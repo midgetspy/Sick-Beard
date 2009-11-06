@@ -1,0 +1,161 @@
+import StringIO
+import gzip
+import os.path
+import os
+
+from sickbeard.exceptions import *
+from sickbeard.common import mediaExtensions
+
+from sickbeard.logging import *
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
+
+from xml.dom.minidom import Document
+
+def replaceExtension (file, newExt):
+	sepFile = file.rpartition(".")
+	if sepFile[0] == "":
+		return file
+	else:
+		return sepFile[0] + "." + newExt
+
+def isMediaFile (file):
+	sepFile = file.rpartition(".")
+	if sepFile[2] in mediaExtensions:
+		return True
+	else:
+		return False
+
+def sanitizeSceneName (name):
+	for x in ":()'":
+		name = name.replace(x, "")
+	return name
+		
+def sanitizeFileName (name):
+	for x in ":\\/":
+		name = name.replace(x, "-")
+	for x in "\"<>|?":
+		name = name.replace(x, "")
+	return name
+		
+def makeSceneSearchString (episode):
+
+	epString = ".S{0:0>2}E{1:0>2}".format(episode.season, episode.episode)
+	showName = episode.show.name.replace(" ", ".").replace("&", "and")
+
+	results = []
+	toReturn = []
+
+	results.append(showName + epString)
+
+	if showName.find("(") != -1:
+		showNameNoBrackets = showName.rpartition(".(")[0]
+		results.append(showNameNoBrackets + epString)
+
+	for x in results:
+		toReturn.append(sanitizeSceneName(x))
+
+	return toReturn
+	
+def getGZippedURL (f):
+	compressedResponse = f.read()
+	compressedStream = StringIO.StringIO(compressedResponse)
+	gzipper = gzip.GzipFile(fileobj=compressedStream)
+	return gzipper.read()
+
+def findCertainShow (showList, tvdbid):
+	results = filter(lambda x: x.tvdbid == tvdbid, showList)
+	if len(results) == 0:
+		return None
+	elif len(results) > 1:
+		raise MultipleShowObjectsException()
+	else:
+		return results[0]
+	
+	
+def makeDir (dir):
+	if not os.path.isdir(dir):
+		try:
+			os.makedirs(dir)
+		except OSError:
+			return False
+	return True
+
+def makeShowNFO(showID, showDir):
+
+	if not makeDir(showDir):
+		return False
+
+	t = tvdb_api.Tvdb()
+	
+	nfo = Document()
+
+	tvNode = nfo.createElement("tvshow")
+	nfo.appendChild(tvNode)
+	
+	try:
+		myShow = t[int(showID)]
+	except tvdb_exceptions.tvdb_shownotfound:
+		Logger().log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", ERROR)
+		raise
+		return False
+
+	# check for title and id
+	try:
+		if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
+			Logger().log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", ERROR)
+			return False
+	except tvdb_exceptions.tvdb_attributenotfound:
+		Logger().log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", ERROR)
+		return False
+		
+	title = nfo.createElement("title")
+	if myShow["seriesname"] != None:
+		title.appendChild(nfo.createTextNode(myShow["seriesname"]))
+	tvNode.appendChild(title)
+		
+	rating = nfo.createElement("rating")
+	if myShow["rating"] != None:
+		rating.appendChild(nfo.createTextNode(myShow["rating"]))
+	tvNode.appendChild(rating)
+
+	plot = nfo.createElement("plot")
+	if myShow["overview"] != None:
+		plot.appendChild(nfo.createTextNode(myShow["overview"]))
+	tvNode.appendChild(plot)
+		
+	mpaa = nfo.createElement("mpaa")
+	if myShow["contentrating"] != None:
+		mpaa.appendChild(nfo.createTextNode(myShow["contentrating"]))
+	tvNode.appendChild(mpaa)
+
+
+	id = nfo.createElement("id")
+	if myShow["imdb_id"] != None:
+		id.appendChild(nfo.createTextNode(myShow["imdb_id"]))
+	tvNode.appendChild(id)
+		
+	tvdbid = nfo.createElement("tvdbid")
+	if myShow["id"] != None:
+		tvdbid.appendChild(nfo.createTextNode(myShow["id"]))
+	tvNode.appendChild(tvdbid)
+		
+	genre = nfo.createElement("genre")
+	if myShow["genre"] != None:
+		genre.appendChild(nfo.createTextNode(" / ".join([x for x in myShow["genre"].split('|') if x != ''])))
+	tvNode.appendChild(genre)
+		
+	premiered = nfo.createElement("premiered")
+	if myShow["firstaired"] != None:
+		premiered.appendChild(nfo.createTextNode(myShow["firstaired"]))
+	tvNode.appendChild(premiered)
+		
+	studio = nfo.createElement("studio")
+	if myShow["network"] != None:
+		studio.appendChild(nfo.createTextNode(myShow["network"]))
+	tvNode.appendChild(studio)
+	
+	nfo_fh = open(os.path.join(showDir, "tvshow.nfo"), 'w')
+	nfo_fh.write(nfo.toxml(encoding="UTF-8"))
+	nfo_fh.close()
+
+	return True

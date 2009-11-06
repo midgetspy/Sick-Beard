@@ -1,0 +1,15 @@
+<html>
+<head>
+</head>
+<body>
+<a href="/">Home</a><br /><br />
+<h2>$episode.prettyName()</h2> (<a href="/searchEpisode?show=$episode.show.tvdbid&season=$episode.season&episode=$episode.episode">find NZB</a>)
+<br />
+Air Date: $episode.airdate<br />
+Status: $statusStrings[$episode.status]<br />
+Location: $episode.location<br />
+Description: $episode.description<br />
+Has NFO: $episode.hasnfo<br />
+Has TBN: $episode.hastbn<br />
+</body>
+</html>

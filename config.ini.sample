@@ -1,0 +1,41 @@
+[General]
+logdir = C:\Logs\
+web_port = 8081
+web_log = 0
+auth_username = # username to use for the web server
+auth_password = # password to use for the web server
+nzb_method = blackhole
+launch_browser = 1
+
+[Blackhole]
+nzb_folder = C:\Downloads\SAB\NZB
+
+[Newzbin]
+newzbin = 1
+newzbin_username = myuser
+newzbin_password = mypass
+
+[TVBinz]
+tvbinz = 0
+tvbinz_uid = 123
+tvbinz_hash = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa # hex hash from tvbinz
+
+[SABnzbd]
+sab_username = ""
+sab_password = ""
+sab_apikey = ""
+sab_category = tv
+sab_host = 192.168.1.100:8080
+
+[IRC]
+irc_bot = 0 
+irc_server = irc.server.com
+irc_channel = "#channel"
+irc_key = mykey
+irc_nick = # SET THIS YOURSELF! (to something unique!)
+
+[XBMC]
+xbmc_notify_onsnatch = False # send xbmc notification when we download an NZB?
+xbmc_notify_ondownload = False # send xbmc notification when we finish a download?
+xbmc_update_library = False # update library when we finish a download?
+xbmc_ips = 192.168.1.101:8080

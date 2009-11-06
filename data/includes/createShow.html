@@ -1,0 +1,18 @@
+<html>
+<head>
+</head>
+<body>
+
+<form name="addForm" method="POST" action="/createShow">
+#if len($resultList) == 0:
+Show name: <input type="text" name="showName" size="50"> 
+#else:
+Choose the show you meant: <select name="showID">
+#for $curShow in $resultList:
+<option value="$curShow['id']">$curShow['seriesname'] (<%=str(max(curShow.keys()))%> seasons)
+#end for
+</select>
+#end if
+<input type="submit" value="Submit"><br />
+</body>
+</html>

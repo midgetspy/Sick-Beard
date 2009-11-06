@@ -1,0 +1,22 @@
+<html>
+<head>
+</head>
+<body>
+
+<form name="addForm" method="POST" action="/addShow">
+#if $resultList == None and $showDir == None:
+Folder to use: <input type="text" name="showDir" size="50">
+#elif len($resultList) == 0:
+Show name: <input type="text" name="showName" size="30"> <input type="hidden" name="showDir" value="$showDir"> 
+#else:
+Choose the show you meant: <select name="seriesList">
+#for $curShow in $resultList:
+<option value="$curShow['id']">$curShow['seriesname'] (<%=str(max(curShow.keys()))%> seasons)
+#end for
+</select>
+<input type="hidden" name="showDir" value="$showDir">
+#end if
+<input type="submit" value="Submit"><br />
+
+</body>
+</html>
