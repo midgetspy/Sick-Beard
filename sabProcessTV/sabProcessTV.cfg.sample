@@ -1,0 +1,10 @@
+[MidgetPVR]
+host=localhost
+port=8081
+username=yourusername
+password=yourpassword
+
+# the following attributes are to allow you to translate the folder names in case your SAB is on
+# a different computer than your midgetPVR
+sourceDir=/dir/on/SAB/host/ # the part of the folder that's different on the SAB computer than the midgetPVR computer
+destDir=Y:/equivalent/dir/on/midgetPVR/host/ # the equivalent path on the midgetPVR computer
