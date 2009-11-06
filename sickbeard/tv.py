@@ -961,6 +961,7 @@ class TVEpisode:
 					showSoup = BeautifulStoneSoup(nfoFileObj, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 				except ValueError as e:
 					Logger().log("Error loading the NFO, skipping for now: " + str(e), ERROR) #TODO: figure out what's wrong and fix it
+					raise exceptions.NoNFOException("Error in NFO format")
 
 				for epDetails in showSoup.findAll('episodedetails'):
 					if isinstance(epDetails, NavigableString):
