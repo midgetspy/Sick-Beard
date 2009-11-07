@@ -5,19 +5,19 @@ import sys
 
 from lib.BeautifulSoup import BeautifulStoneSoup
 
-import midgetpvr
-import midgetpvr.classes
-import midgetpvr.helpers
+import sickbeard
+import sickbeard.classes
+import sickbeard.helpers
 
-from midgetpvr.common import *
-from midgetpvr.logging import *
+from sickbeard.common import *
+from sickbeard.logging import *
 
 def isActive():
-	return midgetpvr.TVBINZ
+	return sickbeard.TVBINZ
 
 def getTVBinzURL (url):
 
-	searchHeaders = {"Cookie": "uid=" + midgetpvr.TVBINZ_UID + ";hash=" + midgetpvr.TVBINZ_HASH, 'Accept-encoding': 'gzip'}
+	searchHeaders = {"Cookie": "uid=" + sickbeard.TVBINZ_UID + ";hash=" + sickbeard.TVBINZ_HASH, 'Accept-encoding': 'gzip'}
 	req = urllib2.Request(url=url, headers=searchHeaders)
 	
 	try:
@@ -26,7 +26,7 @@ def getTVBinzURL (url):
 		Logger().log("Error loading TVBinz URL: " + sys.exc_info() + " - " + str(e))
 		return None
 
-	result = midgetpvr.helpers.getGZippedURL(f)
+	result = sickbeard.helpers.getGZippedURL(f)
 
 	return result
 
@@ -40,7 +40,7 @@ def downloadNZB (nzb):
 	if data == None:
 		return False
 	
-	fileName = os.path.join(midgetpvr.NZB_DIR, nzb.extraInfo[0] + ".nzb")
+	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb")
 	
 	Logger().log("Saving to " + fileName, DEBUG)
 	
@@ -71,7 +71,7 @@ def findNZB (episode, forceQuality=None):
 	else:
 		quality = {}
 		
-	sceneSearchStrings = midgetpvr.helpers.makeSceneSearchString(episode)
+	sceneSearchStrings = sickbeard.helpers.makeSceneSearchString(episode)
 	
 	for curString in sceneSearchStrings:
 		params = {"search": curString, "nodupes": "1", "normalize": "1"}
@@ -98,12 +98,12 @@ def findNZB (episode, forceQuality=None):
 		
 		title = item.title.string
 		url = item.link.string.replace("&amp;", "&")
-		urlParams = {'i': midgetpvr.TVBINZ_UID, 'h': midgetpvr.TVBINZ_HASH}
+		urlParams = {'i': sickbeard.TVBINZ_UID, 'h': sickbeard.TVBINZ_HASH}
 		
 		Logger().log("Found result " + title + " at " + url)
 
-		result = midgetpvr.classes.NZBSearchResult(episode)
-		result.provider = midgetpvr.common.TVBINZ
+		result = sickbeard.classes.NZBSearchResult(episode)
+		result.provider = sickbeard.common.TVBINZ
 		result.url = url + "&" + urllib.urlencode(urlParams) 
 		result.extraInfo = [title]
 		

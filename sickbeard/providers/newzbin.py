@@ -4,14 +4,14 @@ import sys
 import time
 import urllib
 
-import midgetpvr
+import sickbeard
 
-from midgetpvr import exceptions, helpers, classes
-from midgetpvr.common import *
-from midgetpvr.logging import *
+from sickbeard import exceptions, helpers, classes
+from sickbeard.common import *
+from sickbeard.logging import *
 
 def isActive():
-	return midgetpvr.NEWZBIN
+	return sickbeard.NEWZBIN
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -37,12 +37,12 @@ def downloadNZB(nzb):
 
 	Logger().log("Downloading an NZB from newzbin at " + nzb.url)
 
-	fileName = os.path.join(midgetpvr.NZB_DIR, helpers.sanitizeFileName(nzb.fileName()))
+	fileName = os.path.join(sickbeard.NZB_DIR, helpers.sanitizeFileName(nzb.fileName()))
 	Logger().log("Saving to " + fileName, DEBUG)
 
 	urllib._urlopener = NewzbinDownloader()
 
-	params = urllib.urlencode({"username": midgetpvr.NEWZBIN_USERNAME, "password": midgetpvr.NEWZBIN_PASSWORD, "reportid": nzb.extraInfo[0]})
+	params = urllib.urlencode({"username": sickbeard.NEWZBIN_USERNAME, "password": sickbeard.NEWZBIN_PASSWORD, "reportid": nzb.extraInfo[0]})
 	try:
 		urllib.urlretrieve("http://v3.newzbin.com/api/dnzb/", fileName, data=params)
 	except exceptions.NewzbinAPIThrottled:
@@ -95,7 +95,7 @@ def findNZB(episode, forceQuality=None):
     'areadone':-1,
     'feed': 'csv'}
 
-	myOpener = classes.AuthURLOpener(midgetpvr.NEWZBIN_USERNAME, midgetpvr.NEWZBIN_PASSWORD)
+	myOpener = classes.AuthURLOpener(sickbeard.NEWZBIN_USERNAME, sickbeard.NEWZBIN_PASSWORD)
 	searchStr = "http://v3.newzbin.com/search/?%s" % urllib.urlencode(newzbinURL)
 	Logger().log("Search string: " + searchStr, DEBUG)
 	try:
@@ -115,7 +115,7 @@ def findNZB(episode, forceQuality=None):
 		
 		Logger().log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
 		
-		result = midgetpvr.classes.NZBSearchResult(episode)
+		result = sickbeard.classes.NZBSearchResult(episode)
 		result.provider = NEWZBIN
 		result.url = curResult[4]
 		result.extraInfo = [curResult[2], curResult[5]]
