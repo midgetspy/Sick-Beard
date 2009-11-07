@@ -129,7 +129,7 @@ class TVRage:
         
         try:
             ep = self.show.getEpisode(self.nextEpInfo['season'], self.nextEpInfo['episode'], True)
-        except exceptions.MidgetPVRException as e:
+        except exceptions.SickBeardException as e:
             Logger().log("Unable to create episode from tvrage (could be for a variety of reasons): " + str(e), ERROR)
     
         return ep

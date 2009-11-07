@@ -99,7 +99,7 @@ def main():
 	conf = {'/': {
 				  'tools.staticdir.root': os.path.join(sickbeard.PROG_DIR, 'data'),
 				  'tools.auth_basic.on': useAuth,
-				  'tools.auth_basic.realm': 'MidgetPVR',
+				  'tools.auth_basic.realm': 'SickBeard',
 				  'tools.auth_basic.checkpassword': checkpassword},
 		    '/images': {'tools.staticdir.on': True,
 				    'tools.staticdir.dir': 'images'},
