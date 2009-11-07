@@ -11,7 +11,7 @@ Show name: <input type="text" name="showName" size="30"> <input type="hidden" na
 #else:
 Choose the show you meant: <select name="seriesList">
 #for $curShow in $resultList:
-<option value="$curShow['id']">$curShow['seriesname'] (<%=str(max(curShow.keys()))%> seasons)
+<option value="$curShow['id']">$curShow['seriesname'] (<%=str(max(curShow.keys()+[0]))%> seasons)
 #end for
 </select>
 <input type="hidden" name="showDir" value="$showDir">
