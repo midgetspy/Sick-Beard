@@ -11,10 +11,10 @@ configFilename = os.path.join(os.path.dirname(sys.argv[0]), "sabProcessTV.cfg")
 print "Loading config from", configFilename
 config.read(configFilename)
 
-host = config.get("MidgetPVR", "host")
-port = config.get("MidgetPVR", "port")
-username = config.get("MidgetPVR", "username")
-password = config.get("MidgetPVR", "password")
+host = config.get("SickBeard", "host")
+port = config.get("SickBeard", "port")
+username = config.get("SickBeard", "username")
+password = config.get("SickBeard", "password")
 
 params = {}
 
@@ -24,11 +24,11 @@ if len(sys.argv) <= 1:
 else:
     params['dir'] = sys.argv[1]
         
-if config.get("MidgetPVR", "sourceDir") != "" and config.get("MidgetPVR", "pvrDir") != "":
-        params['dir'] = params['dir'].replace(config.get("MidgetPVR", "sourceDir"), config.get("MidgetPVR", "pvrDir"))
+if config.get("SickBeard", "sourceDir") != "" and config.get("SickBeard", "pvrDir") != "":
+        params['dir'] = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "pvrDir"))
 
-if config.get("MidgetPVR", "sourceDir") != "" and config.get("MidgetPVR", "xbmcDir") != "":
-    xbmcPath = params['dir'].replace(config.get("MidgetPVR", "sourceDir"), config.get("MidgetPVR", "xbmcDir"))
+if config.get("SickBeard", "sourceDir") != "" and config.get("SickBeard", "xbmcDir") != "":
+    xbmcPath = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "xbmcDir"))
 else:
     xbmcPath = None
 

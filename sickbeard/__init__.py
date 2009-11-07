@@ -502,7 +502,12 @@ def updateComingList():
     
     for curShow in sickbeard.showList:
 
-        curEp = curShow.nextEpisode()
+        curEp = None
+
+        try:
+            curEp = curShow.nextEpisode()
+        except exceptions.NoNFOException as e:
+            Logger().log("Unable to retrieve episode from show: "+str(e), ERROR)
         
         if curEp != None:
             epList.append(curEp)

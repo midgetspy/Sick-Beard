@@ -74,8 +74,8 @@ class TVShow(object):
 			self.db.checkDB()
 	
 			try:
-				sql = "SELECT * FROM tv_shows WHERE location = '" + self._location + "'"
-				sqlResults = self.db.connection.execute(sql).fetchall()
+				sql = "SELECT * FROM tv_shows WHERE location = ?"
+				sqlResults = self.db.connection.execute(sql, [self._location]).fetchall()
 			except sqlite3.DatabaseError as e:
 				Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
 				raise
