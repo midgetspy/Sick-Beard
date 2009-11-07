@@ -24,7 +24,7 @@ This module contains a single-server IRC bot class that can be used to
 write simpler bots.
 """
 
-from midgetpvr.logging import *
+from sickbeard.logging import *
 
 import sys
 from UserDict import UserDict

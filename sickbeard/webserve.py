@@ -354,7 +354,10 @@ class Whatever:
             print "changing quality from", showObj.quality, "to", quality
             showObj.quality = int(quality)
             showObj.predownload = int(predownload)
-            showObj.seasonfolders = int(seasonfolders)
+            
+            if showObj.seasonfolders != int(seasonfolders):
+                showObj.seasonfolders = int(seasonfolders)
+                showObj.refreshDir()
                         
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.isdir(location) and os.path.normpath(showObj._location) != os.path.normpath(location):

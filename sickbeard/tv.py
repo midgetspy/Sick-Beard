@@ -469,7 +469,8 @@ class TVShow(object):
 		xmlFileObj = open(xmlFile, "r")
 		
 		try:
-			showSoup = BeautifulStoneSoup(xmlFileObj, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
+			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","")
+			showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 		except HTMLParseError as e:
 			Logger().log("There was an error parsing your existing tvshow.nfo file: " + str(e), ERROR)
 			Logger().log("Attempting to rename it to tvshow.nfo.old", DEBUG)
@@ -595,8 +596,15 @@ class TVShow(object):
 			
 			curEp = self.getEpisode(season, episode, True)
 			
-			# if the path doesn't exist or isn't in our show dir then reset the status and change the location
-			if not os.path.isfile(curLoc) or os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
+			# if the path doesn't exist
+			# or if there's no season folders and it's not inside our show dir 
+			# or if there are season folders and it's in the main dir:
+			# or if it's not in our show dir at all
+			if not os.path.isfile(curLoc) or \
+			(not self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) != os.path.normpath(self.location)) or \
+			(self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) == os.path.normpath(self.location)) or \
+			os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
+			
 				Logger().log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", DEBUG)
 				with curEp.lock:
 					curEp.location = ''
@@ -958,7 +966,8 @@ class TVEpisode:
 			if os.path.isfile(nfoFile):
 				nfoFileObj = open(nfoFile, "r")
 				try:
-					showSoup = BeautifulStoneSoup(nfoFileObj, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
+					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","")
+					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 				except ValueError as e:
 					Logger().log("Error loading the NFO, skipping for now: " + str(e), ERROR) #TODO: figure out what's wrong and fix it
 					raise exceptions.NoNFOException("Error in NFO format")
