@@ -893,7 +893,7 @@ class TVEpisode:
 		
 		try:
 			myEp = t[self.show.tvdbid][season][episode]
-		except tvdb_exceptions.tvdb_episodenotfound:
+		except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
 			Logger().log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?")
 			return
 		
