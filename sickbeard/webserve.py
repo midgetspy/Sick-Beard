@@ -40,20 +40,13 @@ class Whatever:
     
     @cherrypy.expose
     def index(self):
-        
-        outStr = ""
-        
-        outStr += """<a href="/displayShowList">Show List</a><br />\n"""
-        outStr += """<a href="/addShow">Add Show</a><br />\n"""
-        outStr += """<a href="/addRootDir">Add Shows From Root Dir</a><br />\n"""
-        outStr += """<a href="/comingEpisodes">Coming Episodes</a><br />\n"""
-        outStr += """<a href="/processEpisode">Process Episode</a><br />\n"""
-        outStr += """<a href="/editConfig">Config</a><br />\n"""
-        outStr += """<a href="/forceBacklog">Force Backlog search</a><br /><br />\n"""
-        outStr += """<!--<a href="/restart">Restart</a><br />-->\n"""
-        outStr += """<a href="/shutdown">Shutdown</a><br />\n"""
-        
-        return outStr
+
+        t = Template(file="data/includes/index.html")
+
+        t.showList = sickbeard.showList
+        t.loadingShowList = sickbeard.loadingShowList.values()
+
+        return self._munge(t)
     
     @cherrypy.expose
     def shutdown(self):
@@ -73,9 +66,9 @@ class Whatever:
 
         # force it to run the next time it looks
         sickbeard.backlogSearchScheduler.forceSearch()
-        Logger().log("Backlog set to run at the next search iteration")
+        Logger().log("Backlog set to run in background")
         
-        return "Backlog will run at the next search iteration"
+        return "Backlog will run in the background"
     
     
     @cherrypy.expose
@@ -114,22 +107,6 @@ class Whatever:
             print "No poster" #TODO: make it return a standard image
     
     @cherrypy.expose
-    def displayShowList(self):
-        outStr = ""
-        
-        outStr += "<a href=\"/\">Home</a><br /><br />"
-
-        for show in sickbeard.showList:
-            outStr += """<a href="/displayShow/?show={0}">{1}</a><br />\n""".format(show.tvdbid, show.name)
-    
-        for show in sickbeard.loadingShowList.values():
-            outStr += show.name + " (loading)<br />\n"
-
-        outStr += """<br /><a href="/addShow">Add Show</a><br />\n"""
-        
-        return outStr
-    
-    @cherrypy.expose
     def createShow(self, showName=None, showID=None, showDir=None):
 
         if showName != None:
@@ -160,10 +137,6 @@ class Whatever:
     @cherrypy.expose
     def displayShow(self, show=None):
         
-        outStr = ""
-
-        outStr += "<a href=\"/\">Home</a><br /><br />"
-        
         if show == None:
             return "Invalid show"
         else:
@@ -171,81 +144,29 @@ class Whatever:
             
             if showObj == None:
                 return "Unable to find show"
-            
-            outStr += "Name: " + showObj.name 
-            outStr += " <a href=\"/editShow/?show=" + str(showObj.tvdbid) + "\">(edit)</a>"
-            outStr += " <a href=\"/deleteShow/?show=" + str(showObj.tvdbid) + "\">(delete)</a>"
-            outStr += " <a href=\"/updateShow/?show=" + str(showObj.tvdbid) + "\">(quick update)</a>"
-            outStr += " <a href=\"/refreshDir/?show=" + str(showObj.tvdbid) + "\">(refresh folder)</a>"
-            outStr += " <a href=\"/fixEpisodeNames/?show=" + str(showObj.tvdbid) + "\">(fix episode names)</a>"
-            outStr += " <a href=\"/updateShow/?show=" + str(showObj.tvdbid) + "&force=1\">(force update - takes forever)</a><br />\n"
-            outStr += "Airs: " + showObj.airs + " on " + showObj.network + "<br />\n"
-            outStr += "Status: " + showObj.status + "<br />\n"
-            try:
-                outStr += "Location: " + showObj.location + "<br />\n"
-            except NoNFOException:
-                outStr += "Location: " + showObj._location + " **<br />n"
-            outStr += "Quality: " + qualityStrings[showObj.quality] + "<br />\n"
-            outStr += "Predownload: " + str(showObj.predownload) + "<br />\n"
-            outStr += "Season Folders: " + str(showObj.seasonfolders) + "<br />\n"
-            
-            outStr += "<br /><br />"
-            
-            
-            myDB = db.DBConnection()
-            myDB.checkDB()
 
-            Logger().log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
+        myDB = db.DBConnection()
+        myDB.checkDB()
+
+        Logger().log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
+    
+        sqlResults = []
+
+        try:
+            sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season, episode ASC"
+            Logger().log("SQL: " + sql, DEBUG)
+            sqlResults = myDB.connection.execute(sql).fetchall()
+        except sqlite3.DatabaseError as e:
+            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            raise
+
+        t = Template(file="data/includes/displayShow.html")
         
-            sqlResults = []
-    
-            try:
-                sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season, episode ASC"
-                Logger().log("SQL: " + sql, DEBUG)
-                sqlResults = myDB.connection.execute(sql).fetchall()
-            except sqlite3.DatabaseError as e:
-                Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-                raise
-    
-            curSeason = 0
-    
-            for epResult in sqlResults:
-               
-                if int(epResult["season"]) != curSeason:
-                    if curSeason != 0:
-                        outStr += "</ul><br />\n"
-                    outStr += "<b>Season " + str(epResult["season"]) + "</b> " + \
-                            "(<a href=\"/setStatus/?show=" + str(showObj.tvdbid) + "&season=" + str(epResult["season"]) + "&status=" + str(BACKLOG) + "\">add to backlog</a>) " + \
-                            "(<a href=\"/setStatus/?show=" + str(showObj.tvdbid) + "&season=" + str(epResult["season"]) + "&status=" + str(DISCBACKLOG) + "\">add to disc backlog</a>)<br />\n"
-                    outStr += "<ul>\n"
-                    curSeason = int(epResult["season"])
-                
-                outStr += "<li><a href=\"/displayEpisode/?show=" + str(showObj.tvdbid) + "&season=" + str(epResult["season"]) + "&episode=" + str(epResult["episode"]) + "\">"
-                outStr += cgi.escape(unicode(showObj.name)).encode('ascii', 'xmlcharrefreplace') + " - " + str(epResult["season"]) + "x" + str(epResult["episode"])
-                outStr += " - " + cgi.escape(unicode(epResult["name"])).encode('ascii', 'xmlcharrefreplace') + "</a>"
-                outStr += " (" + statusStrings[int(epResult["status"])] + ")"
-                outStr += " (<a href=\"/searchEpisode/?show=" + str(showObj.tvdbid) + "&season=" + str(epResult["season"]) + "&episode=" + str(epResult["episode"]) + "\">find NZB</a>)</li>\n"
-                
-            outStr += "</ul><br /><br />\n"
-
-            return outStr            
-            
-            seasons = showObj.episodes.keys()
-            seasons.sort()
-            
-            for season in seasons:
-                outStr += "Season " + str(season) + "<br />\n"
-                outStr += "<ul>\n"
-                
-                episodes = showObj.episodes[season].keys()
-                episodes.sort()
-                for episode in episodes:
-                    ep = showObj.getEpisode(season, episode)
-                    outStr += "<li>" + ep.prettyName() + " (" + statusStrings[ep.status] + ")</li>\n"
-                
-                outStr += "</ul><br />\n"
-            
-        return outStr
+        t.show = showObj
+        t.qualityStrings = sickbeard.common.qualityStrings
+        t.sqlResults = sqlResults
+        
+        return self._munge(t)
     
     @cherrypy.expose
     def updateShow(self, show=None, force=0):
@@ -261,13 +182,6 @@ class Whatever:
         # force the update from the DB
         sickbeard.updateScheduler.updater.updateShowFromTVDB(showObj, bool(force))
         
-        #showObj.loadFromTVDB(cache=False)
-        #showObj.loadEpisodesFromTVDB(cache=False)
-        #showObj.writeEpisodeNFOs()
-        #showObj.saveToDB()
-        #showObj.flushEpisodes()
-        #gc.collect() # try it
-
         raise cherrypy.HTTPRedirect("/displayShow/?show=" + show)
 
     @cherrypy.expose
@@ -435,27 +349,7 @@ class Whatever:
                 myTemplate.showDir = urllib.quote_plus(showDir)
                 return self._munge(myTemplate)
 
-            #newShowAdder.start()
-
-            # try making a show there. if it fails then make them pick what show to create
-            #try:
-            #    newShow = TVShow(showDir)
-            #except exceptions.MultipleShowObjectsException:
-            #    return "That show already exists, can't create a duplicate"
-            #except exceptions.NoNFOException:
-            #    myTemplate.resultList = []
-            #    myTemplate.showDir = urllib.quote_plus(showDir)
-            #    return self._munge(myTemplate)
-
-            #newShow.loadEpisodesFromDir()
-            #try:
-            #    newShow.loadEpisodesFromTVDB()
-            #except tvdb_exceptions.tvdb_error as e:
-            #    Logger().log("Error with TVDB, not creating episode list: "+str(e), ERROR)
-            #newShow.saveToDB()
-            #sickbeard.showList.append(newShow)
-            
-            raise cherrypy.HTTPRedirect("/displayShowList/")
+            raise cherrypy.HTTPRedirect("/")
         
         # if we have a single ID then just make a show with that ID
         elif len(showIDs) == 1:
