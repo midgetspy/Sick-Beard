@@ -505,14 +505,16 @@ class TVShow(object):
 		
 		self.name = showSoup.title.string
 		self.tvdbid = int(showSoup.tvdbid.string)
-		self.network = showSoup.studio.string
+		if showSoup.studio != None:
+			self.network = showSoup.studio.string
 		if self.network == None:
 			self.network = ""
-		self.genre = showSoup.genre.string
+		if showSoup.genre != None:
+			self.genre = showSoup.genre.string
 		if self.genre == None:
 			self.genre = ""
 
-		# need to validate the input, I'm assuming it's good until then
+		# TODO: need to validate the input, I'm assuming it's good until then
 
 		
 	def nextEpisode(self):
