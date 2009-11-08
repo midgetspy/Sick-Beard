@@ -138,8 +138,8 @@ class TVShow(object):
 		t = tvdb_api.Tvdb()
 		try:
 			t[self.tvdbid]
-		except (tvdb_exceptions.tvdb_error, tvdb_exceptions.tvdb_shownotfound):
-			raise exceptions.ShowNotFoundException()
+		except tvdb_exceptions.tvdb_shownotfound as e:
+			raise exceptions.ShowNotFoundException(str(e))
 		
 		self.saveToDB()
 	

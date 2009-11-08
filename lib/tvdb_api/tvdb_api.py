@@ -133,6 +133,15 @@ class Show(dict):
         #end for cur_season
         return results
 
+    def findNewerEps(self, airdate=0):
+        results = []
+        for cur_season in self.values():
+            searchresult = cur_season.findNewerEps(airdate=airdate)
+            if len(searchresult) != 0:
+                results.extend(searchresult)
+        #end for cur_season
+        return results
+
 
 class Season(dict):
     def __repr__(self):
@@ -166,6 +175,22 @@ class Season(dict):
                 )
         return results
 
+    def findNewerEps(self, airdate=0):
+        results = []
+        if airdate == None or int(airdate) == 0:
+            return results
+        for ep in self.values():
+            searchresult = None
+            if ep.has_key('firstaired') and ep['firstaired'] is not None:
+                rawAirdate = [int(x) for x in ep["firstaired"].split("-")]
+                epAirdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+                if epAirdate.toordinal() > airdate:
+                    searchresult = ep
+            if searchresult is not None:
+                results.append(
+                    searchresult
+                )
+        return results
 
 class Episode(dict):
     def __repr__(self):

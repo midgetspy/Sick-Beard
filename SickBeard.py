@@ -59,9 +59,12 @@ def loadShowsFromDB():
 		raise
 
 	for sqlShow in sqlResults:
-		curShow = TVShow(sqlShow["location"])
-		curShow.saveToDB()
-		myShowList.append(curShow)
+		try:
+			curShow = TVShow(sqlShow["location"])
+			curShow.saveToDB()
+			myShowList.append(curShow)
+		except Exception as e:
+			Logger().log("There was an error creating the show in "+sqlShow["location"]+": "+str(e), ERROR)
 		#TODO: make it update the existing shows if the showlist has something in it
 	
 	return myShowList

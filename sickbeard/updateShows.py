@@ -32,6 +32,7 @@ from sickbeard import db
 from sickbeard.logging import *
 
 from lib.BeautifulSoup import BeautifulStoneSoup
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class UpdateScheduler():
 
@@ -156,6 +157,32 @@ class ShowUpdater():
             Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
             raise
 
+    def _getNewestDBEpisode(self, show):
+        
+        myDB = db.DBConnection()
+        myDB.checkDB()
+
+        sqlResults = []
+
+        try:
+            sql = "SELECT * FROM tv_episodes WHERE showid="+str(show.tvdbid)+" ORDER BY airdate DESC LIMIT 1"
+            sqlResults = myDB.connection.execute(sql).fetchall()
+        except sqlite3.DatabaseError as e:
+            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            raise
+
+        if len(sqlResults) == 0:
+            return None
+        
+        sqlResults = sqlResults[0]
+        
+        if sqlResults["season"] == None or sqlResults["episode"] == None or sqlResults["airdate"] == None:
+            return None
+    
+        Logger().log("Newest DB episode for "+show.name+" was "+str(sqlResults['season'])+"x"+str(sqlResults['episode']), DEBUG)
+        
+        return (int(sqlResults["season"]), int(sqlResults["episode"]), int(sqlResults["airdate"]))
+
     def updateShowFromTVDB(self, show, force=False):
         
         if show == None:
@@ -166,10 +193,16 @@ class ShowUpdater():
         newTime, updatedShows, updatedEpisodes = self._getUpdatedShows()
         Logger().log("Shows that have been updated since " + str(self._lastTVDB) + " are " + str(updatedShows), DEBUG)
         
-        with show.lock:
-            show.loadLatestFromTVRage()
-
-        if updatedShows == None or int(show.tvdbid) in updatedShows or force:
+        t = None
+        
+        try:
+            t = tvdb_api.Tvdb(cache=False, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
+        except tvdb_exceptions.tvdb_error:
+            Logger().log("Can't update from TVDB if we can't connect to it..", ERROR)
+           
+        doUpdate = updatedShows == None or int(show.tvdbid) in updatedShows or force
+            
+        if doUpdate:
             
             Logger().log("Updating " + str(show.name) + " (" + str(show.tvdbid) + ")")
 
@@ -189,7 +222,21 @@ class ShowUpdater():
                     Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
                     curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
                     curEp.saveToDB()
-                
+                newestDBEp = self._getNewestDBEpisode(show)
+                if t != None and newestDBEp != None:
+                    s = t[int(show.tvdbid)]
+                    for curEp in s.findNewerEps(newestDBEp[2]):
+                        # add the episode
+                        newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
+                        Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
+        
+        # now that we've updated the DB from TVDB see if there's anything we can add from TVRage
+        with show.lock:
+            show.loadLatestFromTVRage()
+
+        # finish up the update
+        if doUpdate:
+            
             show.writeEpisodeNFOs()
             
             # try keeping ram down
