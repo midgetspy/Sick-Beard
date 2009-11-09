@@ -43,7 +43,7 @@ class TVShow(object):
 
 	def __init__ (self, showdir):
 	
-		self._location = showdir
+		self._location = os.path.normpath(showdir)
 		self.name = ""
 		self.tvdbid = 0
 		self.network = ""
@@ -612,7 +612,7 @@ class TVShow(object):
 			raise
 
 		for ep in sqlResults:
-			curLoc = str(ep["location"])
+			curLoc = os.path.normpath(ep["location"]) #TRYIT
 			season = int(ep["season"])
 			episode = int(ep["episode"])
 			
@@ -662,7 +662,7 @@ class TVShow(object):
 		# build list of locations
 		fileLocations = {}
 		for epResult in sqlResults:
-			goodLoc = str(epResult["location"])
+			goodLoc = os.path.normpath(epResult["location"])
 			goodSeason = int(epResult["season"])
 			goodEpisode = int(epResult["episode"])
 			if fileLocations.has_key(goodLoc):
@@ -891,7 +891,7 @@ class TVEpisode:
 			
 			# don't overwrite my location
 			if sqlResults[0]["location"] != "" and sqlResults[0]["location"] != None:
-				self.location = sqlResults[0]["location"]
+				self.location = os.path.normpath(sqlResults[0]["location"])
 			
 			self.tvdbid = int(sqlResults[0]["tvdbid"])
 			
