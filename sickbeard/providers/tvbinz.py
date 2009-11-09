@@ -116,6 +116,10 @@ def findNZB (episode, forceQuality=None):
 
 	for item in items:
 		
+		if item.title == None or item.link == None:
+			Logger().log("The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+data, ERROR)
+			continue
+		
 		title = item.title.string
 		url = item.link.string.replace("&amp;", "&")
 		urlParams = {'i': sickbeard.TVBINZ_UID, 'h': sickbeard.TVBINZ_HASH}

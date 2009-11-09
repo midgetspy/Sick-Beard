@@ -360,10 +360,10 @@ class TVShow(object):
 			try:
 				showObj = t[result["file_seriesname"]]
 			except tvdb_exceptions.tvdb_shownotfound:
-				raise exceptions.ShowNotFoundException()
+				raise exceptions.ShowNotFoundException("TVDB returned zero results for show "+result["file_seriesname"])
 			
 			if int(showObj["id"]) != int(self.tvdbid):
-				raise exceptions.WrongShowException()
+				raise exceptions.WrongShowException("Expected "+str(self.tvdbid)+" but got "+str(showObj["id"]))
 			
 			season = int(result["seasno"])
 			
@@ -501,7 +501,7 @@ class TVShow(object):
 			raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
 		if showSoup.title == None or showSoup.tvdbid == None:
-			raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
+			raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id)")
 		
 		self.name = showSoup.title.string
 		self.tvdbid = int(showSoup.tvdbid.string)
@@ -872,7 +872,7 @@ class TVEpisode:
 			raise
 
 		if len(sqlResults) > 1:
-			raise exceptions.MultipleDBEpisodesException()
+			raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
 		elif len(sqlResults) == 0:
 			Logger().log(str(self.show.tvdbid) + ": Episode " + str(self.season) + "x" + str(self.episode) + " not found in the database", DEBUG) 
 			return False
@@ -1003,7 +1003,7 @@ class TVEpisode:
 						continue
 				
 					if epDetails.title.string == None or epDetails.aired.string == None:
-						raise exceptions.NoNFOException("Error in NFO format")
+						raise exceptions.NoNFOException("Error in NFO format (missing episode title or airdate)")
 				
 					if epDetails.title.string != None:
 						#NAMEIT Logger().log("CCCCCCC from " + str(self.season)+"x"+str(self.episode) + " -" + str(self.name) + " to " + str(showSoup.title.string))
