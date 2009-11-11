@@ -62,7 +62,8 @@ def updateLibrary(path=None):
         if path == None:
             path = ""
         else:
-            path = "," + urllib.quote_plus(path)
+            path = ""
+            #path = "," + urllib.quote_plus(path)
         urllib2.urlopen("http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=XBMC.updatelibrary(video" + path + ")", timeout=XBMC_TIMEOUT).close()
     except IOError as e:
         Logger().log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
