@@ -474,7 +474,7 @@ def updateAiringList():
     Logger().log("Searching DB and building list of airing episodes")
     
     try:
-        sql = "SELECT * FROM tv_episodes WHERE status IN (" + str(UNKNOWN) + ", " + str(UNAIRED) + ", " + str(PREDOWNLOADED) + ", " + str(MISSED) + ") AND airdate <= " + str(curDate)
+        sql = "SELECT * FROM tv_episodes WHERE status IN (" + str(UNKNOWN) + ", " + str(UNAIRED) + ", " + str(PREDOWNLOADED) + ") AND airdate <= " + str(curDate)
         Logger().log("SQL: " + sql, DEBUG)
         sqlResults = myDB.connection.execute(sql).fetchall()
     except sqlite3.DatabaseError as e:

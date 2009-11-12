@@ -129,7 +129,7 @@ class CurrentSearcher():
         for sqlEp in sqlResults:
             
             try:
-                show = helpers.findCertainShow (sickbeard.showList, int(sqlEp["showid"]))
+                show = helpers.findCertainShow(sickbeard.showList, int(sqlEp["showid"]))
             except exceptions.MultipleShowObjectsException:
                 Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
                 return None
@@ -137,7 +137,7 @@ class CurrentSearcher():
             with ep.lock:
                 ep.status = MISSED
                 ep.saveToDB()
-
+            
 
     def _getEpisodesToSearchFor(self):
     
