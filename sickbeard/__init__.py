@@ -246,9 +246,9 @@ def initialize():
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
         
-        currentSearchScheduler = searchCurrent.CurrentSearchScheduler()
+        currentSearchScheduler = searchCurrent.CurrentSearchScheduler(True)
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler()
-        updateScheduler = updateShows.UpdateScheduler()
+        updateScheduler = updateShows.UpdateScheduler(False)
         botRunner = tvnzbbot.NZBBotRunner()
         showAddScheduler = showAdder.ShowAddScheduler()
         

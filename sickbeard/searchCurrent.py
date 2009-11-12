@@ -30,10 +30,14 @@ import traceback
 
 class CurrentSearchScheduler():
 
-    def __init__(self):
+    def __init__(self, runAtStart=True):
         
         self.isActive = False
-        self.lastRun = datetime.datetime.fromordinal(1)
+        if runAtStart:
+            self.lastRun = datetime.datetime.fromordinal(1)
+        else:
+            self.lastRun = datetime.datetime.now()
+
         self.searcher = CurrentSearcher()
         self.cycleTime = datetime.timedelta(minutes=10)
         

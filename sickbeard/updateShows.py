@@ -36,10 +36,13 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class UpdateScheduler():
 
-    def __init__(self):
+    def __init__(self, runAtStart=True):
         
-        self.lastRun = datetime.datetime.now() # don't run it to start off
-        #self.lastRun = datetime.datetime.fromordinal(1) #start it right away
+        if runAtStart:
+            self.lastRun = datetime.datetime.fromordinal(1) #start it right away
+        else:
+            self.lastRun = datetime.datetime.now() # don't run it to start off
+
         self.updater = ShowUpdater()
         self.cycleTime = datetime.timedelta(hours=1)
         
@@ -270,28 +273,57 @@ class ShowUpdater():
                 Logger().log("No response received from TVDB, skipping update for now")
                 return
 
+        t = None
+        try:
+            t = tvdb_api.Tvdb(cache=False, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
+        except tvdb_exceptions.tvdb_error:
+            Logger().log("Can't update from TVDB if we can't connect to it..", ERROR)
+
+        allSuccessful = True
+
         # check each show to see if it's changed, if so then update it
         for show in sickbeard.showList:
-            if forceUpdate or int(show.tvdbid) in updatedShows:
-                Logger().log("Updating " + str(show.name) + " (" + str(show.tvdbid) + ")")
-                with show.lock:
-                    show.loadFromTVDB(cache=False)
-                with show.lock:
-                    show.saveToDB()
+            doUpdate = forceUpdate or int(show.tvdbid) in updatedShows
 
-                # update each episode that has changed
-                epList = sickbeard.getEpList(updatedEpisodes, show.tvdbid)
-                Logger().log("Updated episodes for this show are " + str(epList), DEBUG)
-                for curEp in epList:
-                    Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
-                    curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
-                    curEp.saveToDB()
+            Logger().log("Beginning update of show " + str(show.name) + " (" + str(show.tvdbid) + ")")
+
+            try:
+                if doUpdate:
+                    with show.lock:
+                        show.loadFromTVDB(cache=False)
+                        show.saveToDB()
+    
+                    # update each episode that has changed
+                    epList = sickbeard.getEpList(updatedEpisodes, show.tvdbid)
+                    Logger().log("Updated episodes for this show are " + str(epList), DEBUG)
+                    for curEp in epList:
+                        Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
+                        curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
+                        curEp.saveToDB()
+                    
+                    newestDBEp = self._getNewestDBEpisode(show)
+                    if t != None and newestDBEp != None:
+                        s = t[int(show.tvdbid)]
+                        for curEp in s.findNewerEps(newestDBEp[2]):
+                            # add the episode
+                            newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
+                            Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
+            
+            except tvdb_exceptions.tvdb_exception as e:
+                allSuccessful = False
+                Logger().log("There was an error with TVDB, show will only be updated from TVRage: "+str(e), ERROR)
                 
                 #show.loadEpisodesFromTVDB(False)
-
-                Logger().log("Update complete")
+            
+            with show.lock:
+                Logger().log("Supplementing TVDB info with TVRage info if possible")
+                show.loadLatestFromTVRage()
+            
+            if doUpdate:
+                Logger().log("Update finished")
             else:
-                Logger().log("Skipping show " + str(show.name) + ", TVDB says it hasn't changed")
+                Logger().log("Not updating show " + str(show.name) + " from TVDB, TVDB says it hasn't changed")
 
-        # update our last update time
-        self._set_lastTVDB(newTime)
+        # update our last update time if we didn't miss any shows on the way
+        if allSuccessful:
+            self._set_lastTVDB(newTime)
