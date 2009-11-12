@@ -122,14 +122,13 @@ class TVShow(object):
 				self.predownload = int(sqlResults[0]["predownload"])
 				self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 	
-			Logger().log(str(self.tvdbid) + ": Loading extra show info from theTVDB")
-			
-		try:
-			self.loadFromTVDB()
-		except tvdb_exceptions.tvdb_error as e:
-			Logger().log("There was a problem loading the details from TVDB (server down?)", ERROR)
-			if str(e) == "Could not connect to server: <urlopen error timed out>":
-				sickbeard.LAST_TVDB_TIMEOUT = datetime.datetime.now()
+		#Logger().log(str(self.tvdbid) + ": Loading extra show info from theTVDB")
+		#try:
+		#	self.loadFromTVDB()
+		#except tvdb_exceptions.tvdb_error as e:
+		#	Logger().log("There was a problem loading the details from TVDB (server down?)", ERROR)
+		#	if str(e) == "Could not connect to server: <urlopen error timed out>":
+		#		sickbeard.LAST_TVDB_TIMEOUT = datetime.datetime.now()
 
 		otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdbid)
 		if otherShow != None:

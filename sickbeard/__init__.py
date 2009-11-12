@@ -200,7 +200,7 @@ def initialize():
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
         if not helpers.makeDir(LOG_DIR):
             Logger().log("!!! No log folder, logging to screen only!", ERROR)
-        
+
         try:
             WEB_PORT = check_setting_int(CFG, 'General', 'web_port', 8081)
         except:
@@ -248,7 +248,7 @@ def initialize():
         
         currentSearchScheduler = searchCurrent.CurrentSearchScheduler(True)
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler()
-        updateScheduler = updateShows.UpdateScheduler(False)
+        updateScheduler = updateShows.UpdateScheduler(True)
         botRunner = tvnzbbot.NZBBotRunner()
         showAddScheduler = showAdder.ShowAddScheduler()
         

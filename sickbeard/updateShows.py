@@ -168,7 +168,7 @@ class ShowUpdater():
         sqlResults = []
 
         try:
-            sql = "SELECT * FROM tv_episodes WHERE showid="+str(show.tvdbid)+" ORDER BY airdate DESC LIMIT 1"
+            sql = "SELECT * FROM tv_episodes WHERE showid="+str(show.tvdbid)+" AND tvdbid != -1 ORDER BY airdate DESC LIMIT 1"
             sqlResults = myDB.connection.execute(sql).fetchall()
         except sqlite3.DatabaseError as e:
             Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
