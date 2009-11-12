@@ -76,7 +76,6 @@ class CurrentSearcher():
     
     def __init__(self):
         self.lock = threading.Lock()
-        self.cycleTime = datetime.timedelta(minutes=5)
     
     def searchForTodaysEpisodes(self):
 
@@ -103,11 +102,11 @@ class CurrentSearcher():
                 
                 if len(foundNZBs) == 0:
                     Logger().log("Unable to find NZB for " + curEp.prettyName())
-                
                 else:
-                    
                     # just use the first result for now
                     nzb.snatchNZB(foundNZBs[0])
+                    
+                time.sleep(3)
 
 
 
