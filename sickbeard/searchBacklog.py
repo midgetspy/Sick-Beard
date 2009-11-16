@@ -202,3 +202,6 @@ class BacklogSearcher:
             Logger().log("Added " + ep.prettyName() + " to the list of episodes to download (status=" + str(ep.status))
         
         return foundEps
+
+    def run(self):
+        self.searchBacklog()

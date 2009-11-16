@@ -26,7 +26,7 @@ import socket
 
 from threading import Lock
 
-from sickbeard import searchCurrent, searchBacklog, updateShows, tvnzbbot, helpers, db, exceptions, showAdder
+from sickbeard import searchCurrent, searchBacklog, updateShows, tvnzbbot, helpers, db, exceptions, showAdder, scheduler
 from sickbeard.logging import *
 from sickbeard.common import *
 
@@ -74,6 +74,10 @@ NEWZBIN_PASSWORD = None
 TVBINZ = False
 TVBINZ_UID = None
 TVBINZ_HASH = None
+
+NZBS = False
+NZBS_UID = None
+NZBS_HASH = None
 
 SAB_USERNAME = None
 SAB_PASSWORD = None
@@ -246,11 +250,17 @@ def initialize():
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
         
-        currentSearchScheduler = searchCurrent.CurrentSearchScheduler(True)
-        backlogSearchScheduler = searchBacklog.BacklogSearchScheduler()
-        updateScheduler = updateShows.UpdateScheduler(True)
+        #currentSearchScheduler = searchCurrent.CurrentSearchScheduler(True)
+        #backlogSearchScheduler = searchBacklog.BacklogSearchScheduler()
+        #updateScheduler = updateShows.UpdateScheduler(True)
+        
+        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(), threadName="SEARCH")
+        backlogSearchScheduler = scheduler.Scheduler(searchBacklog.BacklogSearcher(), cycleTime=datetime.timedelta(hours=1), threadName="BACKLOG")
+        updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(), cycleTime=datetime.timedelta(hours=1), threadName="UPDATE") 
+        
         botRunner = tvnzbbot.NZBBotRunner()
-        showAddScheduler = showAdder.ShowAddScheduler()
+        #showAddScheduler = showAdder.ShowAddScheduler()
+        showAddScheduler = scheduler.Scheduler(showAdder.ShowAddQueue(), cycleTime=datetime.timedelta(minutes=3), threadName="SHOWADDQUEUE")
         
         showList = []
         loadingShowList = {}

@@ -357,29 +357,37 @@ class TVShow(object):
 
 		result = tvnamer.processSingleName(file)
 
+		showInfo = None
+
 		if result != None:
 
-			t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
 			try:
+				t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
 				showObj = t[result["file_seriesname"]]
+				showInfo = (int(showObj["id"]), showObj["seriesname"])
 			except tvdb_exceptions.tvdb_shownotfound:
 				raise exceptions.ShowNotFoundException("TVDB returned zero results for show "+result["file_seriesname"])
+			except (tvdb_exceptions.tvdb_error, IOError) as e:
+				Logger().log("Error connecting to TVDB, trying to search the DB instead: "+ str(e), ERROR)
+				
+				showInfo = helpers.searchDBForShow(result["file_seriesname"])
+				
+			if showInfo == None:
+				Logger().log("Unable to figure out what shot "+result["file_seriesname"] + "is, skipping", ERROR)
+				return None
 			
-			if int(showObj["id"]) != int(self.tvdbid):
+			if showInfo[0] != int(self.tvdbid):
 				raise exceptions.WrongShowException("Expected "+str(self.tvdbid)+" but got "+str(showObj["id"]))
 			
 			season = int(result["seasno"])
 			
-			#TODO: double ep support
-			# if len(episode) > 1 then we should do the below more than once with the same location each time
-	
 			rootEp = None
 	
 			for curEp in result["epno"]:
 	
 				episode = int(curEp)
 				
-				Logger().log(str(self.tvdbid) + ": " + file + " parsed to " + showObj["seriesname"] + " " + str(season) + "x" + str(episode), DEBUG)
+				Logger().log(str(self.tvdbid) + ": " + file + " parsed to " + showInfo[1] + " " + str(season) + "x" + str(episode), DEBUG)
 	
 				curEp = self.getEpisode(season, episode)
 				
@@ -710,19 +718,22 @@ class TVShow(object):
 				if result == False:
 					Logger().log(str(self.tvdbid) + ": Unable to rename file "+file, ERROR)
 			
-			if os.path.isfile(os.path.join(rootEp.show.location, rootEp.prettyName() + ".nfo")):
-				Logger().log(str(self.tvdbid) + ": Renamed NFO successfully")
-				with rootEp.lock:
-					rootEp.hasnfo = True
-					for relEp in rootEp.relatedEps:
-						relEp.hasnfo = True
+			for curEp in [rootEp]+rootEp.relatedEps:
+				curEp.checkForMetaFiles()
+			
+			#if os.path.isfile(os.path.join(rootEp.show.location, rootEp.prettyName() + ".nfo")):
+			#	Logger().log(str(self.tvdbid) + ": Renamed NFO successfully")
+			#	with rootEp.lock:
+			#		rootEp.hasnfo = True
+			#		for relEp in rootEp.relatedEps:
+			#			relEp.hasnfo = True
 
-			if os.path.isfile(os.path.join(rootEp.show.location, rootEp.prettyName() + ".tbn")):
-				Logger().log(str(self.tvdbid) + ": Renamed TBN successfully")
-				with rootEp.lock:
-					rootEp.hastbn = True
-					for relEp in rootEp.relatedEps:
-						relEp.hastbn = True
+			#if os.path.isfile(os.path.join(rootEp.show.location, rootEp.prettyName() + ".tbn")):
+			#	Logger().log(str(self.tvdbid) + ": Renamed TBN successfully")
+			#	with rootEp.lock:
+			#		rootEp.hastbn = True
+			#		for relEp in rootEp.relatedEps:
+			#			relEp.hastbn = True
 
 			with rootEp.lock:
 				rootEp.saveToDB()

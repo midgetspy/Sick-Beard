@@ -21,11 +21,14 @@ import StringIO
 import gzip
 import os.path
 import os
+import sqlite3
 
 from sickbeard.exceptions import *
+from sickbeard.logging import *
 from sickbeard.common import mediaExtensions
 
-from sickbeard.logging import *
+from sickbeard import db
+
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from xml.dom.minidom import Document
@@ -178,3 +181,31 @@ def makeShowNFO(showID, showDir):
 	nfo_fh.close()
 
 	return True
+
+
+def searchDBForShow(showName):
+	# if tvdb fails then try looking it up in the db
+	myDB = db.DBConnection()
+	myDB.checkDB()
+
+	sqlResults = []
+
+	tvdbid = None
+
+	try:
+		sql = "SELECT * FROM tv_shows WHERE show_name LIKE ?"
+		sqlArgs = [showName+'%']
+		Logger().log("SQL: "+sql+" % "+str(sqlArgs), DEBUG)
+		sqlResults = myDB.connection.execute(sql, sqlArgs).fetchall()
+	except sqlite3.DatabaseError as e:
+		Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+		raise
+
+	if len(sqlResults) != 1:
+		if len(sqlResults) == 0:
+			Logger().log("Unable to match a record in the DB for "+showName, DEBUG)
+		else:
+			Logger().log("Multiple results for "+showName+" in the DB, unable to match show name", DEBUG)
+		return tvdbid
+	
+	return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])

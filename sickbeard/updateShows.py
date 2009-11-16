@@ -331,3 +331,6 @@ class ShowUpdater():
         # update our last update time if we didn't miss any shows on the way
         if allSuccessful:
             self._set_lastTVDB(newTime)
+
+    def run(self):
+        self.updateShowsFromTVDB()

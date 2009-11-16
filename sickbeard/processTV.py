@@ -187,38 +187,44 @@ def doIt(downloadDir, showList):
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
             showObj = t[result["file_seriesname"]]
             showInfo = (int(showObj["id"]), showObj["seriesname"])
-        except tvdb_exceptions.tvdb_error as e:
+        except (tvdb_exceptions.tvdb_error, IOError) as e:
 
             logStr = "TVDB didn't respond, trying to look up the show in the DB instead"
             Logger().log(logStr, DEBUG)
             returnStr += logStr + "\n"
 
             # if tvdb fails then try looking it up in the db
-            myDB = db.DBConnection()
-            myDB.checkDB()
+            #myDB = db.DBConnection()
+            #myDB.checkDB()
         
-            sqlResults = []
+            #sqlResults = []
         
-            try:
-                sql = "SELECT * FROM tv_shows WHERE show_name LIKE ?"
-                sqlArgs = ['%'+result["file_seriesname"]]
-                Logger().log("SQL: "+sql+" % "+str(sqlArgs))
-                sqlResults = myDB.connection.execute(sql, sqlArgs).fetchall()
-            except sqlite3.DatabaseError as e:
-                Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-                raise
+            #try:
+            #    sql = "SELECT * FROM tv_shows WHERE show_name LIKE ?"
+            #    sqlArgs = ['%'+result["file_seriesname"]]
+            #    Logger().log("SQL: "+sql+" % "+str(sqlArgs))
+            #    sqlResults = myDB.connection.execute(sql, sqlArgs).fetchall()
+            #except sqlite3.DatabaseError as e:
+            #    Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            #    raise
     
-            if len(sqlResults) != 1:
-                if len(sqlResults) == 0:
-                    logStr = "Unable to match a record in the DB for "+result["file_seriesname"]
-                else:
-                    logStr = "Multiple results for "+result["file_seriesname"]+" in the DB, unable to match show name"
-                Logger().log(logStr, DEBUG)
-                returnStr += logStr + "\n"
-                continue
+            #if len(sqlResults) != 1:
+            #    if len(sqlResults) == 0:
+            #        logStr = "Unable to match a record in the DB for "+result["file_seriesname"]
+            #    else:
+            #        logStr = "Multiple results for "+result["file_seriesname"]+" in the DB, unable to match show name"
+            #    Logger().log(logStr, DEBUG)
+            #    returnStr += logStr + "\n"
+            #    continue
 
-            showInfo = (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+            #showInfo = (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+
+            showInfo = helpers.searchDBForShow(result["file_seriesname"])
             
+        # if we didn't get anything from TVDB or the DB then try the next option
+        if showInfo == None:
+            continue
+
         # find the show in the showlist
         try:
             showResults = helpers.findCertainShow(showList, showInfo[0])

@@ -137,3 +137,6 @@ class CurrentSearcher():
                 ep.status = MISSED
                 ep.saveToDB()
             
+
+    def run(self):
+        self.searchForTodaysEpisodes()
