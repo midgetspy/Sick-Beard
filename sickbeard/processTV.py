@@ -26,12 +26,14 @@ import contactXBMC
 import exceptions
 import helpers
 import sickbeard
+import sqlite3
+import db
 
 from logging import *
 from common import *
 
 from sickbeard import classes
-from lib.tvdb_api import tvnamer, tvdb_api
+from lib.tvdb_api import tvnamer, tvdb_api, tvdb_exceptions
 
 #from tvdb_api.nfogen import createXBMCInfo
 
@@ -180,13 +182,46 @@ def doIt(downloadDir, showList):
             Logger().log(logStr, DEBUG)
             returnStr += logStr + "\n"
             continue
-    
-        t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI)
-        showObj = t[result["file_seriesname"]]
+
+        try:
+            t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
+            showObj = t[result["file_seriesname"]]
+            showInfo = (int(showObj["id"]), showObj["seriesname"])
+        except tvdb_exceptions.tvdb_error as e:
+
+            logStr = "TVDB didn't respond, trying to look up the show in the DB instead"
+            Logger().log(logStr, DEBUG)
+            returnStr += logStr + "\n"
+
+            # if tvdb fails then try looking it up in the db
+            myDB = db.DBConnection()
+            myDB.checkDB()
         
+            sqlResults = []
+        
+            try:
+                sql = "SELECT * FROM tv_shows WHERE show_name LIKE ?"
+                sqlArgs = ['%'+result["file_seriesname"]]
+                Logger().log("SQL: "+sql+" % "+str(sqlArgs))
+                sqlResults = myDB.connection.execute(sql, sqlArgs).fetchall()
+            except sqlite3.DatabaseError as e:
+                Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+                raise
+    
+            if len(sqlResults) != 1:
+                if len(sqlResults) == 0:
+                    logStr = "Unable to match a record in the DB for "+result["file_seriesname"]
+                else:
+                    logStr = "Multiple results for "+result["file_seriesname"]+" in the DB, unable to match show name"
+                Logger().log(logStr, DEBUG)
+                returnStr += logStr + "\n"
+                continue
+
+            showInfo = (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+            
         # find the show in the showlist
         try:
-            showResults = helpers.findCertainShow(showList, int(showObj["id"]))
+            showResults = helpers.findCertainShow(showList, showInfo[0])
         except exceptions.MultipleShowObjectsException:
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
         
@@ -195,6 +230,8 @@ def doIt(downloadDir, showList):
             Logger().log(logStr, DEBUG)
             returnStr += logStr + "\n"
             break
+    
+    # end for
         
     if result == None:
         logStr = "Unable to figure out what this episode is, giving up"
@@ -217,7 +254,7 @@ def doIt(downloadDir, showList):
     for curEpisode in result["epno"]:
         episode = int(curEpisode)
     
-        logStr = "TVDB thinks the file is " + showObj["seriesname"] + str(season) + "x" + str(episode)
+        logStr = "TVDB thinks the file is " + showInfo[1] + str(season) + "x" + str(episode)
         Logger().log(logStr, DEBUG)
         returnStr += logStr + "\n"
         

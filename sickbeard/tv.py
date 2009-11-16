@@ -24,6 +24,7 @@ import sqlite3
 import threading
 import urllib
 import re
+import glob
 from xml.dom.minidom import Document
 
 from lib.BeautifulSoup import BeautifulStoneSoup, NavigableString, HTMLParseError
@@ -702,32 +703,26 @@ class TVShow(object):
 					for relEp in rootEp.relatedEps:
 						relEp.location = result
 			
-			nfoFilename = os.path.join(rootEp.show.location, actualName[0] + ".nfo")
-			tbnFilename = os.path.join(rootEp.show.location, actualName[0] + ".tbn")
-			
-			# check for an NFO under the old filename, rename it if it exists
-			if os.path.isfile(nfoFilename):
-				result = processTV.renameFile(nfoFilename, rootEp.prettyName())
-				if result == False:
-					Logger().log(str(self.tvdbid) + ": Unable to rename the NFO file from " + nfoFilename)
-				else:
-					Logger().log(str(self.tvdbid) + ": Renamed NFO successfully")
-					with rootEp.lock:
-						rootEp.hasnfo = True
-						for relEp in rootEp.relatedEps:
-							relEp.hasnfo = True
+			fileList = glob.glob(os.path.join(rootEp.show.location, actualName[0] + "*"))
 
-			# check for an NFO under the old filename, rename it if it exists
-			if os.path.isfile(tbnFilename):
-				result = processTV.renameFile(tbnFilename, rootEp.prettyName())
+			for file in fileList:
+				result = processTV.renameFile(file, rootEp.prettyName())
 				if result == False:
-					Logger().log(str(self.tvdbid) + ": Unable to rename the TBN file from " + tbnFilename)
-				else:
-					Logger().log(str(self.tvdbid) + ": Renamed TBN successfully")
-					with rootEp.lock:
-						rootEp.hastbn = True
-						for relEp in rootEp.relatedEps:
-							relEp.hastbn = True
+					Logger().log(str(self.tvdbid) + ": Unable to rename file "+file, ERROR)
+			
+			if os.path.isfile(os.path.join(rootEp.show.location, rootEp.prettyName() + ".nfo")):
+				Logger().log(str(self.tvdbid) + ": Renamed NFO successfully")
+				with rootEp.lock:
+					rootEp.hasnfo = True
+					for relEp in rootEp.relatedEps:
+						relEp.hasnfo = True
+
+			if os.path.isfile(os.path.join(rootEp.show.location, rootEp.prettyName() + ".tbn")):
+				Logger().log(str(self.tvdbid) + ": Renamed TBN successfully")
+				with rootEp.lock:
+					rootEp.hastbn = True
+					for relEp in rootEp.relatedEps:
+						relEp.hastbn = True
 
 			with rootEp.lock:
 				rootEp.saveToDB()
@@ -1047,7 +1042,11 @@ class TVEpisode:
 		
 		epsToWrite = [self] + self.relatedEps
 
-		t = tvdb_api.Tvdb(actors=True, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
+		try:
+			t = tvdb_api.Tvdb(actors=True, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
+		except tvdb_exceptions.tvdb_error as o:
+			Logger().log("Unable to connect to TVDB while creating meta files - skipping", ERROR)
+			return
 		
 		nfo = Document()
 		myShow = t[self.show.tvdbid]
