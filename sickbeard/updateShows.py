@@ -222,6 +222,8 @@ class ShowUpdater():
                 epList = sickbeard.getEpList(updatedEpisodes, show.tvdbid)
                 Logger().log("Updated episodes for this show are " + str(epList), DEBUG)
                 for curEp in epList:
+                    if int(curEp.season) == 0:
+                        continue
                     Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
                     curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
                     curEp.saveToDB()
@@ -297,6 +299,8 @@ class ShowUpdater():
                     epList = sickbeard.getEpList(updatedEpisodes, show.tvdbid)
                     Logger().log("Updated episodes for this show are " + str(epList), DEBUG)
                     for curEp in epList:
+                        if int(curEp.season) == 0:
+                            continue
                         Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
                         curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
                         curEp.saveToDB()
