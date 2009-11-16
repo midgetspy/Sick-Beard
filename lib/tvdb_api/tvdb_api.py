@@ -26,6 +26,8 @@ import tempfile
 import logging
 import datetime
 
+import sickbeard
+
 try:
     import xml.etree.cElementTree as ElementTree
 except ImportError:
@@ -338,7 +340,7 @@ class Tvdb:
         """
         
         # if we're given a lastTimeout that is less than 5 mins just give up
-        if lastTimeout != None and datetime.datetime.now() - lastTimeout < datetime.timedelta(minutes=5):
+        if lastTimeout != None and datetime.datetime.now() - lastTimeout < datetime.timedelta(minutes=1):
             raise tvdb_error("We recently timed out, so giving up early this time")
         
         self.shows = ShowContainer() # Holds all Show classes
@@ -454,6 +456,7 @@ class Tvdb:
                     self.log.debug("Attempting to recache %s" % url)
                     resp.recache()
         except IOError, errormsg:
+            sickbeard.LAST_TVDB_TIMEOUT = datetime.datetime.now()
             raise tvdb_error("Could not connect to server: " + str(errormsg) + " from " + str(url))
         #end try
 

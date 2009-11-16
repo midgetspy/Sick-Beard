@@ -104,6 +104,7 @@ class TVShow(object):
 			try:
 				sql = "SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid)
 				sqlResults = self.db.connection.execute(sql).fetchall()
+				Logger().log("SQL: "+sql, DEBUG)
 			except sqlite3.DatabaseError as e:
 				Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
 				raise
@@ -134,11 +135,13 @@ class TVShow(object):
 		if otherShow != None:
 			raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
 		
-		t = tvdb_api.Tvdb()
 		try:
+			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
 			t[self.tvdbid]
 		except tvdb_exceptions.tvdb_shownotfound as e:
 			raise exceptions.ShowNotFoundException(str(e))
+		except tvdb_exceptions.tvdb_error as e:
+			Logger().log("Unable to contact theTVDB.com, it might be down", ERROR)
 		
 		self.saveToDB()
 	

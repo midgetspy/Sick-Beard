@@ -205,12 +205,19 @@ class NZBBot(SingleServerIRCBot):
                 Logger().log("Show " + showObj["seriesname"] + " wasn't found in the show list")
                 return
             
+            if ".720p." in name:
+                quality = HD
+            else:
+                quality = SD
+            
+            Logger().log("Quality got detected as "+str(qualityStrings[quality]))
+            
             season = int(result["seasno"])
             episode = int(result["epno"][0])
             
             ep = show[0].getEpisode(season, episode, True)
             
-            if ep.status not in (SNATCHED, DOWNLOADED, SKIPPED):
+            if ep.status not in (SNATCHED, DOWNLOADED, SKIPPED) and quality == ep.quality:
                 
                 nzbObj = NZBSearchResult(ep)
                 nzbObj.url = url + '&' + urllib.urlencode({'i': sickbeard.TVBINZ_UID, 'h': sickbeard.TVBINZ_HASH})
