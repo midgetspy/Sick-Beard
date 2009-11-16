@@ -30,7 +30,7 @@ from sickbeard.common import *
 from sickbeard import db
 from sickbeard import exceptions
 
-from lib.tvdb_api import tvdb_api
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class TVRage:
     
@@ -50,12 +50,39 @@ class TVRage:
         
         try:
         
+            airdate = None
+        
             # make sure the last TVDB episode matches our last episode
-            t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
-            ep = t[self.show.tvdbid][self.lastEpInfo['season']][self.lastEpInfo['episode']]
+            try:
+                t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
+                ep = t[self.show.tvdbid][self.lastEpInfo['season']][self.lastEpInfo['episode']]
+
+                rawAirdate = [int(x) for x in ep["firstaired"].split("-")]
+                airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
             
-            rawAirdate = [int(x) for x in ep["firstaired"].split("-")]
-            airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+            except tvdb_exceptions.tvdb_exception as e:
+                Logger().log("Unable to check TVRage info against TVDB: "+str(e), ERROR)
+
+                Logger().log("Trying against DB instead", DEBUG)
+
+                myDB = db.DBConnection()
+                myDB.checkDB()
+                
+                sqlResults = []
+            
+                try:
+                    sql = "SELECT * FROM tv_episodes WHERE showid = ? AND season = ? and episode = ?"
+                    sqlArgs = [self.show.tvdbid, self.lastEpInfo['season'], self.lastEpInfo['episode']]
+                    Logger().log("SQL: " + sql + " % " + str(sqlArgs), DEBUG)
+                    sqlResults = myDB.connection.execute(sql, sqlArgs).fetchall()
+                except sqlite3.DatabaseError as e:
+                    Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+                    raise
+        
+                if len(sqlResults) == 0:
+                    raise exceptions.EpisodeNotFoundException("Unable to find episode in DB")
+                else:
+                    airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
             
             Logger().log("Date from TVDB for episode " + str(self.lastEpInfo['season']) + "x" + str(self.lastEpInfo['episode']) + ": " + str(airdate), DEBUG)
             Logger().log("Date from TVRage for episode " + str(self.lastEpInfo['season']) + "x" + str(self.lastEpInfo['episode']) + ": " + str(self.lastEpInfo['airdate']), DEBUG)

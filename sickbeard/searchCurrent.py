@@ -89,7 +89,6 @@ class CurrentSearcher():
     
             Logger().log("Beginning search for todays episodes", DEBUG)
     
-            #epList = self._getEpisodesToSearchFor()
             epList = sickbeard.missingList + sickbeard.airingList
             
             if epList == None or len(epList) == 0:
@@ -138,39 +137,3 @@ class CurrentSearcher():
                 ep.status = MISSED
                 ep.saveToDB()
             
-
-    def _getEpisodesToSearchFor(self):
-    
-        myDB = db.DBConnection()
-        myDB.checkDB()
-        
-        curDate = datetime.date.today().toordinal()
-        sqlResults = []
-        
-        foundEps = []
-        
-        self._changeMissingEpisodes()
-        
-        Logger().log("Searching the database for a list of new episodes to download")
-        
-        try:
-            sql = "SELECT * FROM tv_episodes WHERE status IN (" + str(UNKNOWN) + ", " + str(UNAIRED) + ", " + str(PREDOWNLOADED) + ", " + str(MISSED) + ") AND airdate <= " + str(curDate)
-            Logger().log("SQL: " + sql, DEBUG)
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-    
-        for sqlEp in sqlResults:
-            print "FFS the status is " + str(sqlEp["status"])
-            
-            try:
-                show = helpers.findCertainShow (sickbeard.showList, int(sqlEp["showid"]))
-            except exceptions.MultipleShowObjectsException:
-                Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
-                return None
-            ep = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
-            foundEps.append(ep)
-            Logger().log("Added " + ep.prettyName() + " to the list of episodes to download (status=" + str(ep.status))
-        
-        return foundEps

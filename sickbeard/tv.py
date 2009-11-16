@@ -901,7 +901,7 @@ class TVEpisode:
 
 		try:
 			t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
-		except tvdb_exceptions.tvdb_error:
+		except (tvdb_exceptions.tvdb_error, IOError):
 			# if the episode is already valid just log it, if not throw it up
 			if self.name != "" and self.airdate != datetime.date.fromordinal(1):
 				Logger().log("TVDB timed out but we have enough info from other sources, allowing the error", ERROR)

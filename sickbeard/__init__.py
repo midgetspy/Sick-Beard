@@ -490,6 +490,9 @@ def updateAiringList():
         except exceptions.MultipleShowObjectsException:
             Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
             return None
+        except exceptions.SickBeardException as e:
+            Logger().log("Unexpected exception: "+str(e), ERROR)
+            continue
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
 
         epList.append(ep)
