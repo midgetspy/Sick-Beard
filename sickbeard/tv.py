@@ -912,6 +912,7 @@ class TVEpisode:
 
 		try:
 			t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
+			myEp = t[self.show.tvdbid][season][episode]
 		except (tvdb_exceptions.tvdb_error, IOError):
 			# if the episode is already valid just log it, if not throw it up
 			if self.name != "" and self.airdate != datetime.date.fromordinal(1):
@@ -920,9 +921,6 @@ class TVEpisode:
 			else:
 				Logger().log("TVDB timed out, unable to create the episode", ERROR)
 				return False
-		
-		try:
-			myEp = t[self.show.tvdbid][season][episode]
 		except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
 			Logger().log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?")
 			return
