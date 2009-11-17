@@ -85,7 +85,7 @@ class Logger:
             meThread = threading.currentThread().name
             timestamp = datetime.datetime.now().strftime("%I:%M:%S %p")
             outLine = "[" + timestamp + "] <" + meThread + "::" + logLevelStrings[logLevel] + "> " + message
-            outLine = unicode(outLine).encode('ascii', 'xmlcharrefreplace')
+            outLine = outLine.decode('ascii', 'ignore')
             
             if self.fileObj == None:
                 self.fileObj = self._logObject()

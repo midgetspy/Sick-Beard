@@ -371,13 +371,17 @@ class Tvdb:
             self.config['cache_location'] = cache
         else:
             self.config['cache_enabled'] = False
+            self.config['cache_location'] = self._getTempDir()
 
         if self.config['cache_enabled']:
             self.urlopener = urllib2.build_opener(
                 CacheHandler(self.config['cache_location'])
             )
         else:
-            self.urlopener = urllib2.build_opener()
+            #self.urlopener = urllib2.build_opener()
+            self.urlopener = urllib2.build_opener(
+                CacheHandler(self.config['cache_location'], 1)
+            )
 
         self.config['banners_enabled'] = banners
         self.config['actors_enabled'] = actors
@@ -456,7 +460,8 @@ class Tvdb:
                     self.log.debug("Attempting to recache %s" % url)
                     resp.recache()
         except IOError, errormsg:
-            sickbeard.LAST_TVDB_TIMEOUT = datetime.datetime.now()
+            if not str(errormsg).startswith('HTTP Error'):
+                sickbeard.LAST_TVDB_TIMEOUT = datetime.datetime.now()
             raise tvdb_error("Could not connect to server: " + str(errormsg) + " from " + str(url))
         #end try
 

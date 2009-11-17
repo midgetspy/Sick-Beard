@@ -24,56 +24,16 @@ import threading
 import time
 import traceback
 
-from sickbeard import db, exceptions, helpers, nzb
+from sickbeard import db, exceptions, helpers, nzb, scheduler
 from sickbeard.logging import *
 from sickbeard.common import *
 
-class BacklogSearchScheduler():
+class BacklogSearchScheduler(scheduler.Scheduler):
 
-    def __init__(self):
-        
-        self.isActive = False
-        self.lastRun = datetime.datetime.fromordinal(1)
-        self.searcher = BacklogSearcher()
-        
-        # we will try running it every hour but the searcher itself
-        # will control how often it gets run (once a day at the most)
-        self.cycleTime = datetime.timedelta(hours=1)
-        
-        self.thread = None
-        self.initThread()
-        
-        self.abort = False
-        
-    
-    def initThread(self):
-        if self.thread == None:
-            self.thread = threading.Thread(None, self.runSearch, "BACKLOG")    
-    
     def forceSearch(self):
-        self.searcher._set_lastBacklog(1)
+        self.action._set_lastBacklog(1)
         self.lastRun = datetime.datetime.fromordinal(1)
         
-    def runSearch(self):
-        
-        while True:
-            
-            currentTime = datetime.datetime.now()
-            
-            if currentTime - self.lastRun > self.cycleTime:
-                self.lastRun = currentTime
-                try:
-                    self.searcher.searchBacklog()
-                except Exception as e:
-                    Logger().log("Search generated an exception: " + str(e), ERROR)
-                    Logger().log(traceback.format_exc(), DEBUG)
-            
-            if self.abort:
-                self.abort = False
-                self.thread = None
-                return
-            
-            time.sleep(1) 
 
 class BacklogSearcher:
 

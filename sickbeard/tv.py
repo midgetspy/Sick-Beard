@@ -142,7 +142,7 @@ class TVShow(object):
 		except tvdb_exceptions.tvdb_shownotfound as e:
 			raise exceptions.ShowNotFoundException(str(e))
 		except tvdb_exceptions.tvdb_error as e:
-			Logger().log("Unable to contact theTVDB.com, it might be down", ERROR)
+			Logger().log("Unable to contact theTVDB.com, it might be down: "+str(e), ERROR)
 		
 		self.saveToDB()
 	
@@ -314,6 +314,8 @@ class TVShow(object):
 						Logger().log(str(self.tvdbid) + ": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
 						continue
 					#self.setEpisode(season, episode, ep)
+				else:
+					ep.loadFromTVDB()
 				
 				with ep.lock:
 					Logger().log(str(self.tvdbid) + ": Loading info from theTVDB for episode " + str(season) + "x" + str(episode), DEBUG)
@@ -906,7 +908,12 @@ class TVEpisode:
 			return True
 	
 	
-	def loadFromTVDB(self, season, episode, cache=True):
+	def loadFromTVDB(self, season=None, episode=None, cache=True):
+
+		if season == None:
+			season = self.season
+		if episode == None:
+			episode = self.episode
 
 		Logger().log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), DEBUG)
 
@@ -1212,7 +1219,11 @@ class TVEpisode:
 				else:
 					tbnFilename = helpers.sanitizeFileName(self.prettyName() + '.tbn')
 				Logger().log('Writing thumb to ' + os.path.join(self.show.location, tbnFilename))
-				urllib.urlretrieve(thumbFilename, os.path.join(self.show.location, tbnFilename))
+				try:
+					urllib.urlretrieve(thumbFilename, os.path.join(self.show.location, tbnFilename))
+				except IOError:
+					Logger().log("Unable to download thumbnail from "+thumbFilename, ERROR)
+					return
 				#TODO: check that it worked
 				self.hastbn = True
 

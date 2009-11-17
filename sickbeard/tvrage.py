@@ -107,7 +107,7 @@ class TVRage:
             Logger().log("Unable to load TVRage info: " + str(e), ERROR)
             raise exceptions.TVRageException("urlopen call to " + url + " failed")
         
-        urlData = urlObj.readlines()
+        urlData = [x.decode('ascii', 'ignore') for x in urlObj.readlines()]
         
         info = {}
         

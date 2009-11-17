@@ -1,3 +1,5 @@
+#import os.path
+#import urllib
 <html>
 <head>
 </head>
@@ -7,7 +9,8 @@
 #if $resultList == None and $showDir == None:
 Folder to use: <input type="text" name="showDir" size="50">
 #elif len($resultList) == 0:
-Show name: <input type="text" name="showName" size="30"> <input type="hidden" name="showDir" value="$showDir"> 
+#set $tempName = $os.path.normpath($urllib.unquote_plus($showDir)).split($os.sep)
+Show name: <input type="text" name="showName" size="30" value="$tempName[-1]"> <input type="hidden" name="showDir" value="$showDir"> 
 #else:
 Choose the show you meant: <select name="seriesList">
 #for $curShow in $resultList:

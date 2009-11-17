@@ -260,12 +260,12 @@ def initialize():
         #updateScheduler = updateShows.UpdateScheduler(True)
         
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(), threadName="SEARCH")
-        backlogSearchScheduler = scheduler.Scheduler(searchBacklog.BacklogSearcher(), cycleTime=datetime.timedelta(hours=1), threadName="BACKLOG")
+        backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(), cycleTime=datetime.timedelta(hours=1), threadName="BACKLOG")
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(), cycleTime=datetime.timedelta(hours=1), threadName="UPDATE") 
         
         botRunner = tvnzbbot.NZBBotRunner()
         #showAddScheduler = showAdder.ShowAddScheduler()
-        showAddScheduler = scheduler.Scheduler(showAdder.ShowAddQueue(), cycleTime=datetime.timedelta(minutes=3), threadName="SHOWADDQUEUE")
+        showAddScheduler = scheduler.Scheduler(showAdder.ShowAddQueue(), cycleTime=datetime.timedelta(seconds=3), threadName="SHOWADDQUEUE", silent=True)
         
         showList = []
         loadingShowList = {}

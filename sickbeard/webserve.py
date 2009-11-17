@@ -200,7 +200,7 @@ class Whatever:
             return "Unable to find the specified show"
         
         # force the update from the DB
-        sickbeard.updateScheduler.updater.updateShowFromTVDB(showObj, bool(force))
+        sickbeard.updateScheduler.action.updateShowFromTVDB(showObj, bool(force))
         
         raise cherrypy.HTTPRedirect("/displayShow/?show=" + show)
 
@@ -363,7 +363,7 @@ class Whatever:
 
             try:
                 #newShowAdder = ui.ShowAdder(showDir)
-                sickbeard.showAddScheduler.addShowToQueue(showDir)
+                sickbeard.showAddScheduler.action.addShowToQueue(showDir)
             except exceptions.NoNFOException:
                 myTemplate.resultList = []
                 myTemplate.showDir = urllib.quote_plus(showDir)
