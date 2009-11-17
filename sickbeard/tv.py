@@ -924,7 +924,7 @@ class TVEpisode:
 		except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
 			Logger().log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?")
 			return
-		
+			
 		if myEp["episodename"] == None or myEp["firstaired"] == None:
 			return False
 		

@@ -46,6 +46,14 @@ sickbeard password: <input type="text" name="web_password" value="$sickbeard.WEB
 #end if
 Launch browser on start: <input type="checkbox" name="launch_browser" $launch_browser><br />
 
+<h2>SABnzbd</h2>
+Username: <input type="text" name="sab_username" value="$sickbeard.SAB_USERNAME" size="10"><br />
+Password: <input type="text" name="sab_password" value="$sickbeard.SAB_PASSWORD" size="10"><br />
+API Key: <input type="text" name="sab_apikey" value="$sickbeard.SAB_APIKEY" size="35"><br />
+Category: <input type="text" name="sab_category" value="$sickbeard.SAB_CATEGORY" size="10"><br />
+IP/port: <input type="text" name="sab_host" value="$sickbeard.SAB_HOST" size="35"><br />
+<br />
+
 <h2>Blackhole</h2>
 NZB Directory: <input type="text" name="nzb_dir" value="$sickbeard.NZB_DIR" size="35"><br />
 
@@ -79,14 +87,6 @@ Enable NZBs.org: <input type="checkbox" name="nzbs" $nzbs><br />
 UID: <input type="text" name="nzbs_uid" value="$sickbeard.NZBS_UID" size="6"><br />
 Hash: <input type="text" name="nzbs_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
 
-<h2>SABnzbd</h2>
-Username: <input type="text" name="sab_username" value="$sickbeard.SAB_USERNAME" size="10"><br />
-Password: <input type="text" name="sab_password" value="$sickbeard.SAB_PASSWORD" size="10"><br />
-API Key: <input type="text" name="sab_apikey" value="$sickbeard.SAB_APIKEY" size="35"><br />
-Category: <input type="text" name="sab_category" value="$sickbeard.SAB_CATEGORY" size="10"><br />
-URL: <input type="text" name="sab_host" value="$sickbeard.SAB_HOST" size="35"><br />
-<br />
-
 <h2>IRC Bot</h2>
 #if $sickbeard.IRC_BOT == True:
 #set $irc = "CHECKED"
@@ -119,7 +119,7 @@ Nick: <input type="text" name="irc_nick" value="$sickbeard.IRC_NICK" size="10"><
 Notify XBMC on NZB retrieval: <input type="checkbox" name="xbmc_notify_onsnatch" $xbmc_notify_onsnatch><br />
 Notify XBMC on episode download: <input type="checkbox" name="xbmc_notify_ondownload" $xbmc_notify_ondownload><br />
 Update XBMC library: <input type="checkbox" name="xbmc_update_library" $xbmc_update_library><br />
-XBMC hosts: <input type="text" name="xbmc_host" value="$sickbeard.XBMC_HOST" size="35"><br />
+XBMC host: <input type="text" name="xbmc_host" value="$sickbeard.XBMC_HOST" size="35"><br />
 <br />
 <input type="submit" value="Save">
 </form>

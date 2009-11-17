@@ -4,6 +4,11 @@ port=8081
 username=yourusername
 password=yourpassword
 
+
+#### PATH TRANSLATION ####
+
+# IF YOUR SABNZBD AND SICK BEARD ARE ON THE SAME PC LEAVE BOTH OF THE VARIABLES BELOW BLANK!
+
 # the following attributes are to allow you to translate the folder names in case your SAB is on a different computer than your SickBeard
 # NOTE: If they are on the same PC or the paths are the same on both PCs then leave both of these blank
  
