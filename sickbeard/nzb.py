@@ -27,6 +27,7 @@ from sickbeard import sab, contactXBMC
 
 from providers import newzbin
 from providers import tvbinz
+from providers import nzbs
 
 def _downloadNZB(nzb):
 
@@ -34,6 +35,8 @@ def _downloadNZB(nzb):
 		return newzbin.downloadNZB(nzb)
 	elif nzb.provider == TVBINZ:
 		return tvbinz.downloadNZB(nzb)
+	elif nzb.provider == NZBS:
+		return nzbs.downloadNZB(nzb)
 	else:
 		Logger().log("Invalid provider - this is a coding error, this should never happen.", ERROR)
 		return False
@@ -82,7 +85,7 @@ def findNZB(episode):
 
 	foundEps = []
 
-	for curProvider in (newzbin, tvbinz):
+	for curProvider in (newzbin, tvbinz, nzbs):
 		
 		if not curProvider.isActive():
 			continue

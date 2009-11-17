@@ -186,7 +186,8 @@ def initialize():
                 IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 updateScheduler, botRunner, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
-                airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler
+                airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler, \
+                NZBS, NZBS_UID, NZBS_HASH
         
         if __INITIALIZED__:
             return False
@@ -232,6 +233,10 @@ def initialize():
         TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
         TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
         TVBINZ_HASH = check_setting_str(CFG, 'TVBinz', 'tvbinz_hash', '')
+        
+        NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
+        NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
+        NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
         
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')
@@ -405,6 +410,9 @@ def save_config():
     CFG['TVBinz']['tvbinz'] = int(TVBINZ)
     CFG['TVBinz']['tvbinz_uid'] = TVBINZ_UID
     CFG['TVBinz']['tvbinz_hash'] = TVBINZ_HASH
+    CFG['NZBs']['nzbs'] = int(NZBS)
+    CFG['NZBs']['nzbs_uid'] = NZBS_UID
+    CFG['NZBs']['nzbs_hash'] = NZBS_HASH
     CFG['SABnzbd']['sab_username'] = SAB_USERNAME
     CFG['SABnzbd']['sab_password'] = SAB_PASSWORD
     CFG['SABnzbd']['sab_apikey'] = SAB_APIKEY

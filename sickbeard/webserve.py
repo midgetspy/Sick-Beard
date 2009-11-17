@@ -540,7 +540,7 @@ class Whatever:
                    irc_bot=None, irc_server=None, irc_channel=None, irc_key=None, irc_nick=None,
                    xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_update_library=None,
                    xbmc_host=None, web_port=None, web_log=None, nzb_method=None, launch_browser=None,
-                   create_metadata=None):
+                   create_metadata=None, nzbs=None, nzbs_uid=None, nzbs_hash=None):
 
         results = []
 
@@ -568,6 +568,11 @@ class Whatever:
             tvbinz = 1
         else:
             tvbinz = 0
+            
+        if nzbs == "on":
+            nzbs = 1
+        else:
+            nzbs = 0
             
         if irc_bot == "on":
             irc_bot = 1
@@ -608,9 +613,15 @@ class Whatever:
         sickbeard.NEWZBIN = newzbin
         sickbeard.NEWZBIN_USERNAME = newzbin_username
         sickbeard.NEWZBIN_PASSWORD = newzbin_password
+        
         sickbeard.TVBINZ = tvbinz
         sickbeard.TVBINZ_UID = tvbinz_uid
         sickbeard.TVBINZ_HASH = tvbinz_hash
+        
+        sickbeard.NZBS = nzbs
+        sickbeard.NZBS_UID = nzbs_uid
+        sickbeard.NZBS_HASH = nzbs_hash
+        
         sickbeard.SAB_USERNAME = sab_username
         sickbeard.SAB_PASSWORD = sab_password
         sickbeard.SAB_APIKEY = sab_apikey

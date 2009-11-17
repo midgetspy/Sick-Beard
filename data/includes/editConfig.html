@@ -69,6 +69,16 @@ Enable TVBinz: <input type="checkbox" name="tvbinz" $tvbinz><br />
 UID: <input type="text" name="tvbinz_uid" value="$sickbeard.TVBINZ_UID" size="6"><br />
 Hash: <input type="text" name="tvbinz_hash" value="$sickbeard.TVBINZ_HASH" size="35"><br />
 
+<h2>NZBs.org</h2>
+#if $sickbeard.NZBS == True:
+#set $nzbs = "CHECKED"
+#else
+#set $nzbs = ""
+#end if
+Enable NZBs.org: <input type="checkbox" name="nzbs" $nzbs><br />
+UID: <input type="text" name="nzbs_uid" value="$sickbeard.NZBS_UID" size="6"><br />
+Hash: <input type="text" name="nzbs_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
+
 <h2>SABnzbd</h2>
 Username: <input type="text" name="sab_username" value="$sickbeard.SAB_USERNAME" size="10"><br />
 Password: <input type="text" name="sab_password" value="$sickbeard.SAB_PASSWORD" size="10"><br />

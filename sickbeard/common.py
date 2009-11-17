@@ -47,11 +47,13 @@ statusStrings[DISCBACKLOG] = "Disc Backlog"
 NEWZBIN = 0
 TVNZB = 1
 TVBINZ = 2
+NZBS = 3
 
 providerNames = {}
 providerNames[NEWZBIN] = "Newzbin"
 providerNames[TVNZB] = "TVNZB"
 providerNames[TVBINZ] = "TVBinz"
+providerNames[NZBS] = "NZBs.org"
 
 ### Qualities
 HD = 1
