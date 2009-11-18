@@ -64,6 +64,22 @@ def _genericMessage(subject, message):
     t.message = message
     return _munge(t)
 
+def _getEpisode(show, season, episode):
+
+    if show == None or season == None or episode == None:
+        return "Invalid parameters"
+    
+    showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+    if showObj == None:
+        return "Show not in show list"
+
+    epObj = showObj.getEpisode(int(season), int(episode), True)
+    
+    if epObj == None:
+        return "Episode couldn't be retrieved"
+
+    return epObj
 
 class ConfigGeneral:
     
@@ -515,13 +531,189 @@ class Home:
                 
             raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
 
+    @cherrypy.expose
+    def deleteShow(self, show=None):
 
-class ThemeTest:
+        if show == None:
+            return _genericMessage("Error", "Invalid show ID")
+        
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        
+        if showObj == None:
+            return _genericMessage("Error", "Unable to find the specified show")
+
+        showObj.deleteShow()
+        
+        return _genericMessage("Show deleted", "Show has been deleted.")
+
+    @cherrypy.expose
+    def updateShow(self, show=None, force=0):
+        
+        if show == None:
+            return _genericMessage("Error", "Invalid show ID")
+        
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        
+        if showObj == None:
+            return _genericMessage("Error", "Unable to find the specified show")
+        
+        # force the update from the DB
+        sickbeard.updateScheduler.action.updateShowFromTVDB(showObj, bool(force))
+        
+        raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+
+
+    @cherrypy.expose
+    def fixEpisodeNames(self, show=None):
+        
+        if show == None:
+            return _genericMessage("Error", "Invalid show ID")
+        
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        
+        if showObj == None:
+            return _genericMessage("Error", "Unable to find the specified show")
+        
+        showObj.fixEpisodeNames()
+
+        raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+        
+    
+    @cherrypy.expose
+    def refreshDir(self, show=None):
+        
+        if show == None:
+            return _genericMessage("Error", "Invalid show ID")
+        
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        
+        if showObj == None:
+            return _genericMessage("Error", "Unable to find the specified show")
+
+        showObj.refreshDir()
+
+        raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+        
+    
+    @cherrypy.expose
+    def setStatus(self, show=None, season=None, episode=None, status=None):
+        
+        if show == None or season == None or status == None:
+            return _genericMessage("Error", "You must specify a show and season at least")
+        
+        if not statusStrings.has_key(int(status)):
+            return _genericMessage("Error", "Invalid status")
+        
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+        if showObj == None:
+            return _genericMessage("Error", "Show not in show list")
+
+        if episode != None:
+
+            epObj = showObj.getEpisode(int(season), int(episode), True)
+            
+            if epObj == None:
+                return _genericMessage("Error", "Episode couldn't be retrieved")
+        
+            with epObj.lock:
+                #if epObj.status == SKIPPED:
+                epObj.status = status
+                epObj.saveToDB()
+
+        else:
+            
+            myDB = db.DBConnection()
+            myDB.checkDB()
+
+            Logger().log(str(showObj.tvdbid) + ": Setting status " + str(status) + " on all episodes")
+        
+            sqlResults = []
+    
+            try:
+                sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " AND season = " + str(season)
+                Logger().log("SQL: " + sql, DEBUG)
+                sqlResults = myDB.connection.execute(sql).fetchall()
+            except sqlite3.DatabaseError as e:
+                Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+                raise
+
+            for curEp in sqlResults:
+                
+                curSeason = int(curEp["season"])
+                curEpisode = int(curEp["episode"])
+                
+                epObj = showObj.getEpisode(curSeason, curEpisode, True)
+                Logger().log(str(showObj.tvdbid) + ": Setting status for " + str(curSeason) + "x" + str(curEpisode) + " to " + statusStrings[int(status)], DEBUG)
+                with epObj.lock:
+                    epObj.status = int(status)
+                    epObj.saveToDB()
+                    
+        raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+
+
+
+    @cherrypy.expose
+    def searchEpisode(self, show=None, season=None, episode=None):
+        
+        outStr = ""
+        epObj = _getEpisode(show, season, episode)
+        
+        if isinstance(epObj, str):
+            return _genericMessage("Error", epObj)
+        
+        tempStr = "Searching for NZB for " + epObj.prettyName()
+        Logger().log(tempStr)
+        outStr += tempStr + "<br />\n"
+        foundNZBs = nzb.findNZB(epObj)
+        
+        if len(foundNZBs) == 0:
+            tempStr = "No NZBs were found<br />\n"
+            Logger().log(tempStr)
+            outStr += tempStr + "<br />\n"
+            return _genericMessage("Error", outStr)
+        
+        else:
+
+            # just use the first result for now
+            Logger().log("Downloading NZB from " + foundNZBs[0].url + "<br />\n")
+            result = nzb.snatchNZB(foundNZBs[0])
+            
+            #TODO: check if the download was successful
+            
+            raise cherrypy.HTTPRedirect("displayShow/?show=" + str(epObj.show.tvdbid))
+
+
+
+class WebInterface:
     
     @cherrypy.expose
     def index(self):
         
-        cherrypy.HTTPRedirect("/test/home/")
+        raise cherrypy.HTTPRedirect("home")
+
+    @cherrypy.expose
+    def showPoster(self, show=None):
+        
+        if show == None:
+            return "Invalid show" #TODO: make it return a standard image
+        else:
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+            
+        if showObj == None:
+            return "Unable to find show" #TODO: make it return a standard image
+    
+        posterFilename = os.path.join(showObj.location, "folder.jpg")
+        if os.path.isfile(posterFilename):
+            
+            posterFile = open(posterFilename, "rb")
+            cherrypy.response.headers['Content-type'] = "image/jpeg"
+            posterImage = posterFile.read()
+            posterFile.close()
+            return posterImage
+        
+        else:
+            print "No poster" #TODO: make it return a standard image
 
     @cherrypy.expose
     def comingEpisodes(self):
@@ -543,7 +735,7 @@ class ThemeTest:
 
 class Whatever:
     
-    test = ThemeTest()
+    test = WebInterface()
     
     @cherrypy.expose
     def index(self):
@@ -885,10 +1077,10 @@ class Whatever:
     @cherrypy.expose
     def displayEpisode(self, show=None, season=None, episode=None):
         
-        epObj = self._getEpisode(show, season, episode)
+        epObj = _getEpisode(show, season, episode)
         
         if isinstance(epObj, str):
-            return epObj
+            return _genericMessage("Error", epObj)
         else:
             t = Template(file="data/includes/displayEpisode.html")
             t.episode = epObj
@@ -958,10 +1150,10 @@ class Whatever:
     def searchEpisode(self, show=None, season=None, episode=None):
         
         outStr = ""
-        epObj = self._getEpisode(show, season, episode)
+        epObj = _getEpisode(show, season, episode)
         
         if isinstance(epObj, str):
-            return epObj
+            return _genericMessage("Error", epObj)
         
         tempStr = "Searching for NZB for " + epObj.prettyName()
         Logger().log(tempStr)

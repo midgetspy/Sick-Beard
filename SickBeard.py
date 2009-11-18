@@ -103,7 +103,7 @@ def main():
 		cherry_log = None
 
 	# cherrypy setup
-	webRoot = webserve.Whatever()
+	webRoot = webserve.WebInterface()
 	cherrypy.config.update({
 						    'server.socket_port': sickbeard.WEB_PORT,
 						    'server.socket_host': '0.0.0.0',

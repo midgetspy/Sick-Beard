@@ -13,12 +13,12 @@
 
 <h2>$show.name</h2>
 
-<a href="../editShow?show=$show.tvdbid">(edit)</a>
-<a href="/deleteShow?show=$show.tvdbid">(delete)</a>
-<a href="/updateShow?show=$show.tvdbid">(quick update)</a>
-<a href="/refreshDir?show=$show.tvdbid">(refresh folder)</a>
-<a href="/fixEpisodeNames?show=$show.tvdbid">(fix episode names)</a>
-<a href="/updateShow?show=$show.tvdbid&force=1">(force update - takes forever)</a><br />
+<a href="$statpath/editShow?show=$show.tvdbid">(edit)</a>
+<a href="$statpath/deleteShow?show=$show.tvdbid">(delete)</a>
+<a href="$statpath/updateShow?show=$show.tvdbid">(quick update)</a>
+<a href="$statpath/refreshDir?show=$show.tvdbid">(refresh folder)</a>
+<a href="$statpath/fixEpisodeNames?show=$show.tvdbid">(fix episode names)</a>
+<a href="$statpath/updateShow?show=$show.tvdbid&force=1">(force update - takes forever)</a><br />
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
 
@@ -46,8 +46,8 @@ Season Folders: $show.seasonfolders<br />
     <td colspan=5>
 	<br />
 	<h2>Season $epResult["season"]
-	(<a href="/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
-	(<a href="/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)<br />
+	(<a href="$statpath/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
+	(<a href="$statpath/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)<br />
 	</h2></td>
   </tr>
   <tr> <th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
@@ -61,7 +61,7 @@ Season Folders: $show.seasonfolders<br />
 	 <td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>
 	 <td>$os.path.basename($epResult["location"])</td>
      <td>$statusStrings[int($epResult["status"])]</td>
-     <td><a href="/searchEpisode/?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">find NZB</a></td>
+     <td><a href="$statpath/searchEpisode/?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">find NZB</a></td>
    <tr>
    
 #end for            

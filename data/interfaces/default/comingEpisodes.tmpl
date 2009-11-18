@@ -6,7 +6,9 @@
 <!--#set global $helpsubject="Home"#-->
 #include "data/interfaces/default/inc_top.tmpl"
 
-<span class="SubMenu">a</span>
+<span class="SubMenu">
+<a href="#">Sort by date</a> | <a href="#">Sort by show</a>
+</span>
 
 <div id="outerWrapper">
   <div id="listingWrapper">
@@ -34,7 +36,7 @@
     <div class="$showDiv">
       <div class="listing" id="listing_$curEp.show.tvdbid">
         <a name="$curEp.show.name"></a>
-        <a href="/displayShow/?show=$curEp.show.tvdbid"><img alt="" src="/showPoster/?show=$curEp.show.tvdbid" class="listingThumb" /></a>
+        <a href="$statpath/home/displayShow/?show=$curEp.show.tvdbid"><img alt="" src="/showPoster/?show=$curEp.show.tvdbid" class="listingThumb" /></a>
         <div id="info_$curEp.show.tvdbid">
           <h1>
           <div class="icons">
