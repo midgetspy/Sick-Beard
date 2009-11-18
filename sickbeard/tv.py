@@ -284,7 +284,11 @@ class TVShow(object):
 					
 			else:
 				Logger().log(str(self.tvdbid) + ": " + mediaFile + " isn't in the DB, creating a new episode for it", DEBUG)
-				curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
+				try:
+					curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
+				except exceptions.ShowNotFoundException as e:
+					Logger().log("Episode "+mediaFile+" returned an exception: "+str(e), ERROR)
+					
 					
 
 			# store the reference in the show
@@ -368,7 +372,12 @@ class TVShow(object):
 				showObj = t[result["file_seriesname"]]
 				showInfo = (int(showObj["id"]), showObj["seriesname"])
 			except tvdb_exceptions.tvdb_shownotfound:
-				raise exceptions.ShowNotFoundException("TVDB returned zero results for show "+result["file_seriesname"])
+				Logger().log("Unable to figure out which show this is from the name: "+result["file_seriesname"]+". Assuming it belongs to us.", ERROR)
+				try:
+					showObj = t[self.tvdbid]
+					showInfo = (int(showObj["id"]), showObj["seriesname"])
+				except tvdb_exceptions.tvdb_shownotfound:
+					raise exceptions.ShowNotFoundException("TVDB returned zero results for show "+result["file_seriesname"])
 			except (tvdb_exceptions.tvdb_error, IOError) as e:
 				Logger().log("Error connecting to TVDB, trying to search the DB instead: "+ str(e), ERROR)
 				

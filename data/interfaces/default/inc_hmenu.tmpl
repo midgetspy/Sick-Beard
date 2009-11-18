@@ -1,0 +1,28 @@
+<!--#if $submenu == ""#-->
+    <!--#set $cpath="."#-->
+<!--#else#-->
+    <!--#set $cpath=".."#-->
+<!--#end if#-->
+
+<span class="SubMenu">
+<!--#if $submenu=="addShows"#-->
+    <a class="current" href="./">Add Shows</a> |
+<!--#else#-->
+    <a href="$cpath/addShows/">Add Shows</a> |
+<!--#end if#-->
+
+<!--#if $submenu=="postprocess"#-->
+    <a class="current" href="./">Manual Postprocessing</a> |
+<!--#else#-->
+    <a href="$cpath/postprocess/">Manual Postprocessing</a> |
+<!--#end if#-->
+
+<!--#if $submenu=="forceBacklog"#-->
+    <a class="current" href="./">Force Backlog</a> |
+<!--#else#-->
+    <a href="$cpath/forceBacklog/">Force Backlog</a> |
+<!--#end if#-->
+
+<a href="./shutdown" onclick="javascript:return confirm('Are you sure you want to shutdown Sick Beard?')">Shutdown</a>
+
+</span>

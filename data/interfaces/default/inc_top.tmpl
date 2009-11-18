@@ -7,16 +7,16 @@
 	<link type="text/css" rel="stylesheet" media="all" href="/css/comingEpisodes.css" />
 </head>
 <body>
-<h1><span id="first">Sick</span> <span id="second">Beard</span><span id="third"> alpha</span><span id="catchfrase">The automatic usenet download tool</span></h1>
+<h1><span id="first">Sick</span> <span id="second">Beard</span><span id="third"> alpha</span><span id="catchfrase">This program does stuff</span></h1>
 
 #set $root="/test"
 <!--#set $mypath=$root+"/"+$topmenu#-->
 
 <span class="MainMenu">
-<!--#if $topmenu==''#-->
+<!--#if $topmenu=='home'#-->
     <a class="current" href="$mypath">Home</a> |
 <!--#else#-->
-    <a href="$root">Home</a> |
+    <a href="$root/home/">Home</a> |
 <!--#end if#-->
 
 <!--#if $topmenu=='comingEpisodes'#-->

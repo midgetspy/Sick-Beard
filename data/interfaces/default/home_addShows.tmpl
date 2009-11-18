@@ -1,0 +1,21 @@
+#import sickbeard
+
+<!--#set global $topmenu="home"#-->
+<!--#set global $statpath="../.."#-->
+<!--#set global $helpsubject="Configure+General"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<!--#set global $submenu="addShows"#-->
+#include "data/interfaces/default/inc_hmenu.tmpl"
+
+<h2>Add Shows</h2>
+
+<form method="POST" action="addShow">
+Single show folder: <input type="text" name="showDir" size="50"> <input type="submit" value="Add Show"><br />
+</form>
+<br />
+<form method="POST" action="addRootDir">
+Root show folder: <input type="text" name="dir" size="50"> <input type="submit" value="Add all shows"><br />
+</form>
+
+#include "data/interfaces/default/inc_bottom.tmpl"

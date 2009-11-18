@@ -50,13 +50,19 @@ class TVDBWebUI:
         for curShow in allSeries:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(curShow['sid']))
             if showObj != None:
-                raise cherrypy.HTTPRedirect("/addShow/?showDir=" + self.config['_showDir'] + "&seriesList=" + curShow['sid'])
+                raise cherrypy.HTTPRedirect("addShow/?showDir=" + self.config['_showDir'] + "&seriesList=" + curShow['sid'])
         
         searchList = ",".join([x['sid'] for x in allSeries])
-        raise cherrypy.HTTPRedirect("/addShow/?showDir=" + self.config['_showDir'] + "&seriesList=" + searchList)
+        raise cherrypy.HTTPRedirect("addShow/?showDir=" + self.config['_showDir'] + "&seriesList=" + searchList)
 
 def _munge(string):
     return unicode(string).replace("&", "&amp;").encode('ascii', 'xmlcharrefreplace')
+
+def _genericMessage(subject, message):
+    t = Template(file="data/interfaces/default/genericMessage.tmpl")
+    t.subject = subject
+    t.message = message
+    return _munge(t)
 
 
 class ConfigGeneral:
@@ -284,14 +290,238 @@ class Config:
     
     notifications = ConfigNotifications()
 
+class HomeForceBacklog:
+    @cherrypy.expose
+    def index(self):
 
-class ThemeTest:
+        # force it to run the next time it looks
+        sickbeard.backlogSearchScheduler.forceSearch()
+        Logger().log("Backlog set to run in background")
+        
+        return _genericMessage("Backlog search started", "The backlog search has begun and will run in the background")
+
+
+class HomePostProcess:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        t = Template(file="data/interfaces/default/home_postprocess.tmpl")
+        return _munge(t)
+
+    @cherrypy.expose
+    def processEpisode(self, dir=None, nzbName=None, jobName=None):
+        
+        if dir == None:
+            raise cherrypy.HTTPRedirect("postprocess")
+        else:
+            result = processTV.doIt(dir, sickbeard.showList)
+            return _genericMessage("Postprocessing results", result)
+
+
+class HomeAddShows:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        t = Template(file="data/interfaces/default/home_addShows.tmpl")
+        return _munge(t)
+
+    @cherrypy.expose
+    def addRootDir(self, dir=None):
+        
+        if dir == None:
+            raise cherrypy.HTTPRedirect("addShows")
+
+        result = ui.addShowsFromRootDir(dir)
+
+        return _genericMessage("Adding root directory", result)
+
+    @cherrypy.expose
+    def addShow(self, showDir=None, showName=None, seriesList=None):
+        
+        myTemplate = Template(file="data/interfaces/default/home_addShow.tmpl")
+        myTemplate.resultList = None
+        myTemplate.showDir = showDir
+        
+        # if no showDir then start at the beginning
+        if showDir == None:
+            raise cherrypy.HTTPRedirect("addShows")
+
+        # if we have a dir and a name it means we're mid-search, so get our TVDB list and forward them to the selection screen
+        if showDir != None and showName != None:
+            t = tvdb_api.Tvdb(custom_ui=TVDBWebUI)
+            t.config['_showDir'] = urllib.quote_plus(showDir)
+            try:
+                s = t[showName] # this will throw a cherrypy exception
+            except tvdb_exceptions.tvdb_shownotfound:
+                return _genericMessage("Error", "Couldn't find that show")
+    
+
+        showDir = os.path.normpath(urllib.unquote_plus(showDir))
+
+        if seriesList != None:
+            showIDs = seriesList.split(",")
+        else:
+            showIDs = []
+
+        # if we have a folder but no ID specified then we try scanning it for NFO
+        if len(showIDs) == 0:
+
+            try:
+                #newShowAdder = ui.ShowAdder(showDir)
+                sickbeard.showAddScheduler.action.addShowToQueue(showDir)
+            except exceptions.NoNFOException:
+                myTemplate.resultList = []
+                myTemplate.showDir = urllib.quote_plus(showDir)
+                return _munge(myTemplate)
+
+            # give it a chance to get on the show list so we don't refresh and it looks like nothing happened
+            time.sleep(3)
+
+            raise cherrypy.HTTPRedirect("index")
+        
+        # if we have a single ID then just make a show with that ID
+        elif len(showIDs) == 1:
+            
+            # if the dir doesn't exist then give up
+            if not helpers.makeDir(showDir):
+                return _genericMessage("Error", "Show dir doesn't exist and I'm unable to create it")
+
+    
+            # if the folder exists then make the show there
+            if not helpers.makeShowNFO(showIDs[0], showDir):
+                return _genericMessage("Error", "Unable to make tvshow.nfo?")
+            
+            # just go do the normal show creation now that we have the NFO
+            raise cherrypy.HTTPRedirect("addShow/?showDir=" + urllib.quote_plus(showDir))
+        
+        # if we have multiple IDs then let them pick
+        else:
+            
+            t = tvdb_api.Tvdb()
+            myTemplate.resultList = [t[int(x)] for x in showIDs]
+            myTemplate.showDir = urllib.quote_plus(showDir)
+            
+            return _munge(myTemplate)
+
+
+
+class Home:
     
     @cherrypy.expose
     def index(self):
         
         t = Template(file="data/interfaces/default/home.tmpl")
         return _munge(t)
+
+    addShows = HomeAddShows()
+    
+    postprocess = HomePostProcess()
+    
+    forceBacklog = HomeForceBacklog()
+
+    @cherrypy.expose
+    def displayShow(self, show=None):
+        
+        if show == None:
+            return _genericMessage("Error", "Invalid show ID")
+        else:
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+            
+            if showObj == None:
+                return _genericMessage("Error", "Unable to find the specified show.")
+
+        myDB = db.DBConnection()
+        myDB.checkDB()
+
+        Logger().log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
+    
+        sqlResults = []
+
+        try:
+            sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season, episode ASC"
+            Logger().log("SQL: " + sql, DEBUG)
+            sqlResults = myDB.connection.execute(sql).fetchall()
+        except sqlite3.DatabaseError as e:
+            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            raise
+
+        t = Template(file="data/interfaces/default/displayShow.tmpl")
+        
+        t.show = showObj
+        t.qualityStrings = sickbeard.common.qualityStrings
+        t.sqlResults = sqlResults
+        
+        return _munge(t)
+
+    @cherrypy.expose
+    def editShow(self, show=None, location=None, quality=None, predownload=None, seasonfolders=None):
+        
+        if show == None:
+            return _genericMessage("Error", "Invalid show ID")
+        
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        
+        if showObj == None:
+            return _genericMessage("Error", "Unable to find the specified show")
+
+        if location == None and quality == None and predownload == None and seasonfolders == None:
+            
+            t = Template(file="data/interfaces/default/editShow.tmpl")
+            with showObj.lock:
+                t.show = showObj
+                t.qualityStrings = qualityStrings
+                t.qualities = (SD, HD, ANY)
+            
+            return _munge(t)
+        
+        if seasonfolders == "on":
+            seasonfolders = 1
+        else:
+            seasonfolders = 0
+
+        if predownload == "on":
+            predownload = 1
+        else:
+            predownload = 0
+
+        with showObj.lock:
+
+            Logger().log("changing quality from " + str(showObj.quality) + " to " + str(quality), DEBUG)
+            showObj.quality = int(quality)
+            showObj.predownload = int(predownload)
+            
+            if showObj.seasonfolders != int(seasonfolders):
+                showObj.seasonfolders = int(seasonfolders)
+                showObj.refreshDir()
+                        
+            # if we change location clear the db of episodes, change it, write to db, and rescan
+            if os.path.isdir(location) and os.path.normpath(showObj._location) != os.path.normpath(location):
+                
+                # change it
+                showObj.location = location
+                
+                showObj.refreshDir()
+                
+                # grab updated info from TVDB
+                #showObj.loadEpisodesFromTVDB()
+
+                # rescan the episodes in the new folder
+                showObj.loadEpisodesFromDir()
+                    
+            # save it to the DB
+            showObj.saveToDB()
+                
+            raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+
+
+class ThemeTest:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        cherrypy.HTTPRedirect("/test/home/")
 
     @cherrypy.expose
     def comingEpisodes(self):
@@ -308,6 +538,8 @@ class ThemeTest:
         return _munge(t)
 
     config = Config()
+
+    home = Home()
 
 class Whatever:
     

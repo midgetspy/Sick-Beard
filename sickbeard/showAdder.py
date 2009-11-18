@@ -47,7 +47,7 @@ class ShowAddQueue():
         try:
             self.addQueue.append(ShowAdder(dir))
         except exceptions.NoNFOException:
-            Logger().log(" Unable to add show from " + dir + ", show will not be added", ERROR)
+            Logger().log(" Unable to add show from " + dir + ", NFO must be created first", ERROR)
             raise
 
     def _doAddShow(self):
@@ -153,7 +153,7 @@ class ShowAdder:
 
         try:
             newShow.loadEpisodesFromDir()
-        except Exception as e:
+        except (SickBeardException, tvdb_exceptions.tvdb_exception) as e:
             Logger().log("Error searching dir for episodes: " + str(e), ERROR)
     
         try:

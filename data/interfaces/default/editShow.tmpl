@@ -1,0 +1,48 @@
+#import sickbeard
+#from sickbeard import exceptions
+
+<!--#set global $topmenu="home"#-->
+<!--#set global $statpath=".."#-->
+<!--#set global $helpsubject="Home"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<!--#set global $submenu="other"#-->
+#include "data/interfaces/default/inc_hmenu.tmpl"
+
+<h2>$show.name</h2>
+Airs: $show.airs<br />
+Status: $show.status<br />
+<br />
+<form action="editShow" method="post">
+<input type="hidden" name="show" value="$show.tvdbid">
+#try:
+Location: <input type="text" name="location" value="$show.location"><br />
+#except exceptions.NoNFOException:
+$show._location"><br />
+#end try
+Quality: <select name="quality">
+#for $quality in $qualities:
+#if $show.quality == $quality
+#set $blah = "SELECTED"
+#else
+#set $blah = ""
+#end if
+<option value="$quality" $blah>$qualityStrings[$quality]
+#end for
+</select><br />
+#if $show.predownload == 1:
+#set $predownload = "CHECKED"
+#else:
+#set $predownload = ""
+#end if
+Predownload: <input type="checkbox" name="predownload" $predownload><br />
+#if $show.seasonfolders == 1:
+#set $sf = "CHECKED"
+#else:
+#set $sf = ""
+#end if
+Use Season Folders: <input type="checkbox" name="seasonfolders" $sf><br /><br />
+<input type="submit" value="Submit">
+</form>
+
+#include "data/interfaces/default/inc_bottom.tmpl"

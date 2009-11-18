@@ -1,26 +1,18 @@
 #import sickbeard
-<!--#set global $topmenu=""#-->
+<!--#set global $topmenu="home"#-->
 <!--#set global $statpath=".."#-->
 <!--#set global $helpsubject="Home"#-->
 #include "data/interfaces/default/inc_top.tmpl"
 
-<span class="SubMenu">
-<a href="./shutdown" onclick="javascript:return confirm('Are you sure you want to shutdown Sick Beard?')">Shutdown</a>
-</span>
+<!--#set global $submenu=""#-->
+#include "data/interfaces/default/inc_hmenu.tmpl"
 
-<h2>Home</h2>
-<a href="/addShow">Add Show</a><br />
-<a href="/addRootDir">Add Shows From Root Dir</a><br />
-<a href="/processEpisode">Process Episode</a><br />
-<a href="/forceBacklog">Force Backlog search</a><br /><br />
-<!--<a href="/restart">Restart</a><br />-->
-<br />
 <h2>Show List</h2>
 #for $curShow in $sickbeard.showList:
-<a href="/displayShow/?show=$curShow.tvdbid">$curShow.name</a><br />
+<a href="displayShow/?show=$curShow.tvdbid">$curShow.name</a><br />
 #end for
 #for $curLoadingShow in $sickbeard.loadingShowList:
-$curLoadingShow.name (loading)<br />
+$sickbeard.loadingShowList[$curLoadingShow].name (loading)<br />
 #end for
 
 #include "data/interfaces/default/inc_bottom.tmpl"

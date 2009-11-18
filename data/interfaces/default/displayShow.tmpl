@@ -1,0 +1,71 @@
+#import sickbeard
+#from sickbeard.common import *
+#import os.path
+#import datetime
+
+<!--#set global $topmenu="home"#-->
+<!--#set global $statpath=".."#-->
+<!--#set global $helpsubject="Home"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<!--#set global $submenu=""#-->
+#include "data/interfaces/default/inc_hmenu.tmpl"
+
+<h2>$show.name</h2>
+
+<a href="../editShow?show=$show.tvdbid">(edit)</a>
+<a href="/deleteShow?show=$show.tvdbid">(delete)</a>
+<a href="/updateShow?show=$show.tvdbid">(quick update)</a>
+<a href="/refreshDir?show=$show.tvdbid">(refresh folder)</a>
+<a href="/fixEpisodeNames?show=$show.tvdbid">(fix episode names)</a>
+<a href="/updateShow?show=$show.tvdbid&force=1">(force update - takes forever)</a><br />
+Airs: $show.airs on $show.network<br />
+Status: $show.status<br />
+
+#try:
+Location: $show.location<br />
+#except sickbeard.exceptions.NoNFOException:
+Location: $show._location**<br />
+#end try
+
+Quality: $qualityStrings[$show.quality]<br />
+Predownload: $show.predownload<br />
+Season Folders: $show.seasonfolders<br />
+
+<br /><br />
+    
+#set $curSeason = 0
+#set $odd = 0
+
+<table id="queueTable">
+    
+#for $epResult in $sqlResults:
+   
+    #if int($epResult["season"]) != $curSeason:
+  <tr class="seasonheader">
+    <td colspan=5>
+	<br />
+	<h2>Season $epResult["season"]
+	(<a href="/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
+	(<a href="/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)<br />
+	</h2></td>
+  </tr>
+  <tr> <th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+        #set $curSeason = int($epResult["season"])
+    #end if    
+
+    #set $odd = not $odd#
+  <tr class="#if $odd then "odd" else "even"#Line">
+     <td>$epResult["episode"]</td>
+     <td>$epResult["name"]</td>
+	 <td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>
+	 <td>$os.path.basename($epResult["location"])</td>
+     <td>$statusStrings[int($epResult["status"])]</td>
+     <td><a href="/searchEpisode/?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">find NZB</a></td>
+   <tr>
+   
+#end for            
+</table><br /><br />
+            
+
+#include "data/interfaces/default/inc_bottom.tmpl"

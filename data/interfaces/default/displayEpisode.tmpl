@@ -1,0 +1,19 @@
+#import sickbeard
+<!--#set global $topmenu="home"#-->
+<!--#set global $statpath=".."#-->
+<!--#set global $helpsubject="Home"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<!--#set global $submenu=""#-->
+#include "data/interfaces/default/inc_hmenu.tmpl"
+
+<h2>$episode.prettyName()</h2> (<a href="/searchEpisode?show=$episode.show.tvdbid&season=$episode.season&episode=$episode.episode">find NZB</a>)
+<br />
+Air Date: $episode.airdate<br />
+Status: $statusStrings[$episode.status]<br />
+Location: $episode.location<br />
+Description: $episode.description<br />
+Has NFO: $episode.hasnfo<br />
+Has TBN: $episode.hastbn<br />
+
+#include "data/interfaces/default/inc_bottom.tmpl"

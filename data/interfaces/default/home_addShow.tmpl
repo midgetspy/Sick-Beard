@@ -1,0 +1,29 @@
+#import urllib
+#import sickbeard
+
+<!--#set global $topmenu="home"#-->
+<!--#set global $statpath="../.."#-->
+<!--#set global $helpsubject="Configure+General"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<!--#set global $submenu="addShows"#-->
+#include "data/interfaces/default/inc_hmenu.tmpl"
+
+<h2>Add Show</h2>
+
+<form name="addForm" method="POST" action="addShow">
+#if len($resultList) == 0:
+#set $tempName = $os.path.normpath($urllib.unquote_plus($showDir)).split($os.sep)
+Show name: <input type="text" name="showName" size="30" value="$tempName[-1]"> <input type="hidden" name="showDir" value="$showDir"> 
+#else:
+Choose the show you meant: <select name="seriesList">
+#for $curShow in $resultList:
+<option value="$curShow['id']">$curShow['seriesname'] (<%=str(max(curShow.keys()+[0]))%> seasons)
+#end for
+</select>
+<input type="hidden" name="showDir" value="$showDir">
+#end if
+<input type="submit" value="Submit"><br />
+
+
+#include "data/interfaces/default/inc_bottom.tmpl"

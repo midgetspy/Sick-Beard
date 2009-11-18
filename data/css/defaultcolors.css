@@ -42,7 +42,7 @@ a.current {
 }
 
 .MainMenu {
-	background-color: #f5f5f5;
+	background-color: #F5EEE4;
 
 }
 .SubMenu {
@@ -58,13 +58,19 @@ th {
 
 }
 
+tr.seasonheader{
+    text-align: center;
+    background-color: #fff;
+}
+
 tr.even{
 	background-color: #222222;
     color:white;
 }
 
 tr.evenLine {
-	background-color: #f5f5f5;
+	background-color: #F5EEE4;
+	color: black;
 }
 
 tr.odd {
@@ -73,7 +79,7 @@ tr.odd {
 }
 
 tr.oddLine {
-	background-color: #f5f5f5;
+	background-color: #F5EEE4;
 }
 
 h1 {
@@ -92,7 +98,7 @@ h1 {
   color: black;
 }
 .footer {
-  background-color: #f5f5f5;
+  background-color: #F5EEE4;
   border-top: 1px solid #000;
   color:#4e4e4e;
 }
@@ -109,7 +115,7 @@ h1 {
 .queuelink{color:black;}
 
 .SubMenu, .blockWithBorder , a.current, tr.even, tr.odd{
-	background-color: #44577c;
+	background-color: #57442B;
     color:white;
 }
 
@@ -118,7 +124,7 @@ background-color: #333;
 color:white;
 }
 #first, #third {
-color: #44577c;
+color: #57442B;
 }
 
 a.current:hover, a:hover {
@@ -127,7 +133,7 @@ a.current:hover, a:hover {
 }
 
 td > a, td > a {
-color:white;
+color:black;
 }
 
 a.remove {
