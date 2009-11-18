@@ -1,0 +1,91 @@
+#import sickbeard
+
+<!--#set global $topmenu="config"#-->
+<!--#set global $statpath="../.."#-->
+<!--#set global $helpsubject="Configure+General"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<!--#set global $submenu="notifications"#-->
+#include "data/interfaces/default/inc_cmenu.tmpl"
+
+<h2>Notifications</h2>
+<form action="saveNotifications" method="POST">
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>XBMC</legend>
+
+#if $sickbeard.XBMC_NOTIFY_ONSNATCH == True:
+#set $xbmc_notify_onsnatch = "CHECKED"
+#else
+#set $xbmc_notify_onsnatch = ""
+#end if
+#if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
+#set $xbmc_notify_ondownload = "CHECKED"
+#else
+#set $xbmc_notify_ondownload = ""
+#end if
+#if $sickbeard.XBMC_UPDATE_LIBRARY == True:
+#set $xbmc_update_library = "CHECKED"
+#else
+#set $xbmc_update_library = ""
+#end if
+
+<input type="checkbox" name="xbmc_notify_onsnatch" $xbmc_notify_onsnatch> <strong>Notify XBMC on NZB retrieval:</strong><br />
+Send XBMC a notification when we find an NZB?<br />
+<br />
+
+<input type="checkbox" name="xbmc_notify_ondownload" $xbmc_notify_ondownload> <strong>Notify XBMC on episode download:</strong><br />
+Send XBMC a notification when we finish a download?<br />
+<br />
+
+<input type="checkbox" name="xbmc_update_library" $xbmc_update_library> <strong>Update XBMC library:</strong><br />
+Update XBMC library when we finish a download?<br />
+<br />
+
+<strong>XBMC host:</strong><br />
+XBMC HTTP API address (IP:port, eg. 192.168.1.100:8080)<br />
+<input type="text" name="xbmc_host" value="$sickbeard.XBMC_HOST" size="35"><br />
+<br />
+
+</fieldset>
+</div>
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Email</legend>
+
+Not Implemented<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+</fieldset>
+</div>
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Twitter</legend>
+
+Not Implemented<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+</fieldset>
+</div>
+
+<p>
+<input type="submit" value="Save Changes">
+</p>
+</form>
+
+
+#include "data/interfaces/default/inc_bottom.tmpl"

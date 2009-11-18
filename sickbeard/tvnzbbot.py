@@ -158,7 +158,7 @@ class NZBBot(SingleServerIRCBot):
     def jump_server(self, newServer):
         self.server_list = [(newServer, 6667)]
         self.server = newServer
-        SingleServerIRCBot.jump_server()
+        SingleServerIRCBot.jump_server(self)
 
     def jump_channel(self, newChan, key=None):
         self.connection.part(self.channel.split(" ")[0])

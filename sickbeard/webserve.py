@@ -55,8 +55,263 @@ class TVDBWebUI:
         searchList = ",".join([x['sid'] for x in allSeries])
         raise cherrypy.HTTPRedirect("/addShow/?showDir=" + self.config['_showDir'] + "&seriesList=" + searchList)
 
+def _munge(string):
+    return unicode(string).replace("&", "&amp;").encode('ascii', 'xmlcharrefreplace')
+
+
+class ConfigGeneral:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        t = Template(file="data/interfaces/default/config_general.tmpl")
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, nzb_method=None,
+                    launch_browser=None, create_metadata=None, web_username=None,
+                    web_password=None):
+
+        results = []
+
+        if web_log == "on":
+            web_log = 1
+        else:
+            web_log = 0
+            
+        if launch_browser == "on":
+            launch_browser = 1
+        else:
+            launch_browser = 0
+            
+        if create_metadata == "on":
+            create_metadata = 1
+        else:
+            create_metadata = 0
+            
+        if not config.change_LOG_DIR(log_dir):
+            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
+        
+        sickbeard.NZB_METHOD = nzb_method
+        sickbeard.LAUNCH_BROWSER = launch_browser
+        sickbeard.CREATE_METADATA = create_metadata
+
+        sickbeard.WEB_PORT = web_port
+        sickbeard.WEB_LOG = web_log
+        sickbeard.WEB_USERNAME = web_username
+        sickbeard.WEB_PASSWORD = web_password
+
+        sickbeard.save_config()
+        
+        if len(results) > 0:
+            for x in results:
+                Logger().log(x, ERROR)
+            return "<br />\n".join(results)
+        
+        raise cherrypy.HTTPRedirect("index")
+
+class ConfigNZBActions:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        t = Template(file="data/interfaces/default/config_nzbactions.tmpl")
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveNZBActions(self, nzb_dir=None, sab_username=None, sab_password=None,
+                       sab_apikey=None, sab_category=None, sab_host=None):
+
+        results = []
+
+        if not config.change_NZB_DIR(nzb_dir):
+            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
+
+        sickbeard.SAB_USERNAME = sab_username
+        sickbeard.SAB_PASSWORD = sab_password
+        sickbeard.SAB_APIKEY = sab_apikey
+        sickbeard.SAB_CATEGORY = sab_category
+        sickbeard.SAB_HOST = sab_host
+        
+        sickbeard.save_config()
+        
+        if len(results) > 0:
+            for x in results:
+                Logger().log(x, ERROR)
+            return "<br />\n".join(results)
+        
+        raise cherrypy.HTTPRedirect("index")
+
+class ConfigProviders:
+    
+    @cherrypy.expose
+    def index(self):
+        t = Template(file="data/interfaces/default/config_providers.tmpl")
+        return _munge(t)
+
+    
+    @cherrypy.expose
+    def saveProviders(self, newzbin=None, newzbin_username=None, newzbin_password=None, tvbinz=None,
+                   tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None, nzbs_hash=None):
+
+        results = []
+
+        if newzbin == "on":
+            newzbin = 1
+        else:
+            newzbin = 0
+            
+        if tvbinz == "on":
+            tvbinz = 1
+        else:
+            tvbinz = 0
+            
+        if nzbs == "on":
+            nzbs = 1
+        else:
+            nzbs = 0
+
+        sickbeard.NEWZBIN = newzbin
+        sickbeard.NEWZBIN_USERNAME = newzbin_username
+        sickbeard.NEWZBIN_PASSWORD = newzbin_password
+        
+        sickbeard.TVBINZ = tvbinz
+        sickbeard.TVBINZ_UID = tvbinz_uid
+        sickbeard.TVBINZ_HASH = tvbinz_hash
+        
+        sickbeard.NZBS = nzbs
+        sickbeard.NZBS_UID = nzbs_uid
+        sickbeard.NZBS_HASH = nzbs_hash
+        
+        sickbeard.save_config()
+        
+        if len(results) > 0:
+            for x in results:
+                Logger().log(x, ERROR)
+            return "<br />\n".join(results)
+        
+        raise cherrypy.HTTPRedirect("index")
+
+class ConfigIRC:
+    
+    @cherrypy.expose
+    def index(self):
+        t = Template(file="data/interfaces/default/config_irc.tmpl")
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveIRC(self, irc_bot=None, irc_server=None, irc_channel=None, irc_key=None, irc_nick=None):
+
+        results = []
+
+        if irc_bot == "on":
+            irc_bot = 1
+        else:
+            irc_bot = 0
+
+        config.change_IRC_BOT(irc_bot)
+        config.change_IRC_SERVER(irc_server)
+        config.change_IRC_CHANNEL(irc_channel, irc_key)
+        config.change_IRC_NICK(irc_nick)
+        
+        sickbeard.save_config()
+        
+        if len(results) > 0:
+            for x in results:
+                Logger().log(x, ERROR)
+            return "<br />\n".join(results)
+        
+        raise cherrypy.HTTPRedirect("index")
+
+class ConfigNotifications:
+    
+    @cherrypy.expose
+    def index(self):
+        t = Template(file="data/interfaces/default/config_notifications.tmpl")
+        return _munge(t)
+    
+    @cherrypy.expose
+    def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, 
+                          xbmc_update_library=None, xbmc_host=None):
+
+        results = []
+
+        if xbmc_notify_onsnatch == "on":
+            xbmc_notify_onsnatch = 1
+        else:
+            xbmc_notify_onsnatch = 0
+            
+        if xbmc_notify_ondownload == "on":
+            xbmc_notify_ondownload = 1
+        else:
+            xbmc_notify_ondownload = 0
+            
+        if xbmc_update_library == "on":
+            xbmc_update_library = 1
+        else:
+            xbmc_update_library = 0
+
+        sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch 
+        sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
+        sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
+        sickbeard.XBMC_HOST = xbmc_host
+        
+        sickbeard.save_config()
+        
+        if len(results) > 0:
+            for x in results:
+                Logger().log(x, ERROR)
+            return "<br />\n".join(results)
+        
+        raise cherrypy.HTTPRedirect("index")
+
+
+class Config:
+
+    @cherrypy.expose
+    def index(self):
+        
+        t = Template(file="data/interfaces/default/config.tmpl")
+        return _munge(t)
+    
+    general = ConfigGeneral()
+    
+    nzbActions = ConfigNZBActions()
+    
+    providers = ConfigProviders()
+    
+    irc = ConfigIRC()
+    
+    notifications = ConfigNotifications()
+
+
+class ThemeTest:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        t = Template(file="data/interfaces/default/home.tmpl")
+        return _munge(t)
+
+    @cherrypy.expose
+    def comingEpisodes(self):
+
+        epList = sickbeard.missingList + sickbeard.comingList
+                
+        # sort by air date
+        epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))
+        
+        t = Template(file="data/interfaces/default/comingEpisodes.tmpl")
+        t.epList = epList
+        t.qualityStrings = qualityStrings
+        
+        return _munge(t)
+
+    config = Config()
 
 class Whatever:
+    
+    test = ThemeTest()
     
     @cherrypy.expose
     def index(self):
@@ -66,7 +321,7 @@ class Whatever:
         t.showList = sickbeard.showList
         t.loadingShowList = sickbeard.loadingShowList.values()
 
-        return self._munge(t)
+        return _munge(t)
     
     @cherrypy.expose
     def shutdown(self):
@@ -96,11 +351,11 @@ class Whatever:
         
         if dir == None:
             myTemplate = Template(file="data/includes/addRootDir.html")
-            return self._munge(myTemplate) 
+            return _munge(myTemplate) 
         
         result = ui.addShowsFromRootDir(dir)
 
-        return self._munge(result)
+        return _munge(result)
         
     
     @cherrypy.expose
@@ -151,7 +406,7 @@ class Whatever:
                 t = tvdb_api.Tvdb()
                 myTemplate.resultList = [t[int(x)] for x in showIDList]
         
-        return self._munge(myTemplate)
+        return _munge(myTemplate)
     
     
     @cherrypy.expose
@@ -186,7 +441,7 @@ class Whatever:
         t.qualityStrings = sickbeard.common.qualityStrings
         t.sqlResults = sqlResults
         
-        return self._munge(t)
+        return _munge(t)
     
     @cherrypy.expose
     def updateShow(self, show=None, force=0):
@@ -217,7 +472,7 @@ class Whatever:
 
         showObj.deleteShow()
         
-        return self._munge("Show has been deleted.")
+        return _munge("Show has been deleted.")
 
 
     @cherrypy.expose
@@ -271,7 +526,7 @@ class Whatever:
                 t.qualityStrings = qualityStrings
                 t.qualities = (SD, HD, ANY)
             
-            return self._munge(t)
+            return _munge(t)
         
         if seasonfolders == "on":
             seasonfolders = 1
@@ -338,7 +593,7 @@ class Whatever:
         
         # if no showDir then start at the beginning
         if showDir == None:
-            return self._munge(myTemplate)
+            return _munge(myTemplate)
 
         # if we have a dir and a name it means we're mid-search, so get our TVDB list and forward them to the selection screen
         if showDir != None and showName != None:
@@ -367,7 +622,7 @@ class Whatever:
             except exceptions.NoNFOException:
                 myTemplate.resultList = []
                 myTemplate.showDir = urllib.quote_plus(showDir)
-                return self._munge(myTemplate)
+                return _munge(myTemplate)
 
             raise cherrypy.HTTPRedirect("/")
         
@@ -392,7 +647,7 @@ class Whatever:
             myTemplate.resultList = [t[int(x)] for x in showIDs]
             myTemplate.showDir = urllib.quote_plus(showDir)
             
-            return self._munge(myTemplate)
+            return _munge(myTemplate)
 
     
     @cherrypy.expose
@@ -407,7 +662,7 @@ class Whatever:
             t.episode = epObj
             t.statusStrings = statusStrings
             
-        return self._munge(t)
+        return _munge(t)
 
     @cherrypy.expose
     def setStatus(self, show=None, season=None, episode=None, status=None):
@@ -503,10 +758,10 @@ class Whatever:
         
         if dir == None:
             t = Template(file="data/includes/processEpisode.html")
-            return self._munge(t)
+            return _munge(t)
         else:
             result = processTV.doIt(dir, sickbeard.showList)
-            return self._munge(result)
+            return _munge(result)
     
     @cherrypy.expose
     def comingEpisodes(self):
@@ -520,7 +775,7 @@ class Whatever:
         t.epList = epList
         t.qualityStrings = qualityStrings
         
-        return self._munge(t)
+        return _munge(t)
         
 
     @cherrypy.expose
@@ -530,7 +785,7 @@ class Whatever:
         t.config = sickbeard.CFG
         t.message = message
         
-        return self._munge(t)
+        return _munge(t)
 
     @cherrypy.expose
     def editConfigSub(self, log_dir=None, nzb_dir=None, web_username=None, web_password=None,
@@ -665,7 +920,3 @@ class Whatever:
             return "Episode couldn't be retrieved"
 
         return epObj
-
-    def _munge(self, string):
-        return unicode(string).replace("&", "&amp;").encode('ascii', 'xmlcharrefreplace')
-

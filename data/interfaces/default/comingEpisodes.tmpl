@@ -1,0 +1,61 @@
+#import datetime
+#set $oneWeek = datetime.timedelta(days=7)
+
+<!--#set global $topmenu="comingEpisodes"#-->
+<!--#set global $statpath=".."#-->
+<!--#set global $helpsubject="Home"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<span class="SubMenu">a</span>
+
+<div id="outerWrapper">
+  <div id="listingWrapper">
+    #set $curDay = None
+    #for $curEp in $epList
+        #if $curEp.airdate < datetime.date.today() and $curDay == None:
+    <br /><h1 class="day">Missing</h1>
+        #elif $curDay == None or ($curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() < $oneWeek):
+            #set $curDay = curEp.airdate
+    <br /><h1 class="day">$curEp.airdate.strftime("%A")</h1>
+        #elif $curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() >= $oneWeek:
+            #set $curDay = datetime.date(datetime.MAXYEAR, 1, 1)
+    <br /><h1 class="day">More than one week</h1>
+        #end if
+        
+        #if $curEp.airdate == datetime.date.today()
+            #set $showDiv = "listing_current"
+        #elif $curEp.airdate < datetime.date.today()
+            #set $showDiv = "listing_overdue"
+        #elif $curEp.airdate - datetime.date.today() >= $oneWeek
+            #set $showDiv = "listing_toofar"
+        #else
+            #set $showDiv = ""
+        #end if
+    <div class="$showDiv">
+      <div class="listing" id="listing_$curEp.show.tvdbid">
+        <a name="$curEp.show.name"></a>
+        <a href="/displayShow/?show=$curEp.show.tvdbid"><img alt="" src="/showPoster/?show=$curEp.show.tvdbid" class="listingThumb" /></a>
+        <div id="info_$curEp.show.tvdbid">
+          <h1>
+          <div class="icons">
+            <a href="http://www.thetvdb.com/?tab=series&id=$curEp.show.tvdbid" target="_blank" title="http://www.thetvdb.com/?tab=series&id=$curEp.show.tvdbid"><img alt="" src="/images/info.png" /></a>
+            <a href="/searchEpisode/?show=$curEp.show.tvdbid&season=$curEp.season&episode=$curEp.episode" title="Force Update" id="forceUpdate|$curEp.show.tvdbid|$curEp.show.name" class="forceUpdate"><img alt="" src="/images/forceUpdate.png" id="forceUpdateImage|$curEp.show.tvdbid" /></a>
+          </div>
+          $curEp.show.name
+          </h1>
+          <p class="next">
+            <span class="title">Next Episode:</span> <span class="info "><%=str(curEp.season)+"x"+"{0:0>2}".format(curEp.episode) %> - $curEp.name airs $curEp.airdate</span>
+          </p>
+          <p class="noMargin">
+            <span class="title">Status:</span> <span class="info ">$curEp.show.status</span><br />
+            <span class="title">Airs:</span> <span class="info ">$curEp.show.airs on $curEp.show.network</span><br />
+            <span class="title">Format:</span> <span class="info ">$qualityStrings[$curEp.show.quality]</span><br />
+          </p>
+        </div>
+      </div>
+    </div>
+    #end for
+  </div>
+</div>
+
+#include "data/interfaces/default/inc_bottom.tmpl"

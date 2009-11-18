@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+    <title>Sick Beard alpha</title>
+    <link rel="stylesheet" type="text/css" href="/css/default.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/defaultcolors.css"/>
+	<link type="text/css" rel="stylesheet" media="all" href="/css/comingEpisodes.css" />
+</head>
+<body>
+<h1><span id="first">Sick</span> <span id="second">Beard</span><span id="third"> alpha</span><span id="catchfrase">The automatic usenet download tool</span></h1>
+
+#set $root="/test"
+<!--#set $mypath=$root+"/"+$topmenu#-->
+
+<span class="MainMenu">
+<!--#if $topmenu==''#-->
+    <a class="current" href="$mypath">Home</a> |
+<!--#else#-->
+    <a href="$root">Home</a> |
+<!--#end if#-->
+
+<!--#if $topmenu=='comingEpisodes'#-->
+    <a class="current" href="$mypath/">Coming Episodes</a> |
+<!--#else#-->
+    <a href="$root/comingEpisodes/">Coming Episodes</a> |
+<!--#end if#-->
+
+<!--#if $topmenu=='history'#-->
+    <a class="current" href="$mypath/">History</a> |
+<!--#else#-->
+    <a href="$root/history/">History</a> |
+<!--#end if#-->
+
+<!--#if $topmenu=='config'#-->
+    <a class="current" href="$mypath/">Config</a> |
+<!--#else#-->
+    <a href="$root/config/">Config</a> |
+<!--#end if#-->
+</span>

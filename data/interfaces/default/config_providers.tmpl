@@ -1,0 +1,103 @@
+#import sickbeard
+
+<!--#set global $topmenu="config"#-->
+<!--#set global $statpath="../.."#-->
+<!--#set global $helpsubject="Configure+General"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<!--#set global $submenu="providers"#-->
+#include "data/interfaces/default/inc_cmenu.tmpl"
+
+<h2>NZB Provider Configuration</h2>
+<form action="saveProviders" method="POST">
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Newzbin</legend>
+
+#if $sickbeard.NEWZBIN == True:
+#set $newzbin = "CHECKED"
+#else
+#set $newzbin = ""
+#end if
+<input type="checkbox" name="newzbin" $newzbin> <strong>Enable Newzbin:</strong><br />
+Check to search Newzbin for episodes<br />
+<br />
+
+<strong>Username:</strong><br />
+Newzbin username<br />
+<input type="text" name="newzbin_username" value="$sickbeard.NEWZBIN_USERNAME" size="10"><br />
+<br />
+
+<strong>Password:</strong><br />
+Newzbin password<br />
+<input type="password" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="10"><br />
+<br />
+
+</fieldset>
+</div>
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>TVBinz</legend>
+
+#if $sickbeard.TVBINZ == True:
+#set $tvbinz = "CHECKED"
+#else
+#set $tvbinz = ""
+#end if
+<input type="checkbox" name="tvbinz" $tvbinz> <strong>Enable TVBinz:</strong><br />
+Check to search TVBinz for episodes<br />
+<br />
+
+<strong>UID:</strong><br />
+TVBinz UID<br />
+<input type="text" name="tvbinz_uid" value="$sickbeard.TVBINZ_UID" size="6"><br />
+<br />
+
+<strong>Hash:</strong><br />
+TVBinz hash<br />
+<input type="text" name="tvbinz_hash" value="$sickbeard.TVBINZ_HASH" size="35"><br />
+<br />
+
+</fieldset>
+</div>
+
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>NZBs.org</legend>
+
+#if $sickbeard.NZBS == True:
+#set $nzbs = "CHECKED"
+#else
+#set $nzbs = ""
+#end if
+<input type="checkbox" name="nzbs" $nzbs> <strong>Enable NZBs.org:</strong><br />
+Check to search NZBs.org for episodes<br />
+<br />
+
+<strong>UID:</strong><br />
+NZBs.org UID<br />
+<input type="text" name="nzbs_uid" value="$sickbeard.NZBS_UID" size="6"><br />
+
+<strong>Hash:</strong><br />
+NZBs.org hash<br />
+<input type="text" name="nzbs_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
+<br />
+
+</fieldset>
+</div>
+
+
+
+<p>
+<input type="submit" value="Save Changes">
+</p>
+</form>
+
+
+#include "data/interfaces/default/inc_bottom.tmpl"
