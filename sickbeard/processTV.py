@@ -96,9 +96,14 @@ def moveEpisode(file, ep):
         seasonFolder = 'Season ' + str(ep.season)
     else:
         seasonFolder = ''
-    Logger().log("Seasonfolders were " + str(ep.show.seasonfolders) + " which gave " + seasonFolder)
+    Logger().log("Seasonfolders were " + str(ep.show.seasonfolders) + " which gave " + seasonFolder, DEBUG)
 
     destDir = os.path.join(ep.show.location, seasonFolder)
+    
+    # if the dir doesn't exist (new season folder) then make it
+    if not os.path.isdir(destDir):
+        Logger().log("Season folder didn't exist, creating it", DEBUG)
+        os.mkdir(destDir)
 
     Logger().log("Moving from " + file + " to " + destDir, DEBUG)
     try:
