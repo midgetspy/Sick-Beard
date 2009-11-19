@@ -50,10 +50,10 @@ class TVDBWebUI:
         for curShow in allSeries:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(curShow['sid']))
             if showObj != None:
-                raise cherrypy.HTTPRedirect("addShow/?showDir=" + self.config['_showDir'] + "&seriesList=" + curShow['sid'])
+                raise cherrypy.HTTPRedirect("addShow?showDir=" + self.config['_showDir'] + "&seriesList=" + curShow['sid'])
         
         searchList = ",".join([x['sid'] for x in allSeries])
-        raise cherrypy.HTTPRedirect("addShow/?showDir=" + self.config['_showDir'] + "&seriesList=" + searchList)
+        raise cherrypy.HTTPRedirect("addShow?showDir=" + self.config['_showDir'] + "&seriesList=" + searchList)
 
 def _munge(string):
     return unicode(string).replace("&", "&amp;").encode('ascii', 'xmlcharrefreplace')
@@ -395,7 +395,7 @@ class HomeAddShows:
             # give it a chance to get on the show list so we don't refresh and it looks like nothing happened
             time.sleep(3)
 
-            raise cherrypy.HTTPRedirect("index")
+            raise cherrypy.HTTPRedirect("../")
         
         # if we have a single ID then just make a show with that ID
         elif len(showIDs) == 1:
@@ -410,7 +410,7 @@ class HomeAddShows:
                 return _genericMessage("Error", "Unable to make tvshow.nfo?")
             
             # just go do the normal show creation now that we have the NFO
-            raise cherrypy.HTTPRedirect("addShow/?showDir=" + urllib.quote_plus(showDir))
+            raise cherrypy.HTTPRedirect("addShow?showDir=" + urllib.quote_plus(showDir))
         
         # if we have multiple IDs then let them pick
         else:

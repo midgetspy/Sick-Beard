@@ -8,10 +8,11 @@
 
 <!--#set global $submenu="addShows"#-->
 #include "data/interfaces/default/inc_hmenu.tmpl"
+#set $myform = "/"+$topmenu+"/"+$submenu
 
 <h2>Add Show</h2>
 
-<form name="addForm" method="POST" action="addShow">
+<form method="POST" action="addShow">
 #if len($resultList) == 0:
 #set $tempName = $os.path.normpath($urllib.unquote_plus($showDir)).split($os.sep)
 Show name: <input type="text" name="showName" size="30" value="$tempName[-1]"> <input type="hidden" name="showDir" value="$showDir"> 

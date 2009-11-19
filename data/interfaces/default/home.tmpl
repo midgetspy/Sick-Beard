@@ -9,7 +9,7 @@
 
 <h2>Show List</h2>
 #for $curShow in $sickbeard.showList:
-<a href="displayShow/?show=$curShow.tvdbid">$curShow.name</a><br />
+<a href="displayShow?show=$curShow.tvdbid">$curShow.name</a><br />
 #end for
 #for $curLoadingShow in $sickbeard.loadingShowList:
 $sickbeard.loadingShowList[$curLoadingShow].name (loading)<br />
