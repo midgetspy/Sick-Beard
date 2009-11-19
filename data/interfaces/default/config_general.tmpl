@@ -24,21 +24,6 @@ Directory where Sick Beard should place its logs<br />
 <input type="text" name="log_dir" value="$sickbeard.LOG_DIR" size="35"><br />
 <br />
 
-<strong>NZB Action</strong><br />
-What to do with found NZBs<br />
-<select name="nzb_method">
-#set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd"}
-#for $curAction in ('sabnzbd', 'blackhole'):
-  #if $sickbeard.NZB_METHOD == $curAction:
-    #set $nzb_method = "SELECTED"
-  #else
-    #set $nzb_method = ""
-  #end if
-<option value="$curAction" $nzb_method>$nzb_method_text[$curAction]
-#end for
-</select><br />
-<br />
-
 #if $sickbeard.CREATE_METADATA == True:
   #set $create_metadata = "CHECKED"
 #else

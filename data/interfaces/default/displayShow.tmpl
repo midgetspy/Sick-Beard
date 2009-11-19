@@ -63,7 +63,7 @@ Season Folders: $show.seasonfolders<br />
 	 <td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>
 	 <td>$os.path.basename($epResult["location"])</td>
      <td>$statusStrings[int($epResult["status"])]</td>
-     <td><a href="searchEpisode/?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">find NZB</a></td>
+     <td><a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a></td>
    <tr>
    
 #end for            
