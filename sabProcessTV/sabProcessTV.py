@@ -75,7 +75,7 @@ def blankHook(count, blockSize, totalSize):
 
 myOpener = AuthURLOpener(username, password)
 
-url = "http://" + host + ":" + port + "/home/processEpisode/?" + urllib.urlencode(params)
+url = "http://" + host + ":" + port + "/home/postprocess/processEpisode?" + urllib.urlencode(params)
 
 try:
     urlObj = myOpener.openit(url)
