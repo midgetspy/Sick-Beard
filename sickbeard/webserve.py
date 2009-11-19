@@ -33,6 +33,7 @@ from sickbeard import db
 from sickbeard import nzb
 from sickbeard import processTV
 from sickbeard import ui
+from sickbeard import contactXBMC
 from sickbeard.tv import *
 from lib.tvdb_api import tvdb_exceptions
 
@@ -530,6 +531,19 @@ class Home:
             showObj.saveToDB()
                 
             raise cherrypy.HTTPRedirect("displayShow?show=" + show)
+
+    @cherrypy.expose
+    def updateXBMC(self):
+
+        result = contactXBMC.updateLibrary()
+        
+        if result:
+            message = "Command sent to XBMC to update library"
+        else:
+            message = "Unable to contact XBMC"
+        
+        return _genericMessage("XBMC Library Update", message)
+
 
     @cherrypy.expose
     def deleteShow(self, show=None):

@@ -1,3 +1,4 @@
+#import sickbeard
 <!--#if $submenu == ""#-->
     <!--#set $cpath="."#-->
 <!--#else#-->
@@ -22,6 +23,14 @@
 <!--#else#-->
     <a href="$cpath/forceBacklog/">Force Backlog</a> |
 <!--#end if#-->
+
+#if $sickbeard.XBMC_HOST != None and len($sickbeard.XBMC_HOST) > 0:
+<!--#if $submenu=="updateXBMC"#-->
+    <a class="current" href="./">Update XBMC</a> |
+<!--#else#-->
+    <a href="$cpath/updateXBMC/">Update XBMC</a> |
+<!--#end if#-->
+#end if
 
 <a href="./shutdown" onclick="javascript:return confirm('Are you sure you want to shutdown Sick Beard?')">Shutdown</a>
 
