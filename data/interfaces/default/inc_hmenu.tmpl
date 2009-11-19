@@ -1,34 +1,34 @@
 #import sickbeard
 <!--#if $submenu == ""#-->
-    <!--#set $cpath="."#-->
+    <!--#set $cpath="/home"#-->
 <!--#else#-->
-    <!--#set $cpath=".."#-->
+    <!--#set $cpath="/home"#-->
 <!--#end if#-->
 
 <span class="SubMenu">
 <!--#if $submenu=="addShows"#-->
     <a class="current" href="./">Add Shows</a> |
 <!--#else#-->
-    <a href="$cpath/addShows/">Add Shows</a> |
+    <a href="$cpath/addShows">Add Shows</a> |
 <!--#end if#-->
 
 <!--#if $submenu=="postprocess"#-->
     <a class="current" href="./">Manual Postprocessing</a> |
 <!--#else#-->
-    <a href="$cpath/postprocess/">Manual Postprocessing</a> |
+    <a href="$cpath/postprocess">Manual Postprocessing</a> |
 <!--#end if#-->
 
 <!--#if $submenu=="forceBacklog"#-->
     <a class="current" href="./">Force Backlog</a> |
 <!--#else#-->
-    <a href="$cpath/forceBacklog/">Force Backlog</a> |
+    <a href="$cpath/forceBacklog">Force Backlog</a> |
 <!--#end if#-->
 
 #if $sickbeard.XBMC_HOST != None and len($sickbeard.XBMC_HOST) > 0:
 <!--#if $submenu=="updateXBMC"#-->
     <a class="current" href="./">Update XBMC</a> |
 <!--#else#-->
-    <a href="$cpath/updateXBMC/">Update XBMC</a> |
+    <a href="$cpath/updateXBMC">Update XBMC</a> |
 <!--#end if#-->
 #end if
 

@@ -307,16 +307,6 @@ class Config:
     
     notifications = ConfigNotifications()
 
-class HomeForceBacklog:
-    @cherrypy.expose
-    def index(self):
-
-        # force it to run the next time it looks
-        sickbeard.backlogSearchScheduler.forceSearch()
-        Logger().log("Backlog set to run in background")
-        
-        return _genericMessage("Backlog search started", "The backlog search has begun and will run in the background")
-
 
 class HomePostProcess:
     
@@ -436,7 +426,20 @@ class Home:
     
     postprocess = HomePostProcess()
     
-    forceBacklog = HomeForceBacklog()
+    @cherrypy.expose
+    def forceBacklog(self):
+
+        # force it to run the next time it looks
+        sickbeard.backlogSearchScheduler.forceSearch()
+        Logger().log("Backlog set to run in background")
+        
+        return _genericMessage("Backlog search started", "The backlog search has begun and will run in the background")
+
+    @cherrypy.expose
+    def shutdown(self):
+
+        threading.Timer(2, sickbeard.saveAndShutdown).start()
+        return _genericMessage("Shutting down", "Sick Beard is shutting down...")
 
     @cherrypy.expose
     def displayShow(self, show=None):
