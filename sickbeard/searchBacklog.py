@@ -24,7 +24,7 @@ import threading
 import time
 import traceback
 
-from sickbeard import db, exceptions, helpers, nzb, scheduler
+from sickbeard import db, exceptions, helpers, search, scheduler
 from sickbeard.logging import *
 from sickbeard.common import *
 
@@ -68,14 +68,14 @@ class BacklogSearcher:
             
             for curEp in epList:
                 
-                foundNZBs = nzb.findNZB(curEp)
+                foundNZBs = search.findEpisode(curEp)
                 
                 if len(foundNZBs) == 0:
                     Logger().log("Unable to find NZB for " + curEp.prettyName())
                 
                 else:
                     # just use the first result for now
-                    nzb.snatchNZB(foundNZBs[0])
+                    search.snatchEpisode(foundNZBs[0])
                     
             self._set_lastBacklog(curDate)
             

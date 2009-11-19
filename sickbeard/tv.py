@@ -309,6 +309,8 @@ class TVShow(object):
 			if season == 0:
 				continue
 			for episode in showObj[season]:
+				if episode == 0:
+					continue
 				ep = self.getEpisode(season, episode)
 				if ep == None:
 					Logger().log(str(self.tvdbid) + ": Creating episode object for " + str(season) + "x" + str(episode), DEBUG)

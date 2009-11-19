@@ -57,7 +57,7 @@ from classes import NZBSearchResult
 from common import *
 from logging import *
 
-import sickbeard, nzb
+import sickbeard, search
 
 from lib.irclib.ircbot import SingleServerIRCBot
 from lib.irclib.irclib import nm_to_n, nm_to_h, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
@@ -228,7 +228,7 @@ class NZBBot(SingleServerIRCBot):
                     # don't support any other sources ATM
                     return
     
-                nzb.snatchNZB(nzbObj)
+                search.snatchEpisode(nzbObj)
 
 
 def stripSpecialChars(str):

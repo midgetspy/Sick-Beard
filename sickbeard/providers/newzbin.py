@@ -31,7 +31,7 @@ from sickbeard.common import *
 from sickbeard.logging import *
 
 def isActive():
-	return sickbeard.NEWZBIN
+	return sickbeard.NEWZBIN and sickbeard.USE_NZB
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -76,7 +76,7 @@ def downloadNZB(nzb):
 
 	return True
 		
-def findNZB(episode, forceQuality=None):
+def findEpisode(episode, forceQuality=None):
 
 	Logger().log("Searching newzbin for " + episode.prettyName())
 

@@ -33,7 +33,7 @@ from sickbeard.common import *
 from sickbeard.logging import *
 
 def isActive():
-	return sickbeard.NZBS
+	return sickbeard.NZBS and sickbeard.USE_NZB
 
 def getNZBsURL (url):
 
@@ -69,7 +69,7 @@ def downloadNZB (nzb):
 	return True
 	
 	
-def findNZB (episode, forceQuality=None):
+def findEpisode (episode, forceQuality=None):
 
 	if episode.status == DISCBACKLOG:
 		Logger().log("NZBs.org doesn't support disc backlog. Use newzbin or download it manually from NZBs.org")

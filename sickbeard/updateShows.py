@@ -34,49 +34,6 @@ from sickbeard.logging import *
 from lib.BeautifulSoup import BeautifulStoneSoup
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-class UpdateScheduler():
-
-    def __init__(self, runAtStart=True):
-        
-        if runAtStart:
-            self.lastRun = datetime.datetime.fromordinal(1) #start it right away
-        else:
-            self.lastRun = datetime.datetime.now() # don't run it to start off
-
-        self.updater = ShowUpdater()
-        self.cycleTime = datetime.timedelta(hours=1)
-        
-        self.thread = None
-        self.initThread()
-        
-        self.abort = False
-        
-    def initThread(self):
-        if self.thread == None:
-            self.thread = threading.Thread(None, self.runUpdate, "UPDATE")
-        
-    def runUpdate(self):
-        
-        while True:
-            
-            currentTime = datetime.datetime.now()
-            
-            if currentTime - self.lastRun > self.cycleTime:
-                self.lastRun = currentTime
-                try:
-                    self.updater.updateShowsFromTVDB()
-                except Exception as e:
-                    Logger().log("Error encountered while updating shows: " + str(e), ERROR)
-                    Logger().log(traceback.format_exc(), DEBUG)
-            
-            if self.abort:
-                self.abort = False
-                self.thread = None
-                return
-            
-            time.sleep(1) 
-            
-
 class ShowUpdater():
 
     def __init__(self):

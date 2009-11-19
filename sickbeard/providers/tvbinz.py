@@ -33,7 +33,7 @@ from sickbeard.common import *
 from sickbeard.logging import *
 
 def isActive():
-	return sickbeard.TVBINZ
+	return sickbeard.TVBINZ and sickbeard.USE_NZB
 
 def getTVBinzURL (url):
 
@@ -71,7 +71,7 @@ def downloadNZB (nzb):
 	return True
 	
 	
-def findNZB (episode, forceQuality=None):
+def findEpisode (episode, forceQuality=None):
 
 	if episode.status == DISCBACKLOG:
 		Logger().log("TVbinz doesn't support disc backlog. Use newzbin or download it manually from TVbinz")

@@ -58,6 +58,18 @@ def change_NZB_DIR(nzb_dir):
     return True
 
 
+def change_TORRENT_DIR(torrent_dir):
+
+    if os.path.normpath(sickbeard.TORRENT_DIR) != os.path.normpath(torrent_dir):
+        if helpers.makeDir(torrent_dir):
+            sickbeard.TORRENT_DIR = os.path.normpath(torrent_dir)
+            Logger().log("Changed torrent folder to " + torrent_dir)
+        else:
+            return False
+
+    return True
+
+
 def change_IRC_BOT(irc_bot):
 
     if sickbeard.IRC_BOT == True and irc_bot == False:

@@ -30,7 +30,7 @@ import cherrypy
 
 from sickbeard import config
 from sickbeard import db
-from sickbeard import nzb
+from sickbeard import search
 from sickbeard import processTV
 from sickbeard import ui
 from sickbeard import contactXBMC
@@ -91,7 +91,7 @@ class ConfigGeneral:
         return _munge(t)
 
     @cherrypy.expose
-    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, nzb_method=None,
+    def saveGeneral(self, log_dir=None, web_port=None, web_log=None,
                     launch_browser=None, create_metadata=None, web_username=None,
                     web_password=None):
 
@@ -115,7 +115,6 @@ class ConfigGeneral:
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
-        sickbeard.NZB_METHOD = nzb_method
         sickbeard.LAUNCH_BROWSER = launch_browser
         sickbeard.CREATE_METADATA = create_metadata
 
@@ -129,26 +128,45 @@ class ConfigGeneral:
         if len(results) > 0:
             for x in results:
                 Logger().log(x, ERROR)
-            return "<br />\n".join(results)
+            return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
 
-class ConfigNZBActions:
+class ConfigNZBTorrent:
     
     @cherrypy.expose
     def index(self):
         
-        t = Template(file="data/interfaces/default/config_nzbactions.tmpl")
+        t = Template(file="data/interfaces/default/config_nzbtorrent.tmpl")
         return _munge(t)
 
     @cherrypy.expose
-    def saveNZBActions(self, nzb_dir=None, sab_username=None, sab_password=None,
-                       sab_apikey=None, sab_category=None, sab_host=None):
+    def saveNZBTorrent(self, nzb_dir=None, sab_username=None, sab_password=None,
+                       sab_apikey=None, sab_category=None, sab_host=None, use_nzb=None,
+                       use_torrent=None, torrent_dir=None, nzb_method=None):
 
         results = []
 
         if not config.change_NZB_DIR(nzb_dir):
             results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
+
+        if not config.change_TORRENT_DIR(torrent_dir):
+            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
+
+        if use_nzb == "on":
+            use_nzb = 1
+        else:
+            use_nzb = 0
+            
+        if use_torrent == "on":
+            use_torrent = 1
+        else:
+            use_torrent = 0
+
+        sickbeard.NZB_METHOD = nzb_method
+
+        sickbeard.USE_NZB = use_nzb
+        sickbeard.USE_TORRENT = use_torrent
 
         sickbeard.SAB_USERNAME = sab_username
         sickbeard.SAB_PASSWORD = sab_password
@@ -161,7 +179,7 @@ class ConfigNZBActions:
         if len(results) > 0:
             for x in results:
                 Logger().log(x, ERROR)
-            return "<br />\n".join(results)
+            return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -211,7 +229,7 @@ class ConfigProviders:
         if len(results) > 0:
             for x in results:
                 Logger().log(x, ERROR)
-            return "<br />\n".join(results)
+            return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -242,7 +260,7 @@ class ConfigIRC:
         if len(results) > 0:
             for x in results:
                 Logger().log(x, ERROR)
-            return "<br />\n".join(results)
+            return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -284,7 +302,7 @@ class ConfigNotifications:
         if len(results) > 0:
             for x in results:
                 Logger().log(x, ERROR)
-            return "<br />\n".join(results)
+            return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -299,7 +317,7 @@ class Config:
     
     general = ConfigGeneral()
     
-    nzbActions = ConfigNZBActions()
+    nzbtorrent = ConfigNZBTorrent()
     
     providers = ConfigProviders()
     
@@ -704,13 +722,13 @@ class Home:
         if isinstance(epObj, str):
             return _genericMessage("Error", epObj)
         
-        tempStr = "Searching for NZB for " + epObj.prettyName()
+        tempStr = "Searching for download for " + epObj.prettyName()
         Logger().log(tempStr)
         outStr += tempStr + "<br />\n"
-        foundNZBs = nzb.findNZB(epObj)
+        foundEpisodes = search.findEpisode(epObj)
         
-        if len(foundNZBs) == 0:
-            tempStr = "No NZBs were found<br />\n"
+        if len(foundEpisodes) == 0:
+            tempStr = "No downloads were found<br />\n"
             Logger().log(tempStr)
             outStr += tempStr + "<br />\n"
             return _genericMessage("Error", outStr)
@@ -718,8 +736,8 @@ class Home:
         else:
 
             # just use the first result for now
-            Logger().log("Downloading NZB from " + foundNZBs[0].url + "<br />\n")
-            result = nzb.snatchNZB(foundNZBs[0])
+            Logger().log("Downloading episode from " + foundEpisodes[0].url + "<br />\n")
+            result = search.snatchEpisode(foundEpisodes[0])
             
             #TODO: check if the download was successful
             

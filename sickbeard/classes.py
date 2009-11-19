@@ -41,7 +41,7 @@ class AuthURLOpener(urllib.FancyURLopener):
         self.numTries = 0
         return urllib.FancyURLopener.open(self, url)
 
-class NZBSearchResult:
+class SearchResult:
 
     def __init__(self, episode):
         self.provider = -1
@@ -58,7 +58,15 @@ class NZBSearchResult:
         return myString
 
     def fileName(self):
-        return self.episode.prettyName() + ".nzb"
+        return self.episode.prettyName() + "." + self.resultType
+
+class NZBSearchResult(SearchResult):
+    resultType = "nzb"
+
+
+class TorrentSearchResult(SearchResult):
+    resultType = "torrent"
+
 
 class ShowListUI:
     def __init__(self, config, log):

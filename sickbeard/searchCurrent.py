@@ -18,7 +18,7 @@
 
 
 
-from sickbeard import common, db, exceptions, helpers, nzb
+from sickbeard import common, db, exceptions, helpers, search
 from sickbeard.logging import *
 from sickbeard.common import * 
 
@@ -27,50 +27,6 @@ import sqlite3
 import threading
 import time
 import traceback
-
-class CurrentSearchScheduler():
-
-    def __init__(self, runAtStart=True):
-        
-        self.isActive = False
-        if runAtStart:
-            self.lastRun = datetime.datetime.fromordinal(1)
-        else:
-            self.lastRun = datetime.datetime.now()
-
-        self.searcher = CurrentSearcher()
-        self.cycleTime = datetime.timedelta(minutes=10)
-        
-        self.thread = None
-        self.initThread()
-        
-        self.abort = False
-    
-    def initThread(self):
-        if self.thread == None or not self.thread.isAlive():
-            self.thread = threading.Thread(None, self.runSearch, "SEARCH")
-    
-    def runSearch(self):
-        
-        while True:
-            
-            currentTime = datetime.datetime.now()
-            
-            if currentTime - self.lastRun > self.cycleTime:
-                self.lastRun = currentTime
-                try:
-                    self.searcher.searchForTodaysEpisodes()
-                except Exception as e:
-                    Logger().log("Search generated an exception: " + str(e), ERROR)
-                    Logger().log(traceback.format_exc(), DEBUG)
-            
-            if self.abort:
-                self.abort = False
-                self.thread = None
-                return
-            
-            time.sleep(1) 
-            
 
 class CurrentSearcher():
     
@@ -97,13 +53,13 @@ class CurrentSearcher():
             
             for curEp in epList:
                 
-                foundNZBs = nzb.findNZB(curEp)
+                foundEpisodes = search.findEpisode(curEp)
                 
-                if len(foundNZBs) == 0:
-                    Logger().log("Unable to find NZB for " + curEp.prettyName())
+                if len(foundEpisodes) == 0:
+                    Logger().log("Unable to find download for " + curEp.prettyName())
                 else:
                     # just use the first result for now
-                    nzb.snatchNZB(foundNZBs[0])
+                    search.snatchEpisode(foundEpisodes[0])
                     
                 time.sleep(3)
 

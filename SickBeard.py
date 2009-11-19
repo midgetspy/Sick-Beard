@@ -31,8 +31,8 @@ import cherrypy.lib.auth_basic
 
 import sickbeard
 
-from sickbeard import exceptions, db, helpers, nzb, searchBacklog, searchCurrent, tvnzbbot, updateShows, webserve
-from sickbeard.tv import TVShow, TVEpisode
+from sickbeard import db, webserve
+from sickbeard.tv import TVShow
 from sickbeard.logging import *
 from sickbeard.common import *
 

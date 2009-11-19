@@ -66,55 +66,6 @@ class ShowAddQueue():
 
     
 
-class ShowAddScheduler():
-
-    def __init__(self):
-        
-        self.addQueue = []
-        
-        self.addThread = None
-        
-        self.thread = None
-        self.initThread()
-
-        self.abort = False
-
-    def initThread(self):
-        if self.thread == None:
-            self.thread = threading.Thread(None, self.scheduleShows, "SHOWADDER")
-
-    def addShowToQueue(self, dir):
-        try:
-            self.addQueue.append(ShowAdder(dir))
-        except exceptions.NoNFOException:
-            Logger().log(" Unable to add show from " + dir + ", show will not be added", ERROR)
-            raise
-
-    def _doAddShow(self):
-        # only start a new add task if one isn't already going
-        if self.addThread == None or self.addThread.isAlive() == False:
-
-            # if there's something in the queue then run it in a thread and take it out of the queue
-            if len(self.addQueue) > 0:
-                Logger().log("Starting new add task for dir " + self.addQueue[0].showDir)
-                self.addThread = threading.Thread(None, self.addQueue[0].run, "ADDSHOW")
-                self.addThread.start()
-                del self.addQueue[0]
-                
-        
-    def scheduleShows(self):
-        
-        while True:
-            
-            self._doAddShow()
-            
-            if self.abort:
-                self.abort = False
-                self.addThread = None
-                return
-            
-            time.sleep(3) 
-
 class ShowAdder:
     
     def __init__(self, showDir):

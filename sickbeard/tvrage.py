@@ -48,6 +48,9 @@ class TVRage:
         if self.lastEpInfo == None or self.nextEpInfo == None:
             self._getLatestInfo()
         
+        if self.nextEpInfo['season'] == 0 or self.nextEpInfo['episode'] == 0:
+            return None
+        
         try:
         
             airdate = None
