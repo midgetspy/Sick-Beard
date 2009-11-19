@@ -19,7 +19,7 @@ $sickbeard.loadingShowList[$curLoadingShow].name (loading)<br />
   <tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th></tr>
 
 #set $myShowList = $sickbeard.showList
-#$myShowList.sort(lambda x, y: cmp(x.name, y.name))
+$myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #for $curShow in $myShowList:
 #set $curEp = $curShow.nextEpisode()
 

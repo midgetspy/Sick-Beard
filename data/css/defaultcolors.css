@@ -42,7 +42,7 @@ a.current {
 }
 
 .MainMenu {
-	background-color: #F5EEE4;
+	background-color: #F5F1E4;
 
 }
 .SubMenu {
@@ -69,7 +69,7 @@ tr.even{
 }
 
 tr.evenLine {
-	background-color: #F5EEE4;
+	background-color: #F5F1E4;
 	color: black;
 }
 
@@ -79,7 +79,7 @@ tr.odd {
 }
 
 tr.oddLine {
-	background-color: #F5EEE4;
+	background-color: #F5F1E4;
 }
 
 h1 {
@@ -98,7 +98,7 @@ h1 {
   color: black;
 }
 .footer {
-  background-color: #F5EEE4;
+  background-color: #F5F1E4;
   border-top: 1px solid #000;
   color:#4e4e4e;
 }
