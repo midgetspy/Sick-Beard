@@ -46,8 +46,8 @@ Season Folders: $show.seasonfolders<br />
     <td colspan=7>
 	<br />
 	<h2>Season $epResult["season"]
-	(<a href="$statpath/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
-	(<a href="$statpath/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)<br />
+	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
+	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)<br />
 	</h2></td>
   </tr>
   <tr><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
@@ -63,7 +63,7 @@ Season Folders: $show.seasonfolders<br />
 	 <td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>
 	 <td>$os.path.basename($epResult["location"])</td>
      <td>$statusStrings[int($epResult["status"])]</td>
-     <td><a href="$statpath/searchEpisode/?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">find NZB</a></td>
+     <td><a href="searchEpisode/?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">find NZB</a></td>
    <tr>
    
 #end for            
