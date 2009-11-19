@@ -36,12 +36,12 @@
     <div class="$showDiv">
       <div class="listing" id="listing_$curEp.show.tvdbid">
         <a name="$curEp.show.name"></a>
-        <a href="$statpath/home/displayShow/?show=$curEp.show.tvdbid"><img alt="" src="/showPoster/?show=$curEp.show.tvdbid" class="listingThumb" /></a>
+        <a href="$statpath/home/displayShow?show=$curEp.show.tvdbid"><img alt="" src="/showPoster/?show=$curEp.show.tvdbid" class="listingThumb" /></a>
         <div id="info_$curEp.show.tvdbid">
           <h1>
           <div class="icons">
             <a href="http://www.thetvdb.com/?tab=series&id=$curEp.show.tvdbid" target="_blank" title="http://www.thetvdb.com/?tab=series&id=$curEp.show.tvdbid"><img alt="" src="/images/info.png" /></a>
-            <a href="/searchEpisode/?show=$curEp.show.tvdbid&season=$curEp.season&episode=$curEp.episode" title="Force Update" id="forceUpdate|$curEp.show.tvdbid|$curEp.show.name" class="forceUpdate"><img alt="" src="/images/forceUpdate.png" id="forceUpdateImage|$curEp.show.tvdbid" /></a>
+            <a href="/searchEpisode?show=$curEp.show.tvdbid&season=$curEp.season&episode=$curEp.episode" title="Force Update" id="forceUpdate|$curEp.show.tvdbid|$curEp.show.name" class="forceUpdate"><img alt="" src="/images/forceUpdate.png" id="forceUpdateImage|$curEp.show.tvdbid" /></a>
           </div>
           $curEp.show.name
           </h1>

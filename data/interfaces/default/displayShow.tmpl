@@ -43,19 +43,21 @@ Season Folders: $show.seasonfolders<br />
    
     #if int($epResult["season"]) != $curSeason:
   <tr class="seasonheader">
-    <td colspan=5>
+    <td colspan=7>
 	<br />
 	<h2>Season $epResult["season"]
 	(<a href="$statpath/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
 	(<a href="$statpath/setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)<br />
 	</h2></td>
   </tr>
-  <tr> <th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+  <tr><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
     #set $odd = not $odd#
   <tr class="#if $odd then "odd" else "even"#Line">
+  	 <td align="center">$epResult["hasnfo"]</td>
+  	 <td align="center">$epResult["hastbn"]</td>
      <td>$epResult["episode"]</td>
      <td>$epResult["name"]</td>
 	 <td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>

@@ -529,7 +529,7 @@ class Home:
             # save it to the DB
             showObj.saveToDB()
                 
-            raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+            raise cherrypy.HTTPRedirect("displayShow?show=" + show)
 
     @cherrypy.expose
     def deleteShow(self, show=None):
@@ -560,7 +560,7 @@ class Home:
         # force the update from the DB
         sickbeard.updateScheduler.action.updateShowFromTVDB(showObj, bool(force))
         
-        raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+        raise cherrypy.HTTPRedirect("displayShow?show=" + show)
 
 
     @cherrypy.expose
@@ -576,7 +576,7 @@ class Home:
         
         showObj.fixEpisodeNames()
 
-        raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+        raise cherrypy.HTTPRedirect("displayShow?show=" + show)
         
     
     @cherrypy.expose
@@ -592,7 +592,7 @@ class Home:
 
         showObj.refreshDir()
 
-        raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+        raise cherrypy.HTTPRedirect("displayShow?show=" + show)
         
     
     @cherrypy.expose
@@ -649,7 +649,7 @@ class Home:
                     epObj.status = int(status)
                     epObj.saveToDB()
                     
-        raise cherrypy.HTTPRedirect("displayShow/?show=" + show)
+        raise cherrypy.HTTPRedirect("displayShow?show=" + show)
 
 
 
@@ -681,7 +681,7 @@ class Home:
             
             #TODO: check if the download was successful
             
-            raise cherrypy.HTTPRedirect("displayShow/?show=" + str(epObj.show.tvdbid))
+            raise cherrypy.HTTPRedirect("displayShow?show=" + str(epObj.show.tvdbid))
 
 
 

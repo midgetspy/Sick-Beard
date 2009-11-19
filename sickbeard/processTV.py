@@ -74,18 +74,18 @@ def findMainFile (show_dir):
 def moveEpisode(file, ep):
 
     # if the ep already has an associated file
-    if ep.fullPath() != None and os.path.isfile(ep.fullPath()):
+    if ep.location != None and os.path.isfile(ep.location):
         
         Logger().log("The episode already has a file downloaded", DEBUG)
         
         # see if it's smaller than our new file
-        if os.path.getsize(file) > os.path.getsize(ep.fullPath()):
+        if os.path.getsize(file) > os.path.getsize(ep.location):
             
             Logger().log("The old file is smaller, replacing it", DEBUG)
 
             try:
-                os.remove(ep.fullPath())
-                Logger().log("Deleted " + str(ep.fullPath()), DEBUG)
+                os.remove(ep.location)
+                Logger().log("Deleted " + str(ep.location), DEBUG)
                 with ep.lock:
                     ep.location = None
             except OSError as e:
@@ -115,6 +115,7 @@ def moveEpisode(file, ep):
                 # don't mess up the status - if this is a legit download it should be SNATCHED
                 if curEp.status != PREDOWNLOADED:
                     curEp.status = DOWNLOADED
+                curEp.saveToDB()
 
     except IOError as e:
         Logger().log("Unable to move the file: " + str(e), ERROR)
@@ -198,32 +199,6 @@ def doIt(downloadDir, showList):
             Logger().log(logStr, DEBUG)
             returnStr += logStr + "\n"
 
-            # if tvdb fails then try looking it up in the db
-            #myDB = db.DBConnection()
-            #myDB.checkDB()
-        
-            #sqlResults = []
-        
-            #try:
-            #    sql = "SELECT * FROM tv_shows WHERE show_name LIKE ?"
-            #    sqlArgs = ['%'+result["file_seriesname"]]
-            #    Logger().log("SQL: "+sql+" % "+str(sqlArgs))
-            #    sqlResults = myDB.connection.execute(sql, sqlArgs).fetchall()
-            #except sqlite3.DatabaseError as e:
-            #    Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            #    raise
-    
-            #if len(sqlResults) != 1:
-            #    if len(sqlResults) == 0:
-            #        logStr = "Unable to match a record in the DB for "+result["file_seriesname"]
-            #    else:
-            #        logStr = "Multiple results for "+result["file_seriesname"]+" in the DB, unable to match show name"
-            #    Logger().log(logStr, DEBUG)
-            #    returnStr += logStr + "\n"
-            #    continue
-
-            #showInfo = (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
-
             showInfo = helpers.searchDBForShow(result["file_seriesname"])
             
         # if we didn't get anything from TVDB or the DB then try the next option
@@ -278,26 +253,15 @@ def doIt(downloadDir, showList):
         else:
             rootEp.relatedEps.append(curEp)
 
+    # wait for the copy to finish
+
     if sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
         contactXBMC.notifyXBMC(rootEp.prettyName(), "Download finished")
 
-    # rename it
-    logStr = "Renaming the file " + biggest_file + " to " + rootEp.prettyName()
-    Logger().log(logStr, DEBUG)
-    returnStr += logStr + "\n"
-    
-    result = renameFile(biggest_file, rootEp.prettyName())
-
-    if result == False:
-        logStr = "ERROR: Unable to rename the file " + biggest_file
-        Logger().log(logStr, DEBUG)
-        returnStr += logStr + "\n"
-        return logStr
-    
-    result = moveEpisode(os.path.join(downloadDir, os.path.basename(result)), rootEp)
+    # move it to the show folder
+    #result = moveEpisode(os.path.join(downloadDir, os.path.basename(result)), rootEp)
+    result = moveEpisode(biggest_file, rootEp)
     if result == True:
-        rootEp.createMetaFiles()
-        rootEp.saveToDB()
         logStr = "File was moved successfully"
         Logger().log(logStr, DEBUG)
         returnStr += logStr + "\n"
@@ -307,7 +271,26 @@ def doIt(downloadDir, showList):
         returnStr += logStr + "\n"
         return returnStr
 
+    # rename it
+    logStr = "Renaming the file " + rootEp.location + " to " + rootEp.prettyName()
+    Logger().log(logStr, DEBUG)
+    returnStr += logStr + "\n"
+    
+    result = renameFile(rootEp.location, rootEp.prettyName())
+
+    if result == False:
+        logStr = "ERROR: Unable to rename the file " + rootEp.location
+        Logger().log(logStr, DEBUG)
+        returnStr += logStr + "\n"
+        return logStr
+
+    with rootEp.lock:
+        rootEp.location = result
+        rootEp.saveToDB()
+    
     # generate nfo/tbn
+    rootEp.createMetaFiles()
+    rootEp.saveToDB()
 
     logStr = "Deleting folder " + downloadDir
     Logger().log(logStr, DEBUG)
