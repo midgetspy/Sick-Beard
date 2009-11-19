@@ -83,6 +83,8 @@ form {
   padding: 10px 20px 10px 10px;
   border: 1px solid #ccc;
   margin-top: 10px;
+  margin-right: 10px;
+  margin-left: 10px;
   overflow: hidden;
   background-color: inherit;
 }

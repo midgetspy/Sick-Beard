@@ -1,4 +1,5 @@
 #import sickbeard
+#from sickbeard.common import *
 <!--#set global $topmenu="home"#-->
 <!--#set global $statpath=".."#-->
 <!--#set global $helpsubject="Home"#-->
@@ -8,11 +9,41 @@
 #include "data/interfaces/default/inc_hmenu.tmpl"
 
 <h2>Show List</h2>
-#for $curShow in $sickbeard.showList:
-<a href="displayShow?show=$curShow.tvdbid">$curShow.name</a><br />
-#end for
+
 #for $curLoadingShow in $sickbeard.loadingShowList:
 $sickbeard.loadingShowList[$curLoadingShow].name (loading)<br />
 #end for
 
+<table id="queueTable">
+
+  <tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th></tr>
+
+#set $myShowList = $sickbeard.showList
+#$myShowList.sort(lambda x, y: cmp(x.name, y.name))
+#for $curShow in $myShowList:
+#set $curEp = $curShow.nextEpisode()
+
+#set $curShowDownloads = [x[1] for x in $downloadedEps if int(x[0]) == $curShow.tvdbid]
+#set $curShowAll = [x[1] for x in $allEps if int(x[0]) == $curShow.tvdbid]
+#if len($curShowAll) != 0:
+  #if len($curShowDownloads) != 0:
+    #set $dlStat = str($curShowDownloads[0])+" / "+str($curShowAll[0])
+  #else
+    #set $dlStat = "0 / "+str($curShowAll[0])
+  #end if
+#else
+#set $dlStat = "?"
+#end if
+
+  <tr class="evenLine">
+    <td align="center">#if $curEp != None then $curEp.airdate else ""#</td>
+    <td><a href="displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+    <td>$curShow.network</td>
+    <td align="center">$qualityStrings[$curShow.quality]</td>
+    <td align="center">$dlStat</td>
+  </tr>
+
+#end for
+
+</table>
 #include "data/interfaces/default/inc_bottom.tmpl"

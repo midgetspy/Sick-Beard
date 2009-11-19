@@ -323,6 +323,7 @@ class HomePostProcess:
             raise cherrypy.HTTPRedirect("postprocess")
         else:
             result = processTV.doIt(dir, sickbeard.showList)
+            result = result.replace("\n","<br />\n")
             return _genericMessage("Postprocessing results", result)
 
 
@@ -420,6 +421,30 @@ class Home:
     def index(self):
         
         t = Template(file="data/interfaces/default/home.tmpl")
+        
+        t.downloadedEps = []
+
+        myDB = db.DBConnection()
+        myDB.checkDB()
+
+        try:
+            sql = "SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 GROUP BY showid"
+            Logger().log("SQL: " + sql, DEBUG)
+            t.downloadedEps = myDB.connection.execute(sql).fetchall()
+        except sqlite3.DatabaseError as e:
+            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            raise
+        
+        t.allEps = []
+        
+        try:
+            sql = "SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 GROUP BY showid"
+            Logger().log("SQL: " + sql, DEBUG)
+            t.allEps = myDB.connection.execute(sql).fetchall()
+        except sqlite3.DatabaseError as e:
+            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            raise
+        
         return _munge(t)
 
     addShows = HomeAddShows()
@@ -460,7 +485,7 @@ class Home:
         sqlResults = []
 
         try:
-            sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season, episode ASC"
+            sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*100+episode DESC"
             Logger().log("SQL: " + sql, DEBUG)
             sqlResults = myDB.connection.execute(sql).fetchall()
         except sqlite3.DatabaseError as e:

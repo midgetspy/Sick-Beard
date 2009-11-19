@@ -26,6 +26,17 @@ div.EntryBlock {
 div.EntryBlock form {
   display: inline;
 }
+
+#homeContainer {
+  width: 1000px;
+  align: center;
+}
+
+.homelisting {
+  display: inline-block;
+  width: 475px;
+} 
+
 fieldset.EntryFieldSet {
   vertical-align: top;
   display: inline;
@@ -182,7 +193,9 @@ h2 {
 }
 
 #queueTable, #historyTable {
-width:100%;
+width:80%;
+margin-left: 10%;
+margin-right: 10%;
 }
 
 #row_del, #row_order, #row_mode {
