@@ -56,9 +56,9 @@ Season Folders: $show.seasonfolders<br />
 
     #set $odd = not $odd#
   <tr class="#if $odd then "odd" else "even"#Line">
-  	 <td align="center">$epResult["hasnfo"]</td>
-  	 <td align="center">$epResult["hastbn"]</td>
-     <td>$epResult["episode"]</td>
+  	 <td align="center"><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
+  	 <td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
+     <td align="center">$epResult["episode"]</td>
      <td>$epResult["name"]</td>
 	 <td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>
 	 <td>$os.path.basename($epResult["location"])</td>

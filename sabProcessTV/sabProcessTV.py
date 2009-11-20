@@ -37,6 +37,8 @@ password = config.get("SickBeard", "password")
 
 params = {}
 
+params['quiet'] = 1
+
 if len(sys.argv) <= 1:
     print "ERROR: Insufficient arguments - expecting at least the download folder"
     sys.exit()

@@ -130,6 +130,7 @@ def findEpisode (episode, forceQuality=None):
 		result.provider = sickbeard.common.TVBINZ
 		result.url = url + "&" + urllib.urlencode(urlParams) 
 		result.extraInfo = [title]
+		result.quality = epQuality
 		
 		results.append(result)
 		

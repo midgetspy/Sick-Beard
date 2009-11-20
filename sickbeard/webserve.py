@@ -335,12 +335,15 @@ class HomePostProcess:
         return _munge(t)
 
     @cherrypy.expose
-    def processEpisode(self, dir=None, nzbName=None, jobName=None):
+    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None):
         
         if dir == None:
             raise cherrypy.HTTPRedirect("postprocess")
         else:
             result = processTV.doIt(dir, sickbeard.showList)
+            if quiet != None and int(quiet) == 1:
+                return result  
+        
             result = result.replace("\n","<br />\n")
             return _genericMessage("Postprocessing results", result)
 
@@ -784,7 +787,7 @@ class WebInterface:
         sqlResults = []
 
         try:
-            sql = "SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode"
+            sql = "SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC"
             Logger().log("SQL: " + sql, DEBUG)
             sqlResults = myDB.connection.execute(sql).fetchall()
         except sqlite3.DatabaseError as e:

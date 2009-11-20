@@ -123,6 +123,9 @@ class TVRage:
             
         self.lastEpInfo = self._getEpInfo(info['Latest Episode'])
         self.nextEpInfo = self._getEpInfo(info['Next Episode'])
+        
+        if self.lastEpInfo == None or self.nextEpInfo == None:
+            raise exceptions.TVRageException("TVRage has malformed data, unable to update the show")
 
 
         
@@ -134,7 +137,11 @@ class TVRage:
         
         numInfo = [int(x) for x in epInfo[0].split('x')]
         
-        date = datetime.datetime.strptime(epInfo[2], "%b/%d/%Y").date()
+        try:
+            date = datetime.datetime.strptime(epInfo[2], "%b/%d/%Y").date()
+        except ValueError as e:
+            Logger().log("Unable to figure out the time from the TVRage data "+epInfo[2], ERROR)
+            return None
         
         toReturn = {'season': int(numInfo[0]), 'episode': numInfo[1], 'name': epInfo[1], 'airdate': date}
         

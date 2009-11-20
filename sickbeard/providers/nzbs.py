@@ -132,6 +132,7 @@ def findEpisode (episode, forceQuality=None):
 		result.provider = sickbeard.common.NZBS
 		result.url = url 
 		result.extraInfo = [title]
+		result.quality = epQuality
 		
 		results.append(result)
 		

@@ -68,39 +68,25 @@ def findMainFile (show_dir):
     return os.path.join(show_dir, biggest_file)
 
 
-# ########################
-# Checks if another file exists already, if it
-# does then we replace only if it's larger.
-# ########################      
-def moveEpisode(file, ep):
+def _checkForExistingFile(newFile, oldFile):
 
-    # if the ep already has an associated file
-    if ep.location != None and os.path.isfile(ep.location):
+    # if the new file exists, return the appropriate code depending on the size
+    if os.path.isfile(newFile):
         
-        Logger().log("The episode already has a file downloaded", DEBUG)
+        # see if it's bigger than our old file
+        if os.path.getsize(newFile) > os.path.getsize(oldFile):
+            return 1
         
-        # see if it's smaller than our new file
-        if os.path.getsize(file) > os.path.getsize(ep.location):
-            
-            Logger().log("The old file is smaller, replacing it", DEBUG)
-
-            try:
-                os.remove(ep.location)
-                Logger().log("Deleted " + str(ep.location), DEBUG)
-                with ep.lock:
-                    ep.location = None
-            except OSError as e:
-                Logger().log("Unable to delete existing file, it's probably in use (" + str(e) + ")", ERROR)
-
-    # move it to the right folder
-    if ep.show.seasonfolders == True:
-        seasonFolder = 'Season ' + str(ep.season)
-    else:
-        seasonFolder = ''
-    Logger().log("Seasonfolders were " + str(ep.show.seasonfolders) + " which gave " + seasonFolder, DEBUG)
-
-    destDir = os.path.join(ep.show.location, seasonFolder)
+        else:
+            return -1
     
+    else:
+        return 0
+            
+
+
+def moveEpisode(file, destDir):
+
     # if the dir doesn't exist (new season folder) then make it
     if not os.path.isdir(destDir):
         Logger().log("Season folder didn't exist, creating it", DEBUG)
@@ -256,54 +242,101 @@ def doIt(downloadDir, showList):
     # log it to history
     history.logDownload(rootEp, biggest_file)
 
-
     # wait for the copy to finish
 
     if sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
         contactXBMC.notifyXBMC(rootEp.prettyName(), "Download finished")
 
-    # move it to the show folder
-    #result = moveEpisode(os.path.join(downloadDir, os.path.basename(result)), rootEp)
-    result = moveEpisode(biggest_file, rootEp)
-    if result == True:
-        logStr = "File was moved successfully"
-        Logger().log(logStr, DEBUG)
-        returnStr += logStr + "\n"
+
+    # figure out the new filename
+    biggestFileName = os.path.basename(biggest_file)
+    biggestFileExt = os.path.splitext(biggestFileName)[1]
+
+    # figure out the right folder
+    if rootEp.show.seasonfolders == True:
+        seasonFolder = 'Season ' + str(rootEp.season)
     else:
-        logStr = "I couldn't move it, giving up"
+        seasonFolder = ''
+    logStr = "Seasonfolders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder
+    Logger().log(logStr, DEBUG)
+    returnStr += logStr + "\n"
+
+    destDir = os.path.join(rootEp.show.location, seasonFolder)
+    
+    newFile = os.path.join(destDir, rootEp.prettyName()+biggestFileExt)
+    logStr = "The ultimate destination for " + biggest_file + " is " + newFile
+    Logger().log(logStr, DEBUG)
+    returnStr += logStr + "\n"
+
+    existingResult = _checkForExistingFile(newFile, biggest_file)
+    
+    # see if the existing file is bigger - if it is, bail
+    if existingResult == 1:
+        logStr = "There is already a file that's bigger at "+newFile+" - not processing this episode."
         Logger().log(logStr, DEBUG)
         returnStr += logStr + "\n"
         return returnStr
-
-    # rename it
-    logStr = "Renaming the file " + rootEp.location + " to " + rootEp.prettyName()
-    Logger().log(logStr, DEBUG)
-    returnStr += logStr + "\n"
-    
-    result = renameFile(rootEp.location, rootEp.prettyName())
-
-    if result == False:
-        logStr = "ERROR: Unable to rename the file " + rootEp.location
+        
+    # if the dir doesn't exist (new season folder) then make it
+    if not os.path.isdir(destDir):
+        logStr = "Season folder didn't exist, creating it"
         Logger().log(logStr, DEBUG)
         returnStr += logStr + "\n"
-        return logStr
+        os.mkdir(destDir)
 
-    with rootEp.lock:
-        rootEp.location = result
-        rootEp.saveToDB()
+    Logger().log("Moving from " + biggest_file + " to " + destDir, DEBUG)
+    try:
+        shutil.move(biggest_file, destDir)
+        
+        logStr = "File was moved successfully"
+        Logger().log(logStr, DEBUG)
+        returnStr += logStr + "\n"
+        
+    except IOError as e:
+        logStr = "Unable to move the file: " + str(e)
+        Logger().log(logStr, ERROR)
+        returnStr += logStr + "\n"
+        return returnStr
+
+    # if the file existed and was smaller then lets delete it
+    if existingResult == -1:
+        os.remove(newFile)
+
+    curFile = os.path.join(destDir, biggestFileName)
+
+    try:
+        os.rename(curFile, newFile)
+        logStr = "Renaming the file " + curFile + " to " + newFile
+        Logger().log(logStr, DEBUG)
+        returnStr += logStr + "\n"
+    except (OSError, IOError) as e:
+        logStr = "Failed renaming " + curFile + " to " + newFile + ": " + str(e)
+        Logger().log(logStr, ERROR)
+        returnStr += logStr + "\n"
+        return returnStr
+
+    for curEp in [rootEp] + rootEp.relatedEps:
+        with curEp.lock:
+            curEp.location = newFile
+            
+            # don't mess up the status - if this is a legit download it should be SNATCHED
+            if curEp.status != PREDOWNLOADED:
+                curEp.status = DOWNLOADED
+            curEp.saveToDB()
+
     
     # generate nfo/tbn
     rootEp.createMetaFiles()
     rootEp.saveToDB()
 
-    logStr = "Deleting folder " + downloadDir
-    Logger().log(logStr, DEBUG)
-    returnStr += logStr + "\n"
-    
     # we don't want to put predownloads in the library until we can deal with removing them
     if sickbeard.XBMC_UPDATE_LIBRARY == True and rootEp.status != PREDOWNLOADED:
         contactXBMC.updateLibrary(rootEp.show.location)
 
+    logStr = "Deleting folder " + downloadDir
+    Logger().log(logStr, DEBUG)
+    returnStr += logStr + "\n"
+    
     # delete the old folder full of useless files
     try:
         shutil.rmtree(downloadDir)
