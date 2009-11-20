@@ -20,21 +20,18 @@
 
 import sickbeard
 
-import tv
-import sqlite3
-import db
 import threading
 import traceback
 import time
 
 from sickbeard.logging import *
-
+from sickbeard.tv import TVShow
 from lib.tvdb_api import tvdb_exceptions
 
-from sickbeard.tv import TVShow
-from sickbeard import exceptions
-from sickbeard import ui
-from sickbeard import scheduler
+
+import exceptions
+import ui
+import helpers
 
 class ShowAddQueue():
 
@@ -70,7 +67,9 @@ class ShowAdder:
     
     def __init__(self, showDir):
         if not os.path.isdir(showDir) or not os.path.isfile(os.path.join(showDir, "tvshow.nfo")):
-            raise exceptions.NoNFOException()
+            # if we can't create the dir, bail
+            if not helpers.makeDir(showDir):
+                raise exceptions.NoNFOException()
         
         self.showDir = showDir
 

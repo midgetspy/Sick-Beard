@@ -506,7 +506,7 @@ class Home:
         sqlResults = []
 
         try:
-            sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*100+episode DESC"
+            sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC"
             Logger().log("SQL: " + sql, DEBUG)
             sqlResults = myDB.connection.execute(sql).fetchall()
         except sqlite3.DatabaseError as e:

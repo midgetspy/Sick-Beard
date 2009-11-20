@@ -192,7 +192,7 @@ h2 {
   height: 6px;
 }
 
-#queueTable, #historyTable {
+.sickbeardTable {
 width:80%;
 margin-left: 10%;
 margin-right: 10%;

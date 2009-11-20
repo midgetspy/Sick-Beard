@@ -80,7 +80,7 @@ def main():
 	# rename the main thread
 	threading.currentThread().name = "MAIN"
 	
-	Logger().log("Starting up midgetPVR from " + os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE))
+	Logger().log("Starting up Sick Beard from " + os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE))
 	
 	# load the config and publish it to the sickbeard package
 	if not os.path.isfile(os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE)):
@@ -126,10 +126,10 @@ def main():
 				  'tools.auth_basic.checkpassword': checkpassword},
 		    '/images': {'tools.staticdir.on': True,
 				    'tools.staticdir.dir': 'images'},
+			'/js': {'tools.staticdir.on': True,
+				    'tools.staticdir.dir': 'js'},
 			'/css': {'tools.staticdir.on': True,
 					 'tools.staticdir.dir': 'css'},
-			'/js': {'tools.staticdir.on': True,
-				    'tools.statirdir.dir': 'scripts'}
 	}
 
 	cherrypy.tree.mount(webRoot, '/', conf)

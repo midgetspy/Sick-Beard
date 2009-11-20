@@ -8,15 +8,85 @@
 <!--#set global $submenu=""#-->
 #include "data/interfaces/default/inc_hmenu.tmpl"
 
+<script>
+\$.tablesorter.addParser({ 
+    // set a unique id 
+    id: 'eps', 
+    is: function(s) { 
+        // return false so this parser is not auto detected 
+        return false; 
+    }, 
+    format: function(s) { 
+        // format your data for normalization 
+        return s.split(" ")[0]; 
+    }, 
+    // set type, either numeric or text 
+    type: 'numeric' 
+}); 
+ 
+\$.tablesorter.addParser({ 
+    // set a unique id 
+    id: 'quality', 
+    is: function(s) { 
+        // return false so this parser is not auto detected 
+        return false; 
+    }, 
+    format: function(s) { 
+        // format your data for normalization 
+        return s.toLowerCase().replace(/hd/,2).replace(/sd/,1).replace(/any/,0); 
+    }, 
+    // set type, either numeric or text 
+    type: 'numeric' 
+}); 
+ 
+\$.tablesorter.addParser({ 
+    // set a unique id 
+    id: 'loadingNames', 
+    is: function(s) { 
+        // return false so this parser is not auto detected 
+        return false; 
+    }, 
+    format: function(s) { 
+        // format your data for normalization
+        if (s.indexOf('Loading...') == 0)
+        	return s.replace('Loading...','!!!');
+        else
+        	return s; 
+    }, 
+    // set type, either numeric or text 
+    type: 'text' 
+}); 
+ 
+\$(document).ready(function() 
+{ 
+    \$("#showListTable").tablesorter({
+    	sortList: [[1,0]],
+    	headers: {
+    		1: { sorter: 'loadingNames'},
+    		3: { sorter: 'quality'},
+    		4: { sorter: 'eps' }
+    	}
+    }); 
+});
+</script>
+
 <h2>Show List</h2>
 
+<table id="showListTable" class="sickbeardTable tablesorter">
+
+  <thead><tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th></tr></thead>
+  <tbody>
+
 #for $curLoadingShow in $sickbeard.loadingShowList:
-$sickbeard.loadingShowList[$curLoadingShow].name (loading)<br />
+
+  <tr class="evenLine">
+    <td align="center">(loading)</td>
+    <td>#if $sickbeard.loadingShowList[$curLoadingShow].name == None then "Loading... (" + $curLoadingShow + ")" else $sickbeard.loadingShowList[$curLoadingShow].name#</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
 #end for
-
-<table id="queueTable">
-
-  <tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th></tr>
 
 #set $myShowList = $sickbeard.showList
 $myShowList.sort(lambda x, y: cmp(x.name, y.name))
@@ -44,6 +114,6 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   </tr>
 
 #end for
-
+</tbody>
 </table>
 #include "data/interfaces/default/inc_bottom.tmpl"

@@ -29,15 +29,15 @@ Location: $show._location**<br />
 #end try
 
 Quality: $qualityStrings[$show.quality]<br />
-Predownload: $show.predownload<br />
-Season Folders: $show.seasonfolders<br />
+Predownload: <img src="/images/#if $show.predownload == 1 then "yes.gif" else "no.gif"#" width="16" height="16"><br />
+Season Folders: <img src="/images/#if $show.seasonfolders == 1 then "yes.gif" else "no.gif"#" width="16" height="16"><br />
 
 <br /><br />
 
 #set $curSeason = 0
 #set $odd = 0
 
-<table id="queueTable">
+<table class="sickbeardTable">
     
 #for $epResult in $sqlResults:
    
@@ -56,7 +56,7 @@ Season Folders: $show.seasonfolders<br />
 
     #set $odd = not $odd#
   <tr class="#if $odd then "odd" else "even"#Line">
-  	 <td align="center"><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
+  	 <td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
   	 <td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
      <td align="center">$epResult["episode"]</td>
      <td>$epResult["name"]</td>

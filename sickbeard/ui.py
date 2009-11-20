@@ -31,7 +31,7 @@ from lib.tvdb_api import tvdb_exceptions
 class LoadingTVShow():
     def __init__(self, dir):
         self.dir = dir
-        self.name = "Unknown (" + self.dir + ")"
+        self.name = None
         
 def addShowsFromRootDir(dir):
     
@@ -51,7 +51,7 @@ def addShowsFromRootDir(dir):
         try:
             #myAdder = ShowAdder(showDir)
             #myAdder.start()
-            sickbeard.showAddScheduler.addShowToQueue(showDir)
+            sickbeard.showAddScheduler.action.addShowToQueue(showDir)
         except exceptions.NoNFOException:
             logStr = "Unable to automatically add the show in " + showDir
             Logger().log(logStr, ERROR)
