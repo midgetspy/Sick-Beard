@@ -18,7 +18,7 @@
 
 
 
-mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg']
+mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv']
 
 ### Episode statuses
 UNKNOWN = -1
@@ -44,25 +44,33 @@ statusStrings[DISCBACKLOG] = "Disc Backlog"
 
 # Provider stuff
 #TODO: refactor to providers package
-NEWZBIN = 0
-TVNZB = 1
+NEWZBIN = 1
 TVBINZ = 2
 NZBS = 3
 EZTV = 4
 
 providerNames = {}
 providerNames[NEWZBIN] = "Newzbin"
-providerNames[TVNZB] = "TVNZB"
 providerNames[TVBINZ] = "TVBinz"
 providerNames[NZBS] = "NZBs.org"
 providerNames[EZTV] = "EZTV"
 
 ### Qualities
 HD = 1
-SD = 0
+SD = 3
 ANY = 2
 
 qualityStrings = {}
 qualityStrings[HD] = "HD"
 qualityStrings[SD] = "SD"
 qualityStrings[ANY] = "Any"
+
+# Actions
+ACTION_SNATCHED = 1
+ACTION_PRESNATCHED = 2
+ACTION_DOWNLOADED = 3
+
+actionStrings = {}
+actionStrings[ACTION_SNATCHED] = "Snatched"
+actionStrings[ACTION_PRESNATCHED] = "Pre Snatched"
+actionStrings[ACTION_DOWNLOADED] = "Downloaded"

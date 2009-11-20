@@ -28,6 +28,7 @@ import helpers
 import sickbeard
 import sqlite3
 import db
+import history
 
 from logging import *
 from common import *
@@ -232,7 +233,6 @@ def doIt(downloadDir, showList):
         return returnStr
 
     
-    
     # get or create the episode (should be created probably, but not for sure)
     season = int(result["seasno"])
 
@@ -252,6 +252,10 @@ def doIt(downloadDir, showList):
             rootEp.relatedEps = []
         else:
             rootEp.relatedEps.append(curEp)
+
+    # log it to history
+    history.logDownload(rootEp, biggest_file)
+
 
     # wait for the copy to finish
 

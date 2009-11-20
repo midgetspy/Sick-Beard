@@ -49,6 +49,7 @@ class SearchResult:
         self.extraInfo = []
         self.episode = episode
         self.predownloaded = False
+        self.quality = -1
 
     def __str__(self):
         myString = providerNames[self.provider] + " @ " + self.url + "\n"

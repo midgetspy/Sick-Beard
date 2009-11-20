@@ -139,6 +139,7 @@ def findEpisode(episode, forceQuality=None):
 		result.provider = NEWZBIN
 		result.url = curResult[4]
 		result.extraInfo = [curResult[2], curResult[5]]
+		result.quality = epQuality
 		
 		results.append(result)
 	

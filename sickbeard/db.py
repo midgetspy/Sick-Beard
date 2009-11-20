@@ -58,3 +58,12 @@ class DBConnection:
 				if str(e) != "table info already exists":
 					raise
 
+			# Create the table if it's not already there
+			try:
+				sql = "CREATE TABLE history (action NUMERIC, date TEXT, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider NUMERIC);"
+				self.connection.execute(sql)
+				self.connection.commit()
+			except sqlite3.OperationalError as e:
+				if str(e) != "table history already exists":
+					raise
+

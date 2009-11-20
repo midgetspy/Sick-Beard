@@ -776,6 +776,28 @@ class WebInterface:
             print "No poster" #TODO: make it return a standard image
 
     @cherrypy.expose
+    def history(self):
+        
+        myDB = db.DBConnection()
+        myDB.checkDB()
+
+        sqlResults = []
+
+        try:
+            sql = "SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode"
+            Logger().log("SQL: " + sql, DEBUG)
+            sqlResults = myDB.connection.execute(sql).fetchall()
+        except sqlite3.DatabaseError as e:
+            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            raise
+
+        t = Template(file="data/interfaces/default/history.tmpl")
+        t.historyResults = sqlResults
+        
+        return _munge(t)
+
+
+    @cherrypy.expose
     def comingEpisodes(self):
 
         epList = sickbeard.missingList + sickbeard.comingList
