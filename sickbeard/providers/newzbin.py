@@ -30,6 +30,9 @@ from sickbeard import exceptions, helpers, classes
 from sickbeard.common import *
 from sickbeard.logging import *
 
+providerType = "nzb"
+providerName = "Newzbin"
+
 def isActive():
 	return sickbeard.NEWZBIN and sickbeard.USE_NZB
 

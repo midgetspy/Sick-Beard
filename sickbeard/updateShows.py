@@ -148,6 +148,8 @@ class ShowUpdater():
         if show == None:
             return None
         
+        show.refreshDir()
+        
         self._get_lastTVDB()
         
         newTime, updatedShows, updatedEpisodes = self._getUpdatedShows()
@@ -242,6 +244,9 @@ class ShowUpdater():
 
         # check each show to see if it's changed, if so then update it
         for show in sickbeard.showList:
+
+            show.refreshDir()
+            
             doUpdate = forceUpdate or int(show.tvdbid) in updatedShows
 
             Logger().log("Beginning update of show " + str(show.name) + " (" + str(show.tvdbid) + ")")

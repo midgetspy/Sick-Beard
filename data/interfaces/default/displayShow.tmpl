@@ -11,13 +11,14 @@
 <!--#set global $submenu=""#-->
 #include "data/interfaces/default/inc_hmenu.tmpl"
 
+<script type="text/javascript" src="/js/displayShow.js"></script> 
+
 <h2>$show.name</h2>
 
 <a href="editShow?show=$show.tvdbid">(edit)</a>
 <a href="deleteShow?show=$show.tvdbid">(delete)</a>
-<a href="updateShow?show=$show.tvdbid">(quick update)</a>
-<a href="refreshDir?show=$show.tvdbid">(refresh folder)</a>
-<a href="fixEpisodeNames?show=$show.tvdbid">(fix episode names)</a>
+<a href="updateShow?show=$show.tvdbid">(refresh show)</a>
+<a href="fixEpisodeNames?show=$show.tvdbid">(rename episodes)</a>
 <a href="updateShow?show=$show.tvdbid&force=1">(force update - takes forever)</a><br />
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
@@ -34,6 +35,18 @@ Season Folders: <img src="/images/#if $show.seasonfolders == 1 then "yes.gif" el
 
 <br /><br />
 
+Change selected episodes to 
+<select id="statusSelect">
+#for $curStatus in ($BACKLOG, $DISCBACKLOG, $MISSED, $SKIPPED, $DOWNLOADED)
+<option value="$curStatus">$sickbeard.statusStrings[$curStatus]
+#end for
+</select>
+<input type="hidden" id="showID" value="$show.tvdbid">
+<input type="button" id="changeStatus" value="Go"><br />
+<br />
+<b>NOTE:</b> Episodes can only be changed to "Downloaded" if they are currently "Predownloaded".<br />
+All other episodes should automatically update to Downloaded on a show refresh.<br />
+
 #set $curSeason = 0
 #set $odd = 0
 
@@ -43,27 +56,33 @@ Season Folders: <img src="/images/#if $show.seasonfolders == 1 then "yes.gif" el
    
     #if int($epResult["season"]) != $curSeason:
   <tr class="seasonheader">
-    <td colspan=7>
+    <td colspan=8>
 	<br />
 	<h2>Season $epResult["season"]
-	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
-	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)<br />
+	<!--(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
+	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)-->
+	<br />
 	</h2></td>
   </tr>
-  <tr><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+  <tr><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
     #set $odd = not $odd#
   <tr class="#if $odd then "odd" else "even"#Line">
-  	 <td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
-  	 <td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
-     <td align="center">$epResult["episode"]</td>
-     <td>$epResult["name"]</td>
-	 <td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>
-	 <td>$os.path.basename($epResult["location"])</td>
-     <td>$statusStrings[int($epResult["status"])]</td>
-     <td><a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a></td>
+    <td width="1%">
+#if int($epResult["status"]) != $UNAIRED
+      <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>">
+#end if
+    </td>
+  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
+  	<td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
+    <td align="center">$epResult["episode"]</td>
+    <td>$epResult["name"]</td>
+	<td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>
+	<td>$os.path.basename($epResult["location"])</td>
+    <td>$statusStrings[int($epResult["status"])]</td>
+    <td><a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a></td>
    <tr>
    
 #end for            

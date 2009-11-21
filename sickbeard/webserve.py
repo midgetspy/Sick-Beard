@@ -82,6 +82,51 @@ def _getEpisode(show, season, episode):
 
     return epObj
 
+
+class History:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        myDB = db.DBConnection()
+        myDB.checkDB()
+
+        sqlResults = []
+
+        try:
+            sql = "SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC"
+            Logger().log("SQL: " + sql, DEBUG)
+            sqlResults = myDB.connection.execute(sql).fetchall()
+        except sqlite3.DatabaseError as e:
+            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            raise
+
+        t = Template(file="data/interfaces/default/history.tmpl")
+        t.historyResults = sqlResults
+        
+        return _munge(t)
+
+
+    @cherrypy.expose
+    def clearHistory(self):
+        
+        myDB = db.DBConnection()
+        myDB.checkDB()
+
+        try:
+            sql = "DELETE * FROM history"
+            Logger().log("SQL: " + sql, DEBUG)
+            myDB.connection.execute(sql)
+            myDB.connection.commit()
+        except sqlite3.DatabaseError as e:
+            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+            raise
+
+        raise cherrypy.HTTPRedirect("/history")
+
+
+
+
 class ConfigGeneral:
     
     @cherrypy.expose
@@ -659,10 +704,10 @@ class Home:
         
     
     @cherrypy.expose
-    def setStatus(self, show=None, season=None, episode=None, status=None):
+    def setStatus(self, show=None, eps=None, status=None):
         
-        if show == None or season == None or status == None:
-            return _genericMessage("Error", "You must specify a show and season at least")
+        if show == None or eps == None or status == None:
+            return _genericMessage("Error", "You must specify a show and at least one episode")
         
         if not statusStrings.has_key(int(status)):
             return _genericMessage("Error", "Invalid status")
@@ -672,43 +717,29 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Show not in show list")
 
-        if episode != None:
+        if eps != None:
 
-            epObj = showObj.getEpisode(int(season), int(episode), True)
+            for curEp in eps.split('|'):
+
+                Logger().log("Attempting to set status on episode "+curEp+" to "+status, DEBUG)
+
+                epInfo = curEp.split('x')
+
+                epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]), True)
             
-            if epObj == None:
-                return _genericMessage("Error", "Episode couldn't be retrieved")
-        
-            with epObj.lock:
-                #if epObj.status == SKIPPED:
-                epObj.status = status
-                epObj.saveToDB()
-
-        else:
+                if epObj == None:
+                    return _genericMessage("Error", "Episode couldn't be retrieved")
             
-            myDB = db.DBConnection()
-            myDB.checkDB()
-
-            Logger().log(str(showObj.tvdbid) + ": Setting status " + str(status) + " on all episodes")
-        
-            sqlResults = []
-    
-            try:
-                sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " AND season = " + str(season)
-                Logger().log("SQL: " + sql, DEBUG)
-                sqlResults = myDB.connection.execute(sql).fetchall()
-            except sqlite3.DatabaseError as e:
-                Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-                raise
-
-            for curEp in sqlResults:
-                
-                curSeason = int(curEp["season"])
-                curEpisode = int(curEp["episode"])
-                
-                epObj = showObj.getEpisode(curSeason, curEpisode, True)
-                Logger().log(str(showObj.tvdbid) + ": Setting status for " + str(curSeason) + "x" + str(curEpisode) + " to " + statusStrings[int(status)], DEBUG)
                 with epObj.lock:
+                    # don't let them mess up UNAIRED episodes
+                    if epObj.status == UNAIRED:
+                        Logger().log("Refusing to change status of "+curEp+" because it is UNAIRED", ERROR)
+                        continue
+                    
+                    if int(status) == DOWNLOADED and epObj.status != PREDOWNLOADED:
+                        Logger().log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not PREDOWNLOADED", ERROR)
+                        continue
+
                     epObj.status = int(status)
                     epObj.saveToDB()
                     
@@ -779,28 +810,6 @@ class WebInterface:
             print "No poster" #TODO: make it return a standard image
 
     @cherrypy.expose
-    def history(self):
-        
-        myDB = db.DBConnection()
-        myDB.checkDB()
-
-        sqlResults = []
-
-        try:
-            sql = "SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC"
-            Logger().log("SQL: " + sql, DEBUG)
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-
-        t = Template(file="data/interfaces/default/history.tmpl")
-        t.historyResults = sqlResults
-        
-        return _munge(t)
-
-
-    @cherrypy.expose
     def comingEpisodes(self):
 
         epList = sickbeard.missingList + sickbeard.comingList
@@ -813,6 +822,8 @@ class WebInterface:
         t.qualityStrings = qualityStrings
         
         return _munge(t)
+
+    history = History()
 
     config = Config()
 

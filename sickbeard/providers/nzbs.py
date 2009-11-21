@@ -32,6 +32,9 @@ import sickbeard.helpers
 from sickbeard.common import *
 from sickbeard.logging import *
 
+providerType = "nzb"
+providerName = "NZBs.org"
+
 def isActive():
 	return sickbeard.NZBS and sickbeard.USE_NZB
 

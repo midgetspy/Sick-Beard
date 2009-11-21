@@ -6,6 +6,9 @@ from lib.BeautifulSoup import BeautifulStoneSoup
 from sickbeard.common import *
 from sickbeard.logging import *
 
+providerType = "torrent"
+providerName = "EZTV"
+
 def isActive():
     return sickbeard.USE_TORRENT
 

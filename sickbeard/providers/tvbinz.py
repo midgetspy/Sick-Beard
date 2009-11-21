@@ -32,6 +32,9 @@ import sickbeard.helpers
 from sickbeard.common import *
 from sickbeard.logging import *
 
+providerType = "nzb"
+providerName = "TVBinz"
+
 def isActive():
 	return sickbeard.TVBINZ and sickbeard.USE_NZB
 
