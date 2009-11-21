@@ -13,9 +13,13 @@
 <div id="outerWrapper">
   <div id="listingWrapper">
     #set $curDay = None
+    #set $missed = False
     #for $curEp in $epList
         #if $curEp.airdate < datetime.date.today() and $curDay == None:
+		  #if $missed == False
     <br /><h1 class="day">Missing</h1>
+            #set $missed = True
+          #end if
         #elif $curDay == None or ($curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() < $oneWeek):
             #set $curDay = curEp.airdate
     <br /><h1 class="day">$curEp.airdate.strftime("%A")</h1>
