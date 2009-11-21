@@ -33,7 +33,7 @@ Quality: $qualityStrings[$show.quality]<br />
 Predownload: <img src="/images/#if $show.predownload == 1 then "yes.gif" else "no.gif"#" width="16" height="16"><br />
 Season Folders: <img src="/images/#if $show.seasonfolders == 1 then "yes.gif" else "no.gif"#" width="16" height="16"><br />
 
-<br /><br />
+<br />
 
 Change selected episodes to 
 <select id="statusSelect">
@@ -79,10 +79,10 @@ All other episodes should automatically update to Downloaded on a show refresh.<
   	<td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
     <td align="center">$epResult["episode"]</td>
     <td>$epResult["name"]</td>
-	<td>$datetime.date.fromordinal(int($epResult["airdate"]))</td>
+	<td align="center">$datetime.date.fromordinal(int($epResult["airdate"]))</td>
 	<td>$os.path.basename($epResult["location"])</td>
     <td>$statusStrings[int($epResult["status"])]</td>
-    <td><a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a></td>
+    <td align="center"><a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a></td>
    <tr>
    
 #end for            
