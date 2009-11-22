@@ -85,49 +85,6 @@ def _checkForExistingFile(newFile, oldFile):
             
 
 
-def moveEpisode(file, destDir):
-
-    # if the dir doesn't exist (new season folder) then make it
-    if not os.path.isdir(destDir):
-        Logger().log("Season folder didn't exist, creating it", DEBUG)
-        os.mkdir(destDir)
-
-    Logger().log("Moving from " + file + " to " + destDir, DEBUG)
-    try:
-        shutil.move(file, destDir)
-        for curEp in [ep] + ep.relatedEps:
-            with curEp.lock:
-                curEp.location = os.path.join(destDir, os.path.basename(file))
-                
-                # don't mess up the status - if this is a legit download it should be SNATCHED
-                if curEp.status != PREDOWNLOADED:
-                    curEp.status = DOWNLOADED
-                curEp.saveToDB()
-
-    except IOError as e:
-        Logger().log("Unable to move the file: " + str(e), ERROR)
-        return False
-
-    return True
-
-
-def renameFile(curFile, newName):
-
-    filePath = os.path.split(curFile)
-    oldFile = os.path.splitext(filePath[1])
-
-    newFilename = os.path.join(filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
-    Logger().log("Renaming from " + curFile + " to " + newFilename)
-
-    try:
-        os.rename(curFile, newFilename)
-    except (OSError, IOError) as e:
-        Logger().log("Failed renaming " + curFile + " to " + os.path.basename(newFilename) + ": " + str(e), ERROR)
-        return False
-
-    return newFilename
-
-
 def doIt(downloadDir, showList):
     
     returnStr = ""
@@ -263,7 +220,7 @@ def doIt(downloadDir, showList):
 
     destDir = os.path.join(rootEp.show.location, seasonFolder)
     
-    newFile = os.path.join(destDir, rootEp.prettyName()+biggestFileExt)
+    newFile = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
     logStr = "The ultimate destination for " + biggest_file + " is " + newFile
     Logger().log(logStr, DEBUG)
     returnStr += logStr + "\n"

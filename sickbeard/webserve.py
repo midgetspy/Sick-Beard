@@ -774,6 +774,12 @@ class Home:
             result = search.snatchEpisode(foundEpisodes[0])
             
             #TODO: check if the download was successful
+
+            # update our lists to reflect the result if this search
+            sickbeard.updateMissingList()
+            sickbeard.updateAiringList()
+            sickbeard.updateComingList()
+
             
             raise cherrypy.HTTPRedirect("displayShow?show=" + str(epObj.show.tvdbid))
 

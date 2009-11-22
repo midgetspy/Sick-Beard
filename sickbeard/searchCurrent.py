@@ -37,6 +37,7 @@ class CurrentSearcher():
 
         self._changeMissingEpisodes()
 
+        # make sure our lists are up to date
         sickbeard.updateMissingList()
         sickbeard.updateAiringList()
         sickbeard.updateComingList()
@@ -62,6 +63,12 @@ class CurrentSearcher():
                     search.snatchEpisode(foundEpisodes[0])
                     
                 time.sleep(3)
+
+        # update our lists to reflect any changes we just made
+        sickbeard.updateMissingList()
+        sickbeard.updateAiringList()
+        sickbeard.updateComingList()
+
 
 
 
