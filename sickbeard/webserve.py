@@ -89,18 +89,8 @@ class History:
     def index(self):
         
         myDB = db.DBConnection()
-        myDB.checkDB()
-
-        sqlResults = []
-
-        try:
-            sql = "SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC"
-            Logger().log("SQL: " + sql, DEBUG)
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-
+        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC")
+        
         t = Template(file="data/interfaces/default/history.tmpl")
         t.historyResults = sqlResults
         
@@ -111,17 +101,8 @@ class History:
     def clearHistory(self):
         
         myDB = db.DBConnection()
-        myDB.checkDB()
-
-        try:
-            sql = "DELETE * FROM history"
-            Logger().log("SQL: " + sql, DEBUG)
-            myDB.connection.execute(sql)
-            myDB.connection.commit()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-
+        myDB.action("DELETE * FROM history")
+        
         raise cherrypy.HTTPRedirect("/history")
 
 
@@ -501,28 +482,11 @@ class Home:
         
         t = Template(file="data/interfaces/default/home.tmpl")
         
-        t.downloadedEps = []
-
         myDB = db.DBConnection()
-        myDB.checkDB()
+        
+        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 GROUP BY showid")
 
-        try:
-            sql = "SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 GROUP BY showid"
-            Logger().log("SQL: " + sql, DEBUG)
-            t.downloadedEps = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-        
-        t.allEps = []
-        
-        try:
-            sql = "SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 GROUP BY showid"
-            Logger().log("SQL: " + sql, DEBUG)
-            t.allEps = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
+        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 GROUP BY showid")
         
         return _munge(t)
 
@@ -557,20 +521,11 @@ class Home:
                 return _genericMessage("Error", "Unable to find the specified show.")
 
         myDB = db.DBConnection()
-        myDB.checkDB()
-
+        
         Logger().log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
     
-        sqlResults = []
-
-        try:
-            sql = "SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC"
-            Logger().log("SQL: " + sql, DEBUG)
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC")
+        
         t = Template(file="data/interfaces/default/displayShow.tmpl")
         
         t.show = showObj

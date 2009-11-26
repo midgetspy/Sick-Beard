@@ -184,28 +184,16 @@ def makeShowNFO(showID, showDir):
 
 
 def searchDBForShow(showName):
+	
 	# if tvdb fails then try looking it up in the db
 	myDB = db.DBConnection()
-	myDB.checkDB()
-
-	sqlResults = []
-
-	tvdbid = None
-
-	try:
-		sql = "SELECT * FROM tv_shows WHERE show_name LIKE ?"
-		sqlArgs = [showName+'%']
-		Logger().log("SQL: "+sql+" % "+str(sqlArgs), DEBUG)
-		sqlResults = myDB.connection.execute(sql, sqlArgs).fetchall()
-	except sqlite3.DatabaseError as e:
-		Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-		raise
-
+	sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ?", [showName+'%'])
+	
 	if len(sqlResults) != 1:
 		if len(sqlResults) == 0:
 			Logger().log("Unable to match a record in the DB for "+showName, DEBUG)
 		else:
 			Logger().log("Multiple results for "+showName+" in the DB, unable to match show name", DEBUG)
-		return tvdbid
+		return None
 	
 	return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])

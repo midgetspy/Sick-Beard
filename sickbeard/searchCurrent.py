@@ -74,20 +74,13 @@ class CurrentSearcher():
 
     def _changeMissingEpisodes(self):
         
-        myDB = db.DBConnection()
-        myDB.checkDB()
-
-        curDate = datetime.date.today().toordinal()
-
         Logger().log("Changing all old missing episodes to status MISSED")
         
-        try:
-            sql = "SELECT * FROM tv_episodes WHERE status=" + str(UNAIRED) + " AND airdate < " + str(curDate)
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-    
+        curDate = datetime.date.today().toordinal()
+
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status=" + str(UNAIRED) + " AND airdate < " + str(curDate))
+        
         for sqlEp in sqlResults:
             
             try:

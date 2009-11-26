@@ -72,21 +72,11 @@ class ShowUpdater():
 
     def _get_lastTVDB(self):
     
-        myDB = db.DBConnection()
-        myDB.checkDB()
-        
-        sqlResults = []
-        
         Logger().log("Retrieving the last TVDB update time from the DB", DEBUG)
         
-        try:
-            sql = "SELECT * FROM info"
-            Logger().log("SQL: " + sql, DEBUG)
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-    
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT * FROM info")
+        
         if len(sqlResults) == 0:
             lastTVDB = 0
         elif sqlResults[0]["last_tvdb"] == None or sqlResults[0]["last_tvdb"] == "":
@@ -103,34 +93,17 @@ class ShowUpdater():
     
     def _set_lastTVDB(self, when):
     
-        myDB = db.DBConnection()
-        myDB.checkDB()
-        
         Logger().log("Setting the last TVDB update in the DB to " + str(int(when)), DEBUG)
         
-        try:
-            sql = "UPDATE info SET last_tvdb=" + str(int(when))
-            Logger().log("SQL: " + sql, DEBUG)
-            myDB.connection.execute(sql)
-            myDB.connection.commit()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
+        myDB = db.DBConnection()
+        myDB.action("UPDATE info SET last_tvdb=" + str(int(when)))
+
 
     def _getNewestDBEpisode(self, show):
         
         myDB = db.DBConnection()
-        myDB.checkDB()
-
-        sqlResults = []
-
-        try:
-            sql = "SELECT * FROM tv_episodes WHERE showid="+str(show.tvdbid)+" AND tvdbid != -1 ORDER BY airdate DESC LIMIT 1"
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid="+str(show.tvdbid)+" AND tvdbid != -1 ORDER BY airdate DESC LIMIT 1")
+        
         if len(sqlResults) == 0:
             return None
         

@@ -58,22 +58,11 @@ class BacklogSearcher:
         
         if curDate - self._lastBacklog >= self.cycleTime:
             
-            myDB = db.DBConnection()
-            myDB.checkDB()
-            
-            sqlResults = []
-            
             Logger().log("Searching the database for a list of backlogged episodes to download")
             
-            try:
-                sql = "SELECT * FROM tv_episodes WHERE status IN (" + str(BACKLOG) + ", " + str(DISCBACKLOG) + ")"
-                Logger().log("SQL: " + sql, DEBUG)
-                sqlResults = myDB.connection.execute(sql).fetchall()
-        
-            except sqlite3.DatabaseError as e:
-                Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-                raise
-
+            myDB = db.DBConnection()
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status IN (" + str(BACKLOG) + ", " + str(DISCBACKLOG) + ")")
+            
             if sqlResults == None or len(sqlResults) == 0:
                 Logger().log("No episodes were found in the backlog")
                 self._set_lastBacklog(curDate)
@@ -121,21 +110,11 @@ class BacklogSearcher:
     
     def _get_lastBacklog(self):
     
-        myDB = db.DBConnection()
-        myDB.checkDB()
-        
-        sqlResults = []
-        
         Logger().log("Retrieving the last check time from the DB", DEBUG)
         
-        try:
-            sql = "SELECT * FROM info"
-            Logger().log("SQL: " + sql, DEBUG)
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-    
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT * FROM info")
+        
         if len(sqlResults) == 0:
             lastBacklog = 1
         elif sqlResults[0]["last_backlog"] == None or sqlResults[0]["last_backlog"] == "":
@@ -149,19 +128,11 @@ class BacklogSearcher:
     
     def _set_lastBacklog(self, when):
     
-        myDB = db.DBConnection()
-        myDB.checkDB()
-        
         Logger().log("Setting the last backlog in the DB to " + str(when), DEBUG)
         
-        try:
-            sql = "UPDATE info SET last_backlog=" + str(when)
-            Logger().log("SQL: " + sql, DEBUG)
-            myDB.connection.execute(sql)
-            myDB.connection.commit()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
+        myDB = db.DBConnection()
+        myDB.action("UPDATE info SET last_backlog=" + str(when))
+        
 
     def run(self):
         self.searchBacklog()

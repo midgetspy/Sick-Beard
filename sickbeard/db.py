@@ -76,9 +76,6 @@ class DBConnection:
 			
 			return sqlResults
 		
-		def checkDB(self):
-			self._checkDB()
-		
 		def _checkDB(self):
 			# Create the table if it's not already there
 			try:

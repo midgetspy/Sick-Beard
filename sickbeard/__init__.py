@@ -468,19 +468,11 @@ def launchBrowser(browserURL):
 
 def updateMissingList():
     
-    myDB = db.DBConnection()
-    myDB.checkDB()
-
     Logger().log("Searching DB and building list of MISSED episodes")
     
-    try:
-        sql = "SELECT * FROM tv_episodes WHERE status=" + str(MISSED)
-        Logger().log("SQL: " + sql, DEBUG)
-        sqlResults = myDB.connection.execute(sql).fetchall()
-    except sqlite3.DatabaseError as e:
-        Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-        raise
-
+    myDB = db.DBConnection()
+    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status=" + str(MISSED))
+    
     epList = []
 
     for sqlEp in sqlResults:
@@ -499,21 +491,13 @@ def updateMissingList():
 
 def updateAiringList():
     
-    myDB = db.DBConnection()
-    myDB.checkDB()
-
-    curDate = datetime.date.today().toordinal()
-
     Logger().log("Searching DB and building list of airing episodes")
     
-    try:
-        sql = "SELECT * FROM tv_episodes WHERE status IN (" + str(UNKNOWN) + ", " + str(UNAIRED) + ", " + str(PREDOWNLOADED) + ") AND airdate <= " + str(curDate)
-        Logger().log("SQL: " + sql, DEBUG)
-        sqlResults = myDB.connection.execute(sql).fetchall()
-    except sqlite3.DatabaseError as e:
-        Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-        raise
+    curDate = datetime.date.today().toordinal()
 
+    myDB = db.DBConnection()
+    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status IN (" + str(UNKNOWN) + ", " + str(UNAIRED) + ", " + str(PREDOWNLOADED) + ") AND airdate <= " + str(curDate))
+    
     epList = []
 
     for sqlEp in sqlResults:
@@ -556,19 +540,7 @@ def getEpList(epIDs, showid=None):
         return []
     
     myDB = db.DBConnection()
-    myDB.checkDB()
-        
-    sqlResults = []
-    
-    try:
-        sql = "SELECT * FROM tv_episodes WHERE tvdbid in (" + ",".join([str(x) for x in epIDs]) + ")"
-        if showid != None:
-            sql += " AND showid = " + str(showid)
-        Logger().log("SQL: " + sql, DEBUG)
-        sqlResults = myDB.connection.execute(sql).fetchall()
-    except sqlite3.DatabaseError as e:
-        Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-        raise
+    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE tvdbid in (" + ",".join([str(x) for x in epIDs]) + ")")
 
     epList = []
 

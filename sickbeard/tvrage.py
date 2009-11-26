@@ -69,19 +69,8 @@ class TVRage:
                 Logger().log("Trying against DB instead", DEBUG)
 
                 myDB = db.DBConnection()
-                myDB.checkDB()
+                sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? and episode = ?", [self.show.tvdbid, self.lastEpInfo['season'], self.lastEpInfo['episode']])
                 
-                sqlResults = []
-            
-                try:
-                    sql = "SELECT * FROM tv_episodes WHERE showid = ? AND season = ? and episode = ?"
-                    sqlArgs = [self.show.tvdbid, self.lastEpInfo['season'], self.lastEpInfo['episode']]
-                    Logger().log("SQL: " + sql + " % " + str(sqlArgs), DEBUG)
-                    sqlResults = myDB.connection.execute(sql, sqlArgs).fetchall()
-                except sqlite3.DatabaseError as e:
-                    Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-                    raise
-        
                 if len(sqlResults) == 0:
                     raise exceptions.EpisodeNotFoundException("Unable to find episode in DB")
                 else:
@@ -152,34 +141,18 @@ class TVRage:
     def saveToDB(self):
         
         myDB = db.DBConnection()
-        myDB.checkDB()
-    
-        sqlResults = []
-    
+        
         # double check that it's not already in there
-        try:
-            sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND season = " + str(self.nextEpInfo['season']) + " AND episode = " + str(self.nextEpInfo['episode'])
-            sqlResults = myDB.connection.execute(sql).fetchall()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND season = " + str(self.nextEpInfo['season']) + " AND episode = " + str(self.nextEpInfo['episode']))
+        
         if len(sqlResults) > 0:
             raise exceptions.TVRageException("Show is already in database, not adding the TVRage info")
 
         # insert it
-        sqlValues = [self.show.tvdbid, -1, self.nextEpInfo['name'], self.nextEpInfo['season'], self.nextEpInfo['episode'], '', self.nextEpInfo['airdate'].toordinal(), 0, 0, UNAIRED, '']
         
-        try:
-            sql = "INSERT INTO tv_episodes (showid, tvdbid, name, season, episode, description, airdate, hasnfo, hastbn, status, location) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-            myDB.connection.execute(sql, sqlValues)
-            myDB.connection.commit()
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
+        myDB.action("INSERT INTO tv_episodes (showid, tvdbid, name, season, episode, description, airdate, hasnfo, hastbn, status, location) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                    [self.show.tvdbid, -1, self.nextEpInfo['name'], self.nextEpInfo['season'], self.nextEpInfo['episode'], '', self.nextEpInfo['airdate'].toordinal(), 0, 0, UNAIRED, ''])
         
-        # todo: check that incomplete eps like this get fixed when it shows up on tvdb
-
     def getEpisode(self):
         
         ep = None
