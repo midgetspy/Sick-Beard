@@ -267,9 +267,9 @@ def initialize():
         #backlogSearchScheduler = searchBacklog.BacklogSearchScheduler()
         #updateScheduler = updateShows.UpdateScheduler(True)
         
-        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(), threadName="SEARCH")
-        backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(), cycleTime=datetime.timedelta(hours=1), threadName="BACKLOG")
-        updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(), cycleTime=datetime.timedelta(hours=1), threadName="UPDATE") 
+        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(), threadName="SEARCH", runImmediately=False)
+        backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(), cycleTime=datetime.timedelta(hours=1), threadName="BACKLOG", runImmediately=False)
+        updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(), cycleTime=datetime.timedelta(hours=1), threadName="UPDATE", runImmediately=False) 
         
         botRunner = tvnzbbot.NZBBotRunner()
         #showAddScheduler = showAdder.ShowAddScheduler()

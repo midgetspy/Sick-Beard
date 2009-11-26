@@ -40,6 +40,23 @@ from lib.tvdb_api import tvnamer, tvdb_api, tvdb_exceptions
 
 sample_ratio = 0.3
 
+def renameFile(curFile, newName):
+
+    filePath = os.path.split(curFile)
+    oldFile = os.path.splitext(filePath[1])
+
+    newFilename = os.path.join(filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
+    Logger().log("Renaming from " + curFile + " to " + newFilename)
+
+    try:
+        os.rename(curFile, newFilename)
+    except (OSError, IOError) as e:
+        Logger().log("Failed renaming " + curFile + " to " + os.path.basename(newFilename) + ": " + str(e), ERROR)
+        return False
+
+    return newFilename
+
+
 # #########################
 # Find the file we're dealing with
 # #########################
@@ -137,7 +154,7 @@ def doIt(downloadDir, showList):
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
             showObj = t[result["file_seriesname"]]
             showInfo = (int(showObj["id"]), showObj["seriesname"])
-        except (tvdb_exceptions.tvdb_error, IOError) as e:
+        except (tvdb_exceptions.tvdb_exception, IOError) as e:
 
             logStr = "TVDB didn't respond, trying to look up the show in the DB instead"
             Logger().log(logStr, DEBUG)
