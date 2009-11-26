@@ -57,7 +57,6 @@ class TVShow(object):
 		self.status = ""
 		self.airs = ""
 
-		self.db = None
 		self.lock = threading.Lock()
 		self._isDirGood = False
 		
@@ -152,40 +151,7 @@ class TVShow(object):
 
 		return TVEpisode(self, season, episode)
 
-		if not season in self.episodes:
-			self.episodes[season] = {}
-		
-		ep = None
-		
-		if not episode in self.episodes[season]:
-			if forceCreation == False:
-				return None
-			
-			else:
-				Logger().log(str(self.tvdbid) + ": Episode " + str(season) + "x" + str(episode) + " didn't exist, trying to create it", DEBUG)
-				ep = None
-				try:
-					ep = TVEpisode(self, season, episode)
-				except (exceptions.EpisodeNotFoundException):
-					return None
-				
-				if ep != None:
-					self.episodes[season][episode] = ep
 
-		return self.episodes[season][episode]
-	
-
-	def setEpisode(self, season, episode, epObj):
-		
-		# don't keep it in RAM ever, that's what the DB's for
-		epObj.saveToDB()
-		return
-		
-		if not season in self.episodes:
-			self.episodes[season] = {}
-
-		self.episodes[season][episode] = epObj
-	
 	def writeEpisodeNFOs (self):
 		
 		Logger().log(str(self.tvdbid) + ": Writing NFOs for all episodes")
@@ -236,24 +202,8 @@ class TVShow(object):
 			
 			if skipDBEps == True:
 			
-				self._getDB()
-				self.db.checkDB()
-			
-				sqlResults = []
-			
-				#try:
-				#	sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location = \"" + mediaFile + "\""
-				#	sqlResults = self.db.connection.execute(sql).fetchall()
-				#except sqlite3.DatabaseError as e:
-				#	Logger().log("Fatal error executing query '"+sql+"': "+str(e), ERROR)
-				#	raise
-
-				#if len(sqlResults) == 0:
 				Logger().log(str(self.tvdbid) + ": " + mediaFile + " isn't in the DB, creating a new episode for it", DEBUG)
 				curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
-				#else:
-				#	Logger().log(str(self.tvdbid)+": "+mediaFile+" is already in the DB, skipping NFO scan", DEBUG)
-				#	curEpisode = None
 					
 			else:
 				Logger().log(str(self.tvdbid) + ": " + mediaFile + " isn't in the DB, creating a new episode for it", DEBUG)
@@ -266,7 +216,6 @@ class TVShow(object):
 			# store the reference in the show
 			if curEpisode != None:
 				curEpisode.saveToDB()
-				#self.setEpisode(curEpisode.season, curEpisode.episode, curEpisode)
 	
 
 	def loadEpisodesFromTVDB(self, cache=True):
@@ -292,7 +241,6 @@ class TVShow(object):
 					except exceptions.EpisodeNotFoundException:
 						Logger().log(str(self.tvdbid) + ": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
 						continue
-					#self.setEpisode(season, episode, ep)
 				else:
 					ep.loadFromTVDB()
 				
@@ -320,7 +268,6 @@ class TVShow(object):
 			if newEp != None:
 				Logger().log("TVRage gave us an episode object - saving it for now", DEBUG)
 				newEp.saveToDB()
-				#self.setEpisode(newEp.season, newEp.episode, newEp)
 			
 			# make an episode out of it
 		except exceptions.TVRageException as e:
@@ -407,8 +354,6 @@ class TVShow(object):
 				with curEp.lock:
 					curEp.saveToDB()
 					
-				#self.setEpisode(season, episode, curEp)
-
 			# creating metafiles on the root should be good enough
 			if rootEp != None:
 				with rootEp.lock:
@@ -418,10 +363,6 @@ class TVShow(object):
 		return None
 
 	
-	def _getDB(self):
-		self.db = db.DBConnection()
-		
-
 	def loadFromDB(self):
 
 		Logger().log(str(self.tvdbid) + ": Loading show info from database")
@@ -741,10 +682,8 @@ class TVEpisode:
 		self.show = show
 		self.location = file
 		
-		self.db = None
 		self.lock = threading.Lock()
 		
-		self._getDB()
 		self.specifyEpisode(self.season, self.episode)
 
 		self.relatedEps = []
@@ -763,10 +702,6 @@ class TVEpisode:
 
 
 		
-	def _getDB(self):
-		self.db = db.DBConnection()
-	
-	
 	def specifyEpisode(self, season, episode):
 		
 		sqlResult = self.loadFromDB(season, episode)
