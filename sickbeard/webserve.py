@@ -367,7 +367,7 @@ class HomePostProcess:
         if dir == None:
             raise cherrypy.HTTPRedirect("postprocess")
         else:
-            result = processTV.doIt(dir, sickbeard.showList)
+            result = processTV.doIt(dir, nzbName)
             if quiet != None and int(quiet) == 1:
                 return result  
         

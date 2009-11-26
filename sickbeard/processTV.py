@@ -102,7 +102,7 @@ def _checkForExistingFile(newFile, oldFile):
             
 
 
-def doIt(downloadDir, showList):
+def doIt(downloadDir, nzbName=None):
     
     returnStr = ""
     
@@ -134,9 +134,13 @@ def doIt(downloadDir, showList):
     Logger().log(logStr, DEBUG)
     returnStr += logStr + "\n"
     
-    # try to use the file name to get the episode
+    # use file name, folder name, and NZB name (in that order) to try to figure out the episode info
     result = None
-    for curName in (biggest_file, downloadDir.split(os.path.sep)[-1]):
+    nameList = (biggest_file, downloadDir.split(os.path.sep)[-1])
+    if nzbName != None:
+        nameList.append(nzbName)
+    
+    for curName in nameList:
     
         result = tvnamer.processSingleName(curName)
         logStr = curName + " parsed into: " + str(result)
@@ -168,7 +172,7 @@ def doIt(downloadDir, showList):
 
         # find the show in the showlist
         try:
-            showResults = helpers.findCertainShow(showList, showInfo[0])
+            showResults = helpers.findCertainShow(sickbeard.showList, showInfo[0])
         except exceptions.MultipleShowObjectsException:
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
         
