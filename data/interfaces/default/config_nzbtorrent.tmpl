@@ -17,11 +17,8 @@ All non-absolute folder locations are relative to $sickbeard.PROG_DIR<br /><br /
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
 
-<legend>General</legend>
 
-<input type="checkbox" name="use_torrent" #if $sickbeard.USE_TORRENT == True then "CHECKED" else ""#> <strong>Use Torrents</strong><br />
-If checked Sick Beard will search for shows at torrent sites<br />
-<br />
+<legend>NZB</legend>
 
 <input type="checkbox" name="use_nzb" #if $sickbeard.USE_NZB == True then "CHECKED" else ""#> <strong>Use NZBs</strong><br />
 If checked Sick Beard will search for shows at NZB sites<br />
@@ -48,15 +45,34 @@ your NZB files<br />
 <input type="text" name="nzb_dir" value="$sickbeard.NZB_DIR" size="35"><br />
 <br />
 
+<strong>Usenet Retention:</strong><br />
+How old should a report be before we don't download it<br />
+<input type="text" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="4"><br />
+<br />
+
+
+</fieldset>
+</div>
+
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Torrents</legend>
+
+<input type="checkbox" name="use_torrent" #if $sickbeard.USE_TORRENT == True then "CHECKED" else ""#> <strong>Use Torrents</strong><br />
+If checked Sick Beard will search for shows at torrent sites<br />
+<br />
+
 <strong>Torrent Black Hole:</strong><br />
 The directory where Sick Beard should store<br />
 your torrent files<br />
 <input type="text" name="torrent_dir" value="$sickbeard.TORRENT_DIR" size="35"><br />
 <br />
 
-
 </fieldset>
 </div>
+
 
 
 <div class="EntryBlock">

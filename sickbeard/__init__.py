@@ -56,7 +56,6 @@ INIT_LOCK = Lock()
 __INITIALIZED__ = False
 
 LOG_DIR = None
-NZB_METHOD = None 
 
 WEB_PORT = None
 WEB_LOG = None
@@ -66,7 +65,9 @@ LAUNCH_BROWSER = None
 CREATE_METADATA = None
 
 USE_NZB = False
+NZB_METHOD = None 
 NZB_DIR = None
+USENET_RETENTION = None
 
 USE_TORRENT = False
 TORRENT_DIR = None
@@ -191,7 +192,7 @@ def initialize():
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 updateScheduler, botRunner, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
                 airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler, \
-                NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR
+                NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION
         
         if __INITIALIZED__:
             return False
@@ -230,6 +231,7 @@ def initialize():
         
         USE_NZB = bool(check_setting_int(CFG, 'General', 'use_nzb', 0))
         USE_TORRENT = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
+        USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 200)
 
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
@@ -267,9 +269,9 @@ def initialize():
         #backlogSearchScheduler = searchBacklog.BacklogSearchScheduler()
         #updateScheduler = updateShows.UpdateScheduler(True)
         
-        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(), threadName="SEARCH", runImmediately=False)
+        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(), threadName="SEARCH", runImmediately=True)
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(), cycleTime=datetime.timedelta(hours=1), threadName="BACKLOG", runImmediately=False)
-        updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(), cycleTime=datetime.timedelta(hours=1), threadName="UPDATE", runImmediately=False) 
+        updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(), cycleTime=datetime.timedelta(hours=1), threadName="UPDATE", runImmediately=True) 
         
         botRunner = tvnzbbot.NZBBotRunner()
         #showAddScheduler = showAdder.ShowAddScheduler()
@@ -402,7 +404,7 @@ def save_config():
         SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, IRC_BOT, IRC_SERVER, \
         IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
         XBMC_UPDATE_LIBRARY, XBMC_HOST, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
-        USE_TORRENT, TORRENT_DIR
+        USE_TORRENT, TORRENT_DIR, USENET_RETENTION
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
@@ -410,6 +412,7 @@ def save_config():
     CFG['General']['web_username'] = WEB_USERNAME
     CFG['General']['web_password'] = WEB_PASSWORD
     CFG['General']['nzb_method'] = NZB_METHOD
+    CFG['General']['usenet_retention'] = int(USENET_RETENTION)
     CFG['General']['use_nzb'] = int(USE_NZB)
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)

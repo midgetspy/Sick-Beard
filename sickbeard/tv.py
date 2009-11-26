@@ -166,6 +166,8 @@ class TVShow(object):
 	
 	def getEpisode(self, season, episode, forceCreation=False):
 
+		return TVEpisode(self, season, episode)
+
 		if not season in self.episodes:
 			self.episodes[season] = {}
 		
@@ -190,6 +192,11 @@ class TVShow(object):
 	
 
 	def setEpisode(self, season, episode, epObj):
+		
+		# don't keep it in RAM ever, that's what the DB's for
+		epObj.saveToDB()
+		return
+		
 		if not season in self.episodes:
 			self.episodes[season] = {}
 
@@ -289,11 +296,11 @@ class TVShow(object):
 				except exceptions.ShowNotFoundException as e:
 					Logger().log("Episode "+mediaFile+" returned an exception: "+str(e), ERROR)
 					
-					
 
 			# store the reference in the show
 			if curEpisode != None:
-				self.setEpisode(curEpisode.season, curEpisode.episode, curEpisode)
+				curEpisode.saveToDB()
+				#self.setEpisode(curEpisode.season, curEpisode.episode, curEpisode)
 	
 
 	def loadEpisodesFromTVDB(self, cache=True):
@@ -346,7 +353,8 @@ class TVShow(object):
 			
 			if newEp != None:
 				Logger().log("TVRage gave us an episode object - saving it for now", DEBUG)
-				self.setEpisode(newEp.season, newEp.episode, newEp)
+				newEp.saveToDB()
+				#self.setEpisode(newEp.season, newEp.episode, newEp)
 			
 			# make an episode out of it
 		except exceptions.TVRageException as e:
@@ -369,27 +377,32 @@ class TVShow(object):
 
 		if result != None:
 
-			try:
-				t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
-				showObj = t[result["file_seriesname"]]
-				showInfo = (int(showObj["id"]), showObj["seriesname"])
-			except tvdb_exceptions.tvdb_shownotfound:
-				Logger().log("Unable to figure out which show this is from the name: "+result["file_seriesname"]+". Assuming it belongs to us.", ERROR)
+			# for now lets assume that any show in the show dir belongs to the right place
+			showInfo = (self.tvdbid, self.name)
+			if 0 == 1:
+
 				try:
-					showObj = t[self.tvdbid]
+					t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
+					showObj = t[result["file_seriesname"]]
 					showInfo = (int(showObj["id"]), showObj["seriesname"])
 				except tvdb_exceptions.tvdb_shownotfound:
-					raise exceptions.ShowNotFoundException("TVDB returned zero results for show "+result["file_seriesname"])
-			except (tvdb_exceptions.tvdb_error, IOError) as e:
-				Logger().log("Error connecting to TVDB, trying to search the DB instead: "+ str(e), ERROR)
-				
-				showInfo = helpers.searchDBForShow(result["file_seriesname"])
+					Logger().log("Unable to figure out which show this is from the name: "+result["file_seriesname"]+". Assuming it belongs to us.", ERROR)
+					try:
+						showObj = t[self.tvdbid]
+						showInfo = (int(showObj["id"]), showObj["seriesname"])
+					except tvdb_exceptions.tvdb_shownotfound:
+						raise exceptions.ShowNotFoundException("TVDB returned zero results for show "+result["file_seriesname"])
+				except (tvdb_exceptions.tvdb_error, IOError) as e:
+					Logger().log("Error connecting to TVDB, trying to search the DB instead: "+ str(e), ERROR)
+					
+					showInfo = helpers.searchDBForShow(result["file_seriesname"])
 				
 			if showInfo == None:
-				Logger().log("Unable to figure out what shot "+result["file_seriesname"] + "is, skipping", ERROR)
+				Logger().log("Unable to figure out what show "+result["file_seriesname"] + "is, skipping", ERROR)
 				return None
 			
 			if showInfo[0] != int(self.tvdbid):
+				Logger().log("Show doesn't seem to match, assuming it is the show from the folder it belongs to", ERROR)
 				raise exceptions.WrongShowException("Expected "+str(self.tvdbid)+" but got "+str(showObj["id"]))
 			
 			season = int(result["seasno"])
@@ -428,7 +441,7 @@ class TVShow(object):
 				with curEp.lock:
 					curEp.saveToDB()
 					
-				self.setEpisode(season, episode, curEp)
+				#self.setEpisode(season, episode, curEp)
 
 			# creating metafiles on the root should be good enough
 			if rootEp != None:
@@ -513,7 +526,7 @@ class TVShow(object):
 		xmlFileObj = open(xmlFile, "r")
 		
 		try:
-			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","")
+			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 			showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 		except HTMLParseError as e:
 			Logger().log("There was an error parsing your existing tvshow.nfo file: " + str(e), ERROR)
@@ -1012,7 +1025,7 @@ class TVEpisode:
 			if os.path.isfile(nfoFile):
 				nfoFileObj = open(nfoFile, "r")
 				try:
-					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","")
+					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 				except ValueError as e:
 					Logger().log("Error loading the NFO, skipping for now: " + str(e), ERROR) #TODO: figure out what's wrong and fix it

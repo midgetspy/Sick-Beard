@@ -188,7 +188,7 @@ class ConfigNZBTorrent:
     @cherrypy.expose
     def saveNZBTorrent(self, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, use_nzb=None,
-                       use_torrent=None, torrent_dir=None, nzb_method=None):
+                       use_torrent=None, torrent_dir=None, nzb_method=None, usenet_retention=None):
 
         results = []
 
@@ -209,6 +209,7 @@ class ConfigNZBTorrent:
             use_torrent = 0
 
         sickbeard.NZB_METHOD = nzb_method
+        sickbeard.USENET_RETENTION = int(usenet_retention)
 
         sickbeard.USE_NZB = use_nzb
         sickbeard.USE_TORRENT = use_torrent
@@ -482,6 +483,18 @@ class HomeAddShows:
 
 
 class Home:
+
+    @cherrypy.expose
+    def stats(self):
+        from guppy import hpy
+        hp = hpy()
+        return str(hp.heap())
+    
+    @cherrypy.expose
+    def gc(self):
+        import gc
+        gc.collect()
+        return "Collected"
     
     @cherrypy.expose
     def index(self):
@@ -819,7 +832,7 @@ class WebInterface:
     def comingEpisodes(self):
 
         epList = sickbeard.missingList + sickbeard.comingList
-                
+
         # sort by air date
         epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))
         

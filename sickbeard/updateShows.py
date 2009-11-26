@@ -23,7 +23,7 @@ import threading
 import time
 import urllib2
 import sqlite3
-import gc
+#import gc
 import traceback
 
 import sickbeard
@@ -204,8 +204,8 @@ class ShowUpdater():
             show.writeEpisodeNFOs()
             
             # try keeping ram down
-            show.flushEpisodes()
-            gc.collect() # try it
+            #show.flushEpisodes()
+            #gc.collect() # try it
             
             Logger().log("Update complete")
 

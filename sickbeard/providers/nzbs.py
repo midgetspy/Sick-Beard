@@ -95,7 +95,7 @@ def findEpisode (episode, forceQuality=None):
 	sceneSearchStrings = sickbeard.helpers.makeSceneSearchString(episode)
 	
 	for curString in sceneSearchStrings:
-		params = {"action": "search", "q": "^"+curString, "dl": 1, "i": sickbeard.NZBS_UID, "h": sickbeard.NZBS_HASH}
+		params = {"action": "search", "q": "^"+curString, "dl": 1, "i": sickbeard.NZBS_UID, "h": sickbeard.NZBS_HASH, "age": sickbeard.USENET_RETENTION}
 		params.update(quality)
 		
 		searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
