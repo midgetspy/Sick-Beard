@@ -20,6 +20,7 @@
 
 import cherrypy
 import os.path
+import datetime
 
 from sickbeard import helpers
 from sickbeard.logging import * 
@@ -106,3 +107,18 @@ def change_IRC_NICK(irc_nick):
             pass
 
     sickbeard.IRC_NICK = irc_nick
+
+def change_SEARCH_FREQUENCY(freq):
+    
+    if freq == None:
+        freq = sickbeard.DEFAULT_SEARCH_FREQUENCY
+    else:
+        freq = int(freq)
+    
+    if freq < 10:
+        freq = sickbeard.DEFAULT_SEARCH_FREQUENCY
+    
+    sickbeard.SEARCH_FREQUENCY = freq
+    
+    sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
+    

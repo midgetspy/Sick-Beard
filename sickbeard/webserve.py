@@ -158,18 +158,19 @@ class ConfigGeneral:
         
         raise cherrypy.HTTPRedirect("index")
 
-class ConfigNZBTorrent:
+class ConfigEpisodeSearch:
     
     @cherrypy.expose
     def index(self):
         
-        t = Template(file="data/interfaces/default/config_nzbtorrent.tmpl")
+        t = Template(file="data/interfaces/default/config_episodesearch.tmpl")
         return _munge(t)
 
     @cherrypy.expose
-    def saveNZBTorrent(self, nzb_dir=None, sab_username=None, sab_password=None,
+    def saveEpisodeSearch(self, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, use_nzb=None,
-                       use_torrent=None, torrent_dir=None, nzb_method=None, usenet_retention=None):
+                       use_torrent=None, torrent_dir=None, nzb_method=None, usenet_retention=None,
+                       search_frequency=None):
 
         results = []
 
@@ -178,6 +179,8 @@ class ConfigNZBTorrent:
 
         if not config.change_TORRENT_DIR(torrent_dir):
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
+
+        config.change_SEARCH_FREQUENCY(search_frequency)
 
         if use_nzb == "on":
             use_nzb = 1
@@ -189,8 +192,12 @@ class ConfigNZBTorrent:
         else:
             use_torrent = 0
 
+        if usenet_retention == None:
+            usenet_retention = 200
+
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
+        sickbeard.SEARCH_FREQUENCY = int(search_frequency)
 
         sickbeard.USE_NZB = use_nzb
         sickbeard.USE_TORRENT = use_torrent
@@ -344,7 +351,7 @@ class Config:
     
     general = ConfigGeneral()
     
-    nzbtorrent = ConfigNZBTorrent()
+    episodesearch = ConfigEpisodeSearch()
     
     providers = ConfigProviders()
     

@@ -68,6 +68,8 @@ USE_NZB = False
 NZB_METHOD = None 
 NZB_DIR = None
 USENET_RETENTION = None
+SEARCH_FREQUENCY = None
+DEFAULT_SEARCH_FREQUENCY = 15
 
 USE_TORRENT = False
 TORRENT_DIR = None
@@ -192,7 +194,8 @@ def initialize():
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 updateScheduler, botRunner, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
                 airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler, \
-                NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION
+                NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
+                SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY
         
         if __INITIALIZED__:
             return False
@@ -232,6 +235,8 @@ def initialize():
         USE_NZB = bool(check_setting_int(CFG, 'General', 'use_nzb', 0))
         USE_TORRENT = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 200)
+        
+        SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
 
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
@@ -269,9 +274,18 @@ def initialize():
         #backlogSearchScheduler = searchBacklog.BacklogSearchScheduler()
         #updateScheduler = updateShows.UpdateScheduler(True)
         
-        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(), threadName="SEARCH", runImmediately=True)
-        backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(), cycleTime=datetime.timedelta(hours=1), threadName="BACKLOG", runImmediately=False)
-        updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(), cycleTime=datetime.timedelta(hours=1), threadName="UPDATE", runImmediately=True) 
+        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
+                                                     cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
+                                                     threadName="SEARCH",
+                                                     runImmediately=True)
+        backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
+                                                                      cycleTime=datetime.timedelta(hours=1),
+                                                                      threadName="BACKLOG",
+                                                                      runImmediately=False)
+        updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
+                                              cycleTime=datetime.timedelta(hours=1),
+                                              threadName="UPDATE",
+                                              runImmediately=True) 
         
         botRunner = tvnzbbot.NZBBotRunner()
         #showAddScheduler = showAdder.ShowAddScheduler()
@@ -404,7 +418,7 @@ def save_config():
         SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, IRC_BOT, IRC_SERVER, \
         IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
         XBMC_UPDATE_LIBRARY, XBMC_HOST, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
-        USE_TORRENT, TORRENT_DIR, USENET_RETENTION
+        USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
@@ -413,6 +427,7 @@ def save_config():
     CFG['General']['web_password'] = WEB_PASSWORD
     CFG['General']['nzb_method'] = NZB_METHOD
     CFG['General']['usenet_retention'] = int(USENET_RETENTION)
+    CFG['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     CFG['General']['use_nzb'] = int(USE_NZB)
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)

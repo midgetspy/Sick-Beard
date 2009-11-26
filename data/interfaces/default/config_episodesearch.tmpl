@@ -9,20 +9,40 @@
 #include "data/interfaces/default/inc_cmenu.tmpl"
 
 <h2>NZB/Torrent Options</h2>
-<form action="saveNZBTorrent" method="POST">
+<form action="saveEpisodeSearch" method="POST">
 
 All non-absolute folder locations are relative to $sickbeard.PROG_DIR<br /><br />
+
+<div class="EntryBlock"><p><strong>
+    <em>NOTE:</em> Manual restart needed for web server changes!<br />
+</strong></p>
+<fieldset class="EntryFieldSet">
+
+<legend>Episode Search</legend>
+
+<input type="checkbox" name="use_nzb" #if $sickbeard.USE_NZB == True then "CHECKED" else ""#> <strong>NZBs</strong><br />
+Whether or not we should search NZB sites<br />
+<br />
+
+<input type="checkbox" name="use_torrent" #if $sickbeard.USE_TORRENT == True then "CHECKED" else ""#> <strong>Torrents</strong><br />
+Whether or not we should search Torrent sites<br />
+<br />
+
+
+<strong>Search Frequency:</strong><br />
+Time between searches (in minutes)<br />
+<input type="text" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="4"><br />
+<br />
+
+</fieldset>
+</div>
 
 
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
 
 
-<legend>NZB</legend>
-
-<input type="checkbox" name="use_nzb" #if $sickbeard.USE_NZB == True then "CHECKED" else ""#> <strong>Use NZBs</strong><br />
-If checked Sick Beard will search for shows at NZB sites<br />
-<br />
+<legend>NZB/Torrent Options</legend>
 
 <strong>NZB Action</strong><br />
 What to do with found NZBs<br />
@@ -50,19 +70,6 @@ How old should a report be before we don't download it<br />
 <input type="text" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="4"><br />
 <br />
 
-
-</fieldset>
-</div>
-
-
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>Torrents</legend>
-
-<input type="checkbox" name="use_torrent" #if $sickbeard.USE_TORRENT == True then "CHECKED" else ""#> <strong>Use Torrents</strong><br />
-If checked Sick Beard will search for shows at torrent sites<br />
-<br />
 
 <strong>Torrent Black Hole:</strong><br />
 The directory where Sick Beard should store<br />

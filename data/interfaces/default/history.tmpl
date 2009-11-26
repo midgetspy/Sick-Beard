@@ -1,0 +1,70 @@
+#import os.path
+#import datetime
+#import re
+#from sickbeard import history
+#from sickbeard.common import *
+
+<!--#set global $topmenu="history"#-->
+<!--#set global $statpath=".."#-->
+<!--#set global $helpsubject="Home"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<script>
+\$(document).ready(function() 
+{ 
+    \$("#historyTable").tablesorter({
+    	sortList: [[0,1]],
+    }); 
+});
+</script>
+
+<span class="SubMenu">
+<a href="/history/clearHistory">Clear History</a>
+</span>
+
+<h2>History</h2>
+
+<table id="historyTable" class="sickbeardTable tablesorter">
+  <thead><tr><th>Time</th><th>Episode</th><th>Action</th><th>Provider</th><th>Quality</th></tr></thead>
+  <tbody>
+#for $hItem in $historyResults:
+  <tr class="evenLine">
+    <td>$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</th>
+    <td><a href="/home/displayShow?show=$hItem["showid"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "{0:0>2}".format(hItem["episode"]) %> - $hItem["name"]</a></th>
+    <td align="center">$actionStrings[$hItem["action"]]</td>
+    <td align="center">
+	#if $hItem["action"] == ACTION_DOWNLOADED
+	  #set $match = $re.search("\-(\w*)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
+	  #if $match
+	    <%=match.group(1).upper()%>
+	  #end if
+	#else
+      #if $hItem["provider"] > 0
+        <img src="/images/providers/<%=providerNames[hItem["provider"]].lower()%>.gif" width="16" height="16" alt="$providerNames[$hItem["provider"]]">
+      #end if
+    #end if
+	</td>
+	<td align="center">
+	#set $quality = -1
+	#if $hItem["action"] == ACTION_DOWNLOADED
+	  #if "xvid" in str($hItem["resource"]).lower() or "divx" in str($hItem["resource"]).lower()
+	    #set $quality = SD
+	  #else if "720p" in str($hItem["resource"]).lower()
+	    #set $quality = HD
+	  #end if
+	#else
+      #if int($hItem["quality"]) in (ANY, HD, SD)
+        #set $quality = int($hItem["quality"])
+      #end if
+    #end if
+    #if $quality != -1
+      <!--<img src="/images/quality/<%=qualityStrings[quality].lower()%>.png" height="32">-->
+      $qualityStrings[$quality]
+    #end if
+    </td>
+  </tr>
+#end for
+  </tbody>
+</table>
+
+#include "data/interfaces/default/inc_bottom.tmpl"
