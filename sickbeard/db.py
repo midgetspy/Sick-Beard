@@ -22,6 +22,7 @@ import os.path
 import sqlite3
 
 import sickbeard
+from logging import *
 
 from lib.tvdb_api import tvdb_api
 
@@ -29,8 +30,56 @@ class DBConnection:
 		def __init__(self):
 			self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, "sickbeard.db"), 20)
 			self.connection.row_factory = sqlite3.Row
+
+		def action(self, query, args=None):
+			
+			self._checkDB()
+			
+			if query == None:
+				return
+
+			try:
+				if args == None:
+					self.connection.execute(query)
+				else:
+					self.connection.execute(query, args)
+				self.connection.commit()
+			except sqlite3.DatabaseError as e:
+				Logger().log("Fatal error executing query: " + str(e), ERROR)
+				raise
+			
+
+		def select(self, query, args=None):
+
+			self._checkDB()
+			sqlResults = []
+
+			if query == None:
+				Logger().log("Query must be a string (was None)", ERROR)
+				return
+			else:
+				query = str(query)
+		
+			try:
+				if args == None:
+					Logger().log("SQL: "+query, DEBUG)
+					sqlResults = self.connection.execute(query).fetchall()
+				else:
+					Logger().log("SQL: "+query+" with args "+str(args), DEBUG)
+					sqlResults = self.connection.execute(query, args)
+			except sqlite3.DatabaseError as e:
+				Logger().log("Fatal error executing query: " + str(e), ERROR)
+				raise
+			
+			if sqlResults == None:
+				return []
+			
+			return sqlResults
 		
 		def checkDB(self):
+			self._checkDB()
+		
+		def _checkDB(self):
 			# Create the table if it's not already there
 			try:
 				sql = "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, predownload NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC);"

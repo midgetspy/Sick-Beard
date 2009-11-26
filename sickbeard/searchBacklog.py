@@ -58,16 +58,40 @@ class BacklogSearcher:
         
         if curDate - self._lastBacklog >= self.cycleTime:
             
-            epList = self._getBacklogEpisodesToSearchFor()
+            myDB = db.DBConnection()
+            myDB.checkDB()
             
-            if epList == None or len(epList) == 0:
+            sqlResults = []
+            
+            Logger().log("Searching the database for a list of backlogged episodes to download")
+            
+            try:
+                sql = "SELECT * FROM tv_episodes WHERE status IN (" + str(BACKLOG) + ", " + str(DISCBACKLOG) + ")"
+                Logger().log("SQL: " + sql, DEBUG)
+                sqlResults = myDB.connection.execute(sql).fetchall()
+        
+            except sqlite3.DatabaseError as e:
+                Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
+                raise
+
+            if sqlResults == None or len(sqlResults) == 0:
                 Logger().log("No episodes were found in the backlog")
                 self._set_lastBacklog(curDate)
                 self.amActive = False
                 return
             
-            for curEp in epList:
+            for sqlEp in sqlResults:
                 
+                try:
+                    show = helpers.findCertainShow(sickbeard.showList, int(sqlEp["showid"]))
+                except exceptions.MultipleShowObjectsException:
+                    Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"], ERROR) 
+                    continue
+                
+                curEp = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
+                
+                Logger().log("Found backlog episode: " + curEp.prettyName(), DEBUG)
+            
                 foundNZBs = search.findEpisode(curEp)
                 
                 if len(foundNZBs) == 0:
@@ -81,6 +105,19 @@ class BacklogSearcher:
             
         self.amActive = False
             
+    
+    
+    def _searchBacklogForEp(self, curEp):
+    
+        foundNZBs = search.findEpisode(curEp)
+        
+        if len(foundNZBs) == 0:
+            Logger().log("Unable to find NZB for " + curEp.prettyName())
+        
+        else:
+            # just use the first result for now
+            search.snatchEpisode(foundNZBs[0])
+
     
     def _get_lastBacklog(self):
     
@@ -125,43 +162,6 @@ class BacklogSearcher:
         except sqlite3.DatabaseError as e:
             Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
             raise
-    
-    
-    def _getBacklogEpisodesToSearchFor(self):
-    
-        myDB = db.DBConnection()
-        myDB.checkDB()
-        
-        curDate = datetime.date.today().toordinal()
-        sqlResults = []
-        
-        foundEps = []
-        
-        Logger().log("Searching the database for a list of backlogged episodes to download")
-        
-        try:
-            sql = "SELECT * FROM tv_episodes WHERE status IN (" + str(BACKLOG) + ", " + str(DISCBACKLOG) + ")"
-            Logger().log("SQL: " + sql, DEBUG)
-            sqlResults = myDB.connection.execute(sql).fetchall()
-            print "found", sqlResults
-    
-        except sqlite3.DatabaseError as e:
-            Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-            raise
-    
-        for sqlEp in sqlResults:
-            print "FFS the status is " + str(sqlEp["status"])
-            
-            try:
-                show = helpers.findCertainShow (sickbeard.showList, int(sqlEp["showid"]))
-            except exceptions.MultipleShowObjectsException:
-                Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"], ERROR) 
-                return None
-            ep = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
-            foundEps.append(ep)
-            Logger().log("Added " + ep.prettyName() + " to the list of episodes to download (status=" + str(ep.status))
-        
-        return foundEps
 
     def run(self):
         self.searchBacklog()

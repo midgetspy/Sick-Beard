@@ -62,7 +62,6 @@ class TVShow(object):
 		self._isDirGood = False
 		
 		self.episodes = {}
-		self.missingEpisodes = []
 
 		# if the location doesn't exist, try the DB
 		if not os.path.isdir(self._location):
@@ -71,16 +70,9 @@ class TVShow(object):
 			
 			Logger().log("The show dir doesn't exist! This show will be inactive until the dir is created.", ERROR)
 			
-			self._getDB()
-			self.db.checkDB()
+			myDB = db.DBConnection()
+			sqlResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [self._location])
 	
-			try:
-				sql = "SELECT * FROM tv_shows WHERE location = ?"
-				sqlResults = self.db.connection.execute(sql, [self._location]).fetchall()
-			except sqlite3.DatabaseError as e:
-				Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-				raise
-
 			# if the location is in the DB, load it from the DB only
 			if len(sqlResults) > 0:
 				self.tvdbid = int(sqlResults[0]["tvdb_id"])
@@ -99,17 +91,9 @@ class TVShow(object):
 			
 			self.loadNFO()
 			
-			self._getDB()
-			self.db.checkDB()
-	
-			try:
-				sql = "SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid)
-				sqlResults = self.db.connection.execute(sql).fetchall()
-				Logger().log("SQL: "+sql, DEBUG)
-			except sqlite3.DatabaseError as e:
-				Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-				raise
-	
+			myDB = db.DBConnection()
+			sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
+			
 			if len(sqlResults) > 0:
 	
 				if self.name == "":
@@ -206,18 +190,9 @@ class TVShow(object):
 		
 		Logger().log(str(self.tvdbid) + ": Writing NFOs for all episodes")
 		
-		self._getDB()
-		self.db.checkDB()
-	
-		sqlResults = []
-	
-		try:
-			sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''"
-			sqlResults = self.db.connection.execute(sql).fetchall()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
-
+		myDB = db.DBConnection()
+		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
+		
 		for epResult in sqlResults:
 			Logger().log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), DEBUG)
 			curEp = self.getEpisode(epResult["season"], epResult["episode"], True)
@@ -228,17 +203,8 @@ class TVShow(object):
 		
 		Logger().log(str(self.tvdbid) + ": Loading all episodes from the database")
 		
-		self._getDB()
-		self.db.checkDB()
-	
-		sqlResults = []
-	
-		try:
-			sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid)
-			sqlResults = self.db.connection.execute(sql).fetchall()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
+		myDB = db.DBConnection()
+		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid))
 
 		for epResult in sqlResults:
 			Logger().log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), DEBUG)
@@ -460,16 +426,9 @@ class TVShow(object):
 
 		Logger().log(str(self.tvdbid) + ": Loading show info from database")
 
-		self._getDB()
-		self.db.checkDB()
-		sqlResults = []
-	
-		try:
-			sql = "SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid)
-			sqlResults = self.db.connection.execute(sql).fetchall()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
+		myDB = db.DBConnection()
+		
+		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 
 		if len(sqlResults) > 1:
 			raise exceptions.MultipleDBShowsException()
@@ -556,21 +515,11 @@ class TVShow(object):
 		
 	def nextEpisode(self):
 	
-		self._getDB()
-		self.db.checkDB()
-	
 		Logger().log(str(self.tvdbid) + ": Finding the episode which airs next", DEBUG) 
 
-		
-		# search the db for the next episode
-		try:
-			sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND status = " + str(UNAIRED) + " ORDER BY airdate ASC LIMIT 1"
-			Logger().log("SQL: " + sql, DEBUG)
-			sqlResults = self.db.connection.execute(sql).fetchall()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
-
+		myDB = db.DBConnection()
+		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND status = " + str(UNAIRED) + " ORDER BY airdate ASC LIMIT 1")
+	
 		if sqlResults == None or len(sqlResults) == 0:
 			Logger().log(str(self.tvdbid) + ": No episode found... need to implement tvrage and also show status", DEBUG)
 			return None
@@ -598,30 +547,9 @@ class TVShow(object):
 
 	def deleteShow(self):
 		
-		self._getDB()
-		self.db.checkDB()
-	
-		sqlResults = []
-
-		# delete all episodes
-		try:
-			sql = "DELETE FROM tv_episodes WHERE showid = " + str(self.tvdbid)
-			Logger().log("SQL: " + sql, DEBUG)
-			self.db.connection.execute(sql)
-			self.db.connection.commit()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
-		
-		# delete shows
-		try:
-			sql = "DELETE FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid)
-			Logger().log("SQL: " + sql, DEBUG)
-			self.db.connection.execute(sql)
-			self.db.connection.commit()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
+		myDB = db.DBConnection()
+		myDB.action("DELETE FROM tv_episodes WHERE showid = " + str(self.tvdbid))
+		myDB.action("DELETE FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 		
 		# remove self from show list
 		sickbeard.showList = [x for x in sickbeard.showList if x.tvdbid != self.tvdbid]
@@ -635,19 +563,9 @@ class TVShow(object):
 		# run through all locations from DB, check that they exist
 		Logger().log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
 		
-		self._getDB()
-		self.db.checkDB()
-	
-		sqlResults = []
-	
-		try:
-			sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''"
-			Logger().log("SQL: " + sql, DEBUG)
-			sqlResults = self.db.connection.execute(sql).fetchall()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
-
+		myDB = db.DBConnection()
+		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
+		
 		for ep in sqlResults:
 			curLoc = os.path.normpath(ep["location"]) #TRYIT
 			season = int(ep["season"])
@@ -683,19 +601,9 @@ class TVShow(object):
 		
 		Logger().log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
 		
-		self._getDB()
-		self.db.checkDB()
-	
-		sqlResults = []
-	
-		try:
-			sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''"
-			Logger().log("SQL: " + sql, DEBUG)
-			sqlResults = self.db.connection.execute(sql).fetchall()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
-
+		myDB = db.DBConnection()
+		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
+		
 		# build list of locations
 		fileLocations = {}
 		for epResult in sqlResults:
@@ -771,14 +679,8 @@ class TVShow(object):
 
 		Logger().log(str(self.tvdbid) + ": Saving show info to database", DEBUG)
 
-		self._getDB()
-	
-		self.db.checkDB()
-	
-		# if the show exists then update the DB, if not then insert
-		sql = "SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid)
-		sqlResults = self.db.connection.execute(sql).fetchall()
-		#sqlResults = self.cursor.fetchall()
+		myDB = db.DBConnection()
+		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 
 		# use this list regardless of whether it's in there or not
 		sqlValues = [self.name, self.tvdbid, self._location, self.network, self.genre, self.runtime, self.quality, self.predownload, self.airs, self.status, self.seasonfolders]
@@ -794,10 +696,8 @@ class TVShow(object):
 		else:
 			raise exceptions.MultipleDBShowsException("Multiple records for a single show")
 		
-		# save the values of this show into the database
-		self.db.connection.execute(sql, sqlValues)
-		self.db.connection.commit()
-
+		myDB.action(sql, sqlValues)
+		
 		
 	def __str__(self):
 		toReturn = ""
@@ -893,17 +793,8 @@ class TVEpisode:
 
 		Logger().log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), DEBUG)
 
-		self._getDB()
-		self.db.checkDB()
-	
-		sqlResults = []
-	
-		try:
-			sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND season = " + str(season) + " AND episode = " + str(episode)
-			sqlResults = self.db.connection.execute(sql).fetchall()
-		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-			raise
+		myDB = db.DBConnection()
+		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND season = " + str(season) + " AND episode = " + str(episode))
 
 		if len(sqlResults) > 1:
 			raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
@@ -1259,15 +1150,8 @@ class TVEpisode:
 
 		Logger().log("STATUS IS " + str(self.status), DEBUG)
 	
-		self._getDB()
-	
-		self.db.checkDB()
-	
-		#NAMEIT Logger().log("DDDDDD " + str(self.season)+"x"+str(self.episode) + " -" + str(self.name))
-	
-		# if the show exists then update the DB, if not then insert
-		sql = "SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND episode = " + str(self.episode) + " AND season = " + str(self.season)
-		sqlResults = self.db.connection.execute(sql).fetchall()
+		myDB = db.DBConnection()
+		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND episode = " + str(self.episode) + " AND season = " + str(self.season))
 
 		# use this list regardless of whether it's in there or not
 		sqlValues = [self.show.tvdbid, self.tvdbid, self.name, self.season, self.episode, self.description, self.airdate.toordinal(), self.hasnfo, self.hastbn, self.status, self.location]
@@ -1283,10 +1167,8 @@ class TVEpisode:
 		else:
 			raise sickbeard.exceptions.LaterException("Multiple records for a single episode")
 		
-		# save the values of this show into the database
-		self.db.connection.execute(sql, sqlValues)
-		self.db.connection.commit()
-
+		myDB.action(sql, sqlValues)
+		
 		
 	def fullPath (self):
 		if self.location == None or self.location == "":
