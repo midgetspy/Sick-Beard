@@ -44,20 +44,10 @@ signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 def loadShowsFromDB():
 
 	myDB = db.DBConnection()
-	myDB.checkDB()
+	sqlResults = myDB.select("SELECT * FROM tv_shows")
 	
-	sqlResults = []
 	myShowList = []
 	
-	try:
-		sql = "SELECT * FROM tv_shows"
-		sqlResults = myDB.connection.execute(sql).fetchall()
-		#print "found", sqlResults
-
-	except sqlite3.DatabaseError as e:
-		Logger().log("Fatal error executing query '" + sql + "': " + str(e), ERROR)
-		raise
-
 	for sqlShow in sqlResults:
 		try:
 			curShow = TVShow(sqlShow["location"])
