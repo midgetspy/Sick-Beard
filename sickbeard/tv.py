@@ -165,17 +165,6 @@ class TVShow(object):
 			curEp.createMetaFiles()
 
 
-	def loadEpisodesFromDB (self):
-		
-		Logger().log(str(self.tvdbid) + ": Loading all episodes from the database")
-		
-		myDB = db.DBConnection()
-		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid))
-
-		for epResult in sqlResults:
-			Logger().log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), DEBUG)
-			self.getEpisode(epResult["season"], epResult["episode"], True)
-
 	# find all media files in the show folder and create episodes for as many as possible
 	def loadEpisodesFromDir (self, skipDBEps=True):
 
@@ -227,10 +216,8 @@ class TVShow(object):
 		Logger().log(str(self.tvdbid) + ": Loading all episodes from theTVDB...")
 		
 		for season in showObj:
-			# ignore specials for now
-			if season == 0:
-				continue
 			for episode in showObj[season]:
+				# need some examples of wtf episode 0 means to decide if we want it or not
 				if episode == 0:
 					continue
 				ep = self.getEpisode(season, episode)
@@ -481,11 +468,6 @@ class TVShow(object):
 		# verify that we don't have it in the DB somehow (ep mismatch)
 
 			
-	# clears all my local episode object references, they'll need to be reloaded from the DB
-	def flushEpisodes(self):
-		self.episodes = {}
-			
-
 	def deleteShow(self):
 		
 		myDB = db.DBConnection()
@@ -782,6 +764,9 @@ class TVEpisode:
 			Logger().log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?")
 			return
 			
+		if myEp["firstaired"] == None and season == 0:
+			myEp["firstaired"] = str(datetime.date.fromordinal(1))
+			
 		if myEp["episodename"] == None or myEp["firstaired"] == None:
 			return False
 		
@@ -946,6 +931,9 @@ class TVEpisode:
 				Logger().log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
 				return False
 			
+			if myEp["firstaired"] == None and self.season == 0:
+				myEp["firstaired"] = str(datetime.date.fromordinal(1))
+			
 			if myEp["episodename"] == None or myEp["firstaired"] == None:
 				return False
 				
@@ -953,7 +941,10 @@ class TVEpisode:
 				thumbFilename = myEp["filename"]
 				
 			if not needsNFO:
+				Logger().log("Skipping metadata generation for myself ("+str(self.season)+"x"+str(self.episode)+")", DEBUG)
 				continue
+			else:
+				Logger().log("Creating metadata for myself ("+str(self.season)+"x"+str(self.episode)+")", DEBUG)
 			
 			episode = nfo.createElement("episodedetails")
 			rootNode.appendChild(episode)

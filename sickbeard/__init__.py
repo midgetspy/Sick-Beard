@@ -285,7 +285,7 @@ def initialize():
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
                                               cycleTime=datetime.timedelta(hours=1),
                                               threadName="UPDATE",
-                                              runImmediately=True) 
+                                              runImmediately=False) 
         
         botRunner = tvnzbbot.NZBBotRunner()
         #showAddScheduler = showAdder.ShowAddScheduler()
@@ -497,6 +497,11 @@ def updateMissingList():
         except exceptions.MultipleShowObjectsException:
             Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
             return None
+        
+        # we aren't ever downloading specials
+        if int(sqlEp["season"]) == 0:
+            continue
+        
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
 
         epList.append(ep)
@@ -525,6 +530,11 @@ def updateAiringList():
         except exceptions.SickBeardException as e:
             Logger().log("Unexpected exception: "+str(e), ERROR)
             continue
+
+        # we aren't ever downloading specials
+        if int(sqlEp["season"]) == 0:
+            continue
+        
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
 
         epList.append(ep)
@@ -544,7 +554,7 @@ def updateComingList():
         except exceptions.NoNFOException as e:
             Logger().log("Unable to retrieve episode from show: "+str(e), ERROR)
         
-        if curEp != None:
+        if curEp != None and int(curEp.season) != 0:
             epList.append(curEp)
 
     sickbeard.comingList = epList

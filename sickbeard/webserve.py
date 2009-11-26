@@ -473,27 +473,15 @@ class HomeAddShows:
 class Home:
 
     @cherrypy.expose
-    def stats(self):
-        from guppy import hpy
-        hp = hpy()
-        return str(hp.heap())
-    
-    @cherrypy.expose
-    def gc(self):
-        import gc
-        gc.collect()
-        return "Collected"
-    
-    @cherrypy.expose
     def index(self):
         
         t = Template(file="data/interfaces/default/home.tmpl")
         
         myDB = db.DBConnection()
         
-        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 GROUP BY showid")
+        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 AND airdate != 1 GROUP BY showid")
 
-        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 GROUP BY showid")
+        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 AND airdate != 1 GROUP BY showid")
         
         return _munge(t)
 

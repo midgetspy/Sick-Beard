@@ -79,7 +79,7 @@ All other episodes should automatically update to Downloaded on a show refresh.<
   	<td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
     <td align="center">$epResult["episode"]</td>
     <td>$epResult["name"]</td>
-	<td align="center">$datetime.date.fromordinal(int($epResult["airdate"]))</td>
+	<td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
 	<td>$os.path.basename($epResult["location"])</td>
     <td>$statusStrings[int($epResult["status"])]</td>
     <td align="center"><a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a></td>

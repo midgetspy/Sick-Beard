@@ -23,7 +23,6 @@ import threading
 import time
 import urllib2
 import sqlite3
-#import gc
 import traceback
 
 import sickbeard
@@ -154,15 +153,19 @@ class ShowUpdater():
                 epList = sickbeard.getEpList(updatedEpisodes, show.tvdbid)
                 Logger().log("Updated episodes for this show are " + str(epList), DEBUG)
                 for curEp in epList:
-                    if int(curEp.season) == 0:
-                        continue
                     Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
                     curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
                     curEp.saveToDB()
                 newestDBEp = self._getNewestDBEpisode(show)
                 if t != None and newestDBEp != None:
                     s = t[int(show.tvdbid)]
-                    for curEp in s.findNewerEps(newestDBEp[2]):
+                    
+                    # make a list of all specials and all new eps
+                    epList = []
+                    epList += s.findNewerEps(newestDBEp[2])
+                    if 0 in s:
+                        epList += s[0]
+                    for curEp in epList:
                         # add the episode
                         newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
                         Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
@@ -171,14 +174,10 @@ class ShowUpdater():
         with show.lock:
             show.loadLatestFromTVRage()
 
+        show.writeEpisodeNFOs()
+            
         # finish up the update
         if doUpdate:
-            
-            show.writeEpisodeNFOs()
-            
-            # try keeping ram down
-            #show.flushEpisodes()
-            #gc.collect() # try it
             
             Logger().log("Update complete")
 
@@ -234,8 +233,6 @@ class ShowUpdater():
                     epList = sickbeard.getEpList(updatedEpisodes, show.tvdbid)
                     Logger().log("Updated episodes for this show are " + str(epList), DEBUG)
                     for curEp in epList:
-                        if int(curEp.season) == 0:
-                            continue
                         Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
                         curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
                         curEp.saveToDB()
@@ -243,7 +240,13 @@ class ShowUpdater():
                     newestDBEp = self._getNewestDBEpisode(show)
                     if t != None and newestDBEp != None:
                         s = t[int(show.tvdbid)]
-                        for curEp in s.findNewerEps(newestDBEp[2]):
+                    
+                        # make a list of all specials and all new eps
+                        epList = []
+                        epList += s.findNewerEps(newestDBEp[2])
+                        if 0 in s:
+                            epList += s[0]
+                        for curEp in epList:
                             # add the episode
                             newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
                             Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
