@@ -122,3 +122,17 @@ def change_SEARCH_FREQUENCY(freq):
     
     sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
     
+def change_BACKLOG_SEARCH_FREQUENCY(freq):
+    
+    if freq == None:
+        freq = sickbeard.DEFAULT_BACKLOG_SEARCH_FREQUENCY
+    else:
+        freq = int(freq)
+    
+    if freq < 1:
+        freq = sickbeard.DEFAULT_BACKLOG_SEARCH_FREQUENCY
+    
+    sickbeard.BACKLOG_SEARCH_FREQUENCY = freq
+    
+    sickbeard.backlogSearchScheduler.action.cycleTime = sickbeard.BACKLOG_SEARCH_FREQUENCY
+    

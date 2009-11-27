@@ -57,7 +57,7 @@ class TVDBWebUI:
         raise cherrypy.HTTPRedirect("addShow?showDir=" + self.config['_showDir'] + "&seriesList=" + searchList)
 
 def _munge(string):
-    return unicode(string).replace("&", "&amp;").encode('ascii', 'xmlcharrefreplace')
+    return unicode(string).encode('ascii', 'xmlcharrefreplace')
 
 def _genericMessage(subject, message):
     t = Template(file="data/interfaces/default/genericMessage.tmpl")
@@ -81,6 +81,31 @@ def _getEpisode(show, season, episode):
         return "Episode couldn't be retrieved"
 
     return epObj
+
+
+class Backlog:
+
+    @cherrypy.expose
+    def index(self):
+        
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT e.*, show_name FROM tv_shows s, tv_episodes e WHERE s.tvdb_id=e.showid AND e.status IN ("+str(BACKLOG)+","+str(DISCBACKLOG)+")")
+        
+        t = Template(file="data/interfaces/default/backlog.tmpl")
+        t.backlogResults = sqlResults
+        
+        return _munge(t)
+
+
+    @cherrypy.expose
+    def forceBacklog(self):
+
+        # force it to run the next time it looks
+        sickbeard.backlogSearchScheduler.forceSearch()
+        Logger().log("Backlog set to run in background")
+        
+        return _genericMessage("Backlog search started", "The backlog search has begun and will run in the background")
+
 
 
 class History:
@@ -170,7 +195,7 @@ class ConfigEpisodeSearch:
     def saveEpisodeSearch(self, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, use_nzb=None,
                        use_torrent=None, torrent_dir=None, nzb_method=None, usenet_retention=None,
-                       search_frequency=None):
+                       search_frequency=None, backlog_search_frequency=None):
 
         results = []
 
@@ -181,6 +206,8 @@ class ConfigEpisodeSearch:
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
 
         config.change_SEARCH_FREQUENCY(search_frequency)
+
+        config.change_BACKLOG_SEARCH_FREQUENCY(backlog_search_frequency)
 
         if use_nzb == "on":
             use_nzb = 1
@@ -490,15 +517,6 @@ class Home:
     postprocess = HomePostProcess()
     
     @cherrypy.expose
-    def forceBacklog(self):
-
-        # force it to run the next time it looks
-        sickbeard.backlogSearchScheduler.forceSearch()
-        Logger().log("Backlog set to run in background")
-        
-        return _genericMessage("Backlog search started", "The backlog search has begun and will run in the background")
-
-    @cherrypy.expose
     def shutdown(self):
 
         threading.Timer(2, sickbeard.saveAndShutdown).start()
@@ -785,6 +803,8 @@ class WebInterface:
         t.qualityStrings = qualityStrings
         
         return _munge(t)
+
+    backlog = Backlog()
 
     history = History()
 

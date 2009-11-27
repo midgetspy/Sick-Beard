@@ -8,18 +8,19 @@
 <!--#set global $helpsubject="Home"#-->
 #include "data/interfaces/default/inc_top.tmpl"
 
-<!--#set global $submenu=""#-->
-#include "data/interfaces/default/inc_hmenu.tmpl"
+<span class="SubMenu">
+<a href="editShow?show=$show.tvdbid">Edit</a> |
+<a href="deleteShow?show=$show.tvdbid">Delete</a> | 
+<a href="updateShow?show=$show.tvdbid">Refresh</a> | 
+<a href="fixEpisodeNames?show=$show.tvdbid">Rename Episodes</a> |
+<a href="updateShow?show=$show.tvdbid&force=1">Force Full Update</a>
+</span>
 
 <script type="text/javascript" src="/js/displayShow.js"></script> 
+<script type="text/javascript" src="/js/showPlot.js"></script> 
 
 <h2>$show.name</h2>
 
-<a href="editShow?show=$show.tvdbid">(edit)</a>
-<a href="deleteShow?show=$show.tvdbid">(delete)</a>
-<a href="updateShow?show=$show.tvdbid">(refresh show)</a>
-<a href="fixEpisodeNames?show=$show.tvdbid">(rename episodes)</a>
-<a href="updateShow?show=$show.tvdbid&force=1">(force update - takes forever)</a><br />
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
 

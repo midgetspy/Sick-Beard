@@ -50,6 +50,10 @@ def downloadTorrent (torrent):
 
 def findEpisode(episode, forceQuality=None):
 
+    if episode.status in (BACKLOG, DISCBACKLOG):
+        Logger().log("Skipping "+episode.prettyName()+" because it'll probably be too old", DEBUG)
+        return []
+
     Logger().log("Searching EZTV for " + episode.prettyName())
 
     if forceQuality != None:

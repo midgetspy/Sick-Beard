@@ -1,0 +1,49 @@
+#import datetime
+#from sickbeard.common import *
+
+<!--#set global $topmenu="backlog"#-->
+<!--#set global $statpath=".."#-->
+<!--#set global $helpsubject="Backlog"#-->
+#include "data/interfaces/default/inc_top.tmpl"
+
+<script>
+\$(document).ready(function() 
+{ 
+    \$("#backlogTable").tablesorter({
+    	sortList: [[0,0]],
+    	headers: {
+    		1: { sorter: false },
+    		2: { sorter: false },
+    		5: { sorter: false }
+    	}
+    }); 
+});
+</script>
+
+<script type="text/javascript" src="/js/showPlot.js"></script> 
+
+<span class="SubMenu">
+<a href="/backlog/forceBacklog">Force Backlog</a>
+</span>
+
+<h2>Backlog</h2>
+
+<table id="backlogTable" class="sickbeardTable tablesorter">
+  <thead><tr><th>Show</th><th>Episode</th><th>Name</th><th>Airdate</td><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>
+#for $bItem in $backlogResults:
+  <tr class="evenLine">
+    <td><a href="/home/displayShow?show=$bItem["showid"]">$bItem["show_name"]</a></td>
+    <td align="center"><%=str(bItem["season"]) +"x"+ "{0:0>2}".format(bItem["episode"]) %></td>
+    <td>$bItem["name"] <a href="#" class="plotLink" id="plotLink_<%=str(bItem["season"])+"_"+str(bItem["episode"])%>">[+]</a>
+        <div class="plotDiv" id="epDiv_<%=str(bItem["season"])+"_"+str(bItem["episode"])%>"><br />$bItem["description"]</div>
+    </td>
+    <td align="center">$datetime.date.fromordinal(int($bItem["airdate"]))</td>
+    <td align="center">$statusStrings[$bItem["status"]]</td>
+    <td>(search)</td>
+  </tr>
+#end for
+  </tbody>
+</table>
+
+#include "data/interfaces/default/inc_bottom.tmpl"

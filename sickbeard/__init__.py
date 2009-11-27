@@ -69,7 +69,9 @@ NZB_METHOD = None
 NZB_DIR = None
 USENET_RETENTION = None
 SEARCH_FREQUENCY = None
+BACKLOG_SEARCH_FREQUENCY = None
 DEFAULT_SEARCH_FREQUENCY = 15
+DEFAULT_BACKLOG_SEARCH_FREQUENCY = 7
 
 USE_TORRENT = False
 TORRENT_DIR = None
@@ -195,7 +197,8 @@ def initialize():
                 updateScheduler, botRunner, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
                 airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
-                SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY
+                SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
+                DEFAULT_BACKLOG_SEARCH_FREQUENCY
         
         if __INITIALIZED__:
             return False
@@ -237,6 +240,7 @@ def initialize():
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 200)
         
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
+        BACKLOG_SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'backlog_search_frequency', DEFAULT_BACKLOG_SEARCH_FREQUENCY)
 
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
@@ -278,10 +282,13 @@ def initialize():
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
                                                      runImmediately=False)
+        
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(hours=1),
                                                                       threadName="BACKLOG",
                                                                       runImmediately=False)
+        backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
+        
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
                                               cycleTime=datetime.timedelta(hours=1),
                                               threadName="UPDATE",
