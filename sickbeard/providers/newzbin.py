@@ -103,8 +103,14 @@ def findEpisode(episode, forceQuality=None):
 	if episode.status == DISCBACKLOG:
 		qualAttrs += "(Attr:VideoS=DVD OR Attr:VideoS=Blu OR Attr:VideoS=HD-DVD) "
 
+	showNames = [episode.show.name]
+	if " and " in episode.show.name:
+		showNames += [episode.show.name.replace("and", "&")]
+	if " & " in episode.show.name:
+		showNames += [episode.show.name.replace("&", "and")]
+		
 	q = qualAttrs
-	q += "^{0} {1}x{2:0>2}".format(episode.show.name, episode.season, episode.episode)
+	q += "({0}) {1}x{2:0>2}".format(" OR ".join(["^\""+str(x)+"\"" for x in showNames]), episode.season, episode.episode)
 	
 	newzbinURL = {
 	  'q': q,

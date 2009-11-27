@@ -218,14 +218,11 @@ class TVShow(object):
 				# need some examples of wtf episode 0 means to decide if we want it or not
 				if episode == 0:
 					continue
-				ep = self.getEpisode(season, episode)
-				if ep == None:
-					Logger().log(str(self.tvdbid) + ": Creating episode object for " + str(season) + "x" + str(episode), DEBUG)
-					try:
-						ep = TVEpisode(self, season, episode)
-					except exceptions.EpisodeNotFoundException:
-						Logger().log(str(self.tvdbid) + ": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
-						continue
+				try:
+					ep = TVEpisode(self, season, episode)
+				except exceptions.EpisodeNotFoundException:
+					Logger().log(str(self.tvdbid) + ": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
+					continue
 				else:
 					ep.loadFromTVDB()
 				
