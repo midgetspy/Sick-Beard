@@ -54,6 +54,8 @@ def findEpisode(episode, forceQuality=None):
 
     if forceQuality != None:
         epQuality = forceQuality
+    elif episode.show.quality == BEST:
+        epQuality = HD
     else:
         epQuality = episode.show.quality
     

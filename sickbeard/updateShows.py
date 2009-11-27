@@ -164,7 +164,7 @@ class ShowUpdater():
                     epList = []
                     epList += s.findNewerEps(newestDBEp[2])
                     if 0 in s:
-                        epList += s[0]
+                        epList += s[0].values()
                     for curEp in epList:
                         # add the episode
                         newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)

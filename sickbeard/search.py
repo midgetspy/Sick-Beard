@@ -83,11 +83,13 @@ def _doSearch(episode, provider):
 
 	foundEps = provider.findEpisode(episode)
 	
-	# if we couldn't find any HD eps and we're allowing predownloading, retry for SD
-	if len(foundEps) == 0 and episode.show.quality == HD and episode.show.predownload == True and episode.status != PREDOWNLOADED:
-		foundEps = provider.findEpisode(episode, SD)
-		for curEp in foundEps:
-			curEp.predownloaded = True
+	if len(foundEps) == 0:
+
+		# if we couldn't find any HD eps and we're on BEST, retry for SD
+		if episode.show.quality == BEST and episode.status != PREDOWNLOADED:
+			foundEps = provider.findEpisode(episode, SD)
+			for curEp in foundEps:
+				curEp.predownloaded = True
 
 	return foundEps
 

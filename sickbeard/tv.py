@@ -51,7 +51,6 @@ class TVShow(object):
 		self.genre = ""
 		self.runtime = 0
 		self.quality = ANY
-		self.predownload = 0
 		self.seasonfolders = 0
 		
 		self.status = ""
@@ -104,7 +103,6 @@ class TVShow(object):
 		
 				self.runtime = int(sqlResults[0]["runtime"])
 				self.quality = int(sqlResults[0]["quality"])
-				self.predownload = int(sqlResults[0]["predownload"])
 				self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 	
 		#Logger().log(str(self.tvdbid) + ": Loading extra show info from theTVDB")
@@ -380,7 +378,6 @@ class TVShow(object):
 			if self.airs == None:
 				self.airs = ""
 			self.quality = int(sqlResults[0]["quality"])
-			self.predownload = int(sqlResults[0]["predownload"])
 			self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 	
 	def loadFromTVDB(self, cache=True):
@@ -606,15 +603,15 @@ class TVShow(object):
 		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 
 		# use this list regardless of whether it's in there or not
-		sqlValues = [self.name, self.tvdbid, self._location, self.network, self.genre, self.runtime, self.quality, self.predownload, self.airs, self.status, self.seasonfolders]
+		sqlValues = [self.name, self.tvdbid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders]
 		
 		# if it's not in there then insert it
 		if len(sqlResults) == 0:
-			sql = "INSERT INTO tv_shows (show_name, tvdb_id, location, network, genre, runtime, quality, predownload, airs, status, seasonfolders) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+			sql = "INSERT INTO tv_shows (show_name, tvdb_id, location, network, genre, runtime, quality,  airs, status, seasonfolders) VALUES (?,?,?,?,?,?,?,?,?,?)"
 
 		# if it's already there then just change it
 		elif len(sqlResults) == 1:
-			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, location=?, network=?, genre=?, runtime=?, quality=?, predownload=?, airs=?, status=?, seasonfolders=? WHERE tvdb_id=?"
+			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=? WHERE tvdb_id=?"
 			sqlValues += [self.tvdbid]
 		else:
 			raise exceptions.MultipleDBShowsException("Multiple records for a single show")
@@ -636,7 +633,6 @@ class TVShow(object):
 		toReturn += "genre: " + self.genre + "\n"
 		toReturn += "runtime: " + str(self.runtime) + "\n"
 		toReturn += "quality: " + str(self.quality) + "\n"
-		toReturn += "predownload: " + str(self.predownload) + "\n"
 		return toReturn
 
 		

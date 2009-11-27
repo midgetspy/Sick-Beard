@@ -57,11 +57,13 @@ providerNames[EZTV] = "EZTV"
 HD = 1
 SD = 3
 ANY = 2
+BEST = 4
 
 qualityStrings = {}
 qualityStrings[HD] = "HD"
 qualityStrings[SD] = "SD"
 qualityStrings[ANY] = "Any"
+qualityStrings[BEST] = "Best"
 
 # Actions
 ACTION_SNATCHED = 1

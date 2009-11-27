@@ -30,12 +30,6 @@ Quality: <select name="quality">
 <option value="$quality" $blah>$qualityStrings[$quality]
 #end for
 </select><br />
-#if $show.predownload == 1:
-#set $predownload = "CHECKED"
-#else:
-#set $predownload = ""
-#end if
-Predownload: <input type="checkbox" name="predownload" $predownload><br />
 #if $show.seasonfolders == 1:
 #set $sf = "CHECKED"
 #else:

@@ -530,7 +530,7 @@ class Home:
         return _munge(t)
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, quality=None, predownload=None, seasonfolders=None):
+    def editShow(self, show=None, location=None, quality=None, seasonfolders=None):
         
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
@@ -540,13 +540,13 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
 
-        if location == None and quality == None and predownload == None and seasonfolders == None:
+        if location == None and quality == None and seasonfolders == None:
             
             t = Template(file="data/interfaces/default/editShow.tmpl")
             with showObj.lock:
                 t.show = showObj
                 t.qualityStrings = qualityStrings
-                t.qualities = (SD, HD, ANY)
+                t.qualities = (SD, HD, ANY, BEST)
             
             return _munge(t)
         
@@ -555,16 +555,10 @@ class Home:
         else:
             seasonfolders = 0
 
-        if predownload == "on":
-            predownload = 1
-        else:
-            predownload = 0
-
         with showObj.lock:
 
             Logger().log("changing quality from " + str(showObj.quality) + " to " + str(quality), DEBUG)
             showObj.quality = int(quality)
-            showObj.predownload = int(predownload)
             
             if showObj.seasonfolders != int(seasonfolders):
                 showObj.seasonfolders = int(seasonfolders)
