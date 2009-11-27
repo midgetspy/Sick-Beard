@@ -38,6 +38,8 @@ from sickbeard.common import *
 
 from lib.configobj import ConfigObj
 
+from multiprocessing import Process, freeze_support
+
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
@@ -150,6 +152,6 @@ def main():
 	
 	return
 		
-
 if __name__ == "__main__":
+	freeze_support()
 	main()
