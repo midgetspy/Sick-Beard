@@ -81,15 +81,23 @@ def snatchEpisode(result):
 
 def _doSearch(episode, provider):
 
-	foundEps = provider.findEpisode(episode)
-	
-	if len(foundEps) == 0:
+	# if we already got the SD then only try HD on BEST episodes
+	if episode.show.quality == BEST and episode.status == PREDOWNLOADED:
+		foundEps = provider.findEpisode(episode, HD)
+	else:
+		foundEps = provider.findEpisode(episode)
 
-		# if we couldn't find any HD eps and we're on BEST, retry for SD
-		if episode.show.quality == BEST and episode.status != PREDOWNLOADED:
-			foundEps = provider.findEpisode(episode, SD)
-			for curEp in foundEps:
-				curEp.predownloaded = True
+	
+	# if we found something and we're on BEST, retry to see if we can guarantee HD.
+	if len(foundEps) > 0 and episode.show.quality == BEST and episode.status != PREDOWNLOADED:
+			moreFoundEps = provider.findEpisode(episode, HD)
+			
+			# if we couldn't find a definitive HD version then mark the original ones as predownloaded
+			if len(moreFoundEps) == 0:
+				for curResult in foundEps:
+					curResult.predownloaded = True
+			else:
+				return moreFoundEps
 
 	return foundEps
 

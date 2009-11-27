@@ -86,7 +86,7 @@ def findEpisode(episode, forceQuality=None):
 	if forceQuality != None:
 		epQuality = forceQuality
 	elif episode.show.quality == BEST:
-		epQuality = HD
+		epQuality = ANY
 	else:
 		epQuality = episode.show.quality
 		
@@ -110,7 +110,7 @@ def findEpisode(episode, forceQuality=None):
 		showNames += [episode.show.name.replace("&", "and")]
 		
 	q = qualAttrs
-	q += "({0}) {1}x{2:0>2}".format(" OR ".join(["^\""+str(x)+"\"" for x in showNames]), episode.season, episode.episode)
+	q += "({0}) \" - {1}x{2:0>2}\"".format(" OR ".join(["^\""+str(x)+"\"" for x in showNames]), episode.season, episode.episode)
 	
 	newzbinURL = {
 	  'q': q,
