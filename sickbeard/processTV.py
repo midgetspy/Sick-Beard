@@ -136,7 +136,7 @@ def doIt(downloadDir, nzbName=None):
     
     # use file name, folder name, and NZB name (in that order) to try to figure out the episode info
     result = None
-    nameList = (biggest_file, downloadDir.split(os.path.sep)[-1])
+    nameList = [biggest_file, downloadDir.split(os.path.sep)[-1]]
     if nzbName != None:
         nameList.append(nzbName)
     

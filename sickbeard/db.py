@@ -66,7 +66,7 @@ class DBConnection:
 					sqlResults = self.connection.execute(query).fetchall()
 				else:
 					Logger().log("SQL: "+query+" with args "+str(args), DEBUG)
-					sqlResults = self.connection.execute(query, args)
+					sqlResults = self.connection.execute(query, args).fetchall()
 			except sqlite3.DatabaseError as e:
 				Logger().log("Fatal error executing query: " + str(e), ERROR)
 				raise

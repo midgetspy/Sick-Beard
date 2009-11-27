@@ -97,7 +97,7 @@ def findEpisode (episode, forceQuality=None):
 	sceneSearchStrings = sickbeard.helpers.makeSceneSearchString(episode)
 	
 	for curString in sceneSearchStrings:
-		params = {"search": curString, "nodupes": "1", "normalize": "1", "maxage": sickbeard.USENET_RETENTION}
+		params = {"search": "\""+curString+"\"", "nodupes": "1", "normalize": "1", "maxage": sickbeard.USENET_RETENTION}
 		params.update(quality)
 		
 		searchURL = "https://tvbinz.net/rss.php?" + urllib.urlencode(params)

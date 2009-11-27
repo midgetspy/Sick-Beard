@@ -66,11 +66,15 @@ class ShowAddQueue():
 class ShowAdder:
     
     def __init__(self, showDir):
-        if not os.path.isdir(showDir) or not os.path.isfile(os.path.join(showDir, "tvshow.nfo")):
+        
+        if not os.path.isdir(showDir):
             # if we can't create the dir, bail
             if not helpers.makeDir(showDir):
                 raise exceptions.NoNFOException()
-        
+
+        if not os.path.isfile(os.path.join(showDir, "tvshow.nfo")):
+            raise exceptions.NoNFOException()
+
         self.showDir = showDir
 
     def run(self):

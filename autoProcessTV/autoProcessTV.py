@@ -66,7 +66,7 @@ def processEpisode(dirName, nzbName=None):
             params['dir'] = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "pvrDir"))
     
     if config.get("SickBeard", "sourceDir") != "" and config.get("SickBeard", "xbmcDir") != "":
-        xbmcPath = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "xbmcDir"))
+        xbmcPath = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "    Dir"))
     else:
         xbmcPath = None
     
