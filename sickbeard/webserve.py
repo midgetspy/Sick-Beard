@@ -506,9 +506,11 @@ class Home:
         
         myDB = db.DBConnection()
         
-        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 AND airdate != 1 GROUP BY showid")
+        today = str(datetime.date.today().toordinal())
+        
+        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 AND airdate != 1 AND airdate <= "+today+" GROUP BY showid")
 
-        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 AND airdate != 1 GROUP BY showid")
+        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 AND airdate != 1 AND airdate <= "+today+" GROUP BY showid")
         
         return _munge(t)
 
