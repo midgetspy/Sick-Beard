@@ -144,7 +144,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None,
                     launch_browser=None, create_metadata=None, web_username=None,
-                    web_password=None):
+                    web_password=None, quality_default=None, season_folders_default=None):
 
         results = []
 
@@ -163,13 +163,20 @@ class ConfigGeneral:
         else:
             create_metadata = 0
             
+        if season_folders_default == "on":
+            season_folders_default = 1
+        else:
+            season_folders_default = 0
+            
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
         sickbeard.LAUNCH_BROWSER = launch_browser
         sickbeard.CREATE_METADATA = create_metadata
+        sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
+        sickbeard.QUALITY_DEFAULT = int(quality_default)
 
-        sickbeard.WEB_PORT = web_port
+        sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password

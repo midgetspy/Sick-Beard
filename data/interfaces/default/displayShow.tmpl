@@ -30,7 +30,7 @@ Location: $show.location<br />
 Location: $show._location**<br />
 #end try
 
-Quality: $qualityStrings[$show.quality]<br />
+Quality: $qualityStrings[int($show.quality)]<br />
 Season Folders: <img src="/images/#if $show.seasonfolders == 1 then "yes.gif" else "no.gif"#" width="16" height="16"><br />
 
 <br />

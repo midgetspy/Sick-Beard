@@ -1,4 +1,5 @@
 #import sickbeard
+#from sickbeard.common import *
 
 <!--#set global $topmenu="config"#-->
 <!--#set global $statpath="../.."#-->
@@ -24,22 +25,13 @@ Directory where Sick Beard should place its logs<br />
 <input type="text" name="log_dir" value="$sickbeard.LOG_DIR" size="35"><br />
 <br />
 
-#if $sickbeard.CREATE_METADATA == True:
-  #set $create_metadata = "CHECKED"
-#else
-  #set $create_metadata = ""
-#end if
-<input type="checkbox" name="create_metadata" $create_metadata> <strong>Create metadata:</strong><br />
-Whether you want Sick Beard to generate nfo/tbn files<br />
+<input type="checkbox" name="create_metadata" #if $sickbeard.CREATE_METADATA then "CHECKED" else ""#> <strong>Create metadata</strong><br />
+If checked Sick Beard will create nfo/tbn<br />
+files for all your media<br />
 <br />
 
-#if $sickbeard.LAUNCH_BROWSER == True:
-#set $launch_browser = "CHECKED"
-#else
-#set $launch_browser = ""
-#end if
-<input type="checkbox" name="launch_browser" $launch_browser> <strong>Launch browser on startup:</strong><br />
-Should Sick Beard open its home page in your browser when you start it?<br />
+<input type="checkbox" name="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "CHECKED" else ""#> <strong>Launch browser on startup:</strong><br />
+Should Sick Beard open its home page in your<br />browser when you start it?<br />
 <br />
 
 </fieldset>
@@ -50,32 +42,51 @@ Should Sick Beard open its home page in your browser when you start it?<br />
 
 <legend>Web Interface (requires restart)</legend>
 
-<strong>HTTP port:</strong><br />
-Web port Sick Beard should listen on
+<strong>HTTP port</strong><br />
+Web port Sick Beard should listen on<br />
 <input type="text" name="web_port" value="$sickbeard.WEB_PORT" size="10"><br />
 <br />
 
-#if $sickbeard.WEB_LOG == True:
-#set $web_log = "CHECKED"
-#else
-#set $web_log = ""
-#end if
-<input type="checkbox" name="web_log" $web_log> <strong>Enable HTTP log:</strong><br />
+<input type="checkbox" name="web_log" #if $sickbeard.WEB_LOG then "CHECKED" else ""#> <strong>Enable HTTP log</strong><br />
 Whether you want cherrypy logs to be generated<br />
 <br />
 
-<strong>Sick Beard username:</strong><br />
+<strong>Sick Beard username</strong><br />
 Web authentication username<br />
 <input type="text" name="web_username" value="$sickbeard.WEB_USERNAME" size="10"><br />
 <br />
 
-<strong>Sick Beard password:</strong><br />
+<strong>Sick Beard password</strong><br />
 Web authentication password<br />
 <input type="password" name="web_password" value="$sickbeard.WEB_PASSWORD" size="10"><br />
 <br />
 
 </div>
 </fieldset>
+
+<fieldset class="EntryFieldSet">
+
+<legend>Defaults</legend>
+
+<strong>Initial Quality</strong><br />
+Quality to assign to a newly created show<br />
+<select name="quality_default">
+#for $curQual in ($SD, $HD, $BEST, $ANY):
+<option value="$curQual" #if int($curQual) == int($sickbeard.QUALITY_DEFAULT) then "SELECTED" else ""#>$qualityStrings[$curQual]
+#end for
+</select><br />
+<br />
+
+<input type="checkbox" name="season_folders_default" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "CHECKED" else ""#> <strong>Use Season Folders</strong><br />
+Whether shows should use season folders by default<br />
+<br />
+
+</fieldset>
+</div>
+
+<div class="EntryBlock"><p><strong>
+    <em>NOTE:</em> Manual restart needed for web server changes!<br />
+</strong></p>
 
 
 <p>

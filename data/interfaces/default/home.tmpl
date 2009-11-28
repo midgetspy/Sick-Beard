@@ -109,7 +109,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td align="center">#if $curEp != None then $curEp.airdate else ""#</td>
     <td><a href="displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td>$curShow.network</td>
-    <td align="center">$qualityStrings[$curShow.quality]</td>
+    <td align="center">$qualityStrings[int($curShow.quality)]</td>
     <td align="center">$dlStat</td>
   </tr>
 

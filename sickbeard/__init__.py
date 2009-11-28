@@ -64,6 +64,9 @@ WEB_PASSWORD = None
 LAUNCH_BROWSER = None
 CREATE_METADATA = None
 
+QUALITY_DEFAULT = None
+SEASON_FOLDERS_DEFAULT = None
+
 USE_NZB = False
 NZB_METHOD = None 
 NZB_DIR = None
@@ -198,7 +201,7 @@ def initialize():
                 airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                DEFAULT_BACKLOG_SEARCH_FREQUENCY
+                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT
         
         if __INITIALIZED__:
             return False
@@ -231,6 +234,9 @@ def initialize():
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
         CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
         
+        QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
+        SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
+
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd'):
             NZB_METHOD = 'blackhole'
@@ -281,7 +287,7 @@ def initialize():
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
-                                                     runImmediately=True)
+                                                     runImmediately=False)
         
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(hours=1),
@@ -292,7 +298,7 @@ def initialize():
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
                                               cycleTime=datetime.timedelta(hours=1),
                                               threadName="UPDATE",
-                                              runImmediately=True)
+                                              runImmediately=False)
         
         botRunner = tvnzbbot.NZBBotRunner()
         #showAddScheduler = showAdder.ShowAddScheduler()
@@ -425,7 +431,8 @@ def save_config():
         SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, IRC_BOT, IRC_SERVER, \
         IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
         XBMC_UPDATE_LIBRARY, XBMC_HOST, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
-        USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY
+        USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
+        QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
@@ -435,7 +442,10 @@ def save_config():
     CFG['General']['nzb_method'] = NZB_METHOD
     CFG['General']['usenet_retention'] = int(USENET_RETENTION)
     CFG['General']['search_frequency'] = int(SEARCH_FREQUENCY)
+    CFG['General']['backlog_search_frequency'] = int(BACKLOG_SEARCH_FREQUENCY)
     CFG['General']['use_nzb'] = int(USE_NZB)
+    CFG['General']['quality_default'] = int(QUALITY_DEFAULT)
+    CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
     CFG['General']['create_metadata'] = int(CREATE_METADATA)

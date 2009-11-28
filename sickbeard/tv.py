@@ -50,8 +50,8 @@ class TVShow(object):
 		self.network = ""
 		self.genre = ""
 		self.runtime = 0
-		self.quality = ANY
-		self.seasonfolders = 0
+		self.quality = int(sickbeard.QUALITY_DEFAULT)
+		self.seasonfolders = int(sickbeard.SEASON_FOLDERS_DEFAULT)
 		
 		self.status = ""
 		self.airs = ""
