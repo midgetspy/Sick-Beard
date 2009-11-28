@@ -108,9 +108,18 @@ def findEpisode(episode, forceQuality=None):
 		showNames += [episode.show.name.replace("and", "&")]
 	if " & " in episode.show.name:
 		showNames += [episode.show.name.replace("&", "and")]
+
+	regex = "(.*)( \(.*\))"
+	result = re.match(regex, episode.show.name)
+	if result != None and result.group(2) != None:
+		showNames += [episode.show.name.replace(result.group(2), "")]
 		
 	q = qualAttrs
-	q += "({0}) \" - {1}x{2:0>2}\"".format(" OR ".join(["^\""+str(x)+"\"" for x in showNames]), episode.season, episode.episode)
+	
+	q += "(" + " OR ".join(["^\""+str(x)+" - {0}x{1:0>2}".format(episode.season, episode.episode)+"\"" for x in showNames]) + ")"
+	print "q == ", q
+	
+	#q += "({0}) - {1}x{2:0>2}\"".format(" OR ".join(["^\""+str(x)+"\"" for x in showNames]), episode.season, episode.episode)
 	
 	newzbinURL = {
 	  'q': q,
