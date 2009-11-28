@@ -117,9 +117,6 @@ def findEpisode(episode, forceQuality=None):
 	q = qualAttrs
 	
 	q += "(" + " OR ".join(["^\""+str(x)+" - {0}x{1:0>2}".format(episode.season, episode.episode)+"\"" for x in showNames]) + ")"
-	print "q == ", q
-	
-	#q += "({0}) - {1}x{2:0>2}\"".format(" OR ".join(["^\""+str(x)+"\"" for x in showNames]), episode.season, episode.episode)
 	
 	newzbinURL = {
 	  'q': q,
