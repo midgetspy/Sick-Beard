@@ -54,6 +54,10 @@ class CurrentSearcher():
             
             for curEp in epList:
                 
+                if curEp.show.paused:
+                    Logger().log("Show is currently paused, skipping search")
+                    continue
+                
                 foundEpisodes = search.findEpisode(curEp)
                 
                 if len(foundEpisodes) == 0:

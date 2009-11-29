@@ -557,7 +557,7 @@ class Home:
         return _munge(t)
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, quality=None, seasonfolders=None):
+    def editShow(self, show=None, location=None, quality=None, seasonfolders=None, paused=None):
         
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
@@ -582,14 +582,21 @@ class Home:
         else:
             seasonfolders = 0
 
+        if paused == "on":
+            paused = 1
+        else:
+            paused = 0
+
         with showObj.lock:
 
             Logger().log("changing quality from " + str(showObj.quality) + " to " + str(quality), DEBUG)
             showObj.quality = int(quality)
             
-            if showObj.seasonfolders != int(seasonfolders):
-                showObj.seasonfolders = int(seasonfolders)
+            if showObj.seasonfolders != seasonfolders:
+                showObj.seasonfolders = seasonfolders
                 showObj.refreshDir()
+
+            showObj.paused = paused
                         
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.isdir(location) and os.path.normpath(showObj._location) != os.path.normpath(location):

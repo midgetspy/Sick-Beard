@@ -76,7 +76,11 @@ class BacklogSearcher:
                 except exceptions.MultipleShowObjectsException:
                     Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"], ERROR) 
                     continue
-                
+
+                if show.paused:
+                    Logger().log("Show is currently paused, skipping search")
+                    continue
+                                
                 curEp = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
                 
                 Logger().log("Found backlog episode: " + curEp.prettyName(), DEBUG)

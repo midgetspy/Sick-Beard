@@ -3,6 +3,8 @@ import time
 import threading
 import traceback
 
+from lib.tvdb_api import tvdb_exceptions
+
 from sickbeard.logging import *
 
 class Scheduler:

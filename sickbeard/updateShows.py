@@ -28,6 +28,8 @@ import traceback
 import sickbeard
 
 from sickbeard import db
+
+from sickbeard import exceptions
 from sickbeard.logging import *
 
 from lib.BeautifulSoup import BeautifulStoneSoup
@@ -167,8 +169,11 @@ class ShowUpdater():
                         epList += s[0].values()
                     for curEp in epList:
                         # add the episode
-                        newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
-                        Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
+                        try:
+                            newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
+                            Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
+                        except exceptions.EpisodeNotFoundException as e:
+                            Logger().log("Unable to create episode "+str(curEp["seasonnumber"])+"x"+str(curEp["episodenumber"])+", skipping", ERROR)
         
         # now that we've updated the DB from TVDB see if there's anything we can add from TVRage
         with show.lock:
@@ -248,8 +253,11 @@ class ShowUpdater():
                             epList += s[0].values()
                         for curEp in epList:
                             # add the episode
-                            newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
-                            Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
+                            try:
+                                newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
+                                Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
+                            except exceptions.EpisodeNotFoundException as e:
+                                Logger().log("Unable to create episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+", skipping", ERROR)
             
             except tvdb_exceptions.tvdb_exception as e:
                 allSuccessful = False

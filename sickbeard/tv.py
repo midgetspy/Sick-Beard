@@ -55,6 +55,7 @@ class TVShow(object):
 		
 		self.status = ""
 		self.airs = ""
+		self.paused = 0
 
 		self.lock = threading.Lock()
 		self._isDirGood = False
@@ -104,6 +105,7 @@ class TVShow(object):
 				self.runtime = int(sqlResults[0]["runtime"])
 				self.quality = int(sqlResults[0]["quality"])
 				self.seasonfolders = int(sqlResults[0]["seasonfolders"])
+				self.paused = int(sqlResults[0]["paused"])
 	
 		#Logger().log(str(self.tvdbid) + ": Loading extra show info from theTVDB")
 		#try:
@@ -376,6 +378,7 @@ class TVShow(object):
 				self.airs = ""
 			self.quality = int(sqlResults[0]["quality"])
 			self.seasonfolders = int(sqlResults[0]["seasonfolders"])
+			self.paused = int(sqlResults[0]["paused"])
 	
 	def loadFromTVDB(self, cache=True):
 
@@ -600,15 +603,15 @@ class TVShow(object):
 		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 
 		# use this list regardless of whether it's in there or not
-		sqlValues = [self.name, self.tvdbid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders]
+		sqlValues = [self.name, self.tvdbid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders, self.paused]
 		
 		# if it's not in there then insert it
 		if len(sqlResults) == 0:
-			sql = "INSERT INTO tv_shows (show_name, tvdb_id, location, network, genre, runtime, quality,  airs, status, seasonfolders) VALUES (?,?,?,?,?,?,?,?,?,?)"
+			sql = "INSERT INTO tv_shows (show_name, tvdb_id, location, network, genre, runtime, quality,  airs, status, seasonfolders, paused) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
 
 		# if it's already there then just change it
 		elif len(sqlResults) == 1:
-			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=? WHERE tvdb_id=?"
+			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=?, paused=? WHERE tvdb_id=?"
 			sqlValues += [self.tvdbid]
 		else:
 			raise exceptions.MultipleDBShowsException("Multiple records for a single show")
