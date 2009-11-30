@@ -15,6 +15,9 @@
     #set $curDay = None
     #set $missed = False
     #for $curEp in $epList
+        #if $curEp.show.paused:
+          #continue
+        #end if
         #if $curEp.airdate < datetime.date.today() and $curDay == None:
 		  #if $missed == False
     <br /><h1 class="day">Missing</h1>

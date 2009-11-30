@@ -18,7 +18,8 @@
     }, 
     format: function(s) { 
         // format your data for normalization 
-        return s.split(" ")[0]; 
+        var nums = s.split(" / ");
+        return nums[0]/nums[1]; 
     }, 
     // set type, either numeric or text 
     type: 'numeric' 
