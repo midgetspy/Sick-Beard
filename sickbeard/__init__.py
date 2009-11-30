@@ -298,7 +298,7 @@ def initialize():
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
                                               cycleTime=datetime.timedelta(hours=1),
                                               threadName="UPDATE",
-                                              runImmediately=True)
+                                              runImmediately=False)
         
         botRunner = tvnzbbot.NZBBotRunner()
         #showAddScheduler = showAdder.ShowAddScheduler()
@@ -520,8 +520,11 @@ def updateMissingList():
             continue
         
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
-
-        epList.append(ep)
+        
+        if ep == None:
+            Logger().log("Somehow "+show.name+" - "+str(sqlEp["season"])+"x"+str(sqlEp["episode"])+" is None", ERROR)
+        else:
+            epList.append(ep)
 
     sickbeard.missingList = epList
 
@@ -553,8 +556,11 @@ def updateAiringList():
             continue
         
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
-
-        epList.append(ep)
+        
+        if ep == None:
+            Logger().log("Somehow "+show.name+" - "+str(sqlEp["season"])+"x"+str(sqlEp["episode"])+" is None", ERROR)
+        else:
+            epList.append(ep)
 
     sickbeard.airingList = epList
 

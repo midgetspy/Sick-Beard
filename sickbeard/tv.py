@@ -106,6 +106,8 @@ class TVShow(object):
 		
 				self.runtime = int(sqlResults[0]["runtime"])
 				self.quality = int(sqlResults[0]["quality"])
+				self.status = int(sqlResults[0]["status"])
+				self.airs = int(sqlResults[0]["airs"])
 				self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 				self.paused = int(sqlResults[0]["paused"])
 	
@@ -172,7 +174,7 @@ class TVShow(object):
 		
 		if not episode in self.episodes[season]:
 			Logger().log(str(self.tvdbid) + ": Episode " + str(season) + "x" + str(episode) + " didn't exist, trying to create it", DEBUG)
-			ep = None
+
 			if file != None:
 				ep = TVEpisode(self, season, episode, file)
 			else:
@@ -385,6 +387,8 @@ class TVShow(object):
 
 		t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
 		myEp = t[self.tvdbid]
+		
+		Logger().log("dow: "+str(myEp["airs_dayofweek"])+", time: "+str(myEp["airs_time"])+" status: "+str(myEp["status"]))
 		
 		if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
 			self.airs = myEp["airs_dayofweek"] + " " + myEp["airs_time"]
