@@ -517,7 +517,7 @@ class Home:
         
         t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
 
-        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
         
         return _munge(t)
 

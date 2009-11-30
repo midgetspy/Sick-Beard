@@ -106,8 +106,8 @@ class TVShow(object):
 		
 				self.runtime = int(sqlResults[0]["runtime"])
 				self.quality = int(sqlResults[0]["quality"])
-				self.status = int(sqlResults[0]["status"])
-				self.airs = int(sqlResults[0]["airs"])
+				self.status = sqlResults[0]["status"]
+				self.airs = sqlResults[0]["airs"]
 				self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 				self.paused = int(sqlResults[0]["paused"])
 	

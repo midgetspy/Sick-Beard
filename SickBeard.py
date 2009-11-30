@@ -25,6 +25,7 @@ import time
 import signal
 import sqlite3
 import sys
+import traceback
 
 import cherrypy
 import cherrypy.lib.auth_basic
@@ -57,6 +58,8 @@ def loadShowsFromDB():
 			myShowList.append(curShow)
 		except Exception as e:
 			Logger().log("There was an error creating the show in "+sqlShow["location"]+": "+str(e), ERROR)
+			Logger().log(traceback.format_exc(), DEBUG)
+			
 		#TODO: make it update the existing shows if the showlist has something in it
 	
 	return myShowList

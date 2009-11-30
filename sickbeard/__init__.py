@@ -298,7 +298,7 @@ def initialize():
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
                                               cycleTime=datetime.timedelta(hours=1),
                                               threadName="UPDATE",
-                                              runImmediately=False)
+                                              runImmediately=True)
         
         botRunner = tvnzbbot.NZBBotRunner()
         #showAddScheduler = showAdder.ShowAddScheduler()
@@ -519,6 +519,9 @@ def updateMissingList():
         if int(sqlEp["season"]) == 0:
             continue
         
+        if show == None:
+            continue
+        
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
         
         if ep == None:
@@ -553,6 +556,9 @@ def updateAiringList():
 
         # we aren't ever downloading specials
         if int(sqlEp["season"]) == 0:
+            continue
+        
+        if show == None:
             continue
         
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
