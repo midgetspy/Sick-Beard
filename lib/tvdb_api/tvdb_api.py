@@ -26,7 +26,7 @@ import tempfile
 import logging
 import datetime
 
-import sickbeard
+#import sickbeard
 
 try:
     import xml.etree.cElementTree as ElementTree

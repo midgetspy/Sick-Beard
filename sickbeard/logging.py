@@ -65,7 +65,7 @@ class Logger:
                 return None
             
             #TODO: try catch
-            fileObj = codecs.open(os.path.join(sickbeard.LOG_DIR, self._logName()), "a+", 'utf-8')
+            fileObj = open(os.path.join(sickbeard.LOG_DIR, self._logName()), "a+")
             return fileObj
         
         def shutdown(self):
@@ -86,6 +86,8 @@ class Logger:
             meThread = threading.currentThread().name
             timestamp = datetime.datetime.now().strftime("%I:%M:%S %p")
             outLine = "[" + timestamp + "] <" + meThread + "::" + logLevelStrings[logLevel] + "> " + message
+            
+            outLine = outLine.encode('utf-8')
             
             if self.fileObj == None:
                 self.fileObj = self._logObject()

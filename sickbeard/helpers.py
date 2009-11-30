@@ -177,7 +177,7 @@ def makeShowNFO(showID, showDir):
 		studio.appendChild(nfo.createTextNode(myShow["network"]))
 	tvNode.appendChild(studio)
 	
-	nfo_fh = codecs.open(os.path.join(showDir, "tvshow.nfo"), 'w', "utf-8")
+	nfo_fh = open(os.path.join(showDir, "tvshow.nfo"), 'w')
 	nfo_fh.write(nfo.toxml(encoding="UTF-8"))
 	nfo_fh.close()
 

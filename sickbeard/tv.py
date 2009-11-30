@@ -25,7 +25,6 @@ import threading
 import urllib
 import re
 import glob
-import codecs
 
 from xml.dom.minidom import Document
 
@@ -207,12 +206,12 @@ class TVShow(object):
 		# get file list
 		files = []
 		if not self.seasonfolders:
-			files = os.listdir(self._location)
+			files = os.listdir(unicode(self._location))
 		else:
-			for curFile in os.listdir(self._location):
+			for curFile in os.listdir(unicode(self._location)):
 				match = re.match("[Ss]eason (\d+)", curFile)
 				if match != None:
-					files += [os.path.join(curFile, x) for x in os.listdir(os.path.join(self._location, curFile))]
+					files += [os.path.join(curFile, x) for x in os.listdir(unicode(os.path.join(self._location, curFile)))]
 
 		# check for season folders
 		#Logger().log("Resulting file list: "+str(files))
@@ -223,10 +222,12 @@ class TVShow(object):
 		# create TVEpisodes from each media file (if possible)
 		for mediaFile in mediaFiles:
 			
+			curEpisode = None
+			
 			Logger().log(str(self.tvdbid) + ": Creating episode from " + mediaFile, DEBUG)
 			try:
 				curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
-			except exceptions.ShowNotFoundException as e:
+			except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException) as e:
 				Logger().log("Episode "+mediaFile+" returned an exception: "+str(e), ERROR)
 					
 
@@ -388,8 +389,6 @@ class TVShow(object):
 		t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
 		myEp = t[self.tvdbid]
 		
-		Logger().log("dow: "+str(myEp["airs_dayofweek"])+", time: "+str(myEp["airs_time"])+" status: "+str(myEp["status"]))
-		
 		if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
 			self.airs = myEp["airs_dayofweek"] + " " + myEp["airs_time"]
 
@@ -410,7 +409,7 @@ class TVShow(object):
 		Logger().log(str(self.tvdbid) + ": Loading show info from NFO")
 
 		xmlFile = os.path.join(self._location, "tvshow.nfo")
-		xmlFileObj = codecs.open(xmlFile, "r", "utf-8")
+		xmlFileObj = open(xmlFile, "r")
 		
 		try:
 			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
@@ -677,9 +676,13 @@ class TVEpisode:
 		if os.path.isfile(os.path.join(self.show.location, self.location)):
 			if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'nfo'))):
 				self.hasnfo = True
+			else:
+				self.hasnfo = False
 				
 			if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'tbn'))):
 				self.hastbn = True
+			else:
+				self.hastbn = False
 
 
 		
@@ -833,7 +836,7 @@ class TVEpisode:
 			#nfoFile = os.path.join(self.show.location, nfoFilename)
 			
 			if os.path.isfile(nfoFile):
-				nfoFileObj = codecs.open(nfoFile, "r", "utf-8")
+				nfoFileObj = open(nfoFile, "r")
 				try:
 					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
@@ -889,6 +892,8 @@ class TVEpisode:
 		
 		if sickbeard.CREATE_METADATA != True:
 			return
+		
+		self.checkForMetaFiles()
 		
 		epsToWrite = [self] + self.relatedEps
 
@@ -1044,8 +1049,9 @@ class TVEpisode:
 				nfoFilename = helpers.sanitizeFileName(self.prettyName() + '.nfo')
 	
 			Logger().log('Writing nfo to ' + os.path.join(self.show.location, nfoFilename))
-			nfo_fh = codecs.open(os.path.join(self.show.location, nfoFilename), 'w', "utf-8")
-			nfo_fh.write(nfo.toxml(encoding="UTF-8"))
+			nfo_fh = open(os.path.join(self.show.location, nfoFilename), 'w')
+			a = nfo.toxml(encoding="utf-8")
+			nfo_fh.write(a)
 			nfo_fh.close()
 			
 			for epToWrite in epsToWrite:
@@ -1103,9 +1109,36 @@ class TVEpisode:
 		
 	def prettyName (self):
 		
-		goodName = self.name
-		for relEp in self.relatedEps:
-			goodName += " & " + relEp.name
+		regex = "(.*) \(\d\)"
+
+
+		if len(self.relatedEps) == 0:
+			goodName = self.name
+
+		else:
+			singleName = True
+			curGoodName = None
+
+			for curName in [self.name]+[x.name for x in self.relatedEps]:
+				match = re.match(regex, curName)
+				if not match:
+					singleName = False
+					break
+	
+				if curGoodName == None:
+					curGoodName = match.group(1)
+				else:
+					if curGoodName != match.group(1):
+						singleName = False
+						break
+
+
+			if singleName:
+				goodName = curGoodName
+			else:
+				goodName = self.name
+				for relEp in self.relatedEps:
+					goodName += " & " + relEp.name
 		
 		goodEpString = "x{0:0>2}".format(self.episode)
 		for relEp in self.relatedEps:

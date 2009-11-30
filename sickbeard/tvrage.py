@@ -21,6 +21,7 @@
 import urllib
 import sqlite3
 import datetime
+import traceback
 
 import sickbeard
 
@@ -84,6 +85,7 @@ class TVRage:
             
         except Exception as e:
             Logger().log("Error encountered while checking TVRage<->TVDB sync: " + str(e), ERROR)
+            Logger().log(traceback.format_exc(), DEBUG)
         
         return False
     
@@ -99,7 +101,7 @@ class TVRage:
             Logger().log("Unable to load TVRage info: " + str(e), ERROR)
             raise exceptions.TVRageException("urlopen call to " + url + " failed")
         
-        urlData = [x.decode('ascii', 'ignore') for x in urlObj.readlines()]
+        urlData = [x.decode('utf-8') for x in urlObj.readlines()]
         
         info = {}
         

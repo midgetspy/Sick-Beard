@@ -83,6 +83,7 @@ class ShowAdder:
 
         try:
             newShow = TVShow(self.showDir)
+            newShow.loadFromTVDB()
             
         except exceptions.NoNFOException:
             Logger().log("Unable to load show from NFO", ERROR)
