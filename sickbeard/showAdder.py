@@ -101,24 +101,33 @@ class ShowAdder:
             # take the show out of the loading list
             del sickbeard.loadingShowList[self.showDir]
             return
+        
+        except Exception:
+            del sickbeard.loadingShowList[self.showDir]
+            raise
     
         if sickbeard.loadingShowList.has_key(self.showDir):
             sickbeard.loadingShowList[self.showDir].name = newShow.name
 
         try:
             newShow.loadEpisodesFromDir()
-        except (SickBeardException, tvdb_exceptions.tvdb_exception) as e:
+        except Exception as e:
             Logger().log("Error searching dir for episodes: " + str(e), ERROR)
+            Logger().log(traceback.format_exc(), DEBUG)
     
         try:
             newShow.loadEpisodesFromTVDB()
-        except tvdb_exceptions.tvdb_error as e:
+        except Exception as e:
             Logger().log("Error with TVDB, not creating episode list: " + str(e), ERROR)
+            Logger().log(traceback.format_exc(), DEBUG)
     
         try:
             newShow.saveToDB()
         except Exception as e:
             Logger().log("Error saving the episode to the database: " + str(e), ERROR)
+            Logger().log(traceback.format_exc(), DEBUG)
+        
+        newShow.flushEpisodes()
         
         # take the show out of the loading list
         del sickbeard.loadingShowList[self.showDir]

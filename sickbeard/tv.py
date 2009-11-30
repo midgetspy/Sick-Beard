@@ -25,6 +25,8 @@ import threading
 import urllib
 import re
 import glob
+import codecs
+
 from xml.dom.minidom import Document
 
 from lib.BeautifulSoup import BeautifulStoneSoup, NavigableString, HTMLParseError
@@ -146,10 +148,40 @@ class TVShow(object):
 
 	location = property(_getLocation, _setLocation)
 
-	
-	def getEpisode(self, season, episode, forceCreation=False):
+	# delete references to anything that's not in the internal lists
+	def flushEpisodes(self):
+		
+		for curSeason in self.episodes:
+			for curEp in self.episodes[curSeason]:
+				myEp = self.episodes[curSeason][curEp]
+				if myEp not in sickbeard.comingList and \
+				myEp not in sickbeard.airingList and \
+				myEp not in sickbeard.missingList:
+					self.episodes[curSeason][curEp] = None
+					del myEp
 
-		return TVEpisode(self, season, episode)
+	
+	def getEpisode(self, season, episode, file=None):
+
+		#return TVEpisode(self, season, episode)
+	
+		if not season in self.episodes:
+			self.episodes[season] = {}
+		
+		ep = None
+		
+		if not episode in self.episodes[season]:
+			Logger().log(str(self.tvdbid) + ": Episode " + str(season) + "x" + str(episode) + " didn't exist, trying to create it", DEBUG)
+			ep = None
+			if file != None:
+				ep = TVEpisode(self, season, episode, file)
+			else:
+				ep = TVEpisode(self, season, episode)
+			
+			if ep != None:
+				self.episodes[season][episode] = ep
+		
+		return self.episodes[season][episode]
 
 
 	def writeEpisodeNFOs (self):
@@ -161,12 +193,12 @@ class TVShow(object):
 		
 		for epResult in sqlResults:
 			Logger().log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), DEBUG)
-			curEp = self.getEpisode(epResult["season"], epResult["episode"], True)
+			curEp = self.getEpisode(epResult["season"], epResult["episode"])
 			curEp.createMetaFiles()
 
 
 	# find all media files in the show folder and create episodes for as many as possible
-	def loadEpisodesFromDir (self, skipDBEps=True):
+	def loadEpisodesFromDir (self):
 
 		Logger().log(str(self.tvdbid) + ": Loading all episodes from the show directory " + self._location)
 
@@ -189,17 +221,11 @@ class TVShow(object):
 		# create TVEpisodes from each media file (if possible)
 		for mediaFile in mediaFiles:
 			
-			if skipDBEps == True:
-			
-				Logger().log(str(self.tvdbid) + ": " + mediaFile + " isn't in the DB, creating a new episode for it", DEBUG)
+			Logger().log(str(self.tvdbid) + ": " + mediaFile + " isn't in the DB, creating a new episode for it", DEBUG)
+			try:
 				curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
-					
-			else:
-				Logger().log(str(self.tvdbid) + ": " + mediaFile + " isn't in the DB, creating a new episode for it", DEBUG)
-				try:
-					curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
-				except exceptions.ShowNotFoundException as e:
-					Logger().log("Episode "+mediaFile+" returned an exception: "+str(e), ERROR)
+			except exceptions.ShowNotFoundException as e:
+				Logger().log("Episode "+mediaFile+" returned an exception: "+str(e), ERROR)
 					
 
 			# store the reference in the show
@@ -221,7 +247,8 @@ class TVShow(object):
 				if episode == 0:
 					continue
 				try:
-					ep = TVEpisode(self, season, episode)
+					#ep = TVEpisode(self, season, episode)
+					ep = self.getEpisode(season, episode)
 				except exceptions.EpisodeNotFoundException:
 					Logger().log(str(self.tvdbid) + ": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
 					continue
@@ -270,38 +297,9 @@ class TVShow(object):
 
 		result = tvnamer.processSingleName(file)
 
-		showInfo = None
-
 		if result != None:
 
 			# for now lets assume that any show in the show dir belongs to the right place
-			showInfo = (self.tvdbid, self.name)
-			if 0 == 1:
-
-				try:
-					t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
-					showObj = t[result["file_seriesname"]]
-					showInfo = (int(showObj["id"]), showObj["seriesname"])
-				except tvdb_exceptions.tvdb_shownotfound:
-					Logger().log("Unable to figure out which show this is from the name: "+result["file_seriesname"]+". Assuming it belongs to us.", ERROR)
-					try:
-						showObj = t[self.tvdbid]
-						showInfo = (int(showObj["id"]), showObj["seriesname"])
-					except tvdb_exceptions.tvdb_shownotfound:
-						raise exceptions.ShowNotFoundException("TVDB returned zero results for show "+result["file_seriesname"])
-				except (tvdb_exceptions.tvdb_error, IOError) as e:
-					Logger().log("Error connecting to TVDB, trying to search the DB instead: "+ str(e), ERROR)
-					
-					showInfo = helpers.searchDBForShow(result["file_seriesname"])
-				
-			if showInfo == None:
-				Logger().log("Unable to figure out what show "+result["file_seriesname"] + "is, skipping", ERROR)
-				return None
-			
-			if showInfo[0] != int(self.tvdbid):
-				Logger().log("Show doesn't seem to match, assuming it is the show from the folder it belongs to", ERROR)
-				raise exceptions.WrongShowException("Expected "+str(self.tvdbid)+" but got "+str(showObj["id"]))
-			
 			season = int(result["seasno"])
 			
 			rootEp = None
@@ -310,13 +308,14 @@ class TVShow(object):
 	
 				episode = int(curEp)
 				
-				Logger().log(str(self.tvdbid) + ": " + file + " parsed to " + showInfo[1] + " " + str(season) + "x" + str(episode), DEBUG)
+				Logger().log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), DEBUG)
 	
 				curEp = self.getEpisode(season, episode)
 				
 				if curEp == None:
 					try:
-						curEp = TVEpisode(self, season, episode, file)
+						#curEp = TVEpisode(self, season, episode, file)
+						curEp = self.getEpisode(season, episode, file)
 					except exceptions.EpisodeNotFoundException:
 						Logger().log(str(self.tvdbid) + ": Unable to figure out what this file is, skipping", ERROR)
 						continue
@@ -407,7 +406,7 @@ class TVShow(object):
 		Logger().log(str(self.tvdbid) + ": Loading show info from NFO")
 
 		xmlFile = os.path.join(self._location, "tvshow.nfo")
-		xmlFileObj = open(xmlFile, "r")
+		xmlFileObj = codecs.open(xmlFile, "r", "utf-8")
 		
 		try:
 			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
@@ -453,7 +452,7 @@ class TVShow(object):
 			raise Exception("WTF")
 		else:
 			Logger().log(str(self.tvdbid) + ": Found episode " + str(sqlResults[0]["season"]) + "x" + str(sqlResults[0]["episode"]), DEBUG)
-			nextEp = self.getEpisode(int(sqlResults[0]["season"]), int(sqlResults[0]["episode"]), True)
+			nextEp = self.getEpisode(int(sqlResults[0]["season"]), int(sqlResults[0]["episode"]))
 			return nextEp
 
 		# if we didn't get an episode then try getting one from tvrage
@@ -491,7 +490,7 @@ class TVShow(object):
 			season = int(ep["season"])
 			episode = int(ep["episode"])
 			
-			curEp = self.getEpisode(season, episode, True)
+			curEp = self.getEpisode(season, episode)
 			
 			# if the path doesn't exist
 			# or if there's no season folders and it's not inside our show dir 
@@ -544,7 +543,7 @@ class TVShow(object):
 			# get the root episode and add all related episodes to it
 			rootEp = None
 			for myEp in epList:
-				curEp = self.getEpisode(myEp[0], myEp[1], True)
+				curEp = self.getEpisode(myEp[0], myEp[1])
 				if rootEp == None:
 					rootEp = curEp
 					rootEp.relatedEps = []
@@ -830,7 +829,7 @@ class TVEpisode:
 			#nfoFile = os.path.join(self.show.location, nfoFilename)
 			
 			if os.path.isfile(nfoFile):
-				nfoFileObj = open(nfoFile, "r")
+				nfoFileObj = codecs.open(nfoFile, "r", "utf-8")
 				try:
 					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
@@ -1041,7 +1040,7 @@ class TVEpisode:
 				nfoFilename = helpers.sanitizeFileName(self.prettyName() + '.nfo')
 	
 			Logger().log('Writing nfo to ' + os.path.join(self.show.location, nfoFilename))
-			nfo_fh = open(os.path.join(self.show.location, nfoFilename), 'w')
+			nfo_fh = codecs.open(os.path.join(self.show.location, nfoFilename), 'w', "utf-8")
 			nfo_fh.write(nfo.toxml(encoding="UTF-8"))
 			nfo_fh.close()
 			

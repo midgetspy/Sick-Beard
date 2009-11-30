@@ -209,7 +209,7 @@ def doIt(downloadDir, nzbName=None):
         returnStr += logStr + "\n"
         
         # now that we've figured out which episode this file is just load it manually
-        curEp = showResults.getEpisode(season, episode, True)
+        curEp = showResults.getEpisode(season, episode)
         
         if rootEp == None:
             rootEp = curEp

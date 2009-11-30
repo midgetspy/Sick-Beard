@@ -215,7 +215,7 @@ class NZBBot(SingleServerIRCBot):
             season = int(result["seasno"])
             episode = int(result["epno"][0])
             
-            ep = show[0].getEpisode(season, episode, True)
+            ep = show[0].getEpisode(season, episode)
             
             if ep.status not in (SNATCHED, DOWNLOADED, SKIPPED) and quality == ep.quality:
                 

@@ -170,7 +170,7 @@ class ShowUpdater():
                     for curEp in epList:
                         # add the episode
                         try:
-                            newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
+                            newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']))
                             Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
                         except exceptions.EpisodeNotFoundException as e:
                             Logger().log("Unable to create episode "+str(curEp["seasonnumber"])+"x"+str(curEp["episodenumber"])+", skipping", ERROR)
@@ -180,7 +180,9 @@ class ShowUpdater():
             show.loadLatestFromTVRage()
 
         show.writeEpisodeNFOs()
-            
+        
+        show.flushEpisodes()
+        
         # finish up the update
         if doUpdate:
             
@@ -254,7 +256,7 @@ class ShowUpdater():
                         for curEp in epList:
                             # add the episode
                             try:
-                                newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']), True)
+                                newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']))
                                 Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
                             except exceptions.EpisodeNotFoundException as e:
                                 Logger().log("Unable to create episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+", skipping", ERROR)

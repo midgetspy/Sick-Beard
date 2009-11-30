@@ -23,6 +23,7 @@ import datetime
 import os.path
 import threading
 import unicodedata
+import codecs
 
 from exceptions import *
 
@@ -64,7 +65,7 @@ class Logger:
                 return None
             
             #TODO: try catch
-            fileObj = open(os.path.join(sickbeard.LOG_DIR, self._logName()), "a+")
+            fileObj = codecs.open(os.path.join(sickbeard.LOG_DIR, self._logName()), "a+", 'utf-8')
             return fileObj
         
         def shutdown(self):
@@ -85,7 +86,6 @@ class Logger:
             meThread = threading.currentThread().name
             timestamp = datetime.datetime.now().strftime("%I:%M:%S %p")
             outLine = "[" + timestamp + "] <" + meThread + "::" + logLevelStrings[logLevel] + "> " + message
-            outLine = outLine.decode('ascii', 'ignore')
             
             if self.fileObj == None:
                 self.fileObj = self._logObject()

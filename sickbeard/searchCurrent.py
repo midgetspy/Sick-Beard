@@ -92,7 +92,7 @@ class CurrentSearcher():
             except exceptions.MultipleShowObjectsException:
                 Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
                 return None
-            ep = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
+            ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
             with ep.lock:
                 ep.status = MISSED
                 ep.saveToDB()

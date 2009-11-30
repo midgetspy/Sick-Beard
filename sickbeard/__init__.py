@@ -519,7 +519,7 @@ def updateMissingList():
         if int(sqlEp["season"]) == 0:
             continue
         
-        ep = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
+        ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
 
         epList.append(ep)
 
@@ -552,7 +552,7 @@ def updateAiringList():
         if int(sqlEp["season"]) == 0:
             continue
         
-        ep = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
+        ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
 
         epList.append(ep)
 
@@ -588,7 +588,7 @@ def getEpList(epIDs, showid=None):
 
     for curEp in sqlResults:
         curShowObj = helpers.findCertainShow(sickbeard.showList, int(curEp["showid"]))
-        curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]), True)
+        curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]))
         epList.append(curEpObj)
     
     return epList  

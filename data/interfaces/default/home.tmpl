@@ -74,7 +74,7 @@
 
 <table id="showListTable" class="sickbeardTable tablesorter">
 
-  <thead><tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th></tr></thead>
+  <thead><tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th></tr></thead>
   <tbody>
 
 #for $curLoadingShow in $sickbeard.loadingShowList:
@@ -82,6 +82,7 @@
   <tr class="evenLine">
     <td align="center">(loading)</td>
     <td>#if $sickbeard.loadingShowList[$curLoadingShow].name == None then "Loading... (" + $curLoadingShow + ")" else $sickbeard.loadingShowList[$curLoadingShow].name#</td>
+    <td></td>
     <td></td>
     <td></td>
     <td></td>
@@ -111,6 +112,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td>$curShow.network</td>
     <td align="center">$qualityStrings[int($curShow.quality)]</td>
     <td align="center">$dlStat</td>
+	<td align="center"><img src="/images/#if int($curShow.paused) == 0 then "yes.gif" else "no.gif"#" width="16" height="16"><br /></td>
   </tr>
 
 #end for

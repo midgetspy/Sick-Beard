@@ -75,7 +75,7 @@ def _getEpisode(show, season, episode):
     if showObj == None:
         return "Show not in show list"
 
-    epObj = showObj.getEpisode(int(season), int(episode), True)
+    epObj = showObj.getEpisode(int(season), int(episode))
     
     if epObj == None:
         return "Episode couldn't be retrieved"
@@ -515,9 +515,9 @@ class Home:
         
         today = str(datetime.date.today().toordinal())
         
-        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 AND airdate != 1 AND airdate <= "+today+" GROUP BY showid")
+        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status=4 AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
 
-        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 AND airdate != 1 AND airdate <= "+today+" GROUP BY showid")
+        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status!=1 AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
         
         return _munge(t)
 
@@ -716,7 +716,7 @@ class Home:
 
                 epInfo = curEp.split('x')
 
-                epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]), True)
+                epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]))
             
                 if epObj == None:
                     return _genericMessage("Error", "Episode couldn't be retrieved")

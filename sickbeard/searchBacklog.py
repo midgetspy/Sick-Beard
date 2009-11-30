@@ -81,7 +81,7 @@ class BacklogSearcher:
                     Logger().log("Show is currently paused, skipping search")
                     continue
                                 
-                curEp = show.getEpisode(sqlEp["season"], sqlEp["episode"], True)
+                curEp = show.getEpisode(sqlEp["season"], sqlEp["episode"])
                 
                 Logger().log("Found backlog episode: " + curEp.prettyName(), DEBUG)
             
