@@ -266,6 +266,8 @@ class ShowUpdater():
                 Logger().log("There was an error with TVDB, show will only be updated from TVRage: "+str(e), ERROR)
                 
                 #show.loadEpisodesFromTVDB(False)
+
+            show.flushEpisodes()
             
             with show.lock:
                 Logger().log("Supplementing TVDB info with TVRage info if possible")
