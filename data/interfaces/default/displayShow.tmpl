@@ -60,7 +60,7 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
   <tr class="seasonheader">
     <td colspan=8>
 	<br />
-	<h2>Season $epResult["season"]
+	<h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#
 	<!--(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
 	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)-->
 	<br />
