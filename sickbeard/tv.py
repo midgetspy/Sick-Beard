@@ -161,7 +161,7 @@ class TVShow(object):
 				myEp not in sickbeard.missingList:
 					self.episodes[curSeason][curEp] = None
 					del myEp
-
+			
 	
 	def getEpisode(self, season, episode, file=None):
 
@@ -172,7 +172,7 @@ class TVShow(object):
 		
 		ep = None
 		
-		if not episode in self.episodes[season]:
+		if not episode in self.episodes[season] or self.episodes[season][episode] == None:
 			Logger().log(str(self.tvdbid) + ": Episode " + str(season) + "x" + str(episode) + " didn't exist, trying to create it", DEBUG)
 
 			if file != None:
@@ -223,7 +223,7 @@ class TVShow(object):
 		# create TVEpisodes from each media file (if possible)
 		for mediaFile in mediaFiles:
 			
-			Logger().log(str(self.tvdbid) + ": " + mediaFile + " isn't in the DB, creating a new episode for it", DEBUG)
+			Logger().log(str(self.tvdbid) + ": Creating episode from " + mediaFile, DEBUG)
 			try:
 				curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
 			except exceptions.ShowNotFoundException as e:
