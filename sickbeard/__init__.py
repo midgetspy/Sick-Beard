@@ -301,7 +301,7 @@ def initialize():
                                               threadName="UPDATE",
                                               runImmediately=True)
         
-        botRunner = tvnzbbot.NZBBotRunner()
+        #botRunner = tvnzbbot.NZBBotRunner()
 
         showAddScheduler = scheduler.Scheduler(showAdder.ShowAddQueue(),
                                                cycleTime=datetime.timedelta(seconds=3),
@@ -347,7 +347,7 @@ def start():
             # start the show adder
             showUpdateScheduler.thread.start()
 
-            if IRC_BOT:
+            if IRC_BOT and False:
                 botRunner.thread.start()
 
 
@@ -399,12 +399,13 @@ def halt ():
             except:
                 pass
             
-            botRunner.abort = True
-            Logger().log("Waiting for the IRC thread to exit")
-            try:
-                botRunner.thread.join(10)
-            except:
-                pass
+            if False:
+                botRunner.abort = True
+                Logger().log("Waiting for the IRC thread to exit")
+                try:
+                    botRunner.thread.join(10)
+                except:
+                    pass
 
             __INITIALIZED__ = False
 
@@ -612,8 +613,13 @@ def getEpList(epIDs, showid=None):
     if epIDs == None or len(epIDs) == 0:
         return []
     
+    if showid != None:
+        showStr = " AND showid = "+str(showid)
+    else:
+        showStr = ""
+    
     myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE tvdbid in (" + ",".join([str(x) for x in epIDs]) + ")")
+    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE tvdbid in (" + ",".join([str(x) for x in epIDs]) + ")"+showStr)
 
     epList = []
 

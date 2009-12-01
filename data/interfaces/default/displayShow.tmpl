@@ -10,7 +10,7 @@
 
 <span class="SubMenu">
 <a href="editShow?show=$show.tvdbid">Edit</a> |
-<a href="deleteShow?show=$show.tvdbid">Delete</a> | 
+<a href="deleteShow?show=$show.tvdbid" onclick="javascript:return confirm('Are you sure you want to delete $show.name?')">Delete</a> | 
 <a href="updateShow?show=$show.tvdbid">Refresh</a> | 
 <a href="fixEpisodeNames?show=$show.tvdbid">Rename Episodes</a> |
 <a href="updateShow?show=$show.tvdbid&force=1">Force Full Update</a>
@@ -22,13 +22,13 @@
 <br />
 #if $sickbeard.showAddScheduler.action.isInQueue($show):
 <br />
-<div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show currently being added</div>
+<div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show is incomplete - it is currently being added</div>
 <br />
 #end if
 
 #if $sickbeard.showUpdateScheduler.action.isInQueue($show):
 <br />
-<span class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show currently being updated</span>
+<span class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show is currently being updated</span>
 <br />
 #end if
 

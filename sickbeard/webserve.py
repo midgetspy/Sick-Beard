@@ -482,7 +482,11 @@ class HomeAddShows:
                     break
                 time.sleep(1)
 
-            raise cherrypy.HTTPRedirect("../")
+            if showDir in sickbeard.loadingShowList and sickbeard.loadingShowList[showDir].show != None:
+                raise cherrypy.HTTPRedirect("../displayShow?show="+str(sickbeard.loadingShowList[showDir].show.tvdbid))
+            else:
+                raise cherrypy.HTTPRedirect("../")
+                                    
         
         # if we have a single ID then just make a show with that ID
         elif len(showIDs) == 1:
