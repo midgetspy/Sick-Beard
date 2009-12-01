@@ -116,8 +116,9 @@ h1 {
 }
 
 .showNotice {
-    background-color: #790000;
-    color: white;
+    background-color: #ff9c99;
+    color: black;
+    border: black 1px solid;
 }
 
 th  {
