@@ -35,6 +35,53 @@ from sickbeard.logging import *
 from lib.BeautifulSoup import BeautifulStoneSoup
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
+class ShowUpdateQueue():
+
+    def __init__(self):
+        
+        self.updateQueue = []
+        self.updateThread = None
+        
+        self.currentlyUpdating = None
+
+    def isInQueue(self, show):
+        return show in self.updateQueue or show == self.currentlyUpdating
+
+    def addShowToQueue(self, show, force=False):
+        self.updateQueue.append(SingleShowUpdater(show, force))
+
+    def _doUpdateShow(self):
+
+        # only start a new add task if one isn't already going
+        if self.updateThread == None or self.updateThread.isAlive() == False:
+
+            if self.currentlyUpdating != None:
+                self.currentlyUpdating = None
+
+            # if there's something in the queue then run it in a thread and take it out of the queue
+            if len(self.updateQueue) > 0:
+                Logger().log("Starting new update task for show " + self.updateQueue[0].show.name)
+                self.updateThread = threading.Thread(None, self.updateQueue[0].doUpdate, "UPDATESHOW-"+str(self.updateQueue[0].show.tvdbid))
+                self.updateThread.start()
+                self.currentlyUpdating = self.updateQueue[0].show
+                del self.updateQueue[0]
+
+    def run(self):
+        self._doUpdateShow()
+
+
+class SingleShowUpdater():
+    
+    def __init__(self, show, force=False):
+        self.show = show
+        self.force = force
+
+    def doUpdate(self):
+        su = ShowUpdater()
+        Logger().log("Updating single show "+self.show.name)
+        su.updateShowFromTVDB(self.show, self.force)
+
+
 class ShowUpdater():
 
     def __init__(self):
@@ -183,10 +230,7 @@ class ShowUpdater():
         
         show.flushEpisodes()
         
-        # finish up the update
-        if doUpdate:
-            
-            Logger().log("Update complete")
+        Logger().log("Update complete")
 
 
     def updateShowsFromTVDB(self):

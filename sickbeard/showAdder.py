@@ -40,6 +40,9 @@ class ShowAddQueue():
         self.addQueue = []
         self.addThread = None
 
+    def isInQueue(self, show):
+        return show in [x.show for x in sickbeard.loadingShowList.values()]
+
     def addShowToQueue(self, dir):
         try:
             self.addQueue.append(ShowAdder(dir))
@@ -76,14 +79,15 @@ class ShowAdder:
             raise exceptions.NoNFOException()
 
         self.showDir = showDir
+        self.curShow = None
 
     def run(self):
 
         sickbeard.loadingShowList[self.showDir] = ui.LoadingTVShow(self.showDir)
 
         try:
-            newShow = TVShow(self.showDir)
-            newShow.loadFromTVDB()
+            self.curShow = TVShow(self.showDir)
+            self.curShow.loadFromTVDB()
             
         except exceptions.NoNFOException:
             Logger().log("Unable to load show from NFO", ERROR)
@@ -108,30 +112,30 @@ class ShowAdder:
             raise
     
         if sickbeard.loadingShowList.has_key(self.showDir):
-            sickbeard.loadingShowList[self.showDir].name = newShow.name
+            sickbeard.loadingShowList[self.showDir].show = self.curShow
 
         try:
-            newShow.loadEpisodesFromDir()
+            self.curShow.loadEpisodesFromDir()
         except Exception as e:
             Logger().log("Error searching dir for episodes: " + str(e), ERROR)
             Logger().log(traceback.format_exc(), DEBUG)
     
         try:
-            newShow.loadEpisodesFromTVDB()
+            self.curShow.loadEpisodesFromTVDB()
         except Exception as e:
             Logger().log("Error with TVDB, not creating episode list: " + str(e), ERROR)
             Logger().log(traceback.format_exc(), DEBUG)
     
         try:
-            newShow.saveToDB()
+            self.curShow.saveToDB()
         except Exception as e:
             Logger().log("Error saving the episode to the database: " + str(e), ERROR)
             Logger().log(traceback.format_exc(), DEBUG)
         
-        newShow.flushEpisodes()
+        self.curShow.flushEpisodes()
         
         # take the show out of the loading list
         del sickbeard.loadingShowList[self.showDir]
         
         # add it to the real list
-        sickbeard.showList.append(newShow)
+        sickbeard.showList.append(self.curShow)

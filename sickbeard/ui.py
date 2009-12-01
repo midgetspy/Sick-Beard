@@ -31,7 +31,7 @@ from lib.tvdb_api import tvdb_exceptions
 class LoadingTVShow():
     def __init__(self, dir):
         self.dir = dir
-        self.name = None
+        self.show = None
         
 def addShowsFromRootDir(dir):
     
@@ -40,7 +40,7 @@ def addShowsFromRootDir(dir):
     if not os.path.isdir(dir):
         return "Couldn't find directory " + dir
     
-    for curDir in os.listdir(dir):
+    for curDir in os.listdir(unicode(dir)):
         showDir = os.path.join(dir, curDir)
         logStr = "Attempting to load show in " + showDir
         Logger().log(logStr, DEBUG)

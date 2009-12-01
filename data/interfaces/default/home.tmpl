@@ -34,7 +34,7 @@
     }, 
     format: function(s) { 
         // format your data for normalization 
-        return s.toLowerCase().replace(/hd/,2).replace(/sd/,1).replace(/any/,0); 
+        return s.toLowerCase().replace('hd',3).replace('sd',1).replace('any',0).replace('best',2); 
     }, 
     // set type, either numeric or text 
     type: 'numeric' 
@@ -82,7 +82,14 @@
 
   <tr class="evenLine">
     <td align="center">(loading)</td>
-    <td>#if $sickbeard.loadingShowList[$curLoadingShow].name == None then "Loading... (" + $curLoadingShow + ")" else $sickbeard.loadingShowList[$curLoadingShow].name#</td>
+    <td>
+    #if $sickbeard.loadingShowList[$curLoadingShow].show == None:
+    "Loading... ($curLoadingShow)
+    #else:
+    #set $curShow = $sickbeard.loadingShowList[$curLoadingShow].show
+    <a href="displayShow?show=$curShow.tvdbid">$curShow.name</a>
+    #end if
+    </td>
     <td></td>
     <td></td>
     <td></td>

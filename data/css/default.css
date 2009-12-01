@@ -100,6 +100,14 @@ a.current:hover {
 	padding: 5px;
 }
 
+.showNotice {
+	display: block;
+	padding: 15px;
+    text-decoration: bold;
+    font-size: 2.0em;
+    text-align: center;
+}
+
 table {
 	font-size: 9pt;
 	margin: 0px;

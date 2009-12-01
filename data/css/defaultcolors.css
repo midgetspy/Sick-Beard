@@ -44,9 +44,6 @@ a.current {
 	background-color: #F5F1E4;
 
 }
-.SubMenu {
-	background-color: #000;
-}
 
 table {
 
@@ -118,6 +115,11 @@ h1 {
     color:white;
 }
 
+.showNotice {
+    background-color: #790000;
+    color: white;
+}
+
 th  {
 background-color: #333;
 color:white;
@@ -136,7 +138,7 @@ color:black;
 }
 
 a.imgLink:hover {
-    background-color: white;
+    background-color: transparent;
 }
 
 a.remove {

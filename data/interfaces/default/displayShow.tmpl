@@ -19,7 +19,20 @@
 <script type="text/javascript" src="/js/displayShow.js"></script>
 <script type="text/javascript" src="/js/showPlot.js"></script>
 
-<h2>$show.name</h2>
+#if $sickbeard.showAddScheduler.action.isInQueue($show):
+<br />
+<br />
+<div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show currently being added</div>
+<br />
+#end if
+
+#if $sickbeard.showUpdateScheduler.action.isInQueue($show):
+<br />
+<span class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show currently being updated</span>
+<br />
+#end if
+
+<h2><a href="http://thetvdb.com/?tab=series&id=$show.tvdbid" target="_new">$show.name</a></h2>
 
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
@@ -77,7 +90,7 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>">
 #end if
     </td>
-  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
   	<td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
     <td align="center">$epResult["episode"]</td>
     <td>$epResult["name"] <a href="#" class="plotLink" id="plotLink_<%=str(epResult["season"])+"_"+str(epResult["episode"])%>">[+]</a>

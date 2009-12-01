@@ -474,7 +474,13 @@ class HomeAddShows:
                 return _munge(myTemplate)
 
             # give it a chance to get on the show list so we don't refresh and it looks like nothing happened
-            time.sleep(3)
+            maxWait = 10
+            curWait = 0
+            while showDir not in sickbeard.loadingShowList:
+                curWait += 1
+                if curWait > maxWait:
+                    break
+                time.sleep(1)
 
             raise cherrypy.HTTPRedirect("../")
         
@@ -537,9 +543,10 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         else:
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList+[x.show for x in sickbeard.loadingShowList.values()], int(show))
             
             if showObj == None:
+                
                 return _genericMessage("Error", "Unable to find the specified show.")
 
         myDB = db.DBConnection()
@@ -657,7 +664,15 @@ class Home:
             return _genericMessage("Error", "Unable to find the specified show")
         
         # force the update from the DB
-        sickbeard.updateScheduler.action.updateShowFromTVDB(showObj, bool(force))
+        sickbeard.showUpdateScheduler.action.addShowToQueue(showObj, bool(force))
+        
+        maxWait = 10
+        curWait = 0
+        while not sickbeard.showUpdateScheduler.action.isInQueue(showObj):
+            curWait += 1
+            if curWait > maxWait:
+                break
+            time.sleep(1)
         
         raise cherrypy.HTTPRedirect("displayShow?show=" + show)
 

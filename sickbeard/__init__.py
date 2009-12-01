@@ -42,6 +42,7 @@ currentSearchScheduler = None
 updateScheduler = None
 botRunner = None
 showAddScheduler = None
+showUpdateScheduler = None
 
 ircBot = None
 
@@ -201,7 +202,7 @@ def initialize():
                 airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT
+                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler
         
         if __INITIALIZED__:
             return False
@@ -298,11 +299,19 @@ def initialize():
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
                                               cycleTime=datetime.timedelta(hours=6),
                                               threadName="UPDATE",
-                                              runImmediately=True)
+                                              runImmediately=False)
         
         botRunner = tvnzbbot.NZBBotRunner()
-        #showAddScheduler = showAdder.ShowAddScheduler()
-        showAddScheduler = scheduler.Scheduler(showAdder.ShowAddQueue(), cycleTime=datetime.timedelta(seconds=3), threadName="SHOWADDQUEUE", silent=True)
+
+        showAddScheduler = scheduler.Scheduler(showAdder.ShowAddQueue(),
+                                               cycleTime=datetime.timedelta(seconds=3),
+                                               threadName="SHOWADDQUEUE",
+                                               silent=True)
+        
+        showUpdateScheduler = scheduler.Scheduler(updateShows.ShowUpdateQueue(),
+                                               cycleTime=datetime.timedelta(seconds=3),
+                                               threadName="SHOWUPDATEQUEUE",
+                                               silent=True)
         
         showList = []
         loadingShowList = {}
@@ -317,7 +326,7 @@ def initialize():
 def start():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
-            updateScheduler, IRC_BOT, botRunner, showAddScheduler
+            updateScheduler, IRC_BOT, botRunner, showAddScheduler, showUpdateScheduler
     
     with INIT_LOCK:
         
@@ -335,6 +344,9 @@ def start():
             # start the show adder
             showAddScheduler.thread.start()
 
+            # start the show adder
+            showUpdateScheduler.thread.start()
+
             if IRC_BOT:
                 botRunner.thread.start()
 
@@ -342,7 +354,7 @@ def start():
 def halt ():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, updateScheduler, \
-            botRunner, showAddScheduler
+            botRunner, showAddScheduler, showUpdateScheduler
     
     with INIT_LOCK:
         
@@ -377,6 +389,13 @@ def halt ():
             Logger().log("Waiting for the SHOWADDER thread to exit")
             try:
                 showAddScheduler.thread.join(10)
+            except:
+                pass
+            
+            showUpdateScheduler.abort = True
+            Logger().log("Waiting for the SHOWUPDATER thread to exit")
+            try:
+                showUpdateScheduler.thread.join(10)
             except:
                 pass
             
