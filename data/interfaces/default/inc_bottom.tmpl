@@ -2,7 +2,9 @@
 #import datetime
 #from sickbeard import db
 <div class="footer">
-<b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> | <b>Update</b>: <%=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%>  
+<b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> |
+<b>Update</b>: <%=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%> | 
+<b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%A")  
 <br>
 #set $myDB = $db.DBConnection()
 #set $numShows = myDB.select("SELECT COUNT(*) FROM tv_shows")[0][0]

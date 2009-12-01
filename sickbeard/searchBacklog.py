@@ -34,6 +34,8 @@ class BacklogSearchScheduler(scheduler.Scheduler):
         self.action._set_lastBacklog(1)
         self.lastRun = datetime.datetime.fromordinal(1)
         
+    def nextRun(self):
+        return datetime.date.fromordinal(self.action._lastBacklog + self.action.cycleTime)
 
 class BacklogSearcher:
 
