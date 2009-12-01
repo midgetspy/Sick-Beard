@@ -39,26 +39,31 @@ class ShowAddQueue():
         
         self.addQueue = []
         self.addThread = None
+        self.currentlyAdding = None
 
-    def isInQueue(self, show):
-        return show in [x.show for x in sickbeard.loadingShowList.values()]
+    def isBeingAdded(self, show):
+        return self.currentlyAdding != None and show == self.currentlyAdding.curShow
 
     def addShowToQueue(self, dir):
         try:
             self.addQueue.append(ShowAdder(dir))
         except exceptions.NoNFOException:
-            Logger().log(" Unable to add show from " + dir + ", NFO must be created first", ERROR)
+            Logger().log("Unable to add show from " + dir + ", unable to create NFO", DEBUG)
             raise
 
     def _doAddShow(self):
         # only start a new add task if one isn't already going
         if self.addThread == None or self.addThread.isAlive() == False:
 
+            if self.currentlyAdding != None:
+                self.currentlyAdding = None
+
             # if there's something in the queue then run it in a thread and take it out of the queue
             if len(self.addQueue) > 0:
                 Logger().log("Starting new add task for dir " + self.addQueue[0].showDir)
                 self.addThread = threading.Thread(None, self.addQueue[0].run, "ADDSHOW")
                 self.addThread.start()
+                self.currentlyAdding = self.addQueue[0]
                 del self.addQueue[0]
 
     def run(self):
@@ -81,12 +86,16 @@ class ShowAdder:
         self.showDir = showDir
         self.curShow = None
 
+        self.curShow = TVShow(self.showDir)
+        
+
     def run(self):
+
+        Logger().log("Starting to add show "+self.showDir)
 
         sickbeard.loadingShowList[self.showDir] = ui.LoadingTVShow(self.showDir)
 
         try:
-            self.curShow = TVShow(self.showDir)
             self.curShow.loadFromTVDB()
             
         except exceptions.NoNFOException:
@@ -114,6 +123,9 @@ class ShowAdder:
         if sickbeard.loadingShowList.has_key(self.showDir):
             sickbeard.loadingShowList[self.showDir].show = self.curShow
 
+        # add it to the real list
+        sickbeard.showList.append(self.curShow)
+
         try:
             self.curShow.loadEpisodesFromDir()
         except Exception as e:
@@ -137,5 +149,3 @@ class ShowAdder:
         # take the show out of the loading list
         del sickbeard.loadingShowList[self.showDir]
         
-        # add it to the real list
-        sickbeard.showList.append(self.curShow)

@@ -44,8 +44,11 @@ class ShowUpdateQueue():
         
         self.currentlyUpdating = None
 
+    def isBeingUpdated(self, show):
+        return show == self.currentlyUpdating
+
     def isInQueue(self, show):
-        return show in self.updateQueue or show == self.currentlyUpdating
+        return show in [x.show for x in self.updateQueue]
 
     def addShowToQueue(self, show, force=False):
         self.updateQueue.append(SingleShowUpdater(show, force))

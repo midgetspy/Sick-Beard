@@ -10,25 +10,35 @@
 
 <span class="SubMenu">
 <a href="editShow?show=$show.tvdbid">Edit</a> |
-<a href="deleteShow?show=$show.tvdbid" onclick="javascript:return confirm('Are you sure you want to delete $show.name?')">Delete</a> | 
+#if not $sickbeard.showAddScheduler.action.isBeingAdded($show):
+#if not $sickbeard.showUpdateScheduler.action.isBeingUpdated($show):
+<a href="deleteShow?show=$show.tvdbid" onclick="javascript:return confirm('Are you sure you want to delete $show.name?')">Delete</a> |
 <a href="updateShow?show=$show.tvdbid">Refresh</a> | 
-<a href="fixEpisodeNames?show=$show.tvdbid">Rename Episodes</a> |
-<a href="updateShow?show=$show.tvdbid&force=1">Force Full Update</a>
+<a href="updateShow?show=$show.tvdbid&force=1">Force Full Update</a> |
+#end if
+<a href="fixEpisodeNames?show=$show.tvdbid">Rename Episodes</a>
+#end if 
 </span>
 
 <script type="text/javascript" src="/js/displayShow.js"></script>
 <script type="text/javascript" src="/js/showPlot.js"></script>
 
 <br />
-#if $sickbeard.showAddScheduler.action.isInQueue($show):
+#if $sickbeard.showAddScheduler.action.isBeingAdded($show):
 <br />
 <div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show is incomplete - it is currently being added</div>
 <br />
 #end if
 
-#if $sickbeard.showUpdateScheduler.action.isInQueue($show):
+#if $sickbeard.showUpdateScheduler.action.isBeingUpdated($show):
 <br />
 <span class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show is currently being updated</span>
+<br />
+#end if
+
+#if $sickbeard.showUpdateScheduler.action.isInQueue($show):
+<br />
+<span class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show is queued and awaiting an update</span>
 <br />
 #end if
 
@@ -62,7 +72,7 @@ Change selected episodes to
 <b>NOTE:</b> Episodes can only be changed to "Downloaded" if they are currently "Predownloaded".<br />
 All other statuses will automatically update to Downloaded on a show refresh.<br />
 
-#set $curSeason = 0
+#set $curSeason = -1
 #set $odd = 0
 
 <table class="sickbeardTable">
@@ -98,7 +108,11 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
     <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>$os.path.basename($epResult["location"])</td>
     <td>$statusStrings[int($epResult["status"])]</td>
-    <td align="center"><a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a></td>
+    <td align="center">
+    #if int($epResult["season"]) != 0: 
+    <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a>
+    #end if
+    </td>
    <tr>
    
 #end for            

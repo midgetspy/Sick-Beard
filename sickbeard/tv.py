@@ -417,6 +417,7 @@ class TVShow(object):
 		except HTMLParseError as e:
 			Logger().log("There was an error parsing your existing tvshow.nfo file: " + str(e), ERROR)
 			Logger().log("Attempting to rename it to tvshow.nfo.old", DEBUG)
+			xmlFileObj.close()
 			try:
 				os.rename(xmlFile, xmlFile + ".old")
 			except Exception as e:

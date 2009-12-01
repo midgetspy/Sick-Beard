@@ -48,11 +48,6 @@ class TVDBWebUI:
 
     def selectSeries(self, allSeries):
         
-        for curShow in allSeries:
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(curShow['sid']))
-            if showObj != None:
-                raise cherrypy.HTTPRedirect("addShow?showDir=" + self.config['_showDir'] + "&seriesList=" + curShow['sid'])
-        
         searchList = ",".join([x['sid'] for x in allSeries])
         raise cherrypy.HTTPRedirect("addShow?showDir=" + self.config['_showDir'] + "&seriesList=" + searchList)
 
@@ -469,6 +464,7 @@ class HomeAddShows:
                 #newShowAdder = ui.ShowAdder(showDir)
                 sickbeard.showAddScheduler.action.addShowToQueue(showDir)
             except exceptions.NoNFOException:
+                Logger().log("The show queue said we need to create an NFO for this show", DEBUG)
                 myTemplate.resultList = []
                 myTemplate.showDir = urllib.quote_plus(showDir)
                 return _munge(myTemplate)
@@ -547,7 +543,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         else:
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList+[x.show for x in sickbeard.loadingShowList.values()], int(show))
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
             
             if showObj == None:
                 
@@ -670,15 +666,10 @@ class Home:
         # force the update from the DB
         sickbeard.showUpdateScheduler.action.addShowToQueue(showObj, bool(force))
         
-        maxWait = 10
-        curWait = 0
-        while not sickbeard.showUpdateScheduler.action.isInQueue(showObj):
-            curWait += 1
-            if curWait > maxWait:
-                break
-            time.sleep(1)
+        # just give it some time
+        time.sleep(3)
         
-        raise cherrypy.HTTPRedirect("displayShow?show=" + show)
+        raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
 
 
     @cherrypy.expose
@@ -755,7 +746,12 @@ class Home:
                     
         raise cherrypy.HTTPRedirect("displayShow?show=" + show)
 
-
+    @cherrypy.expose
+    def showList(self):
+        toReturn = ""
+        for x in sickbeard.showList:
+            toReturn += str(x)+"<br />"
+        return toReturn
 
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
