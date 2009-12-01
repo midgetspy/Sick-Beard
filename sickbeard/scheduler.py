@@ -31,6 +31,9 @@ class Scheduler:
         if self.thread == None or not self.thread.isAlive():
             self.thread = threading.Thread(None, self.runAction, self.threadName)
     
+    def timeLeft(self):
+        return self.cycleTime - (datetime.datetime.now() - self.lastRun)
+    
     def runAction(self):
         
         while True:

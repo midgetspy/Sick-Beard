@@ -16,12 +16,8 @@
 
 <legend>Newzbin</legend>
 
-#if $sickbeard.NEWZBIN == True:
-#set $newzbin = "CHECKED"
-#else
-#set $newzbin = ""
-#end if
-<input type="checkbox" name="newzbin" $newzbin> <strong>Enable Newzbin:</strong><br />
+<input type="checkbox" name="newzbin" if $sickbeard.NEWZBIN then "CHECKED" else ""#> <strong>Enable Newzbin</strong>
+<a href="http://www.newzbin.com" class="imgLink" target="_new"><img src="/images/providers/newzbin.gif" alt="Newzbin" width="16" height="16"></a><br />
 Check to search Newzbin for episodes<br />
 <br />
 
@@ -43,12 +39,8 @@ Newzbin password<br />
 
 <legend>TVBinz</legend>
 
-#if $sickbeard.TVBINZ == True:
-#set $tvbinz = "CHECKED"
-#else
-#set $tvbinz = ""
-#end if
-<input type="checkbox" name="tvbinz" $tvbinz> <strong>Enable TVBinz:</strong><br />
+<input type="checkbox" name="tvbinz" #if $sickbeard.TVBINZ then "CHECKED" else ""#> <strong>Enable TVBinz</strong>
+<a href="http://www.tvbinz.net" class="imgLink" target="_new"><img src="/images/providers/tvbinz.gif" alt="TVBinz" width="16" height="16"></a><br />
 Check to search TVBinz for episodes<br />
 <br />
 
@@ -71,12 +63,8 @@ TVBinz hash<br />
 
 <legend>NZBs.org</legend>
 
-#if $sickbeard.NZBS == True:
-#set $nzbs = "CHECKED"
-#else
-#set $nzbs = ""
-#end if
-<input type="checkbox" name="nzbs" $nzbs> <strong>Enable NZBs.org:</strong><br />
+<input type="checkbox" name="nzbs" #if $sickbeard.NZBS then "CHECKED" else ""#> <strong>Enable NZBs.org</strong>
+<a href="http://www.nzbs.org" class="imgLink" target="_new"><img src="/images/providers/nzbs.org.gif" alt="NZBs.org" width="16" height="16"></a><br />
 Check to search NZBs.org for episodes<br />
 <br />
 

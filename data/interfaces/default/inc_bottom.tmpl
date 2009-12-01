@@ -1,5 +1,13 @@
+#import sickbeard
+#import datetime
+#from sickbeard import db
 <div class="footer">
-<br>a
+<b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> | <b>Update</b>: <%=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%>  
+<br>
+#set $myDB = $db.DBConnection()
+#set $numShows = myDB.select("SELECT COUNT(*) FROM tv_shows")[0][0]
+#set $numGoodShows = myDB.select("SELECT COUNT(*) FROM tv_shows WHERE paused=0 AND status!=?", ["Ended"])[0][0]
+<b>$numShows shows</b> ($numGoodShows active)
 </div>
 </body>
 </html>

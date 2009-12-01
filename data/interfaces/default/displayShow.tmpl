@@ -31,9 +31,9 @@ Location: $show._location**<br />
 #end try
 
 Quality: $qualityStrings[int($show.quality)]<br />
-Season Folders: <img src="/images/#if $show.seasonfolders == 1 then "yes.gif" else "no.gif"#" width="16" height="16"><br />
+Season Folders: <img src="/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
-Active: <img src="/images/#if int($show.paused) == 0 then "yes.gif" else "no.gif"#" width="16" height="16"><br />
+Active: <img src="/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 <br />
 
@@ -77,8 +77,8 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>">
 #end if
     </td>
-  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
-  	<td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
+  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+  	<td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
     <td align="center">$epResult["episode"]</td>
     <td>$epResult["name"] <a href="#" class="plotLink" id="plotLink_<%=str(epResult["season"])+"_"+str(epResult["episode"])%>">[+]</a>
         <div class="plotDiv" id="epDiv_<%=str(epResult["season"])+"_"+str(epResult["episode"])%>"><br />$epResult["description"]</div></td>

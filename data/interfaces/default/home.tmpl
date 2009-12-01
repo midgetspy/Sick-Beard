@@ -114,7 +114,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td>$curShow.network</td>
     <td align="center">$qualityStrings[int($curShow.quality)]</td>
     <td align="center">$dlStat</td>
-	<td align="center"><img src="/images/#if int($curShow.paused) == 0 then "yes.gif" else "no.gif"#" width="16" height="16"></td>
+	<td align="center"><img src="/images/#if int($curShow.paused) == 0 then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
 	<td align="center">$curShow.status</td>
   </tr>
 
