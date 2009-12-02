@@ -56,7 +56,7 @@ class TVShow(object):
 		
 		self.status = ""
 		self.airs = ""
-		#self.startyear = 0
+		self.startyear = 0
 		self.paused = 0
 
 		self.lock = threading.Lock()
@@ -108,7 +108,7 @@ class TVShow(object):
 				self.quality = int(sqlResults[0]["quality"])
 				self.status = sqlResults[0]["status"]
 				self.airs = sqlResults[0]["airs"]
-				#self.startyear = sqlResults[0]["startyear"]
+				self.startyear = sqlResults[0]["startyear"]
 				self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 				self.paused = int(sqlResults[0]["paused"])
 	
@@ -380,9 +380,9 @@ class TVShow(object):
 			self.airs = sqlResults[0]["airs"]
 			if self.airs == None:
 				self.airs = ""
-			#self.startyear = sqlResults[0]["startyear"]
-			#if self.startyear == None:
-			#	self.startyear = 0
+			self.startyear = sqlResults[0]["startyear"]
+			if self.startyear == None:
+				self.startyear = 0
 			self.quality = int(sqlResults[0]["quality"])
 			self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 			self.paused = int(sqlResults[0]["paused"])
@@ -397,8 +397,8 @@ class TVShow(object):
 		if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
 			self.airs = myEp["airs_dayofweek"] + " " + myEp["airs_time"]
 
-		#if myEp["firstaired"] != None and myEp["firstaired"]:
-		#	self.startyear = int(myEp["firstaired"].split('-')[0])
+		if myEp["firstaired"] != None and myEp["firstaired"]:
+			self.startyear = int(myEp["firstaired"].split('-')[0])
 
 		if self.airs == None:
 			self.airs = ""
@@ -616,15 +616,15 @@ class TVShow(object):
 		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 
 		# use this list regardless of whether it's in there or not
-		sqlValues = [self.name, self.tvdbid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders, self.paused]
+		sqlValues = [self.name, self.tvdbid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders, self.paused, self.startyear]
 		
 		# if it's not in there then insert it
 		if len(sqlResults) == 0:
-			sql = "INSERT INTO tv_shows (show_name, tvdb_id, location, network, genre, runtime, quality,  airs, status, seasonfolders, paused) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+			sql = "INSERT INTO tv_shows (show_name, tvdb_id, location, network, genre, runtime, quality,  airs, status, seasonfolders, paused, startyear) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
 
 		# if it's already there then just change it
 		elif len(sqlResults) == 1:
-			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=?, paused=? WHERE tvdb_id=?"
+			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=?, paused=?, startyear=? WHERE tvdb_id=?"
 			sqlValues += [self.tvdbid]
 		else:
 			raise exceptions.MultipleDBShowsException("Multiple records for a single show")
@@ -643,6 +643,7 @@ class TVShow(object):
 			toReturn += "airs: " + self.airs + "\n"
 		if self.status != None:
 			toReturn += "status: " + self.status + "\n"
+		toReturn += "startyear: " + str(self.startyear) + "\n"
 		toReturn += "genre: " + self.genre + "\n"
 		toReturn += "runtime: " + str(self.runtime) + "\n"
 		toReturn += "quality: " + str(self.quality) + "\n"

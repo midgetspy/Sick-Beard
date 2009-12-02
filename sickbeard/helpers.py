@@ -65,6 +65,9 @@ def makeSceneSearchString (episode):
 	epString = ".S{0:0>2}E{1:0>2}".format(episode.season, episode.episode)
 	showName = episode.show.name.replace(" ", ".").replace("&", "and")
 
+	if not showName.endswith(")") and episode.show.startyear > 1900:
+		showName += " (" + str(episode.show.startyear) + ")"
+
 	results = []
 	toReturn = []
 
