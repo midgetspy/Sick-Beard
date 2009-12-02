@@ -446,18 +446,20 @@ class TVShow(object):
 		Logger().log(str(self.tvdbid) + ": Finding the episode which airs next", DEBUG) 
 
 		myDB = db.DBConnection()
-		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND status = " + str(UNAIRED) + " ORDER BY airdate ASC LIMIT 1")
+		innerQuery = "SELECT airdate FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND status = " + str(UNAIRED) + " ORDER BY airdate ASC LIMIT 1"
+		query = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND airdate <= ("+innerQuery+")"
+		sqlResults = myDB.select(query)
 	
 		if sqlResults == None or len(sqlResults) == 0:
 			Logger().log(str(self.tvdbid) + ": No episode found... need to implement tvrage and also show status", DEBUG)
-			return None
-		elif len(sqlResults) > 1:
-			Logger().log(str(self.tvdbid) + ": This should never happen, I have LIMIT 1 in the SQL query?!?", ERROR)
-			raise Exception("WTF")
+			return []
 		else:
 			Logger().log(str(self.tvdbid) + ": Found episode " + str(sqlResults[0]["season"]) + "x" + str(sqlResults[0]["episode"]), DEBUG)
-			nextEp = self.getEpisode(int(sqlResults[0]["season"]), int(sqlResults[0]["episode"]))
-			return nextEp
+			foundEps = []
+			for sqlEp in sqlResults:
+				curEp = self.getEpisode(int(sqlEp["season"]), int(sqlEp["episode"]))
+				foundEps.append(curEp)
+			return foundEps
 
 		# if we didn't get an episode then try getting one from tvrage
 		

@@ -55,14 +55,12 @@ def loadShowsFromDB():
 		try:
 			curShow = TVShow(sqlShow["location"])
 			curShow.saveToDB()
-			myShowList.append(curShow)
+			sickbeard.showList.append(curShow)
 		except Exception as e:
 			Logger().log("There was an error creating the show in "+sqlShow["location"]+": "+str(e), ERROR)
 			Logger().log(traceback.format_exc(), DEBUG)
 			
 		#TODO: make it update the existing shows if the showlist has something in it
-	
-	return myShowList
 
 	
 
@@ -86,9 +84,7 @@ def main():
 	# initialize the config and our threads
 	sickbeard.initialize()
 
-	# build from the DB to start with
-	Logger().log("Loading initial show list")
-	sickbeard.showList = loadShowsFromDB()
+	sickbeard.showList = []
 
 	# setup cherrypy logging
 	if os.path.isdir(sickbeard.LOG_DIR) and sickbeard.WEB_LOG:
@@ -140,6 +136,10 @@ def main():
 		Logger().log("Launching browser and exiting", ERROR)
 		sickbeard.launchBrowser(browserURL)
 		sys.exit()
+
+	# build from the DB to start with
+	Logger().log("Loading initial show list")
+	loadShowsFromDB()
 
 	# fire up all our threads
 	sickbeard.start()

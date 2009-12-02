@@ -625,19 +625,6 @@ class Home:
             raise cherrypy.HTTPRedirect("displayShow?show=" + show)
 
     @cherrypy.expose
-    def updateXBMC(self):
-
-        result = contactXBMC.updateLibrary()
-        
-        if result:
-            message = "Command sent to XBMC to update library"
-        else:
-            message = "Unable to contact XBMC"
-        
-        return _genericMessage("XBMC Library Update", message)
-
-
-    @cherrypy.expose
     def deleteShow(self, show=None):
 
         if show == None:
@@ -647,6 +634,10 @@ class Home:
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
+
+        if sickbeard.showAddScheduler.action.isBeingAdded(showObj) or \
+        sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
+            return _genericMessage("Error", "Shows can't be deleted while they're being added or updated.")
 
         showObj.deleteShow()
         
@@ -663,6 +654,12 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
         
+        if sickbeard.showAddScheduler.action.isBeingAdded(showObj):
+            return _genericMessage("Error", "Show is still being added, wait until it is finished before you update.")
+        
+        if sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
+            return _genericMessage("Error", "This show is already being updated, can't update again until it's done.")
+
         # force the update from the DB
         sickbeard.showUpdateScheduler.action.addShowToQueue(showObj, bool(force))
         
@@ -670,6 +667,19 @@ class Home:
         time.sleep(3)
         
         raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
+
+
+    @cherrypy.expose
+    def updateXBMC(self):
+
+        result = contactXBMC.updateLibrary()
+        
+        if result:
+            message = "Command sent to XBMC to update library"
+        else:
+            message = "Unable to contact XBMC"
+        
+        return _genericMessage("XBMC Library Update", message)
 
 
     @cherrypy.expose
@@ -683,27 +693,13 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
         
+        if sickbeard.showAddScheduler.action.isBeingAdded(showObj):
+            return _genericMessage("Error", "Show is still being added, wait until it is finished before you rename files")
+        
         showObj.fixEpisodeNames()
 
         raise cherrypy.HTTPRedirect("displayShow?show=" + show)
         
-    
-    @cherrypy.expose
-    def refreshDir(self, show=None):
-        
-        if show == None:
-            return _genericMessage("Error", "Invalid show ID")
-        
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
-        
-        if showObj == None:
-            return _genericMessage("Error", "Unable to find the specified show")
-
-        showObj.refreshDir()
-
-        raise cherrypy.HTTPRedirect("displayShow?show=" + show)
-        
-    
     @cherrypy.expose
     def setStatus(self, show=None, eps=None, status=None):
         
@@ -745,13 +741,6 @@ class Home:
                     epObj.saveToDB()
                     
         raise cherrypy.HTTPRedirect("displayShow?show=" + show)
-
-    @cherrypy.expose
-    def showList(self):
-        toReturn = ""
-        for x in sickbeard.showList:
-            toReturn += str(x)+"<br />"
-        return toReturn
 
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
