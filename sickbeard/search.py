@@ -78,6 +78,9 @@ def snatchEpisode(result):
 			result.episode.status = PREDOWNLOADED
 		result.episode.saveToDB()
 
+	sickbeard.updateMissingList()
+	sickbeard.updateAiringList()
+	sickbeard.updateComingList()
 
 def _doSearch(episode, provider):
 

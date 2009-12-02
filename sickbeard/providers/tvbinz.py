@@ -46,7 +46,7 @@ def getTVBinzURL (url):
 	try:
 		f = urllib2.urlopen(req)
 	except (urllib.ContentTooShortError, IOError) as e:
-		Logger().log("Error loading TVBinz URL: " + sys.exc_info() + " - " + str(e))
+		Logger().log("Error loading TVBinz URL: " + str(sys.exc_info()) + " - " + str(e))
 		return None
 
 	result = sickbeard.helpers.getGZippedURL(f)

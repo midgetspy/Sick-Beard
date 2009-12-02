@@ -56,6 +56,7 @@ class TVShow(object):
 		
 		self.status = ""
 		self.airs = ""
+		#self.startyear = 0
 		self.paused = 0
 
 		self.lock = threading.Lock()
@@ -107,6 +108,7 @@ class TVShow(object):
 				self.quality = int(sqlResults[0]["quality"])
 				self.status = sqlResults[0]["status"]
 				self.airs = sqlResults[0]["airs"]
+				#self.startyear = sqlResults[0]["startyear"]
 				self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 				self.paused = int(sqlResults[0]["paused"])
 	
@@ -378,6 +380,9 @@ class TVShow(object):
 			self.airs = sqlResults[0]["airs"]
 			if self.airs == None:
 				self.airs = ""
+			#self.startyear = sqlResults[0]["startyear"]
+			#if self.startyear == None:
+			#	self.startyear = 0
 			self.quality = int(sqlResults[0]["quality"])
 			self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 			self.paused = int(sqlResults[0]["paused"])
@@ -391,6 +396,9 @@ class TVShow(object):
 		
 		if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
 			self.airs = myEp["airs_dayofweek"] + " " + myEp["airs_time"]
+
+		#if myEp["firstaired"] != None and myEp["firstaired"]:
+		#	self.startyear = int(myEp["firstaired"].split('-')[0])
 
 		if self.airs == None:
 			self.airs = ""
@@ -447,7 +455,7 @@ class TVShow(object):
 
 		myDB = db.DBConnection()
 		innerQuery = "SELECT airdate FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND status = " + str(UNAIRED) + " ORDER BY airdate ASC LIMIT 1"
-		query = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND airdate <= ("+innerQuery+")"
+		query = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND airdate <= ("+innerQuery+") and status = " + str(UNAIRED)
 		sqlResults = myDB.select(query)
 	
 		if sqlResults == None or len(sqlResults) == 0:

@@ -147,8 +147,13 @@ class ShowUpdater():
         Logger().log("Setting the last TVDB update in the DB to " + str(int(when)), DEBUG)
         
         myDB = db.DBConnection()
-        myDB.action("UPDATE info SET last_tvdb=" + str(int(when)))
 
+        sqlResults = myDB.select("SELECT * FROM info")
+
+        if len(sqlResults) == 0:
+            myDB.action("INSERT INTO info (last_backlog, last_TVDB) VALUES (?,?)", [1, str(when)])
+        else:
+            myDB.action("UPDATE info SET last_tvdb=" + str(int(when)))
 
     def _getNewestDBEpisode(self, show):
         

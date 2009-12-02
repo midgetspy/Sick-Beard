@@ -35,7 +35,10 @@ class BacklogSearchScheduler(scheduler.Scheduler):
         self.lastRun = datetime.datetime.fromordinal(1)
         
     def nextRun(self):
-        return datetime.date.fromordinal(self.action._lastBacklog + self.action.cycleTime)
+        if self.action._lastBacklog <= 1:
+            return datetime.date.today()
+        else:
+            return datetime.date.fromordinal(self.action._lastBacklog + self.action.cycleTime)
 
 class BacklogSearcher:
 
@@ -137,7 +140,12 @@ class BacklogSearcher:
         Logger().log("Setting the last backlog in the DB to " + str(when), DEBUG)
         
         myDB = db.DBConnection()
-        myDB.action("UPDATE info SET last_backlog=" + str(when))
+        sqlResults = myDB.select("SELECT * FROM info")
+
+        if len(sqlResults) == 0:
+            myDB.action("INSERT INTO info (last_backlog, last_TVDB) VALUES (?,?)", [str(when), 0])
+        else:
+            myDB.action("UPDATE info SET last_backlog=" + str(when))
         
 
     def run(self):
