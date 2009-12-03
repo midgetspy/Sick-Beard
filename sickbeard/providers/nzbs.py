@@ -46,7 +46,7 @@ def getNZBsURL (url):
 		f = urllib2.urlopen(url)
 		result = "".join(f.readlines())
 	except (urllib.ContentTooShortError, IOError) as e:
-		Logger().log("Error loading NZBs.org URL: " + sys.exc_info() + " - " + str(e), ERROR)
+		Logger().log("Error loading NZBs.org URL: " + str(sys.exc_info()) + " - " + str(e), ERROR)
 		return None
 
 	return result

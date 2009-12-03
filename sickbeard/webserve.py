@@ -30,11 +30,14 @@ import cherrypy
 
 from sickbeard import config
 from sickbeard import db
-from sickbeard import search
+from sickbeard import notifiers
 from sickbeard import processTV
+from sickbeard import search
 from sickbeard import ui
-from sickbeard import contactXBMC
+
+from sickbeard.notifiers import xbmc
 from sickbeard.tv import *
+
 from lib.tvdb_api import tvdb_exceptions
 
 import sickbeard
@@ -336,7 +339,8 @@ class ConfigNotifications:
     
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, 
-                          xbmc_update_library=None, xbmc_host=None):
+                          xbmc_update_library=None, xbmc_host=None, use_growl=None,
+                          growl_host=None, growl_password=None, ):
 
         results = []
 
@@ -355,10 +359,19 @@ class ConfigNotifications:
         else:
             xbmc_update_library = 0
 
+        if use_growl == "on":
+            use_growl = 1
+        else:
+            use_growl = 0
+
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch 
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
         sickbeard.XBMC_HOST = xbmc_host
+        
+        sickbeard.USE_GROWL = use_growl
+        sickbeard.GROWL_HOST = growl_host
+        sickbeard.GROWL_PASSWORD = growl_password
         
         sickbeard.save_config()
         
@@ -532,6 +545,11 @@ class Home:
     postprocess = HomePostProcess()
     
     @cherrypy.expose
+    def testNotify(self, type=1, message="Test"):
+        
+        notifiers.notify(type, message)
+
+    @cherrypy.expose
     def shutdown(self):
 
         threading.Timer(2, sickbeard.saveAndShutdown).start()
@@ -672,7 +690,7 @@ class Home:
     @cherrypy.expose
     def updateXBMC(self):
 
-        result = contactXBMC.updateLibrary()
+        result = xbmc.updateLibrary()
         
         if result:
             message = "Command sent to XBMC to update library"

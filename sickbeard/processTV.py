@@ -22,18 +22,20 @@ import os
 import shutil
 import sys
 
-import contactXBMC
-import exceptions
-import helpers
-import sickbeard
-import sqlite3
-import db
-import history
-
-from logging import *
-from common import *
-
+from sickbeard import notifiers
+from sickbeard import exceptions
+from sickbeard import helpers
+from sickbeard import notifiers
+from sickbeard import sqlite3
+from sickbeard import db
+from sickbeard import history
 from sickbeard import classes
+
+from sickbeard.logging import *
+from sickbeard.common import *
+
+from sickbeard.notifiers import xbmc
+
 from lib.tvdb_api import tvnamer, tvdb_api, tvdb_exceptions
 
 #from tvdb_api.nfogen import createXBMCInfo
@@ -222,8 +224,7 @@ def doIt(downloadDir, nzbName=None):
 
     # wait for the copy to finish
 
-    if sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
-        contactXBMC.notifyXBMC(rootEp.prettyName(), "Download finished")
+    notifiers.notify(NOTIFY_DOWNLOAD, rootEp.prettyName())
 
 
     # figure out the new filename
@@ -278,6 +279,9 @@ def doIt(downloadDir, nzbName=None):
 
     # if the file existed and was smaller then lets delete it
     if existingResult == -1:
+        logStr = newFile + " already exists but it's smaller than the new file so I'm replacing it"
+        Logger().log(logStr, DEBUG)
+        returnStr += logStr + "\n"
         os.remove(newFile)
 
     curFile = os.path.join(destDir, biggestFileName)
@@ -309,7 +313,7 @@ def doIt(downloadDir, nzbName=None):
 
     # we don't want to put predownloads in the library until we can deal with removing them
     if sickbeard.XBMC_UPDATE_LIBRARY == True and rootEp.status != PREDOWNLOADED:
-        contactXBMC.updateLibrary(rootEp.show.location)
+        notifiers.xbmc.updateLibrary(rootEp.show.location)
 
     logStr = "Deleting folder " + downloadDir
     Logger().log(logStr, DEBUG)

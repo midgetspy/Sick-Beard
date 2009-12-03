@@ -109,6 +109,10 @@ XBMC_NOTIFY_ONDOWNLOAD = False
 XBMC_UPDATE_LIBRARY = False
 XBMC_HOST = None
 
+USE_GROWL = False
+GROWL_HOST = None
+GROWL_PASSWORD = None
+
 __INITIALIZED__ = False
 
 def CheckSection(sec):
@@ -202,7 +206,8 @@ def initialize():
                 airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler
+                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler, \
+                USE_GROWL, GROWL_HOST, GROWL_PASSWORD
         
         if __INITIALIZED__:
             return False
@@ -216,6 +221,7 @@ def initialize():
         CheckSection('SABnzbd')
         CheckSection('IRC')
         CheckSection('XBMC')
+        CheckSection('Growl')
         
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
         if not helpers.makeDir(LOG_DIR):
@@ -280,6 +286,10 @@ def initialize():
         XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
+        
+        USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
+        GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
+        GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
         
         #currentSearchScheduler = searchCurrent.CurrentSearchScheduler(True)
         #backlogSearchScheduler = searchBacklog.BacklogSearchScheduler()
@@ -452,7 +462,7 @@ def save_config():
         IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
         XBMC_UPDATE_LIBRARY, XBMC_HOST, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
         USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-        QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT
+        QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
@@ -494,6 +504,9 @@ def save_config():
     CFG['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
     CFG['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
     CFG['XBMC']['xbmc_host'] = XBMC_HOST
+    CFG['Growl']['use_growl'] = int(USE_GROWL)
+    CFG['Growl']['growl_host'] = GROWL_HOST
+    CFG['Growl']['growl_password'] = GROWL_PASSWORD
     
     CFG.write()
 

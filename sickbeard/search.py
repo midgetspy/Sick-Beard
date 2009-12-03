@@ -23,7 +23,10 @@ import sickbeard
 from common import *
 from logging import *
 
-import sab, contactXBMC, history
+from sickbeard import sab
+from sickbeard import history
+
+from sickbeard import notifiers 
 
 from providers import newzbin
 from providers import tvbinz
@@ -66,8 +69,7 @@ def snatchEpisode(result):
 	# log the snatch
 	history.logSnatch(result)
 
-	if sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
-		contactXBMC.notifyXBMC(result.episode.prettyName(), "Started download")
+	notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName())
 	
 	with result.episode.lock:
 		if result.predownloaded == False:

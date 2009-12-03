@@ -18,6 +18,14 @@
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv']
 
+### Notification Types
+NOTIFY_SNATCH = 1
+NOTIFY_DOWNLOAD = 2
+
+notifyStrings = {}
+notifyStrings[NOTIFY_SNATCH] = "Started Download"
+notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
+
 ### Episode statuses
 UNKNOWN = -1
 UNAIRED = 1

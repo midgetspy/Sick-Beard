@@ -32,15 +32,15 @@
 #set $xbmc_update_library = ""
 #end if
 
-<input type="checkbox" name="xbmc_notify_onsnatch" $xbmc_notify_onsnatch> <strong>Notify XBMC on NZB retrieval:</strong><br />
+<input type="checkbox" name="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "CHECKED" else ""#> <strong>Notify XBMC on NZB retrieval</strong><br />
 Send XBMC a notification when we find an NZB?<br />
 <br />
 
-<input type="checkbox" name="xbmc_notify_ondownload" $xbmc_notify_ondownload> <strong>Notify XBMC on episode download:</strong><br />
+<input type="checkbox" name="xbmc_notify_ondownload" #if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD then "CHECKED" else ""#> <strong>Notify XBMC on episode download</strong><br />
 Send XBMC a notification when we finish a download?<br />
 <br />
 
-<input type="checkbox" name="xbmc_update_library" $xbmc_update_library> <strong>Update XBMC library:</strong><br />
+<input type="checkbox" name="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "CHECKED" else ""#> <strong>Update XBMC library</strong><br />
 Update XBMC library when we finish a download?<br />
 <br />
 
@@ -48,6 +48,31 @@ Update XBMC library when we finish a download?<br />
 XBMC HTTP API address (IP:port, eg. 192.168.1.100:8080)<br />
 <input type="text" name="xbmc_host" value="$sickbeard.XBMC_HOST" size="35"><br />
 <br />
+
+</fieldset>
+</div>
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Growl</legend>
+
+<input type="checkbox" name="use_growl" #if $sickbeard.USE_GROWL then "CHECKED" else ""#> <strong>Enable Growl Notifications</strong><br />
+Should Sick Beard send Growl notifications?<br />
+<br />
+
+<strong>Growl Host:</strong><br />
+IP:Port of the host running Growl (eg. 192.168.1.100:2222)<br />
+If no port is given the default 23053 will be used.<br />
+<input type="text" name="growl_host" value="$sickbeard.GROWL_HOST" size="35"><br />
+<br />
+
+<strong>Growl Password:</strong><br />
+If Growl is running no the same host as Sick Beard you may leave this<br />
+blank, but if the hosts are different Growl <b>requires</b> a password.<br />
+<input type="text" name="growl_password" value="$sickbeard.GROWL_PASSWORD" size="35"><br />
+<br />
+
 
 </fieldset>
 </div>
