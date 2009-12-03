@@ -33,10 +33,17 @@
     <td><a href="/home/displayShow?show=$hItem["showid"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "{0:0>2}".format(hItem["episode"]) %> - $hItem["name"]</a></td>
     <td align="center">$actionStrings[$hItem["action"]]</td>
     <td align="center">
-	#if $hItem["action"] == ACTION_DOWNLOADED
-	  #set $match = $re.search("\-(\w*)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
+	#if $hItem["action"] == ACTION_DOWNLOADED:
+	  #set $match = $re.search("\-(\w+)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
 	  #if $match
-	    <%=match.group(1).upper()%>
+	  	#if $match.group(1).upper() in ("X264", "720P"):
+	  	  #set $match = $re.search("(\w+)\-.*\-"+$match.group(1)+"\.\w{3}\Z", $os.path.basename($hItem["resource"]), re.IGNORECASE)
+	  	  #if $match
+		  	  $match.group(1).upper()
+		  #end if
+	  	#else:
+          $match.group(1).upper()
+        #end if
 	  #end if
 	#else
       #if $hItem["provider"] > 0
