@@ -89,5 +89,5 @@ def sendGrowl(title="Sick Beard Notification", message=None, name=None):
 	for pc in growlHosts:
 		opts['host'] = pc[0]
 		opts['port'] = pc[1]
-		Logger().log("Sending growl to "+opts['host']+":"+str(opts['port']+": "+message))
-		send_growl(opts, "test message")
+		Logger().log("Sending growl to "+opts['host']+":"+str(opts['port'])+": "+message)
+		send_growl(opts, message)
