@@ -909,14 +909,16 @@ class TVEpisode:
 		
 		epsToWrite = [self] + self.relatedEps
 
+		nfo = Document()
+
 		try:
 			t = tvdb_api.Tvdb(actors=True, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
-		except tvdb_exceptions.tvdb_error as o:
-			Logger().log("Unable to connect to TVDB while creating meta files - skipping", ERROR)
+			myShow = t[self.show.tvdbid]
+		except tvdb_exceptions.tvdb_shownotfound as e:
+			raise exceptions.ShowNotFoundException(str(e))
+		except tvdb_exceptions.tvdb_error as e:
+			Logger().log("Unable to connect to TVDB while creating meta files - skipping - "+str(e), ERROR)
 			return
-		
-		nfo = Document()
-		myShow = t[self.show.tvdbid]
 
 		if len(epsToWrite) > 1:
 			dummyNode = nfo.createElement("xbmcmultiepisode")
