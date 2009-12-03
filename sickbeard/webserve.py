@@ -30,6 +30,7 @@ import cherrypy
 
 from sickbeard import config
 from sickbeard import db
+from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import processTV
 from sickbeard import search
@@ -110,10 +111,12 @@ class History:
     
     @cherrypy.expose
     def index(self):
-        
+
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC")
         
+#        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC LIMIT "+str(numPerPage*(p-1))+", "+str(numPerPage))
+        sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+
         t = Template(file="data/interfaces/default/history.tmpl")
         t.historyResults = sqlResults
         
@@ -125,6 +128,15 @@ class History:
         
         myDB = db.DBConnection()
         myDB.action("DELETE * FROM history")
+        
+        raise cherrypy.HTTPRedirect("/history")
+
+
+    @cherrypy.expose
+    def trimHistory(self):
+        
+        myDB = db.DBConnection()
+        myDB.action("DELETE FROM history WHERE date > "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
         
         raise cherrypy.HTTPRedirect("/history")
 
