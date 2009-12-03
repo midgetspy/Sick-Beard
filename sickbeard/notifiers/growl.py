@@ -82,7 +82,7 @@ def sendGrowl(title="Sick Beard Notification", message=None, name=None):
 	opts['priority'] = None
 	opts['debug'] = False
 
-	opts['password'] = 'test'
+	opts['password'] = sickbeard.GROWL_PASSWORD
 	opts['icon'] = False
 
 
