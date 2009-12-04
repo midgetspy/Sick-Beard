@@ -80,6 +80,10 @@
 
 #for $curLoadingShow in $sickbeard.loadingShowList:
 
+  #if $curLoadingShow.show in $sickbeard.showList:
+    #continue
+  #end if
+
   <tr class="evenLine">
     <td align="center">(loading)</td>
     <td>

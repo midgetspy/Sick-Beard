@@ -121,7 +121,7 @@ class ShowAdder:
             raise
     
         if sickbeard.loadingShowList.has_key(self.showDir):
-            sickbeard.loadingShowList[self.showDir].show = self.curShow
+            del sickbeard.loadingShowList[self.showDir].show = self.curShow
 
         # add it to the real list
         sickbeard.showList.append(self.curShow)

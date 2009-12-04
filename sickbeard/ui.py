@@ -57,6 +57,11 @@ def addShowsFromRootDir(dir):
             Logger().log(logStr, ERROR)
             returnStr += logStr + "<br />\n"
             del sickbeard.loadingShowList[showDir]
+        except exceptions.MultipleShowObjectsException:
+            logStr = "Show in "+showDir+" already exists, skipping..."
+            Logger().log(logStr, ERROR)
+            returnStr += logStr + "<br />\n"
+            del sickbeard.loadingShowList[showDir]
 
     return returnStr
 
