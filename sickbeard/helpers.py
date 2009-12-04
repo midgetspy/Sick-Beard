@@ -108,7 +108,10 @@ def makeDir (dir):
 
 def makeShowNFO(showID, showDir):
 
+	Logger().log("Making NFO for show "+str(showID)+" in dir "+showDir, DEBUG)
+
 	if not makeDir(showDir):
+		Logger().log("Unable to create show dir, can't make NFO", ERROR)
 		return False
 
 	t = tvdb_api.Tvdb()
@@ -180,6 +183,7 @@ def makeShowNFO(showID, showDir):
 		studio.appendChild(nfo.createTextNode(myShow["network"]))
 	tvNode.appendChild(studio)
 	
+	Logger().log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), DEBUG)
 	nfo_fh = open(os.path.join(showDir, "tvshow.nfo"), 'w')
 	nfo_fh.write(nfo.toxml(encoding="UTF-8"))
 	nfo_fh.close()

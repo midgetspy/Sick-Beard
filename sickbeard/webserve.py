@@ -53,7 +53,10 @@ class TVDBWebUI:
     def selectSeries(self, allSeries):
         
         searchList = ",".join([x['sid'] for x in allSeries])
-        raise cherrypy.HTTPRedirect("addShow?showDir=" + self.config['_showDir'] + "&seriesList=" + searchList)
+        showDirList = ""
+        for curShowDir in self.config['_showDir']:
+            showDirList += "showDir="+curShowDir+"&"
+        raise cherrypy.HTTPRedirect("addShow?" + showDirList + "seriesList=" + searchList)
 
 def _munge(string):
     return unicode(string).encode('ascii', 'xmlcharrefreplace')
@@ -450,12 +453,37 @@ class HomeAddShows:
         if dir == None:
             raise cherrypy.HTTPRedirect("addShows")
 
-        result = ui.addShowsFromRootDir(dir)
+        if not os.path.isdir(dir):
+            Logger().log("The provided directory "+dir+" doesn't exist", ERROR)
+            return _genericMessage("Error", "Unable to find the directory "+dir)
+        
+        showDirs = []
+        
+        for curDir in os.listdir(unicode(dir)):
+            curPath = os.path.join(dir, curDir)
+            if os.path.isdir(curPath):
+                Logger().log("Adding "+curPath+" to the showDir list", DEBUG)
+                showDirs.append(curPath)
+        
+        if len(showDirs) == 0:
+            Logger().log("The provided directory "+dir+" has no shows in it", ERROR)
+            return _genericMessage("Error", "The provided root folder "+dir+ " has no shows in it.")
+        
+        #result = ui.addShowsFromRootDir(dir)
+        
+        url = "addShow?"+"&".join(["showDir="+x for x in showDirs])
+        Logger().log("Redirecting to URL "+url, DEBUG)
+        raise cherrypy.HTTPRedirect(url)
 
-        return _genericMessage("Adding root directory", result)
+        #return _genericMessage("Adding root directory", result)
 
     @cherrypy.expose
     def addShow(self, showDir=None, showName=None, seriesList=None):
+        
+        if showDir != None and type(showDir) is not list:
+            showDir = [showDir]
+        
+        Logger().log("showDir: "+str(showDir))
         
         myTemplate = Template(file="data/interfaces/default/home_addShow.tmpl")
         myTemplate.resultList = None
@@ -467,15 +495,17 @@ class HomeAddShows:
 
         # if we have a dir and a name it means we're mid-search, so get our TVDB list and forward them to the selection screen
         if showDir != None and showName != None:
+            Logger().log("Getting list of possible shows and asking user to choose one", DEBUG)
             t = tvdb_api.Tvdb(custom_ui=TVDBWebUI)
-            t.config['_showDir'] = urllib.quote_plus(showDir)
+            t.config['_showDir'] = showDir
             try:
                 s = t[showName] # this will throw a cherrypy exception
             except tvdb_exceptions.tvdb_shownotfound:
                 return _genericMessage("Error", "Couldn't find that show")
     
 
-        showDir = os.path.normpath(urllib.unquote_plus(showDir))
+        curShowDir = os.path.normpath(urllib.unquote_plus(showDir[0]))
+        Logger().log("curShowDir: "+curShowDir)
 
         if seriesList != None:
             showIDs = seriesList.split(",")
@@ -485,26 +515,45 @@ class HomeAddShows:
         # if we have a folder but no ID specified then we try scanning it for NFO
         if len(showIDs) == 0:
 
+            Logger().log("Folder has been provided but we have no show ID, scanning it for an NFO", DEBUG)
+
+            showAdded = False
+
             try:
                 #newShowAdder = ui.ShowAdder(showDir)
-                sickbeard.showAddScheduler.action.addShowToQueue(showDir)
+                sickbeard.showAddScheduler.action.addShowToQueue(curShowDir)
+                showAdded = True
             except exceptions.NoNFOException:
                 Logger().log("The show queue said we need to create an NFO for this show", DEBUG)
                 myTemplate.resultList = []
-                myTemplate.showDir = urllib.quote_plus(showDir)
+                myTemplate.showDir = showDir
                 return _munge(myTemplate)
+            except exceptions.MultipleShowObjectsException:
+                # showAdded is already false so we can pass this exception and deal with the redirect below
+                pass 
 
             # give it a chance to get on the show list so we don't refresh and it looks like nothing happened
-            maxWait = 10
-            curWait = 0
-            while showDir not in sickbeard.loadingShowList:
-                curWait += 1
-                if curWait > maxWait:
-                    break
-                time.sleep(1)
+            if showAdded == True:
+                maxWait = 10
+                curWait = 0
+                while curShowDir not in sickbeard.loadingShowList:
+                    curWait += 1
+                    if curWait > maxWait:
+                        break
+                    time.sleep(1)
 
-            if showDir in sickbeard.loadingShowList and sickbeard.loadingShowList[showDir].show != None:
-                raise cherrypy.HTTPRedirect("../displayShow?show="+str(sickbeard.loadingShowList[showDir].show.tvdbid))
+            # if we're done adding, redirect to the appropriate place
+            if showAdded == False or curShowDir in sickbeard.loadingShowList and sickbeard.loadingShowList[curShowDir].show != None:
+                del showDir[0]
+                if len(showDir) == 0:
+                    if showAdded:
+                        raise cherrypy.HTTPRedirect("../displayShow?show="+str(sickbeard.loadingShowList[curShowDir].show.tvdbid))
+                    else:
+                        return _genericMessage("Error", "The show in "+curShowDir+" is already loaded.")
+                else:
+                    url ="addShow?"+ "&".join(["showDir="+x for x in showDir])
+                    Logger().log("There are still shows left to add, so redirecting to "+url)
+                    raise cherrypy.HTTPRedirect(url)
             else:
                 raise cherrypy.HTTPRedirect("../")
                                     
@@ -512,24 +561,30 @@ class HomeAddShows:
         # if we have a single ID then just make a show with that ID
         elif len(showIDs) == 1:
             
+            Logger().log("We have a single show ID, creating a show with that ID", DEBUG)
+            
             # if the dir doesn't exist then give up
-            if not helpers.makeDir(showDir):
+            if not helpers.makeDir(curShowDir):
                 return _genericMessage("Error", "Show dir doesn't exist and I'm unable to create it")
 
     
             # if the folder exists then make the show there
-            if not helpers.makeShowNFO(showIDs[0], showDir):
+            if not helpers.makeShowNFO(showIDs[0], curShowDir):
                 return _genericMessage("Error", "Unable to make tvshow.nfo?")
             
             # just go do the normal show creation now that we have the NFO
-            raise cherrypy.HTTPRedirect("addShow?showDir=" + urllib.quote_plus(showDir))
+            url ="addShow?"+ "&".join(["showDir="+x for x in showDir])
+            Logger().log("Redirecting to "+url, DEBUG)
+            raise cherrypy.HTTPRedirect(url)
         
         # if we have multiple IDs then let them pick
         else:
+
+            Logger().log("Presenting a list of shows to the user", DEBUG)
             
             t = tvdb_api.Tvdb()
             myTemplate.resultList = [t[int(x)] for x in showIDs]
-            myTemplate.showDir = urllib.quote_plus(showDir)
+            myTemplate.showDir = showDir
             
             return _munge(myTemplate)
 
