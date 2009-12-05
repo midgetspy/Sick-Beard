@@ -612,10 +612,15 @@ class Home:
     postprocess = HomePostProcess()
     
     @cherrypy.expose
-    def testNotify(self, type=1, message="Test"):
+    def testGrowl(self, host=None, password=None):
+        notifiers.testGrowl(host, password)
+        return "Tried sending growl to "+host+" with password "+password
         
-        notifiers.notify(type, message)
-
+    @cherrypy.expose
+    def testXBMC(self, host=None):
+        notifiers.testXBMC(urllib.unquote_plus(host))
+        return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
+        
     @cherrypy.expose
     def shutdown(self):
 

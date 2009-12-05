@@ -8,6 +8,27 @@
 <!--#set global $submenu="notifications"#-->
 #include "data/interfaces/default/inc_cmenu.tmpl"
 
+<script>
+\$(document).ready(function(){
+
+  \$('#testGrowl').click(function(){
+
+    var growl_host = \$("#growl_host").val();
+    var growl_password = \$("#growl_password").val();
+    \$.get("/home/testGrowl", {'host': growl_host, 'password': growl_password});
+
+  });
+
+  \$('#testXBMC').click(function(){
+
+    var xbmc_host = \$("#xbmc_host").val();
+    \$.get("/home/testXBMC", {'host': xbmc_host});
+    
+  });
+});  
+      
+</script>
+
 <h2>Notifications</h2>
 <form action="saveNotifications" method="POST">
 
@@ -46,8 +67,10 @@ Update XBMC library when we finish a download?<br />
 
 <strong>XBMC host:</strong><br />
 XBMC HTTP API address (IP:port, eg. 192.168.1.100:8080)<br />
-<input type="text" name="xbmc_host" value="$sickbeard.XBMC_HOST" size="35"><br />
+<input type="text" name="xbmc_host" id="xbmc_host" value="$sickbeard.XBMC_HOST" size="35"><br />
 <br />
+
+<input type="button" value="Test XBMC" id="testXBMC">
 
 </fieldset>
 </div>
@@ -64,15 +87,16 @@ Should Sick Beard send Growl notifications?<br />
 <strong>Growl Host:</strong><br />
 IP:Port of the host running Growl (eg. 192.168.1.100:2222)<br />
 If no port is given the default 23053 will be used.<br />
-<input type="text" name="growl_host" value="$sickbeard.GROWL_HOST" size="35"><br />
+<input type="text" name="growl_host" id="growl_host" value="$sickbeard.GROWL_HOST" size="35"><br />
 <br />
 
 <strong>Growl Password:</strong><br />
 If Growl is running no the same host as Sick Beard you may leave this<br />
 blank, but if the hosts are different Growl <b>requires</b> a password.<br />
-<input type="text" name="growl_password" value="$sickbeard.GROWL_PASSWORD" size="35"><br />
+<input type="text" name="growl_password" id="growl_password" value="$sickbeard.GROWL_PASSWORD" size="35"><br />
 <br />
 
+<input type="button" value="Test Growl" id="testGrowl">
 
 </fieldset>
 </div>

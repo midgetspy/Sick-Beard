@@ -31,7 +31,7 @@ from sickbeard.logging import *
 XBMC_TIMEOUT = 10
 
 # prevent it from dying if the XBMC call hangs
-def notifyXBMC(input, title="midgetPVR"):
+def notifyXBMC(input, title="midgetPVR", host=None):
 
     global XBMC_TIMEOUT
 
@@ -43,7 +43,8 @@ def notifyXBMC(input, title="midgetPVR"):
     
     Logger().log("Encoded message is " + encodedParam, DEBUG)
     
-    host = sickbeard.XBMC_HOST
+    if host == None:
+        host = sickbeard.XBMC_HOST
     
     try:
         urllib2.urlopen("http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")", timeout=XBMC_TIMEOUT).close()

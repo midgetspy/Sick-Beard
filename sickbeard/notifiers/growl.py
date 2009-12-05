@@ -54,7 +54,7 @@ def _send(host,port,data,debug=False):
 	
 	if debug: print '<Recieved>\n',response,'\n</Recieved>'
 
-def sendGrowl(title="Sick Beard Notification", message=None, name=None):
+def sendGrowl(title="Sick Beard Notification", message=None, name=None, host=None, password=None):
 
 	if not sickbeard.USE_GROWL:
 		return False
@@ -62,7 +62,10 @@ def sendGrowl(title="Sick Beard Notification", message=None, name=None):
 	if name == None:
 		name = title
 
-	hostParts = sickbeard.GROWL_HOST.split(':')
+	if host == None:
+		hostParts = sickbeard.GROWL_HOST.split(':')
+	else:
+		hostParts = host.split(':')
 
 	if len(hostParts) != 2 or hostParts[1] == '':
 		port = 23053
@@ -82,7 +85,11 @@ def sendGrowl(title="Sick Beard Notification", message=None, name=None):
 	opts['priority'] = None
 	opts['debug'] = False
 
-	opts['password'] = sickbeard.GROWL_PASSWORD
+	if password == None:
+		opts['password'] = sickbeard.GROWL_PASSWORD
+	else:
+		opts['password'] = password
+
 	opts['icon'] = False
 
 
