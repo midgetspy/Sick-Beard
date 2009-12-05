@@ -80,7 +80,7 @@
 
 #for $curLoadingShow in $sickbeard.loadingShowList:
 
-  #if $curLoadingShow.show != None and $curLoadingShow.show in $sickbeard.showList:
+  #if $sickbeard.loadingShowList[$curLoadingShow].show != None and $sickbeard.loadingShowList[$curLoadingShow].show in $sickbeard.showList:
     #continue
   #end if
 
