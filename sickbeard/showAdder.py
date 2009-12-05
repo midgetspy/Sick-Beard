@@ -148,3 +148,7 @@ class ShowAdder:
         # take the show out of the loading list
         del sickbeard.loadingShowList[self.showDir]
         
+        sickbeard.updateAiringList()
+        sickbeard.updateComingList()
+        sickbeard.updateMissingList()
+        
