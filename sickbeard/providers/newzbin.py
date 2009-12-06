@@ -120,6 +120,8 @@ def findEpisode(episode, forceQuality=None):
 	
 	q += "(" + " OR ".join(["^\""+str(x)+" - {0}x{1:0>2}".format(episode.season, episode.episode)+"\"" for x in showNames]) + ")"
 	
+	q += " AND NOT \"(Passworded)\""
+	
 	newzbinURL = {
 	  'q': q,
     'searchaction': 'Search',
