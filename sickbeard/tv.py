@@ -136,6 +136,11 @@ class TVShow(object):
 	
 	
 	def _getLocation(self):
+		if os.path.isdir(self._location):
+			return self._location
+		else:
+			raise exceptions.ShowDirNotFoundException("Show folder doesn't exist, you shouldn't be using it")
+		
 		if self._isDirGood:
 			return self._location
 		else:
@@ -189,6 +194,10 @@ class TVShow(object):
 
 	def writeEpisodeNFOs (self):
 		
+		if not os.path.isdir(self._location):
+			Logger().log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+			return
+		
 		Logger().log(str(self.tvdbid) + ": Writing NFOs for all episodes")
 		
 		myDB = db.DBConnection()
@@ -203,6 +212,10 @@ class TVShow(object):
 	# find all media files in the show folder and create episodes for as many as possible
 	def loadEpisodesFromDir (self):
 
+		if not os.path.isdir(self._location):
+			Logger().log(str(self.tvdbid) + ": Show dir doesn't exist, not loading episodes from disk")
+			return
+		
 		Logger().log(str(self.tvdbid) + ": Loading all episodes from the show directory " + self._location)
 
 		# get file list
@@ -414,6 +427,10 @@ class TVShow(object):
 	
 	def loadNFO (self):
 
+		if not os.path.isdir(self._location):
+			Logger().log(str(self.tvdbid) + ": Show dir doesn't exist, can't load NFO")
+			raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
+		
 		Logger().log(str(self.tvdbid) + ": Loading show info from NFO")
 
 		xmlFile = os.path.join(self._location, "tvshow.nfo")
@@ -490,7 +507,7 @@ class TVShow(object):
 	def refreshDir(self):
 
 		# make sure the show dir is where we think it is
-		if not os.path.isdir(self.location):
+		if not os.path.isdir(self._location):
 			return False
 		
 		# run through all locations from DB, check that they exist
@@ -528,7 +545,11 @@ class TVShow(object):
 			
 			
 	def fixEpisodeNames(self):
-		
+
+		if not os.path.isdir(self._location):
+			Logger().log(str(self.tvdbid) + ": Show dir doesn't exist, can't rename episodes")
+			return
+				
 		# load episodes from my folder
 		self.loadEpisodesFromDir()
 		
@@ -588,20 +609,6 @@ class TVShow(object):
 			for curEp in [rootEp]+rootEp.relatedEps:
 				curEp.checkForMetaFiles()
 			
-			#if os.path.isfile(os.path.join(rootEp.show.location, rootEp.prettyName() + ".nfo")):
-			#	Logger().log(str(self.tvdbid) + ": Renamed NFO successfully")
-			#	with rootEp.lock:
-			#		rootEp.hasnfo = True
-			#		for relEp in rootEp.relatedEps:
-			#			relEp.hasnfo = True
-
-			#if os.path.isfile(os.path.join(rootEp.show.location, rootEp.prettyName() + ".tbn")):
-			#	Logger().log(str(self.tvdbid) + ": Renamed TBN successfully")
-			#	with rootEp.lock:
-			#		rootEp.hastbn = True
-			#		for relEp in rootEp.relatedEps:
-			#			relEp.hastbn = True
-
 			with rootEp.lock:
 				rootEp.saveToDB()
 				for relEp in rootEp.relatedEps:
@@ -685,7 +692,7 @@ class TVEpisode:
 	def checkForMetaFiles(self): 
 		
 		# check for nfo and tbn
-		if os.path.isfile(os.path.join(self.show.location, self.location)):
+		if os.path.isfile(self.location):
 			if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'nfo'))):
 				self.hasnfo = True
 			else:
@@ -795,9 +802,13 @@ class TVEpisode:
 		self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
 		self.tvdbid = myEp["id"]
 
+		if not os.path.isdir(self.show._location):
+			Logger().log("The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
+			return
+
 		Logger().log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + statusStrings[self.status] + " and existence of " + self.location, DEBUG)
 		
-		if not os.path.isfile(os.path.join(self.show.location, self.location)):
+		if not os.path.isfile(self.location):
 
 			# if we don't have the file and it hasn't aired yet set the status to UNAIRED
 			if self.airdate >= datetime.date.today() and self.status != SNATCHED and self.status != PREDOWNLOADED:
@@ -831,6 +842,10 @@ class TVEpisode:
 		
 		
 	def loadFromNFO(self, location):
+
+		if not os.path.isdir(self.show._location):
+			Logger().log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try loading the episode NFO")
+			return
 
 		Logger().log(str(self.show.tvdbid) + ": Loading episode details from the NFO file associated with " + location, DEBUG)
 
@@ -891,7 +906,7 @@ class TVEpisode:
 
 		toReturn = ""
 		toReturn += self.show.name + " - " + str(self.season) + "x" + str(self.episode) + " - " + self.name + "\n"
-		toReturn += "location: " + os.path.join(self.show.location, self.location) + "\n"
+		toReturn += "location: " + self.location + "\n"
 		toReturn += "description: " + self.description + "\n"
 		toReturn += "airdate: " + str(self.airdate.toordinal()) + " (" + str(self.airdate) + ")\n"
 		toReturn += "hasnfo: " + str(self.hasnfo) + "\n"
@@ -902,6 +917,10 @@ class TVEpisode:
 		
 	def createMetaFiles(self, force=False):
 		
+		if not os.path.isdir(self.show._location):
+			Logger().log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try to create metadata")
+			return
+
 		if sickbeard.CREATE_METADATA != True:
 			return
 		

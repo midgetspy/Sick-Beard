@@ -198,6 +198,12 @@ def doIt(downloadDir, nzbName=None):
         returnStr += logStr + "\n"
         return returnStr
 
+    if not os.path.isdir(showResults._location):
+        logStr = "The show dir doesn't exist, canceling postprocessing"
+        Logger().log(logStr, DEBUG)
+        returnStr += logStr + "\n"
+        return returnStr
+
     
     # get or create the episode (should be created probably, but not for sure)
     season = int(result["seasno"])

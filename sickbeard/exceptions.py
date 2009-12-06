@@ -56,3 +56,6 @@ class NewzbinAPIThrottled(SickBeardException):
 
 class TVRageException(SickBeardException):
 	"TVRage API did something bad"
+
+class ShowDirNotFoundException(SickBeardException):
+	"The show dir doesn't exist"

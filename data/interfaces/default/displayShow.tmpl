@@ -49,8 +49,8 @@ Status: $show.status<br />
 
 #try:
 Location: $show.location<br />
-#except sickbeard.exceptions.NoNFOException:
-Location: $show._location**<br />
+#except sickbeard.exceptions.ShowDirNotFoundException:
+<span style="color: red;">$show._location</span> (dir is missing)<br />
 #end try
 
 Quality: $qualityStrings[int($show.quality)]<br />
