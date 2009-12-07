@@ -314,6 +314,9 @@ class TVShow(object):
 		Logger().log(str(self.tvdbid) + ": Creating episode object from " + file, DEBUG)
 
 		result = tvnamer.processSingleName(file)
+		
+		Logger().log(str(self.tvdbid) + ": Parsed the name to "+str(result))
+		
 
 		if result != None:
 
@@ -1148,6 +1151,9 @@ class TVEpisode:
 		if len(self.relatedEps) == 0:
 			goodName = self.name
 
+		elif len(self.relatedEps) > 1:
+			goodName = ''
+
 		else:
 			singleName = True
 			curGoodName = None
@@ -1176,7 +1182,12 @@ class TVEpisode:
 		goodEpString = "x{0:0>2}".format(self.episode)
 		for relEp in self.relatedEps:
 			goodEpString += "x{0:0>2}".format(relEp.episode)
-		return "{0} - {1}{2} - {3}".format(self.show.name, self.season, goodEpString, unicode(goodName).encode('ascii', 'ignore'))
+		
+		if goodName != '':
+			goodName = ' - ' + goodName
+
+		return self.show.name + ' - ' + str(self.season) + goodEpString + goodName
+		#return "{0} - {1}{2} - {3}".format(self.show.name, self.season, goodEpString, unicode(goodName).encode('utf-8', 'ignore'))
 		
 		
 		
