@@ -207,7 +207,7 @@ def initialize():
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD
+                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR
         
         if __INITIALIZED__:
             return False
@@ -223,7 +223,7 @@ def initialize():
         CheckSection('XBMC')
         CheckSection('Growl')
         
-        LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', '')
+        LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
             Logger().log("!!! No log folder, logging to screen only!", ERROR)
 
@@ -248,7 +248,7 @@ def initialize():
         if NZB_METHOD not in ('blackhole', 'sabnzbd'):
             NZB_METHOD = 'blackhole'
         
-        USE_NZB = bool(check_setting_int(CFG, 'General', 'use_nzb', 0))
+        USE_NZB = bool(check_setting_int(CFG, 'General', 'use_nzb', 1))
         USE_TORRENT = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 200)
         
