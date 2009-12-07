@@ -471,7 +471,7 @@ class HomeAddShows:
         
         #result = ui.addShowsFromRootDir(dir)
         
-        url = "addShow?"+"&".join(["showDir="+x for x in showDirs])
+        url = "addShow?"+"&".join(["showDir="+urllib.quote_plus(x) for x in showDirs])
         Logger().log("Redirecting to URL "+url, DEBUG)
         raise cherrypy.HTTPRedirect(url)
 
@@ -551,7 +551,7 @@ class HomeAddShows:
                     else:
                         return _genericMessage("Error", "The show in "+curShowDir+" is already loaded.")
                 else:
-                    url ="addShow?"+ "&".join(["showDir="+x for x in showDir])
+                    url ="addShow?"+ "&".join(["showDir="+urllib.quote_plus(x) for x in showDir])
                     Logger().log("There are still shows left to add, so redirecting to "+url)
                     raise cherrypy.HTTPRedirect(url)
             else:
