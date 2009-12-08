@@ -15,11 +15,7 @@ Status: $show.status<br />
 <br />
 <form action="editShow" method="post">
 <input type="hidden" name="show" value="$show.tvdbid">
-#try:
-Location: <input type="text" name="location" value="$show.location"><br />
-#except exceptions.NoNFOException:
-$show._location"><br />
-#end try
+Location: <input type="text" name="location" value="$show._location"><br />
 Quality: <select name="quality">
 #for $quality in $qualities:
 #if $show.quality == $quality
