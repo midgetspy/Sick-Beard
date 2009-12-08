@@ -315,9 +315,6 @@ class TVShow(object):
 
 		result = tvnamer.processSingleName(file)
 		
-		Logger().log(str(self.tvdbid) + ": Parsed the name to "+str(result))
-		
-
 		if result != None:
 
 			# for now lets assume that any show in the show dir belongs to the right place

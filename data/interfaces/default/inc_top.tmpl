@@ -1,7 +1,8 @@
+#from sickbeard.version import SICKBEARD_VERSION
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
 <html>
 <head>
-    <title>Sick Beard alpha - $title</title>
+    <title>Sick Beard - alpha $SICKBEARD_VERSION - $title</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     #if $topmenu=="comingEpisodes" then "<meta http-equiv=\"refresh\" content=\"180\">" else ""#
     <link rel="stylesheet" type="text/css" href="/css/default.css"/>
@@ -12,7 +13,7 @@
     <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script> 
 </head>
 <body>
-<h1><span id="first">Sick</span> <span id="second">Beard</span><span id="third"> alpha</span><span id="catchfrase">This program does stuff</span></h1>
+<h1><span id="first">Sick</span> <span id="second">Beard</span><span id="third"> alpha $SICKBEARD_VERSION</span><span id="catchfrase">This program does stuff</span></h1>
 
 #set $root=""
 <!--#set $mypath=$root+"/"+$topmenu#-->

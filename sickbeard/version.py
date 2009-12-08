@@ -1,0 +1,1 @@
+SICKBEARD_VERSION = "trunk"

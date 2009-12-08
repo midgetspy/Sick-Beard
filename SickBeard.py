@@ -36,6 +36,7 @@ from sickbeard import db, webserve
 from sickbeard.tv import TVShow
 from sickbeard.logging import *
 from sickbeard.common import *
+from sickbeard.version import SICKBEARD_VERSION
 
 from lib.configobj import ConfigObj
 
@@ -73,7 +74,7 @@ def main():
 	# rename the main thread
 	threading.currentThread().name = "MAIN"
 	
-	Logger().log("Starting up Sick Beard from " + os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE))
+	Logger().log("Starting up Sick Beard "+SICKBEARD_VERSION+" from " + os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE))
 	
 	# load the config and publish it to the sickbeard package
 	if not os.path.isfile(os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE)):
