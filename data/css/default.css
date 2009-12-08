@@ -27,16 +27,6 @@ div.EntryBlock form {
   display: inline;
 }
 
-#homeContainer {
-  width: 1000px;
-  align: center;
-}
-
-.homelisting {
-  display: inline-block;
-  width: 475px;
-} 
-
 fieldset.EntryFieldSet {
   vertical-align: top;
   display: inline;
@@ -179,39 +169,10 @@ h2 {
   padding-bottom: 5px;
   margin-top: 20px;
 }
-
-#progressBar {
-  height: 6px;
-  width: 90%;
-  margin: 0px;
-  margin-left: auto; 
-  margin-right: auto;
-  padding: 0px;
-  text-align: left;
-}
-
-* html #progressBar {
-  height: 8px;
-  height: 6px;
-}
-
-#percentageBar {
-  position: relative; 
-  height: 6px;
-}
-
 .sickbeardTable {
 width:80%;
 margin-left: 10%;
 margin-right: 10%;
-}
-
-#row_del, #row_order, #row_mode {
-width:75px;
-}
-
-.verbosity_link{
-padding:4px;
 }
 
 .normalheight, .doubleheight, .tripleheight, .pattern, .result, .heading1, .heading2, .heading3 {float:left; border-left:1px }
