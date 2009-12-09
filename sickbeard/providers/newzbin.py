@@ -91,13 +91,16 @@ def findEpisode(episode, forceQuality=None):
 		epQuality = episode.show.quality
 		
 	if epQuality == SD:
-		qualAttrs = "(Attr:VideoF~XviD OR Attr:VideoF~DivX) NOT Attr:VideoF~720p NOT Attr:VideoF~1080p Attr:Lang=Eng "
+		qualAttrs = "(Attr:VideoF~XviD OR Attr:VideoF~DivX) NOT Attr:VideoF~720p NOT Attr:VideoF~1080p "
 		# don't allow subtitles for SD content cause they'll probably be hard subs
 		qualAttrs += "NOT (Attr:SubtitledLanguage~French OR Attr:SubtitledLanguage~Spanish OR Attr:SubtitledLanguage~German OR Attr:SubtitledLanguage~Italian OR Attr:SubtitledLanguage~Danish OR Attr:SubtitledLanguage~Dutch OR Attr:SubtitledLanguage~Japanese OR Attr:SubtitledLanguage~Chinese OR Attr:SubtitledLanguage~Korean OR Attr:SubtitledLanguage~Russian OR Attr:SubtitledLanguage~Polish OR Attr:SubtitledLanguage~Vietnamese OR Attr:SubtitledLanguage~Swedish OR Attr:SubtitledLanguage~Norwegian OR Attr:SubtitledLanguage~Finnish OR Attr:SubtitledLanguage~Turkish) "
 	elif epQuality == HD:
-		qualAttrs = "Attr:VideoF~x264 Attr:VideoF~720p Attr:Lang=Eng "
+		qualAttrs = "Attr:VideoF~x264 Attr:VideoF~720p "
 	else:
 		qualAttrs = "(Attr:VideoF~x264 OR Attr:VideoF~XviD OR Attr:VideoF~DivX) "
+
+	# require english for now
+	qualAttrs += "Attr:Lang=Eng "
 
 	# if it's in the disc backlog then limit the results to disc sources only 
 	if episode.status == DISCBACKLOG:
