@@ -61,6 +61,9 @@ config['name_parse_multi_ep'] = [
     # foo.205 (single eps only)
     (re.compile('''^(.+)[ \._\-]([0-9]{1})([0-9]{2})[\._ -][^\\/]*$'''),
      re.compile("(\d{2})"))
+    # foo.0205 (single eps only)
+    (re.compile('''^(.+)[ \._\-]([0-9]{2})([0-9]{2,3})[\._ -][^\\/]*$'''),
+     re.compile("(\d{2,3})"))
 ]
 
 
@@ -121,7 +124,7 @@ def processSingleName(name, verbose=False):
 				'ext':ext
 			}
 	else:
-		print "Invalid name: %s" % (name)
+		#print "Invalid name: %s" % (name)
 		return None
 	#end for r
 
