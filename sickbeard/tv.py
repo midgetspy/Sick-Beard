@@ -867,8 +867,13 @@ class TVEpisode:
 				try:
 					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
-				except ValueError as e:
-					Logger().log("Error loading the NFO, skipping for now: " + str(e), ERROR) #TODO: figure out what's wrong and fix it
+				except (HTMLParseError, ValueError) as e:
+					Logger().log("Error loading the NFO, backing up the NFO and skipping for now: " + str(e), ERROR) #TODO: figure out what's wrong and fix it
+					nfoFileObj.close()
+					try:
+						os.rename(nfoFile, nfoFile + ".old")
+					except Exception as e:
+						Logger().log("Failed to rename your episode's NFO file - you need to delete it or fix it: " + str(e), ERROR)
 					raise exceptions.NoNFOException("Error in NFO format")
 
 				for epDetails in showSoup.findAll('episodedetails'):
