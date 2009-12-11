@@ -130,7 +130,7 @@ class History:
     def clearHistory(self):
         
         myDB = db.DBConnection()
-        myDB.action("DELETE * FROM history")
+        myDB.action("DELETE FROM history WHERE 1=1")
         
         raise cherrypy.HTTPRedirect("/history")
 
