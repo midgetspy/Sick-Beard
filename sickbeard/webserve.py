@@ -483,11 +483,14 @@ class HomeAddShows:
         if showDir != None and type(showDir) is not list:
             showDir = [showDir]
         
+        # unquote it no matter what
+        showDir = [urllib.unquote_plus(x) for x in showDir]
+        
         Logger().log("showDir: "+str(showDir))
         
         myTemplate = Template(file="data/interfaces/default/home_addShow.tmpl")
         myTemplate.resultList = None
-        myTemplate.showDir = showDir
+        myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
         
         # if no showDir then start at the beginning
         if showDir == None:
@@ -497,14 +500,14 @@ class HomeAddShows:
         if showDir != None and showName != None:
             Logger().log("Getting list of possible shows and asking user to choose one", DEBUG)
             t = tvdb_api.Tvdb(custom_ui=TVDBWebUI)
-            t.config['_showDir'] = showDir
+            t.config['_showDir'] = [urllib.quote_plus(x) for x in showDir]
             try:
                 s = t[showName] # this will throw a cherrypy exception
             except tvdb_exceptions.tvdb_shownotfound:
                 return _genericMessage("Error", "Couldn't find that show")
     
 
-        curShowDir = os.path.normpath(urllib.unquote_plus(showDir[0]))
+        curShowDir = os.path.normpath(showDir[0])
         Logger().log("curShowDir: "+curShowDir)
 
         if seriesList != None:
@@ -523,39 +526,37 @@ class HomeAddShows:
                 #newShowAdder = ui.ShowAdder(showDir)
                 sickbeard.showAddScheduler.action.addShowToQueue(curShowDir)
                 showAdded = True
+                del showDir[0]
             except exceptions.NoNFOException:
                 Logger().log("The show queue said we need to create an NFO for this show", DEBUG)
                 myTemplate.resultList = []
-                myTemplate.showDir = showDir
+                myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
                 return _munge(myTemplate)
             except exceptions.MultipleShowObjectsException:
                 # showAdded is already false so we can pass this exception and deal with the redirect below
+                del showDir[0]
                 pass 
 
-            # give it a chance to get on the show list so we don't refresh and it looks like nothing happened
-            if showAdded == True:
-                maxWait = 10
-                curWait = 0
-                while curShowDir not in sickbeard.loadingShowList:
-                    curWait += 1
-                    if curWait > maxWait:
-                        break
-                    time.sleep(1)
-
-            # if we're done adding, redirect to the appropriate place
-            if showAdded == False or curShowDir in sickbeard.loadingShowList and sickbeard.loadingShowList[curShowDir].show != None:
-                del showDir[0]
-                if len(showDir) == 0:
-                    if showAdded:
+            # if the show list is empty, go to the show page
+            if len(showDir) == 0:
+                if showAdded:
+                    # if we added a show and it's loading then visit its page
+                    if curShowDir in sickbeard.loadingShowList and sickbeard.loadingShowList[curShowDir].show != None:
                         raise cherrypy.HTTPRedirect("../displayShow?show="+str(sickbeard.loadingShowList[curShowDir].show.tvdbid))
+                    # if we added a show but it's not loading yet then go to the home page
                     else:
-                        return _genericMessage("Error", "The show in "+curShowDir+" is already loaded.")
+                        time.sleep(3)
+                        raise cherrypy.HTTPRedirect("../")
+
+                # if we didn't add a show and the show list is empty it means we errored on the last show, so let the user know
                 else:
-                    url ="addShow?"+ "&".join(["showDir="+urllib.quote_plus(x) for x in showDir])
-                    Logger().log("There are still shows left to add, so redirecting to "+url)
-                    raise cherrypy.HTTPRedirect(url)
+                    return _genericMessage("Error", "The show in "+curShowDir+" is already loaded.")
+            
+            # if we have at least one show left to add then redirect
             else:
-                raise cherrypy.HTTPRedirect("../")
+                newCallList = [urllib.quote_plus(x) for x in showDir]
+                Logger().log("There are still shows left to add, so recursively calling myself with showDir="+str(newCallList))
+                return self.addShow(newCallList)
                                     
         
         # if we have a single ID then just make a show with that ID
@@ -573,9 +574,15 @@ class HomeAddShows:
                 return _genericMessage("Error", "Unable to make tvshow.nfo?")
             
             # just go do the normal show creation now that we have the NFO
-            url ="addShow?"+ "&".join(["showDir="+x for x in showDir])
-            Logger().log("Redirecting to "+url, DEBUG)
-            raise cherrypy.HTTPRedirect(url)
+            #url ="addShow?"+ "&".join(["showDir="+urllib.quote_plus(x) for x in showDir])
+            #Logger().log("Redirecting to "+url, DEBUG)
+            #raise cherrypy.HTTPRedirect(url)
+            newCallList = [urllib.quote_plus(x) for x in showDir]
+            Logger().log("We now have an NFO for the show, so recursively calling myself with showDir="+str(newCallList))
+            a = self.addShow(newCallList)
+            Logger().log("HOW DID WE GET HERE: "+a)
+            return a
+            
         
         # if we have multiple IDs then let them pick
         else:
@@ -584,7 +591,7 @@ class HomeAddShows:
             
             t = tvdb_api.Tvdb()
             myTemplate.resultList = [t[int(x)] for x in showIDs]
-            myTemplate.showDir = showDir
+            myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
             
             return _munge(myTemplate)
 

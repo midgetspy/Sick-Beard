@@ -25,7 +25,7 @@
 #end if
 
 #for $curShow in $showDir:
-  <input type="hidden" name="showDir" value="$urllib.quote_plus($curShow)">
+  <input type="hidden" name="showDir" value="$curShow">
 #end for 
 
 <input type="submit" value="Submit"><br />
