@@ -224,7 +224,9 @@ class TVShow(object):
 			files = os.listdir(unicode(self._location))
 		else:
 			for curFile in os.listdir(unicode(self._location)):
-				match = re.match("[Ss]eason (\d+)", curFile)
+				if not os.path.isdir(os.path.join(self._location, curFile)):
+					continue
+				match = re.match("[Ss]eason\s*(\d+)", curFile)
 				if match != None:
 					files += [os.path.join(curFile, x) for x in os.listdir(unicode(os.path.join(self._location, curFile)))]
 
