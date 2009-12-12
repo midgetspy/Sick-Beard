@@ -6,7 +6,7 @@
 <!--#set global $topmenu="home"#-->
 <!--#set global $statpath=".."#-->
 <!--#set global $helpsubject="Home"#-->
-#include "data/interfaces/default/inc_top.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <span class="SubMenu">
 <a href="editShow?show=$show.tvdbid">Edit</a> |
@@ -119,4 +119,4 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
 </table><br /><br />
             
 
-#include "data/interfaces/default/inc_bottom.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

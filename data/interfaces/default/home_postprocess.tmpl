@@ -3,10 +3,11 @@
 <!--#set global $topmenu="home"#-->
 <!--#set global $statpath="../.."#-->
 <!--#set global $helpsubject="Configure+General"#-->
-#include "data/interfaces/default/inc_top.tmpl"
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <!--#set global $submenu="postprocess"#-->
-#include "data/interfaces/default/inc_hmenu.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_hmenu.tmpl")
 
 <h2>Manual postprocessing</h2>
 
@@ -15,4 +16,4 @@ Enter the folder containing the episode: <input type="text" name="dir" size="50"
 <strong>(NOTE: MUST ONLY CONTAIN ONE EPISODE)</strong><br />
 
 
-#include "data/interfaces/default/inc_bottom.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

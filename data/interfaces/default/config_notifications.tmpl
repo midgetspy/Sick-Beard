@@ -3,10 +3,10 @@
 <!--#set global $topmenu="config"#-->
 <!--#set global $statpath="../.."#-->
 <!--#set global $helpsubject="Configure+General"#-->
-#include "data/interfaces/default/inc_top.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <!--#set global $submenu="notifications"#-->
-#include "data/interfaces/default/inc_cmenu.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_cmenu.tmpl")
 
 <script>
 \$(document).ready(function(){
@@ -137,4 +137,4 @@ Not Implemented<br />
 </form>
 
 
-#include "data/interfaces/default/inc_bottom.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

@@ -2,10 +2,10 @@
 <!--#set global $topmenu="home"#-->
 <!--#set global $statpath=".."#-->
 <!--#set global $helpsubject="Home"#-->
-#include "data/interfaces/default/inc_top.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <!--#set global $submenu=""#-->
-#include "data/interfaces/default/inc_hmenu.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_hmenu.tmpl")
 
 <h2>$episode.prettyName()</h2> (<a href="/searchEpisode?show=$episode.show.tvdbid&season=$episode.season&episode=$episode.episode">find NZB</a>)
 <br />
@@ -16,4 +16,4 @@ Description: $episode.description<br />
 Has NFO: $episode.hasnfo<br />
 Has TBN: $episode.hastbn<br />
 
-#include "data/interfaces/default/inc_bottom.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

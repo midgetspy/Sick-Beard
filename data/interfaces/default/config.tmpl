@@ -4,14 +4,14 @@
 <!--#set global $topmenu="config"#-->
 <!--#set global $statpath=".."#-->
 <!--#set global $helpsubject="Configure"#-->
-#include "data/interfaces/default/inc_top.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <!--#set global $submenu=""#-->
-#include "data/interfaces/default/inc_cmenu.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_cmenu.tmpl")
 
 <h2>Configuration</h2>
 <p>
 <b>Configfile:</b> $os.path.join($sickbeard.PROG_DIR, "config.ini")
 </p>
 
-#include "data/interfaces/default/inc_bottom.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

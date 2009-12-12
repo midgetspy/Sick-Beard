@@ -1,3 +1,4 @@
+#import sickbeard
 #import os.path
 #import datetime
 #import re
@@ -7,7 +8,7 @@
 <!--#set global $topmenu="history"#-->
 <!--#set global $statpath=".."#-->
 <!--#set global $helpsubject="Home"#-->
-#include "data/interfaces/default/inc_top.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script>
 \$(document).ready(function() 
@@ -74,4 +75,4 @@
   </tbody>
 </table>
 
-#include "data/interfaces/default/inc_bottom.tmpl"
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
