@@ -62,7 +62,7 @@ def _munge(string):
     return unicode(string).encode('ascii', 'xmlcharrefreplace')
 
 def _genericMessage(subject, message):
-    t = Template(file="data/interfaces/default/genericMessage.tmpl")
+    t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/genericMessage.tmpl"))
     t.subject = subject
     t.message = message
     return _munge(t)
@@ -93,7 +93,7 @@ class Backlog:
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT e.*, show_name FROM tv_shows s, tv_episodes e WHERE s.tvdb_id=e.showid AND e.status IN ("+str(BACKLOG)+","+str(DISCBACKLOG)+")")
         
-        t = Template(file="data/interfaces/default/backlog.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/backlog.tmpl"))
         t.backlogResults = sqlResults
         
         return _munge(t)
@@ -120,7 +120,7 @@ class History:
 #        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC LIMIT "+str(numPerPage*(p-1))+", "+str(numPerPage))
         sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
 
-        t = Template(file="data/interfaces/default/history.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/history.tmpl")))
         t.historyResults = sqlResults
         
         return _munge(t)
@@ -151,7 +151,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file="data/interfaces/default/config_general.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_general.tmpl"))
         return _munge(t)
 
     @cherrypy.expose
@@ -208,7 +208,7 @@ class ConfigEpisodeSearch:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file="data/interfaces/default/config_episodesearch.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_episodesearch.tmpl"))
         return _munge(t)
 
     @cherrypy.expose
@@ -268,7 +268,7 @@ class ConfigProviders:
     
     @cherrypy.expose
     def index(self):
-        t = Template(file="data/interfaces/default/config_providers.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_providers.tmpl"))
         return _munge(t)
 
     
@@ -318,7 +318,7 @@ class ConfigIRC:
     
     @cherrypy.expose
     def index(self):
-        t = Template(file="data/interfaces/default/config_irc.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_irc.tmpl"))
         return _munge(t)
 
     @cherrypy.expose
@@ -349,7 +349,7 @@ class ConfigNotifications:
     
     @cherrypy.expose
     def index(self):
-        t = Template(file="data/interfaces/default/config_notifications.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_notifications.tmpl"))
         return _munge(t)
     
     @cherrypy.expose
@@ -403,7 +403,7 @@ class Config:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file="data/interfaces/default/config.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config.tmpl"))
         return _munge(t)
     
     general = ConfigGeneral()
@@ -422,7 +422,7 @@ class HomePostProcess:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file="data/interfaces/default/home_postprocess.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_postprocess.tmpl"))
         return _munge(t)
 
     @cherrypy.expose
@@ -444,7 +444,7 @@ class HomeAddShows:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file="data/interfaces/default/home_addShows.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_addShows.tmpl"))
         return _munge(t)
 
     @cherrypy.expose
@@ -488,7 +488,7 @@ class HomeAddShows:
         
         Logger().log("showDir: "+str(showDir))
         
-        myTemplate = Template(file="data/interfaces/default/home_addShow.tmpl")
+        myTemplate = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_addShow.tmpl"))
         myTemplate.resultList = None
         myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
         
@@ -602,7 +602,7 @@ class Home:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file="data/interfaces/default/home.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home.tmpl"))
         
         myDB = db.DBConnection()
         
@@ -652,7 +652,7 @@ class Home:
     
         sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC")
         
-        t = Template(file="data/interfaces/default/displayShow.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/displayShow.tmpl"))
         
         t.show = showObj
         t.qualityStrings = sickbeard.common.qualityStrings
@@ -673,7 +673,7 @@ class Home:
 
         if location == None and quality == None and seasonfolders == None:
             
-            t = Template(file="data/interfaces/default/editShow.tmpl")
+            t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/editShow.tmpl"))
             with showObj.lock:
                 t.show = showObj
                 t.qualityStrings = qualityStrings
@@ -915,7 +915,7 @@ class WebInterface:
         # sort by air date
         epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))
         
-        t = Template(file="data/interfaces/default/comingEpisodes.tmpl")
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/comingEpisodes.tmpl"))
         t.epList = epList
         t.qualityStrings = qualityStrings
         
