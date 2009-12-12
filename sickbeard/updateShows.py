@@ -291,7 +291,7 @@ class ShowUpdater():
             
             doUpdate = forceUpdate or int(show.tvdbid) in updatedShows
 
-            Logger().log("Beginning update of show " + str(show.name) + " (" + str(show.tvdbid) + ")")
+            Logger().log("Beginning update of show " + show.name + " (" + str(show.tvdbid) + ")")
 
             try:
                 if doUpdate:
