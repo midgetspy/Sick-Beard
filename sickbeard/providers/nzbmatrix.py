@@ -89,11 +89,11 @@ def findEpisode (episode, forceQuality=None):
 		
 		if searchResult.startswith("error:"):
 			err = searchResult.split(":")[1]
-			Logger().log("An error was encountered during the search: "+err, ERROR)
 			if err == "nothing_found":
 				continue
 			elif err == "invalid_login" or err == "invalid_api":
 				raise exceptions.AuthException("NZBMatrix username or API key is incorrect")
+			Logger().log("An error was encountered during the search: "+err, ERROR)
 		
 		
 		for curResult in searchResult.split("|"):

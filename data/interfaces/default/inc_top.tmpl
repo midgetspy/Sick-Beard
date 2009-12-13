@@ -1,4 +1,6 @@
 #from sickbeard.version import SICKBEARD_VERSION
+#from sickbeard import NEWEST_VERSION
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
 <html>
 <head>
@@ -13,6 +15,10 @@
     <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script> 
 </head>
 <body>
+#if $SICKBEARD_VERSION != "trunk" and $NEWEST_VERSION != None and int($SICKBEARD_VERSION[1:]) < $NEWEST_VERSION:
+<div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">There is a newer version available (r$NEWEST_VERSION)</a></div>
+<br />
+#end if
 <h1><span id="first">Sick</span> <span id="second">Beard</span><span id="third"> alpha $SICKBEARD_VERSION</span><span id="catchfrase">This program does stuff</span></h1>
 
 #set $root=""

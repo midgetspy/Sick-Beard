@@ -23,6 +23,8 @@ import os.path
 import os
 import sqlite3
 import codecs
+import urllib
+import re
 
 from sickbeard.exceptions import *
 from sickbeard.logging import *
@@ -205,3 +207,17 @@ def searchDBForShow(showName):
 		return None
 	
 	return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+
+def findLatestRev():
+
+	regex = "http\://sickbeard\.googlecode\.com/files/SickBeard\-r(\d+)\.zip"
+	
+	svnFile = urllib.urlopen("http://code.google.com/p/sickbeard/downloads/list")
+	
+	for curLine in svnFile.readlines():
+		match = re.search(regex, curLine)
+		if match:
+			groups = match.groups()
+			return int(groups[0])
+
+	return None
