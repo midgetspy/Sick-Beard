@@ -63,8 +63,7 @@ def processEpisode(dirName, nzbName=None):
         params['nzbName'] = nzbName
         
     if config.get("SickBeard", "sourceDir") != "" and config.get("SickBeard", "destDir") != "":
-            params['dir'] = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "destDir"))
-    
+            params['dir'] = params['dir'].replace(os.path.normpath(config.get("SickBeard", "sourceDir")), os.path.normpath(config.get("SickBeard", "destDir")))
     
     myOpener = AuthURLOpener(username, password)
     

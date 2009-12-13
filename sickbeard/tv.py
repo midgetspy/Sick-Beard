@@ -589,6 +589,7 @@ class TVShow(object):
 			
 			goodName = rootEp.prettyName()
 			actualName = os.path.splitext(os.path.basename(curLocation))
+			curEpDir = os.path.dirname(curLocation)
 
 			if goodName == actualName[0]:
 				Logger().log(str(self.tvdbid) + ": File " + rootEp.location + " is already named correctly, skipping", DEBUG)
@@ -601,7 +602,7 @@ class TVShow(object):
 					for relEp in rootEp.relatedEps:
 						relEp.location = result
 			
-			fileList = glob.glob(os.path.join(rootEp.show.location, actualName[0] + "*"))
+			fileList = glob.glob(os.path.join(curEpDir, actualName[0] + "*"))
 
 			for file in fileList:
 				result = processTV.renameFile(file, rootEp.prettyName())
