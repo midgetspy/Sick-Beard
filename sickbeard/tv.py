@@ -28,7 +28,7 @@ import glob
 
 from xml.dom.minidom import Document
 
-from lib.BeautifulSoup import BeautifulStoneSoup, NavigableString, HTMLParseError
+from lib.BeautifulSoup import BeautifulStoneSoup, NavigableString, SGMLParseError
 from lib.tvdb_api import tvdb_api, tvnamer, tvdb_exceptions
 
 from sickbeard import db
@@ -441,7 +441,7 @@ class TVShow(object):
 		try:
 			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 			showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
-		except HTMLParseError as e:
+		except SGMLParseError as e:
 			Logger().log("There was an error parsing your existing tvshow.nfo file: " + str(e), ERROR)
 			Logger().log("Attempting to rename it to tvshow.nfo.old", DEBUG)
 			xmlFileObj.close()
@@ -869,7 +869,7 @@ class TVEpisode:
 				try:
 					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
-				except (HTMLParseError, ValueError) as e:
+				except (SGMLParseError, ValueError) as e:
 					Logger().log("Error loading the NFO, backing up the NFO and skipping for now: " + str(e), ERROR) #TODO: figure out what's wrong and fix it
 					nfoFileObj.close()
 					try:

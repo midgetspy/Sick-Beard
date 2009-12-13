@@ -117,6 +117,8 @@ def findEpisode(episode):
 
 	foundEps = []
 
+	didSearch = False
+
 	for curProvider in (newzbin, tvbinz, nzbs, nzbmatrix, eztv):
 		
 		if not curProvider.isActive():
@@ -124,11 +126,16 @@ def findEpisode(episode):
 		
 		try:
 			foundEps = _doSearch(episode, curProvider)
-		except exceptions.AuthException:
-			Logger().log("The login information in your config for "+curProvider.providerName, ERROR)
+		except exceptions.AuthException as e:
+			Logger().log("Authentication error: "+str(e), ERROR)
 			continue
-			
+		
+		didSearch = True
+		
 		if len(foundEps) > 0:
 			break
+	
+	if not didSearch:
+		Logger().log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", ERROR)
 	
 	return foundEps
