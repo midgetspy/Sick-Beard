@@ -1,0 +1,79 @@
+#import sickbeard
+#import urllib
+#import os.path
+#set global $title="Add Shows"
+<!--#set global $topmenu="home"#-->
+<!--#set global $statpath="../.."#-->
+<!--#set global $helpsubject="Configure+General"#-->
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<!--#set global $submenu="addShows"#-->
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_hmenu.tmpl")
+
+<script>
+\$(document).ready(function() 
+{ 
+    \$("#addRootDirTable").tablesorter({
+    	sortList: [[1,0]],
+    	headers: {
+    		0: { sorter: false }
+    	}
+    }); 
+
+
+  \$('#submitShowDirs').click(function(){
+  
+    var dirArr = new Array()
+
+    \$('.dirCheck').each(function() {
+      
+      if (this.checked == true) {
+        dirArr.push(\$(this).attr('id'))
+      }
+      
+    });  
+
+    if (dirArr.length == 0)
+      return false
+
+    url = 'addShow?showDir='+dirArr.join('&showDir=')
+
+    window.location.href = url
+
+  });
+
+  \$('#checkAll').click(function(){
+    
+    var seasCheck = this;
+
+    \$('.dirCheck').each(function(){
+      this.checked = seasCheck.checked 
+    });
+  });
+
+});
+</script>
+
+<h2>Select Shows To Add</h2>
+
+<table id="addRootDirTable" class="sickbeardTable tablesorter">
+  <thead><tr><th width="1%"><input type="checkbox" id="checkAll" CHECKED></th><th>Dir Name</th><th width="1%">Has tvshow.nfo</td></tr></thead>
+  <tbody>
+#for $curDir in $showDirs:
+  <tr class="evenLine">
+	<td><input type="checkbox" id="$curDir" class="dirCheck" CHECKED></td>
+	<td><%=os.path.normpath(urllib.unquote_plus(curDir)).split(os.sep)[-1]%></td>
+	<td align="center"><img src="/images/#if $os.path.isfile($os.path.join($urllib.unquote_plus($curDir), "tvshow.nfo")) then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+  </tr>
+#end for
+  </tbody>
+  <tfoot>
+  <tr>
+    <td colspan="3"><input type="button" value="Continue" id="submitShowDirs"></td>
+  </tr>
+  </tfoot>
+</tbody>
+</table>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

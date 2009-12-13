@@ -87,13 +87,13 @@ class ShowAdder:
         self.curShow = None
 
         self.curShow = TVShow(self.showDir)
+
+        sickbeard.loadingShowList[self.showDir] = ui.LoadingTVShow(self.showDir)
         
 
     def run(self):
 
         Logger().log("Starting to add show "+self.showDir)
-
-        sickbeard.loadingShowList[self.showDir] = ui.LoadingTVShow(self.showDir)
 
         try:
             self.curShow.loadFromTVDB()

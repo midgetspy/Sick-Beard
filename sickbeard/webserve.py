@@ -481,6 +481,10 @@ class HomeAddShows:
         
         #result = ui.addShowsFromRootDir(dir)
         
+        myTemplate = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_addRootDir.tmpl"))
+        myTemplate.showDirs = [urllib.quote_plus(x.encode('utf-8')) for x in showDirs]
+        return _munge(myTemplate)       
+        
         url = "addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
         Logger().log("Redirecting to URL "+url, DEBUG)
         raise cherrypy.HTTPRedirect(url)
