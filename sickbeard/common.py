@@ -54,12 +54,14 @@ NEWZBIN = 1
 TVBINZ = 2
 NZBS = 3
 EZTV = 4
+NZBMATRIX = 5
 
 providerNames = {}
 providerNames[NEWZBIN] = "Newzbin"
 providerNames[TVBINZ] = "TVBinz"
 providerNames[NZBS] = "NZBs.org"
 providerNames[EZTV] = "EZTV"
+providerNames[NZBMATRIX] = "NZBMatrix"
 
 ### Qualities
 HD = 1

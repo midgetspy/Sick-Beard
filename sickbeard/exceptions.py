@@ -59,3 +59,6 @@ class TVRageException(SickBeardException):
 
 class ShowDirNotFoundException(SickBeardException):
 	"The show dir doesn't exist"
+	
+class AuthException(SickBeardException):
+	"Your authentication information is incorrect"

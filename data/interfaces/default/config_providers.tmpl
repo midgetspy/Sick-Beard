@@ -17,7 +17,7 @@
 
 <legend>Newzbin</legend>
 
-<input type="checkbox" name="newzbin" if $sickbeard.NEWZBIN then "CHECKED" else ""#> <strong>Enable Newzbin</strong>
+<input type="checkbox" name="newzbin" #if $sickbeard.NEWZBIN then "CHECKED" else ""#> <strong>Enable Newzbin</strong>
 <a href="http://www.newzbin.com" class="imgLink" target="_new"><img src="/images/providers/newzbin.gif" alt="Newzbin" width="16" height="16"></a><br />
 Check to search Newzbin for episodes<br />
 <br />
@@ -72,10 +72,36 @@ Check to search NZBs.org for episodes<br />
 <strong>UID:</strong><br />
 NZBs.org UID<br />
 <input type="text" name="nzbs_uid" value="$sickbeard.NZBS_UID" size="6"><br />
+<br />
 
 <strong>Hash:</strong><br />
 NZBs.org hash<br />
 <input type="text" name="nzbs_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
+<br />
+
+</fieldset>
+</div>
+
+
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>NZBMatrix</legend>
+
+<input type="checkbox" name="nzbmatrix" #if $sickbeard.NZBMATRIX then "CHECKED" else ""#> <strong>Enable NZBMatrix</strong>
+<a href="http://www.nzbmatrix.com" class="imgLink" target="_new"><img src="/images/providers/nzbmatrix.gif" alt="NZBMatrix" width="16" height="16"></a><br />
+Check to search NZBMatrix for episodes<br />
+<br />
+
+<strong>Username:</strong><br />
+NZBMatrix UID<br />
+<input type="text" name="nzbmatrix_username" value="$sickbeard.NZBMATRIX_USERNAME" size="6"><br />
+<br />
+
+<strong>API Key:</strong><br />
+NZBMatrix API Key<br />
+<input type="text" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="35"><br />
 <br />
 
 </fieldset>

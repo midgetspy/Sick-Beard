@@ -92,6 +92,10 @@ NZBS = False
 NZBS_UID = None
 NZBS_HASH = None
 
+NZBMATRIX = False
+NZBMATRIX_USERNAME = None
+NZBMATRIX_APIKEY = None
+
 SAB_USERNAME = None
 SAB_PASSWORD = None
 SAB_APIKEY = None
@@ -207,7 +211,8 @@ def initialize():
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR
+                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
+                NZBMATRIX_APIKEY 
         
         if __INITIALIZED__:
             return False
@@ -270,6 +275,10 @@ def initialize():
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
         
+        NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
+        NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
+        NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
+        
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
@@ -298,7 +307,7 @@ def initialize():
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
-                                                     runImmediately=True)
+                                                     runImmediately=False)
         
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(hours=1),
@@ -309,7 +318,7 @@ def initialize():
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
                                               cycleTime=datetime.timedelta(hours=6),
                                               threadName="UPDATE",
-                                              runImmediately=True)
+                                              runImmediately=False)
         
         #botRunner = tvnzbbot.NZBBotRunner()
 
@@ -462,7 +471,8 @@ def save_config():
         IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
         XBMC_UPDATE_LIBRARY, XBMC_HOST, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
         USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-        QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD
+        QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
+        NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
@@ -490,6 +500,9 @@ def save_config():
     CFG['NZBs']['nzbs'] = int(NZBS)
     CFG['NZBs']['nzbs_uid'] = NZBS_UID
     CFG['NZBs']['nzbs_hash'] = NZBS_HASH
+    CFG['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
+    CFG['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
+    CFG['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
     CFG['SABnzbd']['sab_username'] = SAB_USERNAME
     CFG['SABnzbd']['sab_password'] = SAB_PASSWORD
     CFG['SABnzbd']['sab_apikey'] = SAB_APIKEY

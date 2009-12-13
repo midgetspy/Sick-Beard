@@ -31,6 +31,7 @@ from sickbeard import notifiers
 from providers import newzbin
 from providers import tvbinz
 from providers import nzbs
+from providers import nzbmatrix
 from providers import eztv
 
 def _downloadResult(result):
@@ -43,6 +44,8 @@ def _downloadResult(result):
 		return nzbs.downloadNZB(result)
 	elif result.provider == EZTV:
 		return eztv.downloadTorrent(result)
+	elif result.provider == NZBMATRIX:
+		return nzbmatrix.downloadNZB(result)
 	else:
 		Logger().log("Invalid provider - this is a coding error, this should never happen.", ERROR)
 		return False
@@ -112,7 +115,7 @@ def findEpisode(episode):
 
 	foundEps = []
 
-	for curProvider in (newzbin, tvbinz, nzbs, eztv):
+	for curProvider in (newzbin, tvbinz, nzbs, nzbmatrix, eztv):
 		
 		if not curProvider.isActive():
 			continue

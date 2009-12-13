@@ -274,7 +274,8 @@ class ConfigProviders:
     
     @cherrypy.expose
     def saveProviders(self, newzbin=None, newzbin_username=None, newzbin_password=None, tvbinz=None,
-                   tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None, nzbs_hash=None):
+                   tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None, nzbs_hash=None,
+                   nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None):
 
         results = []
 
@@ -293,6 +294,11 @@ class ConfigProviders:
         else:
             nzbs = 0
 
+        if nzbmatrix == "on":
+            nzbmatrix = 1
+        else:
+            nzbmatrix = 0
+
         sickbeard.NEWZBIN = newzbin
         sickbeard.NEWZBIN_USERNAME = newzbin_username
         sickbeard.NEWZBIN_PASSWORD = newzbin_password
@@ -304,6 +310,10 @@ class ConfigProviders:
         sickbeard.NZBS = nzbs
         sickbeard.NZBS_UID = nzbs_uid
         sickbeard.NZBS_HASH = nzbs_hash
+        
+        sickbeard.NZBMATRIX = nzbmatrix
+        sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
+        sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey
         
         sickbeard.save_config()
         
