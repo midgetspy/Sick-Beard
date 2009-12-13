@@ -23,10 +23,12 @@ import sickbeard
 from common import *
 from logging import *
 
+
 from sickbeard import sab
 from sickbeard import history
 
 from sickbeard import notifiers 
+from sickbeard import exceptions
 
 from providers import newzbin
 from providers import tvbinz
@@ -120,7 +122,12 @@ def findEpisode(episode):
 		if not curProvider.isActive():
 			continue
 		
-		foundEps = _doSearch(episode, curProvider)
+		try:
+			foundEps = _doSearch(episode, curProvider)
+		except exceptions.AuthException:
+			Logger().log("The login information in your config for "+curProvider.providerName, ERROR)
+			continue
+			
 		if len(foundEps) > 0:
 			break
 	

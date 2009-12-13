@@ -481,7 +481,7 @@ class HomeAddShows:
         
         #result = ui.addShowsFromRootDir(dir)
         
-        url = "addShow?"+"&".join(["showDir="+urllib.quote_plus(x) for x in showDirs])
+        url = "addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
         Logger().log("Redirecting to URL "+url, DEBUG)
         raise cherrypy.HTTPRedirect(url)
 

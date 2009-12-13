@@ -91,7 +91,7 @@ class TVRage:
     
     def _getLatestInfo(self):
 
-        url = "http://services.tvrage.com/tools/quickinfo.php?" + urllib.urlencode({'show': self.show.name})
+        url = "http://services.tvrage.com/tools/quickinfo.php?" + urllib.urlencode({'show': self.show.name.encode('utf-8')})
 
         Logger().log("Loading TVRage info from URL: " + url, DEBUG)
 
