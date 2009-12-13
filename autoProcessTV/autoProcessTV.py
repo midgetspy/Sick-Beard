@@ -62,13 +62,8 @@ def processEpisode(dirName, nzbName=None):
     if nzbName != None:
         params['nzbName'] = nzbName
         
-    if config.get("SickBeard", "sourceDir") != "" and config.get("SickBeard", "pvrDir") != "":
-            params['dir'] = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "pvrDir"))
-    
-    if config.get("SickBeard", "sourceDir") != "" and config.get("SickBeard", "xbmcDir") != "":
-        xbmcPath = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "    Dir"))
-    else:
-        xbmcPath = None
+    if config.get("SickBeard", "sourceDir") != "" and config.get("SickBeard", "destDir") != "":
+            params['dir'] = params['dir'].replace(config.get("SickBeard", "sourceDir"), config.get("SickBeard", "destDir"))
     
     
     myOpener = AuthURLOpener(username, password)
