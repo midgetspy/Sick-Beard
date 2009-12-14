@@ -163,9 +163,12 @@ def findEpisode(episode, forceQuality=None):
 	
 	results = []
 	
-	Logger().log("rawResults: " + str(rawResults))
+	Logger().log("rawResults: " + str(rawResults), DEBUG)
 	
 	for curResult in rawResults:
+		
+		if type(curResult) != list:
+			continue
 		
 		Logger().log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
 		

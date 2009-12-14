@@ -68,7 +68,7 @@ class TVRage:
                 airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
             
             except tvdb_exceptions.tvdb_exception as e:
-                Logger().log("Unable to check TVRage info against TVDB: "+str(e), ERROR)
+                Logger().log("Unable to check TVRage info against TVDB: "+str(e))
 
                 Logger().log("Trying against DB instead", DEBUG)
 
@@ -101,7 +101,7 @@ class TVRage:
         try:
             urlObj = urllib.urlopen(url)
         except (urllib.ContentTooShortError, IOError) as e:
-            Logger().log("Unable to load TVRage info: " + str(e), ERROR)
+            Logger().log("Unable to load TVRage info: " + str(e))
             raise exceptions.TVRageException("urlopen call to " + url + " failed")
         
         urlData = [x.decode('utf-8') for x in urlObj.readlines()]
@@ -134,7 +134,7 @@ class TVRage:
         try:
             date = datetime.datetime.strptime(epInfo[2], "%b/%d/%Y").date()
         except ValueError as e:
-            Logger().log("Unable to figure out the time from the TVRage data "+epInfo[2], ERROR)
+            Logger().log("Unable to figure out the time from the TVRage data "+epInfo[2])
             return None
         
         toReturn = {'season': int(numInfo[0]), 'episode': numInfo[1], 'name': epInfo[1], 'airdate': date}
@@ -165,6 +165,6 @@ class TVRage:
         try:
             ep = self.show.getEpisode(self.nextEpInfo['season'], self.nextEpInfo['episode'])
         except exceptions.SickBeardException as e:
-            Logger().log("Unable to create episode from tvrage (could be for a variety of reasons): " + str(e), ERROR)
+            Logger().log("Unable to create episode from tvrage (could be for a variety of reasons): " + str(e))
     
         return ep
