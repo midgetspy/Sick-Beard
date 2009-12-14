@@ -38,7 +38,7 @@ def notifyXBMC(input, title="midgetPVR", host=None):
     Logger().log("Sending notification for " + input, DEBUG)
     
     fileString = title + "," + input
-    param = urllib.urlencode({'a':fileString})
+    param = urllib.urlencode({'a': fileString.encode('utf-8')})
     encodedParam = param.split("=")[1]
     
     Logger().log("Encoded message is " + encodedParam, DEBUG)

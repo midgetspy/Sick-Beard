@@ -364,10 +364,10 @@ class GNTPNotice(_GNTPBase):
 		message = self.format_info() + EOL
 		#Headers
 		for k,v in self.headers.iteritems():
-			message += k.encode('utf8') + SEP + str(v).encode('utf8') + EOL
+			message += k + SEP + unicode(v) + EOL
 		
 		message += EOL
-		return message
+		return message.encode('utf-8')
 
 class GNTPSubscribe(_GNTPBase):
 	def __init__(self,data=None,password=None):

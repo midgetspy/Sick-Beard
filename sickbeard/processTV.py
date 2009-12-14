@@ -21,6 +21,7 @@
 import os
 import shutil
 import sys
+import re
 
 from sickbeard import notifiers
 from sickbeard import exceptions
@@ -237,11 +238,28 @@ def doIt(downloadDir, nzbName=None):
     biggestFileName = os.path.basename(biggest_file)
     biggestFileExt = os.path.splitext(biggestFileName)[1]
 
-    # figure out the right folder
+    # if we're supposed to put it in a season folder then figure out what folder to use
+    seasonFolder = ''
     if rootEp.show.seasonfolders == True:
-        seasonFolder = 'Season ' + str(rootEp.season)
-    else:
-        seasonFolder = ''
+        
+        # search the show dir for season folders
+        for curDir in os.listdir(rootEp.show.location):
+
+            if not os.path.isdir(os.path.join(rootEp.show.location, curDir)):
+                continue
+            
+            # if it's a season folder, check if it's the one we want
+            match = re.match("[Ss]eason\s*(\d+)", curDir)
+            if match != None:
+                # if it's the correct season folder then stop looking
+                if int(match.group(1)) == int(rootEp.season):
+                    seasonFolder = curDir
+                    break 
+
+        # if we couldn't find the right one then just assume "Season X" format is what we want
+        if seasonFolder == '':
+            seasonFolder = 'Season ' + str(rootEp.season)
+
     logStr = "Seasonfolders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder
     Logger().log(logStr, DEBUG)
     returnStr += logStr + "\n"

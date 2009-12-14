@@ -61,6 +61,9 @@ class TVRage:
                 t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
                 ep = t[self.show.tvdbid][self.lastEpInfo['season']][self.lastEpInfo['episode']]
 
+                if ep["firstaired"] == "" or ep["firstaired"] == None:
+                    return None
+
                 rawAirdate = [int(x) for x in ep["firstaired"].split("-")]
                 airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
             
