@@ -1,10 +1,10 @@
-#from sickbeard.version import SICKBEARD_VERSION
-#from sickbeard import NEWEST_VERSION
+#import sickbeard.version
+#import sickbeard
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
 <html>
 <head>
-    <title>Sick Beard - alpha $SICKBEARD_VERSION - $title</title>
+    <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     #if $topmenu=="comingEpisodes" then "<meta http-equiv=\"refresh\" content=\"180\">" else ""#
     <link rel="stylesheet" type="text/css" href="/css/default.css"/>
@@ -15,11 +15,11 @@
     <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script> 
 </head>
 <body>
-#if $SICKBEARD_VERSION != "trunk" and $NEWEST_VERSION != None and int($SICKBEARD_VERSION[1:]) < $NEWEST_VERSION:
-<div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">There is a newer version available (r$NEWEST_VERSION)</a></div>
+#if $sickbeard.version.SICKBEARD_VERSION != "trunk" and $sickbeard.NEWEST_VERSION != None and int($sickbeard.version.SICKBEARD_VERSION[1:]) < $sickbeard.NEWEST_VERSION:
+<div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">There is a newer version available (r$sickbeard.NEWEST_VERSION)</a></div>
 <br />
 #end if
-<h1><span id="first">Sick</span> <span id="second">Beard</span><span id="third"> alpha $SICKBEARD_VERSION</span><span id="catchfrase">This program does stuff</span></h1>
+<h1><span id="first">Sick</span> <span id="second">Beard</span><span id="third"> alpha $sickbeard.version.SICKBEARD_VERSION</span><span id="catchfrase">This program does stuff</span></h1>
 
 #set $root=""
 <!--#set $mypath=$root+"/"+$topmenu#-->
