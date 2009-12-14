@@ -96,27 +96,25 @@ def findEpisode (episode, forceQuality=None):
 		
 	sceneSearchStrings = sickbeard.helpers.makeSceneSearchString(episode)
 	
-	for curString in sceneSearchStrings:
-		params = {"search": "\""+curString+"\"", "nodupes": "1", "normalize": "1", "maxage": sickbeard.USENET_RETENTION}
-		params.update(quality)
-		
-		searchURL = "https://tvbinz.net/rss.php?" + urllib.urlencode(params)
+	finalSearchString = "|".join(["\""+x+"\"" for x in sceneSearchStrings])
 	
-		Logger().log("Search string: " + searchURL, DEBUG)
+	params = {"search": "\""+finalSearchString+"\"", "nodupes": "1", "normalize": "1", "maxage": sickbeard.USENET_RETENTION}
+	params.update(quality)
 	
-		data = getTVBinzURL(searchURL)
-		
-		if data == None:
-			return []
-	
-		results = []
-		
-		responseSoup = BeautifulStoneSoup(data)
-		items = responseSoup.findAll('item')
-		
-		if len(items) > 0:
-			break
+	searchURL = "https://tvbinz.net/rss.php?" + urllib.urlencode(params)
 
+	Logger().log("Search string: " + searchURL, DEBUG)
+
+	data = getTVBinzURL(searchURL)
+	
+	if data == None:
+		return []
+
+	results = []
+	
+	responseSoup = BeautifulStoneSoup(data)
+	items = responseSoup.findAll('item')
+		
 	for item in items:
 		
 		if item.title == None or item.link == None:
