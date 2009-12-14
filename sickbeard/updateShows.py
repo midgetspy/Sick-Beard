@@ -339,7 +339,7 @@ class ShowUpdater():
             if doUpdate:
                 Logger().log("Update finished")
             else:
-                Logger().log("Not updating show " + str(show.name) + " from TVDB, TVDB says it hasn't changed")
+                Logger().log("Not updating show " + show.name + " from TVDB, TVDB says it hasn't changed")
 
         # update our last update time if we didn't miss any shows on the way
         if allSuccessful:
