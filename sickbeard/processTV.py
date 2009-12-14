@@ -273,6 +273,12 @@ def doIt(downloadDir, nzbName=None):
 
     existingResult = _checkForExistingFile(newFile, biggest_file)
     
+    # if there's no file with that exact filename then check for a different episode file (in case we're going to delete it)
+    if existingResult == 0:
+        existingResult = _checkForExistingFile(rootEp.location, biggest_file)
+        if existingResult == -1:
+            existingResult = -2
+    
     # see if the existing file is bigger - if it is, bail
     if existingResult == 1:
         logStr = "There is already a file that's bigger at "+newFile+" - not processing this episode."
@@ -302,11 +308,16 @@ def doIt(downloadDir, nzbName=None):
         return returnStr
 
     # if the file existed and was smaller then lets delete it
-    if existingResult == -1:
-        logStr = newFile + " already exists but it's smaller than the new file so I'm replacing it"
+    if existingResult < 0:
+        if existingResult == -1:
+            existingFile = newFile
+        elif existingResult == -2:
+            existingFile = rootEp.location
+        
+        logStr = existingFile + " already exists but it's smaller than the new file so I'm replacing it"
         Logger().log(logStr, DEBUG)
         returnStr += logStr + "\n"
-        os.remove(newFile)
+        os.remove(existingFile)
 
     curFile = os.path.join(destDir, biggestFileName)
 

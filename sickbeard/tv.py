@@ -602,7 +602,7 @@ class TVShow(object):
 					for relEp in rootEp.relatedEps:
 						relEp.location = result
 			
-			fileList = glob.glob(os.path.join(curEpDir, actualName[0] + "*"))
+			fileList = glob.glob(os.path.join(curEpDir, actualName[0] + "*").replace("[","*").replace("]","*"))
 
 			for file in fileList:
 				result = processTV.renameFile(file, rootEp.prettyName())
