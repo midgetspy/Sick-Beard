@@ -22,6 +22,9 @@ from sickbeard import helpers
 class CheckVersion():
     
     def run(self):
+        if not sickbeard.VERSION_NOTIFY:
+            return
+        
         latestBuild = helpers.findLatestRev()
         
         if latestBuild == None:
