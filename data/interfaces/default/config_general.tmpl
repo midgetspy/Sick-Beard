@@ -31,8 +31,12 @@ If checked Sick Beard will create nfo/tbn<br />
 files for all your media<br />
 <br />
 
-<input type="checkbox" name="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "CHECKED" else ""#> <strong>Launch browser on startup:</strong><br />
+<input type="checkbox" name="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "CHECKED" else ""#> <strong>Launch browser on startup</strong><br />
 Should Sick Beard open its home page in your<br />browser when you start it?<br />
+<br />
+
+<input type="checkbox" name="version_notify" #if $sickbeard.VERSION_NOTIFY then "CHECKED" else ""#> <strong>Notify when new versions are available</strong><br />
+Doesn't work for SVN installations - binaries only
 <br />
 
 </fieldset>

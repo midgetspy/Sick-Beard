@@ -40,8 +40,10 @@ class DBConnection:
 
 			try:
 				if args == None:
+					Logger().log("SQL: "+query, DEBUG)
 					self.connection.execute(query)
 				else:
+					Logger().log("SQL: "+query+" with args "+str(args), DEBUG)
 					self.connection.execute(query, args)
 				self.connection.commit()
 			except sqlite3.DatabaseError as e:

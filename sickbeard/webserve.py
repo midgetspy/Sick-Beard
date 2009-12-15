@@ -157,7 +157,8 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None,
                     launch_browser=None, create_metadata=None, web_username=None,
-                    web_password=None, quality_default=None, season_folders_default=None):
+                    web_password=None, quality_default=None, season_folders_default=None,
+                    version_notify=None):
 
         results = []
 
@@ -181,6 +182,11 @@ class ConfigGeneral:
         else:
             season_folders_default = 0
             
+        if version_notify == "on":
+            version_notify = 1
+        else:
+            version_notify = 0
+            
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
@@ -193,6 +199,8 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        config.change_VERSION_NOTIFY(version_notify)
 
         sickbeard.save_config()
         

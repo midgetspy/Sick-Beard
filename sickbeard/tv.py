@@ -169,7 +169,7 @@ class TVShow(object):
 					del myEp
 			
 	
-	def getEpisode(self, season, episode, file=None):
+	def getEpisode(self, season, episode, file=None, noCreate=False):
 
 		#return TVEpisode(self, season, episode)
 	
@@ -179,6 +179,9 @@ class TVShow(object):
 		ep = None
 		
 		if not episode in self.episodes[season] or self.episodes[season][episode] == None:
+			if noCreate:
+				return None
+			
 			Logger().log(str(self.tvdbid) + ": Episode " + str(season) + "x" + str(episode) + " didn't exist, trying to create it", DEBUG)
 
 			if file != None:
@@ -246,11 +249,42 @@ class TVShow(object):
 				curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
 			except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException) as e:
 				Logger().log("Episode "+mediaFile+" returned an exception: "+str(e), ERROR)
+			except exceptions.EpisodeDeletedException:
+				Logger().log("The episode deleted itself when I tried making an object for it", DEBUG)
 					
 
 			# store the reference in the show
 			if curEpisode != None:
 				curEpisode.saveToDB()
+	
+	
+	def updateEpisodesFromDB(self, scannedEps=None):
+	
+		Logger().log("Loading all episodes from the DB")
+	
+		myDB = db.DBConnection()
+		sql = "SELECT * FROM tv_episodes WHERE showid="+str(self.tvdbid)
+		sqlResults = myDB.select(sql)
+		
+		for curResult in sqlResults:
+			
+			Logger().log("Loading episode "+str(curResult["season"])+"x"+str(curResult["episode"])+" from the DB", DEBUG)
+			
+			# if we were given a list and the episode is already in that list then skip it
+			if scannedEps != None and int(curResult["season"]) in scannedEps and int(curResult["episode"]) in scannedEps[int(curResult["season"])]:
+				Logger().log("Episode has previously been scanned, skipping it", DEBUG)
+				continue
+			
+			Logger().log("Loading episode "+str(curResult["season"])+"x"+str(curResult["episode"])+" from the DB", DEBUG)
+			
+			try:
+				curEp = self.getEpisode(int(curResult["season"]), int(curResult["episode"]))
+				curEp.loadFromDB(int(curResult["season"]), int(curResult["episode"]))
+				curEp.loadFromTVDB()
+			except exceptions.EpisodeDeletedException:
+				Logger().log("Tried loading an episode from the DB that should have been deleted, skipping it", DEBUG)
+				continue
+
 	
 
 	def loadEpisodesFromTVDB(self, cache=True):
@@ -261,7 +295,10 @@ class TVShow(object):
 		
 		Logger().log(str(self.tvdbid) + ": Loading all episodes from theTVDB...")
 		
+		scannedEps = {}
+		
 		for season in showObj:
+			scannedEps[season] = {}
 			for episode in showObj[season]:
 				# need some examples of wtf episode 0 means to decide if we want it or not
 				if episode == 0:
@@ -279,6 +316,10 @@ class TVShow(object):
 					Logger().log(str(self.tvdbid) + ": Loading info from theTVDB for episode " + str(season) + "x" + str(episode), DEBUG)
 					ep.loadFromTVDB(season, episode, cache)
 					ep.saveToDB()
+				
+				scannedEps[season][episode] = True
+
+		return scannedEps
 
 	def loadLatestFromTVRage(self):
 		
@@ -401,6 +442,7 @@ class TVShow(object):
 			self.quality = int(sqlResults[0]["quality"])
 			self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 			self.paused = int(sqlResults[0]["paused"])
+			self.tvdbid = int(sqlResults[0]["tvdbid"])
 	
 	def loadFromTVDB(self, cache=True):
 
@@ -519,11 +561,15 @@ class TVShow(object):
 		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
 		
 		for ep in sqlResults:
-			curLoc = os.path.normpath(ep["location"]) #TRYIT
+			curLoc = os.path.normpath(ep["location"])
 			season = int(ep["season"])
 			episode = int(ep["episode"])
 			
-			curEp = self.getEpisode(season, episode)
+			try:
+				curEp = self.getEpisode(season, episode)
+			except exceptions.EpisodeDeletedException:
+				Logger().log("The episode was deleted while we were refreshing it, moving on to the next one", DEBUG)
+				continue
 			
 			# if the path doesn't exist
 			# or if there's no season folders and it's not inside our show dir 
@@ -721,7 +767,10 @@ class TVEpisode:
 		
 		# if we tried loading it from NFO and didn't find the NFO, use TVDB
 		if self.hasnfo == False:
-			result = self.loadFromTVDB(season, episode)
+			try:
+				result = self.loadFromTVDB(season, episode)
+			except exceptions.EpisodeDeletedException:
+				result = False
 			
 			# if we failed TVDB, NFO *and* SQL then fail
 			if result == False and not sqlResult:
@@ -786,12 +835,21 @@ class TVEpisode:
 				return False
 		except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
 			Logger().log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?")
+			# if I'm no longer on TVDB but I once was then delete myself from the DB
+			if self.tvdbid != -1:
+				self.deleteEpisode()
 			return
+
 			
 		if myEp["firstaired"] == None and season == 0:
 			myEp["firstaired"] = str(datetime.date.fromordinal(1))
 			
-		if myEp["episodename"] == None or myEp["firstaired"] == None:
+		if myEp["episodename"] == None or myEp["firstaired"] == None or myEp["episodename"] == "" or myEp["firstaired"] == "":
+			Logger().log("The TVDB info for this episode was incomplete")
+			# if I'm incomplete on TVDB but I once was complete then just delete myself from the DB for now
+			if self.tvdbid != -1:
+				self.deleteEpisode()
+
 			return False
 		
 		#NAMEIT Logger().log("BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
@@ -1082,8 +1140,6 @@ class TVEpisode:
 
 				episode.appendChild(cur_actor)
 					
-			Logger().log("Resulting XML episodedetails node: " + str(episode))
-		
 			if os.path.isfile(self.location):
 				nfoFilename = helpers.replaceExtension(self.location, 'nfo')
 			else:
@@ -1114,7 +1170,37 @@ class TVEpisode:
 				#TODO: check that it worked
 				self.hastbn = True
 
+		# save our new NFO statuses to the DB
+		self.saveToDB()
 
+
+	def deleteEpisode(self):
+
+		Logger().log("Deleting "+self.show.name+" "+str(self.season)+"x"+str(self.episode))
+		
+		# remove myself from the show dictionary
+		if self.show.getEpisode(self.season, self.episode, noCreate=True) == self:
+			Logger().log("Removing myself from my show's list", DEBUG)
+			del self.show.episodes[self.season][self.episode]
+		
+		# make sure it's not in any ep lists
+		if self in sickbeard.airingList:
+			Logger().log("Removing myself from the airing list", DEBUG)
+			sickbeard.airingList.remove(self)
+		if self in sickbeard.comingList:
+			Logger().log("Removing myself from the coming list", DEBUG)
+			sickbeard.comingList.remove(self)
+		if self in sickbeard.missingList:
+			Logger().log("Removing myself from the missing list", DEBUG)
+			sickbeard.missingList.remove(self)
+		
+		# delete myself from the DB
+		Logger().log("Deleting myself from the database", DEBUG)
+		myDB = db.DBConnection()
+		sql = "DELETE FROM tv_episodes WHERE showid="+str(self.show.tvdbid)+" AND season="+str(self.season)+" AND episode="+str(self.episode)
+		myDB.action(sql)
+		
+		raise exceptions.EpisodeDeletedException()
 		
 	def saveToDB(self):
 	

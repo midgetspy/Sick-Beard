@@ -55,6 +55,7 @@ airingList = None
 comingList = None
 
 NEWEST_VERSION = None
+VERSION_NOTIFY = None
 
 INIT_LOCK = Lock()
 __INITIALIZED__ = False
@@ -215,7 +216,7 @@ def initialize():
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
-                NZBMATRIX_APIKEY, versionCheckScheduler
+                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY
         
         if __INITIALIZED__:
             return False
@@ -250,6 +251,7 @@ def initialize():
         CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
         
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
+        VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
@@ -332,7 +334,7 @@ def initialize():
                                                silent=True)
 
         versionCheckScheduler = scheduler.Scheduler(versionChecker.CheckVersion(),
-                                                     cycleTime=datetime.timedelta(hours=1),
+                                                     cycleTime=datetime.timedelta(hours=12),
                                                      threadName="CHECKVERSION",
                                                      runImmediately=True)
         
@@ -489,7 +491,7 @@ def save_config():
         XBMC_UPDATE_LIBRARY, XBMC_HOST, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
         USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
         QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
-        NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY
+        NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
@@ -503,6 +505,7 @@ def save_config():
     CFG['General']['use_nzb'] = int(USE_NZB)
     CFG['General']['quality_default'] = int(QUALITY_DEFAULT)
     CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
+    CFG['General']['version_notify'] = int(VERSION_NOTIFY)
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
     CFG['General']['create_metadata'] = int(CREATE_METADATA)

@@ -207,7 +207,8 @@ class ShowUpdater():
             if force:
                 Logger().log("Forcing update of all info from TVDB")
                 try:
-                    show.loadEpisodesFromTVDB()
+                    updatedEps = show.loadEpisodesFromTVDB()
+                    show.updateEpisodesFromDB(updatedEps)
                 except tvdb_api.tvdb_error as e:
                     Logger().log("Unable to connect to TVDB, skipping episode update", ERROR)
                 

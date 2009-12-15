@@ -62,3 +62,6 @@ class ShowDirNotFoundException(SickBeardException):
 	
 class AuthException(SickBeardException):
 	"Your authentication information is incorrect"
+	
+class EpisodeDeletedException(SickBeardException):
+	"This episode has been deleted"
