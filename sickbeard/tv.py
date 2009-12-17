@@ -844,12 +844,15 @@ class TVEpisode:
 		if myEp["firstaired"] == None and season == 0:
 			myEp["firstaired"] = str(datetime.date.fromordinal(1))
 			
-		if myEp["episodename"] == None or myEp["firstaired"] == None or myEp["episodename"] == "" or myEp["firstaired"] == "":
-			Logger().log("The TVDB info for this episode was incomplete")
+		if myEp["episodename"] == None or myEp["episodename"] == "":
+			Logger().log("The episode has no name on TVDB")
 			# if I'm incomplete on TVDB but I once was complete then just delete myself from the DB for now
 			if self.tvdbid != -1:
 				self.deleteEpisode()
+			return False
 
+		if myEp["firstaired"] == None or myEp["firstaired"] == "":
+			Logger().log("The episode has no air date on TVDB")
 			return False
 		
 		#NAMEIT Logger().log("BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
