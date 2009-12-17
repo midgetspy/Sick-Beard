@@ -94,7 +94,7 @@ class CurrentSearcher():
                 return None
             ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
             with ep.lock:
-                if ep.paused:
+                if ep.show.paused:
                     ep.status = SKIPPED
                 else:
                     ep.status = MISSED

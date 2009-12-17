@@ -51,7 +51,7 @@ def isMediaFile (file):
 		return False
 
 def sanitizeSceneName (name):
-	for x in ":()'":
+	for x in ":()'!":
 		name = name.replace(x, "")
 	return name
 		
