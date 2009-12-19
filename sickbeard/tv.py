@@ -310,7 +310,11 @@ class TVShow(object):
 					Logger().log(str(self.tvdbid) + ": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
 					continue
 				else:
-					ep.loadFromTVDB()
+					try:
+						ep.loadFromTVDB()
+					except exceptions.EpisodeDeletedException:
+						Logger().log("The episode was deleted, skipping the rest of the load")
+						continue
 				
 				with ep.lock:
 					Logger().log(str(self.tvdbid) + ": Loading info from theTVDB for episode " + str(season) + "x" + str(episode), DEBUG)

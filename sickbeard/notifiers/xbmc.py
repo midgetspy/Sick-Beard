@@ -47,7 +47,9 @@ def notifyXBMC(input, title="midgetPVR", host=None):
         host = sickbeard.XBMC_HOST
     
     try:
-        urllib2.urlopen("http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")", timeout=XBMC_TIMEOUT).close()
+        url = "http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")"
+        Logger().log("Sending notification to XBMC via URL: "+url, DEBUG)
+        urllib2.urlopen(url, timeout=XBMC_TIMEOUT).close()
     except IOError as e:
         Logger().log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
     
@@ -65,7 +67,9 @@ def updateLibrary(path=None):
         else:
             path = ""
             #path = "," + urllib.quote_plus(path)
-        urllib2.urlopen("http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=XBMC.updatelibrary(video" + path + ")", timeout=XBMC_TIMEOUT).close()
+        url = "http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=XBMC.updatelibrary(video" + path + ")"
+        Logger().log("Sending command to XBMC via URL: "+url, DEBUG)
+        urllib2.urlopen(url, timeout=XBMC_TIMEOUT).close()
     except IOError as e:
         Logger().log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
         return False

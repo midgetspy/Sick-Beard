@@ -132,7 +132,7 @@ class History:
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
         
-        raise cherrypy.HTTPRedirect("/history")
+        raise cherrypy.HTTPRedirect("../history")
 
 
     @cherrypy.expose
@@ -141,7 +141,7 @@ class History:
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date > "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
         
-        raise cherrypy.HTTPRedirect("/history")
+        raise cherrypy.HTTPRedirect("../history")
 
 
 
@@ -728,7 +728,10 @@ class Home:
             if os.path.isdir(location) and os.path.normpath(showObj._location) != os.path.normpath(location):
                 
                 # change it
-                showObj.location = location
+                try:
+                    showObj.location = location
+                except exceptions.NoNFOException:
+                    return _genericMessage("The folder at "+location+" doesn't contain a tvshow.nfo - copy your files to that folder before you change the directory in Sick Beard.")
                 
                 showObj.refreshDir()
                 

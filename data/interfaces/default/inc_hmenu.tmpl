@@ -1,31 +1,18 @@
 #import sickbeard
 <!--#if $submenu == ""#-->
-    <!--#set $cpath="/home"#-->
+    <!--#set $cpath="../"#-->
 <!--#else#-->
-    <!--#set $cpath="/home"#-->
+    <!--#set $cpath="/home/"#-->
 <!--#end if#-->
 
 <span class="SubMenu">
-<!--#if $submenu=="addShows"#-->
-    <a class="current" href="./">Add Shows</a> |
-<!--#else#-->
-    <a href="$cpath/addShows">Add Shows</a> |
-<!--#end if#-->
 
-<!--#if $submenu=="postprocess"#-->
-    <a class="current" href="./">Manual Postprocessing</a> |
-<!--#else#-->
-    <a href="$cpath/postprocess">Manual Postprocessing</a> |
-<!--#end if#-->
-
+<a href="$sbPath/home/addShows/">Add Shows</a> |
+<a href="$sbPath/home/postprocess/">Manual Post-processing</a> |
 #if $sickbeard.XBMC_HOST != None and len($sickbeard.XBMC_HOST) > 0:
-<!--#if $submenu=="updateXBMC"#-->
-    <a class="current" href="./">Update XBMC</a> |
-<!--#else#-->
-    <a href="$cpath/updateXBMC">Update XBMC</a> |
-<!--#end if#-->
+<a href="$sbPath/home/updateXBMC/">Update XBMC</a> |
 #end if
 
-<a href="$cpath/shutdown" onclick="javascript:return confirm('Are you sure you want to shutdown Sick Beard?')">Shutdown</a>
+<a href="$sbPath/home/shutdown/" onclick="javascript:return confirm('Are you sure you want to shutdown Sick Beard?')">Shutdown</a>
 
 </span>

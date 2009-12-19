@@ -1,40 +1,10 @@
-<!--#if $submenu == ""#-->
-    <!--#set $cpath="."#-->
-<!--#else#-->
-    <!--#set $cpath=".."#-->
-<!--#end if#-->
+
 
 <span class="SubMenu">
-<!--#if $submenu=="general"#-->
-    <a class="current" href="./">General</a> |
-<!--#else#-->
-    <a href="$cpath/general/">General</a> |
-<!--#end if#-->
 
-<!--#if $submenu=="episodesearch"#-->
-    <a class="current" href="./">Episode Search</a> |
-<!--#else#-->
-    <a href="$cpath/episodesearch/">Episode Search</a> |
-<!--#end if#-->
-
-<!--#if $submenu=="providers"#-->
-    <a class="current" href="./">Search Providers</a> |
-<!--#else#-->
-    <a href="$cpath/providers/">Search Providers</a> |
-<!--#end if#-->
-
-#if False:
-<!--#if $submenu=="irc"#-->
-    <a class="current" href="./">IRC Bot</a> |
-<!--#else#-->
-    <a href="$cpath/irc/">IRC Bot</a> |
-<!--#end if#-->
-#end if
-
-<!--#if $submenu=="notifications"#-->
-    <a class="current" href="./">Notifications</a> |
-<!--#else#-->
-    <a href="$cpath/notifications/">Notifications</a> |
-<!--#end if#-->
+<a href="$sbPath/config/general/">General</a> |
+<a href="$sbPath/config/episodesearch/">Episode Search</a> |
+<a href="$sbPath/config/providers/">Search Providers</a> |
+<a href="$sbPath/config/notifications/">Notifications</a> |
 
 </span>
