@@ -172,179 +172,70 @@ class ShowUpdater():
         
         return (int(sqlResults["season"]), int(sqlResults["episode"]), int(sqlResults["airdate"]))
 
+    def refreshShow(self, show):
+
+        Logger().log("Performing refresh on "+show.name)
+
+        show.refreshDir()
+        
+        show.writeEpisodeNFOs()
+
+
     def updateShowFromTVDB(self, show, force=False):
         
         if show == None:
             return None
         
-        show.refreshDir()
+        Logger().log("Beginning update of "+show.name)
         
-        self._get_lastTVDB()
+        # get episode list from DB
+        Logger().log("Loading all episodes from the database", DEBUG)
+        DBEpList = show.loadEpisodesFromDB()
         
-        newTime, updatedShows, updatedEpisodes = self._getUpdatedShows()
-        Logger().log("Shows that have been updated since " + str(self._lastTVDB) + " are " + str(updatedShows), DEBUG)
+        # get episode list from TVDB
+        Logger().log("Loading all episodes from theTVDB", DEBUG)
+        TVDBEpList = show.loadEpisodesFromTVDB(cache=not force)
         
-        t = None
-        
-        try:
-            t = tvdb_api.Tvdb(cache=False, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
-        except tvdb_exceptions.tvdb_error:
-            Logger().log("Can't connect to theTVDB.com - update won't accomplish much", ERROR)
-           
-        doUpdate = updatedShows == None or int(show.tvdbid) in updatedShows or force
-            
-        if doUpdate:
-            
-            Logger().log("Updating " + str(show.name) + " (" + str(show.tvdbid) + ")")
+        # for each ep we found on TVDB delete it from the DB list
+        for curSeason in TVDBEpList:
+            for curEpisode in TVDBEpList[curSeason]:
+                Logger().log("Removing "+str(curSeason)+"x"+str(curEpisode)+" from the DB list", DEBUG)
+                if curSeason in DBEpList and curEpisode in DBEpList[curSeason]:
+                    del DBEpList[curSeason][curEpisode]
 
-            with show.lock:
+        # for the remaining episodes in the DB list just delete them from the DB
+        for curSeason in DBEpList:
+            for curEpisode in DBEpList[curSeason]:
+                Logger().log("Permanently deleting episode "+str(curSeason)+"x"+str(curEpisode)+" from the database", MESSAGE)
+                curEp = show.getEpisode(curSeason, curEpisode)
                 try:
-                    show.loadFromTVDB(cache=False)
-                    show.saveToDB()
-                except tvdb_api.tvdb_error as e:
-                    Logger().log("Unable to connect to TVDB, skipping show update", ERROR)
-
-            if force:
-                Logger().log("Forcing update of all info from TVDB")
-                try:
-                    updatedEps = show.loadEpisodesFromTVDB()
-                    show.updateEpisodesFromDB(updatedEps)
-                except tvdb_api.tvdb_error as e:
-                    Logger().log("Unable to connect to TVDB, skipping episode update", ERROR)
-                
-            else:
-                # update each episode that has changed
-                epList = sickbeard.getEpList(updatedEpisodes, show.tvdbid)
-                Logger().log("Updated episodes for this show are " + str(epList), DEBUG)
-                for curEp in epList:
-                    Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
-                    curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
-                    curEp.saveToDB()
-                newestDBEp = self._getNewestDBEpisode(show)
-                if t != None and newestDBEp != None:
-                    s = None
-                    try:
-                        s = t[int(show.tvdbid)]
-                    except tvdb_api.tvdb_error as e:
-                        Logger().log("Unable to connect to TVDB, not looking for new episodes", ERROR)
-                        
-                    if s != None:
-                        # make a list of all specials and all new eps
-                        epList = []
-                        epList += s.findNewerEps(newestDBEp[2])
-                        if 0 in s:
-                            epList += s[0].values()
-                        for curEp in epList:
-                            # add the episode
-                            try:
-                                newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']))
-                                Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
-                            except exceptions.EpisodeNotFoundException as e:
-                                Logger().log("Unable to create episode "+str(curEp["seasonnumber"])+"x"+str(curEp["episodenumber"])+", skipping", ERROR)
+                    curEp.deleteEpisode()
+                except exceptions.EpisodeDeletedException:
+                    pass
         
         # now that we've updated the DB from TVDB see if there's anything we can add from TVRage
         with show.lock:
+            Logger().log("Attempting to supplement show info with info from TVRage", DEBUG)
             show.loadLatestFromTVRage()
 
-        show.writeEpisodeNFOs()
+        self.refreshShow(show)
         
+        Logger().log("Flushing unneeded episodes from memory", DEBUG)
         show.flushEpisodes()
         
         Logger().log("Update complete")
-
-
-    def updateShowsFromTVDB(self):
-    
-        Logger().log("Beginning update of all shows", DEBUG)
-
-        # check when we last updated
-        self._get_lastTVDB()
         
-        # get a list of shows that have changed since the last update
-        newTime, updatedShows, updatedEpisodes = self._getUpdatedShows()
-        Logger().log("Shows that have been updated since " + str(self._lastTVDB) + " are " + str(updatedShows) + " and now it's " + str(newTime), DEBUG)
+        
 
-        if newTime == 0:
-            newTime = time.time()
-
-        # if we didn't get a response from TVDB and it's been more than a day since our last update then force it
-        forceUpdate = False
-        if updatedShows == None:
-            if datetime.datetime.now() - datetime.datetime.fromtimestamp(self._lastTVDB) >= datetime.timedelta(hours=24):
-                forceUpdate = True
-                Logger().log("No response received from TVDB and it's been more than 24 hrs since our last update so we're forcing all shows to update")
-            else:
-                Logger().log("No response received from TVDB, skipping update for now")
-                return
-
-        t = None
-        try:
-            t = tvdb_api.Tvdb(cache=False, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
-        except tvdb_exceptions.tvdb_error:
-            Logger().log("Can't update from TVDB if we can't connect to it..", ERROR)
-
-        allSuccessful = True
-
-        # check each show to see if it's changed, if so then update it
+    def updateShowsFromTVDB(self, force):
+        
+        Logger().log("Beginning update of all shows")
+        
         for show in sickbeard.showList:
-
-            show.refreshDir()
             
-            doUpdate = forceUpdate or int(show.tvdbid) in updatedShows
+            self.updateShowFromTVDB(show, force)
 
-            Logger().log("Beginning update of show " + show.name + " (" + str(show.tvdbid) + ")")
-
-            try:
-                if doUpdate:
-                    with show.lock:
-                        show.loadFromTVDB(cache=False)
-                        show.saveToDB()
-    
-                    # update each episode that has changed
-                    epList = sickbeard.getEpList(updatedEpisodes, show.tvdbid)
-                    Logger().log("Updated episodes for this show are " + str(epList), DEBUG)
-                    for curEp in epList:
-                        Logger().log("Updating episode " + str(curEp.season) + "x" + str(curEp.episode))
-                        curEp.loadFromTVDB(int(curEp.season), int(curEp.episode))
-                        curEp.saveToDB()
-                    
-                    newestDBEp = self._getNewestDBEpisode(show)
-                    if t != None and newestDBEp != None:
-                        s = t[int(show.tvdbid)]
-                    
-                        # make a list of all specials and all new eps
-                        epList = []
-                        epList += s.findNewerEps(newestDBEp[2])
-                        if 0 in s:
-                            epList += s[0].values()
-                        for curEp in epList:
-                            # add the episode
-                            try:
-                                newEp = show.getEpisode(int(curEp['seasonnumber']), int(curEp['episodenumber']))
-                                Logger().log("Added episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+" to the DB.")
-                            except exceptions.EpisodeNotFoundException as e:
-                                Logger().log("Unable to create episode "+show.name+" - "+str(newEp.season)+"x"+str(newEp.episode)+", skipping", ERROR)
-            
-            except tvdb_exceptions.tvdb_exception as e:
-                allSuccessful = False
-                Logger().log("There was an error with TVDB, show will only be updated from TVRage: "+str(e), ERROR)
-                
-                #show.loadEpisodesFromTVDB(False)
-
-            show.flushEpisodes()
-            
-            with show.lock:
-                Logger().log("Supplementing TVDB info with TVRage info if possible")
-                show.loadLatestFromTVRage()
-            
-            if doUpdate:
-                Logger().log("Update finished")
-            else:
-                Logger().log("Not updating show " + show.name + " from TVDB, TVDB says it hasn't changed")
-
-        # update our last update time if we didn't miss any shows on the way
-        if allSuccessful:
-            self._set_lastTVDB(newTime)
+        Logger().log("All shows' updates are complete.")
 
     def run(self):
         self.updateShowsFromTVDB()

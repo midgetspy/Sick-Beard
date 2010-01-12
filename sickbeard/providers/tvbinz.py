@@ -83,7 +83,7 @@ def findEpisode (episode, forceQuality=None):
 	if forceQuality != None:
 		epQuality = forceQuality
 	elif episode.show.quality == BEST:
-		epQuality = HD
+		epQuality = ANY
 	else:
 		epQuality = episode.show.quality
 	
@@ -96,7 +96,7 @@ def findEpisode (episode, forceQuality=None):
 		
 	sceneSearchStrings = sickbeard.helpers.makeSceneSearchString(episode)
 	
-	finalSearchString = "|".join(["\""+x+"\"" for x in sceneSearchStrings])
+	finalSearchString = "\""+"|".join([x for x in sceneSearchStrings])+"\""
 	
 	params = {"search": "\""+finalSearchString+"\"", "nodupes": "1", "normalize": "1", "maxage": sickbeard.USENET_RETENTION}
 	params.update(quality)

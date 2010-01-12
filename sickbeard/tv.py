@@ -182,7 +182,7 @@ class TVShow(object):
 			if noCreate:
 				return None
 			
-			Logger().log(str(self.tvdbid) + ": Episode " + str(season) + "x" + str(episode) + " didn't exist, trying to create it", DEBUG)
+			Logger().log(str(self.tvdbid) + ": An object for episode " + str(season) + "x" + str(episode) + " didn't exist in the cache, trying to create it", DEBUG)
 
 			if file != None:
 				ep = TVEpisode(self, season, episode, file)
@@ -258,7 +258,7 @@ class TVShow(object):
 				curEpisode.saveToDB()
 	
 	
-	def updateEpisodesFromDB(self, scannedEps=None):
+	def loadEpisodesFromDB(self):
 	
 		Logger().log("Loading all episodes from the DB")
 	
@@ -266,25 +266,28 @@ class TVShow(object):
 		sql = "SELECT * FROM tv_episodes WHERE showid="+str(self.tvdbid)
 		sqlResults = myDB.select(sql)
 		
+		scannedEps = {}
+		
 		for curResult in sqlResults:
 			
-			Logger().log("Loading episode "+str(curResult["season"])+"x"+str(curResult["episode"])+" from the DB", DEBUG)
+			curSeason = int(curResult["season"])
+			curEpisode = int(curResult["episode"])
 			
-			# if we were given a list and the episode is already in that list then skip it
-			if scannedEps != None and int(curResult["season"]) in scannedEps and int(curResult["episode"]) in scannedEps[int(curResult["season"])]:
-				Logger().log("Episode has previously been scanned, skipping it", DEBUG)
-				continue
+			if not curSeason in scannedEps:
+				scannedEps[curSeason] = {}
 			
-			Logger().log("Loading episode "+str(curResult["season"])+"x"+str(curResult["episode"])+" from the DB", DEBUG)
+			Logger().log("Loading episode "+str(curSeason)+"x"+str(curEpisode)+" from the DB", DEBUG)
 			
 			try:
-				curEp = self.getEpisode(int(curResult["season"]), int(curResult["episode"]))
-				curEp.loadFromDB(int(curResult["season"]), int(curResult["episode"]))
+				curEp = self.getEpisode(curSeason, curEpisode)
+				curEp.loadFromDB(curSeason, curEpisode)
 				curEp.loadFromTVDB()
+				scannedEps[curSeason][curEpisode] = True
 			except exceptions.EpisodeDeletedException:
 				Logger().log("Tried loading an episode from the DB that should have been deleted, skipping it", DEBUG)
 				continue
 
+		return scannedEps
 	
 
 	def loadEpisodesFromTVDB(self, cache=True):
@@ -762,7 +765,8 @@ class TVEpisode:
 		
 		sqlResult = self.loadFromDB(season, episode)
 		
-		if os.path.isfile(self.location):
+		# only load from NFO if we didn't load from DB
+		if os.path.isfile(self.location) and self.name == "":
 			try:
 				self.loadFromNFO(self.location)
 			except exceptions.NoNFOException:
