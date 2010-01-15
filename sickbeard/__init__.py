@@ -324,7 +324,7 @@ def initialize():
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
                                               cycleTime=datetime.timedelta(hours=6),
                                               threadName="UPDATE",
-                                              runImmediately=True)
+                                              runImmediately=False)
         
         #botRunner = tvnzbbot.NZBBotRunner()
 
