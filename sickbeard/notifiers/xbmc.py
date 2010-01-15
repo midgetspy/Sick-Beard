@@ -36,6 +36,13 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
 
     global XBMC_TIMEOUT
 
+    if host == None:
+        host = sickbeard.XBMC_HOST
+	if username == None:
+		username = sickbeard.XBMC_USERNAME
+	if password == None:
+		password = sickbeard.XBMC_PASSWORD    
+
     Logger().log("Sending notification for " + input + username + password, DEBUG)
     
     fileString = title + "," + input
@@ -44,12 +51,7 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
     
     Logger().log("Encoded message is " + encodedParam, DEBUG)
     
-    if host == None:
-        host = sickbeard.XBMC_HOST
-	if username == None:
-		username = sickbeard.XBMC_USERNAME
-	if password == None:
-		password = sickbeard.XBMC_PASSWORD
+
     
     try:
         url = "http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")"
