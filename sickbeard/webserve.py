@@ -372,7 +372,7 @@ class ConfigNotifications:
     
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, 
-                          xbmc_update_library=None, xbmc_host=None, use_growl=None,
+                          xbmc_update_library=None, xbmc_host=None, xbmc_username=None, xbmc_password=None, use_growl=None,
                           growl_host=None, growl_password=None, ):
 
         results = []
@@ -401,6 +401,9 @@ class ConfigNotifications:
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
         sickbeard.XBMC_HOST = xbmc_host
+        sickbeard.XBMC_USERNAME = xbmc_username
+        sickbeard.XBMC_PASSWORD = xbmc_password
+
         
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_HOST = growl_host
@@ -646,8 +649,8 @@ class Home:
         return "Tried sending growl to "+host+" with password "+password
         
     @cherrypy.expose
-    def testXBMC(self, host=None):
-        notifiers.testXBMC(urllib.unquote_plus(host))
+    def testXBMC(self, host=None, username=None, password=None):
+        notifiers.testXBMC(urllib.unquote_plus(host), username, password)
         return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
         
     @cherrypy.expose

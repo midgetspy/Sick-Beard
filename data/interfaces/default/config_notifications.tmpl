@@ -25,7 +25,10 @@
   \$('#testXBMC').click(function(){
 
     var xbmc_host = \$("#xbmc_host").val();
-    \$.get("/home/testXBMC", {'host': xbmc_host});
+	var xbmc_username = \$("#xbmc_username").val();
+    var xbmc_password = \$("#xbmc_password").val();
+
+    \$.get("/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
     
   });
 });  
@@ -71,6 +74,14 @@ Update XBMC library when we finish a download?<br />
 <strong>XBMC host:</strong><br />
 XBMC HTTP API address (IP:port, eg. 192.168.1.100:8080)<br />
 <input type="text" name="xbmc_host" id="xbmc_host" value="$sickbeard.XBMC_HOST" size="35"><br />
+<br />
+<strong>XBMC Username:</strong><br />
+XBMC HTTP API address (IP:port, eg. 192.168.1.100:8080)<br />
+<input type="text" name="xbmc_username" id="xbmc_username" value="$sickbeard.XBMC_USERNAME" size="35"><br />
+<br />
+<strong>XBMC Password:</strong><br />
+XBMC HTTP API address (IP:port, eg. 192.168.1.100:8080)<br />
+<input type="text" name="xbmc_password" id="xbmc_password" value="$sickbeard.XBMC_PASSWORD" size="35"><br />
 <br />
 
 <input type="button" value="Test XBMC" id="testXBMC">

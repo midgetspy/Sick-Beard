@@ -9,8 +9,8 @@ from sickbeard.common import *
 def testGrowl(host, password):
     growl.sendGrowl("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password)
 
-def testXBMC(host):
-    xbmc.notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host)
+def testXBMC(host, username, password):
+    xbmc.notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password)
 
 def notify(type, message):
     

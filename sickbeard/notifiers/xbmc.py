@@ -21,6 +21,7 @@
 import urllib, urllib2
 import socket
 import sys
+import base64
 
 #import config
 
@@ -31,11 +32,11 @@ from sickbeard.logging import *
 XBMC_TIMEOUT = 10
 
 # prevent it from dying if the XBMC call hangs
-def notifyXBMC(input, title="midgetPVR", host=None):
+def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None):
 
     global XBMC_TIMEOUT
 
-    Logger().log("Sending notification for " + input, DEBUG)
+    Logger().log("Sending notification for " + input + username + password, DEBUG)
     
     fileString = title + "," + input
     param = urllib.urlencode({'a': fileString.encode('utf-8')})
@@ -45,11 +46,21 @@ def notifyXBMC(input, title="midgetPVR", host=None):
     
     if host == None:
         host = sickbeard.XBMC_HOST
+	if username == None:
+		username = sickbeard.XBMC_USERNAME
+	if password == None:
+		password = sickbeard.XBMC_PASSWORD
     
     try:
         url = "http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")"
-        Logger().log("Sending notification to XBMC via URL: "+url, DEBUG)
-        urllib2.urlopen(url, timeout=XBMC_TIMEOUT).close()
+        Logger().log("Sending notification to XBMC via URL: "+url +" username:"+ username + " password:" + password, DEBUG)
+        req = urllib2.Request(url)
+        if password != '':
+            base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+            authheader =  "Basic %s" % base64string
+            req.add_header("Authorization", authheader)
+            Logger().log("Adding Password to XBMC url", DEBUG)
+        handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
     except IOError as e:
         Logger().log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
     
@@ -60,6 +71,8 @@ def updateLibrary(path=None):
     Logger().log("Updating library in XBMC", DEBUG)
     
     host = sickbeard.XBMC_HOST
+    username = sickbeard.XBMC_USERNAME
+    password = sickbeard.XBMC_PASSWORD
     
     try:
         if path == None:
@@ -68,8 +81,13 @@ def updateLibrary(path=None):
             path = ""
             #path = "," + urllib.quote_plus(path)
         url = "http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=XBMC.updatelibrary(video" + path + ")"
-        Logger().log("Sending command to XBMC via URL: "+url, DEBUG)
-        urllib2.urlopen(url, timeout=XBMC_TIMEOUT).close()
+        req = urllib2.Request(url)
+        if password != '':
+            base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+            authheader =  "Basic %s" % base64string
+            req.add_header("Authorization", authheader)
+            Logger().log("Adding Password to XBMC url", DEBUG)
+        handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
     except IOError as e:
         Logger().log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
         return False
