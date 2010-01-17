@@ -170,7 +170,10 @@ def findEpisode(episode, forceQuality=None):
 		if type(curResult) != list:
 			continue
 		
-		Logger().log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
+		try:
+			Logger().log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
+		except IndexError:
+			Logger().log("Found a newzbin report: " + str(curResult))
 		
 		result = sickbeard.classes.NZBSearchResult(episode)
 		result.provider = NEWZBIN
