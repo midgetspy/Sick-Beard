@@ -322,7 +322,7 @@ def initialize():
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
         
         updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
-                                              cycleTime=datetime.timedelta(hours=6),
+                                              cycleTime=datetime.timedelta(hours=12),
                                               threadName="UPDATE",
                                               runImmediately=False)
         

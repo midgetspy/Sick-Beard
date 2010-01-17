@@ -139,7 +139,7 @@ class History:
     def trimHistory(self):
         
         myDB = db.DBConnection()
-        myDB.action("DELETE FROM history WHERE date > "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
+        myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
         
         raise cherrypy.HTTPRedirect("../history")
 
