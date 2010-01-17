@@ -227,7 +227,7 @@ class ShowUpdater():
         
         
 
-    def updateShowsFromTVDB(self, force):
+    def updateShowsFromTVDB(self, force=False):
         
         Logger().log("Beginning update of all shows")
         
