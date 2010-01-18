@@ -17,11 +17,11 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import urllib, urllib2
 import socket
 import sys
 import base64
+import time, struct
 
 #import config
 
@@ -38,12 +38,12 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
 
     if host == None:
         host = sickbeard.XBMC_HOST
-	if username == None:
-		username = sickbeard.XBMC_USERNAME
-	if password == None:
-		password = sickbeard.XBMC_PASSWORD    
+    if username == None:
+        username = sickbeard.XBMC_USERNAME
+    if password == None:
+        password = sickbeard.XBMC_PASSWORD    
 
-    Logger().log("Sending notification for " + input + username + password, DEBUG)
+    Logger().log("Sending notification for " + input, DEBUG)
     
     fileString = title + "," + input
     param = urllib.urlencode({'a': fileString.encode('utf-8')})
@@ -51,20 +51,20 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
     
     Logger().log("Encoded message is " + encodedParam, DEBUG)
     
-
+    for curHost in [x.strip() for x in host.split(",")]:
     
-    try:
-        url = "http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")"
-        Logger().log("Sending notification to XBMC via URL: "+url +" username:"+ username + " password:" + password, DEBUG)
-        req = urllib2.Request(url)
-        if password != '':
-            base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-            authheader =  "Basic %s" % base64string
-            req.add_header("Authorization", authheader)
-            Logger().log("Adding Password to XBMC url", DEBUG)
-        handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
-    except IOError as e:
-        Logger().log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
+        try:
+            url = "http://" + curHost + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")"
+            Logger().log("Sending notification to XBMC via URL: "+url +" username: "+ username + " password: " + password, DEBUG)
+            req = urllib2.Request(url)
+            if password != '':
+                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+                authheader =  "Basic %s" % base64string
+                req.add_header("Authorization", authheader)
+                Logger().log("Adding Password to XBMC url", DEBUG)
+            handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
+        except IOError as e:
+            Logger().log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
     
 def updateLibrary(path=None):
 
@@ -76,23 +76,67 @@ def updateLibrary(path=None):
     username = sickbeard.XBMC_USERNAME
     password = sickbeard.XBMC_PASSWORD
     
-    try:
-        if path == None:
-            path = ""
-        else:
-            path = ""
-            #path = "," + urllib.quote_plus(path)
-        url = "http://" + host + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=XBMC.updatelibrary(video" + path + ")"
-        req = urllib2.Request(url)
-        if password != '':
-            base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-            authheader =  "Basic %s" % base64string
-            req.add_header("Authorization", authheader)
-            Logger().log("Adding Password to XBMC url", DEBUG)
-        handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
-    except IOError as e:
-        Logger().log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
-        return False
+    for curHost in [x.strip() for x in host.split(",")]:
+        
+        try:
+            if path == None:
+                path = ""
+            else:
+                path = ""
+                #path = "," + urllib.quote_plus(path)
+            url = "http://" + curHost + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=XBMC.updatelibrary(video" + path + ")"
+            req = urllib2.Request(url)
+            if password != '':
+                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+                authheader =  "Basic %s" % base64string
+                req.add_header("Authorization", authheader)
+                Logger().log("Adding Password to XBMC url", DEBUG)
+            handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
+        except IOError as e:
+            Logger().log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
+            return False
 
     return True
 
+# Wake function
+def wakeOnLan(ethernet_address):
+    addr_byte = ethernet_address.split(':')
+    hw_addr = struct.pack('BBBBBB', int(addr_byte[0], 16),
+    int(addr_byte[1], 16),
+    int(addr_byte[2], 16),
+    int(addr_byte[3], 16),
+    int(addr_byte[4], 16),
+    int(addr_byte[5], 16))
+    
+    # Build the Wake-On-LAN "Magic Packet"...
+    msg = '\xff' * 6 + hw_addr * 16
+    
+    # ...and send it to the broadcast address using UDP
+    ss = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    ss.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    ss.sendto(msg, ('<broadcast>', 9))
+    ss.close()
+ 
+# Test Connection function
+def isHostUp(host,port):
+
+    (family, socktype, proto, garbage, address) = socket.getaddrinfo(host, port)[0]
+    s = socket.socket(family, socktype, proto)
+
+    try:
+        s.connect(address)
+        return "Up"
+    except:
+        return "Down"
+
+
+def checkHost(host, port):
+
+    # we should try to get this programmatically from the IP
+    mac = ""
+    
+    i=1
+    while isHostUp(host,port)=="Down" and i<4:
+        wakeOnLan(mac)
+        time.sleep(20)
+        i=i+1
