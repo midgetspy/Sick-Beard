@@ -377,7 +377,6 @@ class TVShow(object):
 			return None
 
 		# for now lets assume that any episode in the show dir belongs to that show
-
 		season = epInfo.seasonnumber
 		rootEp = None
 
