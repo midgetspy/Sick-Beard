@@ -30,6 +30,8 @@ from xml.dom.minidom import Document
 
 from lib.BeautifulSoup import BeautifulStoneSoup, NavigableString, SGMLParseError
 from lib.tvdb_api import tvdb_api, tvnamer, tvdb_exceptions
+from lib.tvnamer.utils import FileParser
+from lib.tvnamer import tvnamer_exceptions
 
 from sickbeard import db
 from sickbeard import helpers
@@ -367,53 +369,60 @@ class TVShow(object):
 
 		Logger().log(str(self.tvdbid) + ": Creating episode object from " + file, DEBUG)
 
-		result = tvnamer.processSingleName(file)
-		
-		if result != None:
+		try:
+			myParser = FileParser(file)
+			epInfo = myParser.parse()
+		except tvnamer_exceptions.InvalidFilename:
+			Logger().log("Unable to parse the filename "+file+" into a valid episode", ERROR)
+			return None
 
-			# for now lets assume that any show in the show dir belongs to the right place
-			season = int(result["seasno"])
+		# for now lets assume that any episode in the show dir belongs to that show
+
+		season = epInfo.seasonnumber
+		rootEp = None
+
+		# TODO: tvnamer should really just return a list always
+		if not isinstance(epInfo.episodenumber, list):
+			epList = [epInfo.episodenumber]
+		else:
+			epList = epInfo.episodenumber
+
+		for curEp in epList:
+
+			episode = int(curEp)
 			
-			rootEp = None
-	
-			for curEp in result["epno"]:
-	
-				episode = int(curEp)
-				
-				Logger().log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), DEBUG)
-	
-				curEp = self.getEpisode(season, episode)
-				
-				if curEp == None:
-					try:
-						#curEp = TVEpisode(self, season, episode, file)
-						curEp = self.getEpisode(season, episode, file)
-					except exceptions.EpisodeNotFoundException:
-						Logger().log(str(self.tvdbid) + ": Unable to figure out what this file is, skipping", ERROR)
-						continue
-				else:
-					with curEp.lock:
-						curEp.location = file
-						curEp.checkForMetaFiles()
-						
-				if rootEp == None:
-					rootEp = curEp
-				else:
-					rootEp.relatedEps.append(curEp)
+			Logger().log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), DEBUG)
 
-				if sickbeard.helpers.isMediaFile(file):
-					with curEp.lock:
-						curEp.status = DOWNLOADED
-						Logger().log("STATUS: we have an associated file, so setting the status to DOWNLOADED/" + str(DOWNLOADED), DEBUG)
-							
+			curEp = self.getEpisode(season, episode)
+			
+			if curEp == None:
+				try:
+					curEp = self.getEpisode(season, episode, file)
+				except exceptions.EpisodeNotFoundException:
+					Logger().log(str(self.tvdbid) + ": Unable to figure out what this file is, skipping", ERROR)
+					continue
+			else:
 				with curEp.lock:
-					curEp.saveToDB()
+					curEp.location = file
+					curEp.checkForMetaFiles()
 					
-			# creating metafiles on the root should be good enough
-			if rootEp != None:
-				with rootEp.lock:
-					rootEp.createMetaFiles()
+			if rootEp == None:
+				rootEp = curEp
+			else:
+				rootEp.relatedEps.append(curEp)
 
+			if sickbeard.helpers.isMediaFile(file):
+				with curEp.lock:
+					curEp.status = DOWNLOADED
+					Logger().log("STATUS: we have an associated file, so setting the status to DOWNLOADED/" + str(DOWNLOADED), DEBUG)
+						
+			with curEp.lock:
+				curEp.saveToDB()
+				
+		# creating metafiles on the root should be good enough
+		if rootEp != None:
+			with rootEp.lock:
+				rootEp.createMetaFiles()
 
 		return None
 
