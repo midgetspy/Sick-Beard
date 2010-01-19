@@ -35,7 +35,7 @@ def downloadTorrent (torrent):
     if data == None:
         return False
     
-    fileName = torrent.fileName()
+    fileName = os.path.join(sickbeard.TORRENT_DIR, torrent.fileName())
     #fileName = os.path.join(sickbeard.TORRENT_DIR, os.path.basename(torrent.url))
     
     Logger().log("Saving to " + fileName, DEBUG)
