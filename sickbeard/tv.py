@@ -298,7 +298,7 @@ class TVShow(object):
 			t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
 		except tvdb_exceptions.tvdb_error:
 			Logger().log("TVDB timed out, unable to update episodes from TVDB", ERROR)
-			return {}
+			return None
 		
 		showObj = t[self.tvdbid]
 		

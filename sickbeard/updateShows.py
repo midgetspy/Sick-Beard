@@ -196,6 +196,10 @@ class ShowUpdater():
         Logger().log("Loading all episodes from theTVDB", DEBUG)
         TVDBEpList = show.loadEpisodesFromTVDB(cache=not force)
         
+        if TVDBEpList == None:
+            Logger().log("No data returned from TVDB, unable to update this show", ERROR)
+            return None
+        
         # for each ep we found on TVDB delete it from the DB list
         for curSeason in TVDBEpList:
             for curEpisode in TVDBEpList[curSeason]:
