@@ -27,8 +27,11 @@ from logging import *
 from lib.tvdb_api import tvdb_api
 
 class DBConnection:
-		def __init__(self):
-			self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, "sickbeard.db"), 20)
+		def __init__(self, dbFileName="sickbeard.db"):
+			
+			self.dbFileName = dbFileName
+			
+			self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, self.dbFileName), 20)
 			self.connection.row_factory = sqlite3.Row
 
 		def action(self, query, args=None):
