@@ -169,11 +169,12 @@ def findEpisode(episode, forceQuality=None):
 		
 		if type(curResult) != list:
 			continue
+
+		if len(curResult) == 1:
+			Logger().log("Newzbin returned a malformed result, skipping it", ERROR)
+			continue
 		
-		try:
-			Logger().log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
-		except IndexError:
-			Logger().log("Found a newzbin report: " + str(curResult))
+		Logger().log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
 		
 		result = sickbeard.classes.NZBSearchResult(episode)
 		result.provider = NEWZBIN
