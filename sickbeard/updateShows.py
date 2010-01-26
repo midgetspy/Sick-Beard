@@ -221,6 +221,8 @@ class ShowUpdater():
         with show.lock:
             Logger().log("Attempting to supplement show info with info from TVRage", DEBUG)
             show.loadLatestFromTVRage()
+            if show.tvrid == 0:
+                show.setTVRID()
 
         self.refreshShow(show)
         

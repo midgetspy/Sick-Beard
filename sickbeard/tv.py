@@ -26,6 +26,8 @@ import urllib
 import re
 import glob
 
+import sickbeard
+
 from xml.dom.minidom import Document
 
 from lib.BeautifulSoup import BeautifulStoneSoup, NavigableString, SGMLParseError
@@ -50,6 +52,7 @@ class TVShow(object):
 		self._location = os.path.normpath(showdir)
 		self.name = ""
 		self.tvdbid = 0
+		self.tvrid = 0
 		self.network = ""
 		self.genre = ""
 		self.runtime = 0
@@ -93,26 +96,8 @@ class TVShow(object):
 			self._isDirGood = True
 			
 			self.loadNFO()
-			
-			myDB = db.DBConnection()
-			sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
-			
-			if len(sqlResults) > 0:
-	
-				if self.name == "":
-					self.name = sqlResults[0]["name"]
-				if self.network == "":
-					self.network = sqlResults[0]["network"]
-				if self.genre == "":
-					self.genre = sqlResults[0]["genre"]
-		
-				self.runtime = int(sqlResults[0]["runtime"])
-				self.quality = int(sqlResults[0]["quality"])
-				self.status = sqlResults[0]["status"]
-				self.airs = sqlResults[0]["airs"]
-				self.startyear = sqlResults[0]["startyear"]
-				self.seasonfolders = int(sqlResults[0]["seasonfolders"])
-				self.paused = int(sqlResults[0]["paused"])
+
+			self.loadFromDB()
 	
 		#Logger().log(str(self.tvdbid) + ": Loading extra show info from theTVDB")
 		#try:
@@ -334,6 +319,41 @@ class TVShow(object):
 
 		return scannedEps
 
+	def setTVRID(self, force=False):
+		
+		if self.tvrid != 0 and not force:
+			Logger().log("No need to get the TVRage ID, it's already populated", DEBUG)
+			return
+
+		Logger().log("Attempting to retrieve the TVRage ID", DEBUG)
+
+		tvrID = None
+		
+		# load the tvrage object
+		tvr = tvrage.TVRage(self)
+		
+		# check for sync
+		try:
+			if not tvr.checkSync():
+				raise exceptions.TVRageException("The latest episodes on TVDB and TVRage are out of sync, trying to sync with earlier episodes")
+		except exceptions.TVRageException as e:
+			Logger().log("TVRage error: "+str(e), DEBUG)
+			try:
+				if not tvr.confirmShow():
+					raise exceptions.TVRageException("Show episodes don't match - maybe the search is giving the wrong show?")
+				tvrID = tvr.getTVRID()
+			except exceptions.TVRageException as e:
+				Logger().log("Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e), ERROR)
+				return
+
+		if tvrID != None:
+			Logger().log("Setting TVRage ID for show "+self.name+" to "+str(tvrID))
+			self.tvrid = tvrID
+			self.saveToDB()
+		else:
+			Logger().log("No TVRage ID was found, not setting it", DEBUG)
+		
+
 	def loadLatestFromTVRage(self):
 		
 		try:
@@ -426,7 +446,7 @@ class TVShow(object):
 		return None
 
 	
-	def loadFromDB(self):
+	def loadFromDB(self, skipNFO=False):
 
 		Logger().log(str(self.tvdbid) + ": Loading show info from database")
 
@@ -458,10 +478,16 @@ class TVShow(object):
 			self.startyear = sqlResults[0]["startyear"]
 			if self.startyear == None:
 				self.startyear = 0
+
 			self.quality = int(sqlResults[0]["quality"])
 			self.seasonfolders = int(sqlResults[0]["seasonfolders"])
 			self.paused = int(sqlResults[0]["paused"])
-			self.tvdbid = int(sqlResults[0]["tvdbid"])
+
+			if self.tvdbid == 0:
+				self.tvdbid = int(sqlResults[0]["tvdb_id"])
+				
+			if self.tvrid == 0:
+				self.tvrid = int(sqlResults[0]["tvr_id"])
 	
 	def loadFromTVDB(self, cache=True):
 
@@ -691,15 +717,15 @@ class TVShow(object):
 		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 
 		# use this list regardless of whether it's in there or not
-		sqlValues = [self.name, self.tvdbid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders, self.paused, self.startyear]
+		sqlValues = [self.name, self.tvdbid, self.tvrid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders, self.paused, self.startyear]
 		
 		# if it's not in there then insert it
 		if len(sqlResults) == 0:
-			sql = "INSERT INTO tv_shows (show_name, tvdb_id, location, network, genre, runtime, quality,  airs, status, seasonfolders, paused, startyear) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+			sql = "INSERT INTO tv_shows (show_name, tvdb_id, tvr_id, location, network, genre, runtime, quality,  airs, status, seasonfolders, paused, startyear) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
 		# if it's already there then just change it
 		elif len(sqlResults) == 1:
-			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=?, paused=?, startyear=? WHERE tvdb_id=?"
+			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, tvr_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=?, paused=?, startyear=? WHERE tvdb_id=?"
 			sqlValues += [self.tvdbid]
 		else:
 			raise exceptions.MultipleDBShowsException("Multiple records for a single show")

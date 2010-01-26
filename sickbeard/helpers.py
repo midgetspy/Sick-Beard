@@ -62,25 +62,34 @@ def sanitizeFileName (name):
 		name = name.replace(x, "")
 	return name
 		
-def makeSceneSearchString (episode):
+def makeSceneShowSearchStrings(show):
 
-	epString = ".S{0:0>2}E{1:0>2}".format(episode.season, episode.episode)
-	showName = episode.show.name.replace(" ", ".").replace("&", "and")
+	showName = show.name.replace(" ", ".").replace("&", "and").replace(". ", " ")
 
-	if not showName.endswith(")") and episode.show.startyear > 1900:
-		showName += ".(" + str(episode.show.startyear) + ")"
+	if not showName.endswith(")") and show.startyear > 1900:
+		showName += ".(" + str(show.startyear) + ")"
 
 	results = []
-	toReturn = []
 
-	results.append(showName + epString)
+	results.append(showName)
 
 	if showName.find("(") != -1:
 		showNameNoBrackets = showName.rpartition(".(")[0]
-		results.append(showNameNoBrackets + epString)
+		results.append(sanitizeSceneName(showNameNoBrackets))
+	
+	return results
 
-	for x in results:
-		toReturn.append(sanitizeSceneName(x))
+
+def makeSceneSearchString (episode):
+
+	epString = ".S{0:0>2}E{1:0>2}".format(episode.season, episode.episode)
+
+	showNames = makeSceneShowSearchStrings(episode.show)
+
+	toReturn = []
+
+	for curShow in showNames:
+		toReturn.append(curShow + epString)
 
 	return toReturn
 	
@@ -92,6 +101,20 @@ def getGZippedURL (f):
 
 def findCertainShow (showList, tvdbid):
 	results = filter(lambda x: x.tvdbid == tvdbid, showList)
+	if len(results) == 0:
+		return None
+	elif len(results) > 1:
+		raise MultipleShowObjectsException()
+	else:
+		return results[0]
+	
+def findCertainTVRageShow (showList, tvrid):
+
+	if tvrid == 0:
+		return None
+
+	results = filter(lambda x: x.tvrid == tvrid, showList)
+
 	if len(results) == 0:
 		return None
 	elif len(results) > 1:
@@ -128,6 +151,9 @@ def makeShowNFO(showID, showDir):
 	except tvdb_exceptions.tvdb_shownotfound:
 		Logger().log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", ERROR)
 		raise
+		return False
+	except tvdb_exceptions.tvdb_error:
+		Logger().log("TVDB is down, can't use its data to add this show", ERROR)
 		return False
 
 	# check for title and id
