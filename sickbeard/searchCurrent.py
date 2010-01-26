@@ -92,6 +92,11 @@ class CurrentSearcher():
             except exceptions.MultipleShowObjectsException:
                 Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
                 return None
+            
+            if show == None:
+                Logger().log("Unable to find the show with ID "+str(sqlEp["showid"])+" in your show list! DB value was "+sqlEp, ERROR)
+                return None
+            
             ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
             with ep.lock:
                 if ep.show.paused:
