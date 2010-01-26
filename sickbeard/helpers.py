@@ -56,7 +56,7 @@ def sanitizeSceneName (name):
 	return name
 		
 def sanitizeFileName (name):
-	for x in ":\\/":
+	for x in ":\\/*":
 		name = name.replace(x, "-")
 	for x in "\"<>|?":
 		name = name.replace(x, "")
