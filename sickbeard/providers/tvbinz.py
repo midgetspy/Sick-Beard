@@ -31,6 +31,7 @@ import sickbeard.classes
 from sickbeard import helpers
 from sickbeard import db
 from sickbeard import tvcache
+from sickbeard import exceptions
 
 from sickbeard.common import *
 from sickbeard.logging import *
@@ -80,9 +81,12 @@ def downloadNZB (nzb):
 def findEpisode (episode, forceQuality=None):
 
 	if episode.status == DISCBACKLOG:
-		Logger().log("TVbinz doesn't support disc backlog. Use newzbin or download it manually from TVbinz")
+		Logger().log("TVbinz doesn't support disc backlog. Use Newzbin or download it manually from TVbinz")
 		return []
 
+	if sickbeard.TVBINZ_UID in (None, "") or sickbeard.TVBINZ_HASH in (None, ""):
+		raise exceptions.AuthException("TVBinz authentication details are empty, check your config")
+	
 	Logger().log("Searching tvbinz for " + episode.prettyName())
 
 	if forceQuality != None:
@@ -169,7 +173,6 @@ class TVBinzCache(tvcache.TVCache):
 
 				# for each scene name mask
 				for curSceneName in sceneNames:
-					Logger().log("Comparing scene name "+curSceneName+" with result "+name, DEBUG)
 
 					# if it matches
 					if name.startswith(curSceneName):
@@ -237,9 +240,12 @@ class TVBinzCache(tvcache.TVCache):
 		items = responseSoup.findAll('item')
 			
 		for item in items:
-			
+
+			if item.title != None and item.title.string == "You must be logged in to view this feed":
+				raise exceptions.AuthException("TVBinz authentication details are incorrect, check your config")
+
 			if item.title == None or item.link == None:
-				Logger().log("The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+item, ERROR)
+				Logger().log("The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+str(item), ERROR)
 				continue
 
 			title = item.title.string

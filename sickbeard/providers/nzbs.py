@@ -29,6 +29,7 @@ import sickbeard
 import sickbeard.classes
 import sickbeard.helpers
 
+from sickbeard import exceptions
 from sickbeard.common import *
 from sickbeard.logging import *
 
@@ -77,6 +78,9 @@ def findEpisode (episode, forceQuality=None):
 	if episode.status == DISCBACKLOG:
 		Logger().log("NZBs.org doesn't support disc backlog. Use newzbin or download it manually from NZBs.org")
 		return []
+
+	if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
+		raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
 
 	Logger().log("Searching NZBs.org for " + episode.prettyName())
 
@@ -130,6 +134,9 @@ def findEpisode (episode, forceQuality=None):
 		
 		title = item.title.string
 		url = item.link.string
+		
+		if "&i=" not in url and "&h=" not in url:
+			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
 		
 		Logger().log("Found result " + title + " at " + url, DEBUG)
 		
