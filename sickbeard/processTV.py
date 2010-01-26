@@ -143,6 +143,8 @@ def doIt(downloadDir, nzbName=None):
     if nzbName != None:
         nameList.append(nzbName)
     
+    showResults = None
+    
     for curName in nameList:
     
         result = tvnamer.processSingleName(curName)
