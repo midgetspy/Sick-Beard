@@ -289,7 +289,7 @@ def initialize():
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
-        SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', '')
+        SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', 'tv')
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
 
         IRC_BOT = bool(check_setting_int(CFG, 'IRC', 'irc_bot', 0))

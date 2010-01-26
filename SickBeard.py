@@ -78,8 +78,8 @@ def main():
 	
 	# load the config and publish it to the sickbeard package
 	if not os.path.isfile(os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE)):
-		Logger().log("Unable to find config.ini - aborting", ERROR)
-		sys.exit()
+		Logger().log("Unable to find config.ini, all settings will be default", ERROR)
+
 	sickbeard.CFG = ConfigObj(os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE))
 
 	# initialize the config and our threads
