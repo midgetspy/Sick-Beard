@@ -28,7 +28,7 @@ import sickbeard
 
 from sickbeard import exceptions, helpers, classes
 from sickbeard.common import *
-from sickbeard.logging import *
+from sickbeard import logger
 
 providerType = "nzb"
 providerName = "NZBMatrix"
@@ -38,11 +38,11 @@ def isActive():
 
 def downloadNZB (nzb):
 
-	Logger().log("Downloading an NZB from NZBMatrix at " + nzb.url)
+	logger.log("Downloading an NZB from NZBMatrix at " + nzb.url)
 
 	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb")
 	
-	Logger().log("Saving to " + fileName, DEBUG)
+	logger.log("Saving to " + fileName, logger.DEBUG)
 
 	urllib.urlretrieve(nzb.url, fileName)
 
@@ -52,10 +52,10 @@ def downloadNZB (nzb):
 def findEpisode (episode, forceQuality=None):
 
 	if episode.status == DISCBACKLOG:
-		Logger().log("NZBMatrix doesn't support disc backlog. Use newzbin or download it manually from NZBMatrix")
+		logger.log("NZBMatrix doesn't support disc backlog. Use newzbin or download it manually from NZBMatrix")
 		return []
 
-	Logger().log("Searching NZBMatrix for " + episode.prettyName())
+	logger.log("Searching NZBMatrix for " + episode.prettyName())
 
 	if forceQuality != None:
 		epQuality = forceQuality
@@ -81,7 +81,7 @@ def findEpisode (episode, forceQuality=None):
 		
 		searchURL = "https://nzbmatrix.com/api-nzb-search.php?" + urllib.urlencode(params)
 	
-		Logger().log("Search string: " + searchURL, DEBUG)
+		logger.log("Search string: " + searchURL, logger.DEBUG)
 
 		f = urllib.urlopen(searchURL)
 		searchResult = "".join(f.readlines())
@@ -93,7 +93,7 @@ def findEpisode (episode, forceQuality=None):
 				continue
 			elif err == "invalid_login" or err == "invalid_api":
 				raise exceptions.AuthException("NZBMatrix username or API key is incorrect")
-			Logger().log("An error was encountered during the search: "+err, ERROR)
+			logger.log("An error was encountered during the search: "+err, logger.ERROR)
 		
 		
 		for curResult in searchResult.split("|"):
@@ -109,7 +109,7 @@ def findEpisode (episode, forceQuality=None):
 				continue
 
 			if epQuality == HD and "720p" not in resultDict["NZBNAME"]:
-				Logger().log("Ignoring result "+resultDict["NZBNAME"]+" because it doesn't contain 720p in the name", DEBUG)
+				logger.log("Ignoring result "+resultDict["NZBNAME"]+" because it doesn't contain 720p in the name", logger.DEBUG)
 				continue
 
 			result = sickbeard.classes.NZBSearchResult(episode)

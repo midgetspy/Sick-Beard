@@ -5,7 +5,7 @@ import traceback
 
 from lib.tvdb_api import tvdb_exceptions
 
-from sickbeard.logging import *
+from sickbeard import logger
 
 class Scheduler:
 
@@ -44,11 +44,11 @@ class Scheduler:
                 self.lastRun = currentTime
                 try:
                     if not self.silent:
-                        Logger().log("Starting new thread: "+self.threadName, DEBUG)
+                        logger.log("Starting new thread: "+self.threadName, logger.DEBUG)
                     self.action.run()
                 except Exception as e:
-                    Logger().log("Exception generated in thread "+self.threadName+": " + str(e), ERROR)
-                    Logger().log(traceback.format_exc(), DEBUG)
+                    logger.log("Exception generated in thread "+self.threadName+": " + str(e), logger.ERROR)
+                    logger.log(traceback.format_exc(), logger.DEBUG)
             
             if self.abort:
                 self.abort = False

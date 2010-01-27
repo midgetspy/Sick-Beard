@@ -19,7 +19,7 @@
 
 
 from sickbeard import common, db, exceptions, helpers, search
-from sickbeard.logging import *
+from sickbeard import logger
 from sickbeard.common import * 
 
 import datetime
@@ -44,24 +44,24 @@ class CurrentSearcher():
 
         with self.lock:
     
-            Logger().log("Beginning search for todays episodes", DEBUG)
+            logger.log("Beginning search for todays episodes", logger.DEBUG)
     
             epList = sickbeard.missingList + sickbeard.airingList
             
             if epList == None or len(epList) == 0:
-                Logger().log("No episodes were found to download")
+                logger.log("No episodes were found to download")
                 return
             
             for curEp in epList:
                 
                 if curEp.show.paused:
-                    Logger().log("Show "+curEp.show.name + " is currently paused, skipping search")
+                    logger.log("Show "+curEp.show.name + " is currently paused, skipping search")
                     continue
                 
                 foundEpisodes = search.findEpisode(curEp)
                 
                 if len(foundEpisodes) == 0:
-                    Logger().log("Unable to find download for " + curEp.prettyName())
+                    logger.log("Unable to find download for " + curEp.prettyName())
                 else:
                     # just use the first result for now
                     search.snatchEpisode(foundEpisodes[0])
@@ -78,7 +78,7 @@ class CurrentSearcher():
 
     def _changeMissingEpisodes(self):
         
-        Logger().log("Changing all old missing episodes to status MISSED")
+        logger.log("Changing all old missing episodes to status MISSED")
         
         curDate = datetime.date.today().toordinal()
 
@@ -90,11 +90,11 @@ class CurrentSearcher():
             try:
                 show = helpers.findCertainShow(sickbeard.showList, int(sqlEp["showid"]))
             except exceptions.MultipleShowObjectsException:
-                Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
+                logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
                 return None
             
             if show == None:
-                Logger().log("Unable to find the show with ID "+str(sqlEp["showid"])+" in your show list! DB value was "+sqlEp, ERROR)
+                logger.log("Unable to find the show with ID "+str(sqlEp["showid"])+" in your show list! DB value was "+sqlEp, logger.ERROR)
                 return None
             
             ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])

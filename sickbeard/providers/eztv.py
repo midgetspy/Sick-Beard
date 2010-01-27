@@ -4,7 +4,7 @@ import os.path
 
 from lib.BeautifulSoup import BeautifulStoneSoup
 from sickbeard.common import *
-from sickbeard.logging import *
+from sickbeard import logger
 
 providerType = "torrent"
 providerName = "EZTV"
@@ -20,7 +20,7 @@ def _getEZTVURL (url):
         f = urllib.urlopen(url)
         result = "".join(f.readlines())
     except (urllib.ContentTooShortError, IOError) as e:
-        Logger().log("Error loading EZTV URL: " + sys.exc_info() + " - " + str(e), ERROR)
+        logger.log("Error loading EZTV URL: " + sys.exc_info() + " - " + str(e), logger.ERROR)
         return None
 
     return result
@@ -28,7 +28,7 @@ def _getEZTVURL (url):
 
 def downloadTorrent (torrent):
     
-    Logger().log("Downloading a torrent from EZTV at " + torrent.url)
+    logger.log("Downloading a torrent from EZTV at " + torrent.url)
 
     data = _getEZTVURL(torrent.url)
     
@@ -38,7 +38,7 @@ def downloadTorrent (torrent):
     fileName = os.path.join(sickbeard.TORRENT_DIR, torrent.fileName())
     #fileName = os.path.join(sickbeard.TORRENT_DIR, os.path.basename(torrent.url))
     
-    Logger().log("Saving to " + fileName, DEBUG)
+    logger.log("Saving to " + fileName, logger.DEBUG)
     
     fileOut = open(fileName, "wb")
     fileOut.write(data)
@@ -51,10 +51,10 @@ def downloadTorrent (torrent):
 def findEpisode(episode, forceQuality=None):
 
     if episode.status in (BACKLOG, DISCBACKLOG):
-        Logger().log("Skipping "+episode.prettyName()+" because it'll probably be too old", DEBUG)
+        logger.log("Skipping "+episode.prettyName()+" because it'll probably be too old", logger.DEBUG)
         return []
 
-    Logger().log("Searching EZTV for " + episode.prettyName())
+    logger.log("Searching EZTV for " + episode.prettyName())
 
     if forceQuality != None:
         epQuality = forceQuality
@@ -76,7 +76,7 @@ def findEpisode(episode, forceQuality=None):
     
     searchURL = "http://ezrss.it/search/index.php?" + urllib.urlencode(params)
 
-    Logger().log("Search string: "+searchURL, DEBUG)
+    logger.log("Search string: "+searchURL, logger.DEBUG)
 
     data = _getEZTVURL(searchURL)
 
@@ -89,13 +89,13 @@ def findEpisode(episode, forceQuality=None):
         responseSoup = BeautifulStoneSoup(data, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
         items = responseSoup.findAll('item')
     except Exception as e:
-        Logger().log("Error trying to load EZTV RSS feed: "+str(e), ERROR)
+        logger.log("Error trying to load EZTV RSS feed: "+str(e), logger.ERROR)
         return []
 
     for item in items:
         
         if item.title == None or item.link == None:
-            Logger().log("The XML returned from the EZTV RSS feed is incomplete, this result is unusable: "+data, ERROR)
+            logger.log("The XML returned from the EZTV RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
             continue
         
         if epQuality == SD and '720p' in item.title or '720p' in item.link:
@@ -104,7 +104,7 @@ def findEpisode(episode, forceQuality=None):
         title = item.title.string
         url = item.link.string
         
-        Logger().log("Found result " + title + " at " + url, DEBUG)
+        logger.log("Found result " + title + " at " + url, logger.DEBUG)
 
         result = sickbeard.classes.TorrentSearchResult(episode)
         result.provider = sickbeard.common.EZTV

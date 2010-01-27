@@ -104,7 +104,7 @@ class Backlog:
 
         # force it to run the next time it looks
         sickbeard.backlogSearchScheduler.forceSearch()
-        Logger().log("Backlog set to run in background")
+        logger.log("Backlog set to run in background")
         
         return _genericMessage("Backlog search started", "The backlog search has begun and will run in the background")
 
@@ -206,7 +206,7 @@ class ConfigGeneral:
         
         if len(results) > 0:
             for x in results:
-                Logger().log(x, ERROR)
+                logger.log(x, logger.ERROR)
             return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
@@ -267,7 +267,7 @@ class ConfigEpisodeSearch:
         
         if len(results) > 0:
             for x in results:
-                Logger().log(x, ERROR)
+                logger.log(x, logger.ERROR)
             return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
@@ -327,7 +327,7 @@ class ConfigProviders:
         
         if len(results) > 0:
             for x in results:
-                Logger().log(x, ERROR)
+                logger.log(x, logger.ERROR)
             return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
@@ -358,7 +358,7 @@ class ConfigIRC:
         
         if len(results) > 0:
             for x in results:
-                Logger().log(x, ERROR)
+                logger.log(x, logger.ERROR)
             return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
@@ -413,7 +413,7 @@ class ConfigNotifications:
         
         if len(results) > 0:
             for x in results:
-                Logger().log(x, ERROR)
+                logger.log(x, logger.ERROR)
             return _genericMessage("Error", "<br />\n".join(results))
         
         raise cherrypy.HTTPRedirect("index")
@@ -475,7 +475,7 @@ class HomeAddShows:
             raise cherrypy.HTTPRedirect("addShows")
 
         if not os.path.isdir(dir):
-            Logger().log("The provided directory "+dir+" doesn't exist", ERROR)
+            logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
             return _genericMessage("Error", "Unable to find the directory "+dir)
         
         showDirs = []
@@ -483,11 +483,11 @@ class HomeAddShows:
         for curDir in os.listdir(unicode(dir)):
             curPath = os.path.join(dir, curDir)
             if os.path.isdir(curPath):
-                Logger().log("Adding "+curPath+" to the showDir list", DEBUG)
+                logger.log("Adding "+curPath+" to the showDir list", logger.DEBUG)
                 showDirs.append(curPath)
         
         if len(showDirs) == 0:
-            Logger().log("The provided directory "+dir+" has no shows in it", ERROR)
+            logger.log("The provided directory "+dir+" has no shows in it", logger.ERROR)
             return _genericMessage("Error", "The provided root folder "+dir+ " has no shows in it.")
         
         #result = ui.addShowsFromRootDir(dir)
@@ -497,7 +497,7 @@ class HomeAddShows:
         return _munge(myTemplate)       
         
         url = "addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
-        Logger().log("Redirecting to URL "+url, DEBUG)
+        logger.log("Redirecting to URL "+url, logger.DEBUG)
         raise cherrypy.HTTPRedirect(url)
 
         #return _genericMessage("Adding root directory", result)
@@ -511,7 +511,7 @@ class HomeAddShows:
         # unquote it no matter what
         showDir = [urllib.unquote_plus(x) for x in showDir]
         
-        Logger().log("showDir: "+str(showDir))
+        logger.log("showDir: "+str(showDir))
         
         myTemplate = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_addShow.tmpl"))
         myTemplate.resultList = None
@@ -523,7 +523,7 @@ class HomeAddShows:
 
         # if we have a dir and a name it means we're mid-search, so get our TVDB list and forward them to the selection screen
         if showDir != None and showName != None:
-            Logger().log("Getting list of possible shows and asking user to choose one", DEBUG)
+            logger.log("Getting list of possible shows and asking user to choose one", logger.DEBUG)
             t = tvdb_api.Tvdb(custom_ui=TVDBWebUI)
             t.config['_showDir'] = [urllib.quote_plus(x) for x in showDir]
             try:
@@ -533,7 +533,7 @@ class HomeAddShows:
     
 
         curShowDir = os.path.normpath(showDir[0])
-        Logger().log("curShowDir: "+curShowDir)
+        logger.log("curShowDir: "+curShowDir)
 
         if seriesList != None:
             showIDs = seriesList.split(",")
@@ -543,7 +543,7 @@ class HomeAddShows:
         # if we have a folder but no ID specified then we try scanning it for NFO
         if len(showIDs) == 0:
 
-            Logger().log("Folder has been provided but we have no show ID, scanning it for an NFO", DEBUG)
+            logger.log("Folder has been provided but we have no show ID, scanning it for an NFO", logger.DEBUG)
 
             showAdded = False
 
@@ -553,7 +553,7 @@ class HomeAddShows:
                 showAdded = True
                 del showDir[0]
             except exceptions.NoNFOException:
-                Logger().log("The show queue said we need to create an NFO for this show", DEBUG)
+                logger.log("The show queue said we need to create an NFO for this show", logger.DEBUG)
                 myTemplate.resultList = []
                 myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
                 return _munge(myTemplate)
@@ -580,14 +580,14 @@ class HomeAddShows:
             # if we have at least one show left to add then redirect
             else:
                 newCallList = [urllib.quote_plus(x) for x in showDir]
-                Logger().log("There are still shows left to add, so recursively calling myself with showDir="+str(newCallList))
+                logger.log("There are still shows left to add, so recursively calling myself with showDir="+str(newCallList))
                 return self.addShow(newCallList)
                                     
         
         # if we have a single ID then just make a show with that ID
         elif len(showIDs) == 1:
             
-            Logger().log("We have a single show ID, creating a show with that ID", DEBUG)
+            logger.log("We have a single show ID, creating a show with that ID", logger.DEBUG)
             
             # if the dir doesn't exist then give up
             if not helpers.makeDir(curShowDir):
@@ -600,19 +600,19 @@ class HomeAddShows:
             
             # just go do the normal show creation now that we have the NFO
             #url ="addShow?"+ "&".join(["showDir="+urllib.quote_plus(x) for x in showDir])
-            #Logger().log("Redirecting to "+url, DEBUG)
+            #logger.log("Redirecting to "+url, logger.DEBUG)
             #raise cherrypy.HTTPRedirect(url)
             newCallList = [urllib.quote_plus(x) for x in showDir]
-            Logger().log("We now have an NFO for the show, so recursively calling myself with showDir="+str(newCallList))
+            logger.log("We now have an NFO for the show, so recursively calling myself with showDir="+str(newCallList))
             a = self.addShow(newCallList)
-            Logger().log("HOW DID WE GET HERE: "+a)
+            logger.log("HOW DID WE GET HERE: "+a)
             return a
             
         
         # if we have multiple IDs then let them pick
         else:
 
-            Logger().log("Presenting a list of shows to the user", DEBUG)
+            logger.log("Presenting a list of shows to the user", logger.DEBUG)
             
             t = tvdb_api.Tvdb()
             myTemplate.resultList = [t[int(x)] for x in showIDs]
@@ -673,7 +673,7 @@ class Home:
 
         myDB = db.DBConnection()
         
-        Logger().log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
+        logger.log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
     
         sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC")
         
@@ -718,7 +718,7 @@ class Home:
 
         with showObj.lock:
 
-            Logger().log("changing quality from " + str(showObj.quality) + " to " + str(quality), DEBUG)
+            logger.log("changing quality from " + str(showObj.quality) + " to " + str(quality), logger.DEBUG)
             showObj.quality = int(quality)
             
             if showObj.seasonfolders != seasonfolders:
@@ -804,7 +804,7 @@ class Home:
         else:
             message = "Unable to contact XBMC"
         
-        return _genericMessage("XBMC Library Update", message)
+        return _genericMessage("XBMC Library Update", logger.MESSAGE)
 
 
     @cherrypy.expose
@@ -843,7 +843,7 @@ class Home:
 
             for curEp in eps.split('|'):
 
-                Logger().log("Attempting to set status on episode "+curEp+" to "+status, DEBUG)
+                logger.log("Attempting to set status on episode "+curEp+" to "+status, logger.DEBUG)
 
                 epInfo = curEp.split('x')
 
@@ -855,11 +855,11 @@ class Home:
                 with epObj.lock:
                     # don't let them mess up UNAIRED episodes
                     if epObj.status == UNAIRED:
-                        Logger().log("Refusing to change status of "+curEp+" because it is UNAIRED", ERROR)
+                        logger.log("Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
                     
                     if int(status) == DOWNLOADED and epObj.status != PREDOWNLOADED:
-                        Logger().log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not PREDOWNLOADED", ERROR)
+                        logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not PREDOWNLOADED", logger.ERROR)
                         continue
 
                     epObj.status = int(status)
@@ -877,20 +877,20 @@ class Home:
             return _genericMessage("Error", epObj)
         
         tempStr = "Searching for download for " + epObj.prettyName()
-        Logger().log(tempStr)
+        logger.log(tempStr)
         outStr += tempStr + "<br />\n"
         foundEpisodes = search.findEpisode(epObj)
         
         if len(foundEpisodes) == 0:
             tempStr = "No downloads were found<br />\n"
-            Logger().log(tempStr)
+            logger.log(tempStr)
             outStr += tempStr + "<br />\n"
             return _genericMessage("Error", outStr)
         
         else:
 
             # just use the first result for now
-            Logger().log("Downloading episode from " + foundEpisodes[0].url + "<br />\n")
+            logger.log("Downloading episode from " + foundEpisodes[0].url + "<br />\n")
             result = search.snatchEpisode(foundEpisodes[0])
             
             #TODO: check if the download was successful

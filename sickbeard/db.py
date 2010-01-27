@@ -22,7 +22,7 @@ import os.path
 import sqlite3
 
 import sickbeard
-from logging import *
+from sickbeard import logger
 
 from lib.tvdb_api import tvdb_api
 
@@ -43,14 +43,14 @@ class DBConnection:
 
 		try:
 			if args == None:
-				Logger().log(self.dbFileName+": "+query, DEBUG)
+				logger.log(self.dbFileName+": "+query, logger.DEBUG)
 				self.connection.execute(query)
 			else:
-				Logger().log(self.dbFileName+": "+query+" with args "+str(args), DEBUG)
+				logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
 				self.connection.execute(query, args)
 			self.connection.commit()
 		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query: " + str(e), ERROR)
+			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
 			raise
 		
 
@@ -60,20 +60,20 @@ class DBConnection:
 		sqlResults = []
 
 		if query == None:
-			Logger().log("Query must be a string (was None)", ERROR)
+			logger.log("Query must be a string (was None)", logger.ERROR)
 			return
 		else:
 			query = str(query)
 	
 		try:
 			if args == None:
-				Logger().log(self.dbFileName+": "+query, DEBUG)
+				logger.log(self.dbFileName+": "+query, logger.DEBUG)
 				sqlResults = self.connection.execute(query).fetchall()
 			else:
-				Logger().log(self.dbFileName+": "+query+" with args "+str(args), DEBUG)
+				logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
 				sqlResults = self.connection.execute(query, args).fetchall()
 		except sqlite3.DatabaseError as e:
-			Logger().log("Fatal error executing query: " + str(e), ERROR)
+			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
 			raise
 		
 		if sqlResults == None:

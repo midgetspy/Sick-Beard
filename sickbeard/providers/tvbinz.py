@@ -34,7 +34,7 @@ from sickbeard import tvcache
 from sickbeard import exceptions
 
 from sickbeard.common import *
-from sickbeard.logging import *
+from sickbeard import logger
 
 providerType = "nzb"
 providerName = "TVBinz"
@@ -50,7 +50,7 @@ def getTVBinzURL (url):
 	try:
 		f = urllib2.urlopen(req)
 	except (urllib.ContentTooShortError, IOError) as e:
-		Logger().log("Error loading TVBinz URL: " + str(sys.exc_info()) + " - " + str(e))
+		logger.log("Error loading TVBinz URL: " + str(sys.exc_info()) + " - " + str(e))
 		return None
 
 	result = helpers.getGZippedURL(f)
@@ -60,7 +60,7 @@ def getTVBinzURL (url):
 						
 def downloadNZB (nzb):
 
-	Logger().log("Downloading an NZB from tvbinz at " + nzb.url)
+	logger.log("Downloading an NZB from tvbinz at " + nzb.url)
 
 	data = getTVBinzURL(nzb.url)
 	
@@ -69,7 +69,7 @@ def downloadNZB (nzb):
 	
 	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb")
 	
-	Logger().log("Saving to " + fileName, DEBUG)
+	logger.log("Saving to " + fileName, logger.DEBUG)
 	
 	fileOut = open(fileName, "w")
 	fileOut.write(data)
@@ -81,13 +81,13 @@ def downloadNZB (nzb):
 def findEpisode (episode, forceQuality=None):
 
 	if episode.status == DISCBACKLOG:
-		Logger().log("TVbinz doesn't support disc backlog. Use Newzbin or download it manually from TVbinz")
+		logger.log("TVbinz doesn't support disc backlog. Use Newzbin or download it manually from TVbinz")
 		return []
 
 	if sickbeard.TVBINZ_UID in (None, "") or sickbeard.TVBINZ_HASH in (None, ""):
 		raise exceptions.AuthException("TVBinz authentication details are empty, check your config")
 	
-	Logger().log("Searching tvbinz for " + episode.prettyName())
+	logger.log("Searching tvbinz for " + episode.prettyName())
 
 	if forceQuality != None:
 		epQuality = forceQuality
@@ -101,7 +101,7 @@ def findEpisode (episode, forceQuality=None):
 	myCache.updateCache()
 	
 	cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
-	Logger().log("Cache results: "+str(cacheResults), DEBUG)
+	logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
 
 	nzbResults = []
 
@@ -111,7 +111,7 @@ def findEpisode (episode, forceQuality=None):
 		url = curResult["url"]
 		urlParams = {'i': sickbeard.TVBINZ_UID, 'h': sickbeard.TVBINZ_HASH}
 	
-		Logger().log("Found result " + title + " at " + url)
+		logger.log("Found result " + title + " at " + url)
 
 		result = sickbeard.classes.NZBSearchResult(episode)
 		result.provider = sickbeard.common.TVBINZ
@@ -163,7 +163,7 @@ class TVBinzCache(tvcache.TVCache):
 
 		if tvrShow == None:
 
-			Logger().log("No show in our list that already matches the TVRage ID, trying to match names", DEBUG)
+			logger.log("No show in our list that already matches the TVRage ID, trying to match names", logger.DEBUG)
 
 			# for each show in our list
 			for curShow in sickbeard.showList:
@@ -176,7 +176,7 @@ class TVBinzCache(tvcache.TVCache):
 
 					# if it matches
 					if name.startswith(curSceneName):
-						Logger().log("Successful match! Result "+name+" matched to show "+curShow.name, DEBUG)
+						logger.log("Successful match! Result "+name+" matched to show "+curShow.name, logger.DEBUG)
 						
 						# set the tvrid of the show to tvrid
 						with curShow.lock:
@@ -194,7 +194,7 @@ class TVBinzCache(tvcache.TVCache):
 					break
 
 			if tvdbid == 0:
-				Logger().log("Unable to find a match for this show in the cache", DEBUG)
+				logger.log("Unable to find a match for this show in the cache", logger.DEBUG)
 		
 		else:
 			tvdbid = tvrShow.tvdbid
@@ -218,7 +218,7 @@ class TVBinzCache(tvcache.TVCache):
 
 		# if we've updated recently then skip the update
 		if datetime.datetime.today() - datetime.datetime.fromtimestamp(lastTimestamp) < datetime.timedelta(minutes=self.minTime):
-			Logger().log("Last update was too soon, using old cache", DEBUG)
+			logger.log("Last update was too soon, using old cache", logger.DEBUG)
 			return
 				
 		# get all records since the last timestamp
@@ -228,12 +228,12 @@ class TVBinzCache(tvcache.TVCache):
 
 		url += urllib.urlencode(urlArgs)
 		
-		Logger().log("TVBinz cache update URL: "+ url, DEBUG)
+		logger.log("TVBinz cache update URL: "+ url, logger.DEBUG)
 		
 		data = getTVBinzURL(url)
 		
 		# now that we've loaded the current RSS feed lets delete the old cache
-		Logger().log("Clearing cache and updating with new information")
+		logger.log("Clearing cache and updating with new information")
 		self._clearCache()
 		
 		responseSoup = BeautifulStoneSoup(data)
@@ -245,17 +245,17 @@ class TVBinzCache(tvcache.TVCache):
 				raise exceptions.AuthException("TVBinz authentication details are incorrect, check your config")
 
 			if item.title == None or item.link == None:
-				Logger().log("The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+str(item), ERROR)
+				logger.log("The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+str(item), logger.ERROR)
 				continue
 
 			title = item.title.string
 			url = item.link.string.replace("&amp;", "&")
 
 			if item.seriesinfo == None:
-				Logger().log("No series info, this is some kind of non-standard release, ignoring it", DEBUG)
+				logger.log("No series info, this is some kind of non-standard release, ignoring it", logger.DEBUG)
 				continue
 
-			Logger().log("Adding item from RSS to cache: "+title, DEBUG)			
+			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 
 			quality = item.seriesinfo.quality.string
 			if quality == "HD":

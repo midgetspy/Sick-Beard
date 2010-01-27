@@ -3,7 +3,7 @@ import sys
 
 import sickbeard
 
-from sickbeard.logging import *
+from sickbeard import logger
 
 from lib.growl import gntp
 
@@ -96,8 +96,8 @@ def sendGrowl(title="Sick Beard Notification", message=None, name=None, host=Non
 	for pc in growlHosts:
 		opts['host'] = pc[0]
 		opts['port'] = pc[1]
-		Logger().log("Sending growl to "+opts['host']+":"+str(opts['port'])+": "+message)
+		logger.log("Sending growl to "+opts['host']+":"+str(opts['port'])+": "+message)
 		try:
 			send_growl(opts, message)
 		except socket.error as e:
-			Logger().log("Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+str(e))
+			logger.log("Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+str(e))

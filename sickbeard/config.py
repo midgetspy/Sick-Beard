@@ -23,7 +23,7 @@ import os.path
 import datetime
 
 from sickbeard import helpers
-from sickbeard.logging import * 
+from sickbeard import logger 
 
 from lib.irclib.irclib import ServerNotConnectedError
 
@@ -35,12 +35,12 @@ def change_LOG_DIR(log_dir):
         if helpers.makeDir(log_dir):
             Logger().shutdown()
             sickbeard.LOG_DIR = os.path.normpath(log_dir)
-            Logger().log("Initialized new log file in " + log_dir)
+            logger.log("Initialized new log file in " + log_dir)
 
             cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
             cherrypy.config.update({'log.access_file': cherry_log})
             
-            Logger().log("Changed cherry log file to " + cherry_log)
+            logger.log("Changed cherry log file to " + cherry_log)
             
         else:
             return False
@@ -52,7 +52,7 @@ def change_NZB_DIR(nzb_dir):
     if os.path.normpath(sickbeard.NZB_DIR) != os.path.normpath(nzb_dir):
         if helpers.makeDir(nzb_dir):
             sickbeard.NZB_DIR = os.path.normpath(nzb_dir)
-            Logger().log("Changed NZB folder to " + nzb_dir)
+            logger.log("Changed NZB folder to " + nzb_dir)
         else:
             return False
 
@@ -64,7 +64,7 @@ def change_TORRENT_DIR(torrent_dir):
     if os.path.normpath(sickbeard.TORRENT_DIR) != os.path.normpath(torrent_dir):
         if helpers.makeDir(torrent_dir):
             sickbeard.TORRENT_DIR = os.path.normpath(torrent_dir)
-            Logger().log("Changed torrent folder to " + torrent_dir)
+            logger.log("Changed torrent folder to " + torrent_dir)
         else:
             return False
 

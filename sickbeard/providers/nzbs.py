@@ -31,7 +31,7 @@ import sickbeard.helpers
 
 from sickbeard import exceptions
 from sickbeard.common import *
-from sickbeard.logging import *
+from sickbeard import logger
 
 providerType = "nzb"
 providerName = "NZBs.org"
@@ -47,7 +47,7 @@ def getNZBsURL (url):
 		f = urllib2.urlopen(url)
 		result = "".join(f.readlines())
 	except (urllib.ContentTooShortError, IOError) as e:
-		Logger().log("Error loading NZBs.org URL: " + str(sys.exc_info()) + " - " + str(e), ERROR)
+		logger.log("Error loading NZBs.org URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
 		return None
 
 	return result
@@ -55,7 +55,7 @@ def getNZBsURL (url):
 						
 def downloadNZB (nzb):
 
-	Logger().log("Downloading an NZB from NZBs.org at " + nzb.url)
+	logger.log("Downloading an NZB from NZBs.org at " + nzb.url)
 
 	data = getNZBsURL(nzb.url)
 	
@@ -64,7 +64,7 @@ def downloadNZB (nzb):
 	
 	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb")
 	
-	Logger().log("Saving to " + fileName, DEBUG)
+	logger.log("Saving to " + fileName, logger.DEBUG)
 	
 	fileOut = open(fileName, "w")
 	fileOut.write(data)
@@ -76,13 +76,13 @@ def downloadNZB (nzb):
 def findEpisode (episode, forceQuality=None):
 
 	if episode.status == DISCBACKLOG:
-		Logger().log("NZBs.org doesn't support disc backlog. Use newzbin or download it manually from NZBs.org")
+		logger.log("NZBs.org doesn't support disc backlog. Use newzbin or download it manually from NZBs.org")
 		return []
 
 	if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
 		raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
 
-	Logger().log("Searching NZBs.org for " + episode.prettyName())
+	logger.log("Searching NZBs.org for " + episode.prettyName())
 
 	if forceQuality != None:
 		epQuality = forceQuality
@@ -106,7 +106,7 @@ def findEpisode (episode, forceQuality=None):
 		
 		searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
 	
-		Logger().log("Search string: " + searchURL, DEBUG)
+		logger.log("Search string: " + searchURL, logger.DEBUG)
 	
 		data = getNZBsURL(searchURL)
 
@@ -119,7 +119,7 @@ def findEpisode (episode, forceQuality=None):
 			responseSoup = BeautifulStoneSoup(data, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 			items = responseSoup.findAll('item')
 		except Exception as e:
-			Logger().log("Error trying to load NZBs.org RSS feed: "+str(e), ERROR)
+			logger.log("Error trying to load NZBs.org RSS feed: "+str(e), logger.ERROR)
 			return []
 			
 		
@@ -129,7 +129,7 @@ def findEpisode (episode, forceQuality=None):
 	for item in items:
 		
 		if item.title == None or item.link == None:
-			Logger().log("The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, ERROR)
+			logger.log("The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 			continue
 		
 		title = item.title.string
@@ -138,7 +138,7 @@ def findEpisode (episode, forceQuality=None):
 		if "&i=" not in url and "&h=" not in url:
 			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
 		
-		Logger().log("Found result " + title + " at " + url, DEBUG)
+		logger.log("Found result " + title + " at " + url, logger.DEBUG)
 		
 		result = sickbeard.classes.NZBSearchResult(episode)
 		result.provider = sickbeard.common.NZBS

@@ -12,7 +12,7 @@ from lib.BeautifulSoup import BeautifulStoneSoup
 import sickbeard
 
 from sickbeard import db
-from sickbeard.logging import *
+from sickbeard import logger
 from sickbeard.common import *
 
 class TVCache():

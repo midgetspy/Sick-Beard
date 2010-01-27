@@ -2,7 +2,7 @@ import db
 import sqlite3
 import datetime
 
-from sickbeard.logging import *
+from sickbeard import logger
 from sickbeard.common import *
 
 dateFormat = "%Y%m%d%H%M%S"

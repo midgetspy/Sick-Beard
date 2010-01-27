@@ -24,7 +24,7 @@ import sickbeard
 
 from sickbeard import exceptions
 from sickbeard.tv import TVShow
-from sickbeard.logging import *
+from sickbeard import logger
 
 from lib.tvdb_api import tvdb_exceptions
         
@@ -43,7 +43,7 @@ def addShowsFromRootDir(dir):
     for curDir in os.listdir(unicode(dir)):
         showDir = os.path.join(dir, curDir)
         logStr = "Attempting to load show in " + showDir
-        Logger().log(logStr, DEBUG)
+        logger.log(logStr, logger.DEBUG)
         returnStr += logStr + "<br />\n"
 
         sickbeard.loadingShowList[showDir] = LoadingTVShow(showDir)
@@ -54,12 +54,12 @@ def addShowsFromRootDir(dir):
             sickbeard.showAddScheduler.action.addShowToQueue(showDir)
         except exceptions.NoNFOException:
             logStr = "Unable to automatically add the show in " + showDir
-            Logger().log(logStr, ERROR)
+            logger.log(logStr, logger.ERROR)
             returnStr += logStr + "<br />\n"
             del sickbeard.loadingShowList[showDir]
         except exceptions.MultipleShowObjectsException:
             logStr = "Show in "+showDir+" already exists, skipping..."
-            Logger().log(logStr, ERROR)
+            logger.log(logStr, logger.ERROR)
             returnStr += logStr + "<br />\n"
             del sickbeard.loadingShowList[showDir]
 

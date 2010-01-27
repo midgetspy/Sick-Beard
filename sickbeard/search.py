@@ -21,9 +21,8 @@
 import sickbeard
 
 from common import *
-from logging import *
 
-
+from sickbeard import logger
 from sickbeard import sab
 from sickbeard import history
 
@@ -49,7 +48,7 @@ def _downloadResult(result):
 	elif result.provider == NZBMATRIX:
 		return nzbmatrix.downloadNZB(result)
 	else:
-		Logger().log("Invalid provider - this is a coding error, this should never happen.", ERROR)
+		logger.log("Invalid provider - this is a coding error, this should never happen.", logger.ERROR)
 		return False
 
 def snatchEpisode(result):
@@ -60,12 +59,12 @@ def snatchEpisode(result):
 		elif sickbeard.NZB_METHOD == "sabnzbd":
 			dlResult = sab.sendNZB(result)
 		else:
-			Logger().log("Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, ERROR)
+			logger.log("Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
 			dlResult = False
 	elif result.resultType == "torrent":
 		dlResult = _downloadResult(result)
 	else:
-		Logger().log("Unknown result type, unable to download it", ERROR)
+		logger.log("Unknown result type, unable to download it", logger.ERROR)
 		dlResult = False
 	
 	if dlResult == False:
@@ -78,10 +77,10 @@ def snatchEpisode(result):
 	
 	with result.episode.lock:
 		if result.predownloaded == False:
-			Logger().log("changing status from " + str(result.episode.status) + " to " + str(SNATCHED), DEBUG)
+			logger.log("changing status from " + str(result.episode.status) + " to " + str(SNATCHED), logger.DEBUG)
 			result.episode.status = SNATCHED
 		elif result.predownloaded == True:
-			Logger().log("changing status from " + str(result.episode.status) + " to " + str(PREDOWNLOADED), DEBUG)
+			logger.log("changing status from " + str(result.episode.status) + " to " + str(PREDOWNLOADED), logger.DEBUG)
 			result.episode.status = PREDOWNLOADED
 		result.episode.saveToDB()
 
@@ -113,7 +112,7 @@ def _doSearch(episode, provider):
 
 def findEpisode(episode):
 
-	Logger().log("Searching for " + episode.prettyName())
+	logger.log("Searching for " + episode.prettyName())
 
 	foundEps = []
 
@@ -127,7 +126,7 @@ def findEpisode(episode):
 		try:
 			foundEps = _doSearch(episode, curProvider)
 		except exceptions.AuthException as e:
-			Logger().log("Authentication error: "+str(e), ERROR)
+			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
 		
 		didSearch = True
@@ -136,6 +135,6 @@ def findEpisode(episode):
 			break
 	
 	if not didSearch:
-		Logger().log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", ERROR)
+		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
 	
 	return foundEps

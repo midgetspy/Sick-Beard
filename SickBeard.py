@@ -34,7 +34,7 @@ import sickbeard
 
 from sickbeard import db, webserve
 from sickbeard.tv import TVShow
-from sickbeard.logging import *
+from sickbeard import logger
 from sickbeard.common import *
 from sickbeard.version import SICKBEARD_VERSION
 
@@ -58,8 +58,8 @@ def loadShowsFromDB():
 			curShow.saveToDB()
 			sickbeard.showList.append(curShow)
 		except Exception as e:
-			Logger().log("There was an error creating the show in "+sqlShow["location"]+": "+str(e), ERROR)
-			Logger().log(traceback.format_exc(), DEBUG)
+			logger.log("There was an error creating the show in "+sqlShow["location"]+": "+str(e), logger.ERROR)
+			logger.log(traceback.format_exc(), logger.DEBUG)
 			
 		#TODO: make it update the existing shows if the showlist has something in it
 
@@ -74,11 +74,11 @@ def main():
 	# rename the main thread
 	threading.currentThread().name = "MAIN"
 	
-	Logger().log("Starting up Sick Beard "+SICKBEARD_VERSION+" from " + os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE))
+	print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE)
 	
 	# load the config and publish it to the sickbeard package
 	if not os.path.isfile(os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE)):
-		Logger().log("Unable to find config.ini, all settings will be default", ERROR)
+		logger.log("Unable to find config.ini, all settings will be default", logger.ERROR)
 
 	sickbeard.CFG = ConfigObj(os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE))
 
@@ -90,7 +90,7 @@ def main():
 	# setup cherrypy logging
 	if os.path.isdir(sickbeard.LOG_DIR) and sickbeard.WEB_LOG:
 		cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
-		Logger().log("Using " + cherry_log + " for cherrypy log")
+		logger.log("Using " + cherry_log + " for cherrypy log")
 	else:
 		cherry_log = None
 
@@ -133,13 +133,13 @@ def main():
 		cherrypy.server.start()
 		cherrypy.server.wait()
 	except IOError:
-		Logger().log("Unable to start web server, is something else running?", ERROR)
-		Logger().log("Launching browser and exiting", ERROR)
+		logger.log("Unable to start web server, is something else running?", logger.ERROR)
+		logger.log("Launching browser and exiting", logger.ERROR)
 		sickbeard.launchBrowser(browserURL)
 		sys.exit()
 
 	# build from the DB to start with
-	Logger().log("Loading initial show list")
+	logger.log("Loading initial show list")
 	loadShowsFromDB()
 
 	# set up the lists

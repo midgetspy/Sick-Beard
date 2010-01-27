@@ -24,7 +24,7 @@ import threading
 import traceback
 import time
 
-from sickbeard.logging import *
+from sickbeard import logger
 from sickbeard.tv import TVShow
 from lib.tvdb_api import tvdb_exceptions
 
@@ -48,7 +48,7 @@ class ShowAddQueue():
         try:
             self.addQueue.append(ShowAdder(dir))
         except exceptions.NoNFOException:
-            Logger().log("Unable to add show from " + dir + ", unable to create NFO", DEBUG)
+            logger.log("Unable to add show from " + dir + ", unable to create NFO", logger.DEBUG)
             raise
 
     def _doAddShow(self):
@@ -60,7 +60,7 @@ class ShowAddQueue():
 
             # if there's something in the queue then run it in a thread and take it out of the queue
             if len(self.addQueue) > 0:
-                Logger().log("Starting new add task for dir " + self.addQueue[0].showDir)
+                logger.log("Starting new add task for dir " + self.addQueue[0].showDir)
                 self.addThread = threading.Thread(None, self.addQueue[0].run, "ADDSHOW")
                 self.addThread.start()
                 self.currentlyAdding = self.addQueue[0]
@@ -93,25 +93,25 @@ class ShowAdder:
 
     def run(self):
 
-        Logger().log("Starting to add show "+self.showDir)
+        logger.log("Starting to add show "+self.showDir)
 
         try:
             self.curShow.loadFromTVDB()
             
         except exceptions.NoNFOException:
-            Logger().log("Unable to load show from NFO", ERROR)
+            logger.log("Unable to load show from NFO", logger.ERROR)
             # take the show out of the loading list
             del sickbeard.loadingShowList[self.showDir]
             return
             
         except exceptions.ShowNotFoundException:
-            Logger().log("The show in " + self.showDir + " couldn't be found on theTVDB, skipping", ERROR)
+            logger.log("The show in " + self.showDir + " couldn't be found on theTVDB, skipping", logger.ERROR)
             # take the show out of the loading list
             del sickbeard.loadingShowList[self.showDir]
             return
     
         except exceptions.MultipleShowObjectsException:
-            Logger().log("The show in " + self.showDir + " is already in your show list, skipping", ERROR)
+            logger.log("The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
             # take the show out of the loading list
             del sickbeard.loadingShowList[self.showDir]
             return
@@ -128,20 +128,20 @@ class ShowAdder:
         try:
             self.curShow.loadEpisodesFromDir()
         except Exception as e:
-            Logger().log("Error searching dir for episodes: " + str(e), ERROR)
-            Logger().log(traceback.format_exc(), DEBUG)
+            logger.log("Error searching dir for episodes: " + str(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
     
         try:
             self.curShow.loadEpisodesFromTVDB()
         except Exception as e:
-            Logger().log("Error with TVDB, not creating episode list: " + str(e), ERROR)
-            Logger().log(traceback.format_exc(), DEBUG)
+            logger.log("Error with TVDB, not creating episode list: " + str(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
     
         try:
             self.curShow.saveToDB()
         except Exception as e:
-            Logger().log("Error saving the episode to the database: " + str(e), ERROR)
-            Logger().log(traceback.format_exc(), DEBUG)
+            logger.log("Error saving the episode to the database: " + str(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
         
         self.curShow.flushEpisodes()
         

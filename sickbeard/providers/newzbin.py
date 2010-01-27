@@ -28,7 +28,7 @@ import sickbeard
 
 from sickbeard import exceptions, helpers, classes
 from sickbeard.common import *
-from sickbeard.logging import *
+from sickbeard import logger
 
 providerType = "nzb"
 providerName = "Newzbin"
@@ -59,7 +59,7 @@ class NewzbinDownloader(urllib.FancyURLopener):
 				raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
 
 				
-			Logger().log("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
+			logger.log("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
 			
 			time.sleep(int(result.group(1)))
 		
@@ -67,10 +67,10 @@ class NewzbinDownloader(urllib.FancyURLopener):
 		
 def downloadNZB(nzb):
 
-	Logger().log("Downloading an NZB from newzbin at " + nzb.url)
+	logger.log("Downloading an NZB from newzbin at " + nzb.url)
 
 	fileName = os.path.join(sickbeard.NZB_DIR, helpers.sanitizeFileName(nzb.fileName()))
-	Logger().log("Saving to " + fileName, DEBUG)
+	logger.log("Saving to " + fileName, logger.DEBUG)
 
 	urllib._urlopener = NewzbinDownloader()
 
@@ -78,10 +78,10 @@ def downloadNZB(nzb):
 	try:
 		urllib.urlretrieve("http://v3.newzbin.com/api/dnzb/", fileName, data=params)
 	except exceptions.NewzbinAPIThrottled:
-		Logger().log("Done waiting for Newzbin API throttle limit, starting downloads again")
+		logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
 		downloadNZB(nzb)
 	except (urllib.ContentTooShortError, IOError) as e:
-		Logger().log("Error downloading NZB: " + str(sys.exc_info()) + " - " + str(e), ERROR)
+		logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
 		return False
 	
 	#TODO: check for throttling, wait if needed
@@ -90,7 +90,7 @@ def downloadNZB(nzb):
 		
 def findEpisode(episode, forceQuality=None):
 
-	Logger().log("Searching newzbin for " + episode.prettyName())
+	logger.log("Searching newzbin for " + episode.prettyName())
 
 	if forceQuality != None:
 		epQuality = forceQuality
@@ -151,11 +151,11 @@ def findEpisode(episode, forceQuality=None):
 
 	myOpener = classes.AuthURLOpener(sickbeard.NEWZBIN_USERNAME, sickbeard.NEWZBIN_PASSWORD)
 	searchStr = "http://v3.newzbin.com/search/?%s" % urllib.urlencode(newzbinURL)
-	Logger().log("Search string: " + searchStr, DEBUG)
+	logger.log("Search string: " + searchStr, logger.DEBUG)
 	try:
 		f = myOpener.openit(searchStr)
 	except (urllib.ContentTooShortError, IOError) as e:
-		Logger().log("Error loading search results: " + str(sys.exc_info()) + " - " + str(e), ERROR)
+		logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
 		return []
 	rawResults = [[y.strip("\"") for y in x.split(",")] for x in f.readlines()]
 	
@@ -163,7 +163,7 @@ def findEpisode(episode, forceQuality=None):
 	
 	results = []
 	
-	Logger().log("rawResults: " + str(rawResults), DEBUG)
+	logger.log("rawResults: " + str(rawResults), logger.DEBUG)
 	
 	for curResult in rawResults:
 		
@@ -171,10 +171,10 @@ def findEpisode(episode, forceQuality=None):
 			continue
 
 		if len(curResult) == 1:
-			Logger().log("Newzbin returned a malformed result, skipping it", ERROR)
+			logger.log("Newzbin returned a malformed result, skipping it", logger.ERROR)
 			continue
 		
-		Logger().log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
+		logger.log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
 		
 		result = sickbeard.classes.NZBSearchResult(episode)
 		result.provider = NEWZBIN

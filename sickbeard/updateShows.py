@@ -30,7 +30,7 @@ import sickbeard
 from sickbeard import db
 
 from sickbeard import exceptions
-from sickbeard.logging import *
+from sickbeard import logger
 
 from lib.BeautifulSoup import BeautifulStoneSoup
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -63,7 +63,7 @@ class ShowUpdateQueue():
 
             # if there's something in the queue then run it in a thread and take it out of the queue
             if len(self.updateQueue) > 0:
-                Logger().log("Starting new update task for show " + self.updateQueue[0].show.name)
+                logger.log("Starting new update task for show " + self.updateQueue[0].show.name)
                 self.updateThread = threading.Thread(None, self.updateQueue[0].doUpdate, "UPDATESHOW-"+str(self.updateQueue[0].show.tvdbid))
                 self.updateThread.start()
                 self.currentlyUpdating = self.updateQueue[0].show
@@ -81,7 +81,7 @@ class SingleShowUpdater():
 
     def doUpdate(self):
         su = ShowUpdater()
-        Logger().log("Updating single show "+self.show.name)
+        logger.log("Updating single show "+self.show.name)
         su.updateShowFromTVDB(self.show, self.force)
 
 
@@ -103,7 +103,7 @@ class ShowUpdater():
         try:
             urlObj = urllib2.urlopen(url, timeout=180)
         except IOError as e:
-            Logger().log("Unable to retrieve updated shows, assuming everything needs updating: " + str(e), ERROR)
+            logger.log("Unable to retrieve updated shows, assuming everything needs updating: " + str(e), logger.ERROR)
             return (0, None, None)
         
         soup = BeautifulStoneSoup(urlObj)
@@ -123,7 +123,7 @@ class ShowUpdater():
 
     def _get_lastTVDB(self):
     
-        Logger().log("Retrieving the last TVDB update time from the DB", DEBUG)
+        logger.log("Retrieving the last TVDB update time from the DB", logger.DEBUG)
         
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT * FROM info")
@@ -135,7 +135,7 @@ class ShowUpdater():
         else:
             lastTVDB = int(sqlResults[0]["last_tvdb"])
     
-        Logger().log("Last TVDB update changed from " + str(self._lastTVDB) + " to " + str(lastTVDB), DEBUG)
+        logger.log("Last TVDB update changed from " + str(self._lastTVDB) + " to " + str(lastTVDB), logger.DEBUG)
         
         self._lastTVDB = lastTVDB
         
@@ -144,7 +144,7 @@ class ShowUpdater():
     
     def _set_lastTVDB(self, when):
     
-        Logger().log("Setting the last TVDB update in the DB to " + str(int(when)), DEBUG)
+        logger.log("Setting the last TVDB update in the DB to " + str(int(when)), logger.DEBUG)
         
         myDB = db.DBConnection()
 
@@ -168,13 +168,13 @@ class ShowUpdater():
         if sqlResults["season"] == None or sqlResults["episode"] == None or sqlResults["airdate"] == None:
             return None
     
-        Logger().log("Newest DB episode for "+show.name+" was "+str(sqlResults['season'])+"x"+str(sqlResults['episode']), DEBUG)
+        logger.log("Newest DB episode for "+show.name+" was "+str(sqlResults['season'])+"x"+str(sqlResults['episode']), logger.DEBUG)
         
         return (int(sqlResults["season"]), int(sqlResults["episode"]), int(sqlResults["airdate"]))
 
     def refreshShow(self, show):
 
-        Logger().log("Performing refresh on "+show.name)
+        logger.log("Performing refresh on "+show.name)
 
         show.refreshDir()
         
@@ -186,31 +186,31 @@ class ShowUpdater():
         if show == None:
             return None
         
-        Logger().log("Beginning update of "+show.name)
+        logger.log("Beginning update of "+show.name)
         
         # get episode list from DB
-        Logger().log("Loading all episodes from the database", DEBUG)
+        logger.log("Loading all episodes from the database", logger.DEBUG)
         DBEpList = show.loadEpisodesFromDB()
         
         # get episode list from TVDB
-        Logger().log("Loading all episodes from theTVDB", DEBUG)
+        logger.log("Loading all episodes from theTVDB", logger.DEBUG)
         TVDBEpList = show.loadEpisodesFromTVDB(cache=not force)
         
         if TVDBEpList == None:
-            Logger().log("No data returned from TVDB, unable to update this show", ERROR)
+            logger.log("No data returned from TVDB, unable to update this show", logger.ERROR)
             return None
         
         # for each ep we found on TVDB delete it from the DB list
         for curSeason in TVDBEpList:
             for curEpisode in TVDBEpList[curSeason]:
-                Logger().log("Removing "+str(curSeason)+"x"+str(curEpisode)+" from the DB list", DEBUG)
+                logger.log("Removing "+str(curSeason)+"x"+str(curEpisode)+" from the DB list", logger.DEBUG)
                 if curSeason in DBEpList and curEpisode in DBEpList[curSeason]:
                     del DBEpList[curSeason][curEpisode]
 
         # for the remaining episodes in the DB list just delete them from the DB
         for curSeason in DBEpList:
             for curEpisode in DBEpList[curSeason]:
-                Logger().log("Permanently deleting episode "+str(curSeason)+"x"+str(curEpisode)+" from the database", MESSAGE)
+                logger.log("Permanently deleting episode "+str(curSeason)+"x"+str(curEpisode)+" from the database", logger.MESSAGE)
                 curEp = show.getEpisode(curSeason, curEpisode)
                 try:
                     curEp.deleteEpisode()
@@ -219,29 +219,29 @@ class ShowUpdater():
         
         # now that we've updated the DB from TVDB see if there's anything we can add from TVRage
         with show.lock:
-            Logger().log("Attempting to supplement show info with info from TVRage", DEBUG)
+            logger.log("Attempting to supplement show info with info from TVRage", logger.DEBUG)
             show.loadLatestFromTVRage()
             if show.tvrid == 0:
                 show.setTVRID()
 
         self.refreshShow(show)
         
-        Logger().log("Flushing unneeded episodes from memory", DEBUG)
+        logger.log("Flushing unneeded episodes from memory", logger.DEBUG)
         show.flushEpisodes()
         
-        Logger().log("Update complete")
+        logger.log("Update complete")
         
         
 
     def updateShowsFromTVDB(self, force=False):
         
-        Logger().log("Beginning update of all shows")
+        logger.log("Beginning update of all shows")
         
         for show in sickbeard.showList:
             
             self.updateShowFromTVDB(show, force)
 
-        Logger().log("All shows' updates are complete.")
+        logger.log("All shows' updates are complete.")
 
     def run(self):
         self.updateShowsFromTVDB()

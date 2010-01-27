@@ -27,7 +27,7 @@ import urllib
 import re
 
 from sickbeard.exceptions import *
-from sickbeard.logging import *
+from sickbeard import logger
 from sickbeard.common import mediaExtensions
 
 from sickbeard import db
@@ -133,10 +133,10 @@ def makeDir (dir):
 
 def makeShowNFO(showID, showDir):
 
-	Logger().log("Making NFO for show "+str(showID)+" in dir "+showDir, DEBUG)
+	logger.log("Making NFO for show "+str(showID)+" in dir "+showDir, logger.DEBUG)
 
 	if not makeDir(showDir):
-		Logger().log("Unable to create show dir, can't make NFO", ERROR)
+		logger.log("Unable to create show dir, can't make NFO", logger.ERROR)
 		return False
 
 	t = tvdb_api.Tvdb()
@@ -149,20 +149,20 @@ def makeShowNFO(showID, showDir):
 	try:
 		myShow = t[int(showID)]
 	except tvdb_exceptions.tvdb_shownotfound:
-		Logger().log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", ERROR)
+		logger.log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 		raise
 		return False
 	except tvdb_exceptions.tvdb_error:
-		Logger().log("TVDB is down, can't use its data to add this show", ERROR)
+		logger.log("TVDB is down, can't use its data to add this show", logger.ERROR)
 		return False
 
 	# check for title and id
 	try:
 		if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
-			Logger().log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", ERROR)
+			logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 			return False
 	except tvdb_exceptions.tvdb_attributenotfound:
-		Logger().log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", ERROR)
+		logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 		return False
 		
 	title = nfo.createElement("title")
@@ -211,7 +211,7 @@ def makeShowNFO(showID, showDir):
 		studio.appendChild(nfo.createTextNode(myShow["network"]))
 	tvNode.appendChild(studio)
 	
-	Logger().log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), DEBUG)
+	logger.log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
 	nfo_fh = open(os.path.join(showDir, "tvshow.nfo"), 'w')
 	nfo_fh.write(nfo.toxml(encoding="UTF-8"))
 	nfo_fh.close()
@@ -227,9 +227,9 @@ def searchDBForShow(showName):
 	
 	if len(sqlResults) != 1:
 		if len(sqlResults) == 0:
-			Logger().log("Unable to match a record in the DB for "+showName, DEBUG)
+			logger.log("Unable to match a record in the DB for "+showName, logger.DEBUG)
 		else:
-			Logger().log("Multiple results for "+showName+" in the DB, unable to match show name", DEBUG)
+			logger.log("Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
 		return None
 	
 	return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])

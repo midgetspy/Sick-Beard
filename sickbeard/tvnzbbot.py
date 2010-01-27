@@ -78,7 +78,7 @@ class NZBBotRunner():
 
     def runBot(self):
 
-        Logger().log("Starting IRC bot up in its own thread")
+        logger.log("Starting IRC bot up in its own thread")
 
         try:
 
@@ -99,8 +99,8 @@ class NZBBotRunner():
                 time.sleep(0.2)
 
         except Exception as e:
-            Logger().log("IRC bot threw an exception: " + str(e), ERROR)
-            Logger().log(traceback.format_exc(), DEBUG)
+            logger.log("IRC bot threw an exception: " + str(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
 
 class NZBBot(SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
@@ -110,20 +110,20 @@ class NZBBot(SingleServerIRCBot):
 
     def on_nicknameinuse(self, c, e):
         newNick = c.get_nickname() + "_"
-        Logger().log("Name was taken, trying " + newNick)
+        logger.log("Name was taken, trying " + newNick)
         c.nick(newNick)
 
     def on_welcome(self, c, e):
         toJoin = self.channel.partition(" ")
         if toJoin[2] == "":
-            Logger().log("Joining channel " + self.channel)
+            logger.log("Joining channel " + self.channel)
             c.join(self.channel)
         else:
-            Logger().log("Joining channel " + toJoin[0] + " with key " + toJoin[2])
+            logger.log("Joining channel " + toJoin[0] + " with key " + toJoin[2])
             c.join(toJoin[0], toJoin[2])
 
     def on_privmsg(self, c, e):
-        Logger().log("Received private msg: " + e.arguments()[0])
+        logger.log("Received private msg: " + e.arguments()[0])
         #self.do_command(e, e.arguments()[0])
 
     def on_pubmsg(self, c, e):
@@ -132,7 +132,7 @@ class NZBBot(SingleServerIRCBot):
         match = re.match(re.compile("\[(\w+)\] (.*?) ::.*::.*::\s*(.*)"), msg)
         if match != None:
             source, name, url = match.group(1, 2, 3)
-            Logger().log("Got news that " + name + " is available at " + url + " on " + source)
+            logger.log("Got news that " + name + " is available at " + url + " on " + source)
             # check it out in a new thread so we don't mess up the bot by blocking
             threading.Thread(None, self.checkNZB, "CheckNZB", [source, name, url]).start()
 
@@ -152,7 +152,7 @@ class NZBBot(SingleServerIRCBot):
             self.dcc_connect(address, port)
 
     def start(self):
-        Logger().log("Creating IRC bot, connecting to " + self.server + " and joining " + self.channel)
+        logger.log("Creating IRC bot, connecting to " + self.server + " and joining " + self.channel)
         SingleServerIRCBot.start(self)
 
     def jump_server(self, newServer):
@@ -176,33 +176,33 @@ class NZBBot(SingleServerIRCBot):
     def checkNZB(self, source, name, url):
         
         if source not in ("TVBINZ"):
-            Logger().log("Source " + source + " isn't supported, ignoring it")
+            logger.log("Source " + source + " isn't supported, ignoring it")
             return
         
-        Logger().log("Parsing the name...", DEBUG)
+        logger.log("Parsing the name...", logger.DEBUG)
         result = tvnamer.processSingleName(name)
-        Logger().log("Result from parse: " + str(result), DEBUG)
+        logger.log("Result from parse: " + str(result), logger.DEBUG)
 
         if result != None:
-            Logger().log("Creating TVDB object", DEBUG)
+            logger.log("Creating TVDB object", logger.DEBUG)
             t = tvdb_api.Tvdb()
-            Logger().log("Object created: " + str(t), DEBUG)
+            logger.log("Object created: " + str(t), logger.DEBUG)
             
             try:
-                Logger().log("Getting show data from TVDB", DEBUG)
+                logger.log("Getting show data from TVDB", logger.DEBUG)
                 showObj = t[result["file_seriesname"]]
-                Logger().log("Show retrieval complete! " + str(showObj), DEBUG)
+                logger.log("Show retrieval complete! " + str(showObj), logger.DEBUG)
             except tvdb_exceptions.tvdb_shownotfound:
-                Logger().log(name + " wasn't found on TVDB, skipping")
+                logger.log(name + " wasn't found on TVDB, skipping")
                 return
                 
 
-            Logger().log(name + " got detected as show " + showObj["seriesname"] + " (" + str(showObj["id"]) + ")")
+            logger.log(name + " got detected as show " + showObj["seriesname"] + " (" + str(showObj["id"]) + ")")
             
             show = filter(lambda x: int(x.tvdbid) == int(showObj["id"]), sickbeard.showList)
             
             if show == []:
-                Logger().log("Show " + showObj["seriesname"] + " wasn't found in the show list")
+                logger.log("Show " + showObj["seriesname"] + " wasn't found in the show list")
                 return
             
             if ".720p." in name:
@@ -210,7 +210,7 @@ class NZBBot(SingleServerIRCBot):
             else:
                 quality = SD
             
-            Logger().log("Quality got detected as "+str(qualityStrings[quality]))
+            logger.log("Quality got detected as "+str(qualityStrings[quality]))
             
             season = int(result["seasno"])
             episode = int(result["epno"][0])

@@ -23,7 +23,7 @@ import urllib
 import sickbeard
 
 from sickbeard.common import *
-from sickbeard.logging import *
+from sickbeard import logger
 
 def sendNZB(nzb):
     
@@ -50,32 +50,32 @@ def sendNZB(nzb):
 
     url = 'http://' + sickbeard.SAB_HOST + "/sabnzbd/api?" + urllib.urlencode(params)
 
-    Logger().log("Sending NZB to SABnzbd")
+    logger.log("Sending NZB to SABnzbd")
 
-    Logger().log("URL: " + url, DEBUG)
+    logger.log("URL: " + url, logger.DEBUG)
 
     f = urllib.urlopen(url)
     
     if f == None:
-        Logger().log("No data returned from SABnzbd, NZB not sent", ERROR)
+        logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
         return False
     
     result = f.readlines()
 
     if len(result) == 0:
-        Logger().log("No data returned from SABnzbd, NZB not sent", ERROR)
+        logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
         return False
     
     sabText = result[0].strip()
     
-    Logger().log("Result text from SAB: " + sabText, DEBUG)
+    logger.log("Result text from SAB: " + sabText, logger.DEBUG)
     
     if sabText == "ok":
-        Logger().log("NZB sent to SAB successfully", DEBUG)
+        logger.log("NZB sent to SAB successfully", logger.DEBUG)
         return True
     elif sabText == "Missing authentication":
-        Logger().log("Incorrect username/password sent to SAB, NZB not sent", ERROR)
+        logger.log("Incorrect username/password sent to SAB, NZB not sent", logger.ERROR)
         return False
     else:
-        Logger().log("Unknown failure sending NZB to sab. Return text is: " + sabText, ERROR)
+        logger.log("Unknown failure sending NZB to sab. Return text is: " + sabText, logger.ERROR)
         return False

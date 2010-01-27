@@ -25,7 +25,7 @@ import time
 import traceback
 
 from sickbeard import db, exceptions, helpers, search, scheduler
-from sickbeard.logging import *
+from sickbeard import logger
 from sickbeard.common import *
 
 class BacklogSearchScheduler(scheduler.Scheduler):
@@ -52,7 +52,7 @@ class BacklogSearcher:
     def searchBacklog(self):
         
         if self.amActive == True:
-            Logger().log("Backlog is still running, not starting it again", DEBUG)
+            logger.log("Backlog is still running, not starting it again", logger.DEBUG)
             return
         
         self.amActive = True
@@ -63,13 +63,13 @@ class BacklogSearcher:
         
         if curDate - self._lastBacklog >= self.cycleTime:
             
-            Logger().log("Searching the database for a list of backlogged episodes to download")
+            logger.log("Searching the database for a list of backlogged episodes to download")
             
             myDB = db.DBConnection()
             sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status IN (" + str(BACKLOG) + ", " + str(DISCBACKLOG) + ")")
             
             if sqlResults == None or len(sqlResults) == 0:
-                Logger().log("No episodes were found in the backlog")
+                logger.log("No episodes were found in the backlog")
                 self._set_lastBacklog(curDate)
                 self.amActive = False
                 return
@@ -79,17 +79,17 @@ class BacklogSearcher:
                 try:
                     show = helpers.findCertainShow(sickbeard.showList, int(sqlEp["showid"]))
                 except exceptions.MultipleShowObjectsException:
-                    Logger().log("ERROR: expected to find a single show matching " + sqlEp["showid"], ERROR) 
+                    logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"], logger.ERROR) 
                     continue
 
                 curEp = show.getEpisode(sqlEp["season"], sqlEp["episode"])
                 
-                Logger().log("Found backlog episode: " + curEp.prettyName(), DEBUG)
+                logger.log("Found backlog episode: " + curEp.prettyName(), logger.DEBUG)
             
                 foundNZBs = search.findEpisode(curEp)
                 
                 if len(foundNZBs) == 0:
-                    Logger().log("Unable to find NZB for " + curEp.prettyName())
+                    logger.log("Unable to find NZB for " + curEp.prettyName())
                 
                 else:
                     # just use the first result for now
@@ -106,7 +106,7 @@ class BacklogSearcher:
         foundNZBs = search.findEpisode(curEp)
         
         if len(foundNZBs) == 0:
-            Logger().log("Unable to find NZB for " + curEp.prettyName())
+            logger.log("Unable to find NZB for " + curEp.prettyName())
         
         else:
             # just use the first result for now
@@ -115,7 +115,7 @@ class BacklogSearcher:
     
     def _get_lastBacklog(self):
     
-        Logger().log("Retrieving the last check time from the DB", DEBUG)
+        logger.log("Retrieving the last check time from the DB", logger.DEBUG)
         
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT * FROM info")
@@ -133,7 +133,7 @@ class BacklogSearcher:
     
     def _set_lastBacklog(self, when):
     
-        Logger().log("Setting the last backlog in the DB to " + str(when), DEBUG)
+        logger.log("Setting the last backlog in the DB to " + str(when), logger.DEBUG)
         
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT * FROM info")

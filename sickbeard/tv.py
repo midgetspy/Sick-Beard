@@ -43,7 +43,7 @@ from sickbeard import classes
 from sickbeard import tvrage
 
 from common import *
-from logging import *
+from sickbeard import logger
 
 class TVShow(object):
 
@@ -74,7 +74,7 @@ class TVShow(object):
 			
 			self._isDirGood = False
 			
-			Logger().log("The show dir doesn't exist! This show will be inactive until the dir is created.", ERROR)
+			logger.log("The show dir doesn't exist! This show will be inactive until the dir is created.", logger.ERROR)
 			
 			myDB = db.DBConnection()
 			sqlResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [self._location])
@@ -99,11 +99,11 @@ class TVShow(object):
 
 			self.loadFromDB()
 	
-		#Logger().log(str(self.tvdbid) + ": Loading extra show info from theTVDB")
+		#logger.log(str(self.tvdbid) + ": Loading extra show info from theTVDB")
 		#try:
 		#	self.loadFromTVDB()
 		#except tvdb_exceptions.tvdb_error as e:
-		#	Logger().log("There was a problem loading the details from TVDB (server down?)", ERROR)
+		#	logger.log("There was a problem loading the details from TVDB (server down?)", logger.ERROR)
 		#	if str(e) == "Could not connect to server: <urlopen error timed out>":
 		#		sickbeard.LAST_TVDB_TIMEOUT = datetime.datetime.now()
 
@@ -117,7 +117,7 @@ class TVShow(object):
 		except tvdb_exceptions.tvdb_shownotfound as e:
 			raise exceptions.ShowNotFoundException(str(e))
 		except tvdb_exceptions.tvdb_error as e:
-			Logger().log("Unable to contact theTVDB.com, it might be down: "+str(e), ERROR)
+			logger.log("Unable to contact theTVDB.com, it might be down: "+str(e), logger.ERROR)
 		
 		self.saveToDB()
 	
@@ -134,7 +134,7 @@ class TVShow(object):
 			raise exceptions.NoNFOException("Show folder doesn't exist, you shouldn't be using it")
 
 	def _setLocation(self, newLocation):
-		Logger().log("Setter sets location to " + newLocation)
+		logger.log("Setter sets location to " + newLocation)
 		if os.path.isdir(newLocation) and os.path.isfile(os.path.join(newLocation, "tvshow.nfo")):
 			self._location = newLocation
 			self._isDirGood = True
@@ -169,7 +169,7 @@ class TVShow(object):
 			if noCreate:
 				return None
 			
-			Logger().log(str(self.tvdbid) + ": An object for episode " + str(season) + "x" + str(episode) + " didn't exist in the cache, trying to create it", DEBUG)
+			logger.log(str(self.tvdbid) + ": An object for episode " + str(season) + "x" + str(episode) + " didn't exist in the cache, trying to create it", logger.DEBUG)
 
 			if file != None:
 				ep = TVEpisode(self, season, episode, file)
@@ -185,16 +185,16 @@ class TVShow(object):
 	def writeEpisodeNFOs (self):
 		
 		if not os.path.isdir(self._location):
-			Logger().log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+			logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
 			return
 		
-		Logger().log(str(self.tvdbid) + ": Writing NFOs for all episodes")
+		logger.log(str(self.tvdbid) + ": Writing NFOs for all episodes")
 		
 		myDB = db.DBConnection()
 		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
 		
 		for epResult in sqlResults:
-			Logger().log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), DEBUG)
+			logger.log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), logger.DEBUG)
 			curEp = self.getEpisode(epResult["season"], epResult["episode"])
 			curEp.createMetaFiles()
 
@@ -203,10 +203,10 @@ class TVShow(object):
 	def loadEpisodesFromDir (self):
 
 		if not os.path.isdir(self._location):
-			Logger().log(str(self.tvdbid) + ": Show dir doesn't exist, not loading episodes from disk")
+			logger.log(str(self.tvdbid) + ": Show dir doesn't exist, not loading episodes from disk")
 			return
 		
-		Logger().log(str(self.tvdbid) + ": Loading all episodes from the show directory " + self._location)
+		logger.log(str(self.tvdbid) + ": Loading all episodes from the show directory " + self._location)
 
 		# get file list
 		files = []
@@ -221,7 +221,7 @@ class TVShow(object):
 					files += [os.path.join(curFile, x) for x in os.listdir(unicode(os.path.join(self._location, curFile)))]
 
 		# check for season folders
-		#Logger().log("Resulting file list: "+str(files))
+		#logger.log("Resulting file list: "+str(files))
 	
 		# find all media files
 		mediaFiles = filter(sickbeard.helpers.isMediaFile, files)
@@ -231,13 +231,13 @@ class TVShow(object):
 			
 			curEpisode = None
 			
-			Logger().log(str(self.tvdbid) + ": Creating episode from " + mediaFile, DEBUG)
+			logger.log(str(self.tvdbid) + ": Creating episode from " + mediaFile, logger.DEBUG)
 			try:
 				curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
 			except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException) as e:
-				Logger().log("Episode "+mediaFile+" returned an exception: "+str(e), ERROR)
+				logger.log("Episode "+mediaFile+" returned an exception: "+str(e), logger.ERROR)
 			except exceptions.EpisodeDeletedException:
-				Logger().log("The episode deleted itself when I tried making an object for it", DEBUG)
+				logger.log("The episode deleted itself when I tried making an object for it", logger.DEBUG)
 					
 
 			# store the reference in the show
@@ -247,7 +247,7 @@ class TVShow(object):
 	
 	def loadEpisodesFromDB(self):
 	
-		Logger().log("Loading all episodes from the DB")
+		logger.log("Loading all episodes from the DB")
 	
 		myDB = db.DBConnection()
 		sql = "SELECT * FROM tv_episodes WHERE showid="+str(self.tvdbid)
@@ -263,7 +263,7 @@ class TVShow(object):
 			if not curSeason in scannedEps:
 				scannedEps[curSeason] = {}
 			
-			Logger().log("Loading episode "+str(curSeason)+"x"+str(curEpisode)+" from the DB", DEBUG)
+			logger.log("Loading episode "+str(curSeason)+"x"+str(curEpisode)+" from the DB", logger.DEBUG)
 			
 			try:
 				curEp = self.getEpisode(curSeason, curEpisode)
@@ -271,7 +271,7 @@ class TVShow(object):
 				curEp.loadFromTVDB()
 				scannedEps[curSeason][curEpisode] = True
 			except exceptions.EpisodeDeletedException:
-				Logger().log("Tried loading an episode from the DB that should have been deleted, skipping it", DEBUG)
+				logger.log("Tried loading an episode from the DB that should have been deleted, skipping it", logger.DEBUG)
 				continue
 
 		return scannedEps
@@ -282,12 +282,12 @@ class TVShow(object):
 		try:
 			t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
 		except tvdb_exceptions.tvdb_error:
-			Logger().log("TVDB timed out, unable to update episodes from TVDB", ERROR)
+			logger.log("TVDB timed out, unable to update episodes from TVDB", logger.ERROR)
 			return None
 		
 		showObj = t[self.tvdbid]
 		
-		Logger().log(str(self.tvdbid) + ": Loading all episodes from theTVDB...")
+		logger.log(str(self.tvdbid) + ": Loading all episodes from theTVDB...")
 		
 		scannedEps = {}
 		
@@ -301,17 +301,17 @@ class TVShow(object):
 					#ep = TVEpisode(self, season, episode)
 					ep = self.getEpisode(season, episode)
 				except exceptions.EpisodeNotFoundException:
-					Logger().log(str(self.tvdbid) + ": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
+					logger.log(str(self.tvdbid) + ": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
 					continue
 				else:
 					try:
 						ep.loadFromTVDB()
 					except exceptions.EpisodeDeletedException:
-						Logger().log("The episode was deleted, skipping the rest of the load")
+						logger.log("The episode was deleted, skipping the rest of the load")
 						continue
 				
 				with ep.lock:
-					Logger().log(str(self.tvdbid) + ": Loading info from theTVDB for episode " + str(season) + "x" + str(episode), DEBUG)
+					logger.log(str(self.tvdbid) + ": Loading info from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 					ep.loadFromTVDB(season, episode, cache)
 					ep.saveToDB()
 				
@@ -322,10 +322,10 @@ class TVShow(object):
 	def setTVRID(self, force=False):
 		
 		if self.tvrid != 0 and not force:
-			Logger().log("No need to get the TVRage ID, it's already populated", DEBUG)
+			logger.log("No need to get the TVRage ID, it's already populated", logger.DEBUG)
 			return
 
-		Logger().log("Attempting to retrieve the TVRage ID", DEBUG)
+		logger.log("Attempting to retrieve the TVRage ID", logger.DEBUG)
 
 		tvrID = None
 		
@@ -337,21 +337,21 @@ class TVShow(object):
 			if not tvr.checkSync():
 				raise exceptions.TVRageException("The latest episodes on TVDB and TVRage are out of sync, trying to sync with earlier episodes")
 		except exceptions.TVRageException as e:
-			Logger().log("TVRage error: "+str(e), DEBUG)
+			logger.log("TVRage error: "+str(e), logger.DEBUG)
 			try:
 				if not tvr.confirmShow():
 					raise exceptions.TVRageException("Show episodes don't match - maybe the search is giving the wrong show?")
 				tvrID = tvr.getTVRID()
 			except exceptions.TVRageException as e:
-				Logger().log("Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e), ERROR)
+				logger.log("Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e), logger.ERROR)
 				return
 
 		if tvrID != None:
-			Logger().log("Setting TVRage ID for show "+self.name+" to "+str(tvrID))
+			logger.log("Setting TVRage ID for show "+self.name+" to "+str(tvrID))
 			self.tvrid = tvrID
 			self.saveToDB()
 		else:
-			Logger().log("No TVRage ID was found, not setting it", DEBUG)
+			logger.log("No TVRage ID was found, not setting it", logger.DEBUG)
 		
 
 	def loadLatestFromTVRage(self):
@@ -362,7 +362,7 @@ class TVShow(object):
 			
 			# check for sync
 			if not tvr.checkSync():
-				Logger().log("TVDB and TVRage are out of sync, not using TVRage data")
+				logger.log("TVDB and TVRage are out of sync, not using TVRage data")
 				return
 			
 			# store it to db
@@ -371,12 +371,12 @@ class TVShow(object):
 			newEp = tvr.getEpisode()
 			
 			if newEp != None:
-				Logger().log("TVRage gave us an episode object - saving it for now", DEBUG)
+				logger.log("TVRage gave us an episode object - saving it for now", logger.DEBUG)
 				newEp.saveToDB()
 			
 			# make an episode out of it
 		except exceptions.TVRageException as e:
-			Logger().log("Unable to add TVRage info: " + str(e), ERROR)
+			logger.log("Unable to add TVRage info: " + str(e), logger.ERROR)
 			
 
 
@@ -384,16 +384,16 @@ class TVShow(object):
 	def makeEpFromFile(self, file):
 
 		if not os.path.isfile(file):
-			Logger().log(str(self.tvdbid) + ": That isn't even a real file dude... " + file)
+			logger.log(str(self.tvdbid) + ": That isn't even a real file dude... " + file)
 			return None
 
-		Logger().log(str(self.tvdbid) + ": Creating episode object from " + file, DEBUG)
+		logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
 		try:
 			myParser = FileParser(file)
 			epInfo = myParser.parse()
 		except tvnamer_exceptions.InvalidFilename:
-			Logger().log("Unable to parse the filename "+file+" into a valid episode", ERROR)
+			logger.log("Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
 			return None
 
 		# for now lets assume that any episode in the show dir belongs to that show
@@ -410,7 +410,7 @@ class TVShow(object):
 
 			episode = int(curEp)
 			
-			Logger().log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), DEBUG)
+			logger.log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), logger.DEBUG)
 
 			curEp = self.getEpisode(season, episode)
 			
@@ -418,7 +418,7 @@ class TVShow(object):
 				try:
 					curEp = self.getEpisode(season, episode, file)
 				except exceptions.EpisodeNotFoundException:
-					Logger().log(str(self.tvdbid) + ": Unable to figure out what this file is, skipping", ERROR)
+					logger.log(str(self.tvdbid) + ": Unable to figure out what this file is, skipping", logger.ERROR)
 					continue
 			else:
 				with curEp.lock:
@@ -433,7 +433,7 @@ class TVShow(object):
 			if sickbeard.helpers.isMediaFile(file):
 				with curEp.lock:
 					curEp.status = DOWNLOADED
-					Logger().log("STATUS: we have an associated file, so setting the status to DOWNLOADED/" + str(DOWNLOADED), DEBUG)
+					logger.log("STATUS: we have an associated file, so setting the status to DOWNLOADED/" + str(DOWNLOADED), logger.DEBUG)
 						
 			with curEp.lock:
 				curEp.saveToDB()
@@ -448,7 +448,7 @@ class TVShow(object):
 	
 	def loadFromDB(self, skipNFO=False):
 
-		Logger().log(str(self.tvdbid) + ": Loading show info from database")
+		logger.log(str(self.tvdbid) + ": Loading show info from database")
 
 		myDB = db.DBConnection()
 		
@@ -457,7 +457,7 @@ class TVShow(object):
 		if len(sqlResults) > 1:
 			raise exceptions.MultipleDBShowsException()
 		elif len(sqlResults) == 0:
-			Logger().log(str(self.tvdbid) + ": Unable to find the show in the database")
+			logger.log(str(self.tvdbid) + ": Unable to find the show in the database")
 			return
 		else:
 			if self.name == "":
@@ -491,7 +491,7 @@ class TVShow(object):
 	
 	def loadFromTVDB(self, cache=True):
 
-		Logger().log(str(self.tvdbid) + ": Loading show info from theTVDB") 
+		logger.log(str(self.tvdbid) + ": Loading show info from theTVDB") 
 
 		t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
 		myEp = t[self.tvdbid]
@@ -517,10 +517,10 @@ class TVShow(object):
 	def loadNFO (self):
 
 		if not os.path.isdir(self._location):
-			Logger().log(str(self.tvdbid) + ": Show dir doesn't exist, can't load NFO")
+			logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't load NFO")
 			raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
 		
-		Logger().log(str(self.tvdbid) + ": Loading show info from NFO")
+		logger.log(str(self.tvdbid) + ": Loading show info from NFO")
 
 		xmlFile = os.path.join(self._location, "tvshow.nfo")
 		xmlFileObj = open(xmlFile, "r")
@@ -529,13 +529,13 @@ class TVShow(object):
 			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 			showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 		except SGMLParseError as e:
-			Logger().log("There was an error parsing your existing tvshow.nfo file: " + str(e), ERROR)
-			Logger().log("Attempting to rename it to tvshow.nfo.old", DEBUG)
+			logger.log("There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
+			logger.log("Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 			xmlFileObj.close()
 			try:
 				os.rename(xmlFile, xmlFile + ".old")
 			except Exception as e:
-				Logger().log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), ERROR)
+				logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
 			raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
 		if showSoup.title == None or showSoup.tvdbid == None:
@@ -557,7 +557,7 @@ class TVShow(object):
 		
 	def nextEpisode(self):
 	
-		Logger().log(str(self.tvdbid) + ": Finding the episode which airs next", DEBUG) 
+		logger.log(str(self.tvdbid) + ": Finding the episode which airs next", logger.DEBUG) 
 
 		myDB = db.DBConnection()
 		innerQuery = "SELECT airdate FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND status = " + str(UNAIRED) + " ORDER BY airdate ASC LIMIT 1"
@@ -565,10 +565,10 @@ class TVShow(object):
 		sqlResults = myDB.select(query)
 	
 		if sqlResults == None or len(sqlResults) == 0:
-			Logger().log(str(self.tvdbid) + ": No episode found... need to implement tvrage and also show status", DEBUG)
+			logger.log(str(self.tvdbid) + ": No episode found... need to implement tvrage and also show status", logger.DEBUG)
 			return []
 		else:
-			Logger().log(str(self.tvdbid) + ": Found episode " + str(sqlResults[0]["season"]) + "x" + str(sqlResults[0]["episode"]), DEBUG)
+			logger.log(str(self.tvdbid) + ": Found episode " + str(sqlResults[0]["season"]) + "x" + str(sqlResults[0]["episode"]), logger.DEBUG)
 			foundEps = []
 			for sqlEp in sqlResults:
 				curEp = self.getEpisode(int(sqlEp["season"]), int(sqlEp["episode"]))
@@ -600,7 +600,7 @@ class TVShow(object):
 			return False
 		
 		# run through all locations from DB, check that they exist
-		Logger().log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
+		logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
 		
 		myDB = db.DBConnection()
 		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
@@ -613,7 +613,7 @@ class TVShow(object):
 			try:
 				curEp = self.getEpisode(season, episode)
 			except exceptions.EpisodeDeletedException:
-				Logger().log("The episode was deleted while we were refreshing it, moving on to the next one", DEBUG)
+				logger.log("The episode was deleted while we were refreshing it, moving on to the next one", logger.DEBUG)
 				continue
 			
 			# if the path doesn't exist
@@ -625,7 +625,7 @@ class TVShow(object):
 			(self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) == os.path.normpath(self.location)) or \
 			os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
 			
-				Logger().log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", DEBUG)
+				logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
 				with curEp.lock:
 					curEp.location = ''
 					if curEp.status == DOWNLOADED:
@@ -640,13 +640,13 @@ class TVShow(object):
 	def fixEpisodeNames(self):
 
 		if not os.path.isdir(self._location):
-			Logger().log(str(self.tvdbid) + ": Show dir doesn't exist, can't rename episodes")
+			logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't rename episodes")
 			return
 				
 		# load episodes from my folder
 		self.loadEpisodesFromDir()
 		
-		Logger().log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
+		logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
 		
 		myDB = db.DBConnection()
 		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
@@ -662,7 +662,7 @@ class TVShow(object):
 			else:
 				fileLocations[goodLoc] = [(goodSeason, goodEpisode)]
 		
-		Logger().log("File results: " + str(fileLocations), DEBUG)
+		logger.log("File results: " + str(fileLocations), logger.DEBUG)
 
 		for curLocation in fileLocations:
 			
@@ -683,7 +683,7 @@ class TVShow(object):
 			curEpDir = os.path.dirname(curLocation)
 
 			if goodName == actualName[0]:
-				Logger().log(str(self.tvdbid) + ": File " + rootEp.location + " is already named correctly, skipping", DEBUG)
+				logger.log(str(self.tvdbid) + ": File " + rootEp.location + " is already named correctly, skipping", logger.DEBUG)
 				continue
 			
 			with rootEp.lock:
@@ -698,7 +698,7 @@ class TVShow(object):
 			for file in fileList:
 				result = processTV.renameFile(file, rootEp.prettyName())
 				if result == False:
-					Logger().log(str(self.tvdbid) + ": Unable to rename file "+file, ERROR)
+					logger.log(str(self.tvdbid) + ": Unable to rename file "+file, logger.ERROR)
 			
 			for curEp in [rootEp]+rootEp.relatedEps:
 				curEp.checkForMetaFiles()
@@ -711,7 +711,7 @@ class TVShow(object):
 			
 	def saveToDB(self):
 
-		Logger().log(str(self.tvdbid) + ": Saving show info to database", DEBUG)
+		logger.log(str(self.tvdbid) + ": Saving show info to database", logger.DEBUG)
 
 		myDB = db.DBConnection()
 		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
@@ -768,7 +768,7 @@ class TVEpisode:
 		self.hasnfo = False
 		self.hastbn = False
 		self.status = UNKNOWN
-		Logger().log("status starts unknown", DEBUG)
+		logger.log("status starts unknown", logger.DEBUG)
 
 		self.tvdbid = 0
 
@@ -808,7 +808,7 @@ class TVEpisode:
 			try:
 				self.loadFromNFO(self.location)
 			except exceptions.NoNFOException:
-				Logger().log(str(self.show.tvdbid) + ": There was an error loading the NFO for episode " + str(season) + "x" + str(episode), ERROR)
+				logger.log(str(self.show.tvdbid) + ": There was an error loading the NFO for episode " + str(season) + "x" + str(episode), logger.ERROR)
 				pass
 		
 		# if we tried loading it from NFO and didn't find the NFO, use TVDB
@@ -827,7 +827,7 @@ class TVEpisode:
 	
 	def loadFromDB(self, season, episode):
 
-		Logger().log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), DEBUG)
+		logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
 		myDB = db.DBConnection()
 		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND season = " + str(season) + " AND episode = " + str(episode))
@@ -835,10 +835,10 @@ class TVEpisode:
 		if len(sqlResults) > 1:
 			raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
 		elif len(sqlResults) == 0:
-			Logger().log(str(self.show.tvdbid) + ": Episode " + str(self.season) + "x" + str(self.episode) + " not found in the database", DEBUG) 
+			logger.log(str(self.show.tvdbid) + ": Episode " + str(self.season) + "x" + str(self.episode) + " not found in the database", logger.DEBUG) 
 			return False
 		else:
-			#NAMEIT Logger().log("AAAAA from" + str(self.season)+"x"+str(self.episode) + " -" + self.name + " to " + str(sqlResults[0]["name"]))
+			#NAMEIT logger.log("AAAAA from" + str(self.season)+"x"+str(self.episode) + " -" + self.name + " to " + str(sqlResults[0]["name"]))
 			if sqlResults[0]["name"] != None:
 				self.name = sqlResults[0]["name"] 
 			self.season = season
@@ -847,7 +847,7 @@ class TVEpisode:
 			if self.description == None:
 				self.description = ""
 			self.airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
-			Logger().log("1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), DEBUG)
+			logger.log("1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
 			self.status = int(sqlResults[0]["status"])
 			
 			# don't overwrite my location
@@ -866,7 +866,7 @@ class TVEpisode:
 		if episode == None:
 			episode = self.episode
 
-		Logger().log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), DEBUG)
+		logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
 		try:
 			t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT)
@@ -874,13 +874,13 @@ class TVEpisode:
 		except (tvdb_exceptions.tvdb_error, IOError):
 			# if the episode is already valid just log it, if not throw it up
 			if self.name != "" and self.airdate != datetime.date.fromordinal(1):
-				Logger().log("TVDB timed out but we have enough info from other sources, allowing the error", ERROR)
+				logger.log("TVDB timed out but we have enough info from other sources, allowing the error", logger.ERROR)
 				return
 			else:
-				Logger().log("TVDB timed out, unable to create the episode", ERROR)
+				logger.log("TVDB timed out, unable to create the episode", logger.ERROR)
 				return False
 		except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-			Logger().log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?")
+			logger.log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?")
 			# if I'm no longer on TVDB but I once was then delete myself from the DB
 			if self.tvdbid != -1:
 				self.deleteEpisode()
@@ -891,17 +891,17 @@ class TVEpisode:
 			myEp["firstaired"] = str(datetime.date.fromordinal(1))
 			
 		if myEp["episodename"] == None or myEp["episodename"] == "":
-			Logger().log("The episode has no name on TVDB")
+			logger.log("The episode has no name on TVDB")
 			# if I'm incomplete on TVDB but I once was complete then just delete myself from the DB for now
 			if self.tvdbid != -1:
 				self.deleteEpisode()
 			return False
 
 		if myEp["firstaired"] == None or myEp["firstaired"] == "":
-			Logger().log("The episode has no air date on TVDB")
+			logger.log("The episode has no air date on TVDB")
 			return False
 		
-		#NAMEIT Logger().log("BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
+		#NAMEIT logger.log("BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
 		self.name = myEp["episodename"]
 		self.season = season
 		self.episode = episode
@@ -913,38 +913,38 @@ class TVEpisode:
 		self.tvdbid = myEp["id"]
 
 		if not os.path.isdir(self.show._location):
-			Logger().log("The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
+			logger.log("The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
 			return
 
-		Logger().log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + statusStrings[self.status] + " and existence of " + self.location, DEBUG)
+		logger.log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + statusStrings[self.status] + " and existence of " + self.location, logger.DEBUG)
 		
 		if not os.path.isfile(self.location):
 
 			# if we don't have the file and it hasn't aired yet set the status to UNAIRED
 			if self.airdate >= datetime.date.today() and self.status != SNATCHED and self.status != PREDOWNLOADED:
-				Logger().log("2 Status changes from " + str(self.status) + " to " + str(UNAIRED), DEBUG)
+				logger.log("2 Status changes from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
 				self.status = UNAIRED
 				
 			else:
 
 				# if we haven't downloaded it then mark it as missed
 				if self.status == UNAIRED:
-					Logger().log("3 Status changes from " + str(self.status) + " to " + str(MISSED), DEBUG)
+					logger.log("3 Status changes from " + str(self.status) + " to " + str(MISSED), logger.DEBUG)
 					self.status = MISSED
 
 				# if it's an old episode we don't have then assume we SKIPPED it
 				elif self.status == UNKNOWN:
-					Logger().log("4 Status changes from " + str(self.status) + " to " + str(SKIPPED), DEBUG)
+					logger.log("4 Status changes from " + str(self.status) + " to " + str(SKIPPED), logger.DEBUG)
 					self.status = SKIPPED
 
 		# if we have a media file then it's downloaded
 		elif sickbeard.helpers.isMediaFile(self.location):
-			Logger().log("5 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), DEBUG)
+			logger.log("5 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
 			self.status = DOWNLOADED
 
 		# shouldn't get here probably
 		else:
-			Logger().log("6 Status changes from " + str(self.status) + " to " + str(UNKNOWN), DEBUG)
+			logger.log("6 Status changes from " + str(self.status) + " to " + str(UNKNOWN), logger.DEBUG)
 			self.status = UNKNOWN
 
 		
@@ -954,10 +954,10 @@ class TVEpisode:
 	def loadFromNFO(self, location):
 
 		if not os.path.isdir(self.show._location):
-			Logger().log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try loading the episode NFO")
+			logger.log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try loading the episode NFO")
 			return
 
-		Logger().log(str(self.show.tvdbid) + ": Loading episode details from the NFO file associated with " + location, DEBUG)
+		logger.log(str(self.show.tvdbid) + ": Loading episode details from the NFO file associated with " + location, logger.DEBUG)
 
 		self.location = location
 	
@@ -965,11 +965,11 @@ class TVEpisode:
 		
 			if self.status == UNKNOWN:
 				if sickbeard.helpers.isMediaFile(self.location):
-					Logger().log("7 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), DEBUG)
+					logger.log("7 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
 					self.status = DOWNLOADED
 		
 			nfoFile = sickbeard.helpers.replaceExtension(self.location, "nfo")
-			Logger().log(str(self.show.tvdbid) + ": Using NFO name " + nfoFile, DEBUG)
+			logger.log(str(self.show.tvdbid) + ": Using NFO name " + nfoFile, logger.DEBUG)
 			#nfoFile = os.path.join(self.show.location, nfoFilename)
 			
 			if os.path.isfile(nfoFile):
@@ -978,12 +978,12 @@ class TVEpisode:
 					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 				except (SGMLParseError, ValueError) as e:
-					Logger().log("Error loading the NFO, backing up the NFO and skipping for now: " + str(e), ERROR) #TODO: figure out what's wrong and fix it
+					logger.log("Error loading the NFO, backing up the NFO and skipping for now: " + str(e), logger.ERROR) #TODO: figure out what's wrong and fix it
 					nfoFileObj.close()
 					try:
 						os.rename(nfoFile, nfoFile + ".old")
 					except Exception as e:
-						Logger().log("Failed to rename your episode's NFO file - you need to delete it or fix it: " + str(e), ERROR)
+						logger.log("Failed to rename your episode's NFO file - you need to delete it or fix it: " + str(e), logger.ERROR)
 					raise exceptions.NoNFOException("Error in NFO format")
 
 				for epDetails in showSoup.findAll('episodedetails'):
@@ -991,14 +991,14 @@ class TVEpisode:
 						continue
 				
 					if epDetails.season.string == None or int(epDetails.season.string) != self.season or epDetails.episode.string == None or int(epDetails.episode.string) != self.episode:
-						Logger().log(str(self.show.tvdbid) + ": NFO has an <episodedetails> block for a different episode - wanted " + str(self.season) + "x" + str(self.episode) + " but got " + str(epDetails.season.string) + "x" + str(epDetails.episode.string), DEBUG)
+						logger.log(str(self.show.tvdbid) + ": NFO has an <episodedetails> block for a different episode - wanted " + str(self.season) + "x" + str(self.episode) + " but got " + str(epDetails.season.string) + "x" + str(epDetails.episode.string), logger.DEBUG)
 						continue
 				
 					if epDetails.title.string == None or epDetails.aired.string == None:
 						raise exceptions.NoNFOException("Error in NFO format (missing episode title or airdate)")
 				
 					if epDetails.title.string != None:
-						#NAMEIT Logger().log("CCCCCCC from " + str(self.season)+"x"+str(self.episode) + " -" + str(self.name) + " to " + str(showSoup.title.string))
+						#NAMEIT logger.log("CCCCCCC from " + str(self.season)+"x"+str(self.episode) + " -" + str(self.name) + " to " + str(showSoup.title.string))
 						self.name = epDetails.title.string
 					self.episode = int(epDetails.episode.string)
 					self.season = int(epDetails.season.string)
@@ -1033,7 +1033,7 @@ class TVEpisode:
 	def createMetaFiles(self, force=False):
 		
 		if not os.path.isdir(self.show._location):
-			Logger().log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try to create metadata")
+			logger.log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try to create metadata")
 			return
 
 		if sickbeard.CREATE_METADATA != True:
@@ -1051,7 +1051,7 @@ class TVEpisode:
 		except tvdb_exceptions.tvdb_shownotfound as e:
 			raise exceptions.ShowNotFoundException(str(e))
 		except tvdb_exceptions.tvdb_error as e:
-			Logger().log("Unable to connect to TVDB while creating meta files - skipping - "+str(e), ERROR)
+			logger.log("Unable to connect to TVDB while creating meta files - skipping - "+str(e), logger.ERROR)
 			return
 
 		if len(epsToWrite) > 1:
@@ -1080,7 +1080,7 @@ class TVEpisode:
 			try:
 				myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
 			except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-				Logger().log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
+				logger.log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
 				return False
 			
 			if myEp["firstaired"] == None and self.season == 0:
@@ -1093,10 +1093,10 @@ class TVEpisode:
 				thumbFilename = myEp["filename"]
 				
 			if not needsNFO:
-				Logger().log("Skipping metadata generation for myself ("+str(self.season)+"x"+str(self.episode)+")", DEBUG)
+				logger.log("Skipping metadata generation for myself ("+str(self.season)+"x"+str(self.episode)+")", logger.DEBUG)
 				continue
 			else:
-				Logger().log("Creating metadata for myself ("+str(self.season)+"x"+str(self.episode)+")", DEBUG)
+				logger.log("Creating metadata for myself ("+str(self.season)+"x"+str(self.episode)+")", logger.DEBUG)
 			
 			episode = nfo.createElement("episodedetails")
 			rootNode.appendChild(episode)
@@ -1194,7 +1194,7 @@ class TVEpisode:
 			else:
 				nfoFilename = helpers.sanitizeFileName(self.prettyName() + '.nfo')
 	
-			Logger().log('Writing nfo to ' + os.path.join(self.show.location, nfoFilename))
+			logger.log('Writing nfo to ' + os.path.join(self.show.location, nfoFilename))
 			nfo_fh = open(os.path.join(self.show.location, nfoFilename), 'w')
 			a = nfo.toxml(encoding="utf-8")
 			nfo_fh.write(a)
@@ -1210,11 +1210,11 @@ class TVEpisode:
 					tbnFilename = helpers.replaceExtension(self.location, 'tbn')
 				else:
 					tbnFilename = helpers.sanitizeFileName(self.prettyName() + '.tbn')
-				Logger().log('Writing thumb to ' + os.path.join(self.show.location, tbnFilename))
+				logger.log('Writing thumb to ' + os.path.join(self.show.location, tbnFilename))
 				try:
 					urllib.urlretrieve(thumbFilename, os.path.join(self.show.location, tbnFilename))
 				except IOError:
-					Logger().log("Unable to download thumbnail from "+thumbFilename, ERROR)
+					logger.log("Unable to download thumbnail from "+thumbFilename, logger.ERROR)
 					return
 				#TODO: check that it worked
 				self.hastbn = True
@@ -1225,26 +1225,26 @@ class TVEpisode:
 
 	def deleteEpisode(self):
 
-		Logger().log("Deleting "+self.show.name+" "+str(self.season)+"x"+str(self.episode))
+		logger.log("Deleting "+self.show.name+" "+str(self.season)+"x"+str(self.episode))
 		
 		# remove myself from the show dictionary
 		if self.show.getEpisode(self.season, self.episode, noCreate=True) == self:
-			Logger().log("Removing myself from my show's list", DEBUG)
+			logger.log("Removing myself from my show's list", logger.DEBUG)
 			del self.show.episodes[self.season][self.episode]
 		
 		# make sure it's not in any ep lists
 		if self in sickbeard.airingList:
-			Logger().log("Removing myself from the airing list", DEBUG)
+			logger.log("Removing myself from the airing list", logger.DEBUG)
 			sickbeard.airingList.remove(self)
 		if self in sickbeard.comingList:
-			Logger().log("Removing myself from the coming list", DEBUG)
+			logger.log("Removing myself from the coming list", logger.DEBUG)
 			sickbeard.comingList.remove(self)
 		if self in sickbeard.missingList:
-			Logger().log("Removing myself from the missing list", DEBUG)
+			logger.log("Removing myself from the missing list", logger.DEBUG)
 			sickbeard.missingList.remove(self)
 		
 		# delete myself from the DB
-		Logger().log("Deleting myself from the database", DEBUG)
+		logger.log("Deleting myself from the database", logger.DEBUG)
 		myDB = db.DBConnection()
 		sql = "DELETE FROM tv_episodes WHERE showid="+str(self.show.tvdbid)+" AND season="+str(self.season)+" AND episode="+str(self.episode)
 		myDB.action(sql)
@@ -1253,9 +1253,9 @@ class TVEpisode:
 		
 	def saveToDB(self):
 	
-		Logger().log(str(self.show.tvdbid) + ": Saving episode details to database", DEBUG)
+		logger.log(str(self.show.tvdbid) + ": Saving episode details to database", logger.DEBUG)
 
-		Logger().log("STATUS IS " + str(self.status), DEBUG)
+		logger.log("STATUS IS " + str(self.status), logger.DEBUG)
 	
 		myDB = db.DBConnection()
 		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND episode = " + str(self.episode) + " AND season = " + str(self.season))

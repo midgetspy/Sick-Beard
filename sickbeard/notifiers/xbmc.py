@@ -27,7 +27,7 @@ import time, struct
 
 import sickbeard
 
-from sickbeard.logging import *
+from sickbeard import logger
 
 XBMC_TIMEOUT = 10
 
@@ -43,34 +43,34 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
     if password == None:
         password = sickbeard.XBMC_PASSWORD    
 
-    Logger().log("Sending notification for " + input, DEBUG)
+    logger.log("Sending notification for " + input, logger.DEBUG)
     
     fileString = title + "," + input
     param = urllib.urlencode({'a': fileString.encode('utf-8')})
     encodedParam = param.split("=")[1]
     
-    Logger().log("Encoded message is " + encodedParam, DEBUG)
+    logger.log("Encoded message is " + encodedParam, logger.DEBUG)
     
     for curHost in [x.strip() for x in host.split(",")]:
     
         try:
             url = "http://" + curHost + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")"
-            Logger().log("Sending notification to XBMC via URL: "+url +" username: "+ username + " password: " + password, DEBUG)
+            logger.log("Sending notification to XBMC via URL: "+url +" username: "+ username + " password: " + password, logger.DEBUG)
             req = urllib2.Request(url)
             if password != '':
                 base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
                 authheader =  "Basic %s" % base64string
                 req.add_header("Authorization", authheader)
-                Logger().log("Adding Password to XBMC url", DEBUG)
+                logger.log("Adding Password to XBMC url", logger.DEBUG)
             handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
         except IOError as e:
-            Logger().log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
+            logger.log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
     
 def updateLibrary(path=None):
 
     global XBMC_TIMEOUT
 
-    Logger().log("Updating library in XBMC", DEBUG)
+    logger.log("Updating library in XBMC", logger.DEBUG)
     
     host = sickbeard.XBMC_HOST
     username = sickbeard.XBMC_USERNAME
@@ -90,10 +90,10 @@ def updateLibrary(path=None):
                 base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
                 authheader =  "Basic %s" % base64string
                 req.add_header("Authorization", authheader)
-                Logger().log("Adding Password to XBMC url", DEBUG)
+                logger.log("Adding Password to XBMC url", logger.DEBUG)
             handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
         except IOError as e:
-            Logger().log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
+            logger.log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
             return False
 
     return True
