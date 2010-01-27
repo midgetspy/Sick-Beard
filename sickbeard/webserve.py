@@ -211,21 +211,25 @@ class ConfigGeneral:
         
         raise cherrypy.HTTPRedirect("index")
 
-class ConfigEpisodeSearch:
+class ConfigEpisodeDownloads:
     
     @cherrypy.expose
     def index(self):
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_episodesearch.tmpl"))
+        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_episodedownloads.tmpl"))
         return _munge(t)
 
     @cherrypy.expose
-    def saveEpisodeSearch(self, nzb_dir=None, sab_username=None, sab_password=None,
+    def saveEpisodeDownloads(self, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, use_nzb=None,
                        use_torrent=None, torrent_dir=None, nzb_method=None, usenet_retention=None,
-                       search_frequency=None, backlog_search_frequency=None):
+                       search_frequency=None, backlog_search_frequency=None, tv_download_dir=None,
+                       keep_processed_dir=None, process_automatically=None):
 
         results = []
+
+        if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
+            results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
 
         if not config.change_NZB_DIR(nzb_dir):
             results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
@@ -237,6 +241,16 @@ class ConfigEpisodeSearch:
 
         config.change_BACKLOG_SEARCH_FREQUENCY(backlog_search_frequency)
 
+        if process_automatically == "on":
+            process_automatically = 1
+        else:
+            process_automatically = 0
+            
+        if keep_processed_dir == "on":
+            keep_processed_dir = 1
+        else:
+            keep_processed_dir = 0
+            
         if use_nzb == "on":
             use_nzb = 1
         else:
@@ -249,6 +263,9 @@ class ConfigEpisodeSearch:
 
         if usenet_retention == None:
             usenet_retention = 200
+
+        sickbeard.PROCESS_AUTOMATICALLY = process_automatically
+        sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
 
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
@@ -429,7 +446,7 @@ class Config:
     
     general = ConfigGeneral()
     
-    episodesearch = ConfigEpisodeSearch()
+    episodedownloads = ConfigEpisodeDownloads()
     
     providers = ConfigProviders()
     

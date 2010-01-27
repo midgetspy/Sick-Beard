@@ -18,6 +18,7 @@
 
 import sickbeard
 from sickbeard import helpers
+from sickbeard import logger
 
 class CheckVersion():
     
@@ -29,5 +30,7 @@ class CheckVersion():
         
         if latestBuild == None:
             return
+        
+        logger.log("Setting NEWEST_VERSION to "+str(latestBuild))
         
         sickbeard.NEWEST_VERSION = latestBuild

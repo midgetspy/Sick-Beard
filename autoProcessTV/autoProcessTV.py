@@ -62,9 +62,6 @@ def processEpisode(dirName, nzbName=None):
     if nzbName != None:
         params['nzbName'] = nzbName
         
-    if config.get("SickBeard", "sourceDir") != "" and config.get("SickBeard", "destDir") != "":
-            params['dir'] = params['dir'].replace(os.path.normpath(config.get("SickBeard", "sourceDir")), os.path.normpath(config.get("SickBeard", "destDir")))
-    
     myOpener = AuthURLOpener(username, password)
     
     url = "http://" + host + ":" + port + "/home/postprocess/processEpisode?" + urllib.urlencode(params)

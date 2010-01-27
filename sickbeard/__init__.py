@@ -88,6 +88,10 @@ DEFAULT_BACKLOG_SEARCH_FREQUENCY = 7
 USE_TORRENT = False
 TORRENT_DIR = None
 
+PROCESS_AUTOMATICALLY = False
+KEEP_PROCESSED_DIR = False
+TV_DOWNLOAD_DIR = None
+
 NEWZBIN = False
 NEWZBIN_USERNAME = None
 NEWZBIN_PASSWORD = None
@@ -222,7 +226,8 @@ def initialize():
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
-                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY
+                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
+                KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR
         
         if __INITIALIZED__:
             return False
@@ -273,6 +278,10 @@ def initialize():
 
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
+        
+        TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
+        PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
+        KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 0)
         
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
         NEWZBIN_USERNAME = check_setting_str(CFG, 'Newzbin', 'newzbin_username', '')
@@ -499,7 +508,8 @@ def save_config():
         XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_PASSWORD, XBMC_USERNAME, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
         USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
         QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
-        NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY
+        NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
+        PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
@@ -517,6 +527,9 @@ def save_config():
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
     CFG['General']['create_metadata'] = int(CREATE_METADATA)
+    CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
+    CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
+    CFG['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     CFG['Blackhole']['nzb_dir'] = NZB_DIR
     CFG['Blackhole']['torrent_dir'] = TORRENT_DIR
     CFG['Newzbin']['newzbin'] = int(NEWZBIN)

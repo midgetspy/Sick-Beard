@@ -105,16 +105,32 @@ def _checkForExistingFile(newFile, oldFile):
             
 
 
-def doIt(downloadDir, nzbName=None):
+def doIt(downloaderDir, nzbName=None):
     
     returnStr = ""
+
+    downloadDir = ''
+
+    # if they passed us a real dir then assume it's the one we want
+    if os.path.isdir(downloaderDir):
+        downloadDir = os.path.abspath(downloaderDir)
     
+    # if they've got a download dir configured then use it
+    elif sickbeard.TV_DOWNLOAD_DIR != '' and os.path.isdir(sickbeard.TV_DOWNLOAD_DIR):
+        downloadDir = os.path.join(sickbeard.TV_DOWNLOAD_DIR, os.path.abspath(downloaderDir).split(os.path.sep)[-1])
+
+        logStr = "Trying to use folder "+downloadDir
+        logger.log(logStr, logger.DEBUG)
+        returnStr += logStr + "\n"
+
+    # if we didn't find a real dir then quit
     if not os.path.isdir(downloadDir):
-        return "Uh, this is not a directory: " + str(downloadDir)
-    
-    # pretty up the path, just in case
-    downloadDir = os.path.abspath(downloadDir)
-    logStr = "Pretty'd up folder is " + downloadDir
+        logStr = "Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config."
+        logger.log(logStr, logger.DEBUG)
+        returnStr += logStr + "\n"
+        return returnStr
+
+    logStr = "Final folder name is " + downloadDir
     logger.log(logStr, logger.DEBUG)
     returnStr += logStr + "\n"
     
@@ -352,17 +368,18 @@ def doIt(downloadDir, nzbName=None):
     if sickbeard.XBMC_UPDATE_LIBRARY == True and rootEp.status != PREDOWNLOADED:
         notifiers.xbmc.updateLibrary(rootEp.show.location)
 
-    logStr = "Deleting folder " + downloadDir
-    logger.log(logStr, logger.DEBUG)
-    returnStr += logStr + "\n"
-    
-    # delete the old folder full of useless files
-    try:
-        shutil.rmtree(downloadDir)
-    except (OSError, IOError) as e:
-        logStr = "Warning: unable to remove the folder " + downloadDir + ": " + str(e)
-        logger.log(logStr, logger.ERROR)
+    # delete the old folder unless the config wants us not to
+    if not sickbeard.KEEP_PROCESSED_DIR:
+        logStr = "Deleting folder " + downloadDir
+        logger.log(logStr, logger.DEBUG)
         returnStr += logStr + "\n"
+        
+        try:
+            shutil.rmtree(downloadDir)
+        except (OSError, IOError) as e:
+            logStr = "Warning: unable to remove the folder " + downloadDir + ": " + str(e)
+            logger.log(logStr, logger.ERROR)
+            returnStr += logStr + "\n"
 
     return returnStr
 

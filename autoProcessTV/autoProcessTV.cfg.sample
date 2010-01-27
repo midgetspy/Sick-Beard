@@ -3,20 +3,3 @@ host=localhost
 port=8081
 username=
 password=
-
-
-#### PATH TRANSLATION ####
-
-# IF YOUR SABNZBD AND SICK BEARD ARE ON THE SAME PC LEAVE BOTH OF THE VARIABLES BELOW BLANK!
-
-# the following attributes are to allow you to translate the folder names in case your SAB is on a different computer than your SickBeard
-# NOTE: If they are on the same PC or the paths are the same on both PCs then leave both of these blank
-
-## Example:
-
-# sourceDir=/dir/on/SAB/host/ # the part of the folder that's different on the SAB computer than the SickBeard computer
-# destDir=Y:/equivalent/dir/on/SickBeard/host/ # the equivalent path on the SickBeard computer
-
-
-sourceDir=
-destDir=
