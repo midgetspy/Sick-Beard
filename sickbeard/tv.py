@@ -338,14 +338,13 @@ class TVShow(object):
 				raise exceptions.TVRageException("The latest episodes on TVDB and TVRage are out of sync, trying to sync with earlier episodes")
 		except exceptions.TVRageException as e:
 			logger.log("TVRage error: "+str(e), logger.DEBUG)
-			try:
-				if not tvr.confirmShow():
-					raise exceptions.TVRageException("Show episodes don't match - maybe the search is giving the wrong show?")
-				tvrID = tvr.getTVRID()
-			except exceptions.TVRageException as e:
-				logger.log("Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e), logger.ERROR)
-				return
-
+		try:
+			if not tvr.confirmShow():
+				raise exceptions.TVRageException("Show episodes don't match - maybe the search is giving the wrong show?")
+			tvrID = tvr.getTVRID()
+		except exceptions.TVRageException as e:
+			logger.log("Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e), logger.DEBUG)
+			return
 		if tvrID != None:
 			logger.log("Setting TVRage ID for show "+self.name+" to "+str(tvrID))
 			self.tvrid = tvrID
