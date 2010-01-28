@@ -134,6 +134,7 @@ class ShowAdder:
     
         try:
             self.curShow.loadEpisodesFromTVDB()
+            self.curShow.setTVRID()
         except Exception as e:
             logger.log("Error with TVDB, not creating episode list: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
