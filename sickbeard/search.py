@@ -34,6 +34,7 @@ from providers import tvbinz
 from providers import nzbs
 from providers import nzbmatrix
 from providers import eztv
+from providers import tvnzb
 
 def _downloadResult(result):
 
@@ -47,6 +48,8 @@ def _downloadResult(result):
 		return eztv.downloadTorrent(result)
 	elif result.provider == NZBMATRIX:
 		return nzbmatrix.downloadNZB(result)
+	elif result.provider == TVNZB:
+		return tvnzb.downloadNZB(result)
 	else:
 		logger.log("Invalid provider - this is a coding error, this should never happen.", logger.ERROR)
 		return False
@@ -118,7 +121,7 @@ def findEpisode(episode):
 
 	didSearch = False
 
-	for curProvider in (newzbin, tvbinz, nzbs, nzbmatrix, eztv):
+	for curProvider in (newzbin, tvbinz, nzbs, nzbmatrix, eztv, tvnzb):
 		
 		if not curProvider.isActive():
 			continue

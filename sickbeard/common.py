@@ -57,6 +57,7 @@ TVBINZ = 2
 NZBS = 3
 EZTV = 4
 NZBMATRIX = 5
+TVNZB = 6
 
 providerNames = {}
 providerNames[NEWZBIN] = "Newzbin"
