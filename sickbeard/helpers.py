@@ -26,15 +26,38 @@ import codecs
 import urllib
 import re
 
+import sickbeard
+
 from sickbeard.exceptions import *
 from sickbeard import logger
-from sickbeard.common import mediaExtensions
+from sickbeard.common import mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-from xml.dom.minidom import Document
+import xml.etree.cElementTree as etree
+
+def indentXML(elem, level=0):
+	'''
+	Does our pretty printing, makes Matt very happy
+	'''
+	i = "\n" + level*"  "
+	if len(elem):
+		if not elem.text or not elem.text.strip():
+			elem.text = i + "  "
+		if not elem.tail or not elem.tail.strip():
+			elem.tail = i
+		for elem in elem:
+			indentXML(elem, level+1)
+		if not elem.tail or not elem.tail.strip():
+			elem.tail = i
+	else:
+		# Strip out the newlines from text
+		if elem.text:
+			elem.text = elem.text.replace('\n', ' ')
+		if level and (not elem.tail or not elem.tail.strip()):
+			elem.tail = i
 
 def replaceExtension (file, newExt):
 	sepFile = file.rpartition(".")
@@ -139,81 +162,101 @@ def makeShowNFO(showID, showDir):
 		logger.log("Unable to create show dir, can't make NFO", logger.ERROR)
 		return False
 
-	t = tvdb_api.Tvdb()
+	t = tvdb_api.Tvdb(apikey=sickbeard.TVDB_API_KEY, actors=True)
 	
-	nfo = Document()
+	tvNode = etree.Element( "tvshow" )
+	for ns in XML_NSMAP.keys():
+		tvNode.set(ns, XML_NSMAP[ns])
 
-	tvNode = nfo.createElement("tvshow")
-	nfo.appendChild(tvNode)
-	
 	try:
 		myShow = t[int(showID)]
 	except tvdb_exceptions.tvdb_shownotfound:
-		logger.log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 		logger.log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+
 		raise
 		return False
 	except tvdb_exceptions.tvdb_error:
-		logger.log("TVDB is down, can't use its data to add this show", logger.ERROR)
+ 		logger.log("TVDB is down, can't use its data to add this show", logger.ERROR)
+
 		return False
 
 	# check for title and id
 	try:
 		if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
-			logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 			logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+
 			return False
 	except tvdb_exceptions.tvdb_attributenotfound:
-		logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 		logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+
 		return False
-		
-	title = nfo.createElement("title")
-	if myShow["seriesname"] != None:
-		title.appendChild(nfo.createTextNode(myShow["seriesname"]))
-	tvNode.appendChild(title)
-		
-	rating = nfo.createElement("rating")
-	if myShow["rating"] != None:
-		rating.appendChild(nfo.createTextNode(myShow["rating"]))
-	tvNode.appendChild(rating)
-
-	plot = nfo.createElement("plot")
-	if myShow["overview"] != None:
-		plot.appendChild(nfo.createTextNode(myShow["overview"]))
-	tvNode.appendChild(plot)
-		
-	mpaa = nfo.createElement("mpaa")
-	if myShow["contentrating"] != None:
-		mpaa.appendChild(nfo.createTextNode(myShow["contentrating"]))
-	tvNode.appendChild(mpaa)
-
-
-	id = nfo.createElement("id")
-	if myShow["imdb_id"] != None:
-		id.appendChild(nfo.createTextNode(myShow["imdb_id"]))
-	tvNode.appendChild(id)
-		
-	tvdbid = nfo.createElement("tvdbid")
-	if myShow["id"] != None:
-		tvdbid.appendChild(nfo.createTextNode(myShow["id"]))
-	tvNode.appendChild(tvdbid)
-		
-	genre = nfo.createElement("genre")
-	if myShow["genre"] != None:
-		genre.appendChild(nfo.createTextNode(" / ".join([x for x in myShow["genre"].split('|') if x != ''])))
-	tvNode.appendChild(genre)
-		
-	premiered = nfo.createElement("premiered")
-	if myShow["firstaired"] != None:
-		premiered.appendChild(nfo.createTextNode(myShow["firstaired"]))
-	tvNode.appendChild(premiered)
-		
-	studio = nfo.createElement("studio")
-	if myShow["network"] != None:
-		studio.appendChild(nfo.createTextNode(myShow["network"]))
-	tvNode.appendChild(studio)
 	
-	logger.log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
+	title = etree.SubElement( tvNode, "title" )
+	if myShow["seriesname"] != None:
+		title.text = myShow["seriesname"]
+		
+	rating = etree.SubElement( tvNode, "rating" )
+	if myShow["rating"] != None:
+		rating.text = myShow["rating"]
+
+	plot = etree.SubElement( tvNode, "plot" )
+	if myShow["overview"] != None:
+		plot.text = myShow["overview"]
+
+	episodeguideurl = etree.SubElement( tvNode, "episodeguideurl" )
+	episodeguide = etree.SubElement( tvNode, "episodeguide" )
+	if myShow["id"] != None:
+		showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
+		episodeguideurl.text = showurl
+		episodeguide.text = showurl
+		
+	mpaa = etree.SubElement( tvNode, "mpaa" )
+	if myShow["contentrating"] != None:
+		mpaa.text = myShow["contentrating"]
+
+	tvdbid = etree.SubElement( tvNode, "id" )
+	if myShow["id"] != None:
+		tvdbid.text = myShow["id"]
+		
+	genre = etree.SubElement( tvNode, "genre" )
+	if myShow["genre"] != None:
+		genre.text = " / ".join([x for x in myShow["genre"].split('|') if x != ''])
+		
+	premiered = etree.SubElement( tvNode, "premiered" )
+	if myShow["firstaired"] != None:
+		premiered.text = myShow["firstaired"]
+		
+	studio = etree.SubElement( tvNode, "studio" )
+	if myShow["network"] != None:
+		studio.text = myShow["network"]
+	
+	for actor in myShow['_actors']:
+
+		cur_actor = etree.SubElement( tvNode, "actor" )
+
+		cur_actor_name = etree.SubElement( cur_actor, "name" )
+		cur_actor_name.text = actor['name']
+		cur_actor_role = etree.SubElement( cur_actor, "role" )
+		cur_actor_role_text = actor['role']
+
+		if cur_actor_role_text != None:
+			cur_actor_role.text = cur_actor_role_text
+
+		cur_actor_thumb = etree.SubElement( cur_actor, "thumb" )
+		cur_actor_thumb_text = actor['image']
+
+		if cur_actor_thumb_text != None:
+			cur_actor_thumb.text = cur_actor_thumb_text
+
+ 	logger.log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
+
+
+	# Make it purdy
+	indentXML( tvNode )
+
 	nfo_fh = open(os.path.join(showDir, "tvshow.nfo"), 'w')
-	nfo_fh.write(nfo.toxml(encoding="UTF-8"))
+	nfo = etree.ElementTree( tvNode )
+	nfo.write( nfo_fh, encoding="utf-8" )
 	nfo_fh.close()
 
 	return True

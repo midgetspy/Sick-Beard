@@ -76,6 +76,9 @@ CREATE_METADATA = None
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_DEFAULT = None
 
+TVDB_API_KEY = '9DAF49C96CBF8DAC'
+TVDB_BASE_URL = None
+
 USE_NZB = False
 NZB_METHOD = None 
 NZB_DIR = None
@@ -229,7 +232,7 @@ def initialize():
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
-                KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB
+                KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL
         
         if __INITIALIZED__:
             return False
@@ -266,6 +269,8 @@ def initialize():
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
+
+        TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd'):

@@ -548,7 +548,7 @@ class HomeAddShows:
         # if we have a dir and a name it means we're mid-search, so get our TVDB list and forward them to the selection screen
         if showDir != None and showName != None:
             logger.log("Getting list of possible shows and asking user to choose one", logger.DEBUG)
-            t = tvdb_api.Tvdb(custom_ui=TVDBWebUI)
+            t = tvdb_api.Tvdb(custom_ui=TVDBWebUI, apikey=sickbeard.TVDB_API_KEY)
             t.config['_showDir'] = [urllib.quote_plus(x) for x in showDir]
             try:
                 s = t[showName] # this will throw a cherrypy exception
@@ -638,7 +638,7 @@ class HomeAddShows:
 
             logger.log("Presenting a list of shows to the user", logger.DEBUG)
             
-            t = tvdb_api.Tvdb()
+            t = tvdb_api.Tvdb(apikey=sickbeard.TVDB_API_KEY)
             myTemplate.resultList = [t[int(x)] for x in showIDs]
             myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
             

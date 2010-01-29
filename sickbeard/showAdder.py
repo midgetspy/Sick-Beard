@@ -48,8 +48,8 @@ class ShowAddQueue():
     def addShowToQueue(self, dir):
         try:
             self.addQueue.append(ShowAdder(dir))
-        except exceptions.NoNFOException:
-            logger.log("Unable to add show from " + dir + ", unable to create NFO", logger.DEBUG)
+        except exceptions.NoNFOException as e:
+            logger.log("Unable to add show from " + dir + ", unable to create NFO: "+str(e), logger.DEBUG)
             raise
 
     def _doAddShow(self):
