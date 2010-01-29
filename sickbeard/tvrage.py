@@ -147,7 +147,7 @@ class TVRage:
             # make sure the last TVDB episode matches our last episode
             try:
                 t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
-			apikey=sickbeard.TVDB_API_KEY)
+                                  apikey=sickbeard.TVDB_API_KEY)
                 ep = t[self.show.tvdbid][self.lastEpInfo['season']][self.lastEpInfo['episode']]
 
                 if ep["firstaired"] == "" or ep["firstaired"] == None:
