@@ -23,6 +23,7 @@ import datetime
 import sqlite3
 import threading
 import urllib
+import urllib2
 import re
 import glob
 
@@ -353,6 +354,52 @@ class TVShow(object):
 			self.saveToDB()
 		else:
 			logger.log("No TVRage ID was found, not setting it", logger.DEBUG)
+		
+		
+	def getImages(self, fanart=None, poster=None):
+		
+		try:
+			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
+			myShow = t[self.tvdbid]
+		except (tvdb_exceptions.tvdb_error, IOError):
+			logger.log("Unable to look up show on TVDB, not downloading images", logger.ERROR)
+			return None
+
+		fanartURL = myShow['fanart']
+		posterURL = myShow['poster']
+
+		# get the image data
+		fanartData = None
+		if fanart != None:
+			fanartData = helpers.getShowImage(fanartURL, fanart)
+		
+		# if we had a custom image number that failed OR we had no custom number then get the default one
+		if fanartData == None:
+			fanartData = helpers.getShowImage(fanartURL)
+
+		if fanartData == None:
+			logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
+		else:
+			outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
+			outFile.write(fanartData)
+			outFile.close()
+		
+		# get the image data
+		posterData = None
+		if poster != None:
+			posterData = helpers.getShowImage(posterURL, poster)
+		
+		# if we had a custom image number that failed OR we had no custom number then get the default one
+		if posterData == None:
+			posterData = helpers.getShowImage(posterURL)
+
+		if posterData == None:
+			logger.log("Unable to retrieve poster, skipping", logger.ERROR)
+		else:
+			outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
+			outFile.write(posterData)
+			outFile.close() 
+
 		
 
 	def loadLatestFromTVRage(self):

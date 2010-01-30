@@ -23,7 +23,7 @@ import os.path
 import os
 import sqlite3
 import codecs
-import urllib
+import urllib, urllib2
 import re
 
 import sickbeard
@@ -94,7 +94,7 @@ def makeSceneShowSearchStrings(show):
 
 	results = []
 
-	results.append(showName)
+	results.append(sanitizeSceneName(showName))
 
 	if showName.find("(") != -1:
 		showNameNoBrackets = showName.rpartition(".(")[0]
@@ -290,3 +290,38 @@ def findLatestRev():
 			return int(groups[0])
 
 	return None
+
+
+def getShowImage(url, imgNum=None):
+	
+	imgFile = None
+	imgData = None
+	
+	# if they provided a fanart number try to use it instead
+	if imgNum != None:
+		tempURL = url.split('-')[0] + "-" + str(imgNum) + ".jpg"
+	else:
+		tempURL = url
+
+	logger.log("Getting show image at "+tempURL, logger.DEBUG)
+	try:
+		imgFile = urllib2.urlopen(tempURL)
+	except urllib2.URLError as e:
+		logger.log("There was an error trying to retrieve the image, aborting", logger.ERROR)
+		return None
+	except urllib2.HTTPError:
+		logger.log("Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e), logger.ERROR)
+		return None
+
+	if imgFile == None:
+		logger.log("Something bad happened and we have no URL data somehow", logger.ERROR)
+		return None
+
+	# get the image
+	try:
+		imgData = imgFile.read()		
+	except (urllib2.URLError, urllib2.HTTPError) as e:
+		logger.log("There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
+		return None
+
+	return imgData

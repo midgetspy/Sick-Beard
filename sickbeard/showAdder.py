@@ -97,6 +97,7 @@ class ShowAdder:
         logger.log("Starting to add show "+self.showDir)
 
         try:
+            self.curShow.getImages()
             self.curShow.loadFromTVDB()
             
         except exceptions.NoNFOException:

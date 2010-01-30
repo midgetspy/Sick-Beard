@@ -24,6 +24,7 @@ class CheckVersion():
     
     def run(self):
         if not sickbeard.VERSION_NOTIFY:
+            logger.log("Version checking is disabled, not checking for the newest version")
             return
         
         latestBuild = helpers.findLatestRev()
