@@ -44,7 +44,7 @@ def sendNZB(nzb):
     if nzb.provider == NEWZBIN:
         params['mode'] = 'addid'
         params['name'] = nzb.extraInfo[0]
-    elif nzb.provider in (TVBINZ, NZBS, NZBMATRIX):
+    elif nzb.provider in (TVBINZ, NZBS, NZBMATRIX, TVNZB):
         params['mode'] = 'addurl'
         params['name'] = nzb.url
 
