@@ -578,7 +578,19 @@ class TVShow(object):
 		try:
 			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 			showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
-		except SGMLParseError as e:
+
+			if showSoup.title == None or (showSoup.tvdbid == None and showSoup.id == None):
+				raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id): "+str(showSoup.title)+" "+str(showSoup.tvdbid)+" "+str(showSoup.id))
+			
+			self.name = showSoup.title.string
+			if showSoup.tvdbid != None and showSoup.tvdbid.string != None:
+				self.tvdbid = int(showSoup.tvdbid.string)
+			elif showSoup.id != None and showSoup.id.string != None:
+				self.tvdbid = int(showSoup.id.string)
+			else:
+				raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
+
+		except (exceptions.NoNFOException, SGMLParseError) as e:
 			logger.log("There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
 			logger.log("Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 			xmlFileObj.close()
@@ -588,21 +600,13 @@ class TVShow(object):
 				logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
 			raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
-		if showSoup.title == None or (showSoup.tvdbid == None and showSoup.id == None):
-			raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id): "+str(showSoup.title)+" "+str(showSoup.tvdbid)+" "+str(showSoup.id))
-		
-		self.name = showSoup.title.string
-		if showSoup.tvdbid != None:
-			self.tvdbid = int(showSoup.tvdbid.string)
-		elif showSoup.id != None:
-			self.tvdbid = int(showSoup.id.string)
-		if showSoup.studio != None:
+		if showSoup.studio != None and showSoup.studio.string != None:
 			self.network = showSoup.studio.string
-		if self.network == None:
+		if self.network == None and showSoup.network.string != None:
 			self.network = ""
-		if showSoup.genre != None:
+		if showSoup.genre != None and showSoup.genre.string != None:
 			self.genre = showSoup.genre.string
-		if self.genre == None:
+		else:
 			self.genre = ""
 
 		# TODO: need to validate the input, I'm assuming it's good until then
