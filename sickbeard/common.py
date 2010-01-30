@@ -65,6 +65,7 @@ providerNames[TVBINZ] = "TVBinz"
 providerNames[NZBS] = "NZBs.org"
 providerNames[EZTV] = "EZTV"
 providerNames[NZBMATRIX] = "NZBMatrix"
+providerNames[TVNZB] = "TVNZB"
 
 ### Qualities
 HD = 1
