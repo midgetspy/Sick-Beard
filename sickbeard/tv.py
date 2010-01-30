@@ -380,9 +380,10 @@ class TVShow(object):
 		if fanartData == None:
 			logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
 		else:
-			outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
-			outFile.write(fanartData)
-			outFile.close()
+			if not os.path.isfile(os.path.join(self.location, "fanart.jpg")):
+				outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
+				outFile.write(fanartData)
+				outFile.close()
 		
 		# get the image data
 		posterData = None
@@ -396,9 +397,10 @@ class TVShow(object):
 		if posterData == None:
 			logger.log("Unable to retrieve poster, skipping", logger.ERROR)
 		else:
-			outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
-			outFile.write(posterData)
-			outFile.close() 
+			if not os.path.isfile(os.path.join(self.location, "folder.jpg")):
+				outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
+				outFile.write(posterData)
+				outFile.close() 
 
 		
 
