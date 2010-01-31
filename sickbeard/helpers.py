@@ -297,6 +297,9 @@ def getShowImage(url, imgNum=None):
 	imgFile = None
 	imgData = None
 	
+	if url == None:
+		return None
+	
 	# if they provided a fanart number try to use it instead
 	if imgNum != None:
 		tempURL = url.split('-')[0] + "-" + str(imgNum) + ".jpg"
