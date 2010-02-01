@@ -105,7 +105,7 @@ def makeSceneShowSearchStrings(show):
 
 def makeSceneSearchString (episode):
 
-	epString = ".S{0:0>2}E{1:0>2}".format(episode.season, episode.episode)
+	epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
 
 	showNames = makeSceneShowSearchStrings(episode.show)
 
@@ -309,10 +309,10 @@ def getShowImage(url, imgNum=None):
 	logger.log("Getting show image at "+tempURL, logger.DEBUG)
 	try:
 		imgFile = urllib2.urlopen(tempURL)
-	except urllib2.URLError as e:
+	except urllib2.URLError, e:
 		logger.log("There was an error trying to retrieve the image, aborting", logger.ERROR)
 		return None
-	except urllib2.HTTPError:
+	except urllib2.HTTPError, e:
 		logger.log("Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e), logger.ERROR)
 		return None
 
@@ -323,7 +323,7 @@ def getShowImage(url, imgNum=None):
 	# get the image
 	try:
 		imgData = imgFile.read()		
-	except (urllib2.URLError, urllib2.HTTPError) as e:
+	except (urllib2.URLError, urllib2.HTTPError), e:
 		logger.log("There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
 		return None
 

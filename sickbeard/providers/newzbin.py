@@ -80,7 +80,7 @@ def downloadNZB(nzb):
 	except exceptions.NewzbinAPIThrottled:
 		logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
 		downloadNZB(nzb)
-	except (urllib.ContentTooShortError, IOError) as e:
+	except (urllib.ContentTooShortError, IOError), e:
 		logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
 		return False
 	
@@ -154,7 +154,7 @@ def findEpisode(episode, forceQuality=None):
 	logger.log("Search string: " + searchStr, logger.DEBUG)
 	try:
 		f = myOpener.openit(searchStr)
-	except (urllib.ContentTooShortError, IOError) as e:
+	except (urllib.ContentTooShortError, IOError), e:
 		logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
 		return []
 	rawResults = [[y.strip("\"") for y in x.split(",")] for x in f.readlines()]

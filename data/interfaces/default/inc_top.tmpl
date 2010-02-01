@@ -15,7 +15,7 @@
     <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script> 
 </head>
 <body>
-#if $sickbeard.VERSION_NOTIFY and $sickbeard.version.SICKBEARD_VERSION != "trunk" and $sickbeard.NEWEST_VERSION != None and int($sickbeard.version.SICKBEARD_VERSION[1:]) < $sickbeard.NEWEST_VERSION:
+#if $sickbeard.VERSION_NOTIFY and $sickbeard.version.SICKBEARD_VERSION not in ("trunk", "python25") and $sickbeard.NEWEST_VERSION != None and int($sickbeard.version.SICKBEARD_VERSION[1:]) < $sickbeard.NEWEST_VERSION:
 <div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">There is a newer version available (r$sickbeard.NEWEST_VERSION)</a></div>
 <br />
 #end if

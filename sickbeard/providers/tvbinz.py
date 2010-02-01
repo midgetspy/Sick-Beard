@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import urllib
 import urllib2
 import os.path
@@ -49,7 +51,7 @@ def getTVBinzURL (url):
 	
 	try:
 		f = urllib2.urlopen(req)
-	except (urllib.ContentTooShortError, IOError) as e:
+	except (urllib.ContentTooShortError, IOError), e:
 		logger.log("Error loading TVBinz URL: " + str(sys.exc_info()) + " - " + str(e))
 		return None
 
@@ -136,7 +138,7 @@ class TVBinzDBConnection(db.DBConnection):
 			sql = "CREATE TABLE tvbinz (name TEXT, season NUMERIC, episode NUMERIC, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
 			self.connection.execute(sql)
 			self.connection.commit()
-		except sqlite3.OperationalError as e:
+		except sqlite3.OperationalError, e:
 			if str(e) != "table tvbinz already exists":
 				raise
 

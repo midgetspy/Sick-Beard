@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from __future__ import with_statement
 
 import sickbeard
 
@@ -128,7 +128,7 @@ def findEpisode(episode):
 		
 		try:
 			foundEps = _doSearch(episode, curProvider)
-		except exceptions.AuthException as e:
+		except exceptions.AuthException, e:
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
 		

@@ -19,7 +19,7 @@ def _getEZTVURL (url):
     try:
         f = urllib.urlopen(url)
         result = "".join(f.readlines())
-    except (urllib.ContentTooShortError, IOError) as e:
+    except (urllib.ContentTooShortError, IOError), e:
         logger.log("Error loading EZTV URL: " + sys.exc_info() + " - " + str(e), logger.ERROR)
         return None
 
@@ -88,7 +88,7 @@ def findEpisode(episode, forceQuality=None):
     try:
         responseSoup = BeautifulStoneSoup(data, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
         items = responseSoup.findAll('item')
-    except Exception as e:
+    except Exception, e:
         logger.log("Error trying to load EZTV RSS feed: "+str(e), logger.ERROR)
         return []
 

@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "trunk"
+SICKBEARD_VERSION = "python25"

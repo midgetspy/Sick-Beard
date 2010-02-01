@@ -29,9 +29,6 @@ import sickbeard
 
 from sickbeard import logger
 
-XBMC_TIMEOUT = 10
-
-# prevent it from dying if the XBMC call hangs
 def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None):
 
     global XBMC_TIMEOUT
@@ -62,8 +59,8 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
                 authheader =  "Basic %s" % base64string
                 req.add_header("Authorization", authheader)
                 logger.log("Adding Password to XBMC url", logger.DEBUG)
-            handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
-        except IOError as e:
+            handle = urllib2.urlopen(req)
+        except IOError, e:
             logger.log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
     
 def updateLibrary(path=None):
@@ -91,8 +88,8 @@ def updateLibrary(path=None):
                 authheader =  "Basic %s" % base64string
                 req.add_header("Authorization", authheader)
                 logger.log("Adding Password to XBMC url", logger.DEBUG)
-            handle = urllib2.urlopen(req, timeout=XBMC_TIMEOUT)
-        except IOError as e:
+            handle = urllib2.urlopen(req)
+        except IOError, e:
             logger.log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
             return False
 

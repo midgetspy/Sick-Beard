@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from __future__ import with_statement
 
 import cherrypy
 import webbrowser
@@ -480,7 +480,7 @@ def halt ():
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
         #logging.warning('[%s] Signal %s caught, saving and exiting...', __NAME__, signum)
-        logger.log("Signal {0} caught, saving and exiting...".format(signum))
+        logger.log("Signal %i caught, saving and exiting..." % int(signum))
         cherrypy.engine.exit()
         saveAndShutdown()
     
@@ -649,7 +649,7 @@ def updateAiringList():
         except exceptions.MultipleShowObjectsException:
             logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
             return None
-        except exceptions.SickBeardException as e:
+        except exceptions.SickBeardException, e:
             logger.log("Unexpected exception: "+str(e), logger.ERROR)
             continue
 
@@ -679,7 +679,7 @@ def updateComingList():
 
         try:
             curEps = curShow.nextEpisode()
-        except exceptions.NoNFOException as e:
+        except exceptions.NoNFOException, e:
             logger.log("Unable to retrieve episode from show: "+str(e), logger.ERROR)
         
         for myEp in curEps:

@@ -48,7 +48,7 @@ class ShowAddQueue():
     def addShowToQueue(self, dir):
         try:
             self.addQueue.append(ShowAdder(dir))
-        except exceptions.NoNFOException as e:
+        except exceptions.NoNFOException, e:
             logger.log("Unable to add show from " + dir + ", unable to create NFO: "+str(e), logger.DEBUG)
             raise
 
@@ -129,20 +129,20 @@ class ShowAdder:
 
         try:
             self.curShow.loadEpisodesFromDir()
-        except Exception as e:
+        except Exception, e:
             logger.log("Error searching dir for episodes: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
     
         try:
             self.curShow.loadEpisodesFromTVDB()
             self.curShow.setTVRID()
-        except Exception as e:
+        except Exception, e:
             logger.log("Error with TVDB, not creating episode list: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
     
         try:
             self.curShow.saveToDB()
-        except Exception as e:
+        except Exception, e:
             logger.log("Error saving the episode to the database: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
         

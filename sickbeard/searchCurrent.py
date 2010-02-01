@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from __future__ import with_statement
 
 from sickbeard import common, db, exceptions, helpers, search
 from sickbeard import logger

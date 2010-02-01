@@ -62,7 +62,7 @@ def initLogging():
     
 def log(toLog, logLevel=MESSAGE):
     
-    meThread = threading.currentThread().name
+    meThread = threading.currentThread().getName()
     outLine = meThread + " :: " + toLog
     
     outLine = outLine.encode('utf-8')

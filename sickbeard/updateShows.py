@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from __future__ import with_statement
 
 import datetime
 import threading
@@ -102,7 +102,7 @@ class ShowUpdater():
         
         try:
             urlObj = urllib2.urlopen(url, timeout=180)
-        except IOError as e:
+        except IOError, e:
             logger.log("Unable to retrieve updated shows, assuming everything needs updating: " + str(e), logger.ERROR)
             return (0, None, None)
         

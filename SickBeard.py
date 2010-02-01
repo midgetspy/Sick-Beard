@@ -16,6 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+
+# we only need this for compiling an EXE and I will just always do that on 2.6+
+if sys.hexversion >= 0x020600F0:
+	from multiprocessing import Process, freeze_support
 
 
 import os
@@ -24,7 +29,6 @@ import threading
 import time
 import signal
 import sqlite3
-import sys
 import traceback
 
 import cherrypy
@@ -39,8 +43,6 @@ from sickbeard.common import *
 from sickbeard.version import SICKBEARD_VERSION
 
 from lib.configobj import ConfigObj
-
-from multiprocessing import Process, freeze_support
 
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
@@ -57,7 +59,7 @@ def loadShowsFromDB():
 			curShow = TVShow(sqlShow["location"])
 			curShow.saveToDB()
 			sickbeard.showList.append(curShow)
-		except Exception as e:
+		except Exception, e:
 			logger.log("There was an error creating the show in "+sqlShow["location"]+": "+str(e), logger.ERROR)
 			logger.log(traceback.format_exc(), logger.DEBUG)
 			
@@ -162,5 +164,6 @@ def main():
 	return
 		
 if __name__ == "__main__":
-	freeze_support()
+	if sys.hexversion >= 0x020600F0:
+		freeze_support()
 	main()

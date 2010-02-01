@@ -52,7 +52,7 @@ def getTVNZBURL (url):
 	try:
 		f = urllib2.urlopen(url)
 		result = "".join(f.readlines())
-	except (urllib.ContentTooShortError, IOError) as e:
+	except (urllib.ContentTooShortError, IOError), e:
 		logger.log("Error loading TVNZB URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
 		return None
 
@@ -132,7 +132,7 @@ class TVNZBDBConnection(db.DBConnection):
 			sql = "CREATE TABLE tvnzb (name TEXT, season NUMERIC, episode NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
 			self.connection.execute(sql)
 			self.connection.commit()
-		except sqlite3.OperationalError as e:
+		except sqlite3.OperationalError, e:
 			if str(e) != "table tvnzb already exists":
 				raise
 

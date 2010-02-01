@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from __future__ import with_statement
 
 import os
 import shutil
@@ -53,7 +53,7 @@ def renameFile(curFile, newName):
 
     try:
         os.rename(curFile, newFilename)
-    except (OSError, IOError) as e:
+    except (OSError, IOError), e:
         logger.log("Failed renaming " + curFile + " to " + os.path.basename(newFilename) + ": " + str(e), logger.ERROR)
         return False
 
@@ -181,7 +181,7 @@ def doIt(downloaderDir, nzbName=None):
                               apikey=sickbeard.TVDB_API_KEY)
             showObj = t[result["file_seriesname"]]
             showInfo = (int(showObj["id"]), showObj["seriesname"])
-        except (tvdb_exceptions.tvdb_exception, IOError) as e:
+        except (tvdb_exceptions.tvdb_exception, IOError), e:
 
             logStr = "TVDB didn't respond, trying to look up the show in the DB instead"
             logger.log(logStr, logger.DEBUG)
@@ -321,7 +321,7 @@ def doIt(downloaderDir, nzbName=None):
         logger.log(logStr, logger.DEBUG)
         returnStr += logStr + "\n"
         
-    except IOError as e:
+    except IOError, e:
         logStr = "Unable to move the file: " + str(e)
         logger.log(logStr, logger.ERROR)
         returnStr += logStr + "\n"
@@ -346,7 +346,7 @@ def doIt(downloaderDir, nzbName=None):
         logStr = "Renaming the file " + curFile + " to " + newFile
         logger.log(logStr, logger.DEBUG)
         returnStr += logStr + "\n"
-    except (OSError, IOError) as e:
+    except (OSError, IOError), e:
         logStr = "Failed renaming " + curFile + " to " + newFile + ": " + str(e)
         logger.log(logStr, logger.ERROR)
         returnStr += logStr + "\n"
@@ -378,7 +378,7 @@ def doIt(downloaderDir, nzbName=None):
         
         try:
             shutil.rmtree(downloadDir)
-        except (OSError, IOError) as e:
+        except (OSError, IOError), e:
             logStr = "Warning: unable to remove the folder " + downloadDir + ": " + str(e)
             logger.log(logStr, logger.ERROR)
             returnStr += logStr + "\n"

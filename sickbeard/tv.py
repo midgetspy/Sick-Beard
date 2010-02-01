@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from __future__ import with_statement
 
 import os.path
 import datetime
@@ -103,7 +103,7 @@ class TVShow(object):
 		#logger.log(str(self.tvdbid) + ": Loading extra show info from theTVDB")
 		#try:
 		#	self.loadFromTVDB()
-		#except tvdb_exceptions.tvdb_error as e:
+		#except tvdb_exceptions.tvdb_error, e:
 		#	logger.log("There was a problem loading the details from TVDB (server down?)", logger.ERROR)
 		#	if str(e) == "Could not connect to server: <urlopen error timed out>":
 		#		sickbeard.LAST_TVDB_TIMEOUT = datetime.datetime.now()
@@ -115,9 +115,9 @@ class TVShow(object):
 		try:
 			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
 			t[self.tvdbid]
-		except tvdb_exceptions.tvdb_shownotfound as e:
+		except tvdb_exceptions.tvdb_shownotfound, e:
 			raise exceptions.ShowNotFoundException(str(e))
-		except tvdb_exceptions.tvdb_error as e:
+		except tvdb_exceptions.tvdb_error, e:
 			logger.log("Unable to contact theTVDB.com, it might be down: "+str(e), logger.ERROR)
 		
 		self.saveToDB()
@@ -235,7 +235,7 @@ class TVShow(object):
 			logger.log(str(self.tvdbid) + ": Creating episode from " + mediaFile, logger.DEBUG)
 			try:
 				curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
-			except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException) as e:
+			except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException), e:
 				logger.log("Episode "+mediaFile+" returned an exception: "+str(e), logger.ERROR)
 			except exceptions.EpisodeDeletedException:
 				logger.log("The episode deleted itself when I tried making an object for it", logger.DEBUG)
@@ -338,13 +338,13 @@ class TVShow(object):
 			if not tvr.checkSync():
 				raise exceptions.TVRageException("The latest episodes on TVDB and TVRage are out of sync, trying to sync with earlier episodes")
 			tvrID = tvr.getTVRID()
-		except exceptions.TVRageException as e:
+		except exceptions.TVRageException, e:
 			logger.log("TVRage error: "+str(e), logger.DEBUG)
 			try:
 				if not tvr.confirmShow():
 					raise exceptions.TVRageException("Show episodes don't match - maybe the search is giving the wrong show?")
 				tvrID = tvr.getTVRID()
-			except exceptions.TVRageException as e:
+			except exceptions.TVRageException, e:
 				logger.log("Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e), logger.DEBUG)
 				return
 
@@ -463,7 +463,7 @@ class TVShow(object):
 				newEp.saveToDB()
 			
 			# make an episode out of it
-		except exceptions.TVRageException as e:
+		except exceptions.TVRageException, e:
 			logger.log("Unable to add TVRage info: " + str(e), logger.ERROR)
 			
 
@@ -628,13 +628,13 @@ class TVShow(object):
 			else:
 				raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
-		except (exceptions.NoNFOException, SGMLParseError) as e:
+		except (exceptions.NoNFOException, SGMLParseError), e:
 			logger.log("There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
 			logger.log("Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 			xmlFileObj.close()
 			try:
 				os.rename(xmlFile, xmlFile + ".old")
-			except Exception as e:
+			except Exception, e:
 				logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
 			raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
@@ -1072,12 +1072,12 @@ class TVEpisode:
 				try:
 					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
 					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
-				except (SGMLParseError, ValueError) as e:
+				except (SGMLParseError, ValueError), e:
 					logger.log("Error loading the NFO, backing up the NFO and skipping for now: " + str(e), logger.ERROR) #TODO: figure out what's wrong and fix it
 					nfoFileObj.close()
 					try:
 						os.rename(nfoFile, nfoFile + ".old")
-					except Exception as e:
+					except Exception, e:
 						logger.log("Failed to rename your episode's NFO file - you need to delete it or fix it: " + str(e), logger.ERROR)
 					raise exceptions.NoNFOException("Error in NFO format")
 
@@ -1143,9 +1143,9 @@ class TVEpisode:
 							  lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
 							  apikey=sickbeard.TVDB_API_KEY)
 			myShow = t[self.show.tvdbid]
-		except tvdb_exceptions.tvdb_shownotfound as e:
+		except tvdb_exceptions.tvdb_shownotfound, e:
 			raise exceptions.ShowNotFoundException(str(e))
-		except tvdb_exceptions.tvdb_error as e:
+		except tvdb_exceptions.tvdb_error, e:
 			logger.log("Unable to connect to TVDB while creating meta files - skipping - "+str(e), logger.ERROR)
 			return
 
@@ -1406,15 +1406,14 @@ class TVEpisode:
 				for relEp in self.relatedEps:
 					goodName += " & " + relEp.name
 		
-		goodEpString = "x{0:0>2}".format(self.episode)
+		goodEpString = "x%02i" % int(self.episode)
 		for relEp in self.relatedEps:
-			goodEpString += "x{0:0>2}".format(relEp.episode)
+			goodEpString += "x%02i" % int(relEp.episode)
 		
 		if goodName != '':
 			goodName = ' - ' + goodName
 
 		return self.show.name + ' - ' + str(self.season) + goodEpString + goodName
-		#return "{0} - {1}{2} - {3}".format(self.show.name, self.season, goodEpString, unicode(goodName).encode('utf-8', 'ignore'))
 		
 		
 		

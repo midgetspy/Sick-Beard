@@ -34,7 +34,7 @@
 #for $hItem in $historyResults:
   <tr class="evenLine">
     <td>$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
-    <td><a href="/home/displayShow?show=$hItem["showid"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "{0:0>2}".format(hItem["episode"]) %></a></td>
+    <td><a href="/home/displayShow?show=$hItem["showid"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
     <td align="center">$actionStrings[$hItem["action"]]</td>
     <td align="center">
 	#if $hItem["action"] == ACTION_DOWNLOADED:

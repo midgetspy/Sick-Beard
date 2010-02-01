@@ -46,7 +46,7 @@ def getNZBsURL (url):
 	try:
 		f = urllib2.urlopen(url)
 		result = "".join(f.readlines())
-	except (urllib.ContentTooShortError, IOError) as e:
+	except (urllib.ContentTooShortError, IOError), e:
 		logger.log("Error loading NZBs.org URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
 		return None
 
@@ -118,7 +118,7 @@ def findEpisode (episode, forceQuality=None):
 		try:
 			responseSoup = BeautifulStoneSoup(data, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 			items = responseSoup.findAll('item')
-		except Exception as e:
+		except Exception, e:
 			logger.log("Error trying to load NZBs.org RSS feed: "+str(e), logger.ERROR)
 			return []
 			

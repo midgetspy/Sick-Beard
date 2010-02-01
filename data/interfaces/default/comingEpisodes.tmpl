@@ -58,7 +58,7 @@
           $curEp.show.name
           </h1>
           <p class="next">
-            <span class="title">Next Episode:</span> <span class="info "><%=str(curEp.season)+"x"+"{0:0>2}".format(curEp.episode) %> - $curEp.name airs $curEp.airdate</span>
+            <span class="title">Next Episode:</span> <span class="info "><%=str(curEp.season)+"x"+"%02i" % int(curEp.episode) %> - $curEp.name airs $curEp.airdate</span>
           </p>
           <p class="noMargin">
             <span class="title">Status:</span> <span class="info ">$curEp.show.status</span><br />

@@ -49,7 +49,7 @@ class DBConnection:
 				logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
 				self.connection.execute(query, args)
 			self.connection.commit()
-		except sqlite3.DatabaseError as e:
+		except sqlite3.DatabaseError, e:
 			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
 			raise
 		
@@ -72,7 +72,7 @@ class DBConnection:
 			else:
 				logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
 				sqlResults = self.connection.execute(query, args).fetchall()
-		except sqlite3.DatabaseError as e:
+		except sqlite3.DatabaseError, e:
 			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
 			raise
 		
@@ -87,7 +87,7 @@ class DBConnection:
 			sql = "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, tvr_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC, paused NUMERIC, startyear NUMERIC);"
 			self.connection.execute(sql)
 			self.connection.commit()
-		except sqlite3.OperationalError as e:
+		except sqlite3.OperationalError, e:
 			if str(e) != "table tv_shows already exists":
 				raise
 
@@ -96,7 +96,7 @@ class DBConnection:
 			sql = "CREATE TABLE tv_episodes (episode_id INTEGER PRIMARY KEY, showid NUMERIC, tvdbid NUMERIC, name TEXT, season NUMERIC, episode NUMERIC, description TEXT, airdate NUMERIC, hasnfo NUMERIC, hastbn NUMERIC, status NUMERIC, location TEXT);"
 			self.connection.execute(sql)
 			self.connection.commit()
-		except sqlite3.OperationalError as e:
+		except sqlite3.OperationalError, e:
 			if str(e) != "table tv_episodes already exists":
 				raise
 
@@ -105,7 +105,7 @@ class DBConnection:
 			sql = "CREATE TABLE info (last_backlog NUMERIC, last_tvdb NUMERIC);"
 			self.connection.execute(sql)
 			self.connection.commit()
-		except sqlite3.OperationalError as e:
+		except sqlite3.OperationalError, e:
 			if str(e) != "table info already exists":
 				raise
 
@@ -114,7 +114,7 @@ class DBConnection:
 			sql = "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider NUMERIC);"
 			self.connection.execute(sql)
 			self.connection.commit()
-		except sqlite3.OperationalError as e:
+		except sqlite3.OperationalError, e:
 			if str(e) != "table history already exists":
 				raise
 

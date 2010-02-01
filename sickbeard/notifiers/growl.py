@@ -99,5 +99,5 @@ def sendGrowl(title="Sick Beard Notification", message=None, name=None, host=Non
 		logger.log("Sending growl to "+opts['host']+":"+str(opts['port'])+": "+message)
 		try:
 			send_growl(opts, message)
-		except socket.error as e:
+		except socket.error, e:
 			logger.log("Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+str(e))
