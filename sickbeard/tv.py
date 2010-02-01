@@ -370,7 +370,7 @@ class TVShow(object):
 
 		# get the image data
 		fanartData = None
-		if fanart != None:
+		if not os.path.isfile(os.path.join(self.location, "fanart.jpg")) and fanart != None:
 			fanartData = helpers.getShowImage(fanartURL, fanart)
 		
 		# if we had a custom image number that failed OR we had no custom number then get the default one
@@ -380,14 +380,13 @@ class TVShow(object):
 		if fanartData == None:
 			logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
 		else:
-			if not os.path.isfile(os.path.join(self.location, "fanart.jpg")):
-				outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
-				outFile.write(fanartData)
-				outFile.close()
+			outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
+			outFile.write(fanartData)
+			outFile.close()
 		
 		# get the image data
 		posterData = None
-		if poster != None:
+		if not os.path.isfile(os.path.join(self.location, "folder.jpg")) and poster != None:
 			posterData = helpers.getShowImage(posterURL, poster)
 		
 		# if we had a custom image number that failed OR we had no custom number then get the default one
@@ -397,12 +396,51 @@ class TVShow(object):
 		if posterData == None:
 			logger.log("Unable to retrieve poster, skipping", logger.ERROR)
 		else:
-			if not os.path.isfile(os.path.join(self.location, "folder.jpg")):
-				outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
-				outFile.write(posterData)
-				outFile.close() 
+			outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
+			outFile.write(posterData)
+			outFile.close() 
 
+		seasonData = None 
+		#  How many seasons? 
+		numOfSeasons = len(myShow) 
 		
+		# Give us just the normal poster-style season graphics 
+		seasonsArtObj = myShow['_banners']['season']['season'] 
+		
+		# This holds our resulting dictionary of season art 
+		seasonsDict = {} 
+		
+		# Returns a nested dictionary of season art with the season 
+		# number as primary key. It's really overkill but gives the option 
+		# to present to user via ui to pick down the road. 
+		for seasonNum in range(numOfSeasons): 
+			# dumb, but we do have issues with types here so make it 
+			# strings for now 
+			seasonNum = str(seasonNum) 
+			seasonsDict[seasonNum] = {} 
+			for seasonArtID in seasonsArtObj.keys(): 
+				seasonArtID = str(seasonArtID) 
+				if seasonsArtObj[seasonArtID]['season'] == seasonNum and seasonsArtObj[seasonArtID]['language'] == 'en': 
+					seasonsDict[seasonNum][seasonArtID] = seasonsArtObj[seasonArtID]['_bannerpath'] 
+			if len(seasonsDict) > 0: 
+				# Just grab whatever's there for now 
+				season, seasonURL = seasonsDict[seasonNum].popitem() 
+			
+				seasonFileName = 'season' + seasonNum.zfill(2) + '.jpg' 
+			
+				# Let's do the check before we pull the file 
+				if not os.path.isfile(os.path.join(self.location, seasonFileName)): 
+					seasonData = helpers.getShowImage(seasonURL, season) 
+			
+					if seasonData == None: 
+						seasonData = helpers.getShowImage(seasonURL) 
+			
+					if seasonData == None: 
+					   logger.log("Unable to retrieve season poster, skipping", logger.ERROR) 
+					else: 
+						outFile = open(os.path.join(self.location, seasonFileName), 'wb') 
+						outFile.write(seasonData) 
+						outFile.close()		
 
 	def loadLatestFromTVRage(self):
 		
@@ -1158,9 +1196,9 @@ class TVEpisode:
 				logger.log("Creating metadata for myself ("+str(self.season)+"x"+str(self.episode)+")", logger.DEBUG)
 			
 			if len(epsToWrite) > 1:
-			    episode = etree.SubElement( rootNode, "episodedetails" )
+				episode = etree.SubElement( rootNode, "episodedetails" )
 			else:
-			    episode = rootNode
+				episode = rootNode
 
 			title = etree.SubElement( episode, "title" )
 			if curEpToWrite.name != None:

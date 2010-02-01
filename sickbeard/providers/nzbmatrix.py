@@ -76,7 +76,7 @@ def findEpisode (episode, forceQuality=None):
 	results = []
 
 	for curString in sceneSearchStrings:
-		params = {"search": curString.replace("."," "), "age": sickbeard.USENET_RETENTION, "username": sickbeard.NZBMATRIX_USERNAME, "apikey": sickbeard.NZBMATRIX_APIKEY}
+		params = {"search": curString.replace("."," ").encode('utf-8'), "age": sickbeard.USENET_RETENTION, "username": sickbeard.NZBMATRIX_USERNAME, "apikey": sickbeard.NZBMATRIX_APIKEY}
 		params.update(quality)
 		
 		searchURL = "https://nzbmatrix.com/api-nzb-search.php?" + urllib.urlencode(params)
