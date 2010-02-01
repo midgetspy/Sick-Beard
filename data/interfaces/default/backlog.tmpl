@@ -39,7 +39,7 @@
 #for $bItem in $backlogResults:
   <tr class="evenLine">
     <td><a href="/home/displayShow?show=$bItem["showid"]">$bItem["show_name"]</a></td>
-    <td align="center"><%=str(bItem["season"]) +"x"+ "{0:0>2}".format(bItem["episode"]) %></td>
+    <td align="center"><%=str(bItem["season"]) +"x"+ "%02i" % int(bItem["episode"]) %></td>
     <td>$bItem["name"] <a href="#" class="plotLink" id="plotLink_<%=str(bItem["season"])+"_"+str(bItem["episode"])%>">[+]</a>
         <div class="plotDiv" id="epDiv_<%=str(bItem["season"])+"_"+str(bItem["episode"])%>"><br />$bItem["description"]</div>
     </td>
