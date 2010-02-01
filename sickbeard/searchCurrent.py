@@ -94,7 +94,7 @@ class CurrentSearcher():
                 return None
             
             if show == None:
-                logger.log("Unable to find the show with ID "+str(sqlEp["showid"])+" in your show list! DB value was "+sqlEp, logger.ERROR)
+                logger.log("Unable to find the show with ID "+str(sqlEp["showid"])+" in your show list! DB value was "+str(sqlEp), logger.ERROR)
                 return None
             
             ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
