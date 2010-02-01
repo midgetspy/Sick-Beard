@@ -358,6 +358,9 @@ class TVShow(object):
 		
 	def getImages(self, fanart=None, poster=None):
 		
+		if not sickbeard.CREATE_METADATA:
+			logger.log("Skipping image retrieval since metadata creation is turned off", logger.DEBUG)
+
 		try:
 			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
 			myShow = t[self.tvdbid]
@@ -436,7 +439,7 @@ class TVShow(object):
 						seasonData = helpers.getShowImage(seasonURL) 
 			
 					if seasonData == None: 
-					   logger.log("Unable to retrieve season poster, skipping", logger.ERROR) 
+						logger.log("Unable to retrieve season poster, skipping", logger.ERROR) 
 					else: 
 						outFile = open(os.path.join(self.location, seasonFileName), 'wb') 
 						outFile.write(seasonData) 

@@ -178,6 +178,8 @@ class ShowUpdater():
 
         show.refreshDir()
         
+        show.getImages()
+        
         show.writeEpisodeNFOs()
 
 
