@@ -362,7 +362,7 @@ class TVShow(object):
 			logger.log("Skipping image retrieval since metadata creation is turned off", logger.DEBUG)
 
 		try:
-			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
+			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY, banners=True)
 			myShow = t[self.tvdbid]
 		except (tvdb_exceptions.tvdb_error, IOError):
 			logger.log("Unable to look up show on TVDB, not downloading images", logger.ERROR)
