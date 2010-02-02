@@ -58,9 +58,9 @@
 	<td align="center">
 	#set $quality = -1
 	#if $hItem["action"] == ACTION_DOWNLOADED
-	  #if "xvid" in str($hItem["resource"]).lower() or "divx" in str($hItem["resource"]).lower()
+	  #if "xvid" in $hItem["resource"].lower() or "divx" in $hItem["resource"].lower()
 	    #set $quality = SD
-	  #else if "720p" in str($hItem["resource"]).lower()
+	  #else if "720p" in $hItem["resource"].lower()
 	    #set $quality = HD
 	  #end if
 	#else
