@@ -425,7 +425,7 @@ class TVShow(object):
 				seasonArtID = str(seasonArtID) 
 				if seasonsArtObj[seasonArtID]['season'] == seasonNum and seasonsArtObj[seasonArtID]['language'] == 'en': 
 					seasonsDict[seasonNum][seasonArtID] = seasonsArtObj[seasonArtID]['_bannerpath'] 
-			if len(seasonsDict) > 0: 
+			if len(seasonsDict[seasonNum]) > 0: 
 				# Just grab whatever's there for now 
 				season, seasonURL = seasonsDict[seasonNum].popitem() 
 			
