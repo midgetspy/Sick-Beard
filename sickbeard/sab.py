@@ -37,8 +37,11 @@ def sendNZB(nzb):
         params['apikey'] = sickbeard.SAB_APIKEY
     if sickbeard.SAB_CATEGORY != None:
         params['cat'] = sickbeard.SAB_CATEGORY
-    
-    params['priority'] = 1
+
+    # don't bother making backlog episodes high priority
+    if nzb.episode.status != BACKLOG:
+        params['priority'] = 1
+
     params['pp'] = 3
     
     if nzb.provider == NEWZBIN:
