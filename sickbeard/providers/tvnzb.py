@@ -181,9 +181,9 @@ class TVNZBCache(tvcache.TVCache):
 		# get the current timestamp
 		curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
 		
-		if "720p" or "1080p" or "x264" in name:
+		if any(x in name.lower() for x in ("720p", "1080p", "x264")):
 			quality = HD
-		elif "xvid" or "divx" in name:
+		elif any(x in name.lower() for x in ("xvid", "divx")):
 			quality = SD
 		else:
 			logger.log("Unable to figure out the quality of "+name+", assuming SD", logger.DEBUG)
