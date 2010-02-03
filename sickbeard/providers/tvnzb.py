@@ -165,7 +165,7 @@ class TVNZBCache(tvcache.TVCache):
 			for curSceneName in sceneNames:
 	
 				# if it matches
-				if name.startswith(curSceneName):
+				if name.lower().startswith(curSceneName.lower()):
 					logger.log("Successful match! Result "+name+" matched to show "+curShow.name, logger.DEBUG)
 					
 					# set the tvdbid in the db to the show's tvdbid
