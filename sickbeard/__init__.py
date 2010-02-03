@@ -85,7 +85,8 @@ NZB_DIR = None
 USENET_RETENTION = None
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = None
-DEFAULT_SEARCH_FREQUENCY = 15
+MIN_SEARCH_FREQUENCY = 30
+DEFAULT_SEARCH_FREQUENCY = 60
 DEFAULT_BACKLOG_SEARCH_FREQUENCY = 7
 
 USE_TORRENT = False
@@ -232,7 +233,7 @@ def initialize():
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
-                KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL
+                KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY
         
         if __INITIALIZED__:
             return False
@@ -281,6 +282,9 @@ def initialize():
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 200)
         
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
+        if SEARCH_FREQUENCY < MIN_SEARCH_FREQUENCY:
+            SEARCH_FREQUENCY = MIN_SEARCH_FREQUENCY
+
         BACKLOG_SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'backlog_search_frequency', DEFAULT_BACKLOG_SEARCH_FREQUENCY)
 
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')

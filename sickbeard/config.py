@@ -136,8 +136,8 @@ def change_SEARCH_FREQUENCY(freq):
     else:
         freq = int(freq)
     
-    if freq < 15:
-        freq = sickbeard.DEFAULT_SEARCH_FREQUENCY
+    if freq < sickbeard.MIN_SEARCH_FREQUENCY:
+        freq = sickbeard.MIN_SEARCH_FREQUENCY
     
     sickbeard.SEARCH_FREQUENCY = freq
     
