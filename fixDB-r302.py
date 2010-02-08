@@ -14,7 +14,7 @@ def addColumn(table, column, type="NUMERIC", default=0):
         print sql
         connection.execute(sql)
         connection.commit()
-    except sqlite3.DatabaseError as e:
+    except sqlite3.DatabaseError, e:
         print "Fatal error executing query '" + sql + "': " + str(e)
         raise
 
