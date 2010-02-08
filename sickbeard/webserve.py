@@ -24,7 +24,12 @@ import gc
 import cgi
 import sqlite3
 import time
-import json
+
+# use the built-in if it's available (python 2.6), if not use the included library
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
 
 from Cheetah.Template import Template
 import cherrypy

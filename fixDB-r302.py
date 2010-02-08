@@ -18,4 +18,4 @@ def addColumn(table, column, type="NUMERIC", default=0):
         print "Fatal error executing query '" + sql + "': " + str(e)
         raise
 
-addColumn("tv_shows", "tvr_name", "TEXT")
+addColumn("tv_shows", "tvr_name", "TEXT", "")
