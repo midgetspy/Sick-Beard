@@ -150,8 +150,8 @@ def change_BACKLOG_SEARCH_FREQUENCY(freq):
     else:
         freq = int(freq)
     
-    if freq < 1:
-        freq = sickbeard.DEFAULT_BACKLOG_SEARCH_FREQUENCY
+    if freq < sickbeard.MIN_BACKLOG_SEARCH_FREQUENCY:
+        freq = sickbeard.MIN_BACKLOG_SEARCH_FREQUENCY
     
     sickbeard.BACKLOG_SEARCH_FREQUENCY = freq
     
