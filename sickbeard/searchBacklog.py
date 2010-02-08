@@ -94,6 +94,8 @@ class BacklogSearcher:
                 else:
                     # just use the first result for now
                     search.snatchEpisode(foundNZBs[0])
+
+                time.sleep(10)
                     
             self._set_lastBacklog(curDate)
             

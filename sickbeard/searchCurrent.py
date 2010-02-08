@@ -66,7 +66,7 @@ class CurrentSearcher():
                     # just use the first result for now
                     search.snatchEpisode(foundEpisodes[0])
                     
-                time.sleep(3)
+                time.sleep(10)
 
         # update our lists to reflect any changes we just made
         sickbeard.updateMissingList()
