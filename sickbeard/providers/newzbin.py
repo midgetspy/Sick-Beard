@@ -122,7 +122,7 @@ def findEpisode(episode, forceQuality=None):
 		showNames += [episode.show.name.replace("&", "and")]
 	if episode.show.startyear > 1900 and not episode.show.name.endswith(")"):
 		showNames += [episode.show.name + " ("+str(episode.show.startyear)+")"]
-	if episode.show.tvrname not in showNames:
+	if episode.show.tvrname not in showNames and episode.show.tvrname != None and episode.show.tvrname != "":
 		showNames += [episode.show.tvrname]
 
 	regex = "(.*)( \(.*\))"
