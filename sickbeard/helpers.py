@@ -95,8 +95,6 @@ def makeSceneShowSearchStrings(show):
 
 	showNames = [show.name]
 	
-	logger.log("Generating show strings for '"+show.name+"'", logger.DEBUG)
-	
 	# if we have a tvrage name then use it
 	if show.tvrname != "" and show.tvrname != None and show.name.lower() != show.tvrname.lower():
 		logger.log("Adding TVRage show name to the list: '"+show.tvrname+"'", logger.DEBUG)
@@ -104,37 +102,7 @@ def makeSceneShowSearchStrings(show):
 
 	showNames = [x.replace(". ", " ").replace(" ", ".").replace("&", "and") for x in showNames]
 
-	newShowNames = []
-
-	for showName in showNames:
-		
-		# don't double-process them
-		if showName in newShowNames:
-			continue
-		
-		newShowNames.append(showName)
-		
-		# if there is (xxxx) in the show name try removing it
-		if showName.find("(") != -1:
-			showNameNoBrackets = showName.rpartition(".(")[0]
-
-			if showNameNoBrackets not in showNames:
-				newShowNames.append(showNameNoBrackets)
-
-		# if there's no (xxxx) at the end of the show name then try adding (YEAR)
-		if not showName.endswith(")") and show.startyear > 1900:
-			showName += ".(" + str(show.startyear) + ")"
-
-			if showName not in showNames:
-				newShowNames.append(showName)
-
-	#TODO: this is probably an encoding problem, i'll take it out later
-	logger.log("After processing show names we end up with: "+str(newShowNames), logger.DEBUG)
-
-	showNames = [sanitizeSceneName(x) for x in newShowNames]
-	
-	#TODO: this is probably an encoding problem, i'll take it out later
-	logger.log("After final processing show names we end up with: "+str(showNames), logger.DEBUG)
+	showNames = map(sanitizeSceneName, showNames)
 
 	return showNames
 
