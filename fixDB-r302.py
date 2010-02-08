@@ -10,7 +10,7 @@ def addColumn(table, column, type="NUMERIC", default=0):
         sql = "ALTER TABLE " + table + " ADD " + column + " " + type
         print sql
         connection.execute(sql)
-        sql = "UPDATE " + table + " SET " + column + "=" + str(default)
+        sql = "UPDATE " + table + " SET " + column + "='" + str(default)+"'"
         print sql
         connection.execute(sql)
         connection.commit()
