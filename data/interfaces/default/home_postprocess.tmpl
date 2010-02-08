@@ -16,8 +16,13 @@
 <h2>Manual postprocessing</h2>
 
 <form name="processForm" method="POST" action="processEpisode">
-Enter the folder containing the episode: <input type="text" name="dir" size="50"> <input type="submit" value="Process"><br />
+Enter the folder containing the episode: <input type="text" name="dir" id="episodeDir" size="50"> <input type="submit" value="Process">
+<input type="button" value="Browse&hellip;" id="episodeBrowse" />
+<br />
 <strong>(NOTE: MUST ONLY CONTAIN ONE EPISODE)</strong><br />
 
+<script type="text/javascript" charset="utf-8">
+    jQuery('#episodeBrowse').fileBrowser({ field: '#episodeDir', title: 'Select Unprocessed Episode Folder' });
+</script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

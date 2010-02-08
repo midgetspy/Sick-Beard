@@ -26,7 +26,7 @@ import sqlite3
 import time
 import datetime
 
-from lib.BeautifulSoup import BeautifulStoneSoup
+import xml.etree.cElementTree as etree
 
 import sickbeard
 import sickbeard.classes
@@ -238,40 +238,45 @@ class TVBinzCache(tvcache.TVCache):
 		logger.log("Clearing cache and updating with new information")
 		self._clearCache()
 		
-		responseSoup = BeautifulStoneSoup(data)
-		items = responseSoup.findAll('item')
+		try:
+			responseSoup = etree.ElementTree(etree.XML(data))
+			items = responseSoup.getiterator('item')
+		except Exception, e:
+			logger.log("Error trying to load TVBinz RSS feed: "+str(e), logger.ERROR)
+			return []
 			
 		for item in items:
 
-			if item.title != None and item.title.string == "You must be logged in to view this feed":
+			if item.findtext('title') != None and item.findtext('title') == "You must be logged in to view this feed":
 				raise exceptions.AuthException("TVBinz authentication details are incorrect, check your config")
 
-			if item.title == None or item.link == None:
+			if item.findtext('title') == None or item.findtext('link') == None:
 				logger.log("The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+str(item), logger.ERROR)
 				continue
 
-			title = item.title.string
-			url = item.link.string.replace("&amp;", "&")
+			title = item.findtext('title')
+			url = item.findtext('link').replace('&amp;', '&')
 
-			if item.seriesinfo == None:
+			sInfo = item.find('seriesInfo')
+			if sInfo == None:
 				logger.log("No series info, this is some kind of non-standard release, ignoring it", logger.DEBUG)
 				continue
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 
-			quality = item.seriesinfo.quality.string
+			quality = sInfo.findtext('quality')
 			if quality == "HD":
 				quality = HD
 			else:
 				quality = SD
 			
-			season = int(item.seriesinfo.seasonnum.string)
-			episode = int(item.seriesinfo.episodenum.string)
+			season = int(sInfo.findtext('seasonNum'))
+			episode = int(sInfo.findtext('episodeNum'))
 
-			if item.seriesinfo.tvrid == None:
+			if sInfo.findtext('tvrID') == None:
 				tvrid = 0
 			else:
-				tvrid = int(item.seriesinfo.tvrid.string)
+				tvrid = int(sInfo.findtext('tvrID'))
 			
 			self._addCacheEntry(title, season, episode, tvrid, url, quality)
 

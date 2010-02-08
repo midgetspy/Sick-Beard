@@ -7,8 +7,6 @@ import gzip
 import urllib2
 import StringIO
 
-from lib.BeautifulSoup import BeautifulStoneSoup
-
 import sickbeard
 
 from sickbeard import db

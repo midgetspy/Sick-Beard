@@ -2,7 +2,7 @@ import urllib
 import sys
 import os.path
 
-from lib.BeautifulSoup import BeautifulStoneSoup
+import xml.etree.cElementTree as etree
 from sickbeard.common import *
 from sickbeard import logger
 
@@ -86,23 +86,23 @@ def findEpisode(episode, forceQuality=None):
     results = []
     
     try:
-        responseSoup = BeautifulStoneSoup(data, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
-        items = responseSoup.findAll('item')
+        responseSoup = etree.ElementTree(element = etree.XML(data))
+        items = responseSoup.getiterator('item')
     except Exception, e:
         logger.log("Error trying to load EZTV RSS feed: "+str(e), logger.ERROR)
         return []
 
     for item in items:
         
-        if item.title == None or item.link == None:
+        if item.findtext('title') == None or item.findtext('link') == None:
             logger.log("The XML returned from the EZTV RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
             continue
         
-        if epQuality == SD and '720p' in item.title or '720p' in item.link:
+        if epQuality == SD and ('720p' in item.findtext('title') or '720p' in item.findtext('link')):
             continue
         
-        title = item.title.string
-        url = item.link.string
+        title = item.findtext('title')
+        url = item.findtext('link')
         
         logger.log("Found result " + title + " at " + url, logger.DEBUG)
 

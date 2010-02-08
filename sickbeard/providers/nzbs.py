@@ -23,7 +23,7 @@ import urllib2
 import os.path
 import sys
 
-from lib.BeautifulSoup import BeautifulStoneSoup
+import xml.etree.cElementTree as etree
 
 import sickbeard
 import sickbeard.classes
@@ -100,6 +100,10 @@ def findEpisode (episode, forceQuality=None):
 		
 	sceneSearchStrings = sickbeard.helpers.makeSceneSearchString(episode)
 	
+	itemList = []
+	results = []
+		
+
 	for curString in sceneSearchStrings:
 		params = {"action": "search", "q": "^"+curString.encode('utf-8'), "dl": 1, "i": sickbeard.NZBS_UID, "h": sickbeard.NZBS_HASH, "age": sickbeard.USENET_RETENTION}
 		params.update(quality)
@@ -113,27 +117,27 @@ def findEpisode (episode, forceQuality=None):
 		if data == None:
 			return []
 
-		results = []
-		
 		try:
-			responseSoup = BeautifulStoneSoup(data, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
-			items = responseSoup.findAll('item')
+			responseSoup = etree.ElementTree(etree.XML(data))
+			items = responseSoup.getiterator('item')
 		except Exception, e:
 			logger.log("Error trying to load NZBs.org RSS feed: "+str(e), logger.ERROR)
 			return []
 			
+		for curItem in items:
+			itemList.append(curItem)
 		
-		if len(items) > 0:
+		if len(itemList) > 0:
 			break
 
-	for item in items:
+	for item in itemList:
 		
-		if item.title == None or item.link == None:
+		if item.findtext('title') == None or item.findtext('link') == None:
 			logger.log("The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 			continue
 		
-		title = item.title.string
-		url = item.link.string
+		title = item.findtext('title')
+		url = item.findtext('link')
 		
 		if "&i=" not in url and "&h=" not in url:
 			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")

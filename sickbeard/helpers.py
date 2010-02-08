@@ -38,6 +38,12 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
 
+import string
+
+# this is for the drive letter code, it only works on windows
+if os.name == 'nt':
+	from ctypes import windll
+
 def indentXML(elem, level=0):
 	'''
 	Does our pretty printing, makes Matt very happy
@@ -87,20 +93,50 @@ def sanitizeFileName (name):
 		
 def makeSceneShowSearchStrings(show):
 
-	showName = show.name.replace(" ", ".").replace("&", "and").replace(". ", " ")
-
-	if not showName.endswith(")") and show.startyear > 1900:
-		showName += ".(" + str(show.startyear) + ")"
-
-	results = []
-
-	results.append(sanitizeSceneName(showName))
-
-	if showName.find("(") != -1:
-		showNameNoBrackets = showName.rpartition(".(")[0]
-		results.append(sanitizeSceneName(showNameNoBrackets))
+	showNames = [show.name]
 	
-	return results
+	logger.log("Generating show strings for '"+show.name+"'", logger.DEBUG)
+	
+	# if we have a tvrage name then use it
+	if show.tvrname != "" and show.tvrname != None and show.name.lower() != show.tvrname.lower():
+		logger.log("Adding TVRage show name to the list: '"+show.tvrname+"'", logger.DEBUG)
+		showNames.append(show.tvrname)
+
+	showNames = [x.replace(". ", " ").replace(" ", ".").replace("&", "and") for x in showNames]
+
+	newShowNames = []
+
+	for showName in showNames:
+		
+		# don't double-process them
+		if showName in newShowNames:
+			continue
+		
+		newShowNames.append(showName)
+		
+		# if there is (xxxx) in the show name try removing it
+		if showName.find("(") != -1:
+			showNameNoBrackets = showName.rpartition(".(")[0]
+
+			if showNameNoBrackets not in showNames:
+				newShowNames.append(showNameNoBrackets)
+
+		# if there's no (xxxx) at the end of the show name then try adding (YEAR)
+		if not showName.endswith(")") and show.startyear > 1900:
+			showName += ".(" + str(show.startyear) + ")"
+
+			if showName not in showNames:
+				newShowNames.append(showName)
+
+	#TODO: this is probably an encoding problem, i'll take it out later
+	logger.log("After processing show names we end up with: "+str(newShowNames), logger.DEBUG)
+
+	showNames = [sanitizeSceneName(x) for x in newShowNames]
+	
+	#TODO: this is probably an encoding problem, i'll take it out later
+	logger.log("After final processing show names we end up with: "+str(showNames), logger.DEBUG)
+
+	return showNames
 
 
 def makeSceneSearchString (episode):
@@ -328,3 +364,17 @@ def getShowImage(url, imgNum=None):
 		return None
 
 	return imgData
+
+# adapted from http://stackoverflow.com/questions/827371/is-there-a-way-to-list-all-the-available-drive-letters-in-python/827490
+def getWinDrives():
+	if os.name != 'nt':
+		return []
+
+	drives = []
+	bitmask = windll.kernel32.GetLogicalDrives()
+	for letter in string.uppercase:
+		if bitmask & 1:
+			drives.append(letter)
+		bitmask >>= 1
+
+	return drives

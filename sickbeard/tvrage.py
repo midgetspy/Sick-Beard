@@ -42,17 +42,41 @@ class TVRage:
         self.lastEpInfo = None
         self.nextEpInfo = None
         
-        pass
-    
-    
-    def confirmShow(self):
+        self._tvrid = 0
+        self._tvrname = None
+        
+        if self.show.tvrid == 0:
+            
+            # if it's the right show then use the tvrage ID that the last lookup found (cached in self._trvid)
+            if self.confirmShow() or self.checkSync():
+                
+                if self._tvrid == 0 or self._tvrname == None:
+                    raise exceptions.TVRageException("We confirmed sync but got invalid data (no ID/name)")
+                
+                logger.log("Setting TVRage ID for "+show.name+" to "+str(self._tvrid))
+                self.show.tvrid = self._tvrid
+                self.show.saveToDB()
+
+        if self.show.tvrname == "" or self.show.tvrname == None:
+
+            if self._tvrname == None:
+                self._getTVRageInfo()
+
+            logger.log("Setting TVRage Show Name for "+show.name+" to "+self._tvrname)
+            self.show.tvrname = self._tvrname
+            self.show.saveToDB()
+
+
+    def confirmShow(self, force=False):
+        
+        if self.show.tvrid != 0 and not force:
+            logger.log("We already have a TVRage ID, skipping confirmation", logger.DEBUG)
+            return True
         
         logger.log("Checking the first episode of each season to see if the air dates match between TVDB and TVRage")
         
         try:
 
-            numGoodUpdates = 0
-            
             try:
                 t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
             except tvdb_exceptions.tvdb_exception, e:
@@ -115,8 +139,8 @@ class TVRage:
                 
                 # check if TVRage and TVDB have the same airdate for this episode
                 if curEpInfo['airdate'] == airdate:
-                    logger.log("Successful match for TVRage and TVDB data dor episode "+str(curSeason)+"x1)", logger.DEBUG)
-                    numGoodUpdates += 1
+                    logger.log("Successful match for TVRage and TVDB data for episode "+str(curSeason)+"x1)", logger.DEBUG)
+                    return True
 
                 logger.log("Date from TVDB for episode " + str(curSeason) + "x1: " + str(airdate), logger.DEBUG)
                 logger.log("Date from TVRage for episode " + str(curSeason) + "x1: " + str(curEpInfo['airdate']), logger.DEBUG)
@@ -125,17 +149,14 @@ class TVRage:
             logger.log("Error encountered while checking TVRage<->TVDB sync: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
         
-        if numGoodUpdates == 0:
-            return False
-        else:
-            return True
+        return False
     
-    def checkSync(self):
+    def checkSync(self, info=None):
         
         logger.log("Checking the last aired episode to see if the dates match between TVDB and TVRage")
         
         if self.lastEpInfo == None or self.nextEpInfo == None:
-            self._saveLatestInfo()
+            self._saveLatestInfo(info)
         
         if self.nextEpInfo['season'] == 0 or self.nextEpInfo['episode'] == 0:
             return None
@@ -181,11 +202,22 @@ class TVRage:
         
         return False
     
-    def _getTVRageInfo(self, season=None, episode=None):
+    def _getTVRageInfo(self, season=None, episode=None, full=False):
         
         url = "http://services.tvrage.com/tools/quickinfo.php?"
         
-        urlData = {'show': self.show.name.encode('utf-8')}
+        # if we need full info OR if we don't have a tvrage id, use show name
+        if full == True or self.show.tvrid == 0:
+            if self.show.tvrname != "" and self.show.tvrname != None:
+                showName = self.show.tvrname
+            else:
+                showName = self.show.name
+
+            urlData = {'show': showName.encode('utf-8')}
+
+        # if we don't need full info and we have a tvrage id, use it
+        else:
+            urlData = {'sid': self.show.tvrid}
         
         if season != None and episode != None:
             urlData['ep'] = str(season)+'x'+str(episode)
@@ -210,11 +242,19 @@ class TVRage:
             key = key.replace('<pre>','')
             info[key] = value.strip()
 
+        # save it for later in case somebody is curious
+        if info.has_key('Show ID'):
+            self._tvrid = info['Show ID']
+
+        if info.has_key('Show Name'):
+            self._tvrname = info['Show Name']
+
         return info
     
-    def _saveLatestInfo(self):
+    def _saveLatestInfo(self, info=None):
 
-        info = self._getTVRageInfo()
+        if info == None:
+            info = self._getTVRageInfo()
         
         if not info.has_key('Next Episode') or not info.has_key('Latest Episode'):
             raise exceptions.TVRageException("TVRage doesn't have all the required info for this show")
@@ -224,7 +264,6 @@ class TVRage:
         
         if self.lastEpInfo == None or self.nextEpInfo == None:
             raise exceptions.TVRageException("TVRage has malformed data, unable to update the show")
-
 
         
     def _getEpInfo(self, epString):
@@ -250,17 +289,13 @@ class TVRage:
         
         return toReturn
 
-    def getTVRID(self):
+    def findLatestEp(self):
 
-        info = self._getTVRageInfo()
+        # will use tvrage name if it got set in the constructor, or tvdb name if not
+        info = self._getTVRageInfo(full=True)
         
-        if not info.has_key('Show ID'):
-            logger.log("No Show ID found: "+str(info), logger.DEBUG)
-            raise exceptions.TVRageException("The search result doesn't have a show ID")
-            
-        return int(info.get('Show ID'))
-
-    def saveToDB(self):
+        if not self.checkSync(info):
+            raise exceptions.TVRageException("TVRage info isn't in sync with TVDB, not using data")
         
         myDB = db.DBConnection()
         
@@ -271,17 +306,16 @@ class TVRage:
             raise exceptions.TVRageException("Show is already in database, not adding the TVRage info")
 
         # insert it
-        
         myDB.action("INSERT INTO tv_episodes (showid, tvdbid, name, season, episode, description, airdate, hasnfo, hastbn, status, location) VALUES (?,?,?,?,?,?,?,?,?,?,?)", \
                     [self.show.tvdbid, -1, self.nextEpInfo['name'], self.nextEpInfo['season'], self.nextEpInfo['episode'], '', self.nextEpInfo['airdate'].toordinal(), 0, 0, UNAIRED, ''])
-        
-    def getEpisode(self):
-        
+
+        # once it's in the DB make an object and return it
         ep = None
-        
+       
         try:
             ep = self.show.getEpisode(self.nextEpInfo['season'], self.nextEpInfo['episode'])
         except exceptions.SickBeardException, e:
             logger.log("Unable to create episode from tvrage (could be for a variety of reasons): " + str(e))
-    
+   
         return ep
+

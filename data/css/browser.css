@@ -1,0 +1,25 @@
+#fileBrowserDialog ul {
+  margin: 0;
+  padding: 0;
+}
+#fileBrowserDialog ul li {
+  margin: 2px;
+  position: relative;
+  padding: 4px 0;
+  cursor: pointer;
+  list-style: none;
+}
+#fileBrowserDialog ul li a {
+  display: block;
+}
+#fileBrowserDialog ul li a:hover {
+  color: blue;
+  background: none;
+}
+#fileBrowserDialog ul li a span.ui-icon {
+  margin: 0 4px;
+  float: left;
+}
+#fileBrowserDialog ul li a:hover span.ui-icon {
+/*  background-position: -16px -96px;*/
+}

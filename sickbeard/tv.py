@@ -31,7 +31,6 @@ import sickbeard
 
 import xml.etree.cElementTree as etree
 
-from lib.BeautifulSoup import BeautifulStoneSoup, NavigableString, SGMLParseError
 from lib.tvdb_api import tvdb_api, tvnamer, tvdb_exceptions
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
@@ -54,6 +53,7 @@ class TVShow(object):
 		self.name = ""
 		self.tvdbid = 0
 		self.tvrid = 0
+		self.tvrname = ""
 		self.network = ""
 		self.genre = ""
 		self.runtime = 0
@@ -328,38 +328,19 @@ class TVShow(object):
 
 		logger.log("Attempting to retrieve the TVRage ID", logger.DEBUG)
 
-		tvrID = None
-		
-		# load the tvrage object
-		tvr = tvrage.TVRage(self)
-		
-		# check for sync
 		try:
-			if not tvr.checkSync():
-				raise exceptions.TVRageException("The latest episodes on TVDB and TVRage are out of sync, trying to sync with earlier episodes")
-			tvrID = tvr.getTVRID()
-		except exceptions.TVRageException, e:
-			logger.log("TVRage error: "+str(e), logger.DEBUG)
-			try:
-				if not tvr.confirmShow():
-					raise exceptions.TVRageException("Show episodes don't match - maybe the search is giving the wrong show?")
-				tvrID = tvr.getTVRID()
-			except exceptions.TVRageException, e:
-				logger.log("Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e), logger.DEBUG)
-				return
-
-		if tvrID != None:
-			logger.log("Setting TVRage ID for show "+self.name+" to "+str(tvrID))
-			self.tvrid = tvrID
+			# load the tvrage object, it will set the ID in its constructor if possible
+			tvr = tvrage.TVRage(self)
 			self.saveToDB()
-		else:
-			logger.log("No TVRage ID was found, not setting it", logger.DEBUG)
-		
+		except exceptions.TVRageException, e:
+			logger.log("Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e), logger.DEBUG)
+			return		
 		
 	def getImages(self, fanart=None, poster=None):
 		
 		if not sickbeard.CREATE_METADATA:
 			logger.log("Skipping image retrieval since metadata creation is turned off", logger.DEBUG)
+			return
 
 		try:
 			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY, banners=True)
@@ -407,6 +388,10 @@ class TVShow(object):
 		#  How many seasons? 
 		numOfSeasons = len(myShow) 
 		
+		# if we have no season banners then just finish
+		if 'season' not in myShow['_banners']:
+			return
+		
 		# Give us just the normal poster-style season graphics 
 		seasonsArtObj = myShow['_banners']['season']['season'] 
 		
@@ -429,10 +414,11 @@ class TVShow(object):
 				# Just grab whatever's there for now 
 				season, seasonURL = seasonsDict[seasonNum].popitem() 
 			
-				seasonFileName = 'season' + seasonNum.zfill(2) + '.jpg' 
+				seasonFileName = 'season' + seasonNum.zfill(2) 
 			
 				# Let's do the check before we pull the file 
-				if not os.path.isfile(os.path.join(self.location, seasonFileName)): 
+				if not os.path.isfile(os.path.join(self.location, seasonFileName+'.jpg')) and \
+				   not os.path.isfile(os.path.join(self.location, seasonFileName+'.tbn')): 
 					seasonData = helpers.getShowImage(seasonURL, season) 
 			
 					if seasonData == None: 
@@ -441,7 +427,7 @@ class TVShow(object):
 					if seasonData == None: 
 						logger.log("Unable to retrieve season poster, skipping", logger.ERROR) 
 					else: 
-						outFile = open(os.path.join(self.location, seasonFileName), 'wb') 
+						outFile = open(os.path.join(self.location, seasonFileName+'.jpg'), 'wb') 
 						outFile.write(seasonData) 
 						outFile.close()		
 
@@ -450,16 +436,8 @@ class TVShow(object):
 		try:
 			# load the tvrage object
 			tvr = tvrage.TVRage(self)
-			
-			# check for sync
-			if not tvr.checkSync():
-				logger.log("TVDB and TVRage are out of sync, not using TVRage data")
-				return
-			
-			# store it to db
-			tvr.saveToDB()
-			
-			newEp = tvr.getEpisode()
+
+			newEp = tvr.findLatestEp()
 			
 			if newEp != None:
 				logger.log("TVRage gave us an episode object - saving it for now", logger.DEBUG)
@@ -553,6 +531,7 @@ class TVShow(object):
 		else:
 			if self.name == "":
 				self.name = sqlResults[0]["show_name"]
+			self.tvrname = sqlResults[0]["tvr_name"]
 			if self.network == "":
 				self.network = sqlResults[0]["network"]
 			if self.genre == "":
@@ -614,39 +593,43 @@ class TVShow(object):
 		logger.log(str(self.tvdbid) + ": Loading show info from NFO")
 
 		xmlFile = os.path.join(self._location, "tvshow.nfo")
-		xmlFileObj = open(xmlFile, "r")
 		
 		try:
-			nfoData = " ".join(xmlFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
-			showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
+			showXML = etree.ElementTree(file = xmlFile)
 
-			if showSoup.title == None or (showSoup.tvdbid == None and showSoup.id == None):
-				raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id): "+str(showSoup.title)+" "+str(showSoup.tvdbid)+" "+str(showSoup.id))
+			if showXML.findtext('title') == None or \
+			    (showXML.findtext('tvdbid') == None and \
+			    showXML.findtext('id') == None):
+				raise exceptions.NoNFOException("Invalid \
+				    info in tvshow.nfo (missing name or id):" \
+				    + str(showXML.findtext('title')) + " " \
+				    + str(showXML.findtext('tvdbid')) + " " \
+				    + str(showXML.findtext('id')))
 			
-			self.name = showSoup.title.string
-			if showSoup.tvdbid != None and showSoup.tvdbid.string != None:
-				self.tvdbid = int(showSoup.tvdbid.string)
-			elif showSoup.id != None and showSoup.id.string != None:
-				self.tvdbid = int(showSoup.id.string)
+			self.name = showXML.findtext('title')
+			if showXML.findtext('tvdbid') != None:
+				self.tvdbid = int(showXML.findtext('tvdbid'))
+			elif showXML.findtext('id'):
+				self.tvdbid = int(showXML.findtext('id'))
 			else:
 				raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
-		except (exceptions.NoNFOException, SGMLParseError), e:
+		except (exceptions.NoNFOException, SyntaxError), e:
 			logger.log("There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
 			logger.log("Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
-			xmlFileObj.close()
+
 			try:
 				os.rename(xmlFile, xmlFile + ".old")
 			except Exception, e:
 				logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
 			raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
-		if showSoup.studio != None and showSoup.studio.string != None:
-			self.network = showSoup.studio.string
-		if self.network == None and showSoup.network.string != None:
+		if showXML.findtext('studio') != None:
+			self.network = showXML.findtext('studio')
+		if self.network == None and showXML.findtext('network') != None:
 			self.network = ""
-		if showSoup.genre != None and showSoup.genre.string != None:
-			self.genre = showSoup.genre.string
+		if showXML.findtext('genre') != None:
+			self.genre = showXML.findtext('genre')
 		else:
 			self.genre = ""
 
@@ -815,15 +798,15 @@ class TVShow(object):
 		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 
 		# use this list regardless of whether it's in there or not
-		sqlValues = [self.name, self.tvdbid, self.tvrid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders, self.paused, self.startyear]
+		sqlValues = [self.name, self.tvdbid, self.tvrid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders, self.paused, self.startyear, self.tvrname]
 		
 		# if it's not in there then insert it
 		if len(sqlResults) == 0:
-			sql = "INSERT INTO tv_shows (show_name, tvdb_id, tvr_id, location, network, genre, runtime, quality,  airs, status, seasonfolders, paused, startyear) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
+			sql = "INSERT INTO tv_shows (show_name, tvdb_id, tvr_id, location, network, genre, runtime, quality,  airs, status, seasonfolders, paused, startyear, tvr_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
 		# if it's already there then just change it
 		elif len(sqlResults) == 1:
-			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, tvr_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=?, paused=?, startyear=? WHERE tvdb_id=?"
+			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, tvr_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=?, paused=?, startyear=?, tvr_name=? WHERE tvdb_id=?"
 			sqlValues += [self.tvdbid]
 		else:
 			raise exceptions.MultipleDBShowsException("Multiple records for a single show")
@@ -1068,42 +1051,36 @@ class TVEpisode:
 		
 			nfoFile = sickbeard.helpers.replaceExtension(self.location, "nfo")
 			logger.log(str(self.show.tvdbid) + ": Using NFO name " + nfoFile, logger.DEBUG)
-			#nfoFile = os.path.join(self.show.location, nfoFilename)
 			
 			if os.path.isfile(nfoFile):
-				nfoFileObj = open(nfoFile, "r")
 				try:
-					nfoData = " ".join(nfoFileObj.readlines()).replace("&#x0D;","").replace("&#x0A;","")
-					showSoup = BeautifulStoneSoup(nfoData, convertEntities=BeautifulStoneSoup.XML_ENTITIES)
-				except (SGMLParseError, ValueError), e:
+					showXML = etree.ElementTree(file = nfoFile)
+				except (SyntaxError, ValueError), e:
 					logger.log("Error loading the NFO, backing up the NFO and skipping for now: " + str(e), logger.ERROR) #TODO: figure out what's wrong and fix it
-					nfoFileObj.close()
 					try:
 						os.rename(nfoFile, nfoFile + ".old")
 					except Exception, e:
 						logger.log("Failed to rename your episode's NFO file - you need to delete it or fix it: " + str(e), logger.ERROR)
 					raise exceptions.NoNFOException("Error in NFO format")
 
-				for epDetails in showSoup.findAll('episodedetails'):
-					if isinstance(epDetails, NavigableString):
+				for epDetails in showXML.getiterator('episodedetails'):
+					if epDetails.findtext('season') == None or int(epDetails.findtext('season')) != self.season or \
+					   epDetails.findtext('episode') == None or int(epDetails.findtext('episode')) != self.episode:
+						logger.log(str(self.show.tvdbid) + ": NFO has an <episodedetails> block for a different episode - wanted " + str(self.season) + "x" + str(self.episode) + " but got " + str(epDetails.findtext('season')) + "x" + str(epDetails.findtext('episode')), logger.DEBUG)
 						continue
 				
-					if epDetails.season.string == None or int(epDetails.season.string) != self.season or epDetails.episode.string == None or int(epDetails.episode.string) != self.episode:
-						logger.log(str(self.show.tvdbid) + ": NFO has an <episodedetails> block for a different episode - wanted " + str(self.season) + "x" + str(self.episode) + " but got " + str(epDetails.season.string) + "x" + str(epDetails.episode.string), logger.DEBUG)
-						continue
-				
-					if epDetails.title.string == None or epDetails.aired.string == None:
+					if epDetails.findtext('title') == None or epDetails.findtext('aired') == None:
 						raise exceptions.NoNFOException("Error in NFO format (missing episode title or airdate)")
 				
-					if epDetails.title.string != None:
-						#NAMEIT logger.log("CCCCCCC from " + str(self.season)+"x"+str(self.episode) + " -" + str(self.name) + " to " + str(showSoup.title.string))
-						self.name = epDetails.title.string
-					self.episode = int(epDetails.episode.string)
-					self.season = int(epDetails.season.string)
-					self.description = epDetails.plot.string
+					self.name = epDetails.findtext('title')
+					self.episode = int(epDetails.findtext('episode'))
+					self.season = int(epDetails.findtext('season'))
+
+					self.description = epDetails.findtext('plot')
 					if self.description == None:
 						self.description = ""
-					rawAirdate = [int(x) for x in epDetails.aired.string.split("-")]
+					
+					rawAirdate = [int(x) for x in epDetails.findtext('aired').split("-")]
 					self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
 					self.hasnfo = True
 			else:

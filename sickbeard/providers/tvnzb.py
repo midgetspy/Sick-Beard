@@ -27,7 +27,7 @@ import datetime
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
-from lib.BeautifulSoup import BeautifulStoneSoup
+import xml.etree.cElementTree as etree
 
 import sickbeard
 import sickbeard.classes
@@ -219,22 +219,26 @@ class TVNZBCache(tvcache.TVCache):
 		logger.log("Clearing cache and updating with new information")
 		self._clearCache()
 		
-		responseSoup = BeautifulStoneSoup(data)
-		items = responseSoup.findAll('item')
+		try:
+			responseSoup = etree.ElementTree(element = etree.XML(data))
+		except (SyntaxError), e:
+			logger.log("Invalid XML returned by TVNZB: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
+			return
+
+		items = responseSoup.getiterator('item')
 			
 		for item in items:
 
-			if item.title == None or item.link == None:
+			if item.findtext('title') == None or item.findtext('link') == None:
 				logger.log("The XML returned from the TVNZB RSS feed is incomplete, this result is unusable: "+str(item), logger.ERROR)
 				continue
 
-			title = item.title.string
-			url = item.link.string
+			title = item.findtext('title')
+			url = item.findtext('link')
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 
-			season = int(item.season.string)
-			episode = int(item.episode.string)
+			season = int(item.findtext('season'))
+			episode = int(item.findtext('episode'))
 
 			self._addCacheEntry(title, season, episode, url)
-

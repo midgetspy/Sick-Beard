@@ -84,7 +84,7 @@ class DBConnection:
 	def _checkDB(self):
 		# Create the table if it's not already there
 		try:
-			sql = "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, tvr_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC, paused NUMERIC, startyear NUMERIC);"
+			sql = "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, tvr_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_name TEXT);"
 			self.connection.execute(sql)
 			self.connection.commit()
 		except sqlite3.OperationalError, e:
@@ -117,4 +117,14 @@ class DBConnection:
 		except sqlite3.OperationalError, e:
 			if str(e) != "table history already exists":
 				raise
+
+		# Create the Index if it's not already there
+		try:
+			sql = "CREATE INDEX idx_tv_episodes_showid_airdate ON tv_episodes(showid,airdate);"
+			self.connection.execute(sql)
+			self.connection.commit()
+		except sqlite3.OperationalError, e:
+			if str(e) != "index idx_tv_episodes_showid_airdate already exists":
+				raise
+
 

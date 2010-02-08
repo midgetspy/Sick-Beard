@@ -238,7 +238,13 @@ def doIt(downloaderDir, nzbName=None):
         returnStr += logStr + "\n"
         
         # now that we've figured out which episode this file is just load it manually
-        curEp = showResults.getEpisode(season, episode)
+        try:        
+            curEp = showResults.getEpisode(season, episode)
+        except exceptions.EpisodeNotFoundException, e:
+            logStr = "Unable to create episode: "+str(e)
+            logger.log(logStr, logger.DEBUG)
+            returnStr += logStr + "\n"
+            return returnStr
         
         if rootEp == None:
             rootEp = curEp

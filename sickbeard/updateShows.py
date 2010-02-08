@@ -32,7 +32,7 @@ from sickbeard import db
 from sickbeard import exceptions
 from sickbeard import logger
 
-from lib.BeautifulSoup import BeautifulStoneSoup
+import xml.etree.cElementTree as etree
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class ShowUpdateQueue():
@@ -106,18 +106,18 @@ class ShowUpdater():
             logger.log("Unable to retrieve updated shows, assuming everything needs updating: " + str(e), logger.ERROR)
             return (0, None, None)
         
-        soup = BeautifulStoneSoup(urlObj)
+        soup = etree.ElementTree(file = urlObj)
         
-        newTime = int(soup.time.string)
+        newTime = int(soup.findtext('time'))
         
         updatedSeries = []
         updatedEpisodes = []
         
-        for curSeries in soup.findAll('series'):
-            updatedSeries.append(int(curSeries.string))
+        for curSeries in soup.findall('Series'):
+            updatedSeries.append(int(curSeries.text))
             
-        for curEpisode in soup.findAll('episode'):
-            updatedEpisodes.append(int(curEpisode.string))
+        for curEpisode in soup.findall('Episode'):
+            updatedEpisodes.append(int(curEpisode.text))
             
         return (newTime, updatedSeries, updatedEpisodes)
 
