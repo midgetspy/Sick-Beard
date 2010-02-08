@@ -990,7 +990,7 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
     
-        posterFilename = os.path.join(showObj.location, "folder.jpg")
+        posterFilename = os.path.abspath(os.path.join(showObj.location, "folder.jpg"))
         if os.path.isfile(posterFilename):
             
             return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")

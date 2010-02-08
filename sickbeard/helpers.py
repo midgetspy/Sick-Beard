@@ -82,6 +82,10 @@ def isMediaFile (file):
 def sanitizeSceneName (name):
 	for x in ":()'!":
 		name = name.replace(x, "")
+
+	name = name.replace("- ", ".").replace(" ", ".").replace("&", "and")
+	name = re.sub("\.\.*", ".", name)	
+	
 	return name
 		
 def sanitizeFileName (name):
@@ -99,8 +103,6 @@ def makeSceneShowSearchStrings(show):
 	if show.tvrname != "" and show.tvrname != None and show.name.lower() != show.tvrname.lower():
 		logger.log("Adding TVRage show name to the list: '"+show.tvrname+"'", logger.DEBUG)
 		showNames.append(show.tvrname)
-
-	showNames = [x.replace(". ", " ").replace(" ", ".").replace("&", "and") for x in showNames]
 
 	showNames = map(sanitizeSceneName, showNames)
 
