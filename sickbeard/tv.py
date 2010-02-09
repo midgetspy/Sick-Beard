@@ -364,9 +364,12 @@ class TVShow(object):
 		if fanartData == None:
 			logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
 		else:
-			outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
-			outFile.write(fanartData)
-			outFile.close()
+			try:
+				outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
+				outFile.write(fanartData)
+				outFile.close()
+			except IOError, e:
+				logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
 		
 		# get the image data
 		posterData = None
@@ -380,9 +383,13 @@ class TVShow(object):
 		if posterData == None:
 			logger.log("Unable to retrieve poster, skipping", logger.ERROR)
 		else:
-			outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
-			outFile.write(posterData)
-			outFile.close() 
+			try:
+				outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
+				outFile.write(posterData)
+				outFile.close()
+			except IOError, e:
+				logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
+			 
 
 		seasonData = None 
 		#  How many seasons? 
@@ -426,10 +433,14 @@ class TVShow(object):
 			
 					if seasonData == None: 
 						logger.log("Unable to retrieve season poster, skipping", logger.ERROR) 
-					else: 
-						outFile = open(os.path.join(self.location, seasonFileName+'.jpg'), 'wb') 
-						outFile.write(seasonData) 
-						outFile.close()		
+					else:
+						try:
+							outFile = open(os.path.join(self.location, seasonFileName+'.jpg'), 'wb') 
+							outFile.write(seasonData) 
+							outFile.close()
+						except IOError, e:
+							logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
+
 
 	def loadLatestFromTVRage(self):
 		
