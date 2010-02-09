@@ -68,7 +68,8 @@ What to do with found NZBs<br />
 <strong>NZB Black Hole:</strong><br />
 The directory where Sick Beard should store<br />
 your NZB files<br />
-<input type="text" name="nzb_dir" value="$sickbeard.NZB_DIR" size="35"><br />
+<input type="text" name="nzb_dir" id="nzb_dir" value="$sickbeard.NZB_DIR" size="35"> <input type="button" value="Browse&hellip;" id="nzb_dir_browse" /><br />
+<br />
 <br />
 
 <strong>Usenet Retention:</strong><br />
@@ -80,7 +81,7 @@ How old should a report be before we don't download it<br />
 <strong>Torrent Black Hole:</strong><br />
 The directory where Sick Beard should store<br />
 your torrent files<br />
-<input type="text" name="torrent_dir" value="$sickbeard.TORRENT_DIR" size="35"><br />
+<input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="35"> <input type="button" value="Browse&hellip;" id="torrent_dir_browse" /><br />
 <br />
 
 </fieldset>
@@ -130,7 +131,7 @@ Address of your SABnzbd server (IP:port, eg. 192.168.1.100:8080)<br />
 <strong>TV Download Dir</strong><br />
 The folder where SAB puts your TV downloads<br />
 (leave blank if SAB and Sick Beard are on the same PC)<br />
-<input type="text" name="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="30"><br />
+<input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="30"> <input type="button" value="Browse&hellip;" id="tv_dir_browse" /><br />
 <br />
 
 <input type="checkbox" name="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""#> <strong>Keep folder after processing</strong><br />
@@ -152,5 +153,11 @@ in the download dir<br />
 </p>
 </form>
 
+
+<script type="text/javascript" charset="utf-8">
+    jQuery('#nzb_dir_browse').fileBrowser({ field: '#nzb_dir', title: 'Select NZB Black Hole/Watch Directory' });
+    jQuery('#torrent_dir_browse').fileBrowser({ field: '#torrent_dir', title: 'Select Torrent Black Hole/Watch Directory' });
+    jQuery('#tv_dir_browse').fileBrowser({ field: '#tv_download_dir', title: 'Select TV Download directory' });
+</script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

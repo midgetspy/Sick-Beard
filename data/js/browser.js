@@ -43,8 +43,14 @@
 					fileBrowserDialog.dialog("close");
 				}
 			});
+			
+			if ($(options.field).val() != "")
+			     browseDir = $(options.field).val()
+			else
+			     browseDir = '/'
+									 
 			if(!currentBrowserPath)
-				browse('/')
+				browse(browseDir)
 			fileBrowserDialog.dialog('open');
 			return false;
 		});

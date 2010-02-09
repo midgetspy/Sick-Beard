@@ -26,7 +26,7 @@ All non-absolute folder locations are relative to $sickbeard.PROG_DIR<br /><br /
 <legend>Misc</legend>
 <strong>Logging directory:</strong><br />
 Directory where Sick Beard should place its logs<br />
-<input type="text" name="log_dir" value="$sickbeard.LOG_DIR" size="35"><br />
+<input type="text" name="log_dir" id="log_dir" value="$sickbeard.LOG_DIR" size="30"> <input type="button" value="Browse&hellip;" id="log_dir_browse" /><br />
 <br />
 
 <input type="checkbox" name="create_metadata" #if $sickbeard.CREATE_METADATA then "CHECKED" else ""#> <strong>Create metadata</strong><br />
@@ -98,5 +98,8 @@ Whether shows should use season folders by default<br />
 </p>
 </form>
 
+<script type="text/javascript" charset="utf-8">
+    jQuery('#log_dir_browse').fileBrowser({ field: '#log_dir', title: 'Select Log Directory' });
+</script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
