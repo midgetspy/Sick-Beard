@@ -421,11 +421,14 @@ class TVShow(object):
 				# Just grab whatever's there for now 
 				season, seasonURL = seasonsDict[seasonNum].popitem() 
 			
-				seasonFileName = 'season' + seasonNum.zfill(2) 
+				# Our specials thumbnail is, well, special
+				if seasonNum == '0':
+				    seasonFileName = 'season-specials'
+				else:
+				    seasonFileName = 'season' + seasonNum.zfill(2) 
 			
 				# Let's do the check before we pull the file 
-				if not os.path.isfile(os.path.join(self.location, seasonFileName+'.jpg')) and \
-				   not os.path.isfile(os.path.join(self.location, seasonFileName+'.tbn')): 
+				if not os.path.isfile(os.path.join(self.location, seasonFileName+'.tbn')):
 					seasonData = helpers.getShowImage(seasonURL, season) 
 			
 					if seasonData == None: 
@@ -435,7 +438,7 @@ class TVShow(object):
 						logger.log("Unable to retrieve season poster, skipping", logger.ERROR) 
 					else:
 						try:
-							outFile = open(os.path.join(self.location, seasonFileName+'.jpg'), 'wb') 
+							outFile = open(os.path.join(self.location, seasonFileName+'.tbn'), 'wb') 
 							outFile.write(seasonData) 
 							outFile.close()
 						except IOError, e:
