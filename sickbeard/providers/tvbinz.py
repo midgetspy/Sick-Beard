@@ -257,26 +257,29 @@ class TVBinzCache(tvcache.TVCache):
 			title = item.findtext('title')
 			url = item.findtext('link').replace('&amp;', '&')
 
-			sInfo = item.find('seriesInfo')
+			sInfo = item.find('{http://tvbinz.net/rss/tvb/}seriesInfo')
 			if sInfo == None:
 				logger.log("No series info, this is some kind of non-standard release, ignoring it", logger.DEBUG)
 				continue
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 
-			quality = sInfo.findtext('quality')
+			quality = sInfo.findtext('{http://tvbinz.net/rss/tvb/}quality')
 			if quality == "HD":
 				quality = HD
 			else:
 				quality = SD
 			
-			season = int(sInfo.findtext('seasonNum'))
-			episode = int(sInfo.findtext('episodeNum'))
+			season = int(sInfo.findtext('{http://tvbinz.net/rss/tvb/}seasonNum'))
+			epNum = sInfo.findtext('{http://tvbinz.net/rss/tvb/}episodeNum')
+			if epNum == '':
+				epNum = 0
+			episode = int(epNum)
 
-			if sInfo.findtext('tvrID') == None:
+			if sInfo.findtext('{http://tvbinz.net/rss/tvb/}tvrID') == None:
 				tvrid = 0
 			else:
-				tvrid = int(sInfo.findtext('tvrID'))
+				tvrid = int(sInfo.findtext('{http://tvbinz.net/rss/tvb/}tvrID'))
 			
 			self._addCacheEntry(title, season, episode, tvrid, url, quality)
 
