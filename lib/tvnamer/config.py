@@ -167,9 +167,9 @@ class _ConfigManager(dict):
                 '''
                 ^(?P<seriesname>.+?)[ \._\-]             # show name
                 (?P<seasonnumber>[0-9]+)                 # 1
-                x(?P<episodenumberstart>[0-9]+)          # first x23
-                (x[0-9]+)*                               # x24x25 etc
-                x(?P<episodenumberend>[0-9]+)            # final episode num
+                [xX](?P<episodenumberstart>[0-9]+)          # first x23
+                ([xX][0-9]+)*                               # x24x25 etc
+                [xX](?P<episodenumberend>[0-9]+)            # final episode num
                 [^\/]*$''',
 
                 # foo.s01e23-24*
@@ -190,7 +190,7 @@ class _ConfigManager(dict):
                 '''
                 ^(?P<seriesname>.+?)[ \._\-]             # show name
                 (?P<seasonnumber>[0-9]+)                 # 1
-                x(?P<episodenumberstart>[0-9]+)          # first x23
+                [xX](?P<episodenumberstart>[0-9]+)          # first x23
                 (                                        # -24 etc
                      [\-][0-9]+
                 )*
@@ -202,7 +202,7 @@ class _ConfigManager(dict):
                 '''^(?P<seriesname>.+?)[ \._\-]       # show name and padding
                 \[                                  # [
                     ?(?P<seasonnumber>[0-9]+)       # season
-                x                                   # x
+                [xX]                                   # x
                     (?P<episodenumberstart>[0-9]+)  # episode
                     (- [0-9]+)*
                 -                                   # -
@@ -221,7 +221,7 @@ class _ConfigManager(dict):
                 '''^(?P<seriesname>.+?)[ \._\-]       # show name and padding
                 \[?                                 # [ optional
                 (?P<seasonnumber>[0-9]+)            # season
-                x                                   # x
+                [xX]                                   # x
                 (?P<episodenumber>[0-9]+)           # episode
                 \]?                                 # ] optional
                 [^\\/]*$''',
