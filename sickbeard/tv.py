@@ -353,43 +353,44 @@ class TVShow(object):
 		posterURL = myShow['poster']
 
 		# get the image data
-		fanartData = None
-		if not os.path.isfile(os.path.join(self.location, "fanart.jpg")) and fanart != None:
-			fanartData = helpers.getShowImage(fanartURL, fanart)
-		
-		# if we had a custom image number that failed OR we had no custom number then get the default one
-		if fanartData == None:
-			fanartData = helpers.getShowImage(fanartURL)
-
-		if fanartData == None:
-			logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
-		else:
-			try:
-				outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
-				outFile.write(fanartData)
-				outFile.close()
-			except IOError, e:
-				logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
+		if not os.path.isfile(os.path.join(self.location, "fanart.jpg")):
+			fanartData = None
+			if fanart != None:
+				fanartData = helpers.getShowImage(fanartURL, fanart)
+			
+			# if we had a custom image number that failed OR we had no custom number then get the default one
+			if fanartData == None:
+				fanartData = helpers.getShowImage(fanartURL)
+	
+			if fanartData == None:
+				logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
+			else:
+				try:
+					outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
+					outFile.write(fanartData)
+					outFile.close()
+				except IOError, e:
+					logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
 		
 		# get the image data
-		posterData = None
-		if not os.path.isfile(os.path.join(self.location, "folder.jpg")) and poster != None:
-			posterData = helpers.getShowImage(posterURL, poster)
-		
-		# if we had a custom image number that failed OR we had no custom number then get the default one
-		if posterData == None:
-			posterData = helpers.getShowImage(posterURL)
-
-		if posterData == None:
-			logger.log("Unable to retrieve poster, skipping", logger.ERROR)
-		else:
-			try:
-				outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
-				outFile.write(posterData)
-				outFile.close()
-			except IOError, e:
-				logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
-			 
+		if not os.path.isfile(os.path.join(self.location, "folder.jpg")):
+			posterData = None
+			if poster != None:
+				posterData = helpers.getShowImage(posterURL, poster)
+			
+			# if we had a custom image number that failed OR we had no custom number then get the default one
+			if posterData == None:
+				posterData = helpers.getShowImage(posterURL)
+	
+			if posterData == None:
+				logger.log("Unable to retrieve poster, skipping", logger.ERROR)
+			else:
+				try:
+					outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
+					outFile.write(posterData)
+					outFile.close()
+				except IOError, e:
+					logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
 
 		seasonData = None 
 		#  How many seasons? 
