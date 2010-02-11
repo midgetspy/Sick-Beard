@@ -192,7 +192,7 @@ class FileParser(object):
                         if epnomatch:
                             epnos.append(int(match.group(cur)))
                     epnos.sort()
-                    episodenumber = epnos
+                    episodenumbers = epnos
 
                 elif 'episodenumberstart' in namedgroups:
                     # Multiple episodes, regex specifies start and end number
@@ -201,10 +201,10 @@ class FileParser(object):
                     if start > end:
                         # Swap start and end
                         start, end = end, start
-                    episodenumber = range(start, end + 1)
+                    episodenumbers = range(start, end + 1)
 
                 else:
-                    episodenumber = int(match.group('episodenumber'))
+                    episodenumbers = [int(match.group('episodenumber'))]
 
                 if 'seasonnumber' in namedgroups:
                     seasonnumber = int(match.group('seasonnumber'))
@@ -214,12 +214,13 @@ class FileParser(object):
 
                 seriesname = match.group('seriesname')
 
-                seriesname = cleanRegexedSeriesName(seriesname)
+                if seriesname != None:
+                    seriesname = cleanRegexedSeriesName(seriesname)
 
                 episode = EpisodeInfo(
                     seriesname = seriesname,
                     seasonnumber = seasonnumber,
-                    episodenumber = episodenumber,
+                    episodenumbers = episodenumbers,
                     filename = self.path)
                 return episode
         else:

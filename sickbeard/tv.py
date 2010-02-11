@@ -484,13 +484,7 @@ class TVShow(object):
 		season = epInfo.seasonnumber
 		rootEp = None
 
-		# TODO: tvnamer should really just return a list always
-		if not isinstance(epInfo.episodenumber, list):
-			epList = [epInfo.episodenumber]
-		else:
-			epList = epInfo.episodenumber
-
-		for curEp in epList:
+		for curEp in epInfo.episodenumbers:
 
 			episode = int(curEp)
 			

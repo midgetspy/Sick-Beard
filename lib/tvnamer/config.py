@@ -152,9 +152,25 @@ class _ConfigManager(dict):
                 [ ]?[-_][ ]?(?P<episodenumber>\d+)
                 [^\/]*$''',
 
+                # foo s01e23 s01e24 s01e25 *
+                '''
+                ^((?P<seriesname>.+?)[ \._\-])?          # show name
+                [Ss](?P<seasonnumber>[0-9]+)             # s01
+                [\.\- ]?                                 # separator
+                [Ee](?P<episodenumberstart>[0-9]+)       # first e23
+                ([\.\- ]+                                # separator
+                [Ss](?P=seasonnumber)                    # s01
+                [\.\- ]?                                 # separator
+                [Ee][0-9]+)*                             # e24 etc (middle groups)
+                ([\.\- ]+                                # separator
+                [Ss](?P=seasonnumber)                    # last s01
+                [\.\- ]?                                 # separator
+                [Ee](?P<episodenumberend>[0-9]+))        # final episode number
+                [^\/]*$''',                
+
                 # foo.s01e23e24*
                 '''
-                ^(?P<seriesname>.+?)[ \._\-]             # show name
+                ^((?P<seriesname>.+?)[ \._\-])?          # show name
                 [Ss](?P<seasonnumber>[0-9]+)             # s01
                 [\.\- ]?                                 # separator
                 [Ee](?P<episodenumberstart>[0-9]+)       # first e23
@@ -163,18 +179,31 @@ class _ConfigManager(dict):
                 [\.\- ]?[Ee](?P<episodenumberend>[0-9]+) # final episode num
                 [^\/]*$''',
 
+                # foo.1x23 1x24 1x25
+                '''
+                ^((?P<seriesname>.+?)[ \._\-])?          # show name
+                (?P<seasonnumber>[0-9]+)                 # 1
+                [xX](?P<episodenumberstart>[0-9]+)       # first x23
+                ([ \._\-]+
+                (?P=seasonnumber)[xX]
+                [0-9]+)*
+                ([ \._\-]+
+                (?P=seasonnumber)[xX]
+                (?P<episodenumberend>[0-9]+))
+                [^\/]*$''',
+
                 # foo.1x23x24*
                 '''
-                ^(?P<seriesname>.+?)[ \._\-]             # show name
+                ^((?P<seriesname>.+?)[ \._\-])?          # show name
                 (?P<seasonnumber>[0-9]+)                 # 1
-                [xX](?P<episodenumberstart>[0-9]+)          # first x23
-                ([xX][0-9]+)*                               # x24x25 etc
-                [xX](?P<episodenumberend>[0-9]+)            # final episode num
+                [xX](?P<episodenumberstart>[0-9]+)       # first x23
+                ([xX][0-9]+)*                            # x24x25 etc
+                [xX](?P<episodenumberend>[0-9]+)         # final episode num
                 [^\/]*$''',
 
                 # foo.s01e23-24*
                 '''
-                ^(?P<seriesname>.+?)[ \._\-]             # show name
+                ^((?P<seriesname>.+?)[ \._\-])?          # show name
                 [Ss](?P<seasonnumber>[0-9]+)             # s01
                 [\.\- ]?                                 # separator
                 [Ee](?P<episodenumberstart>[0-9]+)       # first e23
@@ -188,9 +217,9 @@ class _ConfigManager(dict):
 
                 # foo.1x23-24*
                 '''
-                ^(?P<seriesname>.+?)[ \._\-]             # show name
+                ^((?P<seriesname>.+?)[ \._\-])?          # show name
                 (?P<seasonnumber>[0-9]+)                 # 1
-                [xX](?P<episodenumberstart>[0-9]+)          # first x23
+                [xX](?P<episodenumberstart>[0-9]+)       # first x23
                 (                                        # -24 etc
                      [\-][0-9]+
                 )*
@@ -199,41 +228,46 @@ class _ConfigManager(dict):
                 [^\/]*$''',
 
                 # foo.[1x09-11]*
-                '''^(?P<seriesname>.+?)[ \._\-]       # show name and padding
-                \[                                  # [
-                    ?(?P<seasonnumber>[0-9]+)       # season
-                [xX]                                   # x
-                    (?P<episodenumberstart>[0-9]+)  # episode
+                '''
+                ^((?P<seriesname>.+?)[ \._\-])?          # show name and padding
+                \[                                       # [
+                    ?(?P<seasonnumber>[0-9]+)            # season
+                [xX]                                     # x
+                    (?P<episodenumberstart>[0-9]+)       # episode
                     (- [0-9]+)*
-                -                                   # -
-                    (?P<episodenumberend>[0-9]+)    # episode
-                \]                                  # \]
+                -                                        # -
+                    (?P<episodenumberend>[0-9]+)         # episode
+                \]                                       # \]
                 [^\\/]*$''',
 
                 # foo.s0101, foo.0201
-                '''^(?P<seriesname>.+?)[ \._\-]
+                '''
+                ^(?P<seriesname>.+?)[ \._\-]
                 [Ss](?P<seasonnumber>[0-9]{2})
                 [\.\- ]?
                 (?P<episodenumber>[0-9]{2})
                 [^\\/]*$''',
 
                 # foo.1x09*
-                '''^(?P<seriesname>.+?)[ \._\-]       # show name and padding
-                \[?                                 # [ optional
-                (?P<seasonnumber>[0-9]+)            # season
-                [xX]                                   # x
-                (?P<episodenumber>[0-9]+)           # episode
-                \]?                                 # ] optional
+                '''
+                ^((?P<seriesname>.+?)[ \._\-])?          # show name and padding
+                \[?                                      # [ optional
+                (?P<seasonnumber>[0-9]+)                 # season
+                [xX]                                     # x
+                (?P<episodenumber>[0-9]+)                # episode
+                \]?                                      # ] optional
                 [^\\/]*$''',
 
                 # foo.s01.e01, foo.s01_e01
-                '''^(?P<seriesname>.+?)[ \._\-]
+                '''
+                ^((?P<seriesname>.+?)[ \._\-])?
                 [Ss](?P<seasonnumber>[0-9]+)[\.\- ]?
                 [Ee]?(?P<episodenumber>[0-9]+)
                 [^\\/]*$''',
 
                 # foo.103*
-                '''^(?P<seriesname>.+)[ \._\-]
+                '''
+                ^(?P<seriesname>.+)[ \._\-]
                 (?P<seasonnumber>[0-9]{1})
                 (?P<episodenumber>[0-9]{2})
                 [\._ -][^\\/]*$''',
@@ -245,10 +279,10 @@ class _ConfigManager(dict):
                 [\._ -][^\\/]*$''',
 
                 # show.name.e123.abc
-                '''^(?P<seriesname>.+?)          # Show name
-                [ \._\-]                       # Padding
-                [Ee](?P<episodenumber>[0-9]+)  # E123
-                [\._ -][^\\/]*$                # More padding, then anything
+                '''^(?P<seriesname>.+?)                    # Show name
+                [ \._\-]                                   # Padding
+                [Ee](?P<episodenumber>[0-9]+)              # E123
+                [\._ -][^\\/]*$                            # More padding, then anything
                 '''
             ],
 
