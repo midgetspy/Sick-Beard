@@ -74,7 +74,7 @@ def replaceExtension (file, newExt):
 
 def isMediaFile (file):
 	sepFile = file.rpartition(".")
-	if sepFile[2] in mediaExtensions:
+	if sepFile[2].lower() in mediaExtensions:
 		return True
 	else:
 		return False
