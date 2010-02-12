@@ -220,7 +220,7 @@ class FileParser(object):
                 episode = EpisodeInfo(
                     seriesname = seriesname,
                     seasonnumber = seasonnumber,
-                    episodenumbers = episodenumbers,
+                    episodenumber = episodenumbers,
                     filename = self.path)
                 return episode
         else:
