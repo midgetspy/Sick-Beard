@@ -39,6 +39,8 @@ from sickbeard.notifiers import xbmc
 
 from lib.tvdb_api import tvnamer, tvdb_api, tvdb_exceptions
 
+from lib.tvnamer.utils import FileParser
+from lib.tvnamer import tvnamer_exceptions
 #from tvdb_api.nfogen import createXBMCInfo
 
 sample_ratio = 0.3
@@ -163,14 +165,11 @@ def doIt(downloaderDir, nzbName=None):
     
     for curName in nameList:
     
-        result = tvnamer.processSingleName(curName)
-        logStr = curName + " parsed into: " + str(result)
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
-    
-        # if this one doesn't work try the next one
-        if result == None:
-            logStr = "Unable to parse this name"
+        try:
+            myParser = FileParser(curName)
+            result = myParser.parse()
+        except tvnamer_exceptions.InvalidFilename:
+            logStr = "Unable to parse the filename "+curName+" into a valid episode"
             logger.log(logStr, logger.DEBUG)
             returnStr += logStr + "\n"
             continue
@@ -179,7 +178,7 @@ def doIt(downloaderDir, nzbName=None):
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI,
                               lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
                               apikey=sickbeard.TVDB_API_KEY)
-            showObj = t[result["file_seriesname"]]
+            showObj = t[result.seriesname]
             showInfo = (int(showObj["id"]), showObj["seriesname"])
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
@@ -187,7 +186,7 @@ def doIt(downloaderDir, nzbName=None):
             logger.log(logStr, logger.DEBUG)
             returnStr += logStr + "\n"
 
-            showInfo = helpers.searchDBForShow(result["file_seriesname"])
+            showInfo = helpers.searchDBForShow(result.seriesname)
             
         # if we didn't get anything from TVDB or the DB then try the next option
         if showInfo == None:
@@ -227,10 +226,10 @@ def doIt(downloaderDir, nzbName=None):
 
     
     # get or create the episode (should be created probably, but not for sure)
-    season = int(result["seasno"])
+    season = int(result.seasonnumber)
 
     rootEp = None
-    for curEpisode in result["epno"]:
+    for curEpisode in result.episodenumber:
         episode = int(curEpisode)
     
         logStr = "TVDB thinks the file is " + showInfo[1] + str(season) + "x" + str(episode)
