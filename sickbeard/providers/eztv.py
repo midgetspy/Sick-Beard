@@ -50,8 +50,8 @@ def downloadTorrent (torrent):
 
 def findEpisode(episode, forceQuality=None):
 
-    if episode.status in (BACKLOG, DISCBACKLOG):
-        logger.log("Skipping "+episode.prettyName()+" because it'll probably be too old", logger.DEBUG)
+    if episode.status == DISCBACKLOG:
+        logger.log("EZTV doesn't support disc backlog. Download it manually.")
         return []
 
     logger.log("Searching EZTV for " + episode.prettyName())
@@ -59,7 +59,7 @@ def findEpisode(episode, forceQuality=None):
     if forceQuality != None:
         epQuality = forceQuality
     elif episode.show.quality == BEST:
-        epQuality = HD
+        epQuality = ANY
     else:
         epQuality = episode.show.quality
     
@@ -94,23 +94,35 @@ def findEpisode(episode, forceQuality=None):
 
     for item in items:
         
-        if item.findtext('title') == None or item.findtext('link') == None:
+        title = item.findtext('title')
+        url = item.findtext('link')
+        filesize = item.find('enclosure').attrib['length']
+        
+        if title == None or url == None:
             logger.log("The XML returned from the EZTV RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
             continue
         
-        if epQuality == SD and ('720p' in item.findtext('title') or '720p' in item.findtext('link')):
+        # if we are looking for an SD episode pass on anything with 720p in it
+        if epQuality == SD and ('720p' in title.lower() or '720p' in url.lower()):
+            logger.log("Looking for SD episode on EZTV but found HD. Title: " + title + " URL: " + url)
             continue
         
-        title = item.findtext('title')
-        url = item.findtext('link')
+        try:
+            filesize = int(filesize)
+        except ValueError:
+            logger.log("The file size from EZTV is invalid. Filesize" + filesize +  " Title: " + title + " URL: " + url)
+            filesize = 0
         
         logger.log("Found result " + title + " at " + url, logger.DEBUG)
 
         result = sickbeard.classes.TorrentSearchResult(episode)
         result.provider = sickbeard.common.EZTV
         result.url = url 
-        result.extraInfo = [title]
+        result.extraInfo = [title, filesize]
         
         results.append(result)
+        
+    # this shouldn't be necessary but can't hurt
+    results.sort(lambda x,y: cmp(y.extraInfo[1], x.extraInfo[1]))
         
     return results
