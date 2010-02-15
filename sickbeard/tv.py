@@ -804,23 +804,24 @@ class TVShow(object):
 		logger.log(str(self.tvdbid) + ": Saving show info to database", logger.DEBUG)
 
 		myDB = db.DBConnection()
-		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
 
-		# use this list regardless of whether it's in there or not
-		sqlValues = [self.name, self.tvdbid, self.tvrid, self._location, self.network, self.genre, self.runtime, self.quality, self.airs, self.status, self.seasonfolders, self.paused, self.startyear, self.tvrname]
-		
-		# if it's not in there then insert it
-		if len(sqlResults) == 0:
-			sql = "INSERT INTO tv_shows (show_name, tvdb_id, tvr_id, location, network, genre, runtime, quality,  airs, status, seasonfolders, paused, startyear, tvr_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+		controlValueDict = {"tvdb_id": self.tvdbid}
+		newValueDict = {"show_name": self.name,
+					    "tvr_id": self.tvrid,
+					    "location": self._location,
+					    "network": self.network,
+					    "genre": self.genre,
+					    "runtime": self.runtime,
+					    "quality": self.quality,
+					    "airs": self.airs,
+					    "status": self.status,
+					    "seasonfolders": self.seasonfolders,
+					    "paused": self.paused,
+					    "startyear": self.startyear,
+					    "tvr_name": self.tvrname
+					    }
 
-		# if it's already there then just change it
-		elif len(sqlResults) == 1:
-			sql = "UPDATE tv_shows SET show_name=?, tvdb_id=?, tvr_id=?, location=?, network=?, genre=?, runtime=?, quality=?, airs=?, status=?, seasonfolders=?, paused=?, startyear=?, tvr_name=? WHERE tvdb_id=?"
-			sqlValues += [self.tvdbid]
-		else:
-			raise exceptions.MultipleDBShowsException("Multiple records for a single show")
-		
-		myDB.action(sql, sqlValues)
+		myDB.upsert("tv_shows", newValueDict, controlValueDict)
 		
 		
 	def __str__(self):
@@ -937,7 +938,7 @@ class TVEpisode:
 			if self.description == None:
 				self.description = ""
 			self.airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
-			logger.log("1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
+			#logger.log("1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
 			self.status = int(sqlResults[0]["status"])
 			
 			# don't overwrite my location
@@ -1334,23 +1335,20 @@ class TVEpisode:
 		logger.log("STATUS IS " + str(self.status), logger.DEBUG)
 	
 		myDB = db.DBConnection()
-		sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND episode = " + str(self.episode) + " AND season = " + str(self.season))
-
-		# use this list regardless of whether it's in there or not
-		sqlValues = [self.show.tvdbid, self.tvdbid, self.name, self.season, self.episode, self.description, self.airdate.toordinal(), self.hasnfo, self.hastbn, self.status, self.location]
+		newValueDict = {"tvdbid": self.tvdbid,
+					    "name": self.name,
+					    "description": self.description,
+					    "airdate": self.airdate.toordinal(),
+					    "hasnfo": self.hasnfo,
+					    "hastbn": self.hastbn,
+					    "status": self.status,
+					    "location": self.location}
+		controlValueDict = {"showid": self.show.tvdbid,
+						    "season": self.season,
+						    "episode": self.episode}
 		
-		# if it's not in there then insert it
-		if len(sqlResults) == 0:
-			sql = "INSERT INTO tv_episodes (showid, tvdbid, name, season, episode, description, airdate, hasnfo, hastbn, status, location) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-
-		# if it's already there then just change it
-		elif len(sqlResults) == 1:
-			sql = "UPDATE tv_episodes SET showid=?, tvdbid=?, name=?, season=?, episode=?, description=?, airdate=?, hasnfo=?, hastbn=?, status=?, location=? WHERE showid=? AND season=? AND episode=?"
-			sqlValues += [self.show.tvdbid, self.season, self.episode]
-		else:
-			raise sickbeard.exceptions.LaterException("Multiple records for a single episode")
-		
-		myDB.action(sql, sqlValues)
+		# use a custom update/insert method to get the data into the DB
+		myDB.upsert("tv_episodes", newValueDict, controlValueDict)
 		
 		
 	def fullPath (self):

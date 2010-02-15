@@ -24,8 +24,6 @@ import sqlite3
 import sickbeard
 from sickbeard import logger
 
-from lib.tvdb_api import tvdb_api
-
 class DBConnection:
 	def __init__(self, dbFileName="sickbeard.db"):
 		
@@ -36,50 +34,52 @@ class DBConnection:
 
 	def action(self, query, args=None):
 		
-		self._checkDB()
-		
 		if query == None:
 			return
 
 		try:
 			if args == None:
 				logger.log(self.dbFileName+": "+query, logger.DEBUG)
-				self.connection.execute(query)
+				sqlResult = self.connection.execute(query)
 			else:
 				logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
-				self.connection.execute(query, args)
+				sqlResult = self.connection.execute(query, args)
 			self.connection.commit()
+		except sqlite3.OperationalError, e:
+			if str(e).startswith("no such table: "):
+				self._checkDB()
+				self.action(query, args)
 		except sqlite3.DatabaseError, e:
 			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
 			raise
+		
+		return sqlResult
 		
 
 	def select(self, query, args=None):
 
-		self._checkDB()
-		sqlResults = []
+		sqlResults = self.action(query, args).fetchall()
 
-		if query == None:
-			logger.log("Query must be a string (was None)", logger.ERROR)
-			return
-		else:
-			query = str(query)
-	
-		try:
-			if args == None:
-				logger.log(self.dbFileName+": "+query, logger.DEBUG)
-				sqlResults = self.connection.execute(query).fetchall()
-			else:
-				logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
-				sqlResults = self.connection.execute(query, args).fetchall()
-		except sqlite3.DatabaseError, e:
-			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
-			raise
-		
 		if sqlResults == None:
 			return []
 		
 		return sqlResults
+	
+	def upsert(self, tableName, valueDict, keyDict):
+		
+		changesBefore = self.connection.total_changes
+		
+		genParams = lambda myDict : [x + " = ?" for x in myDict.keys()]
+		
+		query = "UPDATE "+tableName+" SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
+		
+		self.action(query, valueDict.values() + keyDict.values())
+
+		if self.connection.total_changes == changesBefore:
+			query = "INSERT INTO "+tableName+" (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + \
+			         " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")" 
+			self.action(query, valueDict.values() + keyDict.values())
+
 	
 	def _checkDB(self):
 		# Create the table if it's not already there
