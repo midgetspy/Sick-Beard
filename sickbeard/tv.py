@@ -430,10 +430,8 @@ class TVShow(object):
 			
 				# Let's do the check before we pull the file 
 				if not os.path.isfile(os.path.join(self.location, seasonFileName+'.tbn')):
-					seasonData = helpers.getShowImage(seasonURL, season) 
-			
-					if seasonData == None: 
-						seasonData = helpers.getShowImage(seasonURL) 
+
+					seasonData = helpers.getShowImage(seasonURL) 
 			
 					if seasonData == None: 
 						logger.log("Unable to retrieve season poster, skipping", logger.ERROR) 
@@ -1002,7 +1000,15 @@ class TVEpisode:
 		if self.description == None:
 			self.description = ""
 		rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
-		self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+		try:
+			self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+		except ValueError:
+			logger.log("Malformed air date retrieved from TVDB ("+self.show.name+" - "+str(season)+"x"+str(episode)+")", logger.ERROR)
+			# if I'm incomplete on TVDB but I once was complete then just delete myself from the DB for now
+			if self.tvdbid != -1:
+				self.deleteEpisode()
+			return False
+			
 		self.tvdbid = myEp["id"]
 
 		if not os.path.isdir(self.show._location):
