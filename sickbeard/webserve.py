@@ -333,7 +333,8 @@ class ConfigProviders:
     @cherrypy.expose
     def saveProviders(self, newzbin=None, newzbin_username=None, newzbin_password=None, tvbinz=None,
                    tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None, nzbs_hash=None,
-                   nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None, tvnzb=None):
+                   nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None, tvnzb=None,
+                   tvbinz_auth=None):
 
         results = []
 
@@ -369,6 +370,7 @@ class ConfigProviders:
         sickbeard.TVBINZ = tvbinz
         sickbeard.TVBINZ_UID = tvbinz_uid
         sickbeard.TVBINZ_HASH = tvbinz_hash
+        sickbeard.TVBINZ_AUTH = tvbinz_auth
         
         sickbeard.NZBS = nzbs
         sickbeard.NZBS_UID = nzbs_uid

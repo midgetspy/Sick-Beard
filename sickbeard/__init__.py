@@ -108,6 +108,7 @@ NEWZBIN_PASSWORD = None
 TVBINZ = False
 TVBINZ_UID = None
 TVBINZ_HASH = None
+TVBINZ_AUTH = None
 
 NZBS = False
 NZBS_UID = None
@@ -239,7 +240,7 @@ def initialize():
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                MIN_BACKLOG_SEARCH_FREQUENCY
+                MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH
         
         if __INITIALIZED__:
             return False
@@ -310,6 +311,7 @@ def initialize():
         TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
         TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
         TVBINZ_HASH = check_setting_str(CFG, 'TVBinz', 'tvbinz_hash', '')
+        TVBINZ_AUTH = check_setting_str(CFG, 'TVBinz', 'tvbinz_auth', '')
         
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -531,7 +533,7 @@ def save_config():
         USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
         QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
         NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
-        PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB
+        PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB, TVBINZ_AUTH
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
@@ -561,6 +563,7 @@ def save_config():
     CFG['TVBinz']['tvbinz'] = int(TVBINZ)
     CFG['TVBinz']['tvbinz_uid'] = TVBINZ_UID
     CFG['TVBinz']['tvbinz_hash'] = TVBINZ_HASH
+    CFG['TVBinz']['tvbinz_auth'] = TVBINZ_AUTH
     CFG['NZBs']['nzbs'] = int(NZBS)
     CFG['NZBs']['nzbs_uid'] = NZBS_UID
     CFG['NZBs']['nzbs_hash'] = NZBS_HASH

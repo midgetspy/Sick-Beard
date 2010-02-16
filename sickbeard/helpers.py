@@ -126,7 +126,12 @@ def getGZippedURL (f):
 	compressedResponse = f.read()
 	compressedStream = StringIO.StringIO(compressedResponse)
 	gzipper = gzip.GzipFile(fileobj=compressedStream)
-	return gzipper.read()
+	try:
+		data = None
+		data = gzipper.read()
+	except IOError, e:
+		logger.log("Exception encountered trying to read gzip: "+str(e), logger.ERROR)
+	return data
 
 def findCertainShow (showList, tvdbid):
 	results = filter(lambda x: x.tvdbid == tvdbid, showList)

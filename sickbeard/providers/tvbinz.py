@@ -46,7 +46,7 @@ def isActive():
 
 def getTVBinzURL (url):
 
-	searchHeaders = {"Cookie": "uid=" + sickbeard.TVBINZ_UID + ";hash=" + sickbeard.TVBINZ_HASH, 'Accept-encoding': 'gzip'}
+	searchHeaders = {"Cookie": "uid=" + sickbeard.TVBINZ_UID + ";hash=" + sickbeard.TVBINZ_HASH + ";auth=" + sickbeard.TVBINZ_AUTH, 'Accept-encoding': 'gzip'}
 	req = urllib2.Request(url=url, headers=searchHeaders)
 	
 	try:
@@ -86,7 +86,7 @@ def findEpisode (episode, forceQuality=None):
 		logger.log("TVbinz doesn't support disc backlog. Use Newzbin or download it manually from TVbinz")
 		return []
 
-	if sickbeard.TVBINZ_UID in (None, "") or sickbeard.TVBINZ_HASH in (None, ""):
+	if sickbeard.TVBINZ_UID in (None, "") or sickbeard.TVBINZ_HASH in (None, "") or sickbeard.TVBINZ_AUTH in (None, ""):
 		raise exceptions.AuthException("TVBinz authentication details are empty, check your config")
 	
 	logger.log("Searching tvbinz for " + episode.prettyName())
