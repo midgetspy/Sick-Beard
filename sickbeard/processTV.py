@@ -106,6 +106,10 @@ def _checkForExistingFile(newFile, oldFile):
         return 0
             
 
+def logHelper (logMessage, logLevel=logger.MESSAGE):
+    logger.log(logMessage, logLevel)
+    return logMessage + "\n"
+
 
 def doIt(downloaderDir, nzbName=None):
     
@@ -121,39 +125,34 @@ def doIt(downloaderDir, nzbName=None):
     elif sickbeard.TV_DOWNLOAD_DIR != '' and os.path.isdir(sickbeard.TV_DOWNLOAD_DIR):
         downloadDir = os.path.join(sickbeard.TV_DOWNLOAD_DIR, os.path.abspath(downloaderDir).split(os.path.sep)[-1])
 
-        logStr = "Trying to use folder "+downloadDir
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Trying to use folder "+downloadDir, logger.DEBUG)
 
     # if we didn't find a real dir then quit
     if not os.path.isdir(downloadDir):
-        logStr = "Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config."
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
         return returnStr
 
-    logStr = "Final folder name is " + downloadDir
-    logger.log(logStr, logger.DEBUG)
-    returnStr += logStr + "\n"
+    myDB = db.DBConnection()
+    sqlResults = myDB.select("SELECT * FROM tv_shows")
+    for sqlShow in sqlResults:
+        if downloadDir.startswith(os.path.abspath(sqlShow["location"])):
+            returnStr += logHelper("You're trying to post process a show that's already been moved to its show dir", logger.ERROR)
+            return returnStr
+
+    returnStr += logHelper("Final folder name is " + downloadDir, logger.DEBUG)
     
     # TODO: check if it's failed and deal with it if it is
     if downloadDir.startswith('_FAILED_'):
-        logStr = "The directory name indicates it failed to extract, cancelling"
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("The directory name indicates it failed to extract, cancelling", logger.DEBUG)
         return returnStr
     
     # find the file we're dealing with
     biggest_file = findMainFile(downloadDir)
     if biggest_file == None:
-        logStr = "Unable to find the biggest file - is this really a TV download?"
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Unable to find the biggest file - is this really a TV download?", logger.DEBUG)
         return returnStr
         
-    logStr = "The biggest file in the dir is: " + biggest_file
-    logger.log(logStr, logger.DEBUG)
-    returnStr += logStr + "\n"
+    returnStr += logHelper("The biggest file in the dir is: " + biggest_file, logger.DEBUG)
     
     # use file name, folder name, and NZB name (in that order) to try to figure out the episode info
     result = None
@@ -169,9 +168,7 @@ def doIt(downloaderDir, nzbName=None):
             myParser = FileParser(curName)
             result = myParser.parse()
         except tvnamer_exceptions.InvalidFilename:
-            logStr = "Unable to parse the filename "+curName+" into a valid episode"
-            logger.log(logStr, logger.DEBUG)
-            returnStr += logStr + "\n"
+            returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
             continue
 
         try:
@@ -182,9 +179,7 @@ def doIt(downloaderDir, nzbName=None):
             showInfo = (int(showObj["id"]), showObj["seriesname"])
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
-            logStr = "TVDB didn't respond, trying to look up the show in the DB instead"
-            logger.log(logStr, logger.DEBUG)
-            returnStr += logStr + "\n"
+            returnStr += logHelper("TVDB didn't respond, trying to look up the show in the DB instead", logger.DEBUG)
 
             showInfo = helpers.searchDBForShow(result.seriesname)
             
@@ -199,29 +194,21 @@ def doIt(downloaderDir, nzbName=None):
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
         
         if showResults != None:
-            logStr = "Found the show in our list, continuing"
-            logger.log(logStr, logger.DEBUG)
-            returnStr += logStr + "\n"
+            returnStr += logHelper("Found the show in our list, continuing", logger.DEBUG)
             break
     
     # end for
         
     if result == None:
-        logStr = "Unable to figure out what this episode is, giving up"
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Unable to figure out what this episode is, giving up", logger.DEBUG)
         return returnStr
 
     if showResults == None:
-        logStr = "The episode doesn't match a show in my list - bad naming?"
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("The episode doesn't match a show in my list - bad naming?", logger.DEBUG)
         return returnStr
 
     if not os.path.isdir(showResults._location):
-        logStr = "The show dir doesn't exist, canceling postprocessing"
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("The show dir doesn't exist, canceling postprocessing", logger.DEBUG)
         return returnStr
 
     
@@ -232,17 +219,13 @@ def doIt(downloaderDir, nzbName=None):
     for curEpisode in result.episodenumber:
         episode = int(curEpisode)
     
-        logStr = "TVDB thinks the file is " + showInfo[1] + str(season) + "x" + str(episode)
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("TVDB thinks the file is " + showInfo[1] + str(season) + "x" + str(episode), logger.DEBUG)
         
         # now that we've figured out which episode this file is just load it manually
         try:        
             curEp = showResults.getEpisode(season, episode)
         except exceptions.EpisodeNotFoundException, e:
-            logStr = "Unable to create episode: "+str(e)
-            logger.log(logStr, logger.DEBUG)
-            returnStr += logStr + "\n"
+            returnStr += logHelper("Unable to create episode: "+str(e), logger.DEBUG)
             return returnStr
         
         if rootEp == None:
@@ -285,16 +268,12 @@ def doIt(downloaderDir, nzbName=None):
         if seasonFolder == '':
             seasonFolder = 'Season ' + str(rootEp.season)
 
-    logStr = "Seasonfolders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder
-    logger.log(logStr, logger.DEBUG)
-    returnStr += logStr + "\n"
+    returnStr += logHelper("Seasonfolders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder, logger.DEBUG)
 
     destDir = os.path.join(rootEp.show.location, seasonFolder)
     
     newFile = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
-    logStr = "The ultimate destination for " + biggest_file + " is " + newFile
-    logger.log(logStr, logger.DEBUG)
-    returnStr += logStr + "\n"
+    returnStr += logHelper("The ultimate destination for " + biggest_file + " is " + newFile, logger.DEBUG)
 
     existingResult = _checkForExistingFile(newFile, biggest_file)
     
@@ -306,30 +285,22 @@ def doIt(downloaderDir, nzbName=None):
     
     # see if the existing file is bigger - if it is, bail
     if existingResult == 1:
-        logStr = "There is already a file that's bigger at "+newFile+" - not processing this episode."
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
         return returnStr
         
     # if the dir doesn't exist (new season folder) then make it
     if not os.path.isdir(destDir):
-        logStr = "Season folder didn't exist, creating it"
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Season folder didn't exist, creating it", logger.DEBUG)
         os.mkdir(destDir)
 
-    logger.log("Moving from " + biggest_file + " to " + destDir, logger.DEBUG)
+    returnStr += logHelper("Moving from " + biggest_file + " to " + destDir, logger.DEBUG)
     try:
         shutil.move(biggest_file, destDir)
         
-        logStr = "File was moved successfully"
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("File was moved successfully", logger.DEBUG)
         
     except IOError, e:
-        logStr = "Unable to move the file: " + str(e)
-        logger.log(logStr, logger.ERROR)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Unable to move the file: " + str(e), logger.ERROR)
         return returnStr
 
     # if the file existed and was smaller then lets delete it
@@ -339,22 +310,16 @@ def doIt(downloaderDir, nzbName=None):
         elif existingResult == -2:
             existingFile = rootEp.location
         
-        logStr = existingFile + " already exists but it's smaller than the new file so I'm replacing it"
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
         os.remove(existingFile)
 
     curFile = os.path.join(destDir, biggestFileName)
 
     try:
         os.rename(curFile, newFile)
-        logStr = "Renaming the file " + curFile + " to " + newFile
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
     except (OSError, IOError), e:
-        logStr = "Failed renaming " + curFile + " to " + newFile + ": " + str(e)
-        logger.log(logStr, logger.ERROR)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Failed renaming " + curFile + " to " + newFile + ": " + str(e), logger.ERROR)
         return returnStr
 
     for curEp in [rootEp] + rootEp.relatedEps:
@@ -377,16 +342,12 @@ def doIt(downloaderDir, nzbName=None):
 
     # delete the old folder unless the config wants us not to
     if not sickbeard.KEEP_PROCESSED_DIR:
-        logStr = "Deleting folder " + downloadDir
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "\n"
+        returnStr += logHelper("Deleting folder " + downloadDir, logger.DEBUG)
         
         try:
             shutil.rmtree(downloadDir)
         except (OSError, IOError), e:
-            logStr = "Warning: unable to remove the folder " + downloadDir + ": " + str(e)
-            logger.log(logStr, logger.ERROR)
-            returnStr += logStr + "\n"
+            returnStr += logHelper("Warning: unable to remove the folder " + downloadDir + ": " + str(e), logger.ERROR)
 
     return returnStr
 
