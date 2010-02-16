@@ -1,17 +1,13 @@
 #import sickbeard
 #from sickbeard.common import *
 #set global $title="Home"
+#set global $header="Show List"
 
 #set global $sbPath = ".."
 
 <!--#set global $topmenu="home"#-->
-<!--#set global $statpath=".."#-->
-<!--#set global $helpsubject="Home"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-
-<!--#set global $submenu=""#-->
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_hmenu.tmpl")
 
 <script>
 \$.tablesorter.addParser({ 
@@ -76,8 +72,6 @@
 });
 </script>
 
-<h2>Show List</h2>
-
 <table id="showListTable" class="sickbeardTable tablesorter">
 
   <thead><tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
@@ -130,7 +124,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td>$curShow.network</td>
     <td align="center">$qualityStrings[int($curShow.quality)]</td>
     <td align="center">$dlStat</td>
-	<td align="center"><img src="/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+	<td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
 	<td align="center">$curShow.status</td>
   </tr>
 

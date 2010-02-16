@@ -6,8 +6,6 @@
 #set global $sbPath=".."
 
 <!--#set global $topmenu="backlog"#-->
-<!--#set global $statpath=".."#-->
-<!--#set global $helpsubject="Backlog"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
@@ -25,20 +23,14 @@
 });
 </script>
 
-<script type="text/javascript" src="/js/showPlot.js"></script> 
-
-<span class="SubMenu">
-<a href="/backlog/forceBacklog">Force Backlog</a>
-</span>
-
-<h2>Backlog</h2>
+<script type="text/javascript" src="$sbRoot/js/showPlot.js"></script> 
 
 <table id="backlogTable" class="sickbeardTable tablesorter">
   <thead><tr><th>Show</th><th>Episode</th><th>Name</th><th>Airdate</td><th>Status</th><th>Actions</th></tr></thead>
   <tbody>
 #for $bItem in $backlogResults:
   <tr class="evenLine">
-    <td><a href="/home/displayShow?show=$bItem["showid"]">$bItem["show_name"]</a></td>
+    <td><a href="$sbRoot/home/displayShow?show=$bItem["showid"]">$bItem["show_name"]</a></td>
     <td align="center"><%=str(bItem["season"]) +"x"+ "%02i" % int(bItem["episode"]) %></td>
     <td>$bItem["name"] <a href="#" class="plotLink" id="plotLink_<%=str(bItem["season"])+"_"+str(bItem["episode"])%>">[+]</a>
         <div class="plotDiv" id="epDiv_<%=str(bItem["season"])+"_"+str(bItem["episode"])%>"><br />$bItem["description"]</div>

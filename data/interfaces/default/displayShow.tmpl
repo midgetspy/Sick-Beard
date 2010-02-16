@@ -3,49 +3,32 @@
 #import os.path
 #import datetime
 #set global $title=$show.name
-
-#set global $sbPath="../.."
+#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a></h2>' % ($show.tvdbid, $show.name)
 
 <!--#set global $topmenu="home"#-->
-<!--#set global $statpath=".."#-->
-<!--#set global $helpsubject="Home"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<span class="SubMenu">
-<a href="editShow?show=$show.tvdbid">Edit</a> |
-#if not $sickbeard.showAddScheduler.action.isBeingAdded($show):
-#if not $sickbeard.showUpdateScheduler.action.isBeingUpdated($show):
-<a href="deleteShow?show=$show.tvdbid" onclick="javascript:return confirm('Are you sure you want to delete $show.name?')">Delete</a> |
-<a href="updateShow?show=$show.tvdbid">Refresh</a> | 
-<a href="updateShow?show=$show.tvdbid&force=1">Force Full Update</a> |
-#end if
-<a href="fixEpisodeNames?show=$show.tvdbid">Rename Episodes</a>
-#end if 
-</span>
-
-<script type="text/javascript" src="/js/displayShow.js"></script>
-<script type="text/javascript" src="/js/showPlot.js"></script>
+<script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
+<script type="text/javascript" src="$sbRoot/js/showPlot.js"></script>
 
 <br />
 #if $sickbeard.showAddScheduler.action.isBeingAdded($show):
 <br />
-<div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> This show is in the process of being downloading from theTVDB.com - the info below is incomplete.</div>
+<div class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> This show is in the process of being downloading from theTVDB.com - the info below is incomplete.</div>
 <br />
 #end if
 
 #if $sickbeard.showUpdateScheduler.action.isBeingUpdated($show):
 <br />
-<span class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: The information below is in the process of being updated.</span>
+<span class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> Note: The information below is in the process of being updated.</span>
 <br />
 #end if
 
 #if $sickbeard.showUpdateScheduler.action.isInQueue($show):
 <br />
-<span class="showNotice"><img class="showNoticeImg" src="/images/error.png"> Note: This show is queued and awaiting an update</span>
+<span class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> Note: This show is queued and awaiting an update</span>
 <br />
 #end if
-
-<h2><a href="http://thetvdb.com/?tab=series&id=$show.tvdbid" target="_new">$show.name</a></h2>
 
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
@@ -57,9 +40,9 @@ Location: $show.location<br />
 #end try
 
 Quality: $qualityStrings[int($show.quality)]<br />
-Season Folders: <img src="/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
+Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
-Active: <img src="/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
+Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 <br />
 
@@ -103,8 +86,8 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>">
 #end if
     </td>
-  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
-  	<td align="center"><img src="/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+  	<td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
     <td align="center">$epResult["episode"]</td>
     <td>$epResult["name"]
     #if $epResult["description"] != "" and $epResult["description"] != None:

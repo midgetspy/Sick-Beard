@@ -7,56 +7,43 @@
     <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     #if $topmenu=="comingEpisodes" then "<meta http-equiv=\"refresh\" content=\"180\">" else ""#
-    <link rel="stylesheet" type="text/css" href="/css/default.css"/>
-    <link rel="stylesheet" type="text/css" href="/css/defaultcolors.css"/>
-    <link rel="stylesheet" type="text/css" media="all" href="/css/comingEpisodes.css" />
-    <link rel="stylesheet" type="text/css" href="/css/tablesorter.css"/>
-    <link rel="stylesheet" type="text/css" href="/css/ui-lightness/jquery-ui-1.7.2.css" />
-    <link rel="stylesheet" type="text/css" href="/css/browser.css" />
-    <script type="text/javascript" src="/js/jquery-1.3.2.min.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/js/jquery.tablesorter.min.js"></script> 
-    <script type="text/javascript" src="/js/browser.js"></script> 
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css"/>
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/defaultcolors.css"/>
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/ui-lightness/jquery-ui-1.7.2.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
+    <script type="text/javascript" src="$sbRoot/js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.7.2.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
 </head>
 <body>
 #if $sickbeard.VERSION_NOTIFY and $sickbeard.version.SICKBEARD_VERSION not in ("trunk", "python25") and $sickbeard.NEWEST_VERSION != None and int($sickbeard.version.SICKBEARD_VERSION[1:]) < $sickbeard.NEWEST_VERSION:
-<div class="showNotice"><img class="showNoticeImg" src="/images/error.png"> <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">There is a newer version available (r$sickbeard.NEWEST_VERSION)</a></div>
+<div class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">There is a newer version available (r$sickbeard.NEWEST_VERSION)</a></div>
 <br />
 #end if
-<span id="first"><img src="/images/sickbeard_small.png" width="150"></span> <span id="third"> alpha $sickbeard.version.SICKBEARD_VERSION</span><div id="logotext">This program does stuff</div>
-
-#set $root=$sbPath
-
-<!--#set $mypath=$root+"/"+$topmenu#-->
+<span id="first"><img src="$sbRoot/images/sickbeard_small.png" width="150"></span> <span id="third"> alpha $sickbeard.version.SICKBEARD_VERSION</span><div id="logotext">This program does stuff</div>
 
 <span class="MainMenu">
-<!--#if $topmenu=='home'#-->
-    <a class="current" href="$mypath">Home</a> |
-<!--#else#-->
-    <a href="$root/home/">Home</a> |
-<!--#end if#-->
-
-<!--#if $topmenu=='comingEpisodes'#-->
-    <a class="current" href="$mypath/">Coming Episodes</a> |
-<!--#else#-->
-    <a href="$root/comingEpisodes/">Coming Episodes</a> |
-<!--#end if#-->
-
-<!--#if $topmenu=='history'#-->
-    <a class="current" href="$mypath/">History</a> |
-<!--#else#-->
-    <a href="$root/history/">History</a> |
-<!--#end if#-->
-
-<!--#if $topmenu=='backlog'#-->
-    <a class="current" href="$mypath/">Backlog</a> |
-<!--#else#-->
-    <a href="$root/backlog/">Backlog</a> |
-<!--#end if#-->
-
-<!--#if $topmenu=='config'#-->
-    <a class="current" href="$mypath/">Config</a> |
-<!--#else#-->
-    <a href="$root/config/">Config</a> |
-<!--#end if#-->
+    #for $menuItem in $menu:
+        #if $topmenu == $menuItem.key
+            <a class="current" href="$sbRoot/$menuItem.key">$menuItem.title</a> |
+        #else
+            <a href="$sbRoot/$menuItem.key">$menuItem.title</a> |
+        #end if
+    #end for
+    <br />
 </span>
+
+#if $varExists('submenu'):
+<span class="SubMenu">
+#for $menuItem in $submenu:
+    #if 'requires' not in $menuItem or $menuItem.requires():
+    <a href="$sbRoot/$menuItem.path">$menuItem.title</a> |
+    #end if
+#end for
+</span>
+#end if
+
+<h1>#if $varExists('header') then $header else $title#</h1>

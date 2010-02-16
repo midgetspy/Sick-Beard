@@ -9,8 +9,6 @@
 #set global $sbPath=".."
 
 <!--#set global $topmenu="history"#-->
-<!--#set global $statpath=".."#-->
-<!--#set global $helpsubject="Home"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script>
@@ -22,11 +20,6 @@
 });
 </script>
 
-<span class="SubMenu">
-<a href="/history/clearHistory">Clear History</a> | <a href="/history/trimHistory">Trim History</a>
-</span>
-
-<h2>History</h2>
 
 <table id="historyTable" class="sickbeardTable tablesorter">
   <thead><tr><th>Time</th><th>Episode</th><th>Action</th><th>Provider</th><th>Quality</th></tr></thead>
@@ -34,7 +27,7 @@
 #for $hItem in $historyResults:
   <tr class="evenLine">
     <td>$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
-    <td><a href="/home/displayShow?show=$hItem["showid"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
+    <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
     <td align="center">$actionStrings[$hItem["action"]]</td>
     <td align="center">
 	#if $hItem["action"] == ACTION_DOWNLOADED:
@@ -51,7 +44,7 @@
 	  #end if
 	#else
       #if $hItem["provider"] > 0
-        <img src="/images/providers/<%=providerNames[hItem["provider"]].lower()%>.gif" width="16" height="16" alt="$providerNames[$hItem["provider"]]">
+        <img src="$sbRoot/images/providers/<%=providerNames[hItem["provider"]].lower()%>.gif" width="16" height="16" alt="$providerNames[$hItem["provider"]]">
       #end if
     #end if
 	</td>
@@ -69,7 +62,7 @@
       #end if
     #end if
     #if $quality != -1
-      <!--<img src="/images/quality/<%=qualityStrings[quality].lower()%>.png" height="32">-->
+      <!--<img src="$sbRoot/images/quality/<%=qualityStrings[quality].lower()%>.png" height="32">-->
       $qualityStrings[$quality]
     #end if
     </td>

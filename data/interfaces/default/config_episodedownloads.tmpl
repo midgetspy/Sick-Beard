@@ -1,18 +1,13 @@
 #import sickbeard
 #set global $title="Config - Episode Search"
+#set global $header="Episode Download Options"
 
 #set global $sbPath="../.."
 
 <!--#set global $topmenu="config"#-->
-<!--#set global $statpath="../.."#-->
-<!--#set global $helpsubject="Configure+General"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<!--#set global $submenu="nzbactions"#-->
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_cmenu.tmpl")
-
-<h2>Episode Download Options</h2>
 <form action="saveEpisodeDownloads" method="POST">
 
 All non-absolute folder locations are relative to $sickbeard.PROG_DIR<br /><br />

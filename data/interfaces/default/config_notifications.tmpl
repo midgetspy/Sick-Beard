@@ -1,15 +1,11 @@
 #import sickbeard
 #set global $title="Config - Notifications"
+#set global $header="Notifications"
 
 #set global $sbPath="../.."
 
 <!--#set global $topmenu="config"#-->
-<!--#set global $statpath="../.."#-->
-<!--#set global $helpsubject="Configure+General"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-
-<!--#set global $submenu="notifications"#-->
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_cmenu.tmpl")
 
 <script>
 \$(document).ready(function(){
@@ -35,7 +31,6 @@
       
 </script>
 
-<h2>Notifications</h2>
 <form action="saveNotifications" method="POST">
 
 <div class="EntryBlock">

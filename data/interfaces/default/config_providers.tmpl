@@ -1,18 +1,13 @@
 #import sickbeard
 #set global $title="Config - Providers"
+#set global $header="NZB Provider Configuration"
 
 #set global $sbPath="../.."
 
 <!--#set global $topmenu="config"#-->
-<!--#set global $statpath="../.."#-->
-<!--#set global $helpsubject="Configure+General"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<!--#set global $submenu="providers"#-->
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_cmenu.tmpl")
-
-<h2>NZB Provider Configuration</h2>
 <form action="saveProviders" method="POST">
 
 <div class="EntryBlock">
@@ -21,7 +16,7 @@
 <legend>Newzbin</legend>
 
 <input type="checkbox" name="newzbin" #if $sickbeard.NEWZBIN then "CHECKED" else ""#> <strong>Enable Newzbin</strong>
-<a href="http://www.newzbin.com" class="imgLink" target="_new"><img src="/images/providers/newzbin.gif" alt="Newzbin" width="16" height="16"></a><br />
+<a href="http://www.newzbin.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/newzbin.gif" alt="Newzbin" width="16" height="16"></a><br />
 Check to search Newzbin for episodes<br />
 <br />
 
@@ -44,7 +39,7 @@ Newzbin password<br />
 <legend>TVBinz</legend>
 
 <input type="checkbox" name="tvbinz" #if $sickbeard.TVBINZ then "CHECKED" else ""#> <strong>Enable TVBinz</strong>
-<a href="http://www.tvbinz.net" class="imgLink" target="_new"><img src="/images/providers/tvbinz.gif" alt="TVBinz" width="16" height="16"></a><br />
+<a href="http://www.tvbinz.net" class="imgLink" target="_new"><img src="$sbRoot/images/providers/tvbinz.gif" alt="TVBinz" width="16" height="16"></a><br />
 Check to search TVBinz for episodes<br />
 <br />
 
@@ -68,7 +63,7 @@ TVBinz hash<br />
 <legend>NZBs.org</legend>
 
 <input type="checkbox" name="nzbs" #if $sickbeard.NZBS then "CHECKED" else ""#> <strong>Enable NZBs.org</strong>
-<a href="http://www.nzbs.org" class="imgLink" target="_new"><img src="/images/providers/nzbs.org.gif" alt="NZBs.org" width="16" height="16"></a><br />
+<a href="http://www.nzbs.org" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbs.org.gif" alt="NZBs.org" width="16" height="16"></a><br />
 Check to search NZBs.org for episodes<br />
 <br />
 
@@ -93,7 +88,7 @@ NZBs.org hash<br />
 <legend>NZBMatrix</legend>
 
 <input type="checkbox" name="nzbmatrix" #if $sickbeard.NZBMATRIX then "CHECKED" else ""#> <strong>Enable NZBMatrix</strong>
-<a href="http://www.nzbmatrix.com" class="imgLink" target="_new"><img src="/images/providers/nzbmatrix.gif" alt="NZBMatrix" width="16" height="16"></a><br />
+<a href="http://www.nzbmatrix.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbmatrix.gif" alt="NZBMatrix" width="16" height="16"></a><br />
 Check to search NZBMatrix for episodes<br />
 <br />
 
@@ -118,7 +113,7 @@ NZBMatrix API Key<br />
 <legend>TVNZB</legend>
 
 <input type="checkbox" name="tvnzb" #if $sickbeard.TVNZB then "CHECKED" else ""#> <strong>Enable TVNZB</strong>
-<a href="http://www.tvnzb.com" class="imgLink" target="_new"><img src="/images/providers/tvnzb.gif" alt="TVNZB" width="16" height="16"></a><br />
+<a href="http://www.tvnzb.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/tvnzb.gif" alt="TVNZB" width="16" height="16"></a><br />
 Check to search TVNZB for episodes<br />
 <br />
 </fieldset>

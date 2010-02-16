@@ -68,6 +68,7 @@ LOG_DIR = None
 
 WEB_PORT = None
 WEB_LOG = None
+WEB_ROOT = None
 WEB_USERNAME = None
 WEB_PASSWORD = None 
 LAUNCH_BROWSER = None
@@ -225,7 +226,7 @@ def initialize():
     
     with INIT_LOCK:
         
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_USERNAME, WEB_PASSWORD, NZB_METHOD, NZB_DIR, \
+        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, NZB_METHOD, NZB_DIR, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, TVBINZ, TVBINZ_UID, TVBINZ_HASH, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, IRC_BOT, IRC_SERVER, \
                 IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
@@ -262,10 +263,11 @@ def initialize():
             WEB_PORT = check_setting_int(CFG, 'General', 'web_port', 8081)
         except:
             WEB_PORT = 8081
-        
+
         if WEB_PORT < 21 or WEB_PORT > 65535:
             WEB_PORT = 8081
-        
+
+        WEB_ROOT = check_setting_str(CFG, 'General', 'web_root', '').rstrip("/")
         WEB_LOG = bool(check_setting_int(CFG, 'General', 'web_log', 0))
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
@@ -534,6 +536,7 @@ def save_config():
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
     CFG['General']['web_log'] = int(WEB_LOG)
+    CFG['General']['web_root'] = WEB_ROOT
     CFG['General']['web_username'] = WEB_USERNAME
     CFG['General']['web_password'] = WEB_PASSWORD
     CFG['General']['nzb_method'] = NZB_METHOD
@@ -598,7 +601,8 @@ def restart():
     if INIT_OK:
         start()
     
-def launchBrowser(browserURL):
+def launchBrowser():
+    browserURL = 'http://localhost:%d%s' % (WEB_PORT, WEB_ROOT)
     try:
         webbrowser.open(browserURL, 2, 1)
     except:

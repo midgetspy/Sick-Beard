@@ -36,7 +36,8 @@ import cherrypy.lib.auth_basic
 
 import sickbeard
 
-from sickbeard import db, webserve
+from sickbeard import db
+from sickbeard.webserve import WebInterface
 from sickbeard.tv import TVShow
 from sickbeard import logger
 from sickbeard.common import *
@@ -64,8 +65,6 @@ def loadShowsFromDB():
 			logger.log(traceback.format_exc(), logger.DEBUG)
 			
 		#TODO: make it update the existing shows if the showlist has something in it
-
-	
 
 def main():
 
@@ -97,7 +96,6 @@ def main():
 		cherry_log = None
 
 	# cherrypy setup
-	webRoot = webserve.WebInterface()
 	cherrypy.config.update({
 						    'server.socket_port': sickbeard.WEB_PORT,
 						    'server.socket_host': '0.0.0.0',
@@ -113,31 +111,37 @@ def main():
 	else:
 		useAuth = True 
 	
-	conf = {'/': {
-				  'tools.staticdir.root': os.path.join(sickbeard.PROG_DIR, 'data'),
-				  'tools.auth_basic.on': useAuth,
-				  'tools.auth_basic.realm': 'SickBeard',
-				  'tools.auth_basic.checkpassword': checkpassword},
-		    '/images': {'tools.staticdir.on': True,
-				    'tools.staticdir.dir': 'images'},
-			'/js': {'tools.staticdir.on': True,
-				    'tools.staticdir.dir': 'js'},
-			'/css': {'tools.staticdir.on': True,
-					 'tools.staticdir.dir': 'css'},
+	conf = {
+			'/': {
+				'tools.staticdir.root': os.path.join(sickbeard.PROG_DIR, 'data'),
+				'tools.auth_basic.on': useAuth,
+				'tools.auth_basic.realm': 'SickBeard',
+				'tools.auth_basic.checkpassword': checkpassword
+			},
+			'/images': {
+				'tools.staticdir.on': True,
+				'tools.staticdir.dir': 'images'
+			},
+			'/js':	   {
+				'tools.staticdir.on': True,
+				'tools.staticdir.dir': 'js'
+			},
+			'/css':	   {
+				'tools.staticdir.on': True,
+				'tools.staticdir.dir': 'css'
+			},
 	}
 
-	cherrypy.tree.mount(webRoot, '/', conf)
-
-	# launch a browser if we need to
-	browserURL = 'http://localhost:' + str(sickbeard.WEB_PORT) + '/'
+	cherrypy.tree.mount(WebInterface(), sickbeard.WEB_ROOT, conf)
 
 	try:
 		cherrypy.server.start()
 		cherrypy.server.wait()
 	except IOError:
-		logger.log("Unable to start web server, is something else running?", logger.ERROR)
-		logger.log("Launching browser and exiting", logger.ERROR)
-		sickbeard.launchBrowser(browserURL)
+		logger.log("Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)
+		if sickbeard.LAUNCH_BROWSER:
+			logger.log("Launching browser and exiting", logger.ERROR)
+			sickbeard.launchBrowser()
 		sys.exit()
 
 	# build from the DB to start with
@@ -154,7 +158,7 @@ def main():
 
 	# launch browser if we're supposed to
 	if sickbeard.LAUNCH_BROWSER:
-		sickbeard.launchBrowser(browserURL)
+		sickbeard.launchBrowser()
 
 	# stay alive while my threads do the work
 	while (True):

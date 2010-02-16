@@ -6,13 +6,8 @@
 #set global $sbPath="../../.."
 
 <!--#set global $topmenu="home"#-->
-<!--#set global $statpath="../.."#-->
-<!--#set global $helpsubject="Configure+General"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-
-<!--#set global $submenu="addShows"#-->
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_hmenu.tmpl")
 
 <script>
 \$(document).ready(function() 
@@ -67,7 +62,7 @@
   <tr class="evenLine">
 	<td><input type="checkbox" id="$curDir" class="dirCheck" CHECKED></td>
 	<td><%=os.path.normpath(urllib.unquote_plus(curDir)).split(os.sep)[-1]%></td>
-	<td align="center"><img src="/images/#if $os.path.isfile($os.path.join($urllib.unquote_plus($curDir), "tvshow.nfo")) then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+	<td align="center"><img src="$sbRoot/images/#if $os.path.isfile($os.path.join($urllib.unquote_plus($curDir), "tvshow.nfo")) then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
   </tr>
 #end for
   </tbody>

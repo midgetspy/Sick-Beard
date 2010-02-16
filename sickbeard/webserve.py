@@ -50,6 +50,18 @@ from lib.tvdb_api import tvdb_exceptions
 import sickbeard
 import sickbeard.helpers
 
+class PageTemplate (Template):
+    def __init__(self, *args, **KWs):
+        KWs['file'] = os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
+        super(PageTemplate, self).__init__(*args, **KWs)
+        self.sbRoot = sickbeard.WEB_ROOT
+        self.menu = [
+            { 'title': 'Home',            'key': 'home'           },
+            { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
+            { 'title': 'History',         'key': 'history'        },
+            { 'title': 'Backlog',         'key': 'backlog'        },
+            { 'title': 'Config',          'key': 'config'         },
+        ]
 
 class TVDBWebUI:
     def __init__(self, config, log):
@@ -68,7 +80,7 @@ def _munge(string):
     return unicode(string).encode('ascii', 'xmlcharrefreplace')
 
 def _genericMessage(subject, message):
-    t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/genericMessage.tmpl"))
+    t = PageTemplate(file="genericMessage.tmpl")
     t.subject = subject
     t.message = message
     return _munge(t)
@@ -99,8 +111,11 @@ class Backlog:
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT e.*, show_name FROM tv_shows s, tv_episodes e WHERE s.tvdb_id=e.showid AND e.status IN ("+str(BACKLOG)+","+str(DISCBACKLOG)+")")
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/backlog.tmpl"))
+        t = PageTemplate(file="backlog.tmpl")
         t.backlogResults = sqlResults
+        t.submenu = [
+            { 'title': 'Force Backlog', 'path': 'backlog/forceBacklog' }
+        ]
         
         return _munge(t)
 
@@ -126,8 +141,12 @@ class History:
 #        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC LIMIT "+str(numPerPage*(p-1))+", "+str(numPerPage))
         sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
 
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/history.tmpl")))
+        t = PageTemplate(file="history.tmpl")
         t.historyResults = sqlResults
+        t.submenu = [
+            { 'title': 'Clear History', 'path': 'history/clearHistory' },
+            { 'title': 'Trim History',  'path': 'history/trimHistory'  },
+        ]
         
         return _munge(t)
 
@@ -150,14 +169,20 @@ class History:
         raise cherrypy.HTTPRedirect("../history")
 
 
-
+ConfigMenu = [
+    { 'title': 'General',           'path': 'config/general/'          },
+    { 'title': 'Episode Downloads', 'path': 'config/episodedownloads/' },
+    { 'title': 'Search Providers',  'path': 'config/providers/'        },
+    { 'title': 'Notifications',     'path': 'config/notifications/'    },
+]
 
 class ConfigGeneral:
     
     @cherrypy.expose
     def index(self):
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_general.tmpl"))
+        t = PageTemplate(file="config_general.tmpl")
+        t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -222,7 +247,8 @@ class ConfigEpisodeDownloads:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_episodedownloads.tmpl"))
+        t = PageTemplate(file="config_episodedownloads.tmpl")
+        t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -299,7 +325,8 @@ class ConfigProviders:
     
     @cherrypy.expose
     def index(self):
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_providers.tmpl"))
+        t = PageTemplate(file="config_providers.tmpl")
+        t.submenu = ConfigMenu
         return _munge(t)
 
     
@@ -366,7 +393,8 @@ class ConfigIRC:
     
     @cherrypy.expose
     def index(self):
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_irc.tmpl"))
+        t = PageTemplate(file="config_irc.tmpl")
+        t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -397,7 +425,8 @@ class ConfigNotifications:
     
     @cherrypy.expose
     def index(self):
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config_notifications.tmpl"))
+        t = PageTemplate(file="config_notifications.tmpl")
+        t.submenu = ConfigMenu
         return _munge(t)
     
     @cherrypy.expose
@@ -454,7 +483,8 @@ class Config:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/config.tmpl"))
+        t = PageTemplate(file="config.tmpl")
+        t.submenu = ConfigMenu
         return _munge(t)
     
     general = ConfigGeneral()
@@ -467,13 +497,23 @@ class Config:
     
     notifications = ConfigNotifications()
 
+def haveXBMC():
+    return sickbeard.XBMC_HOST != None and len(sickbeard.XBMC_HOST) > 0
+
+HomeMenu = [
+    { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
+    { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
+    { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
+    { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
+]
 
 class HomePostProcess:
     
     @cherrypy.expose
     def index(self):
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_postprocess.tmpl"))
+        t = PageTemplate(file="home_postprocess.tmpl")
+        t.submenu = HomeMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -495,7 +535,8 @@ class HomeAddShows:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_addShows.tmpl"))
+        t = PageTemplate(file="home_addShows.tmpl")
+        t.submenu = HomeMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -522,7 +563,7 @@ class HomeAddShows:
         
         #result = ui.addShowsFromRootDir(dir)
         
-        myTemplate = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_addRootDir.tmpl"))
+        myTemplate = PageTemplate(file="home_addRootDir.tmpl")
         myTemplate.showDirs = [urllib.quote_plus(x.encode('utf-8')) for x in showDirs]
         return _munge(myTemplate)       
         
@@ -543,7 +584,7 @@ class HomeAddShows:
         
         logger.log("showDir: "+str(showDir))
         
-        myTemplate = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home_addShow.tmpl"))
+        myTemplate = PageTemplate(file="home_addShow.tmpl")
         myTemplate.resultList = None
         myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
         
@@ -657,7 +698,8 @@ class Home:
     @cherrypy.expose
     def index(self):
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/home.tmpl"))
+        t = PageTemplate(file="home.tmpl")
+        t.submenu = HomeMenu
         
         myDB = db.DBConnection()
         
@@ -706,9 +748,15 @@ class Home:
         logger.log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
     
         sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC")
-        
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/displayShow.tmpl"))
-        
+
+        t = PageTemplate(file="displayShow.tmpl")
+        t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
+        if not sickbeard.showAddScheduler.action.isBeingAdded(showObj):
+            if not sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
+                t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid         })
+                t.submenu.append({ 'title': 'Refresh',           'path': 'home/updateShow?show=%d'%showObj.tvdbid         })
+                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdbid })
+            t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid        })
         t.show = showObj
         t.qualityStrings = sickbeard.common.qualityStrings
         t.sqlResults = sqlResults
@@ -728,7 +776,8 @@ class Home:
 
         if location == None and quality == None and seasonfolders == None:
             
-            t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/editShow.tmpl"))
+            t = PageTemplate(file="editShow.tmpl")
+            t.submenu = HomeMenu
             with showObj.lock:
                 t.show = showObj
                 t.qualityStrings = qualityStrings
@@ -1006,7 +1055,11 @@ class WebInterface:
         # sort by air date
         epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))
         
-        t = Template(file=os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/comingEpisodes.tmpl"))
+        t = PageTemplate(file="comingEpisodes.tmpl")
+        t.submenu = [
+            { 'title': 'Sort by Date', 'path': 'comingEpisodes/#' },
+            { 'title': 'Sort by Show', 'path': 'comingEpisodes/#' },
+        ]
         t.epList = epList
         t.qualityStrings = qualityStrings
         
