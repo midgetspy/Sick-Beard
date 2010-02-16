@@ -81,6 +81,7 @@ def _munge(string):
 
 def _genericMessage(subject, message):
     t = PageTemplate(file="genericMessage.tmpl")
+    t.submenu = HomeMenu
     t.subject = subject
     t.message = message
     return _munge(t)
