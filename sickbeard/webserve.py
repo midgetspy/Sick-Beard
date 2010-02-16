@@ -568,6 +568,7 @@ class HomeAddShows:
         
         myTemplate = PageTemplate(file="home_addRootDir.tmpl")
         myTemplate.showDirs = [urllib.quote_plus(x.encode('utf-8')) for x in showDirs]
+        myTemplate.submenu = HomeMenu
         return _munge(myTemplate)       
         
         url = "addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
@@ -590,6 +591,7 @@ class HomeAddShows:
         myTemplate = PageTemplate(file="home_addShow.tmpl")
         myTemplate.resultList = None
         myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
+        myTemplate.submenu = HomeMenu
         
         # if no showDir then start at the beginning
         if showDir == None:
@@ -994,12 +996,17 @@ class WebFileBrowser:
         
         entries = []
         
-        if path == "**ROOT**":
+        if path == "**ROOT**" or path == '/':
             driveLetters = helpers.getWinDrives()
-            for x in driveLetters:
-                letterPath = x+':\\'
-                entries.append({'name': letterPath, 'path': letterPath})
-            return json.dumps(entries)
+            
+            if len(driveLetters) > 0:
+                for x in driveLetters:
+                    letterPath = x+':\\'
+                    entries.append({'name': letterPath, 'path': letterPath})
+                return json.dumps(entries)
+            
+            else:
+                path = '/'
         
         # fix up the path and find the parent
         path = os.path.abspath(os.path.normpath(path))

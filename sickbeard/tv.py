@@ -604,13 +604,11 @@ class TVShow(object):
 		xmlFile = os.path.join(self._location, "tvshow.nfo")
 		
 		try:
-			showXML = etree.ElementTree(file = xmlFile)
+			xmlFileObj = open(xmlFile, 'r')
+			showXML = etree.ElementTree(file = xmlFileObj)
 
-			if showXML.findtext('title') == None or \
-			    (showXML.findtext('tvdbid') == None and \
-			    showXML.findtext('id') == None):
-				raise exceptions.NoNFOException("Invalid \
-				    info in tvshow.nfo (missing name or id):" \
+			if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
+				raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id):" \
 				    + str(showXML.findtext('title')) + " " \
 				    + str(showXML.findtext('tvdbid')) + " " \
 				    + str(showXML.findtext('id')))
@@ -628,6 +626,7 @@ class TVShow(object):
 			logger.log("Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 
 			try:
+				xmlFileObj.close()
 				os.rename(xmlFile, xmlFile + ".old")
 			except Exception, e:
 				logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)

@@ -48,7 +48,7 @@ class DBConnection:
 		except sqlite3.OperationalError, e:
 			if str(e).startswith("no such table: "):
 				self._checkDB()
-				self.action(query, args)
+				return self.action(query, args)
 		except sqlite3.DatabaseError, e:
 			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
 			raise
