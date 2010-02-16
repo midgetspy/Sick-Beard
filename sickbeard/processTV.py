@@ -135,8 +135,8 @@ def doIt(downloaderDir, nzbName=None):
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
     for sqlShow in sqlResults:
-        if downloadDir.startswith(os.path.abspath(sqlShow["location"])):
-            returnStr += logHelper("You're trying to post process a show that's already been moved to its show dir (from "+downloadDir+" to "+os.path.abspath(sqlShow["location"])+")", logger.ERROR)
+        if downloadDir.startswith(os.path.abspath(sqlShow["location"])+os.sep):
+            returnStr += logHelper("You're trying to post process a show that's already been moved to its show dir", logger.ERROR)
             return returnStr
 
     returnStr += logHelper("Final folder name is " + downloadDir, logger.DEBUG)
