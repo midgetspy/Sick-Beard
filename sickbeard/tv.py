@@ -1383,10 +1383,9 @@ class TVEpisode:
 	
 				if curGoodName == None:
 					curGoodName = match.group(1)
-				else:
-					if curGoodName != match.group(1):
-						singleName = False
-						break
+				elif curGoodName != match.group(1):
+					singleName = False
+					break
 
 
 			if singleName:

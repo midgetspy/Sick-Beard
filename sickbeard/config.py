@@ -50,6 +50,7 @@ def change_LOG_DIR(log_dir):
 def change_NZB_DIR(nzb_dir):
 
     if nzb_dir == '':
+        sickbeard.NZB_DIR = ''
         return True
 
     if os.path.normpath(sickbeard.NZB_DIR) != os.path.normpath(nzb_dir):
@@ -65,6 +66,7 @@ def change_NZB_DIR(nzb_dir):
 def change_TORRENT_DIR(torrent_dir):
 
     if torrent_dir == '':
+        sickbeard.TORRENT_DIR = ''
         return True
 
     if os.path.normpath(sickbeard.TORRENT_DIR) != os.path.normpath(torrent_dir):
@@ -80,6 +82,7 @@ def change_TORRENT_DIR(torrent_dir):
 def change_TV_DOWNLOAD_DIR(tv_download_dir):
 
     if tv_download_dir == '':
+        sickbeard.TV_DOWNLOAD_DIR = ''
         return True
 
     if os.path.normpath(sickbeard.TV_DOWNLOAD_DIR) != os.path.normpath(tv_download_dir):
