@@ -111,13 +111,13 @@ def findEpisode (episode, forceQuality=None):
 		
 		title = curResult["name"]
 		url = curResult["url"]
-		urlParams = {'i': sickbeard.TVBINZ_UID, 'h': sickbeard.TVBINZ_HASH}
+		#urlParams = {'i': sickbeard.TVBINZ_UID, 'h': sickbeard.TVBINZ_HASH}
 	
 		logger.log("Found result " + title + " at " + url)
 
 		result = sickbeard.classes.NZBSearchResult(episode)
 		result.provider = sickbeard.common.TVBINZ
-		result.url = url + "&" + urllib.urlencode(urlParams) 
+		result.url = url 
 		result.extraInfo = [title]
 		result.quality = epQuality
 		
