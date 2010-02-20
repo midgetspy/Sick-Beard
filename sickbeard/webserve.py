@@ -50,6 +50,27 @@ from lib.tvdb_api import tvdb_exceptions
 import sickbeard
 import sickbeard.helpers
 
+class Flash:
+    store = {}
+
+    def __init__(self):
+        self.localstore = {}
+
+    def __getitem__(self, key):
+        if key in self.store:
+            value = self.store[key]
+            self.localstore[key] = value
+            del self.store[key]
+        if key in self.localstore:
+            return self.localstore[key]
+        else:
+            return None
+
+    def __setitem__(self, key, value):
+        self.store[key] = value
+
+flash = Flash()
+
 class PageTemplate (Template):
     def __init__(self, *args, **KWs):
         KWs['file'] = os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
@@ -62,6 +83,7 @@ class PageTemplate (Template):
             { 'title': 'Backlog',         'key': 'backlog'        },
             { 'title': 'Config',          'key': 'config'         },
         ]
+        self.flash = Flash()
 
 class TVDBWebUI:
     def __init__(self, config, log):
@@ -127,8 +149,10 @@ class Backlog:
         # force it to run the next time it looks
         sickbeard.backlogSearchScheduler.forceSearch()
         logger.log("Backlog set to run in background")
+        flash['message']        = 'Backlog search started'
+        flash['message-detail'] = 'The backlog search has begun and will run in the background'
         
-        return _genericMessage("Backlog search started", "The backlog search has begun and will run in the background")
+        raise cherrypy.HTTPRedirect("../backlog")
 
 
 
@@ -157,7 +181,7 @@ class History:
         
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
-        
+        flash['message'] = 'History cleared'
         raise cherrypy.HTTPRedirect("../history")
 
 
@@ -166,7 +190,7 @@ class History:
         
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
-        
+        flash['message'] = 'Removed all history entries greater than 30 days old'
         raise cherrypy.HTTPRedirect("../history")
 
 
@@ -239,7 +263,10 @@ class ConfigGeneral:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            return _genericMessage("Error", "<br />\n".join(results))
+            flash['error']        = 'Error(s) Saving Configuration'
+            flash['error-detail'] = "<br />\n".join(results)
+        else:
+            flash['message'] = 'Configuration Saved'
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -318,7 +345,10 @@ class ConfigEpisodeDownloads:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            return _genericMessage("Error", "<br />\n".join(results))
+            flash['error']        = 'Error(s) Saving Configuration'
+            flash['error-detail'] = "<br />\n".join(results)
+        else:
+            flash['message'] = 'Configuration Saved'
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -335,7 +365,7 @@ class ConfigProviders:
     def saveProviders(self, newzbin=None, newzbin_username=None, newzbin_password=None, tvbinz=None,
                    tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None, nzbs_hash=None,
                    nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None, tvnzb=None,
-                   tvbinz_auth=None):
+                   tvbinz_auth=None, tvbinz_sabuid=None):
 
         results = []
 
@@ -370,6 +400,7 @@ class ConfigProviders:
         
         sickbeard.TVBINZ = tvbinz
         sickbeard.TVBINZ_UID = tvbinz_uid
+        sickbeard.TVBINZ_SABUID = tvbinz_sabuid
         sickbeard.TVBINZ_HASH = tvbinz_hash
         sickbeard.TVBINZ_AUTH = tvbinz_auth
         
@@ -388,7 +419,10 @@ class ConfigProviders:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            return _genericMessage("Error", "<br />\n".join(results))
+            flash['error']        = 'Error(s) Saving Configuration'
+            flash['error-detail'] = "<br />\n".join(results)
+        else:
+            flash['message'] = 'Configuration Saved'
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -420,7 +454,10 @@ class ConfigIRC:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            return _genericMessage("Error", "<br />\n".join(results))
+            flash['error']        = 'Error(s) Saving Configuration'
+            flash['error-detail'] = "<br />\n".join(results)
+        else:
+            flash['message'] = 'Configuration Saved'
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -476,7 +513,10 @@ class ConfigNotifications:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            return _genericMessage("Error", "<br />\n".join(results))
+            flash['error']        = 'Error(s) Saving Configuration'
+            flash['error-detail'] = "<br />\n".join(results)
+        else:
+            flash['message'] = 'Configuration Saved'
         
         raise cherrypy.HTTPRedirect("index")
 
@@ -544,13 +584,13 @@ class HomeAddShows:
 
     @cherrypy.expose
     def addRootDir(self, dir=None):
-        
         if dir == None:
-            raise cherrypy.HTTPRedirect("addShows")
+            raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + "/home/addShows")
 
         if not os.path.isdir(dir):
             logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
-            return _genericMessage("Error", "Unable to find the directory "+dir)
+            flash['error'] = "Unable to find the directory <tt>%s</tt>" % dir
+            raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + "/home/addShows")
         
         showDirs = []
         
@@ -562,7 +602,8 @@ class HomeAddShows:
         
         if len(showDirs) == 0:
             logger.log("The provided directory "+dir+" has no shows in it", logger.ERROR)
-            return _genericMessage("Error", "The provided root folder "+dir+ " has no shows in it.")
+            flash['error'] = "The provided root folder <tt>%s</tt> has no shows in it." % dir
+            raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + "/home/addShows")
         
         #result = ui.addShowsFromRootDir(dir)
         
@@ -584,14 +625,15 @@ class HomeAddShows:
             showDir = [showDir]
         
         # unquote it no matter what
-        showDir = [urllib.unquote_plus(x) for x in showDir]
+        showDir = [os.path.normpath(urllib.unquote_plus(x)) for x in showDir]
         
         logger.log("showDir: "+str(showDir))
         
         myTemplate = PageTemplate(file="home_addShow.tmpl")
+        myTemplate.submenu    = HomeMenu
         myTemplate.resultList = None
-        myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
-        myTemplate.submenu = HomeMenu
+        myTemplate.showName   = showName or os.path.split(showDir[0])[1]
+        myTemplate.showDir    = [urllib.quote_plus(x) for x in showDir]
         
         # if no showDir then start at the beginning
         if showDir == None:
@@ -605,10 +647,11 @@ class HomeAddShows:
             try:
                 s = t[showName] # this will throw a cherrypy exception
             except tvdb_exceptions.tvdb_shownotfound:
-                return _genericMessage("Error", "Couldn't find that show")
-    
+                flash['error'] = "Couldn't find that show on theTVDB. Try a more general search."
+            except tvdb_exceptions.tvdb_error, e:
+                flash['error'] = "TVDB error, unable to search for show title/info: "+str(e)
 
-        curShowDir = os.path.normpath(showDir[0])
+        curShowDir = showDir[0]
         logger.log("curShowDir: "+curShowDir)
 
         if seriesList != None:
@@ -756,6 +799,16 @@ class Home:
 
         t = PageTemplate(file="displayShow.tmpl")
         t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
+
+        if sickbeard.showAddScheduler.action.isBeingAdded(showObj):
+            flash['message'] = 'This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.'
+            
+        elif sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
+            flash['message'] = 'The information below is in the process of being updated.'
+        
+        elif sickbeard.showUpdateScheduler.action.isInQueue(showObj):
+            flash['message'] = 'This show is queued and awaiting an update.'
+
         if not sickbeard.showAddScheduler.action.isBeingAdded(showObj):
             if not sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
                 t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid         })
@@ -801,7 +854,7 @@ class Home:
             paused = 0
 
         with showObj.lock:
-
+            errors = []
             logger.log("changing quality from " + str(showObj.quality) + " to " + str(quality), logger.DEBUG)
             showObj.quality = int(quality)
             
@@ -812,25 +865,29 @@ class Home:
             showObj.paused = paused
                         
             # if we change location clear the db of episodes, change it, write to db, and rescan
-            if os.path.isdir(location) and os.path.normpath(showObj._location) != os.path.normpath(location):
-                
-                # change it
-                try:
-                    showObj.location = location
-                except exceptions.NoNFOException:
-                    return _genericMessage("The folder at "+location+" doesn't contain a tvshow.nfo - copy your files to that folder before you change the directory in Sick Beard.")
-                
-                showObj.refreshDir()
-                
-                # grab updated info from TVDB
-                #showObj.loadEpisodesFromTVDB()
+            if os.path.normpath(showObj._location) != os.path.normpath(location):
+                if not os.path.isdir(location):
+                    errors.append("New location <tt>%s</tt> does not exist" % location)
 
-                # rescan the episodes in the new folder
-                showObj.loadEpisodesFromDir()
+                else:
+                    # change it
+                    try:
+                        showObj.location = location
+                        showObj.refreshDir()
+                        # grab updated info from TVDB
+                        #showObj.loadEpisodesFromTVDB()
+                        # rescan the episodes in the new folder
+                        showObj.loadEpisodesFromDir()
+                    except exceptions.NoNFOException:
+                        errors.append("The folder at <tt>%s</tt> doesn't contain a tvshow.nfo - copy your files to that folder before you change the directory in Sick Beard." % location)
                     
             # save it to the DB
             showObj.saveToDB()
-                
+
+            if len(errors) > 0:
+                flash['error'] = '%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s")
+                flash['error-detail'] = "<ul>" + "\n".join(["<li>%s</li>" % error for error in errors]) + "</ul>"
+
             raise cherrypy.HTTPRedirect("displayShow?show=" + show)
 
     @cherrypy.expose
@@ -850,7 +907,8 @@ class Home:
 
         showObj.deleteShow()
         
-        return _genericMessage("Show deleted", "Show has been deleted.")
+        flash['message'] = '<b>%s</b> has been deleted' % showObj.name
+        raise cherrypy.HTTPRedirect("/home")
 
     @cherrypy.expose
     def updateShow(self, show=None, force=0):
@@ -966,16 +1024,17 @@ class Home:
         foundEpisodes = search.findEpisode(epObj)
         
         if len(foundEpisodes) == 0:
-            tempStr = "No downloads were found<br />\n"
-            logger.log(tempStr)
-            outStr += tempStr + "<br />\n"
-            return _genericMessage("Error", outStr)
+            message = 'No downloads were found'
+            flash['error'] = message
+            flash['error-detail'] = "Couldn't find a download for <i>%s</i>" % epObj.prettyName()
+            logger.log(message)
         
         else:
 
             # just use the first result for now
             logger.log("Downloading episode from " + foundEpisodes[0].url + "<br />\n")
             result = search.snatchEpisode(foundEpisodes[0])
+            flash['message'] = 'Episode snatched from <b>%s</b>' % providerNames[foundEpisodes[0].provider]
             
             #TODO: check if the download was successful
 
@@ -984,8 +1043,7 @@ class Home:
             sickbeard.updateAiringList()
             sickbeard.updateComingList()
 
-            
-            raise cherrypy.HTTPRedirect("displayShow?show=" + str(epObj.show.tvdbid))
+        raise cherrypy.HTTPRedirect("displayShow?show=" + str(epObj.show.tvdbid))
 
 class WebFileBrowser:
 

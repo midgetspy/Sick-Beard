@@ -1,4 +1,3 @@
-#import urllib
 #import sickbeard
 #set global $title="Add Show"
 
@@ -11,8 +10,7 @@
 
 <form method="POST" action="addShow">
 #if len($resultList) == 0:
-  #set $tempName = $os.path.normpath($urllib.unquote_plus($showDir[0])).split($os.sep)
-  Show name: <input type="text" name="showName" size="30" value="$tempName[-1]">
+  Show name: <input type="text" name="showName" size="30" value="$showName">
 #else:
   Choose the show you meant: <select name="seriesList">
   #for $curShow in $resultList:

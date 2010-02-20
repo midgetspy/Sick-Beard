@@ -100,6 +100,11 @@ class ShowAdder:
             self.curShow.getImages()
             self.curShow.loadFromTVDB()
             
+        except tvdb_exceptions.tvdb_exception, e:
+            logger.log("Unable to add show due to an error with TVDB: "+str(e), logger.ERROR)
+            del sickbeard.loadingShowList[self.showDir]
+            return
+            
         except exceptions.NoNFOException:
             logger.log("Unable to load show from NFO", logger.ERROR)
             # take the show out of the loading list

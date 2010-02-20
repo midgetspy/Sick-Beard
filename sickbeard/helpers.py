@@ -30,7 +30,7 @@ import sickbeard
 
 from sickbeard.exceptions import *
 from sickbeard import logger
-from sickbeard.common import mediaExtensions, XML_NSMAP
+from sickbeard.common import mediaExtensions, XML_NSMAP, sceneExceptions
 
 from sickbeard import db
 
@@ -98,6 +98,9 @@ def sanitizeFileName (name):
 def makeSceneShowSearchStrings(show):
 
 	showNames = [show.name]
+
+	if int(show.tvdbid) in sceneExceptions:
+		showNames += sceneExceptions[int(show.tvdbid)]
 	
 	# if we have a tvrage name then use it
 	if show.tvrname != "" and show.tvrname != None and show.name.lower() != show.tvrname.lower():
@@ -183,13 +186,11 @@ def makeShowNFO(showID, showDir):
 		myShow = t[int(showID)]
 	except tvdb_exceptions.tvdb_shownotfound:
  		logger.log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
-
 		raise
-		return False
+
 	except tvdb_exceptions.tvdb_error:
  		logger.log("TVDB is down, can't use its data to add this show", logger.ERROR)
-
-		return False
+ 		raise
 
 	# check for title and id
 	try:

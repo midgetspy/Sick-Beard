@@ -200,24 +200,25 @@ class ShowUpdater():
         
         if TVDBEpList == None:
             logger.log("No data returned from TVDB, unable to update this show", logger.ERROR)
-            return None
-        
-        # for each ep we found on TVDB delete it from the DB list
-        for curSeason in TVDBEpList:
-            for curEpisode in TVDBEpList[curSeason]:
-                logger.log("Removing "+str(curSeason)+"x"+str(curEpisode)+" from the DB list", logger.DEBUG)
-                if curSeason in DBEpList and curEpisode in DBEpList[curSeason]:
-                    del DBEpList[curSeason][curEpisode]
 
-        # for the remaining episodes in the DB list just delete them from the DB
-        for curSeason in DBEpList:
-            for curEpisode in DBEpList[curSeason]:
-                logger.log("Permanently deleting episode "+str(curSeason)+"x"+str(curEpisode)+" from the database", logger.MESSAGE)
-                curEp = show.getEpisode(curSeason, curEpisode)
-                try:
-                    curEp.deleteEpisode()
-                except exceptions.EpisodeDeletedException:
-                    pass
+        else:
+        
+            # for each ep we found on TVDB delete it from the DB list
+            for curSeason in TVDBEpList:
+                for curEpisode in TVDBEpList[curSeason]:
+                    logger.log("Removing "+str(curSeason)+"x"+str(curEpisode)+" from the DB list", logger.DEBUG)
+                    if curSeason in DBEpList and curEpisode in DBEpList[curSeason]:
+                        del DBEpList[curSeason][curEpisode]
+    
+            # for the remaining episodes in the DB list just delete them from the DB
+            for curSeason in DBEpList:
+                for curEpisode in DBEpList[curSeason]:
+                    logger.log("Permanently deleting episode "+str(curSeason)+"x"+str(curEpisode)+" from the database", logger.MESSAGE)
+                    curEp = show.getEpisode(curSeason, curEpisode)
+                    try:
+                        curEp.deleteEpisode()
+                    except exceptions.EpisodeDeletedException:
+                        pass
         
         # now that we've updated the DB from TVDB see if there's anything we can add from TVRage
         with show.lock:

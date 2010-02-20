@@ -11,25 +11,6 @@
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/showPlot.js"></script>
 
-<br />
-#if $sickbeard.showAddScheduler.action.isBeingAdded($show):
-<br />
-<div class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> This show is in the process of being downloading from theTVDB.com - the info below is incomplete.</div>
-<br />
-#end if
-
-#if $sickbeard.showUpdateScheduler.action.isBeingUpdated($show):
-<br />
-<span class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> Note: The information below is in the process of being updated.</span>
-<br />
-#end if
-
-#if $sickbeard.showUpdateScheduler.action.isInQueue($show):
-<br />
-<span class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> Note: This show is queued and awaiting an update</span>
-<br />
-#end if
-
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
 

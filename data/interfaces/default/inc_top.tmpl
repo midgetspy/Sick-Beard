@@ -47,3 +47,17 @@
 #end if
 
 <h1>#if $varExists('header') then $header else $title#</h1>
+
+#if $flash['message']
+<div class="message ui-state-highlight ui-corner-all">
+    <p><span class="ui-icon ui-icon-info"></span>$flash['message']</p>
+    $flash['message-detail']
+</div><br />
+#end if
+
+#if $flash['error']
+<div class="message ui-state-error ui-corner-all">
+    <p><span class="ui-icon ui-icon-alert"></span>$flash['error']</p>
+    $flash['error-detail']
+</div><br />
+#end if

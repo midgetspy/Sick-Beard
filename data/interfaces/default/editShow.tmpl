@@ -14,7 +14,7 @@ Status: $show.status<br />
 <br />
 <form action="editShow" method="post">
 <input type="hidden" name="show" value="$show.tvdbid">
-Location: <input type="text" name="location" value="$show._location"><br />
+Location: <input type="text" name="location" value="$show._location" size="80"><br />
 Quality: <select name="quality">
 #for $quality in $qualities:
 #if $show.quality == $quality

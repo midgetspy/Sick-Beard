@@ -111,13 +111,13 @@ def findEpisode (episode, forceQuality=None):
 		
 		title = curResult["name"]
 		url = curResult["url"]
-		#urlParams = {'i': sickbeard.TVBINZ_UID, 'h': sickbeard.TVBINZ_HASH}
+		urlParams = {'i': sickbeard.TVBINZ_SABUID, 'h': sickbeard.TVBINZ_HASH}
 	
 		logger.log("Found result " + title + " at " + url)
 
 		result = sickbeard.classes.NZBSearchResult(episode)
 		result.provider = sickbeard.common.TVBINZ
-		result.url = url 
+		result.url = url + "&" + urllib.urlencode(urlParams) 
 		result.extraInfo = [title]
 		result.quality = epQuality
 		
@@ -226,7 +226,7 @@ class TVBinzCache(tvcache.TVCache):
 		# get all records since the last timestamp
 		url = "https://tvbinz.net/rss.php?"
 		
-		urlArgs = {'normalize': 1, 'n': 100, 'maxage': 400, 'seriesinfo': 1}
+		urlArgs = {'normalize': 1, 'n': 100, 'maxage': 400, 'seriesinfo': 1, 'nodupes': 1, 'sets': 'none'}
 
 		url += urllib.urlencode(urlArgs)
 		

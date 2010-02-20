@@ -263,3 +263,25 @@ Son of Suckerfish Dropdowns END
 */
 
 #speedbox{width:36px;}
+
+
+/* ========= */
+/* = Flash = */
+/* ========= */
+
+.message {
+    padding: 4px 0 4px 1em;
+    margin-bottom: 20px;
+    text-align: left;
+    font-size: larger;
+}
+.message p {
+    margin: 0;
+}
+.message p span {
+    float: left;
+    margin-right: .5em;
+}
+.message ul {
+   margin: 0;
+}
