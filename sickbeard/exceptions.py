@@ -65,3 +65,9 @@ class AuthException(SickBeardException):
 	
 class EpisodeDeletedException(SickBeardException):
 	"This episode has been deleted"
+
+class CantRefreshException(SickBeardException):
+	"The show can't be refreshed right now"
+
+class CantUpdateException(SickBeardException):
+	"The show can't be updated right now"

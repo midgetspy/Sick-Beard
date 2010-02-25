@@ -84,3 +84,8 @@ class ShowListUI:
         
         # if nothing matches then just go with the first match I guess
         return allSeries[0]
+
+# This is easy to solve with a simple tiny wrapper:
+class Callable:
+    def __init__(self, anycallable):
+        self.__call__ = anycallable

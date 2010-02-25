@@ -37,6 +37,8 @@ class DBConnection:
 		if query == None:
 			return
 
+		sqlResult = None
+
 		try:
 			if args == None:
 				logger.log(self.dbFileName+": "+query, logger.DEBUG)
@@ -49,6 +51,9 @@ class DBConnection:
 			if str(e).startswith("no such table: "):
 				self._checkDB()
 				return self.action(query, args)
+			else:
+				logger.log("DB error: "+str(e), logger.ERROR)
+				raise
 		except sqlite3.DatabaseError, e:
 			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
 			raise

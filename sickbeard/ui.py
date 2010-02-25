@@ -25,9 +25,67 @@ import sickbeard
 from sickbeard import exceptions
 from sickbeard.tv import TVShow
 from sickbeard import logger
+from sickbeard import classes
 
 from lib.tvdb_api import tvdb_exceptions
+
+class ProgressIndicators():
+    _pi = {'massUpdate': [],
+           'massAdd': [],
+           'dailyUpdate': []
+           }
+    
+    def getIndicator(name):
+        if name not in ProgressIndicators._pi:
+            return []
+
+        # if any of the progress indicators are done take them off the list
+        for curPI in ProgressIndicators._pi[name]:
+            if curPI != None and curPI.percentComplete() == 100:
+                ProgressIndicators._pi[name].remove(curPI)
+
+        # return the list of progress indicators associated with this name
+        return ProgressIndicators._pi[name]
+
+    def setIndicator(name, indicator):
+        ProgressIndicators._pi[name].append(indicator)
+
+    getIndicator = classes.Callable(getIndicator)
+    setIndicator = classes.Callable(setIndicator)
+
+class QueueProgressIndicator():
+    """
+    A class used by the UI to show the progress of the queue or a part of it.
+    """
+    def __init__(self, name, queueItemList):
+        self.queueItemList = queueItemList
+        self.name = name
+    
+    def numTotal(self):
+        return len(self.queueItemList)
+
+    def numFinished(self):
+        return len([x for x in self.queueItemList if not x.isInQueue()])
+
+    def numRemaining(self):
+        return len([x for x in self.queueItemList if x.isInQueue()])
+
+    def nextName(self):
+        for curItem in [sickbeard.showQueueScheduler.action.currentItem]+sickbeard.showQueueScheduler.action.queue:
+            if curItem in self.queueItemList:
+                return curItem.name
         
+        return "Unknown"
+
+    def percentComplete(self):
+        numFinished = self.numFinished()
+        numTotal = self.numTotal()
+        
+        if numTotal == 0:
+            return 0
+        else:
+            return int(float(numFinished)/float(numTotal)*100)
+
 class LoadingTVShow():
     def __init__(self, dir):
         self.dir = dir

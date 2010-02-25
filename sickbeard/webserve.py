@@ -668,7 +668,7 @@ class HomeAddShows:
 
             try:
                 #newShowAdder = ui.ShowAdder(showDir)
-                sickbeard.showAddScheduler.action.addShowToQueue(curShowDir)
+                sickbeard.showQueueScheduler.action.addShow(curShowDir)
                 showAdded = True
                 del showDir[0]
             except exceptions.NoNFOException:
@@ -800,19 +800,19 @@ class Home:
         t = PageTemplate(file="displayShow.tmpl")
         t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
 
-        if sickbeard.showAddScheduler.action.isBeingAdded(showObj):
+        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             flash['message'] = 'This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.'
             
-        elif sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
+        elif sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
             flash['message'] = 'The information below is in the process of being updated.'
         
-        elif sickbeard.showUpdateScheduler.action.isInQueue(showObj):
+        elif sickbeard.showQueueScheduler.action.isInUpdateQueue(showObj):
             flash['message'] = 'This show is queued and awaiting an update.'
 
-        if not sickbeard.showAddScheduler.action.isBeingAdded(showObj):
-            if not sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
+        if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
+            if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
                 t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid         })
-                t.submenu.append({ 'title': 'Refresh',           'path': 'home/updateShow?show=%d'%showObj.tvdbid         })
+                t.submenu.append({ 'title': 'Refresh',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid         })
                 t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdbid })
             t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid        })
         t.show = showObj
@@ -901,14 +901,40 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
 
-        if sickbeard.showAddScheduler.action.isBeingAdded(showObj) or \
-        sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
+        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or \
+        sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
             return _genericMessage("Error", "Shows can't be deleted while they're being added or updated.")
 
         showObj.deleteShow()
         
         flash['message'] = '<b>%s</b> has been deleted' % showObj.name
         raise cherrypy.HTTPRedirect("/home")
+
+    @cherrypy.expose
+    def refreshShow(self, show=None):
+
+        if show == None:
+            return _genericMessage("Error", "Invalid show ID")
+        
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        
+        if showObj == None:
+            return _genericMessage("Error", "Unable to find the specified show")
+        
+        # force the update from the DB
+        try:
+            sickbeard.showQueueScheduler.action.refreshShow(showObj)
+        except exceptions.CantRefreshException, e:
+            flash['error'] = "Unable to refresh this show."
+            flash['error-detail'] = str(e)
+
+        # wait for it to finish
+        if sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
+            flash['message'] = 'Refresh is in progress.'
+        
+        time.sleep(1)
+
+        raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
 
     @cherrypy.expose
     def updateShow(self, show=None, force=0):
@@ -921,17 +947,15 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
         
-        if sickbeard.showAddScheduler.action.isBeingAdded(showObj):
-            return _genericMessage("Error", "Show is still being added, wait until it is finished before you update.")
-        
-        if sickbeard.showUpdateScheduler.action.isBeingUpdated(showObj):
-            return _genericMessage("Error", "This show is already being updated, can't update again until it's done.")
-
         # force the update from the DB
-        sickbeard.showUpdateScheduler.action.addShowToQueue(showObj, bool(force))
+        try:
+            sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force))
+        except exceptions.CantUpdateException, e:
+            flash['error'] = "Unable to update this show."
+            flash['error-detail'] = str(e)
         
         # just give it some time
-        time.sleep(3)
+        time.sleep(1)
         
         raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
 
@@ -960,7 +984,7 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
         
-        if sickbeard.showAddScheduler.action.isBeingAdded(showObj):
+        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             return _genericMessage("Error", "Show is still being added, wait until it is finished before you rename files")
         
         showObj.fixEpisodeNames()

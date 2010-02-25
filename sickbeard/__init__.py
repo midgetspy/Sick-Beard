@@ -27,8 +27,9 @@ import os
 
 from threading import Lock
 
-from sickbeard import searchCurrent, searchBacklog, updateShows
-from sickbeard import helpers, db, exceptions, showAdder, scheduler, versionChecker
+from sickbeard import searchCurrent, searchBacklog, showUpdater
+from sickbeard import helpers, db, exceptions, queue, scheduler, versionChecker
+#from sickbeard import showAdder, updateShows
 from sickbeard import logger
 
 from sickbeard.common import *
@@ -43,11 +44,10 @@ LAST_TVDB_TIMEOUT = None
 
 backlogSearchScheduler = None
 currentSearchScheduler = None
-updateScheduler = None
-botRunner = None
-showAddScheduler = None
 showUpdateScheduler = None
+botRunner = None
 versionCheckScheduler = None
+showQueueScheduler = None
 
 ircBot = None
 
@@ -233,15 +233,15 @@ def initialize():
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, IRC_BOT, IRC_SERVER, \
                 IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
-                updateScheduler, botRunner, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
-                airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, showAddScheduler, \
+                showUpdateScheduler, botRunner, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
+                airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, showUpdateScheduler, \
+                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID
+                MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler
         
         if __INITIALIZED__:
             return False
@@ -362,27 +362,22 @@ def initialize():
                                                                       runImmediately=False)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
         
-        updateScheduler = scheduler.Scheduler(updateShows.ShowUpdater(),
-                                              cycleTime=datetime.timedelta(hours=12),
-                                              threadName="UPDATE",
-                                              runImmediately=False)
-        
-        #botRunner = tvnzbbot.NZBBotRunner()
-
-        showAddScheduler = scheduler.Scheduler(showAdder.ShowAddQueue(),
-                                               cycleTime=datetime.timedelta(seconds=3),
-                                               threadName="SHOWADDQUEUE",
-                                               silent=True)
-        
-        showUpdateScheduler = scheduler.Scheduler(updateShows.ShowUpdateQueue(),
-                                               cycleTime=datetime.timedelta(seconds=3),
-                                               threadName="SHOWUPDATEQUEUE",
-                                               silent=True)
+        # the interval for this is stored inside the ShowUpdater class
+        showUpdaterInstance = showUpdater.ShowUpdater()
+        showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
+                                               cycleTime=showUpdaterInstance.updateInterval,
+                                               threadName="SHOWUPDATER",
+                                               runImmediately=True)
 
         versionCheckScheduler = scheduler.Scheduler(versionChecker.CheckVersion(),
                                                      cycleTime=datetime.timedelta(hours=12),
                                                      threadName="CHECKVERSION",
                                                      runImmediately=True)
+        
+        showQueueScheduler = scheduler.Scheduler(queue.ShowQueue(),
+                                               cycleTime=datetime.timedelta(seconds=3),
+                                               threadName="SHOWQUEUE",
+                                               silent=True)
         
         
         showList = []
@@ -398,8 +393,7 @@ def initialize():
 def start():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
-            updateScheduler, IRC_BOT, botRunner, showAddScheduler, showUpdateScheduler, \
-            versionCheckScheduler
+            showUpdateScheduler, IRC_BOT, botRunner, versionCheckScheduler, showQueueScheduler
     
     with INIT_LOCK:
         
@@ -408,20 +402,17 @@ def start():
             # start the search scheduler
             currentSearchScheduler.thread.start()
         
-            # start the search scheduler
+            # start the backlog scheduler
             backlogSearchScheduler.thread.start()
         
-            # start the search scheduler
-            updateScheduler.thread.start()
-
-            # start the show adder
-            showAddScheduler.thread.start()
-
-            # start the show adder
+            # start the show updater
             showUpdateScheduler.thread.start()
 
             # start the version checker
             versionCheckScheduler.thread.start()
+
+            # start the queue checker
+            showQueueScheduler.thread.start()
 
             if IRC_BOT and False:
                 botRunner.thread.start()
@@ -429,8 +420,8 @@ def start():
 
 def halt ():
     
-    global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, updateScheduler, \
-            botRunner, showAddScheduler, showUpdateScheduler
+    global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
+            botRunner, showQueueScheduler
     
     with INIT_LOCK:
         
@@ -454,20 +445,6 @@ def halt ():
             except:
                 pass
 
-            updateScheduler.abort = True
-            logger.log("Waiting for the UPDATE thread to exit")
-            try:
-                updateScheduler.thread.join(10)
-            except:
-                pass
-            
-            showAddScheduler.abort = True
-            logger.log("Waiting for the SHOWADDER thread to exit")
-            try:
-                showAddScheduler.thread.join(10)
-            except:
-                pass
-            
             showUpdateScheduler.abort = True
             logger.log("Waiting for the SHOWUPDATER thread to exit")
             try:
@@ -477,6 +454,13 @@ def halt ():
             
             versionCheckScheduler.abort = True
             logger.log("Waiting for the VERSIONCHECKER thread to exit")
+            try:
+                versionCheckScheduler.thread.join(10)
+            except:
+                pass
+            
+            showQueueScheduler.abort = True
+            logger.log("Waiting for the SHOWQUEUE thread to exit")
             try:
                 versionCheckScheduler.thread.join(10)
             except:

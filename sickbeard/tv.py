@@ -856,7 +856,6 @@ class TVEpisode:
 		self.hasnfo = False
 		self.hastbn = False
 		self.status = UNKNOWN
-		logger.log("status starts unknown", logger.DEBUG)
 
 		self.tvdbid = 0
 
@@ -1136,6 +1135,8 @@ class TVEpisode:
 		
 		epsToWrite = [self] + self.relatedEps
 
+		shouldSave = False
+
 		try:
 			t = tvdb_api.Tvdb(actors=True,
 							  lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
@@ -1287,6 +1288,7 @@ class TVEpisode:
 			
 			for epToWrite in epsToWrite:
 				epToWrite.hasnfo = True
+				shouldSave = True
 		# end if needsNFO
 
 		if not self.hastbn or force:
@@ -1303,9 +1305,11 @@ class TVEpisode:
 					return
 				#TODO: check that it worked
 				self.hastbn = True
+				shouldSave = True
 
 		# save our new NFO statuses to the DB
-		self.saveToDB()
+		if shouldSave:
+			self.saveToDB()
 
 
 	def deleteEpisode(self):

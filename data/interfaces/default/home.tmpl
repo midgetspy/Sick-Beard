@@ -81,20 +81,19 @@
   <thead><tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
   <tbody>
 
-#for $curLoadingShow in $sickbeard.loadingShowList:
+#for $curLoadingShow in $sickbeard.showQueueScheduler.action.loadingShowList:
 
-  #if $sickbeard.loadingShowList[$curLoadingShow].show != None and $sickbeard.loadingShowList[$curLoadingShow].show in $sickbeard.showList:
+  #if $curLoadingShow.show != None and $curLoadingShow.show in $sickbeard.showList:
     #continue
   #end if
 
   <tr class="evenLine">
     <td align="center">(loading)</td>
     <td>
-    #if $sickbeard.loadingShowList[$curLoadingShow].show == None:
-    "Loading... ($curLoadingShow)
+    #if $curLoadingShow.show == None:
+    "Loading... ($curLoadingShow.name)
     #else:
-    #set $curShow = $sickbeard.loadingShowList[$curLoadingShow].show
-    <a href="displayShow?show=$curShow.tvdbid">$curShow.name</a>
+    <a href="displayShow?show=$curLoadingShow.show.tvdbid">$curLoadingShow.show.name</a>
     #end if
     </td>
     <td></td>

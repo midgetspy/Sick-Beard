@@ -51,6 +51,7 @@ def renameFile(curFile, newName):
     oldFile = os.path.splitext(filePath[1])
 
     newFilename = os.path.join(filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
+    
     logger.log("Renaming from " + curFile + " to " + newFilename)
 
     try:
