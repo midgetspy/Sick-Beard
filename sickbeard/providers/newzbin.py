@@ -182,7 +182,7 @@ def findEpisode(episode, forceQuality=None):
 		logger.log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
 		
 		result = sickbeard.classes.NZBSearchResult(episode)
-		result.provider = NEWZBIN
+		result.provider = 'newzbin'
 		result.url = curResult[4]
 		result.extraInfo = [curResult[2], curResult[5]]
 		result.quality = epQuality

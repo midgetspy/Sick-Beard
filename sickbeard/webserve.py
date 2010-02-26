@@ -42,6 +42,8 @@ from sickbeard import processTV
 from sickbeard import search
 from sickbeard import ui
 
+from sickbeard import providers
+
 from sickbeard.notifiers import xbmc
 from sickbeard.tv import *
 
@@ -1074,7 +1076,11 @@ class Home:
             # just use the first result for now
             logger.log("Downloading episode from " + foundEpisodes[0].url + "<br />\n")
             result = search.snatchEpisode(foundEpisodes[0])
-            flash['message'] = 'Episode snatched from <b>%s</b>' % providerNames[foundEpisodes[0].provider]
+            providerModule = providers.getProviderModule(foundEpisodes[0].provider)
+            if providerModule == None:
+                flash['error'] = 'Provider is configured incorrectly, unable to download'
+            else: 
+                flash['message'] = 'Episode snatched from <b>%s</b>' % providerModule.providerName
             
             #TODO: check if the download was successful
 

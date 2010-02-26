@@ -113,7 +113,7 @@ def findEpisode (episode, forceQuality=None):
 				continue
 
 			result = sickbeard.classes.NZBSearchResult(episode)
-			result.provider = NZBMATRIX 
+			result.provider = 'nzbmatrix' 
 			result.url = "http://nzbmatrix.com/api-nzb-download.php?id="+resultDict["NZBID"]+"&username="+sickbeard.NZBMATRIX_USERNAME+"&apikey="+sickbeard.NZBMATRIX_APIKEY
 			result.extraInfo = [resultDict["NZBNAME"]]
 			result.quality = epQuality

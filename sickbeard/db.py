@@ -116,7 +116,7 @@ class DBConnection:
 
 		# Create the table if it's not already there
 		try:
-			sql = "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider NUMERIC);"
+			sql = "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider TEXT);"
 			self.connection.execute(sql)
 			self.connection.commit()
 		except sqlite3.OperationalError, e:

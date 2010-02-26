@@ -4,6 +4,7 @@ import datetime
 
 from sickbeard import logger
 from sickbeard.common import *
+from sickbeard import providers
 
 dateFormat = "%Y%m%d%H%M%S"
 
@@ -22,7 +23,11 @@ def logSnatch(searchResult):
     episode = int(searchResult.episode.episode)
     quality = searchResult.quality
     
-    provider = searchResult.provider
+    providerModule = providers.getProviderModule(searchResult.provider)
+    if providerModule != None:
+        provider = providerModule.providerName
+    else:
+        provider = "unknown"
     
     if searchResult.predownloaded:
         action = ACTION_PRESNATCHED

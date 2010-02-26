@@ -34,7 +34,7 @@ from sickbeard.common import *
 from sickbeard import logger
 
 providerType = "nzb"
-providerName = "NZBs.org"
+providerName = "NZBs"
 
 def isActive():
 	return sickbeard.NZBS and sickbeard.USE_NZB
@@ -145,7 +145,7 @@ def findEpisode (episode, forceQuality=None):
 		logger.log("Found result " + title + " at " + url, logger.DEBUG)
 		
 		result = sickbeard.classes.NZBSearchResult(episode)
-		result.provider = sickbeard.common.NZBS
+		result.provider = 'nzbs'
 		result.url = url 
 		result.extraInfo = [title]
 		result.quality = epQuality

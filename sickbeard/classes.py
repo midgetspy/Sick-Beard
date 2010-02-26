@@ -22,6 +22,7 @@ import sickbeard
 
 import urllib
 from common import *
+from sickbeard import providers
 
 class AuthURLOpener(urllib.FancyURLopener):
     def __init__(self, user, pw):
@@ -52,7 +53,13 @@ class SearchResult:
         self.quality = -1
 
     def __str__(self):
-        myString = providerNames[self.provider] + " @ " + self.url + "\n"
+        
+        providerModule = providers.getProviderModule(self.provider)
+        
+        if providerModule == None:
+            return "Invalid provider, unable to print self"
+        
+        myString = providerModule.providerName + " @ " + self.url + "\n"
         myString += "Extra Info:\n"
         for extra in self.extraInfo:
             myString += "  " + extra + "\n"

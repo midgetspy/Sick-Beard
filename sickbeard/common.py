@@ -50,23 +50,6 @@ statusStrings[MISSED] = "Missed"
 statusStrings[BACKLOG] = "Backlog"
 statusStrings[DISCBACKLOG] = "Disc Backlog"
 
-# Provider stuff
-#TODO: refactor to providers package
-NEWZBIN = 1
-TVBINZ = 2
-NZBS = 3
-EZTV = 4
-NZBMATRIX = 5
-TVNZB = 6
-
-providerNames = {}
-providerNames[NEWZBIN] = "Newzbin"
-providerNames[TVBINZ] = "TVBinz"
-providerNames[NZBS] = "NZBs.org"
-providerNames[EZTV] = "EZTV"
-providerNames[NZBMATRIX] = "NZBMatrix"
-providerNames[TVNZB] = "TVNZB"
-
 ### Qualities
 HD = 1
 SD = 3

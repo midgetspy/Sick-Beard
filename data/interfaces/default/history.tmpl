@@ -3,6 +3,7 @@
 #import datetime
 #import re
 #from sickbeard import history
+#from sickbeard import providers
 #from sickbeard.common import *
 #set global $title="History"
 
@@ -44,7 +45,10 @@
 	  #end if
 	#else
       #if $hItem["provider"] > 0
-        <img src="$sbRoot/images/providers/<%=providerNames[hItem["provider"]].lower()%>.gif" width="16" height="16" alt="$providerNames[$hItem["provider"]]">
+        #set $providerModule = $providers.getProviderModule($hItem["provider"])
+        #if $providerModule != None: 
+        <img src="$sbRoot/images/providers/<%=providerModule.providerName.lower()%>.gif" width="16" height="16" alt="$providerModule.providerName">
+        #end if
       #end if
     #end if
 	</td>

@@ -116,7 +116,7 @@ def findEpisode(episode, forceQuality=None):
         logger.log("Found result " + title + " at " + url, logger.DEBUG)
 
         result = sickbeard.classes.TorrentSearchResult(episode)
-        result.provider = sickbeard.common.EZTV
+        result.provider = 'eztv'
         result.url = url 
         result.extraInfo = [title, filesize]
         
