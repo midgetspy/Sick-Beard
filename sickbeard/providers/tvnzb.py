@@ -84,7 +84,7 @@ def findEpisode (episode, forceQuality=None):
 		logger.log("TVNZB doesn't support disc backlog. Use Newzbin or download it manually from TVNZB")
 		return []
 
-	logger.log("Searching TVNZB for " + episode.prettyName())
+	logger.log("Searching TVNZB for " + episode.prettyName(True))
 
 	if forceQuality != None:
 		epQuality = forceQuality

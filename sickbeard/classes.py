@@ -59,7 +59,7 @@ class SearchResult:
         return myString
 
     def fileName(self):
-        return self.episode.prettyName() + "." + self.resultType
+        return self.episode.prettyName(True) + "." + self.resultType
 
 class NZBSearchResult(SearchResult):
     resultType = "nzb"
@@ -85,7 +85,7 @@ class ShowListUI:
         # if nothing matches then just go with the first match I guess
         return allSeries[0]
 
-# This is easy to solve with a simple tiny wrapper:
+# Simple wrapper to allow me to simulate static classes
 class Callable:
     def __init__(self, anycallable):
         self.__call__ = anycallable

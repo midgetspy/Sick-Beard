@@ -54,7 +54,7 @@ def findEpisode(episode, forceQuality=None):
         logger.log("EZTV doesn't support disc backlog. Download it manually.")
         return []
 
-    logger.log("Searching EZTV for " + episode.prettyName())
+    logger.log("Searching EZTV for " + episode.prettyName(True))
 
     if forceQuality != None:
         epQuality = forceQuality

@@ -240,7 +240,7 @@ def doIt(downloaderDir, nzbName=None):
 
     # wait for the copy to finish
 
-    notifiers.notify(NOTIFY_DOWNLOAD, rootEp.prettyName())
+    notifiers.notify(NOTIFY_DOWNLOAD, rootEp.prettyName(True))
 
 
     # figure out the new filename

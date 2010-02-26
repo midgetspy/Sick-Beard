@@ -29,6 +29,14 @@ from lib.irclib.irclib import ServerNotConnectedError
 
 import sickbeard
 
+naming_ep_type = ("%(seasonnumber)dx%(episodenumber)02d",
+                  "s%(seasonnumber)02de%(episodenumber)02d",
+                   "S%(seasonnumber)02dE%(episodenumber)02d")
+naming_multi_ep_type = {0: ["-%(episodenumber)02d"]*len(naming_ep_type),
+                        1: [" - " + x for x in naming_ep_type],
+                        2: [x + "%(episodenumber)02d" for x in ("x", "e", "E")]}
+
+
 def change_LOG_DIR(log_dir):
 
     if os.path.normpath(sickbeard.LOG_DIR) != os.path.normpath(log_dir):

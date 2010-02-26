@@ -82,7 +82,7 @@ def findEpisode (episode, forceQuality=None):
 	if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
 		raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
 
-	logger.log("Searching NZBs.org for " + episode.prettyName())
+	logger.log("Searching NZBs.org for " + episode.prettyName(True))
 
 	if forceQuality != None:
 		epQuality = forceQuality

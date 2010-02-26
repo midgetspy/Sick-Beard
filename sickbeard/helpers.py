@@ -95,6 +95,11 @@ def sanitizeFileName (name):
 		name = name.replace(x, "")
 	return name
 		
+
+def sceneToNormalShowNames(name):
+	
+	return (name, name.replace(" and ", " & "))
+
 def makeSceneShowSearchStrings(show):
 
 	showNames = [show.name]
@@ -276,16 +281,28 @@ def makeShowNFO(showID, showDir):
 
 def searchDBForShow(showName):
 	
+	showNames = [showName]
+	
 	# if tvdb fails then try looking it up in the db
 	myDB = db.DBConnection()
+
+	yearRegex = "(.*)([(]?)(\d{4})(?(2)[)]?).*"
 	sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ?", [showName+'%'])
 	
 	if len(sqlResults) != 1:
+
+		# if we didn't get exactly one result then try again with the year stripped off if possible
+		match = re.match(yearRegex, showName)
+		if match:
+			logger.log("Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
+			sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? AND startyear = ?", [match.group(1)+'%', match.group(3)])
+
 		if len(sqlResults) == 0:
 			logger.log("Unable to match a record in the DB for "+showName, logger.DEBUG)
-		else:
+			return None
+		elif len(sqlResults) > 1:
 			logger.log("Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
-		return None
+			return None
 	
 	return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 

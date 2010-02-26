@@ -41,6 +41,7 @@ from sickbeard import exceptions
 from sickbeard import processTV
 from sickbeard import classes
 from sickbeard import tvrage
+from sickbeard import config
 
 from common import *
 from sickbeard import logger
@@ -717,6 +718,8 @@ class TVShow(object):
 					curEp.location = ''
 					if curEp.status == DOWNLOADED:
 						curEp.status = SKIPPED
+					curEp.hasnfo = False
+					curEp.hastbn = False
 					curEp.saveToDB()
 
 		
@@ -872,6 +875,9 @@ class TVEpisode:
 
 	def checkForMetaFiles(self): 
 		
+		oldhasnfo = self.hasnfo
+		oldhastbn = self.hastbn
+		
 		# check for nfo and tbn
 		if os.path.isfile(self.location):
 			if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'nfo'))):
@@ -884,7 +890,8 @@ class TVEpisode:
 			else:
 				self.hastbn = False
 
-
+		# if either setting has changed return true, if not return false
+		return oldhasnfo != self.hasnfo or oldhastbn != self.hastbn 
 		
 	def specifyEpisode(self, season, episode):
 		
@@ -1131,11 +1138,9 @@ class TVEpisode:
 		if sickbeard.CREATE_METADATA != True:
 			return
 		
-		self.checkForMetaFiles()
-		
-		epsToWrite = [self] + self.relatedEps
+		shouldSave = self.checkForMetaFiles()
 
-		shouldSave = False
+		epsToWrite = [self] + self.relatedEps
 
 		try:
 			t = tvdb_api.Tvdb(actors=True,
@@ -1369,7 +1374,7 @@ class TVEpisode:
 		else:
 			return os.path.join(self.show.location, self.location)
 		
-	def prettyName (self):
+	def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None):
 		
 		regex = "(.*) \(\d\)"
 
@@ -1404,14 +1409,32 @@ class TVEpisode:
 				for relEp in self.relatedEps:
 					goodName += " & " + relEp.name
 		
-		goodEpString = "x%02i" % int(self.episode)
+		if naming_show_name == None:
+			naming_show_name = sickbeard.NAMING_SHOW_NAME
+		
+		if naming_ep_type == None:
+			naming_ep_type = sickbeard.NAMING_EP_TYPE
+		
+		if naming_multi_ep_type == None:
+			naming_multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
+		
+		goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
+		
 		for relEp in self.relatedEps:
-			goodEpString += "x%02i" % int(relEp.episode)
+			goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
 		
 		if goodName != '':
 			goodName = ' - ' + goodName
 
-		return self.show.name + ' - ' + str(self.season) + goodEpString + goodName
+		finalName = ""
+		
+		if naming_show_name:
+			finalName += self.show.name + " - "
+
+		finalName += goodEpString
+		finalName += goodName
+
+		return finalName
 		
 		
 		

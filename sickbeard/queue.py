@@ -282,7 +282,7 @@ class QueueItemRefresh(QueueItem):
 
         logger.log("Performing refresh on "+self.show.name)
 
-        self.show.loadEpisodesFromDir()
+        self.show.refreshDir()
         self.show.getImages()
         self.show.writeEpisodeNFOs()
         

@@ -90,7 +90,7 @@ def downloadNZB(nzb):
 		
 def findEpisode(episode, forceQuality=None):
 
-	logger.log("Searching newzbin for " + episode.prettyName())
+	logger.log("Searching newzbin for " + episode.prettyName(True))
 
 	if forceQuality != None:
 		epQuality = forceQuality
@@ -173,7 +173,10 @@ def findEpisode(episode, forceQuality=None):
 			continue
 
 		if len(curResult) == 1:
-			logger.log("Newzbin returned a malformed result, skipping it", logger.ERROR)
+			if curResult[0] == 'Error: Login Required - You need to login to access this feed.':
+				raise exceptions.AuthException("Incorrect username/password for Newzbin")
+			else:
+				logger.log("Newzbin returned a malformed result, skipping it", logger.ERROR)
 			continue
 		
 		logger.log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")

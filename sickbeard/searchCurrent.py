@@ -62,9 +62,9 @@ class CurrentSearcher():
                 
                 if len(foundEpisodes) == 0:
                     if curEp.status == PREDOWNLOADED:
-                        logger.log("Unable to find an HD version of the existing episode "+ curEp.prettyName())
+                        logger.log("Unable to find an HD version of the existing episode "+ curEp.prettyName(True))
                     else:
-                        logger.log("Unable to find download for " + curEp.prettyName())
+                        logger.log("Unable to find download for " + curEp.prettyName(True))
                 else:
                     # just use the first result for now
                     search.snatchEpisode(foundEpisodes[0])

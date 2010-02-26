@@ -55,7 +55,7 @@ def findEpisode (episode, forceQuality=None):
 		logger.log("NZBMatrix doesn't support disc backlog. Use newzbin or download it manually from NZBMatrix")
 		return []
 
-	logger.log("Searching NZBMatrix for " + episode.prettyName())
+	logger.log("Searching NZBMatrix for " + episode.prettyName(True))
 
 	if forceQuality != None:
 		epQuality = forceQuality

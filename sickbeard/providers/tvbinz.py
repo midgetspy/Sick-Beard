@@ -89,7 +89,7 @@ def findEpisode (episode, forceQuality=None):
 	if sickbeard.TVBINZ_UID in (None, "") or sickbeard.TVBINZ_HASH in (None, "") or sickbeard.TVBINZ_AUTH in (None, ""):
 		raise exceptions.AuthException("TVBinz authentication details are empty, check your config")
 	
-	logger.log("Searching tvbinz for " + episode.prettyName())
+	logger.log("Searching tvbinz for " + episode.prettyName(True))
 
 	if forceQuality != None:
 		epQuality = forceQuality

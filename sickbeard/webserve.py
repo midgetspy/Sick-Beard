@@ -214,7 +214,8 @@ class ConfigGeneral:
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None,
                     launch_browser=None, create_metadata=None, web_username=None,
                     web_password=None, quality_default=None, season_folders_default=None,
-                    version_notify=None):
+                    version_notify=None, naming_show_name=None, naming_ep_type=None,
+                    naming_multi_ep_type=None):
 
         results = []
 
@@ -243,6 +244,11 @@ class ConfigGeneral:
         else:
             version_notify = 0
             
+        if naming_show_name == "on":
+            naming_show_name = 1
+        else:
+            naming_show_name = 0
+            
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
@@ -251,6 +257,10 @@ class ConfigGeneral:
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = int(quality_default)
 
+        sickbeard.NAMING_SHOW_NAME = naming_show_name
+        sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
+        sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
+                    
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
@@ -806,6 +816,12 @@ class Home:
         elif sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
             flash['message'] = 'The information below is in the process of being updated.'
         
+        elif sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
+            flash['message'] = 'The episodes below are currently being refreshed from disk'
+        
+        elif sickbeard.showQueueScheduler.action.isInRefreshQueue(showObj):
+            flash['message'] = 'This show is queued to be refreshed.'
+        
         elif sickbeard.showQueueScheduler.action.isInUpdateQueue(showObj):
             flash['message'] = 'This show is queued and awaiting an update.'
 
@@ -932,7 +948,7 @@ class Home:
         if sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
             flash['message'] = 'Refresh is in progress.'
         
-        time.sleep(1)
+        time.sleep(3)
 
         raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
 
@@ -955,7 +971,7 @@ class Home:
             flash['error-detail'] = str(e)
         
         # just give it some time
-        time.sleep(1)
+        time.sleep(3)
         
         raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
 
@@ -1042,7 +1058,7 @@ class Home:
         if isinstance(epObj, str):
             return _genericMessage("Error", epObj)
         
-        tempStr = "Searching for download for " + epObj.prettyName()
+        tempStr = "Searching for download for " + epObj.prettyName(True)
         logger.log(tempStr)
         outStr += tempStr + "<br />\n"
         foundEpisodes = search.findEpisode(epObj)
@@ -1050,7 +1066,7 @@ class Home:
         if len(foundEpisodes) == 0:
             message = 'No downloads were found'
             flash['error'] = message
-            flash['error-detail'] = "Couldn't find a download for <i>%s</i>" % epObj.prettyName()
+            flash['error-detail'] = "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True)
             logger.log(message)
         
         else:

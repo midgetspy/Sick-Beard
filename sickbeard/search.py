@@ -76,7 +76,7 @@ def snatchEpisode(result):
 	# log the snatch
 	history.logSnatch(result)
 
-	notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName())
+	notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
 	
 	with result.episode.lock:
 		if result.predownloaded == False:
@@ -115,7 +115,7 @@ def _doSearch(episode, provider):
 
 def findEpisode(episode):
 
-	logger.log("Searching for " + episode.prettyName())
+	logger.log("Searching for " + episode.prettyName(True))
 
 	foundEps = []
 

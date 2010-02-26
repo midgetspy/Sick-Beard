@@ -84,12 +84,12 @@ class BacklogSearcher:
 
                 curEp = show.getEpisode(sqlEp["season"], sqlEp["episode"])
                 
-                logger.log("Found backlog episode: " + curEp.prettyName(), logger.DEBUG)
+                logger.log("Found backlog episode: " + curEp.prettyName(True), logger.DEBUG)
             
                 foundNZBs = search.findEpisode(curEp)
                 
                 if len(foundNZBs) == 0:
-                    logger.log("Unable to find NZB for " + curEp.prettyName())
+                    logger.log("Unable to find NZB for " + curEp.prettyName(True))
                 
                 else:
                     # just use the first result for now
@@ -108,7 +108,7 @@ class BacklogSearcher:
         foundNZBs = search.findEpisode(curEp)
         
         if len(foundNZBs) == 0:
-            logger.log("Unable to find NZB for " + curEp.prettyName())
+            logger.log("Unable to find NZB for " + curEp.prettyName(True))
         
         else:
             # just use the first result for now
