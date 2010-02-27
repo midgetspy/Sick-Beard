@@ -16,7 +16,7 @@ histMap = {-1: 'unknown',
            6: 'tvnzb'}
 
 
-def fixHistory(number, name):
+def fixHistoryTable():
 
     connection = sqlite3.connect("sickbeard.db")
     connection.row_factory = sqlite3.Row
@@ -32,6 +32,18 @@ def fixHistory(number, name):
         connection.execute(sql)
         connection.commit()
 
+    
+    except sqlite3.DatabaseError, e:
+        print "Fatal error executing query '" + sql + "': " + str(e)
+        raise
+
+def fixHistory(number, name):
+
+    connection = sqlite3.connect("sickbeard.db")
+    connection.row_factory = sqlite3.Row
+    
+    try:
+
         sql = "SELECT * FROM history_old"
         print sql
         sqlResults = connection.execute(sql).fetchall()
@@ -42,7 +54,7 @@ def fixHistory(number, name):
             except ValueError:
                 continue
             print sql, args
-            connection.execute(sql, )
+            connection.execute(sql, args)
             connection.commit()
 
     
@@ -51,5 +63,6 @@ def fixHistory(number, name):
         raise
 
 
+fixHistoryTable()
 for x in histMap.keys():
     fixHistory(x, histMap[x])
