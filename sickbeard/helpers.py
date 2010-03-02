@@ -181,7 +181,7 @@ def makeShowNFO(showID, showDir):
 		logger.log("Unable to create show dir, can't make NFO", logger.ERROR)
 		return False
 
-	t = tvdb_api.Tvdb(apikey=sickbeard.TVDB_API_KEY, actors=True)
+	t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
 	
 	tvNode = etree.Element( "tvshow" )
 	for ns in XML_NSMAP.keys():

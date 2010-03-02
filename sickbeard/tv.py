@@ -114,7 +114,7 @@ class TVShow(object):
 			raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
 		
 		try:
-			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
+			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, **sickbeard.TVDB_API_PARMS)
 			t[self.tvdbid]
 		except tvdb_exceptions.tvdb_shownotfound, e:
 			raise exceptions.ShowNotFoundException(str(e))
@@ -281,8 +281,15 @@ class TVShow(object):
 
 	def loadEpisodesFromTVDB(self, cache=True):
 	
+		# There's gotta be a better way of doing this but we don't wanna
+		# change the cache value elsewhere
+		ltvdb_api_parms = sickbeard.TVDB_API_PARMS
+
+		if not cache:
+		    ltvdb_api_parms['cache'] = None
+
 		try:
-			t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
+			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, **ltvdb_api_parms)
 		except tvdb_exceptions.tvdb_error:
 			logger.log("TVDB timed out, unable to update episodes from TVDB", logger.ERROR)
 			return None
@@ -344,7 +351,7 @@ class TVShow(object):
 			return
 
 		try:
-			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY, banners=True)
+			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, banners=True, **sickbeard.TVDB_API_PARMS)
 			myShow = t[self.tvdbid]
 		except (tvdb_exceptions.tvdb_error, IOError):
 			logger.log("Unable to look up show on TVDB, not downloading images", logger.ERROR)
@@ -571,7 +578,15 @@ class TVShow(object):
 
 		logger.log(str(self.tvdbid) + ": Loading show info from theTVDB") 
 
-		t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
+		# There's gotta be a better way of doing this but we don't wanna
+		# change the cache value elsewhere
+		ltvdb_api_parms = sickbeard.TVDB_API_PARMS
+
+		if not cache:
+		    ltvdb_api_parms['cache'] = None
+
+		t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
+			**ltvdb_api_parms)
 		myEp = t[self.tvdbid]
 		
 		if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
@@ -962,8 +977,16 @@ class TVEpisode:
 
 		logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
+		# There's gotta be a better way of doing this but we don't wanna
+		# change the cache value elsewhere
+		ltvdb_api_parms = sickbeard.TVDB_API_PARMS
+
+		if not cache:
+		    ltvdb_api_parms['cache'] = None
+
 		try:
-			t = tvdb_api.Tvdb(cache=cache, lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
+			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
+				**ltvdb_api_parms)
 			myEp = t[self.show.tvdbid][season][episode]
 		except (tvdb_exceptions.tvdb_error, IOError):
 			# if the episode is already valid just log it, if not throw it up
@@ -1144,8 +1167,8 @@ class TVEpisode:
 
 		try:
 			t = tvdb_api.Tvdb(actors=True,
-							  lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
-							  apikey=sickbeard.TVDB_API_KEY)
+					  lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
+					  **sickbeard.TVDB_API_PARMS)
 			myShow = t[self.show.tvdbid]
 		except tvdb_exceptions.tvdb_shownotfound, e:
 			raise exceptions.ShowNotFoundException(str(e))

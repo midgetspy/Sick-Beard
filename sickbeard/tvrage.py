@@ -78,7 +78,8 @@ class TVRage:
         try:
 
             try:
-                t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, apikey=sickbeard.TVDB_API_KEY)
+                t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
+				    **sickbeard.TVDB_API_PARMS)
             except tvdb_exceptions.tvdb_exception, e:
                 logger.log("Currently this doesn't work with TVDB down but with some DB magic it can be added", logger.DEBUG)
                 return None
@@ -168,7 +169,7 @@ class TVRage:
             # make sure the last TVDB episode matches our last episode
             try:
                 t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT,
-                                  apikey=sickbeard.TVDB_API_KEY)
+                                  **sickbeard.TVDB_API_PARMS)
                 ep = t[self.show.tvdbid][self.lastEpInfo['season']][self.lastEpInfo['episode']]
 
                 if ep["firstaired"] == "" or ep["firstaired"] == None:
