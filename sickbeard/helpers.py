@@ -114,8 +114,6 @@ def makeSceneShowSearchStrings(show):
 
 	showNames = map(sanitizeSceneName, showNames)
 
-	logger.log("Show strings: "+ str(showNames))
-
 	return showNames
 
 
@@ -129,8 +127,6 @@ def makeSceneSearchString (episode):
 
 	for curShow in showNames:
 		toReturn.append(curShow + epString)
-
-	logger.log("Returning names: "+str(toReturn))
 
 	return toReturn
 	
