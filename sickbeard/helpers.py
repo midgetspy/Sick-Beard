@@ -105,7 +105,7 @@ def makeSceneShowSearchStrings(show):
 	showNames = [show.name]
 
 	if int(show.tvdbid) in sceneExceptions:
-		showNames += sceneExceptions[int(show.tvdbid)]
+		showNames.append(sceneExceptions[int(show.tvdbid)])
 	
 	# if we have a tvrage name then use it
 	if show.tvrname != "" and show.tvrname != None and show.name.lower() != show.tvrname.lower():
@@ -113,6 +113,8 @@ def makeSceneShowSearchStrings(show):
 		showNames.append(show.tvrname)
 
 	showNames = map(sanitizeSceneName, showNames)
+
+	logger.log("Show strings: "+ str(showNames))
 
 	return showNames
 
@@ -127,6 +129,8 @@ def makeSceneSearchString (episode):
 
 	for curShow in showNames:
 		toReturn.append(curShow + epString)
+
+	logger.log("Returning names: "+str(toReturn))
 
 	return toReturn
 	
