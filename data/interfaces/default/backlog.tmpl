@@ -37,7 +37,7 @@
     </td>
     <td align="center">$datetime.date.fromordinal(int($bItem["airdate"]))</td>
     <td align="center">$statusStrings[$bItem["status"]]</td>
-    <td>(search)</td>
+	<td align="center"><a href="$sbRoot/home/searchEpisode?show=$bItem["showid"]&season=$bItem["season"]&episode=$bItem["episode"]">(search)</a></td>
   </tr>
 #end for
   </tbody>
