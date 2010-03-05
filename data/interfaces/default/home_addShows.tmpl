@@ -11,19 +11,17 @@
 
 <form method="POST" action="addShow">
 Single show folder: <input type="text" name="showDir" id="showDir" size="50"> <input type="submit" value="Add Show">
-<input type="button" value="Browse&hellip;" id="showBrowse" />
 </form>
 <br />
 <br />
 <h2>Add all shows in a root directory</h2>
 <form method="POST" action="addRootDir">
 Root show folder: <input type="text" name="dir" id="showsDir" size="50"> <input type="submit" value="Add all shows">
-<input type="button" value="Browse&hellip;" id="showsBrowse" />
 </form>
 
 <script type="text/javascript" charset="utf-8">
-    jQuery('#showBrowse').fileBrowser({ field: '#showDir', title: 'Select Show Folder' });
-    jQuery('#showsBrowse').fileBrowser({ field: '#showsDir', title: 'Select Root Show Folder' });
+    jQuery('#showDir').fileBrowser({ title: 'Select Show Folder', key: 'showPath' });
+    jQuery('#showsDir').fileBrowser({ title: 'Select Root Show Folder', key: 'showsPath' });
 </script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

@@ -22,7 +22,8 @@
 	}
 
 	$.fn.fileBrowser = function(options){
-		return this.click(function(){
+		field = this;
+		return field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function(){
 			if(!fileBrowserDialog) {
 				fileBrowserDialog = $('<div id="fileBrowserDialog" style="display:hidden"></div>').appendTo('body').dialog({
 					title:     options.title || 'Choose Directory',
@@ -36,7 +37,9 @@
 			fileBrowserDialog.dialog('option', 'buttons',
 			{
 				"Ok": function(){
-					$(options.field).val(currentBrowserPath);
+					field.val(currentBrowserPath);
+					if(options.key)
+						$.cookie('fileBrowser-' + options.key, currentBrowserPath);
 					fileBrowserDialog.dialog("close");
 				},
 				"Cancel": function(){
@@ -44,15 +47,10 @@
 				}
 			});
 			
-			if ($(options.field).val() != "")
-			     browseDir = $(options.field).val()
-			else
-			     browseDir = '/'
-									 
-			if(!currentBrowserPath)
-				browse(browseDir)
+			initialDir = field.val() || (options.key && $.cookie('fileBrowser-' + options.key)) || '/';
+			browse(initialDir)
 			fileBrowserDialog.dialog('open');
 			return false;
-		});
+		}));
 	};
 })();
