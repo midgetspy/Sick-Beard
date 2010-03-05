@@ -57,7 +57,11 @@ def sendNZB(nzb):
 
     logger.log("URL: " + url, logger.DEBUG)
 
-    f = urllib.urlopen(url)
+    try:
+        f = urllib.urlopen(url)
+    except IOError, e:
+        logger.log("Unable to connect to SAB: "+str(e), logger.ERROR)
+        return False
     
     if f == None:
         logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
