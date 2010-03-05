@@ -17,12 +17,13 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+import sys
 import os.path
 import sqlite3
 
 import sickbeard
 from sickbeard import logger
+from sickbeard import dbSetup
 
 class DBConnection:
 	def __init__(self, dbFileName="sickbeard.db"):
@@ -48,12 +49,8 @@ class DBConnection:
 				sqlResult = self.connection.execute(query, args)
 			self.connection.commit()
 		except sqlite3.OperationalError, e:
-			if str(e).startswith("no such table: "):
-				self._checkDB()
-				return self.action(query, args)
-			else:
-				logger.log("DB error: "+str(e), logger.ERROR)
-				raise
+			logger.log("DB error: "+str(e), logger.ERROR)
+			raise
 		except sqlite3.DatabaseError, e:
 			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
 			raise
@@ -85,51 +82,10 @@ class DBConnection:
 			         " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")" 
 			self.action(query, valueDict.values() + keyDict.values())
 
-	
-	def _checkDB(self):
-		# Create the table if it's not already there
-		try:
-			sql = "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, tvr_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_name TEXT);"
-			self.connection.execute(sql)
-			self.connection.commit()
-		except sqlite3.OperationalError, e:
-			if str(e) != "table tv_shows already exists":
-				raise
-
-		# Create the table if it's not already there
-		try:
-			sql = "CREATE TABLE tv_episodes (episode_id INTEGER PRIMARY KEY, showid NUMERIC, tvdbid NUMERIC, name TEXT, season NUMERIC, episode NUMERIC, description TEXT, airdate NUMERIC, hasnfo NUMERIC, hastbn NUMERIC, status NUMERIC, location TEXT);"
-			self.connection.execute(sql)
-			self.connection.commit()
-		except sqlite3.OperationalError, e:
-			if str(e) != "table tv_episodes already exists":
-				raise
-
-		# Create the table if it's not already there
-		try:
-			sql = "CREATE TABLE info (last_backlog NUMERIC, last_tvdb NUMERIC);"
-			self.connection.execute(sql)
-			self.connection.commit()
-		except sqlite3.OperationalError, e:
-			if str(e) != "table info already exists":
-				raise
-
-		# Create the table if it's not already there
-		try:
-			sql = "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider TEXT);"
-			self.connection.execute(sql)
-			self.connection.commit()
-		except sqlite3.OperationalError, e:
-			if str(e) != "table history already exists":
-				raise
-
-		# Create the Index if it's not already there
-		try:
-			sql = "CREATE INDEX idx_tv_episodes_showid_airdate ON tv_episodes(showid,airdate);"
-			self.connection.execute(sql)
-			self.connection.commit()
-		except sqlite3.OperationalError, e:
-			if str(e) != "index idx_tv_episodes_showid_airdate already exists":
-				raise
-
-
+	def tableInfo(self, tableName):
+		# FIXME ? binding is not supported here, but I cannot find a way to escape a string manually
+		cursor = self.connection.execute("PRAGMA table_info(%s)" % tableName)
+		columns = {}
+		for column in cursor:
+			columns[column['name']] = { 'type': column['type'] }
+		return columns

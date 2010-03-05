@@ -376,6 +376,8 @@ def initialize():
         
         logger.initLogging()
 
+        dbSetup.upgradeDatabase(db.DBConnection())
+
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
@@ -411,7 +413,7 @@ def initialize():
         missingList = []
         airingList = []
         comingList = []
-        
+
         __INITIALIZED__ = True
         return True
 
