@@ -31,7 +31,7 @@
 					width:     600,
 					height:    600,
 					modal:     true,
-					autoOpen:  false,
+					autoOpen:  false
 				});
 			}
 			fileBrowserDialog.dialog('option', 'buttons',
