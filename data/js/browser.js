@@ -30,8 +30,8 @@
 
 	$.fn.fileBrowser = function(options){
 		options = $.extend({}, $.Browser.defaults, options);
-		field = this;
-		return field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function(){
+		options.field = $(this);
+		return options.field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function(){
 			if(!fileBrowserDialog) {
 				fileBrowserDialog = $('<div id="fileBrowserDialog" style="display:hidden"></div>').appendTo('body').dialog({
 					title:     options.title,
@@ -45,7 +45,7 @@
 			fileBrowserDialog.dialog('option', 'buttons',
 			{
 				"Ok": function(){
-					field.val(currentBrowserPath);
+					options.field.val(currentBrowserPath);
 					if(options.key)
 						$.cookie('fileBrowser-' + options.key, currentBrowserPath);
 					fileBrowserDialog.dialog("close");
@@ -55,7 +55,7 @@
 				}
 			});
 			
-			initialDir = field.val() || (options.key && $.cookie('fileBrowser-' + options.key)) || '/';
+			initialDir = options.field.val() || (options.key && $.cookie('fileBrowser-' + options.key)) || '/';
 			browse(initialDir, options.url)
 			fileBrowserDialog.dialog('open');
 			return false;
