@@ -1,15 +1,22 @@
 (function(){
+	$.Browser = {
+		defaults: {
+			title: 'Choose Directory',
+			url:   '/browser/'
+		}
+	};
+
 	var fileBrowserDialog  = null;
 	var currentBrowserPath = null;
 
-	function browse(path) {
+	function browse(path, endpoint) {
 		currentBrowserPath = path;
-		$.getJSON('/browser/', { path: path }, function(data){
+		$.getJSON(endpoint, { path: path }, function(data){
 			fileBrowserDialog.empty();
 			$('<h1>').text(path).appendTo(fileBrowserDialog);
 			list = $('<ul>').appendTo(fileBrowserDialog);
 			$.each(data, function(i, entry) {
-				link = $("<a />").click(function(){ browse(entry.path); }).text(entry.name);
+				link = $("<a />").click(function(){ browse(entry.path, endpoint); }).text(entry.name);
 				$('<span class="ui-icon ui-icon-folder-collapsed"></span>').appendTo(link);
 				link.hover(
 					function(){jQuery("span", this).addClass("ui-icon-folder-open");    },
@@ -22,11 +29,12 @@
 	}
 
 	$.fn.fileBrowser = function(options){
+		options = $.extend({}, $.Browser.defaults, options);
 		field = this;
 		return field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function(){
 			if(!fileBrowserDialog) {
 				fileBrowserDialog = $('<div id="fileBrowserDialog" style="display:hidden"></div>').appendTo('body').dialog({
-					title:     options.title || 'Choose Directory',
+					title:     options.title,
 					position:  ['center', 50],
 					width:     600,
 					height:    600,
@@ -48,7 +56,7 @@
 			});
 			
 			initialDir = field.val() || (options.key && $.cookie('fileBrowser-' + options.key)) || '/';
-			browse(initialDir)
+			browse(initialDir, options.url)
 			fileBrowserDialog.dialog('open');
 			return false;
 		}));

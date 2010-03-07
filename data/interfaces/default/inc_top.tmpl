@@ -18,6 +18,9 @@
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
+    <script type="text/javascript" charset="utf-8">
+    $.Browser.defaults.url = '$sbRoot/browser/';
+    </script>
 </head>
 <body>
 #if $sickbeard.VERSION_NOTIFY and $sickbeard.version.SICKBEARD_VERSION not in ("trunk", "python25") and $sickbeard.NEWEST_VERSION != None and int($sickbeard.version.SICKBEARD_VERSION[1:]) < $sickbeard.NEWEST_VERSION:
