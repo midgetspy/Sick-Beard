@@ -111,5 +111,10 @@ class NumericProviders (AddAirdateIndex):
 		oldHistory = self.connection.action("SELECT * FROM history_old").fetchall()
 		for curResult in oldHistory:
 			sql = "INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) VALUES (?,?,?,?,?,?,?,?)"
-			args = [curResult["action"], curResult["date"], curResult["showid"], curResult["season"], curResult["episode"], curResult["quality"], curResult["resource"], self.histMap[int(curResult["provider"])]]
+			provider = 'unknown'
+			try:
+				provider = self.histMap[int(curResult["provider"])]
+			except ValueError:
+				provider = curResult["provider"]
+			args = [curResult["action"], curResult["date"], curResult["showid"], curResult["season"], curResult["episode"], curResult["quality"], curResult["resource"], provider]
 			self.connection.action(sql, args)
