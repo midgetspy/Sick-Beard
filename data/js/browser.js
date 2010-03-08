@@ -11,6 +11,8 @@
 	var currentRequest     = null;
 
 	function browse(path, endpoint) {
+		if(currentBrowserPath == path)
+			return;
 		currentBrowserPath = path;
 		if(currentRequest)
 			currentRequest.abort();
