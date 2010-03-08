@@ -291,21 +291,21 @@ def initialize():
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         if not helpers.makeDir(CACHE_DIR):
             logger.log("!!! Creating local cache dir failed, using system default", logger.ERROR)
-	    CACHE_DIR = None
+        CACHE_DIR = None
 
-	# Set our common tvdb_api options here
-	TVDB_API_PARMS = {'cache': None, 'apikey': TVDB_API_KEY}
-	if CACHE_DIR:
-	    TVDB_API_PARMS['cache'] = CACHE_DIR + '/tvdb'
-	else:
-	    TVDB_API_PARMS['cache'] = True
+        # Set our common tvdb_api options here
+        TVDB_API_PARMS = {'cache': None, 'apikey': TVDB_API_KEY}
+        if CACHE_DIR:
+            TVDB_API_PARMS['cache'] = CACHE_DIR + '/tvdb'
+        else:
+            TVDB_API_PARMS['cache'] = True
         
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
 
         NAMING_SHOW_NAME = bool(check_setting_int(CFG, 'General', 'naming_show_name', 1))
-        NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_string', 0)
+        NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
         NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
