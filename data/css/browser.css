@@ -4,10 +4,9 @@
 }
 #fileBrowserDialog ul li {
   margin: 2px;
-  position: relative;
   padding: 4px 0;
   cursor: pointer;
-  list-style: none;
+  list-style-type: none;
 }
 #fileBrowserDialog ul li a {
   display: block;

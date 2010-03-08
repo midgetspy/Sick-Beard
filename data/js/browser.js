@@ -22,8 +22,8 @@
 			$('<h1>').text(path).appendTo(fileBrowserDialog);
 			list = $('<ul>').appendTo(fileBrowserDialog);
 			$.each(data, function(i, entry) {
-				link = $("<a />").click(function(){ browse(entry.path, endpoint); }).text(entry.name);
-				$('<span class="ui-icon ui-icon-folder-collapsed"></span>').appendTo(link);
+				link = $("<a href='javascript:void(0)' />").click(function(){ browse(entry.path, endpoint); }).text(entry.name);
+				$('<span class="ui-icon ui-icon-folder-collapsed"></span>').prependTo(link);
 				link.hover(
 					function(){jQuery("span", this).addClass("ui-icon-folder-open");    },
 					function(){jQuery("span", this).removeClass("ui-icon-folder-open"); }
