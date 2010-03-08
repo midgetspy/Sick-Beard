@@ -38,6 +38,8 @@
 	$.fn.fileBrowser = function(options){
 		options = $.extend({}, $.Browser.defaults, options);
 		options.field = $(this);
+		if(options.key && options.field.val().length == 0 && (path = $.cookie('fileBrowser-' + options.key)))
+			options.field.val(path);
 		return options.field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function(){
 			if(!fileBrowserDialog) {
 				fileBrowserDialog = $('<div id="fileBrowserDialog" style="display:hidden"></div>').appendTo('body').dialog({
