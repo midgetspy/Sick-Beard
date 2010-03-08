@@ -313,7 +313,11 @@ class QueueItemUpdate(QueueItem):
         
         # get episode list from TVDB
         logger.log("Loading all episodes from theTVDB", logger.DEBUG)
-        TVDBEpList = self.show.loadEpisodesFromTVDB(cache=not self.force)
+        try:
+            TVDBEpList = self.show.loadEpisodesFromTVDB(cache=not self.force)
+        except tvdb_exceptions.tvdb_exception, e:
+            logger.log("Unable to get info from TVDB, the show info will not be refreshed: "+str(e), logger.ERROR)
+            TVDBEpList = None
         
         if TVDBEpList == None:
             logger.log("No data returned from TVDB, unable to update this show", logger.ERROR)
