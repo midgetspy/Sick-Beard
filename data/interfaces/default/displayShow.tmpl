@@ -3,7 +3,7 @@
 #import os.path
 #import datetime
 #set global $title=$show.name
-#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a></h2>' % ($show.tvdbid, $show.name)
+#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
 
 <!--#set global $topmenu="home"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
