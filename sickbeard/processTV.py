@@ -161,9 +161,13 @@ def doIt(downloaderDir, nzbName=None):
     if nzbName != None:
         nameList.append(nzbName)
     
+    finalNameList = []
+    for curName in nameList:
+        finalNameList += helpers.sceneToNormalShowNames(curName)
+
     showResults = None
     
-    for curName in nameList:
+    for curName in set(finalNameList):
     
         try:
             myParser = FileParser(curName)
@@ -180,7 +184,7 @@ def doIt(downloaderDir, nzbName=None):
             showInfo = (int(showObj["id"]), showObj["seriesname"])
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
-            returnStr += logHelper("TVDB didn't respond, trying to look up the show in the DB instead", logger.DEBUG)
+            returnStr += logHelper("TVDB didn't respond, trying to look up the show in the DB instead: "+str(e), logger.DEBUG)
 
             showInfo = helpers.searchDBForShow(result.seriesname)
             

@@ -98,7 +98,7 @@ def sanitizeFileName (name):
 
 def sceneToNormalShowNames(name):
 	
-	return (name, name.replace(" and ", " & "))
+	return [name, name.replace(".and.", ".&.")]
 
 def makeSceneShowSearchStrings(show):
 
@@ -279,32 +279,41 @@ def makeShowNFO(showID, showDir):
 	return True
 
 
-def searchDBForShow(showName):
+def searchDBForShow(regShowName):
 	
-	showNames = [showName]
+	showNames = set([regShowName+'%', regShowName.replace(' ','_')+'%'])
 	
 	# if tvdb fails then try looking it up in the db
 	myDB = db.DBConnection()
 
-	yearRegex = "(.*)([(]?)(\d{4})(?(2)[)]?).*"
-	sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ?", [showName+'%'])
-	
-	if len(sqlResults) != 1:
+	yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
 
-		# if we didn't get exactly one result then try again with the year stripped off if possible
-		match = re.match(yearRegex, showName)
-		if match:
-			logger.log("Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
-			sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? AND startyear = ?", [match.group(1)+'%', match.group(3)])
-
-		if len(sqlResults) == 0:
-			logger.log("Unable to match a record in the DB for "+showName, logger.DEBUG)
-			return None
-		elif len(sqlResults) > 1:
-			logger.log("Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
-			return None
+	for showName in showNames:
 	
-	return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
+		
+		if len(sqlResults) == 1:
+			return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+
+		else:
+	
+			# if we didn't get exactly one result then try again with the year stripped off if possible
+			match = re.match(yearRegex, showName)
+			if match:
+				logger.log("Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
+				sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
+	
+			if len(sqlResults) == 0:
+				logger.log("Unable to match a record in the DB for "+showName, logger.DEBUG)
+				continue
+			elif len(sqlResults) > 1:
+				logger.log("Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
+				continue
+			else:
+				return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+
+	
+	return None
 
 def findLatestRev():
 
