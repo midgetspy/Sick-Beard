@@ -209,6 +209,12 @@ class QueueItemAdd(QueueItem):
 
         logger.log("Starting to add show "+self.showDir)
 
+        otherShow = helpers.findCertainShow(sickbeard.showList, self.initialShow.tvdbid)
+        if otherShow != None:
+            logger.log("Show is already in your list, not adding it again")
+            self.finish()
+            return
+
         try:
             self.initialShow.getImages()
             self.initialShow.loadFromTVDB()
