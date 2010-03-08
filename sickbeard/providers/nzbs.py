@@ -139,6 +139,10 @@ def findEpisode (episode, forceQuality=None):
 		title = item.findtext('title')
 		url = item.findtext('link')
 		
+		if "subpack" in title.lower():
+			logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
+			continue
+		
 		if "&i=" not in url and "&h=" not in url:
 			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
 		
