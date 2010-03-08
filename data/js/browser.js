@@ -8,10 +8,13 @@
 
 	var fileBrowserDialog  = null;
 	var currentBrowserPath = null;
+	var currentRequest     = null;
 
 	function browse(path, endpoint) {
 		currentBrowserPath = path;
-		$.getJSON(endpoint, { path: path }, function(data){
+		if(currentRequest)
+			currentRequest.abort();
+		currentRequest = $.getJSON(endpoint, { path: path }, function(data){
 			fileBrowserDialog.empty();
 			$('<h1>').text(path).appendTo(fileBrowserDialog);
 			list = $('<ul>').appendTo(fileBrowserDialog);
