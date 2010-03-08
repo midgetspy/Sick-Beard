@@ -1140,6 +1140,12 @@ class WebFileBrowser:
 
         return json.dumps(entries)
 
+    @cherrypy.expose
+    def complete(self, q, limit, timestamp):
+        fileList = glob.glob(os.path.join(os.path.dirname(q), "*"))
+        fileList = sorted(fileList, lambda x, y: cmp(os.path.basename(x).lower(), os.path.basename(y).lower()))
+        return "\n".join(filter(os.path.isdir, fileList))
+
 class WebInterface:
     
     @cherrypy.expose

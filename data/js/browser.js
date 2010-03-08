@@ -1,8 +1,9 @@
 (function(){
 	$.Browser = {
 		defaults: {
-			title: 'Choose Directory',
-			url:   '/browser/'
+			title:             'Choose Directory',
+			url:               '/browser/',
+			autocompleteURL:   '/browser/complete'
 		}
 	};
 
@@ -38,6 +39,8 @@
 	$.fn.fileBrowser = function(options){
 		options = $.extend({}, $.Browser.defaults, options);
 		options.field = $(this);
+		if(options.field.autocomplete && options.autocompleteURL)
+			options.field.autocomplete(options.autocompleteURL);
 		if(options.key && options.field.val().length == 0 && (path = $.cookie('fileBrowser-' + options.key)))
 			options.field.val(path);
 		return options.field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function(){
