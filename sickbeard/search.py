@@ -93,7 +93,6 @@ def _doSearch(episode, provider):
 	else:
 		foundEps = provider.findEpisode(episode)
 
-	
 	# if we found something and we're on BEST, retry to see if we can guarantee HD.
 	if len(foundEps) > 0 and episode.show.quality == BEST and episode.status != PREDOWNLOADED:
 			moreFoundEps = provider.findEpisode(episode, HD)

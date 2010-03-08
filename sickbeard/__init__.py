@@ -27,6 +27,9 @@ import os
 
 from threading import Lock
 
+# apparently py2exe won't build these unless they're imported somewhere 
+from providers import eztv, nzbs, nzbmatrix, newzbin, tvnzb, tvbinz
+
 from sickbeard import searchCurrent, searchBacklog, showUpdater
 from sickbeard import helpers, db, exceptions, queue, scheduler, versionChecker
 #from sickbeard import showAdder, updateShows
