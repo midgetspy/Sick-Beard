@@ -116,14 +116,19 @@ def findEpisode(episode, forceQuality=None):
 		qualAttrs += "(Attr:VideoS=DVD OR Attr:VideoS=Blu OR Attr:VideoS=HD-DVD) "
 
 	showNames = [episode.show.name]
-	if " and " in episode.show.name:
-		showNames += [episode.show.name.replace("and", "&")]
-	if " & " in episode.show.name:
-		showNames += [episode.show.name.replace("&", "and")]
-	if episode.show.startyear > 1900 and not episode.show.name.endswith(")"):
-		showNames += [episode.show.name + " ("+str(episode.show.startyear)+")"]
-	if episode.show.tvrname not in showNames and episode.show.tvrname != None and episode.show.tvrname != "":
-		showNames += [episode.show.tvrname]
+
+	# these shouldn't be required now that we use TVRage names
+	if episode.show.tvrname == None or episode.show.tvrname == "":
+		if " and " in episode.show.name:
+			showNames += [episode.show.name.replace("and", "&")]
+		if " & " in episode.show.name:
+			showNames += [episode.show.name.replace("&", "and")]
+		if episode.show.startyear > 1900 and not episode.show.name.endswith(")"):
+			showNames += [episode.show.name + " ("+str(episode.show.startyear)+")"]
+
+	else:
+		if episode.show.tvrname not in showNames:
+			showNames += [episode.show.tvrname]
 
 	regex = "(.*)( \(.*\))"
 	result = re.match(regex, episode.show.name)
