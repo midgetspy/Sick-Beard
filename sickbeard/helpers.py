@@ -40,10 +40,6 @@ import xml.etree.cElementTree as etree
 
 import string
 
-# this is for the drive letter code, it only works on windows
-if os.name == 'nt':
-	from ctypes import windll
-
 def indentXML(elem, level=0):
 	'''
 	Does our pretty printing, makes Matt very happy
@@ -366,17 +362,3 @@ def getShowImage(url, imgNum=None):
 		return None
 
 	return imgData
-
-# adapted from http://stackoverflow.com/questions/827371/is-there-a-way-to-list-all-the-available-drive-letters-in-python/827490
-def getWinDrives():
-	if os.name != 'nt':
-		return []
-
-	drives = []
-	bitmask = windll.kernel32.GetLogicalDrives()
-	for letter in string.uppercase:
-		if bitmask & 1:
-			drives.append(letter)
-		bitmask >>= 1
-
-	return drives

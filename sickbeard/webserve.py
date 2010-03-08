@@ -25,12 +25,6 @@ import cgi
 import sqlite3
 import time
 
-# use the built-in if it's available (python 2.6), if not use the included library
-try:
-    import json
-except ImportError:
-    from lib import simplejson as json
-
 from Cheetah.Template import Template
 import cherrypy
 
@@ -51,6 +45,7 @@ from lib.tvdb_api import tvdb_exceptions
 
 import sickbeard
 import sickbeard.helpers
+from sickbeard import browser
 
 class Flash:
     store = {}
@@ -1096,56 +1091,6 @@ class Home:
 
         raise cherrypy.HTTPRedirect("displayShow?show=" + str(epObj.show.tvdbid))
 
-class WebFileBrowser:
-
-    @cherrypy.expose
-    def index(self, path='/'):
-        
-        logger.log("Incoming path: "+path, logger.DEBUG)
-        
-        entries = []
-        
-        if path == "**ROOT**" or path == '/':
-            driveLetters = helpers.getWinDrives()
-            
-            if len(driveLetters) > 0:
-                for x in driveLetters:
-                    letterPath = x+':\\'
-                    entries.append({'name': letterPath, 'path': letterPath})
-                return json.dumps(entries)
-            
-            else:
-                path = '/'
-        
-        # fix up the path and find the parent
-        path = os.path.abspath(os.path.normpath(path))
-        parentPath = os.path.dirname(path)
-
-        logger.log("Normalized path: "+path, logger.DEBUG)
-        
-        # if we're at the root then the next step is the meta-node showing our drive letters
-        if path == parentPath and os.name == 'nt':
-            parentPath = "**ROOT**"
-        
-        if parentPath != path: 
-            entries.append({ 'name': "..", 'path': parentPath })
-
-        fileList = glob.glob(os.path.join(path, "*"))
-        fileList = sorted(fileList, lambda x, y: cmp(os.path.basename(x).lower(), os.path.basename(y).lower()))
-        
-        for filename in fileList:
-            absPath = os.path.abspath(filename)
-            if os.path.isdir(absPath):
-                entries.append({ 'name': os.path.basename(filename), 'path': absPath })
-
-        return json.dumps(entries)
-
-    @cherrypy.expose
-    def complete(self, q, limit, timestamp):
-        fileList = glob.glob(os.path.join(os.path.dirname(q), "*"))
-        fileList = sorted(fileList, lambda x, y: cmp(os.path.basename(x).lower(), os.path.basename(y).lower()))
-        return "\n".join(filter(os.path.isdir, fileList))
-
 class WebInterface:
     
     @cherrypy.expose
@@ -1198,4 +1143,4 @@ class WebInterface:
 
     home = Home()
 
-    browser = WebFileBrowser()
+    browser = browser.WebFileBrowser()
