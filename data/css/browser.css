@@ -20,3 +20,6 @@
   margin: 0 4px;
   float: left;
 }
+.browserDialog.busy .ui-dialog-buttonpane {
+   background: url(../images/loading.gif) 10px 50% no-repeat;
+}
