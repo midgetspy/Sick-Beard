@@ -9,7 +9,6 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
-<script type="text/javascript" src="$sbRoot/js/showPlot.js"></script>
 
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
@@ -70,11 +69,12 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
   	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
   	<td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
     <td align="center">$epResult["episode"]</td>
-    <td>$epResult["name"]
-    #if $epResult["description"] != "" and $epResult["description"] != None:
-      <a href="#" class="plotLink" id="plotLink_<%=str(epResult["season"])+"_"+str(epResult["episode"])%>">[+]</a>
-    #end if
-      <div class="plotDiv" id="epDiv_<%=str(epResult["season"])+"_"+str(epResult["episode"])%>"><br />$epResult["description"]</div></td>
+    <td>
+        $epResult["name"]
+        #if $epResult["description"] != "" and $epResult["description"] != None:
+        <img src="$sbRoot/images/info.png" height="16" class="plotInfo" id="plot_info_<%=str(epResult["season"])+"_"+str(epResult["episode"])%>" />
+        #end if
+    </td>
     <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>$os.path.basename($epResult["location"])</td>
     <td>$statusStrings[int($epResult["status"])]</td>

@@ -36,3 +36,17 @@ $(document).ready(function(){
   });
   
 });
+
+$(function(){
+    $('.plotInfo').tooltip({
+        bodyHandler: function(){
+            match = this.id.match(/^plot_info_(\d+)_(\d+)$/);
+            return $.ajax({
+                async:   false,
+                data:    { show: $('#showID').attr('value'), episode: match[2], season: match[1] },
+                url:     'plotDetails',
+            }).responseText;
+        },
+        showURL: false,
+    })
+})

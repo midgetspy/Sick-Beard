@@ -840,6 +840,11 @@ class Home:
         return _munge(t)
 
     @cherrypy.expose
+    def plotDetails(self, show, season, episode):
+        result = db.DBConnection().action("SELECT description FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", (show, season, episode)).fetchone()
+        return result['description'] if result else 'Episode not found.'
+
+    @cherrypy.expose
     def editShow(self, show=None, location=None, quality=None, seasonfolders=None, paused=None):
         
         if show == None:
