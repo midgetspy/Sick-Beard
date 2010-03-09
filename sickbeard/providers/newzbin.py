@@ -123,8 +123,10 @@ def findEpisode(episode, forceQuality=None):
 			showNames += [episode.show.name.replace("and", "&")]
 		if " & " in episode.show.name:
 			showNames += [episode.show.name.replace("&", "and")]
-		if episode.show.startyear > 1900 and not episode.show.name.endswith(")"):
-			showNames += [episode.show.name + " ("+str(episode.show.startyear)+")"]
+
+	# I guess using tvrage name doesn't negate the need for this case
+	if episode.show.startyear > 1900 and not episode.show.name.endswith(")"):
+		showNames += [episode.show.name + " ("+str(episode.show.startyear)+")"]
 
 	else:
 		if episode.show.tvrname not in showNames:
