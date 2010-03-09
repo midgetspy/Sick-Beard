@@ -125,8 +125,6 @@ class TVNZBDBConnection(db.DBConnection):
 	def __init__(self):
 		db.DBConnection.__init__(self, "cache.db")
 
-	def _checkDB(self):
-
 		# Create the table if it's not already there
 		try:
 			sql = "CREATE TABLE tvnzb (name TEXT, season NUMERIC, episode NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
