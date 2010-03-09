@@ -44,9 +44,9 @@ $(function(){
             return $.ajax({
                 async:   false,
                 data:    { show: $('#showID').attr('value'), episode: match[2], season: match[1] },
-                url:     'plotDetails',
+                url:     'plotDetails'
             }).responseText;
         },
-        showURL: false,
+        showURL: false
     })
 })
