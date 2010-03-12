@@ -96,7 +96,7 @@ def sceneToNormalShowNames(name):
 	
 	return [name, name.replace(".and.", ".&.")]
 
-def makeSceneShowSearchStrings(show):
+def allPossibleShowNames(show):
 
 	showNames = [show.name]
 
@@ -104,23 +104,33 @@ def makeSceneShowSearchStrings(show):
 		showNames.append(sceneExceptions[int(show.tvdbid)])
 	
 	# if we have a tvrage name then use it
-	if show.tvrname != "" and show.tvrname != None and show.name.lower() != show.tvrname.lower():
+	if show.tvrname != "" and show.tvrname != None:
 		logger.log("Adding TVRage show name to the list: '"+show.tvrname+"'", logger.DEBUG)
 		showNames.append(show.tvrname)
 
 	newShowNames = []
 
+	# if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
+	# any countries defined in common.countryList
 	for curName in showNames:
 		for curCountry in countryList:
 			if curName.endswith(' '+curCountry):
 				logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
 				newShowNames.append(curName.replace(' '+curCountry, ' ('+countryList[curCountry]+')'))
+			elif curName.endswith(' ('+curCountry+')'):
+				logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
+				newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+countryList[curCountry]+')'))
 
 	showNames += newShowNames
 
-	showNames = map(sanitizeSceneName, set(showNames))
+	return set(showNames)
 
-	return showNames
+def makeSceneShowSearchStrings(show):
+
+	showNames = allPossibleShowNames(show)
+
+	# eliminate duplicates and scenify the names
+	return map(sanitizeSceneName, showNames)
 
 
 def makeSceneSearchString (episode):

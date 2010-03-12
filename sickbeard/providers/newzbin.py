@@ -115,31 +115,33 @@ def findEpisode(episode, forceQuality=None):
 	if episode.status == DISCBACKLOG:
 		qualAttrs += "(Attr:VideoS=DVD OR Attr:VideoS=Blu OR Attr:VideoS=HD-DVD) "
 
-	showNames = [episode.show.name]
+	# this will be a list containing:
+	# - tvdb name
+	# - forced sick beard exceptions
+	# - tvrage name
+	# - country coded name if applicable
+	showNames = helpers.allPossibleShowNames(episode.show)
 
 	# these shouldn't be required now that we use TVRage names
 	if episode.show.tvrname == None or episode.show.tvrname == "":
 		if " and " in episode.show.name:
-			showNames += [episode.show.name.replace("and", "&")]
+			showNames.append(episode.show.name.replace("and", "&"))
 		if " & " in episode.show.name:
-			showNames += [episode.show.name.replace("&", "and")]
+			showNames.append(episode.show.name.replace("&", "and"))
 
 	# I guess using tvrage name doesn't negate the need for this case
 	if episode.show.startyear > 1900 and not episode.show.name.endswith(")"):
-		showNames += [episode.show.name + " ("+str(episode.show.startyear)+")"]
+		showNames.append(episode.show.name + " ("+str(episode.show.startyear)+")")
 
-	else:
-		if episode.show.tvrname not in showNames:
-			showNames += [episode.show.tvrname]
-
-	regex = "(.*)( \(.*\))"
-	result = re.match(regex, episode.show.name)
-	if result != None and result.group(2) != None:
-		showNames += [episode.show.name.replace(result.group(2), "")]
+	# this strips the (XX) off the end of the show. we shouldn't need it anymore with the tvrage names
+	#regex = "(.*)( \(.*\))"
+	#result = re.match(regex, episode.show.name)
+	#if result != None and result.group(2) != None:
+	#	showNames += [episode.show.name.replace(result.group(2), "")]
 		
 	q = qualAttrs
 	
-	q += "(" + " OR ".join(["^\""+x+" - %ix%02i" % (int(episode.season), int(episode.episode))+"\"" for x in showNames]) + ")"
+	q += "(" + " OR ".join(["^\""+x+" - %ix%02i" % (int(episode.season), int(episode.episode))+"\"" for x in set(showNames)]) + ")"
 	
 	q += " AND NOT \"(Passworded)\" AND NOT \"(Password)\""
 	
