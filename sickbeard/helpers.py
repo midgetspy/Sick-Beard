@@ -30,7 +30,7 @@ import sickbeard
 
 from sickbeard.exceptions import *
 from sickbeard import logger
-from sickbeard.common import mediaExtensions, XML_NSMAP, sceneExceptions
+from sickbeard.common import mediaExtensions, XML_NSMAP, sceneExceptions, countryList
 
 from sickbeard import db
 
@@ -108,7 +108,17 @@ def makeSceneShowSearchStrings(show):
 		logger.log("Adding TVRage show name to the list: '"+show.tvrname+"'", logger.DEBUG)
 		showNames.append(show.tvrname)
 
-	showNames = map(sanitizeSceneName, showNames)
+	newShowNames = []
+
+	for curName in showNames:
+		for curCountry in countryList:
+			if curName.endswith(' '+curCountry):
+				logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
+				newShowNames.append(curName.replace(' '+curCountry, ' ('+countryList[curCountry]+')'))
+
+	showNames += newShowNames
+
+	showNames = map(sanitizeSceneName, set(showNames))
 
 	return showNames
 
