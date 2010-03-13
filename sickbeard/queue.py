@@ -348,7 +348,7 @@ class QueueItemUpdate(QueueItem):
             if self.show.tvrid == 0:
                 self.show.setTVRID()
 
-        sickbeard.showQueueScheduler.action.refreshShow(self.show)
+        sickbeard.showQueueScheduler.action.refreshShow(self.show, True)
 
 class QueueItemForceUpdate(QueueItemUpdate):
     def __init__(self, show=None):

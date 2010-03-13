@@ -352,8 +352,8 @@ class TVShow(object):
 		try:
 			t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, banners=True, **sickbeard.TVDB_API_PARMS)
 			myShow = t[self.tvdbid]
-		except (tvdb_exceptions.tvdb_error, IOError):
-			logger.log("Unable to look up show on TVDB, not downloading images", logger.ERROR)
+		except (tvdb_exceptions.tvdb_error, IOError), e:
+			logger.log("Unable to look up show on TVDB, not downloading images: "+str(e), logger.ERROR)
 			return None
 
 		fanartURL = myShow['fanart']
