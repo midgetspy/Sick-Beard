@@ -221,29 +221,26 @@ class QueueItemAdd(QueueItem):
             
         except tvdb_exceptions.tvdb_exception, e:
             logger.log("Unable to add show due to an error with TVDB: "+str(e), logger.ERROR)
-            self.finish()
+            self._finishEarly()
             return
             
         except exceptions.NoNFOException:
             logger.log("Unable to load show from NFO", logger.ERROR)
-            # take the show out of the loading list
-            self.finish()
+            self._finishEarly()
             return
             
         except exceptions.ShowNotFoundException:
             logger.log("The show in " + self.showDir + " couldn't be found on theTVDB, skipping", logger.ERROR)
-            # take the show out of the loading list
-            self.finish()
+            self._finishEarly()
             return
     
         except exceptions.MultipleShowObjectsException:
             logger.log("The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
-            # take the show out of the loading list
-            self.finish()
+            self._finishEarly()
             return
         
         except Exception:
-            self.finish()
+            self._finishEarly()
             raise
     
         self.show = self.initialShow
@@ -278,6 +275,12 @@ class QueueItemAdd(QueueItem):
         sickbeard.updateComingList()
         sickbeard.updateMissingList()
         
+
+    def _finishEarly(self):
+        if self.show != None:
+            self.show.deleteShow()
+        
+        self.finish()
 
 
 class QueueItemRefresh(QueueItem):
