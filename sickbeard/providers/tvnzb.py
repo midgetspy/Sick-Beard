@@ -157,7 +157,7 @@ class TVNZBCache(tvcache.TVCache):
 		for curShow in sickbeard.showList:
 	
 			# get the scene name masks
-			sceneNames = helpers.makeSceneShowSearchStrings(curShow)
+			sceneNames = set(helpers.makeSceneShowSearchStrings(curShow))
 	
 			# for each scene name mask
 			for curSceneName in sceneNames:

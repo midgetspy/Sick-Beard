@@ -98,7 +98,7 @@ def findEpisode (episode, forceQuality=None):
 	else:
 		quality = {}
 		
-	sceneSearchStrings = sickbeard.helpers.makeSceneSearchString(episode)
+	sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
 	
 	itemList = []
 	results = []
