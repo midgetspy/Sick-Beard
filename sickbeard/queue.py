@@ -97,12 +97,12 @@ class ShowQueue:
         
         return queueItemObj
 
-    def refreshShow(self, show):
+    def refreshShow(self, show, force=False):
 
-        if self.isBeingRefreshed(show):
+        if self.isBeingRefreshed(show) and not force:
             raise exceptions.CantRefreshException("This show is already being refreshed, not refreshing again.")
 
-        if self.isBeingUpdated(show) or self.isInUpdateQueue(show):
+        if (self.isBeingUpdated(show) or self.isInUpdateQueue(show)) and not force:
             logger.log("A refresh was attempted but there is already an update queued or in progress. Since updates do a refres at the end anyway I'm skipping this request.", logger.DEBUG)
             return
         

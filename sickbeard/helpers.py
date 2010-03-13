@@ -123,7 +123,7 @@ def allPossibleShowNames(show):
 
 	showNames += newShowNames
 
-	return set(showNames)
+	return showNames
 
 def makeSceneShowSearchStrings(show):
 
