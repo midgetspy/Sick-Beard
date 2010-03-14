@@ -289,6 +289,7 @@ def initialize():
         CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
+        CACHE_DIR = 'cache'
         if not helpers.makeDir(CACHE_DIR):
             logger.log("!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
