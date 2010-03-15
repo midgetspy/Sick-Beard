@@ -1039,25 +1039,21 @@ class TVEpisode:
         
         if not os.path.isfile(self.location):
 
-            # if we don't have the file and it hasn't aired yet set the status to UNAIRED
+            # if we don't have the file
             if self.status != SNATCHED and self.status != PREDOWNLOADED:
+                # and it hasn't aired yet set the status to UNAIRED
                 if self.airdate >= datetime.date.today():
                     logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                     self.status = UNAIRED
+                # if we don't have the file and it aired recently set it to missed
                 elif self.airdate >= datetime.date.today() - datetime.timedelta(days=7):
                     logger.log("Episode aired within the last week, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                     self.status = MISSED
-                
-            else:
+                else:
+                	self.status = SKIPPED
 
-                # if we haven't downloaded it then mark it as missed
-                if self.status == UNAIRED:
-                    logger.log("Episode airs more than a week ago and hasn't been downloaded, changing status from " + str(self.status) + " to " + str(MISSED), logger.DEBUG)
-                    self.status = MISSED
-
-                # if it's an old episode we don't have then assume we SKIPPED it
-                elif self.status == UNKNOWN:
-                    logger.log("Episode is old and hasn't been downloaded, changing status from " + str(self.status) + " to " + str(SKIPPED), logger.DEBUG)
+            # if we somehow are still UNKNOWN then just skip it
+            if self.status == UNKNOWN:
                     self.status = SKIPPED
 
         # if we have a media file then it's downloaded
