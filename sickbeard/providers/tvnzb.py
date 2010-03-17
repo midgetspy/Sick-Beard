@@ -219,7 +219,7 @@ class TVNZBCache(tvcache.TVCache):
 		
 		try:
 			responseSoup = etree.ElementTree(element = etree.XML(data))
-		except (SyntaxError), e:
+		except (SyntaxError, TypeError), e:
 			logger.log("Invalid XML returned by TVNZB: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
 			return
 
