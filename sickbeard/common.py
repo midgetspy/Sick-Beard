@@ -90,8 +90,7 @@ XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
 sceneExceptions = {72546: ('CSI'),
                    110381: ('Archer'),
                    83897: ('Life After People: The Series'),
-                   74584: ('Kitchen Nightmares'),
-                   91041: ('Kitchen Nightmares (US)')
+                   80552: ('Kitchen Nightmares (US)')
                    }
 
 countryList = {'Australia': 'AU',
