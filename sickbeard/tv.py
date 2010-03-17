@@ -105,13 +105,13 @@ class TVShow(object):
         if otherShow != None:
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
         
-        try:
-            t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, **sickbeard.TVDB_API_PARMS)
-            t[self.tvdbid]
-        except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
-        except tvdb_exceptions.tvdb_error, e:
-            logger.log("Unable to contact theTVDB.com, it might be down: "+str(e), logger.ERROR)
+        #try:
+        #    t = tvdb_api.Tvdb(lastTimeout=sickbeard.LAST_TVDB_TIMEOUT, **sickbeard.TVDB_API_PARMS)
+        #    t[self.tvdbid]
+        #except tvdb_exceptions.tvdb_shownotfound, e:
+        #    raise exceptions.ShowNotFoundException(str(e))
+        #except tvdb_exceptions.tvdb_error, e:
+        #    logger.log("Unable to contact theTVDB.com, it might be down: "+str(e), logger.ERROR)
         
         self.saveToDB()
     
