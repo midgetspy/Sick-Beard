@@ -47,6 +47,7 @@ import sickbeard
 import sickbeard.helpers
 from sickbeard import browser
 
+
 class Flash:
     store = {}
 
@@ -552,6 +553,7 @@ def haveXBMC():
 
 HomeMenu = [
     { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
+    { 'title': 'Mass Update',              'path': 'home/massUpdate/'                       },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
@@ -625,6 +627,7 @@ class HomeAddShows:
 
         #return _genericMessage("Adding root directory", result)
 
+    #TODO: this function is a disgrace, I need to break it up and make it much much clearer
     @cherrypy.expose
     def addShow(self, showDir=None, showName=None, seriesList=None):
         
@@ -721,8 +724,11 @@ class HomeAddShows:
 
     
             # if the folder exists then make the show there
-            if not helpers.makeShowNFO(showIDs[0], curShowDir):
-                return _genericMessage("Error", "Unable to make tvshow.nfo?")
+            try:
+                if not helpers.makeShowNFO(showIDs[0], curShowDir):
+                    return _genericMessage("Error", "Unable to make tvshow.nfo?")
+            except tvdb_exceptions.tvdb_exception, e:
+                return _genericMessage("Error", "Unable to make tvshow.nfo: "+str(e))
             
             # just go do the normal show creation now that we have the NFO
             #url ="addShow?"+ "&".join(["showDir="+urllib.quote_plus(x) for x in showDir])
@@ -731,7 +737,7 @@ class HomeAddShows:
             newCallList = [urllib.quote_plus(x) for x in showDir]
             logger.log("We now have an NFO for the show, so recursively calling myself with showDir="+str(newCallList))
             a = self.addShow(newCallList)
-            logger.log("HOW DID WE GET HERE: "+a)
+            #logger.log("HOW DID WE GET HERE: "+a)
             return a
             
         
@@ -746,6 +752,92 @@ class HomeAddShows:
             
             return _munge(myTemplate)
 
+
+class HomeMassUpdate:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        t = PageTemplate(file="home_massUpdate.tmpl")
+        t.submenu = HomeMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toMetadata=None):
+
+        if toUpdate != None:
+            toUpdate = toUpdate.split('|')
+        else:
+            toUpdate = []
+
+        if toRefresh != None:
+            toRefresh = toRefresh.split('|')
+        else:
+            toRefresh = []
+
+        if toRename != None:
+            toRename = toRename.split('|')
+        else:
+            toRename = []
+
+        if toMetadata != None:
+            toMetadata = toMetadata.split('|')
+        else:
+            toMetadata = []
+
+        errors = []
+        refreshes = []
+        updates = []
+
+        for curShowID in set(toUpdate+toRefresh+toRename+toMetadata):
+            
+            if curShowID == '':
+                continue
+
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(curShowID))
+            
+            if showObj == None:
+                continue
+
+            if curShowID in toUpdate:
+                try:
+                    sickbeard.showQueueScheduler.action.updateShow(showObj, True)
+                    updates.append(showObj.name)
+                except exceptions.CantUpdateException, e:
+                    errors.append("Unable to update show "+showObj.name+": "+str(e))
+            
+            if curShowID in toRefresh and curShowID not in toUpdate:
+                try:
+                    sickbeard.showQueueScheduler.action.refreshShow(showObj)
+                    refreshes.append(showObj.name)
+                except exceptions.CantRefreshException, e:
+                    errors.append("Unable to refresh show "+showObj.name+": "+str(e))
+
+            
+        if len(errors) > 0:
+            flash['error'] = "Errors encountered"
+            flash['error-detail'] = "<br >\n".join(errors)
+
+        messageDetail = ""
+        
+        if len(updates) > 0:
+            messageDetail += "<b>Updates</b><br />\n<ul>\n<li>"
+            messageDetail += "</li>\n<li>".join(updates)
+            messageDetail += "</li>\n</ul>\n<br />"
+
+        if len(refreshes) > 0:
+            messageDetail += "<b>Refreshes</b><br />\n<ul>\n<li>"
+            messageDetail += "</li>\n<li>".join(refreshes)
+            messageDetail += "</li>\n</ul>\n<br />"
+
+        if len(updates+refreshes) > 0:
+            flash['message'] = "The following actions were queued:<br /><br />"
+            flash['message-detail'] = messageDetail
+
+        raise cherrypy.HTTPRedirect("../")
+        return _genericMessage("Stuff:", "toUpdate: "+str(toUpdate)+"<br>\n"+
+                                        "toRefresh: "+str(toRefresh)+"<br>\n"+
+                                        "toRename: "+str(toRename)+"<br>\n")
 
 
 class Home:
@@ -769,6 +861,8 @@ class Home:
     addShows = HomeAddShows()
     
     postprocess = HomePostProcess()
+    
+    massUpdate = HomeMassUpdate()
     
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
@@ -946,12 +1040,12 @@ class Home:
             flash['error'] = "Unable to refresh this show."
             flash['error-detail'] = str(e)
 
+        time.sleep(3)
+
         # wait for it to finish
         if sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
             flash['message'] = 'Refresh is in progress.'
         
-        time.sleep(3)
-
         raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
 
     @cherrypy.expose
@@ -965,7 +1059,7 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
         
-        # force the update from the DB
+        # force the update
         try:
             sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force))
         except exceptions.CantUpdateException, e:
@@ -1090,6 +1184,8 @@ class Home:
             sickbeard.updateComingList()
 
         raise cherrypy.HTTPRedirect("displayShow?show=" + str(epObj.show.tvdbid))
+
+
 
 class WebInterface:
     
