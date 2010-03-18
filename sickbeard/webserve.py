@@ -746,9 +746,14 @@ class HomeAddShows:
 
             logger.log("Presenting a list of shows to the user", logger.DEBUG)
             
-            t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-            myTemplate.resultList = [t[int(x)] for x in showIDs]
-            myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
+            try:
+                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                myTemplate.resultList = [t[int(x)] for x in showIDs]
+                myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
+            except tvdb_exceptions.tvdb_exception, e:
+                logger.log("Error trying to search shows, skipping show: "+str(e), logger.ERROR)
+                return _genericMessage("Error", "TVDB messed up and I don't have a good way to handle this yet.")
+                #TODO: need to skip just this show and continue on
             
             return _munge(myTemplate)
 
