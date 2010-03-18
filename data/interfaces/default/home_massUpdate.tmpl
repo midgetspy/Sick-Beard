@@ -37,7 +37,8 @@
         headers: {
             0: { sorter: 'showNames'},
             4: { sorter: false},
-            5: { sorter: false}
+            5: { sorter: false},
+            6: { sorter: false}
         }
     }); 
 });
@@ -56,8 +57,8 @@
       <th>Status</th>
       <th>Update <input type="checkbox" class="bulkCheck" id="updateCheck"></th>
       <th>Refresh <input type="checkbox" class="bulkCheck" id="refreshCheck"></th>
-<!--      <th>Rename <input type="checkbox" class="bulkCheck" id="renameCheck"></th>
-      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck"></th>-->
+      <th>Rename <input type="checkbox" class="bulkCheck" id="renameCheck"></th>
+<!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck"></th>-->
     </tr>
   </thead>
   <tbody>
@@ -79,6 +80,12 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $curRefresh = "<input type=\"checkbox\" class=\"refreshCheck\" id=\"refresh-"+str($curShow.tvdbid)+"\">"
 #end if
 
+#if $sickbeard.showQueueScheduler.action.isBeingRenamed($curShow) or $sickbeard.showQueueScheduler.action.isInRenameQueue($curShow):
+  #set $curRename = ""
+#else:
+  #set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\">"
+#end if
+
   <tr class="evenLine">
     <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td align="center">$qualityStrings[int($curShow.quality)]</td>
@@ -86,14 +93,14 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
-<!--    <td align="center"><input type="checkbox" class="renameCheck" id="rename-$curShow.tvdbid"></td>
-    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid"></td>-->
+    <td align="center">$curRename</td>
+<!--    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid"></td>-->
   </tr>
 
 #end for
 </tbody>
 <tfoot>
-  <tr class="evenLine"><td colspan="6" align="center"><input type="button" value="Submit" id="submitMassUpdate"></td></tr>
+  <tr class="evenLine"><td colspan="7" align="center"><input type="button" value="Submit" id="submitMassUpdate"></td></tr>
 </tfoot>
 </table>
 

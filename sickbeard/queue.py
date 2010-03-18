@@ -35,6 +35,9 @@ class ShowQueue:
     def isInRefreshQueue(self, show):
         return self._isInQueue(show, (QueueActions.REFRESH,))
 
+    def isInRenameQueue(self, show):
+        return self._isInQueue(show, (QueueActions.RENAME,))
+
     def isBeingAdded(self, show):
         return self._isBeingSomethinged(show, (QueueActions.ADD,))
 
@@ -43,6 +46,9 @@ class ShowQueue:
 
     def isBeingRefreshed(self, show):
         return self._isBeingSomethinged(show, (QueueActions.REFRESH,))
+
+    def isBeingRenamed(self, show):
+        return self._isBeingSomethinged(show, (QueueActions.RENAME,))
 
     def _getLoadingShowList(self):
         return [x for x in self.queue+[self.currentItem] if x != None and x.isLoading]
@@ -113,6 +119,14 @@ class ShowQueue:
         
         return queueItemObj
     
+    def renameShowEpisodes(self, show, force=False):
+
+        queueItemObj = QueueItemRename(show)
+        
+        self.queue.append(queueItemObj)
+        
+        return queueItemObj
+    
     def addShow(self, showDir):
         queueItemObj = QueueItemAdd(showDir)
         self.queue.append(queueItemObj)
@@ -124,11 +138,13 @@ class QueueActions:
     ADD=2
     UPDATE=3
     FORCEUPDATE=4
+    RENAME=5
     
     TEXT = {REFRESH: 'Refresh',
             ADD: 'Add',
             UPDATE: 'Update',
-            FORCEUPDATE: 'Forced Update'
+            FORCEUPDATE: 'Forced Update',
+            RENAME: 'Rename'
     }
 
 class QueueItem:
@@ -296,6 +312,20 @@ class QueueItemRefresh(QueueItem):
         self.show.refreshDir()
         self.show.getImages()
         self.show.writeEpisodeNFOs()
+        
+        self.inProgress = False
+        
+class QueueItemRename(QueueItem):
+    def __init__(self, show=None):
+        QueueItem.__init__(self, QueueActions.RENAME, show)
+
+    def execute(self):
+
+        QueueItem.execute(self)
+
+        logger.log("Performing rename on "+self.show.name)
+
+        self.show.fixEpisodeNames()
         
         self.inProgress = False
         

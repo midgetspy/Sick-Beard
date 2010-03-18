@@ -18,13 +18,13 @@ $(document).ready(function(){
         refreshArr.push($(this).attr('id').split('-')[1])
       }
     });  
-/*
+
     $('.renameCheck').each(function() {
       if (this.checked == true) {
         renameArr.push($(this).attr('id').split('-')[1])
       }
     });  
-
+/*
     $('.metadataCheck').each(function() {
       if (this.checked == true) {
         metadataArr.push($(this).attr('id').split('-')[1])

@@ -793,6 +793,7 @@ class HomeMassUpdate:
         errors = []
         refreshes = []
         updates = []
+        renames = []
 
         for curShowID in set(toUpdate+toRefresh+toRename+toMetadata):
             
@@ -818,6 +819,10 @@ class HomeMassUpdate:
                 except exceptions.CantRefreshException, e:
                     errors.append("Unable to refresh show "+showObj.name+": "+str(e))
 
+            if curShowID in toRename:
+                sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
+                renames.append(showObj.name)
+
             
         if len(errors) > 0:
             flash['error'] = "Errors encountered"
@@ -835,7 +840,12 @@ class HomeMassUpdate:
             messageDetail += "</li>\n<li>".join(refreshes)
             messageDetail += "</li>\n</ul>\n<br />"
 
-        if len(updates+refreshes) > 0:
+        if len(renames) > 0:
+            messageDetail += "<b>Renames</b><br />\n<ul>\n<li>"
+            messageDetail += "</li>\n<li>".join(renames)
+            messageDetail += "</li>\n</ul>\n<br />"
+
+        if len(updates+refreshes+renames) > 0:
             flash['message'] = "The following actions were queued:<br /><br />"
             flash['message-detail'] = messageDetail
 
