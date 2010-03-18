@@ -26,8 +26,6 @@ import tempfile
 import logging
 import datetime
 
-import sickbeard
-
 try:
     import xml.etree.cElementTree as ElementTree
 except ImportError:
@@ -38,6 +36,8 @@ from cache import CacheHandler
 from tvdb_ui import BaseUI, ConsoleUI
 from tvdb_exceptions import (tvdb_error, tvdb_userabort, tvdb_shownotfound,
     tvdb_seasonnotfound, tvdb_episodenotfound, tvdb_attributenotfound)
+
+lastTimeout = None
 
 class ShowContainer(dict):
     """Simple dict that holds a series of Show instances
@@ -256,7 +256,7 @@ class Tvdb:
                 language=None,
                 search_all_languages=False,
                 apikey=None,
-                lastTimeout=None):
+                forceConnect=False):
         """interactive (True/False):
             When True, uses built-in console UI is used to select the correct show.
             When False, the first search result is used.
@@ -310,10 +310,18 @@ class Tvdb:
             own key if desired - this is recommended if you are embedding
             tvdb_api in a larger application)
             See http://thetvdb.com/?tab=apiregister to get your own key
+
+        forceConnect (bool):
+            If true it will always try to connect to theTVDB.com even if we
+            recently timed out. By default it will wait one minute before
+            trying again, and any requests within that one minute window will
+            return an exception immediately. 
         """
         
-        # if we're given a lastTimeout that is less than 5 mins just give up
-        if lastTimeout != None and datetime.datetime.now() - lastTimeout < datetime.timedelta(minutes=1):
+        global lastTimeout
+        
+        # if we're given a lastTimeout that is less than 1 min just give up
+        if not forceConnect and lastTimeout != None and datetime.datetime.now() - lastTimeout < datetime.timedelta(minutes=1):
             raise tvdb_error("We recently timed out, so giving up early this time")
         
         self.shows = ShowContainer() # Holds all Show classes
@@ -421,6 +429,7 @@ class Tvdb:
         return os.path.join(tempfile.gettempdir(), "tvdb_api")
 
     def _loadUrl(self, url, recache=False):
+        global lastTimeout
         try:
             self.log.debug("Retrieving URL %s" % url)
             resp = self.urlopener.open(url)
@@ -434,7 +443,7 @@ class Tvdb:
                     resp.recache()
         except IOError, errormsg:
             if not str(errormsg).startswith('HTTP Error'):
-                sickbeard.LAST_TVDB_TIMEOUT = datetime.datetime.now()
+                lastTimeout = datetime.datetime.now()
             raise tvdb_error("Could not connect to server: " + str(errormsg) + " from " + str(url))
         #end try
 

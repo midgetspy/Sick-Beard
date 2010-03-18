@@ -43,8 +43,6 @@ SOCKET_TIMEOUT = 30
 CFG = None
 PROG_DIR = None
 
-LAST_TVDB_TIMEOUT = None
-
 backlogSearchScheduler = None
 currentSearchScheduler = None
 showUpdateScheduler = None
