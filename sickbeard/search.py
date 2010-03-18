@@ -124,6 +124,9 @@ def findEpisode(episode):
 		except exceptions.AuthException, e:
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
+		except Exception, e:
+			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			continue
 		
 		didSearch = True
 		
