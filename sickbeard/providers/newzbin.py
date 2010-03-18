@@ -188,6 +188,10 @@ def findEpisode(episode, forceQuality=None):
 				logger.log("Newzbin returned a malformed result, skipping it", logger.ERROR)
 			continue
 		
+		if len(curResult) < 6:
+			logger.log("Unknown error with Newzbin search, skipping this result", logger.ERROR)
+			continue
+		
 		logger.log("Found report number " + str(curResult[2]) + " at " + curResult[4] + " (" + curResult[5] + ")")
 		
 		result = sickbeard.classes.NZBSearchResult(episode)
