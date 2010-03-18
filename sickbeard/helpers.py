@@ -331,9 +331,9 @@ def searchDBForShow(regShowName):
 	
 	return None
 
-def findLatestRev():
+def findLatestBuild():
 
-	regex = "http\://sickbeard\.googlecode\.com/files/SickBeard\-r(\d+)\.zip"
+	regex = "http\://sickbeard\.googlecode\.com/files/SickBeard\-win32\-build(\d+)\.zip"
 	
 	svnFile = urllib.urlopen("http://code.google.com/p/sickbeard/downloads/list")
 	

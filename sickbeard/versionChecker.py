@@ -27,7 +27,7 @@ class CheckVersion():
             logger.log("Version checking is disabled, not checking for the newest version")
             return
         
-        latestBuild = helpers.findLatestRev()
+        latestBuild = helpers.findLatestBuild()
         
         if latestBuild == None:
             return
