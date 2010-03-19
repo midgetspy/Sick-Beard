@@ -323,12 +323,17 @@ def doIt(downloaderDir, nzbName=None):
 
     curFile = os.path.join(destDir, biggestFileName)
 
-    try:
-        os.rename(curFile, newFile)
-        returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
-    except (OSError, IOError), e:
-        returnStr += logHelper("Failed renaming " + curFile + " to " + newFile + ": " + str(e), logger.ERROR)
-        return returnStr
+    if sickbeard.RENAME_EPISODES:
+        try:
+            os.rename(curFile, newFile)
+            returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
+        except (OSError, IOError), e:
+            returnStr += logHelper("Failed renaming " + curFile + " to " + newFile + ": " + str(e), logger.ERROR)
+            return returnStr
+
+    else:
+        returnStr += logHelper("Renaming is disabled, leaving file as "+curFile, logger.DEBUG)
+        newFile = curFile
 
     for curEp in [rootEp] + rootEp.relatedEps:
         with curEp.lock:

@@ -134,6 +134,11 @@ If checked Sick Beard won't delete the episode folder<br />
 and any extra files (original nfo, sfv, etc)<br />
 <br />
 
+<input type="checkbox" name="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "CHECKED" else ""#> <strong>Rename episodes</strong><br />
+If checked Sick Beard will rename the episode according<br />
+to the naming settings in <a href="$sbRoot/config/general">General</a><br />
+<br />
+
 <input type="checkbox" name="process_automatically" disabled #if $sickbeard.PROCESS_AUTOMATICALLY == True then "CHECKED" else ""#> <strong>Automatically post-process episodes</strong><br />
 Automatically post-process files that appear<br />
 in the download dir<br />

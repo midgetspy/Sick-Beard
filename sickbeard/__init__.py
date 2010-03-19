@@ -104,6 +104,7 @@ DEFAULT_BACKLOG_SEARCH_FREQUENCY = 21
 USE_TORRENT = False
 TORRENT_DIR = None
 
+RENAME_EPISODES = False
 PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
 TV_DOWNLOAD_DIR = None
@@ -249,8 +250,8 @@ def initialize():
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
-                NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, \
-		CACHE_DIR, TVDB_API_PARMS
+                NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
+                RENAME_EPISODES
 
         
         if __INITIALIZED__:
@@ -330,6 +331,7 @@ def initialize():
         
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
+        RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 0)
         
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
@@ -549,7 +551,7 @@ def save_config():
         QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
         NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
         PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB, TVBINZ_AUTH, TVBINZ_SABUID, \
-        NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR
+        NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES
 
 
         
@@ -577,6 +579,7 @@ def save_config():
     CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     CFG['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
+    CFG['General']['rename_episodes'] = int(RENAME_EPISODES)
     CFG['Blackhole']['nzb_dir'] = NZB_DIR
     CFG['Blackhole']['torrent_dir'] = TORRENT_DIR
     CFG['Newzbin']['newzbin'] = int(NEWZBIN)
