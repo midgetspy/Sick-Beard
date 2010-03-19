@@ -261,6 +261,7 @@ width:100px;
 
 .plotInfo {
    cursor: help;
+   float: right;
 }
 /*
 Son of Suckerfish Dropdowns END
