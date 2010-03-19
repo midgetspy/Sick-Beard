@@ -299,8 +299,12 @@ def doIt(downloaderDir, nzbName=None):
 
     returnStr += logHelper("Moving from " + biggest_file + " to " + destDir, logger.DEBUG)
     try:
-        shutil.move(biggest_file, destDir)
-        
+        # try using rename to move it because shutil.move is bugged in python 2.5
+        try:
+            os.rename(biggest_file, os.path.join(destDir, os.path.basename(biggest_file)))
+        except OSError:
+            shutil.move(biggest_file, destDir)
+       
         returnStr += logHelper("File was moved successfully", logger.DEBUG)
         
     except IOError, e:
