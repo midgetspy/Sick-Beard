@@ -1043,16 +1043,13 @@ class TVEpisode:
                 if self.airdate >= datetime.date.today():
                     logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                     self.status = UNAIRED
-                # if we don't have the file and it aired recently set it to missed
-                elif self.airdate >= datetime.date.today() - datetime.timedelta(days=7):
-                    logger.log("Episode aired within the last week, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
+            else:
+                if self.status == UNAIRED:
                     self.status = MISSED
-                else:
-                	self.status = SKIPPED
-
-            # if we somehow are still UNKNOWN then just skip it
-            if self.status == UNKNOWN:
-                    self.status = SKIPPED
+    
+                # if we somehow are still UNKNOWN then just skip it
+                elif self.status == UNKNOWN:
+                        self.status = SKIPPED
 
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
