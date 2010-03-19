@@ -70,18 +70,19 @@ def main():
 
 	# do some preliminary stuff
 	sickbeard.PROG_DIR = os.path.dirname(os.path.normpath(os.path.abspath(sys.argv[0])))
-	sickbeard.CONFIG_FILE = "config.ini"
+
+	config_file = os.path.join(sickbeard.PROG_DIR, "config.ini")
 
 	# rename the main thread
 	threading.currentThread().name = "MAIN"
 	
-	print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE)
+	print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
 	
 	# load the config and publish it to the sickbeard package
-	if not os.path.isfile(os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE)):
+	if not os.path.isfile(config_file):
 		logger.log("Unable to find config.ini, all settings will be default", logger.ERROR)
 
-	sickbeard.CFG = ConfigObj(os.path.join(sickbeard.PROG_DIR, sickbeard.CONFIG_FILE))
+	sickbeard.CFG = ConfigObj(config_file)
 
 	# initialize the config and our threads
 	sickbeard.initialize()
