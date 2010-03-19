@@ -40,7 +40,7 @@
 		options = $.extend({}, $.Browser.defaults, options);
 		options.field = $(this);
 		if(options.field.autocomplete && options.autocompleteURL)
-			options.field.autocomplete(options.autocompleteURL);
+			options.field.autocomplete(options.autocompleteURL, { matchCase: true });
 		if(options.key && options.field.val().length == 0 && (path = $.cookie('fileBrowser-' + options.key)))
 			options.field.val(path);
 		return options.field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function(){
