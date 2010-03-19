@@ -84,6 +84,10 @@ class PageTemplate (Template):
         ]
         self.flash = Flash()
 
+def redirect(abspath, *args, **KWs):
+    assert abspath[0] == '/'
+    raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + abspath, *args, **KWs)
+
 class TVDBWebUI:
     def __init__(self, config, log):
         self.config = config
@@ -95,7 +99,7 @@ class TVDBWebUI:
         showDirList = ""
         for curShowDir in self.config['_showDir']:
             showDirList += "showDir="+curShowDir+"&"
-        raise cherrypy.HTTPRedirect("addShow?" + showDirList + "seriesList=" + searchList)
+        redirect("/home/addShow?" + showDirList + "seriesList=" + searchList)
 
 def _munge(string):
     return unicode(string).encode('ascii', 'xmlcharrefreplace')
@@ -151,7 +155,7 @@ class Backlog:
         flash['message']        = 'Backlog search started'
         flash['message-detail'] = 'The backlog search has begun and will run in the background'
         
-        raise cherrypy.HTTPRedirect("../backlog")
+        redirect("/backlog")
 
 
 
@@ -181,7 +185,7 @@ class History:
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
         flash['message'] = 'History cleared'
-        raise cherrypy.HTTPRedirect("../history")
+        redirect("/history")
 
 
     @cherrypy.expose
@@ -190,7 +194,7 @@ class History:
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
         flash['message'] = 'Removed all history entries greater than 30 days old'
-        raise cherrypy.HTTPRedirect("../history")
+        redirect("/history")
 
 
 ConfigMenu = [
@@ -277,7 +281,7 @@ class ConfigGeneral:
         else:
             flash['message'] = 'Configuration Saved'
         
-        raise cherrypy.HTTPRedirect("index")
+        redirect("/config/index")
 
 class ConfigEpisodeDownloads:
     
@@ -365,7 +369,7 @@ class ConfigEpisodeDownloads:
         else:
             flash['message'] = 'Configuration Saved'
         
-        raise cherrypy.HTTPRedirect("index")
+        redirect("/config/episodedownloads/")
 
 class ConfigProviders:
     
@@ -439,8 +443,7 @@ class ConfigProviders:
         else:
             flash['message'] = 'Configuration Saved'
         
-        raise cherrypy.HTTPRedirect("index")
-
+        redirect("/config/providers/")
 
 class ConfigNotifications:
     
@@ -499,7 +502,7 @@ class ConfigNotifications:
         else:
             flash['message'] = 'Configuration Saved'
         
-        raise cherrypy.HTTPRedirect("index")
+        redirect("/config/notifications/")
 
 
 class Config:
@@ -543,7 +546,7 @@ class HomePostProcess:
     def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None):
         
         if dir == None:
-            raise cherrypy.HTTPRedirect("postprocess")
+            redirect("/home/postprocess")
         else:
             result = processTV.doIt(dir, nzbName)
             if quiet != None and int(quiet) == 1:
@@ -565,12 +568,12 @@ class HomeAddShows:
     @cherrypy.expose
     def addRootDir(self, dir=None):
         if dir == None:
-            raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + "/home/addShows")
+            redirect("/home/addShows")
 
         if not os.path.isdir(dir):
             logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
             flash['error'] = "Unable to find the directory <tt>%s</tt>" % dir
-            raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + "/home/addShows")
+            redirect("/home/addShows")
         
         showDirs = []
         
@@ -583,7 +586,7 @@ class HomeAddShows:
         if len(showDirs) == 0:
             logger.log("The provided directory "+dir+" has no shows in it", logger.ERROR)
             flash['error'] = "The provided root folder <tt>%s</tt> has no shows in it." % dir
-            raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + "/home/addShows")
+            redirect("/home/addShows")
         
         #result = ui.addShowsFromRootDir(dir)
         
@@ -592,9 +595,9 @@ class HomeAddShows:
         myTemplate.submenu = HomeMenu
         return _munge(myTemplate)       
         
-        url = "addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
+        url = "/home/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
         logger.log("Redirecting to URL "+url, logger.DEBUG)
-        raise cherrypy.HTTPRedirect(url)
+        redirect(url)
 
         #return _genericMessage("Adding root directory", result)
 
@@ -618,7 +621,7 @@ class HomeAddShows:
         
         # if no showDir then start at the beginning
         if showDir == None:
-            raise cherrypy.HTTPRedirect("addShows")
+            redirect("/home/addShows")
 
         # if we have a dir and a name it means we're mid-search, so get our TVDB list and forward them to the selection screen
         if showDir != None and showName != None:
@@ -667,11 +670,11 @@ class HomeAddShows:
                 if showAdded:
                     # if we added a show and it's loading then visit its page
                     if curShowDir in sickbeard.loadingShowList and sickbeard.loadingShowList[curShowDir].show != None:
-                        raise cherrypy.HTTPRedirect("../displayShow?show="+str(sickbeard.loadingShowList[curShowDir].show.tvdbid))
+                        redirect("/home/displayShow?show="+str(sickbeard.loadingShowList[curShowDir].show.tvdbid))
                     # if we added a show but it's not loading yet then go to the home page
                     else:
                         time.sleep(3)
-                        raise cherrypy.HTTPRedirect("../")
+                        redirect("/home")
 
                 # if we didn't add a show and the show list is empty it means we errored on the last show, so let the user know
                 else:
@@ -820,7 +823,7 @@ class HomeMassUpdate:
             flash['message'] = "The following actions were queued:<br /><br />"
             flash['message-detail'] = messageDetail
 
-        raise cherrypy.HTTPRedirect("../")
+        redirect("/home")
         return _genericMessage("Stuff:", "toUpdate: "+str(toUpdate)+"<br>\n"+
                                         "toRefresh: "+str(toRefresh)+"<br>\n"+
                                         "toRename: "+str(toRename)+"<br>\n")
@@ -986,7 +989,7 @@ class Home:
                 flash['error'] = '%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s")
                 flash['error-detail'] = "<ul>" + "\n".join(["<li>%s</li>" % error for error in errors]) + "</ul>"
 
-            raise cherrypy.HTTPRedirect("displayShow?show=" + show)
+            redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
     def deleteShow(self, show=None):
@@ -1006,7 +1009,7 @@ class Home:
         showObj.deleteShow()
         
         flash['message'] = '<b>%s</b> has been deleted' % showObj.name
-        raise cherrypy.HTTPRedirect("/home")
+        redirect("/home")
 
     @cherrypy.expose
     def refreshShow(self, show=None):
@@ -1032,7 +1035,7 @@ class Home:
         if sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
             flash['message'] = 'Refresh is in progress.'
         
-        raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
+        redirect("/home/displayShow?show="+str(showObj.tvdbid))
 
     @cherrypy.expose
     def updateShow(self, show=None, force=0):
@@ -1055,7 +1058,7 @@ class Home:
         # just give it some time
         time.sleep(3)
         
-        raise cherrypy.HTTPRedirect("displayShow?show="+str(showObj.tvdbid))
+        redirect("/home/displayShow?show="+str(showObj.tvdbid))
 
 
     @cherrypy.expose
@@ -1065,7 +1068,7 @@ class Home:
             flash['message'] = "Command sent to XBMC to update library"
         else:
             flash['error'] = "Unable to contact XBMC"
-        raise cherrypy.HTTPRedirect('../home')
+        redirect('/home')
 
 
     @cherrypy.expose
@@ -1084,7 +1087,7 @@ class Home:
         
         showObj.fixEpisodeNames()
 
-        raise cherrypy.HTTPRedirect("displayShow?show=" + show)
+        redirect("/home/displayShow?show=" + show)
         
     @cherrypy.expose
     def setStatus(self, show=None, eps=None, status=None):
@@ -1126,7 +1129,7 @@ class Home:
                     epObj.status = int(status)
                     epObj.saveToDB()
                     
-        raise cherrypy.HTTPRedirect("displayShow?show=" + show)
+        redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
@@ -1166,7 +1169,7 @@ class Home:
             sickbeard.updateAiringList()
             sickbeard.updateComingList()
 
-        raise cherrypy.HTTPRedirect("displayShow?show=" + str(epObj.show.tvdbid))
+        redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
 
 
 
@@ -1175,7 +1178,7 @@ class WebInterface:
     @cherrypy.expose
     def index(self):
         
-        raise cherrypy.HTTPRedirect("home")
+        redirect("/home")
 
     @cherrypy.expose
     def showPoster(self, show=None):
