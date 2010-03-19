@@ -146,19 +146,20 @@ def findEpisode(episode, forceQuality=None):
 	q += " AND NOT \"(Passworded)\" AND NOT \"(Password)\""
 	
 	newzbinURL = {
-	  'q': q.encode('utf-8'),
-    'searchaction': 'Search',
-    'fpn': 'p',
-    'category': 8,
-    'area':-1,
-    'u_nfo_posts_only': 0,
-    'u_url_posts_only': 0,
-    'u_comment_posts_only': 0,
-    'sort': 'ps_edit_date',
-    'order': 'desc',
-    'areadone':-1,
-    'feed': 'csv',
-    'u_v3_retention': sickbeard.USENET_RETENTION * 24 * 60 * 60}
+				  'hauth': 1,
+				  'q': q.encode('utf-8'),
+    		      'searchaction': 'Search',
+        		  'fpn': 'p',
+                  'category': 8,
+                  'area':-1,
+                  'u_nfo_posts_only': 0,
+                  'u_url_posts_only': 0,
+                  'u_comment_posts_only': 0,
+                  'sort': 'ps_edit_date',
+                  'order': 'desc',
+                  'areadone':-1,
+                  'feed': 'csv',
+                  'u_v3_retention': sickbeard.USENET_RETENTION * 24 * 60 * 60}
 
 	myOpener = classes.AuthURLOpener(sickbeard.NEWZBIN_USERNAME, sickbeard.NEWZBIN_PASSWORD)
 	searchStr = "http://v3.newzbin.com/search/?%s" % urllib.urlencode(newzbinURL)
