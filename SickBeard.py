@@ -31,17 +31,15 @@ import signal
 import sqlite3
 import traceback
 
-import cherrypy
-import cherrypy.lib.auth_basic
-
 import sickbeard
 
 from sickbeard import db
-from sickbeard.webserve import WebInterface
 from sickbeard.tv import TVShow
 from sickbeard import logger
 from sickbeard.common import *
 from sickbeard.version import SICKBEARD_VERSION
+
+from sickbeard.webserveInit import initWebServer
 
 from lib.configobj import ConfigObj
 
@@ -89,55 +87,15 @@ def main():
 
 	sickbeard.showList = []
 
-	# setup cherrypy logging
-	if os.path.isdir(sickbeard.LOG_DIR) and sickbeard.WEB_LOG:
-		cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
-		logger.log("Using " + cherry_log + " for cherrypy log")
-	else:
-		cherry_log = None
-
-	# cherrypy setup
-	cherrypy.config.update({
-						    'server.socket_port': sickbeard.WEB_PORT,
-						    'server.socket_host': '0.0.0.0',
-						    'log.screen': False,
-						    'log.access_file': cherry_log
-	})
-	
-	userpassdict = {sickbeard.WEB_USERNAME: sickbeard.WEB_PASSWORD}
-	checkpassword = cherrypy.lib.auth_basic.checkpassword_dict(userpassdict)
-	
-	if sickbeard.WEB_USERNAME == "" or sickbeard.WEB_PASSWORD == "":
-		useAuth = False
-	else:
-		useAuth = True 
-	
-	conf = {
-			'/': {
-				'tools.staticdir.root': os.path.join(sickbeard.PROG_DIR, 'data'),
-				'tools.auth_basic.on': useAuth,
-				'tools.auth_basic.realm': 'SickBeard',
-				'tools.auth_basic.checkpassword': checkpassword
-			},
-			'/images': {
-				'tools.staticdir.on': True,
-				'tools.staticdir.dir': 'images'
-			},
-			'/js':	   {
-				'tools.staticdir.on': True,
-				'tools.staticdir.dir': 'js'
-			},
-			'/css':	   {
-				'tools.staticdir.on': True,
-				'tools.staticdir.dir': 'css'
-			},
-	}
-
-	cherrypy.tree.mount(WebInterface(), sickbeard.WEB_ROOT, conf)
-
 	try:
-		cherrypy.server.start()
-		cherrypy.server.wait()
+		initWebServer({
+		        'port':      sickbeard.WEB_PORT,
+		        'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
+		        'web_root':  sickbeard.WEB_ROOT,
+		        'log_dir':   sickbeard.LOG_DIR if sickbeard.WEB_LOG else None,
+		        'username':  sickbeard.WEB_USERNAME,
+		        'password':  sickbeard.WEB_PASSWORD,
+		})
 	except IOError:
 		logger.log("Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)
 		if sickbeard.LAUNCH_BROWSER:
