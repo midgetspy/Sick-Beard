@@ -49,7 +49,7 @@
             <a href="http://www.thetvdb.com/?tab=series&id=$curEp.show.tvdbid" target="_blank" title="http://www.thetvdb.com/?tab=series&id=$curEp.show.tvdbid"><img alt="" src="$sbRoot/images/info.png" /></a>
             <a href="$sbRoot/home/searchEpisode?show=$curEp.show.tvdbid&season=$curEp.season&episode=$curEp.episode" title="Force Update" id="forceUpdate|$curEp.show.tvdbid|$curEp.show.name" class="forceUpdate"><img alt="" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|$curEp.show.tvdbid" /></a>
           </div>
-          $curEp.show.name
+          <a href="$sbRoot/home/displayShow?show=$curEp.show.tvdbid">$curEp.show.name</a>
           </h1>
           <p class="next">
             <span class="title">Next Episode:</span> <span class="info "><%=str(curEp.season)+"x"+"%02i" % int(curEp.episode) %> - $curEp.name airs $curEp.airdate</span>
