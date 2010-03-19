@@ -82,17 +82,6 @@ h1 {
   border-bottom: 1px solid #4e4e4e;
 }
 
-#first {
-	color: black;
-}
-
-#second {
-	color: black;
-}
-
-#catchfrase {
-  color: black;
-}
 .footer {
   background-color: #F5F1E4;
   border-top: 1px solid #000;
@@ -124,9 +113,6 @@ h1 {
 th  {
 background-color: #333;
 color:white;
-}
-#first, #third {
-color: #57442B;
 }
 
 a.current:hover, a:hover {

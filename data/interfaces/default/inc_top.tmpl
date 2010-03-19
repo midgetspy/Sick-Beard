@@ -32,8 +32,12 @@
 <div class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">There is a newer version available (build $sickbeard.NEWEST_VERSION)</a></div>
 <br />
 #end if
-<span id="first"><img src="$sbRoot/images/sickbeard_small.png" width="150"></span> <span id="third"> alpha $sickbeard.version.SICKBEARD_VERSION</span><div id="logotext">This program does stuff</div>
 
+<div id="header">
+    <span id="logo"><a href="$projectHomePage" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard_small.png" width="150"></a></span>
+    <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
+    <span id="tagline">This Program does stuff</span>
+</div>
 <span class="MainMenu">
     #for $menuItem in $menu:
         #if $topmenu == $menuItem.key

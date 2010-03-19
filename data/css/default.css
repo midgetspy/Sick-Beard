@@ -140,11 +140,12 @@ h2 {
   font-size: 18px;
   font-weight: bold;
 }
-#logo {
-    left: 0;
-    width: 50%;
+
+#header a:hover {
+    background: none;
 }
-#logotext {
+
+#tagline {
 	display: block;
 	position: relative;
 	top: -18px;
@@ -152,39 +153,23 @@ h2 {
 	text-align: right;
 	font-size: 10px;
 	font-weight: normal;
-    
 }
 
-#first {
+#logo {
 	font-size: 33px;
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: bold ;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold ;
 	text-transform: uppercase;
 	padding-left: 20px;
 }
 
-#second {
-	font-size: 30px;
-    font-family: Arial, Helvetica, sans-serif;
-    font-style: italic;
-	text-transform: lowercase;
-}
-
-#third {
+#versiontext {
 	font-size: 20px;
-    font-family: Arial, Helvetica, sans-serif;
+	font-family: Arial, Helvetica, sans-serif;
 	text-transform: lowercase;
+	color: #57442B;
 }
 
-#catchfrase {
-  display: block;
-  position: relative;
-  top: -18px;
-  float: right;
-  text-align: right;
-  font-size: 10px;
-  font-weight: normal;
-}
 .footer {
   text-align: center;
   padding-bottom: 5px;

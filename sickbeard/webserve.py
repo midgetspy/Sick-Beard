@@ -74,6 +74,7 @@ class PageTemplate (Template):
         KWs['file'] = os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
+        self.projectHomePage = "http://code.google.com/p/sickbeard/"
         self.menu = [
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
