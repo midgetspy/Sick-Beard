@@ -1091,14 +1091,11 @@ class Home:
     @cherrypy.expose
     def updateXBMC(self):
 
-        result = xbmc.updateLibrary()
-        
-        if result:
-            message = "Command sent to XBMC to update library"
+        if xbmc.updateLibrary():
+            flash['message'] = "Command sent to XBMC to update library"
         else:
-            message = "Unable to contact XBMC"
-        
-        return _genericMessage("XBMC Library Update", logger.MESSAGE)
+            flash['error'] = "Unable to contact XBMC"
+        raise cherrypy.HTTPRedirect('../home')
 
 
     @cherrypy.expose
