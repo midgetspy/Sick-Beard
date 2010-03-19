@@ -28,11 +28,6 @@
     </script>
 </head>
 <body>
-#if $sickbeard.VERSION_NOTIFY and $sickbeard.version.SICKBEARD_VERSION != "trunk" and $sickbeard.NEWEST_VERSION != None and int($sickbeard.version.SICKBEARD_VERSION[6:]) < $sickbeard.NEWEST_VERSION:
-<div class="showNotice"><img class="showNoticeImg" src="$sbRoot/images/error.png"> <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">There is a newer version available (build $sickbeard.NEWEST_VERSION)</a></div>
-<br />
-#end if
-
 <div id="header">
     <span id="logo"><a href="$projectHomePage" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard_small.png" width="150"></a></span>
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
@@ -58,6 +53,14 @@
 #end for
 </span>
 #end if
+
+#if $sickbeard.VERSION_NOTIFY and $sickbeard.version.SICKBEARD_VERSION != "trunk" and $sickbeard.NEWEST_VERSION != None and int($sickbeard.version.SICKBEARD_VERSION[6:]) < $sickbeard.NEWEST_VERSION:
+<div class="message ui-state-highlight ui-corner-all">
+    <p><span class="ui-icon ui-icon-alert"></span>There is a <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">newer version available (build $sickbeard.NEWEST_VERSION)</a></p>
+</div>
+<br />
+#end if
+
 
 <h1>#if $varExists('header') then $header else $title#</h1>
 

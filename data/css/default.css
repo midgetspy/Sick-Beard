@@ -90,14 +90,6 @@ a.current:hover {
 	padding: 5px;
 }
 
-.showNotice {
-	display: block;
-	padding: 15px;
-    text-decoration: bold;
-    font-size: 2.0em;
-    text-align: center;
-}
-
 table {
 	font-size: 9pt;
 	margin: 0px;
@@ -260,20 +252,25 @@ Son of Suckerfish Dropdowns END
 /* ========= */
 
 .message {
-    padding: 4px 0 4px 1em;
-    margin-bottom: 20px;
-    text-align: left;
-    font-size: larger;
+	padding: 4px 0 4px 1em;
+	margin-bottom: 20px;
+	text-align: left;
+	font-size: larger;
 }
 .message p {
-    margin: 0;
+	margin: 0;
 }
 .message p span {
-    float: left;
-    margin-right: .5em;
+	float: left;
+	margin-right: .5em;
 }
 .message ul {
-   margin: 0;
+	margin: 0;
+}
+
+.message a:hover {
+	color: blue;
+	background: none;
 }
 
 /* =========== */
