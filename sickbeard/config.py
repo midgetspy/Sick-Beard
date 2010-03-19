@@ -103,43 +103,6 @@ def change_TV_DOWNLOAD_DIR(tv_download_dir):
     return True
 
 
-def change_IRC_BOT(irc_bot):
-
-    if sickbeard.IRC_BOT == True and irc_bot == False:
-        sickbeard.botRunner.abort = True
-    elif sickbeard.IRC_BOT == False and irc_bot == True:
-        sickbeard.botRunner.initThread()
-        sickbeard.botRunner.thread.start()
-    sickbeard.IRC_BOT = irc_bot 
-
-def change_IRC_SERVER(irc_server):
-    
-    if sickbeard.IRC_SERVER != irc_server:
-        sickbeard.botRunner.bot.jump_server(irc_server)
-    sickbeard.IRC_SERVER = irc_server
-
-def change_IRC_CHANNEL(irc_channel, irc_key):
-
-    if sickbeard.IRC_CHANNEL != irc_channel or sickbeard.IRC_KEY != irc_key:
-        try:
-            sickbeard.botRunner.bot.jump_channel(irc_channel, irc_key)
-        except ServerNotConnectedError:
-            pass
-            
-    sickbeard.IRC_CHANNEL = irc_channel
-    sickbeard.IRC_KEY = irc_key
-
-
-def change_IRC_NICK(irc_nick):
-            
-    if sickbeard.IRC_NICK != irc_nick:
-        try:
-            sickbeard.botRunner.bot.nick(irc_nick)
-        except ServerNotConnectedError:
-            pass
-
-    sickbeard.IRC_NICK = irc_nick
-
 def change_SEARCH_FREQUENCY(freq):
     
     if freq == None:

@@ -441,40 +441,6 @@ class ConfigProviders:
         
         raise cherrypy.HTTPRedirect("index")
 
-class ConfigIRC:
-    
-    @cherrypy.expose
-    def index(self):
-        t = PageTemplate(file="config_irc.tmpl")
-        t.submenu = ConfigMenu
-        return _munge(t)
-
-    @cherrypy.expose
-    def saveIRC(self, irc_bot=None, irc_server=None, irc_channel=None, irc_key=None, irc_nick=None):
-
-        results = []
-
-        if irc_bot == "on":
-            irc_bot = 1
-        else:
-            irc_bot = 0
-
-        config.change_IRC_BOT(irc_bot)
-        config.change_IRC_SERVER(irc_server)
-        config.change_IRC_CHANNEL(irc_channel, irc_key)
-        config.change_IRC_NICK(irc_nick)
-        
-        sickbeard.save_config()
-        
-        if len(results) > 0:
-            for x in results:
-                logger.log(x, logger.ERROR)
-            flash['error']        = 'Error(s) Saving Configuration'
-            flash['error-detail'] = "<br />\n".join(results)
-        else:
-            flash['message'] = 'Configuration Saved'
-        
-        raise cherrypy.HTTPRedirect("index")
 
 class ConfigNotifications:
     
@@ -550,8 +516,6 @@ class Config:
     episodedownloads = ConfigEpisodeDownloads()
     
     providers = ConfigProviders()
-    
-    irc = ConfigIRC()
     
     notifications = ConfigNotifications()
 

@@ -46,11 +46,8 @@ PROG_DIR = None
 backlogSearchScheduler = None
 currentSearchScheduler = None
 showUpdateScheduler = None
-botRunner = None
 versionCheckScheduler = None
 showQueueScheduler = None
-
-ircBot = None
 
 showList = None
 loadingShowList = None
@@ -134,12 +131,6 @@ SAB_PASSWORD = None
 SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = None
-
-IRC_BOT = False
-IRC_SERVER = None
-IRC_CHANNEL = None
-IRC_KEY = None
-IRC_NICK = None
 
 XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
@@ -238,10 +229,10 @@ def initialize():
         
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, NZB_METHOD, NZB_DIR, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, TVBINZ, TVBINZ_UID, TVBINZ_HASH, \
-                SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, IRC_BOT, IRC_SERVER, \
-                IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
+                SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
+                XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
-                showUpdateScheduler, botRunner, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
+                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
                 airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -264,7 +255,6 @@ def initialize():
         CheckSection('Newzbin')
         CheckSection('TVBinz')
         CheckSection('SABnzbd')
-        CheckSection('IRC')
         CheckSection('XBMC')
         CheckSection('Growl')
         
@@ -360,12 +350,6 @@ def initialize():
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', 'tv')
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
 
-        IRC_BOT = bool(check_setting_int(CFG, 'IRC', 'irc_bot', 0))
-        IRC_SERVER = check_setting_str(CFG, 'IRC', 'irc_server', '')
-        IRC_CHANNEL = check_setting_str(CFG, 'IRC', 'irc_channel', '')
-        IRC_KEY = check_setting_str(CFG, 'IRC', 'irc_key', '')
-        IRC_NICK = check_setting_str(CFG, 'IRC', 'irc_nick', '')
-        
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
         XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
@@ -424,7 +408,7 @@ def initialize():
 def start():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
-            showUpdateScheduler, IRC_BOT, botRunner, versionCheckScheduler, showQueueScheduler
+            showUpdateScheduler, versionCheckScheduler, showQueueScheduler
     
     with INIT_LOCK:
         
@@ -445,14 +429,11 @@ def start():
             # start the queue checker
             showQueueScheduler.thread.start()
 
-            if IRC_BOT and False:
-                botRunner.thread.start()
-
 
 def halt ():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
-            botRunner, showQueueScheduler
+            showQueueScheduler
     
     with INIT_LOCK:
         
@@ -497,15 +478,6 @@ def halt ():
             except:
                 pass
             
-
-            if False:
-                botRunner.abort = True
-                logger.log("Waiting for the IRC thread to exit")
-                try:
-                    botRunner.thread.join(10)
-                except:
-                    pass
-
             __INITIALIZED__ = False
 
 
@@ -544,8 +516,8 @@ def saveAndShutdown():
 def save_config():
     global LOG_DIR, WEB_PORT, WEB_LOG, WEB_USERNAME, WEB_PASSWORD, NZB_METHOD, NZB_DIR, \
         NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, TVBINZ, TVBINZ_UID, TVBINZ_HASH, \
-        SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, IRC_BOT, IRC_SERVER, \
-        IRC_CHANNEL, IRC_KEY, IRC_NICK, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
+        SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
+        XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
         XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_PASSWORD, XBMC_USERNAME, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
         USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
         QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
@@ -602,11 +574,6 @@ def save_config():
     CFG['SABnzbd']['sab_apikey'] = SAB_APIKEY
     CFG['SABnzbd']['sab_category'] = SAB_CATEGORY
     CFG['SABnzbd']['sab_host'] = SAB_HOST
-    CFG['IRC']['irc_bot'] = int(IRC_BOT)
-    CFG['IRC']['irc_server'] = IRC_SERVER
-    CFG['IRC']['irc_channel'] = IRC_CHANNEL
-    CFG['IRC']['irc_key'] = IRC_KEY
-    CFG['IRC']['irc_nick'] = IRC_NICK
     CFG['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
     CFG['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
     CFG['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
