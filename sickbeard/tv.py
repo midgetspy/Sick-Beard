@@ -396,11 +396,11 @@ class TVShow(object):
         numOfSeasons = len(myShow) 
         
         # if we have no season banners then just finish
-        if 'season' not in myShow['_banners']:
+        if 'season' not in myShow['_banners'] or 'season' not in myShow['_banners']['season']:
             return
         
         # Give us just the normal poster-style season graphics 
-        seasonsArtObj = myShow['_banners']['season']['season'] 
+        seasonsArtObj = myShow['_banners']['season']['season']
         
         # This holds our resulting dictionary of season art 
         seasonsDict = {} 
