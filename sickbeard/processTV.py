@@ -220,7 +220,7 @@ def doIt(downloaderDir, nzbName=None):
     season = int(result.seasonnumber)
 
     rootEp = None
-    for curEpisode in result.episodenumber:
+    for curEpisode in result.episodenumbers:
         episode = int(curEpisode)
     
         returnStr += logHelper("TVDB thinks the file is " + showInfo[1] + str(season) + "x" + str(episode), logger.DEBUG)

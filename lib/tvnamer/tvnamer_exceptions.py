@@ -46,14 +46,9 @@ class BaseConfigError(BaseTvnamerException):
     pass
 
 
-class InvalidConfigFile(BaseConfigError):
+class ConfigValueError(BaseConfigError):
     """Raised if the config file is malformed or unreadable
     """
-    pass
-
-
-class WrongConfigVersion(BaseTvnamerException):
-    """Config versions do not match"""
     pass
 
 

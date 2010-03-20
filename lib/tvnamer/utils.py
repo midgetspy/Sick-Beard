@@ -13,22 +13,30 @@ import os
 import re
 import sys
 import shutil
+import logging
 import platform
 
-# MIDGETSPY: updated this line to fit Sick Beard lib architecture
-from lib.tvdb_api.tvdb_exceptions import (tvdb_error, tvdb_shownotfound, tvdb_seasonnotfound,
-tvdb_episodenotfound, tvdb_attributenotfound)
+from lib.tvdb_api.tvdb_api import (tvdb_error, tvdb_shownotfound, tvdb_seasonnotfound,
+tvdb_episodenotfound, tvdb_attributenotfound, tvdb_userabort)
+
+from unicode_helper import p
 
 from config import Config
 from tvnamer_exceptions import (InvalidPath, InvalidFilename,
 ShowNotFound, DataRetrievalError, SeasonNotFound, EpisodeNotFound,
-EpisodeNameNotFound)
+EpisodeNameNotFound, ConfigValueError, UserAbort)
+
+
+def log():
+    """Returns the logger for current file
+    """
+    return logging.getLogger(__name__)
 
 
 def warn(text):
     """Displays message to sys.stdout
     """
-    sys.stderr.write("%s\n" % text)
+    p(text, file = sys.stderr)
 
 
 def getEpisodeName(tvdb_instance, episode):
@@ -42,18 +50,15 @@ def getEpisodeName(tvdb_instance, episode):
     try:
         show = tvdb_instance[episode.seriesname]
     except tvdb_error, errormsg:
-        raise DataRetrievalError("! Warning: Error contacting www.thetvdb.com: %s" % errormsg)
+        raise DataRetrievalError("Error contacting www.thetvdb.com: %s" % errormsg)
     except tvdb_shownotfound:
         # No such series found.
         raise ShowNotFound("Show %s not found on www.thetvdb.com" % episode.seriesname)
+    except tvdb_userabort, error:
+        raise UserAbort(unicode(error))
     else:
         # Series was found, use corrected series name
         correctedShowName = show['seriesname']
-
-    if not isinstance(episode.episodenumber, list):
-        epNoList = [episode.episodenumber]
-    else:
-        epNoList = episode.episodenumber
 
     if episode.seasonnumber is None:
         # Series without concept of seasons have all episodes in season 1
@@ -62,7 +67,7 @@ def getEpisodeName(tvdb_instance, episode):
         seasonnumber = episode.seasonnumber
 
     epnames = []
-    for cepno in epNoList:
+    for cepno in episode.episodenumbers:
         try:
             episodeinfo = show[seasonnumber][cepno]
 
@@ -88,6 +93,35 @@ def getEpisodeName(tvdb_instance, episode):
     return correctedShowName, epnames
 
 
+def _applyReplacements(cfile, replacements):
+    """Applies custom replacements.
+
+    Argument cfile is string.
+
+    Argument replacements is a list of dicts, with keys "match",
+    "replacement", and (optional) "is_regex"
+    """
+    for rep in replacements:
+        if 'is_regex' in rep and rep['is_regex']:
+            cfile = re.sub(rep['match'], rep['replacement'], cfile)
+        else:
+            cfile = cfile.replace(rep['match'], rep['replacement'])
+
+    return cfile
+
+
+def applyCustomInputReplacements(cfile):
+    """Applies custom input filename replacements, wraps _applyReplacements
+    """
+    return _applyReplacements(cfile, Config['input_filename_replacements'])
+
+
+def applyCustomOutputReplacements(cfile):
+    """Applies custom output filename replacements, wraps _applyReplacements
+    """
+    return _applyReplacements(cfile, Config['output_filename_replacements'])
+
+
 def cleanRegexedSeriesName(seriesname):
     """Cleans up series name by removing any . and _
     characters, along with any trailing hyphens.
@@ -109,45 +143,65 @@ def cleanRegexedSeriesName(seriesname):
 
 
 class FileFinder(object):
-    """Given a file, it will verify it exists, given a folder it will descend
+    """Given a file, it will verify it exists. Given a folder it will descend
     one level into it and return a list of files, unless the recursive argument
     is True, in which case it finds all files contained within the path.
+
+    The with_extension argument is a list of valid extensions, without leading
+    spaces. If an empty list (or None) is supplied, no extension checking is
+    performed.
     """
 
-    def __init__(self, path, recursive = False):
+    def __init__(self, path, with_extension = None, recursive = False):
         self.path = path
+        if with_extension is None:
+            self.with_extension = []
+        else:
+            self.with_extension = with_extension
         self.recursive = recursive
 
     def findFiles(self):
         """Returns list of files found at path
         """
         if os.path.isfile(self.path):
-            return [os.path.abspath(self.path)]
+            if self._checkExtension(self.path):
+                return [os.path.abspath(self.path)]
+            else:
+                return []
         elif os.path.isdir(self.path):
             return self._findFilesInPath(self.path)
         else:
             raise InvalidPath("%s is not a valid file/directory" % self.path)
 
+    def _checkExtension(self, fname):
+        if len(self.with_extension) == 0:
+            return True
+
+        _, extension = os.path.splitext(fname)
+        for cext in self.with_extension:
+            cext = ".%s" % cext
+            if extension == cext:
+                return True
+        else:
+            return False
+
     def _findFilesInPath(self, startpath):
         """Finds files from startpath, could be called recursively
         """
         allfiles = []
-        if os.path.isfile(startpath):
-            allfiles.append(os.path.abspath(startpath))
-
-        elif os.path.isdir(startpath):
-            for subf in os.listdir(startpath):
-                newpath = os.path.join(startpath, subf)
-                newpath = os.path.abspath(newpath)
-                if os.path.isfile(newpath):
-                    allfiles.append(newpath)
-                else:
-                    if self.recursive:
-                        allfiles.extend(self._findFilesInPath(newpath))
-                    #end if recursive
-                #end if isfile
-            #end for sf
-        #end if isdir
+        for subf in os.listdir(unicode(startpath)):
+            if not self._checkExtension(subf):
+                continue
+            newpath = os.path.join(startpath, subf)
+            newpath = os.path.abspath(newpath)
+            if os.path.isfile(newpath):
+                allfiles.append(newpath)
+            else:
+                if self.recursive:
+                    allfiles.extend(self._findFilesInPath(newpath))
+                #end if recursive
+            #end if isfile
+        #end for sf
         return allfiles
 
 
@@ -164,7 +218,7 @@ class FileParser(object):
         """Takes episode_patterns from config, compiles them all
         into self.compiled_regexs
         """
-        for cpattern in Config['episode_patterns']:
+        for cpattern in Config['filename_patterns']:
             try:
                 cregex = re.compile(cpattern, re.VERBOSE)
             except re.error, errormsg:
@@ -178,6 +232,8 @@ class FileParser(object):
         Returns an EpisodeInfo instance containing extracted data.
         """
         _, filename = os.path.split(self.path)
+
+        filename = applyCustomInputReplacements(filename)
 
         for cmatcher in self.compiled_regexs:
             match = cmatcher.match(filename)
@@ -203,8 +259,15 @@ class FileParser(object):
                         start, end = end, start
                     episodenumbers = range(start, end + 1)
 
+                elif 'episodenumber' in namedgroups:
+                    episodenumbers = [int(match.group('episodenumber')), ]
+
                 else:
-                    episodenumbers = [int(match.group('episodenumber'))]
+                    raise ConfigValueError(
+                        "Regex does not contain episode number group, should"
+                        "contain episodenumber, episodenumber1-9, or"
+                        "episodenumberstart and episodenumberend\n\nPattern"
+                        "was:\n" + cmatcher.pattern)
 
                 if 'seasonnumber' in namedgroups:
                     seasonnumber = int(match.group('seasonnumber'))
@@ -212,7 +275,11 @@ class FileParser(object):
                     # No season number specified, usually for Anime
                     seasonnumber = None
 
-                seriesname = match.group('seriesname')
+                if 'seriesname' in namedgroups:
+                    seriesname = match.group('seriesname')
+                else:
+                    raise ConfigValueError(
+                        "Regex must contain seriesname. Pattern was:\n" + cmatcher.pattern)
 
                 if seriesname != None:
                     seriesname = cleanRegexedSeriesName(seriesname)
@@ -220,7 +287,7 @@ class FileParser(object):
                 episode = EpisodeInfo(
                     seriesname = seriesname,
                     seasonnumber = seasonnumber,
-                    episodenumber = episodenumbers,
+                    episodenumbers = episodenumbers,
                     filename = self.path)
                 return episode
         else:
@@ -353,6 +420,17 @@ def makeValidFilename(value, normalize_unicode = False, windows_safe = False, cu
     return value + extension
 
 
+def formatEpisodeNumbers(episodenumbers):
+    """Format episode number(s) into string, using configured values
+    """
+    if len(episodenumbers) == 1:
+        epno = Config['episode_single'] % episodenumbers[0]
+    else:
+        epno = Config['episode_separator'].join(
+            Config['episode_single'] % x for x in episodenumbers)
+
+    return epno
+
 class EpisodeInfo(object):
     """Stores information (season, episode number, episode name), and contains
     logic to generate new name
@@ -361,13 +439,13 @@ class EpisodeInfo(object):
     def __init__(self,
         seriesname = None,
         seasonnumber = None,
-        episodenumber = None,
+        episodenumbers= None,
         episodename = None,
         filename = None):
 
         self.seriesname = seriesname
         self.seasonnumber = seasonnumber
-        self.episodenumber = episodenumber
+        self.episodenumbers = episodenumbers
         self.episodename = episodename
         self.fullpath = filename
 
@@ -398,17 +476,14 @@ class EpisodeInfo(object):
         episode_separator # used to join multiple episode numbers
         """
         # Format episode number into string, or a list
-        if isinstance(self.episodenumber, list):
-            epno = Config['episode_separator'].join(
-                Config['episode_single'] % x for x in self.episodenumber)
-        else:
-            epno = Config['episode_single'] % self.episodenumber
+        epno = formatEpisodeNumbers(self.episodenumbers)
 
         # Data made available to config'd output file format
         if self.extension is None:
             prep_extension = ''
         else:
             prep_extension = '.%s' % self.extension
+
         epdata = {
             'seriesname': self.seriesname,
             'seasonno': self.seasonnumber,
@@ -437,8 +512,7 @@ class EpisodeInfo(object):
             fname,
             normalize_unicode = Config['normalize_unicode_filenames'],
             windows_safe = Config['windows_safe_filenames'],
-            custom_blacklist = Config['custom_filename_character_blacklist'],
-            replace_with = Config['replace_blacklisted_characters_with'])
+            replace_with = Config['replace_invalid_characters_with'])
 
     def __repr__(self):
         return "<%s: %s>" % (
@@ -450,6 +524,10 @@ def same_partition(f1, f2):
     """Returns True if both files or directories are on the same partition
     """
     return os.stat(f1).st_dev == os.stat(f2).st_dev
+
+
+def delete_file(fpath):
+    raise NotImplementedError("delete_file not yet implimented")
 
 
 class Renamer(object):
@@ -470,13 +548,13 @@ class Renamer(object):
         if os.path.isfile(newpath):
             # If the destination exists, raise exception unless force is True
             if not force:
-                raise OSError("File %s already exists, not forcefully moving %s" % (
+                raise OSError("File %s already exists, not forcefully renaming %s" % (
                     newpath, self.filename))
 
         os.rename(self.filename, newpath)
         self.filename = newpath
 
-    def newPath(self, new_path, force = False, always_copy = False, always_move = False):
+    def newPath(self, new_path, force = False, always_copy = False, always_move = False, create_dirs = True):
         """Moves the file to a new path.
 
         If it is on the same partition, it will be moved (unless always_copy is True)
@@ -484,13 +562,24 @@ class Renamer(object):
         If the target file already exists, it will raise OSError unless force is True.
         """
 
-        raise NotImplementedError('The function is not tested at all, needs testing before use')
-
         if always_copy and always_move:
             raise ValueError("Both always_copy and always_move cannot be specified")
 
-        _, old_filename = os.path.split(self.filename)
-        new_fullpath = os.path.abspath(os.path.join(new_path, old_filename))
+        old_dir, old_filename = os.path.split(self.filename)
+
+        # Join new filepath to old one (to handle realtive dirs)
+        new_dir = os.path.abspath(os.path.join(old_dir, new_path))
+
+        # Join new filename onto new filepath
+        new_fullpath = os.path.join(new_dir, old_filename)
+
+        if create_dirs:
+            print "Creating %s" % new_dir
+            try:
+                os.makedirs(new_dir)
+            except OSError, e:
+                if e.errno != 17:
+                    raise
 
         if os.path.isfile(new_fullpath):
             # If the destination exists, raise exception unless force is True
@@ -498,7 +587,7 @@ class Renamer(object):
                 raise OSError("File %s already exists, not forcefully moving %s" % (
                     new_fullpath, self.filename))
 
-        if same_partition(self.filename, new_path):
+        if same_partition(self.filename, new_dir):
             if always_copy:
                 # Same partition, but forced to copy
                 print "copy %s to %s" % (self.filename, new_fullpath)

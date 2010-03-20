@@ -481,7 +481,7 @@ class TVShow(object):
         season = epInfo.seasonnumber
         rootEp = None
 
-        for curEp in epInfo.episodenumber:
+        for curEp in epInfo.episodenumbers:
 
             episode = int(curEp)
             
