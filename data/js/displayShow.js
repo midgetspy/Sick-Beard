@@ -52,6 +52,6 @@ $(function(){
                                 data:    { show: $('#showID').attr('value'), episode: match[2], season: match[1] },
                                 url:     'plotDetails'
                         }).responseText);
-                },
+                }
         })
 })
