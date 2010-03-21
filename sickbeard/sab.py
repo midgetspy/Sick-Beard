@@ -50,6 +50,9 @@ def sendNZB(nzb):
     elif nzb.provider in ('tvbinz', 'nzbs', 'nzbmatrix', 'tvnzb'):
         params['mode'] = 'addurl'
         params['name'] = nzb.url
+    else:
+        logger.log("Unknown provider "+nzb.provider+", unable to send to SAB")
+        return False
 
     url = 'http://' + sickbeard.SAB_HOST + "/sabnzbd/api?" + urllib.urlencode(params)
 
