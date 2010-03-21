@@ -19,10 +19,8 @@
 from __future__ import with_statement
 
 import datetime
-import sqlite3
 import threading
 import time
-import traceback
 
 from sickbeard import db, exceptions, helpers, search, scheduler
 from sickbeard import logger

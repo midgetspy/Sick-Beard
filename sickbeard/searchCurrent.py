@@ -23,10 +23,8 @@ from sickbeard import logger
 from sickbeard.common import * 
 
 import datetime
-import sqlite3
 import threading
 import time
-import traceback
 
 class CurrentSearcher():
     
