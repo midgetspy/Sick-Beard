@@ -18,6 +18,7 @@
 
 from __future__ import with_statement
 
+import traceback
 import sickbeard
 
 from common import *
@@ -126,6 +127,7 @@ def findEpisode(episode):
 			continue
 		except Exception, e:
 			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			logger.log(traceback.format_exc(), logger.DEBUG)
 			continue
 		
 		didSearch = True
