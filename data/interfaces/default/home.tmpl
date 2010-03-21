@@ -73,9 +73,27 @@
     format: function(s) { 
         // format your data for normalization
         if (s == '')
-        	return '9999-99-99';
+            return '9999-99-99';
         else
-        	return s; 
+            return s; 
+    }, 
+    // set type, either numeric or text 
+    type: 'text' 
+}); 
+ 
+\$.tablesorter.addParser({ 
+    // set a unique id 
+    id: 'active', 
+    is: function(s) { 
+        // return false so this parser is not auto detected 
+        return false; 
+    }, 
+    format: function(s) { 
+        // format your data for normalization
+        if (s == '')
+            return '~~';
+        else
+            return s; 
     }, 
     // set type, either numeric or text 
     type: 'text' 
@@ -89,7 +107,8 @@
     		0: { sorter: 'nextAirDate'},
     		1: { sorter: 'loadingNames'},
     		3: { sorter: 'quality'},
-    		4: { sorter: 'eps' }
+            4: { sorter: 'eps' },
+            5: { sorter: 'active' }
     	}
     }); 
 });
@@ -110,7 +129,7 @@
     <td align="center">(loading)</td>
     <td>
     #if $curLoadingShow.show == None:
-    "Loading... ($curLoadingShow.name)
+    Loading... ($curLoadingShow.name)
     #else:
     <a href="displayShow?show=$curLoadingShow.show.tvdbid">$curLoadingShow.show.name</a>
     #end if
