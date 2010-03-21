@@ -474,7 +474,7 @@ def halt ():
             showQueueScheduler.abort = True
             logger.log("Waiting for the SHOWQUEUE thread to exit")
             try:
-                versionCheckScheduler.thread.join(10)
+                showQueueScheduler.thread.join(10)
             except:
                 pass
             
