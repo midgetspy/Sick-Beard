@@ -99,7 +99,7 @@ class TVDBWebUI:
         showDirList = ""
         for curShowDir in self.config['_showDir']:
             showDirList += "showDir="+curShowDir+"&"
-        redirect("/home/addShow?" + showDirList + "seriesList=" + searchList)
+        redirect("/home/addShows/addShow?" + showDirList + "seriesList=" + searchList)
 
 def _munge(string):
     return unicode(string).encode('ascii', 'xmlcharrefreplace')
@@ -595,7 +595,7 @@ class HomeAddShows:
         myTemplate.submenu = HomeMenu
         return _munge(myTemplate)       
         
-        url = "/home/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
+        url = "/home/addShows/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
         logger.log("Redirecting to URL "+url, logger.DEBUG)
         redirect(url)
 
