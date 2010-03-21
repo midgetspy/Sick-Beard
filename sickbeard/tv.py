@@ -481,9 +481,9 @@ class TVShow(object):
         season = epInfo.seasonnumber
         rootEp = None
 
-        for curEp in epInfo.episodenumbers:
+        for curEpNum in epInfo.episodenumbers:
 
-            episode = int(curEp)
+            episode = int(curEpNum)
             
             logger.log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), logger.DEBUG)
 
