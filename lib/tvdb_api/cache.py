@@ -10,16 +10,31 @@
 urllib2 caching handler
 Modified from http://code.activestate.com/recipes/491261/
 """
+from __future__ import with_statement
 
 __author__ = "dbr/Ben"
-__version__ = "1.1"
+__version__ = "1.4"
 
 import os
 import time
+import errno
 import httplib
 import urllib2
 import StringIO
 from hashlib import md5
+from threading import RLock
+
+cache_lock = RLock()
+
+def locked_function(origfunc):
+    """Decorator to execute function under lock"""
+    def wrapped(*args, **kwargs):
+        cache_lock.acquire()
+        try:
+            return origfunc(*args, **kwargs)
+        finally:
+            cache_lock.release()
+    return wrapped
 
 def calculate_cache_path(cache_location, url):
     """Checks if [cache_location]/[hash_of_url].headers and .body exist
@@ -43,6 +58,7 @@ def check_cache_time(path, max_age):
     else:
         return True
 
+@locked_function
 def exists_in_cache(cache_location, url, max_age):
     """Returns if header AND body cache file exist (and are up-to-date)"""
     hpath, bpath = calculate_cache_path(cache_location, url)
@@ -55,6 +71,7 @@ def exists_in_cache(cache_location, url, max_age):
         # File does not exist
         return False
 
+@locked_function
 def store_in_cache(cache_location, url, response):
     """Tries to store response in cache."""
     hpath, bpath = calculate_cache_path(cache_location, url)
@@ -78,12 +95,23 @@ class CacheHandler(urllib2.BaseHandler):
     If a subsequent GET request is made for the same URL, the stored
     response is returned, saving time, resources and bandwidth
     """
-    def __init__(self, cache_location, max_age=21600):
+    @locked_function
+    def __init__(self, cache_location, max_age = 21600):
         """The location of the cache directory"""
         self.max_age = max_age
         self.cache_location = cache_location
         if not os.path.exists(self.cache_location):
-            os.mkdir(self.cache_location)
+            try:
+                os.mkdir(self.cache_location)
+            except OSError, e:
+                if e.errno == errno.EEXIST and os.path.isdir(self.cache_location):
+                    # File exists, and it's a directory,
+                    # another process beat us to creating this dir, that's OK.
+                    pass
+                else:
+                    # Our target dir is already a file, or different error,
+                    # relay the error!
+                    raise
 
     def default_open(self, request):
         """Handles GET requests, if the response is cached it returns it
@@ -97,7 +125,7 @@ class CacheHandler(urllib2.BaseHandler):
             return CachedResponse(
                 self.cache_location,
                 request.get_full_url(),
-                set_cache_header=True
+                set_cache_header = True
             )
         else:
             return None
@@ -123,7 +151,7 @@ class CacheHandler(urllib2.BaseHandler):
             return CachedResponse(
                 self.cache_location,
                 request.get_full_url(),
-                set_cache_header=set_cache_header
+                set_cache_header = set_cache_header
             )
         else:
             return response
@@ -134,15 +162,17 @@ class CachedResponse(StringIO.StringIO):
     To determine if a response is cached or coming directly from
     the network, check the x-local-cache header rather than the object type.
     """
+
+    @locked_function
     def __init__(self, cache_location, url, set_cache_header=True):
         self.cache_location = cache_location
         hpath, bpath = calculate_cache_path(cache_location, url)
 
         StringIO.StringIO.__init__(self, file(bpath).read())
 
-        self.url = url
-        self.code = 200
-        self.msg = "OK"
+        self.url     = url
+        self.code    = 200
+        self.msg     = "OK"
         headerbuf = file(hpath).read()
         if set_cache_header:
             headerbuf += "x-local-cache: %s\r\n" % (bpath)
@@ -158,6 +188,7 @@ class CachedResponse(StringIO.StringIO):
         """
         return self.url
 
+    @locked_function
     def recache(self):
         new_request = urllib2.urlopen(self.url)
         set_cache_header = store_in_cache(
@@ -179,4 +210,23 @@ if __name__ == "__main__":
         response.recache()
         print response.headers
         print "After recache:", response.read()
+
+        # Test usage in threads
+        from threading import Thread
+        class CacheThreadTest(Thread):
+            lastdata = None
+            def run(self):
+                req = opener.open("http://google.com")
+                newdata = req.read()
+                if self.lastdata is None:
+                    self.lastdata = newdata
+                assert self.lastdata == newdata, "Data was not consistent, uhoh"
+                req.recache()
+        threads = [CacheThreadTest() for x in range(50)]
+        print "Starting threads"
+        [t.start() for t in threads]
+        print "..done"
+        print "Joining threads"
+        [t.join() for t in threads]
+        print "..done"
     main()

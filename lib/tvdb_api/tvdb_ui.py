@@ -44,16 +44,26 @@ Then to use it..
 """
 
 __author__ = "dbr/Ben"
-__version__ = "1.1"
+__version__ = "1.4"
+
+import logging
+import warnings
 
 from tvdb_exceptions import tvdb_userabort
+
+def log():
+    return logging.getLogger(__name__)
 
 class BaseUI:
     """Default non-interactive UI, which auto-selects first results
     """
-    def __init__(self, config, log):
+    def __init__(self, config, log = None):
         self.config = config
-        self.log = log
+        if log is not None:
+            warnings.warn("the UI's log parameter is deprecated, instead use\n"
+                "use import logging; logging.getLogger('ui').info('blah')\n"
+                "The self.log attribute will be removed in the next version")
+            self.log = logging.getLogger(__name__)
 
     def selectSeries(self, allSeries):
         return allSeries[0]
@@ -67,13 +77,15 @@ class ConsoleUI(BaseUI):
         """Helper function, lists series with corresponding ID
         """
         print "TVDB Search Results:"
-        for i in range(len(allSeries[:6])): # list first 6 search results
+        for i, cshow in enumerate(allSeries[:6]):
             i_show = i + 1 # Start at more human readable number 1 (not 0)
-            self.log.debug('Showing allSeries[%s] = %s)' % (i_show, allSeries[i]))
-            print "%s -> %s # http://thetvdb.com/?tab=series&id=%s" % (
+            log().debug('Showing allSeries[%s], series %s)' % (i_show, allSeries[i]['seriesname']))
+            print "%s -> %s [%s] # http://thetvdb.com/?tab=series&id=%s&lid=%s" % (
                 i_show,
-                allSeries[i]['name'].encode("UTF-8", "ignore"),
-                allSeries[i]['sid'].encode("UTF-8", "ignore")
+                cshow['seriesname'].encode("UTF-8", "ignore"),
+                cshow['language'].encode("UTF-8", "ignore"),
+                cshow['id'].encode("UTF-8", "ignore"),
+                cshow['lid']
             )
 
     def selectSeries(self, allSeries):
@@ -97,12 +109,12 @@ class ConsoleUI(BaseUI):
             except EOFError:
                 raise tvdb_userabort("User aborted (EOF received)")
 
-            self.log.debug('Got choice of: %s' % (ans))
+            log().debug('Got choice of: %s' % (ans))
             try:
                 selected_id = int(ans) - 1 # The human entered 1 as first result, not zero
             except ValueError: # Input was not number
                 if ans == "q":
-                    self.log.debug('Got quit command (q)')
+                    log().debug('Got quit command (q)')
                     raise tvdb_userabort("User aborted ('q' quit command)")
                 elif ans == "?":
                     print "## Help"
@@ -110,13 +122,13 @@ class ConsoleUI(BaseUI):
                     print "# ? - this help"
                     print "# q - abort tvnamer"
                 else:
-                    self.log.debug('Unknown keypress %s' % (ans))
+                    log().debug('Unknown keypress %s' % (ans))
             else:
-                self.log.debug('Trying to return ID: %d' % (selected_id))
+                log().debug('Trying to return ID: %d' % (selected_id))
                 try:
                     return allSeries[ selected_id ]
                 except IndexError:
-                    self.log.debug('Invalid show number entered!')
+                    log().debug('Invalid show number entered!')
                     print "Invalid number (%s) selected!"
                     self._displaySeries(allSeries)
             #end try

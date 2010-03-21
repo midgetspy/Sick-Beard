@@ -284,7 +284,7 @@ def initialize():
             CACHE_DIR = None
 
         # Set our common tvdb_api options here
-        TVDB_API_PARMS = {'cache': None, 'apikey': TVDB_API_KEY}
+        TVDB_API_PARMS = {'cache': None, 'apikey': TVDB_API_KEY, 'language': 'en'}
         if CACHE_DIR:
             TVDB_API_PARMS['cache'] = CACHE_DIR + '/tvdb'
         else:

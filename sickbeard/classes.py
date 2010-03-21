@@ -77,7 +77,7 @@ class TorrentSearchResult(SearchResult):
 
 
 class ShowListUI:
-    def __init__(self, config, log):
+    def __init__(self, config, log=None):
         self.config = config
         self.log = log
 
@@ -86,7 +86,7 @@ class ShowListUI:
 
         # try to pick a show that's in my show list
         for curShow in allSeries:
-            if int(curShow['sid']) in idList:
+            if int(curShow['id']) in idList:
                 return curShow
         
         # if nothing matches then just go with the first match I guess
@@ -96,3 +96,17 @@ class ShowListUI:
 class Callable:
     def __init__(self, anycallable):
         self.__call__ = anycallable
+
+class Proper:
+    def __init__(self, name, url, date, provider):
+        self.name = name
+        self.url = url
+        self.date = date
+        self.provider = provider
+        
+        self.tvdbid = -1
+        self.season = -1
+        self.episode = -1
+    
+    def __str__(self):
+        return str(self.date)+" "+self.name+" "+str(self.season)+"x"+str(self.episode)+" of "+str(self.tvdbid)

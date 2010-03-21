@@ -89,13 +89,13 @@ def redirect(abspath, *args, **KWs):
     raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + abspath, *args, **KWs)
 
 class TVDBWebUI:
-    def __init__(self, config, log):
+    def __init__(self, config, log=None):
         self.config = config
         self.log = log
 
     def selectSeries(self, allSeries):
         
-        searchList = ",".join([x['sid'] for x in allSeries])
+        searchList = ",".join([x['id'] for x in allSeries])
         showDirList = ""
         for curShowDir in self.config['_showDir']:
             showDirList += "showDir="+curShowDir+"&"

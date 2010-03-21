@@ -977,7 +977,8 @@ class TVEpisode:
         try:
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
             myEp = t[self.show.tvdbid][season][episode]
-        except (tvdb_exceptions.tvdb_error, IOError):
+        except (tvdb_exceptions.tvdb_error, IOError), e:
+            logger.log("TVDB threw up an error: "+str(e), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
             if self.name != "" and self.airdate != datetime.date.fromordinal(1):
                 logger.log("TVDB timed out but we have enough info from other sources, allowing the error", logger.ERROR)
