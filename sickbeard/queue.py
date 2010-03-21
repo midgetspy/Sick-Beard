@@ -12,6 +12,7 @@ from sickbeard.tv import TVShow
 from sickbeard import exceptions
 from sickbeard import helpers
 from sickbeard import logger
+from sickbeard import webserve
 
 
 class ShowQueue:
@@ -237,16 +238,19 @@ class QueueItemAdd(QueueItem):
             
         except tvdb_exceptions.tvdb_exception, e:
             logger.log("Unable to add show due to an error with TVDB: "+str(e), logger.ERROR)
+            webserve.flash['error'] = "Unable to add "+str(self.initialShow.name)+" due to an error with TVDB"
             self._finishEarly()
             return
             
         except exceptions.NoNFOException:
             logger.log("Unable to load show from NFO", logger.ERROR)
+            webserve.flash['error'] = "Unable to add "+str(self.initialShow.name)+" from NFO, skipping"
             self._finishEarly()
             return
             
         except exceptions.ShowNotFoundException:
             logger.log("The show in " + self.showDir + " couldn't be found on theTVDB, skipping", logger.ERROR)
+            webserve.flash['message'] = "The show in " + self.showDir + " couldn't be found on theTVDB, skipping"
             self._finishEarly()
             return
     
@@ -295,6 +299,9 @@ class QueueItemAdd(QueueItem):
     def _finishEarly(self):
         if self.show != None:
             self.show.deleteShow()
+        
+        if self.initialShow != None:
+            self.initialShow.deleteShow()
         
         self.finish()
 
