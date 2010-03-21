@@ -105,7 +105,6 @@ def allPossibleShowNames(show):
 	
 	# if we have a tvrage name then use it
 	if show.tvrname != "" and show.tvrname != None:
-		logger.log("Adding TVRage show name to the list: '"+show.tvrname+"'", logger.DEBUG)
 		showNames.append(show.tvrname)
 
 	newShowNames = []
