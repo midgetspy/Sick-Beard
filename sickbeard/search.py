@@ -75,7 +75,9 @@ def snatchEpisode(result, endStatus=SNATCHED):
 	# log the snatch
 	history.logSnatch(result)
 
-	notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
+	# don't notify when we snatch a backlog episode, that's just annoying
+	if endStatus != SNATCHED_BACKLOG:
+		notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
 	
 	with result.episode.lock:
 		if result.predownloaded == True:

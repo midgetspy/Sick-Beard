@@ -91,7 +91,7 @@ class BacklogSearcher:
                 
                 else:
                     # just use the first result for now
-                    search.snatchEpisode(foundNZBs[0])
+                    search.snatchEpisode(foundNZBs[0], SNATCHED_BACKLOG)
 
                 time.sleep(10)
                     
