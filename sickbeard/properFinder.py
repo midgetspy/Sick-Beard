@@ -130,7 +130,7 @@ class ProperFinder():
                     break
 
             # if the show is in our list and there hasn't been a proper already added for that particular episode then add it to our list of propers
-            if curProper.tvdbid != -1 and (curProper.tvdbid, curProper.season, curProper.episode) not in map(operator.attrgetter('tvdbid', 'season', 'episodes'), finalPropers):
+            if curProper.tvdbid != -1 and (curProper.tvdbid, curProper.season, curProper.episode) not in map(operator.attrgetter('tvdbid', 'season', 'episode'), finalPropers):
                 logger.log("Found a proper that we need: "+str(curProper.name))
                 finalPropers.append(curProper)
         
