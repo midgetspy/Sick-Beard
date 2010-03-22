@@ -981,13 +981,13 @@ class TVEpisode:
             logger.log("TVDB threw up an error: "+str(e), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
             if self.name != "" and self.airdate != datetime.date.fromordinal(1):
-                logger.log("TVDB timed out but we have enough info from other sources, allowing the error", logger.ERROR)
+                logger.log("TVDB timed out but we have enough info from other sources, allowing the error", logger.DEBUG)
                 return
             else:
                 logger.log("TVDB timed out, unable to create the episode", logger.ERROR)
                 return False
         except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-            logger.log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?")
+            logger.log("Unable to find the episode on tvdb... has it been removed? Should I delete from db?", logger.DEBUG)
             # if I'm no longer on TVDB but I once was then delete myself from the DB
             if self.tvdbid != -1:
                 self.deleteEpisode()

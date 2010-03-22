@@ -611,7 +611,7 @@ class HomeAddShows:
         # unquote it no matter what
         showDir = [os.path.normpath(urllib.unquote_plus(x)) for x in showDir]
         
-        logger.log("showDir: "+str(showDir))
+        logger.log("showDir: "+str(showDir), logger.DEBUG)
         
         myTemplate = PageTemplate(file="home_addShow.tmpl")
         myTemplate.submenu    = HomeMenu
@@ -636,7 +636,7 @@ class HomeAddShows:
                 flash['error'] = "TVDB error, unable to search for show title/info: "+str(e)
 
         curShowDir = showDir[0]
-        logger.log("curShowDir: "+curShowDir)
+        logger.log("curShowDir: "+curShowDir, logger.DEBUG)
 
         if seriesList != None:
             showIDs = seriesList.split(",")
@@ -718,7 +718,7 @@ class HomeAddShows:
         # if we have multiple IDs then let them pick
         else:
 
-            logger.log("Presenting a list of shows to the user", logger.DEBUG)
+            logger.log("Presenting a list of shows to the user: "+str(showIDs), logger.DEBUG)
             
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
