@@ -13,7 +13,8 @@ def _logHistoryItem(action, showid, season, episode, quality, resource, provider
     logDate = datetime.datetime.today().strftime(dateFormat)
     
     myDB = db.DBConnection()
-    myDB.action("INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) VALUES (?,?,?,?,?,?,?,?)", [action, logDate, showid, season, episode, quality, resource, provider])
+    myDB.action("INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) VALUES (?,?,?,?,?,?,?,?)",
+                [action, logDate, showid, season, episode, quality, resource, provider])
     
 
 def logSnatch(searchResult):
