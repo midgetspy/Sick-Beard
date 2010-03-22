@@ -8,14 +8,36 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script type="text/javascript" src="$sbRoot/js/providerOrder.js"></script>
+
 <form action="saveProviders" method="POST">
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Provider Priorities</legend>
+
+Drag the providers into the order<br />
+you want them to be searched<br />
+<br />
+<select id="provider_order_list" size="<%=len(sickbeard.providers.getAllModules())%>">
+#for $curProvider in $sickbeard.providers.getAllModules():
+<option value="$curProvider.providerName.lower()">$curProvider.providerName</option>
+#end for
+</select>
+<br />
+<input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join(sickbeard.PROVIDER_ORDER)%>">
+
+</fieldset>
+</div>
+
 
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
 
 <legend>Newzbin</legend>
 
-<input type="checkbox" name="newzbin" #if $sickbeard.NEWZBIN then "CHECKED" else ""#> <strong>Enable Newzbin</strong>
+<input type="checkbox" name="newzbin" id="newzbin_active" class="provider_active" #if $sickbeard.NEWZBIN then "CHECKED" else ""#> <strong>Enable Newzbin</strong>
 <a href="http://www.newzbin.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/newzbin.gif" alt="Newzbin" width="16" height="16"></a><br />
 Check to search Newzbin for episodes<br />
 <br />
