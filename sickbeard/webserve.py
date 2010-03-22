@@ -662,24 +662,20 @@ class HomeAddShows:
                 return _munge(myTemplate)
             except exceptions.MultipleShowObjectsException:
                 # showAdded is already false so we can pass this exception and deal with the redirect below
+                flash['error'] = "The show in "+curShowDir+" is already loaded."
                 del showDir[0]
                 pass 
 
             # if the show list is empty, go to the show page
             if len(showDir) == 0:
-                if showAdded:
-                    # if we added a show and it's loading then visit its page
-                    if curShowDir in sickbeard.loadingShowList and sickbeard.loadingShowList[curShowDir].show != None:
-                        redirect("/home/displayShow?show="+str(sickbeard.loadingShowList[curShowDir].show.tvdbid))
-                    # if we added a show but it's not loading yet then go to the home page
-                    else:
-                        time.sleep(3)
-                        redirect("/home")
-
-                # if we didn't add a show and the show list is empty it means we errored on the last show, so let the user know
+                # if we added a show and it's loading then visit its page
+                if curShowDir in sickbeard.loadingShowList and sickbeard.loadingShowList[curShowDir].show != None:
+                    redirect("/home/displayShow?show="+str(sickbeard.loadingShowList[curShowDir].show.tvdbid))
+                # if we added a show but it's not loading yet then go to the home page
                 else:
-                    return _genericMessage("Error", "The show in "+curShowDir+" is already loaded.")
-            
+                    time.sleep(3)
+                    redirect("/home")
+
             # if we have at least one show left to add then redirect
             else:
                 newCallList = [urllib.quote_plus(x) for x in showDir]
@@ -722,13 +718,36 @@ class HomeAddShows:
             
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-                myTemplate.resultList = [t[int(x)] for x in showIDs]
+                resultList = []
+                for x in showIDs:
+                    try:
+                        resultList.append(t[int(x)])
+                    except tvdb_exceptions.tvdb_exception, e:
+                        logger.log("There was some kind of error with TVDB when trying to select show "+str(x)+": "+str(e), logger.ERROR)
+                        continue
+
+                if len(resultList) == 0:
+
+                    flash['error'] = "TVDB error while trying to add the show, skipping the show in "+str(showDir[0])
+
+                    if len(showDir) > 1:
+                        del showDir[0]
+                        newCallList = [urllib.quote_plus(x) for x in showDir]
+                        logger.log("There are still shows left to add, so recursively calling myself with showDir="+str(newCallList))
+                        return self.addShow(newCallList)
+                    else:
+                        redirect("/home")
+                
+                elif len(resultList) == 1:
+                    return self.addShow(showDir, resultList[0])
+                    
+                myTemplate.resultList = resultList
                 myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
             except tvdb_exceptions.tvdb_exception, e:
                 logger.log("Error trying to search shows, skipping show: "+str(e), logger.ERROR)
-                return _genericMessage("Error", "TVDB messed up and I don't have a good way to handle this yet.")
-                #TODO: need to skip just this show and continue on
-            
+                flash['error'] = "TVDB error while trying to add shows, unable to proceed: "+str(e)
+                redirect("/home")
+              
             return _munge(myTemplate)
 
 
