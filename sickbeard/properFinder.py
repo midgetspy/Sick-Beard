@@ -28,6 +28,7 @@ from sickbeard import providers
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import search
+from sickbeard import history
 
 from sickbeard.common import *
 
@@ -139,10 +140,12 @@ class ProperFinder():
 
         for curProper in properList:
 
+            historyLimit = datetime.datetime.today() - datetime.timedelta(days=7)
+
             # make sure the episode has been downloaded before
             myDB = db.DBConnection() 
-            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action IN (?,?)",
-                        [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, common.ACTION_SNATCHED, common.ACTION_PRESNATCHED])
+            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action IN (?,?) AND date >= ?",
+                        [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, common.ACTION_SNATCHED, common.ACTION_PRESNATCHED, historyLimit.strftime(history.dateFormat)])
              
             # if we didn't download this episode in the first place we don't know what quality to use for the proper so we can't do it
             if len(historyResults) == 0:
