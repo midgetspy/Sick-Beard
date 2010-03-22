@@ -140,12 +140,12 @@ class ProperFinder():
 
         for curProper in properList:
 
-            historyLimit = datetime.datetime.today() - datetime.timedelta(days=7)
+            historyLimit = datetime.datetime.today() - datetime.timedelta(days=30)
 
             # make sure the episode has been downloaded before
             myDB = db.DBConnection() 
-            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action IN (?,?) AND date >= ?",
-                        [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, common.ACTION_SNATCHED, common.ACTION_PRESNATCHED, historyLimit.strftime(history.dateFormat)])
+            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action = ? AND date >= ?",
+                        [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, common.ACTION_SNATCHED, historyLimit.strftime(history.dateFormat)])
              
             # if we didn't download this episode in the first place we don't know what quality to use for the proper so we can't do it
             if len(historyResults) == 0:
