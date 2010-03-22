@@ -22,12 +22,13 @@ import urllib
 import urllib2
 import os.path
 import sys
+import datetime
 
 import xml.etree.cElementTree as etree
 
 import sickbeard
-import sickbeard.classes
-import sickbeard.helpers
+
+from sickbeard import helpers, classes
 
 from sickbeard import exceptions
 from sickbeard.common import *
@@ -96,36 +97,16 @@ def findEpisode (episode, forceQuality=None):
 	elif epQuality == HD:
 		quality = {"catid": 14}
 	else:
-		quality = {}
+		quality = {"type": 1}
 		
-	sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
+	sceneSearchStrings = set(helpers.makeSceneSearchString(episode))
 	
 	itemList = []
 	results = []
-		
 
 	for curString in sceneSearchStrings:
-		params = {"action": "search", "q": "^"+curString.encode('utf-8'), "dl": 1, "i": sickbeard.NZBS_UID, "h": sickbeard.NZBS_HASH, "age": sickbeard.USENET_RETENTION}
-		params.update(quality)
-		
-		searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
-	
-		logger.log("Search string: " + searchURL, logger.DEBUG)
-	
-		data = getNZBsURL(searchURL)
 
-		if data == None:
-			return []
-
-		try:
-			responseSoup = etree.ElementTree(etree.XML(data))
-			items = responseSoup.getiterator('item')
-		except Exception, e:
-			logger.log("Error trying to load NZBs.org RSS feed: "+str(e), logger.ERROR)
-			return []
-			
-		for curItem in items:
-			itemList.append(curItem)
+		itemList += _doSearch("^"+curString, quality)
 		
 		if len(itemList) > 0:
 			break
@@ -139,6 +120,44 @@ def findEpisode (episode, forceQuality=None):
 		title = item.findtext('title')
 		url = item.findtext('link')
 		
+		logger.log("Found result " + title + " at " + url, logger.DEBUG)
+		
+		result = classes.NZBSearchResult(episode)
+		result.provider = providerName.lower()
+		result.url = url 
+		result.extraInfo = [title]
+		result.quality = epQuality
+		
+		results.append(result)
+		
+	return results
+
+def _doSearch(curString, quality):
+
+	params = {"action": "search", "q": curString.encode('utf-8'), "dl": 1, "i": sickbeard.NZBS_UID, "h": sickbeard.NZBS_HASH, "age": sickbeard.USENET_RETENTION}
+	params.update(quality)
+	
+	searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
+
+	logger.log("Search string: " + searchURL, logger.DEBUG)
+
+	data = getNZBsURL(searchURL)
+
+	if data == None:
+		return []
+
+	try:
+		responseSoup = etree.ElementTree(etree.XML(data))
+		items = responseSoup.getiterator('item')
+	except Exception, e:
+		logger.log("Error trying to load NZBs.org RSS feed: "+str(e), logger.ERROR)
+		return []
+		
+	results = []
+	
+	for curItem in items:
+		title = curItem.findtext('title')
+		url = curItem.findtext('link')
 		if "subpack" in title.lower():
 			logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
 			continue
@@ -146,14 +165,21 @@ def findEpisode (episode, forceQuality=None):
 		if "&i=" not in url and "&h=" not in url:
 			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
 		
-		logger.log("Found result " + title + " at " + url, logger.DEBUG)
-		
-		result = sickbeard.classes.NZBSearchResult(episode)
-		result.provider = 'nzbs'
-		result.url = url 
-		result.extraInfo = [title]
-		result.quality = epQuality
-		
-		results.append(result)
-		
+		results.append(curItem)
+	
+	return results
+
+def findPropers(date=None):
+
+	results = []
+	
+	for curString in (".PROPER.", ".REPACK."):
+	
+		for curResult in _doSearch(curString, {"type": 1}):
+
+			resultDate = datetime.datetime.strptime(curResult.findtext('pubDate'), "%a, %d %b %Y %H:%M:%S +0000")
+			
+			if date == None or resultDate > date:
+				results.append(classes.Proper(curResult.findtext('title'), curResult.findtext('link'), resultDate))
+	
 	return results

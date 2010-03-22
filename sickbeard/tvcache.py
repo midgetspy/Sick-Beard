@@ -46,3 +46,16 @@ class TVCache():
             sql += " AND quality = "+str(quality)
         
         return myDB.select(sql)
+    
+    def listPropers(self, date=None):
+        
+        myDB = self._getDB()
+        
+        sql = "SELECT * FROM "+self.providerName+" WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
+        
+        if date != None:
+            sql += " AND time >= "+str(int(time.mktime(date.timetuple())))
+        
+        #return filter(lambda x: x['tvdbid'] != 0, myDB.select(sql))
+        return myDB.select(sql)
+

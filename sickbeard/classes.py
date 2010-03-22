@@ -98,11 +98,12 @@ class Callable:
         self.__call__ = anycallable
 
 class Proper:
-    def __init__(self, name, url, date, provider):
+    def __init__(self, name, url, date):
         self.name = name
         self.url = url
         self.date = date
-        self.provider = provider
+        self.provider = None
+        self.quality = -1
         
         self.tvdbid = -1
         self.season = -1

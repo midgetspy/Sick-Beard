@@ -30,7 +30,7 @@ import sickbeard
 
 from sickbeard.exceptions import *
 from sickbeard import logger
-from sickbeard.common import mediaExtensions, XML_NSMAP, sceneExceptions, countryList
+from sickbeard.common import *
 
 from sickbeard import db
 
@@ -381,3 +381,9 @@ def getShowImage(url, imgNum=None):
 		return None
 
 	return imgData
+
+def guessSceneEpisodeQuality(name):
+	if '720p' in name or '1080p' in name:
+		return HD
+	else:
+		return SD

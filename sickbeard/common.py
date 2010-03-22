@@ -38,6 +38,8 @@ SKIPPED = 5
 MISSED = 6
 BACKLOG = 7
 DISCBACKLOG = 8
+SNATCHED_PROPER = 9
+SNATCHED_BACKLOG = 10
 
 statusStrings = {}
 statusStrings[UNKNOWN] = "Unknown"
@@ -49,6 +51,8 @@ statusStrings[SKIPPED] = "Skipped"
 statusStrings[MISSED] = "Missed"
 statusStrings[BACKLOG] = "Backlog"
 statusStrings[DISCBACKLOG] = "Disc Backlog"
+statusStrings[SNATCHED_PROPER] = "Snatched (Proper)"
+statusStrings[SNATCHED_BACKLOG] = "Snatched (Backlog)"
 
 ### Qualities
 HD = 1

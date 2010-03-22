@@ -19,6 +19,10 @@
 from __future__ import with_statement
 
 import traceback
+
+from lib.tvnamer.utils import FileParser
+from lib.tvnamer import tvnamer_exceptions
+
 import sickbeard
 
 from common import *
@@ -49,7 +53,7 @@ def _downloadResult(result):
 		logger.log("Invalid provider type - this is a coding error, report it please", logger.ERROR)
 		return False
 
-def snatchEpisode(result):
+def snatchEpisode(result, endStatus=SNATCHED):
 
 	if result.resultType == "nzb":
 		if sickbeard.NZB_METHOD == "blackhole":
@@ -74,12 +78,12 @@ def snatchEpisode(result):
 	notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
 	
 	with result.episode.lock:
-		if result.predownloaded == False:
-			logger.log("changing status from " + str(result.episode.status) + " to " + str(SNATCHED), logger.DEBUG)
-			result.episode.status = SNATCHED
-		elif result.predownloaded == True:
+		if result.predownloaded == True:
 			logger.log("changing status from " + str(result.episode.status) + " to " + str(PREDOWNLOADED), logger.DEBUG)
 			result.episode.status = PREDOWNLOADED
+		else:
+			logger.log("changing status from " + str(result.episode.status) + " to " + str(endStatus), logger.DEBUG)
+			result.episode.status = endStatus
 		result.episode.saveToDB()
 
 	sickbeard.updateMissingList()

@@ -286,11 +286,16 @@ def doIt(downloaderDir, nzbName=None):
         existingResult = _checkForExistingFile(rootEp.location, biggest_file)
         if existingResult == -1:
             existingResult = -2
+        if existingResult == 1:
+            existingResult = 2
     
-    # see if the existing file is bigger - if it is, bail
-    if existingResult == 1:
-        returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
-        return returnStr
+    # see if the existing file is bigger - if it is, bail (unless it's a proper in which case we're forcing an overwrite)
+    if existingResult > 0:
+        if rootEp.status == SNATCHED_PROPER:
+            returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
+        else:
+            returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
+            return returnStr
         
     # if the dir doesn't exist (new season folder) then make it
     if not os.path.isdir(destDir):
@@ -312,14 +317,19 @@ def doIt(downloaderDir, nzbName=None):
         return returnStr
 
     # if the file existed and was smaller then lets delete it
-    if existingResult < 0:
-        if existingResult == -1:
-            existingFile = newFile
-        elif existingResult == -2:
+    # OR if the file existed, was bigger, but we want to replace it anyway cause it's a PROPER snatch
+    if existingResult < 0 or (existingResult > 0 and rootEp.status == SNATCHED_PROPER):
+        # if we're deleting a file with a different name then just go ahead
+        if existingResult in (-2, 2):
             existingFile = rootEp.location
-        
-        returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
-        os.remove(existingFile)
+            if rootEp.status == SNATCHED_PROPER:
+                returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
+            else:
+                returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
+            os.remove(existingFile)
+            #TODO: delete old metadata
+            
+            
 
     curFile = os.path.join(destDir, biggestFileName)
 

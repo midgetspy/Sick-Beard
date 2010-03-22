@@ -30,8 +30,7 @@ from lib.tvnamer import tvnamer_exceptions
 import xml.etree.cElementTree as etree
 
 import sickbeard
-import sickbeard.classes
-from sickbeard import helpers
+from sickbeard import helpers, classes
 from sickbeard import db
 from sickbeard import tvcache
 from sickbeard import exceptions
@@ -109,7 +108,7 @@ def findEpisode (episode, forceQuality=None):
 	
 		logger.log("Found result " + title + " at " + url)
 
-		result = sickbeard.classes.NZBSearchResult(episode)
+		result = classes.NZBSearchResult(episode)
 		result.provider = 'tvnzb'
 		result.url = url 
 		result.extraInfo = [title]
@@ -119,6 +118,12 @@ def findEpisode (episode, forceQuality=None):
 
 	return nzbResults
 		
+def findPropers(date=None):
+
+	results = TVNZBCache().listPropers(date)
+	
+	return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
+	
 
 class TVNZBDBConnection(db.DBConnection):
 

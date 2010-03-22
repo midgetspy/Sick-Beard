@@ -30,8 +30,8 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere 
 from providers import eztv, nzbs, nzbmatrix, newzbin, tvnzb, tvbinz
 
-from sickbeard import searchCurrent, searchBacklog, showUpdater
-from sickbeard import helpers, db, exceptions, queue, scheduler, versionChecker
+from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder
+from sickbeard import helpers, db, exceptions, queue, scheduler
 #from sickbeard import showAdder, updateShows
 from sickbeard import logger
 
@@ -48,6 +48,7 @@ currentSearchScheduler = None
 showUpdateScheduler = None
 versionCheckScheduler = None
 showQueueScheduler = None
+properFinderScheduler = None
 
 showList = None
 loadingShowList = None
@@ -242,7 +243,7 @@ def initialize():
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
-                RENAME_EPISODES
+                RENAME_EPISODES, properFinderScheduler
 
         
         if __INITIALIZED__:
@@ -382,7 +383,7 @@ def initialize():
         showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
                                                cycleTime=showUpdaterInstance.updateInterval,
                                                threadName="SHOWUPDATER",
-                                               runImmediately=True)
+                                               runImmediately=False)
 
         versionCheckScheduler = scheduler.Scheduler(versionChecker.CheckVersion(),
                                                      cycleTime=datetime.timedelta(hours=12),
@@ -393,6 +394,12 @@ def initialize():
                                                cycleTime=datetime.timedelta(seconds=3),
                                                threadName="SHOWQUEUE",
                                                silent=True)
+
+        properFinderInstance = properFinder.ProperFinder()
+        properFinderScheduler = scheduler.Scheduler(properFinderInstance,
+                                                     cycleTime=properFinderInstance.updateInterval,
+                                                     threadName="FINDPROPERS",
+                                                     runImmediately=False)
         
         
         showList = []
@@ -408,7 +415,8 @@ def initialize():
 def start():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
-            showUpdateScheduler, versionCheckScheduler, showQueueScheduler
+            showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
+            properFinderScheduler
     
     with INIT_LOCK:
         
@@ -429,11 +437,14 @@ def start():
             # start the queue checker
             showQueueScheduler.thread.start()
 
+            # start the queue checker
+            properFinderScheduler.thread.start()
+
 
 def halt ():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
-            showQueueScheduler
+            showQueueScheduler, properFinderScheduler
     
     with INIT_LOCK:
         
@@ -477,6 +488,14 @@ def halt ():
                 showQueueScheduler.thread.join(10)
             except:
                 pass
+            
+            properFinderScheduler.abort = True
+            logger.log("Waiting for the PROPERFINDER thread to exit")
+            try:
+                properFinderScheduler.thread.join(10)
+            except:
+                pass
+            
             
             __INITIALIZED__ = False
 

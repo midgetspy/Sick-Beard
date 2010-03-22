@@ -29,8 +29,7 @@ import datetime
 import xml.etree.cElementTree as etree
 
 import sickbeard
-import sickbeard.classes
-from sickbeard import helpers
+from sickbeard import helpers, classes
 from sickbeard import db
 from sickbeard import tvcache
 from sickbeard import exceptions
@@ -115,7 +114,7 @@ def findEpisode (episode, forceQuality=None):
 	
 		logger.log("Found result " + title + " at " + url)
 
-		result = sickbeard.classes.NZBSearchResult(episode)
+		result = classes.NZBSearchResult(episode)
 		result.provider = 'tvbinz'
 		result.url = url + "&" + urllib.urlencode(urlParams) 
 		result.extraInfo = [title]
@@ -125,6 +124,13 @@ def findEpisode (episode, forceQuality=None):
 
 	return nzbResults
 		
+
+def findPropers(date=None):
+
+	results = TVBinzCache().listPropers(date)
+	
+	return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
+	
 
 class TVBinzDBConnection(db.DBConnection):
 
@@ -145,7 +151,7 @@ class TVBinzCache(tvcache.TVCache):
 	
 	def __init__(self):
 
-		# only poll TVBinz every 10 minutes
+		# only poll TVBinz every 10 minutes max
 		self.minTime = 10
 		
 		tvcache.TVCache.__init__(self, "tvbinz")

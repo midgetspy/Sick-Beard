@@ -205,3 +205,6 @@ def findEpisode(episode, forceQuality=None):
 	
 	return results
 
+
+def findPropers(date=None):
+	return []

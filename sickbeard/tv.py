@@ -505,10 +505,10 @@ class TVShow(object):
             else:
                 rootEp.relatedEps.append(curEp)
 
-            if sickbeard.helpers.isMediaFile(file):
+            if sickbeard.helpers.isMediaFile(file) and curEp.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG):
                 with curEp.lock:
+                    logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(DOWNLOADED), logger.DEBUG)
                     curEp.status = DOWNLOADED
-                    logger.log("STATUS: we have an associated file, so setting the status to DOWNLOADED/" + str(DOWNLOADED), logger.DEBUG)
                         
             with curEp.lock:
                 curEp.saveToDB()
@@ -1039,11 +1039,10 @@ class TVEpisode:
         if not os.path.isfile(self.location):
 
             # if we don't have the file
-            if self.status != SNATCHED and self.status != PREDOWNLOADED:
+            if self.airdate >= datetime.date.today() and self.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG, PREDOWNLOADED):
                 # and it hasn't aired yet set the status to UNAIRED
-                if self.airdate >= datetime.date.today():
-                    logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
-                    self.status = UNAIRED
+                logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
+                self.status = UNAIRED
             else:
                 if self.status == UNAIRED:
                     self.status = MISSED
@@ -1054,8 +1053,9 @@ class TVEpisode:
 
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
-            logger.log("5 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
-            self.status = DOWNLOADED
+            if self.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG):
+                logger.log("5 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
+                self.status = DOWNLOADED
 
         # shouldn't get here probably
         else:

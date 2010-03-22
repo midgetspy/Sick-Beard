@@ -126,3 +126,6 @@ def findEpisode(episode, forceQuality=None):
     results.sort(lambda x,y: cmp(y.extraInfo[1], x.extraInfo[1]))
         
     return results
+
+def findPropers(date=None):
+    return []
