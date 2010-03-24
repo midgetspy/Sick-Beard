@@ -885,12 +885,12 @@ class TVEpisode:
         
         # check for nfo and tbn
         if os.path.isfile(self.location.encode('utf-8')):
-            if os.path.isfile(os.path.join(self.show.location.encode('utf-8'), helpers.replaceExtension(self.location, 'nfo'))):
+            if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'nfo')).encode('utf-8')):
                 self.hasnfo = True
             else:
                 self.hasnfo = False
                 
-            if os.path.isfile(os.path.join(self.show.location.encode('utf-8'), helpers.replaceExtension(self.location, 'tbn'))):
+            if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'tbn')).encode('utf-8')):
                 self.hastbn = True
             else:
                 self.hastbn = False
@@ -903,7 +903,7 @@ class TVEpisode:
         sqlResult = self.loadFromDB(season, episode)
         
         # only load from NFO if we didn't load from DB
-        if os.path.isfile(self.location) and self.name == "":
+        if os.path.isfile(self.location.encode('utf-8')) and self.name == "":
             try:
                 self.loadFromNFO(self.location)
             except exceptions.NoNFOException:
@@ -1036,7 +1036,7 @@ class TVEpisode:
 
         logger.log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + statusStrings[self.status] + " and existence of " + self.location, logger.DEBUG)
         
-        if not os.path.isfile(self.location):
+        if not os.path.isfile(self.location.encode('utf-8')):
 
             # if we don't have the file
             if self.airdate >= datetime.date.today() and self.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG, PREDOWNLOADED):
@@ -1086,13 +1086,13 @@ class TVEpisode:
             nfoFile = sickbeard.helpers.replaceExtension(self.location, "nfo")
             logger.log(str(self.show.tvdbid) + ": Using NFO name " + nfoFile, logger.DEBUG)
             
-            if os.path.isfile(nfoFile):
+            if os.path.isfile(nfoFile.encode('utf-8')):
                 try:
                     showXML = etree.ElementTree(file = nfoFile)
                 except (SyntaxError, ValueError), e:
                     logger.log("Error loading the NFO, backing up the NFO and skipping for now: " + str(e), logger.ERROR) #TODO: figure out what's wrong and fix it
                     try:
-                        os.rename(nfoFile, nfoFile + ".old")
+                        os.rename(nfoFile.encode('utf-8'), nfoFile.encode('utf-8') + ".old")
                     except Exception, e:
                         logger.log("Failed to rename your episode's NFO file - you need to delete it or fix it: " + str(e), logger.ERROR)
                     raise exceptions.NoNFOException("Error in NFO format")
@@ -1120,7 +1120,7 @@ class TVEpisode:
             else:
                 self.hasnfo = False
             
-            if os.path.isfile(sickbeard.helpers.replaceExtension(nfoFile, "tbn")):
+            if os.path.isfile(sickbeard.helpers.replaceExtension(nfoFile, "tbn").encode('utf-8')):
                 self.hastbn = True
             else:
                 self.hastbn = False
@@ -1295,7 +1295,7 @@ class TVEpisode:
             helpers.indentXML( rootNode )
 
             nfo = etree.ElementTree( rootNode )
-            nfo_fh = open(os.path.join(self.show.location, nfoFilename), 'w')
+            nfo_fh = open(os.path.join(self.show.location, nfoFilename.encode('utf-8')), 'w')
             nfo.write( nfo_fh, encoding="utf-8" ) 
             nfo_fh.close()
             
@@ -1306,7 +1306,7 @@ class TVEpisode:
 
         if not self.hastbn or force:
             if thumbFilename != None:
-                if os.path.isfile(self.location):
+                if os.path.isfile(self.location.encode('utf-8')):
                     tbnFilename = helpers.replaceExtension(self.location, 'tbn')
                 else:
                     tbnFilename = helpers.sanitizeFileName(self.prettyName() + '.tbn')
