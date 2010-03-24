@@ -788,7 +788,7 @@ class TVShow(object):
                     for relEp in rootEp.relatedEps:
                         relEp.location = result
             
-            fileList = glob.glob(os.path.join(curEpDir, actualName[0] + "*").replace("[","*").replace("]","*").encode('utf-8'))
+            fileList = helpers.fixListEncodings(glob.glob(os.path.join(curEpDir, actualName[0] + "*").replace("[","*").replace("]","*").encode('utf-8')))
 
             for file in fileList:
                 result = processTV.renameFile(file, rootEp.prettyName())
