@@ -713,7 +713,7 @@ class TVShow(object):
             # or if there's no season folders and it's not inside our show dir 
             # or if there are season folders and it's in the main dir:
             # or if it's not in our show dir at all
-            if not os.path.isfile(curLoc) or \
+            if not os.path.isfile(curLoc.encode('utf-8')) or \
             (not self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) != os.path.normpath(self.location)) or \
             (self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) == os.path.normpath(self.location)) or \
             os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
