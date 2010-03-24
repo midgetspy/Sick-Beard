@@ -88,7 +88,7 @@ class TVShow(object):
             else:
                 raise exceptions.NoNFOException("Show folder doesn't exist")
         
-        elif not os.path.isfile(os.path.join(self._location, "tvshow.nfo")):
+        elif not os.path.isfile(os.path.join(self._location, "tvshow.nfo").encode('utf-8')):
             
             raise exceptions.NoNFOException("No NFO found in show dir")
         
@@ -117,7 +117,7 @@ class TVShow(object):
     
     
     def _getLocation(self):
-        if os.path.isdir(self._location):
+        if os.path.isdir(self._location.encode('utf-8')):
             return self._location
         else:
             raise exceptions.ShowDirNotFoundException("Show folder doesn't exist, you shouldn't be using it")
@@ -129,7 +129,7 @@ class TVShow(object):
 
     def _setLocation(self, newLocation):
         logger.log("Setter sets location to " + newLocation)
-        if os.path.isdir(newLocation) and os.path.isfile(os.path.join(newLocation, "tvshow.nfo")):
+        if os.path.isdir(newLocation.encode('utf-8')) and os.path.isfile(os.path.join(newLocation, "tvshow.nfo").encode('utf-8')):
             self._location = newLocation
             self._isDirGood = True
         else:
@@ -352,7 +352,7 @@ class TVShow(object):
         posterURL = myShow['poster']
 
         # get the image data
-        if not os.path.isfile(os.path.join(self.location, "fanart.jpg")):
+        if not os.path.isfile(os.path.join(self.location, "fanart.jpg").encode('utf-8')):
             fanartData = None
             if fanart != None:
                 fanartData = helpers.getShowImage(fanartURL, fanart)
@@ -365,14 +365,14 @@ class TVShow(object):
                 logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
             else:
                 try:
-                    outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
+                    outFile = open(os.path.join(self.location, "fanart.jpg").encode('utf-8'), 'wb')
                     outFile.write(fanartData)
                     outFile.close()
                 except IOError, e:
                     logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
         
         # get the image data
-        if not os.path.isfile(os.path.join(self.location, "folder.jpg")):
+        if not os.path.isfile(os.path.join(self.location, "folder.jpg").encode('utf-8')):
             posterData = None
             if poster != None:
                 posterData = helpers.getShowImage(posterURL, poster)
@@ -428,7 +428,7 @@ class TVShow(object):
                     seasonFileName = 'season' + seasonNum.zfill(2) 
             
                 # Let's do the check before we pull the file 
-                if not os.path.isfile(os.path.join(self.location, seasonFileName+'.tbn')):
+                if not os.path.isfile(os.path.join(self.location, seasonFileName+'.tbn').encode('utf-8')):
 
                     seasonData = helpers.getShowImage(seasonURL) 
             
@@ -464,7 +464,7 @@ class TVShow(object):
     # make a TVEpisode object from a media file
     def makeEpFromFile(self, file):
 
-        if not os.path.isfile(file):
+        if not os.path.isfile(file.encode('utf-8')):
             logger.log(str(self.tvdbid) + ": That isn't even a real file dude... " + file)
             return None
 
@@ -1284,7 +1284,7 @@ class TVEpisode:
                 if cur_actor_thumb_text != None:
                     cur_actor_thumb.text = cur_actor_thumb_text
                     
-            if os.path.isfile(self.location):
+            if os.path.isfile(self.location.encode('utf-8')):
                 nfoFilename = helpers.replaceExtension(self.location, 'nfo')
             else:
                 nfoFilename = helpers.sanitizeFileName(self.prettyName() + '.nfo')
