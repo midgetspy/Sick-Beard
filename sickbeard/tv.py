@@ -1312,7 +1312,7 @@ class TVEpisode:
                     tbnFilename = helpers.sanitizeFileName(self.prettyName() + '.tbn')
                 logger.log('Writing thumb to ' + os.path.join(self.show.location, tbnFilename))
                 try:
-                    urllib.urlretrieve(thumbFilename, os.path.join(self.show.location, tbnFilename))
+                    urllib.urlretrieve(thumbFilename, os.path.join(self.show.location, tbnFilename).encode('utf-8'))
                 except IOError:
                     logger.log("Unable to download thumbnail from "+thumbFilename, logger.ERROR)
                     return
