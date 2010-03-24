@@ -17,21 +17,33 @@ Features include:
 
 
 Sick Beard makes use of the following projects:
-* [cherrypy][http://www.cherrypy.org]
-* [http://www.cheetahtemplate.org/][Cheetah]
-* [http://code.google.com/p/simplejson/][simplejson]
-* [http://github.com/dbr/tvdb_api][tvdb_api]
-* [http://github.com/dbr/tvnamer][tvnamer]
-* [http://www.voidspace.org.uk/python/configobj.html][ConfigObj]
-* [http://www.sabnzbd.org/][SABnzbd+]
-* [http://jquery.com][jQuery]
-* [http://github.com/kfdm/gntp][Python GNTP]
-
+* [cherrypy][cherrypy]
+* [Cheetah][cheetah]
+* [simplejson][simplejson]
+* [tvdb_api][tvdb_api]
+* [tvnamer][tvnamer]
+* [ConfigObj][configobj]
+* [SABnzbd+][sabnzbd]
+* [jQuery][jquery]
+* [Python GNTP][pythongntp]
 
 ## Dependencies
 
-To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+. The [http://code.google.com/p/sickbeard/downloads/list][binary releases] are standalone.
+To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+. The [binary releases][googledownloads] are standalone.
 
 ## Bugs
 
-If you find a bug please report it or it'll never get fixed. Verify that it hasn't [http://code.google.com/p/sickbeard/issues/list][already been submitted] and then [http://code.google.com/p/sickbeard/issues/entry][log a new bug]. Be sure to provide as much information as possible.
+If you find a bug please report it or it'll never get fixed. Verify that it hasn't [already been submitted][googleissues] and then [log a new bug][googlenewissue]. Be sure to provide as much information as possible.
+
+[cherrypy]: http://www.cherrypy.org
+[cheetah]: http://www.cheetahtemplate.org/
+[simplejson]: http://code.google.com/p/simplejson/ 
+[tvdb_api]: http://github.com/dbr/tvdb_api
+[tvnamer]: http://github.com/dbr/tvnamer
+[configobj]: http://www.voidspace.org.uk/python/configobj.html
+[sabnzbd]: http://www.sabnzbd.org/
+[jquery]: http://jquery.com
+[pythongntp]: http://github.com/kfdm/gntp
+[googledownloads]: http://code.google.com/p/sickbeard/downloads/list
+[googleissues]: http://code.google.com/p/sickbeard/issues/list
+[googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
