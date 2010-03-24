@@ -30,6 +30,7 @@ import time
 import signal
 import sqlite3
 import traceback
+import getopt
 
 import sickbeard
 
@@ -67,14 +68,31 @@ def loadShowsFromDB():
 def main():
 
 	# do some preliminary stuff
-	sickbeard.PROG_DIR = os.path.dirname(os.path.normpath(os.path.abspath(sys.argv[0])))
+	sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(sys.argv[0]))
+	sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
+	sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
 
 	config_file = os.path.join(sickbeard.PROG_DIR, "config.ini")
 
+	# need console logging for SickBeard.py and SickBeard-console.exe
+	consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
+
 	# rename the main thread
 	threading.currentThread().name = "MAIN"
+
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "q", ['quiet'])
+	except getopt.GetoptError:
+		print "Available options: --quiet"
+		sys.exit()
 	
-	print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
+	for o, a in opts:
+		# for now we'll just silence the logging
+		if (o in ('-q', '--quiet')):
+			consoleLogging = False
+	
+	if consoleLogging:
+		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
 	
 	# load the config and publish it to the sickbeard package
 	if not os.path.isfile(config_file):
@@ -83,7 +101,7 @@ def main():
 	sickbeard.CFG = ConfigObj(config_file)
 
 	# initialize the config and our threads
-	sickbeard.initialize()
+	sickbeard.initialize(consoleLogging=consoleLogging)
 
 	sickbeard.showList = []
 

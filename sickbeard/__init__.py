@@ -41,7 +41,10 @@ from sickbeard.common import *
 SOCKET_TIMEOUT = 30
 
 CFG = None
+
 PROG_DIR = None
+MY_FULLNAME = None
+MY_NAME = None
 
 backlogSearchScheduler = None
 currentSearchScheduler = None
@@ -224,7 +227,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     return my_val
 
 
-def initialize():
+def initialize(consoleLogging=True):
     
     with INIT_LOCK:
         
@@ -363,7 +366,7 @@ def initialize():
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
         
-        logger.initLogging()
+        logger.initLogging(consoleLogging=consoleLogging)
 
         dbSetup.upgradeDatabase(db.DBConnection())
 

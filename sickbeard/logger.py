@@ -38,7 +38,7 @@ MESSAGE = 1
 DEBUG = 0
 
 
-def initLogging():
+def initLogging(consoleLogging=True):
             
     fileHandler = logging.handlers.RotatingFileHandler(
                   os.path.join(sickbeard.LOG_DIR, 'sickbeard.log'), maxBytes=25000000, backupCount=5)
@@ -49,15 +49,17 @@ def initLogging():
     logging.getLogger('sickbeard').addHandler(fileHandler)
     
     # define a Handler which writes INFO messages or higher to the sys.stderr
-    console = logging.StreamHandler()
+    if consoleLogging:
+        console = logging.StreamHandler()
+        
+        console.setLevel(logging.INFO)
     
-    console.setLevel(logging.INFO)
+        # set a format which is simpler for console use
+        console.setFormatter(logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'))
+    
+        # add the handler to the root logger
+        logging.getLogger('sickbeard').addHandler(console)
 
-    # set a format which is simpler for console use
-    console.setFormatter(logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'))
-
-    # add the handler to the root logger
-    logging.getLogger('sickbeard').addHandler(console)
     logging.getLogger('sickbeard').setLevel(logging.DEBUG)
     
 def log(toLog, logLevel=MESSAGE):
