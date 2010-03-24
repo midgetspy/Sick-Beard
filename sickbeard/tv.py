@@ -884,13 +884,13 @@ class TVEpisode:
         oldhastbn = self.hastbn
         
         # check for nfo and tbn
-        if os.path.isfile(self.location):
-            if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'nfo'))):
+        if os.path.isfile(self.location.encode('utf-8')):
+            if os.path.isfile(os.path.join(self.show.location.encode('utf-8'), helpers.replaceExtension(self.location, 'nfo'))):
                 self.hasnfo = True
             else:
                 self.hasnfo = False
                 
-            if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'tbn'))):
+            if os.path.isfile(os.path.join(self.show.location.encode('utf-8'), helpers.replaceExtension(self.location, 'tbn'))):
                 self.hastbn = True
             else:
                 self.hastbn = False
