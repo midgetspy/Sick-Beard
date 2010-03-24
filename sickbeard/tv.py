@@ -208,7 +208,7 @@ class TVShow(object):
             files = helpers.fixListEncodings(os.listdir(unicode(self._location)))
         else:
             for curFile in helpers.fixListEncodings(os.listdir(unicode(self._location))):
-                if not os.path.isdir(os.path.join(self._location, curFile)):
+                if not os.path.isdir(os.path.join(self._location, curFile).encode('utf-8')):
                     continue
                 match = re.match("[Ss]eason\s*(\d+)", curFile)
                 if match != None:
