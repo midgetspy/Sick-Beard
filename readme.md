@@ -17,7 +17,7 @@ Features include:
 
 
 Sick Beard makes use of the following projects:
-* [http://www.cherrypy.org][cherrypy]
+* [cherrypy][http://www.cherrypy.org]
 * [http://www.cheetahtemplate.org/][Cheetah]
 * [http://code.google.com/p/simplejson/][simplejson]
 * [http://github.com/dbr/tvdb_api][tvdb_api]
