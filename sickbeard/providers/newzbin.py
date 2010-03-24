@@ -104,9 +104,9 @@ def findEpisode(episode, forceQuality=None):
 		# don't allow subtitles for SD content cause they'll probably be hard subs
 		qualAttrs += "NOT (Attr:SubtitledLanguage~French OR Attr:SubtitledLanguage~Spanish OR Attr:SubtitledLanguage~German OR Attr:SubtitledLanguage~Italian OR Attr:SubtitledLanguage~Danish OR Attr:SubtitledLanguage~Dutch OR Attr:SubtitledLanguage~Japanese OR Attr:SubtitledLanguage~Chinese OR Attr:SubtitledLanguage~Korean OR Attr:SubtitledLanguage~Russian OR Attr:SubtitledLanguage~Polish OR Attr:SubtitledLanguage~Vietnamese OR Attr:SubtitledLanguage~Swedish OR Attr:SubtitledLanguage~Norwegian OR Attr:SubtitledLanguage~Finnish OR Attr:SubtitledLanguage~Turkish) "
 	elif epQuality == HD:
-		qualAttrs = "Attr:VideoF~x264 Attr:VideoF~720p "
+		qualAttrs = "(Attr:VideoF~x264 OR Attr:VideoF~H.264) Attr:VideoF~720p "
 	else:
-		qualAttrs = "(Attr:VideoF~x264 OR Attr:VideoF~XviD OR Attr:VideoF~DivX) "
+		qualAttrs = "(Attr:VideoF~x264 OR Attr:VideoF~H.264 OR Attr:VideoF~XviD OR Attr:VideoF~DivX) "
 
 	# require english for now
 	qualAttrs += "Attr:Lang=Eng "
