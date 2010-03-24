@@ -205,14 +205,14 @@ class TVShow(object):
         # get file list
         files = []
         if not self.seasonfolders:
-            files = os.listdir(unicode(self._location))
+            files = helpers.fixListEncodings(os.listdir(unicode(self._location)))
         else:
-            for curFile in os.listdir(unicode(self._location)):
+            for curFile in helpers.fixListEncodings(os.listdir(unicode(self._location))):
                 if not os.path.isdir(os.path.join(self._location, curFile)):
                     continue
                 match = re.match("[Ss]eason\s*(\d+)", curFile)
                 if match != None:
-                    files += [os.path.join(curFile, x) for x in os.listdir(unicode(os.path.join(self._location, curFile)))]
+                    files += [os.path.join(curFile, x) for x in helpers.fixListEncodings(os.listdir(unicode(os.path.join(self._location, curFile))))]
 
         # check for season folders
         #logger.log("Resulting file list: "+str(files))

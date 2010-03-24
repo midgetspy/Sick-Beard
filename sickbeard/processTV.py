@@ -55,7 +55,7 @@ def renameFile(curFile, newName):
     logger.log("Renaming from " + curFile + " to " + newFilename)
 
     try:
-        os.rename(curFile, newFilename)
+        os.rename(curFile, newFilename.encode('utf-8'))
     except (OSError, IOError), e:
         logger.log("Failed renaming " + curFile + " to " + os.path.basename(newFilename) + ": " + str(e), logger.ERROR)
         return False
