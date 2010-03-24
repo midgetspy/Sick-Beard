@@ -17,6 +17,7 @@ Features include:
 
 
 Sick Beard makes use of the following projects:
+
 * [cherrypy][cherrypy]
 * [Cheetah][cheetah]
 * [simplejson][simplejson]
