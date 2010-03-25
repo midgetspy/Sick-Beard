@@ -384,7 +384,7 @@ class ConfigProviders:
     def saveProviders(self, newzbin=None, newzbin_username=None, newzbin_password=None, tvbinz=None,
                    tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None, nzbs_hash=None,
                    nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None, tvnzb=None,
-                   tvbinz_auth=None, tvbinz_sabuid=None):
+                   tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None):
 
         results = []
 
@@ -432,6 +432,8 @@ class ConfigProviders:
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey
         
         sickbeard.TVNZB = tvnzb
+        
+        sickbeard.PROVIDER_ORDER = provider_order.split()
         
         sickbeard.save_config()
         
