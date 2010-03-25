@@ -36,22 +36,3 @@ $(document).ready(function(){
   });
   
 });
-
-$(function(){
-        $('body').append('<div id="tooltip" />');
-        $('.plotInfo').tooltip(
-        {
-                position:     'bottom right',
-                delay:        100,
-                effect:       'fade',
-                tip:          '#tooltip',
-                onBeforeShow: function(e) {
-                        match = this.getTrigger().attr("id").match(/^plot_info_(\d+)_(\d+)$/);
-                        $('#tooltip').html($.ajax({
-                                async:   false,
-                                data:    { show: $('#showID').attr('value'), episode: match[2], season: match[1] },
-                                url:     'plotDetails'
-                        }).responseText);
-                }
-        })
-})

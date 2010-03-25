@@ -41,7 +41,10 @@ from sickbeard.common import *
 SOCKET_TIMEOUT = 30
 
 CFG = None
+
 PROG_DIR = None
+MY_FULLNAME = None
+MY_NAME = None
 
 backlogSearchScheduler = None
 currentSearchScheduler = None
@@ -76,6 +79,7 @@ CACHE_DIR = None
 
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_DEFAULT = None
+PROVIDER_ORDER = None
 
 NAMING_SHOW_NAME = None
 NAMING_EP_TYPE = None
@@ -224,7 +228,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     return my_val
 
 
-def initialize():
+def initialize(consoleLogging=True):
     
     with INIT_LOCK:
         
@@ -243,7 +247,7 @@ def initialize():
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
-                RENAME_EPISODES, properFinderScheduler
+                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER
 
         
         if __INITIALIZED__:
@@ -294,6 +298,8 @@ def initialize():
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
+
+        PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
         NAMING_SHOW_NAME = bool(check_setting_int(CFG, 'General', 'naming_show_name', 1))
         NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
@@ -363,7 +369,7 @@ def initialize():
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
         
-        logger.initLogging()
+        logger.initLogging(consoleLogging=consoleLogging)
 
         dbSetup.upgradeDatabase(db.DBConnection())
 
@@ -542,7 +548,7 @@ def save_config():
         QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
         NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
         PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB, TVBINZ_AUTH, TVBINZ_SABUID, \
-        NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES
+        NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES, PROVIDER_ORDER
 
 
         
@@ -559,6 +565,7 @@ def save_config():
     CFG['General']['use_nzb'] = int(USE_NZB)
     CFG['General']['quality_default'] = int(QUALITY_DEFAULT)
     CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
+    CFG['General']['provider_order'] = ' '.join(PROVIDER_ORDER)
     CFG['General']['version_notify'] = int(VERSION_NOTIFY)
     CFG['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
     CFG['General']['naming_ep_type'] = int(NAMING_EP_TYPE)

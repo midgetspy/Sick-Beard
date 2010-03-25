@@ -238,19 +238,19 @@ class QueueItemAdd(QueueItem):
             
         except tvdb_exceptions.tvdb_exception, e:
             logger.log("Unable to add show due to an error with TVDB: "+str(e), logger.ERROR)
-            webserve.flash['error'] = "Unable to add "+str(self.initialShow.name)+" due to an error with TVDB"
+            webserve.flash.error("Unable to add "+str(self.initialShow.name)+" due to an error with TVDB")
             self._finishEarly()
             return
             
         except exceptions.NoNFOException:
             logger.log("Unable to load show from NFO", logger.ERROR)
-            webserve.flash['error'] = "Unable to add "+str(self.initialShow.name)+" from NFO, skipping"
+            webserve.flash.error("Unable to add "+str(self.initialShow.name)+" from NFO, skipping")
             self._finishEarly()
             return
             
         except exceptions.ShowNotFoundException:
             logger.log("The show in " + self.showDir + " couldn't be found on theTVDB, skipping", logger.ERROR)
-            webserve.flash['message'] = "The show in " + self.showDir + " couldn't be found on theTVDB, skipping"
+            webserve.flash.message("The show in " + self.showDir + " couldn't be found on theTVDB, skipping")
             self._finishEarly()
             return
     
