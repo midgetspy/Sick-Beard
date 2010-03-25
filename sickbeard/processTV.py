@@ -32,6 +32,8 @@ from sickbeard import db
 from sickbeard import history
 from sickbeard import classes
 
+from sickbeard import encodingKludge as ek
+
 from sickbeard import logger
 from sickbeard.common import *
 
@@ -55,7 +57,7 @@ def renameFile(curFile, newName):
     logger.log("Renaming from " + curFile + " to " + newFilename)
 
     try:
-        os.rename(curFile.encode('utf-8'), newFilename.encode('utf-8'))
+        ek.ek(os.rename, curFile, newFilename)
     except (OSError, IOError), e:
         logger.log("Failed renaming " + curFile + " to " + os.path.basename(newFilename) + ": " + str(e), logger.ERROR)
         return False

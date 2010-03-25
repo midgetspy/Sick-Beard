@@ -388,23 +388,3 @@ def guessSceneEpisodeQuality(name):
 	else:
 		return SD
 
-def fixStupidEncodings(x):
-	if type(x) == str:
-		try:
-			return x.decode('utf-8')
-		except UnicodeDecodeError:
-			logger.log("Unable to decode value: "+str(repr(x)), logger.ERROR)
-			return None
-	elif type(x) == unicode:
-		return x
-	else:
-		logger.log("Unknown value passed in, ignoring it: "+str(type(x)), logger.ERROR)
-		return None
-
-	return None
-	
-def fixListEncodings(x):
-	if type(x) != list:
-		return x
-	else:
-		return filter(lambda x: x != None, map(fixStupidEncodings, x))
