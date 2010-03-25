@@ -49,23 +49,24 @@ from sickbeard import browser
 
 
 class Flash:
-    store = {}
+    _messages = []
+    _errors = []
 
-    def __init__(self):
-        self.localstore = {}
+    def message(self, title, detail=''):
+        Flash._messages.append((title, detail))
 
-    def __getitem__(self, key):
-        if key in self.store:
-            value = self.store[key]
-            self.localstore[key] = value
-            del self.store[key]
-        if key in self.localstore:
-            return self.localstore[key]
-        else:
-            return None
+    def error(self, title, detail=''):
+        Flash._errors.append((title, detail))
 
-    def __setitem__(self, key, value):
-        self.store[key] = value
+    def messages(self):
+        tempMessages = Flash._messages
+        Flash._messages = []
+        return tempMessages
+
+    def errors(self):
+        tempErrors = Flash._errors
+        Flash._errors = []
+        return tempErrors
 
 flash = Flash()
 
@@ -152,8 +153,8 @@ class Backlog:
         # force it to run the next time it looks
         sickbeard.backlogSearchScheduler.forceSearch()
         logger.log("Backlog set to run in background")
-        flash['message']        = 'Backlog search started'
-        flash['message-detail'] = 'The backlog search has begun and will run in the background'
+        flash.message('Backlog search started',
+                      'The backlog search has begun and will run in the background')
         
         redirect("/backlog")
 
@@ -184,7 +185,7 @@ class History:
         
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
-        flash['message'] = 'History cleared'
+        flash.message('History cleared')
         redirect("/history")
 
 
@@ -193,7 +194,7 @@ class History:
         
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
-        flash['message'] = 'Removed all history entries greater than 30 days old'
+        flash.message('Removed all history entries greater than 30 days old')
         redirect("/history")
 
 
@@ -276,10 +277,10 @@ class ConfigGeneral:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            flash['error']        = 'Error(s) Saving Configuration'
-            flash['error-detail'] = "<br />\n".join(results)
+            flash.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
         else:
-            flash['message'] = 'Configuration Saved'
+            flash.message('Configuration Saved')
         
         redirect("/config/index")
 
@@ -364,10 +365,10 @@ class ConfigEpisodeDownloads:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            flash['error']        = 'Error(s) Saving Configuration'
-            flash['error-detail'] = "<br />\n".join(results)
+            flash.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
         else:
-            flash['message'] = 'Configuration Saved'
+            flash.message('Configuration Saved')
         
         redirect("/config/episodedownloads/")
 
@@ -440,10 +441,10 @@ class ConfigProviders:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            flash['error']        = 'Error(s) Saving Configuration'
-            flash['error-detail'] = "<br />\n".join(results)
+            flash.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
         else:
-            flash['message'] = 'Configuration Saved'
+            flash.message('Configuration Saved')
         
         redirect("/config/providers/")
 
@@ -499,10 +500,10 @@ class ConfigNotifications:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            flash['error']        = 'Error(s) Saving Configuration'
-            flash['error-detail'] = "<br />\n".join(results)
+            flash.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
         else:
-            flash['message'] = 'Configuration Saved'
+            flash.message('Configuration Saved')
         
         redirect("/config/notifications/")
 
@@ -574,7 +575,7 @@ class HomeAddShows:
 
         if not os.path.isdir(dir):
             logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
-            flash['error'] = "Unable to find the directory <tt>%s</tt>" % dir
+            flash.error("Unable to find the directory <tt>%s</tt>" % dir)
             redirect("/home/addShows")
         
         showDirs = []
@@ -587,7 +588,7 @@ class HomeAddShows:
         
         if len(showDirs) == 0:
             logger.log("The provided directory "+dir+" has no shows in it", logger.ERROR)
-            flash['error'] = "The provided root folder <tt>%s</tt> has no shows in it." % dir
+            flash.error("The provided root folder <tt>%s</tt> has no shows in it." % dir)
             redirect("/home/addShows")
         
         #result = ui.addShowsFromRootDir(dir)
@@ -633,9 +634,9 @@ class HomeAddShows:
                 t.config['_showDir'] = [urllib.quote_plus(x) for x in showDir]
                 s = t[showName] # this will throw a cherrypy exception
             except tvdb_exceptions.tvdb_shownotfound:
-                flash['error'] = "Couldn't find that show on theTVDB. Try a more general search."
+                flash.error("Couldn't find that show on theTVDB. Try a more general search.")
             except tvdb_exceptions.tvdb_error, e:
-                flash['error'] = "TVDB error, unable to search for show title/info: "+str(e)
+                flash.error("TVDB error, unable to search for show title/info: "+str(e))
 
         curShowDir = showDir[0]
         logger.log("curShowDir: "+curShowDir, logger.DEBUG)
@@ -664,7 +665,7 @@ class HomeAddShows:
                 return _munge(myTemplate)
             except exceptions.MultipleShowObjectsException:
                 # showAdded is already false so we can pass this exception and deal with the redirect below
-                flash['error'] = "The show in "+curShowDir+" is already loaded."
+                flash.error("The show in "+curShowDir+" is already loaded.")
                 del showDir[0]
                 pass 
 
@@ -730,7 +731,7 @@ class HomeAddShows:
 
                 if len(resultList) == 0:
 
-                    flash['error'] = "TVDB error while trying to add the show, skipping the show in "+str(showDir[0])
+                    flash.error("TVDB error while trying to add the show, skipping the show in "+str(showDir[0]))
 
                     if len(showDir) > 1:
                         del showDir[0]
@@ -747,7 +748,7 @@ class HomeAddShows:
                 myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
             except tvdb_exceptions.tvdb_exception, e:
                 logger.log("Error trying to search shows, skipping show: "+str(e), logger.ERROR)
-                flash['error'] = "TVDB error while trying to add shows, unable to proceed: "+str(e)
+                flash.error("TVDB error while trying to add shows, unable to proceed: "+str(e))
                 redirect("/home")
               
             return _munge(myTemplate)
@@ -820,8 +821,8 @@ class HomeMassUpdate:
 
             
         if len(errors) > 0:
-            flash['error'] = "Errors encountered"
-            flash['error-detail'] = "<br >\n".join(errors)
+            flash.error("Errors encountered",
+                        '<br >\n'.join(errors))
 
         messageDetail = ""
         
@@ -841,8 +842,8 @@ class HomeMassUpdate:
             messageDetail += "</li>\n</ul>\n<br />"
 
         if len(updates+refreshes+renames) > 0:
-            flash['message'] = "The following actions were queued:<br /><br />"
-            flash['message-detail'] = messageDetail
+            flash.message("The following actions were queued:<br /><br />",
+                          messageDetail)
 
         redirect("/home")
         return _genericMessage("Stuff:", "toUpdate: "+str(toUpdate)+"<br>\n"+
@@ -912,19 +913,19 @@ class Home:
         t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
 
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
-            flash['message'] = 'This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.'
+            flash.message('This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.')
             
         elif sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
-            flash['message'] = 'The information below is in the process of being updated.'
+            flash.message('The information below is in the process of being updated.')
         
         elif sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
-            flash['message'] = 'The episodes below are currently being refreshed from disk'
+            flash.message('The episodes below are currently being refreshed from disk')
         
         elif sickbeard.showQueueScheduler.action.isInRefreshQueue(showObj):
-            flash['message'] = 'This show is queued to be refreshed.'
+            flash.message('This show is queued to be refreshed.')
         
         elif sickbeard.showQueueScheduler.action.isInUpdateQueue(showObj):
-            flash['message'] = 'This show is queued and awaiting an update.'
+            flash.message('This show is queued and awaiting an update.')
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
@@ -1007,8 +1008,8 @@ class Home:
             showObj.saveToDB()
 
             if len(errors) > 0:
-                flash['error'] = '%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s")
-                flash['error-detail'] = "<ul>" + "\n".join(["<li>%s</li>" % error for error in errors]) + "</ul>"
+                flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
+                            '<ul>' + '\n'.join(['<li>%s</li>' % error for error in errors]) + "</ul>")
 
             redirect("/home/displayShow?show=" + show)
 
@@ -1029,7 +1030,7 @@ class Home:
 
         showObj.deleteShow()
         
-        flash['message'] = '<b>%s</b> has been deleted' % showObj.name
+        flash.message('<b>%s</b> has been deleted' % showObj.name)
         redirect("/home")
 
     @cherrypy.expose
@@ -1047,14 +1048,14 @@ class Home:
         try:
             sickbeard.showQueueScheduler.action.refreshShow(showObj)
         except exceptions.CantRefreshException, e:
-            flash['error'] = "Unable to refresh this show."
-            flash['error-detail'] = str(e)
+            flash.error("Unable to refresh this show.",
+                        str(e))
 
         time.sleep(3)
 
         # wait for it to finish
         if sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
-            flash['message'] = 'Refresh is in progress.'
+            flash.message('Refresh is in progress.')
         
         redirect("/home/displayShow?show="+str(showObj.tvdbid))
 
@@ -1073,8 +1074,8 @@ class Home:
         try:
             sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force))
         except exceptions.CantUpdateException, e:
-            flash['error'] = "Unable to update this show."
-            flash['error-detail'] = str(e)
+            flash.error("Unable to update this show.",
+                        str(e))
         
         # just give it some time
         time.sleep(3)
@@ -1086,9 +1087,9 @@ class Home:
     def updateXBMC(self):
 
         if xbmc.updateLibrary():
-            flash['message'] = "Command sent to XBMC to update library"
+            flash.message("Command sent to XBMC to update library")
         else:
-            flash['error'] = "Unable to contact XBMC"
+            flash.error("Unable to contact XBMC")
         redirect('/home')
 
 
@@ -1168,8 +1169,8 @@ class Home:
         
         if len(foundEpisodes) == 0:
             message = 'No downloads were found'
-            flash['error'] = message
-            flash['error-detail'] = "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True)
+            flash.error(message,
+                        "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
             logger.log(message)
         
         else:
@@ -1179,9 +1180,9 @@ class Home:
             result = search.snatchEpisode(foundEpisodes[0])
             providerModule = providers.getProviderModule(foundEpisodes[0].provider)
             if providerModule == None:
-                flash['error'] = 'Provider is configured incorrectly, unable to download'
+                flash.error('Provider is configured incorrectly, unable to download')
             else: 
-                flash['message'] = 'Episode snatched from <b>%s</b>' % providerModule.providerName
+                flash.message('Episode snatched from <b>%s</b>' % providerModule.providerName)
             
             #TODO: check if the download was successful
 

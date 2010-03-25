@@ -63,16 +63,17 @@
 
 <h1>#if $varExists('header') then $header else $title#</h1>
 
-#if $flash['message']
+#for $curMessage in $flash.messages():
 <div class="message ui-state-highlight ui-corner-all">
-    <p><span class="ui-icon ui-icon-info"></span>$flash['message']</p>
-    $flash['message-detail']
-</div><br />
-#end if
-
-#if $flash['error']
+    <p><span class="ui-icon ui-icon-info"></span>$curMessage[0]</p>
+    $curMessage[1]
+</div>
+#end for
+<br />
+#for $curError in $flash.errors():
 <div class="message ui-state-error ui-corner-all">
-    <p><span class="ui-icon ui-icon-alert"></span>$flash['error']</p>
-    $flash['error-detail']
-</div><br />
-#end if
+    <p><span class="ui-icon ui-icon-alert"></span>$curError[0]</p>
+    $curError[1]
+</div>
+#end for
+<br />
