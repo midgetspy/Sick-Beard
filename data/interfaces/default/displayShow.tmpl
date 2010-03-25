@@ -8,7 +8,10 @@
 <!--#set global $topmenu="home"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<input type="hidden" id="sbRoot" value="$sbRoot">
+
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
@@ -72,7 +75,7 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
     <td>
         $epResult["name"]
         #if $epResult["description"] != "" and $epResult["description"] != None:
-        <img src="$sbRoot/images/info.png" height="16" class="plotInfo" id="plot_info_<%=str(epResult["season"])+"_"+str(epResult["episode"])%>" />
+        <img src="$sbRoot/images/info.png" height="16" class="plotInfo" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
         #end if
     </td>
     <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
