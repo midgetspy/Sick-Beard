@@ -1053,10 +1053,6 @@ class Home:
 
         time.sleep(3)
 
-        # wait for it to finish
-        if sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
-            flash.message('Refresh is in progress.')
-        
         redirect("/home/displayShow?show="+str(showObj.tvdbid))
 
     @cherrypy.expose
