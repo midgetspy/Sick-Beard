@@ -912,6 +912,11 @@ class Home:
         t = PageTemplate(file="displayShow.tmpl")
         t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
 
+        try:
+            t.showLoc = (showObj.location, True)
+        except sickbeard.exceptions.ShowDirNotFoundException:
+            t.showLoc = (showObj._location, False)
+
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             flash.message('This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.')
             

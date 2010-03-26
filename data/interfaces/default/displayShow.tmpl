@@ -16,11 +16,12 @@
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
 
-#try:
-Location: $show.location<br />
-#except sickbeard.exceptions.ShowDirNotFoundException:
-<span style="color: red;">$show._location</span> (dir is missing)<br />
-#end try
+#if $showLoc[1]:
+Location: $showLoc[0]
+#else:
+<span style="color: red;">Location: $showLoc[0]</span> (dir is missing)
+#end if
+<br />
 
 Quality: $qualityStrings[int($show.quality)]<br />
 Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
