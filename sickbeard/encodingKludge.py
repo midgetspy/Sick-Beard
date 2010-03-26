@@ -1,6 +1,7 @@
 import os
 import os.path
 import glob
+import sys
 
 from sickbeard import helpers
 from sickbeard import logger
@@ -33,10 +34,11 @@ def fixListEncodings(x):
 
 def ek(func, *args):
     result = None
-    try:
+
+    if os.name == 'nt':
         result = func(*args)
-    except UnicodeEncodeError:
-        result = func(*[x.encode('utf-8') for x in args])
+    else:
+        result = func(*[x.encode('UTF-8') for x in args])
     
     if type(result) == list:
         return fixListEncodings(result)
