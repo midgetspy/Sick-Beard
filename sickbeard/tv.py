@@ -633,7 +633,7 @@ class TVShow(object):
 
             try:
                 xmlFileObj.close()
-                os.rename(xmlFile, xmlFile + ".old")
+                ek.ek(os.rename, xmlFile, xmlFile + ".old")
             except Exception, e:
                 logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
             raise exceptions.NoNFOException("Invalid info in tvshow.nfo")

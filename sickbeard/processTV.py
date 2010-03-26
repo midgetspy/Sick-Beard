@@ -52,7 +52,7 @@ def renameFile(curFile, newName):
     filePath = os.path.split(curFile)
     oldFile = os.path.splitext(filePath[1])
 
-    newFilename = os.path.join(filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
+    newFilename = ek.ek(os.path.join, filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
     
     logger.log("Renaming from " + curFile + " to " + newFilename)
 
