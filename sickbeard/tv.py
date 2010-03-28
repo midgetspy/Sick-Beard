@@ -43,6 +43,8 @@ from sickbeard import classes
 from sickbeard import tvrage
 from sickbeard import config
 
+from sickbeard import encodingKludge as ek
+
 from common import *
 from sickbeard import logger
 
@@ -88,7 +90,7 @@ class TVShow(object):
             else:
                 raise exceptions.NoNFOException("Show folder doesn't exist")
         
-        elif not os.path.isfile(os.path.join(self._location, "tvshow.nfo")):
+        elif not ek.ek(os.path.isfile, ek.ek(os.path.join, self._location, "tvshow.nfo")):
             
             raise exceptions.NoNFOException("No NFO found in show dir")
         
@@ -117,7 +119,7 @@ class TVShow(object):
     
     
     def _getLocation(self):
-        if os.path.isdir(self._location):
+        if ek.ek(os.path.isdir, self._location):
             return self._location
         else:
             raise exceptions.ShowDirNotFoundException("Show folder doesn't exist, you shouldn't be using it")
@@ -129,7 +131,7 @@ class TVShow(object):
 
     def _setLocation(self, newLocation):
         logger.log("Setter sets location to " + newLocation)
-        if os.path.isdir(newLocation) and os.path.isfile(os.path.join(newLocation, "tvshow.nfo")):
+        if ek.ek(os.path.isdir, newLocation) and ek.ek(os.path.isfile, ek.ek(os.path.join, newLocation, "tvshow.nfo")):
             self._location = newLocation
             self._isDirGood = True
         else:
@@ -205,14 +207,14 @@ class TVShow(object):
         # get file list
         files = []
         if not self.seasonfolders:
-            files = os.listdir(unicode(self._location))
+            files = ek.ek(os.listdir, unicode(self._location))
         else:
-            for curFile in os.listdir(unicode(self._location)):
-                if not os.path.isdir(os.path.join(self._location, curFile)):
+            for curFile in ek.ek(os.listdir, unicode(self._location)):
+                if not ek.ek(os.path.isdir, ek.ek(os.path.join, self._location, curFile)):
                     continue
                 match = re.match("[Ss]eason\s*(\d+)", curFile)
                 if match != None:
-                    files += [os.path.join(curFile, x) for x in os.listdir(unicode(os.path.join(self._location, curFile)))]
+                    files += [os.path.join(curFile, x) for x in ek.ek(os.listdir, unicode(os.path.join(self._location, curFile)))]
 
         # check for season folders
         #logger.log("Resulting file list: "+str(files))
@@ -352,7 +354,7 @@ class TVShow(object):
         posterURL = myShow['poster']
 
         # get the image data
-        if not os.path.isfile(os.path.join(self.location, "fanart.jpg")):
+        if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.location, "fanart.jpg")):
             fanartData = None
             if fanart != None:
                 fanartData = helpers.getShowImage(fanartURL, fanart)
@@ -365,14 +367,14 @@ class TVShow(object):
                 logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
             else:
                 try:
-                    outFile = open(os.path.join(self.location, "fanart.jpg"), 'wb')
+                    outFile = ek.ek(open, ek.ek(os.path.join, self.location, "fanart.jpg"), 'wb')
                     outFile.write(fanartData)
                     outFile.close()
                 except IOError, e:
                     logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
         
         # get the image data
-        if not os.path.isfile(os.path.join(self.location, "folder.jpg")):
+        if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.location, "folder.jpg")):
             posterData = None
             if poster != None:
                 posterData = helpers.getShowImage(posterURL, poster)
@@ -385,7 +387,7 @@ class TVShow(object):
                 logger.log("Unable to retrieve poster, skipping", logger.ERROR)
             else:
                 try:
-                    outFile = open(os.path.join(self.location, "folder.jpg"), 'wb')
+                    outFile = ek.ek(open, ek.ek(os.path.join, self.location, "folder.jpg"), 'wb')
                     outFile.write(posterData)
                     outFile.close()
                 except IOError, e:
@@ -428,7 +430,7 @@ class TVShow(object):
                     seasonFileName = 'season' + seasonNum.zfill(2) 
             
                 # Let's do the check before we pull the file 
-                if not os.path.isfile(os.path.join(self.location, seasonFileName+'.tbn')):
+                if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.location, seasonFileName+'.tbn')):
 
                     seasonData = helpers.getShowImage(seasonURL) 
             
@@ -436,7 +438,7 @@ class TVShow(object):
                         logger.log("Unable to retrieve season poster, skipping", logger.ERROR) 
                     else:
                         try:
-                            outFile = open(os.path.join(self.location, seasonFileName+'.tbn'), 'wb') 
+                            outFile = ek.ek(open, ek.ek(os.path.join, self.location, seasonFileName+'.tbn'), 'wb') 
                             outFile.write(seasonData) 
                             outFile.close()
                         except IOError, e:
@@ -464,7 +466,7 @@ class TVShow(object):
     # make a TVEpisode object from a media file
     def makeEpFromFile(self, file):
 
-        if not os.path.isfile(file):
+        if not ek.ek(os.path.isfile, file):
             logger.log(str(self.tvdbid) + ": That isn't even a real file dude... " + file)
             return None
 
@@ -631,7 +633,7 @@ class TVShow(object):
 
             try:
                 xmlFileObj.close()
-                os.rename(xmlFile, xmlFile + ".old")
+                ek.ek(os.rename, xmlFile, xmlFile + ".old")
             except Exception, e:
                 logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
             raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
@@ -713,7 +715,7 @@ class TVShow(object):
             # or if there's no season folders and it's not inside our show dir 
             # or if there are season folders and it's in the main dir:
             # or if it's not in our show dir at all
-            if not os.path.isfile(curLoc) or \
+            if not ek.ek(os.path.isfile, curLoc) or \
             (not self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) != os.path.normpath(self.location)) or \
             (self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) == os.path.normpath(self.location)) or \
             os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
@@ -788,7 +790,7 @@ class TVShow(object):
                     for relEp in rootEp.relatedEps:
                         relEp.location = result
             
-            fileList = glob.glob(os.path.join(curEpDir, actualName[0] + "*").replace("[","*").replace("]","*"))
+            fileList = ek.ek(glob.glob, ek.ek(os.path.join, curEpDir, actualName[0] + "*").replace("[","*").replace("]","*"))
 
             for file in fileList:
                 result = processTV.renameFile(file, rootEp.prettyName())
@@ -884,13 +886,13 @@ class TVEpisode:
         oldhastbn = self.hastbn
         
         # check for nfo and tbn
-        if os.path.isfile(self.location):
-            if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'nfo'))):
+        if ek.ek(os.path.isfile, self.location):
+            if ek.ek(os.path.isfile, ek.ek(os.path.join, self.show.location, helpers.replaceExtension(self.location, 'nfo'))):
                 self.hasnfo = True
             else:
                 self.hasnfo = False
                 
-            if os.path.isfile(os.path.join(self.show.location, helpers.replaceExtension(self.location, 'tbn'))):
+            if ek.ek(os.path.isfile, ek.ek(os.path.join, self.show.location, helpers.replaceExtension(self.location, 'tbn'))):
                 self.hastbn = True
             else:
                 self.hastbn = False
@@ -903,7 +905,7 @@ class TVEpisode:
         sqlResult = self.loadFromDB(season, episode)
         
         # only load from NFO if we didn't load from DB
-        if os.path.isfile(self.location) and self.name == "":
+        if ek.ek(os.path.isfile, self.location) and self.name == "":
             try:
                 self.loadFromNFO(self.location)
             except exceptions.NoNFOException:
@@ -1036,7 +1038,7 @@ class TVEpisode:
 
         logger.log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + statusStrings[self.status] + " and existence of " + self.location, logger.DEBUG)
         
-        if not os.path.isfile(self.location):
+        if not ek.ek(os.path.isfile, self.location):
 
             # if we don't have the file
             if self.airdate >= datetime.date.today() and self.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG, PREDOWNLOADED):
@@ -1086,13 +1088,13 @@ class TVEpisode:
             nfoFile = sickbeard.helpers.replaceExtension(self.location, "nfo")
             logger.log(str(self.show.tvdbid) + ": Using NFO name " + nfoFile, logger.DEBUG)
             
-            if os.path.isfile(nfoFile):
+            if ek.ek(os.path.isfile, nfoFile):
                 try:
                     showXML = etree.ElementTree(file = nfoFile)
                 except (SyntaxError, ValueError), e:
                     logger.log("Error loading the NFO, backing up the NFO and skipping for now: " + str(e), logger.ERROR) #TODO: figure out what's wrong and fix it
                     try:
-                        os.rename(nfoFile, nfoFile + ".old")
+                        ek.ek(os.rename, nfoFile, nfoFile + ".old")
                     except Exception, e:
                         logger.log("Failed to rename your episode's NFO file - you need to delete it or fix it: " + str(e), logger.ERROR)
                     raise exceptions.NoNFOException("Error in NFO format")
@@ -1120,7 +1122,7 @@ class TVEpisode:
             else:
                 self.hasnfo = False
             
-            if os.path.isfile(sickbeard.helpers.replaceExtension(nfoFile, "tbn")):
+            if ek.ek(os.path.isfile, sickbeard.helpers.replaceExtension(nfoFile, "tbn")):
                 self.hastbn = True
             else:
                 self.hastbn = False
@@ -1284,7 +1286,7 @@ class TVEpisode:
                 if cur_actor_thumb_text != None:
                     cur_actor_thumb.text = cur_actor_thumb_text
                     
-            if os.path.isfile(self.location):
+            if ek.ek(os.path.isfile, self.location):
                 nfoFilename = helpers.replaceExtension(self.location, 'nfo')
             else:
                 nfoFilename = helpers.sanitizeFileName(self.prettyName() + '.nfo')
@@ -1295,7 +1297,7 @@ class TVEpisode:
             helpers.indentXML( rootNode )
 
             nfo = etree.ElementTree( rootNode )
-            nfo_fh = open(os.path.join(self.show.location, nfoFilename), 'w')
+            nfo_fh = ek.ek(open, ek.ek(os.path.join, self.show.location, nfoFilename), 'w')
             nfo.write( nfo_fh, encoding="utf-8" ) 
             nfo_fh.close()
             
@@ -1306,13 +1308,13 @@ class TVEpisode:
 
         if not self.hastbn or force:
             if thumbFilename != None:
-                if os.path.isfile(self.location):
+                if ek.ek(os.path.isfile, self.location):
                     tbnFilename = helpers.replaceExtension(self.location, 'tbn')
                 else:
                     tbnFilename = helpers.sanitizeFileName(self.prettyName() + '.tbn')
                 logger.log('Writing thumb to ' + os.path.join(self.show.location, tbnFilename))
                 try:
-                    urllib.urlretrieve(thumbFilename, os.path.join(self.show.location, tbnFilename))
+                    ek.ek(urllib.urlretrieve, thumbFilename, ek.ek(os.path.join, self.show.location, tbnFilename))
                 except IOError:
                     logger.log("Unable to download thumbnail from "+thumbFilename, logger.ERROR)
                     return

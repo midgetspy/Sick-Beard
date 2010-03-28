@@ -181,9 +181,9 @@ def findCertainTVRageShow (showList, tvrid):
 	
 	
 def makeDir (dir):
-	if not os.path.isdir(dir):
+	if not os.path.isdir(dir.encode('utf-8')):
 		try:
-			os.makedirs(dir)
+			os.makedirs(dir.encode('utf-8'))
 		except OSError:
 			return False
 	return True
@@ -286,7 +286,7 @@ def makeShowNFO(showID, showDir):
 	# Make it purdy
 	indentXML( tvNode )
 
-	nfo_fh = open(os.path.join(showDir, "tvshow.nfo"), 'w')
+	nfo_fh = open(os.path.join(showDir, "tvshow.nfo").encode('utf-8'), 'w')
 	nfo = etree.ElementTree( tvNode )
 	nfo.write( nfo_fh, encoding="utf-8" )
 	nfo_fh.close()
@@ -387,3 +387,4 @@ def guessSceneEpisodeQuality(name):
 		return HD
 	else:
 		return SD
+
