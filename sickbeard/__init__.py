@@ -283,17 +283,15 @@ def initialize(consoleLogging=True):
         CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
-        CACHE_DIR = 'cache'
         if not helpers.makeDir(CACHE_DIR):
             logger.log("!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
 
         # Set our common tvdb_api options here
-        TVDB_API_PARMS = {'cache': None, 'apikey': TVDB_API_KEY, 'language': 'en'}
+        TVDB_API_PARMS = {'cache': True, 'apikey': TVDB_API_KEY, 'language':
+		'en', 'cache_dir': False}
         if CACHE_DIR:
-            TVDB_API_PARMS['cache'] = CACHE_DIR + '/tvdb'
-        else:
-            TVDB_API_PARMS['cache'] = True
+            TVDB_API_PARMS['cache_dir'] = CACHE_DIR + '/tvdb'
         
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
