@@ -32,7 +32,6 @@ from providers import eztv, nzbs, nzbmatrix, newzbin, tvnzb, tvbinz
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder
 from sickbeard import helpers, db, exceptions, queue, scheduler
-#from sickbeard import showAdder, updateShows
 from sickbeard import logger
 
 from sickbeard.common import *
