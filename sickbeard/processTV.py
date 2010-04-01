@@ -75,7 +75,7 @@ def findMainFile (show_dir):
     next_biggest_file_size = 0
 
     # find the biggest file in the folder
-    for file in filter(helpers.isMediaFile, os.listdir(show_dir)):
+    for file in filter(helpers.isMediaFile, ek.ek(os.listdir, show_dir)):
         cur_size = os.path.getsize(os.path.join(show_dir, file))
         if cur_size > biggest_file_size:
             biggest_file = file
@@ -96,10 +96,10 @@ def findMainFile (show_dir):
 def _checkForExistingFile(newFile, oldFile):
 
     # if the new file exists, return the appropriate code depending on the size
-    if os.path.isfile(newFile):
+    if ek.ek(os.path.isfile, newFile):
         
         # see if it's bigger than our old file
-        if os.path.getsize(newFile) > os.path.getsize(oldFile):
+        if ek.ek(os.path.getsize, newFile) > ek.ek(os.path.getsize, oldFile):
             return 1
         
         else:
