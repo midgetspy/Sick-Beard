@@ -280,7 +280,7 @@ class TVShow(object):
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
         if not cache:
-            ltvdb_api_parms['cache'] = False
+            ltvdb_api_parms['cache'] = 'recache'
 
         try:
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
@@ -576,7 +576,7 @@ class TVShow(object):
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
         if not cache:
-            ltvdb_api_parms['cache'] = False
+            ltvdb_api_parms['cache'] = 'recache'
 
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
         myEp = t[self.tvdbid]
@@ -974,7 +974,7 @@ class TVEpisode:
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
         if not cache:
-            ltvdb_api_parms['cache'] = False
+            ltvdb_api_parms['cache'] = 'recache'
 
         try:
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
