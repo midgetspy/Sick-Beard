@@ -17,13 +17,12 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import sys
 import os.path
+import re
 import sqlite3
 
 import sickbeard
 from sickbeard import logger
-from sickbeard import dbSetup
 
 class DBConnection:
 	def __init__(self, dbFileName="sickbeard.db"):
@@ -89,3 +88,47 @@ class DBConnection:
 		for column in cursor:
 			columns[column['name']] = { 'type': column['type'] }
 		return columns
+
+# ===============
+# = Upgrade API =
+# ===============
+
+def upgradeDatabase(connection, schema):
+	logger.log("Checking database structure...", logger.MESSAGE)
+	_processUpgrade(connection, schema)
+
+def prettyName(str):
+	return ' '.join([x.group() for x in re.finditer("([A-Z])([a-z0-9]+)", str)])
+
+def _processUpgrade(connection, upgradeClass):
+	instance = upgradeClass(connection)
+	logger.log("Checking " + prettyName(upgradeClass.__name__) + " database upgrade", logger.DEBUG)
+	if not instance.test():
+		logger.log("Database upgrade required: " + prettyName(upgradeClass.__name__), logger.MESSAGE)
+		try:
+			instance.execute()
+		except sqlite3.DatabaseError, e:
+			print "Error in " + str(upgradeClass.__name__) + ": " + str(e)
+			raise
+		logger.log(upgradeClass.__name__ + " upgrade completed", logger.DEBUG)
+	else:
+		logger.log(upgradeClass.__name__ + " upgrade not required", logger.DEBUG)
+
+	for upgradeSubClass in upgradeClass.__subclasses__():
+		_processUpgrade(connection, upgradeSubClass)
+
+# Base migration class. All future DB changes should be subclassed from this class
+class SchemaUpgrade (object):
+	def __init__(self, connection):
+		self.connection = connection
+
+	def hasTable(self, tableName):
+		return len(self.connection.action("SELECT 1 FROM sqlite_master WHERE name = ?;", (tableName, )).fetchall()) > 0
+
+	def hasColumn(self, tableName, column):
+		return column in self.connection.tableInfo(tableName)
+
+	def addColumn(self, table, column, type="NUMERIC", default=0):
+		self.connection.action("ALTER TABLE %s ADD %s %s" % (table, column, type))
+		self.connection.action("UPDATE %s SET %s = ?" % (table, column), (default,))
+

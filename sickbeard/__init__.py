@@ -30,13 +30,13 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere 
 from providers import eztv, nzbs, nzbmatrix, newzbin, tvnzb, tvbinz
 
-from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder
+from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, queue, scheduler
-#from sickbeard import showAdder, updateShows
 from sickbeard import logger
 
 from sickbeard.common import *
 
+from sickbeard.databases import mainDB
 
 SOCKET_TIMEOUT = 30
 
@@ -52,6 +52,7 @@ showUpdateScheduler = None
 versionCheckScheduler = None
 showQueueScheduler = None
 properFinderScheduler = None
+autoPostProcesserScheduler = None
 
 showList = None
 loadingShowList = None
@@ -109,6 +110,7 @@ TORRENT_DIR = None
 RENAME_EPISODES = False
 PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
+KEEP_PROCESSED_FILE = False
 TV_DOWNLOAD_DIR = None
 
 NEWZBIN = False
@@ -247,7 +249,8 @@ def initialize(consoleLogging=True):
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVNZB, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
-                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER
+                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
+                KEEP_PROCESSED_FILE
 
         
         if __INITIALIZED__:
@@ -328,6 +331,7 @@ def initialize(consoleLogging=True):
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 0)
+        KEEP_PROCESSED_FILE = check_setting_int(CFG, 'General', 'keep_processed_file', 0)
         
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
         NEWZBIN_USERNAME = check_setting_str(CFG, 'Newzbin', 'newzbin_username', '')
@@ -369,7 +373,8 @@ def initialize(consoleLogging=True):
         
         logger.initLogging(consoleLogging=consoleLogging)
 
-        dbSetup.upgradeDatabase(db.DBConnection())
+        # initialize the main SB database
+        db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
@@ -405,6 +410,11 @@ def initialize(consoleLogging=True):
                                                      threadName="FINDPROPERS",
                                                      runImmediately=False)
         
+        autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
+                                                     cycleTime=datetime.timedelta(minutes=10),
+                                                     threadName="POSTPROCESSER",
+                                                     runImmediately=True)
+        
         
         showList = []
         loadingShowList = {}
@@ -420,7 +430,7 @@ def start():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
-            properFinderScheduler
+            properFinderScheduler, autoPostProcesserScheduler
     
     with INIT_LOCK:
         
@@ -444,11 +454,13 @@ def start():
             # start the queue checker
             properFinderScheduler.thread.start()
 
+            # start the proper finder
+            autoPostProcesserScheduler.thread.start()
 
 def halt ():
     
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
-            showQueueScheduler, properFinderScheduler
+            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler
     
     with INIT_LOCK:
         
@@ -490,6 +502,13 @@ def halt ():
             logger.log("Waiting for the SHOWQUEUE thread to exit")
             try:
                 showQueueScheduler.thread.join(10)
+            except:
+                pass
+            
+            autoPostProcesserScheduler.abort = True
+            logger.log("Waiting for the POSTPROCESSER thread to exit")
+            try:
+                autoPostProcesserScheduler.thread.join(10)
             except:
                 pass
             
@@ -546,7 +565,8 @@ def save_config():
         QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
         NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
         PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB, TVBINZ_AUTH, TVBINZ_SABUID, \
-        NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES, PROVIDER_ORDER
+        NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES, PROVIDER_ORDER, \
+        KEEP_PROCESSED_FILE
 
 
         
@@ -574,6 +594,7 @@ def save_config():
     CFG['General']['cache_dir'] = CACHE_DIR
     CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
+    CFG['General']['keep_processed_file'] = int(KEEP_PROCESSED_FILE)
     CFG['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     CFG['General']['rename_episodes'] = int(RENAME_EPISODES)
     CFG['Blackhole']['nzb_dir'] = NZB_DIR

@@ -214,7 +214,7 @@ class TVShow(object):
                     continue
                 match = re.match("[Ss]eason\s*(\d+)", curFile)
                 if match != None:
-                    files += [os.path.join(curFile, x) for x in ek.ek(os.listdir, unicode(os.path.join(self._location, curFile)))]
+                    files += [ek.ek(os.path.join, curFile, x) for x in ek.ek(os.listdir, unicode(ek.ek(os.path.join, self._location, curFile)))]
 
         # check for season folders
         #logger.log("Resulting file list: "+str(files))
