@@ -1,0 +1,10 @@
+<configure xmlns:meta="http://namespaces.zope.org/meta">
+
+  <meta:directive
+        namespace="http://namespaces.zope.org/zope"
+        name="store"
+        schema=".metadirectives.IStoreDirective"
+        handler=".metaconfigure.store"
+        />
+
+</configure>

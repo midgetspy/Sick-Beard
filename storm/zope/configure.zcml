@@ -1,0 +1,38 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="zope"
+    >
+
+    <utility
+        component=".zstorm.global_zstorm"
+        provides=".interfaces.IZStorm"
+        />
+
+    <class class="storm.store.ResultSet">
+        <allow interface=".interfaces.IResultSet" />
+        <allow attributes="__getslice__" />
+    </class>
+
+    <class class="storm.store.EmptyResultSet">
+        <allow interface=".interfaces.IResultSet" />
+        <allow attributes="__getslice__" />
+    </class>
+
+    <class class="storm.sqlobject.SQLObjectResultSet">
+        <allow interface=".interfaces.ISQLObjectResultSet" />
+    </class>
+
+    <class class="storm.references.BoundReferenceSet">
+        <allow attributes="__iter__ find first last one any values order_by
+                           count __contains__" />
+    </class>
+
+    <class class="storm.references.BoundIndirectReferenceSet">
+        <require like_class="storm.references.BoundReferenceSet" />
+    </class>
+
+    <adapter factory=".adapters.sqlobject_result_set_to_storm_result_set"
+             trusted="yes" />
+
+</configure>
