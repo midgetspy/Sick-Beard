@@ -114,9 +114,52 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     return logMessage + "\n"
 
 
-def doIt(downloaderDir, nzbName=None):
+def processDir (dirName, recurse=False):
+
+    returnStr = ''
+
+    logger.log("Processing folder "+dirName, logger.DEBUG)
+
+    fileList = ek.ek(os.listdir, dirName)
     
-    returnStr = ""
+    # split the list into video files and folders
+    folders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
+    videoFiles = filter(helpers.isMediaFile, fileList)
+
+    # recursively process all the folders
+    for curFolder in folders:
+        logger.log("Recursively processing a folder: "+curFolder, logger.DEBUG)
+        processDir(ek.ek(os.path.join, dirName, curFolder), True)
+
+    # process any files in the dir
+    for curFile in videoFiles:
+        
+        curFile = ek.ek(os.path.join, dirName, curFile)
+        
+        # if there's only one video file in the dir we can use the dirname to process too
+        if len(videoFiles) == 1 and recurse:
+            logger.log("Auto processing file: "+curFile+" ("+dirName+")")
+            result = processFile(curFile, dirName)
+
+            # as long as the postprocessing was successfil delete the old folder unless the config wants us not to
+            if type(result) == list and not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
+                returnStr += logHelper("Deleting folder " + dirName, logger.DEBUG)
+                
+                try:
+                    shutil.rmtree(dirName)
+                except (OSError, IOError), e:
+                    returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
+            
+        else:
+            logger.log("Auto processing file: "+curFile)
+            result = processFile(curFile)
+
+            
+
+
+def postProcessDir(downloaderDir, nzbName=None):
+    
+    returnStr = ''
 
     downloadDir = ''
 
@@ -126,15 +169,15 @@ def doIt(downloaderDir, nzbName=None):
     
     # if they've got a download dir configured then use it
     elif sickbeard.TV_DOWNLOAD_DIR != '' and os.path.isdir(sickbeard.TV_DOWNLOAD_DIR):
-        downloadDir = os.path.join(sickbeard.TV_DOWNLOAD_DIR, os.path.abspath(downloaderDir).split(os.path.sep)[-1])
-
+        downloadDir = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, os.path.abspath(downloaderDir).split(os.path.sep)[-1])
         returnStr += logHelper("Trying to use folder "+downloadDir, logger.DEBUG)
 
     # if we didn't find a real dir then quit
-    if not os.path.isdir(downloadDir):
+    if not ek.ek(os.path.isdir, downloadDir):
         returnStr += logHelper("Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
         return returnStr
 
+    # make sure the dir isn't inside a show dir
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
     for sqlShow in sqlResults:
@@ -156,18 +199,45 @@ def doIt(downloaderDir, nzbName=None):
         return returnStr
         
     returnStr += logHelper("The biggest file in the dir is: " + biggest_file, logger.DEBUG)
+
+    result = processFile(biggest_file, downloadDir, nzbName)
+
+    # a successful post-processing will return a list with a string in it
+    # if it's not successful then I just return right now
+    if type(result) == str:
+        return returnStr + result
+
+    returnStr += result[0]
+
+    # delete the old folder unless the config wants us not to
+    if not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
+        returnStr += logHelper("Deleting folder " + downloadDir, logger.DEBUG)
+        
+        try:
+            shutil.rmtree(downloadDir)
+        except (OSError, IOError), e:
+            returnStr += logHelper("Warning: unable to remove the folder " + downloadDir + ": " + str(e), logger.ERROR)
+
+    return returnStr
+
+def processFile(fileName, downloadDir=None, nzbName=None):
+
+    returnStr = ''
+
+    folderName = None
+    if downloadDir != None:
+        folderName = downloadDir.split(os.path.sep)[-1]
     
-    # use file name, folder name, and NZB name (in that order) to try to figure out the episode info
-    result = None
-    nameList = [downloadDir.split(os.path.sep)[-1], biggest_file]
-    if nzbName != None:
-        nameList.append(nzbName)
-    
+    returnStr += logHelper("Processing file "+fileName+" (with folder name "+str(folderName)+" and NZB name "+str(nzbName)+")", logger.DEBUG)
+
     finalNameList = []
-    for curName in nameList:
-        finalNameList += helpers.sceneToNormalShowNames(curName)
+
+    for curName in (fileName, folderName, nzbName):
+        if curName != None:
+            finalNameList += helpers.sceneToNormalShowNames(curName)
 
     showResults = None
+    result = None
     
     for curName in set(finalNameList):
     
@@ -179,8 +249,7 @@ def doIt(downloaderDir, nzbName=None):
             continue
 
         try:
-            t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI,
-                              **sickbeard.TVDB_API_PARMS)
+            t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
             showObj = t[result.seriesname]
             showInfo = (int(showObj["id"]), showObj["seriesname"])
         except (tvdb_exceptions.tvdb_exception, IOError), e:
@@ -241,7 +310,7 @@ def doIt(downloaderDir, nzbName=None):
             rootEp.relatedEps.append(curEp)
 
     # log it to history
-    history.logDownload(rootEp, biggest_file)
+    history.logDownload(rootEp, fileName)
 
     # wait for the copy to finish
 
@@ -249,7 +318,7 @@ def doIt(downloaderDir, nzbName=None):
 
 
     # figure out the new filename
-    biggestFileName = os.path.basename(biggest_file)
+    biggestFileName = os.path.basename(fileName)
     biggestFileExt = os.path.splitext(biggestFileName)[1]
 
     # if we're supposed to put it in a season folder then figure out what folder to use
@@ -279,13 +348,13 @@ def doIt(downloaderDir, nzbName=None):
     destDir = os.path.join(rootEp.show.location, seasonFolder)
     
     newFile = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
-    returnStr += logHelper("The ultimate destination for " + biggest_file + " is " + newFile, logger.DEBUG)
+    returnStr += logHelper("The ultimate destination for " + fileName + " is " + newFile, logger.DEBUG)
 
-    existingResult = _checkForExistingFile(newFile, biggest_file)
+    existingResult = _checkForExistingFile(newFile, fileName)
     
     # if there's no file with that exact filename then check for a different episode file (in case we're going to delete it)
     if existingResult == 0:
-        existingResult = _checkForExistingFile(rootEp.location, biggest_file)
+        existingResult = _checkForExistingFile(rootEp.location, fileName)
         if existingResult == -1:
             existingResult = -2
         if existingResult == 1:
@@ -304,19 +373,33 @@ def doIt(downloaderDir, nzbName=None):
         returnStr += logHelper("Season folder didn't exist, creating it", logger.DEBUG)
         os.mkdir(destDir)
 
-    returnStr += logHelper("Moving from " + biggest_file + " to " + destDir, logger.DEBUG)
-    try:
-        # try using rename to move it because shutil.move is bugged in python 2.5
+    if sickbeard.KEEP_PROCESSED_FILE:
+        returnStr += logHelper("Copying from " + fileName + " to " + destDir, logger.DEBUG)
         try:
-            os.rename(biggest_file, os.path.join(destDir, os.path.basename(biggest_file)))
-        except OSError:
-            shutil.move(biggest_file, destDir)
-       
-        returnStr += logHelper("File was moved successfully", logger.DEBUG)
-        
-    except IOError, e:
-        returnStr += logHelper("Unable to move the file: " + str(e), logger.ERROR)
-        return returnStr
+            # try using rename to move it because shutil.move is bugged in python 2.5
+            shutil.copy(fileName, destDir)
+           
+            returnStr += logHelper("File was copied successfully", logger.DEBUG)
+            
+        except IOError, e:
+            returnStr += logHelper("Unable to copy the file: " + str(e), logger.ERROR)
+            return returnStr
+
+    else:
+
+        returnStr += logHelper("Moving from " + fileName + " to " + destDir, logger.DEBUG)
+        try:
+            # try using rename to move it because shutil.move is bugged in python 2.5
+            try:
+                os.rename(fileName, os.path.join(destDir, os.path.basename(fileName)))
+            except OSError:
+                shutil.move(fileName, destDir)
+           
+            returnStr += logHelper("File was moved successfully", logger.DEBUG)
+            
+        except IOError, e:
+            returnStr += logHelper("Unable to move the file: " + str(e), logger.ERROR)
+            return returnStr
 
     # if the file existed and was smaller then lets delete it
     # OR if the file existed, was bigger, but we want to replace it anyway cause it's a PROPER snatch
@@ -365,16 +448,4 @@ def doIt(downloaderDir, nzbName=None):
     if sickbeard.XBMC_UPDATE_LIBRARY == True and rootEp.status != PREDOWNLOADED:
         notifiers.xbmc.updateLibrary(rootEp.show.location)
 
-    # delete the old folder unless the config wants us not to
-    if not sickbeard.KEEP_PROCESSED_DIR:
-        returnStr += logHelper("Deleting folder " + downloadDir, logger.DEBUG)
-        
-        try:
-            shutil.rmtree(downloadDir)
-        except (OSError, IOError), e:
-            returnStr += logHelper("Warning: unable to remove the folder " + downloadDir + ": " + str(e), logger.ERROR)
-
-    return returnStr
-
-if __name__ == "__main__":
-    doIt(sys.argv[1])
+    return [returnStr]
