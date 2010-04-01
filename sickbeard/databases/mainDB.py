@@ -1,59 +1,11 @@
-import re
-import sqlite3
-from sickbeard import logger
+from sickbeard import db
 
-# ==============
-# = Public API =
-# ==============
-
-def upgradeDatabase(connection):
-	logger.log("Checking database structure...", logger.MESSAGE)
-	_processUpgrade(connection, InitialSchema)
-
-def prettyName(str):
-	return ' '.join([x.group() for x in re.finditer("([A-Z])([a-z0-9]+)", str)])
-
-def _processUpgrade(connection, upgradeClass):
-	instance = upgradeClass(connection)
-	logger.log("Checking " + prettyName(upgradeClass.__name__) + " database upgrade", logger.DEBUG)
-	if not instance.test():
-		logger.log("Database upgrade required: " + prettyName(upgradeClass.__name__), logger.MESSAGE)
-		try:
-			instance.execute()
-		except sqlite3.DatabaseError, e:
-			print "Error in " + str(upgradeClass.__name__) + ": " + str(e)
-			raise
-		logger.log(upgradeClass.__name__ + " upgrade completed", logger.DEBUG)
-	else:
-		logger.log(upgradeClass.__name__ + " upgrade not required", logger.DEBUG)
-
-	for upgradeSubClass in upgradeClass.__subclasses__():
-		_processUpgrade(connection, upgradeSubClass)
-
-# ==============
-# = Migrations =
-# ==============
+# ======================
+# = Main DB Migrations =
+# ======================
 # Add new migrations at the bottom of the list; subclass the previous migration.
 
-class SchemaUpgrade (object):
-	def __init__(self, connection):
-		self.connection = connection
-
-	# =====================
-	# = Migration helpers =
-	# =====================
-
-	def hasTable(self, tableName):
-		return len(self.connection.action("SELECT 1 FROM sqlite_master WHERE name = ?;", (tableName, )).fetchall()) > 0
-
-	def hasColumn(self, tableName, column):
-		return column in self.connection.tableInfo(tableName)
-
-	def addColumn(self, table, column, type="NUMERIC", default=0):
-		self.connection.action("ALTER TABLE %s ADD %s %s" % (table, column, type))
-		self.connection.action("UPDATE %s SET %s = ?" % (table, column), (default,))
-
-class InitialSchema (SchemaUpgrade):
+class InitialSchema (db.SchemaUpgrade):
 	def test(self):
 		return self.hasTable("tv_shows")
 

@@ -36,6 +36,7 @@ from sickbeard import logger
 
 from sickbeard.common import *
 
+from sickbeard.databases import mainDB
 
 SOCKET_TIMEOUT = 30
 
@@ -374,7 +375,8 @@ def initialize(consoleLogging=True):
         
         logger.initLogging(consoleLogging=consoleLogging)
 
-        dbSetup.upgradeDatabase(db.DBConnection())
+        # initialize the main SB database
+        db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
