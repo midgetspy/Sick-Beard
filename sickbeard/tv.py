@@ -1260,6 +1260,11 @@ class TVEpisode:
             director_text = myEp['director']
             if director_text != None:
                 director.text = director_text
+
+            rating = etree.SubElement( episode, "rating" )
+            rating_text = myEp['rating']
+            if rating_text != None:
+                rating.text = rating_text
     
             gueststar_text = myEp['gueststars']
             if gueststar_text != None:
