@@ -35,7 +35,14 @@ class TVEpisodeData(object):
     director = Unicode()
     writer = Unicode()
     rating = Float()
+    gueststars = Pickle()
+
+    thumb = Unicode()
+
+    displayseason = Int()
+    displayepisode = Int()
     #other season/episode info needed for absolute/dvd/etc ordering
+    
     tvdb_id = Int()
     imdb_id = Unicode()
 

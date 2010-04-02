@@ -47,6 +47,18 @@ class TVEpisode(object):
             self.episodes.add(result.one())
         else:
             raise Exception()
+
+    def getEp(self, season, episode):
+        result = tvapi.store.find(TVEpisodeData, TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
+        
+        if result.count() == 1:
+            if result.one() in self.episodes:
+                return result.one()
+            else:
+                print "not mine"
+                raise Exception()
+        else:
+            raise Exception()
    
 class EpisodeDataRel(object):
     __storm_table__ = "episodedatarel"

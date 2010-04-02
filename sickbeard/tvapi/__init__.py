@@ -31,6 +31,10 @@ if True:
                   director TEXT, \
                   writer TEXT, \
                   rating NUMERIC, \
+                  gueststars BLOB, \
+                  thumb TEXT, \
+                  displayseason NUMERIC, \
+                  displayepisode NUMERIC, \
                   tvdb_id NUMERIC, \
                   imdb_id NUMERIC \
                   )")

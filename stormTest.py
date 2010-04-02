@@ -1,6 +1,7 @@
 from sickbeard.tvclasses import TVEpisode
 from sickbeard.tvapi import store
 from sickbeard.tvapi.tvapi import getTVShow
+from sickbeard.tvapi.tvapi_classes import TVEpisodeData
 
 # use case: parsing a random scene name, generating temp objects for it, and throwing them away
 #           for example, when parsing the RSS names and finding an episode we already have
@@ -30,9 +31,3 @@ print "2. %s" % ", ".join(["%dx%d - %s" % (x.season, x.episode, x.name) for x in
 epObj.addEp(1,3)
 print "3. %s" % ", ".join(["%dx%d - %s" % (x.season, x.episode, x.name) for x in epObj.episodes])
 store.commit()
-del epObj
-store.commit()
-
-from sickbeard import nfo
-from xml.etree import ElementTree
-print ElementTree.tostring(nfo.makeShowNFO(myShow))

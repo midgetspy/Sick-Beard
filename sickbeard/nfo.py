@@ -66,11 +66,72 @@ def makeShowNFO(show):
         if cur_actor_thumb_text != None:
             cur_actor_thumb.text = cur_actor_thumb_text
 
-
     # Make it purdy
-    #indentXML( tvNode )
+    #helpers.indentXML( tvNode )
 
     return tvNode
 
 def makeEpNFO(ep):
-    pass
+
+    episode = etree.Element( "episodedetails" )
+
+    title = etree.SubElement( episode, "title" )
+    title.text = ep.name if ep.name else None
+
+    season = etree.SubElement( episode, "season" )
+    season.text = str(ep.season)
+
+    episodenum = etree.SubElement( episode, "episode" )
+    episodenum.text = str(ep.episode)
+    
+    aired = etree.SubElement( episode, "aired" )
+    aired.text = str(ep.aired)
+
+    plot = etree.SubElement( episode, "plot" )
+    plot.text = ep.description if ep.description else None
+
+    displayseason = etree.SubElement( episode, "displayseason" )
+    displayseason.text = str(ep.displayseason) if ep.displayseason else None
+
+    displayepisode = etree.SubElement( episode, "displayepisode" )
+    displayepisode.text = str(ep.displayepisode) if ep.displayepisode else None
+
+    thumb = etree.SubElement( episode, "thumb" )
+    thumb.text = ep.thumb if ep.thumb else None
+
+    watched = etree.SubElement( episode, "watched" )
+    watched.text = 'false'
+
+    credits = etree.SubElement( episode, "credits" )
+    credits.text = ep.writer if ep.writer else None
+
+    director = etree.SubElement( episode, "director" )
+    director.text = ep.director if ep.director else None
+
+    for actor in ep.gueststars:
+        cur_actor = etree.SubElement( episode, "actor" )
+        cur_actor_name = etree.SubElement( cur_actor, "name" )
+        cur_actor_name.text = actor
+
+    for actor in ep.show.actors:
+
+        cur_actor = etree.SubElement( episode, "actor" )
+
+        cur_actor_name = etree.SubElement( cur_actor, "name" )
+        cur_actor_name.text = actor['name']
+        cur_actor_role = etree.SubElement( cur_actor, "role" )
+        cur_actor_role_text = actor['role']
+
+        if cur_actor_role_text != None:
+            cur_actor_role.text = cur_actor_role_text
+
+        cur_actor_thumb = etree.SubElement( cur_actor, "thumb" )
+        cur_actor_thumb_text = actor['image']
+
+        if cur_actor_thumb_text != None:
+            cur_actor_thumb.text = cur_actor_thumb_text
+
+    # Make it purdy
+    #helpers.indentXML( episode )
+
+    return episode
