@@ -204,7 +204,7 @@ def postProcessDir(downloaderDir, nzbName=None):
 
     # a successful post-processing will return a list with a string in it
     # if it's not successful then I just return right now
-    if type(result) == str:
+    if type(result) in (str, unicode):
         return returnStr + result
 
     returnStr += result[0]
@@ -234,14 +234,17 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     for curName in (fileName, folderName, nzbName):
         if curName != None:
-            finalNameList += helpers.sceneToNormalShowNames(curName)
+            for curSceneName in helpers.sceneToNormalShowNames(curName):
+                if curSceneName not in finalNameList:
+                    finalNameList.append(curSceneName)
 
     showResults = None
     result = None
     
-    for curName in set(finalNameList):
+    for curName in finalNameList:
     
         try:
+            returnStr += logHelper("Attempting to parse name "+curName, logger.DEBUG)
             myParser = FileParser(curName)
             result = myParser.parse()
         except tvnamer_exceptions.InvalidFilename:
