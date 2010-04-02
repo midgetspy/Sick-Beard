@@ -32,3 +32,7 @@ print "3. %s" % ", ".join(["%dx%d - %s" % (x.season, x.episode, x.name) for x in
 store.commit()
 del epObj
 store.commit()
+
+from sickbeard import nfo
+from xml.etree import ElementTree
+print ElementTree.tostring(nfo.makeShowNFO(myShow))

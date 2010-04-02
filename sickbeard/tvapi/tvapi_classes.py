@@ -1,19 +1,21 @@
-from storm.locals import Int, Unicode, Float, List, Reference, Date
+from storm.locals import Int, Unicode, Float, List, Reference, Date, Pickle
 
 class TVShowData(object):
     __storm_table__ = "tvshowdata"
 
     tvdb_id = Int(primary=True)
     name = Unicode()
-    genres = List()
+    plot = Unicode()
+    genres = Pickle()
     network = Unicode()
-    duration = Unicode()
-    actors = List()
-    firstAired = Unicode()
+    duration = Int()
+    actors = Pickle()
+    firstaired = Date()
     status = Unicode()
     classification = Unicode()
     country = Unicode()
     rating = Float()
+    contentrating = Unicode()
     tvrage_id = Int()
     imdb_id = Unicode()
     

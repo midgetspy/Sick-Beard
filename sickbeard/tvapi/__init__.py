@@ -38,15 +38,17 @@ if True:
     
     store.execute("CREATE TABLE tvshowdata ( \
                   name TEXT, \
-                  genres TEXT, \
+                  plot TEXT, \
+                  genres BLOB, \
                   network TEXT, \
-                  duration TEXT, \
-                  actors TEXT, \
-                  firstAired TEXT, \
+                  duration NUMERIC, \
+                  actors BLOB, \
+                  firstaired TEXT, \
                   status TEXT, \
                   classification TEXT, \
                   country TEXT, \
                   rating NUMERIC, \
+                  contentrating TEXT, \
                   tvdb_id INTEGER PRIMARY KEY, \
                   tvrage_id NUMERIC, \
                   imdb_id NUMERIC \
