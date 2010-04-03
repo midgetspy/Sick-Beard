@@ -20,6 +20,7 @@
 import os.path
 import re
 import sqlite3
+import time
 
 import sickbeard
 from sickbeard import logger
@@ -32,27 +33,35 @@ class DBConnection:
 		self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, self.dbFileName), 20)
 		self.connection.row_factory = sqlite3.Row
 
-	def action(self, query, args=None):
+ 	def action(self, query, args=None):
 		
 		if query == None:
 			return
 
 		sqlResult = None
+		attempt = 0
 
-		try:
-			if args == None:
-				logger.log(self.dbFileName+": "+query, logger.DEBUG)
-				sqlResult = self.connection.execute(query)
-			else:
-				logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
-				sqlResult = self.connection.execute(query, args)
-			self.connection.commit()
-		except sqlite3.OperationalError, e:
-			logger.log("DB error: "+str(e), logger.ERROR)
-			raise
-		except sqlite3.DatabaseError, e:
-			logger.log("Fatal error executing query: " + str(e), logger.ERROR)
-			raise
+		while attempt < 3:
+			try:
+				if args == None:
+					logger.log(self.dbFileName+": "+query, logger.DEBUG)
+					sqlResult = self.connection.execute(query)
+				else:
+					logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
+					sqlResult = self.connection.execute(query, args)
+				self.connection.commit()
+				# get out of the connection attempt loop since we were successful
+				break
+			except sqlite3.OperationalError, e:
+				logger.log("DB error: "+str(e), logger.ERROR)
+				if "unable to open database file" in str(e):
+					attempt += 1
+					time.sleep(1)
+				else:
+					raise
+			except sqlite3.DatabaseError, e:
+				logger.log("Fatal error executing query: " + str(e), logger.ERROR)
+				raise
 		
 		return sqlResult
 		

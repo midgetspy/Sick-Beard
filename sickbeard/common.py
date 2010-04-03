@@ -91,10 +91,13 @@ XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
 ###
 #####################################################################
 
-sceneExceptions = {72546: ('CSI'),
-                   110381: ('Archer'),
-                   83897: ('Life After People: The Series'),
-                   80552: ('Kitchen Nightmares (US)')
+sceneExceptions = {72546: ['CSI'],
+                   110381: ['Archer'],
+                   83897: ['Life After People: The Series'],
+                   80552: ['Kitchen Nightmares (US)'],
+                   71256: ['The Daily Show'],
+                   75692: ['Law & Order: SVU'],
+                   71489: ['Law & Order: Criminal Intent', 'Law & Order: CI']
                    }
 
 countryList = {'Australia': 'AU',
