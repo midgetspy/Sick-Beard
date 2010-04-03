@@ -219,7 +219,7 @@ class ConfigGeneral:
                     launch_browser=None, create_metadata=None, web_username=None,
                     web_password=None, quality_default=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None):
+                    naming_multi_ep_type=None, create_images=None):
 
         results = []
 
@@ -237,6 +237,11 @@ class ConfigGeneral:
             create_metadata = 1
         else:
             create_metadata = 0
+            
+        if create_images == "on":
+            create_images = 1
+        else:
+            create_images = 0
             
         if season_folders_default == "on":
             season_folders_default = 1
@@ -258,6 +263,7 @@ class ConfigGeneral:
         
         sickbeard.LAUNCH_BROWSER = launch_browser
         sickbeard.CREATE_METADATA = create_metadata
+        sickbeard.CREATE_IMAGES = create_images
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = int(quality_default)
 

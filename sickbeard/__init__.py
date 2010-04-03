@@ -76,6 +76,7 @@ WEB_USERNAME = None
 WEB_PASSWORD = None 
 LAUNCH_BROWSER = None
 CREATE_METADATA = None
+CREATE_IMAGES = None
 CACHE_DIR = None
 
 QUALITY_DEFAULT = None
@@ -250,7 +251,7 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                KEEP_PROCESSED_FILE
+                KEEP_PROCESSED_FILE, CREATE_METADATA
 
         
         if __INITIALIZED__:
@@ -284,6 +285,7 @@ def initialize(consoleLogging=True):
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
         CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
+        CREATE_IMAGES = bool(check_setting_int(CFG, 'General', 'create_images', 1))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         if not helpers.makeDir(CACHE_DIR):
@@ -566,7 +568,7 @@ def save_config():
         NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
         PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB, TVBINZ_AUTH, TVBINZ_SABUID, \
         NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES, PROVIDER_ORDER, \
-        KEEP_PROCESSED_FILE
+        KEEP_PROCESSED_FILE, CREATE_IMAGES
 
 
         
@@ -591,6 +593,7 @@ def save_config():
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
     CFG['General']['create_metadata'] = int(CREATE_METADATA)
+    CFG['General']['create_images'] = int(CREATE_IMAGES)
     CFG['General']['cache_dir'] = CACHE_DIR
     CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
