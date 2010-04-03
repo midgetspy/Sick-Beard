@@ -27,8 +27,13 @@ Directory where Sick Beard should place its logs<br />
 <br />
 
 <input type="checkbox" name="create_metadata" #if $sickbeard.CREATE_METADATA then "CHECKED" else ""#> <strong>Create metadata</strong><br />
-If checked Sick Beard will create nfo/tbn<br />
-files for all your media<br />
+If checked Sick Beard will create nfo files<br />
+for all your media<br />
+<br />
+
+<input type="checkbox" name="create_images" #if $sickbeard.CREATE_IMAGES then "CHECKED" else ""#> <strong>Create images</strong><br />
+If checked Sick Beard will create tbn/fanart/posters<br />
+for all your media<br />
 <br />
 
 <input type="checkbox" name="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "CHECKED" else ""#> <strong>Launch browser on startup</strong><br />
