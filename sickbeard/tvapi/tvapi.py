@@ -16,4 +16,3 @@ def getTVShow(tvdb_id):
     else:
         return result.one()
 
-

@@ -5,6 +5,16 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 from tvapi_classes import TVShowData, TVEpisodeData
 
 from sickbeard import tvapi
+from sickbeard import exceptions
+
+class Logger():
+    DEBUG = 1
+    MESSAGE = 2
+    ERROR = 3
+    def log(self, message, blah=MESSAGE):
+        if blah > Logger.DEBUG:
+            print message
+logger = Logger()
 
 def loadShow(tvdb_id, cache=True):
 
@@ -16,8 +26,11 @@ def loadShow(tvdb_id, cache=True):
     
     showData = tvapi.store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
     if showData == None:
+        logger.log("Show doesn't exist in DB, making new entry", logger.DEBUG)
         showData = TVShowData(tvdb_id)
         tvapi.store.add(showData)
+
+    logger.log("Updating all info for show "+str(tvdb_id)+"from TVDB", logger.DEBUG)
 
     showData.name = tvdbShow['seriesname']
 
@@ -79,4 +92,6 @@ def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
     #other season/episode info needed for absolute/dvd/etc ordering
     
     epData.tvdb_id = int(epObj['id'])
-    epData.imdb_id = epObj['imdb_id']
+
+    # weird data on tvdb is messing this up, but we don't need it anyway
+    #epData.imdb_id = unicode(epObj['imdb_id'])

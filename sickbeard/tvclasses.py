@@ -50,14 +50,10 @@ class TVEpisode(object):
             raise Exception()
 
     def getEp(self, season, episode):
-        result = tvapi.store.find(TVEpisodeData, TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
+        result = self.episodes.find(TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
         
         if result.count() == 1:
-            if result.one() in self.episodes:
-                return result.one()
-            else:
-                print "not mine"
-                raise Exception()
+            return result.one()
         else:
             raise Exception()
    
