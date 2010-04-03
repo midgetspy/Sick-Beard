@@ -134,7 +134,11 @@ def makeSceneShowSearchStrings(show):
 
 def makeSceneSearchString (episode):
 
-	epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
+	# see if we should use dates instead of episodes
+	if "Talk Show" in episode.show.genre:
+		epString = '.' + str(episode.airdate).replace('-', '.')
+	else:
+		epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
 
 	showNames = makeSceneShowSearchStrings(episode.show)
 
