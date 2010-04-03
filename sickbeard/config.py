@@ -25,8 +25,6 @@ import datetime
 from sickbeard import helpers
 from sickbeard import logger 
 
-from lib.irclib.irclib import ServerNotConnectedError
-
 import sickbeard
 
 naming_ep_type = ("%(seasonnumber)dx%(episodenumber)02d",

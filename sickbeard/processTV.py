@@ -118,7 +118,7 @@ def processDir (dirName, recurse=False):
 
     returnStr = ''
 
-    logger.log("Processing folder "+dirName, logger.DEBUG)
+    returnStr += logHelper("Processing folder "+dirName, logger.DEBUG)
 
     fileList = ek.ek(os.listdir, dirName)
     
@@ -128,7 +128,7 @@ def processDir (dirName, recurse=False):
 
     # recursively process all the folders
     for curFolder in folders:
-        logger.log("Recursively processing a folder: "+curFolder, logger.DEBUG)
+        returnStr += logHelper("Recursively processing a folder: "+curFolder, logger.DEBUG)
         processDir(ek.ek(os.path.join, dirName, curFolder), True)
 
     # process any files in the dir
@@ -138,7 +138,7 @@ def processDir (dirName, recurse=False):
         
         # if there's only one video file in the dir we can use the dirname to process too
         if len(videoFiles) == 1 and recurse:
-            logger.log("Auto processing file: "+curFile+" ("+dirName+")")
+            returnStr += logHelper("Auto processing file: "+curFile+" ("+dirName+")")
             result = processFile(curFile, dirName)
 
             # as long as the postprocessing was successfil delete the old folder unless the config wants us not to
@@ -151,9 +151,10 @@ def processDir (dirName, recurse=False):
                     returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
             
         else:
-            logger.log("Auto processing file: "+curFile)
+            returnStr += logHelper("Auto processing file: "+curFile)
             result = processFile(curFile)
 
+    return returnStr
             
 
 
@@ -204,7 +205,7 @@ def postProcessDir(downloaderDir, nzbName=None):
 
     # a successful post-processing will return a list with a string in it
     # if it's not successful then I just return right now
-    if type(result) == str:
+    if type(result) in (str, unicode):
         return returnStr + result
 
     returnStr += result[0]
@@ -234,14 +235,17 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     for curName in (fileName, folderName, nzbName):
         if curName != None:
-            finalNameList += helpers.sceneToNormalShowNames(curName)
+            for curSceneName in helpers.sceneToNormalShowNames(curName):
+                if curSceneName not in finalNameList:
+                    finalNameList.append(curSceneName)
 
     showResults = None
     result = None
     
-    for curName in set(finalNameList):
+    for curName in finalNameList:
     
         try:
+            returnStr += logHelper("Attempting to parse name "+curName, logger.DEBUG)
             myParser = FileParser(curName)
             result = myParser.parse()
         except tvnamer_exceptions.InvalidFilename:

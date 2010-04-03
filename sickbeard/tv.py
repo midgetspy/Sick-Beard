@@ -277,10 +277,10 @@ class TVShow(object):
     
         # There's gotta be a better way of doing this but we don't wanna
         # change the cache value elsewhere
-        ltvdb_api_parms = sickbeard.TVDB_API_PARMS
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
         if not cache:
-            ltvdb_api_parms['cache'] = False
+            ltvdb_api_parms['cache'] = 'recache'
 
         try:
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
@@ -314,7 +314,7 @@ class TVShow(object):
                 
                 with ep.lock:
                     logger.log(str(self.tvdbid) + ": Loading info from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
-                    ep.loadFromTVDB(season, episode, cache)
+                    ep.loadFromTVDB(season, episode)
                     ep.saveToDB()
                 
                 scannedEps[season][episode] = True
@@ -573,10 +573,10 @@ class TVShow(object):
 
         # There's gotta be a better way of doing this but we don't wanna
         # change the cache value elsewhere
-        ltvdb_api_parms = sickbeard.TVDB_API_PARMS
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
         if not cache:
-            ltvdb_api_parms['cache'] = False
+            ltvdb_api_parms['cache'] = 'recache'
 
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
         myEp = t[self.tvdbid]
@@ -971,10 +971,10 @@ class TVEpisode:
 
         # There's gotta be a better way of doing this but we don't wanna
         # change the cache value elsewhere
-        ltvdb_api_parms = sickbeard.TVDB_API_PARMS
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
         if not cache:
-            ltvdb_api_parms['cache'] = False
+            ltvdb_api_parms['cache'] = 'recache'
 
         try:
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
