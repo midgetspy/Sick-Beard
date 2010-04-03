@@ -16,7 +16,7 @@ from sickbeard.tvapi.tvapi_classes import TVEpisodeData
 
 # the use case starts here
 # use the tvdb id to make the show data
-myShow = getTVShow(73244) # really I'd just look it up in sickbeard.showList
+myShow = getTVShow(79488) # really I'd just look it up in sickbeard.showList
 
 # in real life this line wouldn't be necessary since the metadata database would always have the latest required info
 myShow.update()

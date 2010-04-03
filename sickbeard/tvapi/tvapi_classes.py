@@ -16,7 +16,10 @@ class TVShowData(object):
     country = Unicode()
     rating = Float()
     contentrating = Unicode()
+
     tvrage_id = Int()
+    tvrage_name = Unicode()
+    
     imdb_id = Unicode()
     
     def __init__(self, tvdb_id):

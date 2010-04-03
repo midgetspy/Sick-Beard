@@ -5,7 +5,7 @@ from tvapi.tvapi_classes import TVShowData, TVEpisodeData
 
 from sickbeard import tvapi
 
-from tvapi import tvapi_tvdb
+from tvapi import tvapi_tvdb, tvapi_tvrage
 
 class TVShow(object):
     __storm_table__ = "tvshow"
@@ -22,6 +22,7 @@ class TVShow(object):
 
     def update(self, cache=True):
         tvapi_tvdb.loadShow(self.tvdb_id, cache)
+        tvapi_tvrage.loadShow(self.tvdb_id)
     
 
 class TVEpisode(object):

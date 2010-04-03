@@ -55,6 +55,7 @@ if True:
                   contentrating TEXT, \
                   tvdb_id INTEGER PRIMARY KEY, \
                   tvrage_id NUMERIC, \
+                  tvrage_name TEXT, \
                   imdb_id NUMERIC \
                   )")
     
