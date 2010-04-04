@@ -1,5 +1,7 @@
 from storm.locals import Int, Unicode, Float, List, Reference, Date, Pickle
 
+from sickbeard.tvapi import store 
+
 class TVShowData(object):
     __storm_table__ = "tvshowdata"
 
@@ -22,8 +24,49 @@ class TVShowData(object):
     
     imdb_id = Unicode()
     
+    _cached_seasons = None
+    _cached_episodes = {}
+    
     def __init__(self, tvdb_id):
         self.tvdb_id = tvdb_id
+
+    # give a list of seasons
+    def _seasons(self):
+
+        if self._cached_seasons != None:
+            return self._cached_seasons
+        
+        toReturn = []
+        for x in store.execute("SELECT distinct season from tvepisodedata where show_id = ?", (self.tvdb_id,)):
+            toReturn.append(x[0])
+        
+        if self._cached_seasons == None:
+            self._cached_seasons = toReturn
+        
+        return toReturn
+    
+    seasons = property(_seasons)
+
+    # provide a list of episode numbers for obj[season] accesses
+    def __getitem__(self, key):
+
+        # if it's been looked up before just return the cache
+        if key in self._cached_episodes:
+            return self._cached_episodes[key]
+        
+        toReturn = []
+        for x in store.execute("SELECT episode FROM tvepisodedata WHERE show_id = ? AND season = ?", (self.tvdb_id, key)):
+            toReturn.append(x[0])
+
+        # put the new lookup in the cache
+        self._cached_episodes[key] = toReturn
+        
+        return toReturn
+
+    def __storm_invalidated__(self):
+        self._cached_episodes = None
+        self._cached_seasons = None
+
     
 class TVEpisodeData(object):
     __storm_table__ = "tvepisodedata"

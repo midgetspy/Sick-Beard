@@ -21,6 +21,8 @@ myShow = getTVShow(79488) # really I'd just look it up in sickbeard.showList
 # in real life this line wouldn't be necessary since the metadata database would always have the latest required info
 myShow.update()
 store.add(myShow)
+for x in myShow.data.seasons:
+    print myShow.data[x]
 
 print "1. %s (%r)" % (myShow.data.name, myShow.tvdb_id)
 
