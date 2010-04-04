@@ -27,8 +27,6 @@ import traceback
 
 from sickbeard import exceptions
 
-from lib.tvdb_api import tvdb_api, tvdb_exceptions
-
 from tvapi_classes import TVShowData, TVEpisodeData
 
 from sickbeard import tvapi
@@ -103,54 +101,44 @@ class TVRage:
         
         try:
 
-            try:
-                t = tvdb_api.Tvdb(language='en')
-            except tvdb_exceptions.tvdb_exception, e:
-                logger.log("Currently this doesn't work with TVDB down but with some DB magic it can be added", logger.DEBUG)
-                return None
-            
             # check the first episode of every season
-            for curSeason in t[self.show.tvdb_id]:
+            for curSeason in self.show.seasons:
 
                 logger.log("Checking TVDB and TVRage sync for season "+str(curSeason), logger.DEBUG)
 
                 airdate = None
 
-                try:
-                    
-                    # don't do specials and don't do seasons with no episode 1
-                    if curSeason == 0 or 1 not in t[self.show.tvdb_id]:
-                        continue
-                    
-                    # get the episode info from TVDB
-                    ep = t[self.show.tvdb_id][curSeason][1]
+                # don't do specials and don't do seasons with no episode 1
+                if curSeason == 0 or 1 not in self.show[curSeason]:
+                    continue
                 
-                    # make sure we have a date to compare with 
-                    if ep["firstaired"] == "" or ep["firstaired"] == None:
-                        continue
-
-                    # get a datetime object
-                    rawAirdate = [int(x) for x in ep["firstaired"].split("-")]
-                    airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+                # get the episode info from the DB
+                epObj = tvapi.store.find(TVEpisodeData,
+                                   TVEpisodeData.show_id == self.show.tvdb_id,
+                                   TVEpisodeData.season == curSeason,
+                                   TVEpisodeData.episode == 1).one()
             
-                    # get the episode info from TVRage
-                    info = self._getTVRageInfo(curSeason, 1)
+                # make sure we have a date to compare with 
+                if not epObj.aired:
+                    continue
+
+                # get a datetime object
+                airdate = epObj.aired
+        
+                # get the episode info from TVRage
+                info = self._getTVRageInfo(curSeason, 1)
+                
+                # make sure we have enough info
+                if info == None or not info.has_key('Episode Info'):
+                    logger.log("TVRage doesn't have the episode info, skipping it", logger.DEBUG)
+                    continue
                     
-                    # make sure we have enough info
-                    if info == None or not info.has_key('Episode Info'):
-                        logger.log("TVRage doesn't have the episode info, skipping it", logger.DEBUG)
-                        continue
-                        
-                    # parse the episode info
-                    curEpInfo = self._getEpInfo(info['Episode Info'])
-                    
-                    # make sure we got some info back
-                    if curEpInfo == None:
-                        continue
-                        
-                # if we couldn't compare with TVDB try comparing it with the local database
-                except tvdb_exceptions.tvdb_exception, e:
-                    raise exceptions.EpisodeNotFoundException("Unable to find episode in DB")
+                # parse the episode info
+                curEpInfo = self._getEpInfo(info['Episode Info'])
+                
+                # make sure we got some info back
+                if curEpInfo == None:
+                    continue
                     
                 
                 # check if TVRage and TVDB have the same airdate for this episode
@@ -181,19 +169,17 @@ class TVRage:
         
             airdate = None
         
-            # make sure the last TVDB episode matches our last episode
-            try:
-                t = tvdb_api.Tvdb(language='en')
-                ep = t[self.show.tvdb_id][self.lastEpInfo['season']][self.lastEpInfo['episode']]
 
-                if ep["firstaired"] == "" or ep["firstaired"] == None:
-                    return None
+            # get the episode info from the DB
+            epObj = tvapi.store.find(TVEpisodeData,
+                               TVEpisodeData.show_id == self.show.tvdb_id,
+                               TVEpisodeData.season == self.lastEpInfo['season'],
+                               TVEpisodeData.episode == self.lastEpInfo['episode']).one()
+        
+            if not epObj.aired:
+                return None
 
-                rawAirdate = [int(x) for x in ep["firstaired"].split("-")]
-                airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
-            
-            except tvdb_exceptions.tvdb_exception, e:
-                raise exceptions.EpisodeNotFoundException("Unable to find episode in DB")
+            airdate = epObj.aired
             
             logger.log("Date from TVDB for episode " + str(self.lastEpInfo['season']) + "x" + str(self.lastEpInfo['episode']) + ": " + str(airdate), logger.DEBUG)
             logger.log("Date from TVRage for episode " + str(self.lastEpInfo['season']) + "x" + str(self.lastEpInfo['episode']) + ": " + str(self.lastEpInfo['airdate']), logger.DEBUG)
