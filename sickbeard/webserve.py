@@ -35,6 +35,7 @@ from sickbeard import notifiers
 from sickbeard import processTV
 from sickbeard import search
 from sickbeard import ui
+from sickbeard import classes
 
 from sickbeard import providers
 
@@ -76,12 +77,18 @@ class PageTemplate (Template):
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
+
+        logPageTitle = 'Logs & Errors'
+        if len(classes.ErrorViewer.errors):
+            logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
+        
         self.menu = [
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
             { 'title': 'History',         'key': 'history'        },
             { 'title': 'Backlog',         'key': 'backlog'        },
             { 'title': 'Config',          'key': 'config'         },
+            { 'title': logPageTitle,      'key': 'errorlogs'      },
         ]
         self.flash = Flash()
 
@@ -864,6 +871,84 @@ class HomeMassUpdate:
                                         "toRename: "+str(toRename)+"<br>\n")
 
 
+ErrorLogsMenu = [
+    { 'title': 'Clear Errors', 'path': 'errorlogs/clearerrors' },
+    { 'title': 'View Log',  'path': 'errorlogs/viewlog'  },
+]
+
+
+class ErrorLogs:
+    
+    @cherrypy.expose
+    def index(self):
+
+        t = PageTemplate(file="errorlogs.tmpl")
+        t.submenu = ErrorLogsMenu
+        
+        return _munge(t)
+    
+
+    @cherrypy.expose
+    def clearerrors(self):
+        classes.ErrorViewer.clear()
+        redirect("/errorlogs")
+
+    @cherrypy.expose
+    def viewlog(self, minLevel=logger.MESSAGE, maxLines=500):
+        
+        t = PageTemplate(file="viewlogs.tmpl")
+        t.submenu = ErrorLogsMenu
+
+        minLevel = int(minLevel)
+
+        data = []
+        if os.path.isfile(logger.logFile):
+            f = ek.ek(open, logger.logFile)
+            data = f.readlines()
+            f.close()
+
+        regex =  "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
+
+        finalData = []
+
+        numLines = 0
+        lastLine = False
+        numToShow = min(maxLines, len(data))
+        
+        for x in reversed(data):
+
+            x = x.decode('utf-8')
+            match = re.match(regex, x)
+            
+            if match:
+                level = match.group(6)
+                if level not in logger.reverseNames:
+                    lastLine = False
+                    continue
+                
+                if logger.reverseNames[level] >= minLevel:
+                    lastLine = True
+                    finalData.append(x)
+                else:
+                    lastLine = False
+                    continue
+
+            elif lastLine:
+                finalData.append("AA"+x)
+            
+            numLines += 1
+            
+            if numLines >= numToShow:
+                break
+
+        result = "".join(finalData)
+        
+        t.logLines = result
+        t.minLevel = minLevel
+        
+        return _munge(t)
+
+
 class Home:
 
     @cherrypy.expose
@@ -1262,3 +1347,5 @@ class WebInterface:
     home = Home()
 
     browser = browser.WebFileBrowser()
+
+    errorlogs = ErrorLogs()

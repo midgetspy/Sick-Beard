@@ -21,7 +21,10 @@
 import sickbeard
 
 import urllib
+import datetime
+
 from common import *
+
 from sickbeard import providers
 
 class AuthURLOpener(urllib.FancyURLopener):
@@ -106,3 +109,24 @@ class Proper:
     
     def __str__(self):
         return str(self.date)+" "+self.name+" "+str(self.season)+"x"+str(self.episode)+" of "+str(self.tvdbid)
+    
+    
+class ErrorViewer():
+    
+    errors = []
+    
+    def __init__(self):
+        ErrorViewer.errors = []
+
+    @staticmethod
+    def add(error):
+        ErrorViewer.errors.append(error)
+
+    @staticmethod
+    def clear():
+        ErrorViewer.errors = []
+
+class UIError():
+    def __init__(self, message):
+        self.message = message
+        self.time = datetime.datetime.now()
