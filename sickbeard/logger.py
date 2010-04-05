@@ -19,11 +19,8 @@
 
 
 
-import datetime
 import os.path
 import threading
-import unicodedata
-import codecs
 
 import logging
 import logging.handlers
@@ -37,11 +34,17 @@ ERROR = 2
 MESSAGE = 1
 DEBUG = 0
 
+logFile = ''
 
 def initLogging(consoleLogging=True):
+    global logFile
+
+    logFile = os.path.join(sickbeard.LOG_DIR, 'sickbeard.log')
             
     fileHandler = logging.handlers.RotatingFileHandler(
-                  os.path.join(sickbeard.LOG_DIR, 'sickbeard.log'), maxBytes=25000000, backupCount=5)
+                  logFile,
+                  maxBytes=25000000,
+                  backupCount=5)
 
     fileHandler.setLevel(logging.DEBUG)
     fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
