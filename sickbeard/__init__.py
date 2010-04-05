@@ -251,7 +251,7 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                KEEP_PROCESSED_FILE, CREATE_METADATA
+                KEEP_PROCESSED_FILE, CREATE_IMAGES
 
         
         if __INITIALIZED__:
