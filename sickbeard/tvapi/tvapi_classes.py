@@ -32,6 +32,10 @@ class TVShowData(object):
 
     # give a list of seasons
     def _seasons(self):
+        """
+        Getter for the seasons property. Returns a list of seasons available for this show.
+        Caches the result to limit unnecessary SQL queries.
+        """
 
         if self._cached_seasons != None:
             return self._cached_seasons
@@ -49,6 +53,10 @@ class TVShowData(object):
 
     # provide a list of episode numbers for obj[season] accesses
     def __getitem__(self, key):
+        """
+        Allows access to episode lists via TVEpisodeData[season]. Returns a list of episodes
+        in the given season. Caches the result to limit unnecessary SQL queries.
+        """
 
         # if it's been looked up before just return the cache
         if key in self._cached_episodes:
@@ -63,9 +71,21 @@ class TVShowData(object):
         
         return toReturn
 
-    def __storm_invalidated__(self):
-        self._cached_episodes = None
+    def resetCache(self, season=None):
+        """
+        Clear the season/episode cache. If a season is given then only that season's episodes
+        are refreshed. 
+        """
+        
+        # reset the season list
         self._cached_seasons = None
+        
+        # if there's a specific season given then delete it, else just empty the whole thing
+        if season:
+            if season in self._cached_episodes:
+                del self._cached_episodes[season]
+        else:
+            self._cached_episodes = {}
 
     
 class TVEpisodeData(object):
@@ -98,3 +118,9 @@ class TVEpisodeData(object):
         self.show_id = show_id
         self.season = season
         self.episode = episode
+
+        self.show._resetCache()
+
+    def __storm_invalidated__(self):
+        self.show.resetCache(self.season)
+

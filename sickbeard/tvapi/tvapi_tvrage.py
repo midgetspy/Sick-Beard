@@ -57,6 +57,18 @@ def loadShow(tvdb_id):
         
 
 
+def getID(tvdb_id):
+
+    showData = tvapi.store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
+    if showData == None:
+        showData = TVShowData(tvdb_id)
+        tvapi.store.add(showData)
+
+    tvr = TVRage(showData)
+        
+    return tvr._tvrage_id
+
+
 class TVRage:
     
     def __init__(self, show):

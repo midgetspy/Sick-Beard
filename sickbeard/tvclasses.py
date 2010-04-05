@@ -24,6 +24,8 @@ class TVShow(object):
         tvapi_tvdb.loadShow(self.tvdb_id, cache)
         tvapi_tvrage.loadShow(self.tvdb_id)
     
+    def nextEpisode(self):
+        pass
 
 class TVEpisode(object):
     __storm_table__ = "tvepisode"
