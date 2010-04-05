@@ -571,7 +571,7 @@ class HomePostProcess:
         if dir == None:
             redirect("/home/postprocess")
         else:
-            result = processTV.postProcessDir(dir, nzbName)
+            result = processTV.processDir(dir, nzbName)
             if quiet != None and int(quiet) == 1:
                 return result  
         
