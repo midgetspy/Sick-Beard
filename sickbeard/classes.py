@@ -92,11 +92,6 @@ class ShowListUI:
         # if nothing matches then just go with the first match I guess
         return allSeries[0]
 
-# Simple wrapper to allow me to simulate static classes
-class Callable:
-    def __init__(self, anycallable):
-        self.__call__ = anycallable
-
 class Proper:
     def __init__(self, name, url, date):
         self.name = name

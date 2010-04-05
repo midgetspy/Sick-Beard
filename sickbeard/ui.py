@@ -19,7 +19,7 @@
 
 
 import os.path
-import threading
+import datetime
 import sickbeard
 
 from sickbeard import exceptions
@@ -35,6 +35,7 @@ class ProgressIndicators():
            'dailyUpdate': []
            }
     
+    @staticmethod
     def getIndicator(name):
         if name not in ProgressIndicators._pi:
             return []
@@ -47,11 +48,9 @@ class ProgressIndicators():
         # return the list of progress indicators associated with this name
         return ProgressIndicators._pi[name]
 
+    @staticmethod
     def setIndicator(name, indicator):
         ProgressIndicators._pi[name].append(indicator)
-
-    getIndicator = classes.Callable(getIndicator)
-    setIndicator = classes.Callable(setIndicator)
 
 class QueueProgressIndicator():
     """
@@ -122,4 +121,3 @@ def addShowsFromRootDir(dir):
             del sickbeard.loadingShowList[showDir]
 
     return returnStr
-
