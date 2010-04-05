@@ -35,11 +35,11 @@ $(document).ready(function(){
         $(this).setExampleText();
     });  
 
-  $('#naming_multi_ep_type').click(function(){
+  $('#naming_multi_ep_type').change(function(){
         $(this).setExampleText();
     });  
 
-  $('#naming_ep_type').click(function(){
+  $('#naming_ep_type').change(function(){
         $(this).setExampleText();
     });  
 
