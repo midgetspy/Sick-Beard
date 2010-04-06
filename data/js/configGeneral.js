@@ -7,6 +7,8 @@ $(document).ready(function(){
                   'ep_type': $('#naming_ep_type :selected').val(),
                   'multi_ep_type': $('#naming_multi_ep_type :selected').val(),
                   'ep_name': $('#naming_ep_name').attr('checked')?"1":"0",
+                  'use_periods': $('#naming_use_periods').attr('checked')?"1":"0",
+                  'sep_type': $('#naming_sep_type :selected').val(),
                   'whichTest': 'single'
                   }
         
@@ -35,11 +37,19 @@ $(document).ready(function(){
         $(this).setExampleText();
     });  
 
+  $('#naming_use_periods').click(function(){
+        $(this).setExampleText();
+    });  
+
   $('#naming_multi_ep_type').change(function(){
         $(this).setExampleText();
     });  
 
   $('#naming_ep_type').change(function(){
+        $(this).setExampleText();
+    });  
+
+  $('#naming_sep_type').change(function(){
         $(this).setExampleText();
     });  
 

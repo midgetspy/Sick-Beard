@@ -111,6 +111,17 @@ Whether shows should use season folders by default<br />
 <br />
 <input type="checkbox" name="naming_ep_name" id="naming_ep_name" #if $sickbeard.NAMING_EP_NAME then "CHECKED" else ""#> <strong>Include episode name</strong><br />
 <br />
+<input type="checkbox" name="naming_use_periods" id="naming_use_periods" #if $sickbeard.NAMING_USE_PERIODS then "CHECKED" else ""#> <strong>Use periods</strong><br />
+If checked all spaces will be replaced with periods<br />
+<br />
+
+<strong>Separator Style</strong><br />
+<select name="naming_sep_type" id="naming_sep_type">
+#for ($i, $ex) in enumerate($config.naming_sep_type_text):
+<option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "SELECTED" else ""#>$ex
+#end for
+</select><br />
+<br />
 
 <strong>Number Style</strong><br />
 Style of season/episode numbers<br />
@@ -122,7 +133,6 @@ Style of season/episode numbers<br />
 <br />
 
 <strong>Example:</strong> <div id="normalExampleText"></div><br />
-<br />
 
 <strong>Multi-episode Style</strong><br />
 Style of season/episode numbers for multi-episodes<br />

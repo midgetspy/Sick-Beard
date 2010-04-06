@@ -230,7 +230,8 @@ class ConfigGeneral:
                     launch_browser=None, create_metadata=None, web_username=None,
                     web_password=None, quality_default=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None, create_images=None, naming_ep_name=None):
+                    naming_multi_ep_type=None, create_images=None, naming_ep_name=None,
+                    naming_use_periods=None, naming_sep_type=None):
 
         results = []
 
@@ -274,6 +275,11 @@ class ConfigGeneral:
         else:
             naming_ep_name = 0
             
+        if naming_use_periods == "on":
+            naming_use_periods = 1
+        else:
+            naming_use_periods = 0
+            
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
@@ -285,8 +291,10 @@ class ConfigGeneral:
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
         sickbeard.NAMING_EP_NAME = naming_ep_name
+        sickbeard.NAMING_USE_PERIODS = naming_use_periods
         sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
         sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
+        sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
                     
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_LOG = web_log
@@ -309,7 +317,8 @@ class ConfigGeneral:
 
 
     @cherrypy.expose
-    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None, whichTest="single"):
+    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
+                   sep_type=None, use_periods=None, whichTest="single"):
         
         if show_name == None:
             show_name = sickbeard.NAMING_SHOW_NAME
@@ -327,6 +336,14 @@ class ConfigGeneral:
             else:
                 ep_name = True
             
+        if use_periods == None:
+            use_periods = sickbeard.NAMING_USE_PERIODS
+        else:
+            if use_periods == "0":
+                use_periods = False
+            else:
+                use_periods = True
+            
         if ep_type == None:
             ep_type = sickbeard.NAMING_EP_TYPE
         else:
@@ -337,6 +354,11 @@ class ConfigGeneral:
         else:
             multi_ep_type = int(multi_ep_type)
         
+        if sep_type == None:
+            sep_type = sickbeard.NAMING_SEP_TYPE
+        else:
+            sep_type = int(sep_type)
+            
         class TVShow():
             def __init__(self):
                 self.name = "Show Name"
@@ -360,7 +382,7 @@ class ConfigGeneral:
             ep.relatedEps.append(secondEp)
         
         # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name)
+        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods)
         
         return name
 
