@@ -16,7 +16,7 @@ from sickbeard.tvapi.tvapi_classes import TVEpisodeData
 
 # the use case starts here
 # use the tvdb id to make the show data
-myShow = getTVShow(79488) # really I'd just look it up in sickbeard.showList
+myShow = getTVShow(73244) # really I'd just look it up in sickbeard.showList
 
 # in real life this line wouldn't be necessary since the metadata database would always have the latest required info
 myShow.update()
@@ -33,3 +33,5 @@ print "2. %s" % ", ".join(["%dx%d - %s" % (x.season, x.episode, x.name) for x in
 epObj.addEp(1,3)
 print "3. %s" % ", ".join(["%dx%d - %s" % (x.season, x.episode, x.name) for x in epObj.episodes])
 store.commit()
+for x in myShow.nextEpisodes():
+    print x.season, x.episode, x.aired
