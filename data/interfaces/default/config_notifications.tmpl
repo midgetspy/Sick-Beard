@@ -14,7 +14,7 @@
 
     var growl_host = \$("#growl_host").val();
     var growl_password = \$("#growl_password").val();
-    \$.get("/home/testGrowl", {'host': growl_host, 'password': growl_password});
+    \$.get("$sbRoot/home/testGrowl", {'host': growl_host, 'password': growl_password});
 
   });
 
@@ -24,7 +24,7 @@
 	var xbmc_username = \$("#xbmc_username").val();
     var xbmc_password = \$("#xbmc_password").val();
 
-    \$.get("/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
+    \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
     
   });
 });  
