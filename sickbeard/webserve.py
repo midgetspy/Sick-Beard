@@ -282,7 +282,7 @@ class ConfigGeneral:
         else:
             flash.message('Configuration Saved')
         
-        redirect("/config/index")
+        redirect("/config/general/")
 
 class ConfigEpisodeDownloads:
     
