@@ -54,6 +54,11 @@ def processEpisode(dirName, nzbName=None):
     username = config.get("SickBeard", "username")
     password = config.get("SickBeard", "password")
     
+    try:
+        web_root = config.get("SickBeard", "web_root")
+    except ConfigParser.NoSectionError:
+        web_root = ""
+    
     params = {}
     
     params['quiet'] = 1
@@ -64,7 +69,7 @@ def processEpisode(dirName, nzbName=None):
         
     myOpener = AuthURLOpener(username, password)
     
-    url = "http://" + host + ":" + port + "/home/postprocess/processEpisode?" + urllib.urlencode(params)
+    url = "http://" + host + ":" + port + web_root + "/home/postprocess/processEpisode?" + urllib.urlencode(params)
     
     try:
         urlObj = myOpener.openit(url)
