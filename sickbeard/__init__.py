@@ -84,6 +84,7 @@ SEASON_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = None
 
 NAMING_SHOW_NAME = None
+NAMING_EP_NAME = None
 NAMING_EP_TYPE = None
 NAMING_MULTI_EP_TYPE = None
 
@@ -251,7 +252,7 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                KEEP_PROCESSED_FILE, CREATE_IMAGES
+                KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME
 
         
         if __INITIALIZED__:
@@ -305,6 +306,7 @@ def initialize(consoleLogging=True):
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
         NAMING_SHOW_NAME = bool(check_setting_int(CFG, 'General', 'naming_show_name', 1))
+        NAMING_EP_NAME = bool(check_setting_int(CFG, 'General', 'naming_ep_name', 1))
         NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
         NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
 
@@ -587,6 +589,7 @@ def save_config():
     CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     CFG['General']['provider_order'] = ' '.join(PROVIDER_ORDER)
     CFG['General']['version_notify'] = int(VERSION_NOTIFY)
+    CFG['General']['naming_ep_name'] = int(NAMING_SHOW_NAME)
     CFG['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
     CFG['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
     CFG['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)

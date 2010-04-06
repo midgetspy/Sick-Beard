@@ -1,12 +1,13 @@
+#import os.path
 #import sickbeard
 #from sickbeard.common import *
+#from sickbeard import config
 #set global $title  = "Config - General"
 #set global $header = "General Configuration"
 
 #set global $sbPath="../.."
 
 <!--#set global $topmenu="config"#-->
-#import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript">
@@ -106,16 +107,16 @@ Whether shows should use season folders by default<br />
 
 <legend>Episode Naming</legend>
 
-<input type="checkbox" name="naming_show_name" id="naming_show_name" #if $sickbeard.NAMING_SHOW_NAME then "CHECKED" else ""#> <strong>Use show name</strong><br />
-If not checked the show name will be<br />
-omitted from your episode names<br />
+<input type="checkbox" name="naming_show_name" id="naming_show_name" #if $sickbeard.NAMING_SHOW_NAME then "CHECKED" else ""#> <strong>Include show name</strong><br />
+<br />
+<input type="checkbox" name="naming_ep_name" id="naming_ep_name" #if $sickbeard.NAMING_EP_NAME then "CHECKED" else ""#> <strong>Include episode name</strong><br />
 <br />
 
 <strong>Number Style</strong><br />
 Style of season/episode numbers<br />
 <select name="naming_ep_type" id="naming_ep_type">
-#for $i in range(len($naming_ep_type_text)):
-<option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "SELECTED" else ""#>$naming_ep_type_text[$i]
+#for ($i, $ex) in enumerate($config.naming_ep_type_text):
+<option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "SELECTED" else ""#>$ex
 #end for
 </select><br />
 <br />
@@ -126,8 +127,8 @@ Style of season/episode numbers<br />
 <strong>Multi-episode Style</strong><br />
 Style of season/episode numbers for multi-episodes<br />
 <select name="naming_multi_ep_type" id="naming_multi_ep_type">
-#for $i in range(len($naming_multi_ep_type_text)):
-<option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "SELECTED" else ""#>$naming_multi_ep_type_text[$i]
+#for ($i, $ex) in enumerate($config.naming_multi_ep_type_text):
+<option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "SELECTED" else ""#>$ex
 #end for
 </select><br />
 <br />

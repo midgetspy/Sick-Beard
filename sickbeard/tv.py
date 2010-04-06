@@ -1431,7 +1431,7 @@ class TVEpisode:
         else:
             return os.path.join(self.show.location, self.location)
         
-    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None):
+    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None, naming_ep_name=None):
         
         regex = "(.*) \(\d\)"
 
@@ -1469,6 +1469,9 @@ class TVEpisode:
         if naming_show_name == None:
             naming_show_name = sickbeard.NAMING_SHOW_NAME
         
+        if naming_ep_name == None:
+            naming_ep_name = sickbeard.NAMING_EP_NAME
+        
         if naming_ep_type == None:
             naming_ep_type = sickbeard.NAMING_EP_TYPE
         
@@ -1485,11 +1488,13 @@ class TVEpisode:
 
         finalName = ""
         
-        if naming_show_name == True:
+        if naming_show_name:
             finalName += self.show.name + " - "
 
         finalName += goodEpString
-        finalName += goodName
+
+        if naming_ep_name:
+            finalName += goodName
 
         return finalName
         

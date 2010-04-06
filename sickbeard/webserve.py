@@ -230,7 +230,7 @@ class ConfigGeneral:
                     launch_browser=None, create_metadata=None, web_username=None,
                     web_password=None, quality_default=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None, create_images=None):
+                    naming_multi_ep_type=None, create_images=None, naming_ep_name=None):
 
         results = []
 
@@ -269,6 +269,11 @@ class ConfigGeneral:
         else:
             naming_show_name = 0
             
+        if naming_ep_name == "on":
+            naming_ep_name = 1
+        else:
+            naming_ep_name = 0
+            
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
@@ -279,6 +284,7 @@ class ConfigGeneral:
         sickbeard.QUALITY_DEFAULT = int(quality_default)
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
+        sickbeard.NAMING_EP_NAME = naming_ep_name
         sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
         sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
                     
@@ -303,7 +309,7 @@ class ConfigGeneral:
 
 
     @cherrypy.expose
-    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, whichTest="single"):
+    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None, whichTest="single"):
         
         if show_name == None:
             show_name = sickbeard.NAMING_SHOW_NAME
@@ -312,6 +318,14 @@ class ConfigGeneral:
                 show_name = False
             else:
                 show_name = True
+            
+        if ep_name == None:
+            ep_name = sickbeard.NAMING_EP_NAME
+        else:
+            if ep_name == "0":
+                ep_name = False
+            else:
+                ep_name = True
             
         if ep_type == None:
             ep_type = sickbeard.NAMING_EP_TYPE
@@ -346,7 +360,7 @@ class ConfigGeneral:
             ep.relatedEps.append(secondEp)
         
         # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type)
+        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name)
         
         return name
 

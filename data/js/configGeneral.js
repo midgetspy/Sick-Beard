@@ -6,6 +6,7 @@ $(document).ready(function(){
         params = {'show_name': $('#naming_show_name').attr('checked')?"1":"0",
                   'ep_type': $('#naming_ep_type :selected').val(),
                   'multi_ep_type': $('#naming_multi_ep_type :selected').val(),
+                  'ep_name': $('#naming_ep_name').attr('checked')?"1":"0",
                   'whichTest': 'single'
                   }
         
@@ -25,6 +26,10 @@ $(document).ready(function(){
     };
 
   $(this).setExampleText();
+
+  $('#naming_ep_name').click(function(){
+        $(this).setExampleText();
+    });  
 
   $('#naming_show_name').click(function(){
         $(this).setExampleText();
