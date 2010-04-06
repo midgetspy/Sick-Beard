@@ -46,8 +46,4 @@ class PostProcesser():
                                  [os.path.abspath(sickbeard.TV_DOWNLOAD_DIR),
                                   ek.ek(os.path.join, os.path.abspath(sickbeard.TV_DOWNLOAD_DIR), '%')])
 
-        if sqlResults:
-            logger.log("You have shows inside your TV Download Dir, refusing to automatically post-process it.", logger.ERROR)
-            return
-        
         processTV.processDir(sickbeard.TV_DOWNLOAD_DIR)
