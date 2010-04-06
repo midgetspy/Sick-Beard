@@ -20,13 +20,15 @@ from __future__ import with_statement
 
 import os.path
 
-import gc
-import cgi
-import sqlite3
 import time
+import urllib
+import re
+import threading
+import datetime
 
 from Cheetah.Template import Template
 import cherrypy
+import cherrypy.lib
 
 from sickbeard import config
 from sickbeard import db
@@ -34,18 +36,20 @@ from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import processTV
 from sickbeard import search
-from sickbeard import ui
 from sickbeard import classes
-
 from sickbeard import providers
+from sickbeard import tv
+from sickbeard import logger, helpers, exceptions
+from sickbeard import encodingKludge as ek
 
 from sickbeard.notifiers import xbmc
-from sickbeard.tv import *
+from sickbeard.common import *
 
 from lib.tvdb_api import tvdb_exceptions
+from lib.tvdb_api import tvdb_api
 
 import sickbeard
-import sickbeard.helpers
+
 from sickbeard import browser
 
 
@@ -296,6 +300,55 @@ class ConfigGeneral:
             flash.message('Configuration Saved')
         
         redirect("/config/index")
+
+
+    @cherrypy.expose
+    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, whichTest="single"):
+        
+        if show_name == None:
+            show_name = sickbeard.NAMING_SHOW_NAME
+        else:
+            if show_name == "0":
+                show_name = False
+            else:
+                show_name = True
+            
+        if ep_type == None:
+            ep_type = sickbeard.NAMING_EP_TYPE
+        else:
+            ep_type = int(ep_type)
+            
+        if multi_ep_type == None:
+            multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
+        else:
+            multi_ep_type = int(multi_ep_type)
+        
+        class TVShow():
+            def __init__(self):
+                self.name = "Show Name"
+        
+        # fake a TVShow (hack since new TVShow is coming anyway)
+        class TVEpisode(tv.TVEpisode):
+            def __init__(self, season, episode, name):
+                self.relatedEps = []
+                self.name = name
+                self.season = season
+                self.episode = episode
+                self.show = TVShow()
+                
+        
+        # make a fake episode object
+        ep = TVEpisode(1,2,"Ep Name")
+        
+        if whichTest == "multi":
+            ep.name = "Ep Name (1)"
+            secondEp = TVEpisode(1,3,"Ep Name (2)")
+            ep.relatedEps.append(secondEp)
+        
+        # get the name
+        name = ep.prettyName(show_name, ep_type, multi_ep_type)
+        
+        return name
 
 class ConfigEpisodeDownloads:
     

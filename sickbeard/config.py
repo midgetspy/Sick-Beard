@@ -29,11 +29,14 @@ import sickbeard
 
 naming_ep_type = ("%(seasonnumber)dx%(episodenumber)02d",
                   "s%(seasonnumber)02de%(episodenumber)02d",
-                   "S%(seasonnumber)02dE%(episodenumber)02d")
+                   "S%(seasonnumber)02dE%(episodenumber)02d",
+                   "%(seasonnumber)02dx%(episodenumber)02d")
+naming_ep_type_text = ("1x02", "s01e02", "S01E02", "01x02")
+
 naming_multi_ep_type = {0: ["-%(episodenumber)02d"]*len(naming_ep_type),
                         1: [" - " + x for x in naming_ep_type],
-                        2: [x + "%(episodenumber)02d" for x in ("x", "e", "E")]}
-
+                        2: [x + "%(episodenumber)02d" for x in ("x", "e", "E", "x")]}
+naming_multi_ep_type_text = ("extend", "duplicate", "repeat")
 
 def change_LOG_DIR(log_dir):
 

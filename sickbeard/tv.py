@@ -1485,7 +1485,7 @@ class TVEpisode:
 
         finalName = ""
         
-        if naming_show_name:
+        if naming_show_name == True:
             finalName += self.show.name + " - "
 
         finalName += goodEpString

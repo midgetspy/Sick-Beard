@@ -1,32 +1,27 @@
 $(document).ready(function(){
 
-    var multiExamples = [["1x02-03", "s01e02-03", "S01E02-03"],
-                         ["1x02 - 1x03", "s01e02 - s01e03", "S01E02 - S01E03"],
-                         ["1x02x03", "s01e02e03", "S01E02E03"]
-                         ]
 
     $.fn.setExampleText = function() { 
 
-        exampleText = ""
-        multiExampleText = ""
+        params = {'show_name': $('#naming_show_name').attr('checked')?"1":"0",
+                  'ep_type': $('#naming_ep_type :selected').val(),
+                  'multi_ep_type': $('#naming_multi_ep_type :selected').val(),
+                  'whichTest': 'single'
+                  }
         
-        if ($('#naming_show_name').attr('checked')) {
-            exampleText += "Show Name - ";
-            multiExampleText += "Show Name - ";
-        }
-        
-        var numStyleSel = $('#naming_ep_type :selected')
-        var multiNumStyleSel = $('#naming_multi_ep_type :selected')
-        
-        exampleText += numStyleSel.text()
-        multiExampleText += multiExamples[multiNumStyleSel.val()][numStyleSel.val()]
-        
-        exampleText += " - Episode Name"
-        multiExampleText += " - Episode Name(s)"
-        
-        $('#multiExampleText').text(multiExampleText);
+        $.get(nameTestURL, params,
+              function(data){
+                  $('#normalExampleText').text(data);
+        });
 
-        return $('#normalExampleText').text(exampleText); 
+        params['whichTest'] = 'multi'
+        $.get(nameTestURL, params,
+              function(data){
+                  $('#multiExampleText').text(data);
+        });
+
+        return
+
     };
 
   $(this).setExampleText();
