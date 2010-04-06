@@ -179,10 +179,17 @@ def processDir (dirName, recurse=False):
                     shutil.rmtree(dirName)
                 except (OSError, IOError), e:
                     returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
+
+            else:
+                returnStr += result
             
         else:
             returnStr += logHelper("Auto processing file: "+curFile)
             result = processFile(curFile)
+            if type(result) == list:
+                returnStr += result[0]
+            else:
+                returnStr += result
 
     return returnStr
             
