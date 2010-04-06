@@ -289,6 +289,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
             continue
 
+        if not result.seriesname:
+            returnStr += logHelper("Filename "+curName+" has no series name, unable to use this name for processing", logger.DEBUG)
+            continue
+
         try:
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
             showObj = t[result.seriesname]
