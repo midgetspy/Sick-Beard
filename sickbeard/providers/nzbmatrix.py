@@ -102,6 +102,8 @@ def _doSearch(curString, quality):
 
 	logger.log("Search string: " + searchURL, logger.DEBUG)
 
+	logger.log("Sleeping 60 seconds to respect NZBMatrix's API rules")
+	time.sleep(60)
 	f = urllib.urlopen(searchURL)
 	searchResult = "".join(f.readlines())
 	f.close()
