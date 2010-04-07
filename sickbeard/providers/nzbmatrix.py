@@ -20,14 +20,17 @@
 
 import os.path
 import re
-import sys
+import sqlite3
 import time
 import urllib
 import datetime
 
+import xml.etree.cElementTree as etree
+
 import sickbeard
 
 from sickbeard import exceptions, helpers, classes
+from sickbeard import db, tvcache
 from sickbeard.common import *
 from sickbeard import logger
 
@@ -71,28 +74,60 @@ def findEpisode (episode, forceQuality=None):
 		quality = {"catid": 41}
 	else:
 		quality = {"catid": "tv-all"}
-		
-	sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
 	
-	results = []
-
-	for curString in sceneSearchStrings:
-
-		for resultDict in _doSearch(curString, quality):
-
-			if epQuality == HD and "720p" not in resultDict["NZBNAME"]:
-				logger.log("Ignoring result "+resultDict["NZBNAME"]+" because it doesn't contain 720p in the name", logger.DEBUG)
-				continue
-
-			result = sickbeard.classes.NZBSearchResult(episode)
-			result.provider = providerName.lower()
-			result.url = resultDict["SBURL"]
-			result.extraInfo = [resultDict["NZBNAME"]]
-			result.quality = epQuality
+	if episode.status == (BACKLOG):
 		
-			results.append(result)
-					
-	return results
+	
+		sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
+		
+		results = []
+	
+		for curString in sceneSearchStrings:
+	
+			for resultDict in _doSearch(curString, quality):
+	
+				if epQuality == HD and "720p" not in resultDict["NZBNAME"]:
+					logger.log("Ignoring result "+resultDict["NZBNAME"]+" because it doesn't contain 720p in the name", logger.DEBUG)
+					continue
+	
+				result = classes.NZBSearchResult(episode)
+				result.provider = providerName.lower()
+				result.url = resultDict["SBURL"]
+				result.extraInfo = [resultDict["NZBNAME"]]
+				result.quality = epQuality
+			
+				results.append(result)
+						
+		return results
+
+	else:
+
+		myCache = NZBMatrixCache()
+		
+		myCache.updateCache()
+		
+		cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
+		logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
+	
+		nzbResults = []
+	
+		for curResult in cacheResults:
+			
+			title = curResult["name"]
+			url = curResult["url"]
+		
+			logger.log("Found result " + title + " at " + url)
+	
+			result = classes.NZBSearchResult(episode)
+			result.provider = providerName.lower()
+			result.url = url 
+			result.extraInfo = [title]
+			result.quality = epQuality
+			
+			nzbResults.append(result)
+	
+		return nzbResults
+
 
 def _doSearch(curString, quality):
 	params = {"search": curString.replace("."," ").encode('utf-8'), "age": sickbeard.USENET_RETENTION, "username": sickbeard.NZBMATRIX_USERNAME, "apikey": sickbeard.NZBMATRIX_APIKEY}
@@ -155,3 +190,64 @@ def findPropers(date=None):
 					results.append(classes.Proper(curResult["NZBNAME"], curResult["SBURL"], resultDate))
 	
 	return results
+
+
+class NZBMatrixCache(tvcache.TVCache):
+	
+	def __init__(self):
+
+		# only poll NZBMatrix every 10 minutes max
+		self.minTime = 25
+		
+		tvcache.TVCache.__init__(self, "nzbmatrix")
+	
+	def updateCache(self):
+
+		if not self.shouldUpdate():
+			return
+		
+		# get all records since the last timestamp
+		url = "http://rss.nzbmatrix.com/rss.php?"
+
+		urlArgs = {'page': 'download',
+				   'username': sickbeard.NZBMATRIX_USERNAME,
+				   'apikey': sickbeard.NZBMATRIX_APIKEY,
+				   'subcat': '6,5,41',
+				   'english': 1}
+
+		url += urllib.urlencode(urlArgs)
+		
+		logger.log("NZBMatrix cache update URL: "+ url, logger.DEBUG)
+		
+		f = urllib.urlopen(url)
+		data = "".join(f.readlines())
+		f.close()
+		
+		# as long as the http request worked we count this as an update
+		if data:
+			self.setLastUpdate()
+		
+		# now that we've loaded the current RSS feed lets delete the old cache
+		logger.log("Clearing cache and updating with new information")
+		self._clearCache()
+		
+		try:
+			responseSoup = etree.ElementTree(etree.XML(data))
+			items = responseSoup.getiterator('item')
+		except Exception, e:
+			logger.log("Error trying to load TVBinz RSS feed: "+str(e), logger.ERROR)
+			return []
+			
+		for item in items:
+
+			if item.findtext('title') == None or item.findtext('link') == None:
+				logger.log("The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable: "+str(item), logger.ERROR)
+				continue
+
+			title = item.findtext('title')
+			url = item.findtext('link').replace('&amp;', '&')
+
+			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
+
+			self._addCacheEntry(title, url)
+
