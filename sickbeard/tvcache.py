@@ -111,11 +111,11 @@ class TVCache():
                 continue
         
         if not epInfo:
-            logger.log("Giving up because I'm unable to figure out what show/etc this is: "+name, logger.ERROR)
+            logger.log("Giving up because I'm unable to figure out what show/etc this is: "+name, logger.DEBUG)
             return False
         
         if not epInfo.seriesname:
-            logger.log("No series name retrieved from "+name+", unable to cache it", logger.ERROR)
+            logger.log("No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
             return False
 
         # if we need tvdb_id or tvrage_id then search the DB for them
