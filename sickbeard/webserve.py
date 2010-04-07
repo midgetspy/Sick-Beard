@@ -1332,8 +1332,8 @@ class Home:
                         logger.log("Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
                     
-                    if int(status) == DOWNLOADED and epObj.status != PREDOWNLOADED:
-                        logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not PREDOWNLOADED", logger.ERROR)
+                    if int(status) == DOWNLOADED and epObj.status not in (PREDOWNLOADED, SNATCHED_PROPER):
+                        logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not PREDOWNLOADED/SNATCHED_PROPER", logger.ERROR)
                         continue
 
                     epObj.status = int(status)

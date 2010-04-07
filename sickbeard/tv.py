@@ -1055,7 +1055,8 @@ class TVEpisode:
 
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
-            if self.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG):
+            # leave propers alone, you have to either post-process them or manually change them back
+            if self.status not in (SNATCHED_PROPER, PREDOWNLOADED):
                 logger.log("5 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
                 self.status = DOWNLOADED
 

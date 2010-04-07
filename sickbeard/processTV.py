@@ -144,8 +144,8 @@ def processDir (dirName, recurse=False):
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
     for sqlShow in sqlResults:
-        if dirName.startswith(os.path.abspath(sqlShow["location"])+os.sep):
-            returnStr += logHelper("You're trying to post process a show that's already been moved to its show dir", logger.ERROR)
+        if dirName.startswith(os.path.abspath(sqlShow["location"])+os.sep) or dirName == os.path.abspath(sqlShow["location"]):
+            returnStr += logHelper("You're trying to post process an episode that's already been moved to its show dir", logger.ERROR)
             return returnStr
 
     fileList = ek.ek(os.listdir, dirName)
@@ -289,6 +289,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
             continue
 
+        if not result.seriesname:
+            returnStr += logHelper("Filename "+curName+" has no series name, unable to use this name for processing", logger.DEBUG)
+            continue
+
         try:
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
             showObj = t[result.seriesname]
@@ -401,6 +405,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         if existingResult == 1:
             existingResult = 2
     
+    returnStr += logHelper("Existing result: "+str(existingResult), logger.DEBUG)
+    
     # see if the existing file is bigger - if it is, bail (unless it's a proper in which case we're forcing an overwrite)
     if existingResult > 0:
         if rootEp.status == SNATCHED_PROPER:
@@ -452,8 +458,12 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
             else:
                 returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
-            os.remove(existingFile)
-            #TODO: delete old metadata
+            #TODO: delete old metadata?
+        else:
+            returnStr += logHelper(newFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
+            existingFile = newFile
+        
+        os.remove(existingFile)
             
             
 
