@@ -405,6 +405,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         if existingResult == 1:
             existingResult = 2
     
+    returnStr += logger.log("Existing result: "+str(existingResult), logger.DEBUG)
+    
     # see if the existing file is bigger - if it is, bail (unless it's a proper in which case we're forcing an overwrite)
     if existingResult > 0:
         if rootEp.status == SNATCHED_PROPER:
@@ -456,8 +458,12 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
             else:
                 returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
-            os.remove(existingFile)
-            #TODO: delete old metadata
+            #TODO: delete old metadata?
+        else:
+            returnStr += logHelper(newFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
+            existingFile = newFile
+        
+        os.remove(existingFile)
             
             
 
