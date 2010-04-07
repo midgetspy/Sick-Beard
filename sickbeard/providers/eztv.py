@@ -4,7 +4,7 @@ import os.path
 
 import xml.etree.cElementTree as etree
 from sickbeard.common import *
-from sickbeard import logger
+from sickbeard import logger, helpers
 
 providerType = "torrent"
 providerName = "EZTV"
@@ -35,7 +35,7 @@ def downloadTorrent (torrent):
     if data == None:
         return False
     
-    fileName = os.path.join(sickbeard.TORRENT_DIR, torrent.fileName())
+    fileName = os.path.join(sickbeard.TORRENT_DIR, helpers.sanitizeFileName(torrent.fileName()))
     #fileName = os.path.join(sickbeard.TORRENT_DIR, os.path.basename(torrent.url))
     
     logger.log("Saving to " + fileName, logger.DEBUG)
