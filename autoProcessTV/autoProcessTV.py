@@ -56,7 +56,7 @@ def processEpisode(dirName, nzbName=None):
     
     try:
         web_root = config.get("SickBeard", "web_root")
-    except ConfigParser.NoSectionError, ConfigParser.NoOptionError:
+    except ConfigParser.NoOptionError:
         web_root = ""
     
     params = {}
