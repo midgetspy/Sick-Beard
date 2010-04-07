@@ -405,7 +405,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         if existingResult == 1:
             existingResult = 2
     
-    returnStr += logger.log("Existing result: "+str(existingResult), logger.DEBUG)
+    returnStr += logHelper("Existing result: "+str(existingResult), logger.DEBUG)
     
     # see if the existing file is bigger - if it is, bail (unless it's a proper in which case we're forcing an overwrite)
     if existingResult > 0:
