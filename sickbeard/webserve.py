@@ -1353,7 +1353,7 @@ class Home:
         tempStr = "Searching for download for " + epObj.prettyName(True)
         logger.log(tempStr)
         outStr += tempStr + "<br />\n"
-        foundEpisodes = search.findEpisode(epObj)
+        foundEpisodes = search.findEpisode(epObj, manualSearch=True)
         
         if len(foundEpisodes) == 0:
             message = 'No downloads were found'

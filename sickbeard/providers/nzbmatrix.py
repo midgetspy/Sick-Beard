@@ -53,7 +53,7 @@ def downloadNZB (nzb):
 	return True
 	
 	
-def findEpisode (episode, forceQuality=None):
+def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	if episode.status == DISCBACKLOG:
 		logger.log("NZBMatrix doesn't support disc backlog. Use newzbin or download it manually from NZBMatrix")

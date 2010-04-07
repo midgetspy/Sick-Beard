@@ -48,7 +48,7 @@ def downloadTorrent (torrent):
 
 
 
-def findEpisode(episode, forceQuality=None):
+def findEpisode(episode, forceQuality=None, manualSearch=False):
 
     if episode.status == DISCBACKLOG:
         logger.log("EZTV doesn't support disc backlog. Download it manually.")

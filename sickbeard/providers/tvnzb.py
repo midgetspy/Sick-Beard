@@ -77,7 +77,7 @@ def downloadNZB (nzb):
 
 	return True
 	
-def findEpisode (episode, forceQuality=None):
+def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	if episode.status == DISCBACKLOG:
 		logger.log("TVNZB doesn't support disc backlog. Use Newzbin or download it manually from TVNZB")
