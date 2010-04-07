@@ -75,58 +75,60 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 	else:
 		quality = {"catid": "tv-all"}
 	
-	if episode.status == (BACKLOG):
-		
+	myCache = NZBMatrixCache()
 	
-		sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
-		
-		results = []
+	myCache.updateCache()
 	
-		for curString in sceneSearchStrings:
-	
-			for resultDict in _doSearch(curString, quality):
-	
-				if epQuality == HD and "720p" not in resultDict["NZBNAME"]:
-					logger.log("Ignoring result "+resultDict["NZBNAME"]+" because it doesn't contain 720p in the name", logger.DEBUG)
-					continue
-	
-				result = classes.NZBSearchResult(episode)
-				result.provider = providerName.lower()
-				result.url = resultDict["SBURL"]
-				result.extraInfo = [resultDict["NZBNAME"]]
-				result.quality = epQuality
-			
-				results.append(result)
-						
-		return results
+	cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
+	logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
 
-	else:
+	nzbResults = []
 
-		myCache = NZBMatrixCache()
+	for curResult in cacheResults:
 		
-		myCache.updateCache()
+		title = curResult["name"]
+		url = curResult["url"]
+	
+		logger.log("Found result " + title + " at " + url)
+
+		result = classes.NZBSearchResult(episode)
+		result.provider = providerName.lower()
+		result.url = url 
+		result.extraInfo = [title]
+		result.quality = epQuality
 		
-		cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
-		logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
+		nzbResults.append(result)
+
+	return nzbResults
+
+	# if we got some results then use them no matter what.
+	# OR
+	# return anyway unless we're doing a backlog or manual search
+	if nzbResults or not (episode.status == BACKLOG or manualSearch):
+		return nzbResults
+
 	
-		nzbResults = []
+	sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
 	
-		for curResult in cacheResults:
-			
-			title = curResult["name"]
-			url = curResult["url"]
-		
-			logger.log("Found result " + title + " at " + url)
-	
+	results = []
+
+	for curString in sceneSearchStrings:
+
+		for resultDict in _doSearch(curString, quality):
+
+			if epQuality == HD and "720p" not in resultDict["NZBNAME"]:
+				logger.log("Ignoring result "+resultDict["NZBNAME"]+" because it doesn't contain 720p in the name", logger.DEBUG)
+				continue
+
 			result = classes.NZBSearchResult(episode)
 			result.provider = providerName.lower()
-			result.url = url 
-			result.extraInfo = [title]
+			result.url = resultDict["SBURL"]
+			result.extraInfo = [resultDict["NZBNAME"]]
 			result.quality = epQuality
-			
-			nzbResults.append(result)
-	
-		return nzbResults
+		
+			results.append(result)
+					
+	return results
 
 
 def _doSearch(curString, quality):
@@ -199,7 +201,7 @@ class NZBMatrixCache(tvcache.TVCache):
 		# only poll NZBMatrix every 10 minutes max
 		self.minTime = 25
 		
-		tvcache.TVCache.__init__(self, "nzbmatrix")
+		tvcache.TVCache.__init__(self, providerName.lower())
 	
 	def updateCache(self):
 
