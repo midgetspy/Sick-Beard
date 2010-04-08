@@ -170,15 +170,17 @@ def processDir (dirName, recurse=False):
             result = processFile(curFile, dirName)
 
             # as long as the postprocessing was successful delete the old folder unless the config wants us not to
-            if type(result) == list and not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
+            if type(result) == list:
                 returnStr += result[0]
-                
-                returnStr += logHelper("Deleting folder " + dirName, logger.DEBUG)
-                
-                try:
-                    shutil.rmtree(dirName)
-                except (OSError, IOError), e:
-                    returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
+
+                if not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
+                    
+                    returnStr += logHelper("Deleting folder " + dirName, logger.DEBUG)
+                    
+                    try:
+                        shutil.rmtree(dirName)
+                    except (OSError, IOError), e:
+                        returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
 
             else:
                 returnStr += result
