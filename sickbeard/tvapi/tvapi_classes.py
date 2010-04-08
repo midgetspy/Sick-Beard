@@ -1,8 +1,8 @@
-from storm.locals import Int, Unicode, Float, List, Reference, Date, Pickle
+from storm.locals import Int, Unicode, Float, Reference, Date, Pickle, Storm
 
 from sickbeard.tvapi import store 
 
-class TVShowData(object):
+class TVShowData(Storm):
     __storm_table__ = "tvshowdata"
 
     tvdb_id = Int(primary=True)
@@ -23,6 +23,8 @@ class TVShowData(object):
     tvrage_name = Unicode()
     
     imdb_id = Unicode()
+    
+    show_obj = Reference(tvdb_id, "TVShow.tvdb_id")
     
     _cached_seasons = None
     _cached_episodes = {}
@@ -88,7 +90,7 @@ class TVShowData(object):
             self._cached_episodes = {}
 
     
-class TVEpisodeData(object):
+class TVEpisodeData(Storm):
     __storm_table__ = "tvepisodedata"
     __storm_primary__ = "show_id", "season", "episode"
 
@@ -109,18 +111,21 @@ class TVEpisodeData(object):
     displayepisode = Int()
     #other season/episode info needed for absolute/dvd/etc ordering
     
+    _eid = Int()
+    
     tvdb_id = Int()
     imdb_id = Unicode()
 
-    show = Reference(show_id, TVShowData.tvdb_id)
+    show_data = Reference(show_id, "TVShowData.tvdb_id")
+    ep_obj = Reference(_eid, "TVEpisode.eid")
 
     def __init__(self, show_id, season, episode):
         self.show_id = show_id
         self.season = season
         self.episode = episode
 
-        self.show._resetCache()
-
     def __storm_invalidated__(self):
-        self.show.resetCache(self.season)
+        self.show_data.resetCache(self.season)
 
+    def __storm_loaded__(self):
+        self.show_data.resetCache(self.season)

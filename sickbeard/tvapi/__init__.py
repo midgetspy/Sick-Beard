@@ -36,7 +36,8 @@ if True:
                   displayseason NUMERIC, \
                   displayepisode NUMERIC, \
                   tvdb_id NUMERIC, \
-                  imdb_id NUMERIC \
+                  imdb_id NUMERIC, \
+                  _eid NUMERIC \
                   )")
     
     
@@ -69,7 +70,7 @@ if True:
     store.execute("CREATE TABLE tvepisode ( \
                   eid INTEGER PRIMARY KEY, \
                   location TEXT, \
-                  status NUMERIC, \
+                  _status NUMERIC, \
                   hasnfo NUMERIC, \
                   hastbn NUMERIC, \
                   _show NUMERIC \

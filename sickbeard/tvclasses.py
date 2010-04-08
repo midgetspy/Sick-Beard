@@ -1,5 +1,8 @@
+import datetime
+
 from storm.locals import Int, Unicode, List, Float, Date, Bool, \
-                        Reference, ReferenceSet
+                        Reference, ReferenceSet, Storm
+from storm.expr import And
 
 from tvapi.tvapi_classes import TVShowData, TVEpisodeData
 
@@ -7,7 +10,7 @@ from sickbeard import tvapi
 
 from tvapi import tvapi_tvdb, tvapi_tvrage
 
-class TVShow(object):
+class TVShow(Storm):
     """
     Represents a show that's been added in Sick Beard. Stores all data specific to
     TV shows in Sick Beard (as opposed to the data that is specific to the TV show
@@ -26,14 +29,14 @@ class TVShow(object):
     seasonFolders = Bool()
     paused = Bool()
     
-    data = Reference(tvdb_id, TVShowData.tvdb_id)
+    show_data = Reference(tvdb_id, "TVShowData.tvdb_id")
     
     def __init__(self, tvdb_id):
         self.tvdb_id = tvdb_id
 
     def update(self, cache=True):
         tvapi_tvdb.loadShow(self.tvdb_id, cache)
-        tvapi_tvrage.loadShow(self.tvdb_id)
+        #tvapi_tvrage.loadShow(self.tvdb_id)
     
     def nextEpisodes(self, fromDate=None, untilDate=None):
         """
@@ -58,7 +61,7 @@ class TVShow(object):
         result = tvapi.store.find(TVEpisodeData, And(*conditions))
         return result
 
-class TVEpisode(object):
+class TVEpisode(Storm):
     """
     Represents an episode of a show that's added in Sick Beard. Stores all data
     specific to a TV episode in Sick Beard (as opposed to the data that is specific
@@ -85,7 +88,7 @@ class TVEpisode(object):
     location = Unicode()
 
     # sick beard status (skipped, missed, snatched, etc)
-    status = Int()
+    _status = Int()
     
     # whether nfo/tbn exists
     hasnfo = Bool()
@@ -93,7 +96,26 @@ class TVEpisode(object):
     
     _show = Int()
     
-    show = Reference(_show, TVShow.tvdb_id)
+    show = Reference(_show, "TVShow.tvdb_id")
+    episodes_data = ReferenceSet(eid, "TVEpisodeData._eid")
+    
+    def _getStatus(self):
+        if self._status == None:
+            if self.episodes_data.count() == 1:
+                epData = self.episodes_data.one()
+                if epData.aired >= datetime.date.today():
+                    return 11 #TODO: UNAIRED
+                else:
+                    return 22 #TODO: SKIPPED
+            else:
+                return 33 #UNKNOWN
+        else:
+            return self._status
+    
+    def _setStatus(self, value):
+        self._status = value
+    
+    status = property(_getStatus, _setStatus)
     
     def __init__(self, show):
         self.show = show
@@ -105,29 +127,15 @@ class TVEpisode(object):
         result = tvapi.store.find(TVEpisodeData, TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
         
         if result.count() == 1:
-            self.episodes.add(result.one())
+            self.episodes_data.add(result.one())
         else:
             raise Exception()
 
     def getEp(self, season, episode):
-        result = self.episodes.find(TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
+        result = self.episodes_data.find(TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
         
         if result.count() == 1:
             return result.one()
         else:
             raise Exception()
    
-class EpisodeDataRel(object):
-    __storm_table__ = "episodedatarel"
-    __storm_primary__ = "eid", "show_id", "season", "episode"
-
-    eid = Int()
-    show_id = Int()
-    season = Int()
-    episode = Int()
-
-TVEpisode.episodes = ReferenceSet(TVEpisode.eid, EpisodeDataRel.eid, 
-                                  (EpisodeDataRel.show_id, EpisodeDataRel.season, EpisodeDataRel.episode),
-                                  (TVEpisodeData.show_id, TVEpisodeData.season, TVEpisodeData.episode))
-
-
