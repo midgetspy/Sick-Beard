@@ -1055,7 +1055,8 @@ class TVEpisode:
 
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
-            if self.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG):
+            # leave propers alone, you have to either post-process them or manually change them back
+            if self.status not in (SNATCHED_PROPER, PREDOWNLOADED):
                 logger.log("5 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
                 self.status = DOWNLOADED
 
@@ -1431,7 +1432,8 @@ class TVEpisode:
         else:
             return os.path.join(self.show.location, self.location)
         
-    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None):
+    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
+                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None):
         
         regex = "(.*) \(\d\)"
 
@@ -1469,11 +1471,20 @@ class TVEpisode:
         if naming_show_name == None:
             naming_show_name = sickbeard.NAMING_SHOW_NAME
         
+        if naming_ep_name == None:
+            naming_ep_name = sickbeard.NAMING_EP_NAME
+        
         if naming_ep_type == None:
             naming_ep_type = sickbeard.NAMING_EP_TYPE
         
         if naming_multi_ep_type == None:
             naming_multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
+        
+        if naming_sep_type == None:
+            naming_sep_type = sickbeard.NAMING_SEP_TYPE
+        
+        if naming_use_periods == None:
+            naming_use_periods = sickbeard.NAMING_USE_PERIODS
         
         goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
         
@@ -1481,15 +1492,20 @@ class TVEpisode:
             goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
         
         if goodName != '':
-            goodName = ' - ' + goodName
+            goodName = config.naming_sep_type[naming_sep_type] + goodName
 
         finalName = ""
         
         if naming_show_name:
-            finalName += self.show.name + " - "
+            finalName += self.show.name + config.naming_sep_type[naming_sep_type]
 
         finalName += goodEpString
-        finalName += goodName
+
+        if naming_ep_name:
+            finalName += goodName
+        
+        if naming_use_periods:
+            finalName = re.sub("\s+", ".", finalName)
 
         return finalName
         

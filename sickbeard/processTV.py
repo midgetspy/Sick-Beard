@@ -120,6 +120,34 @@ def processDir (dirName, recurse=False):
 
     returnStr += logHelper("Processing folder "+dirName, logger.DEBUG)
 
+    # if they passed us a real dir then assume it's the one we want
+    if os.path.isdir(dirName):
+        dirName = os.path.abspath(dirName)
+    
+    # if they've got a download dir configured then use it
+    elif sickbeard.TV_DOWNLOAD_DIR and os.path.isdir(sickbeard.TV_DOWNLOAD_DIR) \
+            and os.path.normpath(dirName) != os.path.normpath(sickbeard.TV_DOWNLOAD_DIR):
+        dirName = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, os.path.abspath(dirName).split(os.path.sep)[-1])
+        returnStr += logHelper("Trying to use folder "+dirName, logger.DEBUG)
+
+    # if we didn't find a real dir then quit
+    if not ek.ek(os.path.isdir, dirName):
+        returnStr += logHelper("Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
+        return returnStr
+
+    # TODO: check if it's failed and deal with it if it is
+    if dirName.startswith('_FAILED_'):
+        returnStr += logHelper("The directory name indicates it failed to extract, cancelling", logger.DEBUG)
+        return returnStr
+    
+    # make sure the dir isn't inside a show dir
+    myDB = db.DBConnection()
+    sqlResults = myDB.select("SELECT * FROM tv_shows")
+    for sqlShow in sqlResults:
+        if dirName.startswith(os.path.abspath(sqlShow["location"])+os.sep) or dirName == os.path.abspath(sqlShow["location"]):
+            returnStr += logHelper("You're trying to post process an episode that's already been moved to its show dir", logger.ERROR)
+            return returnStr
+
     fileList = ek.ek(os.listdir, dirName)
     
     # split the list into video files and folders
@@ -141,18 +169,27 @@ def processDir (dirName, recurse=False):
             returnStr += logHelper("Auto processing file: "+curFile+" ("+dirName+")")
             result = processFile(curFile, dirName)
 
-            # as long as the postprocessing was successfil delete the old folder unless the config wants us not to
+            # as long as the postprocessing was successful delete the old folder unless the config wants us not to
             if type(result) == list and not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
+                returnStr += result[0]
+                
                 returnStr += logHelper("Deleting folder " + dirName, logger.DEBUG)
                 
                 try:
                     shutil.rmtree(dirName)
                 except (OSError, IOError), e:
                     returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
+
+            else:
+                returnStr += result
             
         else:
             returnStr += logHelper("Auto processing file: "+curFile)
             result = processFile(curFile)
+            if type(result) == list:
+                returnStr += result[0]
+            else:
+                returnStr += result
 
     return returnStr
             
@@ -250,6 +287,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             result = myParser.parse()
         except tvnamer_exceptions.InvalidFilename:
             returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
+            continue
+
+        if not result.seriesname:
+            returnStr += logHelper("Filename "+curName+" has no series name, unable to use this name for processing", logger.DEBUG)
             continue
 
         try:
@@ -364,6 +405,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         if existingResult == 1:
             existingResult = 2
     
+    returnStr += logHelper("Existing result: "+str(existingResult), logger.DEBUG)
+    
     # see if the existing file is bigger - if it is, bail (unless it's a proper in which case we're forcing an overwrite)
     if existingResult > 0:
         if rootEp.status == SNATCHED_PROPER:
@@ -415,8 +458,12 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
             else:
                 returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
-            os.remove(existingFile)
-            #TODO: delete old metadata
+            #TODO: delete old metadata?
+        else:
+            returnStr += logHelper(newFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
+            existingFile = newFile
+        
+        os.remove(existingFile)
             
             
 
@@ -451,5 +498,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     # we don't want to put predownloads in the library until we can deal with removing them
     if sickbeard.XBMC_UPDATE_LIBRARY == True and rootEp.status != PREDOWNLOADED:
         notifiers.xbmc.updateLibrary(rootEp.show.location)
+
+    returnStr += logHelper("Post processing finished successfully", logger.DEBUG)
 
     return [returnStr]

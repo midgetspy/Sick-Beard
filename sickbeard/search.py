@@ -92,17 +92,17 @@ def snatchEpisode(result, endStatus=SNATCHED):
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
 
-def _doSearch(episode, provider):
+def _doSearch(episode, provider, manualSearch):
 
 	# if we already got the SD then only try HD on BEST episodes
 	if episode.show.quality == BEST and episode.status == PREDOWNLOADED:
-		foundEps = provider.findEpisode(episode, HD)
+		foundEps = provider.findEpisode(episode, HD, manualSearch)
 	else:
-		foundEps = provider.findEpisode(episode)
+		foundEps = provider.findEpisode(episode, manualSearch=manualSearch)
 
 	# if we found something and we're on BEST, retry to see if we can guarantee HD.
 	if len(foundEps) > 0 and episode.show.quality == BEST and episode.status != PREDOWNLOADED:
-			moreFoundEps = provider.findEpisode(episode, HD)
+			moreFoundEps = provider.findEpisode(episode, HD, manualSearch)
 			
 			# if we couldn't find a definitive HD version then mark the original ones as predownloaded
 			if len(moreFoundEps) == 0:
@@ -113,7 +113,7 @@ def _doSearch(episode, provider):
 
 	return foundEps
 
-def findEpisode(episode):
+def findEpisode(episode, manualSearch=False):
 
 	logger.log("Searching for " + episode.prettyName(True))
 
@@ -127,7 +127,7 @@ def findEpisode(episode):
 			continue
 		
 		try:
-			foundEps = _doSearch(episode, curProvider)
+			foundEps = _doSearch(episode, curProvider, manualSearch)
 		except exceptions.AuthException, e:
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue

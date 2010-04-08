@@ -19,11 +19,8 @@
 
 
 
-import datetime
 import os.path
 import threading
-import unicodedata
-import codecs
 
 import logging
 import logging.handlers
@@ -32,16 +29,29 @@ from exceptions import *
 
 import sickbeard
 
+from sickbeard import classes
 
-ERROR = 2
-MESSAGE = 1
-DEBUG = 0
+ERROR = logging.ERROR
+WARNING = logging.WARNING
+MESSAGE = logging.INFO
+DEBUG = logging.DEBUG
 
+reverseNames = {u'ERROR': ERROR,
+                u'WARNING': WARNING,
+                u'INFO': MESSAGE,
+                u'DEBUG': DEBUG}
+
+logFile = ''
 
 def initLogging(consoleLogging=True):
+    global logFile
+
+    logFile = os.path.join(sickbeard.LOG_DIR, 'sickbeard.log')
             
     fileHandler = logging.handlers.RotatingFileHandler(
-                  os.path.join(sickbeard.LOG_DIR, 'sickbeard.log'), maxBytes=25000000, backupCount=5)
+                  logFile,
+                  maxBytes=25000000,
+                  backupCount=5)
 
     fileHandler.setLevel(logging.DEBUG)
     fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
@@ -65,9 +75,9 @@ def initLogging(consoleLogging=True):
 def log(toLog, logLevel=MESSAGE):
     
     meThread = threading.currentThread().getName()
-    outLine = meThread + " :: " + toLog
+    message = meThread + " :: " + toLog
     
-    outLine = outLine.encode('utf-8')
+    outLine = message.encode('utf-8')
 
     sbLogger = logging.getLogger('sickbeard')
 
@@ -75,7 +85,12 @@ def log(toLog, logLevel=MESSAGE):
         sbLogger.debug(outLine)
     elif logLevel == MESSAGE:
         sbLogger.info(outLine)
+    elif logLevel == WARNING:
+        sbLogger.warning(outLine)
     elif logLevel == ERROR:
         sbLogger.error(outLine)
+        
+        # add errors to the UI logger
+        classes.ErrorViewer.add(classes.UIError(message))
     else:
         sbLogger.log(logLevel, outLine)

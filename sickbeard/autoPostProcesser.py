@@ -22,6 +22,7 @@ from sickbeard import logger
 
 from sickbeard import encodingKludge as ek
 from sickbeard import processTV
+from sickbeard import db
 
 import os.path
 
@@ -36,4 +37,13 @@ class PostProcesser():
             logger.log("Automatic post-processing attempted but dir "+sickbeard.TV_DOWNLOAD_DIR+" doesn't exist", logger.ERROR)
             return
         
+        if not ek.ek(os.path.isabs, sickbeard.TV_DOWNLOAD_DIR):
+            logger.log("Automatic post-processing attempted but dir "+sickbeard.TV_DOWNLOAD_DIR+" is relative (and probably not what you really want to process)", logger.ERROR)
+            return
+        
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT * FROM tv_shows WHERE location = ? OR location LIKE ?", 
+                                 [os.path.abspath(sickbeard.TV_DOWNLOAD_DIR),
+                                  ek.ek(os.path.join, os.path.abspath(sickbeard.TV_DOWNLOAD_DIR), '%')])
+
         processTV.processDir(sickbeard.TV_DOWNLOAD_DIR)

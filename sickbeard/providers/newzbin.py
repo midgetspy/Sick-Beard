@@ -88,7 +88,7 @@ def downloadNZB(nzb):
 
 	return True
 		
-def findEpisode(episode, forceQuality=None):
+def findEpisode(episode, forceQuality=None, manualSearch=False):
 
 	logger.log("Searching newzbin for " + episode.prettyName(True))
 
