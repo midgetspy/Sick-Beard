@@ -60,6 +60,16 @@ class TVShow(Storm):
 
         result = tvapi.store.find(TVEpisodeData, And(*conditions))
         return result
+    
+    def getEp(self, season, episode): # I'd like to replace this with [season][episode] eventually
+        epData = tvapi.store.find(TVEpisodeData,
+                                  TVEpisodeData.show_id == self.tvdb_id,
+                                  TVEpisodeData.season == season,
+                                  TVEpisodeData.episode == episode)
+        if epData.one():
+            return epData.one().ep_obj
+        else:
+            return None
 
 class TVEpisode(Storm):
     """
@@ -117,25 +127,27 @@ class TVEpisode(Storm):
     
     status = property(_getStatus, _setStatus)
     
-    def __init__(self, show):
+    def __init__(self, show, season=None, episode=None):
         self.show = show
+        if season != None and episode != None:
+            self.addEp(season, episode)
 
-    def addEp(self, season, episode):
+    def epDataList(self):
+        return [x for x in self.episodes_data]
+
+    def addEp(self, season=None, episode=None, ep=None):
         """
         Add an episode to the episode data list (TVEpisode.episodes)
         """
-        result = tvapi.store.find(TVEpisodeData, TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
-        
-        if result.count() == 1:
-            self.episodes_data.add(result.one())
-        else:
-            raise Exception()
+        if not ep:
+            result = tvapi.store.find(TVEpisodeData, TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
+            
+            if result.count() == 1:
+                ep = result.one()
+            else:
+                raise Exception()
 
-    def getEp(self, season, episode):
-        result = self.episodes_data.find(TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
-        
-        if result.count() == 1:
-            return result.one()
-        else:
-            raise Exception()
-   
+        self.episodes_data.add(ep)
+
+        # keep the status up to date
+        self._status = self._getStatus() 

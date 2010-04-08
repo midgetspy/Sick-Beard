@@ -8,11 +8,27 @@ def findTVShow(name):
 
 def getTVShow(tvdb_id):
     result = tvapi.store.find(TVShow, TVShow.tvdb_id == tvdb_id)
-    
-    if result.count() == 0:
-        result = TVShow(tvdb_id)
-        tvapi.store.add(result)
-        return result 
-    else:
-        return result.one()
+    return result.one()
 
+def createTVShow(tvdb_id):
+    curShowObj = getTVShow(tvdb_id)
+    if curShowObj:
+        return curShowObj
+    
+    # make the show
+    showObj = TVShow(tvdb_id)
+    
+    # get the metadata
+    showObj.update()
+    
+    # make a TVEpisode for any TVEpisodeData objects that don't already have one
+    for epData in tvapi.store.find(TVEpisodeData, TVEpisodeData.show_id == tvdb_id):
+        if not epData.ep_obj:
+            epObj = TVEpisode(showObj)
+            epObj.addEp(ep=epData)
+            tvapi.store.add(epObj)
+    
+    tvapi.store.add(showObj)
+    tvapi.store.commit()
+    
+    return showObj

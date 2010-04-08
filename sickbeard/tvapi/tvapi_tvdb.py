@@ -49,11 +49,19 @@ def loadShow(tvdb_id, cache=True):
 
     showData.imdb_id = tvdbShow['imdb_id']
 
+    resultingData = {}
+
     for season in tvdbShow:
         for episode in tvdbShow[season]:
-            loadEpisode(tvdb_id, season, episode, tvdbObj)
+            result = loadEpisode(tvdb_id, season, episode, tvdbObj)
+            if result:
+                if season not in resultingData:
+                    resultingData[season] = []
+                resultingData[season].append(result)
     
     tvapi.store.commit()
+    
+    return resultingData
     
 
 def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
@@ -93,5 +101,7 @@ def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
     
     epData.tvdb_id = int(epObj['id'])
 
-    # weird data on tvdb is messing this up, but we don't need it anyway
+    # weird data on tvdb is messing this up, but we don't need it anyway (for now at least)
     #epData.imdb_id = unicode(epObj['imdb_id'])
+
+    return epData
