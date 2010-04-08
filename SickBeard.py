@@ -81,15 +81,21 @@ def main():
 	threading.currentThread().name = "MAIN"
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "q", ['quiet'])
+		opts, args = getopt.getopt(sys.argv[1:], "qf", ['quiet', 'force-update'])
 	except getopt.GetoptError:
-		print "Available options: --quiet"
+		print "Available options: --quiet, --force-update"
 		sys.exit()
+	
+	forceUpdate = False
 	
 	for o, a in opts:
 		# for now we'll just silence the logging
 		if (o in ('-q', '--quiet')):
 			consoleLogging = False
+	
+		# should we update right away?
+		if (o in ('-f', '--forceupdate')):
+			forceUpdate = True
 	
 	if consoleLogging:
 		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
@@ -136,6 +142,10 @@ def main():
 	# launch browser if we're supposed to
 	if sickbeard.LAUNCH_BROWSER:
 		sickbeard.launchBrowser()
+
+	# start an update if we're supposed to
+	if forceUpdate:
+		sickbeard.showUpdateScheduler.action.run(force=True)
 
 	# stay alive while my threads do the work
 	while (True):
