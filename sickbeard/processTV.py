@@ -157,7 +157,7 @@ def processDir (dirName, recurse=False):
     # recursively process all the folders
     for curFolder in folders:
         returnStr += logHelper("Recursively processing a folder: "+curFolder, logger.DEBUG)
-        processDir(ek.ek(os.path.join, dirName, curFolder), True)
+        returnStr += processDir(ek.ek(os.path.join, dirName, curFolder), True)
 
     # process any files in the dir
     for curFile in videoFiles:
