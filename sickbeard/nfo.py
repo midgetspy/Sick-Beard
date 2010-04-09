@@ -1,13 +1,15 @@
+import sickbeard
+
 import xml.etree.cElementTree as etree
 
-from sickbeard import XML_NSMAP, TVDB_BASE_URL
-TVDB_BASE_URL = "aoeu"
+from sickbeard import helpers
+
 
 def makeShowNFO(show):
     
     tvNode = etree.Element( "tvshow" )
-    for ns in XML_NSMAP.keys():
-        tvNode.set(ns, XML_NSMAP[ns])
+    for ns in sickbeard.XML_NSMAP.keys():
+        tvNode.set(ns, sickbeard.XML_NSMAP[ns])
 
     title = etree.SubElement( tvNode, "title" )
     if show.data.name != None:
@@ -24,7 +26,7 @@ def makeShowNFO(show):
     episodeguideurl = etree.SubElement( tvNode, "episodeguideurl" )
     episodeguide = etree.SubElement( tvNode, "episodeguide" )
     if show.tvdb_id != None:
-        showurl = TVDB_BASE_URL + '/series/' + str(show.tvdb_id) + '/all/en.zip'
+        showurl = sickbeard.TVDB_BASE_URL + '/series/' + str(show.tvdb_id) + '/all/en.zip'
         episodeguideurl.text = showurl
         episodeguide.text = showurl
         
@@ -113,7 +115,7 @@ def makeEpNFO(ep):
         cur_actor_name = etree.SubElement( cur_actor, "name" )
         cur_actor_name.text = actor
 
-    for actor in ep.show.actors:
+    for actor in ep.show_data.actors:
 
         cur_actor = etree.SubElement( episode, "actor" )
 
@@ -132,6 +134,6 @@ def makeEpNFO(ep):
             cur_actor_thumb.text = cur_actor_thumb_text
 
     # Make it purdy
-    #helpers.indentXML( episode )
+    helpers.indentXML( episode )
 
     return episode

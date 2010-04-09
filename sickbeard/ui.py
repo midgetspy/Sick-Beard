@@ -23,7 +23,7 @@ import datetime
 import sickbeard
 
 from sickbeard import exceptions
-from sickbeard.tv import TVShow
+#from sickbeard.tv import TVShow
 from sickbeard import logger
 from sickbeard import classes
 

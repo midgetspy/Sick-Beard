@@ -25,8 +25,6 @@ import threading
 import logging
 import logging.handlers
 
-from exceptions import *
-
 import sickbeard
 
 from sickbeard import classes

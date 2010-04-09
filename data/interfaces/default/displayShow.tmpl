@@ -1,9 +1,19 @@
+#from storm.locals import Store
+#from sickbeard import tvapi, tvclasses
+#from sickbeard.tvapi.tvapi import getTVShow
+#from sickbeard.tvapi import tvapi_classes
+
 #import sickbeard
 #from sickbeard.common import *
+
 #import os.path
 #import datetime
-#set global $title=$show.name
-#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
+
+#set $store = Store($tvapi.database)
+#set $show = $getTVShow($tvdb_id)
+
+#set global $title = $show.show_data.name
+#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdb_id, $show.show_data.name)
 
 <!--#set global $topmenu="home"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
@@ -13,8 +23,8 @@
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 
-Airs: $show.airs on $show.network<br />
-Status: $show.status<br />
+Airs: show.airs on <%=show.show_data.network%><br />
+Status: <%=show.show_data.status%><br />
 
 #if $showLoc[1]:
 Location: $showLoc[0]
@@ -23,10 +33,10 @@ Location: $showLoc[0]
 #end if
 <br />
 
-Quality: $qualityStrings[int($show.quality)]<br />
+Quality: qualityStrings[int(show.quality)]<br />
 Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
-Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
+Active: <img src="$sbRoot/images/#if not $show.paused then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 <br />
 
@@ -36,7 +46,7 @@ Change selected episodes to
 <option value="$curStatus">$sickbeard.statusStrings[$curStatus]
 #end for
 </select>
-<input type="hidden" id="showID" value="$show.tvdbid">
+<input type="hidden" id="showID" value="$show.tvdb_id">
 <input type="button" id="changeStatus" value="Go"><br />
 <br />
 <b>NOTE:</b> Episodes can only be changed to "Downloaded" if they are currently "Predownloaded" or "Snatched (Proper)".<br />
@@ -47,44 +57,44 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
 
 <table class="sickbeardTable">
     
-#for $epResult in $sqlResults:
+#for $epData in $epList:
    
-    #if int($epResult["season"]) != $curSeason:
+    #if int($epData.season) != $curSeason:
   <tr class="seasonheader">
     <td colspan=8>
-	<br />
-	<h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#
-	<!--(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
-	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)-->
-	<br />
-	</h2></td>
+    <br />
+    <h2>#if $epData.season == 0 then "Specials" else "Season "+str($epData.season)#
+    <!--(<a href="setStatus/?show=$show.tvdb_id&season=$epData.season&status=$BACKLOG">add to backlog</a>)
+    (<a href="setStatus/?show=$show.tvdb_id&season=$epData.season"&status=$DISCBACKLOG">add to disc backlog</a>)-->
+    <br />
+    </h2></td>
   </tr>
-  <tr><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
-        #set $curSeason = int($epResult["season"])
+  <tr><th width="1%"><input type="checkbox" class="seasonCheck" id="$epData.season"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+        #set $curSeason = int($epData.season)
     #end if    
 
     #set $odd = not $odd#
   <tr class="#if $odd then "odd" else "even"#Line">
     <td width="1%">
-#if int($epResult["status"]) != $UNAIRED
-      <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>">
+#if int($epData.ep_obj.status) != $UNAIRED
+      <input type="checkbox" class="epCheck" id="<%=str(epData.season)+'x'+str(epData.episode)%>" name="<%=str(epData.season) +"x"+str(epData.episode) %>">
 #end if
     </td>
-  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
-  	<td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
-    <td align="center">$epResult["episode"]</td>
+    <td align="center"><a name="<%=str(epData.season)+"x"+str(epData.episode)%>"></a><img src="$sbRoot/images/#if $epData.ep_obj.hasnfo == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+    <td align="center"><img src="$sbRoot/images/#if $epData.ep_obj.hastbn == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+    <td align="center">$epData.episode</td>
     <td>
-        $epResult["name"]
-        #if $epResult["description"] != "" and $epResult["description"] != None:
-        <img src="$sbRoot/images/info.png" height="16" class="plotInfo" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
+        $epData.name
+        #if $epData.description:
+        <img src="$sbRoot/images/info.png" height="16" class="plotInfo" id="plot_info_$show.tvdb_id<%="_"+str(epData.season)+"_"+str(epData.episode)%>" />
         #end if
     </td>
-    <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
-    <td>$os.path.basename($epResult["location"])</td>
-    <td>$statusStrings[int($epResult["status"])]</td>
+    <td align="center">#if $epData.aired == 1 then "never" else $epData.aired#</td>
+    <td>os.path.basename($epData.ep_obj.location)</td>
+    <td>$statusStrings[int($epData.ep_obj.status)]</td>
     <td align="center">
-    #if int($epResult["season"]) != 0: 
-    <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a>
+    #if int($epData.season) != 0: 
+    <a href="searchEpisode?show=$show.tvdb_id&season=$epData.season&episode=$epData.episode">search</a>
     #end if
     </td>
    <tr>

@@ -22,8 +22,7 @@ import urllib
 import datetime
 import traceback
 
-#from sickbeard import logger
-#from sickbeard.common import *
+from storm.locals import Store
 
 from sickbeard import exceptions
 
@@ -43,10 +42,12 @@ logger = Logger()
 
 def loadShow(tvdb_id):
 
-    showData = tvapi.store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
+    store = Store(tvapi.database)
+    showData = store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
     if showData == None:
         showData = TVShowData(tvdb_id)
-        tvapi.store.add(showData)
+        store.add(showData)
+        store.commit()
 
     tvr = TVRage(showData)
         
@@ -59,10 +60,12 @@ def loadShow(tvdb_id):
 
 def getID(tvdb_id):
 
-    showData = tvapi.store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
+    store = Store(tvapi.database)
+    showData = store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
     if showData == None:
         showData = TVShowData(tvdb_id)
-        tvapi.store.add(showData)
+        store.add(showData)
+        store.commit()
 
     tvr = TVRage(showData)
         
@@ -124,8 +127,9 @@ class TVRage:
                 if curSeason == 0 or 1 not in self.show[curSeason]:
                     continue
                 
+                store = Store(tvapi.database)
                 # get the episode info from the DB
-                epObj = tvapi.store.find(TVEpisodeData,
+                epObj = store.find(TVEpisodeData,
                                    TVEpisodeData.show_id == self.show.tvdb_id,
                                    TVEpisodeData.season == curSeason,
                                    TVEpisodeData.episode == 1).one()
@@ -182,8 +186,9 @@ class TVRage:
             airdate = None
         
 
+            store = Store(tvapi.database)
             # get the episode info from the DB
-            epObj = tvapi.store.find(TVEpisodeData,
+            epObj = store.find(TVEpisodeData,
                                TVEpisodeData.show_id == self.show.tvdb_id,
                                TVEpisodeData.season == self.lastEpInfo['season'],
                                TVEpisodeData.episode == self.lastEpInfo['episode']).one()
@@ -297,7 +302,8 @@ class TVRage:
         if not self.checkSync(info):
             raise exceptions.TVRageException("TVRage info isn't in sync with TVDB, not using data")
         
-        epData = tvapi.store.find(TVEpisodeData,
+        store = Store(tvapi.database)
+        epData = store.find(TVEpisodeData,
                                   TVEpisodeData.show_id == self.show.tvdb_id,
                                   TVEpisodeData.season == self.nextEpInfo['season'],
                                   TVEpisodeData.episode == self.nextEpInfo['episode']).one()
@@ -308,7 +314,8 @@ class TVRage:
         epData = TVEpisodeData(self.show.tvdb_id, self.nextEpInfo['season'], self.nextEpInfo['episode'])
         epData.name = self.nextEpInfo['name']
         epData.airdate = self.nextEpInfo['airdate']
-        tvapi.store.add(epData)
+        store.add(epData)
+        store.commit()
 
         return epData
 

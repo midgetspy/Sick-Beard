@@ -1,9 +1,23 @@
+import Queue
+
 from storm.locals import create_database, Store
 
 from lib.tvdb_api import tvdb_api
 
+storeQueue = Queue.Queue()
 database = create_database("sqlite:stormtest.db")
-store = Store(database)
+
+def getStore():
+
+    store = Store(database)
+    
+    # block on the put, then get as soon as we can
+    storeQueue.put(store, True)
+    return storeQueue.get()
+    
+def releaseStore():
+    
+    storeQueue.task_done()    
 
 
 ###################################################################################
@@ -12,8 +26,10 @@ store = Store(database)
 ## often to bother.
 
 # set it to false if you want to persist data from the last time for testing
-if True:
+if False:
 
+    store = Store(database)
+    
     for table in ("tvepisodedata", "tvshowdata", "tvepisode", "tvshow", "episodedatarel"):
         try:
             store.execute("DROP TABLE "+table)
@@ -62,9 +78,10 @@ if True:
     
     store.execute("CREATE TABLE tvshow ( \
                   tvdb_id INTEGER PRIMARY KEY, \
-                  location TEXT, \
-                  seasonFolders TEXT, \
-                  paused NUMERIC \
+                  _location TEXT, \
+                  seasonfolders TEXT, \
+                  paused NUMERIC, \
+                  quality NUMERIC \
                   )")
     
     store.execute("CREATE TABLE tvepisode ( \
@@ -73,7 +90,7 @@ if True:
                   _status NUMERIC, \
                   hasnfo NUMERIC, \
                   hastbn NUMERIC, \
-                  _show NUMERIC \
+                  _show_id NUMERIC \
                   )")
     
     store.execute("CREATE TABLE episodedatarel ( \
@@ -84,3 +101,4 @@ if True:
                   PRIMARY KEY (eid, show_id, season, episode) \
                   )")
 
+    store.commit()

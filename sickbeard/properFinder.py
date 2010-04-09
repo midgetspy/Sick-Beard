@@ -32,8 +32,6 @@ from sickbeard import history
 
 from sickbeard.common import *
 
-from sickbeard.tv import TVEpisode
-
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 

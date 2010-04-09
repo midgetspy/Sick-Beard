@@ -30,6 +30,8 @@ from Cheetah.Template import Template
 import cherrypy
 import cherrypy.lib
 
+from sickbeard.tvapi import tvapi
+
 from sickbeard import config
 from sickbeard import db
 from sickbeard import history
@@ -1084,25 +1086,20 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         else:
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+            #showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+            showObj = tvapi.getTVShow(int(show))
             
             if showObj == None:
-                
                 return _genericMessage("Error", "Unable to find the specified show.")
 
-        myDB = db.DBConnection()
-        
-        logger.log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
-    
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC")
-
         t = PageTemplate(file="displayShow.tmpl")
-        t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
+        t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdb_id } ]
 
-        try:
-            t.showLoc = (showObj.location, True)
-        except sickbeard.exceptions.ShowDirNotFoundException:
-            t.showLoc = (showObj._location, False)
+        #try:
+        #    t.showLoc = (showObj.location, True)
+        #except sickbeard.exceptions.ShowDirNotFoundException:
+        #    t.showLoc = (showObj._location, False)
+        t.showLoc = 'aoeu'
 
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             flash.message('This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.')
@@ -1121,13 +1118,16 @@ class Home:
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
-                t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid         })
-                t.submenu.append({ 'title': 'Refresh',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid         })
-                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdbid })
-            t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid        })
+                t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdb_id         })
+                t.submenu.append({ 'title': 'Refresh',           'path': 'home/refreshShow?show=%d'%showObj.tvdb_id         })
+                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdb_id })
+            t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdb_id        })
+
         t.show = showObj
+        t.tvdb_id = showObj.tvdb_id
+        t.epList = showObj.show_data.episodes_data
         t.qualityStrings = sickbeard.common.qualityStrings
-        t.sqlResults = sqlResults
+        t.sqlResults = []
         
         return _munge(t)
 

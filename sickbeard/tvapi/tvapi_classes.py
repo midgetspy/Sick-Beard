@@ -1,6 +1,6 @@
-from storm.locals import Int, Unicode, Float, Reference, Date, Pickle, Storm
+from storm.locals import Int, Unicode, Float, Reference, ReferenceSet, Date, Pickle, Storm, Store
 
-from sickbeard.tvapi import store 
+from sickbeard import tvapi
 
 class TVShowData(Storm):
     __storm_table__ = "tvshowdata"
@@ -25,6 +25,7 @@ class TVShowData(Storm):
     imdb_id = Unicode()
     
     show_obj = Reference(tvdb_id, "TVShow.tvdb_id")
+    episodes_data = ReferenceSet(tvdb_id, "TVEpisodeData.show_id")
     
     _cached_seasons = None
     _cached_episodes = {}
@@ -43,6 +44,7 @@ class TVShowData(Storm):
             return self._cached_seasons
         
         toReturn = []
+        store = Store(tvapi.database)
         for x in store.execute("SELECT distinct season from tvepisodedata where show_id = ?", (self.tvdb_id,)):
             toReturn.append(x[0])
         
@@ -65,6 +67,7 @@ class TVShowData(Storm):
             return self._cached_episodes[key]
         
         toReturn = []
+        store = Store(tvapi.database)
         for x in store.execute("SELECT episode FROM tvepisodedata WHERE show_id = ? AND season = ?", (self.tvdb_id, key)):
             toReturn.append(x[0])
 

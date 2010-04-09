@@ -8,12 +8,13 @@ from lib.tvdb_api import tvdb_exceptions
 
 from sickbeard.common import *
 
-from sickbeard.tv import TVShow
+#from sickbeard.tv import TVShow
 from sickbeard import exceptions
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import webserve
 
+from tvapi import tvapi
 
 class ShowQueue:
     def __init__(self):
@@ -204,7 +205,7 @@ class QueueItemAdd(QueueItem):
         # this will initialize self.show to None
         QueueItem.__init__(self, QueueActions.ADD)
 
-        self.initialShow = TVShow(self.showDir)
+        self.tvdb_id = tvapi.TEMP_getTVDBIDFromNFO(self.showDir)
 
     def _getName(self):
         if self.show == None:
@@ -226,74 +227,15 @@ class QueueItemAdd(QueueItem):
 
         logger.log("Starting to add show "+self.showDir)
 
-        otherShow = helpers.findCertainShow(sickbeard.showList, self.initialShow.tvdbid)
+        otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdb_id)
         if otherShow != None:
             logger.log("Show is already in your list, not adding it again")
             self.finish()
             return
 
-        try:
-            self.initialShow.getImages()
-            self.initialShow.loadFromTVDB()
-            
-        except tvdb_exceptions.tvdb_exception, e:
-            logger.log("Unable to add show due to an error with TVDB: "+str(e), logger.ERROR)
-            webserve.flash.error("Unable to add "+str(self.initialShow.name)+" due to an error with TVDB")
-            self._finishEarly()
-            return
-            
-        except exceptions.NoNFOException:
-            logger.log("Unable to load show from NFO", logger.ERROR)
-            webserve.flash.error("Unable to add "+str(self.initialShow.name)+" from NFO, skipping")
-            self._finishEarly()
-            return
-            
-        except exceptions.ShowNotFoundException:
-            logger.log("The show in " + self.showDir + " couldn't be found on theTVDB, skipping", logger.ERROR)
-            webserve.flash.message("The show in " + self.showDir + " couldn't be found on theTVDB, skipping")
-            self._finishEarly()
-            return
-    
-        except exceptions.MultipleShowObjectsException:
-            logger.log("The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
-            self._finishEarly()
-            return
-        
-        except Exception:
-            self._finishEarly()
-            raise
-    
-        self.show = self.initialShow
-
-        # add it to the show list
-        sickbeard.showList.append(self.show)
-
-        try:
-            self.show.loadEpisodesFromDir()
-        except Exception, e:
-            logger.log("Error searching dir for episodes: " + str(e), logger.ERROR)
-            logger.log(traceback.format_exc(), logger.DEBUG)
-    
-        try:
-            self.show.loadEpisodesFromTVDB()
-            self.show.setTVRID()
-        except Exception, e:
-            logger.log("Error with TVDB, not creating episode list: " + str(e), logger.ERROR)
-            logger.log(traceback.format_exc(), logger.DEBUG)
-    
-        try:
-            self.show.saveToDB()
-        except Exception, e:
-            logger.log("Error saving the episode to the database: " + str(e), logger.ERROR)
-            logger.log(traceback.format_exc(), logger.DEBUG)
-        
-        self.show.flushEpisodes()
+        self.show = tvapi.createTVShow(self.tvdb_id)
 
         self.finish()
-        
-        sickbeard.updateAiringList()
-        sickbeard.updateComingList()
-        sickbeard.updateMissingList()
         
 
     def _finishEarly(self):

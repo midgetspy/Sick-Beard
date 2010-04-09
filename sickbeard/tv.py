@@ -31,7 +31,7 @@ import sickbeard
 
 import xml.etree.cElementTree as etree
 
-from lib.tvdb_api import tvdb_api, tvnamer, tvdb_exceptions
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
@@ -48,7 +48,7 @@ from sickbeard import encodingKludge as ek
 from common import *
 from sickbeard import logger
 
-class TVShow(object):
+class aTVShow(object):
 
     def __init__ (self, showdir):
     
@@ -854,7 +854,7 @@ class TVShow(object):
         
         
         
-class TVEpisode:
+class aTVEpisode:
 
     def __init__(self, show, season, episode, file=""):
     

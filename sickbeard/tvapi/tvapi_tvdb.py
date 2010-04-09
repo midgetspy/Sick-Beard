@@ -1,5 +1,7 @@
 import datetime
 
+from storm.locals import Store
+
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from tvapi_classes import TVShowData, TVEpisodeData
@@ -18,17 +20,20 @@ logger = Logger()
 
 def loadShow(tvdb_id, cache=True):
 
+    store = Store(tvapi.database)
+
     try:
         tvdbObj = tvdb_api.Tvdb(actors=True, language='en', cache=cache)
         tvdbShow = tvdbObj[tvdb_id]
     except tvdb_exceptions.tvdb_error, e:
         raise
     
-    showData = tvapi.store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
+    showData = store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
     if showData == None:
         logger.log("Show doesn't exist in DB, making new entry", logger.DEBUG)
         showData = TVShowData(tvdb_id)
-        tvapi.store.add(showData)
+        store.add(showData)
+        #store.commit()
 
     logger.log("Updating all info for show "+str(tvdb_id)+"from TVDB", logger.DEBUG)
 
@@ -49,6 +54,8 @@ def loadShow(tvdb_id, cache=True):
 
     showData.imdb_id = tvdbShow['imdb_id']
 
+    store.commit()
+
     resultingData = {}
 
     for season in tvdbShow:
@@ -59,12 +66,12 @@ def loadShow(tvdb_id, cache=True):
                     resultingData[season] = []
                 resultingData[season].append(result)
     
-    tvapi.store.commit()
-    
     return resultingData
     
 
 def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
+    
+    store = Store(tvapi.database)
     
     try:
         if tvdbObj == None:
@@ -73,13 +80,14 @@ def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
     except tvdb_exceptions.tvdb_error, e:
         raise
 
-    epData = tvapi.store.find(TVEpisodeData,
+    epData = store.find(TVEpisodeData,
                               TVEpisodeData.show_id == tvdb_id,
                               TVEpisodeData.season == season,
                               TVEpisodeData.episode == episode).one()
     if epData == None:
         epData = TVEpisodeData(tvdb_id, season, episode)
-        tvapi.store.add(epData)
+        store.add(epData)
+        store.commit()
 
     epData.name = epObj['episodename']
     
@@ -100,8 +108,10 @@ def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
     #other season/episode info needed for absolute/dvd/etc ordering
     
     epData.tvdb_id = int(epObj['id'])
-
+    
     # weird data on tvdb is messing this up, but we don't need it anyway (for now at least)
     #epData.imdb_id = unicode(epObj['imdb_id'])
+
+    store.commit()
 
     return epData

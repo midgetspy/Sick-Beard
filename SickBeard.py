@@ -35,7 +35,7 @@ import getopt
 import sickbeard
 
 from sickbeard import db
-from sickbeard.tv import TVShow
+from sickbeard.tvclasses import TVShow
 from sickbeard import logger
 from sickbeard.common import *
 from sickbeard.version import SICKBEARD_VERSION
@@ -48,6 +48,9 @@ signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
 def loadShowsFromDB():
+
+	return
+    #TODO: I think this is unnecessary since storm will cache the shows
 
 	myDB = db.DBConnection()
 	sqlResults = myDB.select("SELECT * FROM tv_shows")
