@@ -291,10 +291,12 @@ def initialize(consoleLogging=True):
             CACHE_DIR = None
 
         # Set our common tvdb_api options here
-        TVDB_API_PARMS = {'cache': True, 'apikey': TVDB_API_KEY, 'language':
-		'en', 'cache_dir': False}
+        TVDB_API_PARMS = {'cache': True,
+                          'apikey': TVDB_API_KEY,
+                          'language': 'en',
+                          'cache_dir': False}
         if CACHE_DIR:
-            TVDB_API_PARMS['cache_dir'] = CACHE_DIR + '/tvdb'
+            TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
         
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
