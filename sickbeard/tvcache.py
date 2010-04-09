@@ -174,7 +174,7 @@ class TVCache():
                 quality = SD
         
         myDB.action("INSERT INTO "+self.providerName+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
-                    [name, season, episodeText, tvdb_id, tvrage_id, url, curTimestamp, quality])
+                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
         
         
 
