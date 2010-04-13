@@ -157,7 +157,7 @@ def processDir (dirName, recurse=False):
     # recursively process all the folders
     for curFolder in folders:
         returnStr += logHelper("Recursively processing a folder: "+curFolder, logger.DEBUG)
-        processDir(ek.ek(os.path.join, dirName, curFolder), True)
+        returnStr += processDir(ek.ek(os.path.join, dirName, curFolder), True)
 
     # process any files in the dir
     for curFile in videoFiles:
@@ -165,20 +165,22 @@ def processDir (dirName, recurse=False):
         curFile = ek.ek(os.path.join, dirName, curFile)
         
         # if there's only one video file in the dir we can use the dirname to process too
-        if len(videoFiles) == 1 and recurse:
+        if len(videoFiles) == 1:
             returnStr += logHelper("Auto processing file: "+curFile+" ("+dirName+")")
             result = processFile(curFile, dirName)
 
             # as long as the postprocessing was successful delete the old folder unless the config wants us not to
-            if type(result) == list and not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
+            if type(result) == list:
                 returnStr += result[0]
-                
-                returnStr += logHelper("Deleting folder " + dirName, logger.DEBUG)
-                
-                try:
-                    shutil.rmtree(dirName)
-                except (OSError, IOError), e:
-                    returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
+
+                if not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
+                    
+                    returnStr += logHelper("Deleting folder " + dirName, logger.DEBUG)
+                    
+                    try:
+                        shutil.rmtree(dirName)
+                    except (OSError, IOError), e:
+                        returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
 
             else:
                 returnStr += result

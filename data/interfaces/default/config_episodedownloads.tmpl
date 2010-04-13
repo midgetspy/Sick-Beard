@@ -140,9 +140,10 @@ If checked Sick Beard will rename the episode according<br />
 to the naming settings in <a href="$sbRoot/config/general">General</a><br />
 <br />
 
-<input type="checkbox" name="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "CHECKED" else ""#> <strong>Automatically post-process episodes</strong><br />
-Automatically post-process files that appear<br />
-in the download dir<br />
+<input type="checkbox" name="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "CHECKED" else ""#> <strong>Scan & Process TV Download Dir</strong><br />
+Will scan your <i>TV Download Dir</i> and attempt to<br />
+post-process every file it finds.<br />
+NOTE: If SABnzbd+ is calling sabToSickbeard.py this is redundant!<br />
 <br />
 
 </fieldset>
