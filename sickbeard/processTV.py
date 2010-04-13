@@ -165,7 +165,7 @@ def processDir (dirName, recurse=False):
         curFile = ek.ek(os.path.join, dirName, curFile)
         
         # if there's only one video file in the dir we can use the dirname to process too
-        if len(videoFiles) == 1 and recurse:
+        if len(videoFiles) == 1:
             returnStr += logHelper("Auto processing file: "+curFile+" ("+dirName+")")
             result = processFile(curFile, dirName)
 
