@@ -32,6 +32,8 @@ from sickbeard.exceptions import *
 from sickbeard import logger
 from sickbeard.common import *
 
+from sickbeard import encodingKludge as ek
+
 from sickbeard import db
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -392,3 +394,21 @@ def guessSceneEpisodeQuality(name):
 	else:
 		return SD
 
+def listMediaFiles(dir):
+	if not dir or not ek.ek(os.path.isdir, dir):
+		return []
+	
+	files = []
+	for curFile in ek.ek(os.listdir, dir):
+		fullCurFile = ek.ek(os.path.join, dir, curFile)
+		
+		# if it's a dir do it recursively
+		if ek.ek(os.path.isdir, fullCurFile):
+			files += listMediaFiles(fullCurFile)
+		
+		else:
+			if isMediaFile(curFile):
+				files.append(fullCurFile)
+	
+	return files
+		
