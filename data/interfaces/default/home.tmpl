@@ -1,5 +1,8 @@
-#from storm.locals import Store
+#import operator
+
 #from sickbeard import tvapi, tvclasses
+#from sickbeard.tvapi import safestore
+#from sickbeard.tvapi import proxy
 
 #import sickbeard
 #from sickbeard.common import *
@@ -141,7 +144,6 @@ td {
   <thead><tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
   <tbody>
 
-#set $store = Store($tvapi.database)
 #for $curLoadingShow in $sickbeard.showQueueScheduler.action.loadingShowList:
 
   #if $curLoadingShow.show != None and $curLoadingShow.show in $sickbeard.showList:
@@ -165,10 +167,14 @@ td {
   </tr>
 #end for
 
-#set $myShowList = [x for x in $store.find(tvclasses.TVShow)]
-<%myShowList.sort(lambda x, y: cmp(x.show_data.name, y.show_data.name))%>
+#set $myShowRS = $sickbeard.storeManager.safe_store("find", tvclasses.TVShow)
+## RS: $myShowRS
+#set $myShowList = $sickbeard.tvapi.safestore.safe_list($myShowRS)
+## list: $myShowList
+##$myShowList.sort(lambda x, y: cmp(x.show_data.name, y.show_data.name))
+
 #for $curShow in $myShowList:
-#set $curEp = $curShow.nextEpisodes()
+#set $curEp = curShow.nextEpisodes()
 
 #set $curShowDownloads = [x[1] for x in $downloadedEps if int(x[0]) == $curShow.tvdb_id]
 #set $curShowAll = [x[1] for x in $allEps if int(x[0]) == $curShow.tvdb_id]
@@ -189,13 +195,13 @@ td {
 #end if
 
   <tr class="evenLine">
-    <td align="center">#if $curEp.count() != 0 then $curEp[0].airdate else ""#</td>
+    <td align="center">##if len($curEp) != 0 then $curEp[0].airdate else ""##</td>
     <td><a href="displayShow?show=$curShow.tvdb_id"><%=curShow.show_data.name%></a></td>
     <td><%=curShow.show_data.network%></td>
     <td align="center">qualityStrings[int(curShow.quality)]</td>
     <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdb_id"></div></td>
-	<td align="center"><img src="$sbRoot/images/#if $curShow.paused and int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
-	<td align="center"><%=curShow.show_data.status%></td>
+    <td align="center"><img src="$sbRoot/images/#if $curShow.paused and int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+    <td align="center"><%=curShow.show_data.status%></td>
   </tr>
 
 <script type="text/javascript">

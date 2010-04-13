@@ -1,7 +1,6 @@
-#from storm.locals import Store
 #from sickbeard import tvapi, tvclasses
-#from sickbeard.tvapi.tvapi import getTVShow
-#from sickbeard.tvapi import tvapi_classes
+#from sickbeard.tvapi.tvapi_main import getTVShow
+#from sickbeard.tvapi import tvapi_classes, safestore
 
 #import sickbeard
 #from sickbeard.common import *
@@ -9,7 +8,7 @@
 #import os.path
 #import datetime
 
-#set $store = Store($tvapi.database)
+#set $tvdb_id = 80349
 #set $show = $getTVShow($tvdb_id)
 
 #set global $title = $show.show_data.name
@@ -57,9 +56,9 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
 
 <table class="sickbeardTable">
     
-#for $epData in $epList:
-   
-    #if int($epData.season) != $curSeason:
+#for $epData in $safestore.safe_list($sickbeard.storeManager.safe_store("find", tvapi_classes.TVEpisodeData)):
+
+  #if int($epData.season) != $curSeason:
   <tr class="seasonheader">
     <td colspan=8>
     <br />

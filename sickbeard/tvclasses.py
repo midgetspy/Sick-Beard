@@ -5,15 +5,16 @@ from storm.locals import Int, Unicode, Bool, Reference, ReferenceSet, Storm, Sto
 from storm.expr import And
 
 from tvapi.tvapi_classes import TVEpisodeData
-from tvapi import tvapi_tvdb, tvapi_tvrage
 
 import sickbeard
 
 from sickbeard import common, exceptions, helpers
-from sickbeard import tvapi
 from sickbeard import encodingKludge as ek
 
 import sickbeard.nfo
+import sickbeard.tvapi.tvapi_main
+
+from sickbeard.tvapi import tvapi_tvdb, proxy, safestore
 
 from sickbeard import logger
 
@@ -90,8 +91,7 @@ class TVShow(Storm):
         if untilDate:
             conditions.append(TVEpisodeData.aired <= untilDate)
 
-        store = Store(tvapi.database)
-        result = store.find(TVEpisodeData, And(*conditions))
+        result = safestore._safe_list(sickbeard.storeManager._store.find(TVEpisodeData, And(*conditions)))
         return result
     
     def getEp(self, season, episode): # I'd like to replace this with [season][episode] eventually
@@ -99,8 +99,7 @@ class TVShow(Storm):
         Returns a specific TVEpisodeData belonging to this show. If it doesn't exist, returns None.
         """
         
-        store = Store(tvapi.database)
-        epData = store.find(TVEpisodeData,
+        epData = sickbeard.storeManager._store.find(TVEpisodeData,
                                   TVEpisodeData.show_id == self.tvdb_id,
                                   TVEpisodeData.season == season,
                                   TVEpisodeData.episode == episode)
@@ -159,6 +158,20 @@ class TVShow(Storm):
                 epObj.hasnfo = False
                 epObj.hastbn = False
 
+        # for each media file in the folder
+        for curFile in helpers.listMediaFiles(self._location):
+            logger.log("Checking file "+curFile+" for a TVEpisode", logger.DEBUG)
+            
+            # get the episode object if it exists
+            epObj = sickbeard.storeManager._store.find(TVEpisode, TVEpisode.location == curFile).one()
+            sickbeard.storeManager._store.commit()
+            
+            # if not, make it
+            if not epObj:
+                epObj = sickbeard.tvapi.tvapi_main.createEpFromName(ek.ek(os.path.basename, curFile), self.tvdb_id)
+                epObj.location = curFile
+                sickbeard.storeManager._store.commit()
+
     
     def fixEpisodeNames(self):
         pass
@@ -201,6 +214,15 @@ class TVEpisode(Storm):
     show = Reference(_show_id, "TVShow.tvdb_id")
     episodes_data = ReferenceSet(eid, "TVEpisodeData._eid")
     
+    def __init__(self, show, season=None, episode=None):
+        # dereference the proxy if applicable
+        if isinstance(show, proxy.GenericProxy):
+            show = show.obj
+
+        self.show = show
+        if season != None and episode != None:
+            self.addEp(season, episode)
+
     def _getStatus(self):
         if self._status == None:
             if self.episodes_data.count() == 1:
@@ -221,11 +243,6 @@ class TVEpisode(Storm):
     
     status = property(_getStatus, _setStatus)
     
-    def __init__(self, show, season=None, episode=None):
-        self.show = show
-        if season != None and episode != None:
-            self.addEp(season, episode)
-
     def epDataList(self):
         return [x for x in self.episodes_data]
 
@@ -233,17 +250,27 @@ class TVEpisode(Storm):
         """
         Add an episode to the episode data list (TVEpisode.episodes)
         """
-        store = Store(tvapi.database)
+        # dereference the proxy if applicable
+        if isinstance(ep, proxy.GenericProxy):
+            logger.log("Dereferencing proxy, from "+str(ep)+" to "+str(ep.obj), logger.DEBUG)
+            ep = ep.obj
+
+        logger.log("Object to add: "+str(ep), logger.DEBUG)
+
         if not ep:
-            result = store.find(TVEpisodeData, TVEpisodeData.show_id == self.show.tvdb_id, TVEpisodeData.season == season, TVEpisodeData.episode == episode)
+            result = sickbeard.storeManager._store.find(TVEpisodeData,
+                                                        TVEpisodeData.show_id == self.show.tvdb_id,
+                                                        TVEpisodeData.season == season,
+                                                        TVEpisodeData.episode == episode)
             
             if result.count() == 1:
                 ep = result.one()
             else:
-                raise Exception()
+                raise Exception("The season/episode given didn't return a single episode: "+str(season)+"x"+str(episode))
 
-        self.episodes_data.add(ep)
-        store.commit()
+        if ep not in self.episodes_data:
+            self.episodes_data.add(ep)
+            sickbeard.storeManager._store.commit()
 
         # keep the status up to date
         self._status = self._getStatus() 

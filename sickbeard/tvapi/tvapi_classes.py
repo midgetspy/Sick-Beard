@@ -1,6 +1,6 @@
-from storm.locals import Int, Unicode, Float, Reference, ReferenceSet, Date, Pickle, Storm, Store
+from storm.locals import Int, Unicode, Float, Reference, ReferenceSet, Date, Pickle, Storm
 
-from sickbeard import tvapi
+import sickbeard
 
 class TVShowData(Storm):
     __storm_table__ = "tvshowdata"
@@ -44,8 +44,7 @@ class TVShowData(Storm):
             return self._cached_seasons
         
         toReturn = []
-        store = Store(tvapi.database)
-        for x in store.execute("SELECT distinct season from tvepisodedata where show_id = ?", (self.tvdb_id,)):
+        for x in sickbeard.storeManager._store.execute("SELECT distinct season from tvepisodedata where show_id = ?", (self.tvdb_id,)):
             toReturn.append(x[0])
         
         if self._cached_seasons == None:
@@ -67,8 +66,7 @@ class TVShowData(Storm):
             return self._cached_episodes[key]
         
         toReturn = []
-        store = Store(tvapi.database)
-        for x in store.execute("SELECT episode FROM tvepisodedata WHERE show_id = ? AND season = ?", (self.tvdb_id, key)):
+        for x in sickbeard.storeManager._store.execute("SELECT episode FROM tvepisodedata WHERE show_id = ? AND season = ?", (self.tvdb_id, key)):
             toReturn.append(x[0])
 
         # put the new lookup in the cache

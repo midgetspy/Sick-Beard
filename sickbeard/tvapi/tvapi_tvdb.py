@@ -1,12 +1,11 @@
 import datetime
 
-from storm.locals import Store
-
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from tvapi_classes import TVShowData, TVEpisodeData
+import safestore
 
-from sickbeard import tvapi
+import sickbeard
 from sickbeard import exceptions
 
 class Logger():
@@ -20,20 +19,21 @@ logger = Logger()
 
 def loadShow(tvdb_id, cache=True):
 
-    store = Store(tvapi.database)
-
     try:
         tvdbObj = tvdb_api.Tvdb(actors=True, language='en', cache=cache)
         tvdbShow = tvdbObj[tvdb_id]
     except tvdb_exceptions.tvdb_error, e:
         raise
     
-    showData = store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
-    if showData == None:
+    showList = safestore.safe_list(sickbeard.storeManager.safe_store("find", TVShowData, TVShowData.tvdb_id == tvdb_id))
+    if len(showList) == 0:
         logger.log("Show doesn't exist in DB, making new entry", logger.DEBUG)
-        showData = TVShowData(tvdb_id)
-        store.add(showData)
+        showData = safestore._getProxy(sickbeard.storeManager.safe_store(TVShowData, tvdb_id))
+        sickbeard.storeManager.safe_store("add", showData.obj)
         #store.commit()
+    else:
+        showData = showList[0]
+        logger.log("Updating show "+str(tvdb_id)+":"+str(showData), logger.DEBUG)
 
     logger.log("Updating all info for show "+str(tvdb_id)+"from TVDB", logger.DEBUG)
 
@@ -54,8 +54,6 @@ def loadShow(tvdb_id, cache=True):
 
     showData.imdb_id = tvdbShow['imdb_id']
 
-    store.commit()
-
     resultingData = {}
 
     for season in tvdbShow:
@@ -66,12 +64,12 @@ def loadShow(tvdb_id, cache=True):
                     resultingData[season] = []
                 resultingData[season].append(result)
     
+    sickbeard.storeManager.safe_store("commit")
+
     return resultingData
     
 
 def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
-    
-    store = Store(tvapi.database)
     
     try:
         if tvdbObj == None:
@@ -80,14 +78,16 @@ def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
     except tvdb_exceptions.tvdb_error, e:
         raise
 
-    epData = store.find(TVEpisodeData,
+    epList = safestore.safe_list(sickbeard.storeManager.safe_store("find", TVEpisodeData,
                               TVEpisodeData.show_id == tvdb_id,
                               TVEpisodeData.season == season,
-                              TVEpisodeData.episode == episode).one()
-    if epData == None:
-        epData = TVEpisodeData(tvdb_id, season, episode)
-        store.add(epData)
-        store.commit()
+                              TVEpisodeData.episode == episode))
+    if len(epList) == 0:
+        epData = safestore._getProxy(sickbeard.storeManager.safe_store(TVEpisodeData, tvdb_id, season, episode))
+        sickbeard.storeManager.safe_store("add", epData.obj)
+        #sickbeard.storeManager.safe_store("commit")
+    else:
+        epData = epList[0]
 
     epData.name = epObj['episodename']
     
@@ -111,7 +111,5 @@ def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
     
     # weird data on tvdb is messing this up, but we don't need it anyway (for now at least)
     #epData.imdb_id = unicode(epObj['imdb_id'])
-
-    store.commit()
 
     return epData

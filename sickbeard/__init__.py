@@ -24,6 +24,7 @@ import sqlite3
 import datetime
 import socket
 import os
+import threading
 
 from threading import Lock
 
@@ -37,6 +38,8 @@ from sickbeard import logger
 from sickbeard.common import *
 
 from sickbeard.databases import mainDB
+
+import tvapi.safestore, tvapi.makeDB
 
 SOCKET_TIMEOUT = 30
 
@@ -53,6 +56,9 @@ versionCheckScheduler = None
 showQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
+
+storeThread = None
+storeManager = None
 
 showList = None
 loadingShowList = None
@@ -254,7 +260,8 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS
+                KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
+                storeThread, storeManager
 
         
         if __INITIALIZED__:
@@ -424,6 +431,9 @@ def initialize(consoleLogging=True):
                                                      runImmediately=True)
         
         
+        storeManager = tvapi.safestore.SafeStore()
+        storeThread = threading.Thread(None, storeManager.run, "StoreManager")
+        
         showList = []
         loadingShowList = {}
         
@@ -464,6 +474,9 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
+            
+            storeThread.start()
+            #tvapi.makeDB.makeDB()
 
 def halt ():
     
@@ -526,6 +539,8 @@ def halt ():
                 properFinderScheduler.thread.join(10)
             except:
                 pass
+            
+            storeThread.join(1)
             
             
             __INITIALIZED__ = False

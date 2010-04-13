@@ -27,10 +27,11 @@ import threading
 import datetime
 
 from Cheetah.Template import Template
+
 import cherrypy
 import cherrypy.lib
 
-from sickbeard.tvapi import tvapi
+from sickbeard.tvapi import tvapi_main, safestore
 
 from sickbeard import config
 from sickbeard import db
@@ -1087,7 +1088,7 @@ class Home:
             return _genericMessage("Error", "Invalid show ID")
         else:
             #showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
-            showObj = tvapi.getTVShow(int(show))
+            showObj = tvapi_main.getTVShow(int(show))
             
             if showObj == None:
                 return _genericMessage("Error", "Unable to find the specified show.")
@@ -1124,8 +1125,6 @@ class Home:
             t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdb_id        })
 
         t.show = showObj
-        t.tvdb_id = showObj.tvdb_id
-        t.epList = showObj.show_data.episodes_data
         t.qualityStrings = sickbeard.common.qualityStrings
         t.sqlResults = []
         
@@ -1231,21 +1230,16 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
-        
-        if showObj == None:
-            return _genericMessage("Error", "Unable to find the specified show")
-        
         # force the update from the DB
         try:
-            sickbeard.showQueueScheduler.action.refreshShow(showObj)
+            sickbeard.showQueueScheduler.action.refreshShow(int(show))
         except exceptions.CantRefreshException, e:
             flash.error("Unable to refresh this show.",
                         str(e))
 
         time.sleep(3)
 
-        redirect("/home/displayShow?show="+str(showObj.tvdbid))
+        redirect("/home/displayShow?show="+show)
 
     @cherrypy.expose
     def updateShow(self, show=None, force=0):

@@ -1,53 +1,53 @@
 import os.path
 import xml.etree.cElementTree as etree
 
-from storm.locals import Store
-
 from tvapi_classes import TVShowData, TVEpisodeData
+import safestore, proxy
 
 from sickbeard import logger, common, exceptions
 from sickbeard import encodingKludge as ek
-from sickbeard import tvapi
 
 from sickbeard.tvclasses import TVShow, TVEpisode
+
+import sickbeard
 
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
 def findTVShow(name):
-    store = Store(tvapi.database)
-    return store.find(TVShow, TVShow.tvdb_id == TVShowData.tvdb_id, TVShowData.name == name).one()
+    result = sickbeard.storeManager.safe_store("find", TVShow, TVShow.tvdb_id == TVShowData.tvdb_id, TVShowData.name == name)
+    return proxy._getProxy(sickbeard.storeManager.safe_store(result.one))
 
 def getTVShow(tvdb_id):
-    store = Store(tvapi.database)
-    result = store.find(TVShow, TVShow.tvdb_id == tvdb_id)
-    return result.one()
+    result = sickbeard.storeManager.safe_store("find", TVShow, TVShow.tvdb_id == tvdb_id)
+    return proxy._getProxy(sickbeard.storeManager.safe_store(result.one))
 
 def createTVShow(tvdb_id):
     curShowObj = getTVShow(tvdb_id)
     if curShowObj:
         return curShowObj
     
-    store = Store(tvapi.database)
-
     # make the show
-    showObj = TVShow(tvdb_id)
-    store.add(showObj)
-    store.commit()
+    showObj = proxy._getProxy(sickbeard.storeManager.safe_store(TVShow, tvdb_id))
+    
+    sickbeard.storeManager.safe_store("add", showObj.obj)
+    sickbeard.storeManager.safe_store("commit")
     
     # get the metadata
     showObj.update()
     
     # make a TVEpisode for any TVEpisodeData objects that don't already have one
-    for epData in store.find(TVEpisodeData, TVEpisodeData.show_id == tvdb_id):
+    for epData in safestore.safe_list(sickbeard.storeManager.safe_store("find",
+                                                                        TVEpisodeData,
+                                                                        TVEpisodeData.show_id == tvdb_id)):
         if not epData.ep_obj:
-            epObj = TVEpisode(showObj)
-            epObj.addEp(ep=epData)
-            #store.add(epObj)
+            epObj = proxy._getProxy(sickbeard.storeManager.safe_store(TVEpisode, showObj))
+            sickbeard.storeManager.safe_store(epObj.addEp, ep=epData)
+            sickbeard.storeManager.safe_store("add", epObj.obj)
             #store.commit()
     
     #store.add(showObj)
-    store.commit()
+    sickbeard.storeManager.safe_store("commit")
     
     return showObj
 

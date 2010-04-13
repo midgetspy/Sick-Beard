@@ -14,7 +14,7 @@ from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import webserve
 
-from tvapi import tvapi
+from sickbeard.tvapi import tvapi_main
 
 class ShowQueue:
     def __init__(self):
@@ -166,7 +166,8 @@ class QueueItem:
         self.inProgress = False
     
     def _getName(self):
-        return self.show.name
+        return 'aoeu'
+        return self.show.show_data.name
 
     def _isLoading(self):
         return False
@@ -205,7 +206,7 @@ class QueueItemAdd(QueueItem):
         # this will initialize self.show to None
         QueueItem.__init__(self, QueueActions.ADD)
 
-        self.tvdb_id = tvapi.TEMP_getTVDBIDFromNFO(self.showDir)
+        self.tvdb_id = tvapi_main.TEMP_getTVDBIDFromNFO(self.showDir)
 
     def _getName(self):
         if self.show == None:
@@ -233,7 +234,7 @@ class QueueItemAdd(QueueItem):
             self.finish()
             return
 
-        self.show = tvapi.createTVShow(self.tvdb_id)
+        self.show = tvapi_main.createTVShow(self.tvdb_id)
 
         self.finish()
         
@@ -249,18 +250,21 @@ class QueueItemAdd(QueueItem):
 
 
 class QueueItemRefresh(QueueItem):
-    def __init__(self, show=None):
-        QueueItem.__init__(self, QueueActions.REFRESH, show)
+    def __init__(self, tvdb_id=None):
+        QueueItem.__init__(self, QueueActions.REFRESH, tvdb_id)
+        self.tvdb_id = tvdb_id
 
     def execute(self):
 
         QueueItem.execute(self)
+        
+        self.show = tvapi_main.getTVShow(self.tvdb_id)
 
-        logger.log("Performing refresh on "+self.show.name)
+        logger.log("Performing refresh on "+self.show.show_data.name)
 
         self.show.refreshDir()
         self.show.getImages()
-        self.show.writeEpisodeNFOs()
+        self.show.writeEpisodeMetafiles()
         
         self.inProgress = False
         
