@@ -41,17 +41,21 @@ def _downloadResult(result):
 
 	resProvider = providers.getProviderModule(result.provider)
 
+	result = False
+
 	if resProvider == None:
 		logger.log("Invalid provider name - this is a coding error, report it please", logger.ERROR)
 		return False
 
 	if resProvider.providerType == "nzb":
-		resProvider.downloadNZB(result)
+		result = resProvider.downloadNZB(result)
 	elif resProvider.providerType == "torrent":
-		resProvider.downloadTorrent(result)
+		result = resProvider.downloadTorrent(result)
 	else:
 		logger.log("Invalid provider type - this is a coding error, report it please", logger.ERROR)
 		return False
+
+	return result
 
 def snatchEpisode(result, endStatus=SNATCHED):
 
@@ -72,7 +76,6 @@ def snatchEpisode(result, endStatus=SNATCHED):
 	if dlResult == False:
 		return
 
-	# log the snatch
 	history.logSnatch(result)
 
 	# don't notify when we snatch a backlog episode, that's just annoying
