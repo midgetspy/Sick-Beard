@@ -11,7 +11,7 @@ class ShowUpdater():
     def __init__(self):
         self.updateInterval = datetime.timedelta(hours=1) 
     
-    def run(self):
+    def run(self, force=False):
 
         # update at 3 AM
         updateTime = datetime.time(hour=3)
@@ -20,8 +20,8 @@ class ShowUpdater():
 
         hourDiff = datetime.datetime.today().time().hour - updateTime.hour
         
-        # if it's less than an interval after the update time then do an update
-        if hourDiff >= 0 and hourDiff < self.updateInterval.seconds/3600:
+        # if it's less than an interval after the update time then do an update (or if we're forcing it)
+        if hourDiff >= 0 and hourDiff < self.updateInterval.seconds/3600 or force:
             logger.log("Doing full update on all shows")
         else:
             return
