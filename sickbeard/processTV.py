@@ -107,6 +107,18 @@ def _checkForExistingFile(newFile, oldFile):
     
     else:
         return 0
+
+
+def findInHistory(nzbName):
+
+    myDB = db.DBConnection()
+    sqlResults = myDB.select("SELECT * FROM history WHERE resource = ?", [nzbName])
+    
+    if len(sqlResults) == 1:
+        return (int(sqlResults[0]["showid"]), int(sqlResults[0]["season"]), int(sqlResults[0]["episode"]))
+
+    else:
+        return None
             
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
@@ -286,12 +298,34 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     showResults = None
     result = None
     
+    tvdb_id = None
+    season = None
+    episodes = []
+        
+    # first try looking up every name in our history
     for curName in finalNameList:
+
+        historyResult = findInHistory(curName)
+        if historyResult:
+            returnStr += logHelper("Result from history: "+str(historyResult)+" from "+curName, logger.DEBUG)
+            (tvdb_id, season, episode) = historyResult
+            episodes = [episode]
+            showResults = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+            break
+
+    # if that didn't work then try manually parsing and searching them on TVDB
+    for curName in finalNameList:
+        
+        # if we already have the info from the history then don't bother with this
+        if tvdb_id != None and season != None and episodes != []:
+            break
     
         try:
             returnStr += logHelper("Attempting to parse name "+curName, logger.DEBUG)
             myParser = FileParser(curName)
             result = myParser.parse()
+            season = result.seasonnumber
+            episodes = result.episodenumbers
         except tvnamer_exceptions.InvalidFilename:
             returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
             continue
@@ -307,11 +341,12 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
             returnStr += logHelper("TVDB didn't respond, trying to look up the show in the DB instead: "+str(e), logger.DEBUG)
-
             showInfo = helpers.searchDBForShow(result.seriesname)
+
+        tvdb_id = showInfo[0]
             
-        # if we didn't get anything from TVDB or the DB then try the next option
-        if showInfo == None:
+        # if we couldn't get the necessary info from either of the above methods, try the next name
+        if tvdb_id == None or season == None or episodes == []:
             continue
 
         # find the show in the showlist
@@ -326,27 +361,27 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     
     # end for
         
-    if result == None:
+    # if we came out of the loop with not enough info then give up
+    if tvdb_id == None or season == None or episodes == []:
         returnStr += logHelper("Unable to figure out what this episode is, giving up", logger.DEBUG)
         return returnStr
 
+    # if we found enough info but it wasn't a show we know about, give up
     if showResults == None:
         returnStr += logHelper("The episode doesn't match a show in my list - bad naming?", logger.DEBUG)
         return returnStr
 
+    # if we DO know about the show but its dir is offline, give up
     if not os.path.isdir(showResults._location):
         returnStr += logHelper("The show dir doesn't exist, canceling postprocessing", logger.DEBUG)
         return returnStr
 
-    
-    # get or create the episode (should be created probably, but not for sure)
-    season = int(result.seasonnumber)
 
     rootEp = None
-    for curEpisode in result.episodenumbers:
+    for curEpisode in episodes:
         episode = int(curEpisode)
     
-        returnStr += logHelper("TVDB thinks the file is " + showInfo[1] + str(season) + "x" + str(episode), logger.DEBUG)
+        returnStr += logHelper("TVDB thinks the file is tvdb_id = " + str(tvdb_id) + " " + str(season) + "x" + str(episode), logger.DEBUG)
         
         # now that we've figured out which episode this file is just load it manually
         try:        
