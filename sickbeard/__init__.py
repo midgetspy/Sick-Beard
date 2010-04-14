@@ -540,7 +540,13 @@ def halt ():
             except:
                 pass
             
-            storeThread.join(1)
+            storeManager.abort()
+            logger.log("Waiting for the STOREMANAGER thread to exit")
+            try:
+                storeThread.thread.join(9)
+            except:
+                pass
+            
             
             
             __INITIALIZED__ = False

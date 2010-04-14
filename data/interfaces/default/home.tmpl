@@ -168,13 +168,13 @@ td {
 #end for
 
 #set $myShowRS = $sickbeard.storeManager.safe_store("find", tvclasses.TVShow)
-## RS: $myShowRS
+##RS: $myShowRS
 #set $myShowList = $sickbeard.tvapi.safestore.safe_list($myShowRS)
-## list: $myShowList
+##list: $myShowList
 ##$myShowList.sort(lambda x, y: cmp(x.show_data.name, y.show_data.name))
 
 #for $curShow in $myShowList:
-#set $curEp = curShow.nextEpisodes()
+#set $curEp = $sickbeard.tvapi.safestore.safe_list(curShow.nextEpisodes())
 
 #set $curShowDownloads = [x[1] for x in $downloadedEps if int(x[0]) == $curShow.tvdb_id]
 #set $curShowAll = [x[1] for x in $allEps if int(x[0]) == $curShow.tvdb_id]
@@ -195,12 +195,12 @@ td {
 #end if
 
   <tr class="evenLine">
-    <td align="center">##if len($curEp) != 0 then $curEp[0].airdate else ""##</td>
+    <td align="center">#if len($curEp) != 0 then $curEp[0].aired else ""#</td>
     <td><a href="displayShow?show=$curShow.tvdb_id"><%=curShow.show_data.name%></a></td>
     <td><%=curShow.show_data.network%></td>
-    <td align="center">qualityStrings[int(curShow.quality)]</td>
+    <td align="center">#if $curShow.quality then $qualityStrings[int($curShow.quality)] else "?"#</td>
     <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdb_id"></div></td>
-    <td align="center"><img src="$sbRoot/images/#if $curShow.paused and int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+    <td align="center"><img src="$sbRoot/images/#if not $curShow.paused and $curShow.show_data.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
     <td align="center"><%=curShow.show_data.status%></td>
   </tr>
 

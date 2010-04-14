@@ -235,6 +235,14 @@ class QueueItemAdd(QueueItem):
             return
 
         self.show = tvapi_main.createTVShow(self.tvdb_id)
+        
+        # set up initial values
+        self.show.location = self.showDir
+        self.show.quality = sickbeard.QUALITY_DEFAULT
+        self.show.seasonfolders = sickbeard.SEASON_FOLDERS_DEFAULT
+        self.show.paused = False
+
+        self.show.refreshDir()
 
         self.finish()
         

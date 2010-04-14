@@ -27,11 +27,13 @@ import threading
 import datetime
 
 from Cheetah.Template import Template
+from storm.locals import Count, In
 
 import cherrypy
 import cherrypy.lib
 
 from sickbeard.tvapi import tvapi_main, safestore
+from sickbeard.tvapi.tvapi_classes import TVEpisodeData, TVShowData
 
 from sickbeard import config
 from sickbeard import db
@@ -44,6 +46,7 @@ from sickbeard import providers
 from sickbeard import tv
 from sickbeard import logger, helpers, exceptions
 from sickbeard import encodingKludge as ek
+from sickbeard.tvclasses import TVEpisode
 
 from sickbeard.notifiers import xbmc
 from sickbeard.common import *
@@ -1053,9 +1056,25 @@ class Home:
         
         today = str(datetime.date.today().toordinal())
         
-        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status IN ("+str(DOWNLOADED)+","+str(PREDOWNLOADED)+") AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        #t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status IN ("+str(DOWNLOADED)+","+str(PREDOWNLOADED)+") AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        downloadedEps = sickbeard.storeManager.safe_store("find",
+                                                          (TVEpisodeData.show_id, Count(TVEpisodeData.show_id)),
+                                                          TVEpisodeData.season != 0,
+                                                          TVEpisodeData.episode != 0,
+                                                          TVEpisodeData.aired <= datetime.date.today(),
+                                                          TVEpisode.eid == TVEpisodeData._eid,
+                                                          In(TVEpisode._status, ([DOWNLOADED, PREDOWNLOADED])))
+        downloadedEps = safestore.safe_list(sickbeard.storeManager.safe_store(downloadedEps.group_by, TVEpisodeData.show_id))
+        t.downloadedEps = downloadedEps
 
-        t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        #t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        allEps = sickbeard.storeManager.safe_store("find",
+                                                   (TVEpisodeData.show_id, Count(TVEpisodeData.show_id)),
+                                                   TVEpisodeData.season != 0,
+                                                   TVEpisodeData.episode != 0,
+                                                   TVEpisodeData.aired <= datetime.date.today())
+        allEps = safestore.safe_list(sickbeard.storeManager.safe_store(allEps.group_by, TVEpisodeData.show_id))
+        t.allEps = allEps
         
         return _munge(t)
 
@@ -1087,7 +1106,6 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         else:
-            #showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
             showObj = tvapi_main.getTVShow(int(show))
             
             if showObj == None:
@@ -1096,11 +1114,10 @@ class Home:
         t = PageTemplate(file="displayShow.tmpl")
         t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdb_id } ]
 
-        #try:
-        #    t.showLoc = (showObj.location, True)
-        #except sickbeard.exceptions.ShowDirNotFoundException:
-        #    t.showLoc = (showObj._location, False)
-        t.showLoc = 'aoeu'
+        try:
+            t.showLoc = (showObj.location, True)
+        except sickbeard.exceptions.ShowDirNotFoundException:
+            t.showLoc = (showObj._location, False)
 
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             flash.message('This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.')
@@ -1210,7 +1227,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = tvapi_main.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1219,9 +1236,10 @@ class Home:
         sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
             return _genericMessage("Error", "Shows can't be deleted while they're being added or updated.")
 
+        tempName = showObj.show_data.name
         showObj.deleteShow()
         
-        flash.message('<b>%s</b> has been deleted' % showObj.name)
+        flash.message('<b>%s</b> has been deleted' % tempName)
         redirect("/home")
 
     @cherrypy.expose

@@ -327,11 +327,16 @@ class BoolVariable(Variable):
     __slots__ = ()
 
     def parse_set(self, value, from_db):
+        if isinstance(value, (str, unicode)):
+            try:
+                value = int(value)
+            except ValueError:
+                pass
         if not isinstance(value, (int, long, float, Decimal)):
             raise TypeError("Expected bool, found %r: %r"
                             % (type(value), value))
         return bool(value)
-
+    
 
 class IntVariable(Variable):
     __slots__ = ()

@@ -22,8 +22,8 @@
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 
-Airs: show.airs on <%=show.show_data.network%><br />
-Status: <%=show.show_data.status%><br />
+Airs: show.airs on $show.show_data.network<br />
+Status: $show.show_data.status<br />
 
 #if $showLoc[1]:
 Location: $showLoc[0]
@@ -32,7 +32,7 @@ Location: $showLoc[0]
 #end if
 <br />
 
-Quality: qualityStrings[int(show.quality)]<br />
+Quality: #if $show.quality then $qualityStrings[int($show.quality)] else "?"#<br />
 Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 Active: <img src="$sbRoot/images/#if not $show.paused then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
@@ -55,8 +55,10 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
 #set $odd = 0
 
 <table class="sickbeardTable">
-    
-#for $epData in $safestore.safe_list($sickbeard.storeManager.safe_store("find", tvapi_classes.TVEpisodeData)):
+
+#set $epList = $safestore.safe_list($sickbeard.storeManager.safe_store("find", tvapi_classes.TVEpisodeData))
+$epList.sort(lambda x, y: ($x.season*1000 + $x.episode) - ($y.season*1000 + $y.episode), reverse=True)
+#for $epData in $epList:
 
   #if int($epData.season) != $curSeason:
   <tr class="seasonheader">
@@ -89,7 +91,7 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
         #end if
     </td>
     <td align="center">#if $epData.aired == 1 then "never" else $epData.aired#</td>
-    <td>os.path.basename($epData.ep_obj.location)</td>
+    <td>#if $epData.ep_obj.location then $os.path.basename($epData.ep_obj.location) else ""#</td>
     <td>$statusStrings[int($epData.ep_obj.status)]</td>
     <td align="center">
     #if int($epData.season) != 0: 

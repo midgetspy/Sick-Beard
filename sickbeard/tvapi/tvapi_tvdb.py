@@ -3,7 +3,7 @@ import datetime
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from tvapi_classes import TVShowData, TVEpisodeData
-import safestore
+import safestore, proxy
 
 import sickbeard
 from sickbeard import exceptions
@@ -28,7 +28,7 @@ def loadShow(tvdb_id, cache=True):
     showList = safestore.safe_list(sickbeard.storeManager.safe_store("find", TVShowData, TVShowData.tvdb_id == tvdb_id))
     if len(showList) == 0:
         logger.log("Show doesn't exist in DB, making new entry", logger.DEBUG)
-        showData = safestore._getProxy(sickbeard.storeManager.safe_store(TVShowData, tvdb_id))
+        showData = proxy._getProxy(sickbeard.storeManager.safe_store(TVShowData, tvdb_id))
         sickbeard.storeManager.safe_store("add", showData.obj)
         #store.commit()
     else:
@@ -64,7 +64,7 @@ def loadShow(tvdb_id, cache=True):
                     resultingData[season] = []
                 resultingData[season].append(result)
     
-    sickbeard.storeManager.safe_store("commit")
+    sickbeard.storeManager.commit()
 
     return resultingData
     
@@ -83,9 +83,9 @@ def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
                               TVEpisodeData.season == season,
                               TVEpisodeData.episode == episode))
     if len(epList) == 0:
-        epData = safestore._getProxy(sickbeard.storeManager.safe_store(TVEpisodeData, tvdb_id, season, episode))
+        epData = proxy._getProxy(sickbeard.storeManager.safe_store(TVEpisodeData, tvdb_id, season, episode))
         sickbeard.storeManager.safe_store("add", epData.obj)
-        #sickbeard.storeManager.safe_store("commit")
+        #sickbeard.storeManager.commit()
     else:
         epData = epList[0]
 

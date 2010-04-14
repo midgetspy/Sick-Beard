@@ -47,7 +47,7 @@ class TVShow(Storm):
         self.tvdb_id = tvdb_id
 
     def _getLocation(self):
-        if ek.ek(os.path.isdir, self._location):
+        if self._location and ek.ek(os.path.isdir, self._location):
             return self._location
         else:
             raise exceptions.ShowDirNotFoundException("Show folder doesn't exist, you shouldn't be using it")
@@ -91,7 +91,7 @@ class TVShow(Storm):
         if untilDate:
             conditions.append(TVEpisodeData.aired <= untilDate)
 
-        result = safestore._safe_list(sickbeard.storeManager._store.find(TVEpisodeData, And(*conditions)))
+        result = sickbeard.storeManager._store.find(TVEpisodeData, And(*conditions))
         return result
     
     def getEp(self, season, episode): # I'd like to replace this with [season][episode] eventually
@@ -109,9 +109,9 @@ class TVShow(Storm):
         else:
             return None
 
-    def writeEpisodeMetafiles (self):
+    def writeEpisodeMetafiles(self):
         
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             #logger.log(str(self.tvdb_id) + ": Show dir doesn't exist, skipping NFO generation")
             return
         
@@ -124,7 +124,14 @@ class TVShow(Storm):
         pass
     
     def deleteShow(self):
-        pass
+        for epObj in self.episodes:
+            try:
+                epObj.deleteEpisode()
+            except exceptions.EpisodeDeletedException:
+                pass
+        sickbeard.storeManager._store.remove(self.show_data)
+        sickbeard.storeManager._store.remove(self)
+        sickbeard.storeManager.commit()
     
     def refreshDir(self):
         
@@ -164,13 +171,13 @@ class TVShow(Storm):
             
             # get the episode object if it exists
             epObj = sickbeard.storeManager._store.find(TVEpisode, TVEpisode.location == curFile).one()
-            sickbeard.storeManager._store.commit()
             
             # if not, make it
             if not epObj:
                 epObj = sickbeard.tvapi.tvapi_main.createEpFromName(ek.ek(os.path.basename, curFile), self.tvdb_id)
                 epObj.location = curFile
-                sickbeard.storeManager._store.commit()
+                epObj.status = common.DOWNLOADED
+                sickbeard.storeManager.commit()
 
     
     def fixEpisodeNames(self):
@@ -228,7 +235,7 @@ class TVEpisode(Storm):
             if self.episodes_data.count() == 1:
                 epData = self.episodes_data.one()
                 if not epData.aired:
-                    return common.SKIPPED
+                    return common.UNKNOWN
                 elif epData.aired >= datetime.date.today():
                     return common.UNAIRED
                 else:
@@ -270,7 +277,7 @@ class TVEpisode(Storm):
 
         if ep not in self.episodes_data:
             self.episodes_data.add(ep)
-            sickbeard.storeManager._store.commit()
+            sickbeard.storeManager.commit()
 
         # keep the status up to date
         self._status = self._getStatus() 
@@ -307,7 +314,10 @@ class TVEpisode(Storm):
         nfo_fh.close()
         
     def deleteEpisode(self):
-        pass
+        for epData in self.episodes_data:
+            sickbeard.storeManager._store.remove(epData)
+        sickbeard.storeManager._store.remove(self)
+        raise exceptions.EpisodeDeletedException()
 
     def fullPath(self):
         return os.path.join(self.show.location, self.location)

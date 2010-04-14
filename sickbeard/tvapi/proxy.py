@@ -1,6 +1,8 @@
 import sickbeard
 import sqlite3
 
+from sickbeard import logger
+
 class GenericProxy():
     def __init__(self, obj):
         self.__dict__['obj'] = obj
@@ -14,6 +16,7 @@ class GenericProxy():
     def __getattr__(self, name):
         if name in ("__call__"):
             return getattr(self.obj, name)
+        logger.log("proxying call to "+name, logger.DEBUG)
 
         try:
             return getattr(self.obj, name)
@@ -31,11 +34,40 @@ class TVShowProxy(GenericProxy):
 
     def __init__(self, show):
         GenericProxy.__init__(self, show)
-        self.__dict__['show_data'] = GenericProxy(sickbeard.storeManager.safe_store(getattr, show, 'show_data'))
+        self.__dict__['show_data'] = _getProxy(sickbeard.storeManager.safe_store(getattr, show, 'show_data'))
+
+    def _safe(self, func, *args, **kwargs):
+        return sickbeard.storeManager.safe_store(func, *args, **kwargs)
+
+    def deleteShow(self):
+        return self._safe(self.obj.deleteShow)
     
+    def nextEpisodes(self):
+        return self._safe(self.obj.nextEpisodes)
+    
+    def refreshDir(self):
+        return self._safe(self.obj.refreshDir)
+    
+    def getImages(self):
+        return self._safe(self.obj.getImages)
+    
+    def writeEpisodeMetafiles(self):
+        return self._safe(self.obj.writeEpisodeMetafiles)
+    
+
 
 class TVEpisodeProxy(GenericProxy):
     pass
+
+class TVEpisodeDataProxy(GenericProxy):
+    def __init__(self, epData):
+        GenericProxy.__init__(self, epData)
+        self.__dict__['ep_obj'] = _getProxy(sickbeard.storeManager.safe_store(getattr, epData, 'ep_obj'))
+        self.__dict__['show_data'] = _getProxy(sickbeard.storeManager.safe_store(getattr, epData, 'show_data'))
+
+class TVShowDataProxy(GenericProxy):
+    pass
+
 
 def _getProxy(obj):
     """
@@ -47,9 +79,9 @@ def _getProxy(obj):
     elif type(obj) == sickbeard.tvclasses.TVEpisode:
         return TVEpisodeProxy(obj)
     elif type(obj) == sickbeard.tvapi.tvapi_classes.TVShowData:
-        return GenericProxy(obj)
+        return TVShowDataProxy(obj)
     elif type(obj) == sickbeard.tvapi.tvapi_classes.TVEpisodeData:
-        return GenericProxy(obj)
+        return TVEpisodeDataProxy(obj)
     else:
         return obj
 
