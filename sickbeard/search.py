@@ -41,21 +41,21 @@ def _downloadResult(result):
 
 	resProvider = providers.getProviderModule(result.provider)
 
-	result = False
+	newResult = False
 
 	if resProvider == None:
 		logger.log("Invalid provider name - this is a coding error, report it please", logger.ERROR)
 		return False
 
 	if resProvider.providerType == "nzb":
-		result = resProvider.downloadNZB(result)
+		newResult = resProvider.downloadNZB(result)
 	elif resProvider.providerType == "torrent":
-		result = resProvider.downloadTorrent(result)
+		newResult = resProvider.downloadTorrent(result)
 	else:
 		logger.log("Invalid provider type - this is a coding error, report it please", logger.ERROR)
 		return False
 
-	return result
+	return newResult
 
 def snatchEpisode(result, endStatus=SNATCHED):
 
