@@ -182,16 +182,21 @@ def processDir (dirName, recurse=False):
                     except (OSError, IOError), e:
                         returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
 
+                returnStr += logHelper("Processing succeeded for "+curFile)
+
             else:
                 returnStr += result
+                returnStr += logHelper("Processing failed for "+curFile)
             
         else:
             returnStr += logHelper("Auto processing file: "+curFile)
             result = processFile(curFile)
             if type(result) == list:
                 returnStr += result[0]
+                returnStr += logHelper("Processing succeeded for "+curFile)
             else:
                 returnStr += result
+                returnStr += logHelper("Processing failed for "+curFile)
 
     return returnStr
             
