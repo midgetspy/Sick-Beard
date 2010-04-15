@@ -2,9 +2,13 @@ import datetime
 
 from sickbeard.common import *
 
+import sickbeard
+
 from sickbeard import logger
 from sickbeard import exceptions
 from sickbeard import ui
+from sickbeard.tvapi import safestore, tvapi_main
+from sickbeard.tvclasses import TVShow
 
 class ShowUpdater():
     
@@ -28,17 +32,18 @@ class ShowUpdater():
 
         piList = []
         
-        for curShow in sickbeard.showList:
+        #for curShow in sickbeard.showList:
+        for showObj in safestore.safe_list(sickbeard.storeManager.safe_store("find", TVShow)): 
             
             try:
             
                 # either update or refresh depending on the time
-                if curShow.status == "Ended":
+                if showObj.show_data.status == "Ended":
                     #TODO: maybe I should still update specials?
-                    logger.log("Doing refresh only for show "+curShow.name+" because it's marked as ended.", logger.DEBUG)
-                    curQueueItem = sickbeard.showQueueScheduler.action.refreshShow(curShow)
+                    logger.log("Doing refresh only for show "+showObj.show_data.name+" because it's marked as ended.", logger.DEBUG)
+                    curQueueItem = sickbeard.showQueueScheduler.action.refreshShow(showObj)
                 else:
-                    curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)
+                    curQueueItem = sickbeard.showQueueScheduler.action.updateShow(showObj, True)
                 
                 piList.append(curQueueItem)
 
