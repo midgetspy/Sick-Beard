@@ -22,53 +22,44 @@ import urllib
 import datetime
 import traceback
 
-from storm.locals import Store
+from sickbeard import exceptions, common, logger
+from sickbeard.tvapi import proxy, safestore
 
-from sickbeard import exceptions
+import sickbeard
 
 from tvapi_classes import TVShowData, TVEpisodeData
 
-from sickbeard import tvapi
-
-class Logger():
-    DEBUG = 1
-    MESSAGE = 2
-    ERROR = 3
-    def log(self, message, blah=MESSAGE):
-        if blah > Logger.DEBUG:
-            print message
-logger = Logger()
-
-
-def loadShow(tvdb_id):
-
-    store = Store(tvapi.database)
-    showData = store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
-    if showData == None:
-        showData = TVShowData(tvdb_id)
-        store.add(showData)
-        store.commit()
+def _makeTVR(tvdb_id):
+    showList = safestore.safe_list(sickbeard.storeManager.safe_store("find", TVShowData, TVShowData.tvdb_id == tvdb_id))
+    if len(showList) == 0:
+        logger.log("Show doesn't exist in DB, making new entry", logger.DEBUG)
+        showData = proxy._getProxy(sickbeard.storeManager.safe_store(TVShowData, tvdb_id))
+        sickbeard.storeManager.safe_store("add", showData.obj)
+    else:
+        showData = showList[0]
 
     tvr = TVRage(showData)
         
+    sickbeard.storeManager.commit()
+
+    return tvr
+
+def loadShow(tvdb_id):
+
+    tvr = _makeTVR(tvdb_id)
+
     try:
         ep = tvr.findLatestEp()
     except exceptions.TVRageException, e:
         logger.log("Unable to find next episode on TVRage: "+str(e), logger.DEBUG)
-        
+
+    sickbeard.storeManager.commit()
 
 
 def getID(tvdb_id):
 
-    store = Store(tvapi.database)
-    showData = store.find(TVShowData, TVShowData.tvdb_id == tvdb_id).one()
-    if showData == None:
-        showData = TVShowData(tvdb_id)
-        store.add(showData)
-        store.commit()
+    tvr = _makeTVR(tvdb_id)
 
-    tvr = TVRage(showData)
-        
     return tvr._tvrage_id
 
 
@@ -118,28 +109,34 @@ class TVRage:
 
             # check the first episode of every season
             for curSeason in self.show.seasons:
-
+                
                 logger.log("Checking TVDB and TVRage sync for season "+str(curSeason), logger.DEBUG)
 
                 airdate = None
 
                 # don't do specials and don't do seasons with no episode 1
-                if curSeason == 0 or 1 not in self.show[curSeason]:
+                if curSeason == 0 or 1 not in self.show.season(curSeason):
                     continue
                 
-                store = Store(tvapi.database)
                 # get the episode info from the DB
-                epObj = store.find(TVEpisodeData,
-                                   TVEpisodeData.show_id == self.show.tvdb_id,
-                                   TVEpisodeData.season == curSeason,
-                                   TVEpisodeData.episode == 1).one()
-            
+                epDataList = sickbeard.storeManager.safe_store("find",
+                                                              TVEpisodeData,
+                                                              TVEpisodeData.show_id == self.show.tvdb_id,
+                                                              TVEpisodeData.season == curSeason,
+                                                              TVEpisodeData.episode == 1)
+                epDataList = safestore.safe_list(epDataList)
+                if len(epDataList) == 0:
+                    logger.log("Unable to look up the TVDB info, skipping", logger.DEBUG)
+                    continue
+                else:
+                    epData = epDataList[0]
+                
                 # make sure we have a date to compare with 
-                if not epObj.aired:
+                if not epData.aired:
                     continue
 
                 # get a datetime object
-                airdate = epObj.aired
+                airdate = epData.aired
         
                 # get the episode info from TVRage
                 info = self._getTVRageInfo(curSeason, 1)
@@ -185,18 +182,23 @@ class TVRage:
         
             airdate = None
         
-
-            store = Store(tvapi.database)
             # get the episode info from the DB
-            epObj = store.find(TVEpisodeData,
-                               TVEpisodeData.show_id == self.show.tvdb_id,
-                               TVEpisodeData.season == self.lastEpInfo['season'],
-                               TVEpisodeData.episode == self.lastEpInfo['episode']).one()
+            epDataList = sickbeard.storeManager.safe_store("find",
+                                                          TVEpisodeData,
+                                                          TVEpisodeData.show_id == self.show.tvdb_id,
+                                                          TVEpisodeData.season == self.lastEpInfo['season'],
+                                                          TVEpisodeData.episode == self.lastEpInfo['episode'])
+            epDataList = safestore.safe_list(epDataList)
+            if len(epDataList) == 0:
+                logger.log("Unable to look up the TVDB info, skipping", logger.DEBUG)
+                return None
+            else:
+                epData = epDataList[0]
         
-            if not epObj.aired:
+            if not epData.aired:
                 return None
 
-            airdate = epObj.aired
+            airdate = epData.aired
             
             logger.log("Date from TVDB for episode " + str(self.lastEpInfo['season']) + "x" + str(self.lastEpInfo['episode']) + ": " + str(airdate), logger.DEBUG)
             logger.log("Date from TVRage for episode " + str(self.lastEpInfo['season']) + "x" + str(self.lastEpInfo['episode']) + ": " + str(self.lastEpInfo['airdate']), logger.DEBUG)
@@ -302,20 +304,25 @@ class TVRage:
         if not self.checkSync(info):
             raise exceptions.TVRageException("TVRage info isn't in sync with TVDB, not using data")
         
-        store = Store(tvapi.database)
-        epData = store.find(TVEpisodeData,
-                                  TVEpisodeData.show_id == self.show.tvdb_id,
-                                  TVEpisodeData.season == self.nextEpInfo['season'],
-                                  TVEpisodeData.episode == self.nextEpInfo['episode']).one()
-
+        # get the episode info from the DB
+        epDataList = sickbeard.storeManager.safe_store("find",
+                                                      TVEpisodeData,
+                                                      TVEpisodeData.show_id == self.show.tvdb_id,
+                                                      TVEpisodeData.season == self.lastEpInfo['season'],
+                                                      TVEpisodeData.episode == self.lastEpInfo['episode'])
+        epDataList = safestore.safe_list(epDataList)
+        if len(epDataList) == 0:
+            epData = None
+        else:
+            epData = epDataList[0]
+    
         if epData:
             raise exceptions.TVRageException("Show is already in database, not adding the TVRage info")
 
-        epData = TVEpisodeData(self.show.tvdb_id, self.nextEpInfo['season'], self.nextEpInfo['episode'])
+        epData = sickbeard.storeManager.safe_store(TVEpisodeData, self.show.tvdb_id, self.nextEpInfo['season'], self.nextEpInfo['episode'])
         epData.name = self.nextEpInfo['name']
         epData.airdate = self.nextEpInfo['airdate']
-        store.add(epData)
-        store.commit()
+        sickbeard.storeManager.safe_store("add", epData)
 
         return epData
 

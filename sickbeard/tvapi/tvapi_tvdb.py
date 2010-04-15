@@ -64,6 +64,12 @@ def loadShow(tvdb_id, cache=True):
                     resultingData[season] = []
                 resultingData[season].append(result)
     
+    # delete episodes from the database that are no longer found on TVDB
+    for season in resultingData:
+        for epData in resultingData[season]:
+            if epData.season not in tvdbShow and epData.episode not in tvdbShow[season]:
+                epData.delete()
+
     sickbeard.storeManager.commit()
 
     return resultingData

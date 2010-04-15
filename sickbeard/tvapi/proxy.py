@@ -7,6 +7,9 @@ class GenericProxy():
     def __init__(self, obj):
         self.__dict__['obj'] = obj
 
+    def _safe(self, func, *args, **kwargs):
+        return sickbeard.storeManager.safe_store(func, *args, **kwargs)
+
     def __repr__(self):
         return self.__str__()
     
@@ -16,7 +19,6 @@ class GenericProxy():
     def __getattr__(self, name):
         if name in ("__call__"):
             return getattr(self.obj, name)
-        logger.log("proxying call to "+name, logger.DEBUG)
 
         try:
             return getattr(self.obj, name)
@@ -36,11 +38,8 @@ class TVShowProxy(GenericProxy):
         GenericProxy.__init__(self, show)
         self.__dict__['show_data'] = _getProxy(sickbeard.storeManager.safe_store(getattr, show, 'show_data'))
 
-    def _safe(self, func, *args, **kwargs):
-        return sickbeard.storeManager.safe_store(func, *args, **kwargs)
-
-    def deleteShow(self):
-        return self._safe(self.obj.deleteShow)
+    def delete(self):
+        return self._safe(self.obj.delete)
     
     def nextEpisodes(self):
         return self._safe(self.obj.nextEpisodes)
@@ -65,8 +64,12 @@ class TVEpisodeDataProxy(GenericProxy):
         self.__dict__['ep_obj'] = _getProxy(sickbeard.storeManager.safe_store(getattr, epData, 'ep_obj'))
         self.__dict__['show_data'] = _getProxy(sickbeard.storeManager.safe_store(getattr, epData, 'show_data'))
 
+    def delete(self):
+        return self._safe(self.obj.delete)
+
 class TVShowDataProxy(GenericProxy):
-    pass
+    def season(self, season):
+        self._safe(self.obj.season, season)
 
 
 def _getProxy(obj):

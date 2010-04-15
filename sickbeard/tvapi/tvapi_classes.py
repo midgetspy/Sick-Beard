@@ -55,22 +55,22 @@ class TVShowData(Storm):
     seasons = property(_seasons)
 
     # provide a list of episode numbers for obj[season] accesses
-    def __getitem__(self, key):
+    def season(self, season):
         """
         Allows access to episode lists via TVEpisodeData[season]. Returns a list of episodes
         in the given season. Caches the result to limit unnecessary SQL queries.
         """
 
         # if it's been looked up before just return the cache
-        if key in self._cached_episodes:
-            return self._cached_episodes[key]
+        if season in self._cached_episodes:
+            return self._cached_episodes[season]
         
         toReturn = []
-        for x in sickbeard.storeManager._store.execute("SELECT episode FROM tvepisodedata WHERE show_id = ? AND season = ?", (self.tvdb_id, key)):
+        for x in sickbeard.storeManager._store.execute("SELECT episode FROM tvepisodedata WHERE show_id = ? AND season = ?", (self.tvdb_id, season)):
             toReturn.append(x[0])
 
         # put the new lookup in the cache
-        self._cached_episodes[key] = toReturn
+        self._cached_episodes[season] = toReturn
         
         return toReturn
 
@@ -124,6 +124,16 @@ class TVEpisodeData(Storm):
         self.show_id = show_id
         self.season = season
         self.episode = episode
+
+    def delete(self):
+        """
+        Deletes the episode data from the database, and if the associated episode object
+        has no other metadataassociated with it then it's deleted as well.
+        """
+        if self.ep_obj and self.ep_obj.episodes_data.count() == 1:
+            self.ep_obj.delete()
+        else:
+            sickbeard.storeManager._store.remove(self)
 
     def __storm_invalidated__(self):
         self.show_data.resetCache(self.season)

@@ -166,7 +166,6 @@ class QueueItem:
         self.inProgress = False
     
     def _getName(self):
-        return 'aoeu'
         return self.show.show_data.name
 
     def _isLoading(self):
@@ -258,16 +257,14 @@ class QueueItemAdd(QueueItem):
 
 
 class QueueItemRefresh(QueueItem):
-    def __init__(self, tvdb_id=None):
-        QueueItem.__init__(self, QueueActions.REFRESH, tvdb_id)
-        self.tvdb_id = tvdb_id
+    def __init__(self, show=None):
+        QueueItem.__init__(self, QueueActions.REFRESH, show)
+        self.show = show
 
     def execute(self):
 
         QueueItem.execute(self)
         
-        self.show = tvapi_main.getTVShow(self.tvdb_id)
-
         logger.log("Performing refresh on "+self.show.show_data.name)
 
         self.show.refreshDir()
@@ -284,7 +281,7 @@ class QueueItemRename(QueueItem):
 
         QueueItem.execute(self)
 
-        logger.log("Performing rename on "+self.show.name)
+        logger.log("Performing rename on "+self.show.show_data.name)
 
         self.show.fixEpisodeNames()
         
@@ -299,48 +296,9 @@ class QueueItemUpdate(QueueItem):
         
         QueueItem.execute(self)
         
-        logger.log("Beginning update of "+self.show.name)
+        logger.log("Beginning update of "+self.show.show_data.name)
         
-        # get episode list from DB
-        logger.log("Loading all episodes from the database", logger.DEBUG)
-        DBEpList = self.show.loadEpisodesFromDB()
-        
-        # get episode list from TVDB
-        logger.log("Loading all episodes from theTVDB", logger.DEBUG)
-        try:
-            TVDBEpList = self.show.loadEpisodesFromTVDB(cache=not self.force)
-        except tvdb_exceptions.tvdb_exception, e:
-            logger.log("Unable to get info from TVDB, the show info will not be refreshed: "+str(e), logger.ERROR)
-            TVDBEpList = None
-        
-        if TVDBEpList == None:
-            logger.log("No data returned from TVDB, unable to update this show", logger.ERROR)
-
-        else:
-        
-            # for each ep we found on TVDB delete it from the DB list
-            for curSeason in TVDBEpList:
-                for curEpisode in TVDBEpList[curSeason]:
-                    logger.log("Removing "+str(curSeason)+"x"+str(curEpisode)+" from the DB list", logger.DEBUG)
-                    if curSeason in DBEpList and curEpisode in DBEpList[curSeason]:
-                        del DBEpList[curSeason][curEpisode]
-    
-            # for the remaining episodes in the DB list just delete them from the DB
-            for curSeason in DBEpList:
-                for curEpisode in DBEpList[curSeason]:
-                    logger.log("Permanently deleting episode "+str(curSeason)+"x"+str(curEpisode)+" from the database", logger.MESSAGE)
-                    curEp = self.show.getEpisode(curSeason, curEpisode)
-                    try:
-                        curEp.deleteEpisode()
-                    except exceptions.EpisodeDeletedException:
-                        pass
-        
-        # now that we've updated the DB from TVDB see if there's anything we can add from TVRage
-        with self.show.lock:
-            logger.log("Attempting to supplement show info with info from TVRage", logger.DEBUG)
-            self.show.loadLatestFromTVRage()
-            if self.show.tvrid == 0:
-                self.show.setTVRID()
+        self.show.update()
 
         sickbeard.showQueueScheduler.action.refreshShow(self.show, True)
 

@@ -1237,7 +1237,7 @@ class Home:
             return _genericMessage("Error", "Shows can't be deleted while they're being added or updated.")
 
         tempName = showObj.show_data.name
-        showObj.deleteShow()
+        showObj.delete()
         
         flash.message('<b>%s</b> has been deleted' % tempName)
         redirect("/home")
@@ -1248,9 +1248,14 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
+        showObj = tvapi_main.getTVShow(int(show))
+        
+        if showObj == None:
+            return _genericMessage("Error", "Unable to find the specified show")
+        
         # force the update from the DB
         try:
-            sickbeard.showQueueScheduler.action.refreshShow(int(show))
+            sickbeard.showQueueScheduler.action.refreshShow(showObj)
         except exceptions.CantRefreshException, e:
             flash.error("Unable to refresh this show.",
                         str(e))
@@ -1265,7 +1270,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = tvapi_main.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1280,7 +1285,7 @@ class Home:
         # just give it some time
         time.sleep(3)
         
-        redirect("/home/displayShow?show="+str(showObj.tvdbid))
+        redirect("/home/displayShow?show="+str(show))
 
 
     @cherrypy.expose

@@ -14,7 +14,7 @@ from sickbeard import encodingKludge as ek
 import sickbeard.nfo
 import sickbeard.tvapi.tvapi_main
 
-from sickbeard.tvapi import tvapi_tvdb, proxy, safestore
+from sickbeard.tvapi import tvapi_tvdb, tvapi_tvrage, proxy, safestore
 
 from sickbeard import logger
 
@@ -67,9 +67,20 @@ class TVShow(Storm):
 
     location = property(_getLocation, _setLocation)
 
-    def update(self, cache=True):
+    def update(self, cache=False):
+        """
+        Updates the show's metadata from TVDB and TVRage.
+        
+        cache: default=False
+            If this is true then the TVDB API will use the cached copies of metadata to update. With the local
+            database being used to store the data I can't think of a single reason you'd ever need this.
+        """
         tvapi_tvdb.loadShow(self.tvdb_id, cache)
-        #tvapi_tvrage.loadShow(self.tvdb_id)
+        
+        try:
+            tvapi_tvrage.loadShow(self.tvdb_id)
+        except exceptions.TVRageException, e:
+            logger.log("Error while trying to set TVRage info: "+str(e), logger.WARNING)
     
     def nextEpisodes(self, fromDate=None, untilDate=None):
         """
@@ -123,10 +134,10 @@ class TVShow(Storm):
     def getImages(self):
         pass
     
-    def deleteShow(self):
+    def delete(self):
         for epObj in self.episodes:
             try:
-                epObj.deleteEpisode()
+                epObj.delete()
             except exceptions.EpisodeDeletedException:
                 pass
         sickbeard.storeManager._store.remove(self.show_data)
@@ -313,7 +324,7 @@ class TVEpisode(Storm):
         nfo.write( nfo_fh, encoding="utf-8" ) 
         nfo_fh.close()
         
-    def deleteEpisode(self):
+    def delete(self):
         for epData in self.episodes_data:
             sickbeard.storeManager._store.remove(epData)
         sickbeard.storeManager._store.remove(self)
