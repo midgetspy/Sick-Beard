@@ -91,7 +91,7 @@ $epList.sort(lambda x, y: ($x.season*1000 + $x.episode) - ($y.season*1000 + $y.e
         #end if
     </td>
     <td align="center">#if $epData.aired == 1 then "never" else $epData.aired#</td>
-    <td>#if $epData.ep_obj.location then $os.path.basename($epData.ep_obj.location) else ""#</td>
+    <td>#if $epData.ep_obj.location then $epData.ep_obj.location[len($epData.ep_obj.show._location)+1:] else ""#</td>
     <td>$statusStrings[int($epData.ep_obj.status)]</td>
     <td align="center">
     #if int($epData.season) != 0: 
