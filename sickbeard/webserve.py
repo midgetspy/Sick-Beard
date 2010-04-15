@@ -25,6 +25,7 @@ import urllib
 import re
 import threading
 import datetime
+import operator
 
 from Cheetah.Template import Template
 from storm.locals import Count, In
@@ -33,7 +34,7 @@ import cherrypy
 import cherrypy.lib
 
 from sickbeard.tvapi import tvapi_main, safestore
-from sickbeard.tvapi.tvapi_classes import TVEpisodeData, TVShowData
+from sickbeard.tvapi.tvapi_classes import TVEpisodeData
 
 from sickbeard import config
 from sickbeard import db
@@ -46,7 +47,7 @@ from sickbeard import providers
 from sickbeard import tv
 from sickbeard import logger, helpers, exceptions
 from sickbeard import encodingKludge as ek
-from sickbeard.tvclasses import TVEpisode
+from sickbeard.tvclasses import TVEpisode, TVShow
 
 from sickbeard.notifiers import xbmc
 from sickbeard.common import *
@@ -1141,7 +1142,7 @@ class Home:
                 t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdb_id })
             t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdb_id        })
 
-        t.show = showObj
+        t.tvdb_id = showObj.tvdb_id
         t.qualityStrings = sickbeard.common.qualityStrings
         t.sqlResults = []
         
@@ -1404,14 +1405,13 @@ class WebInterface:
         if show == None:
             return "Invalid show" #TODO: make it return a standard image
         else:
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+            showObj = tvapi_main.getTVShow(int(show))
             
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
     
-        posterFilename = os.path.abspath(os.path.join(showObj.location, "folder.jpg"))
+        posterFilename = os.path.abspath(ek.ek(os.path.join, showObj.location, "folder.jpg"))
         if os.path.isfile(posterFilename):
-            
             return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
         
         else:
@@ -1420,10 +1420,26 @@ class WebInterface:
     @cherrypy.expose
     def comingEpisodes(self):
 
-        epList = sickbeard.missingList + sickbeard.comingList
+        #epList = sickbeard.missingList + sickbeard.comingList
 
         # sort by air date
-        epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))
+        #epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))
+        
+        epList = []
+        for showObj in safestore.safe_list(sickbeard.storeManager.safe_store("find", TVShow)):
+            results = safestore.safe_list(showObj.nextEpisodes())
+            logger.log("From "+showObj.show_data.name+" got: "+str([str(x.season)+"x"+str(x.episode) for x in results]))
+            epList += results
+            
+        missedEps = sickbeard.storeManager.safe_store("find", TVEpisodeData,
+                                                       TVEpisodeData._eid == TVEpisode.eid,
+                                                       TVEpisode.status == MISSED)
+        
+        logger.log("missed eps to add: "+str(safestore.safe_list(missedEps)))
+
+        epList += safestore.safe_list(missedEps)
+        #epList = filter(lambda x: x.season != 0, epList)
+        #epList.sort(key=operator.attrgetter('aired'))
         
         t = PageTemplate(file="comingEpisodes.tmpl")
         t.submenu = [

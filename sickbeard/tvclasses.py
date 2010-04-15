@@ -90,7 +90,9 @@ class TVShow(Storm):
     def nextEpisodes(self, fromDate=None, untilDate=None):
         """
         Returns a list containing the next episode(s) with aired date between fromDate
-        and untilDate (inclusive).
+        and untilDate (inclusive). If no untilDate is given then episodes in the next
+        week are given. If no episodes between fromDate an untilDate exist then the next
+        available episode is given.
         
         fromDate: default=None
             datetime.date object representing the lower bound of air dates to return.
@@ -102,12 +104,21 @@ class TVShow(Storm):
         if not fromDate:
             fromDate = datetime.date.today()
         
-        conditions = [TVEpisodeData.aired >= fromDate]
+        conditions = [TVEpisodeData.aired >= fromDate, TVEpisodeData.show_id == self.tvdb_id]
         
         if untilDate:
             conditions.append(TVEpisodeData.aired <= untilDate)
+        else:
+            conditions.append(TVEpisodeData.aired <= fromDate + datetime.timedelta(days=7))
 
         result = sickbeard.storeManager._store.find(TVEpisodeData, And(*conditions))
+        
+        # if no results in the specified interval then just get the next few
+        #result = sickbeard.storeManager._store.find(TVEpisodeData, TVEpisodeData.show_id == )
+        
+        #sql = """SELECT * FROM tvepisodedata WHERE episode = ( SELECT MIN(episode) AS min_ep FROM tvepisodedata e1 WHERE episode > 10)"""
+    
+            
         return result
     
     def getEp(self, season, episode): # I'd like to replace this with [season][episode] eventually
@@ -187,9 +198,14 @@ class TVShow(Storm):
             # if not, make it
             if not epObj:
                 epObj = sickbeard.tvapi.tvapi_main.createEpFromName(ek.ek(os.path.basename, curFile), self.tvdb_id)
-                epObj.location = curFile
-                epObj.status = common.DOWNLOADED
-                sickbeard.storeManager.commit()
+
+            if not epObj:
+                logger.log("Unable to find episode metadata for "+curFile+", giving up", logger.ERROR)
+                continue
+                
+            epObj.location = curFile
+            epObj.status = common.DOWNLOADED
+            sickbeard.storeManager.commit()
 
     
     def renameEpisodes(self):

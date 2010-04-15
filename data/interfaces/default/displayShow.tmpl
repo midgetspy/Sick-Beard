@@ -8,7 +8,6 @@
 #import os.path
 #import datetime
 
-#set $tvdb_id = 80349
 #set $show = $getTVShow($tvdb_id)
 
 #set global $title = $show.show_data.name
@@ -56,7 +55,7 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
 
 <table class="sickbeardTable">
 
-#set $epList = $safestore.safe_list($sickbeard.storeManager.safe_store("find", tvapi_classes.TVEpisodeData))
+#set $epList = $safestore.safe_list($sickbeard.storeManager.safe_store("find", tvapi_classes.TVEpisodeData, tvapi_classes.TVEpisodeData.show_id == $tvdb_id))
 $epList.sort(lambda x, y: ($x.season*1000 + $x.episode) - ($y.season*1000 + $y.episode), reverse=True)
 #for $epData in $epList:
 

@@ -118,7 +118,7 @@ class SafeStore():
     
         toWaitFor = self.req
         self._queue.put((toWaitFor, func, args, kwargs))
-        logger.log("Placed req number " + str(toWaitFor) + " on the queue: "+str(func)+" w/ "+str(args)+" & "+str(kwargs), logger.DEBUG)
+        #logger.log("Placed req number " + str(toWaitFor) + " on the queue: "+str(func)+" w/ "+str(args)+" & "+str(kwargs), logger.DEBUG)
         
         # block until the result we want is given for us to eat
         while toWaitFor not in self._resultDict:

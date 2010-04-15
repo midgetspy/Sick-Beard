@@ -13,51 +13,51 @@
   <div id="listingWrapper">
     #set $curDay = None
     #set $missed = False
-    #for $curEp in $epList
-        #if $curEp.show.paused:
+    #for $curEp in $epList:
+        #if $curEp.show_data.show_obj.paused:
           #continue
         #end if
-        #if $curEp.airdate < datetime.date.today() and $curDay == None:
+        #if $curEp.aired < datetime.date.today() and $curDay == None:
 		  #if $missed == False
     <br /><h1 class="day">Missing</h1>
             #set $missed = True
           #end if
-        #elif $curDay == None or ($curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() < $oneWeek):
-            #set $curDay = curEp.airdate
-    <br /><h1 class="day">$curEp.airdate.strftime("%A")</h1>
-        #elif $curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() >= $oneWeek:
+        #elif $curDay == None or ($curEp.aired > $curDay and $curEp.aired - datetime.date.today() < $oneWeek):
+            #set $curDay = curEp.aired
+    <br /><h1 class="day">$curEp.aired.strftime("%A")</h1>
+        #elif $curEp.aired > $curDay and $curEp.aired - datetime.date.today() >= $oneWeek:
             #set $curDay = datetime.date(datetime.MAXYEAR, 1, 1)
     <br /><h1 class="day">More than one week</h1>
         #end if
         
-        #if $curEp.airdate == datetime.date.today()
+        #if $curEp.aired == datetime.date.today()
             #set $showDiv = "listing_current"
-        #elif $curEp.airdate < datetime.date.today()
+        #elif $curEp.aired < datetime.date.today()
             #set $showDiv = "listing_overdue"
-        #elif $curEp.airdate - datetime.date.today() >= $oneWeek
+        #elif $curEp.aired - datetime.date.today() >= $oneWeek
             #set $showDiv = "listing_toofar"
         #else
             #set $showDiv = ""
         #end if
     <div class="$showDiv">
-      <div class="listing" id="listing_$curEp.show.tvdbid">
-        <a name="$curEp.show.name"></a>
-        <a href="$sbRoot/home/displayShow?show=$curEp.show.tvdbid"><img alt="" src="$sbRoot/showPoster/?show=$curEp.show.tvdbid" class="listingThumb" /></a>
-        <div id="info_$curEp.show.tvdbid">
+      <div class="listing" id="listing_$curEp.show_id">
+        <a name="$curEp.show_data.name"></a>
+        <a href="$sbRoot/home/displayShow?show=$curEp.show_id"><img alt="" src="$sbRoot/showPoster/?show=$curEp.show_id" class="listingThumb" /></a>
+        <div id="info_$curEp.show_id">
           <h1>
           <div class="icons">
-            <a href="http://www.thetvdb.com/?tab=series&id=$curEp.show.tvdbid" target="_blank" title="http://www.thetvdb.com/?tab=series&id=$curEp.show.tvdbid"><img alt="" src="$sbRoot/images/info.png" /></a>
-            <a href="$sbRoot/home/searchEpisode?show=$curEp.show.tvdbid&season=$curEp.season&episode=$curEp.episode" title="Force Update" id="forceUpdate|$curEp.show.tvdbid|$curEp.show.name" class="forceUpdate"><img alt="" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|$curEp.show.tvdbid" /></a>
+            <a href="http://www.thetvdb.com/?tab=series&id=$curEp.show_id" target="_blank" title="http://www.thetvdb.com/?tab=series&id=$curEp.show_id"><img alt="" src="$sbRoot/images/info.png" /></a>
+            <a href="$sbRoot/home/searchEpisode?show=$curEp.show_id&season=$curEp.season&episode=$curEp.episode" title="Force Update" id="forceUpdate|$curEp.show_id|$curEp.show_data.name" class="forceUpdate"><img alt="" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|$curEp.show_id" /></a>
           </div>
-          <a href="$sbRoot/home/displayShow?show=$curEp.show.tvdbid">$curEp.show.name</a>
+          <a href="$sbRoot/home/displayShow?show=$curEp.show_id">$curEp.show_data.name</a>
           </h1>
           <p class="next">
-            <span class="title">Next Episode:</span> <span class="info "><%=str(curEp.season)+"x"+"%02i" % int(curEp.episode) %> - $curEp.name airs $curEp.airdate</span>
+            <span class="title">Next Episode:</span> <span class="info "><%=str(curEp.season)+"x"+"%02i" % int(curEp.episode) %> - $curEp.name airs $curEp.aired</span>
           </p>
           <p class="noMargin">
-            <span class="title">Status:</span> <span class="info ">$curEp.show.status</span><br />
-            <span class="title">Airs:</span> <span class="info ">$curEp.show.airs on $curEp.show.network</span><br />
-            <span class="title">Format:</span> <span class="info ">$qualityStrings[$curEp.show.quality]</span><br />
+            <span class="title">Status:</span> <span class="info ">$curEp.show_data.status</span><br />
+            <span class="title">Airs:</span> <span class="info ">curEp.show_data.airs on $curEp.show_data.network</span><br />
+            <span class="title">Format:</span> <span class="info ">$qualityStrings[$curEp.show_data.show_obj.quality]</span><br />
           </p>
         </div>
       </div>
