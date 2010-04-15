@@ -11,9 +11,6 @@
 #set $tvdb_id = 80349
 #set $show = $getTVShow($tvdb_id)
 
-repr: $repr($show.show_data)
-repr: $repr($show.show_data.name)
-
 #set global $title = $show.show_data.name
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdb_id, $show.show_data.name)
 
