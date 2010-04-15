@@ -1304,7 +1304,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = tvapi_main.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1312,7 +1312,7 @@ class Home:
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             return _genericMessage("Error", "Show is still being added, wait until it is finished before you rename files")
         
-        showObj.fixEpisodeNames()
+        showObj.renameEpisodes()
 
         redirect("/home/displayShow?show=" + show)
         

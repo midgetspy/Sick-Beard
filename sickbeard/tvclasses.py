@@ -1,5 +1,8 @@
 import datetime
 import os.path
+import operator
+import re
+import glob
 
 from storm.locals import Int, Unicode, Bool, Reference, ReferenceSet, Storm, Store
 from storm.expr import And
@@ -9,6 +12,8 @@ from tvapi.tvapi_classes import TVEpisodeData
 import sickbeard
 
 from sickbeard import common, exceptions, helpers
+from sickbeard import config
+from sickbeard import processTV
 from sickbeard import encodingKludge as ek
 
 import sickbeard.nfo
@@ -191,8 +196,47 @@ class TVShow(Storm):
                 sickbeard.storeManager.commit()
 
     
-    def fixEpisodeNames(self):
-        pass
+    def renameEpisodes(self):
+        """
+        Goes through every episode with an associated file and renames it according to the
+        rename options.
+        """
+
+        # for each episode in the show
+        for epObj in self.episodes:
+
+            if not epObj.location:
+                continue
+
+            # get the correct name
+            goodName = epObj.prettyName()
+            
+            # fix up the location, just in case
+            curLocation = ek.ek(os.path.normpath, epObj.location)
+
+            # get the filename of the episode and the folder it lives in 
+            actualName = ek.ek(os.path.splitext, ek.ek(os.path.basename, curLocation))[0]
+            curEpDir = os.path.dirname(curLocation)
+
+            if goodName == actualName:
+                logger.log("File " + epObj.location + " is already named correctly, skipping", logger.DEBUG)
+                continue
+
+            # rename the file and update the object with the new location
+            result = processTV.renameFile(epObj.location, goodName)
+            if result != False:
+                epObj.location = result
+            
+            # get a list of all associated files
+            associatedFiles = ek.ek(glob.glob, ek.ek(os.path.join, curEpDir, actualName + "*").replace("[","*").replace("]","*"))
+
+            # rename all associated files
+            for associatedFile in associatedFiles:
+                result = processTV.renameFile(associatedFile, goodName)
+                if result == False:
+                    logger.log("Unable to rename file "+associatedFile, logger.ERROR)
+            
+            epObj.checkForMetaFiles()
 
 class TVEpisode(Storm):
     """
@@ -333,5 +377,81 @@ class TVEpisode(Storm):
     def fullPath(self):
         return os.path.join(self.show.location, self.location)
     
-    def prettyName(self):
-        return self.show.name + " - " + " & ".join([str(x.season) + "x" + str(x.episode) + " - " + x.name for x in self.episodes_data])
+    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
+                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None):
+        
+        regex = "(.*) \(\d\)"
+
+        if self.episodes_data.count() == 1:
+            goodName = self.episodes_data.one().name
+
+        elif self.episodes_data.count() > 2:
+            goodName = ''
+
+        else:
+            singleName = True
+            curGoodName = None
+
+            for curName in [x.name for x in self.episodes_data]:
+                match = re.match(regex, curName)
+                if not match:
+                    singleName = False
+                    break
+    
+                if curGoodName == None:
+                    curGoodName = match.group(1)
+                elif curGoodName != match.group(1):
+                    singleName = False
+                    break
+
+            if singleName:
+                goodName = curGoodName
+            else:
+                goodName = " & ".join([x.name for x in self.episodes_data])
+        
+        if naming_show_name == None:
+            naming_show_name = sickbeard.NAMING_SHOW_NAME
+        
+        if naming_ep_name == None:
+            naming_ep_name = sickbeard.NAMING_EP_NAME
+        
+        if naming_ep_type == None:
+            naming_ep_type = sickbeard.NAMING_EP_TYPE
+        
+        if naming_multi_ep_type == None:
+            naming_multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
+        
+        if naming_sep_type == None:
+            naming_sep_type = sickbeard.NAMING_SEP_TYPE
+        
+        if naming_use_periods == None:
+            naming_use_periods = sickbeard.NAMING_USE_PERIODS
+        
+        goodEpString = ''
+        
+        # cycle through the episode data, sorted by episode number ascending
+        for (s, e) in sorted([(x.season, x.episode) for x in self.episodes_data], key=operator.itemgetter(1)):
+
+            # if it's the first one then make the initial string out of it
+            if not goodEpString:
+                goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': s, 'episodenumber': e}
+            else:
+                goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': s, 'episodenumber': e}
+        
+        if goodName != '':
+            goodName = config.naming_sep_type[naming_sep_type] + goodName
+
+        finalName = ""
+        
+        if naming_show_name:
+            finalName += self.show.show_data.name + config.naming_sep_type[naming_sep_type]
+
+        finalName += goodEpString
+
+        if naming_ep_name:
+            finalName += goodName
+        
+        if naming_use_periods:
+            finalName = re.sub("\s+", ".", finalName)
+
+        return finalName

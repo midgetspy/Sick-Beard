@@ -53,10 +53,14 @@ class TVShowProxy(GenericProxy):
     def writeEpisodeMetafiles(self):
         return self._safe(self.obj.writeEpisodeMetafiles)
     
+    def renameEpisodes(self):
+        return self._safe(self.obj.renameEpisodes)
+    
 
 
 class TVEpisodeProxy(GenericProxy):
-    pass
+    def prettyName(self, *args, **kwargs):
+        return self._safe(self.obj.prettyName, *args, **kwargs)
 
 class TVEpisodeDataProxy(GenericProxy):
     def __init__(self, epData):
