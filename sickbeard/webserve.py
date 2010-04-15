@@ -1158,7 +1158,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = tvapi_main.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1167,59 +1167,50 @@ class Home:
             
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu
-            with showObj.lock:
-                t.show = showObj
-                t.qualityStrings = qualityStrings
-                t.qualities = (SD, HD, ANY, BEST)
+            t.show = showObj
+            t.qualityStrings = qualityStrings
+            t.qualities = (SD, HD, ANY, BEST)
             
             return _munge(t)
         
         if seasonfolders == "on":
-            seasonfolders = 1
+            seasonfolders = True
         else:
-            seasonfolders = 0
+            seasonfolders = False
 
         if paused == "on":
-            paused = 1
+            paused = True
         else:
-            paused = 0
+            paused = False
 
-        with showObj.lock:
-            errors = []
-            logger.log("changing quality from " + str(showObj.quality) + " to " + str(quality), logger.DEBUG)
-            showObj.quality = int(quality)
-            
-            if showObj.seasonfolders != seasonfolders:
-                showObj.seasonfolders = seasonfolders
-                showObj.refreshDir()
+        errors = []
+        needRefresh = False
+        showObj.quality = int(quality)
+        
+        if showObj.seasonfolders != seasonfolders:
+            showObj.seasonfolders = seasonfolders
+            needRefresh = True
 
-            showObj.paused = paused
-                        
-            # if we change location clear the db of episodes, change it, write to db, and rescan
-            if os.path.normpath(showObj._location) != os.path.normpath(location):
-                if not os.path.isdir(location):
-                    errors.append("New location <tt>%s</tt> does not exist" % location)
-
-                else:
-                    # change it
-                    try:
-                        showObj.location = location
-                        showObj.refreshDir()
-                        # grab updated info from TVDB
-                        #showObj.loadEpisodesFromTVDB()
-                        # rescan the episodes in the new folder
-                        showObj.loadEpisodesFromDir()
-                    except exceptions.NoNFOException:
-                        errors.append("The folder at <tt>%s</tt> doesn't contain a tvshow.nfo - copy your files to that folder before you change the directory in Sick Beard." % location)
+        showObj.paused = paused
                     
-            # save it to the DB
-            showObj.saveToDB()
+        # if the location changes
+        if os.path.normpath(showObj._location) != os.path.normpath(location):
+            if not os.path.isdir(location):
+                errors.append("New location <tt>%s</tt> does not exist" % location)
 
-            if len(errors) > 0:
-                flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
-                            '<ul>' + '\n'.join(['<li>%s</li>' % error for error in errors]) + "</ul>")
+            else:
+                # change it and then refresh all episode locations
+                showObj.location = location
+                needRefresh = True
 
-            redirect("/home/displayShow?show=" + show)
+        if needRefresh:
+            showObj.refreshDir()
+
+        if len(errors) > 0:
+            flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
+                        '<ul>' + '\n'.join(['<li>%s</li>' % error for error in errors]) + "</ul>")
+
+        redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
     def deleteShow(self, show=None):
