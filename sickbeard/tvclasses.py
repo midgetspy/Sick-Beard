@@ -165,17 +165,13 @@ class TVShow(Storm):
             curLoc = os.path.normpath(epObj.location)
         
             # if the path doesn't exist
-            # or if there's no season folders and it's not inside our show dir 
-            # or if there are season folders and it's in the main dir:
-            # or if it's not in our show dir at all
+            # or if it's not in our show dir
             if not ek.ek(os.path.isfile, curLoc) or \
-            (not self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) != os.path.normpath(self.location)) or \
-            (self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) == os.path.normpath(self.location)) or \
             os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
             
                 logger.log("Location "+curLoc+" doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
                 #with curEp.lock:
-                epObj.location = ''
+                epObj.location = None
                 if epObj.status == common.DOWNLOADED:
                     epObj.status = common.SKIPPED
                 epObj.hasnfo = False
