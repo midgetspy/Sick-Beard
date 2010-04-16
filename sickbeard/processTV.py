@@ -22,7 +22,7 @@ import os
 import shutil
 import sys
 import re
-import shutil.Error
+from shutil import Error
 
 from sickbeard import notifiers
 from sickbeard import exceptions
@@ -435,7 +435,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
            
             returnStr += logHelper("File was copied successfully", logger.DEBUG)
             
-        except (shutil.Error, IOError, OSError), e:
+        except (Error, IOError, OSError), e:
             returnStr += logHelper("Unable to copy the file: " + str(e), logger.ERROR)
             return returnStr
 
@@ -451,7 +451,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
            
             returnStr += logHelper("File was moved successfully", logger.DEBUG)
             
-        except (shutil.Error, IOError, OSError), e:
+        except (Error, IOError, OSError), e:
             returnStr += logHelper("Unable to move the file: " + str(e), logger.ERROR)
             return returnStr
 
