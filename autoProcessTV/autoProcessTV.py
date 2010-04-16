@@ -17,11 +17,10 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import ConfigParser
-import urllib
 import sys
-import os
+import urllib
 import os.path
+import ConfigParser
 
 class AuthURLOpener(urllib.FancyURLopener):
     def __init__(self, user, pw):
