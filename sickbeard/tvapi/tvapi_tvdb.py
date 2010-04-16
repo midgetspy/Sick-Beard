@@ -113,6 +113,8 @@ def loadEpisode(tvdb_id, season, episode, tvdbObj=None, cache=True):
         epData.displayeposide = int(epObj['airsbefore_episode'])
     #other season/episode info needed for absolute/dvd/etc ordering
     
+    epData.thumb = epObj['filename']
+    
     epData.tvdb_id = int(epObj['id'])
     
     # weird data on tvdb is messing this up, but we don't need it anyway (for now at least)

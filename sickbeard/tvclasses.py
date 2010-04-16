@@ -15,8 +15,8 @@ from sickbeard import common, exceptions, helpers
 from sickbeard import config
 from sickbeard import processTV
 from sickbeard import encodingKludge as ek
+from sickbeard import metadata
 
-import sickbeard.nfo
 import sickbeard.tvapi.tvapi_main
 
 from sickbeard.tvapi import tvapi_tvdb, tvapi_tvrage, proxy, safestore
@@ -139,10 +139,10 @@ class TVShow(Storm):
     def writeEpisodeMetafiles(self):
         
         if not ek.ek(os.path.isdir, self._location):
-            #logger.log(str(self.tvdb_id) + ": Show dir doesn't exist, skipping NFO generation")
+            logger.log("Show dir doesn't exist, skipping NFO generation")
             return
         
-        #logger.log(str(self.tvdb_id) + ": Writing NFOs for all episodes")
+        logger.log("Writing metadata for all episodes")
         
         for epObj in self.episodes:
             epObj.createMetaFiles()
@@ -351,33 +351,104 @@ class TVEpisode(Storm):
 
 
     def checkForMetaFiles(self):
-        pass
-    
-    def createMetaFiles(self):
-        pass
-    
-    def createArt(self):
-        pass
 
-    def createNFO(self):
+        # check for nfo and tbn
+        if ek.ek(os.path.isfile, self.location):
+            self.hasnfo = ek.ek(os.path.isfile, helpers.replaceExtension(self.location, 'nfo'))
+            self.hastbn = ek.ek(os.path.isfile, helpers.replaceExtension(self.location, 'tbn'))
+
+    def createMetaFiles(self, force=False):
+        if not ek.ek(os.path.isdir, self.show._location):
+            logger.log("The show dir is missing, not bothering to try to create metadata", logger.WARNING)
+            return
+        elif not self.location or not ek.ek(os.path.isfile, self.location):
+            logger.log("This episode has no file, not bothering to create metadata", logger.DEBUG)
+            return
+
+        if sickbeard.CREATE_METADATA or force:
+            self.createNFO(force)
+        
+        if sickbeard.CREATE_IMAGES or force:
+            self.createTBN(force)
+        
+        self.checkForMetaFiles()
+
+    def createTBN(self, force=False):
+        """
+        Retrieves a thumbnail file from URLs in the episodes' associated metadata. If the TVEpisode
+        has no location no file is created. Doesn't overwrite existing thumbnails by default.
+        
+        force: default=False
+            If true then this function will download a tbn even if there as an existing tbn (it will
+            overwrite it).
+        """
+        
+        if self.hastbn and not force:
+            return
+        
+        if self.location and ek.ek(os.path.isfile, self.location):
+            tbnFilename = helpers.replaceExtension(self.location, "tbn")
+        else:
+            logger.log("No file exists for this episode, skipping thumbnail download", logger.DEBUG)
+
+        tbnURLList = [] 
+
+        # find all possible URLs for this file
+        for epData in self.episodes_data:
+            if epData.thumb:
+                tbnURLList.append(epData.thumb)
+        
+        if len(tbnURLList) == 0:
+            logger.log("Unable to find any thumbnail URLs for this episode, can't download a TBN", logger.WARNING)
+            return
+        
+        logger.log('Writing thumb to ' + tbnFilename)
+        for curURL in tbnURLList:
+            try:
+                ek.ek(urllib.urlretrieve, curURL, tbnFilename)
+            except IOError:
+                logger.log("Unable to download thumbnail from "+curURL, logger.ERROR)
+                return None
+            
+            if not ek.ek(os.path.isfile, tbnFilename):
+                logger.log("Tried to download "+curURL+" to "+tbnFilename+" but something went wrong.", logger.WARNING)
+                continue
+            else:
+                break
+
+
+    def createNFO(self, force=False):
+        """
+        Generates an XBMC-compatible NFO file for this episode. Multi-episode files are supported
+        in an <xbmcmultiepisode> block.
+        
+        force: default=False
+            If true then this function will download even if there as an existing nfo (it will
+            overwrite it).
+        """
+        
+        if self.hasnfo and not force:
+            return
         
         if self.episodes_data.count() == 0:
             return False
         elif self.episodes_data.count() > 1:
             rootNode = etree.Element( "xbmcmultiepisode" )
             for epData in self.episodes_data:
-                rootNode.append(sickbeard.nfo.makeEpNFO(epData))
+                rootNode.append(metadata.makeEpNFO(epData))
         else:
-            rootNode = sickbeard.nfo.makeEpNFO(self.episodes_data.one())
+            rootNode = metadata.makeEpNFO(self.episodes_data.one())
 
         # Set our namespace correctly
         for ns in sickbeard.XML_NSMAP.keys():
             rootNode.set(ns, sickbeard.XML_NSMAP[ns])
 
-        nfo = etree.ElementTree( rootNode )
-        #nfo_fh = ek.ek(open, ek.ek(os.path.join, self.show.location, nfoFilename), 'w')
-        nfo_fh = open(os.path.join(self.show.location, "test.nfo"), 'w')
-        nfo.write( nfo_fh, encoding="utf-8" ) 
+        # self.location should always be absolute paths, no need to append self.show.location
+        nfoFilename = helpers.replaceExtension(self.location, "nfo")
+
+        nfoTree = etree.ElementTree( rootNode )
+        nfo_fh = ek.ek(open, nfoFilename, 'w')
+        nfoTree.write( nfo_fh, encoding="utf-8" ) 
         nfo_fh.close()
         
     def delete(self):
