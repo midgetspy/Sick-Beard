@@ -22,6 +22,7 @@ import os
 import shutil
 import sys
 import re
+import shutil.Error
 
 from sickbeard import notifiers
 from sickbeard import exceptions
@@ -430,12 +431,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if sickbeard.KEEP_PROCESSED_FILE:
         returnStr += logHelper("Copying from " + fileName + " to " + destDir, logger.DEBUG)
         try:
-            # try using rename to move it because shutil.move is bugged in python 2.5
             shutil.copy(fileName, destDir)
            
             returnStr += logHelper("File was copied successfully", logger.DEBUG)
             
-        except IOError, e:
+        except (shutil.Error, IOError, OSError), e:
             returnStr += logHelper("Unable to copy the file: " + str(e), logger.ERROR)
             return returnStr
 
@@ -451,7 +451,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
            
             returnStr += logHelper("File was moved successfully", logger.DEBUG)
             
-        except IOError, e:
+        except (shutil.Error, IOError, OSError), e:
             returnStr += logHelper("Unable to move the file: " + str(e), logger.ERROR)
             return returnStr
 
