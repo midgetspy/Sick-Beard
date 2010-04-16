@@ -3,8 +3,9 @@ import os.path
 import operator
 import re
 import glob
+import urllib
 
-from storm.locals import Int, Unicode, Bool, Reference, ReferenceSet, Storm, Store
+from storm.locals import Int, Unicode, Bool, Reference, ReferenceSet, Storm, Select, Min
 from storm.expr import And
 
 from tvapi.tvapi_classes import TVEpisodeData
@@ -106,19 +107,25 @@ class TVShow(Storm):
         
         conditions = [TVEpisodeData.aired >= fromDate, TVEpisodeData.show_id == self.tvdb_id]
         
-        if untilDate:
-            conditions.append(TVEpisodeData.aired <= untilDate)
-        else:
-            conditions.append(TVEpisodeData.aired <= fromDate + datetime.timedelta(days=7))
-
+        # find all eps until untilDate or else the next 7 days
+        if not untilDate:
+            untilDate = fromDate + datetime.timedelta(days=7)
+        conditions.append(TVEpisodeData.aired <= untilDate)
+        
         result = sickbeard.storeManager._store.find(TVEpisodeData, And(*conditions))
         
-        # if no results in the specified interval then just get the next few
-        #result = sickbeard.storeManager._store.find(TVEpisodeData, TVEpisodeData.show_id == )
+        # if there are no results in the specified interval then just get the next eps
+        if result.count() == 0:
+            logger.log("No results within a week, trying a second query")
+            subselect = Select(Min(TVEpisodeData.aired),
+                               And(TVEpisodeData.aired >= fromDate,
+                               TVEpisodeData.show_id == self.tvdb_id),
+                               [TVEpisodeData])
+            result = sickbeard.storeManager._store.find(TVEpisodeData,
+                                                        TVEpisodeData.aired == subselect,
+                                                        TVEpisodeData.show_id == self.tvdb_id)
+            logger.log("Result: "+str(result)+" with "+str(result.count())+" elements")
         
-        #sql = """SELECT * FROM tvepisodedata WHERE episode = ( SELECT MIN(episode) AS min_ep FROM tvepisodedata e1 WHERE episode > 10)"""
-    
-            
         return result
     
     def getEp(self, season, episode): # I'd like to replace this with [season][episode] eventually
