@@ -11,12 +11,16 @@ import sickbeard
 from sickbeard import logger
 
 def safe_list(resultSet):
+    if not resultSet:
+        return []
     return sickbeard.storeManager.safe_store(_safe_list, resultSet)
 
 def _safe_list(resultSet):
     """
     Take a ResultSet object and return a list of thread-safe proxy objects instead 
     """
+    if not resultSet:
+        return []
     return [proxy._getProxy(x) for x in resultSet]
 
 class SafeStore():
