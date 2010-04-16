@@ -421,7 +421,7 @@ class Tvdb:
         self.config['url_actorsInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/actors.xml" % self.config
 
         self.config['url_seriesBanner'] = "%(base_url)s/api/%(apikey)s/series/%%s/banners.xml" % self.config
-        self.config['url_artworkPrefix'] = "%(base_url)s/banners/%%s" % self.config
+        self.config['url_artworkPrefix'] = u"%(base_url)s/banners/%%s" % self.config
 
     #end __init__
 
