@@ -18,7 +18,10 @@
 
 import sickbeard
 
-mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv', 'ogm', 'mp4', 'iso', 'img', 'divx', 'm2ts', 'm4v', 'ts', 'flv', 'f4v']
+mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
+                   'ogm', 'mp4', 'iso', 'img', 'divx',
+                   'm2ts', 'm4v', 'ts', 'flv', 'f4v',
+                   'mov']
 
 ### Notification Types
 NOTIFY_SNATCH = 1
