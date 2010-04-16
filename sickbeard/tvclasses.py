@@ -457,7 +457,8 @@ class TVEpisode(Storm):
         nfo_fh = ek.ek(open, nfoFilename, 'w')
         nfoTree.write( nfo_fh, encoding="utf-8" ) 
         nfo_fh.close()
-        
+
+
     def delete(self):
         for epData in self.episodes_data:
             sickbeard.storeManager._store.remove(epData)
@@ -465,17 +466,25 @@ class TVEpisode(Storm):
         raise exceptions.EpisodeDeletedException()
 
     def fullPath(self):
-        return os.path.join(self.show.location, self.location)
+        if not os.path.isabs(self.location):
+            return os.path.join(self.show.location, self.location)
     
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
                     naming_ep_name=None, naming_sep_type=None, naming_use_periods=None):
+        """
+        Builds a name string for the episode based on the config naming settings or
+        alternately on the settings provided as arguments. For multi-episode files
+        it combines names like "Ep Name (1)" and "Ep Name (2)" into simply "Ep Name",
+        or for non-linked names it includes all names separated by a &. For files with
+        more than 3 episodes no name is given at all (it gets far too long).
+        """
         
         regex = "(.*) \(\d\)"
 
         if self.episodes_data.count() == 1:
             goodName = self.episodes_data.one().name
 
-        elif self.episodes_data.count() > 2:
+        elif self.episodes_data.count() > 3:
             goodName = ''
 
         else:
