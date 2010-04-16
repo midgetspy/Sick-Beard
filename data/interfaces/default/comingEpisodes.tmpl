@@ -19,15 +19,15 @@
         #end if
         #if $curEp.aired < datetime.date.today() and $curDay == None:
 		  #if $missed == False
-    <br /><h1 class="day">Missing</h1>
+            <br /><h1 class="day">Missing</h1>
             #set $missed = True
           #end if
+        #elif ($curDay == None or $curEp.aired > $curDay) and $curEp.aired - datetime.date.today() >= $oneWeek:
+            #set $curDay = datetime.date(datetime.MAXYEAR, 1, 1)
+            <br /><h1 class="day">More than one week</h1>
         #elif $curDay == None or ($curEp.aired > $curDay and $curEp.aired - datetime.date.today() < $oneWeek):
             #set $curDay = curEp.aired
-    <br /><h1 class="day">$curEp.aired.strftime("%A")</h1>
-        #elif $curEp.aired > $curDay and $curEp.aired - datetime.date.today() >= $oneWeek:
-            #set $curDay = datetime.date(datetime.MAXYEAR, 1, 1)
-    <br /><h1 class="day">More than one week</h1>
+            <br /><h1 class="day">$curEp.aired.strftime("%A")</h1>
         #end if
         
         #if $curEp.aired == datetime.date.today()
