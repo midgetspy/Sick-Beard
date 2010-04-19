@@ -230,7 +230,7 @@ class TVBinzCache(tvcache.TVCache):
 		# get all records since the last timestamp
 		url = "https://tvbinz.net/rss.php?"
 		
-		urlArgs = {'normalize': 2, 'n': 100, 'maxage': 400, 'seriesinfo': 1, 'nodupes': 1, 'sets': 'none'}
+		urlArgs = {'normalize': 1012, 'n': 100, 'maxage': 400, 'seriesinfo': 1, 'nodupes': 1, 'sets': 'none'}
 
 		url += urllib.urlencode(urlArgs)
 		
