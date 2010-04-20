@@ -123,7 +123,7 @@ def processDir (dirName, recurse=False):
 
     # if they passed us a real dir then assume it's the one we want
     if os.path.isdir(dirName):
-        dirName = os.path.abspath(dirName)
+        dirName = ek.ek(os.path.realpath, dirName)
     
     # if they've got a download dir configured then use it
     elif sickbeard.TV_DOWNLOAD_DIR and os.path.isdir(sickbeard.TV_DOWNLOAD_DIR) \
@@ -145,7 +145,7 @@ def processDir (dirName, recurse=False):
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
     for sqlShow in sqlResults:
-        if dirName.startswith(os.path.abspath(sqlShow["location"])+os.sep) or dirName == os.path.abspath(sqlShow["location"]):
+        if dirName.startswith(ek.ek(os.path.realpath, sqlShow["location"])+os.sep) or dirName == ek.ek(os.path.realpath, sqlShow["location"]):
             returnStr += logHelper("You're trying to post process an episode that's already been moved to its show dir", logger.ERROR)
             return returnStr
 
