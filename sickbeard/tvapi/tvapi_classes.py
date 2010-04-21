@@ -2,6 +2,7 @@ from storm.locals import Int, Unicode, Float, Reference, ReferenceSet, Date, Pic
 
 import sickbeard
 
+import proxy, safestore
 class TVShowData(Storm):
     __storm_table__ = "tvshowdata"
 
@@ -33,6 +34,8 @@ class TVShowData(Storm):
     def __init__(self, tvdb_id):
         self.tvdb_id = tvdb_id
 
+    def proxy(self):
+        return proxy.TVShowDataProxy(self)
     # give a list of seasons
     def _seasons(self):
         """
@@ -124,6 +127,9 @@ class TVEpisodeData(Storm):
         self.show_id = show_id
         self.season = season
         self.episode = episode
+
+    def proxy(self):
+        return proxy.TVEpisodeDataProxy(self)
 
     def delete(self):
         """

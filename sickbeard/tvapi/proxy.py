@@ -75,21 +75,8 @@ class TVShowDataProxy(GenericProxy):
     def season(self, season):
         self._safe(self.obj.season, season)
 
-
 def _getProxy(obj):
-    """
-    Returns the appropriate thread-safe proxy object if it exists, or else returns
-    the object that was passed in.
-    """
-    if type(obj) == sickbeard.tvclasses.TVShow:
-        return TVShowProxy(obj)
-    elif type(obj) == sickbeard.tvclasses.TVEpisode:
-        return TVEpisodeProxy(obj)
-    elif type(obj) == sickbeard.tvapi.tvapi_classes.TVShowData:
-        return TVShowDataProxy(obj)
-    elif type(obj) == sickbeard.tvapi.tvapi_classes.TVEpisodeData:
-        return TVEpisodeDataProxy(obj)
-    else:
+    try:
+        return obj.proxy()
+    except AttributeError:
         return obj
-
-

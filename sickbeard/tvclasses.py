@@ -20,6 +20,7 @@ from sickbeard import metadata
 
 import sickbeard.tvapi.tvapi_main
 
+from sickbeard.tvapi import proxy
 from sickbeard.tvapi import tvapi_tvdb, tvapi_tvrage, proxy, safestore
 
 from sickbeard import logger
@@ -51,6 +52,9 @@ class TVShow(Storm):
     
     def __init__(self, tvdb_id):
         self.tvdb_id = tvdb_id
+
+    def proxy(self):
+        return proxy.TVShowProxy(self)
 
     def _getLocation(self):
         if self._location and ek.ek(os.path.isdir, self._location):
@@ -303,6 +307,9 @@ class TVEpisode(Storm):
         self.show = show
         if season != None and episode != None:
             self.addEp(season, episode)
+
+    def proxy(self):
+        return proxy.TVEpisodeProxy(self)
 
     def _getStatus(self):
         if self._status == None:
