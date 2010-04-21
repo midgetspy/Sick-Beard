@@ -2,11 +2,21 @@ from storm.locals import Int, Unicode, Float, Reference, ReferenceSet, Date, Pic
 
 import sickbeard
 
+from sickbeard import logger
+
 import proxy, safestore
+from tvdb import tvdb_classes
+
 class TVShowData(Storm):
     __storm_table__ = "tvshowdata"
 
     tvdb_id = Int(primary=True)
+    tvrage_id = Int()
+    imdb_id = Unicode()
+
+    show_obj = Reference(tvdb_id, "TVShow.tvdb_id")
+    episodes_data = ReferenceSet(tvdb_id, "TVEpisodeData.tvdb_show_id")
+
     name = Unicode()
     plot = Unicode()
     genres = Pickle()
@@ -20,14 +30,6 @@ class TVShowData(Storm):
     rating = Float()
     contentrating = Unicode()
 
-    tvrage_id = Int()
-    tvrage_name = Unicode()
-    
-    imdb_id = Unicode()
-    
-    show_obj = Reference(tvdb_id, "TVShow.tvdb_id")
-    episodes_data = ReferenceSet(tvdb_id, "TVEpisodeData.show_id")
-    
     _cached_seasons = None
     _cached_episodes = {}
     
@@ -36,6 +38,37 @@ class TVShowData(Storm):
 
     def proxy(self):
         return proxy.TVShowDataProxy(self)
+
+    def update(self):
+        """
+        Gets all metadata associated with this show (TVDB/TVRage/etc) and combines it to form
+        a global metadata object to be used inside Sick Beard.
+        """
+        
+        tvdb_data_list = safestore.safe_list(sickbeard.storeManager.safe_store("find", tvdb_classes.TVShowData_TVDB, tvdb_classes.TVShowData_TVDB.tvdb_id == self.tvdb_id))
+        if len(tvdb_data_list) == 0:
+            tvdb_data = None
+        else:
+            tvdb_data = tvdb_data_list[0]
+        
+        if not tvdb_data:
+            return
+        
+        # just use all TVDB data for now
+        self.name = tvdb_data.name
+        self.plot = tvdb_data.plot
+        self.genres = tvdb_data.genres
+        self.network = tvdb_data.network
+        self.duration = tvdb_data.duration
+        self.actors = tvdb_data.actors
+        self.firstaired = tvdb_data.firstaired
+        self.status = tvdb_data.status
+        self.classification = tvdb_data.classification
+        self.country = tvdb_data.country
+        self.rating = tvdb_data.rating
+        self.contentrating = tvdb_data.contentrating
+        
+
     # give a list of seasons
     def _seasons(self):
         """
@@ -92,15 +125,19 @@ class TVShowData(Storm):
                 del self._cached_episodes[season]
         else:
             self._cached_episodes = {}
-
     
 class TVEpisodeData(Storm):
     __storm_table__ = "tvepisodedata"
-    __storm_primary__ = "show_id", "season", "episode"
+    __storm_primary__ = "tvdb_show_id", "season", "episode"
 
-    show_id = Int()
+    tvdb_show_id = Int()
+    tvrage_show_id = Int()
+    
     season = Int()
     episode = Int()
+
+    _eid = Int()
+
     name = Unicode()
     description = Unicode()
     aired = Date()
@@ -108,33 +145,58 @@ class TVEpisodeData(Storm):
     writer = Unicode()
     rating = Float()
     gueststars = Pickle()
-
     thumb = Unicode()
 
-    displayseason = Int()
-    displayepisode = Int()
-    #other season/episode info needed for absolute/dvd/etc ordering
-    
-    _eid = Int()
-    
-    tvdb_id = Int()
-    imdb_id = Unicode()
-
-    show_data = Reference(show_id, "TVShowData.tvdb_id")
+    show_data = Reference(tvdb_show_id, "TVShowData.tvdb_id")
     ep_obj = Reference(_eid, "TVEpisode.eid")
 
-    def __init__(self, show_id, season, episode):
-        self.show_id = show_id
+    def __init__(self, tvdb_show_id, season, episode):
+        self.tvdb_show_id = tvdb_show_id
         self.season = season
         self.episode = episode
+        
+        #self.update()
 
     def proxy(self):
         return proxy.TVEpisodeDataProxy(self)
 
+    def update(self):
+        """
+        Gets all metadata associated with this episode (TVDB/TVRage/etc) and combines it to form
+        a global metadata object to be used inside Sick Beard.
+        """
+        
+        logger.log("Updating the data for TVEpisodeData for "+str(self.season)+"x"+str(self.episode), logger.DEBUG)
+        
+        tvdb_data_rs = sickbeard.storeManager.safe_store("find", tvdb_classes.TVEpisodeData_TVDB,
+                                                                   tvdb_classes.TVEpisodeData_TVDB.show_id == self.tvdb_show_id,
+                                                                   tvdb_classes.TVEpisodeData_TVDB.season == self.season,
+                                                                   tvdb_classes.TVEpisodeData_TVDB.episode == self.episode)
+        tvdb_data_list = safestore.safe_list(tvdb_data_rs)
+        if len(tvdb_data_list) == 0:
+            logger.log("No TVDB data found for this episode", logger.DEBUG)
+            tvdb_data = None
+        else:
+            tvdb_data = tvdb_data_list[0]
+
+        if not tvdb_data:
+            return
+        
+        # just use all TVDB data for now
+        self.name = tvdb_data.name
+        self.description = tvdb_data.description
+        self.aired = tvdb_data.aired
+        self.director = tvdb_data.director
+        self.writer = tvdb_data.writer
+        self.rating = tvdb_data.rating
+        self.gueststars = tvdb_data.gueststars
+        self.thumb = tvdb_data.thumb
+        
+
     def delete(self):
         """
         Deletes the episode data from the database, and if the associated episode object
-        has no other metadataassociated with it then it's deleted as well.
+        has no other metadata associated with it then it's deleted as well.
         """
         if self.ep_obj and self.ep_obj.episodes_data.count() == 1:
             self.ep_obj.delete()

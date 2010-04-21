@@ -1059,22 +1059,22 @@ class Home:
         
         #t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status IN ("+str(DOWNLOADED)+","+str(PREDOWNLOADED)+") AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
         downloadedEps = sickbeard.storeManager.safe_store("find",
-                                                          (TVEpisodeData.show_id, Count(TVEpisodeData.show_id)),
+                                                          (TVEpisodeData.tvdb_show_id, Count(TVEpisodeData.tvdb_show_id)),
                                                           TVEpisodeData.season != 0,
                                                           TVEpisodeData.episode != 0,
                                                           TVEpisodeData.aired <= datetime.date.today(),
                                                           TVEpisode.eid == TVEpisodeData._eid,
                                                           In(TVEpisode._status, ([DOWNLOADED, PREDOWNLOADED])))
-        downloadedEps = safestore.safe_list(sickbeard.storeManager.safe_store(downloadedEps.group_by, TVEpisodeData.show_id))
+        downloadedEps = safestore.safe_list(sickbeard.storeManager.safe_store(downloadedEps.group_by, TVEpisodeData.tvdb_show_id))
         t.downloadedEps = downloadedEps
 
         #t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
         allEps = sickbeard.storeManager.safe_store("find",
-                                                   (TVEpisodeData.show_id, Count(TVEpisodeData.show_id)),
+                                                   (TVEpisodeData.tvdb_show_id, Count(TVEpisodeData.tvdb_show_id)),
                                                    TVEpisodeData.season != 0,
                                                    TVEpisodeData.episode != 0,
                                                    TVEpisodeData.aired <= datetime.date.today())
-        allEps = safestore.safe_list(sickbeard.storeManager.safe_store(allEps.group_by, TVEpisodeData.show_id))
+        allEps = safestore.safe_list(sickbeard.storeManager.safe_store(allEps.group_by, TVEpisodeData.tvdb_show_id))
         t.allEps = allEps
         
         return _munge(t)

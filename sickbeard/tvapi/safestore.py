@@ -21,7 +21,7 @@ def _safe_list(resultSet):
     """
     if not resultSet:
         return []
-    return [proxy._getProxy(x) for x in resultSet]
+    return [proxy._getProxy(x) for x in resultSet if x != None]
 
 class SafeStore():
     """

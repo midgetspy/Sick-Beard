@@ -3,6 +3,9 @@ import sqlite3
 
 from sickbeard import logger
 
+#import sickbeard.tvapi.tvrage.tvrage_classes
+#import sickbeard.tvapi.tvdb.tvdb_classes
+
 class GenericProxy():
     def __init__(self, obj):
         self.__dict__['obj'] = obj
@@ -55,6 +58,9 @@ class TVShowProxy(GenericProxy):
     
     def renameEpisodes(self):
         return self._safe(self.obj.renameEpisodes)
+    
+    def updateMetadata(self):
+        return self._safe(self.obj.updateMetadata)
     
 
 

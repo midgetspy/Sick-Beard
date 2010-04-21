@@ -9,6 +9,8 @@ from sickbeard import encodingKludge as ek
 
 from sickbeard.tvclasses import TVShow, TVEpisode
 
+import proxy
+
 import sickbeard
 
 from lib.tvnamer.utils import FileParser
@@ -29,17 +31,16 @@ def createTVShow(tvdb_id):
     
     # make the show
     showObj = proxy._getProxy(sickbeard.storeManager.safe_store(TVShow, tvdb_id))
-    
     sickbeard.storeManager.safe_store("add", showObj.obj)
     sickbeard.storeManager.safe_store("commit")
     
     # get the metadata
-    showObj.update()
+    showObj.updateMetadata()
     
     # make a TVEpisode for any TVEpisodeData objects that don't already have one
     for epData in safestore.safe_list(sickbeard.storeManager.safe_store("find",
                                                                         TVEpisodeData,
-                                                                        TVEpisodeData.show_id == tvdb_id)):
+                                                                        TVEpisodeData.tvdb_show_id == tvdb_id)):
         if not epData.ep_obj:
             epObj = proxy._getProxy(sickbeard.storeManager.safe_store(TVEpisode, showObj))
             sickbeard.storeManager.safe_store(epObj.addEp, ep=epData)
@@ -81,16 +82,16 @@ def createEpFromName(name, tvdb_id=None):
 
 def TEMP_getTVDBIDFromNFO(dir):
 
-    if not os.path.isdir(dir):
+    if not ek.ek(os.path.isdir, dir):
         logger.log("Show dir doesn't exist, can't load NFO")
         raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
     
     logger.log("Loading show info from NFO")
 
-    xmlFile = os.path.join(dir, "tvshow.nfo")
+    xmlFile = ek.ek(os.path.join, dir, "tvshow.nfo")
     
     try:
-        xmlFileObj = open(xmlFile, 'r')
+        xmlFileObj = ek.ek(open, xmlFile, 'r')
         showXML = etree.ElementTree(file = xmlFileObj)
 
         if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):

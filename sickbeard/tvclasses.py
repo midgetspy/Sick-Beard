@@ -8,7 +8,7 @@ import urllib
 from storm.locals import Int, Unicode, Bool, Reference, ReferenceSet, Storm, Select, Min
 from storm.expr import And
 
-from tvapi.tvapi_classes import TVEpisodeData
+from tvapi.tvapi_classes import TVEpisodeData, TVShowData
 
 import sickbeard
 
@@ -21,7 +21,9 @@ from sickbeard import metadata
 import sickbeard.tvapi.tvapi_main
 
 from sickbeard.tvapi import proxy
-from sickbeard.tvapi import tvapi_tvdb, tvapi_tvrage, proxy, safestore
+from sickbeard.tvapi import safestore 
+from sickbeard.tvapi.tvdb import tvdb_update
+from sickbeard.tvapi.tvdb import tvdb_classes
 
 from sickbeard import logger
 
@@ -77,7 +79,7 @@ class TVShow(Storm):
 
     location = property(_getLocation, _setLocation)
 
-    def update(self, cache=False):
+    def updateMetadata(self, cache=False):
         """
         Updates the show's metadata from TVDB and TVRage.
         
@@ -85,12 +87,21 @@ class TVShow(Storm):
             If this is true then the TVDB API will use the cached copies of metadata to update. With the local
             database being used to store the data I can't think of a single reason you'd ever need this.
         """
-        tvapi_tvdb.loadShow(self.tvdb_id, cache)
+        
+        # loads TVDB data into the database
+        tvdb_update.loadShow(self.tvdb_id, cache)
         
         try:
-            tvapi_tvrage.loadShow(self.tvdb_id)
+            #tvapi_tvrage.loadShow(self.tvdb_id)
+            pass
         except exceptions.TVRageException, e:
             logger.log("Error while trying to set TVRage info: "+str(e), logger.WARNING)
+        
+        # update any existing data objects with the new metadata
+        if self.show_data:
+            self.show_data.update()
+        for epObj in self.show_data.episodes_data:
+            epObj.update()
     
     def nextEpisodes(self, fromDate=None, untilDate=None):
         """
@@ -109,7 +120,7 @@ class TVShow(Storm):
         if not fromDate:
             fromDate = datetime.date.today()
         
-        conditions = [TVEpisodeData.aired >= fromDate, TVEpisodeData.show_id == self.tvdb_id]
+        conditions = [TVEpisodeData.aired >= fromDate, TVEpisodeData.tvdb_show_id == self.tvdb_id]
         
         # find all eps until untilDate or else the next 7 days
         if not untilDate:
@@ -120,15 +131,13 @@ class TVShow(Storm):
         
         # if there are no results in the specified interval then just get the next eps
         if result.count() == 0:
-            logger.log("No results within a week, trying a second query")
             subselect = Select(Min(TVEpisodeData.aired),
                                And(TVEpisodeData.aired >= fromDate,
-                               TVEpisodeData.show_id == self.tvdb_id),
+                               TVEpisodeData.tvdb_show_id == self.tvdb_id),
                                [TVEpisodeData])
             result = sickbeard.storeManager._store.find(TVEpisodeData,
                                                         TVEpisodeData.aired == subselect,
-                                                        TVEpisodeData.show_id == self.tvdb_id)
-            logger.log("Result: "+str(result)+" with "+str(result.count())+" elements")
+                                                        TVEpisodeData.tvdb_show_id == self.tvdb_id)
         
         return result
     
@@ -138,7 +147,7 @@ class TVShow(Storm):
         """
         
         epData = sickbeard.storeManager._store.find(TVEpisodeData,
-                                  TVEpisodeData.show_id == self.tvdb_id,
+                                  TVEpisodeData.tvdb_show_id == self.tvdb_id,
                                   TVEpisodeData.season == season,
                                   TVEpisodeData.episode == episode)
         
@@ -331,6 +340,11 @@ class TVEpisode(Storm):
     
     status = property(_getStatus, _setStatus)
     
+    def update(self):
+        for epData in self.episodes_data:
+            logger.log("Calling update on TVEpisodeData for "+str(epData.season)+"x"+str(epData.episode), logger.DEBUG)
+            epData.update()
+    
     def epDataList(self):
         return [x for x in self.episodes_data]
 
@@ -347,14 +361,17 @@ class TVEpisode(Storm):
 
         if not ep:
             result = sickbeard.storeManager._store.find(TVEpisodeData,
-                                                        TVEpisodeData.show_id == self.show.tvdb_id,
+                                                        TVEpisodeData.tvdb_show_id == self.show.tvdb_id,
                                                         TVEpisodeData.season == season,
                                                         TVEpisodeData.episode == episode)
             
             if result.count() == 1:
                 ep = result.one()
+            # if the episode doesn't have an epData object then we need to make one for it
             else:
-                raise Exception("The season/episode given didn't return a single episode: "+str(season)+"x"+str(episode))
+                ep = TVEpisodeData(self.show.tvdb_id, season, episode)
+                ep.update()
+                #raise Exception("The season/episode given didn't return a single episode: "+str(season)+"x"+str(episode))
 
         if ep not in self.episodes_data:
             self.episodes_data.add(ep)
@@ -469,6 +486,7 @@ class TVEpisode(Storm):
     def delete(self):
         for epData in self.episodes_data:
             sickbeard.storeManager._store.remove(epData)
+            del epData
         sickbeard.storeManager._store.remove(self)
         raise exceptions.EpisodeDeletedException()
 

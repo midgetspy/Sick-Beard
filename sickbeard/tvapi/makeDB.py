@@ -9,7 +9,24 @@ import sickbeard
 def makeDB():
 
     sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvepisodedata ( \
-                  edid INTEGER PRIMARY KEY, \
+                  tvdb_show_id NUMERIC, \
+                  tvrage_show_id NUMERIC, \
+                  season NUMERIC, \
+                  episode NUMERIC, \
+                  name TEXT, \
+                  description TEXT, \
+                  aired TEXT, \
+                  director TEXT, \
+                  writer TEXT, \
+                  rating NUMERIC, \
+                  gueststars BLOB, \
+                  thumb TEXT, \
+                  displayseason NUMERIC, \
+                  displayepisode NUMERIC, \
+                  _eid NUMERIC \
+                  )")
+    
+    sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvepisodedata_tvdb ( \
                   show_id NUMERIC, \
                   season NUMERIC, \
                   episode NUMERIC, \
@@ -23,13 +40,30 @@ def makeDB():
                   thumb TEXT, \
                   displayseason NUMERIC, \
                   displayepisode NUMERIC, \
-                  tvdb_id NUMERIC, \
-                  imdb_id NUMERIC, \
-                  _eid NUMERIC \
+                  tvdb_id NUMERIC \
+                  )")
+    
+    sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvepisodedata_tvrage ( \
+                  show_id NUMERIC, \
+                  season NUMERIC, \
+                  episode NUMERIC, \
+                  name TEXT, \
+                  description TEXT, \
+                  aired TEXT, \
+                  director TEXT, \
+                  writer TEXT, \
+                  rating NUMERIC, \
+                  gueststars BLOB, \
+                  thumb TEXT, \
+                  displayseason NUMERIC, \
+                  displayepisode NUMERIC, \
+                  tvrage_id NUMERIC \
                   )")
     
     
     sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvshowdata ( \
+                  tvdb_id INTEGER PRIMARY KEY, \
+                  tvrage_id NUMERIC, \
                   name TEXT, \
                   plot TEXT, \
                   genres BLOB, \
@@ -42,10 +76,39 @@ def makeDB():
                   country TEXT, \
                   rating NUMERIC, \
                   contentrating TEXT, \
-                  tvdb_id INTEGER PRIMARY KEY, \
-                  tvrage_id NUMERIC, \
-                  tvrage_name TEXT, \
                   imdb_id NUMERIC \
+                  )")
+    
+    sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvshowdata_tvdb ( \
+                  name TEXT, \
+                  plot TEXT, \
+                  genres BLOB, \
+                  network TEXT, \
+                  duration NUMERIC, \
+                  actors BLOB, \
+                  firstaired TEXT, \
+                  status TEXT, \
+                  classification TEXT, \
+                  country TEXT, \
+                  rating NUMERIC, \
+                  contentrating TEXT, \
+                  tvdb_id INTEGER PRIMARY KEY \
+                  )")
+    
+    sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvshowdata_tvrage ( \
+                  name TEXT, \
+                  plot TEXT, \
+                  genres BLOB, \
+                  network TEXT, \
+                  duration NUMERIC, \
+                  actors BLOB, \
+                  firstaired TEXT, \
+                  status TEXT, \
+                  classification TEXT, \
+                  country TEXT, \
+                  rating NUMERIC, \
+                  contentrating TEXT, \
+                  tvrage_id NUMERIC \
                   )")
     
     sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvshow ( \

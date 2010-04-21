@@ -298,7 +298,7 @@ class QueueItemUpdate(QueueItem):
         
         logger.log("Beginning update of "+self.show.show_data.name)
         
-        self.show.update()
+        self.show.updateMetadata()
 
         sickbeard.showQueueScheduler.action.refreshShow(self.show, True)
 

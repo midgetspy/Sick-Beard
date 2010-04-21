@@ -27,7 +27,8 @@ from sickbeard.tvapi import proxy, safestore
 
 import sickbeard
 
-from tvapi_classes import TVShowData, TVEpisodeData
+#from sickbeard.tvapi.tvapi_classes import TVShowData, TVEpisodeData
+from sickbeard.tvapi.tvrage.tvrage_classes import TVShowData_TVRage, TVEpisodeData_TVRage
 
 def _makeTVR(tvdb_id):
     showList = safestore.safe_list(sickbeard.storeManager.safe_store("find", TVShowData, TVShowData.tvdb_id == tvdb_id))
