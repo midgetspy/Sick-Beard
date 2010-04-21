@@ -20,7 +20,6 @@
 
 
 import sys
-
 import autoProcessTV
 
 if len(sys.argv) < 2:

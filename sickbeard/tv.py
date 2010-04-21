@@ -1312,13 +1312,13 @@ class TVEpisode:
             else:
                 nfoFilename = helpers.sanitizeFileName(self.prettyName() + '.nfo')
     
-            logger.log('Writing nfo to ' + os.path.join(self.show.location, nfoFilename))
+            logger.log('Writing nfo to ' + nfoFilename)
             #
             # Make it purdy
             helpers.indentXML( rootNode )
 
             nfo = etree.ElementTree( rootNode )
-            nfo_fh = ek.ek(open, ek.ek(os.path.join, self.show.location, nfoFilename), 'w')
+            nfo_fh = ek.ek(open, nfoFilename, 'w')
             nfo.write( nfo_fh, encoding="utf-8" ) 
             nfo_fh.close()
             
@@ -1363,9 +1363,9 @@ class TVEpisode:
                     tbnFilename = helpers.replaceExtension(self.location, 'tbn')
                 else:
                     tbnFilename = helpers.sanitizeFileName(self.prettyName() + '.tbn')
-                logger.log('Writing thumb to ' + os.path.join(self.show.location, tbnFilename))
+                logger.log('Writing thumb to ' + tbnFilename)
                 try:
-                    ek.ek(urllib.urlretrieve, thumbFilename, ek.ek(os.path.join, self.show.location, tbnFilename))
+                    ek.ek(urllib.urlretrieve, thumbFilename, tbnFilename)
                 except IOError:
                     logger.log("Unable to download thumbnail from "+thumbFilename, logger.ERROR)
                     return None

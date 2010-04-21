@@ -239,12 +239,11 @@ def makeShowNFO(showID, showDir):
 	if myShow["overview"] != None:
 		plot.text = myShow["overview"]
 
-	episodeguideurl = etree.SubElement( tvNode, "episodeguideurl" )
 	episodeguide = etree.SubElement( tvNode, "episodeguide" )
+	episodeguideurl = etree.SubElement( episodeguide, "url" )
 	if myShow["id"] != None:
 		showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
 		episodeguideurl.text = showurl
-		episodeguide.text = showurl
 		
 	mpaa = etree.SubElement( tvNode, "mpaa" )
 	if myShow["contentrating"] != None:
@@ -391,4 +390,3 @@ def guessSceneEpisodeQuality(name):
 		return HD
 	else:
 		return SD
-
