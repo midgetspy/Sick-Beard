@@ -81,12 +81,13 @@ def main():
 	threading.currentThread().name = "MAIN"
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "qf", ['quiet', 'force-update'])
+		opts, args = getopt.getopt(sys.argv[1:], "qfp:", ['quiet', 'force-update', 'port='])
 	except getopt.GetoptError:
-		print "Available options: --quiet, --force-update"
+		print "Available options: --quiet, --forceupdate, --port"
 		sys.exit()
 	
 	forceUpdate = False
+	forcedPort = None
 	
 	for o, a in opts:
 		# for now we'll just silence the logging
@@ -96,6 +97,10 @@ def main():
 		# should we update right away?
 		if (o in ('-f', '--forceupdate')):
 			forceUpdate = True
+	
+		# should we update right away?
+		if (o in ('-p', '--port')):
+			forcedPort = int(a)
 	
 	if consoleLogging:
 		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
@@ -110,10 +115,18 @@ def main():
 	sickbeard.initialize(consoleLogging=consoleLogging)
 
 	sickbeard.showList = []
+	
+	if forcedPort:
+		logger.log("Forcing web server to port "+str(forcedPort))
+		startPort = forcedPort
+	else:
+		startPort = sickbeard.WEB_PORT
+	
+	logger.log("Starting Sick Beard on http://localhost:"+str(startPort))
 
 	try:
 		initWebServer({
-		        'port':      sickbeard.WEB_PORT,
+		        'port':      startPort,
 		        'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
 		        'web_root':  sickbeard.WEB_ROOT,
 		        'log_dir':   sickbeard.LOG_DIR if sickbeard.WEB_LOG else None,
