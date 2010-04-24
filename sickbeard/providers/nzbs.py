@@ -23,6 +23,7 @@ import urllib2
 import os.path
 import sys
 import datetime
+import time
 
 import xml.etree.cElementTree as etree
 
@@ -142,6 +143,9 @@ def _doSearch(curString, quality):
 	logger.log("Search string: " + searchURL, logger.DEBUG)
 
 	data = getNZBsURL(searchURL)
+
+	# Pause to avoid 503's
+	time.sleep(5)
 
 	if data == None:
 		return []
