@@ -1,4 +1,4 @@
-from storm.locals import Unicode, Pickle, Int, Date, Float, Storm, Reference, ReferenceSet
+from storm.locals import Unicode, Pickle, Int, Date, Float, Storm
 
 from sickbeard.tvapi import proxy
 
@@ -8,7 +8,7 @@ class TVShowData_TVDB(Storm):
     tvdb_id = Int(primary=True)
     name = Unicode()
     plot = Unicode()
-    genres = Pickle()
+    _genres = Unicode()
     network = Unicode()
     duration = Int()
     actors = Pickle()

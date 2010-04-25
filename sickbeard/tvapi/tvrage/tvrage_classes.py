@@ -1,12 +1,15 @@
-from storm.locals import Unicode, Pickle, Int, Date, Float, Storm, Reference
+from storm.locals import Unicode, Pickle, Int, Date, Float, Storm
+
+from sickbeard.tvapi import proxy
 
 class TVShowData_TVRage(Storm):
     __storm_table__ = "tvshowdata_tvrage"
 
-    tvrage_id = Int(primary=True)
+    tvdb_id = Int(primary=True)
+    tvrage_id = Int()
     name = Unicode()
     plot = Unicode()
-    genres = Pickle()
+    _genres = Unicode()
     network = Unicode()
     duration = Int()
     actors = Pickle()
@@ -17,10 +20,11 @@ class TVShowData_TVRage(Storm):
     rating = Float()
     contentrating = Unicode()
 
-    show_data = Reference(tvrage_id, "TVShowData.tvrage_id")
+    def __init__(self, tvdb_id):
+        self.tvdb_id = tvdb_id
 
-    def __init__(self, tvrage_id):
-        self.tvrage_id = tvrage_id
+    def proxy(self):
+        return proxy.GenericProxy(self)
 
 class TVEpisodeData_TVRage(Storm):
     __storm_table__ = "tvepisodedata_tvrage"
@@ -43,15 +47,12 @@ class TVEpisodeData_TVRage(Storm):
     displayepisode = Int()
     #other season/episode info needed for absolute/dvd/etc ordering
     
-    _eid = Int()
-    
     tvrage_id = Int()
-
-    ep_data = Reference((show_id, season, episode),
-                        ("TVEpisodeData.tvrage_show_id", "TVEpisodeData.season", "TVEpisodeData.episode"))
-    ep_obj = Reference(_eid, "TVEpisode.eid")
 
     def __init__(self, show_id, season, episode):
         self.show_id = show_id
         self.season = season
         self.episode = episode
+
+    def proxy(self):
+        return proxy.GenericProxy(self)

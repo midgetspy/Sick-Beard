@@ -22,6 +22,12 @@ from sickbeard import common, db, exceptions, helpers, search
 from sickbeard import logger
 from sickbeard.common import * 
 
+from tvapi import safestore
+#from tvclasses import TVEpisode
+#from sickbeard.tvapi.tvapi_classes import TVEpisodeData
+import tvclasses
+from tvapi import tvapi_classes
+
 import datetime
 import threading
 import time
@@ -35,16 +41,22 @@ class CurrentSearcher():
 
         self._changeMissingEpisodes()
 
-        # make sure our lists are up to date
-        sickbeard.updateMissingList()
-        sickbeard.updateAiringList()
-        sickbeard.updateComingList()
-
         with self.lock:
     
             logger.log("Beginning search for todays episodes", logger.DEBUG)
     
-            epList = sickbeard.missingList + sickbeard.airingList
+            # get all eps that air today
+            airingList = sickbeard.storeManager.safe_store("find", tvapi_classes.TVEpisodeData,
+                                                           tvapi_classes.TVEpisodeData.aired == datetime.date.today())
+            airingList = safestore.safe_list(airingList)
+    
+            # get all eps with MISSED status
+            missedList = sickbeard.storeManager.safe_store("find", tvapi_classes.TVEpisodeData,
+                                                           tvclasses.TVEpisode.eid == tvapi_classes.TVEpisodeData._eid,
+                                                           tvclasses.TVEpisode.status == MISSED)
+            missedList = safestore.safe_list(missedList)
+    
+            epList = set(airingList + missedList)
             
             if epList == None or len(epList) == 0:
                 logger.log("No episodes were found to download")
@@ -60,19 +72,15 @@ class CurrentSearcher():
                 
                 if len(foundEpisodes) == 0:
                     if curEp.status == PREDOWNLOADED:
-                        logger.log("Unable to find an HD version of the existing episode "+ curEp.prettyName(True))
+                        logger.log("Unable to find an HD version of the existing episode "+ curEp.prettyName(naming_show_name=True, naming_ep_name=False))
                     else:
-                        logger.log("Unable to find download for " + curEp.prettyName(True))
+                        logger.log("Unable to find download for " + curEp.prettyName(naming_show_name=True, naming_ep_name=False))
                 else:
                     # just use the first result for now
+                    #TODO: regex the eps and get a good one
                     search.snatchEpisode(foundEpisodes[0])
                     
                 time.sleep(10)
-
-        # update our lists to reflect any changes we just made
-        sickbeard.updateMissingList()
-        sickbeard.updateAiringList()
-        sickbeard.updateComingList()
 
 
 

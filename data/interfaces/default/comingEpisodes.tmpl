@@ -40,16 +40,16 @@
             #set $showDiv = ""
         #end if
     <div class="$showDiv">
-      <div class="listing" id="listing_$curEp.show_id">
+      <div class="listing" id="listing_$curEp.tvdb_show_id">
         <a name="$curEp.show_data.name"></a>
-        <a href="$sbRoot/home/displayShow?show=$curEp.show_id"><img alt="" src="$sbRoot/showPoster/?show=$curEp.show_id" class="listingThumb" /></a>
-        <div id="info_$curEp.show_id">
+        <a href="$sbRoot/home/displayShow?show=$curEp.tvdb_show_id"><img alt="" src="$sbRoot/showPoster/?show=$curEp.tvdb_show_id" class="listingThumb" /></a>
+        <div id="info_$curEp.tvdb_show_id">
           <h1>
           <div class="icons">
-            <a href="http://www.thetvdb.com/?tab=series&id=$curEp.show_id" target="_blank" title="http://www.thetvdb.com/?tab=series&id=$curEp.show_id"><img alt="" src="$sbRoot/images/info.png" /></a>
-            <a href="$sbRoot/home/searchEpisode?show=$curEp.show_id&season=$curEp.season&episode=$curEp.episode" title="Force Update" id="forceUpdate|$curEp.show_id|$curEp.show_data.name" class="forceUpdate"><img alt="" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|$curEp.show_id" /></a>
+            <a href="http://www.thetvdb.com/?tab=series&id=$curEp.tvdb_show_id" target="_blank" title="http://www.thetvdb.com/?tab=series&id=$curEp.tvdb_show_id"><img alt="" src="$sbRoot/images/info.png" /></a>
+            <a href="$sbRoot/home/searchEpisode?show=$curEp.tvdb_show_id&season=$curEp.season&episode=$curEp.episode" title="Force Update" id="forceUpdate|$curEp.tvdb_show_id|$curEp.show_data.name" class="forceUpdate"><img alt="" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|$curEp.tvdb_show_id" /></a>
           </div>
-          <a href="$sbRoot/home/displayShow?show=$curEp.show_id">$curEp.show_data.name</a>
+          <a href="$sbRoot/home/displayShow?show=$curEp.tvdb_show_id">$curEp.show_data.name</a>
           </h1>
           <p class="next">
             <span class="title">Next Episode:</span> <span class="info "><%=str(curEp.season)+"x"+"%02i" % int(curEp.episode) %> - $curEp.name airs $curEp.aired</span>

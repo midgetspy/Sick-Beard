@@ -66,7 +66,7 @@ def makeDB():
                   tvrage_id NUMERIC, \
                   name TEXT, \
                   plot TEXT, \
-                  genres BLOB, \
+                  _genres TEXT, \
                   network TEXT, \
                   duration NUMERIC, \
                   actors BLOB, \
@@ -82,7 +82,7 @@ def makeDB():
     sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvshowdata_tvdb ( \
                   name TEXT, \
                   plot TEXT, \
-                  genres BLOB, \
+                  _genres TEXT, \
                   network TEXT, \
                   duration NUMERIC, \
                   actors BLOB, \
@@ -98,7 +98,7 @@ def makeDB():
     sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvshowdata_tvrage ( \
                   name TEXT, \
                   plot TEXT, \
-                  genres BLOB, \
+                  _genres TEXT, \
                   network TEXT, \
                   duration NUMERIC, \
                   actors BLOB, \
@@ -108,7 +108,8 @@ def makeDB():
                   country TEXT, \
                   rating NUMERIC, \
                   contentrating TEXT, \
-                  tvrage_id NUMERIC \
+                  tvrage_id NUMERIC, \
+                  tvdb_id INTEGER PRIMARY KEY \
                   )")
     
     sickbeard.storeManager.safe_store("execute", "CREATE TABLE tvshow ( \

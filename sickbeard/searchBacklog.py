@@ -22,9 +22,15 @@ import datetime
 import threading
 import time
 
+from storm.locals import In
+
 from sickbeard import db, exceptions, helpers, search, scheduler
 from sickbeard import logger
 from sickbeard.common import *
+
+from sickbeard.tvapi.tvapi_classes import TVEpisodeData
+from sickbeard.tvclasses import TVEpisode
+from sickbeard.tvapi import safestore, tvapi_main
 
 class BacklogSearchScheduler(scheduler.Scheduler):
 
@@ -63,31 +69,23 @@ class BacklogSearcher:
             
             logger.log("Searching the database for a list of backlogged episodes to download")
             
-            myDB = db.DBConnection()
-            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status IN (" + str(BACKLOG) + ", " + str(DISCBACKLOG) + ")")
+            backlogEpList = sickbeard.storeManager.safe_store("find", TVEpisodeData,
+                                                           TVEpisode.eid == TVEpisodeData._eid,
+                                                           In(TVEpisode.status, ([BACKLOG, DISCBACKLOG])))
+            backlogEpList = safestore.safe_list(backlogEpList)
             
-            if sqlResults == None or len(sqlResults) == 0:
+            if len(backlogEpList) == 0:
                 logger.log("No episodes were found in the backlog")
                 self._set_lastBacklog(curDate)
                 self.amActive = False
                 return
             
-            for sqlEp in sqlResults:
+            for epData in backlogEpList:
                 
-                try:
-                    show = helpers.findCertainShow(sickbeard.showList, int(sqlEp["showid"]))
-                except exceptions.MultipleShowObjectsException:
-                    logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"], logger.ERROR) 
-                    continue
-
-                curEp = show.getEpisode(sqlEp["season"], sqlEp["episode"])
-                
-                logger.log("Found backlog episode: " + curEp.prettyName(True), logger.DEBUG)
-            
-                foundNZBs = search.findEpisode(curEp)
+                foundNZBs = search.findEpisode(epData)
                 
                 if len(foundNZBs) == 0:
-                    logger.log("Unable to find NZB for " + curEp.prettyName(True))
+                    logger.log("Unable to find NZB for " + epData.ep_obj.prettyName(True))
                 
                 else:
                     # just use the first result for now
@@ -100,18 +98,6 @@ class BacklogSearcher:
         self.amActive = False
             
     
-    
-    def _searchBacklogForEp(self, curEp):
-    
-        foundNZBs = search.findEpisode(curEp)
-        
-        if len(foundNZBs) == 0:
-            logger.log("Unable to find NZB for " + curEp.prettyName(True))
-        
-        else:
-            # just use the first result for now
-            search.snatchEpisode(foundNZBs[0])
-
     
     def _get_lastBacklog(self):
     

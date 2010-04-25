@@ -80,32 +80,29 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
 	# don't notify when we snatch a backlog episode, that's just annoying
 	if endStatus != SNATCHED_BACKLOG:
-		notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
+		notifiers.notify(NOTIFY_SNATCH, result.episode.ep_obj.prettyName(True))
 	
 	with result.episode.lock:
 		if result.predownloaded == True:
-			logger.log("changing status from " + str(result.episode.status) + " to " + str(PREDOWNLOADED), logger.DEBUG)
-			result.episode.status = PREDOWNLOADED
+			logger.log("changing status from " + str(result.episode.ep_obj.status) + " to " + str(PREDOWNLOADED), logger.DEBUG)
+			result.episode.ep_obj.status = PREDOWNLOADED
 		else:
-			logger.log("changing status from " + str(result.episode.status) + " to " + str(endStatus), logger.DEBUG)
-			result.episode.status = endStatus
-		result.episode.saveToDB()
+			logger.log("changing status from " + str(result.episode.ep_obj.status) + " to " + str(endStatus), logger.DEBUG)
+			result.episode.ep_obj.status = endStatus
+		sickbeard.storeManager.commit()
 
-	sickbeard.updateMissingList()
-	sickbeard.updateAiringList()
-	sickbeard.updateComingList()
 
-def _doSearch(episode, provider, manualSearch):
+def _doSearch(epData, provider, manualSearch):
 
 	# if we already got the SD then only try HD on BEST episodes
-	if episode.show.quality == BEST and episode.status == PREDOWNLOADED:
-		foundEps = provider.findEpisode(episode, HD, manualSearch)
+	if epData.ep_obj.show.quality == BEST and epData.ep_obj.status == PREDOWNLOADED:
+		foundEps = provider.findEpisode(epData, HD, manualSearch)
 	else:
-		foundEps = provider.findEpisode(episode, manualSearch=manualSearch)
+		foundEps = provider.findEpisode(epData, manualSearch=manualSearch)
 
 	# if we found something and we're on BEST, retry to see if we can guarantee HD.
-	if len(foundEps) > 0 and episode.show.quality == BEST and episode.status != PREDOWNLOADED:
-			moreFoundEps = provider.findEpisode(episode, HD, manualSearch)
+	if len(foundEps) > 0 and epData.ep_obj.show.quality == BEST and epData.ep_obj.status != PREDOWNLOADED:
+			moreFoundEps = provider.findEpisode(epData, HD, manualSearch)
 			
 			# if we couldn't find a definitive HD version then mark the original ones as predownloaded
 			if len(moreFoundEps) == 0:
@@ -116,9 +113,9 @@ def _doSearch(episode, provider, manualSearch):
 
 	return foundEps
 
-def findEpisode(episode, manualSearch=False):
+def findEpisode(epData, manualSearch=False):
 
-	logger.log("Searching for " + episode.prettyName(True))
+	logger.log("Searching for " + epData.ep_obj.prettyName(naming_show_name=True, naming_ep_name=False))
 
 	foundEps = []
 
@@ -130,7 +127,7 @@ def findEpisode(episode, manualSearch=False):
 			continue
 		
 		try:
-			foundEps = _doSearch(episode, curProvider, manualSearch)
+			foundEps = _doSearch(epData, curProvider, manualSearch)
 		except exceptions.AuthException, e:
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue

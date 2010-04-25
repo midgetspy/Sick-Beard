@@ -39,7 +39,7 @@ def sendNZB(nzb):
         params['cat'] = sickbeard.SAB_CATEGORY
 
     # don't bother making backlog episodes high priority
-    if nzb.episode.status != BACKLOG:
+    if nzb.episode.ep_obj.status != BACKLOG:
         params['priority'] = 1
 
     params['pp'] = 3

@@ -39,8 +39,8 @@ def makeShowNFO(show):
         tvdbid.text = str(show.tvdb_id)
         
     genre = etree.SubElement( tvNode, "genre" )
-    if show.data.genres != None:
-        genre.text = " / ".join(show.data.genres)
+    if show.data._genres != None:
+        genre.text = " / ".join(show.data._genres)
         
     premiered = etree.SubElement( tvNode, "premiered" )
     if show.data.firstaired != None:

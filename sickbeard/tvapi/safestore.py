@@ -2,6 +2,7 @@ import sqlite3
 import time
 import threading
 import Queue
+import traceback
 
 from storm.locals import Store, create_database
 from sickbeard.tvapi import proxy
@@ -59,6 +60,7 @@ class SafeStore():
             try:
                 self._resultDict[i] = self._exec_on_store(f, *a, **k)
             except Exception, e:
+                logger.log("Error executing thread-safe command: "+traceback.format_exc(), logger.WARNING)
                 self._resultDict[i] = e
             
             if self._abort:

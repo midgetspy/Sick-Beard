@@ -4,11 +4,10 @@ import operator
 import re
 import glob
 import urllib
+import threading
 
 from storm.locals import Int, Unicode, Bool, Reference, ReferenceSet, Storm, Select, Min
 from storm.expr import And
-
-from tvapi.tvapi_classes import TVEpisodeData, TVShowData
 
 import sickbeard
 
@@ -18,16 +17,19 @@ from sickbeard import processTV
 from sickbeard import encodingKludge as ek
 from sickbeard import metadata
 
-import sickbeard.tvapi.tvapi_main
+from sickbeard.tvapi.tvapi_classes import TVEpisodeData, TVShowData
 
 from sickbeard.tvapi import proxy
-from sickbeard.tvapi import safestore 
 from sickbeard.tvapi.tvdb import tvdb_update
-from sickbeard.tvapi.tvdb import tvdb_classes
+from sickbeard.tvapi.tvrage import tvrage_update
 
 from sickbeard import logger
 
 import xml.etree.cElementTree as etree
+
+from lib.tvnamer.utils import FileParser
+from lib.tvnamer import tvnamer_exceptions
+
 
 class TVShow(Storm):
     """
@@ -54,6 +56,7 @@ class TVShow(Storm):
     
     def __init__(self, tvdb_id):
         self.tvdb_id = tvdb_id
+        self.lock = threading.Lock()
 
     def proxy(self):
         return proxy.TVShowProxy(self)
@@ -92,16 +95,18 @@ class TVShow(Storm):
         tvdb_update.loadShow(self.tvdb_id, cache)
         
         try:
-            #tvapi_tvrage.loadShow(self.tvdb_id)
-            pass
+            tvrage_update.loadShow(self.tvdb_id)
+            #pass
         except exceptions.TVRageException, e:
             logger.log("Error while trying to set TVRage info: "+str(e), logger.WARNING)
-        
+
         # update any existing data objects with the new metadata
         if self.show_data:
             self.show_data.update()
         for epObj in self.show_data.episodes_data:
             epObj.update()
+
+        sickbeard.storeManager.commit()
     
     def nextEpisodes(self, fromDate=None, untilDate=None):
         """
@@ -217,7 +222,7 @@ class TVShow(Storm):
             
             # if not, make it
             if not epObj:
-                epObj = sickbeard.tvapi.tvapi_main.createEpFromName(ek.ek(os.path.basename, curFile), self.tvdb_id)
+                epObj = TVEpisode.createEpFromName(ek.ek(os.path.basename, curFile), self.tvdb_id)
 
             if not epObj:
                 logger.log("Unable to find episode metadata for "+curFile+", giving up", logger.ERROR)
@@ -270,6 +275,18 @@ class TVShow(Storm):
             
             epObj.checkForMetaFiles()
 
+    @staticmethod
+    def findTVShow(name):
+        result = sickbeard.storeManager.safe_store("find", TVShow, TVShow.tvdb_id == TVShowData.tvdb_id, TVShowData.name == name)
+        return proxy._getProxy(sickbeard.storeManager.safe_store(result.one))
+    
+    @staticmethod
+    def getTVShow(tvdb_id):
+        result = sickbeard.storeManager.safe_store("find", TVShow, TVShow.tvdb_id == tvdb_id)
+        return proxy._getProxy(sickbeard.storeManager.safe_store(result.one))
+
+
+
 class TVEpisode(Storm):
     """
     Represents an episode of a show that's added in Sick Beard. Stores all data
@@ -317,6 +334,8 @@ class TVEpisode(Storm):
         if season != None and episode != None:
             self.addEp(season, episode)
 
+        self.lock = threading.Lock()
+
     def proxy(self):
         return proxy.TVEpisodeProxy(self)
 
@@ -352,14 +371,10 @@ class TVEpisode(Storm):
         """
         Add an episode to the episode data list (TVEpisode.episodes)
         """
-        # dereference the proxy if applicable
-        if isinstance(ep, proxy.GenericProxy):
-            logger.log("Dereferencing proxy, from "+str(ep)+" to "+str(ep.obj), logger.DEBUG)
-            ep = ep.obj
-
-        logger.log("Object to add: "+str(ep), logger.DEBUG)
 
         if not ep:
+            logger.log("Creating and adding TVEpisodeData object for "+str(season)+"x"+str(episode)+" to the TVEpisode object", logger.DEBUG)
+
             result = sickbeard.storeManager._store.find(TVEpisodeData,
                                                         TVEpisodeData.tvdb_show_id == self.show.tvdb_id,
                                                         TVEpisodeData.season == season,
@@ -373,12 +388,17 @@ class TVEpisode(Storm):
                 ep.update()
                 #raise Exception("The season/episode given didn't return a single episode: "+str(season)+"x"+str(episode))
 
+        else:
+            logger.log("Adding the existing TVEpisodeData object for "+str(ep.season)+"x"+str(ep.episode)+" to the TVEpisode object", logger.DEBUG)
+
         if ep not in self.episodes_data:
             self.episodes_data.add(ep)
             sickbeard.storeManager.commit()
 
         # keep the status up to date
         self._status = self._getStatus() 
+
+        logger.log("Set my status to "+str(self._status), logger.DEBUG)
 
 
     def checkForMetaFiles(self):
@@ -395,6 +415,8 @@ class TVEpisode(Storm):
         elif not self.location or not ek.ek(os.path.isfile, self.location):
             logger.log("This episode has no file, not bothering to create metadata", logger.DEBUG)
             return
+
+        self.checkForMetaFiles()
 
         if sickbeard.CREATE_METADATA or force:
             self.createNFO(force)
@@ -579,3 +601,33 @@ class TVEpisode(Storm):
             finalName = re.sub("\s+", ".", finalName)
 
         return finalName
+
+    @staticmethod
+    def createEpFromName(name, tvdb_id=None):
+        
+        try:
+            myParser = FileParser(name)
+            epInfo = myParser.parse()
+        except tvnamer_exceptions.InvalidFilename:
+            #logger.log("Unable to parse the filename "+name+" into a valid episode", logger.ERROR)
+            return None
+    
+        if not tvdb_id:
+            # try looking the name up in the DB
+            
+            # if that fails try a TVDB lookup
+            pass
+        
+        showObj = TVShow.getTVShow(tvdb_id)
+        epObj = showObj.getEp(epInfo.seasonnumber, epInfo.episodenumbers[0])
+        
+        if epObj:
+            for anotherEpNum in epInfo.episodenumbers[1:]:
+                epObj.addEp(epInfo.seasonnumber, anotherEpNum)
+        
+            if os.path.isfile(name):
+                epObj.location = name
+        
+        return epObj
+
+

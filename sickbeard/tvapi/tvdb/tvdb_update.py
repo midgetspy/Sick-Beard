@@ -38,8 +38,7 @@ def loadShow(tvdb_id, cache=True):
     showData.name = tvdbShow['seriesname']
 
     showData.plot = tvdbShow['overview']
-    showData.genres = tvdbShow['genre'].split('|') if tvdbShow['genre'] else []
-    showData.genres = filter(lambda x: x != '', showData.genres)
+    showData._genres = tvdbShow['genre']
     showData.network = tvdbShow['network']
     showData.duration = int(tvdbShow['runtime']) if tvdbShow['runtime'] else None
     showData.actors = tvdbShow['_actors']
@@ -66,7 +65,6 @@ def loadShow(tvdb_id, cache=True):
             if epData.season not in tvdbShow and epData.episode not in tvdbShow[season]:
                 epData.delete()
 
-    print "Committing all the show data"
     sickbeard.storeManager.commit()
 
     return resultingData

@@ -1,5 +1,4 @@
 #from sickbeard import tvapi, tvclasses
-#from sickbeard.tvapi.tvapi_main import getTVShow
 #from sickbeard.tvapi import tvapi_classes, safestore
 
 #import sickbeard
@@ -8,7 +7,7 @@
 #import os.path
 #import datetime
 
-#set $show = $getTVShow($tvdb_id)
+#set $show = $tvclasses.TVShow.getTVShow($tvdb_id)
 
 #set global $title = $show.show_data.name
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdb_id, $show.show_data.name)

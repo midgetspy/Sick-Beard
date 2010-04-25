@@ -19,9 +19,9 @@ def _logHistoryItem(action, showid, season, episode, quality, resource, provider
 
 def logSnatch(searchResult):
     
-    showid = int(searchResult.episode.show.tvdbid)
-    season = int(searchResult.episode.season)
-    episode = int(searchResult.episode.episode)
+    showid = searchResult.episode.tvdb_show_id
+    season = searchResult.episode.season
+    episode = searchResult.episode.episode
     quality = searchResult.quality
     
     providerModule = providers.getProviderModule(searchResult.provider)
@@ -41,9 +41,9 @@ def logSnatch(searchResult):
 
 def logDownload(episode, filename):
     
-    showid = int(episode.show.tvdbid)
-    season = int(episode.season)
-    episode = int(episode.episode)
+    showid = episode.tvdb_show_id
+    season = episode.season
+    episode = episode.episode
     
     quality = -1
     provider = -1

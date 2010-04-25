@@ -79,7 +79,7 @@ class TVEpisodeDataProxy(GenericProxy):
 
 class TVShowDataProxy(GenericProxy):
     def season(self, season):
-        self._safe(self.obj.season, season)
+        return self._safe(self.obj.season, season)
 
 def _getProxy(obj):
     try:

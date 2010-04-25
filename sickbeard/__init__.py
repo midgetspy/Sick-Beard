@@ -28,6 +28,8 @@ import threading
 
 from threading import Lock
 
+import tvapi.safestore, tvapi.makeDB
+
 # apparently py2exe won't build these unless they're imported somewhere 
 from providers import eztv, nzbs, nzbmatrix, newzbin, tvnzb, tvbinz
 
@@ -38,8 +40,6 @@ from sickbeard import logger
 from sickbeard.common import *
 
 from sickbeard.databases import mainDB
-
-import tvapi.safestore, tvapi.makeDB
 
 SOCKET_TIMEOUT = 30
 
@@ -456,6 +456,9 @@ def start():
         
         if __INITIALIZED__:
         
+            storeThread.start()
+            #tvapi.makeDB.makeDB()
+
             # start the search scheduler
             currentSearchScheduler.thread.start()
         
@@ -476,9 +479,6 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
-            
-            storeThread.start()
-            #tvapi.makeDB.makeDB()
 
 def halt ():
     

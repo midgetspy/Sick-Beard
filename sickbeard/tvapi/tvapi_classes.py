@@ -1,3 +1,5 @@
+import threading
+
 from storm.locals import Int, Unicode, Float, Reference, ReferenceSet, Date, Pickle, Storm
 
 import sickbeard
@@ -6,6 +8,7 @@ from sickbeard import logger
 
 import proxy, safestore
 from tvdb import tvdb_classes
+from tvrage import tvrage_classes
 
 class TVShowData(Storm):
     __storm_table__ = "tvshowdata"
@@ -19,7 +22,7 @@ class TVShowData(Storm):
 
     name = Unicode()
     plot = Unicode()
-    genres = Pickle()
+    _genres = Unicode()
     network = Unicode()
     duration = Int()
     actors = Pickle()
@@ -35,6 +38,7 @@ class TVShowData(Storm):
     
     def __init__(self, tvdb_id):
         self.tvdb_id = tvdb_id
+        self.lock = threading.Lock()
 
     def proxy(self):
         return proxy.TVShowDataProxy(self)
@@ -57,7 +61,7 @@ class TVShowData(Storm):
         # just use all TVDB data for now
         self.name = tvdb_data.name
         self.plot = tvdb_data.plot
-        self.genres = tvdb_data.genres
+        self._genres = tvdb_data._genres
         self.network = tvdb_data.network
         self.duration = tvdb_data.duration
         self.actors = tvdb_data.actors
@@ -68,6 +72,21 @@ class TVShowData(Storm):
         self.rating = tvdb_data.rating
         self.contentrating = tvdb_data.contentrating
         
+        tvrage_data_list = safestore.safe_list(sickbeard.storeManager.safe_store("find", tvrage_classes.TVShowData_TVRage, tvrage_classes.TVShowData_TVRage.tvdb_id == self.tvdb_id))
+        if len(tvrage_data_list) == 0:
+            tvrage_data = None
+        else:
+            tvrage_data = tvrage_data_list[0]
+
+        logger.log("TVRage data: "+str(tvrage_data))
+
+        if tvrage_data:
+            self.tvrage_id = tvrage_data.tvrage_id
+
+    def getGenres(self):
+        return filter(lambda x: x, self._genres.split('|'))
+    
+    genres = property(getGenres)
 
     # give a list of seasons
     def _seasons(self):
@@ -80,7 +99,7 @@ class TVShowData(Storm):
             return self._cached_seasons
         
         toReturn = []
-        for x in sickbeard.storeManager._store.execute("SELECT distinct season from tvepisodedata where show_id = ?", (self.tvdb_id,)):
+        for x in sickbeard.storeManager._store.execute("SELECT distinct season from tvepisodedata where tvdb_show_id = ?", (self.tvdb_id,)):
             toReturn.append(x[0])
         
         if self._cached_seasons == None:
@@ -102,8 +121,11 @@ class TVShowData(Storm):
             return self._cached_episodes[season]
         
         toReturn = []
-        for x in sickbeard.storeManager._store.execute("SELECT episode FROM tvepisodedata WHERE show_id = ? AND season = ?", (self.tvdb_id, season)):
-            toReturn.append(x[0])
+        #for x in sickbeard.storeManager._store.execute("SELECT episode FROM tvepisodedata WHERE tvdb_show_id = ? AND season = ?", (self.tvdb_id, season)):
+        for x in sickbeard.storeManager._store.find(TVEpisodeData.episode,
+                                                    TVEpisodeData.tvdb_show_id == self.tvdb_id,
+                                                    TVEpisodeData.season == season):
+            toReturn.append(x)
 
         # put the new lookup in the cache
         self._cached_episodes[season] = toReturn
@@ -147,6 +169,9 @@ class TVEpisodeData(Storm):
     gueststars = Pickle()
     thumb = Unicode()
 
+    displayseason = Int()
+    displayepisode = Int()
+
     show_data = Reference(tvdb_show_id, "TVShowData.tvdb_id")
     ep_obj = Reference(_eid, "TVEpisode.eid")
 
@@ -155,6 +180,7 @@ class TVEpisodeData(Storm):
         self.season = season
         self.episode = episode
         
+        self.lock = threading.Lock()
         #self.update()
 
     def proxy(self):
@@ -191,6 +217,9 @@ class TVEpisodeData(Storm):
         self.rating = tvdb_data.rating
         self.gueststars = tvdb_data.gueststars
         self.thumb = tvdb_data.thumb
+
+        self.displayseason = tvdb_data.displayseason
+        self.displayepisode = tvdb_data.displayepisode
         
 
     def delete(self):

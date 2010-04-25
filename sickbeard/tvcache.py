@@ -1,19 +1,16 @@
 import time
 import datetime
 import sqlite3
-import urllib
-
-import gzip
-import urllib2
-import StringIO
 
 import sickbeard
 
 from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import *
-
-from sickbeard import helpers
+from sickbeard import showHelpers
+from sickbeard.tvapi import tvapi_classes
+from sickbeard.tvapi import safestore
+from sickbeard import tvclasses
 
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
@@ -103,6 +100,7 @@ class TVCache():
         
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
+
             try:
                 myParser = FileParser(curName)
                 epInfo = myParser.parse()
@@ -123,18 +121,24 @@ class TVCache():
             
             # if we have only the tvdb_id, use the database
             if tvdb_id:
-                showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                if showObj:
-                    tvrage_id = showObj.tvrid
+                #showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                showDataList = safestore.safe_list(sickbeard.storeManager.safe_store("find",
+                                                                                     tvapi_classes.TVShowData,
+                                                                                     tvapi_classes.TVShowData.tvdb_id == tvdb_id))
+                if len(showDataList) > 0:
+                    tvrage_id = showDataList[0].tvrid
                 else:
                     logger.log("We were given a TVDB id "+str(tvdb_id)+" but it doesn't match a show we have in our list, so leaving tvrage_id empty", logger.DEBUG)
                     tvrage_id = 0 
             
             # if we have only a tvrage_id then use the database
             elif tvrage_id:
-                showObj = helpers.findCertainTVRageShow(sickbeard.showList, tvrage_id)
-                if showObj:
-                    tvdb_id = showObj.tvdbid
+                #showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                showDataList = safestore.safe_list(sickbeard.storeManager.safe_store("find",
+                                                                                     tvapi_classes.TVShowData,
+                                                                                     tvapi_classes.TVShowData.tvrage_id == tvrage_id))
+                if len(showDataList) > 0:
+                    tvdb_id = showDataList[0].tvdbid
                 else:
                     logger.log("We were given a TVRage id "+str(tvrage_id)+" but it doesn't match a show we have in our list, so leaving tvdb_id empty", logger.DEBUG)
                     tvdb_id = 0 
@@ -142,15 +146,15 @@ class TVCache():
             # if they're both empty then fill out as much info as possible by searching the show name
             else:    
 
-                showResult = helpers.searchDBForShow(epInfo.seriesname)
+                showResult = showHelpers.searchDBForShow(epInfo.seriesname)
                 if showResult:
                     logger.log(epInfo.seriesname+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
                     tvdb_id = showResult[0]
-                    showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                    showObj = tvclasses.TVShow.getTVShow(tvdb_id)
                     if not showObj:
                         logger.log("This should never have happened, post a bug about this!", logger.ERROR)
                         raise Exception("BAD STUFF HAPPENED")
-                    tvrage_id = showObj.tvrid
+                    tvrage_id = showObj.tvrage_id
             
             
         if not season:
@@ -178,12 +182,12 @@ class TVCache():
         
         
 
-    def searchCache(self, show, season, episode, quality=ANY):
+    def searchCache(self, epData, quality=ANY):
         
         myDB = self._getDB()
         
-        sql = "SELECT * FROM "+self.providerName+" WHERE tvdbid = "+str(show.tvdbid)+ \
-              " AND season = "+str(season)+" AND episodes LIKE '%|"+str(episode)+"|%'"
+        sql = "SELECT * FROM "+self.providerName+" WHERE tvdbid = "+str(epData.tvdb_show_id)+ \
+              " AND season = "+str(epData.season)+" AND episodes LIKE '%|"+str(epData.episode)+"|%'"
 
         if quality != ANY:
             sql += " AND quality = "+str(quality)

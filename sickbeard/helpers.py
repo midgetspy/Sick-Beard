@@ -21,8 +21,6 @@ import StringIO
 import gzip
 import os.path
 import os
-import sqlite3
-import codecs
 import urllib, urllib2
 import re
 
@@ -31,16 +29,12 @@ import sickbeard
 from sickbeard.exceptions import *
 from sickbeard import logger
 from sickbeard.common import *
-
 from sickbeard import encodingKludge as ek
-
 from sickbeard import db
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
-
-import string
 
 def indentXML(elem, level=0):
 	'''
@@ -98,16 +92,16 @@ def sceneToNormalShowNames(name):
 	
 	return [name, name.replace(".and.", ".&.")]
 
-def allPossibleShowNames(show):
+def allPossibleShowNames(showData):
 
-	showNames = [show.name]
+	showNames = [showData.name]
 
-	if int(show.tvdbid) in sceneExceptions:
-		showNames += sceneExceptions[int(show.tvdbid)]
+	if int(showData.tvdb_id) in sceneExceptions:
+		showNames += sceneExceptions[showData.tvdb_id]
 	
 	# if we have a tvrage name then use it
-	if show.tvrname != "" and show.tvrname != None:
-		showNames.append(show.tvrname)
+	#if show.tvrname != "" and show.tvrname != None:
+	#	showNames.append(show.tvrname)
 
 	newShowNames = []
 
@@ -134,15 +128,15 @@ def makeSceneShowSearchStrings(show):
 	return map(sanitizeSceneName, showNames)
 
 
-def makeSceneSearchString (episode):
+def makeSceneSearchString (epData):
 
 	# see if we should use dates instead of episodes
-	if "Talk Show" in episode.show.genre:
-		epString = '.' + str(episode.airdate).replace('-', '.')
+	if "Talk Show" in epData.show_data.genres:
+		epString = '.' + str(epData.aired).replace('-', '.')
 	else:
-		epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
+		epString = ".S%02iE%02i" % (epData.season, epData.episode)
 
-	showNames = makeSceneShowSearchStrings(episode.show)
+	showNames = makeSceneShowSearchStrings(epData.show_data)
 
 	toReturn = []
 
@@ -300,41 +294,6 @@ def makeShowNFO(showID, showDir):
 	return True
 
 
-def searchDBForShow(regShowName):
-	
-	showNames = set([regShowName+'%', regShowName.replace(' ','_')+'%'])
-	
-	# if tvdb fails then try looking it up in the db
-	myDB = db.DBConnection()
-
-	yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
-
-	for showName in showNames:
-	
-		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
-		
-		if len(sqlResults) == 1:
-			return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
-
-		else:
-	
-			# if we didn't get exactly one result then try again with the year stripped off if possible
-			match = re.match(yearRegex, showName)
-			if match:
-				logger.log("Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
-				sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
-	
-			if len(sqlResults) == 0:
-				logger.log("Unable to match a record in the DB for "+showName, logger.DEBUG)
-				continue
-			elif len(sqlResults) > 1:
-				logger.log("Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
-				continue
-			else:
-				return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
-
-	
-	return None
 
 def findLatestBuild():
 

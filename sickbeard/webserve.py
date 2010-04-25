@@ -135,17 +135,15 @@ def _getEpisode(show, season, episode):
     if show == None or season == None or episode == None:
         return "Invalid parameters"
     
-    showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
-
-    if showObj == None:
+    # get the epObj
+    epDataList = safestore.safe_list(sickbeard.storeManager.safe_store("find", TVEpisodeData,
+                                              TVEpisodeData.tvdb_show_id == int(show),
+                                              TVEpisodeData.season == int(season),
+                                              TVEpisodeData.episode == int(episode)))
+    if len(epDataList) == 0:
         return "Show not in show list"
-
-    epObj = showObj.getEpisode(int(season), int(episode))
-    
-    if epObj == None:
-        return "Episode couldn't be retrieved"
-
-    return epObj
+    else:
+        return epDataList[0]
 
 
 class Backlog:
@@ -1107,7 +1105,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         else:
-            showObj = tvapi_main.getTVShow(int(show))
+            showObj = TVShow.getTVShow(int(show))
             
             if showObj == None:
                 return _genericMessage("Error", "Unable to find the specified show.")
@@ -1159,7 +1157,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = tvapi_main.getTVShow(int(show))
+        showObj = TVShow.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1219,7 +1217,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = tvapi_main.getTVShow(int(show))
+        showObj = TVShow.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1240,7 +1238,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = tvapi_main.getTVShow(int(show))
+        showObj = TVShow.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1262,7 +1260,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = tvapi_main.getTVShow(int(show))
+        showObj = TVShow.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1296,7 +1294,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         
-        showObj = tvapi_main.getTVShow(int(show))
+        showObj = TVShow.getTVShow(int(show))
         
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -1354,20 +1352,20 @@ class Home:
     def searchEpisode(self, show=None, season=None, episode=None):
         
         outStr = ""
-        epObj = _getEpisode(show, season, episode)
+        epData = _getEpisode(show, season, episode)
         
-        if isinstance(epObj, str):
-            return _genericMessage("Error", epObj)
+        if isinstance(epData, str):
+            return _genericMessage("Error", epData)
         
-        tempStr = "Searching for download for " + epObj.prettyName(True)
+        tempStr = "Searching for download for " + epData.ep_obj.prettyName(True)
         logger.log(tempStr)
         outStr += tempStr + "<br />\n"
-        foundEpisodes = search.findEpisode(epObj, manualSearch=True)
+        foundEpisodes = search.findEpisode(epData, manualSearch=True)
         
         if len(foundEpisodes) == 0:
             message = 'No downloads were found'
             flash.error(message,
-                        "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
+                        "Couldn't find a download for <i>%s</i>" % epData.ep_obj.prettyName(True))
             logger.log(message)
         
         else:
@@ -1383,12 +1381,7 @@ class Home:
             
             #TODO: check if the download was successful
 
-            # update our lists to reflect the result if this search
-            sickbeard.updateMissingList()
-            sickbeard.updateAiringList()
-            sickbeard.updateComingList()
-
-        redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
+        redirect("/home/displayShow?show=" + str(epData.tvdb_show_id))
 
 
 
@@ -1405,13 +1398,13 @@ class WebInterface:
         if show == None:
             return "Invalid show" #TODO: make it return a standard image
         else:
-            showObj = tvapi_main.getTVShow(int(show))
+            showObj = TVShow.getTVShow(int(show))
             
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
     
         posterFilename = os.path.abspath(ek.ek(os.path.join, showObj.location, "folder.jpg"))
-        if os.path.isfile(posterFilename):
+        if ek.ek(os.path.isfile, posterFilename):
             return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
         
         else:

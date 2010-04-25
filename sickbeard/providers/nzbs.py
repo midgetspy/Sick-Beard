@@ -75,23 +75,23 @@ def downloadNZB (nzb):
 	return True
 	
 	
-def findEpisode (episode, forceQuality=None, manualSearch=False):
+def findEpisode (epData, forceQuality=None, manualSearch=False):
 
-	if episode.status == DISCBACKLOG:
+	if epData.ep_obj.status == DISCBACKLOG:
 		logger.log("NZBs.org doesn't support disc backlog. Use newzbin or download it manually from NZBs.org")
 		return []
 
 	if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
 		raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
 
-	logger.log("Searching NZBs.org for " + episode.prettyName(True))
+	logger.log("Searching NZBs.org for " + epData.ep_obj.prettyName(True))
 
 	if forceQuality != None:
 		epQuality = forceQuality
-	elif episode.show.quality == BEST:
+	elif epData.ep_obj.show.quality == BEST:
 		epQuality = ANY
 	else:
-		epQuality = episode.show.quality
+		epQuality = epData.ep_obj.show.quality
 	
 	if epQuality == SD:
 		quality = {"catid": 1}
@@ -104,7 +104,7 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 	myCache = NZBsCache()
 	myCache.updateCache()
 	
-	cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
+	cacheResults = myCache.searchCache(epData, epQuality)
 	logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
 
 	nzbResults = []
@@ -116,7 +116,7 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 	
 		logger.log("Found result " + title + " at " + url)
 
-		result = classes.NZBSearchResult(episode)
+		result = classes.NZBSearchResult(epData)
 		result.provider = providerName.lower()
 		result.url = url 
 		result.extraInfo = [title]
@@ -127,10 +127,10 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 	# if we got some results then use them no matter what.
 	# OR
 	# return anyway unless we're doing a backlog or manual search
-	if nzbResults or not (episode.status == BACKLOG or manualSearch):
+	if nzbResults or not (epData.ep_obj.status == BACKLOG or manualSearch):
 		return nzbResults
 
-	sceneSearchStrings = set(helpers.makeSceneSearchString(episode))
+	sceneSearchStrings = set(helpers.makeSceneSearchString(epData))
 	
 	itemList = []
 	results = []
@@ -149,7 +149,7 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 		
 		logger.log("Found result " + title + " at " + url, logger.DEBUG)
 		
-		result = classes.NZBSearchResult(episode)
+		result = classes.NZBSearchResult(epData)
 		result.provider = providerName.lower()
 		result.url = url 
 		result.extraInfo = [title]
@@ -262,7 +262,7 @@ class NZBsCache(tvcache.TVCache):
 			
 		for item in items:
 
-			title = item.findtext('title')
+			title = item.findtext('title').decode('utf-8')
 			url = item.findtext('link')
 
 			if not title or not url:
