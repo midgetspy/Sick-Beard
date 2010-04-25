@@ -454,6 +454,10 @@ class Tvdb:
             if not str(errormsg).startswith('HTTP Error'):
                 lastTimeout = datetime.datetime.now()
             raise tvdb_error("Could not connect to server %s: %s" % (url, errormsg))
+	except (AttributeError), errormsg:
+	    raise tvdb_error("Silly upstream module timed out and didn't give a \
+	    good error.  Failed hitting %, error message: %s" % (url,
+		str(errormsg)))
         #end try
 
         return str(resp)
