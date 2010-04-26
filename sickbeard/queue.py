@@ -12,7 +12,7 @@ from sickbeard.common import *
 from sickbeard import exceptions
 from sickbeard import helpers
 from sickbeard import logger
-from sickbeard import webserve
+from sickbeard import tvclasses
 
 from sickbeard.tvapi import tvapi_main
 
@@ -129,8 +129,8 @@ class ShowQueue:
         
         return queueItemObj
     
-    def addShow(self, showDir):
-        queueItemObj = QueueItemAdd(showDir)
+    def addShow(self, tvdb_id, showDir):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir)
         self.queue.append(queueItemObj)
         
         return queueItemObj
@@ -190,22 +190,13 @@ class QueueItem:
         self.inProgress = False
         
 class QueueItemAdd(QueueItem):
-    def __init__(self, show=None):
+    def __init__(self, tvdb_id, showDir):
 
-        self.showDir = show
-
-        # if we can't create the dir, bail
-        if not os.path.isdir(self.showDir):
-            if not helpers.makeDir(self.showDir):
-                raise exceptions.NoNFOException("Unable to create the show dir " + self.showDir)
-
-        if not os.path.isfile(os.path.join(self.showDir, "tvshow.nfo")):
-            raise exceptions.NoNFOException("No tvshow.nfo found")
+        self.showDir = showDir
+        self.tvdb_id = tvdb_id
 
         # this will initialize self.show to None
         QueueItem.__init__(self, QueueActions.ADD)
-
-        self.tvdb_id = tvapi_main.TEMP_getTVDBIDFromNFO(self.showDir)
 
     def _getName(self):
         if self.show == None:
@@ -227,13 +218,14 @@ class QueueItemAdd(QueueItem):
 
         logger.log("Starting to add show "+self.showDir)
 
+        #TODO: fix this
         otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdb_id)
         if otherShow != None:
             logger.log("Show is already in your list, not adding it again")
             self.finish()
             return
 
-        self.show = tvapi_main.createTVShow(self.tvdb_id)
+        self.show = tvclasses.TVShow.createTVShow(self.tvdb_id)
         
         # set up initial values
         self.show.location = self.showDir

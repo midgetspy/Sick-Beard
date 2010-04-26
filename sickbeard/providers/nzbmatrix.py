@@ -99,14 +99,11 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 		
 		nzbResults.append(result)
 
-	return nzbResults
-
 	# if we got some results then use them no matter what.
 	# OR
 	# return anyway unless we're doing a backlog or manual search
 	if nzbResults or not (episode.status == BACKLOG or manualSearch):
 		return nzbResults
-
 	
 	sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
 	

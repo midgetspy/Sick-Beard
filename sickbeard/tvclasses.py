@@ -6,7 +6,7 @@ import glob
 import urllib
 import threading
 
-from storm.locals import Int, Unicode, Bool, Reference, ReferenceSet, Storm, Select, Min
+from storm.locals import Int, Unicode, Bool, Reference, ReferenceSet, Storm, Select, Min, AutoReload
 from storm.expr import And
 
 import sickbeard
@@ -19,7 +19,7 @@ from sickbeard import metadata
 
 from sickbeard.tvapi.tvapi_classes import TVEpisodeData, TVShowData
 
-from sickbeard.tvapi import proxy
+from sickbeard.tvapi import proxy, safestore
 from sickbeard.tvapi.tvdb import tvdb_update
 from sickbeard.tvapi.tvrage import tvrage_update
 
@@ -73,8 +73,8 @@ class TVShow(Storm):
             raise exceptions.NoNFOException("Show folder doesn't exist, you shouldn't be using it")
 
     def _setLocation(self, newLocation):
-        logger.log("Setter sets location to " + newLocation)
-        if ek.ek(os.path.isdir, newLocation) and ek.ek(os.path.isfile, ek.ek(os.path.join, newLocation, "tvshow.nfo")):
+        logger.log("Setter sets location to " + newLocation, logger.DEBUG)
+        if ek.ek(os.path.isdir, newLocation):
             self._location = newLocation
             self._isDirGood = True
         else:
@@ -93,6 +93,7 @@ class TVShow(Storm):
         
         # loads TVDB data into the database
         tvdb_update.loadShow(self.tvdb_id, cache)
+        sickbeard.storeManager.commit()
         
         try:
             tvrage_update.loadShow(self.tvdb_id)
@@ -191,6 +192,17 @@ class TVShow(Storm):
         if not ek.ek(os.path.isdir, self._location):
             return False
         
+        nfoFilename = ek.ek(os.path.join, self._location, "tvshow.nfo")
+        
+        # if metadata creation is turned on then make ourselves a tvshow.nfo, unless we already have one
+        if sickbeard.CREATE_METADATA and not ek.ek(os.path.isfile, nfoFilename):
+            logger.log("No tvshow.nfo found, generating one")
+            rootNode = metadata.makeShowNFO(self)
+            nfoTree = etree.ElementTree( rootNode )
+            nfo_fh = ek.ek(open, nfoFilename, 'w')
+            nfoTree.write( nfo_fh, encoding="utf-8" ) 
+            nfo_fh.close()
+
         # run through all locations from DB, check that they exist
         logger.log(str(self.tvdb_id) + ": Loading all episodes with a location from the database")
         
@@ -285,6 +297,46 @@ class TVShow(Storm):
         result = sickbeard.storeManager.safe_store("find", TVShow, TVShow.tvdb_id == tvdb_id)
         return proxy._getProxy(sickbeard.storeManager.safe_store(result.one))
 
+    @staticmethod
+    def createTVShow(tvdb_id):
+        curShowObj = TVShow.getTVShow(tvdb_id)
+        if curShowObj:
+            return curShowObj
+
+        from storm.tracer import debug
+        import sys
+        
+        debug(True, stream=sys.stdout)
+        
+        # make the show
+        showObj = proxy._getProxy(sickbeard.storeManager.safe_store(TVShow, tvdb_id))
+        sickbeard.storeManager.safe_store("add", showObj.obj)
+        sickbeard.storeManager.safe_store("commit")
+        
+        # get the metadata
+        showObj.updateMetadata()
+        
+        # make a TVEpisode for any tvapi_classes.TVEpisodeData objects that don't already have one
+        for epData in safestore.safe_list(sickbeard.storeManager.safe_store("find",
+                                                                            TVEpisodeData,
+                                                                            TVEpisodeData.tvdb_show_id == tvdb_id)):
+    
+            if not epData.ep_obj:
+                logger.log("Creating TVEpisode object for episode "+str(epData.season)+"x"+str(epData.episode), logger.DEBUG)
+                print "Creating TVEpisode object for episode "+str(epData.season)+"x"+str(epData.episode) 
+                epObj = proxy._getProxy(sickbeard.storeManager.safe_store(TVEpisode, showObj))
+                sickbeard.storeManager.safe_store(epObj.addEp, ep=epData)
+                sickbeard.storeManager.safe_store("add", epObj.obj)
+                logger.log("Added a TVEpisode to the TVEpisodeData: "+str(epData._eid)+" == "+str(epObj.eid)+" and "+str(epData.ep_obj)+" == "+str(epObj), logger.DEBUG)
+                print "Added a TVEpisode to the TVEpisodeData: "+str(epData._eid)+" == "+str(epObj.eid)+" and "+str(epData.ep_obj)+" == "+str(epObj)
+                #store.commit()
+        
+        #store.add(showObj)
+        sickbeard.storeManager.safe_store("commit")
+        
+        debug(False)
+        
+        return showObj
 
 
 class TVEpisode(Storm):
@@ -390,15 +442,21 @@ class TVEpisode(Storm):
 
         else:
             logger.log("Adding the existing TVEpisodeData object for "+str(ep.season)+"x"+str(ep.episode)+" to the TVEpisode object", logger.DEBUG)
+            print "Adding the existing TVEpisodeData object for "+str(ep.season)+"x"+str(ep.episode)+" to the TVEpisode object"
 
         if ep not in self.episodes_data:
+            logger.log("Performing the add and committing it", logger.DEBUG)
+            print "Performing the add and committing it"
             self.episodes_data.add(ep)
             sickbeard.storeManager.commit()
+            logger.log("After I did the add, hopefully "+str(ep._eid)+" == "+str(self.eid), logger.DEBUG)
+            print "After I did the add, hopefully "+str(ep._eid)+" == "+str(self.eid)
 
         # keep the status up to date
         self._status = self._getStatus() 
 
         logger.log("Set my status to "+str(self._status), logger.DEBUG)
+        print "Set my status to "+str(self._status)
 
 
     def checkForMetaFiles(self):

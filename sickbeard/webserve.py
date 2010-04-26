@@ -47,6 +47,7 @@ from sickbeard import providers
 from sickbeard import tv
 from sickbeard import logger, helpers, exceptions
 from sickbeard import encodingKludge as ek
+from sickbeard import metadata
 from sickbeard.tvclasses import TVEpisode, TVShow
 
 from sickbeard.notifiers import xbmc
@@ -55,9 +56,17 @@ from sickbeard.common import *
 from lib.tvdb_api import tvdb_exceptions
 from lib.tvdb_api import tvdb_api
 
+import xml.etree.cElementTree as etree
+
 import sickbeard
 
 from sickbeard import browser
+
+# use the built-in if it's available (python 2.6), if not use the included library
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
 
 
 class Flash:
@@ -681,6 +690,99 @@ class HomeAddShows:
         t = PageTemplate(file="home_addShows.tmpl")
         t.submenu = HomeMenu
         return _munge(t)
+
+    @cherrypy.expose
+    def searchTVDBForShowName(self, name):
+        
+        url = "http://thetvdb.com/api/GetSeries.php?seriesname=%s&language=en"
+        
+        urlObj = urllib.urlopen(url % name)
+        
+        seriesXML = etree.ElementTree(file = urlObj)
+        
+        series = seriesXML.getiterator('Series')
+        
+        results = []
+        
+        for curSeries in series:
+            results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
+    
+        return json.dumps({'results': results})
+
+    @cherrypy.expose
+    def addSingleShow(self, showToAdd, whichSeries=None, skipShow=False, showDirs=[]):
+        
+        # we don't need to unquote the rest of the showDirs cause we're going to pass them straight through 
+        showToAdd = urllib.unquote_plus(showToAdd)
+
+        # if they intentionally skipped the show then oblige them
+        if skipShow == "1":
+            return self.addShowsNew(showDirs)
+
+        # if we got a TVDB ID then make a show out of it
+        sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd)
+        flash.message('Show added', 'Adding the specified show into '+showToAdd)
+        # no need to display anything now that we added the show, so continue on to the next show
+        return self.addShowsNew(showDirs)
+
+    @cherrypy.expose
+    def addShowsNew(self, showDirs=[]):
+        
+        if showDirs and type(showDirs) != list:
+            showDirs = [showDirs]
+
+        # if there's nothing left to add, go home
+        if len(showDirs) == 0:
+            redirect("/home")
+        
+        t = PageTemplate(file="home_addShow_new.tmpl")
+        t.submenu = HomeMenu
+
+        # make sure everything's unescaped
+        showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
+
+        # peel off a single show that we'll be working on, leave the rest in a list
+        showToAdd = showDirs[0]
+        restOfShowDirs = showDirs[1:]
+
+        # if the dir we're given doesn't exist and we can't create it then skip it
+        if not helpers.makeDir(showToAdd):
+            flash.error("Warning", "Unable to create dir "+showToAdd+", skipping")
+            # recursively continue on our way, encoding the input as though we came from the web form
+            return self.addShowsNew([urllib.quote_plus(x) for x in restOfShowDirs])
+        
+        # if there's a tvshow.nfo then try to get a TVDB ID out of it
+        if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo")):
+            tvdb_id = None
+            try:
+                tvdb_id = metadata.getTVDBIDFromNFO(showToAdd)
+            except exceptions.NoNFOException, e:
+                # we couldn't get a tvdb id from the file so let them know and just print the search page
+                if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo.old")):
+                    flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo, renamed it to tvshow.nfo.old and ignoring it')
+
+                # no tvshow.nfo.old means we couldn't rename it and we can't continue adding this show
+                # encode the input as though we came from the web form
+                else:
+                    flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo and unable to rename it - you will need to remove it manually')
+                    return self.addShowsNew([urllib.quote_plus(x) for x in restOfShowDirs])
+        
+            # if we got a TVDB ID then make a show out of it
+            if tvdb_id:
+                sickbeard.showQueueScheduler.action.addShow(tvdb_id, showToAdd)
+                flash.message('Show added', 'Auto-added show from tvshow.nfo in '+showToAdd)
+                # no need to display anything now that we added the show, so continue on to the next show
+                return self.addShowsNew([urllib.quote_plus(x) for x in restOfShowDirs])
+        
+        # encode any info we send to the web page
+        t.showToAdd = urllib.quote_plus(showToAdd)
+        t.showNameToAdd = os.path.split(showToAdd)[1]
+        
+        # get the rest so we can pass them along
+        t.showDirs = [urllib.quote_plus(x) for x in restOfShowDirs]
+        
+        return _munge(t)
+        
 
     @cherrypy.expose
     def addRootDir(self, dir=None):

@@ -41,6 +41,8 @@ class SafeStore():
         
         self._abort = False
         
+        self.lock = threading.Lock()
+        
     def _getReq(self):
         self._req += 1
         return self._req

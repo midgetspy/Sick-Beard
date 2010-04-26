@@ -18,7 +18,10 @@
 
 import sickbeard
 
-mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv', 'ogm', 'mp4', 'iso', 'img', 'divx', 'm2ts', 'm4v', 'ts', 'flv', 'f4v']
+mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
+                   'ogm', 'mp4', 'iso', 'img', 'divx',
+                   'm2ts', 'm4v', 'ts', 'flv', 'f4v',
+                   'mov']
 
 ### Notification Types
 NOTIFY_SNATCH = 1
@@ -92,6 +95,7 @@ XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
 #####################################################################
 
 sceneExceptions = {72546: ['CSI'],
+                   73696: ['CSI: New York'],
                    110381: ['Archer'],
                    83897: ['Life After People: The Series'],
                    80552: ['Kitchen Nightmares (US)'],
