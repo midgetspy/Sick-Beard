@@ -81,7 +81,7 @@ def main():
 	threading.currentThread().name = "MAIN"
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "q", ['quiet'])
+		opts, args = getopt.getopt(sys.argv[1:], "q", ['quiet', 'tvbinz'])
 	except getopt.GetoptError:
 		print "Available options: --quiet"
 		sys.exit()
@@ -90,6 +90,9 @@ def main():
 		# for now we'll just silence the logging
 		if (o in ('-q', '--quiet')):
 			consoleLogging = False
+		# for now we'll just silence the logging
+		if (o in ('--tvbinz')):
+			sickbeard.SHOW_TVBINZ = True
 	
 	if consoleLogging:
 		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
@@ -107,12 +110,12 @@ def main():
 
 	try:
 		initWebServer({
-		        'port':      sickbeard.WEB_PORT,
-		        'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
-		        'web_root':  sickbeard.WEB_ROOT,
-		        'log_dir':   sickbeard.LOG_DIR if sickbeard.WEB_LOG else None,
-		        'username':  sickbeard.WEB_USERNAME,
-		        'password':  sickbeard.WEB_PASSWORD,
+				'port':	  sickbeard.WEB_PORT,
+				'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
+				'web_root':  sickbeard.WEB_ROOT,
+				'log_dir':   sickbeard.LOG_DIR if sickbeard.WEB_LOG else None,
+				'username':  sickbeard.WEB_USERNAME,
+				'password':  sickbeard.WEB_PASSWORD,
 		})
 	except IOError:
 		logger.log("Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)

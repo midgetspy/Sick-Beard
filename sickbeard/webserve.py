@@ -403,7 +403,7 @@ class ConfigProviders:
             
         if tvbinz == "on":
             tvbinz = 1
-        else:
+        elif tvbinz != None:
             tvbinz = 0
             
         if nzbs == "on":
@@ -424,12 +424,17 @@ class ConfigProviders:
         sickbeard.NEWZBIN = newzbin
         sickbeard.NEWZBIN_USERNAME = newzbin_username
         sickbeard.NEWZBIN_PASSWORD = newzbin_password
-        
-        sickbeard.TVBINZ = tvbinz
-        sickbeard.TVBINZ_UID = tvbinz_uid
-        sickbeard.TVBINZ_SABUID = tvbinz_sabuid
-        sickbeard.TVBINZ_HASH = tvbinz_hash
-        sickbeard.TVBINZ_AUTH = tvbinz_auth
+
+        if tvbinz != None:
+            sickbeard.TVBINZ = tvbinz
+        if tvbinz_uid:
+            sickbeard.TVBINZ_UID = tvbinz_uid
+        if tvbinz_sabuid:
+            sickbeard.TVBINZ_SABUID = tvbinz_sabuid
+        if tvbinz_hash:
+            sickbeard.TVBINZ_HASH = tvbinz_hash
+        if tvbinz_auth:
+            sickbeard.TVBINZ_AUTH = tvbinz_auth
         
         sickbeard.NZBS = nzbs
         sickbeard.NZBS_UID = nzbs_uid

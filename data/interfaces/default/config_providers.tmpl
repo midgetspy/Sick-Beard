@@ -38,7 +38,10 @@ you want them to be searched<br />
 <br />
 <ul id="provider_order_list">
 #for $curProvider in $sickbeard.providers.getAllModules():
-<li class="ui-state-default" id="$curProvider.providerName.lower()">$curProvider.providerName</li>
+    #if $curProvider.providerName == 'TVBinz' and not $sickbeard.SHOW_TVBINZ
+        #continue
+    #end if
+    <li class="ui-state-default" id="$curProvider.providerName.lower()">$curProvider.providerName</li>
 #end for
 </ul>
 <br />
@@ -70,7 +73,7 @@ Newzbin password<br />
 
 </fieldset>
 </div>
-
+#if $sickbeard.SHOW_TVBINZ
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
 
@@ -103,7 +106,7 @@ TVBinz auth string<br />
 
 </fieldset>
 </div>
-
+#end if
 
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
