@@ -20,13 +20,15 @@ from __future__ import with_statement
 
 import os.path
 
-import gc
-import cgi
-import sqlite3
 import time
+import urllib
+import re
+import threading
+import datetime
 
 from Cheetah.Template import Template
 import cherrypy
+import cherrypy.lib
 
 from sickbeard import config
 from sickbeard import db
@@ -34,17 +36,20 @@ from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import processTV
 from sickbeard import search
-from sickbeard import ui
-
+from sickbeard import classes
 from sickbeard import providers
+from sickbeard import tv
+from sickbeard import logger, helpers, exceptions
+from sickbeard import encodingKludge as ek
 
 from sickbeard.notifiers import xbmc
-from sickbeard.tv import *
+from sickbeard.common import *
 
 from lib.tvdb_api import tvdb_exceptions
+from lib.tvdb_api import tvdb_api
 
 import sickbeard
-import sickbeard.helpers
+
 from sickbeard import browser
 
 
@@ -76,12 +81,18 @@ class PageTemplate (Template):
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
+
+        logPageTitle = 'Logs & Errors'
+        if len(classes.ErrorViewer.errors):
+            logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
+        
         self.menu = [
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
             { 'title': 'History',         'key': 'history'        },
             { 'title': 'Backlog',         'key': 'backlog'        },
             { 'title': 'Config',          'key': 'config'         },
+            { 'title': logPageTitle,      'key': 'errorlogs'      },
         ]
         self.flash = Flash()
 
@@ -219,7 +230,8 @@ class ConfigGeneral:
                     launch_browser=None, create_metadata=None, web_username=None,
                     web_password=None, quality_default=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None):
+                    naming_multi_ep_type=None, create_images=None, naming_ep_name=None,
+                    naming_use_periods=None, naming_sep_type=None):
 
         results = []
 
@@ -238,6 +250,11 @@ class ConfigGeneral:
         else:
             create_metadata = 0
             
+        if create_images == "on":
+            create_images = 1
+        else:
+            create_images = 0
+            
         if season_folders_default == "on":
             season_folders_default = 1
         else:
@@ -253,17 +270,31 @@ class ConfigGeneral:
         else:
             naming_show_name = 0
             
+        if naming_ep_name == "on":
+            naming_ep_name = 1
+        else:
+            naming_ep_name = 0
+            
+        if naming_use_periods == "on":
+            naming_use_periods = 1
+        else:
+            naming_use_periods = 0
+            
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
         sickbeard.LAUNCH_BROWSER = launch_browser
         sickbeard.CREATE_METADATA = create_metadata
+        sickbeard.CREATE_IMAGES = create_images
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = int(quality_default)
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
+        sickbeard.NAMING_EP_NAME = naming_ep_name
+        sickbeard.NAMING_USE_PERIODS = naming_use_periods
         sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
         sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
+        sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
                     
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_LOG = web_log
@@ -283,6 +314,77 @@ class ConfigGeneral:
             flash.message('Configuration Saved')
         
         redirect("/config/general/")
+
+
+    @cherrypy.expose
+    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
+                   sep_type=None, use_periods=None, whichTest="single"):
+        
+        if show_name == None:
+            show_name = sickbeard.NAMING_SHOW_NAME
+        else:
+            if show_name == "0":
+                show_name = False
+            else:
+                show_name = True
+            
+        if ep_name == None:
+            ep_name = sickbeard.NAMING_EP_NAME
+        else:
+            if ep_name == "0":
+                ep_name = False
+            else:
+                ep_name = True
+            
+        if use_periods == None:
+            use_periods = sickbeard.NAMING_USE_PERIODS
+        else:
+            if use_periods == "0":
+                use_periods = False
+            else:
+                use_periods = True
+            
+        if ep_type == None:
+            ep_type = sickbeard.NAMING_EP_TYPE
+        else:
+            ep_type = int(ep_type)
+            
+        if multi_ep_type == None:
+            multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
+        else:
+            multi_ep_type = int(multi_ep_type)
+        
+        if sep_type == None:
+            sep_type = sickbeard.NAMING_SEP_TYPE
+        else:
+            sep_type = int(sep_type)
+            
+        class TVShow():
+            def __init__(self):
+                self.name = "Show Name"
+        
+        # fake a TVShow (hack since new TVShow is coming anyway)
+        class TVEpisode(tv.TVEpisode):
+            def __init__(self, season, episode, name):
+                self.relatedEps = []
+                self.name = name
+                self.season = season
+                self.episode = episode
+                self.show = TVShow()
+                
+        
+        # make a fake episode object
+        ep = TVEpisode(1,2,"Ep Name")
+        
+        if whichTest == "multi":
+            ep.name = "Ep Name (1)"
+            secondEp = TVEpisode(1,3,"Ep Name (2)")
+            ep.relatedEps.append(secondEp)
+        
+        # get the name
+        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods)
+        
+        return name
 
 class ConfigEpisodeDownloads:
     
@@ -863,6 +965,84 @@ class HomeMassUpdate:
                                         "toRename: "+str(toRename)+"<br>\n")
 
 
+ErrorLogsMenu = [
+    { 'title': 'Clear Errors', 'path': 'errorlogs/clearerrors' },
+    { 'title': 'View Log',  'path': 'errorlogs/viewlog'  },
+]
+
+
+class ErrorLogs:
+    
+    @cherrypy.expose
+    def index(self):
+
+        t = PageTemplate(file="errorlogs.tmpl")
+        t.submenu = ErrorLogsMenu
+        
+        return _munge(t)
+    
+
+    @cherrypy.expose
+    def clearerrors(self):
+        classes.ErrorViewer.clear()
+        redirect("/errorlogs")
+
+    @cherrypy.expose
+    def viewlog(self, minLevel=logger.MESSAGE, maxLines=500):
+        
+        t = PageTemplate(file="viewlogs.tmpl")
+        t.submenu = ErrorLogsMenu
+
+        minLevel = int(minLevel)
+
+        data = []
+        if os.path.isfile(logger.logFile):
+            f = ek.ek(open, logger.logFile)
+            data = f.readlines()
+            f.close()
+
+        regex =  "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
+
+        finalData = []
+
+        numLines = 0
+        lastLine = False
+        numToShow = min(maxLines, len(data))
+        
+        for x in reversed(data):
+
+            x = x.decode('utf-8')
+            match = re.match(regex, x)
+            
+            if match:
+                level = match.group(6)
+                if level not in logger.reverseNames:
+                    lastLine = False
+                    continue
+                
+                if logger.reverseNames[level] >= minLevel:
+                    lastLine = True
+                    finalData.append(x)
+                else:
+                    lastLine = False
+                    continue
+
+            elif lastLine:
+                finalData.append("AA"+x)
+            
+            numLines += 1
+            
+            if numLines >= numToShow:
+                break
+
+        result = "".join(finalData)
+        
+        t.logLines = result
+        t.minLevel = minLevel
+        
+        return _munge(t)
+
+
 class Home:
 
     @cherrypy.expose
@@ -1178,7 +1358,7 @@ class Home:
         tempStr = "Searching for download for " + epObj.prettyName(True)
         logger.log(tempStr)
         outStr += tempStr + "<br />\n"
-        foundEpisodes = search.findEpisode(epObj)
+        foundEpisodes = search.findEpisode(epObj, manualSearch=True)
         
         if len(foundEpisodes) == 0:
             message = 'No downloads were found'
@@ -1261,3 +1441,5 @@ class WebInterface:
     home = Home()
 
     browser = browser.WebFileBrowser()
+
+    errorlogs = ErrorLogs()

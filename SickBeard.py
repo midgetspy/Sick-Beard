@@ -81,10 +81,13 @@ def main():
 	threading.currentThread().name = "MAIN"
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "q", ['quiet', 'tvbinz'])
+		opts, args = getopt.getopt(sys.argv[1:], "qfp:", ['quiet', 'force-update', 'port=', 'tvbinz'])
 	except getopt.GetoptError:
-		print "Available options: --quiet"
+		print "Available options: --quiet, --forceupdate, --port"
 		sys.exit()
+	
+	forceUpdate = False
+	forcedPort = None
 	
 	for o, a in opts:
 		# for now we'll just silence the logging
@@ -93,6 +96,14 @@ def main():
 		# for now we'll just silence the logging
 		if (o in ('--tvbinz')):
 			sickbeard.SHOW_TVBINZ = True
+	
+		# should we update right away?
+		if (o in ('-f', '--forceupdate')):
+			forceUpdate = True
+	
+		# should we update right away?
+		if (o in ('-p', '--port')):
+			forcedPort = int(a)
 	
 	if consoleLogging:
 		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
@@ -107,15 +118,23 @@ def main():
 	sickbeard.initialize(consoleLogging=consoleLogging)
 
 	sickbeard.showList = []
+	
+	if forcedPort:
+		logger.log("Forcing web server to port "+str(forcedPort))
+		startPort = forcedPort
+	else:
+		startPort = sickbeard.WEB_PORT
+	
+	logger.log("Starting Sick Beard on http://localhost:"+str(startPort))
 
 	try:
 		initWebServer({
-				'port':	  sickbeard.WEB_PORT,
-				'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
-				'web_root':  sickbeard.WEB_ROOT,
-				'log_dir':   sickbeard.LOG_DIR if sickbeard.WEB_LOG else None,
-				'username':  sickbeard.WEB_USERNAME,
-				'password':  sickbeard.WEB_PASSWORD,
+		        'port':      startPort,
+		        'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
+		        'web_root':  sickbeard.WEB_ROOT,
+		        'log_dir':   sickbeard.LOG_DIR if sickbeard.WEB_LOG else None,
+		        'username':  sickbeard.WEB_USERNAME,
+		        'password':  sickbeard.WEB_PASSWORD,
 		})
 	except IOError:
 		logger.log("Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)
@@ -139,6 +158,10 @@ def main():
 	# launch browser if we're supposed to
 	if sickbeard.LAUNCH_BROWSER:
 		sickbeard.launchBrowser()
+
+	# start an update if we're supposed to
+	if forceUpdate:
+		sickbeard.showUpdateScheduler.action.run(force=True)
 
 	# stay alive while my threads do the work
 	while (True):

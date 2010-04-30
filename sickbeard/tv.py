@@ -339,7 +339,7 @@ class TVShow(object):
         
     def getImages(self, fanart=None, poster=None):
         
-        if not sickbeard.CREATE_METADATA:
+        if not sickbeard.CREATE_IMAGES:
             logger.log("Skipping image retrieval since metadata creation is turned off", logger.DEBUG)
             return
 
@@ -1148,12 +1148,32 @@ class TVEpisode:
             logger.log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try to create metadata")
             return
 
-        if sickbeard.CREATE_METADATA != True:
-            return
-        
+        epsToWrite = [self] + self.relatedEps
+
         shouldSave = self.checkForMetaFiles()
 
-        epsToWrite = [self] + self.relatedEps
+        if sickbeard.CREATE_METADATA or force:
+            result = self.createNFOs(epsToWrite, force)
+            if result == None:
+                return False
+            elif result == True:
+                shouldSave = True
+        
+        if sickbeard.CREATE_IMAGES or force:
+            result = self.createArt(epsToWrite, force)
+            if result == None:
+                return False
+            elif result == True:
+                shouldSave = True
+
+        # save our new NFO statuses to the DB
+        if shouldSave:
+            self.saveToDB()
+
+        
+    def createNFOs(self, epsToWrite, force=False):
+        
+        shouldSave = False
 
         try:
             t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
@@ -1184,8 +1204,6 @@ class TVEpisode:
                     break
                 needsNFO = False
 
-        thumbFilename = None
-
         # write an NFO containing info for all matching episodes
         for curEpToWrite in epsToWrite:
         
@@ -1193,16 +1211,13 @@ class TVEpisode:
                 myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
             except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
                 logger.log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
-                return False
+                return None
             
             if myEp["firstaired"] == None and self.season == 0:
                 myEp["firstaired"] = str(datetime.date.fromordinal(1))
             
             if myEp["episodename"] == None or myEp["firstaired"] == None:
-                return False
-                
-            if curEpToWrite == self:
-                thumbFilename = myEp["filename"]
+                return None
                 
             if not needsNFO:
                 logger.log("Skipping metadata generation for myself ("+str(self.season)+"x"+str(self.episode)+")", logger.DEBUG)
@@ -1261,6 +1276,11 @@ class TVEpisode:
             director_text = myEp['director']
             if director_text != None:
                 director.text = director_text
+
+            rating = etree.SubElement( episode, "rating" )
+            rating_text = myEp['rating']
+            if rating_text != None:
+                rating.text = rating_text
     
             gueststar_text = myEp['gueststars']
             if gueststar_text != None:
@@ -1307,6 +1327,36 @@ class TVEpisode:
                 shouldSave = True
         # end if needsNFO
 
+        return shouldSave
+
+
+    def createArt(self, epsToWrite, force=False):
+
+        shouldSave = False
+
+        try:
+            t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
+            myShow = t[self.show.tvdbid]
+        except tvdb_exceptions.tvdb_shownotfound, e:
+            raise exceptions.ShowNotFoundException(str(e))
+        except tvdb_exceptions.tvdb_error, e:
+            logger.log("Unable to connect to TVDB while creating meta files - skipping - "+str(e), logger.ERROR)
+            return
+
+        thumbFilename = None
+
+        # write an NFO containing info for all matching episodes
+        for curEpToWrite in epsToWrite:
+        
+            try:
+                myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
+            except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
+                logger.log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
+                return None
+            
+            if curEpToWrite == self:
+                thumbFilename = myEp["filename"]
+
         if not self.hastbn or force:
             if thumbFilename != None:
                 if ek.ek(os.path.isfile, self.location):
@@ -1318,15 +1368,12 @@ class TVEpisode:
                     ek.ek(urllib.urlretrieve, thumbFilename, tbnFilename)
                 except IOError:
                     logger.log("Unable to download thumbnail from "+thumbFilename, logger.ERROR)
-                    return
+                    return None
                 #TODO: check that it worked
                 self.hastbn = True
                 shouldSave = True
 
-        # save our new NFO statuses to the DB
-        if shouldSave:
-            self.saveToDB()
-
+        return shouldSave
 
     def deleteEpisode(self):
 
@@ -1385,7 +1432,8 @@ class TVEpisode:
         else:
             return os.path.join(self.show.location, self.location)
         
-    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None):
+    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
+                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None):
         
         regex = "(.*) \(\d\)"
 
@@ -1423,11 +1471,20 @@ class TVEpisode:
         if naming_show_name == None:
             naming_show_name = sickbeard.NAMING_SHOW_NAME
         
+        if naming_ep_name == None:
+            naming_ep_name = sickbeard.NAMING_EP_NAME
+        
         if naming_ep_type == None:
             naming_ep_type = sickbeard.NAMING_EP_TYPE
         
         if naming_multi_ep_type == None:
             naming_multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
+        
+        if naming_sep_type == None:
+            naming_sep_type = sickbeard.NAMING_SEP_TYPE
+        
+        if naming_use_periods == None:
+            naming_use_periods = sickbeard.NAMING_USE_PERIODS
         
         goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
         
@@ -1435,15 +1492,20 @@ class TVEpisode:
             goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
         
         if goodName != '':
-            goodName = ' - ' + goodName
+            goodName = config.naming_sep_type[naming_sep_type] + goodName
 
         finalName = ""
         
         if naming_show_name:
-            finalName += self.show.name + " - "
+            finalName += self.show.name + config.naming_sep_type[naming_sep_type]
 
         finalName += goodEpString
-        finalName += goodName
+
+        if naming_ep_name:
+            finalName += goodName
+        
+        if naming_use_periods:
+            finalName = re.sub("\s+", ".", finalName)
 
         return finalName
         

@@ -79,7 +79,7 @@ def downloadNZB (nzb):
 	return True
 	
 	
-def findEpisode (episode, forceQuality=None):
+def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	if episode.status == DISCBACKLOG:
 		logger.log("TVbinz doesn't support disc backlog. Use Newzbin or download it manually from TVbinz")
@@ -132,21 +132,6 @@ def findPropers(date=None):
 	return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
 	
 
-class TVBinzDBConnection(db.DBConnection):
-
-	def __init__(self):
-		db.DBConnection.__init__(self, "cache.db")
-
-		# Create the table if it's not already there
-		try:
-			sql = "CREATE TABLE tvbinz (name TEXT, season NUMERIC, episode NUMERIC, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
-			self.connection.execute(sql)
-			self.connection.commit()
-		except sqlite3.OperationalError, e:
-			if str(e) != "table tvbinz already exists":
-				raise
-
-
 class TVBinzCache(tvcache.TVCache):
 	
 	def __init__(self):
@@ -156,77 +141,11 @@ class TVBinzCache(tvcache.TVCache):
 		
 		tvcache.TVCache.__init__(self, "tvbinz")
 	
-	def _getDB(self):
-		return TVBinzDBConnection()
-	
-	def _addCacheEntry(self, name, season, episode, tvrid, url, quality):
-	
-		myDB = self._getDB()
-
-		tvdbid = 0
-
-		tvrShow = helpers.findCertainTVRageShow(sickbeard.showList, tvrid)
-
-		if tvrShow == None:
-
-			logger.log("No show in our list that already matches the TVRage ID, trying to match names", logger.DEBUG)
-
-			# for each show in our list
-			for curShow in sickbeard.showList:
-		
-				# get the scene name masks\
-				sceneNames = set(helpers.makeSceneShowSearchStrings(curShow))
-
-				# for each scene name mask
-				for curSceneName in sceneNames:
-
-					# if it matches
-					if name.startswith(curSceneName):
-						logger.log("Successful match! Result "+name+" matched to show "+curShow.name, logger.DEBUG)
-						
-						# set the tvrid of the show to tvrid
-						with curShow.lock:
-							curShow.tvrid = tvrid
-							curShow.saveToDB()
-						
-						# set the tvdbid in the db to the show's tvdbid
-						tvdbid = curShow.tvdbid
-						
-						# since we found it, break out
-						break
-				
-				# if we found something in the inner for loop break out of tchis one
-				if tvdbid != 0:
-					break
-
-			if tvdbid == 0:
-				logger.log("Unable to find a match for this show in the cache", logger.DEBUG)
-		
-		else:
-			tvdbid = tvrShow.tvdbid
-
-		# get the current timestamp
-		curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
-		
-		myDB.action("INSERT INTO tvbinz (name, season, episode, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
-					[name, season, episode, tvrid, tvdbid, url, curTimestamp, quality])
-
 	def updateCache(self):
 
-		myDB = self._getDB()
-
-		# get the timestamp of the last update
-		sqlResults = myDB.select("SELECT * FROM "+self.providerName+" ORDER BY time DESC LIMIT 1")
-		if len(sqlResults) == 0:
-			lastTimestamp = 0
-		else:
-			lastTimestamp = int(sqlResults[0]["time"])		
-
-		# if we've updated recently then skip the update
-		if datetime.datetime.today() - datetime.datetime.fromtimestamp(lastTimestamp) < datetime.timedelta(minutes=self.minTime):
-			logger.log("Last update was too soon, using old cache", logger.DEBUG)
+		if not self.shouldUpdate():
 			return
-				
+			
 		# get all records since the last timestamp
 		url = "https://tvbinz.net/rss.php?"
 		
@@ -237,6 +156,10 @@ class TVBinzCache(tvcache.TVCache):
 		logger.log("TVBinz cache update URL: "+ url, logger.DEBUG)
 		
 		data = getTVBinzURL(url)
+		
+		# as long as the http request worked we count this as an update
+		if data:
+			self.setLastUpdate()
 		
 		# now that we've loaded the current RSS feed lets delete the old cache
 		logger.log("Clearing cache and updating with new information")
@@ -275,15 +198,13 @@ class TVBinzCache(tvcache.TVCache):
 				quality = SD
 			
 			season = int(sInfo.findtext('{http://tvbinz.net/rss/tvb/}seasonNum'))
-			epNum = sInfo.findtext('{http://tvbinz.net/rss/tvb/}episodeNum')
-			if epNum == '':
-				epNum = 0
-			episode = int(epNum)
 
 			if sInfo.findtext('{http://tvbinz.net/rss/tvb/}tvrID') == None:
 				tvrid = 0
 			else:
 				tvrid = int(sInfo.findtext('{http://tvbinz.net/rss/tvb/}tvrID'))
 			
-			self._addCacheEntry(title, season, episode, tvrid, url, quality)
+			# since TVBinz normalizes the scene names it's more reliable to parse the episodes out myself
+			# than to rely on it, because it doesn't support multi-episode numbers in the feed
+			self._addCacheEntry(title, url, season, tvrage_id=tvrid, quality=quality)
 

@@ -1,14 +1,18 @@
+#import os.path
 #import sickbeard
 #from sickbeard.common import *
+#from sickbeard import config
 #set global $title  = "Config - General"
 #set global $header = "General Configuration"
 
 #set global $sbPath="../.."
 
 <!--#set global $topmenu="config"#-->
-#import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script type="text/javascript">
+nameTestURL = "$sbRoot/config/general/testNaming";
+</script>
 <script type="text/javascript" src="$sbRoot/js/configGeneral.js"></script>
 
 <form action="saveGeneral" method="POST">
@@ -27,8 +31,13 @@ Directory where Sick Beard should place its logs<br />
 <br />
 
 <input type="checkbox" name="create_metadata" #if $sickbeard.CREATE_METADATA then "CHECKED" else ""#> <strong>Create metadata</strong><br />
-If checked Sick Beard will create nfo/tbn<br />
-files for all your media<br />
+If checked Sick Beard will create nfo files<br />
+for all your media<br />
+<br />
+
+<input type="checkbox" name="create_images" #if $sickbeard.CREATE_IMAGES then "CHECKED" else ""#> <strong>Create images</strong><br />
+If checked Sick Beard will create tbn/fanart/posters<br />
+for all your media<br />
 <br />
 
 <input type="checkbox" name="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "CHECKED" else ""#> <strong>Launch browser on startup</strong><br />
@@ -98,28 +107,38 @@ Whether shows should use season folders by default<br />
 
 <legend>Episode Naming</legend>
 
-<input type="checkbox" name="naming_show_name" id="naming_show_name" #if $sickbeard.NAMING_SHOW_NAME then "CHECKED" else ""#> <strong>Use show name</strong><br />
-If not checked the show name will be<br />
-omitted from your episode names<br />
+<input type="checkbox" name="naming_show_name" id="naming_show_name" #if $sickbeard.NAMING_SHOW_NAME then "CHECKED" else ""#> <strong>Include show name</strong><br />
+<br />
+<input type="checkbox" name="naming_ep_name" id="naming_ep_name" #if $sickbeard.NAMING_EP_NAME then "CHECKED" else ""#> <strong>Include episode name</strong><br />
+<br />
+<input type="checkbox" name="naming_use_periods" id="naming_use_periods" #if $sickbeard.NAMING_USE_PERIODS then "CHECKED" else ""#> <strong>Use periods</strong><br />
+If checked all spaces will be replaced with periods<br />
+<br />
+
+<strong>Separator Style</strong><br />
+<select name="naming_sep_type" id="naming_sep_type">
+#for ($i, $ex) in enumerate($config.naming_sep_type_text):
+<option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "SELECTED" else ""#>$ex
+#end for
+</select><br />
 <br />
 
 <strong>Number Style</strong><br />
 Style of season/episode numbers<br />
 <select name="naming_ep_type" id="naming_ep_type">
-#for $i in range(len($naming_ep_type_text)):
-<option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "SELECTED" else ""#>$naming_ep_type_text[$i]
+#for ($i, $ex) in enumerate($config.naming_ep_type_text):
+<option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "SELECTED" else ""#>$ex
 #end for
 </select><br />
 <br />
 
 <strong>Example:</strong> <div id="normalExampleText"></div><br />
-<br />
 
 <strong>Multi-episode Style</strong><br />
 Style of season/episode numbers for multi-episodes<br />
 <select name="naming_multi_ep_type" id="naming_multi_ep_type">
-#for $i in range(len($naming_multi_ep_type_text)):
-<option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "SELECTED" else ""#>$naming_multi_ep_type_text[$i]
+#for ($i, $ex) in enumerate($config.naming_multi_ep_type_text):
+<option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "SELECTED" else ""#>$ex
 #end for
 </select><br />
 <br />

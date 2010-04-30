@@ -76,6 +76,7 @@ WEB_USERNAME = None
 WEB_PASSWORD = None 
 LAUNCH_BROWSER = None
 CREATE_METADATA = None
+CREATE_IMAGES = None
 CACHE_DIR = None
 
 QUALITY_DEFAULT = None
@@ -83,8 +84,11 @@ SEASON_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = None
 
 NAMING_SHOW_NAME = None
+NAMING_EP_NAME = None
 NAMING_EP_TYPE = None
 NAMING_MULTI_EP_TYPE = None
+NAMING_SEP_TYPE = None
+NAMING_USE_PERIODS = None
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
@@ -251,7 +255,7 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                KEEP_PROCESSED_FILE
+                KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS
 
         
         if __INITIALIZED__:
@@ -285,6 +289,7 @@ def initialize(consoleLogging=True):
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
         CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
+        CREATE_IMAGES = bool(check_setting_int(CFG, 'General', 'create_images', 1))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         if not helpers.makeDir(CACHE_DIR):
@@ -306,8 +311,11 @@ def initialize(consoleLogging=True):
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
         NAMING_SHOW_NAME = bool(check_setting_int(CFG, 'General', 'naming_show_name', 1))
+        NAMING_EP_NAME = bool(check_setting_int(CFG, 'General', 'naming_ep_name', 1))
         NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
         NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
+        NAMING_SEP_TYPE = check_setting_int(CFG, 'General', 'naming_sep_type', 0)
+        NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
@@ -569,7 +577,7 @@ def save_config():
         NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
         PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB, TVBINZ_AUTH, TVBINZ_SABUID, \
         NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES, PROVIDER_ORDER, \
-        KEEP_PROCESSED_FILE
+        KEEP_PROCESSED_FILE, CREATE_IMAGES
 
 
         
@@ -588,12 +596,16 @@ def save_config():
     CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     CFG['General']['provider_order'] = ' '.join(PROVIDER_ORDER)
     CFG['General']['version_notify'] = int(VERSION_NOTIFY)
+    CFG['General']['naming_ep_name'] = int(NAMING_SHOW_NAME)
     CFG['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
     CFG['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
     CFG['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
+    CFG['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
+    CFG['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
     CFG['General']['create_metadata'] = int(CREATE_METADATA)
+    CFG['General']['create_images'] = int(CREATE_IMAGES)
     CFG['General']['cache_dir'] = CACHE_DIR
     CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)

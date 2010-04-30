@@ -77,7 +77,7 @@ def downloadNZB (nzb):
 
 	return True
 	
-def findEpisode (episode, forceQuality=None):
+def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	if episode.status == DISCBACKLOG:
 		logger.log("TVNZB doesn't support disc backlog. Use Newzbin or download it manually from TVNZB")
@@ -125,98 +125,31 @@ def findPropers(date=None):
 	return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
 	
 
-class TVNZBDBConnection(db.DBConnection):
-
-	def __init__(self):
-		db.DBConnection.__init__(self, "cache.db")
-
-		# Create the table if it's not already there
-		try:
-			sql = "CREATE TABLE tvnzb (name TEXT, season NUMERIC, episode NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
-			self.connection.execute(sql)
-			self.connection.commit()
-		except sqlite3.OperationalError, e:
-			if str(e) != "table tvnzb already exists":
-				raise
-
 
 class TVNZBCache(tvcache.TVCache):
 	
 	def __init__(self):
 
-		# only poll TVNZB every 10 minutes
+		# only poll TVNZB every 10 minutes at the most
 		self.minTime = 10
 		
 		tvcache.TVCache.__init__(self, "tvnzb")
 	
-	def _getDB(self):
-		return TVNZBDBConnection()
-	
-	def _addCacheEntry(self, name, season, episode, url):
-	
-		myDB = self._getDB()
-
-		tvdbid = 0
-
-		# for each show in our list
-		for curShow in sickbeard.showList:
-	
-			# get the scene name masks
-			sceneNames = set(helpers.makeSceneShowSearchStrings(curShow))
-	
-			# for each scene name mask
-			for curSceneName in sceneNames:
-	
-				# if it matches
-				if name.lower().startswith(curSceneName.lower()):
-					logger.log("Successful match! Result "+name+" matched to show "+curShow.name, logger.DEBUG)
-					
-					# set the tvdbid in the db to the show's tvdbid
-					tvdbid = curShow.tvdbid
-					
-					# since we found it, break out
-					break
-			
-			# if we found something in the inner for loop break out of this one
-			if tvdbid != 0:
-				break
-
-		# get the current timestamp
-		curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
-		
-		if any(x in name.lower() for x in ("720p", "1080p", "x264")):
-			quality = HD
-		elif any(x in name.lower() for x in ("xvid", "divx")):
-			quality = SD
-		else:
-			logger.log("Unable to figure out the quality of "+name+", assuming SD", logger.DEBUG)
-			quality = SD
-		
-		myDB.action("INSERT INTO tvnzb (name, season, episode, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?)",
-					[name, season, episode, tvdbid, url, curTimestamp, quality])
-
 	def updateCache(self):
 
-		myDB = self._getDB()
-
-		# get the timestamp of the last update
-		sqlResults = myDB.select("SELECT * FROM "+self.providerName+" ORDER BY time DESC LIMIT 1")
-		if len(sqlResults) == 0:
-			lastTimestamp = 0
-		else:
-			lastTimestamp = int(sqlResults[0]["time"])		
-
-		# if we've updated recently then skip the update
-		if datetime.datetime.today() - datetime.datetime.fromtimestamp(lastTimestamp) < datetime.timedelta(minutes=self.minTime):
-			logger.log("Last update was too soon, using old cache", logger.DEBUG)
+		if not self.shouldUpdate():
 			return
-				
+			
 		# get all records since the last timestamp
 		url = "http://www.tvnzb.com/tvnzb_new.rss"
 		
 		logger.log("TVNZB cache update URL: "+ url, logger.DEBUG)
 		
 		data = getTVNZBURL(url)
+		
+		# as long as the http request worked we count this as an update
+		if data:
+			self.setLastUpdate()
 		
 		# now that we've loaded the current RSS feed lets delete the old cache
 		logger.log("Clearing cache and updating with new information")
@@ -237,6 +170,7 @@ class TVNZBCache(tvcache.TVCache):
 				continue
 
 			title = item.findtext('title')
+			desc = item.findtext('description')
 			url = item.findtext('link')
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
@@ -244,4 +178,5 @@ class TVNZBCache(tvcache.TVCache):
 			season = int(item.findtext('season'))
 			episode = int(item.findtext('episode'))
 
-			self._addCacheEntry(title, season, episode, url)
+			self._addCacheEntry(title, url, season, [episode], extraNames=[desc])
+				
