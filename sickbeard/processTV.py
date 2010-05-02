@@ -172,6 +172,8 @@ def processDir (dirName, recurse=False):
         returnStr += logHelper("Recursively processing a folder: "+curFolder, logger.DEBUG)
         returnStr += processDir(ek.ek(os.path.join, dirName, curFolder), True)
 
+    remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
+
     # process any files in the dir
     for curFile in videoFiles:
         
@@ -186,7 +188,9 @@ def processDir (dirName, recurse=False):
             if type(result) == list:
                 returnStr += result[0]
 
-                if not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
+                if not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE and \
+                    os.path.normpath(dirName) != os.path.normpath(sickbeard.TV_DOWNLOAD_DIR) and \
+                    len(remainingFolders) == 0:
                     
                     returnStr += logHelper("Deleting folder " + dirName, logger.DEBUG)
                     

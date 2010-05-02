@@ -341,7 +341,7 @@ def initialize(consoleLogging=True):
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
-        KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 0)
+        KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         KEEP_PROCESSED_FILE = check_setting_int(CFG, 'General', 'keep_processed_file', 0)
         
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
