@@ -261,7 +261,7 @@ class NZBsCache(tvcache.TVCache):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log("Error trying to load TVBinz RSS feed: "+str(e), logger.ERROR)
+			logger.log("Error trying to load NZBs.org RSS feed: "+str(e), logger.ERROR)
 			return []
 			
 		for item in items:
