@@ -146,7 +146,7 @@ class TVRage:
                 logger.log("Date from TVRage for episode " + str(curSeason) + "x1: " + str(curEpInfo['airdate']), logger.DEBUG)
         
         except Exception, e:
-            logger.log("Error encountered while checking TVRage<->TVDB sync: " + str(e), logger.ERROR)
+            logger.log("Error encountered while checking TVRage<->TVDB sync: " + str(e), logger.WARNING)
             logger.log(traceback.format_exc(), logger.DEBUG)
         
         return False
@@ -196,7 +196,7 @@ class TVRage:
                 return True
             
         except Exception, e:
-            logger.log("Error encountered while checking TVRage<->TVDB sync: " + str(e), logger.ERROR)
+            logger.log("Error encountered while checking TVRage<->TVDB sync: " + str(e), logger.WARNING)
             logger.log(traceback.format_exc(), logger.DEBUG)
         
         return False
