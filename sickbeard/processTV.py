@@ -127,7 +127,7 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     return logMessage + "\n"
 
 
-def processDir (dirName, recurse=False):
+def processDir (dirName, nzbName=None, recurse=False):
 
     returnStr = ''
 
@@ -182,7 +182,7 @@ def processDir (dirName, recurse=False):
         # if there's only one video file in the dir we can use the dirname to process too
         if len(videoFiles) == 1:
             returnStr += logHelper("Auto processing file: "+curFile+" ("+dirName+")")
-            result = processFile(curFile, dirName)
+            result = processFile(curFile, dirName, nzbName)
 
             # as long as the postprocessing was successful delete the old folder unless the config wants us not to
             if type(result) == list:
@@ -207,7 +207,7 @@ def processDir (dirName, recurse=False):
             
         else:
             returnStr += logHelper("Auto processing file: "+curFile)
-            result = processFile(curFile)
+            result = processFile(curFile, None, nzbName)
             if type(result) == list:
                 returnStr += result[0]
                 returnStr += logHelper("Processing succeeded for "+curFile)
@@ -217,70 +217,6 @@ def processDir (dirName, recurse=False):
 
     return returnStr
             
-
-
-def postProcessDir(downloaderDir, nzbName=None):
-    
-    returnStr = ''
-
-    downloadDir = ''
-
-    # if they passed us a real dir then assume it's the one we want
-    if os.path.isdir(downloaderDir):
-        downloadDir = os.path.abspath(downloaderDir)
-    
-    # if they've got a download dir configured then use it
-    elif sickbeard.TV_DOWNLOAD_DIR != '' and os.path.isdir(sickbeard.TV_DOWNLOAD_DIR):
-        downloadDir = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, os.path.abspath(downloaderDir).split(os.path.sep)[-1])
-        returnStr += logHelper("Trying to use folder "+downloadDir, logger.DEBUG)
-
-    # if we didn't find a real dir then quit
-    if not ek.ek(os.path.isdir, downloadDir):
-        returnStr += logHelper("Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
-        return returnStr
-
-    # make sure the dir isn't inside a show dir
-    myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_shows")
-    for sqlShow in sqlResults:
-        if downloadDir.startswith(os.path.abspath(sqlShow["location"])+os.sep):
-            returnStr += logHelper("You're trying to post process a show that's already been moved to its show dir", logger.ERROR)
-            return returnStr
-
-    returnStr += logHelper("Final folder name is " + downloadDir, logger.DEBUG)
-    
-    # TODO: check if it's failed and deal with it if it is
-    if downloadDir.startswith('_FAILED_'):
-        returnStr += logHelper("The directory name indicates it failed to extract, cancelling", logger.DEBUG)
-        return returnStr
-    
-    # find the file we're dealing with
-    biggest_file = findMainFile(downloadDir)
-    if biggest_file == None:
-        returnStr += logHelper("Unable to find the biggest file - is this really a TV download?", logger.DEBUG)
-        return returnStr
-        
-    returnStr += logHelper("The biggest file in the dir is: " + biggest_file, logger.DEBUG)
-
-    result = processFile(biggest_file, downloadDir, nzbName)
-
-    # a successful post-processing will return a list with a string in it
-    # if it's not successful then I just return right now
-    if type(result) in (str, unicode):
-        return returnStr + result
-
-    returnStr += result[0]
-
-    # delete the old folder unless the config wants us not to
-    if not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE:
-        returnStr += logHelper("Deleting folder " + downloadDir, logger.DEBUG)
-        
-        try:
-            shutil.rmtree(downloadDir)
-        except (OSError, IOError), e:
-            returnStr += logHelper("Warning: unable to remove the folder " + downloadDir + ": " + str(e), logger.ERROR)
-
-    return returnStr
 
 def processFile(fileName, downloadDir=None, nzbName=None):
 
