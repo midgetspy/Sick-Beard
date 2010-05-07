@@ -112,6 +112,11 @@ def _checkForExistingFile(newFile, oldFile):
 
 def findInHistory(nzbName):
 
+    nzbName = nzbName.rpartition(".")[0]
+    
+    if not nzbName:
+        return None
+    
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM history WHERE resource = ?", [nzbName])
     
@@ -284,7 +289,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("TVDB didn't respond, trying to look up the show in the DB instead: "+str(e), logger.DEBUG)
             showInfo = helpers.searchDBForShow(result.seriesname)
 
-        tvdb_id = showInfo[0]
+        if showInfo:
+            tvdb_id = showInfo[0]
             
         # if we couldn't get the necessary info from either of the above methods, try the next name
         if tvdb_id == None or season == None or episodes == []:
