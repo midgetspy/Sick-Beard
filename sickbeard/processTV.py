@@ -281,6 +281,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             continue
 
         try:
+            returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
             showObj = t[result.seriesname]
             showInfo = (int(showObj["id"]), showObj["seriesname"])
