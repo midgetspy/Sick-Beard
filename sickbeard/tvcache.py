@@ -165,7 +165,10 @@ class TVCache():
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
         
         if not quality:
-            if any(x in name.lower() for x in ("720p", "1080p", "x264")):
+            # if we don't know what quality it is and it looks like itouch quality, skip it
+            if "itouch" in name.lower():
+                return False
+            elif any(x in name.lower() for x in ("720p", "1080p", "x264")):
                 quality = HD
             elif any(x in name.lower() for x in ("xvid", "divx")):
                 quality = SD

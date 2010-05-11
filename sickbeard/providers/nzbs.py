@@ -148,6 +148,10 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 		title = item.findtext('title')
 		url = item.findtext('link')
 		
+		if epQuality == HD and ("720p" not in title or "itouch" in title.lower()):
+			logger.log("Ignoring result "+title+" because it doesn't contain 720p in the name or is an iTouch release", logger.DEBUG)
+			continue
+		
 		logger.log("Found result " + title + " at " + url, logger.DEBUG)
 		
 		result = classes.NZBSearchResult(episode)

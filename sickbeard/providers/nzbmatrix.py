@@ -113,7 +113,7 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 		for resultDict in _doSearch(curString, quality):
 
-			if epQuality == HD and "720p" not in resultDict["NZBNAME"]:
+			if epQuality == HD and ("720p" not in resultDict["NZBNAME"] or "itouch" in resultDict["NZBNAME"].lower()):
 				logger.log("Ignoring result "+resultDict["NZBNAME"]+" because it doesn't contain 720p in the name", logger.DEBUG)
 				continue
 
