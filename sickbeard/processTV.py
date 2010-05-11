@@ -358,14 +358,6 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         else:
             rootEp.relatedEps.append(curEp)
 
-    # log it to history
-    history.logDownload(rootEp, fileName)
-
-    # wait for the copy to finish
-
-    notifiers.notify(NOTIFY_DOWNLOAD, rootEp.prettyName(True))
-
-
     # figure out the new filename
     biggestFileName = os.path.basename(fileName)
     biggestFileExt = os.path.splitext(biggestFileName)[1]
@@ -470,8 +462,6 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         
         os.remove(existingFile)
             
-            
-
     curFile = os.path.join(destDir, biggestFileName)
 
     if sickbeard.RENAME_EPISODES:
@@ -494,6 +484,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             if curEp.status != PREDOWNLOADED:
                 curEp.status = DOWNLOADED
             curEp.saveToDB()
+
+    # log it to history
+    history.logDownload(rootEp, fileName)
+
+    notifiers.notify(NOTIFY_DOWNLOAD, rootEp.prettyName(True))
 
     
     # generate nfo/tbn
