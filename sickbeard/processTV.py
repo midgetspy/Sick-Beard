@@ -65,6 +65,20 @@ def renameFile(curFile, newName):
 
     return newFilename
 
+def copyFile(srcFile, destFile):
+    shutil.copyfile(srcFile, destFile)
+    try:
+        shutil.copymode(srcFile, destFile)
+    except OSError:
+        pass
+
+def moveFile(srcFile, destFile):
+    try:
+        os.rename(srcFile, destFile)
+    except OSError:
+        copyFile(srcFile, destFile)
+        os.unlink(srcFile)
+
 
 # #########################
 # Find the file we're dealing with
@@ -175,7 +189,7 @@ def processDir (dirName, nzbName=None, recurse=False):
     # recursively process all the folders
     for curFolder in folders:
         returnStr += logHelper("Recursively processing a folder: "+curFolder, logger.DEBUG)
-        returnStr += processDir(ek.ek(os.path.join, dirName, curFolder), True)
+        returnStr += processDir(ek.ek(os.path.join, dirName, curFolder), recurse=True)
 
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
@@ -413,7 +427,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if sickbeard.KEEP_PROCESSED_FILE:
         returnStr += logHelper("Copying from " + fileName + " to " + destDir, logger.DEBUG)
         try:
-            shutil.copy(fileName, destDir)
+            copyFile(fileName, destDir)
            
             returnStr += logHelper("File was copied successfully", logger.DEBUG)
             
@@ -425,6 +439,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         returnStr += logHelper("Moving from " + fileName + " to " + destDir, logger.DEBUG)
         try:
+            #moveFile(fileName, destDir)
+            
             # try using rename to move it because shutil.move is bugged in python 2.5
             try:
                 os.rename(fileName, os.path.join(destDir, os.path.basename(fileName)))
