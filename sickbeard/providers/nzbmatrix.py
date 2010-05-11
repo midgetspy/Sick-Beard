@@ -218,9 +218,13 @@ class NZBMatrixCache(tvcache.TVCache):
 		
 		logger.log("NZBMatrix cache update URL: "+ url, logger.DEBUG)
 		
-		f = urllib.urlopen(url)
-		data = "".join(f.readlines())
-		f.close()
+		try:
+			f = urllib.urlopen(url)
+			data = "".join(f.readlines())
+			f.close()
+		except IOError, e:
+			logger.log("Unable to load RSS feed from NZBMatrix, skipping: "+str(e), logger.ERROR)
+			return []
 		
 		# as long as the http request worked we count this as an update
 		if data:
