@@ -596,7 +596,7 @@ def save_config():
     CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     CFG['General']['provider_order'] = ' '.join(PROVIDER_ORDER)
     CFG['General']['version_notify'] = int(VERSION_NOTIFY)
-    CFG['General']['naming_ep_name'] = int(NAMING_SHOW_NAME)
+    CFG['General']['naming_ep_name'] = int(NAMING_EP_NAME)
     CFG['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
     CFG['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
     CFG['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
