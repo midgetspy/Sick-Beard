@@ -388,6 +388,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     destDir = os.path.join(rootEp.show.location, seasonFolder)
     
+    curFile = os.path.join(destDir, biggestFileName)
     newFile = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
     returnStr += logHelper("The ultimate destination for " + fileName + " is " + newFile, logger.DEBUG)
 
@@ -419,7 +420,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if sickbeard.KEEP_PROCESSED_FILE:
         returnStr += logHelper("Copying from " + fileName + " to " + destDir, logger.DEBUG)
         try:
-            copyFile(fileName, destDir)
+            copyFile(fileName, curFile)
            
             returnStr += logHelper("File was copied successfully", logger.DEBUG)
             
@@ -431,14 +432,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         returnStr += logHelper("Moving from " + fileName + " to " + destDir, logger.DEBUG)
         try:
-            #moveFile(fileName, destDir)
+            moveFile(fileName, curFile)
             
-            # try using rename to move it because shutil.move is bugged in python 2.5
-            try:
-                os.rename(fileName, os.path.join(destDir, os.path.basename(fileName)))
-            except OSError:
-                shutil.move(fileName, destDir)
-           
             returnStr += logHelper("File was moved successfully", logger.DEBUG)
             
         except (Error, IOError, OSError), e:
@@ -462,8 +457,6 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         
         os.remove(existingFile)
             
-    curFile = os.path.join(destDir, biggestFileName)
-
     if sickbeard.RENAME_EPISODES:
         try:
             os.rename(curFile, newFile)
