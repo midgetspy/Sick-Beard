@@ -127,8 +127,8 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	# if we got some results then use them no matter what.
 	# OR
-	# return anyway unless we're doing a backlog or manual search
-	if nzbResults or not (episode.status == BACKLOG or manualSearch):
+	# return anyway unless we're doing a backlog/missing or manual search
+	if nzbResults or not (episode.status in (BACKLOG, MISSED) or manualSearch):
 		return nzbResults
 
 	sceneSearchStrings = set(helpers.makeSceneSearchString(episode))
