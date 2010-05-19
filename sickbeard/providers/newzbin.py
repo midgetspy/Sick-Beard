@@ -143,7 +143,7 @@ def findEpisode(episode, forceQuality=None, manualSearch=False):
 	
 	q += "(" + " OR ".join(["^\""+x+" - %ix%02i" % (int(episode.season), int(episode.episode))+"\"" for x in set(showNames)]) + ")"
 	
-	q += " AND NOT \"(Passworded)\" AND NOT \"(Password)\""
+	q += " AND NOT \"(Passworded)\" AND NOT \"(Password)\" AND NOT \"(Password Required)\""
 	
 	newzbinURL = {
 				  'hauth': 1,
