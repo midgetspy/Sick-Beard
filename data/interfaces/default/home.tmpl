@@ -21,7 +21,7 @@
         // format your data for normalization
         match = s.match(/^\<\!\-\-(.*)\-\-\>\<div.*$/)
         
-        if (match[1] == "?")
+        if (match == null || match[1] == "?")
             return -10;
         
         var nums = match[1].split(" / ");
