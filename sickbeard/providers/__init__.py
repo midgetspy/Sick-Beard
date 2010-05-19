@@ -1,4 +1,4 @@
-__all__ = ['eztv','newzbin','nzbmatrix','nzbs','tvbinz','tvnzb']
+__all__ = ['eztv','nzbmatrix','nzbs','tvbinz']
 
 import sickbeard
 

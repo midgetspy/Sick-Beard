@@ -51,28 +51,6 @@ you want them to be searched<br />
 </div>
 
 
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>Newzbin</legend>
-
-<input type="checkbox" name="newzbin" id="newzbin_active" class="provider_active" #if $sickbeard.NEWZBIN then "CHECKED" else ""#> <strong>Enable Newzbin</strong>
-<a href="http://www.newzbin.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/newzbin.gif" alt="Newzbin" width="16" height="16"></a><br />
-Check to search Newzbin for episodes<br />
-<br />
-
-<strong>Username:</strong><br />
-Newzbin username<br />
-<input type="text" name="newzbin_username" value="$sickbeard.NEWZBIN_USERNAME" size="10"><br />
-<br />
-
-<strong>Password:</strong><br />
-Newzbin password<br />
-<input type="password" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="10"><br />
-<br />
-
-</fieldset>
-</div>
 #if $sickbeard.SHOW_TVBINZ
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
@@ -153,20 +131,6 @@ NZBMatrix API Key<br />
 <input type="text" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="35"><br />
 <br />
 
-</fieldset>
-</div>
-
-
-
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>TVNZB</legend>
-
-<input type="checkbox" name="tvnzb" #if $sickbeard.TVNZB then "CHECKED" else ""#> <strong>Enable TVNZB</strong>
-<a href="http://www.tvnzb.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/tvnzb.gif" alt="TVNZB" width="16" height="16"></a><br />
-Check to search TVNZB for episodes<br />
-<br />
 </fieldset>
 </div>
 
