@@ -1,5 +1,3 @@
-from sickbeard import encodingKludge as ek
-
 import os
 import glob
 import string
@@ -52,8 +50,8 @@ def foldersAtPath(path, includeParent = False):
 	if path == parentPath and os.name == 'nt':
 		parentPath = ""
 
-	fileList = [{ 'name': filename, 'path': ek.ek(os.path.join, path, filename) } for filename in os.listdir(path)]
-	fileList = filter(lambda entry: ek.ek(os.path.isdir, entry['path']), fileList)
+	fileList = [{ 'name': filename, 'path': os.path.join(path, filename) } for filename in os.listdir(path)]
+	fileList = filter(lambda entry: os.path.isdir(entry['path']), fileList)
 	fileList = sorted(fileList, lambda x, y: cmp(os.path.basename(x['name']).lower(), os.path.basename(y['path']).lower()))
 
 	entries = []

@@ -5,8 +5,6 @@ import os.path
 from sickbeard import logger
 from sickbeard.webserve import WebInterface
 
-from sickbeard import encodingKludge as ek
-
 def initWebServer(options = {}):
         options.setdefault('port',      8081)
         options.setdefault('log_dir',   None)
@@ -24,8 +22,8 @@ def initWebServer(options = {}):
         })
 
         # setup cherrypy logging
-        if options['log_dir'] and ek.ek(os.path.isdir, options['log_dir']):
-                cherrypy.config.update({ 'log.access_file': ek.ek(os.path.join, options['log_dir'], "cherrypy.log") })
+        if options['log_dir'] and os.path.isdir(options['log_dir']):
+                cherrypy.config.update({ 'log.access_file': os.path.join(options['log_dir'], "cherrypy.log") })
                 logger.log('Using %s for cherrypy log' % cherrypy.config['log.access_file'])
 
         conf = {

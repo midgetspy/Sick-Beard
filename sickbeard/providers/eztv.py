@@ -35,7 +35,8 @@ def downloadTorrent (torrent):
     if data == None:
         return False
     
-    fileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(torrent.fileName()))
+    fileName = os.path.join(sickbeard.TORRENT_DIR, helpers.sanitizeFileName(torrent.fileName()))
+    #fileName = os.path.join(sickbeard.TORRENT_DIR, os.path.basename(torrent.url))
     
     logger.log("Saving to " + fileName, logger.DEBUG)
     

@@ -77,7 +77,7 @@ flash = Flash()
 
 class PageTemplate (Template):
     def __init__(self, *args, **KWs):
-        KWs['file'] = ek.ek(os.path.join, sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
+        KWs['file'] = os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
@@ -687,7 +687,7 @@ class HomeAddShows:
         if dir == None:
             redirect("/home/addShows")
 
-        if not ek.ek(os.path.isdir, dir):
+        if not os.path.isdir(dir):
             logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
             flash.error("Unable to find the directory <tt>%s</tt>" % dir)
             redirect("/home/addShows")
@@ -695,8 +695,8 @@ class HomeAddShows:
         showDirs = []
         
         for curDir in os.listdir(unicode(dir)):
-            curPath = ek.ek(os.path.join, dir, curDir)
-            if ek.ek(os.path.isdir, curPath):
+            curPath = os.path.join(dir, curDir)
+            if os.path.isdir(curPath):
                 logger.log("Adding "+curPath+" to the showDir list", logger.DEBUG)
                 showDirs.append(curPath)
         
@@ -996,7 +996,7 @@ class ErrorLogs:
         minLevel = int(minLevel)
 
         data = []
-        if ek.ek(os.path.isfile, logger.logFile):
+        if os.path.isfile(logger.logFile):
             f = ek.ek(open, logger.logFile)
             data = f.readlines()
             f.close()
@@ -1186,7 +1186,7 @@ class Home:
                         
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
-                if not ek.ek(os.path.isdir, location):
+                if not os.path.isdir(location):
                     errors.append("New location <tt>%s</tt> does not exist" % location)
 
                 else:
@@ -1407,7 +1407,7 @@ class WebInterface:
             return "Unable to find show" #TODO: make it return a standard image
     
         posterFilename = os.path.abspath(os.path.join(showObj.location, "folder.jpg"))
-        if ek.ek(os.path.isfile, posterFilename):
+        if os.path.isfile(posterFilename):
             
             return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
         

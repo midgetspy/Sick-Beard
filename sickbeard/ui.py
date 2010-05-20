@@ -94,11 +94,11 @@ def addShowsFromRootDir(dir):
     
     returnStr = ""
     
-    if not ek.ek(os.path.isdir, dir):
+    if not os.path.isdir(dir):
         return "Couldn't find directory " + dir
     
     for curDir in os.listdir(unicode(dir)):
-        showDir = ek.ek(os.path.join, dir, curDir)
+        showDir = os.path.join(dir, curDir)
         logStr = "Attempting to load show in " + showDir
         logger.log(logStr, logger.DEBUG)
         returnStr += logStr + "<br />\n"
