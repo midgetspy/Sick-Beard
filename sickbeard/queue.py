@@ -14,6 +14,7 @@ from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import webserve
 
+from sickbeard import encodingKludge as ek
 
 class ShowQueue:
     def __init__(self):
@@ -194,11 +195,11 @@ class QueueItemAdd(QueueItem):
         self.showDir = show
 
         # if we can't create the dir, bail
-        if not os.path.isdir(self.showDir):
+        if not ek.ek(os.path.isdir, self.showDir):
             if not helpers.makeDir(self.showDir):
                 raise exceptions.NoNFOException("Unable to create the show dir " + self.showDir)
 
-        if not os.path.isfile(os.path.join(self.showDir, "tvshow.nfo")):
+        if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.showDir, "tvshow.nfo")):
             raise exceptions.NoNFOException("No tvshow.nfo found")
 
         # this will initialize self.show to None

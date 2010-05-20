@@ -74,7 +74,7 @@ class TVShow(object):
         self.episodes = {}
 
         # if the location doesn't exist, try the DB
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             
             self._isDirGood = False
             
@@ -180,7 +180,7 @@ class TVShow(object):
 
     def writeEpisodeNFOs (self):
         
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
             return
         
@@ -198,7 +198,7 @@ class TVShow(object):
     # find all media files in the show folder and create episodes for as many as possible
     def loadEpisodesFromDir (self):
 
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, not loading episodes from disk")
             return
         
@@ -229,7 +229,7 @@ class TVShow(object):
             
             logger.log(str(self.tvdbid) + ": Creating episode from " + mediaFile, logger.DEBUG)
             try:
-                curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
+                curEpisode = self.makeEpFromFile(ek.ek(os.path.join, self._location, mediaFile))
             except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException), e:
                 logger.log("Episode "+mediaFile+" returned an exception: "+str(e), logger.ERROR)
             except exceptions.EpisodeDeletedException:
@@ -601,13 +601,13 @@ class TVShow(object):
     
     def loadNFO (self):
 
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't load NFO")
             raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
         
         logger.log(str(self.tvdbid) + ": Loading show info from NFO")
 
-        xmlFile = os.path.join(self._location, "tvshow.nfo")
+        xmlFile = ek.ek(os.path.join, self._location, "tvshow.nfo")
         
         try:
             xmlFileObj = open(xmlFile, 'r')
@@ -691,7 +691,7 @@ class TVShow(object):
     def refreshDir(self):
 
         # make sure the show dir is where we think it is
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             return False
         
         # run through all locations from DB, check that they exist
@@ -736,7 +736,7 @@ class TVShow(object):
             
     def fixEpisodeNames(self):
 
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't rename episodes")
             return
                 
@@ -1032,7 +1032,7 @@ class TVEpisode:
             
         self.tvdbid = myEp["id"]
 
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log("The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
 
@@ -1071,7 +1071,7 @@ class TVEpisode:
         
     def loadFromNFO(self, location):
 
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try loading the episode NFO")
             return
 
@@ -1144,7 +1144,7 @@ class TVEpisode:
         
     def createMetaFiles(self, force=False):
         
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try to create metadata")
             return
 
@@ -1430,7 +1430,7 @@ class TVEpisode:
         if self.location == None or self.location == "":
             return None
         else:
-            return os.path.join(self.show.location, self.location)
+            return ek.ek(os.path.join, self.show.location, self.location)
         
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
                     naming_ep_name=None, naming_sep_type=None, naming_use_periods=None):

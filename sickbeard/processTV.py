@@ -83,31 +83,6 @@ def moveFile(srcFile, destFile):
 # #########################
 # Find the file we're dealing with
 # #########################
-def findMainFile (show_dir):
-    # init vars
-    biggest_file = None
-    biggest_file_size = 0
-    next_biggest_file_size = 0
-
-    # find the biggest file in the folder
-    for file in filter(helpers.isMediaFile, ek.ek(os.listdir, show_dir)):
-        cur_size = os.path.getsize(os.path.join(show_dir, file))
-        if cur_size > biggest_file_size:
-            biggest_file = file
-            next_biggest_file_size = biggest_file_size
-            biggest_file_size = cur_size
-
-    if biggest_file == None:
-        return biggest_file
-
-    # it should be by far the biggest file in the folder. If it isn't, we have a problem (multi-show nzb or something, not going to deal with it)
-    if float(next_biggest_file_size) / float(biggest_file_size) > sample_ratio:
-        logger.log("Multiple files in the folder are comparably large, giving up", logger.ERROR)
-        return None
-
-    return os.path.join(show_dir, biggest_file)
-
-
 def _checkForExistingFile(newFile, oldFile):
 
     # if the new file exists, return the appropriate code depending on the size
@@ -334,7 +309,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         return returnStr
 
     # if we DO know about the show but its dir is offline, give up
-    if not os.path.isdir(showResults._location):
+    if not ek.ek(os.path.isdir, showResults._location):
         returnStr += logHelper("The show dir doesn't exist, canceling postprocessing", logger.DEBUG)
         return returnStr
 
@@ -369,7 +344,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         # search the show dir for season folders
         for curDir in os.listdir(rootEp.show.location):
 
-            if not os.path.isdir(os.path.join(rootEp.show.location, curDir)):
+            if not ek.ek(os.path.isdir, ek.ek(os.path.join, rootEp.show.location, curDir)):
                 continue
             
             # if it's a season folder, check if it's the one we want
@@ -386,10 +361,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     returnStr += logHelper("Seasonfolders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder, logger.DEBUG)
 
-    destDir = os.path.join(rootEp.show.location, seasonFolder)
+    destDir = ek.ek(os.path.join, rootEp.show.location, seasonFolder)
     
-    curFile = os.path.join(destDir, biggestFileName)
-    newFile = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
+    curFile = ek.ek(os.path.join, destDir, biggestFileName)
+    newFile = ek.ek(os.path.join, destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
     returnStr += logHelper("The ultimate destination for " + fileName + " is " + newFile, logger.DEBUG)
 
     existingResult = _checkForExistingFile(newFile, fileName)
@@ -413,7 +388,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             return returnStr
         
     # if the dir doesn't exist (new season folder) then make it
-    if not os.path.isdir(destDir):
+    if not ek.ek(os.path.isdir, destDir):
         returnStr += logHelper("Season folder didn't exist, creating it", logger.DEBUG)
         os.mkdir(destDir)
 

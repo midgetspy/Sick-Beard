@@ -24,6 +24,7 @@ import datetime
 
 from sickbeard import helpers
 from sickbeard import logger 
+from sickbeard import encodingKludge as ek
 
 import sickbeard
 
@@ -49,7 +50,7 @@ def change_LOG_DIR(log_dir):
             logger.initLogging()
             logger.log("Initialized new log file in " + log_dir)
 
-            cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
+            cherry_log = ek.ek(os.path.join, sickbeard.LOG_DIR, "cherrypy.log")
             cherrypy.config.update({'log.access_file': cherry_log})
             
             logger.log("Changed cherry log file to " + cherry_log)

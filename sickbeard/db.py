@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from sickbeard import encodingKludge as ek
 
 import os.path
 import re
@@ -30,7 +31,7 @@ class DBConnection:
 		
 		self.dbFileName = dbFileName
 		
-		self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, self.dbFileName), 20)
+		self.connection = sqlite3.connect(ek.ek(os.path.join, sickbeard.PROG_DIR, self.dbFileName), 20)
 		self.connection.row_factory = sqlite3.Row
 
  	def action(self, query, args=None):

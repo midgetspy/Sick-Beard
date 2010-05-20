@@ -3,7 +3,6 @@ import os.path
 import glob
 import sys
 
-from sickbeard import helpers
 from sickbeard import logger
 
 # This module tries to deal with the apparently random behavior of python when dealing with unicode <-> utf-8

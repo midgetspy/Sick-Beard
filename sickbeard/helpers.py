@@ -32,6 +32,8 @@ from sickbeard.exceptions import *
 from sickbeard import logger
 from sickbeard.common import *
 
+from sickbeard import encodingKludge as ek
+
 from sickbeard import db
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -185,9 +187,9 @@ def findCertainTVRageShow (showList, tvrid):
 	
 	
 def makeDir (dir):
-	if not os.path.isdir(dir.encode('utf-8')):
+	if not ek.ek(os.path.isdir, dir):
 		try:
-			os.makedirs(dir.encode('utf-8'))
+			ek.ek(os.makedirs, dir)
 		except OSError:
 			return False
 	return True
