@@ -494,7 +494,8 @@ class ConfigProviders:
     def saveProviders(self, newzbin=None, newzbin_username=None, newzbin_password=None, tvbinz=None,
                    tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None, nzbs_hash=None,
                    nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None, tvnzb=None,
-                   tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None):
+                   tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None, nzbsrus=None,
+                   nzbsrus_uid=None, nzbsrus_hash=None):
 
         results = []
 
@@ -512,6 +513,11 @@ class ConfigProviders:
             nzbs = 1
         else:
             nzbs = 0
+
+        if nzbsrus == "on":
+            nzbsrus = 1
+        else:
+            nzbsrus = 0
 
         if nzbmatrix == "on":
             nzbmatrix = 1
@@ -541,6 +547,10 @@ class ConfigProviders:
         sickbeard.NZBS = nzbs
         sickbeard.NZBS_UID = nzbs_uid
         sickbeard.NZBS_HASH = nzbs_hash
+        
+        sickbeard.NZBSRUS = nzbsrus
+        sickbeard.NZBSRUS_UID = nzbsrus_uid
+        sickbeard.NZBSRUS_HASH = nzbsrus_hash
         
         sickbeard.NZBMATRIX = nzbmatrix
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username

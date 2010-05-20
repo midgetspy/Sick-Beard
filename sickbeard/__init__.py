@@ -132,6 +132,10 @@ NZBS = False
 NZBS_UID = None
 NZBS_HASH = None
 
+NZBSRUS = False
+NZBSRUS_UID = None
+NZBSRUS_HASH = None
+
 NZBMATRIX = False
 NZBMATRIX_USERNAME = None
 NZBMATRIX_APIKEY = None
@@ -255,7 +259,8 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS
+                KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH 
 
         
         if __INITIALIZED__:
@@ -357,6 +362,10 @@ def initialize(consoleLogging=True):
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
+        
+        NZBSRUS = bool(check_setting_int(CFG, 'NZBsRUS', 'nzbsrus', 0))
+        NZBSRUS_UID = check_setting_str(CFG, 'NZBsRUS', 'nzbsrus_uid', '')
+        NZBSRUS_HASH = check_setting_str(CFG, 'NZBsRUS', 'nzbsrus_hash', '')
         
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
@@ -625,6 +634,9 @@ def save_config():
     CFG['NZBs']['nzbs'] = int(NZBS)
     CFG['NZBs']['nzbs_uid'] = NZBS_UID
     CFG['NZBs']['nzbs_hash'] = NZBS_HASH
+    CFG['NZBsRUS']['nzbsrus'] = int(NZBSRUS)
+    CFG['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
+    CFG['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
     CFG['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
     CFG['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
     CFG['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY

@@ -114,6 +114,31 @@ NZBs.org hash<br />
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
 
+<legend>NZBs'R'US</legend>
+
+<input type="checkbox" name="nzbsrus" #if $sickbeard.NZBSRUS then "CHECKED" else ""#> <strong>Enable NZBs'R'US</strong>
+<a href="http://www.nzbsrus.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbsrus.gif" alt="NZBs'R'US" width="16" height="16"></a><br />
+Check to search NZBs.org for episodes<br />
+<br />
+
+<strong>UID:</strong><br />
+NZBs'R'US UID<br />
+<input type="text" name="nzbsrus_uid" value="$sickbeard.NZBSRUS_UID" size="6"><br />
+<br />
+
+<strong>Hash:</strong><br />
+NZBs'R'US hash<br />
+<input type="text" name="nzbsrus_hash" value="$sickbeard.NZBSRUS_HASH" size="35"><br />
+<br />
+
+</fieldset>
+</div>
+
+
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
 <legend>NZBMatrix</legend>
 
 <input type="checkbox" name="nzbmatrix" #if $sickbeard.NZBMATRIX then "CHECKED" else ""#> <strong>Enable NZBMatrix</strong>
