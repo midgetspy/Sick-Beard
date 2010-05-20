@@ -260,7 +260,7 @@ def initialize(consoleLogging=True):
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH 
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ
 
         
         if __INITIALIZED__:
@@ -371,6 +371,7 @@ def initialize(consoleLogging=True):
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
         NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
         
+        BINREQ = bool(check_setting_int(CFG, 'Bin-Req', 'binreq', 1))
         TVNZB = bool(check_setting_int(CFG, 'TVNZB', 'tvnzb', 0))
 
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -640,6 +641,7 @@ def save_config():
     CFG['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
     CFG['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
     CFG['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
+    CFG['Bin-Req']['binreq'] = int(BINREQ)
     CFG['TVNZB']['tvnzb'] = int(TVNZB)
     CFG['SABnzbd']['sab_username'] = SAB_USERNAME
     CFG['SABnzbd']['sab_password'] = SAB_PASSWORD

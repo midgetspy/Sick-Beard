@@ -491,11 +491,10 @@ class ConfigProviders:
 
     
     @cherrypy.expose
-    def saveProviders(self, newzbin=None, newzbin_username=None, newzbin_password=None, tvbinz=None,
-                   tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None, nzbs_hash=None,
-                   nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None, tvnzb=None,
-                   tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None, nzbsrus=None,
-                   nzbsrus_uid=None, nzbsrus_hash=None):
+    def saveProviders(self, tvbinz=None, tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None,
+                      nzbs_hash=None, nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
+                      tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None, nzbsrus=None,
+                      nzbsrus_uid=None, nzbsrus_hash=None, binreq=None):
 
         results = []
 
@@ -524,9 +523,12 @@ class ConfigProviders:
         else:
             nzbmatrix = 0
 
+        if binreq == "on":
+            binreq = 1
         if tvnzb == "on":
             tvnzb = 1
         else:
+            binreq = 0
             tvnzb = 0
 
         sickbeard.NEWZBIN = newzbin
@@ -556,6 +558,7 @@ class ConfigProviders:
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey
         
+        sickbeard.BINREQ = binreq
         sickbeard.TVNZB = tvnzb
         
         sickbeard.PROVIDER_ORDER = provider_order.split()
