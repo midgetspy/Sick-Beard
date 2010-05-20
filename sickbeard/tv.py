@@ -78,7 +78,7 @@ class TVShow(object):
             
             self._isDirGood = False
             
-            logger.log("The show dir doesn't exist! This show will be inactive until the dir is created.", logger.ERROR)
+            logger.log("The show dir "+self._location+" doesn't exist! This show will be inactive until the dir is created.", logger.ERROR)
             
             myDB = db.DBConnection()
             sqlResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [self._location])
