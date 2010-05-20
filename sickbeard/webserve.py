@@ -498,11 +498,6 @@ class ConfigProviders:
 
         results = []
 
-        if newzbin == "on":
-            newzbin = 1
-        else:
-            newzbin = 0
-            
         if tvbinz == "on":
             tvbinz = 1
         elif sickbeard.SHOW_TVBINZ:
@@ -525,15 +520,8 @@ class ConfigProviders:
 
         if binreq == "on":
             binreq = 1
-        if tvnzb == "on":
-            tvnzb = 1
         else:
             binreq = 0
-            tvnzb = 0
-
-        sickbeard.NEWZBIN = newzbin
-        sickbeard.NEWZBIN_USERNAME = newzbin_username
-        sickbeard.NEWZBIN_PASSWORD = newzbin_password
 
         if tvbinz != None:
             sickbeard.TVBINZ = tvbinz
@@ -559,7 +547,6 @@ class ConfigProviders:
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey
         
         sickbeard.BINREQ = binreq
-        sickbeard.TVNZB = tvnzb
         
         sickbeard.PROVIDER_ORDER = provider_order.split()
         
