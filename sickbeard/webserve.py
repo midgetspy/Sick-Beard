@@ -505,7 +505,7 @@ class ConfigProviders:
             
         if tvbinz == "on":
             tvbinz = 1
-        elif tvbinz != None:
+        elif sickbeard.SHOW_TVBINZ:
             tvbinz = 0
             
         if nzbs == "on":
