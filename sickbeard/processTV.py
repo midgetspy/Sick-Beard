@@ -151,7 +151,7 @@ def processDir (dirName, nzbName=None, recurse=False):
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
     for sqlShow in sqlResults:
-        if dirName.startswith(ek.ek(os.path.realpath, sqlShow["location"])+os.sep) or dirName == ek.ek(os.path.realpath, sqlShow["location"]):
+        if dirName.lower().startswith(ek.ek(os.path.realpath, sqlShow["location"]).lower()+os.sep) or dirName.lower() == ek.ek(os.path.realpath, sqlShow["location"]).lower():
             returnStr += logHelper("You're trying to post process an episode that's already been moved to its show dir", logger.ERROR)
             return returnStr
 
