@@ -456,7 +456,7 @@ class Tvdb:
             raise tvdb_error("Could not connect to server %s: %s" % (url, errormsg))
 	except (AttributeError), errormsg:
 	    raise tvdb_error("Silly upstream module timed out and didn't give a \
-	    good error.  Failed hitting %, error message: %s" % (url,
+	    good error.  Failed hitting %s, error message: %s" % (url,
 		str(errormsg)))
         #end try
 
