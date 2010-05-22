@@ -306,7 +306,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             showInfo = (int(showObj["id"]), showObj["seriesname"])
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
-            returnStr += logHelper("TVDB didn't respond, trying to look up the show in the DB instead: "+str(e), logger.DEBUG)
+            returnStr += logHelper("Unable to look up show on TVDB: "+str(e), logger.DEBUG)
+            returnStr += logHelper("Looking up show in DB instead", logger.DEBUG)
             showInfo = helpers.searchDBForShow(result.seriesname)
 
         if showInfo:
