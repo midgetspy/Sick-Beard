@@ -279,7 +279,12 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         # if we already have the info from the history then don't bother with this
         if tvdb_id != None and season != None and episodes != []:
             break
-    
+
+        # set all search stuff to defaults so we don't carry results over from the last iteration
+        tvdb_id = None
+        season = None
+        episodes = []
+        
         try:
             returnStr += logHelper("Attempting to parse name "+curName, logger.DEBUG)
             myParser = FileParser(curName)
