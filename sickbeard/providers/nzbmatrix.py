@@ -206,7 +206,7 @@ class NZBMatrixCache(tvcache.TVCache):
 			return
 		
 		# get all records since the last timestamp
-		url = "http://rss.nzbmatrix.com/rss.php?"
+		url = "http://services.nzbmatrix.com/rss.php?"
 
 		urlArgs = {'page': 'download',
 				   'username': sickbeard.NZBMATRIX_USERNAME,
