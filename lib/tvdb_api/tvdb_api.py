@@ -16,12 +16,13 @@ Example usage:
 u'Cabin Fever'
 """
 __author__ = "dbr/Ben"
-__version__ = "1.4"
+__version__ = "1.5"
 
 import os
 import sys
 import urllib
 import urllib2
+import StringIO
 import tempfile
 import warnings
 import logging
@@ -31,6 +32,12 @@ try:
     import xml.etree.cElementTree as ElementTree
 except ImportError:
     import xml.etree.ElementTree as ElementTree
+
+try:
+    import gzip
+except ImportError:
+    gzip = None
+
 
 import lib.httplib2 as httplib2
 
@@ -80,6 +87,12 @@ class Show(dict):
             # If it's not numeric, it must be an attribute name, which
             # doesn't exist, so attribute error.
             raise tvdb_attributenotfound("Cannot find attribute %s" % (repr(key)))
+
+    def airedOn(self, date):
+        ret = self.search(str(date), 'firstaired')
+        if len(ret) == 0:
+            raise tvdb_episodenotfound("Could not find any episodes that aired on %s" % date)
+        return ret
 
     def search(self, term = None, key = None):
         """
@@ -459,11 +472,21 @@ class Tvdb:
 	    good error.  Failed hitting %s, error message: %s" % (url,
 		str(errormsg)))
         #end try
-
+        
+        # handle gzipped content,
+        # http://dbr.lighthouseapp.com/projects/13342/tickets/72-gzipped-data-patch
+        if 'gzip' in resp.headers.get("Content-Encoding", ''):
+            if gzip:
+                stream = StringIO.StringIO(resp.read())
+                gz = gzip.GzipFile(fileobj=stream)
+                return gz.read()
+            
+            raise tvdb_error("Received gzip data from thetvdb.com, but could not correctly handle it")
+        
         return str(resp)
 
     def _getetsrc(self, url):
-        """Loads a URL sing caching, returns an ElementTree of the source
+        """Loads a URL using caching, returns an ElementTree of the source
         """
         src = self._loadUrl(url)
         try:
@@ -577,7 +600,7 @@ class Tvdb:
         >>> t['scrubs']['_banners'].keys()
         ['fanart', 'poster', 'series', 'season']
         >>> t['scrubs']['_banners']['poster']['680x1000']['35308']['_bannerpath']
-        'http://www.thetvdb.com/banners/posters/76156-2.jpg'
+        u'http://www.thetvdb.com/banners/posters/76156-2.jpg'
         >>>
 
         Any key starting with an underscore has been processed (not the raw
@@ -638,7 +661,7 @@ class Tvdb:
         >>> actors[0]['name']
         u'Zach Braff'
         >>> actors[0]['image']
-        'http://www.thetvdb.com/banners/actors/43640.jpg'
+        u'http://www.thetvdb.com/banners/actors/43640.jpg'
 
         Any key starting with an underscore has been processed (not the raw
         data from the XML)
