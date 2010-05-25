@@ -23,7 +23,7 @@ import urllib2
 import os.path
 import sys
 import datetime
-import time
+import re
 
 import xml.etree.cElementTree as etree
 
@@ -61,10 +61,29 @@ def downloadNZB (nzb):
 	logger.log("Downloading an NZB from Bin-Req at " + nzb.url)
 
 	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb.gz")
+
+	nzbDownloadURL = "http://www.bin-req.net/download.php?nzbid="
+	
+	# get the request page
+	f = urllib.urlopen(nzb.url)
+	requestPage = f.readlines();
+	f.close()
+	
+	# find the nzb id
+	nzbID = None
+	for curLine in requestPage:
+		match = re.match("^\s*<a href=\"/view\.php\?nzbid=(\d+)\".*", curLine)
+		if not match:
+			continue
+		nzbID = match.group(1)
+	
+	if not nzbID:
+		logger.log("Unable to find an NZB ID on the request page "+nzb.url, logger.ERROR)
+		return False	
 	
 	logger.log("Saving to " + fileName, logger.DEBUG)
 
-	urllib.urlretrieve(nzb.url, fileName)
+	urllib.urlretrieve(nzbDownloadURL + nzbID, fileName)
 
 	return True
 	
