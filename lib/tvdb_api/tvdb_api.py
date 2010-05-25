@@ -27,6 +27,7 @@ import tempfile
 import warnings
 import logging
 import datetime
+import time
 
 try:
     import xml.etree.cElementTree as ElementTree
@@ -39,7 +40,11 @@ except ImportError:
     gzip = None
 
 
-import lib.httplib2 as httplib2
+# Use local version for sickbeard, system version elsewhere
+try:
+    import lib.httplib2 as httplib2
+except ImportError:
+    import httplib2 as httplib2
 
 from tvdb_ui import BaseUI, ConsoleUI
 from tvdb_exceptions import (tvdb_error, tvdb_userabort, tvdb_shownotfound,
@@ -50,6 +55,31 @@ lastTimeout = None
 def log():
     return logging.getLogger("tvdb_api")
 
+def clean_cache(cachedir):
+    '''
+    Clean any files in the cache older than 24 hrs
+    '''
+
+    # Does our cachedir exists
+    if not os.path.isdir(cachedir):
+	raise tvdb_error("Told to clean cache dir %s but it does not exist" %
+		cachedir)
+	return
+    now = time.time()
+    day = 86400
+
+    # Get all our cache files
+    files = os.listdir(cachedir)
+
+    for file in files:
+	ffile = os.path.join(cachedir,file)
+	# If modified time is > 24 hrs ago, die!
+	# log().debug("Comparing %s mtime" % ffile)
+	if now - os.stat(ffile).st_mtime > day:
+	    try:
+		os.remove(ffile)
+	    except:
+		raise tvdb_error("Couldn't remove %s" % ffile)
 
 class ShowContainer(dict):
     """Simple dict that holds a series of Show instances
@@ -382,6 +412,11 @@ class Tvdb:
 	else:
             self.config['cache_enabled'] = False
 
+	# Clean cache, this might need to be moved elsewhere
+	if self.config['cache_enabled'] and self.config['cache_location']:
+	    # log().debug("Cleaning cache %s " % self.config['cache_location'])
+	    clean_cache(self.config['cache_location'])
+
         self.config['banners_enabled'] = banners
         self.config['actors_enabled'] = actors
 
@@ -472,16 +507,6 @@ class Tvdb:
 	    good error.  Failed hitting %s, error message: %s" % (url,
 		str(errormsg)))
         #end try
-        
-        # handle gzipped content,
-        # http://dbr.lighthouseapp.com/projects/13342/tickets/72-gzipped-data-patch
-        if 'gzip' in resp.headers.get("Content-Encoding", ''):
-            if gzip:
-                stream = StringIO.StringIO(resp.read())
-                gz = gzip.GzipFile(fileobj=stream)
-                return gz.read()
-            
-            raise tvdb_error("Received gzip data from thetvdb.com, but could not correctly handle it")
         
         return str(resp)
 
