@@ -25,6 +25,7 @@ import urllib
 import re
 import threading
 import datetime
+import operator
 
 from Cheetah.Template import Template
 import cherrypy
@@ -1055,7 +1056,7 @@ class Home:
         
         today = str(datetime.date.today().toordinal())
         
-        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status IN ("+str(DOWNLOADED)+","+str(PREDOWNLOADED)+") AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status IN ("+",".join([str(x) for x in Quality.DOWNLOADED])+","+str(PREDOWNLOADED)+") AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
 
         t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
         
@@ -1142,7 +1143,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, quality=None, seasonfolders=None, paused=None):
+    def editShow(self, show=None, location=None, qualityType=None, quality=None, seasonfolders=None, paused=None):
         
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
@@ -1152,7 +1153,7 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
 
-        if location == None and quality == None and seasonfolders == None:
+        if location == None and quality == None and qualityType == None and seasonfolders == None:
             
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu
@@ -1175,8 +1176,9 @@ class Home:
 
         with showObj.lock:
             errors = []
-            logger.log("changing quality from " + str(showObj.quality) + " to " + str(quality), logger.DEBUG)
-            showObj.quality = int(quality)
+            newQuality = reduce(operator.or_, map(int, quality)) | int(qualityType)
+            logger.log("changing quality from " + str(showObj.quality) + " to " + str(newQuality), logger.DEBUG)
+            showObj.quality = newQuality
             
             if showObj.seasonfolders != seasonfolders:
                 showObj.seasonfolders = seasonfolders
@@ -1337,7 +1339,7 @@ class Home:
                         logger.log("Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
                     
-                    if int(status) == DOWNLOADED and epObj.status not in (PREDOWNLOADED, SNATCHED_PROPER, SNATCHED_BACKLOG):
+                    if int(status) in Quality.DOWNLOADED and epObj.status not in [PREDOWNLOADED, SNATCHED_PROPER, SNATCHED_BACKLOG] + Quality.DOWNLOADED:
                         logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not PREDOWNLOADED/SNATCHED_PROPER/SNATCHED_BACKLOG", logger.ERROR)
                         continue
 

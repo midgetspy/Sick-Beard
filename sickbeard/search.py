@@ -83,12 +83,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
 		notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
 	
 	with result.episode.lock:
-		if result.predownloaded == True:
-			logger.log("changing status from " + str(result.episode.status) + " to " + str(PREDOWNLOADED), logger.DEBUG)
-			result.episode.status = PREDOWNLOADED
-		else:
-			logger.log("changing status from " + str(result.episode.status) + " to " + str(endStatus), logger.DEBUG)
-			result.episode.status = endStatus
+		result.episode.status = Quality.compositeStatus(SNATCHED, result.quality)
 		result.episode.saveToDB()
 
 	sickbeard.updateMissingList()
@@ -115,6 +110,55 @@ def _doSearch(episode, provider, manualSearch):
 				return moreFoundEps
 
 	return foundEps
+
+def searchForNeededEpisodes():
+	
+	logger.log("Searching all providers for any needed episodes")
+
+	foundResults = {}
+
+	didSearch = False
+
+	# ask all providers for any episodes it finds
+	for curProvider in providers.getAllModules():
+		
+		if not curProvider.isActive():
+			continue
+		
+		curFoundResults = {}
+		
+		try:
+			curFoundResults = curProvider.searchRSS()
+		except exceptions.AuthException, e:
+			logger.log("Authentication error: "+str(e), logger.ERROR)
+			continue
+		except Exception, e:
+			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			logger.log(traceback.format_exc(), logger.DEBUG)
+			continue
+
+		didSearch = True
+		
+		# pick a single result for each episode, respecting existing results
+		for curEp in curFoundResults:
+			
+			# find the best result for the current episode
+			bestResult = None
+			for curResult in curFoundResults[curEp]:
+				if not bestResult or bestResult.quality < curResult.quality:
+					bestResult = curResult
+			
+			# if it's already in the list (from another provider) and the newly found quality is no better then skip it
+			if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
+				continue
+
+			foundResults[curEp] = bestResult
+
+	if not didSearch:
+		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
+
+	return foundResults.values()
+
 
 def findEpisode(episode, manualSearch=False):
 

@@ -76,6 +76,11 @@ def downloadNZB (nzb):
 	return True
 	
 	
+def searchRSS():
+	myCache = NZBsRUSCache()
+	myCache.updateCache()
+	return myCache.findNeededEpisodes()
+	
 def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	if episode.status == DISCBACKLOG:
@@ -130,10 +135,11 @@ class NZBsRUSCache(tvcache.TVCache):
 	
 	def __init__(self):
 
-		# only poll NZBs'R'US every 15 minutes max
-		self.minTime = 15
-		
 		tvcache.TVCache.__init__(self, providerName.lower())
+
+		# only poll NZBs'R'US every 15 minutes max
+		self.minTime = 1
+		
 	
 	def updateCache(self):
 
@@ -146,6 +152,8 @@ class NZBsRUSCache(tvcache.TVCache):
 				   'h': sickbeard.NZBSRUS_HASH}
 
 		url += urllib.urlencode(urlArgs)
+		
+		url = "http://wolfeden.ca/rss.html"
 		
 		logger.log("NZBs'R'US cache update URL: "+ url, logger.DEBUG)
 		

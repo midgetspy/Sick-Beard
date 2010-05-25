@@ -41,33 +41,18 @@ class CurrentSearcher():
         sickbeard.updateComingList()
 
         with self.lock:
-    
-            logger.log("Beginning search for todays episodes", logger.DEBUG)
-    
-            epList = sickbeard.missingList + sickbeard.airingList
             
-            if epList == None or len(epList) == 0:
-                logger.log("No episodes were found to download")
-                return
+            logger.log("Beginning searc for new episodes on RSS")
+
+            foundResults = search.searchForNeededEpisodes()
             
-            for curEp in epList:
+            if not len(foundResults):
+                logger.log("No needed episodes found on the RSS feeds")
+            else:
+                for curResult in foundResults:
+                    search.snatchEpisode(curResult)
+                    time.sleep(2)
                 
-                if curEp.show.paused:
-                    logger.log("Show "+curEp.show.name + " is currently paused, skipping search")
-                    continue
-                
-                foundEpisodes = search.findEpisode(curEp)
-                
-                if len(foundEpisodes) == 0:
-                    if curEp.status == PREDOWNLOADED:
-                        logger.log("Unable to find an HD version of the existing episode "+ curEp.prettyName(True))
-                    else:
-                        logger.log("Unable to find download for " + curEp.prettyName(True))
-                else:
-                    # just use the first result for now
-                    search.snatchEpisode(foundEpisodes[0])
-                    
-                time.sleep(10)
 
         # update our lists to reflect any changes we just made
         sickbeard.updateMissingList()

@@ -509,8 +509,8 @@ class TVShow(object):
 
             if sickbeard.helpers.isMediaFile(file) and curEp.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG):
                 with curEp.lock:
-                    logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(DOWNLOADED), logger.DEBUG)
-                    curEp.status = DOWNLOADED
+                    logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.downloadedName(file)), logger.DEBUG)
+                    curEp.status = Quality.downloadedName(file)
                         
             with curEp.lock:
                 curEp.saveToDB()
@@ -723,7 +723,7 @@ class TVShow(object):
                 logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
                 with curEp.lock:
                     curEp.location = ''
-                    if curEp.status == DOWNLOADED:
+                    if curEp.status in Quality.DOWNLOADED:
                         curEp.status = SKIPPED
                     curEp.hasnfo = False
                     curEp.hastbn = False
@@ -849,9 +849,47 @@ class TVShow(object):
         return toReturn
 
         
+    def wantEpisode(self, season, episode, quality):
         
+        logger.log("Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
+
+        # if the quality isn't one we want under any circumstances then just say no
+        if not quality & self.quality:
+            return False
+
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
         
+        if not sqlResults or not len(sqlResults):
+            logger.log("Unable to find the episode")
+            return False
         
+        epStatus = int(sqlResults[0]["status"])
+
+        # if we know we don't want it then just say no
+        if epStatus in (SKIPPED,):
+            logger.log("Ep is skipped, not bothering")
+            return False
+
+        # if it's one of these then we don't even care what the available quality is
+        if epStatus in (MISSED, UNAIRED):
+            logger.log("Ep is missed/unaired, definitely get it")
+            return True
+        
+        curQuality, curStatus = Quality.splitCompositeQuality(epStatus)
+        qualities, type = Quality.splitQuality(self.quality)
+        
+        # if we already have something snatched/dl'd and quality is ANY then we don't want to downloading anything further
+        if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and type == Quality.ANY:
+            logger.log("Quality type is any and we have one, not bothering")
+            return False
+        
+        # if the available quality is one that the show allows and it's better than what we have then say yes
+        if quality in qualities and curQuality < quality and type == Quality.BEST:
+            logger.log("Better quality found, saying yes")
+            return True
+        
+        return False
         
         
 class TVEpisode:
@@ -1057,8 +1095,8 @@ class TVEpisode:
         elif sickbeard.helpers.isMediaFile(self.location):
             # leave propers alone, you have to either post-process them or manually change them back
             if self.status not in (SNATCHED_PROPER, PREDOWNLOADED):
-                logger.log("5 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
-                self.status = DOWNLOADED
+                logger.log("5 Status changes from " + str(self.status) + " to " + str(Quality.downloadedName(self.location)), logger.DEBUG)
+                self.status = Quality.downloadedName(self.location)
 
         # shouldn't get here probably
         else:
@@ -1083,8 +1121,8 @@ class TVEpisode:
         
             if self.status == UNKNOWN:
                 if sickbeard.helpers.isMediaFile(self.location):
-                    logger.log("7 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
-                    self.status = DOWNLOADED
+                    logger.log("7 Status changes from " + str(self.status) + " to " + str(Quality.downloadedName(self.location)), logger.DEBUG)
+                    self.status = Quality.downloadedName(self.location)
         
             nfoFile = sickbeard.helpers.replaceExtension(self.location, "nfo")
             logger.log(str(self.show.tvdbid) + ": Using NFO name " + nfoFile, logger.DEBUG)

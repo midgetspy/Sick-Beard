@@ -1,6 +1,7 @@
 #import sickbeard
+#import sickbeard.helpers
 #from sickbeard.common import *
-#import os.path
+#import os.path, os
 #import datetime
 #set global $title=$show.name
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
@@ -23,17 +24,24 @@ Location: $showLoc[0]
 #end if
 <br />
 
-Quality: $qualityStrings[int($show.quality)]<br />
+#set $qualities, $type = $Quality.splitQuality(int($show.quality))
+#set $typeStr = "??"
+#if $type == $Quality.BEST:
+#set $typeStr = "Best of"
+#elif $type == $Quality.ANY:
+#set $typeStr = "First available between"
+#end if
+#set $qualityStr = ", ".join([$Quality.qualityStrings[x] for x in $qualities])
+Quality: $typeStr $qualityStr<br />
 Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 <br />
-
 Change selected episodes to 
 <select id="statusSelect">
-#for $curStatus in ($BACKLOG, $DISCBACKLOG, $MISSED, $SKIPPED, $DOWNLOADED)
-<option value="$curStatus">$sickbeard.statusStrings[$curStatus]
+#for $curStatusTuple in [($x, $sickbeard.statusStrings[x]) for x in ($BACKLOG, $DISCBACKLOG, $MISSED, $SKIPPED)] + $Quality.downloadedStrings.items():
+<option value="$curStatusTuple[0]">$curStatusTuple[1]
 #end for
 </select>
 <input type="hidden" id="showID" value="$show.tvdbid">
@@ -59,7 +67,7 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
 	<br />
 	</h2></td>
   </tr>
-  <tr><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+  <tr><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Size</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -80,8 +88,13 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
         #end if
     </td>
     <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td>
+#if $epResult["location"] and $os.path.isfile($os.path.join($showLoc[0], $epResult["location"])):
+$sickbeard.helpers.sizeof_fmt($os.path.getsize($os.path.join($showLoc[0], $epResult["location"])))
+#end if
+    </td>
     <td>$os.path.basename($epResult["location"])</td>
-    <td>$statusStrings[int($epResult["status"])]</td>
+    <td>$Quality.qualityStrings[$Quality.qualityDownloaded(int($epResult["status"]))]</td>
     <td align="center">
     #if int($epResult["season"]) != 0: 
     <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a>

@@ -708,7 +708,7 @@ def updateAiringList():
     curDate = datetime.date.today().toordinal()
 
     myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status IN (" + str(UNAIRED) + ", " + str(PREDOWNLOADED) + ") AND airdate <= " + str(curDate))
+    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status == " + str(UNAIRED) + " AND airdate <= " + str(curDate))
     
     epList = []
 

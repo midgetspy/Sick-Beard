@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
+import os.path
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -62,6 +63,104 @@ HD = 1
 SD = 3
 ANY = 2
 BEST = 4
+
+class StatusStrings:
+    pass
+
+class Quality:
+
+    UNKNOWN = 0
+    SDTV = 1
+    SDDVD = 1<<1 # 2
+    HDTV = 1<<2 # 4
+    HDWEBDL = 1<<3 # 8
+    HDBLURAY = 1<<4 # 16
+    FULLHDBLURAY = 1<<5 # 32
+    
+    # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
+    BEST = 1<<20
+    ANY = 1<<19
+    
+    qualityStrings = {UNKNOWN: "Unknown",
+                      SDTV: "SD TV",
+                      SDDVD: "SD DVD",
+                      HDTV: "720p TV",
+                      HDWEBDL: "720p WEB-DL",
+                      HDBLURAY: "720p BluRay",
+                      FULLHDBLURAY: "1080p BluRay"}
+
+    @staticmethod
+    def _getStatusStrings(prefix):
+        toReturn = {}
+        for x in Quality.qualityStrings.keys():
+            toReturn[x] = prefix+" ("+Quality.qualityStrings[x]+")"
+        return toReturn
+
+    @staticmethod
+    def getQuality(quality, type):
+        return quality | type
+
+    @staticmethod
+    def splitQuality(quality):
+        if quality & Quality.BEST:
+            type = Quality.BEST
+        elif quality & Quality.ANY:
+            type = Quality.ANY
+        
+        qualities = []
+        for curQual in Quality.qualityStrings.keys():
+            if curQual & quality:
+                qualities.append(curQual)
+        
+        return (qualities, type)
+
+    @staticmethod
+    def nameQuality(name, delimiter="."):
+        
+        name = os.path.basename(name)
+        
+        containsOne = lambda list: any([x.replace(".", delimiter) in name.lower() for x in list])
+        containsAll = lambda list: all([x.replace(".", delimiter) in name.lower() for x in list])
+    
+        if containsOne(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"]):
+            return Quality.SDTV
+        elif containsOne(["dvdrip.xvid", "bdrip.xvid"]):
+            return Quality.SDDVD
+        elif containsAll(["720p", "hdtv", "x264"]):
+            return Quality.HDTV
+        elif containsAll(["720p", "web-dl"]):
+            return Quality.HDWEBDL
+        elif containsAll(["720p", "bluray", "x264"]):
+            return Quality.HDBLURAY
+        elif containsAll(["1080p", "bluray", "x264"]):
+            return Quality.FULLHDBLURAY
+        else:
+            return Quality.UNKNOWN
+
+    @staticmethod
+    def compositeStatus(status, quality):
+        return status + 100 * quality
+
+    @staticmethod
+    def qualityDownloaded(status):
+        return (status - DOWNLOADED) / 100
+
+    @staticmethod
+    def splitCompositeQuality(quality):
+        for x in sorted(Quality.qualityStrings.keys(), reverse=True):
+            if quality > x*100:
+                return (x, quality-x*100)
+
+    @staticmethod
+    def downloadedName(name):
+        return Quality.downloaded(Quality.nameQuality(name))
+
+
+Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qualityStrings.keys()]
+Quality.downloadedStrings = Quality._getStatusStrings("Downloaded")
+Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
+Quality.snatchedStrings = Quality._getStatusStrings("Snatched")
+
 
 qualityStrings = {}
 qualityStrings[HD] = "HD"

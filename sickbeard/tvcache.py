@@ -13,7 +13,7 @@ from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import *
 
-from sickbeard import helpers
+from sickbeard import helpers, classes
 
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
@@ -164,17 +164,7 @@ class TVCache():
         # get the current timestamp
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
         
-        if not quality:
-            # if we don't know what quality it is and it looks like itouch quality, skip it
-            if "itouch" in name.lower():
-                return False
-            elif any(x in name.lower() for x in ("720p", "1080p", "x264")):
-                quality = HD
-            elif any(x in name.lower() for x in ("xvid", "divx")):
-                quality = SD
-            else:
-                logger.log("Unable to figure out the quality of "+name+", assuming SD", logger.DEBUG)
-                quality = SD
+        quality = Quality.nameQuality(name)
         
         myDB.action("INSERT INTO "+self.providerName+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
                     [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
@@ -193,7 +183,7 @@ class TVCache():
         
         return myDB.select(sql)
     
-    def listPropers(self, date=None):
+    def listPropers(self, date=None, delimiter="."):
         
         myDB = self._getDB()
         
@@ -205,3 +195,46 @@ class TVCache():
         #return filter(lambda x: x['tvdbid'] != 0, myDB.select(sql))
         return myDB.select(sql)
 
+    def findNeededEpisodes(self):
+        neededEps = {}
+
+        myDB = self._getDB()
+        
+        sqlResults = myDB.select("SELECT * FROM "+self.providerName)
+
+        # for each cache entry
+        for curResult in sqlResults:
+
+            # get the show object, or if it's not one of our shows then ignore it
+            showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
+            if not showObj:
+                continue
+            
+            # get season and ep data (ignoring multi-eps for now)
+            curSeason = int(curResult["season"])
+            curEp = int(curResult["episodes"].split("|")[1])
+
+            # if the show says we want that episode then add it to the list
+            if showObj.wantEpisode(curSeason, curEp, int(curResult["quality"])):
+                
+                epObj = showObj.getEpisode(curSeason, curEp)
+                
+                # build a result object
+                title = curResult["name"]
+                url = curResult["url"]
+            
+                logger.log("Found result " + title + " at " + url)
+        
+                result = classes.NZBSearchResult(epObj)
+                result.provider = self.providerName.lower()
+                result.url = url 
+                result.extraInfo = [title]
+                result.quality = int(curResult["quality"])
+                
+                # add it to the list
+                if epObj not in neededEps:
+                    neededEps[epObj] = [result]
+                else:
+                    neededEps[epObj].append(result)
+                    
+        return neededEps

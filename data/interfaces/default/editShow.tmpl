@@ -1,4 +1,5 @@
 #import sickbeard
+#from sickbeard import common
 #from sickbeard import exceptions
 #set global $title="Edit "+$show.name
 #set global $header=$show.name
@@ -9,22 +10,19 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-Airs: $show.airs<br />
-Status: $show.status<br />
-<br />
 <form action="editShow" method="post">
 <input type="hidden" name="show" value="$show.tvdbid">
 Location: <input type="text" name="location" id="location" value="$show._location" size="50"><br />
-Quality: <select name="quality">
-#for $quality in $qualities:
-#if $show.quality == $quality
-#set $blah = "SELECTED"
-#else
-#set $blah = ""
-#end if
-<option value="$quality" $blah>$qualityStrings[$quality]
+<br />
+Quality:<br />
+<input type="radio" name="qualityType" value="$common.Quality.ANY" #if $show.quality & $common.Quality.ANY then "CHECKED" else ""#>Any<br />
+<input type="radio" name="qualityType" value="$common.Quality.BEST" #if $show.quality & $common.Quality.BEST then "CHECKED" else ""#>Best of:<br />
+<select name="quality" multiple="multiple" size="len($common.Quality.qualityStrings)">
+#for $curQuality in sorted($common.Quality.qualityStrings):
+<option value="$curQuality" #if $show.quality & $curQuality then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
 #end for
 </select><br />
+<br />
 Use Season Folders: <input type="checkbox" name="seasonfolders" #if $show.seasonfolders == 1 then "CHECKED" else ""#><br /><br />
 Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "CHECKED" else ""#><br /><br />
 <input type="submit" value="Submit">

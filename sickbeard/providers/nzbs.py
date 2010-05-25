@@ -74,7 +74,12 @@ def downloadNZB (nzb):
 	fileOut.close()
 
 	return True
-	
+
+
+def searchRSS():
+	myCache = NZBsCache()
+	myCache.updateCache()
+	return myCache.findNeededEpisodes()
 	
 def findEpisode (episode, forceQuality=None, manualSearch=False):
 
@@ -203,6 +208,8 @@ def _doSearch(curString, quality):
 			logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
 			continue
 		
+		url = url.replace('&amp;','&')
+
 		if "&i=" not in url and "&h=" not in url:
 			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
 		
@@ -281,10 +288,10 @@ class NZBsCache(tvcache.TVCache):
 				logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
 				continue
 			
+			url = url.replace('&amp;','&')
+
 			if "&i=" not in url and "&h=" not in url:
 				raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
-
-			url = url.replace('&amp;','&')
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 

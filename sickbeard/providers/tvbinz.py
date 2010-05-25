@@ -79,6 +79,11 @@ def downloadNZB (nzb):
 	return True
 	
 	
+def searchRSS():
+	myCache = TVBinzCache()
+	myCache.updateCache()
+	return myCache.findNeededEpisodes()
+	
 def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	if episode.status == DISCBACKLOG:

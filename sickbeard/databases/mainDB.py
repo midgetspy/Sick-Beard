@@ -1,4 +1,5 @@
 from sickbeard import db
+from sickbeard import common
 
 # ======================
 # = Main DB Migrations =
@@ -70,3 +71,43 @@ class NumericProviders (AddAirdateIndex):
 				provider = curResult["provider"]
 			args = [curResult["action"], curResult["date"], curResult["showid"], curResult["season"], curResult["episode"], curResult["quality"], curResult["resource"], provider]
 			self.connection.action(sql, args)
+
+class NewQualitySettings (NumericProviders):
+	def test(self):
+		return len(self.connection.select("SELECT * FROM tv_episodes WHERE status = ?", [common.DOWNLOADED])) == 0
+
+	def execute(self):
+
+		toUpdate = self.connection.select("SELECT episode_id, location FROM tv_episodes WHERE status = ?", [common.DOWNLOADED])
+		
+		for curUpdate in toUpdate:
+			if not curUpdate["location"]:
+				continue
+			if curUpdate["location"].endswith(".avi"):
+				newQuality = common.Quality.SDTV
+			elif curUpdate["location"].endswith(".mkv"):
+				newQuality = common.Quality.HDTV
+			else:
+				newQuality = common.Quality.UNKNOWN
+
+			self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [common.Quality.compositeStatus(common.DOWNLOADED, newQuality), curUpdate["episode_id"]])
+
+		toUpdate = self.connection.select("SELECT * FROM tv_shows")
+		
+		for curUpdate in toUpdate:
+			
+			if not curUpdate["quality"]:
+				continue
+			
+			if int(curUpdate["quality"]) == common.HD:
+				newQuality = common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.ANY 
+			elif int(curUpdate["quality"]) == common.SD:
+				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.ANY 
+			elif int(curUpdate["quality"]) == common.ANY:
+				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.ANY
+			elif int(curUpdate["quality"]) == common.BEST:
+				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.BEST
+			else:
+				newQuality = common.Quality.UNKNOWN
+			
+			self.connection.action("UPDATE tv_shows SET quality = ? WHERE show_id = ?", [newQuality, curUpdate["show_id"]])

@@ -481,7 +481,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             
             # don't mess up the status - if this is a legit download it should be SNATCHED
             if curEp.status != PREDOWNLOADED:
-                curEp.status = DOWNLOADED
+                curEp.status = Quality.downloadedName(biggestFileName)
             curEp.saveToDB()
 
     # log it to history
