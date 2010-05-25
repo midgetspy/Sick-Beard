@@ -45,18 +45,18 @@ DISCBACKLOG = 8
 SNATCHED_PROPER = 9
 SNATCHED_BACKLOG = 10
 
-statusStrings = {}
-statusStrings[UNKNOWN] = "Unknown"
-statusStrings[UNAIRED] = "Unaired"
-statusStrings[SNATCHED] = "Snatched"
-statusStrings[PREDOWNLOADED] = "Predownloaded"
-statusStrings[DOWNLOADED] = "Downloaded"
-statusStrings[SKIPPED] = "Skipped"
-statusStrings[MISSED] = "Missed"
-statusStrings[BACKLOG] = "Backlog"
-statusStrings[DISCBACKLOG] = "Disc Backlog"
-statusStrings[SNATCHED_PROPER] = "Snatched (Proper)"
-statusStrings[SNATCHED_BACKLOG] = "Snatched (Backlog)"
+#statusStrings = {}
+#statusStrings[UNKNOWN] = "Unknown"
+#statusStrings[UNAIRED] = "Unaired"
+#statusStrings[SNATCHED] = "Snatched"
+#statusStrings[PREDOWNLOADED] = "Predownloaded"
+#statusStrings[DOWNLOADED] = "Downloaded"
+#statusStrings[SKIPPED] = "Skipped"
+#statusStrings[MISSED] = "Missed"
+#statusStrings[BACKLOG] = "Backlog"
+#statusStrings[DISCBACKLOG] = "Disc Backlog"
+#statusStrings[SNATCHED_PROPER] = "Snatched (Proper)"
+#statusStrings[SNATCHED_BACKLOG] = "Snatched (Backlog)"
 
 ### Qualities
 HD = 1
@@ -64,20 +64,17 @@ SD = 3
 ANY = 2
 BEST = 4
 
-class StatusStrings:
-    pass
-
 class Quality:
 
-    UNKNOWN = 0
     SDTV = 1
     SDDVD = 1<<1 # 2
     HDTV = 1<<2 # 4
     HDWEBDL = 1<<3 # 8
     HDBLURAY = 1<<4 # 16
     FULLHDBLURAY = 1<<5 # 32
-    
+
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
+    UNKNOWN = 1<<18
     BEST = 1<<20
     ANY = 1<<19
     
@@ -89,11 +86,14 @@ class Quality:
                       HDBLURAY: "720p BluRay",
                       FULLHDBLURAY: "1080p BluRay"}
 
+    statusPrefixes = {DOWNLOADED: "Downloaded",
+                      SNATCHED: "Snatched"}
+
     @staticmethod
-    def _getStatusStrings(prefix):
+    def _getStatusStrings(status):
         toReturn = {}
         for x in Quality.qualityStrings.keys():
-            toReturn[x] = prefix+" ("+Quality.qualityStrings[x]+")"
+            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status]+" ("+Quality.qualityStrings[x]+")"
         return toReturn
 
     @staticmethod
@@ -147,19 +147,41 @@ class Quality:
 
     @staticmethod
     def splitCompositeQuality(quality):
+        """Returns a tuple containing (quality, status)"""
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
             if quality > x*100:
                 return (x, quality-x*100)
 
     @staticmethod
-    def downloadedName(name):
-        return Quality.downloaded(Quality.nameQuality(name))
+    def statusFromName(name):
+        return Quality.compositeStatus(DOWNLOADED, Quality.nameQuality(name))
 
 
 Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qualityStrings.keys()]
-Quality.downloadedStrings = Quality._getStatusStrings("Downloaded")
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
-Quality.snatchedStrings = Quality._getStatusStrings("Snatched")
+
+class StatusStrings:
+    def __init__(self):
+        self.statusStrings = {UNKNOWN: "Unknown",
+                              UNAIRED: "Unaired",
+                              SNATCHED: "Snatched",
+                              PREDOWNLOADED: "Predownloaded",
+                              DOWNLOADED:  "Downloaded",
+                              SKIPPED: "Skipped",
+                              MISSED: "Missed",
+                              BACKLOG: "Backlog",
+                              DISCBACKLOG: "Disc Backlog",
+                              SNATCHED_PROPER: "Snatched (Proper)",
+                              SNATCHED_BACKLOG: "Snatched (Backlog)"}
+
+    def __getitem__(self, name):
+        if name in Quality.DOWNLOADED + Quality.SNATCHED:
+            quality, status = Quality.splitCompositeQuality(name)
+            return Quality.statusPrefixes[status]+" ("+Quality.qualityStrings[quality]+")"
+        else:
+            return self.statusStrings[name]
+
+statusStrings = StatusStrings()
 
 
 qualityStrings = {}

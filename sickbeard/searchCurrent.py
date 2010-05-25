@@ -42,7 +42,7 @@ class CurrentSearcher():
 
         with self.lock:
             
-            logger.log("Beginning searc for new episodes on RSS")
+            logger.log("Beginning search for new episodes on RSS")
 
             foundResults = search.searchForNeededEpisodes()
             

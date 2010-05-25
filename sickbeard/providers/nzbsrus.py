@@ -153,8 +153,6 @@ class NZBsRUSCache(tvcache.TVCache):
 
 		url += urllib.urlencode(urlArgs)
 		
-		url = "http://wolfeden.ca/rss.html"
-		
 		logger.log("NZBs'R'US cache update URL: "+ url, logger.DEBUG)
 		
 		data = getNZBsURL(url)

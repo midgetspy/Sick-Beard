@@ -40,8 +40,8 @@ Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=
 <br />
 Change selected episodes to 
 <select id="statusSelect">
-#for $curStatusTuple in [($x, $sickbeard.statusStrings[x]) for x in ($BACKLOG, $DISCBACKLOG, $MISSED, $SKIPPED)] + $Quality.downloadedStrings.items():
-<option value="$curStatusTuple[0]">$curStatusTuple[1]
+#for $curStatus in [$BACKLOG, $DISCBACKLOG, $MISSED, $SKIPPED] + $Quality.DOWNLOADED:
+<option value="$curStatus">$statusStrings[$curStatus]
 #end for
 </select>
 <input type="hidden" id="showID" value="$show.tvdbid">
@@ -67,7 +67,7 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
 	<br />
 	</h2></td>
   </tr>
-  <tr><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Size</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+  <tr><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -88,13 +88,8 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
         #end if
     </td>
     <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
-    <td>
-#if $epResult["location"] and $os.path.isfile($os.path.join($showLoc[0], $epResult["location"])):
-$sickbeard.helpers.sizeof_fmt($os.path.getsize($os.path.join($showLoc[0], $epResult["location"])))
-#end if
-    </td>
     <td>$os.path.basename($epResult["location"])</td>
-    <td>$Quality.qualityStrings[$Quality.qualityDownloaded(int($epResult["status"]))]</td>
+    <td>$statusStrings[int($epResult["status"])]</td>
     <td align="center">
     #if int($epResult["season"]) != 0: 
     <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a>

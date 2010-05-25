@@ -481,7 +481,16 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             
             # don't mess up the status - if this is a legit download it should be SNATCHED
             if curEp.status != PREDOWNLOADED:
-                curEp.status = Quality.downloadedName(biggestFileName)
+                
+                # if it used to be snatched then maintain the same quality for the downloaded status
+                if curEp.status in Quality.SNATCHED:
+                    oldQuality, oldStatus = Quality.splitCompositeQuality(curEp.status)
+                    curEp.status = Quality.compositeStatus(DOWNLOADED, oldQuality)
+                
+                # if it didn't used to be snatched then guess the status from the name
+                else:
+                    returnStr += logHelper("Processing something that isn't snatched, so just guessing what the quality is", logger.ERROR)
+                    curEp.status = Quality.downloadedName(biggestFileName)
             curEp.saveToDB()
 
     # log it to history

@@ -507,10 +507,10 @@ class TVShow(object):
             else:
                 rootEp.relatedEps.append(curEp)
 
-            if sickbeard.helpers.isMediaFile(file) and curEp.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG):
+            if sickbeard.helpers.isMediaFile(file) and curEp.status not in [SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG] + Quality.DOWNLOADED:
                 with curEp.lock:
-                    logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.downloadedName(file)), logger.DEBUG)
-                    curEp.status = Quality.downloadedName(file)
+                    logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.statusFromName(file)), logger.DEBUG)
+                    curEp.status = Quality.statusFromName(file)
                         
             with curEp.lock:
                 curEp.saveToDB()
@@ -1074,7 +1074,7 @@ class TVEpisode:
             logger.log("The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
 
-        logger.log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + statusStrings[self.status] + " and existence of " + self.location, logger.DEBUG)
+        logger.log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + str(self.status) + " and existence of " + self.location, logger.DEBUG)
         
         if not ek.ek(os.path.isfile, self.location):
 
@@ -1094,9 +1094,9 @@ class TVEpisode:
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
             # leave propers alone, you have to either post-process them or manually change them back
-            if self.status not in (SNATCHED_PROPER, PREDOWNLOADED):
-                logger.log("5 Status changes from " + str(self.status) + " to " + str(Quality.downloadedName(self.location)), logger.DEBUG)
-                self.status = Quality.downloadedName(self.location)
+            if self.status not in [SNATCHED_PROPER, PREDOWNLOADED] + Quality.DOWNLOADED + Quality.SNATCHED:
+                logger.log("5 Status changes from " + str(self.status) + " to " + str(Quality.statusFromName(self.location)), logger.DEBUG)
+                self.status = Quality.statusFromName(self.location)
 
         # shouldn't get here probably
         else:
@@ -1121,8 +1121,8 @@ class TVEpisode:
         
             if self.status == UNKNOWN:
                 if sickbeard.helpers.isMediaFile(self.location):
-                    logger.log("7 Status changes from " + str(self.status) + " to " + str(Quality.downloadedName(self.location)), logger.DEBUG)
-                    self.status = Quality.downloadedName(self.location)
+                    logger.log("7 Status changes from " + str(self.status) + " to " + str(Quality.statusFromName(self.location)), logger.DEBUG)
+                    self.status = Quality.statusFromName(self.location)
         
             nfoFile = sickbeard.helpers.replaceExtension(self.location, "nfo")
             logger.log(str(self.show.tvdbid) + ": Using NFO name " + nfoFile, logger.DEBUG)
