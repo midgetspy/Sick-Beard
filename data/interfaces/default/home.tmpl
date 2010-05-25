@@ -108,11 +108,35 @@
     // set type, either numeric or text 
     type: 'text' 
 }); 
+
+//http://web.archive.org/web/20080801073104/http://www.jdempster.com/category/code/jquery/tablesortercookiewidget/
+\$.tablesorter.addWidget({
+  id: 'cookie',
+  format: function(table) {
+    var sortList = table.config.sortList;
+    var tablesorterCookieJar = \$.cookieJar('tablesorter');
+    if ( sortList.length > 0) {
+      tablesorterCookieJar.set(\$(table).attr('id'), sortList);
+    } else {
+      var sortList = tablesorterCookieJar.get(\$(table).attr('id'));
+      if (sortList && sortList.length > 0) {
+        jQuery(table).trigger('sorton', [sortList]);
+      }
+    }
+  }
+});
  
-\$(document).ready(function() 
-{ 
+\$(document).ready(function(){ 
+
+	// workaround: the tablesorter cookie widget does not support a defaulted sortList set within the $.tablesorter() instantiation
+    var tablesorterCookieJar = \$.cookieJar('tablesorter');
+    var sortList = tablesorterCookieJar.get('showListTable');
+	if (!sortList || !sortList.length)
+		sortList = [[5,1],[1,0]];	
+
     \$("#showListTable").tablesorter({
-    	sortList: [[5,1],[1,0]],
+    	sortList: sortList,
+		widgets: ['cookie'],
     	headers: {
     		0: { sorter: 'nextAirDate'},
     		1: { sorter: 'loadingNames'},
@@ -120,7 +144,8 @@
             4: { sorter: 'eps' },
             5: { sorter: 'active' }
     	}
-    }); 
+    });
+
 });
 </script>
 <style>
