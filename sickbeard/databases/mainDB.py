@@ -78,6 +78,26 @@ class NewQualitySettings (NumericProviders):
 
 	def execute(self):
 
+		toUpdate = self.connection.select("SELECT episode_id, location, status FROM tv_episodes WHERE status IN (?, ?)", [common.DOWNLOADED, common.SNATCHED])
+		
+		for curUpdate in toUpdate:
+
+			if int(curUpdate["status"]) == common.SNATCHED:
+				self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ? ", [common.Quality.compositeStatus(common.SNATCHED, common.Quality.UNKNOWN), curUpdate["episode_id"]])
+				continue
+			
+			if not curUpdate["location"]:
+				continue
+			if curUpdate["location"].endswith(".avi"):
+				newQuality = common.Quality.SDTV
+			elif curUpdate["location"].endswith(".mkv"):
+				newQuality = common.Quality.HDTV
+			else:
+				newQuality = common.Quality.UNKNOWN
+
+			self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [common.Quality.compositeStatus(common.DOWNLOADED, newQuality), curUpdate["episode_id"]])
+
+
 		toUpdate = self.connection.select("SELECT episode_id, location FROM tv_episodes WHERE status = ?", [common.DOWNLOADED])
 		
 		for curUpdate in toUpdate:
@@ -91,8 +111,8 @@ class NewQualitySettings (NumericProviders):
 				newQuality = common.Quality.UNKNOWN
 
 			self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [common.Quality.compositeStatus(common.DOWNLOADED, newQuality), curUpdate["episode_id"]])
-
-		toUpdate = self.connection.select("SELECT * FROM tv_shows")
+			
+			toUpdate = self.connection.select("SELECT * FROM tv_shows")
 		
 		for curUpdate in toUpdate:
 			
