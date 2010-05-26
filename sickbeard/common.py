@@ -151,6 +151,8 @@ class Quality:
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
             if quality > x*100:
                 return (x, quality-x*100)
+        
+        return (quality, UNKNOWN)
 
     @staticmethod
     def statusFromName(name):
