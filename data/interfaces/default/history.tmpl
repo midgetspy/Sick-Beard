@@ -61,13 +61,10 @@
 	    #set $quality = HD
 	  #end if
 	#else
-      #if int($hItem["quality"]) in (ANY, HD, SD)
-        #set $quality = int($hItem["quality"])
-      #end if
+      #set $quality = $hItem["quality"]
     #end if
     #if $quality != -1
-      <!--<img src="$sbRoot/images/quality/<%=qualityStrings[quality].lower()%>.png" height="32">-->
-      $qualityStrings[$quality]
+      $Quality.qualityStrings[$quality]
     #end if
     </td>
   </tr>

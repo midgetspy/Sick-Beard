@@ -146,13 +146,13 @@ class Quality:
         return (status - DOWNLOADED) / 100
 
     @staticmethod
-    def splitCompositeQuality(quality):
+    def splitCompositeQuality(status):
         """Returns a tuple containing (quality, status)"""
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
             if quality > x*100:
-                return (x, quality-x*100)
+                return (x, status-x*100)
         
-        return (quality, UNKNOWN)
+        return (Quality.UNKNOWN, status)
 
     @staticmethod
     def statusFromName(name):
