@@ -136,8 +136,6 @@ def _doSearch(curString, quality, skipDelay = False):
 
 	logger.log("Search string: " + searchURL, logger.DEBUG)
 
-	logger.log("Sleeping 30 seconds to respect NZBMatrix's API rules")
-	time.sleep(30)
 	if not skipDelay:
 		logger.log("Sleeping 30 seconds to respect NZBMatrix's API rules")
 		time.sleep(30)
