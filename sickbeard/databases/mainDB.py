@@ -103,12 +103,14 @@ class NewQualitySettings (NumericProviders):
 		for curUpdate in toUpdate:
 			if not curUpdate["location"]:
 				continue
-			if curUpdate["location"].endswith(".avi"):
-				newQuality = common.Quality.SDTV
-			elif curUpdate["location"].endswith(".mkv"):
-				newQuality = common.Quality.HDTV
-			else:
-				newQuality = common.Quality.UNKNOWN
+
+			newQuality = common.Quality.nameQuality(curUpdate["location"])
+			
+			if newQuality == common.Quality.UNKNOWN:
+				if curUpdate["location"].endswith(".avi"):
+					newQuality = common.Quality.SDTV
+				elif curUpdate["location"].endswith(".mkv"):
+					newQuality = common.Quality.HDTV
 
 			self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [common.Quality.compositeStatus(common.DOWNLOADED, newQuality), curUpdate["episode_id"]])
 			

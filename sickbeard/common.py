@@ -119,6 +119,11 @@ class Quality:
         
         name = os.path.basename(name)
         
+        # if we have our exact text then assume we put it there 
+        for x in Quality.qualityStrings:
+            if Quality.qualityStrings[x] in name:
+                return x
+        
         containsOne = lambda list: any([x.replace(".", delimiter) in name.lower() for x in list])
         containsAll = lambda list: all([x.replace(".", delimiter) in name.lower() for x in list])
     
