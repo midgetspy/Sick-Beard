@@ -52,6 +52,11 @@ def downloadNZB (nzb):
 
 	return True
 	
+def searchRSS():
+	myCache = NZBMatrixCache()
+	myCache.updateCache()
+	return myCache.findNeededEpisodes()
+
 	
 def findEpisode (episode, forceQuality=None, manualSearch=False):
 
@@ -253,4 +258,3 @@ class NZBMatrixCache(tvcache.TVCache):
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 
 			self._addCacheEntry(title, url)
-
