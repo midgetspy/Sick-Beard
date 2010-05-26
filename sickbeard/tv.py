@@ -872,8 +872,8 @@ class TVShow(object):
             return False
 
         # if it's one of these then we don't even care what the available quality is
-        if epStatus in (MISSED, UNAIRED):
-            logger.log("Ep is missed/unaired, definitely get it")
+        if epStatus in (MISSED, UNAIRED, BACKLOG, DISCBACKLOG):
+            logger.log("Ep is missed/unaired/backlog/discbacklog, definitely get it")
             return True
         
         curQuality, curStatus = Quality.splitCompositeQuality(epStatus)
