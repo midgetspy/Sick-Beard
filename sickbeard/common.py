@@ -149,7 +149,7 @@ class Quality:
     def splitCompositeQuality(status):
         """Returns a tuple containing (quality, status)"""
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
-            if quality > x*100:
+            if status > x*100:
                 return (x, status-x*100)
         
         return (Quality.UNKNOWN, status)
