@@ -29,70 +29,124 @@ import sickbeard
 
 from sickbeard import logger
 
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import xml.etree.ElementTree as etree
+
+def sendToXBMC(command, host, username=None, password=None):
+    '''
+    Handles communication with XBMC servers
+
+    command - Dictionary of field/data pairs, encoded via urllib.urlencode and
+    passed to /xbmcCmds/xbmcHttp
+
+    host - host/ip + port (foo:8080) 
+    '''
+
+    if not username:
+        username = sickbeard.XBMC_USERNAME
+    if not password:
+        password = sickbeard.XBMC_PASSWORD    
+
+    # If we have a password, use authentication
+    if password:
+	passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+	passman.add_password(None, host, username, password)
+
+	authhandler =  urllib2.HTTPBasicAuthHandler(passman)
+	opener = urllib2.build_opener(authhandler)
+	urllib2.install_opener(opener)
+
+    enc_command = urllib.urlencode(command)
+    logger.log("Encoded command is " + enc_command, logger.DEBUG)
+    url = 'http://%s/xbmcCmds/xbmcHttp' % (host)
+
+    try:
+	logger.log("Contacting XBMC via url: " + url + '?' + enc_command , logger.DEBUG)
+	req = urllib2.urlopen(url, enc_command)
+	response = req.read()
+    except IOError, e:
+	# print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
+	logger.log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
+	response = ''
+
+    return response
+
 def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None):
 
     global XBMC_TIMEOUT
 
-    if host == None:
+    if not host:
         host = sickbeard.XBMC_HOST
-    if username == None:
+    if not username:
         username = sickbeard.XBMC_USERNAME
-    if password == None:
+    if not password:
         password = sickbeard.XBMC_PASSWORD    
 
     logger.log("Sending notification for " + input, logger.DEBUG)
     
     fileString = title + "," + input
-    param = urllib.urlencode({'a': fileString.encode('utf-8')})
-    encodedParam = param.split("=")[1]
-    
-    logger.log("Encoded message is " + encodedParam, logger.DEBUG)
     
     for curHost in [x.strip() for x in host.split(",")]:
+	command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' +fileString + ')' }
+	logger.log("Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
+	request = sendToXBMC(command, curHost, username, password)
+	logger.log("Response: "+ request, logger.DEBUG)
     
-        try:
-            url = "http://" + curHost + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=Notification(" + encodedParam + ")"
-            logger.log("Sending notification to XBMC via URL: "+url +" username: "+ username + " password: " + password, logger.DEBUG)
-            req = urllib2.Request(url)
-            if password != '':
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader =  "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
-                logger.log("Adding Password to XBMC url", logger.DEBUG)
-            handle = urllib2.urlopen(req)
-        except IOError, e:
-            logger.log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
-    
-def updateLibrary(path=None):
+def updateLibrary(path=None, showName=None):
 
     global XBMC_TIMEOUT
 
     logger.log("Updating library in XBMC", logger.DEBUG)
     
     host = sickbeard.XBMC_HOST
-    username = sickbeard.XBMC_USERNAME
-    password = sickbeard.XBMC_PASSWORD
+
+    if showName:
+	pathSql = 'select path.strPath from path, tvshow, tvshowlinkpath where \
+	    tvshow.c00 = "%s" and tvshowlinkpath.idShow = tvshow.idShow \
+	    and tvshowlinkpath.idPath = path.idPath' % (showName)
+
+	# Use this to get xml back for the path lookups
+	xmlCommand = {'command': 'SetResponseFormat(webheader;false;webfooter;false;header;<xml>;footer;</xml>;opentag;<tag>;closetag;</tag>;closefinaltag;false)'}
+	# Sql used to grab path(s)
+	sqlCommand = {'command': 'QueryVideoDatabase(%s)' % (pathSql)}
+	# Set output back to default
+	resetCommand = {'command': 'SetResponseFormat()'}
     
     for curHost in [x.strip() for x in host.split(",")]:
-        
-        try:
-            if path == None:
-                path = ""
-            else:
-                path = ""
-                #path = "," + urllib.quote_plus(path)
-            url = "http://" + curHost + "/xbmcCmds/xbmcHttp?command=ExecBuiltIn&parameter=XBMC.updatelibrary(video" + path + ")"
-            req = urllib2.Request(url)
-            if password != '':
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader =  "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
-                logger.log("Adding Password to XBMC url", logger.DEBUG)
-            handle = urllib2.urlopen(req)
-        except IOError, e:
-            logger.log("Warning: Couldn't contact XBMC HTTP server at " + curHost + ": " + str(e))
-            return False
+	## This block looks pointless, leaving just in case
+	if path == None:
+	    path = ""
+	else:
+	    path = ""
+	    #path = "," + urllib.quote_plus(path)
+	##
 
+	if showName:
+	    # Get our path for show
+	    request = sendToXBMC(xmlCommand, curHost)
+	    sqlXML = sendToXBMC(sqlCommand, curHost)
+	    request = sendToXBMC(resetCommand, curHost)
+	    if not sqlXML:
+		logger.log("Invalid response for " + showName + " on " + curHost, logger.DEBUG)
+		return False
+
+	    et = etree.fromstring(sqlXML)
+	    paths = et.findall('field')
+
+	    if not paths:
+		logger.log("No valid paths found for " + showName + " on " + curHost, logger.DEBUG)
+		return False
+
+	    for path in paths:
+		logger.log("XBMC Updating " + showName + " on " + curHost + " at " + path.text, logger.DEBUG)
+		updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (path.text)}
+		request = sendToXBMC(updateCommand, curHost)
+	else:
+	    logger.log("XBMC Updating " + curHost, logger.DEBUG)
+	    updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
+	    request = sendToXBMC(updateCommand, curHost)
     return True
 
 # Wake function
