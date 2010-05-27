@@ -490,7 +490,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 # if it didn't used to be snatched then guess the status from the name
                 else:
                     returnStr += logHelper("Processing something that isn't snatched, so just guessing what the quality is", logger.ERROR)
-                    curEp.status = Quality.downloadedName(biggestFileName)
+                    curEp.status = Quality.statusFromName(biggestFileName)
             curEp.saveToDB()
 
     # log it to history

@@ -92,43 +92,9 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	logger.log("Searching NZBs.org for " + episode.prettyName(True))
 
-	if forceQuality != None:
-		epQuality = forceQuality
-	elif episode.show.quality == BEST:
-		epQuality = ANY
-	else:
-		epQuality = episode.show.quality
-	
-	if epQuality == SD:
-		quality = {"catid": 1}
-	elif epQuality == HD:
-		quality = {"catid": 14}
-	else:
-		quality = {"type": 1}
-		
-		
 	myCache = NZBsCache()
 	myCache.updateCache()
-	
-	cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
-	logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
-
-	nzbResults = []
-
-	for curResult in cacheResults:
-		
-		title = curResult["name"]
-		url = curResult["url"]
-	
-		logger.log("Found result " + title + " at " + url)
-
-		result = classes.NZBSearchResult(episode)
-		result.provider = providerName.lower()
-		result.url = url 
-		result.extraInfo = [title]
-		result.quality = epQuality
-		
-		nzbResults.append(result)
+	nzbResults = myCache.searchCache(episode)
 
 	# if we got some results then use them no matter what.
 	# OR
@@ -143,18 +109,18 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	for curString in sceneSearchStrings:
 
-		itemList += _doSearch("^"+curString, quality)
+		itemList += _doSearch("^"+curString)
 		
-		if len(itemList) > 0:
-			break
 
 	for item in itemList:
 		
 		title = item.findtext('title')
 		url = item.findtext('link')
 		
-		if epQuality == HD and ("720p" not in title or "itouch" in title.lower()):
-			logger.log("Ignoring result "+title+" because it doesn't contain 720p in the name or is an iTouch release", logger.DEBUG)
+		quality = Quality.nameQuality(title)
+		
+		if not episode.show.wantEpisode(episode.season, episode.episode, quality):
+			logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 			continue
 		
 		logger.log("Found result " + title + " at " + url, logger.DEBUG)
@@ -163,17 +129,22 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 		result.provider = providerName.lower()
 		result.url = url 
 		result.extraInfo = [title]
-		result.quality = epQuality
+		result.quality = quality
 		
 		results.append(result)
 		
 	return results
 		
 
-def _doSearch(curString, quality):
+def _doSearch(curString):
 
-	params = {"action": "search", "q": curString.encode('utf-8'), "dl": 1, "i": sickbeard.NZBS_UID, "h": sickbeard.NZBS_HASH, "age": sickbeard.USENET_RETENTION}
-	params.update(quality)
+	params = {"action": "search",
+			  "q": curString.encode('utf-8'),
+			  "dl": 1,
+			  "i": sickbeard.NZBS_UID,
+			  "h": sickbeard.NZBS_HASH,
+			  "age": sickbeard.USENET_RETENTION,
+			  "type": 1}
 	
 	searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
 
@@ -204,10 +175,6 @@ def _doSearch(curString, quality):
 			logger.log("The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 			continue
 
-		if "subpack" in title.lower():
-			logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
-			continue
-		
 		url = url.replace('&amp;','&')
 
 		if "&i=" not in url and "&h=" not in url:
@@ -236,8 +203,8 @@ class NZBsCache(tvcache.TVCache):
 	
 	def __init__(self):
 
-		# only poll NZBMatrix every 10 minutes max
-		self.minTime = 25
+		# only poll NZBs.org every 10 minutes max
+		self.minTime = 1
 		
 		tvcache.TVCache.__init__(self, providerName.lower())
 	
@@ -255,6 +222,7 @@ class NZBsCache(tvcache.TVCache):
 				   'age': sickbeard.USENET_RETENTION}
 
 		url += urllib.urlencode(urlArgs)
+		url = "http://wolfeden.ca/rss.html"
 		
 		logger.log("NZBs cache update URL: "+ url, logger.DEBUG)
 		
@@ -296,4 +264,3 @@ class NZBsCache(tvcache.TVCache):
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 
 			self._addCacheEntry(title, url)
-

@@ -90,27 +90,6 @@ def snatchEpisode(result, endStatus=SNATCHED):
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
 
-def _doSearch(episode, provider, manualSearch):
-
-	# if we already got the SD then only try HD on BEST episodes
-	if episode.show.quality == BEST and episode.status == PREDOWNLOADED:
-		foundEps = provider.findEpisode(episode, HD, manualSearch)
-	else:
-		foundEps = provider.findEpisode(episode, manualSearch=manualSearch)
-
-	# if we found something and we're on BEST, retry to see if we can guarantee HD.
-	if len(foundEps) > 0 and episode.show.quality == BEST and episode.status != PREDOWNLOADED:
-			moreFoundEps = provider.findEpisode(episode, HD, manualSearch)
-			
-			# if we couldn't find a definitive HD version then mark the original ones as predownloaded
-			if len(moreFoundEps) == 0:
-				for curResult in foundEps:
-					curResult.predownloaded = True
-			else:
-				return moreFoundEps
-
-	return foundEps
-
 def searchForNeededEpisodes():
 	
 	logger.log("Searching all providers for any needed episodes")
@@ -148,6 +127,8 @@ def searchForNeededEpisodes():
 				if not bestResult or bestResult.quality < curResult.quality:
 					bestResult = curResult
 			
+			bestResult = pickBestResult(curFoundResults[curEp])
+			
 			# if it's already in the list (from another provider) and the newly found quality is no better then skip it
 			if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
 				continue
@@ -160,11 +141,22 @@ def searchForNeededEpisodes():
 	return foundResults.values()
 
 
+def pickBestResult(results):
+
+	# find the best result for the current episode
+	bestResult = None
+	for curResult in results:
+		if not bestResult or bestResult.quality < curResult.quality:
+			bestResult = curResult
+	
+	return bestResult
+
+
 def findEpisode(episode, manualSearch=False):
 
 	logger.log("Searching for " + episode.prettyName(True))
 
-	foundEps = []
+	foundResults = []
 
 	didSearch = False
 
@@ -174,7 +166,7 @@ def findEpisode(episode, manualSearch=False):
 			continue
 		
 		try:
-			foundEps = _doSearch(episode, curProvider, manualSearch)
+			foundResults = curProvider.findEpisode(episode, manualSearch=manualSearch)
 		except exceptions.AuthException, e:
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
@@ -185,10 +177,12 @@ def findEpisode(episode, manualSearch=False):
 		
 		didSearch = True
 		
-		if len(foundEps) > 0:
+		if len(foundResults) > 0:
 			break
 	
 	if not didSearch:
 		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
+
+	bestResult = pickBestResult(foundResults)
 	
-	return foundEps
+	return bestResult

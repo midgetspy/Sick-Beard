@@ -1360,9 +1360,9 @@ class Home:
         tempStr = "Searching for download for " + epObj.prettyName(True)
         logger.log(tempStr)
         outStr += tempStr + "<br />\n"
-        foundEpisodes = search.findEpisode(epObj, manualSearch=True)
+        foundEpisode = search.findEpisode(epObj, manualSearch=True)
         
-        if len(foundEpisodes) == 0:
+        if not foundEpisode:
             message = 'No downloads were found'
             flash.error(message,
                         "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
@@ -1371,13 +1371,13 @@ class Home:
         else:
 
             # just use the first result for now
-            logger.log("Downloading episode from " + foundEpisodes[0].url + "<br />\n")
-            result = search.snatchEpisode(foundEpisodes[0])
-            providerModule = providers.getProviderModule(foundEpisodes[0].provider)
+            logger.log("Downloading episode from " + foundEpisode.url + "<br />\n")
+            result = search.snatchEpisode(foundEpisode)
+            providerModule = providers.getProviderModule(foundEpisode.provider)
             if providerModule == None:
                 flash.error('Provider is configured incorrectly, unable to download')
             else: 
-                flash.message('Episode snatched from <b>%s</b>' % providerModule.providerName)
+                flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.extraInfo[0], providerModule.providerName))
             
             #TODO: check if the download was successful
 

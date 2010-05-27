@@ -170,18 +170,9 @@ class TVCache():
                     [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
         
         
-
-    def searchCache(self, show, season, episode, quality=ANY):
-        
-        myDB = self._getDB()
-        
-        sql = "SELECT * FROM "+self.providerName+" WHERE tvdbid = "+str(show.tvdbid)+ \
-              " AND season = "+str(season)+" AND episodes LIKE '%|"+str(episode)+"|%'"
-
-        if quality != ANY:
-            sql += " AND quality = "+str(quality)
-        
-        return myDB.select(sql)
+    def searchCache(self, episode):
+        neededEps = self.findNeededEpisodes(episode)
+        return neededEps[episode]
     
     def listPropers(self, date=None, delimiter="."):
         
@@ -195,12 +186,18 @@ class TVCache():
         #return filter(lambda x: x['tvdbid'] != 0, myDB.select(sql))
         return myDB.select(sql)
 
-    def findNeededEpisodes(self):
+    def findNeededEpisodes(self, episode = None):
         neededEps = {}
+
+        if episode:
+            neededEps[episode] = []
 
         myDB = self._getDB()
         
-        sqlResults = myDB.select("SELECT * FROM "+self.providerName)
+        if not episode:
+            sqlResults = myDB.select("SELECT * FROM "+self.providerName)
+        else:
+            sqlResults = myDB.select("SELECT * FROM "+self.providerName+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "|"+str(episode.episode)+"|"])
 
         # for each cache entry
         for curResult in sqlResults:
@@ -213,11 +210,18 @@ class TVCache():
             # get season and ep data (ignoring multi-eps for now)
             curSeason = int(curResult["season"])
             curEp = int(curResult["episodes"].split("|")[1])
+            curQuality = int(curResult["quality"])
 
             # if the show says we want that episode then add it to the list
-            if showObj.wantEpisode(curSeason, curEp, int(curResult["quality"])):
+            if not showObj.wantEpisode(curSeason, curEp, curQuality):
+                logger.log("Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
+            
+            else:
                 
-                epObj = showObj.getEpisode(curSeason, curEp)
+                if episode:
+                    epObj = episode
+                else:
+                    epObj = showObj.getEpisode(curSeason, curEp)
                 
                 # build a result object
                 title = curResult["name"]
@@ -229,7 +233,7 @@ class TVCache():
                 result.provider = self.providerName.lower()
                 result.url = url 
                 result.extraInfo = [title]
-                result.quality = int(curResult["quality"])
+                result.quality = curQuality
                 
                 # add it to the list
                 if epObj not in neededEps:

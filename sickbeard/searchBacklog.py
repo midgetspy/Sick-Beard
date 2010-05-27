@@ -84,14 +84,14 @@ class BacklogSearcher:
                 
                 logger.log("Found backlog episode: " + curEp.prettyName(True), logger.DEBUG)
             
-                foundNZBs = search.findEpisode(curEp)
+                foundResult = search.findEpisode(curEp)
                 
-                if len(foundNZBs) == 0:
+                if not foundResult:
                     logger.log("Unable to find NZB for " + curEp.prettyName(True))
                 
                 else:
                     # just use the first result for now
-                    search.snatchEpisode(foundNZBs[0], SNATCHED_BACKLOG)
+                    search.snatchEpisode(foundResult, SNATCHED_BACKLOG)
 
                 time.sleep(10)
                     
@@ -103,14 +103,14 @@ class BacklogSearcher:
     
     def _searchBacklogForEp(self, curEp):
     
-        foundNZBs = search.findEpisode(curEp)
+        foundResult = search.findEpisode(curEp)
         
-        if len(foundNZBs) == 0:
+        if not foundResult:
             logger.log("Unable to find NZB for " + curEp.prettyName(True))
         
         else:
             # just use the first result for now
-            search.snatchEpisode(foundNZBs[0])
+            search.snatchEpisode(foundResult)
 
     
     def _get_lastBacklog(self):

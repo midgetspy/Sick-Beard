@@ -143,6 +143,14 @@ class Quality:
             return Quality.UNKNOWN
 
     @staticmethod
+    def assumeQuality(name):
+        
+        if name.endswith(".avi"):
+            return Quality.SDTV
+        elif name.endswith(".mkv"):
+            return Quality.HDTV
+
+    @staticmethod
     def compositeStatus(status, quality):
         return status + 100 * quality
 
@@ -160,8 +168,11 @@ class Quality:
         return (Quality.UNKNOWN, status)
 
     @staticmethod
-    def statusFromName(name):
-        return Quality.compositeStatus(DOWNLOADED, Quality.nameQuality(name))
+    def statusFromName(name, assume=True):
+        quality = Quality.nameQuality(name)
+        if assume and quality == Quality.UNKNOWN:
+            quality = Quality.assumeQuality(name) 
+        return Quality.compositeStatus(DOWNLOADED, quality)
 
 
 Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qualityStrings.keys()]
@@ -187,6 +198,9 @@ class StatusStrings:
             return Quality.statusPrefixes[status]+" ("+Quality.qualityStrings[quality]+")"
         else:
             return self.statusStrings[name]
+
+    def has_key(self, name):
+        return name in self.statusStrings or name in Quality.DOWNLOADED or name in Quality.SNATCHED
 
 statusStrings = StatusStrings()
 

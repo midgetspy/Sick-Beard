@@ -507,7 +507,7 @@ class TVShow(object):
             else:
                 rootEp.relatedEps.append(curEp)
 
-            if sickbeard.helpers.isMediaFile(file) and curEp.status not in [SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG] + Quality.DOWNLOADED:
+            if sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.SNATCHED + [SNATCHED_PROPER, SNATCHED_BACKLOG] + Quality.DOWNLOADED:
                 with curEp.lock:
                     logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.statusFromName(file)), logger.DEBUG)
                     curEp.status = Quality.statusFromName(file)
@@ -694,6 +694,9 @@ class TVShow(object):
         if not os.path.isdir(self._location):
             return False
         
+        # load from dir
+        self.loadEpisodesFromDir()
+            
         # run through all locations from DB, check that they exist
         logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
         
@@ -730,9 +733,6 @@ class TVShow(object):
                     curEp.saveToDB()
 
         
-        # load from dir
-        self.loadEpisodesFromDir()
-            
             
     def fixEpisodeNames(self):
 
@@ -1079,7 +1079,7 @@ class TVEpisode:
         if not ek.ek(os.path.isfile, self.location):
 
             # if we don't have the file
-            if self.airdate >= datetime.date.today() and self.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG, PREDOWNLOADED):
+            if self.airdate >= datetime.date.today() and self.status not in Quality.SNATCHED + [SNATCHED_PROPER, SNATCHED_BACKLOG, PREDOWNLOADED]:
                 # and it hasn't aired yet set the status to UNAIRED
                 logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
