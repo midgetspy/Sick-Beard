@@ -1286,10 +1286,11 @@ class Home:
     @cherrypy.expose
     def updateXBMC(self, showName=None):
 
-        if xbmc.updateLibrary(showName=showName):
-            flash.message("Command sent to XBMC to update library")
-        else:
-            flash.error("Unable to contact XBMC")
+	for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
+	    if xbmc.updateLibrary(curHost, showName=showName):
+		flash.message("Command sent to XBMC host " + curHost + " to update library")
+	    else:
+		flash.error("Unable to contact XBMC host " + curHost)
         redirect('/home')
 
 

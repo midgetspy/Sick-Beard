@@ -67,6 +67,7 @@ def sendToXBMC(command, host, username=None, password=None):
 	logger.log("Contacting XBMC via url: " + url, logger.DEBUG)
 	req = urllib2.urlopen(url)
 	response = req.read()
+	logger.log("response: " + response, logger.DEBUG)
     except IOError, e:
 	# print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
 	logger.log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
@@ -94,13 +95,15 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
 	logger.log("Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
 	request = sendToXBMC(command, curHost, username, password)
     
-def updateLibrary(path=None, showName=None):
+def updateLibrary(host, path=None, showName=None):
 
     global XBMC_TIMEOUT
 
     logger.log("Updating library in XBMC", logger.DEBUG)
     
-    host = sickbeard.XBMC_HOST
+    if not host:
+	logger.log('No host specified, no updates done', logger.DEBUG)
+	return FALSE
 
     if showName:
 	pathSql = 'select path.strPath from path, tvshow, tvshowlinkpath where \
@@ -114,43 +117,42 @@ def updateLibrary(path=None, showName=None):
 	# Set output back to default
 	resetCommand = {'command': 'SetResponseFormat()'}
     
-    for curHost in [x.strip() for x in host.split(",")]:
-	## This block looks pointless, leaving just in case
-	if path == None:
-	    path = ""
-	else:
-	    path = ""
-	    #path = "," + urllib.quote_plus(path)
-	##
+    ## This block looks pointless, leaving just in case
+    if path == None:
+	path = ""
+    else:
+	path = ""
+	#path = "," + urllib.quote_plus(path)
+    ##
 
-	if showName:
-	    # Get our path for show
-	    request = sendToXBMC(xmlCommand, curHost)
-	    sqlXML = sendToXBMC(sqlCommand, curHost)
-	    request = sendToXBMC(resetCommand, curHost)
-	    if not sqlXML:
-		logger.log("Invalid response for " + showName + " on " + curHost, logger.DEBUG)
-		return False
+    if showName:
+	# Get our path for show
+	request = sendToXBMC(xmlCommand, host)
+	sqlXML = sendToXBMC(sqlCommand, host)
+	request = sendToXBMC(resetCommand, host)
+	if not sqlXML:
+	    logger.log("Invalid response for " + showName + " on " + host, logger.DEBUG)
+	    return False
 
-	    et = etree.fromstring(sqlXML)
-	    paths = et.findall('field')
+	et = etree.fromstring(sqlXML)
+	paths = et.findall('field')
 
-	    if not paths:
-		logger.log("No valid paths found for " + showName + " on " + curHost, logger.DEBUG)
-		return False
+	if not paths:
+	    logger.log("No valid paths found for " + showName + " on " + host, logger.DEBUG)
+	    return False
 
-	    for path in paths:
-		logger.log("XBMC Updating " + showName + " on " + curHost + " at " + path.text, logger.DEBUG)
-		updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (path.text)}
-		request = sendToXBMC(updateCommand, curHost)
-		if not request:
-		    return False
-	else:
-	    logger.log("XBMC Updating " + curHost, logger.DEBUG)
-	    updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
-	    request = sendToXBMC(updateCommand, curHost)
+	for path in paths:
+	    logger.log("XBMC Updating " + showName + " on " + host + " at " + path.text, logger.DEBUG)
+	    updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (path.text)}
+	    request = sendToXBMC(updateCommand, host)
 	    if not request:
 		return False
+    else:
+	logger.log("XBMC Updating " + host, logger.DEBUG)
+	updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
+	request = sendToXBMC(updateCommand, host)
+	if not request:
+	    return False
     return True
 
 # Wake function
