@@ -92,6 +92,7 @@ class ProperFinder():
 
         for curProper in sortedPropers:
 
+            # parse the file name
             try:
                 myParser = FileParser(curProper.name)
                 epInfo = myParser.parse()
@@ -99,10 +100,11 @@ class ProperFinder():
                 logger.log("Unable to parse the filename "+curProper.name+" into a valid episode", logger.ERROR)
                 continue
     
+            # populate our Proper instance
             curProper.season = epInfo.seasonnumber
             curProper.episode = epInfo.episodenumbers[0]
-    
-            curProper.quality = helpers.guessSceneEpisodeQuality(curProper.name)
+            #curProper.quality = helpers.guessSceneEpisodeQuality(curProper.name)
+            curProper.quality = Quality.nameQuality(curProper.name)
     
             # for each show in our list
             for curShow in sickbeard.showList:
@@ -128,6 +130,17 @@ class ProperFinder():
                 # if we found something in the inner for loop break out of this one
                 if curProper.tvdbid != -1:
                     break
+
+            # check if we actually want this proper (if it's the right quality)
+            sqlResults = db.DBConnection().select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [curProper.tvdbid, curProper.season, curProper.episode])
+            if not sqlResults:
+                continue
+            oldStatus = int(sqlResults[0]["status"])
+            oldQuality, oldStatus = Quality.splitCompositeQuality(oldStatus)
+            
+            # only keep the proper if we have already retrieved the same quality ep (don't get better/worse ones) 
+            if oldStatus not in (DOWNLOADED, SNATCHED) or oldQuality != curProper.quality:
+                continue
 
             # if the show is in our list and there hasn't been a proper already added for that particular episode then add it to our list of propers
             if curProper.tvdbid != -1 and (curProper.tvdbid, curProper.season, curProper.episode) not in map(operator.attrgetter('tvdbid', 'season', 'episode'), finalPropers):
