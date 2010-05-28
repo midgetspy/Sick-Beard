@@ -495,8 +495,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     rootEp.saveToDB()
 
     # we don't want to put predownloads in the library until we can deal with removing them
+    # try updating just show path first
     if sickbeard.XBMC_UPDATE_LIBRARY == True and rootEp.status != PREDOWNLOADED:
-        notifiers.xbmc.updateLibrary(rootEp.show.location)
+        if not notifiers.xbmc.updateLibrary(showName=rootEp.show.name) and sickbeard.XBMC_UPDATE_FULL:
+	    # do a full update if requested
+	    notifiers.xbmc.updateLibrary()
 
     returnStr += logHelper("Post processing finished successfully", logger.DEBUG)
 

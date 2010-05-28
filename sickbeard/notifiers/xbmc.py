@@ -143,10 +143,14 @@ def updateLibrary(path=None, showName=None):
 		logger.log("XBMC Updating " + showName + " on " + curHost + " at " + path.text, logger.DEBUG)
 		updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (path.text)}
 		request = sendToXBMC(updateCommand, curHost)
+		if not request:
+		    return False
 	else:
 	    logger.log("XBMC Updating " + curHost, logger.DEBUG)
 	    updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
 	    request = sendToXBMC(updateCommand, curHost)
+	    if not request:
+		return False
     return True
 
 # Wake function
