@@ -364,14 +364,14 @@ class TVShow(object):
                 fanartData = helpers.getShowImage(fanartURL)
     
             if fanartData == None:
-                logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
+                logger.log("Unable to retrieve fanart, skipping", logger.WARNING)
             else:
                 try:
                     outFile = ek.ek(open, ek.ek(os.path.join, self.location, "fanart.jpg"), 'wb')
                     outFile.write(fanartData)
                     outFile.close()
                 except IOError, e:
-                    logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
+                    logger.log("Unable to write fanart to "+ek.ek(os.path.join, self.location, "fanart.jpg")+" - are you sure the show folder is writable? "+str(e), logger.ERROR)
         
         # get the image data
         if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.location, "folder.jpg")):
@@ -384,14 +384,14 @@ class TVShow(object):
                 posterData = helpers.getShowImage(posterURL)
     
             if posterData == None:
-                logger.log("Unable to retrieve poster, skipping", logger.ERROR)
+                logger.log("Unable to retrieve poster, skipping", logger.WARNING)
             else:
                 try:
                     outFile = ek.ek(open, ek.ek(os.path.join, self.location, "folder.jpg"), 'wb')
                     outFile.write(posterData)
                     outFile.close()
                 except IOError, e:
-                    logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
+                    logger.log("Unable to write poster to "+ek.ek(os.path.join, self.location, "folder.jpg")+" - are you sure the show folder is writable? "+str(e), logger.ERROR)
 
         seasonData = None 
         #  How many seasons? 
@@ -459,7 +459,7 @@ class TVShow(object):
             
             # make an episode out of it
         except exceptions.TVRageException, e:
-            logger.log("Unable to add TVRage info: " + str(e), logger.ERROR)
+            logger.log("Unable to add TVRage info: " + str(e), logger.WARNING)
             
 
 
