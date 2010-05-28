@@ -53,6 +53,11 @@
 #else
 #set $xbmc_update_library = ""
 #end if
+#if $sickbeard.XBMC_UPDATE_FULL == True:
+#set $xbmc_update_full = "CHECKED"
+#else
+#set $xbmc_update_full = ""
+#end if
 
 <input type="checkbox" name="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "CHECKED" else ""#> <strong>Notify XBMC on NZB retrieval</strong><br />
 Send XBMC a notification when we find an NZB?<br />
@@ -64,6 +69,10 @@ Send XBMC a notification when we finish a download?<br />
 
 <input type="checkbox" name="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "CHECKED" else ""#> <strong>Update XBMC library</strong><br />
 Update XBMC library when we finish a download?<br />
+<br />
+
+<input type="checkbox" name="xbmc_update_full" #if $sickbeard.XBMC_UPDATE_FULL then "CHECKED" else ""#> <strong>Fall Back To Full Update</strong><br />
+Do a full library update if per-show fails?<br />
 <br />
 
 <strong>XBMC host:</strong><br />

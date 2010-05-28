@@ -572,8 +572,8 @@ class ConfigNotifications:
     
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, 
-                          xbmc_update_library=None, xbmc_host=None, xbmc_username=None, xbmc_password=None, use_growl=None,
-                          growl_host=None, growl_password=None, ):
+                          xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+                          use_growl=None, growl_host=None, growl_password=None, ):
 
         results = []
 
@@ -592,6 +592,11 @@ class ConfigNotifications:
         else:
             xbmc_update_library = 0
 
+        if xbmc_update_full == "on":
+            xbmc_update_full = 1
+        else:
+            xbmc_update_full = 0
+
         if use_growl == "on":
             use_growl = 1
         else:
@@ -600,6 +605,7 @@ class ConfigNotifications:
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch 
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
+        sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
