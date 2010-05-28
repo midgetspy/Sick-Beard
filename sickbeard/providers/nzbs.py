@@ -190,7 +190,7 @@ def findPropers(date=None):
 	
 	for curString in (".PROPER.", ".REPACK."):
 	
-		for curResult in _doSearch(curString, {"type": 1}):
+		for curResult in _doSearch(curString):
 
 			resultDate = datetime.datetime.strptime(curResult.findtext('pubDate'), "%a, %d %b %Y %H:%M:%S +0000")
 			
