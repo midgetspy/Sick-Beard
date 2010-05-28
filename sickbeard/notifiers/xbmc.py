@@ -60,11 +60,12 @@ def sendToXBMC(command, host, username=None, password=None):
 
     enc_command = urllib.urlencode(command)
     logger.log("Encoded command is " + enc_command, logger.DEBUG)
-    url = 'http://%s/xbmcCmds/xbmcHttp' % (host)
+    # Web server doesn't like POST, GET is the way to go
+    url = 'http://%s/xbmcCmds/xbmcHttp/?%s' % (host, enc_command)
 
     try:
-	logger.log("Contacting XBMC via url: " + url + '?' + enc_command , logger.DEBUG)
-	req = urllib2.urlopen(url, enc_command)
+	logger.log("Contacting XBMC via url: " + url, logger.DEBUG)
+	req = urllib2.urlopen(url)
 	response = req.read()
     except IOError, e:
 	# print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
