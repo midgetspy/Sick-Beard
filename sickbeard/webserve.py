@@ -148,7 +148,7 @@ class Backlog:
     def index(self):
         
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT e.*, show_name FROM tv_shows s, tv_episodes e WHERE s.tvdb_id=e.showid AND e.status IN ("+str(BACKLOG)+","+str(DISCBACKLOG)+")")
+        sqlResults = []# myDB.select("SELECT e.*, show_name FROM tv_shows s, tv_episodes e WHERE s.tvdb_id=e.showid AND e.status IN ("+str(BACKLOG)+","+str(DISCBACKLOG)+")")
         
         t = PageTemplate(file="backlog.tmpl")
         t.backlogResults = sqlResults
@@ -1056,7 +1056,7 @@ class Home:
         
         today = str(datetime.date.today().toordinal())
         
-        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status IN ("+",".join([str(x) for x in Quality.DOWNLOADED])+","+str(PREDOWNLOADED)+") AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        t.downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status IN ("+",".join([str(x) for x in Quality.DOWNLOADED])+") AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
 
         t.allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
         
@@ -1339,8 +1339,8 @@ class Home:
                         logger.log("Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
                     
-                    if int(status) in Quality.DOWNLOADED and epObj.status not in [PREDOWNLOADED, SNATCHED_PROPER, SNATCHED_BACKLOG] + Quality.DOWNLOADED:
-                        logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not PREDOWNLOADED/SNATCHED_PROPER/SNATCHED_BACKLOG", logger.ERROR)
+                    if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
+                        logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED_PROPER/DOWNLOADED", logger.ERROR)
                         continue
 
                     epObj.status = int(status)

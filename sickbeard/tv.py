@@ -507,7 +507,7 @@ class TVShow(object):
             else:
                 rootEp.relatedEps.append(curEp)
 
-            if sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.SNATCHED + [SNATCHED_PROPER, SNATCHED_BACKLOG] + Quality.DOWNLOADED:
+            if sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
                 with curEp.lock:
                     logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.statusFromName(file)), logger.DEBUG)
                     curEp.status = Quality.statusFromName(file)
@@ -849,7 +849,7 @@ class TVShow(object):
         return toReturn
 
         
-    def wantEpisode(self, season, episode, quality):
+    def wantEpisode(self, season, episode, quality, manualSearch=False):
         
         logger.log("Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
 
@@ -861,19 +861,19 @@ class TVShow(object):
         sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
         
         if not sqlResults or not len(sqlResults):
-            logger.log("Unable to find the episode")
+            logger.log("Unable to find the episode", logger.DEBUG)
             return False
         
         epStatus = int(sqlResults[0]["status"])
 
         # if we know we don't want it then just say no
-        if epStatus in (SKIPPED,):
-            logger.log("Ep is skipped, not bothering")
+        if epStatus in (SKIPPED,) and not manualSearch:
+            logger.log("Ep is skipped, not bothering", logger.DEBUG)
             return False
 
         # if it's one of these then we don't even care what the available quality is
-        if epStatus in (MISSED, UNAIRED, BACKLOG, DISCBACKLOG):
-            logger.log("Ep is missed/unaired/backlog/discbacklog, definitely get it")
+        if epStatus in (WANTED, UNAIRED):
+            logger.log("Ep is missed/unaired/backlog/discbacklog, definitely get it", logger.DEBUG)
             return True
         
         curQuality, curStatus = Quality.splitCompositeQuality(epStatus)
@@ -881,12 +881,12 @@ class TVShow(object):
         
         # if we already have something snatched/dl'd and quality is ANY then we don't want to downloading anything further
         if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and type == Quality.ANY:
-            logger.log("Quality type is any and we have one, not bothering")
+            logger.log("Quality type is any and we have one, not bothering", logger.DEBUG)
             return False
         
         # if the available quality is one that the show allows and it's better than what we have then say yes
         if quality in qualities and curQuality < quality and type == Quality.BEST:
-            logger.log("Better quality found, saying yes")
+            logger.log("Better quality found, saying yes", logger.DEBUG)
             return True
         
         return False
@@ -1079,13 +1079,13 @@ class TVEpisode:
         if not ek.ek(os.path.isfile, self.location):
 
             # if we don't have the file
-            if self.airdate >= datetime.date.today() and self.status not in Quality.SNATCHED + [SNATCHED_PROPER, SNATCHED_BACKLOG, PREDOWNLOADED]:
+            if self.airdate >= datetime.date.today() and self.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER:
                 # and it hasn't aired yet set the status to UNAIRED
                 logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
             else:
                 if self.status == UNAIRED:
-                    self.status = MISSED
+                    self.status = WANTED
     
                 # if we somehow are still UNKNOWN then just skip it
                 elif self.status == UNKNOWN:
@@ -1094,7 +1094,7 @@ class TVEpisode:
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
             # leave propers alone, you have to either post-process them or manually change them back
-            if self.status not in [SNATCHED_PROPER, PREDOWNLOADED] + Quality.DOWNLOADED + Quality.SNATCHED:
+            if self.status not in Quality.SNATCHED_PROPER + Quality.DOWNLOADED + Quality.SNATCHED:
                 logger.log("5 Status changes from " + str(self.status) + " to " + str(Quality.statusFromName(self.location)), logger.DEBUG)
                 self.status = Quality.statusFromName(self.location)
 

@@ -33,30 +33,15 @@ notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
 
 ### Episode statuses
-UNKNOWN = -1
-UNAIRED = 1
-SNATCHED = 2
-PREDOWNLOADED = 3
-DOWNLOADED = 4
-SKIPPED = 5
-MISSED = 6
-BACKLOG = 7
-DISCBACKLOG = 8
-SNATCHED_PROPER = 9
-SNATCHED_BACKLOG = 10
-
-#statusStrings = {}
-#statusStrings[UNKNOWN] = "Unknown"
-#statusStrings[UNAIRED] = "Unaired"
-#statusStrings[SNATCHED] = "Snatched"
-#statusStrings[PREDOWNLOADED] = "Predownloaded"
-#statusStrings[DOWNLOADED] = "Downloaded"
-#statusStrings[SKIPPED] = "Skipped"
-#statusStrings[MISSED] = "Missed"
-#statusStrings[BACKLOG] = "Backlog"
-#statusStrings[DISCBACKLOG] = "Disc Backlog"
-#statusStrings[SNATCHED_PROPER] = "Snatched (Proper)"
-#statusStrings[SNATCHED_BACKLOG] = "Snatched (Backlog)"
+UNKNOWN = -1 # should never happen
+UNAIRED = 1 # episodes that haven't aired yet
+SNATCHED = 2 # qualified with quality
+DOWNLOADED = 4 # qualified with quality
+SKIPPED = 5 # episodes we don't want
+SNATCHED_PROPER = 9 # qualified with quality
+WANTED = 3 # episodes we don't have but want to get
+ARCHIVED = 6 # episodes that you don't have locally (counts toward download completion stats)
+IGNORED = 7 # episodes that you don't want included in your download stats
 
 ### Qualities
 HD = 1
@@ -66,6 +51,7 @@ BEST = 4
 
 class Quality:
 
+    NONE = 0
     SDTV = 1
     SDDVD = 1<<1 # 2
     HDTV = 1<<2 # 4
@@ -115,7 +101,7 @@ class Quality:
         return (qualities, type)
 
     @staticmethod
-    def nameQuality(name, delimiter="."):
+    def nameQuality(name, nzbMatrix=False):
         
         name = os.path.basename(name)
         
@@ -124,8 +110,13 @@ class Quality:
             if Quality.qualityStrings[x] in name:
                 return x
         
-        containsOne = lambda list: any([x.replace(".", delimiter) in name.lower() for x in list])
-        containsAll = lambda list: all([x.replace(".", delimiter) in name.lower() for x in list])
+        if nzbMatrix:
+            fixName = lambda x: x.replace("."," ").replace("-"," ")
+        else:
+            fixName = lambda x: x
+        
+        containsOne = lambda list: any([fixName(x) in name.lower() for x in list])
+        containsAll = lambda list: all([fixName(x) in name.lower() for x in list])
     
         if containsOne(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"]):
             return Quality.SDTV
@@ -165,7 +156,7 @@ class Quality:
             if status > x*100:
                 return (x, status-x*100)
         
-        return (Quality.UNKNOWN, status)
+        return (Quality.NONE, status)
 
     @staticmethod
     def statusFromName(name, assume=True):
@@ -177,30 +168,29 @@ class Quality:
 
 Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
+Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
 class StatusStrings:
     def __init__(self):
         self.statusStrings = {UNKNOWN: "Unknown",
                               UNAIRED: "Unaired",
                               SNATCHED: "Snatched",
-                              PREDOWNLOADED: "Predownloaded",
                               DOWNLOADED:  "Downloaded",
                               SKIPPED: "Skipped",
-                              MISSED: "Missed",
-                              BACKLOG: "Backlog",
-                              DISCBACKLOG: "Disc Backlog",
                               SNATCHED_PROPER: "Snatched (Proper)",
-                              SNATCHED_BACKLOG: "Snatched (Backlog)"}
+                              WANTED: "Wanted",
+                              ARCHIVED: "Archived",
+                              IGNORED: "Ignored"}
 
     def __getitem__(self, name):
-        if name in Quality.DOWNLOADED + Quality.SNATCHED:
+        if name in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
             quality, status = Quality.splitCompositeQuality(name)
-            return Quality.statusPrefixes[status]+" ("+Quality.qualityStrings[quality]+")"
+            return self.statusStrings[status]+" ("+Quality.qualityStrings[quality]+")"
         else:
             return self.statusStrings[name]
 
     def has_key(self, name):
-        return name in self.statusStrings or name in Quality.DOWNLOADED or name in Quality.SNATCHED
+        return name in self.statusStrings or name in Quality.DOWNLOADED or name in Quality.SNATCHED or name in Quality.SNATCHED_PROPER
 
 statusStrings = StatusStrings()
 

@@ -40,7 +40,7 @@ Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=
 <br />
 Change selected episodes to 
 <select id="statusSelect">
-#for $curStatus in [$BACKLOG, $DISCBACKLOG, $MISSED, $SKIPPED] + $Quality.DOWNLOADED:
+#for $curStatus in [$WANTED, $SKIPPED] + $Quality.DOWNLOADED:
 <option value="$curStatus">$statusStrings[$curStatus]
 #end for
 </select>
@@ -62,8 +62,6 @@ All other statuses will automatically update to Downloaded on a show refresh.<br
     <td colspan=8>
 	<br />
 	<h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#
-	<!--(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
-	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)-->
 	<br />
 	</h2></td>
   </tr>

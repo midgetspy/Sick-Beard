@@ -669,36 +669,7 @@ def launchBrowser():
 
 def updateMissingList():
     
-    logger.log("Searching DB and building list of MISSED episodes")
-    
-    myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status=" + str(MISSED))
-    
-    epList = []
-
-    for sqlEp in sqlResults:
-        
-        try:
-            show = helpers.findCertainShow (sickbeard.showList, int(sqlEp["showid"]))
-        except exceptions.MultipleShowObjectsException:
-            logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
-            return None
-        
-        # we aren't ever downloading specials
-        if int(sqlEp["season"]) == 0:
-            continue
-        
-        if show == None:
-            continue
-        
-        ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
-        
-        if ep == None:
-            logger.log("Somehow "+show.name+" - "+str(sqlEp["season"])+"x"+str(sqlEp["episode"])+" is None", logger.ERROR)
-        else:
-            epList.append(ep)
-
-    sickbeard.missingList = epList
+    return []
 
 
 def updateAiringList():

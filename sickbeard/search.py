@@ -78,12 +78,12 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
 	history.logSnatch(result)
 
-	# don't notify when we snatch a backlog episode, that's just annoying
-	if endStatus != SNATCHED_BACKLOG:
+	# don't notify when we re-download an episode
+	if result.episode.status in Quality.DOWNLOADED:
 		notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
 	
 	with result.episode.lock:
-		result.episode.status = Quality.compositeStatus(SNATCHED, result.quality)
+		result.episode.status = Quality.compositeStatus(endStatus, result.quality)
 		result.episode.saveToDB()
 
 	sickbeard.updateMissingList()
@@ -186,3 +186,43 @@ def findEpisode(episode, manualSearch=False):
 	bestResult = pickBestResult(foundResults)
 	
 	return bestResult
+
+def findSeason(show, season):
+	
+	logger.log("Searching for results from "+show.name+" season "+str(season), logger.DEBUG)
+	
+	foundResults = {}
+	
+	for curProvider in providers.getAllModules():
+		
+		if not curProvider.isActive():
+			continue
+		
+		try:
+			curResults = curProvider.findSeasonResults(show, season)
+			for curEp in curResults:
+				if curEp in foundResults:
+					foundResults[curEp] += curResults[curEp]
+				else:
+					foundResults[curEp] = curResults[curEp]
+		except exceptions.AuthException, e:
+			logger.log("Authentication error: "+str(e), logger.ERROR)
+			continue
+		except Exception, e:
+			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			logger.log(traceback.format_exc(), logger.DEBUG)
+			continue
+		
+		didSearch = True
+		
+		if len(foundResults) > 0:
+			break
+	
+	if not didSearch:
+		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
+	
+	finalResults = []
+	for curEp in foundResults:
+		finalResults.append(pickBestResult(foundResults[curEp]))
+	
+	return finalResults

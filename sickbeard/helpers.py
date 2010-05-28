@@ -132,6 +132,21 @@ def makeSceneShowSearchStrings(show):
 	return map(sanitizeSceneName, showNames)
 
 
+def makeSceneSeasonSearchString (show, season):
+
+	seasonStrings = ["S%02d" % season]
+
+	showNames = set(makeSceneShowSearchStrings(show))
+
+	toReturn = []
+
+	for curShow in showNames:
+		for curSeasonString in seasonStrings:
+			toReturn.append(curShow + "." + curSeasonString)
+
+	return toReturn
+
+
 def makeSceneSearchString (episode):
 
 	# see if we should use dates instead of episodes
@@ -140,7 +155,7 @@ def makeSceneSearchString (episode):
 	else:
 		epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
 
-	showNames = makeSceneShowSearchStrings(episode.show)
+	showNames = set(makeSceneShowSearchStrings(episode.show))
 
 	toReturn = []
 

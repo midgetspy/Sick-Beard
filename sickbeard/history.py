@@ -30,10 +30,7 @@ def logSnatch(searchResult):
     else:
         provider = "unknown"
     
-    if searchResult.predownloaded:
-        action = ACTION_PRESNATCHED
-    else:
-        action = ACTION_SNATCHED
+    action = searchResult.episode.status
 
     resource = searchResult.extraInfo[0]
     
@@ -48,7 +45,7 @@ def logDownload(episode, filename):
     quality = -1
     provider = -1
     
-    action = ACTION_DOWNLOADED
+    action = episode.status
     
     _logHistoryItem(action, showid, season, episode, quality, filename, provider)
 

@@ -1,5 +1,7 @@
 from sickbeard import db
 from sickbeard import common
+from sickbeard import logger
+
 
 # ======================
 # = Main DB Migrations =
@@ -74,59 +76,107 @@ class NumericProviders (AddAirdateIndex):
 
 class NewQualitySettings (NumericProviders):
 	def test(self):
-		return len(self.connection.select("SELECT * FROM tv_episodes WHERE status = ?", [common.DOWNLOADED])) == 0
+		return self.hasColumn("tv_shows", "redl_quality")
 
 	def execute(self):
-
-		toUpdate = self.connection.select("SELECT episode_id, location, status FROM tv_episodes WHERE status IN (?, ?)", [common.DOWNLOADED, common.SNATCHED])
 		
+		# old stuff that's been removed from common but we need it to upgrade
+		HD = 1
+		SD = 3
+		ANY = 2
+		BEST = 4
+
+		ACTION_SNATCHED = 1
+		ACTION_PRESNATCHED = 2
+		ACTION_DOWNLOADED = 3
+
+		PREDOWNLOADED = 3
+		MISSED = 6
+		BACKLOG = 7
+		DISCBACKLOG = 8
+		SNATCHED_BACKLOG = 10
+
+
+		### Update episode statuses
+		toUpdate = self.connection.select("SELECT episode_id, location, status FROM tv_episodes WHERE status IN (?, ?, ?, ?, ?, ?, ?)", [common.DOWNLOADED, common.SNATCHED, PREDOWNLOADED, MISSED, BACKLOG, DISCBACKLOG, SNATCHED_BACKLOG])
 		for curUpdate in toUpdate:
 
-			if int(curUpdate["status"]) == common.SNATCHED:
-				self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ? ", [common.Quality.compositeStatus(common.SNATCHED, common.Quality.UNKNOWN), curUpdate["episode_id"]])
+			newStatus = None
+			oldStatus = int(curUpdate["status"])
+			if oldStatus == common.SNATCHED:
+				newStatus = common.Quality.compositeStatus(common.SNATCHED, common.Quality.UNKNOWN)
+			elif oldStatus == PREDOWNLOADED:
+				newStatus = common.Quality.compositeStatus(common.DOWNLOADED, common.Quality.SDTV)
+			elif oldStatus in (MISSED, BACKLOG, DISCBACKLOG):
+				newStatus = common.WANTED
+			elif oldStatus == SNATCHED_BACKLOG:
+				newStatus = common.Quality.compositeStatus(common.SNATCHED, common.Quality.UNKNOWN)
+
+			if newStatus != None:
+				self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ? ", [newStatus, curUpdate["episode_id"]])
 				continue
 			
-			if not curUpdate["location"]:
-				continue
-			if curUpdate["location"].endswith(".avi"):
-				newQuality = common.Quality.SDTV
-			elif curUpdate["location"].endswith(".mkv"):
-				newQuality = common.Quality.HDTV
-			else:
-				newQuality = common.Quality.UNKNOWN
-
-			self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [common.Quality.compositeStatus(common.DOWNLOADED, newQuality), curUpdate["episode_id"]])
-
-
-		toUpdate = self.connection.select("SELECT episode_id, location FROM tv_episodes WHERE status = ?", [common.DOWNLOADED])
-		
-		for curUpdate in toUpdate:
+			# if we get here status should be == DOWNLOADED
 			if not curUpdate["location"]:
 				continue
 
 			newQuality = common.Quality.nameQuality(curUpdate["location"])
-			
+
 			if newQuality == common.Quality.UNKNOWN:
 				newQuality = common.Quality.assumeQuality(curUpdate["location"])
 
 			self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [common.Quality.compositeStatus(common.DOWNLOADED, newQuality), curUpdate["episode_id"]])
-			
-			toUpdate = self.connection.select("SELECT * FROM tv_shows")
-		
+
+
+		### Update show qualities
+		toUpdate = self.connection.select("SELECT * FROM tv_shows")
 		for curUpdate in toUpdate:
 			
 			if not curUpdate["quality"]:
 				continue
 			
-			if int(curUpdate["quality"]) == common.HD:
+			if int(curUpdate["quality"]) == HD:
 				newQuality = common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.ANY 
-			elif int(curUpdate["quality"]) == common.SD:
+			elif int(curUpdate["quality"]) == SD:
 				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.ANY 
-			elif int(curUpdate["quality"]) == common.ANY:
+			elif int(curUpdate["quality"]) == ANY:
 				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.ANY
-			elif int(curUpdate["quality"]) == common.BEST:
+			elif int(curUpdate["quality"]) == BEST:
 				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.BEST
 			else:
-				newQuality = common.Quality.UNKNOWN
+				logger.log("Unknown show quality: "+str(curUpdate["quality"]), logger.WARNING)
+				newQuality = None
 			
-			self.connection.action("UPDATE tv_shows SET quality = ? WHERE show_id = ?", [newQuality, curUpdate["show_id"]])
+			if newQuality:
+				self.connection.action("UPDATE tv_shows SET quality = ? WHERE show_id = ?", [newQuality, curUpdate["show_id"]])
+			
+			
+		### Update history
+		toUpdate = self.connection.select("SELECT * FROM history")
+		for curUpdate in toUpdate:
+			
+			newAction = None
+			newStatus = None
+			if int(curUpdate["action"] == ACTION_SNATCHED):
+				newStatus = common.SNATCHED
+			elif int(curUpdate["action"] == ACTION_DOWNLOADED):
+				newStatus = common.DOWNLOADED
+			elif int(curUpdate["action"] == ACTION_PRESNATCHED):
+				newAction = common.Quality.compositeStatus(common.SNATCHED, common.Quality.SDTV)
+
+			if newAction == None and newStatus == None:
+				continue
+
+			if not newAction:
+				if int(curUpdate["quality"] == HD):
+					newAction = common.Quality.compositeStatus(newStatus, common.Quality.HDTV)
+				elif int(curUpdate["quality"] == SD):
+					newAction = common.Quality.compositeStatus(newStatus, common.Quality.SDTV)
+				else:
+					newAction = common.Quality.compositeStatus(newStatus, common.Quality.UNKNOWN)
+
+			self.connection.action("UPDATE history SET action = ? WHERE date = ? AND showid = ?", [newAction, curUpdate["date"], curUpdate["showid"]])
+
+			
+		self.addColumn("tv_shows", "redl_quality", "NUMERIC", -1)
+			

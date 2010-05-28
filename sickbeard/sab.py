@@ -38,8 +38,8 @@ def sendNZB(nzb):
     if sickbeard.SAB_CATEGORY != None:
         params['cat'] = sickbeard.SAB_CATEGORY
 
-    # don't bother making backlog episodes high priority
-    if nzb.episode.status != BACKLOG:
+    # don't bother making re-downloads high priority
+    if nzb.episode.status in Quality.DOWNLOADED:
         params['priority'] = 1
 
     params['pp'] = 3

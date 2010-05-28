@@ -64,7 +64,7 @@ class CurrentSearcher():
 
     def _changeMissingEpisodes(self):
         
-        logger.log("Changing all old missing episodes to status MISSED")
+        logger.log("Changing all old missing episodes to status WANTED")
         
         curDate = datetime.date.today().toordinal()
 
@@ -88,7 +88,7 @@ class CurrentSearcher():
                 if ep.show.paused:
                     ep.status = SKIPPED
                 else:
-                    ep.status = MISSED
+                    ep.status = WANTED
                 ep.saveToDB()
             
 

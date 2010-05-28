@@ -34,8 +34,12 @@ from sickbeard import db, tvcache
 from sickbeard.common import *
 from sickbeard import logger
 
+from lib.tvnamer.utils import FileParser
+from lib.tvnamer import tvnamer_exceptions
+
 providerType = "nzb"
 providerName = "NZBMatrix"
+delimiter = " "
 
 def isActive():
 	return sickbeard.NZBMATRIX and sickbeard.USE_NZB
@@ -58,140 +62,165 @@ def searchRSS():
 	return myCache.findNeededEpisodes()
 
 	
-def findEpisode (episode, forceQuality=None, manualSearch=False):
-
-	if episode.status == DISCBACKLOG:
-		logger.log("NZBMatrix doesn't support disc backlog. Use newzbin or download it manually from NZBMatrix")
-		return []
+def findEpisode (episode, manualSearch=False):
 
 	logger.log("Searching NZBMatrix for " + episode.prettyName(True))
 
-	if forceQuality != None:
-		epQuality = forceQuality
-	elif episode.show.quality == BEST:
-		epQuality = ANY
-	else:
-		epQuality = episode.show.quality
-	
-	if epQuality == SD:
-		quality = {"catid": 6}
-	elif epQuality == HD:
-		quality = {"catid": 41}
-	else:
-		quality = {"catid": "tv-all"}
-	
 	myCache = NZBMatrixCache()
-	
 	myCache.updateCache()
-	
-	cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
-	logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
-
-	nzbResults = []
-
-	for curResult in cacheResults:
-		
-		title = curResult["name"]
-		url = curResult["url"]
-	
-		logger.log("Found result " + title + " at " + url)
-
-		result = classes.NZBSearchResult(episode)
-		result.provider = providerName.lower()
-		result.url = url 
-		result.extraInfo = [title]
-		result.quality = epQuality
-		
-		nzbResults.append(result)
+	nzbResults = myCache.searchCache(episode)
+	logger.log("Cache results: "+str(nzbResults), logger.DEBUG)
 
 	# if we got some results then use them no matter what.
 	# OR
-	# return anyway unless we're doing a backlog or manual search
-	if nzbResults or not (episode.status in (BACKLOG, MISSED) or manualSearch):
+	# return anyway unless we're doing a manual search
+	if nzbResults or not manualSearch:
 		return nzbResults
 	
 	sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
 	
 	results = []
+	itemList = []
 
 	for curString in sceneSearchStrings:
-
-		for resultDict in _doSearch(curString, quality):
-
-			if epQuality == HD and ("720p" not in resultDict["NZBNAME"] or "itouch" in resultDict["NZBNAME"].lower()):
-				logger.log("Ignoring result "+resultDict["NZBNAME"]+" because it doesn't contain 720p in the name", logger.DEBUG)
-				continue
-
-			result = classes.NZBSearchResult(episode)
-			result.provider = providerName.lower()
-			result.url = resultDict["SBURL"]
-			result.extraInfo = [resultDict["NZBNAME"]]
-			result.quality = epQuality
+		itemList += _doSearch(curString)
 		
-			results.append(result)
-					
+	for item in itemList:
+		
+		title = item.findtext('title')
+		url = item.findtext('link').replace('&amp;','&')
+		
+		quality = Quality.nameQuality(title, True)
+		
+		if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
+			logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+			continue
+		
+		logger.log("Found result " + title + " at " + url, logger.DEBUG)
+		
+		result = classes.NZBSearchResult(episode)
+		result.provider = providerName.lower()
+		result.url = url
+		result.extraInfo = [title]
+		result.quality = quality
+		
+		results.append(result)
+		
 	return results
 
 
-def _doSearch(curString, quality):
-	params = {"search": curString.replace("."," ").encode('utf-8'), "age": sickbeard.USENET_RETENTION, "username": sickbeard.NZBMATRIX_USERNAME, "apikey": sickbeard.NZBMATRIX_APIKEY}
-	params.update(quality)
+def findSeasonResults(show, season):
 	
-	searchURL = "https://nzbmatrix.com/api-nzb-search.php?" + urllib.urlencode(params)
+	itemList = []
+	results = {}
+
+	for curString in helpers.makeSceneSeasonSearchString(show, season):
+		itemList += _doSearch(curString)
+
+	for item in itemList:
+
+		title = item.findtext('title')
+		url = item.findtext('link')
+		
+		quality = Quality.nameQuality(title, True)
+		
+		# parse the file name
+		try:
+			myParser = FileParser(title)
+			epInfo = myParser.parse()
+		except tvnamer_exceptions.InvalidFilename:
+			logger.log("Unable to parse the filename "+title+" into a valid episode", logger.ERROR)
+			continue
+		
+		
+		if epInfo.seasonnumber != season:
+			continue
+			
+		# make sure we want the episode
+		wantEp = True
+		for epNo in epInfo.episodenumbers:
+			if not show.wantEpisode(season, epNo, quality):
+				logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+				wantEp = False
+				break
+		if not wantEp:
+			continue
+		
+		logger.log("Found result " + title + " at " + url, logger.DEBUG)
+		
+		# make a result object
+		epNum = epInfo.episodenumbers[0]
+		epObj = show.getEpisode(season, epNum)
+		
+		result = classes.NZBSearchResult(epObj)
+		result.provider = providerName.lower()
+		result.url = url
+		result.extraInfo = [title]
+		result.quality = quality
+	
+		if epNum in results:
+			results[epNum].append(result)
+		else:
+			results[epNum] = [result]
+		
+	return results
+
+
+def _doSearch(curString):
+
+	params = {"term": curString.replace("."," ").encode('utf-8'),
+			  "age": sickbeard.USENET_RETENTION,
+			  "page": "download",
+			  "username": sickbeard.NZBMATRIX_USERNAME,
+			  "apikey": sickbeard.NZBMATRIX_APIKEY,
+			  "subcat": "6,41",
+			  "english": 1}
+	
+	searchURL = "http://services.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
 	logger.log("Search string: " + searchURL, logger.DEBUG)
 
-	logger.log("Sleeping 10 seconds to respect NZBMatrix's API rules")
+	logger.log("Sleeping 10 seconds")
 	time.sleep(10)
 	f = urllib.urlopen(searchURL)
 	searchResult = "".join(f.readlines())
 	f.close()
 	
-	if searchResult.startswith("error:"):
-		err = searchResult.split(":")[1]
-		if err == "nothing_found":
-			return []
-		elif err == "invalid_login" or err == "invalid_api":
-			raise exceptions.AuthException("NZBMatrix username or API key is incorrect")
-		logger.log("An error was encountered during the search: "+err, logger.ERROR)
+	if not searchResult:
+		return []
 
+	try:
+		responseSoup = etree.ElementTree(etree.XML(searchResult))
+		items = responseSoup.getiterator('item')
+	except Exception, e:
+		logger.log("Error trying to load NZBMatrix RSS feed: "+str(e), logger.ERROR)
+		return []
+		
 	results = []
 	
-	for curResult in searchResult.split("|"):
-		resultDict = {}
-		lines = curResult.split("\n")
-		for info in lines:
-			curInfo = info.strip(";").partition(":")
-			if len(curInfo) != 3:
-				continue
-			resultDict[curInfo[0]] = curInfo[2]
+	for curItem in items:
+		title = curItem.findtext('title')
+		url = curItem.findtext('link')
 
-		if len(resultDict) == 0:
+		if not title or not url:
+			logger.log("The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 			continue
 
-		if "NZBID" not in resultDict:
-			continue
-
-		resultDict["SBURL"] = "http://nzbmatrix.com/api-nzb-download.php?id="+resultDict["NZBID"]+"&username="+sickbeard.NZBMATRIX_USERNAME+"&apikey="+sickbeard.NZBMATRIX_APIKEY
-
-		results.append(resultDict)
-
+		results.append(curItem)
+	
 	return results
+
 
 def findPropers(date=None):
 	
 	results = []
 	
-	for curString in ("PROPER", "REPACK"):
-	
-		for curQuality in (6,41):
-		
-			for curResult in _doSearch(curString, {"catid": curQuality}):
+	for curResult in _doSearch("(PROPER,REPACK)"):
 
-				resultDate = datetime.datetime.strptime(curResult["INDEX_DATE"], "%Y-%m-%d %H:%M:%S")
-				
-				if date == None or resultDate > date:
-					results.append(classes.Proper(curResult["NZBNAME"], curResult["SBURL"], resultDate))
+		resultDate = datetime.datetime.strptime(curResult["INDEX_DATE"], "%Y-%m-%d %H:%M:%S")
+		
+		if date == None or resultDate > date:
+			results.append(classes.Proper(curResult["NZBNAME"], curResult["SBURL"], resultDate))
 	
 	return results
 
@@ -216,8 +245,9 @@ class NZBMatrixCache(tvcache.TVCache):
 		urlArgs = {'page': 'download',
 				   'username': sickbeard.NZBMATRIX_USERNAME,
 				   'apikey': sickbeard.NZBMATRIX_APIKEY,
-				   'subcat': '6,5,41',
-				   'english': 1}
+				   'english': 1,
+				   'scenename': 1,
+				   'subcat': '6,41'}
 
 		url += urllib.urlencode(urlArgs)
 		

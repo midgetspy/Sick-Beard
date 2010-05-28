@@ -412,7 +412,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     
     # see if the existing file is bigger - if it is, bail (unless it's a proper in which case we're forcing an overwrite)
     if existingResult > 0:
-        if rootEp.status == SNATCHED_PROPER:
+        if rootEp.status in Quality.SNATCHED_PROPER:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
         else:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
@@ -448,11 +448,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     # if the file existed and was smaller then lets delete it
     # OR if the file existed, was bigger, but we want to replace it anyway cause it's a PROPER snatch
-    if existingResult < 0 or (existingResult > 0 and rootEp.status == SNATCHED_PROPER):
+    if existingResult < 0 or (existingResult > 0 and rootEp.status in Quality.SNATCHED_PROPER):
         # if we're deleting a file with a different name then just go ahead
         if existingResult in (-2, 2):
             existingFile = rootEp.location
-            if rootEp.status == SNATCHED_PROPER:
+            if rootEp.status in Quality.SNATCHED_PROPER:
                 returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
             else:
                 returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
@@ -479,18 +479,16 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         with curEp.lock:
             curEp.location = newFile
             
-            # don't mess up the status - if this is a legit download it should be SNATCHED
-            if curEp.status != PREDOWNLOADED:
-                
-                # if it used to be snatched then maintain the same quality for the downloaded status
-                if curEp.status in Quality.SNATCHED:
-                    oldQuality, oldStatus = Quality.splitCompositeQuality(curEp.status)
-                    curEp.status = Quality.compositeStatus(DOWNLOADED, oldQuality)
-                
-                # if it didn't used to be snatched then guess the status from the name
-                else:
-                    returnStr += logHelper("Processing something that isn't snatched, so just guessing what the quality is", logger.ERROR)
-                    curEp.status = Quality.statusFromName(biggestFileName)
+            # if it used to be snatched then maintain the same quality for the downloaded status
+            if curEp.status in Quality.SNATCHED:
+                oldQuality, oldStatus = Quality.splitCompositeQuality(curEp.status)
+                curEp.status = Quality.compositeStatus(DOWNLOADED, oldQuality)
+            
+            # if it didn't used to be snatched then guess the status from the name
+            else:
+                returnStr += logHelper("Processing something that isn't snatched, so just guessing what the quality is", logger.ERROR)
+                curEp.status = Quality.statusFromName(biggestFileName)
+
             curEp.saveToDB()
 
     # log it to history
@@ -504,7 +502,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     rootEp.saveToDB()
 
     # we don't want to put predownloads in the library until we can deal with removing them
-    if sickbeard.XBMC_UPDATE_LIBRARY == True and rootEp.status != PREDOWNLOADED:
+    if sickbeard.XBMC_UPDATE_LIBRARY:
         notifiers.xbmc.updateLibrary(rootEp.show.location)
 
     returnStr += logHelper("Post processing finished successfully", logger.DEBUG)

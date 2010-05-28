@@ -36,8 +36,12 @@ from sickbeard.common import *
 from sickbeard import logger
 from sickbeard import tvcache
 
+from lib.tvnamer.utils import FileParser
+from lib.tvnamer import tvnamer_exceptions
+
 providerType = "nzb"
 providerName = "NZBs"
+delimiter = "."
 
 def isActive():
 	return sickbeard.NZBS and sickbeard.USE_NZB
@@ -81,11 +85,7 @@ def searchRSS():
 	myCache.updateCache()
 	return myCache.findNeededEpisodes()
 	
-def findEpisode (episode, forceQuality=None, manualSearch=False):
-
-	if episode.status == DISCBACKLOG:
-		logger.log("NZBs.org doesn't support disc backlog. Use newzbin or download it manually from NZBs.org")
-		return []
+def findEpisode (episode, manualSearch=False):
 
 	if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
 		raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
@@ -95,11 +95,12 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 	myCache = NZBsCache()
 	myCache.updateCache()
 	nzbResults = myCache.searchCache(episode)
+	logger.log("Cache results: "+str(nzbResults), logger.DEBUG)
 
 	# if we got some results then use them no matter what.
 	# OR
 	# return anyway unless we're doing a backlog/missing or manual search
-	if nzbResults or not (episode.status in (BACKLOG, MISSED) or manualSearch):
+	if nzbResults or not manualSearch:
 		return nzbResults
 
 	sceneSearchStrings = set(helpers.makeSceneSearchString(episode))
@@ -117,7 +118,7 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 		title = item.findtext('title')
 		url = item.findtext('link')
 		
-		quality = Quality.nameQuality(title)
+		quality = Quality.nameQuality(title, " ")
 		
 		if not episode.show.wantEpisode(episode.season, episode.episode, quality):
 			logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
@@ -127,11 +128,64 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 		
 		result = classes.NZBSearchResult(episode)
 		result.provider = providerName.lower()
-		result.url = url 
+		result.url = url
 		result.extraInfo = [title]
 		result.quality = quality
 		
 		results.append(result)
+		
+	return results
+
+
+def findSeasonResults(show, season):
+	
+	itemList = []
+	results = {}
+
+	for curString in helpers.makeSceneSeasonSearchString(show, season):
+		itemList += _doSearch("^"+curString)
+
+	for item in itemList:
+
+		title = item.findtext('title')
+		url = item.findtext('link')
+		
+		quality = Quality.nameQuality(title, " ")
+		
+		# parse the file name
+		try:
+			myParser = FileParser(title)
+			epInfo = myParser.parse()
+		except tvnamer_exceptions.InvalidFilename:
+			logger.log("Unable to parse the filename "+title+" into a valid episode", logger.ERROR)
+			continue
+		
+		# make sure we want the episode
+		wantEp = True
+		for epNo in epInfo.episodenumbers:
+			if not show.wantEpisode(season, epNo, quality):
+				logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+				wantEp = False
+				break
+		if not wantEp:
+			continue
+		
+		logger.log("Found result " + title + " at " + url, logger.DEBUG)
+		
+		# make a result object
+		epNum = epInfo.episodenumbers[0]
+		epObj = show.getEpisode(season, epNum)
+		
+		result = classes.NZBSearchResult(epObj)
+		result.provider = providerName.lower()
+		result.url = url
+		result.extraInfo = [title]
+		result.quality = quality
+	
+		if epNum in results:
+			results[epNum].append(result)
+		else:
+			results[epNum] = [result]
 		
 	return results
 		
