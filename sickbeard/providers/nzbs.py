@@ -222,7 +222,6 @@ class NZBsCache(tvcache.TVCache):
 				   'age': sickbeard.USENET_RETENTION}
 
 		url += urllib.urlencode(urlArgs)
-		url = "http://wolfeden.ca/rss.html"
 		
 		logger.log("NZBs cache update URL: "+ url, logger.DEBUG)
 		
