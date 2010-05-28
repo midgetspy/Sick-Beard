@@ -92,7 +92,6 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
 	command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' +fileString + ')' }
 	logger.log("Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
 	request = sendToXBMC(command, curHost, username, password)
-	logger.log("Response: "+ request, logger.DEBUG)
     
 def updateLibrary(path=None, showName=None):
 
