@@ -400,12 +400,6 @@ def getShowImage(url, imgNum=None):
 
 	return imgData
 
-def guessSceneEpisodeQuality(name, delimiter="."):
-	if '720p' in name or '1080p' in name:
-		return HD
-	else:
-		return SD
-	
 
 def sizeof_fmt(num):
 	for x in ['bytes','KB','MB','GB','TB']:

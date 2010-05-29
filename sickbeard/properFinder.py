@@ -103,7 +103,6 @@ class ProperFinder():
             # populate our Proper instance
             curProper.season = epInfo.seasonnumber
             curProper.episode = epInfo.episodenumbers[0]
-            #curProper.quality = helpers.guessSceneEpisodeQuality(curProper.name)
             curProper.quality = Quality.nameQuality(curProper.name)
     
             # for each show in our list

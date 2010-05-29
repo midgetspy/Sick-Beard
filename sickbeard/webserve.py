@@ -1168,8 +1168,6 @@ class Home:
             t.submenu = HomeMenu
             with showObj.lock:
                 t.show = showObj
-                t.qualityStrings = qualityStrings
-                t.qualities = (SD, HD, ANY, BEST)
             
             return _munge(t)
         
