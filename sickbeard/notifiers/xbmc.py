@@ -139,18 +139,12 @@ def updateLibrary(host, path=None, showName=None):
 	    logger.log("No valid paths found for " + showName + " on " + host, logger.DEBUG)
 	    return False
 
-	allPaths = ''
-
 	for path in paths:
-	    allPaths += path.text + ','
-
-	allPaths = allPaths.strip(',')
-
-	logger.log("XBMC Updating " + showName + " on " + host + " at " + allPaths, logger.DEBUG)
-	updateCommand = {'command': 'ExecBuiltIn', 'parameter':	'XBMC.updatelibrary(video, %s)' % (allPaths)}
-	request = sendToXBMC(updateCommand, host)
-	if not request:
-	    return False
+	    logger.log("XBMC Updating " + showName + " on " + host + " at " + path.text, logger.DEBUG)
+	    updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (path.text)}
+	    request = sendToXBMC(updateCommand, host)
+	    if not request:
+		return False
     else:
 	logger.log("XBMC Updating " + host, logger.DEBUG)
 	updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
