@@ -168,7 +168,7 @@ def findSeasonResults(show, season):
 
 def _doSearch(curString):
 
-	params = {"term": curString.replace("."," ").encode('utf-8'),
+	params = {"term": "\""+curString+"\"".replace("."," ").encode('utf-8'),
 			  "age": sickbeard.USENET_RETENTION,
 			  "page": "download",
 			  "username": sickbeard.NZBMATRIX_USERNAME,
