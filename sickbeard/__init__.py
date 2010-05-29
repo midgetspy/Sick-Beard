@@ -326,7 +326,7 @@ def initialize(consoleLogging=True):
         
         USE_NZB = bool(check_setting_int(CFG, 'General', 'use_nzb', 1))
         USE_TORRENT = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
-        USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 200)
+        USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
         
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
         if SEARCH_FREQUENCY < MIN_SEARCH_FREQUENCY:
