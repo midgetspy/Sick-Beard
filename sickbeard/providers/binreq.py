@@ -84,7 +84,10 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 	logger.log("Cache results: "+str(nzbResults), logger.DEBUG)
 
 	return nzbResults
-		
+
+def findSeasonResults(show, season):
+	
+	return {}		
 
 def findPropers(date=None):
 

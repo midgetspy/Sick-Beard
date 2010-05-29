@@ -99,6 +99,10 @@ def findEpisode (episode, manualSearch=False):
 	return nzbResults
 		
 
+def findSeasonResults(show, season):
+	
+	return {}		
+
 def findPropers(date=None):
 
 	results = TVBinzCache().listPropers(date)

@@ -97,6 +97,10 @@ def findEpisode (episode, manualSearch=False):
 	return nzbResults
 		
 
+def findSeasonResults(show, season):
+	
+	return {}		
+
 def findPropers(date=None):
 
 	results = NZBsRUSCache().listPropers(date)
