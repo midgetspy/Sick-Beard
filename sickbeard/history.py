@@ -40,7 +40,7 @@ def logDownload(episode, filename):
     
     showid = int(episode.show.tvdbid)
     season = int(episode.season)
-    episode = int(episode.episode)
+    epNum = int(episode.episode)
     
     quality = -1
     provider = -1
@@ -51,6 +51,6 @@ def logDownload(episode, filename):
     else:
         action = Quality.compositeStatus(DOWNLOADED, Quality.UNKNOWN)
     
-    _logHistoryItem(action, showid, season, episode, quality, filename, provider)
+    _logHistoryItem(action, showid, season, epNum, quality, filename, provider)
 
     
