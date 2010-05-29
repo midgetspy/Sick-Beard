@@ -141,6 +141,8 @@ class Quality:
             return Quality.SDTV
         elif name.endswith(".mkv"):
             return Quality.HDTV
+        else:
+            return Quality.UNKNOWN
 
     @staticmethod
     def compositeStatus(status, quality):
