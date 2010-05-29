@@ -232,7 +232,7 @@ class ConfigGeneral:
                     web_password=None, quality_default=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, create_images=None, naming_ep_name=None,
-                    naming_use_periods=None, naming_sep_type=None):
+                    naming_use_periods=None, naming_sep_type=None, naming_quality=None):
 
         results = []
 
@@ -281,6 +281,11 @@ class ConfigGeneral:
         else:
             naming_use_periods = 0
             
+        if naming_quality == "on":
+            naming_quality = 1
+        else:
+            naming_quality = 0
+            
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
@@ -293,6 +298,7 @@ class ConfigGeneral:
         sickbeard.NAMING_SHOW_NAME = naming_show_name
         sickbeard.NAMING_EP_NAME = naming_ep_name
         sickbeard.NAMING_USE_PERIODS = naming_use_periods
+        sickbeard.NAMING_QUALITY = naming_quality
         sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
         sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
         sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
