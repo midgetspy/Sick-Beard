@@ -64,7 +64,8 @@ class Quality:
     BEST = 1<<20
     ANY = 1<<19
     
-    qualityStrings = {UNKNOWN: "Unknown",
+    qualityStrings = {NONE: "N/A",
+                      UNKNOWN: "Unknown",
                       SDTV: "SD TV",
                       SDDVD: "SD DVD",
                       HDTV: "720p TV",
