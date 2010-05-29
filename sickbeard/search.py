@@ -189,7 +189,7 @@ def findEpisode(episode, manualSearch=False):
 
 def findSeason(show, season):
 	
-	logger.log("Searching for results from "+show.name+" season "+str(season), logger.DEBUG)
+	logger.log("Searching for stuff we need from "+show.name+" season "+str(season))
 	
 	foundResults = {}
 	
