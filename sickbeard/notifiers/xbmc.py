@@ -145,6 +145,10 @@ def updateLibrary(host, path=None, showName=None):
 	    request = sendToXBMC(updateCommand, host)
 	    if not request:
 		return False
+	    # Sleep for a few seconds just to be sure sab has a chance to finish
+	    # each directory
+	    if len(paths) > 1:
+		time.sleep(5)
     else:
 	logger.log("XBMC Updating " + host, logger.DEBUG)
 	updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
