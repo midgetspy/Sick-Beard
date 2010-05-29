@@ -49,24 +49,22 @@ def sendToXBMC(command, host, username=None, password=None):
     if not password:
         password = sickbeard.XBMC_PASSWORD    
 
-    # If we have a password, use authentication
-    if password:
-	passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-	passman.add_password(None, host, username, password)
-
-	authhandler =  urllib2.HTTPBasicAuthHandler(passman)
-	opener = urllib2.build_opener(authhandler)
-	urllib2.install_opener(opener)
-
     enc_command = urllib.urlencode(command)
     logger.log("Encoded command is " + enc_command, logger.DEBUG)
     # Web server doesn't like POST, GET is the way to go
     url = 'http://%s/xbmcCmds/xbmcHttp/?%s' % (host, enc_command)
 
     try:
+    # If we have a password, use authentication
+	req = urllib2.Request(url)
+	if password:
+	    logger.log("Adding Password to XBMC url", logger.DEBUG)
+	    base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+	    authheader =  "Basic %s" % base64string
+	    req.add_header("Authorization", authheader)
 	logger.log("Contacting XBMC via url: " + url, logger.DEBUG)
-	req = urllib2.urlopen(url)
-	response = req.read()
+	handle = urllib2.urlopen(req)
+	response = handle.read()
 	logger.log("response: " + response, logger.DEBUG)
     except IOError, e:
 	# print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
