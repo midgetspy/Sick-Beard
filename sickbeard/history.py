@@ -45,11 +45,7 @@ def logDownload(episode, filename):
     quality = -1
     provider = -1
     
-    oldQuality, oldStatus = Quality.splitCompositeQuality(episode.status)
-    if oldStatus == SNATCHED:
-        action = Quality.compositeStatus(DOWNLOADED, oldQuality)
-    else:
-        action = Quality.compositeStatus(DOWNLOADED, Quality.UNKNOWN)
+    action = episode.status
     
     _logHistoryItem(action, showid, season, epNum, quality, filename, provider)
 
