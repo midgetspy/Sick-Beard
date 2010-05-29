@@ -30,7 +30,7 @@ def logSnatch(searchResult):
     else:
         provider = "unknown"
     
-    action = searchResult.episode.status
+    action = Quality.compositeStatus(SNATCHED, searchResult.quality)
 
     resource = searchResult.extraInfo[0]
     
@@ -45,7 +45,11 @@ def logDownload(episode, filename):
     quality = -1
     provider = -1
     
-    action = episode.status
+    oldQuality, oldStatus = Quality.splitCompositeQuality(episode.status)
+    if oldStatus == SNATCHED:
+        action = Quality.compositeStatus(DOWNLOADED, oldQuality)
+    else:
+        action = Quality.compositeStatus(DOWNLOADED, Quality.UNKNOWN)
     
     _logHistoryItem(action, showid, season, episode, quality, filename, provider)
 
