@@ -44,10 +44,11 @@ def downloadNZB (nzb):
 
 	logger.log("Downloading an NZB from NZBMatrix at " + nzb.url)
 
-	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb.gz")
+	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb")
 	
 	logger.log("Saving to " + fileName, logger.DEBUG)
 
+	time.sleep(10)
 	urllib.urlretrieve(nzb.url, fileName)
 
 	return True
