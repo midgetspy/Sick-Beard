@@ -186,7 +186,10 @@ class StatusStrings:
     def __getitem__(self, name):
         if name in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
             quality, status = Quality.splitCompositeQuality(name)
-            return self.statusStrings[status]+" ("+Quality.qualityStrings[quality]+")"
+            if quality == Quality.NONE:
+                return self.statusStrings[status]
+            else:
+                return self.statusStrings[status]+" ("+Quality.qualityStrings[quality]+")"
         else:
             return self.statusStrings[name]
 
