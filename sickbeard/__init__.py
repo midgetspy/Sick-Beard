@@ -89,6 +89,7 @@ NAMING_EP_TYPE = None
 NAMING_MULTI_EP_TYPE = None
 NAMING_SEP_TYPE = None
 NAMING_USE_PERIODS = None
+NAMING_QUALITY = None
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
@@ -254,7 +255,7 @@ def initialize(consoleLogging=True):
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY
 
         
         if __INITIALIZED__:
@@ -315,6 +316,7 @@ def initialize(consoleLogging=True):
         NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
         NAMING_SEP_TYPE = check_setting_int(CFG, 'General', 'naming_sep_type', 0)
         NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
+        NAMING_QUALITY = bool(check_setting_int(CFG, 'General', 'naming_quality', 0))
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
@@ -601,6 +603,7 @@ def save_config():
     CFG['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
     CFG['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
     CFG['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
+    CFG['General']['naming_quality'] = int(NAMING_QUALITY)
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
     CFG['General']['create_metadata'] = int(CREATE_METADATA)

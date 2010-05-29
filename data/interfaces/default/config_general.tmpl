@@ -115,6 +115,10 @@ Whether shows should use season folders by default<br />
 If checked all spaces will be replaced with periods<br />
 <br />
 
+<input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "CHECKED" else ""#> <strong>Include quality</strong><br />
+If checked the episode quality will be appended to the end of the file name<br />
+<br />
+
 <strong>Separator Style</strong><br />
 <select name="naming_sep_type" id="naming_sep_type">
 #for ($i, $ex) in enumerate($config.naming_sep_type_text):
