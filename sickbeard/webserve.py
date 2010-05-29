@@ -319,7 +319,7 @@ class ConfigGeneral:
 
     @cherrypy.expose
     def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
-                   sep_type=None, use_periods=None, whichTest="single"):
+                   sep_type=None, use_periods=None, quality=None, whichTest="single"):
         
         if show_name == None:
             show_name = sickbeard.NAMING_SHOW_NAME
@@ -344,6 +344,14 @@ class ConfigGeneral:
                 use_periods = False
             else:
                 use_periods = True
+            
+        if quality == None:
+            quality = sickbeard.NAMING_QUALITY
+        else:
+            if quality == "0":
+                quality = False
+            else:
+                quality = True
             
         if ep_type == None:
             ep_type = sickbeard.NAMING_EP_TYPE
@@ -376,6 +384,7 @@ class ConfigGeneral:
         
         # make a fake episode object
         ep = TVEpisode(1,2,"Ep Name")
+        ep.status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
         
         if whichTest == "multi":
             ep.name = "Ep Name (1)"
@@ -383,7 +392,7 @@ class ConfigGeneral:
             ep.relatedEps.append(secondEp)
         
         # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods)
+        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality)
         
         return name
 

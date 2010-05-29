@@ -1471,7 +1471,7 @@ class TVEpisode:
             return os.path.join(self.show.location, self.location)
         
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
-                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None):
+                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):
         
         regex = "(.*) \(\d\)"
 
@@ -1541,6 +1541,11 @@ class TVEpisode:
 
         if naming_ep_name:
             finalName += goodName
+
+        if naming_quality:
+            epQual, epStatus = Quality.splitCompositeQuality(self.status)
+            if epQual != Quality.NONE:
+                finalName += config.naming_sep_type[naming_sep_type] + Quality.qualityStrings[epQual]
         
         if naming_use_periods:
             finalName = re.sub("\s+", ".", finalName)
