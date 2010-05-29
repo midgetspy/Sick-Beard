@@ -198,6 +198,7 @@ def _doSearch(curString):
 			  "i": sickbeard.NZBS_UID,
 			  "h": sickbeard.NZBS_HASH,
 			  "age": sickbeard.USENET_RETENTION,
+              "num": 100,
 			  "type": 1}
 	
 	searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
