@@ -165,11 +165,7 @@ class TVBinzCache(tvcache.TVCache):
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 
-			quality = sInfo.findtext('{http://tvbinz.net/rss/tvb/}quality')
-			if quality == "HD":
-				quality = HD
-			else:
-				quality = SD
+			quality = Quality.nameQuality(title)
 			
 			season = int(sInfo.findtext('{http://tvbinz.net/rss/tvb/}seasonNum'))
 
@@ -181,4 +177,3 @@ class TVBinzCache(tvcache.TVCache):
 			# since TVBinz normalizes the scene names it's more reliable to parse the episodes out myself
 			# than to rely on it, because it doesn't support multi-episode numbers in the feed
 			self._addCacheEntry(title, url, season, tvrage_id=tvrid, quality=quality)
-
