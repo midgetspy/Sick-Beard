@@ -128,7 +128,7 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 	return results
 
 
-def _doSearch(curString, quality):
+def _doSearch(curString, quality, skipDelay = False):
 	params = {"search": curString.replace("."," ").encode('utf-8'), "age": sickbeard.USENET_RETENTION, "username": sickbeard.NZBMATRIX_USERNAME, "apikey": sickbeard.NZBMATRIX_APIKEY}
 	params.update(quality)
 	
@@ -136,8 +136,9 @@ def _doSearch(curString, quality):
 
 	logger.log("Search string: " + searchURL, logger.DEBUG)
 
-	logger.log("Sleeping 30 seconds to respect NZBMatrix's API rules")
-	time.sleep(30)
+	if not skipDelay:
+		logger.log("Sleeping 30 seconds to respect NZBMatrix's API rules")
+		time.sleep(30)
 	f = urllib.urlopen(searchURL)
 	searchResult = "".join(f.readlines())
 	f.close()
@@ -148,6 +149,11 @@ def _doSearch(curString, quality):
 			return []
 		elif err == "invalid_login" or err == "invalid_api":
 			raise exceptions.AuthException("NZBMatrix username or API key is incorrect")
+		elif err[:12] == "please_wait_":
+			delay = err[12:]
+			logger.log("Waiting "+delay+" seconds at NZBMatrix's API's request")
+			time.sleep(int(delay))
+			return _doSearch(curString, quality, True)
 		logger.log("An error was encountered during the search: "+err, logger.ERROR)
 
 	results = []
