@@ -21,11 +21,10 @@ $backlogPI.currentStatus['title']<br />
 #end if
 <br />
 <b>Episode Search:</b><br />
-#if $searchPI == None:
+#if not $searchStatus:
 Not in progress <a href="$sbRoot/manageShows/manageSearches/forceSearch">(force)</a><br />
 #else:
-$searchPI.percentComplete %<br />
-$searchPI.currentStatus['title']<br />
+In Progress
 #end if
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

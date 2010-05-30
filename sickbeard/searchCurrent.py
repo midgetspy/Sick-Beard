@@ -20,6 +20,7 @@ from __future__ import with_statement
 
 from sickbeard import common, db, exceptions, helpers, search
 from sickbeard import logger
+from sickbeard import ui
 from sickbeard.common import * 
 
 import datetime
@@ -30,8 +31,12 @@ class CurrentSearcher():
     
     def __init__(self):
         self.lock = threading.Lock()
+        
+        self.amActive = False
     
     def searchForTodaysEpisodes(self):
+
+        self.amActive = True
 
         self._changeMissingEpisodes()
 
@@ -57,8 +62,7 @@ class CurrentSearcher():
         sickbeard.updateAiringList()
         sickbeard.updateComingList()
 
-
-
+        self.amActive = False
 
     def _changeMissingEpisodes(self):
         

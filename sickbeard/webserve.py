@@ -245,7 +245,7 @@ class ManageShowsManageSearches:
     def index(self):
         t = PageTemplate(file="manageShows_manageSearches.tmpl")
         t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
-        t.searchPI = None
+        t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
         t.submenu = ManageShowsMenu
         
         return _munge(t)
@@ -258,17 +258,19 @@ class ManageShowsManageSearches:
         logger.log("Backlog search started in background")
         flash.message('Backlog search started',
                       'The backlog search has begun and will run in the background')
-        redirect("/backlog")
+        redirect("/manageShows/manageSearches")
 
     @cherrypy.expose
     def forceSearch(self):
 
         # force it to run the next time it looks
-        logger.log("Search forced")
-        flash.message('Episode search started',
-                      'Note: RSS feeds may not be updated if they have been retrieved too recently')
+        result = sickbeard.currentSearchScheduler.forceRun()
+        if result:
+            logger.log("Search forced")
+            flash.message('Episode search started',
+                          'Note: RSS feeds may not be updated if they have been retrieved too recently')
         
-        redirect("/backlog")
+        redirect("/manageShows/manageSearches")
 
 
 class ManageShows:
