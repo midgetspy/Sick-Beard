@@ -88,7 +88,13 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
   <tr class="evenLine">
     <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-    <td align="center">$ Quality.qualityStrings[int($curShow.quality)]</td>
+    <td align="center">
+#if $curShow.quality in $qualityPresets:
+$qualityPresetStrings[$curShow.quality]
+#else:
+Custom
+#end if 
+    </td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>

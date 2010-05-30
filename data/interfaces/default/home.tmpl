@@ -214,7 +214,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td>$curShow.network</td>
     <td align="center">
 #if $curShow.quality in $qualityPresets:
-$qualityPresetStrings[$show.quality]
+$qualityPresetStrings[$curShow.quality]
 #else:
 Custom
 #end if 
