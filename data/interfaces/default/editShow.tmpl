@@ -61,14 +61,14 @@ Quality:
 </select><br />
 <br />
 <div id="customQuality">
-Initially downloade one of the following:<br />
+Initially download one of the following:<br />
 <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($common.Quality.qualityStrings)">
 #for $curQuality in sorted($common.Quality.qualityStrings):
 <option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
 #end for
 </select><br />
 <br />
-Re-download these qualities if available:<br />
+Re-download any/all of these qualities if available:<br />
 <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($common.Quality.qualityStrings)">
 #for $curQuality in sorted($common.Quality.qualityStrings):
 <option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
