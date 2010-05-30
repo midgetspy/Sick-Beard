@@ -209,22 +209,6 @@ class StatusStrings:
 statusStrings = StatusStrings()
 
 
-qualityStrings = {}
-qualityStrings[HD] = "HD"
-qualityStrings[SD] = "SD"
-qualityStrings[ANY] = "Any"
-qualityStrings[BEST] = "Best"
-
-# Actions
-ACTION_SNATCHED = 1
-ACTION_PRESNATCHED = 2
-ACTION_DOWNLOADED = 3
-
-actionStrings = {}
-actionStrings[ACTION_SNATCHED] = "Snatched"
-actionStrings[ACTION_PRESNATCHED] = "Pre Snatched"
-actionStrings[ACTION_DOWNLOADED] = "Downloaded"
-
 # Get our xml namespaces correct for lxml
 XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 
              'xsd': 'http://www.w3.org/2001/XMLSchema'}

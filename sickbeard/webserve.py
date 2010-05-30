@@ -349,10 +349,11 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None,
                     launch_browser=None, create_metadata=None, web_username=None,
-                    web_password=None, quality_default=None, season_folders_default=None,
+                    web_password=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, create_images=None, naming_ep_name=None,
-                    naming_use_periods=None, naming_sep_type=None, naming_quality=None):
+                    naming_use_periods=None, naming_sep_type=None, naming_quality=None,
+                    anyQualities = [], bestQualities = []):
 
         results = []
 
@@ -406,6 +407,14 @@ class ConfigGeneral:
         else:
             naming_quality = 0
             
+        if type(anyQualities) != list:
+            anyQualities = [anyQualities]
+
+        if type(bestQualities) != list:
+            bestQualities = [bestQualities]
+
+        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
         
@@ -413,7 +422,7 @@ class ConfigGeneral:
         sickbeard.CREATE_METADATA = create_metadata
         sickbeard.CREATE_IMAGES = create_images
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
-        sickbeard.QUALITY_DEFAULT = int(quality_default)
+        sickbeard.QUALITY_DEFAULT = newQuality
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
         sickbeard.NAMING_EP_NAME = naming_ep_name

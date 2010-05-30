@@ -1,3 +1,4 @@
+import sickbeard
 from sickbeard import db
 from sickbeard import common
 from sickbeard import logger
@@ -96,6 +97,15 @@ class NewQualitySettings (NumericProviders):
 		DISCBACKLOG = 8
 		SNATCHED_BACKLOG = 10
 
+		### Update default quality
+		if sickbeard.QUALITY_DEFAULT == HD:
+			sickbeard.QUALITY_DEFAULT = common.HD
+		elif sickbeard.QUALITY_DEFAULT == SD:
+			sickbeard.QUALITY_DEFAULT = common.SD
+		elif sickbeard.QUALITY_DEFAULT == ANY:
+			sickbeard.QUALITY_DEFAULT = common.ANY
+		elif sickbeard.QUALITY_DEFAULT == BEST:
+			sickbeard.QUALITY_DEFAULT = common.BEST
 
 		### Update episode statuses
 		toUpdate = self.connection.select("SELECT episode_id, location, status FROM tv_episodes WHERE status IN (?, ?, ?, ?, ?, ?, ?)", [common.DOWNLOADED, common.SNATCHED, PREDOWNLOADED, MISSED, BACKLOG, DISCBACKLOG, SNATCHED_BACKLOG])
