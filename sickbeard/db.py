@@ -53,11 +53,12 @@ class DBConnection:
 				# get out of the connection attempt loop since we were successful
 				break
 			except sqlite3.OperationalError, e:
-				logger.log("DB error: "+str(e), logger.ERROR)
 				if "unable to open database file" in str(e):
+					logger.log("DB error: "+str(e), logger.WARNING)
 					attempt += 1
 					time.sleep(1)
 				else:
+					logger.log("DB error: "+str(e), logger.ERROR)
 					raise
 			except sqlite3.DatabaseError, e:
 				logger.log("Fatal error executing query: " + str(e), logger.ERROR)
