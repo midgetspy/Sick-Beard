@@ -1,0 +1,31 @@
+#import sickbeard
+#import datetime
+#from sickbeard.common import *
+#set global $title="Manage Searches"
+
+#set global $sbPath=".."
+
+<!--#set global $topmenu="manageShows"#-->
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+
+<b>Backlog Search:</b><br />
+
+#if $backlogPI == None:
+Not in progress <a href="$sbRoot/manageShows/manageSearches/forceBacklog">(force)</a><br />
+#else:
+$backlogPI.percentComplete %<br />
+$backlogPI.currentStatus['title']<br />
+#end if
+<br />
+<b>Episode Search:</b><br />
+#if $searchPI == None:
+Not in progress <a href="$sbRoot/manageShows/manageSearches/forceSearch">(force)</a><br />
+#else:
+$searchPI.percentComplete %<br />
+$searchPI.currentStatus['title']<br />
+#end if
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

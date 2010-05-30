@@ -91,7 +91,7 @@ class PageTemplate (Template):
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
             { 'title': 'History',         'key': 'history'        },
-            { 'title': 'Backlog',         'key': 'backlog'        },
+            { 'title': 'Manage Shows',    'key': 'manageShows'    },
             { 'title': 'Config',          'key': 'config'         },
             { 'title': logPageTitle,      'key': 'errorlogs'      },
         ]
@@ -141,8 +141,137 @@ def _getEpisode(show, season, episode):
 
     return epObj
 
+ManageShowsMenu = [
+            { 'title': 'Manage Searches', 'path': 'manageShows/manageSearches' },
+            { 'title': 'Mass Edit/Update', 'path': 'manageShows/massUpdate' }
+            ]
 
-class Backlog:
+class ManageShowsMassUpdate:
+    
+    @cherrypy.expose
+    def index(self):
+        
+        t = PageTemplate(file="manageShows_massUpdate.tmpl")
+        t.submenu = ManageShowsMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toMetadata=None):
+
+        if toUpdate != None:
+            toUpdate = toUpdate.split('|')
+        else:
+            toUpdate = []
+
+        if toRefresh != None:
+            toRefresh = toRefresh.split('|')
+        else:
+            toRefresh = []
+
+        if toRename != None:
+            toRename = toRename.split('|')
+        else:
+            toRename = []
+
+        if toMetadata != None:
+            toMetadata = toMetadata.split('|')
+        else:
+            toMetadata = []
+
+        errors = []
+        refreshes = []
+        updates = []
+        renames = []
+
+        for curShowID in set(toUpdate+toRefresh+toRename+toMetadata):
+            
+            if curShowID == '':
+                continue
+
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(curShowID))
+            
+            if showObj == None:
+                continue
+
+            if curShowID in toUpdate:
+                try:
+                    sickbeard.showQueueScheduler.action.updateShow(showObj, True)
+                    updates.append(showObj.name)
+                except exceptions.CantUpdateException, e:
+                    errors.append("Unable to update show "+showObj.name+": "+str(e))
+            
+            if curShowID in toRefresh and curShowID not in toUpdate:
+                try:
+                    sickbeard.showQueueScheduler.action.refreshShow(showObj)
+                    refreshes.append(showObj.name)
+                except exceptions.CantRefreshException, e:
+                    errors.append("Unable to refresh show "+showObj.name+": "+str(e))
+
+            if curShowID in toRename:
+                sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
+                renames.append(showObj.name)
+
+            
+        if len(errors) > 0:
+            flash.error("Errors encountered",
+                        '<br >\n'.join(errors))
+
+        messageDetail = ""
+        
+        if len(updates) > 0:
+            messageDetail += "<b>Updates</b><br />\n<ul>\n<li>"
+            messageDetail += "</li>\n<li>".join(updates)
+            messageDetail += "</li>\n</ul>\n<br />"
+
+        if len(refreshes) > 0:
+            messageDetail += "<b>Refreshes</b><br />\n<ul>\n<li>"
+            messageDetail += "</li>\n<li>".join(refreshes)
+            messageDetail += "</li>\n</ul>\n<br />"
+
+        if len(renames) > 0:
+            messageDetail += "<b>Renames</b><br />\n<ul>\n<li>"
+            messageDetail += "</li>\n<li>".join(renames)
+            messageDetail += "</li>\n</ul>\n<br />"
+
+        if len(updates+refreshes+renames) > 0:
+            flash.message("The following actions were queued:<br /><br />",
+                          messageDetail)
+
+        redirect("/manageShows/massUpdate")
+
+class ManageShowsManageSearches:
+
+    @cherrypy.expose
+    def index(self):
+        t = PageTemplate(file="manageShows_manageSearches.tmpl")
+        t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
+        t.searchPI = None
+        t.submenu = ManageShowsMenu
+        
+        return _munge(t)
+        
+    @cherrypy.expose
+    def forceBacklog(self):
+
+        # force it to run the next time it looks
+        sickbeard.backlogSearchScheduler.forceSearch()
+        logger.log("Backlog search started in background")
+        flash.message('Backlog search started',
+                      'The backlog search has begun and will run in the background')
+        redirect("/backlog")
+
+    @cherrypy.expose
+    def forceSearch(self):
+
+        # force it to run the next time it looks
+        logger.log("Search forced")
+        flash.message('Episode search started',
+                      'Note: RSS feeds may not be updated if they have been retrieved too recently')
+        
+        redirect("/backlog")
+
+
+class ManageShows:
 
     @cherrypy.expose
     def index(self):
@@ -150,26 +279,15 @@ class Backlog:
         myDB = db.DBConnection()
         sqlResults = []# myDB.select("SELECT e.*, show_name FROM tv_shows s, tv_episodes e WHERE s.tvdb_id=e.showid AND e.status IN ("+str(BACKLOG)+","+str(DISCBACKLOG)+")")
         
-        t = PageTemplate(file="backlog.tmpl")
+        t = PageTemplate(file="manageShows.tmpl")
         t.backlogResults = sqlResults
-        t.submenu = [
-            { 'title': 'Force Backlog', 'path': 'backlog/forceBacklog' }
-        ]
+        t.submenu = ManageShowsMenu
         
         return _munge(t)
 
-
-    @cherrypy.expose
-    def forceBacklog(self):
-
-        # force it to run the next time it looks
-        sickbeard.backlogSearchScheduler.forceSearch()
-        logger.log("Backlog set to run in background")
-        flash.message('Backlog search started',
-                      'The backlog search has begun and will run in the background')
-        
-        redirect("/backlog")
-
+    massUpdate = ManageShowsMassUpdate()
+    
+    manageSearches = ManageShowsManageSearches()
 
 
 class History:
@@ -660,7 +778,6 @@ def haveXBMC():
 
 HomeMenu = [
     { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
-    { 'title': 'Mass Update',              'path': 'home/massUpdate/'                       },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
@@ -884,102 +1001,6 @@ class HomeAddShows:
             return _munge(myTemplate)
 
 
-class HomeMassUpdate:
-    
-    @cherrypy.expose
-    def index(self):
-        
-        t = PageTemplate(file="home_massUpdate.tmpl")
-        t.submenu = HomeMenu
-        return _munge(t)
-
-    @cherrypy.expose
-    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toMetadata=None):
-
-        if toUpdate != None:
-            toUpdate = toUpdate.split('|')
-        else:
-            toUpdate = []
-
-        if toRefresh != None:
-            toRefresh = toRefresh.split('|')
-        else:
-            toRefresh = []
-
-        if toRename != None:
-            toRename = toRename.split('|')
-        else:
-            toRename = []
-
-        if toMetadata != None:
-            toMetadata = toMetadata.split('|')
-        else:
-            toMetadata = []
-
-        errors = []
-        refreshes = []
-        updates = []
-        renames = []
-
-        for curShowID in set(toUpdate+toRefresh+toRename+toMetadata):
-            
-            if curShowID == '':
-                continue
-
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(curShowID))
-            
-            if showObj == None:
-                continue
-
-            if curShowID in toUpdate:
-                try:
-                    sickbeard.showQueueScheduler.action.updateShow(showObj, True)
-                    updates.append(showObj.name)
-                except exceptions.CantUpdateException, e:
-                    errors.append("Unable to update show "+showObj.name+": "+str(e))
-            
-            if curShowID in toRefresh and curShowID not in toUpdate:
-                try:
-                    sickbeard.showQueueScheduler.action.refreshShow(showObj)
-                    refreshes.append(showObj.name)
-                except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh show "+showObj.name+": "+str(e))
-
-            if curShowID in toRename:
-                sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
-                renames.append(showObj.name)
-
-            
-        if len(errors) > 0:
-            flash.error("Errors encountered",
-                        '<br >\n'.join(errors))
-
-        messageDetail = ""
-        
-        if len(updates) > 0:
-            messageDetail += "<b>Updates</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(updates)
-            messageDetail += "</li>\n</ul>\n<br />"
-
-        if len(refreshes) > 0:
-            messageDetail += "<b>Refreshes</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(refreshes)
-            messageDetail += "</li>\n</ul>\n<br />"
-
-        if len(renames) > 0:
-            messageDetail += "<b>Renames</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(renames)
-            messageDetail += "</li>\n</ul>\n<br />"
-
-        if len(updates+refreshes+renames) > 0:
-            flash.message("The following actions were queued:<br /><br />",
-                          messageDetail)
-
-        redirect("/home")
-        return _genericMessage("Stuff:", "toUpdate: "+str(toUpdate)+"<br>\n"+
-                                        "toRefresh: "+str(toRefresh)+"<br>\n"+
-                                        "toRename: "+str(toRename)+"<br>\n")
-
 
 ErrorLogsMenu = [
     { 'title': 'Clear Errors', 'path': 'errorlogs/clearerrors' },
@@ -1080,8 +1101,6 @@ class Home:
     addShows = HomeAddShows()
     
     postprocess = HomePostProcess()
-    
-    massUpdate = HomeMassUpdate()
     
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
@@ -1187,10 +1206,16 @@ class Home:
         else:
             paused = 0
 
+        if type(anyQualities) != list:
+            anyQualities = [anyQualities]
+
+        if type(bestQualities) != list:
+            bestQualities = [bestQualities]
+
         with showObj.lock:
             errors = []
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
-            logger.log("changing quality from " + str(showObj.quality) + " to " + str(newQuality), logger.DEBUG)
+            logger.log("got qualities "+str(anyQualities)+" "+str(bestQualities)+", changing quality from " + str(showObj.quality) + " to " + str(newQuality), logger.DEBUG)
             showObj.quality = newQuality
             
             if showObj.seasonfolders != seasonfolders:
@@ -1446,7 +1471,7 @@ class WebInterface:
         
         return _munge(t)
 
-    backlog = Backlog()
+    manageShows = ManageShows()
 
     history = History()
 

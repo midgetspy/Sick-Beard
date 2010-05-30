@@ -854,6 +854,7 @@ class TVShow(object):
 
         # if the quality isn't one we want under any circumstances then just say no
         anyQualities, bestQualities = Quality.splitQuality(self.quality)
+        logger.log("A,B = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
         
         if quality not in anyQualities and quality not in bestQualities:
             return False
@@ -874,7 +875,7 @@ class TVShow(object):
 
         # if it's one of these then we want it as long as it's in our allowed initial qualities
         if epStatus in (WANTED, UNAIRED) and quality in anyQualities:
-            logger.log("Ep is missed/unaired, definitely get it", logger.DEBUG)
+            logger.log("Ep is wanted/unaired, definitely get it", logger.DEBUG)
             return True
         
         curQuality, curStatus = Quality.splitCompositeQuality(epStatus)

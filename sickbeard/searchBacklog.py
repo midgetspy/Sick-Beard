@@ -24,6 +24,7 @@ import time
 
 from sickbeard import db, exceptions, helpers, search, scheduler
 from sickbeard import logger
+from sickbeard import ui
 from sickbeard.common import *
 
 class BacklogSearchScheduler(scheduler.Scheduler):
@@ -46,6 +47,15 @@ class BacklogSearcher:
         self.cycleTime = 3
         self.lock = threading.Lock()
         self.amActive = False
+        
+        self.percentDone = 0
+        self.currentSearchInfo = {}
+
+    def getProgressIndicator(self):
+        if self.amActive:
+            return ui.ProgressIndicator(self.percentDone, self.currentSearchInfo)
+        else:
+            return None
 
     def searchBacklog(self):
 
@@ -63,9 +73,16 @@ class BacklogSearcher:
             return
 
         myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT DISTINCT(season), showid as season FROM tv_episodes eps, tv_shows shows WHERE season != 0 AND eps.showid = shows.tvdb_id AND shows.paused = 0")
+
+        totalSeasons = float(len(sqlResults))
+        numSeasonsDone = 0.0
 
         # go through every show and see if it needs any episodes
         for curShow in sickbeard.showList:
+
+            if curShow.paused:
+                continue
 
             logger.log("Checking backlog for show "+curShow.name)
 
@@ -77,6 +94,9 @@ class BacklogSearcher:
                 curSeason = int(curSeasonResult["season"])
                 if curSeason == 0:
                     continue
+
+                logger.log("Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
+                self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
 
                 # see if there is anything in this season worth searching for
                 wantSeason = False
@@ -99,6 +119,9 @@ class BacklogSearcher:
                 for curResult in results:
                     search.snatchEpisode(curResult)
                     time.sleep(5)
+                
+                numSeasonsDone += 1.0
+                self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
 
         self._set_lastBacklog(curDate)
             
