@@ -24,15 +24,15 @@ Location: $showLoc[0]
 #end if
 <br />
 
-#set $qualities, $type = $Quality.splitQuality(int($show.quality))
-#set $typeStr = "??"
-#if $type == $Quality.BEST:
-#set $typeStr = "Best of"
-#elif $type == $Quality.ANY:
-#set $typeStr = "First available between"
-#end if
-#set $qualityStr = ", ".join([$Quality.qualityStrings[x] for x in $qualities])
-Quality: $typeStr $qualityStr<br />
+#set $anyQualities, $bestQualities = $Quality.splitQuality(int($show.quality))
+
+#if $show.quality in $qualityPresets:
+#set $qualityStr = $qualityPresetStrings[$show.quality]
+#else:
+#set $qualityStr = "Custom"
+#end if 
+
+Quality: $qualityStr<br />
 Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />

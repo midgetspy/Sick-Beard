@@ -136,13 +136,13 @@ class NewQualitySettings (NumericProviders):
 				continue
 			
 			if int(curUpdate["quality"]) == HD:
-				newQuality = common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.ANY 
+				newQuality = common.HD 
 			elif int(curUpdate["quality"]) == SD:
-				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.ANY 
+				newQuality = common.SD
 			elif int(curUpdate["quality"]) == ANY:
-				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.ANY
+				newQuality = common.ANY
 			elif int(curUpdate["quality"]) == BEST:
-				newQuality = common.Quality.SDTV | common.Quality.SDDVD | common.Quality.HDTV | common.Quality.HDWEBDL | common.Quality.HDBLURAY | common.Quality.FULLHDBLURAY | common.Quality.BEST
+				newQuality = common.BEST
 			else:
 				logger.log("Unknown show quality: "+str(curUpdate["quality"]), logger.WARNING)
 				newQuality = None

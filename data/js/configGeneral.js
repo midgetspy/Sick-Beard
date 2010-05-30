@@ -1,6 +1,5 @@
 $(document).ready(function(){
 
-
     $.fn.setExampleText = function() { 
 
         params = {'show_name': $('#naming_show_name').attr('checked')?"1":"0",

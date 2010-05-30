@@ -18,6 +18,7 @@
 
 import sickbeard
 import os.path
+import operator
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -43,12 +44,6 @@ WANTED = 3 # episodes we don't have but want to get
 ARCHIVED = 6 # episodes that you don't have locally (counts toward download completion stats)
 IGNORED = 7 # episodes that you don't want included in your download stats
 
-### Qualities
-HD = 1
-SD = 3
-ANY = 2
-BEST = 4
-
 class Quality:
 
     NONE = 0
@@ -60,9 +55,7 @@ class Quality:
     FULLHDBLURAY = 1<<5 # 32
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
-    UNKNOWN = 1<<18
-    BEST = 1<<20
-    ANY = 1<<19
+    UNKNOWN = 1<<15
     
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
@@ -84,22 +77,26 @@ class Quality:
         return toReturn
 
     @staticmethod
-    def getQuality(quality, type):
-        return quality | type
+    def combineQualities(anyQualities, bestQualities):
+        anyQuality = 0
+        bestQuality = 0
+        if anyQualities:
+            anyQuality = reduce(operator.or_, anyQualities)
+        if bestQualities:
+            bestQuality = reduce(operator.or_, bestQualities)
+        return anyQuality | (bestQuality<<16)
 
     @staticmethod
     def splitQuality(quality):
-        if quality & Quality.BEST:
-            type = Quality.BEST
-        elif quality & Quality.ANY:
-            type = Quality.ANY
-        
-        qualities = []
+        anyQualities = []
+        bestQualities = []
         for curQual in Quality.qualityStrings.keys():
             if curQual & quality:
-                qualities.append(curQual)
+                anyQualities.append(curQual)
+            if curQual<<16 & quality:
+                bestQualities.append(curQual)
         
-        return (qualities, type)
+        return (anyQualities, bestQualities)
 
     @staticmethod
     def nameQuality(name, nzbMatrix=False):
@@ -153,11 +150,11 @@ class Quality:
         return (status - DOWNLOADED) / 100
 
     @staticmethod
-    def splitCompositeQuality(status):
-        """Returns a tuple containing (quality, status)"""
+    def splitCompositeStatus(status):
+        """Returns a tuple containing (status, quality)"""
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
             if status > x*100:
-                return (x, status-x*100)
+                return (status-x*100, x)
         
         return (Quality.NONE, status)
 
@@ -173,6 +170,17 @@ Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qu
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
+HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], []) 
+SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
+ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
+BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV], [Quality.SDTV, Quality.HDTV])
+
+qualityPresets = (SD, HD, ANY, BEST)
+qualityPresetStrings = {SD: "SD",
+                        HD: "HD",
+                        ANY: "Any",
+                        BEST: "Best"}
+
 class StatusStrings:
     def __init__(self):
         self.statusStrings = {UNKNOWN: "Unknown",
@@ -187,7 +195,7 @@ class StatusStrings:
 
     def __getitem__(self, name):
         if name in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
-            quality, status = Quality.splitCompositeQuality(name)
+            status, quality = Quality.splitCompositeStatus(name)
             if quality == Quality.NONE:
                 return self.statusStrings[status]
             else:

@@ -1158,7 +1158,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, qualityType=None, quality=None, seasonfolders=None, paused=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None):
         
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
@@ -1168,7 +1168,7 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
 
-        if location == None and quality == None and qualityType == None and seasonfolders == None:
+        if not location and not anyQualities and not bestQualities and not seasonfolders:
             
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu
@@ -1189,7 +1189,7 @@ class Home:
 
         with showObj.lock:
             errors = []
-            newQuality = reduce(operator.or_, map(int, quality)) | int(qualityType)
+            newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             logger.log("changing quality from " + str(showObj.quality) + " to " + str(newQuality), logger.DEBUG)
             showObj.quality = newQuality
             

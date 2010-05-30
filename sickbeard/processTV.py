@@ -481,7 +481,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             
             # if it used to be snatched then maintain the same quality for the downloaded status
             if curEp.status in Quality.SNATCHED:
-                oldQuality, oldStatus = Quality.splitCompositeQuality(curEp.status)
+                oldStatus, oldQuality = Quality.splitCompositeStatus(curEp.status)
                 curEp.status = Quality.compositeStatus(DOWNLOADED, oldQuality)
             
             # if it didn't used to be snatched then guess the status from the name

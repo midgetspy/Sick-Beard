@@ -854,7 +854,9 @@ class TVShow(object):
         logger.log("Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
 
         # if the quality isn't one we want under any circumstances then just say no
-        if not quality & self.quality:
+        anyQualities, bestQualities = Quality.splitQuality(self.quality)
+        
+        if quality not in anyQualities and quality not in bestQualities:
             return False
 
         myDB = db.DBConnection()
@@ -871,24 +873,19 @@ class TVShow(object):
             logger.log("Ep is skipped, not bothering", logger.DEBUG)
             return False
 
-        # if it's one of these then we don't even care what the available quality is
-        if epStatus in (WANTED, UNAIRED):
-            logger.log("Ep is missed/unaired/backlog/discbacklog, definitely get it", logger.DEBUG)
+        # if it's one of these then we want it as long as it's in our allowed initial qualities
+        if epStatus in (WANTED, UNAIRED) and quality in anyQualities:
+            logger.log("Ep is missed/unaired, definitely get it", logger.DEBUG)
             return True
         
         curQuality, curStatus = Quality.splitCompositeQuality(epStatus)
-        qualities, type = Quality.splitQuality(self.quality)
         
-        # if we already have something snatched/dl'd and quality is ANY then we don't want to downloading anything further
-        if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and type == Quality.ANY:
-            logger.log("Quality type is any and we have one, not bothering", logger.DEBUG)
-            return False
-        
-        # if the available quality is one that the show allows and it's better than what we have then say yes
-        if quality in qualities and curQuality < quality and type == Quality.BEST:
-            logger.log("Better quality found, saying yes", logger.DEBUG)
+        # if we are re-downloading then we only want it if it's in our bestQualities list and better than what we have
+        if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and quality in bestQualities and quality > curQuality:
+            logger.log("We already have this ep but the new one is better quality, saying yes", logger.DEBUG)
             return True
-        
+
+        logger.log("None of the conditions were met so I'm just saying no", logger.DEBUG)
         return False
         
         

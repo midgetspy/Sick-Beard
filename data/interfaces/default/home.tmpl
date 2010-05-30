@@ -212,7 +212,13 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td align="center">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
     <td><a href="displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td>$curShow.network</td>
-    <td align="center">Quality.qualityStrings[int($curShow.quality)]</td>
+    <td align="center">
+#if $curShow.quality in $qualityPresets:
+$qualityPresetStrings[$show.quality]
+#else:
+Custom
+#end if 
+    </td>
     <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid"></div></td>
 	<td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
 	<td align="center">$curShow.status</td>

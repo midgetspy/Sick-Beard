@@ -10,16 +10,58 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script>
+\$(document).ready(function(){
+
+  \$.fn.setFromPresets = function(preset) {
+      \$('#anyQualities option').each(function(i) {
+          var result = preset & \$(this).val()
+          if (result > 0) \$(this).attr('selected', 'selected');
+          else \$(this).attr('selected', false);
+      });
+
+      \$('#bestQualities option').each(function(i) {
+          var result = preset & (\$(this).val() << 16)
+          if (result > 0) \$(this).attr('selected', 'selected');
+          else \$(this).attr('selected', false);
+      });
+
+      return
+  }
+  
+  \$('#qualityPreset').change(function(){
+        \$(this).setFromPresets(\$('#qualityPreset :selected').val());
+  });
+
+});
+</script>
+
+
 <form action="editShow" method="post">
 <input type="hidden" name="show" value="$show.tvdbid">
 Location: <input type="text" name="location" id="location" value="$show._location" size="50"><br />
 <br />
-Quality:<br />
-<input type="radio" name="qualityType" value="$common.Quality.ANY" #if $show.quality & $common.Quality.ANY then "CHECKED" else ""#>Any<br />
-<input type="radio" name="qualityType" value="$common.Quality.BEST" #if $show.quality & $common.Quality.BEST then "CHECKED" else ""#>Best of:<br />
-<select name="quality" multiple="multiple" size="len($common.Quality.qualityStrings)">
+Quality:
+#set $selected = None
+<select id="qualityPreset">
+<option value="0">Custom
+#for $curPreset in sorted($common.qualityPresets):
+<option value="$curPreset" #if $curPreset == $show.quality then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
+#end for
+</select><br />
+
+#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($show.quality))
+Initial Download Quality:<br />
+<select id="anyQualities" name="anyQualities" multiple="multiple" size="len($common.Quality.qualityStrings)">
 #for $curQuality in sorted($common.Quality.qualityStrings):
-<option value="$curQuality" #if $show.quality & $curQuality then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
+<option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
+#end for
+</select><br />
+
+Allowed Re-Download Qualities:<br />
+<select id="bestQualities" name="bestQualities" multiple="multiple" size="len($common.Quality.qualityStrings)">
+#for $curQuality in sorted($common.Quality.qualityStrings):
+<option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
 #end for
 </select><br />
 <br />

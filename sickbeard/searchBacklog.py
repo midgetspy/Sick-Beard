@@ -69,7 +69,7 @@ class BacklogSearcher:
 
             logger.log("Checking backlog for show "+curShow.name)
 
-            qualities = Quality.splitQuality(curShow.quality)
+            anyQualities, bestQualities = Quality.splitQuality(curShow.quality)
             
             sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ?", [curShow.tvdbid])
 
@@ -83,10 +83,10 @@ class BacklogSearcher:
                 statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [curShow.tvdbid, curSeason])
                 for curStatusResult in statusResults:
                     curCompositeStatus = int(curStatusResult["status"])
-                    curQuality, curStatus = Quality.splitCompositeQuality(curCompositeStatus)
+                    curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
                     
                     # if we need a better one then say yes
-                    if curStatus in (DOWNLOADED, SNATCHED) and curQuality < max(qualities) or curStatus == WANTED:
+                    if curStatus in (DOWNLOADED, SNATCHED) and curQuality < max(bestQualities) or curStatus == WANTED:
                         wantSeason = True
                         break
 
