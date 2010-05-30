@@ -76,7 +76,9 @@ class NumericProviders (AddAirdateIndex):
 
 class NewQualitySettings (NumericProviders):
 	def test(self):
-		return self.hasColumn("tv_shows", "redl_quality")
+		# if there are any download statuses then we need to migrate the DB
+		if len(self.connection.select("SELECT * FROM tv_episodes WHERE status = ?", [common.DOWNLOADED])) == 0:
+			return False
 
 	def execute(self):
 		
@@ -177,6 +179,4 @@ class NewQualitySettings (NumericProviders):
 
 			self.connection.action("UPDATE history SET action = ? WHERE date = ? AND showid = ?", [newAction, curUpdate["date"], curUpdate["showid"]])
 
-			
-		self.addColumn("tv_shows", "redl_quality", "NUMERIC", -1)
 			
