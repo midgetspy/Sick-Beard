@@ -40,7 +40,7 @@ Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=
 <br />
 Change selected episodes to 
 <select id="statusSelect">
-#for $curStatus in [$WANTED, $SKIPPED] + $Quality.DOWNLOADED:
+#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
 <option value="$curStatus">$statusStrings[$curStatus]
 #end for
 </select>

@@ -37,12 +37,12 @@ notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
 UNKNOWN = -1 # should never happen
 UNAIRED = 1 # episodes that haven't aired yet
 SNATCHED = 2 # qualified with quality
+WANTED = 3 # episodes we don't have but want to get
 DOWNLOADED = 4 # qualified with quality
 SKIPPED = 5 # episodes we don't want
-SNATCHED_PROPER = 9 # qualified with quality
-WANTED = 3 # episodes we don't have but want to get
 ARCHIVED = 6 # episodes that you don't have locally (counts toward download completion stats)
 IGNORED = 7 # episodes that you don't want included in your download stats
+SNATCHED_PROPER = 9 # qualified with quality
 
 class Quality:
 
