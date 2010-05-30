@@ -146,8 +146,7 @@ class TVShow(object):
             for curEp in self.episodes[curSeason]:
                 myEp = self.episodes[curSeason][curEp]
                 if myEp not in sickbeard.comingList and \
-                myEp not in sickbeard.airingList and \
-                myEp not in sickbeard.missingList:
+                myEp not in sickbeard.airingList:
                     self.episodes[curSeason][curEp] = None
                     del myEp
             
@@ -1426,9 +1425,6 @@ class TVEpisode:
         if self in sickbeard.comingList:
             logger.log("Removing myself from the coming list", logger.DEBUG)
             sickbeard.comingList.remove(self)
-        if self in sickbeard.missingList:
-            logger.log("Removing myself from the missing list", logger.DEBUG)
-            sickbeard.missingList.remove(self)
         
         # delete myself from the DB
         logger.log("Deleting myself from the database", logger.DEBUG)

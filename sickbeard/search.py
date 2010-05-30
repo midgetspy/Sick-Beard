@@ -86,7 +86,6 @@ def snatchEpisode(result, endStatus=SNATCHED):
 		result.episode.status = Quality.compositeStatus(endStatus, result.quality)
 		result.episode.saveToDB()
 
-	sickbeard.updateMissingList()
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
 

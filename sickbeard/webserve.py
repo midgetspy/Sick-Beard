@@ -1395,7 +1395,6 @@ class Home:
             #TODO: check if the download was successful
 
             # update our lists to reflect the result if this search
-            sickbeard.updateMissingList()
             sickbeard.updateAiringList()
             sickbeard.updateComingList()
 
@@ -1432,7 +1431,7 @@ class WebInterface:
     @cherrypy.expose
     def comingEpisodes(self):
 
-        epList = sickbeard.missingList + sickbeard.comingList
+        epList = sickbeard.comingList
 
         # sort by air date
         epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))

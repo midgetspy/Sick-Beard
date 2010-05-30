@@ -57,7 +57,6 @@ autoPostProcesserScheduler = None
 showList = None
 loadingShowList = None
 
-missingList = None
 airingList = None
 comingList = None
 
@@ -243,7 +242,7 @@ def initialize(consoleLogging=True):
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
-                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, missingList, \
+                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, \
                 airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -431,7 +430,6 @@ def initialize(consoleLogging=True):
         showList = []
         loadingShowList = {}
         
-        missingList = []
         airingList = []
         comingList = []
 
@@ -668,11 +666,6 @@ def launchBrowser():
             webbrowser.open(browserURL, 1, 1)
         except:
             logger.log("Unable to launch a browser", logger.ERROR)
-
-
-def updateMissingList():
-    
-    return []
 
 
 def updateAiringList():
