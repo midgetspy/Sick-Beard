@@ -9,11 +9,21 @@
 <!--#set global $topmenu="home"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-
+#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($show.quality))
 <script>
 \$(document).ready(function(){
 
+  if (#if $show.quality in $common.qualityPresets then "1" else "0"#) {
+      \$('#customQuality').hide();
+  }
+
   \$.fn.setFromPresets = function(preset) {
+      if (preset == 0) {
+        \$('#customQuality').show();
+        return
+      } else
+        \$('#customQuality').hide();
+  
       \$('#anyQualities option').each(function(i) {
           var result = preset & \$(this).val()
           if (result > 0) \$(this).attr('selected', 'selected');
@@ -49,22 +59,24 @@ Quality:
 <option value="$curPreset" #if $curPreset == $show.quality then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
 #end for
 </select><br />
-
-#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($show.quality))
-Initial Download Quality:<br />
+<br />
+<div id="customQuality">
+Initially downloade one of the following:<br />
 <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($common.Quality.qualityStrings)">
 #for $curQuality in sorted($common.Quality.qualityStrings):
 <option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
 #end for
 </select><br />
-
-Allowed Re-Download Qualities:<br />
+<br />
+Re-download these qualities if available:<br />
 <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($common.Quality.qualityStrings)">
 #for $curQuality in sorted($common.Quality.qualityStrings):
 <option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
 #end for
-</select><br />
+</select>
 <br />
+<br />
+</div>
 Use Season Folders: <input type="checkbox" name="seasonfolders" #if $show.seasonfolders == 1 then "CHECKED" else ""#><br /><br />
 Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "CHECKED" else ""#><br /><br />
 <input type="submit" value="Submit">
