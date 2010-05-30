@@ -1537,7 +1537,7 @@ class TVEpisode:
             finalName += goodName
 
         if naming_quality:
-            epQual, epStatus = Quality.splitCompositeQuality(self.status)
+            epQual, epStatus = Quality.splitCompositeStatus(self.status)
             if epQual != Quality.NONE:
                 finalName += config.naming_sep_type[naming_sep_type] + Quality.qualityStrings[epQual]
         
