@@ -23,7 +23,7 @@ import operator
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
                    'm2ts', 'm4v', 'ts', 'flv', 'f4v',
-                   'mov']
+                   'mov', 'rmvb']
 
 ### Notification Types
 NOTIFY_SNATCH = 1

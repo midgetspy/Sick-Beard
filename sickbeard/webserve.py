@@ -717,8 +717,8 @@ class ConfigNotifications:
     
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, 
-                          xbmc_update_library=None, xbmc_host=None, xbmc_username=None, xbmc_password=None, use_growl=None,
-                          growl_host=None, growl_password=None, ):
+                          xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+                          use_growl=None, growl_host=None, growl_password=None, ):
 
         results = []
 
@@ -737,6 +737,11 @@ class ConfigNotifications:
         else:
             xbmc_update_library = 0
 
+        if xbmc_update_full == "on":
+            xbmc_update_full = 1
+        else:
+            xbmc_update_full = 0
+
         if use_growl == "on":
             use_growl = 1
         else:
@@ -745,6 +750,7 @@ class ConfigNotifications:
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch 
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
+        sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
@@ -1166,6 +1172,7 @@ class Home:
                 t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid         })
                 t.submenu.append({ 'title': 'Re-scan files',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid         })
                 t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s'%showObj.name, 'requires': haveXBMC })
             t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid        })
         t.show = showObj
         t.qualityStrings = sickbeard.common.qualityStrings
@@ -1319,12 +1326,13 @@ class Home:
 
 
     @cherrypy.expose
-    def updateXBMC(self):
+    def updateXBMC(self, showName=None):
 
-        if xbmc.updateLibrary():
-            flash.message("Command sent to XBMC to update library")
-        else:
-            flash.error("Unable to contact XBMC")
+	for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
+	    if xbmc.updateLibrary(curHost, showName=showName):
+		flash.message("Command sent to XBMC host " + curHost + " to update library")
+	    else:
+		flash.error("Unable to contact XBMC host " + curHost)
         redirect('/home')
 
 

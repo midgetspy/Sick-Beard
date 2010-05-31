@@ -62,7 +62,7 @@ def clean_cache(cachedir):
 
     # Does our cachedir exists
     if not os.path.isdir(cachedir):
-	raise tvdb_error("Told to clean cache dir %s but it does not exist" %
+	log().debug("Told to clean cache dir %s but it does not exist" %
 		cachedir)
 	return
     now = time.time()

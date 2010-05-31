@@ -501,9 +501,14 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     rootEp.createMetaFiles()
     rootEp.saveToDB()
 
-    # we don't want to put predownloads in the library until we can deal with removing them
+
+    # try updating just show path first
     if sickbeard.XBMC_UPDATE_LIBRARY:
-        notifiers.xbmc.updateLibrary(rootEp.show.location)
+	for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
+	    if not notifiers.xbmc.updateLibrary(curHost, showName=rootEp.show.name) and sickbeard.XBMC_UPDATE_FULL:
+		# do a full update if requested
+		returnStr += logHelper("Update of show directory failed on " + curHost + ", trying full update as requested")
+		notifiers.xbmc.updateLibrary(curHost)
 
     returnStr += logHelper("Post processing finished successfully", logger.DEBUG)
 

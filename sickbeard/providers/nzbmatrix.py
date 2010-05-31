@@ -48,10 +48,12 @@ def downloadNZB (nzb):
 
 	logger.log("Downloading an NZB from NZBMatrix at " + nzb.url)
 
-	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb.gz")
+	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb")
 	
 	logger.log("Saving to " + fileName, logger.DEBUG)
 
+	logger.log("Sleeping 10 seconds before downloading to respect NZBMatrix's rules")
+	time.sleep(10)
 	urllib.urlretrieve(nzb.url, fileName)
 
 	return True
@@ -180,8 +182,9 @@ def _doSearch(curString):
 
 	logger.log("Search string: " + searchURL, logger.DEBUG)
 
-	logger.log("Sleeping 10 seconds")
+	logger.log("Sleeping 10 seconds to respect NZBMatrix's rules")
 	time.sleep(10)
+
 	f = urllib.urlopen(searchURL)
 	searchResult = "".join(f.readlines())
 	f.close()
