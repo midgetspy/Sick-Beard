@@ -164,7 +164,7 @@ class Quality:
     def statusFromName(name, assume=True):
         quality = Quality.nameQuality(name)
         if assume and quality == Quality.UNKNOWN:
-            quality = Quality.assumeQuality(name) 
+            quality = Quality.assumeQuality(name)
         return Quality.compositeStatus(DOWNLOADED, quality)
 
 

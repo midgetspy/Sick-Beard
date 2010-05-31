@@ -463,18 +463,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         
         os.remove(existingFile)
             
-    if sickbeard.RENAME_EPISODES:
-        try:
-            os.rename(curFile, newFile)
-            returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
-        except (OSError, IOError), e:
-            returnStr += logHelper("Failed renaming " + curFile + " to " + newFile + ": " + str(e), logger.ERROR)
-            return returnStr
-
-    else:
-        returnStr += logHelper("Renaming is disabled, leaving file as "+curFile, logger.DEBUG)
-        newFile = curFile
-
+    # update the statuses before we rename so the quality goes into the name properly
     for curEp in [rootEp] + rootEp.relatedEps:
         with curEp.lock:
             curEp.location = newFile
@@ -490,6 +479,18 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 curEp.status = Quality.statusFromName(biggestFileName)
 
             curEp.saveToDB()
+
+    if sickbeard.RENAME_EPISODES:
+        try:
+            os.rename(curFile, newFile)
+            returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
+        except (OSError, IOError), e:
+            returnStr += logHelper("Failed renaming " + curFile + " to " + newFile + ": " + str(e), logger.ERROR)
+            return returnStr
+
+    else:
+        returnStr += logHelper("Renaming is disabled, leaving file as "+curFile, logger.DEBUG)
+        newFile = curFile
 
     # log it to history
     history.logDownload(rootEp, fileName)
