@@ -878,7 +878,7 @@ class TVShow(object):
             logger.log("Ep is wanted/unaired, definitely get it", logger.DEBUG)
             return True
         
-        curQuality, curStatus = Quality.splitCompositeStatus(epStatus)
+        curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
         
         # if we are re-downloading then we only want it if it's in our bestQualities list and better than what we have
         if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and quality in bestQualities and quality > curQuality:
@@ -1537,7 +1537,7 @@ class TVEpisode:
             finalName += goodName
 
         if naming_quality:
-            epQual, epStatus = Quality.splitCompositeStatus(self.status)
+            epStatus, epQual = Quality.splitCompositeStatus(self.status)
             if epQual != Quality.NONE:
                 finalName += config.naming_sep_type[naming_sep_type] + Quality.qualityStrings[epQual]
         
