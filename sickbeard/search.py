@@ -176,6 +176,9 @@ def findEpisode(episode, manualSearch=False):
 		
 		didSearch = True
 		
+		# skip non-tv crap
+		foundResults = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), foundResults)
+		
 		if len(foundResults) > 0:
 			break
 	
@@ -199,6 +202,9 @@ def findSeason(show, season):
 		
 		try:
 			curResults = curProvider.findSeasonResults(show, season)
+			# skip non-tv crap
+			curResults = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), curResults)
+		
 			for curEp in curResults:
 				if curEp in foundResults:
 					foundResults[curEp] += curResults[curEp]
