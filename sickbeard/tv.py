@@ -1518,6 +1518,9 @@ class TVEpisode:
         if naming_use_periods == None:
             naming_use_periods = sickbeard.NAMING_USE_PERIODS
         
+        if naming_quality == None:
+            naming_quality = sickbeard.NAMING_QUALITY
+        
         goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
         
         for relEp in self.relatedEps:
