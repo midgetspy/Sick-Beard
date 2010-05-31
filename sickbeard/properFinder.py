@@ -134,8 +134,7 @@ class ProperFinder():
             sqlResults = db.DBConnection().select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [curProper.tvdbid, curProper.season, curProper.episode])
             if not sqlResults:
                 continue
-            oldStatus = int(sqlResults[0]["status"])
-            oldStatus, oldQuality = Quality.splitCompositeStatus(oldStatus)
+            oldStatus, oldQuality = Quality.splitCompositeStatus(int(sqlResults[0]["status"]))
             
             # only keep the proper if we have already retrieved the same quality ep (don't get better/worse ones) 
             if oldStatus not in (DOWNLOADED, SNATCHED) or oldQuality != curProper.quality:
