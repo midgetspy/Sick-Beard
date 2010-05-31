@@ -312,7 +312,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         if showInfo:
             tvdb_id = showInfo[0]
-            
+
+
         # if we couldn't get the necessary info from either of the above methods, try the next name
         if tvdb_id == None or season == None or episodes == []:
             continue
@@ -322,15 +323,17 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             showResults = helpers.findCertainShow(sickbeard.showList, showInfo[0])
         except exceptions.MultipleShowObjectsException:
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
-        
+
         if showResults != None:
             returnStr += logHelper("Found the show in our list, continuing", logger.DEBUG)
             break
     
     # end for
-        
+
     # if we came out of the loop with not enough info then give up
     if tvdb_id == None or season == None or episodes == []:
+        # if we have a good enough result then fine, use it
+        
         returnStr += logHelper("Unable to figure out what this episode is, giving up", logger.DEBUG)
         return returnStr
 
@@ -344,6 +347,20 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         returnStr += logHelper("The show dir doesn't exist, canceling postprocessing", logger.DEBUG)
         return returnStr
 
+
+    # search all possible names for our new quality, in case the file or dir doesn't have it
+    newQuality = Quality.UNKNOWN
+    for curName in finalNameList:
+        curNewQuality = Quality.nameQuality(curName)
+        # just remember if we find a good quality
+        if curNewQuality != Quality.UNKNOWN and newQuality == Quality.UNKNOWN:
+            newQuality = curNewQuality
+
+    # if we didn't get a quality from one of the names above, try assuming from each of the names
+    for curName in finalNameList:
+        newQuality = Quality.assumeQuality(curName)
+        if newQuality != Quality.UNKNOWN:
+            break
 
     rootEp = None
     for curEpisode in episodes:
@@ -473,10 +490,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 oldStatus, oldQuality = Quality.splitCompositeStatus(curEp.status)
                 curEp.status = Quality.compositeStatus(DOWNLOADED, oldQuality)
             
-            # if it didn't used to be snatched then guess the status from the name
+            # if we don't know the status from the snatched status then use the status we guessed from the name
             else:
                 returnStr += logHelper("Processing something that isn't snatched, so just guessing what the quality is", logger.ERROR)
-                curEp.status = Quality.statusFromName(biggestFileName)
+                curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
 
             curEp.saveToDB()
 
