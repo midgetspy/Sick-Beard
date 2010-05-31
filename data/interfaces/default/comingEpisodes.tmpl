@@ -58,8 +58,8 @@
             <span class="title">Status:</span> <span class="info ">$curEp.show.status</span><br />
             <span class="title">Airs:</span> <span class="info ">$curEp.show.airs on $curEp.show.network</span><br />
             <span class="title">Format:</span> <span class="info ">
-#if $curShow.quality in $qualityPresets:
-$qualityPresetStrings[$curShow.quality]
+#if $curEp.show.quality in $qualityPresets:
+$qualityPresetStrings[$curEp.show.quality]
 #else:
 Custom
 #end if 
