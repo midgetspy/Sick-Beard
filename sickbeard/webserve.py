@@ -1175,7 +1175,6 @@ class Home:
                 t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s'%showObj.name, 'requires': haveXBMC })
             t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid        })
         t.show = showObj
-        t.qualityStrings = sickbeard.common.qualityStrings
         t.sqlResults = sqlResults
         
         return _munge(t)
@@ -1477,7 +1476,6 @@ class WebInterface:
             { 'title': 'Sort by Show', 'path': 'comingEpisodes/#' },
         ]
         t.epList = epList
-        t.qualityStrings = qualityStrings
         
         return _munge(t)
 
