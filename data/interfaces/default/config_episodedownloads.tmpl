@@ -17,11 +17,11 @@ All non-absolute folder locations are relative to $sickbeard.PROG_DIR<br /><br /
 
 <legend>Episode Search</legend>
 
-<input type="checkbox" name="use_nzb" #if $sickbeard.USE_NZB == True then "CHECKED" else ""#> <strong>NZBs</strong><br />
+<label for="use_nzb"><input type="checkbox" name="use_nzb" id="use_nzb" #if $sickbeard.USE_NZB == True then "CHECKED" else ""#> <strong>NZBs</strong></label><br />
 Whether or not we should search NZB sites<br />
 <br />
 
-<input type="checkbox" name="use_torrent" #if $sickbeard.USE_TORRENT == True then "CHECKED" else ""#> <strong>Torrents</strong><br />
+<label for="use_torrent"><input type="checkbox" name="use_torrent" id="use_torrent" #if $sickbeard.USE_TORRENT == True then "CHECKED" else ""#> <strong>Torrents</strong></label><br />
 Whether or not we should search Torrent sites<br />
 <br />
 
@@ -130,17 +130,17 @@ if SAB and Sick Beard are on different PCs)<br />
 <input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="30"><br />
 <br />
 
-<input type="checkbox" name="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""#> <strong>Keep folder</strong><br />
+<label for="keep_processed_dir"><input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""#> <strong>Keep folder</strong></label><br />
 If checked Sick Beard won't delete the episode folder<br />
 and any extra files (original nfo, sfv, etc)<br />
 <br />
 
-<input type="checkbox" name="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "CHECKED" else ""#> <strong>Rename episodes</strong><br />
+<label for="rename_episodes"><input type="checkbox" name="rename_episodes" id="rename_episodes"#if $sickbeard.RENAME_EPISODES == True then "CHECKED" else ""#> <strong>Rename episodes</strong></label><br />
 If checked Sick Beard will rename the episode according<br />
 to the naming settings in <a href="$sbRoot/config/general">General</a><br />
 <br />
 
-<input type="checkbox" name="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "CHECKED" else ""#> <strong>Scan & Process TV Download Dir</strong><br />
+<label for="process_automatically"><input type="checkbox" name="process_automatically" if="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "CHECKED" else ""#> <strong>Scan & Process TV Download Dir</strong></label><br />
 Will scan your <i>TV Download Dir</i> and attempt to<br />
 post-process every file it finds.<br />
 NOTE: If you use sabToSickbeard w/ SABnzbd+ do not check this!<br />
