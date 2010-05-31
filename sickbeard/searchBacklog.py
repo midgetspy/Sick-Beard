@@ -105,8 +105,13 @@ class BacklogSearcher:
                     curCompositeStatus = int(curStatusResult["status"])
                     curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
                     
+                    if bestQualities:
+                        highestBestQuality = max(bestQualities)
+                    else:
+                        highestBestQuality = 0
+                    
                     # if we need a better one then say yes
-                    if curStatus in (DOWNLOADED, SNATCHED) and curQuality < max(bestQualities) or curStatus == WANTED:
+                    if curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality or curStatus == WANTED:
                         wantSeason = True
                         break
 
