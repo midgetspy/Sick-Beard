@@ -446,9 +446,9 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Unable to move the file: " + str(e), logger.ERROR)
             return returnStr
 
-    # if the file existed and was smaller then lets delete it
+    # if the file existed and was smaller/same then lets delete it
     # OR if the file existed, was bigger, but we want to replace it anyway cause it's a PROPER snatch
-    if existingResult < 0 or (existingResult > 0 and rootEp.status in Quality.SNATCHED_PROPER):
+    if existingResult <= 0 or (existingResult > 0 and rootEp.status in Quality.SNATCHED_PROPER):
         # if we're deleting a file with a different name then just go ahead
         if existingResult in (-2, 2):
             existingFile = rootEp.location
