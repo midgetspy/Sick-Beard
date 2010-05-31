@@ -878,7 +878,7 @@ class TVShow(object):
             logger.log("Ep is wanted/unaired, definitely get it", logger.DEBUG)
             return True
         
-        curQuality, curStatus = Quality.splitCompositeQuality(epStatus)
+        curQuality, curStatus = Quality.splitCompositeStatus(epStatus)
         
         # if we are re-downloading then we only want it if it's in our bestQualities list and better than what we have
         if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and quality in bestQualities and quality > curQuality:

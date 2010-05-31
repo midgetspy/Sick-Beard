@@ -26,7 +26,7 @@
   <thead><tr><th>Time</th><th>Episode</th><th>Action</th><th>Provider</th><th>Quality</th></tr></thead>
   <tbody>
 #for $hItem in $historyResults:
-#set $curQual, $curStatus = $Quality.splitCompositeQuality(int($hItem["action"]))
+#set $curQual, $curStatus = $Quality.splitCompositeStatus(int($hItem["action"]))
   <tr class="evenLine">
     <td>$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
     <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
