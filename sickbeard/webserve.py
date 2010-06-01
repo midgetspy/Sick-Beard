@@ -1468,8 +1468,8 @@ class Home:
                         logger.log("Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
                     
-                    if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
-                        logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED_PROPER/DOWNLOADED", logger.ERROR)
+                    if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
+                        logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
                         continue
 
                     epObj.status = int(status)
