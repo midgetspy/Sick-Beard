@@ -869,13 +869,13 @@ class TVShow(object):
         epStatus = int(sqlResults[0]["status"])
 
         # if we know we don't want it then just say no
-        if epStatus in (SKIPPED,) and not manualSearch:
+        if epStatus == SKIPPED and not manualSearch:
             logger.log("Ep is skipped, not bothering", logger.DEBUG)
             return False
 
         # if it's one of these then we want it as long as it's in our allowed initial qualities
-        if epStatus in (WANTED, UNAIRED) and quality in anyQualities:
-            logger.log("Ep is wanted/unaired, definitely get it", logger.DEBUG)
+        if epStatus in (WANTED, UNAIRED, SKIPPED) and quality in anyQualities:
+            logger.log("Ep is wanted/unaired/skipped, definitely get it", logger.DEBUG)
             return True
         
         curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
