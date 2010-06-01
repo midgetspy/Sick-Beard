@@ -352,15 +352,22 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     newQuality = Quality.UNKNOWN
     for curName in finalNameList:
         curNewQuality = Quality.nameQuality(curName)
+        logger.log("Looking up quality for name "+curName+", got "+Quality.qualityStrings[curNewQuality], logger.DEBUG)
         # just remember if we find a good quality
         if curNewQuality != Quality.UNKNOWN and newQuality == Quality.UNKNOWN:
             newQuality = curNewQuality
+            logger.log("saved quality "+Quality.qualityStrings[newQuality], logger.DEBUG)
 
     # if we didn't get a quality from one of the names above, try assuming from each of the names
     for curName in finalNameList:
-        newQuality = Quality.assumeQuality(curName)
         if newQuality != Quality.UNKNOWN:
             break
+        newQuality = Quality.assumeQuality(curName)
+        logger.log("Guessing quality for name "+curName+", got "+Quality.qualityStrings[curNewQuality], logger.DEBUG)
+        if newQuality != Quality.UNKNOWN:
+            break
+
+    returnStr += logHelper("Unless we're told otherwise, assuming the quality is "+Quality.qualityStrings[newQuality], logger.DEBUG)
 
     rootEp = None
     for curEpisode in episodes:
@@ -380,6 +387,14 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             rootEp.relatedEps = []
         else:
             rootEp.relatedEps.append(curEp)
+
+    # make sure the quality is set right before we continue
+    if rootEp.status in Quality.SNATCHED:
+        oldStatus, newQuality = Quality.splitCompositeStatus(rootEp.status)
+        returnStr += logHelper("The old status had a quality in it, using that: "+Quality.qualityStrings[newQuality], logger.DEBUG)
+    else:
+        for curEp in [rootEp] + rootEp.relatedEps:
+            curEp.status = Quality.compositeStatus(SNATCHED, newQuality)
 
     # figure out the new filename
     biggestFileName = os.path.basename(fileName)
@@ -466,6 +481,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     # if the file existed and was smaller/same then lets delete it
     # OR if the file existed, was bigger, but we want to replace it anyway cause it's a PROPER snatch
     if existingResult <= 0 or (existingResult > 0 and rootEp.status in Quality.SNATCHED_PROPER):
+        existingFile = None
         # if we're deleting a file with a different name then just go ahead
         if existingResult in (-2, 2):
             existingFile = rootEp.location
@@ -474,27 +490,20 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             else:
                 returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
             #TODO: delete old metadata?
-        else:
-            returnStr += logHelper(newFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
+        elif ek.ek(os.path.isfile, newFile):
+            returnStr += logHelper(newFile + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
             existingFile = newFile
-        
-        os.remove(existingFile)
+
+        if existingFile:
+            os.remove(existingFile)
             
     # update the statuses before we rename so the quality goes into the name properly
     for curEp in [rootEp] + rootEp.relatedEps:
         with curEp.lock:
             curEp.location = newFile
             
-            # if it used to be snatched then maintain the same quality for the downloaded status
-            if curEp.status in Quality.SNATCHED:
-                oldStatus, oldQuality = Quality.splitCompositeStatus(curEp.status)
-                curEp.status = Quality.compositeStatus(DOWNLOADED, oldQuality)
+            curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
             
-            # if we don't know the status from the snatched status then use the status we guessed from the name
-            else:
-                returnStr += logHelper("Processing something that isn't snatched, so just guessing what the quality is", logger.ERROR)
-                curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
-
             curEp.saveToDB()
 
     if sickbeard.RENAME_EPISODES:
