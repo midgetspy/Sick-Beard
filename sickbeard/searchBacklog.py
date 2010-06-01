@@ -76,7 +76,7 @@ class BacklogSearcher:
             return
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT DISTINCT(season), showid as season FROM tv_episodes eps, tv_shows shows WHERE season != 0 AND eps.showid = shows.tvdb_id AND shows.paused = 0")
+        sqlResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes eps, tv_shows shows WHERE season != 0 AND eps.showid = shows.tvdb_id AND shows.paused = 0")
 
         totalSeasons = float(len(sqlResults))
         numSeasonsDone = 0.0
@@ -91,12 +91,10 @@ class BacklogSearcher:
 
             anyQualities, bestQualities = Quality.splitQuality(curShow.quality)
             
-            sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ?", [curShow.tvdbid])
+            sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0", [curShow.tvdbid])
 
             for curSeasonResult in sqlResults:
                 curSeason = int(curSeasonResult["season"])
-                if curSeason == 0:
-                    continue
 
                 logger.log("Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
                 self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
