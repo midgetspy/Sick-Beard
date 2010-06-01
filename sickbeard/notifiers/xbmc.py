@@ -55,21 +55,22 @@ def sendToXBMC(command, host, username=None, password=None):
     url = 'http://%s/xbmcCmds/xbmcHttp/?%s' % (host, enc_command)
 
     try:
-    # If we have a password, use authentication
-	req = urllib2.Request(url)
-	if password:
-	    logger.log("Adding Password to XBMC url", logger.DEBUG)
-	    base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-	    authheader =  "Basic %s" % base64string
-	    req.add_header("Authorization", authheader)
-	logger.log("Contacting XBMC via url: " + url, logger.DEBUG)
-	handle = urllib2.urlopen(req)
-	response = handle.read()
-	logger.log("response: " + response, logger.DEBUG)
+        # If we have a password, use authentication
+        req = urllib2.Request(url)
+        if password:
+            logger.log("Adding Password to XBMC url", logger.DEBUG)
+            base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+            authheader =  "Basic %s" % base64string
+            req.add_header("Authorization", authheader)
+
+        logger.log("Contacting XBMC via url: " + url, logger.DEBUG)
+        handle = urllib2.urlopen(req)
+        response = handle.read()
+        logger.log("response: " + response, logger.DEBUG)
     except IOError, e:
-	# print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
-	logger.log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
-	response = ''
+        # print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
+        logger.log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
+        response = ''
 
     return response
 
@@ -89,72 +90,67 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
     fileString = title + "," + input
     
     for curHost in [x.strip() for x in host.split(",")]:
-	command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' +fileString + ')' }
-	logger.log("Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
-	request = sendToXBMC(command, curHost, username, password)
+        command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' +fileString + ')' }
+        logger.log("Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
+        request = sendToXBMC(command, curHost, username, password)
     
-def updateLibrary(host, path=None, showName=None):
+def updateLibrary(host, showName=None):
 
     global XBMC_TIMEOUT
 
     logger.log("Updating library in XBMC", logger.DEBUG)
     
     if not host:
-	logger.log('No host specified, no updates done', logger.DEBUG)
-	return FALSE
+        logger.log('No host specified, no updates done', logger.DEBUG)
+        return False
 
+    # if we're doing per-show
     if showName:
-	pathSql = 'select path.strPath from path, tvshow, tvshowlinkpath where \
-	    tvshow.c00 = "%s" and tvshowlinkpath.idShow = tvshow.idShow \
-	    and tvshowlinkpath.idPath = path.idPath' % (showName)
+        pathSql = 'select path.strPath from path, tvshow, tvshowlinkpath where \
+            tvshow.c00 = "%s" and tvshowlinkpath.idShow = tvshow.idShow \
+            and tvshowlinkpath.idPath = path.idPath' % (showName)
 
-	# Use this to get xml back for the path lookups
-	xmlCommand = {'command': 'SetResponseFormat(webheader;false;webfooter;false;header;<xml>;footer;</xml>;opentag;<tag>;closetag;</tag>;closefinaltag;false)'}
-	# Sql used to grab path(s)
-	sqlCommand = {'command': 'QueryVideoDatabase(%s)' % (pathSql)}
-	# Set output back to default
-	resetCommand = {'command': 'SetResponseFormat()'}
+        # Use this to get xml back for the path lookups
+        xmlCommand = {'command': 'SetResponseFormat(webheader;false;webfooter;false;header;<xml>;footer;</xml>;opentag;<tag>;closetag;</tag>;closefinaltag;false)'}
+        # Sql used to grab path(s)
+        sqlCommand = {'command': 'QueryVideoDatabase(%s)' % (pathSql)}
+        # Set output back to default
+        resetCommand = {'command': 'SetResponseFormat()'}
     
-    ## This block looks pointless, leaving just in case
-    if path == None:
-	path = ""
+        # Get our path for show
+        request = sendToXBMC(xmlCommand, host)
+        sqlXML = sendToXBMC(sqlCommand, host)
+        request = sendToXBMC(resetCommand, host)
+
+        if not sqlXML:
+            logger.log("Invalid response for " + showName + " on " + host, logger.DEBUG)
+            return False
+
+        et = etree.fromstring(sqlXML)
+        paths = et.findall('field')
+    
+        if not paths:
+            logger.log("No valid paths found for " + showName + " on " + host, logger.DEBUG)
+            return False
+    
+        for path in paths:
+            logger.log("XBMC Updating " + showName + " on " + host + " at " + path.text, logger.DEBUG)
+            updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (path.text)}
+            request = sendToXBMC(updateCommand, host)
+            if not request:
+                return False
+            # Sleep for a few seconds just to be sure xbmc has a chance to finish
+            # each directory
+            if len(paths) > 1:
+                time.sleep(5)
     else:
-	path = ""
-	#path = "," + urllib.quote_plus(path)
-    ##
+        logger.log("XBMC Updating " + host, logger.DEBUG)
+        updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
+        request = sendToXBMC(updateCommand, host)
 
-    if showName:
-	# Get our path for show
-	request = sendToXBMC(xmlCommand, host)
-	sqlXML = sendToXBMC(sqlCommand, host)
-	request = sendToXBMC(resetCommand, host)
-	if not sqlXML:
-	    logger.log("Invalid response for " + showName + " on " + host, logger.DEBUG)
-	    return False
-
-	et = etree.fromstring(sqlXML)
-	paths = et.findall('field')
-
-	if not paths:
-	    logger.log("No valid paths found for " + showName + " on " + host, logger.DEBUG)
-	    return False
-
-	for path in paths:
-	    logger.log("XBMC Updating " + showName + " on " + host + " at " + path.text, logger.DEBUG)
-	    updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (path.text)}
-	    request = sendToXBMC(updateCommand, host)
-	    if not request:
-		return False
-	    # Sleep for a few seconds just to be sure sab has a chance to finish
-	    # each directory
-	    if len(paths) > 1:
-		time.sleep(5)
-    else:
-	logger.log("XBMC Updating " + host, logger.DEBUG)
-	updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
-	request = sendToXBMC(updateCommand, host)
-	if not request:
-	    return False
+        if not request:
+            return False
+    
     return True
 
 # Wake function
