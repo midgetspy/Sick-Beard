@@ -48,8 +48,11 @@ class BacklogSearcher:
         self.lock = threading.Lock()
         self.amActive = False
         
+        self._resetPI()
+        
+    def _resetPI(self):
         self.percentDone = 0
-        self.currentSearchInfo = {}
+        self.currentSearchInfo = {'title': 'Initializing'}
 
     def getProgressIndicator(self):
         if self.amActive:
@@ -131,6 +134,7 @@ class BacklogSearcher:
         self._set_lastBacklog(curDate)
             
         self.amActive = False
+        self._resetPI()
 
 
     def _searchBacklogForEp(self, curEp):
