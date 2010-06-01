@@ -160,10 +160,6 @@ class NZBsRUSCache(tvcache.TVCache):
 				logger.log("The XML returned from the NZBs'R'US RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 				continue
 			
-			if "subpack" in title.lower():
-				logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
-				continue
-			
 			url = url.replace('&amp;','&')
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			

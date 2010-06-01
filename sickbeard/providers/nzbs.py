@@ -306,10 +306,6 @@ class NZBsCache(tvcache.TVCache):
 				logger.log("The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 				continue
 			
-			if "subpack" in title.lower():
-				logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
-				continue
-			
 			url = url.replace('&amp;','&')
 
 			if "&i=" not in url and "&h=" not in url:

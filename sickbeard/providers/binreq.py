@@ -147,10 +147,6 @@ class BinReqCache(tvcache.TVCache):
 			
 			url = url.replace('view.php', 'download.php')
 			
-			if "subpack" in title.lower():
-				logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
-				continue
-			
 			url = url.replace('&amp;','&')
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
