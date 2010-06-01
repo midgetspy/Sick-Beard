@@ -130,7 +130,7 @@ class TVShow(object):
             raise exceptions.NoNFOException("Show folder doesn't exist, you shouldn't be using it")
 
     def _setLocation(self, newLocation):
-        logger.log("Setter sets location to " + newLocation)
+        logger.log("Setter sets location to " + newLocation, logger.DEBUG)
         if ek.ek(os.path.isdir, newLocation) and ek.ek(os.path.isfile, ek.ek(os.path.join, newLocation, "tvshow.nfo")):
             self._location = newLocation
             self._isDirGood = True
