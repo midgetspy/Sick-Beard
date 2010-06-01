@@ -202,10 +202,11 @@ def findSeason(show, season):
 		
 		try:
 			curResults = curProvider.findSeasonResults(show, season)
-			# skip non-tv crap
-			curResults = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), curResults)
-		
+
 			for curEp in curResults:
+				# skip non-tv crap
+				curResults[curEp] = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), curResults[curEp])
+				
 				if curEp in foundResults:
 					foundResults[curEp] += curResults[curEp]
 				else:
