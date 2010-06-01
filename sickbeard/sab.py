@@ -19,6 +19,7 @@
 
 
 import urllib
+import datetime
 
 import sickbeard
 
@@ -38,12 +39,10 @@ def sendNZB(nzb):
     if sickbeard.SAB_CATEGORY != None:
         params['cat'] = sickbeard.SAB_CATEGORY
 
-    # don't bother making re-downloads high priority
-    if nzb.episode.status in Quality.DOWNLOADED:
+    # if it aired recently make it high priority
+    if nzb.episode.airdate - datetime.date.today() <= datetime.timedelta(days=7):
         params['priority'] = 1
 
-    params['pp'] = 3
-    
     params['mode'] = 'addurl'
     params['name'] = nzb.url
 
