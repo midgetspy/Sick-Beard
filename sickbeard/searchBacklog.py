@@ -111,7 +111,7 @@ class BacklogSearcher:
                         highestBestQuality = 0
                     
                     # if we need a better one then say yes
-                    if curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality or curStatus == WANTED:
+                    if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
                         wantSeason = True
                         break
 
