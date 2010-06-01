@@ -142,18 +142,135 @@ def _getEpisode(show, season, episode):
     return epObj
 
 ManageShowsMenu = [
-            { 'title': 'Manage Searches', 'path': 'manageShows/manageSearches' },
-            { 'title': 'Mass Edit/Update', 'path': 'manageShows/massUpdate' }
+            { 'title': 'Manage Searches', 'path': 'manageShows/manageSearches' }
             ]
 
 class ManageShowsMassUpdate:
-    
+    pass
+
+class ManageShowsManageSearches:
+
+    @cherrypy.expose
+    def index(self):
+        t = PageTemplate(file="manageShows_manageSearches.tmpl")
+        t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
+        t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
+        t.submenu = ManageShowsMenu
+        
+        return _munge(t)
+        
+    @cherrypy.expose
+    def forceBacklog(self):
+
+        # force it to run the next time it looks
+        sickbeard.backlogSearchScheduler.forceSearch()
+        logger.log("Backlog search started in background")
+        flash.message('Backlog search started',
+                      'The backlog search has begun and will run in the background')
+        redirect("/manageShows/manageSearches")
+
+    @cherrypy.expose
+    def forceSearch(self):
+
+        # force it to run the next time it looks
+        result = sickbeard.currentSearchScheduler.forceRun()
+        if result:
+            logger.log("Search forced")
+            flash.message('Episode search started',
+                          'Note: RSS feeds may not be updated if they have been retrieved too recently')
+        
+        redirect("/manageShows/manageSearches")
+
+
+class ManageShows:
+
     @cherrypy.expose
     def index(self):
         
-        t = PageTemplate(file="manageShows_massUpdate.tmpl")
+        t = PageTemplate(file="manageShows.tmpl")
         t.submenu = ManageShowsMenu
         return _munge(t)
+
+    @cherrypy.expose
+    def massEdit(self, toEdit=None):
+        
+        t = PageTemplate(file="manageShows_massEdit.tmpl")
+        t.submenu = ManageShowsMenu
+
+        if not toEdit:
+            redirect("/manageShows")
+        
+        showIDs = toEdit.split("|")
+        showList = []
+        for curID in showIDs:
+            curID = int(curID)
+            showObj = helpers.findCertainShow(sickbeard.showList, curID)
+            if showObj:
+                showList.append(showObj)
+
+        useSeasonfolders = True
+        lastSeasonfolders = None
+
+        usePaused = True
+        lastPaused = None
+
+        useQuality = True
+        lastQuality = None
+        
+        for curShow in showList:
+            if usePaused:
+                if lastPaused == None:
+                    lastPaused = curShow.paused
+                elif lastPaused != curShow.paused:
+                    usePaused = True
+        
+            if useSeasonfolders:
+                if lastSeasonfolders == None:
+                    lastSeasonfolders = curShow.seasonfolders
+                elif lastSeasonfolders != curShow.seasonfolders:
+                    useSeasonfolders = True
+        
+            if useQuality:
+                if lastQuality == None:
+                    lastQuality = curShow.quality
+                elif lastQuality != curShow.quality:
+                    useQuality = True
+        
+        t.showList = toEdit
+        t.pausedValue = lastPaused if usePaused else False
+        t.seasonfoldersValue = lastSeasonfolders if useSeasonfolders else False
+        t.qualityValue = lastQuality if useQuality else SD
+        t.commonPath = os.path.dirname(os.path.commonprefix([x._location for x in showList]))
+        
+        return _munge(t)
+    
+    @cherrypy.expose
+    def massEditSubmit(self, paused=None, seasonfolders=None, anyQualities=[], bestQualities=[],
+                       oldCommonPath=None, newCommonPath=None, toEdit=None):
+
+        showIDs = toEdit.split("|")
+        errors = []
+        for curShow in showIDs:
+            curErrors = []
+            showObj = helpers.findCertainShow(sickbeard.showList, int(curShow))
+            if not showObj:
+                continue
+            if oldCommonPath:
+                newLocation = showObj._location.replace(oldCommonPath, newCommonPath)
+            else:
+                newLocation = ek.ek(os.path.join, newCommonPath, showObj._location)
+            
+            curErrors += Home().editShow(curShow, newLocation, anyQualities, bestQualities, seasonfolders, paused, True)
+
+            if curErrors:
+                logger.log("Errors: "+str(curErrors))
+                errors.append('<b>%s:</b><br />\n<ul>' % showObj.name + '\n'.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
+        
+        if len(errors) > 0:
+            flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
+                        "<br />\n".join(errors))
+
+        redirect("/manageShows")
 
     @cherrypy.expose
     def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toMetadata=None):
@@ -237,58 +354,8 @@ class ManageShowsMassUpdate:
             flash.message("The following actions were queued:<br /><br />",
                           messageDetail)
 
-        redirect("/manageShows/massUpdate")
+        redirect("/manageShows")
 
-class ManageShowsManageSearches:
-
-    @cherrypy.expose
-    def index(self):
-        t = PageTemplate(file="manageShows_manageSearches.tmpl")
-        t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
-        t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
-        t.submenu = ManageShowsMenu
-        
-        return _munge(t)
-        
-    @cherrypy.expose
-    def forceBacklog(self):
-
-        # force it to run the next time it looks
-        sickbeard.backlogSearchScheduler.forceSearch()
-        logger.log("Backlog search started in background")
-        flash.message('Backlog search started',
-                      'The backlog search has begun and will run in the background')
-        redirect("/manageShows/manageSearches")
-
-    @cherrypy.expose
-    def forceSearch(self):
-
-        # force it to run the next time it looks
-        result = sickbeard.currentSearchScheduler.forceRun()
-        if result:
-            logger.log("Search forced")
-            flash.message('Episode search started',
-                          'Note: RSS feeds may not be updated if they have been retrieved too recently')
-        
-        redirect("/manageShows/manageSearches")
-
-
-class ManageShows:
-
-    @cherrypy.expose
-    def index(self):
-        
-        myDB = db.DBConnection()
-        sqlResults = []# myDB.select("SELECT e.*, show_name FROM tv_shows s, tv_episodes e WHERE s.tvdb_id=e.showid AND e.status IN ("+str(BACKLOG)+","+str(DISCBACKLOG)+")")
-        
-        t = PageTemplate(file="manageShows.tmpl")
-        t.backlogResults = sqlResults
-        t.submenu = ManageShowsMenu
-        
-        return _munge(t)
-
-    massUpdate = ManageShowsMassUpdate()
-    
     manageSearches = ManageShowsManageSearches()
 
 
@@ -1185,15 +1252,23 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False):
         
         if show == None:
-            return _genericMessage("Error", "Invalid show ID")
+            errString = "Invalid show ID: "+str(show)
+            if directCall:
+                return [errString]
+            else:
+                return _genericMessage("Error", errString)
         
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
         
         if showObj == None:
-            return _genericMessage("Error", "Unable to find the specified show")
+            errString = "Unable to find the specified show: "+str(show)
+            if directCall:
+                return [errString]
+            else:
+                return _genericMessage("Error", errString)
 
         if not location and not anyQualities and not bestQualities and not seasonfolders:
             
@@ -1220,15 +1295,17 @@ class Home:
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
 
+        errors = []
         with showObj.lock:
-            errors = []
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
-            logger.log("got qualities "+str(anyQualities)+" "+str(bestQualities)+", changing quality from " + str(showObj.quality) + " to " + str(newQuality), logger.DEBUG)
             showObj.quality = newQuality
             
             if showObj.seasonfolders != seasonfolders:
                 showObj.seasonfolders = seasonfolders
-                showObj.refreshDir()
+                try:
+                    sickbeard.showQueueScheduler.action.refreshShow(showObj)
+                except exceptions.CantRefreshException, e:
+                    errors.append("Unable to refresh this show: "+str(e))
 
             showObj.paused = paused
                         
@@ -1241,22 +1318,27 @@ class Home:
                     # change it
                     try:
                         showObj.location = location
-                        showObj.refreshDir()
+                        try:
+                            sickbeard.showQueueScheduler.action.refreshShow(showObj)
+                        except exceptions.CantRefreshException, e:
+                            errors.append("Unable to refresh this show:"+str(e))
                         # grab updated info from TVDB
                         #showObj.loadEpisodesFromTVDB()
                         # rescan the episodes in the new folder
-                        showObj.loadEpisodesFromDir()
                     except exceptions.NoNFOException:
                         errors.append("The folder at <tt>%s</tt> doesn't contain a tvshow.nfo - copy your files to that folder before you change the directory in Sick Beard." % location)
                     
             # save it to the DB
             showObj.saveToDB()
 
-            if len(errors) > 0:
-                flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
-                            '<ul>' + '\n'.join(['<li>%s</li>' % error for error in errors]) + "</ul>")
+        if directCall:
+            return errors
 
-            redirect("/home/displayShow?show=" + show)
+        if len(errors) > 0:
+            flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
+                        '<ul>' + '\n'.join(['<li>%s</li>' % error for error in errors]) + "</ul>")
+
+        redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
     def deleteShow(self, show=None):

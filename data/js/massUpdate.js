@@ -1,5 +1,22 @@
 $(document).ready(function(){
 
+  $('#submitMassEdit').click(function(){
+    var editArr = new Array()
+  
+    $('.editCheck').each(function() {
+      if (this.checked == true) {
+        editArr.push($(this).attr('id').split('-')[1])
+      }
+    });
+
+    if (editArr.length == 0)
+        return
+
+    url = 'massEdit?toEdit='+editArr.join('|')
+    window.location.href = url
+  });
+
+
   $('#submitMassUpdate').click(function(){
   
     var updateArr = new Array()

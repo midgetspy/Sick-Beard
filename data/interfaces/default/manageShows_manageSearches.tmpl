@@ -14,15 +14,15 @@
 <b>Backlog Search:</b><br />
 
 #if $backlogPI == None:
-Not in progress <a href="$sbRoot/manageShows/manageSearches/forceBacklog">(force)</a><br />
+Not in progress (<a href="$sbRoot/manageShows/manageSearches/forceBacklog">force</a>)<br />
 #else:
 $backlogPI.percentComplete %<br />
 $backlogPI.currentStatus['title']<br />
 #end if
 <br />
-<b>Episode Search:</b><br />
+<b>Daily Episode Search:</b><br />
 #if not $searchStatus:
-Not in progress <a href="$sbRoot/manageShows/manageSearches/forceSearch">(force)</a><br />
+Not in progress (<a href="$sbRoot/manageShows/manageSearches/forceSearch">force</a>)<br />
 #else:
 In Progress
 #end if
