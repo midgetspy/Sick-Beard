@@ -131,7 +131,7 @@ Quality to assign to a newly created show<br />
 <br />
 <div id="customQuality">
 If I don't have the episode then download it in <b>one</b> of the following qualities:<br />
-#set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
+#set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
 <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
 #for $curQuality in sorted($anyQualityList):
 <option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$Quality.qualityStrings[$curQuality]
@@ -139,7 +139,7 @@ If I don't have the episode then download it in <b>one</b> of the following qual
 </select><br />
 <br />
 Then Re-download the episodes in any or all of these qualities as they are available:<br />
-#set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
+#set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
 <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
 #for $curQuality in sorted($bestQualityList):
 <option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$Quality.qualityStrings[$curQuality]
