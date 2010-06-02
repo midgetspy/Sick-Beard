@@ -734,9 +734,9 @@ class HomeAddShows:
 		
 		if showDir != None and type(showDir) is not list:
 			# make sure they didn't put something retarded in
-			if not os.path.isabs(showDir) or not ek.ek(os.path.isdir, showDir):
-				flash.error('Error', 'Enter an actual folder!')
-				redirect('/home/addShows')
+			#if not os.path.isabs(showDir) or not ek.ek(os.path.isdir, showDir):
+				#flash.error('Error', 'Enter an actual folder!')
+				#redirect('/home/addShows')
 			
 			showDir = [showDir]
 		
