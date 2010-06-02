@@ -1,0 +1,130 @@
+#import sickbeard
+#import datetime
+#from sickbeard.common import *
+#set global $title="Episode Overview"
+
+#set global $sbPath=".."
+
+<!--#set global $topmenu="manageShows"#-->
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+<script>
+\$(document).ready(function() 
+{ 
+    // show/hide different types of rows when the checkboxes are changed
+    \$(".checkboxControls input").change(function(e){
+        var showID = \$(this).attr('id')
+        var myTable = \$('#showTable-'+showID)
+        var whichClass = \$(this).attr('class')
+        \$('tr.'+whichClass).each(function(i){
+            \$(this).toggle();
+        });
+        
+        // uncommenting this makes the accordion *GROW* every time you hide/show rows
+        \$("#showAccordion").accordion('resize')
+    });        
+
+    // set up the accordion plugin
+    \$(function() {
+        \$("#showAccordion").accordion({
+            collapsible: true,
+            //fillSpace: true,
+            clearStyle: true,
+            active: false
+        });
+    });
+    
+    // select all visible checkboxes for the current show
+    \$('.checkAll').change(function(){
+    
+        var showCheck = this
+        var tvdbid = \$(showCheck).attr('id');
+
+        \$('.epCheck-'+tvdbid+':visible').each(function(){
+            var epParts = \$(this).attr('id').split('-')
+
+            if (epParts[0] == tvdbid) {
+                this.checked = showCheck.checked 
+            }
+        }); 
+    });
+  
+    // handle the status change button - build the URL for the currently active show and send it via ajax (eventually)
+    \$('#changeStatus').click(function(){
+        var tvdbid = \$('#showAccordion > h3.ui-state-active').attr('id').split('-')[1]
+        var epArr = new Array()
+        
+        \$('.epCheck-'+tvdbid).each(function(){
+            if (this.checked == true) {
+                epArr.push(\$(this).attr('id').split('-')[1])
+            }
+        });  
+
+        if (epArr.length == 0)
+            return false
+
+        url = '$sbRoot/home/setStatus'
+        params = { show: tvdbid, eps: epArr.join('|'), status: \$('#statusSelect').attr('value'), direct: 'True'}
+
+        \$.getJSON(url, params, function(data){
+            location.reload() // it'd be nice if this kept the same accordion tab open
+        });
+
+    });
+  
+    // start with the "skipped" rows hidden
+    \$("tr.skipped").each(function(){
+        \$(this).hide()
+    });
+    
+});
+
+</script>
+
+Change selected episodes to 
+<select id="statusSelect">
+#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
+<option value="$curStatus">$statusStrings[$curStatus]
+#end for
+</select>
+<input type="button" id="changeStatus" value="Go"><br />
+<br />
+
+<div align="right" class="checkboxControls">
+<span class="wanted">Wanted: <input type="checkbox" class="wanted" CHECKED></span>
+<span class="qual">Low Quality: <input type="checkbox" class="qual" CHECKED></span>
+<span class="good">Downloaded: <input type="checkbox" class="good" CHECKED></span>
+<span class="skipped">Skipped: <input type="checkbox" class="skipped"></span>
+<br /><br />
+</div>
+
+<div id="showAccordion" width="80%">
+#for $curShow in $sickbeard.showList:
+<h3 id="header-$curShow.tvdbid"><a href="#">$curShow.name</a></h3>
+<div>
+<div align="right">
+<span class="wanted">Wanted: $wantedEpCounts[$curShow.tvdbid]</span>
+<span class="qual">Low Quality: $qualEpCounts[$curShow.tvdbid]</span>
+<span class="good">Downloaded: $goodEpCounts[$curShow.tvdbid]</span>
+<span class="skipped">Skipped: $skippedEpCounts[$curShow.tvdbid]</span>
+<br /><br />
+</div>
+<table id="showTable-$curShow.tvdbid" class="sickbeardTable">
+  <thead><tr><th width="1%"><input type="checkbox" id="$curShow.tvdbid" class="checkAll"></th><th>Episode</th><th>Name</th><th>Status</th></tr></thead>
+  <tbody>
+  #for $curEp in $allEps[$curShow.tvdbid]:
+  #set $epStr = str($curEp["season"]) + "x" + str($curEp["episode"])
+  <tr class="$epCats[curShow.tvdbid][$epStr]">
+    <td><input type="checkbox" id="$curShow.tvdbid-$epStr" class="epCheck-$curShow.tvdbid"></td>
+    <td>$curEp["season"] x $curEp["episode"]</td>
+    <td>$curEp["name"]</td>
+    <td>$statusStrings[int($curEp["status"])]</td>
+  </tr>
+  #end for
+  </tbody>
+</table>
+</div>
+#end for
+</div>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

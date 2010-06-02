@@ -49,6 +49,11 @@ from sickbeard.common import *
 from lib.tvdb_api import tvdb_exceptions
 from lib.tvdb_api import tvdb_api
 
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
+
 import sickbeard
 
 from sickbeard import browser
@@ -142,11 +147,83 @@ def _getEpisode(show, season, episode):
     return epObj
 
 ManageShowsMenu = [
-            { 'title': 'Manage Searches', 'path': 'manageShows/manageSearches' }
+            { 'title': 'Manage Searches', 'path': 'manageShows/manageSearches' },
+            #{ 'title': 'Episode Overview', 'path': 'manageShows/episodeOverview' }
             ]
 
-class ManageShowsMassUpdate:
-    pass
+class ManageShowsEpisodeOverview:
+
+    @cherrypy.expose
+    def index(self):
+        t = PageTemplate(file="manageShows_episodeOverview.tmpl")
+        
+        myDB = db.DBConnection()
+        
+        allEps = {}
+        epCats = {}
+        skippedEpCounts = {}
+        wantedEpCounts = {}
+        qualEpCounts = {}
+        goodEpCounts = {}
+        
+        for curShow in sickbeard.showList:
+            epCats[curShow.tvdbid] = {}
+            skippedEpCounts[curShow.tvdbid] = 0
+            wantedEpCounts[curShow.tvdbid] = 0
+            qualEpCounts[curShow.tvdbid] = 0
+            goodEpCounts[curShow.tvdbid] = 0
+            allEps[curShow.tvdbid] = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(curShow.tvdbid) + " AND status != "+str(UNAIRED)+" ORDER BY season*1000+episode DESC")
+
+            anyQualities, bestQualities = Quality.splitQuality(curShow.quality)
+            if bestQualities:
+                maxBestQuality = max(bestQualities)
+            else:
+                maxBestQuality = None 
+        
+            for curResult in allEps[curShow.tvdbid]:
+                curStatus = int(curResult["status"])
+                curEpCat = None
+                if curStatus == WANTED:
+                    curEpCat = "wanted"
+                elif curStatus in (SKIPPED, IGNORED):
+                    curEpCat = "skipped"
+                elif curStatus == ARCHIVED:
+                    curEpCat = "good"
+                elif curStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
+                    curStatus, curQuality = Quality.splitCompositeStatus(curStatus)
+                    
+                    # if they don't want re-downloads then we call it good if they have anything
+                    if maxBestQuality == None:
+                        curEpCat = "good"
+                    # if they have one but it's not the best they want then mark it as qual
+                    elif curQuality < maxBestQuality:
+                        curEpCat = "qual"
+                    # if it's >= maxBestQuality then it's good
+                    else:
+                        curEpCat = "good"
+
+                epCats[curShow.tvdbid][str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
+
+                if curEpCat == "wanted":
+                    wantedEpCounts[curShow.tvdbid] += 1
+                elif curEpCat == "good":
+                    goodEpCounts[curShow.tvdbid] += 1
+                elif curEpCat == "qual":
+                    qualEpCounts[curShow.tvdbid] += 1
+                elif curEpCat == "skipped":
+                    skippedEpCounts[curShow.tvdbid] += 1
+        
+        
+        t.allEps = allEps
+        t.skippedEpCounts = skippedEpCounts
+        t.wantedEpCounts = wantedEpCounts
+        t.qualEpCounts = qualEpCounts
+        t.goodEpCounts = goodEpCounts
+        t.epCats = epCats
+        t.submenu = ManageShowsMenu
+        
+        return _munge(t)
+        
 
 class ManageShowsManageSearches:
 
@@ -183,6 +260,10 @@ class ManageShowsManageSearches:
 
 
 class ManageShows:
+
+    manageSearches = ManageShowsManageSearches()
+
+    episodeOverview = ManageShowsEpisodeOverview()
 
     @cherrypy.expose
     def index(self):
@@ -355,8 +436,6 @@ class ManageShows:
                           messageDetail)
 
         redirect("/manageShows")
-
-    manageSearches = ManageShowsManageSearches()
 
 
 class History:
@@ -1436,18 +1515,33 @@ class Home:
         redirect("/home/displayShow?show=" + show)
         
     @cherrypy.expose
-    def setStatus(self, show=None, eps=None, status=None):
+    def setStatus(self, show=None, eps=None, status=None, direct=False):
         
         if show == None or eps == None or status == None:
-            return _genericMessage("Error", "You must specify a show and at least one episode")
+            errMsg = "You must specify a show and at least one episode"
+            if direct:
+                flash.error('Error', errorMsg)
+                return json.dumps({'result': 'error'})
+            else:
+                return _genericMessage("Error", errMsg)
         
         if not statusStrings.has_key(int(status)):
-            return _genericMessage("Error", "Invalid status")
+            errMsg = "Invalid status"
+            if direct:
+                flash.error('Error', errorMsg)
+                return json.dumps({'result': 'error'})
+            else:
+                return _genericMessage("Error", errMsg)
         
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
         if showObj == None:
-            return _genericMessage("Error", "Show not in show list")
+            errMsg = "Error", "Show not in show list"
+            if direct:
+                flash.error('Error', errorMsg)
+                return json.dumps({'result': 'error'})
+            else:
+                return _genericMessage("Error", errMsg)
 
         if eps != None:
 
@@ -1475,7 +1569,10 @@ class Home:
                     epObj.status = int(status)
                     epObj.saveToDB()
                     
-        redirect("/home/displayShow?show=" + show)
+        if direct:
+            return json.dumps({'result': 'success'})
+        else:
+            redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
