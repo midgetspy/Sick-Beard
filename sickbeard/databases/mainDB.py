@@ -3,6 +3,8 @@ from sickbeard import db
 from sickbeard import common
 from sickbeard import logger
 
+from sickbeard import encodingKludge as ek
+import shutil, time, os.path, sys
 
 # ======================
 # = Main DB Migrations =
@@ -80,6 +82,25 @@ class NewQualitySettings (NumericProviders):
 		return self.hasTable("db_version")
 
 	def execute(self):
+		
+		numTries = 0
+		while not ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0')):
+			if not ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db')):
+				break
+
+			try:
+				logger.log("Attempting to back up your sickbeard.db file before migration...")
+				shutil.copy(ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db'), ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0'))
+				break
+			except Exception, e:
+				logger.log("Error while trying to back up your sickbeard.db: "+str(e))
+				numTries += 1
+				time.sleep(1)
+				logger.log("Trying again.")
+			
+			if numTries >= 10:
+				logger.log("Unable to back up your sickbeard.db file, please do it manually.")
+				sys.exit(1)
 		
 		# old stuff that's been removed from common but we need it to upgrade
 		HD = 1
