@@ -345,6 +345,9 @@ class QueueItemUpdate(QueueItem):
         QueueItem.execute(self)
         
         logger.log("Beginning update of "+self.show.name)
+
+        logger.log("Retrieving show info from TVDB", logger.DEBUG)
+        self.show.loadFromTVDB()
         
         # get episode list from DB
         logger.log("Loading all episodes from the database", logger.DEBUG)

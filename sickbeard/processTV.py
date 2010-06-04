@@ -347,6 +347,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         returnStr += logHelper("The show dir doesn't exist, canceling postprocessing", logger.DEBUG)
         return returnStr
 
+    if season == -1:
+        return returnStr
 
     # search all possible names for our new quality, in case the file or dir doesn't have it
     newQuality = Quality.UNKNOWN

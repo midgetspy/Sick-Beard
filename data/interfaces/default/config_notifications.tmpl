@@ -38,40 +38,19 @@
 
 <legend>XBMC</legend>
 
-#if $sickbeard.XBMC_NOTIFY_ONSNATCH == True:
-#set $xbmc_notify_onsnatch = "CHECKED"
-#else
-#set $xbmc_notify_onsnatch = ""
-#end if
-#if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
-#set $xbmc_notify_ondownload = "CHECKED"
-#else
-#set $xbmc_notify_ondownload = ""
-#end if
-#if $sickbeard.XBMC_UPDATE_LIBRARY == True:
-#set $xbmc_update_library = "CHECKED"
-#else
-#set $xbmc_update_library = ""
-#end if
-#if $sickbeard.XBMC_UPDATE_FULL == True:
-#set $xbmc_update_full = "CHECKED"
-#else
-#set $xbmc_update_full = ""
-#end if
-
-<input type="checkbox" name="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "CHECKED" else ""#> <strong>Notify XBMC on NZB retrieval</strong><br />
+<label for="xbmc_notify_onsnatch"><input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "CHECKED" else ""#> <strong>Notify XBMC on NZB retrieval</strong></label><br />
 Send XBMC a notification when we find an NZB?<br />
 <br />
 
-<input type="checkbox" name="xbmc_notify_ondownload" #if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD then "CHECKED" else ""#> <strong>Notify XBMC on episode download</strong><br />
+<label for="xbmc_notify_ondownload"><input type="checkbox" name="xbmc_notify_ondownload" id="xbmc_notify_ondownload" #if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD then "CHECKED" else ""#> <strong>Notify XBMC on episode download</strong></label><br />
 Send XBMC a notification when we finish a download?<br />
 <br />
 
-<input type="checkbox" name="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "CHECKED" else ""#> <strong>Update XBMC library</strong><br />
+<label for="xbmc_update_library"><input type="checkbox" name="xbmc_update_library" id="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "CHECKED" else ""#> <strong>Update XBMC library</strong></label><br />
 Update XBMC library when we finish a download?<br />
 <br />
 
-<input type="checkbox" name="xbmc_update_full" #if $sickbeard.XBMC_UPDATE_FULL then "CHECKED" else ""#> <strong>Fall Back To Full Update</strong><br />
+<label for="xbmc_update_full"><input type="checkbox" name="xbmc_update_full" id="xbmc_update_full" #if $sickbeard.XBMC_UPDATE_FULL then "CHECKED" else ""#> <strong>Fall Back To Full Update</strong></label><br />
 Do a full library update if per-show fails?<br />
 <br />
 
@@ -99,7 +78,7 @@ Password of your XBMC server (blank for none)<br />
 
 <legend>Growl</legend>
 
-<input type="checkbox" name="use_growl" #if $sickbeard.USE_GROWL then "CHECKED" else ""#> <strong>Enable Growl Notifications</strong><br />
+<label for="use_growl"><input type="checkbox" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "CHECKED" else ""#> <strong>Enable Growl Notifications</strong></label><br />
 Should Sick Beard send Growl notifications?<br />
 <br />
 
@@ -124,21 +103,6 @@ blank, but if the hosts are different Growl <b>requires</b> a password.<br />
 <fieldset class="EntryFieldSet">
 
 <legend>Email</legend>
-
-Not Implemented<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-
-</fieldset>
-</div>
-
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>Twitter</legend>
 
 Not Implemented<br />
 <br />

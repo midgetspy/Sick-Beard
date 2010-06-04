@@ -732,9 +732,13 @@ class ConfigEpisodeDownloads:
 
         sickbeard.SAB_USERNAME = sab_username
         sickbeard.SAB_PASSWORD = sab_password
-        sickbeard.SAB_APIKEY = sab_apikey
+        sickbeard.SAB_APIKEY = sab_apikey.strip()
         sickbeard.SAB_CATEGORY = sab_category
-        sickbeard.SAB_HOST = sab_host
+        
+        if sab_host.startswith('http://'):
+            sickbeard.SAB_HOST = sab_host[7:].rstrip('/')
+        else:
+            sickbeard.SAB_HOST = sab_host
         
         sickbeard.save_config()
         
@@ -793,25 +797,25 @@ class ConfigProviders:
         if tvbinz != None:
             sickbeard.TVBINZ = tvbinz
         if tvbinz_uid:
-            sickbeard.TVBINZ_UID = tvbinz_uid
+            sickbeard.TVBINZ_UID = tvbinz_uid.strip()
         if tvbinz_sabuid:
-            sickbeard.TVBINZ_SABUID = tvbinz_sabuid
+            sickbeard.TVBINZ_SABUID = tvbinz_sabuid.strip()
         if tvbinz_hash:
-            sickbeard.TVBINZ_HASH = tvbinz_hash
+            sickbeard.TVBINZ_HASH = tvbinz_hash.strip()
         if tvbinz_auth:
-            sickbeard.TVBINZ_AUTH = tvbinz_auth
+            sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
         
         sickbeard.NZBS = nzbs
-        sickbeard.NZBS_UID = nzbs_uid
-        sickbeard.NZBS_HASH = nzbs_hash
+        sickbeard.NZBS_UID = nzbs_uid.strip()
+        sickbeard.NZBS_HASH = nzbs_hash.strip()
         
         sickbeard.NZBSRUS = nzbsrus
-        sickbeard.NZBSRUS_UID = nzbsrus_uid
-        sickbeard.NZBSRUS_HASH = nzbsrus_hash
+        sickbeard.NZBSRUS_UID = nzbsrus_uid.strip()
+        sickbeard.NZBSRUS_HASH = nzbsrus_hash.strip()
         
         sickbeard.NZBMATRIX = nzbmatrix
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
-        sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey
+        sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()
         
         sickbeard.BINREQ = binreq
         
@@ -995,6 +999,11 @@ class HomeAddShows:
     def addShow(self, showDir=None, showName=None, seriesList=None):
         
         if showDir != None and type(showDir) is not list:
+            # make sure they didn't put something retarded in
+            #if not os.path.isabs(showDir) or not ek.ek(os.path.isdir, showDir):
+                #flash.error('Error', 'Enter an actual folder!')
+                #redirect('/home/addShows')
+            
             showDir = [showDir]
         
         # unquote it no matter what
