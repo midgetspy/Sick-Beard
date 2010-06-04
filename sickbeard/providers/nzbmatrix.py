@@ -136,8 +136,9 @@ def findSeasonResults(show, season):
 		
 		
 		if epInfo.seasonnumber != season:
+			logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
 			continue
-			
+
 		# make sure we want the episode
 		wantEp = True
 		for epNo in epInfo.episodenumbers:

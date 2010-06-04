@@ -160,6 +160,10 @@ def findSeasonResults(show, season):
 			logger.log("Unable to parse the filename "+title+" into a valid episode", logger.ERROR)
 			continue
 		
+		if epInfo.seasonnumber != season:
+			logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+			continue
+		
 		# make sure we want the episode
 		wantEp = True
 		for epNo in epInfo.episodenumbers:
@@ -198,7 +202,7 @@ def _doSearch(curString):
 			  "i": sickbeard.NZBS_UID,
 			  "h": sickbeard.NZBS_HASH,
 			  "age": sickbeard.USENET_RETENTION,
-              "num": 100,
+			  "num": 100,
 			  "type": 1}
 	
 	searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
