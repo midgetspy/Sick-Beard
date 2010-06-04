@@ -209,6 +209,8 @@ class TVCache():
             
             # get season and ep data (ignoring multi-eps for now)
             curSeason = int(curResult["season"])
+            if curSeason == -1:
+                continue
             curEp = int(curResult["episodes"].split("|")[1])
             curQuality = int(curResult["quality"])
 
