@@ -25,7 +25,7 @@ mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'm2ts', 'm4v', 'ts', 'flv', 'f4v',
                    'mov', 'rmvb']
 
-resultFilters = ("subpack", "nlsub", "samplefix")
+resultFilters = ("subpack", "nlsub", "samplefix", "nfofix", "sample")
 
 ### Notification Types
 NOTIFY_SNATCH = 1
