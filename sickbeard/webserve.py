@@ -1464,11 +1464,11 @@ class Home:
     @cherrypy.expose
     def updateXBMC(self, showName=None):
 
-	for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-	    if xbmc.updateLibrary(curHost, showName=showName):
-		flash.message("Command sent to XBMC host " + curHost + " to update library")
-	    else:
-		flash.error("Unable to contact XBMC host " + curHost)
+        for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
+            if xbmc.updateLibrary(curHost, showName=showName):
+                flash.message("Command sent to XBMC host " + curHost + " to update library")
+            else:
+                flash.error("Unable to contact XBMC host " + curHost)
         redirect('/home')
 
 
@@ -1496,7 +1496,7 @@ class Home:
         if show == None or eps == None or status == None:
             errMsg = "You must specify a show and at least one episode"
             if direct:
-                flash.error('Error', errorMsg)
+                flash.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -1504,7 +1504,7 @@ class Home:
         if not statusStrings.has_key(int(status)):
             errMsg = "Invalid status"
             if direct:
-                flash.error('Error', errorMsg)
+                flash.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -1514,7 +1514,7 @@ class Home:
         if showObj == None:
             errMsg = "Error", "Show not in show list"
             if direct:
-                flash.error('Error', errorMsg)
+                flash.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
