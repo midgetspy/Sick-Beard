@@ -344,6 +344,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 		returnStr += logHelper("The show dir doesn't exist, canceling postprocessing", logger.DEBUG)
 		return returnStr
 
+	if season == -1:
+		return returnStr
 
 	rootEp = None
 	for curEpisode in episodes:
