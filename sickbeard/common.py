@@ -210,6 +210,16 @@ class StatusStrings:
 
 statusStrings = StatusStrings()
 
+class Overview:
+    SKIPPED = 1
+    WANTED = 2
+    QUAL = 3
+    GOOD = 4
+    
+    overviewStrings = {SKIPPED: "skipped",
+                       WANTED: "wanted",
+                       QUAL: "qual",
+                       GOOD: "good"}
 
 # Get our xml namespaces correct for lxml
 XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 

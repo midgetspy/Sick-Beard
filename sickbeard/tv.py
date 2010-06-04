@@ -889,6 +889,34 @@ class TVShow(object):
         return False
         
         
+    def getOverview(self, epStatus):
+
+        anyQualities, bestQualities = Quality.splitQuality(self.quality)
+        if bestQualities:
+            maxBestQuality = max(bestQualities)
+        else:
+            maxBestQuality = None 
+    
+        if epStatus == WANTED:
+            return Overview.WANTED
+        elif epStatus in (SKIPPED, IGNORED):
+            return Overview.SKIPPED
+        elif epStatus == ARCHIVED:
+            return Overview.GOOD
+        elif epStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
+            epStatus, curQuality = Quality.splitCompositeStatus(epStatus)
+            
+            # if they don't want re-downloads then we call it good if they have anything
+            if maxBestQuality == None:
+                return Overview.GOOD
+            # if they have one but it's not the best they want then mark it as qual
+            elif curQuality < maxBestQuality:
+                return Overview.QUAL
+            # if it's >= maxBestQuality then it's good
+            else:
+                return Overview.GOOD
+
+        
 class TVEpisode:
 
     def __init__(self, show, season, episode, file=""):
@@ -1463,6 +1491,9 @@ class TVEpisode:
             return None
         else:
             return os.path.join(self.show.location, self.location)
+        
+    def getOverview(self):
+        return self.show.getOverview(self.status)
         
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
                     naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):

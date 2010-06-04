@@ -114,7 +114,7 @@ Change selected episodes to
   <tbody>
   #for $curEp in $allEps[$curShow.tvdbid]:
   #set $epStr = str($curEp["season"]) + "x" + str($curEp["episode"])
-  <tr class="$epCats[curShow.tvdbid][$epStr]">
+  <tr class="$Overview.overviewStrings[$epCats[curShow.tvdbid][$epStr]]">
     <td><input type="checkbox" id="$curShow.tvdbid-$epStr" class="epCheck-$curShow.tvdbid"></td>
     <td>$curEp["season"] x $curEp["episode"]</td>
     <td>$curEp["name"]</td>

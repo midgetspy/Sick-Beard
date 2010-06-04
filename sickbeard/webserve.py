@@ -174,43 +174,19 @@ class ManageShowsEpisodeOverview:
             goodEpCounts[curShow.tvdbid] = 0
             allEps[curShow.tvdbid] = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(curShow.tvdbid) + " AND status != "+str(UNAIRED)+" ORDER BY season*1000+episode DESC")
 
-            anyQualities, bestQualities = Quality.splitQuality(curShow.quality)
-            if bestQualities:
-                maxBestQuality = max(bestQualities)
-            else:
-                maxBestQuality = None 
-        
             for curResult in allEps[curShow.tvdbid]:
-                curStatus = int(curResult["status"])
-                curEpCat = None
-                if curStatus == WANTED:
-                    curEpCat = "wanted"
-                elif curStatus in (SKIPPED, IGNORED):
-                    curEpCat = "skipped"
-                elif curStatus == ARCHIVED:
-                    curEpCat = "good"
-                elif curStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
-                    curStatus, curQuality = Quality.splitCompositeStatus(curStatus)
-                    
-                    # if they don't want re-downloads then we call it good if they have anything
-                    if maxBestQuality == None:
-                        curEpCat = "good"
-                    # if they have one but it's not the best they want then mark it as qual
-                    elif curQuality < maxBestQuality:
-                        curEpCat = "qual"
-                    # if it's >= maxBestQuality then it's good
-                    else:
-                        curEpCat = "good"
+
+                curEpCat = curShow.getOverview(int(curResult["status"]))
 
                 epCats[curShow.tvdbid][str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
 
-                if curEpCat == "wanted":
+                if curEpCat == Overview.WANTED:
                     wantedEpCounts[curShow.tvdbid] += 1
-                elif curEpCat == "good":
+                elif curEpCat == Overview.GOOD:
                     goodEpCounts[curShow.tvdbid] += 1
-                elif curEpCat == "qual":
+                elif curEpCat == Overview.QUAL:
                     qualEpCounts[curShow.tvdbid] += 1
-                elif curEpCat == "skipped":
+                elif curEpCat == Overview.SKIPPED:
                     skippedEpCounts[curShow.tvdbid] += 1
         
         
