@@ -69,6 +69,10 @@ def replaceExtension (file, newExt):
 		return sepFile[0] + "." + newExt
 
 def isMediaFile (file):
+	# ignore samples
+	if re.search('(^|[\W_])sample\d*[\W_]', file):
+		return False
+	
 	sepFile = file.rpartition(".")
 	if sepFile[2].lower() in mediaExtensions:
 		return True
