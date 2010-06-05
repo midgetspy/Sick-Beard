@@ -1,5 +1,8 @@
 #import sickbeard
+#import datetime
 #from sickbeard.common import *
+#from sickbeard import db
+
 #set global $title="Home"
 #set global $header="Show List"
 
@@ -8,6 +11,11 @@
 <!--#set global $topmenu="home"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+#set $myDB = $db.DBConnection()
+#set $today = str($datetime.date.today().toordinal())
+#set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") AND airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
+#set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE airdate != 1 AND season != 0 and episode != 0 AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
 
 <script>
 \$.tablesorter.addParser({ 
@@ -61,13 +69,13 @@
     format: function(s) { 
         // format your data for normalization
         if (s.indexOf('Loading...') == 0)
-        	return s.replace('Loading...','!!!');
+            return s.replace('Loading...','!!!');
         else if (s.indexOf('The ') == 0)
             return s.replace('The ', '')
         else if (s.indexOf('A ') == 0)
             return s.replace('A ', '')
         else
-        	return s; 
+            return s; 
     }, 
     // set type, either numeric or text 
     type: 'text' 
@@ -128,22 +136,22 @@
  
 \$(document).ready(function(){ 
 
-	// workaround: the tablesorter cookie widget does not support a defaulted sortList set within the $.tablesorter() instantiation
+    // workaround: the tablesorter cookie widget does not support a defaulted sortList set within the $.tablesorter() instantiation
     var tablesorterCookieJar = \$.cookieJar('tablesorter');
     var sortList = tablesorterCookieJar.get('showListTable');
-	if (!sortList || !sortList.length)
-		sortList = [[5,1],[1,0]];	
+    if (!sortList || !sortList.length)
+        sortList = [[5,1],[1,0]];   
 
     \$("#showListTable").tablesorter({
-    	sortList: sortList,
-		widgets: ['cookie'],
-    	headers: {
-    		0: { sorter: 'nextAirDate'},
-    		1: { sorter: 'loadingNames'},
-    		3: { sorter: 'quality'},
+        sortList: sortList,
+        widgets: ['cookie'],
+        headers: {
+            0: { sorter: 'nextAirDate'},
+            1: { sorter: 'loadingNames'},
+            3: { sorter: 'quality'},
             4: { sorter: 'eps' },
             5: { sorter: 'active' }
-    	}
+        }
     });
 
 });
@@ -210,12 +218,18 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
   <tr class="evenLine">
     <td align="center">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
-    <td><a href="displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+    <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td>$curShow.network</td>
-    <td align="center">$qualityStrings[int($curShow.quality)]</td>
+    <td align="center">
+#if $curShow.quality in $qualityPresets:
+$qualityPresetStrings[$curShow.quality]
+#else:
+Custom
+#end if 
+    </td>
     <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid"></div></td>
-	<td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
-	<td align="center">$curShow.status</td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+    <td align="center">$curShow.status</td>
   </tr>
 
 <script type="text/javascript">
@@ -233,4 +247,5 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end for
 </tbody>
 </table>
+
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

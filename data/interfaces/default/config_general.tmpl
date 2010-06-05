@@ -14,6 +14,42 @@
 nameTestURL = "$sbRoot/config/general/testNaming";
 </script>
 <script type="text/javascript" src="$sbRoot/js/configGeneral.js"></script>
+#set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
+<script>
+\$(document).ready(function(){
+
+  if (#if $sickbeard.QUALITY_DEFAULT in $qualityPresets then "1" else "0"#) {
+      \$('#customQuality').hide();
+  }
+
+  \$.fn.setFromPresets = function(preset) {
+      if (preset == 0) {
+        \$('#customQuality').show();
+        return
+      } else
+        \$('#customQuality').hide();
+  
+      \$('#anyQualities option').each(function(i) {
+          var result = preset & \$(this).val()
+          if (result > 0) \$(this).attr('selected', 'selected');
+          else \$(this).attr('selected', false);
+      });
+
+      \$('#bestQualities option').each(function(i) {
+          var result = preset & (\$(this).val() << 16)
+          if (result > 0) \$(this).attr('selected', 'selected');
+          else \$(this).attr('selected', false);
+      });
+
+      return
+  }
+  
+  \$('#qualityPreset').change(function(){
+        \$(this).setFromPresets(\$('#qualityPreset :selected').val());
+  });
+
+});
+</script>
 
 <form action="saveGeneral" method="POST">
 
@@ -85,12 +121,32 @@ Web authentication password<br />
 
 <strong>Initial Quality</strong><br />
 Quality to assign to a newly created show<br />
-<select name="quality_default">
-#for $curQual in ($SD, $HD, $BEST, $ANY):
-<option value="$curQual" #if int($curQual) == int($sickbeard.QUALITY_DEFAULT) then "SELECTED" else ""#>$qualityStrings[$curQual]
+#set $selected = None
+<select id="qualityPreset">
+<option value="0">Custom
+#for $curPreset in sorted($qualityPresets):
+<option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "SELECTED" else ""#>$qualityPresetStrings[$curPreset]
 #end for
 </select><br />
 <br />
+<div id="customQuality">
+If I don't have the episode then download it in <b>one</b> of the following qualities:<br />
+#set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
+<select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
+#for $curQuality in sorted($anyQualityList):
+<option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$Quality.qualityStrings[$curQuality]
+#end for
+</select><br />
+<br />
+Then Re-download the episodes in any or all of these qualities as they are available:<br />
+#set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
+<select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
+#for $curQuality in sorted($bestQualityList):
+<option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$Quality.qualityStrings[$curQuality]
+#end for
+</select><br />
+<br />
+</div>
 
 <input type="checkbox" name="season_folders_default" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "CHECKED" else ""#> <strong>Use Season Folders</strong><br />
 Whether shows should use season folders by default<br />
@@ -113,6 +169,10 @@ Whether shows should use season folders by default<br />
 <br />
 <label for="naming_use_periods"><input type="checkbox" name="naming_use_periods" id="naming_use_periods" #if $sickbeard.NAMING_USE_PERIODS then "CHECKED" else ""#> <strong>Use periods</strong></label><br />
 If checked all spaces will be replaced with periods<br />
+<br />
+
+<input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "CHECKED" else ""#> <strong>Include quality</strong><br />
+If checked the episode quality will be appended to the end of the file name<br />
 <br />
 
 <strong>Separator Style</strong><br />

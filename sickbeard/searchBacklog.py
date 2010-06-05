@@ -24,6 +24,7 @@ import time
 
 from sickbeard import db, exceptions, helpers, search, scheduler
 from sickbeard import logger
+from sickbeard import ui
 from sickbeard.common import *
 
 class BacklogSearchScheduler(scheduler.Scheduler):
@@ -46,9 +47,21 @@ class BacklogSearcher:
         self.cycleTime = 3
         self.lock = threading.Lock()
         self.amActive = False
+        
+        self._resetPI()
+        
+    def _resetPI(self):
+        self.percentDone = 0
+        self.currentSearchInfo = {'title': 'Initializing'}
+
+    def getProgressIndicator(self):
+        if self.amActive:
+            return ui.ProgressIndicator(self.percentDone, self.currentSearchInfo)
+        else:
+            return None
 
     def searchBacklog(self):
-        
+
         if self.amActive == True:
             logger.log("Backlog is still running, not starting it again", logger.DEBUG)
             return
@@ -59,58 +72,79 @@ class BacklogSearcher:
         
         curDate = datetime.date.today().toordinal()
         
-        if curDate - self._lastBacklog >= self.cycleTime:
-            
-            logger.log("Searching the database for a list of backlogged episodes to download")
-            
-            myDB = db.DBConnection()
-            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status IN (" + str(BACKLOG) + ", " + str(DISCBACKLOG) + ")")
-            
-            if sqlResults == None or len(sqlResults) == 0:
-                logger.log("No episodes were found in the backlog")
-                self._set_lastBacklog(curDate)
-                self.amActive = False
-                return
-            
-            for sqlEp in sqlResults:
-                
-                try:
-                    show = helpers.findCertainShow(sickbeard.showList, int(sqlEp["showid"]))
-                except exceptions.MultipleShowObjectsException:
-                    logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"], logger.ERROR) 
-                    continue
+        if not curDate - self._lastBacklog >= self.cycleTime:
+            return
 
-                curEp = show.getEpisode(sqlEp["season"], sqlEp["episode"])
-                
-                logger.log("Found backlog episode: " + curEp.prettyName(True), logger.DEBUG)
-            
-                foundNZBs = search.findEpisode(curEp)
-                
-                if len(foundNZBs) == 0:
-                    logger.log("Unable to find NZB for " + curEp.prettyName(True))
-                
-                else:
-                    # just use the first result for now
-                    search.snatchEpisode(foundNZBs[0], SNATCHED_BACKLOG)
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes eps, tv_shows shows WHERE season != 0 AND eps.showid = shows.tvdb_id AND shows.paused = 0")
 
-                time.sleep(10)
+        totalSeasons = float(len(sqlResults))
+        numSeasonsDone = 0.0
+
+        # go through every show and see if it needs any episodes
+        for curShow in sickbeard.showList:
+
+            if curShow.paused:
+                continue
+
+            logger.log("Checking backlog for show "+curShow.name)
+
+            anyQualities, bestQualities = Quality.splitQuality(curShow.quality)
+            
+            sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0", [curShow.tvdbid])
+
+            for curSeasonResult in sqlResults:
+                curSeason = int(curSeasonResult["season"])
+
+                logger.log("Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
+                self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
+
+                # see if there is anything in this season worth searching for
+                wantSeason = False
+                statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [curShow.tvdbid, curSeason])
+                for curStatusResult in statusResults:
+                    curCompositeStatus = int(curStatusResult["status"])
+                    curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
                     
-            self._set_lastBacklog(curDate)
+                    if bestQualities:
+                        highestBestQuality = max(bestQualities)
+                    else:
+                        highestBestQuality = 0
+                    
+                    # if we need a better one then say yes
+                    if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
+                        wantSeason = True
+                        break
+
+                if not wantSeason:
+                    logger.log("Nothing in season "+str(curSeason)+" needs to be downloaded, skipping this season", logger.DEBUG)
+                    continue
+                
+                results = search.findSeason(curShow, curSeason)
+                
+                for curResult in results:
+                    search.snatchEpisode(curResult)
+                    time.sleep(5)
+                
+                numSeasonsDone += 1.0
+                self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
+
+        self._set_lastBacklog(curDate)
             
         self.amActive = False
-            
-    
-    
+        self._resetPI()
+
+
     def _searchBacklogForEp(self, curEp):
     
-        foundNZBs = search.findEpisode(curEp)
+        foundResult = search.findEpisode(curEp)
         
-        if len(foundNZBs) == 0:
+        if not foundResult:
             logger.log("Unable to find NZB for " + curEp.prettyName(True))
         
         else:
             # just use the first result for now
-            search.snatchEpisode(foundNZBs[0])
+            search.snatchEpisode(foundResult)
 
     
     def _get_lastBacklog(self):

@@ -130,7 +130,7 @@ class TVShow(object):
             raise exceptions.NoNFOException("Show folder doesn't exist, you shouldn't be using it")
 
     def _setLocation(self, newLocation):
-        logger.log("Setter sets location to " + newLocation)
+        logger.log("Setter sets location to " + newLocation, logger.DEBUG)
         if ek.ek(os.path.isdir, newLocation) and ek.ek(os.path.isfile, ek.ek(os.path.join, newLocation, "tvshow.nfo")):
             self._location = newLocation
             self._isDirGood = True
@@ -146,8 +146,7 @@ class TVShow(object):
             for curEp in self.episodes[curSeason]:
                 myEp = self.episodes[curSeason][curEp]
                 if myEp not in sickbeard.comingList and \
-                myEp not in sickbeard.airingList and \
-                myEp not in sickbeard.missingList:
+                myEp not in sickbeard.airingList:
                     self.episodes[curSeason][curEp] = None
                     del myEp
             
@@ -364,14 +363,14 @@ class TVShow(object):
                 fanartData = helpers.getShowImage(fanartURL)
     
             if fanartData == None:
-                logger.log("Unable to retrieve fanart, skipping", logger.ERROR)
+                logger.log("Unable to retrieve fanart, skipping", logger.WARNING)
             else:
                 try:
                     outFile = ek.ek(open, ek.ek(os.path.join, self.location, "fanart.jpg"), 'wb')
                     outFile.write(fanartData)
                     outFile.close()
                 except IOError, e:
-                    logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
+                    logger.log("Unable to write fanart to "+ek.ek(os.path.join, self.location, "fanart.jpg")+" - are you sure the show folder is writable? "+str(e), logger.ERROR)
         
         # get the image data
         if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.location, "folder.jpg")):
@@ -384,14 +383,14 @@ class TVShow(object):
                 posterData = helpers.getShowImage(posterURL)
     
             if posterData == None:
-                logger.log("Unable to retrieve poster, skipping", logger.ERROR)
+                logger.log("Unable to retrieve poster, skipping", logger.WARNING)
             else:
                 try:
                     outFile = ek.ek(open, ek.ek(os.path.join, self.location, "folder.jpg"), 'wb')
                     outFile.write(posterData)
                     outFile.close()
                 except IOError, e:
-                    logger.log("Unable to write fanart - are you sure the show folder is writable? "+str(e), logger.ERROR)
+                    logger.log("Unable to write poster to "+ek.ek(os.path.join, self.location, "folder.jpg")+" - are you sure the show folder is writable? "+str(e), logger.ERROR)
 
         seasonData = None 
         #  How many seasons? 
@@ -459,7 +458,7 @@ class TVShow(object):
             
             # make an episode out of it
         except exceptions.TVRageException, e:
-            logger.log("Unable to add TVRage info: " + str(e), logger.ERROR)
+            logger.log("Unable to add TVRage info: " + str(e), logger.WARNING)
             
 
 
@@ -507,10 +506,10 @@ class TVShow(object):
             else:
                 rootEp.relatedEps.append(curEp)
 
-            if sickbeard.helpers.isMediaFile(file) and curEp.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG):
+            if sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
                 with curEp.lock:
-                    logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(DOWNLOADED), logger.DEBUG)
-                    curEp.status = DOWNLOADED
+                    logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.statusFromName(file)), logger.DEBUG)
+                    curEp.status = Quality.statusFromName(file)
                         
             with curEp.lock:
                 curEp.saveToDB()
@@ -694,6 +693,9 @@ class TVShow(object):
         if not os.path.isdir(self._location):
             return False
         
+        # load from dir
+        self.loadEpisodesFromDir()
+            
         # run through all locations from DB, check that they exist
         logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
         
@@ -723,16 +725,13 @@ class TVShow(object):
                 logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
                 with curEp.lock:
                     curEp.location = ''
-                    if curEp.status == DOWNLOADED:
+                    if curEp.status in Quality.DOWNLOADED:
                         curEp.status = SKIPPED
                     curEp.hasnfo = False
                     curEp.hastbn = False
                     curEp.saveToDB()
 
         
-        # load from dir
-        self.loadEpisodesFromDir()
-            
             
     def fixEpisodeNames(self):
 
@@ -849,10 +848,76 @@ class TVShow(object):
         return toReturn
 
         
+    def wantEpisode(self, season, episode, quality, manualSearch=False):
+        
+        logger.log("Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
+
+        # if the quality isn't one we want under any circumstances then just say no
+        anyQualities, bestQualities = Quality.splitQuality(self.quality)
+        logger.log("A,B = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
+        
+        if quality not in anyQualities and quality not in bestQualities:
+            return False
+
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
+        
+        if not sqlResults or not len(sqlResults):
+            logger.log("Unable to find the episode", logger.DEBUG)
+            return False
+        
+        epStatus = int(sqlResults[0]["status"])
+
+        # if we know we don't want it then just say no
+        if epStatus == SKIPPED and not manualSearch:
+            logger.log("Ep is skipped, not bothering", logger.DEBUG)
+            return False
+
+        # if it's one of these then we want it as long as it's in our allowed initial qualities
+        if epStatus in (WANTED, UNAIRED, SKIPPED) and quality in anyQualities:
+            logger.log("Ep is wanted/unaired/skipped, definitely get it", logger.DEBUG)
+            return True
+        
+        curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
+        
+        # if we are re-downloading then we only want it if it's in our bestQualities list and better than what we have
+        if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and quality in bestQualities and quality > curQuality:
+            logger.log("We already have this ep but the new one is better quality, saying yes", logger.DEBUG)
+            return True
+
+        logger.log("None of the conditions were met so I'm just saying no", logger.DEBUG)
+        return False
         
         
-        
-        
+    def getOverview(self, epStatus):
+
+        anyQualities, bestQualities = Quality.splitQuality(self.quality)
+        if bestQualities:
+            maxBestQuality = max(bestQualities)
+        else:
+            maxBestQuality = None 
+    
+        if epStatus == WANTED:
+            return Overview.WANTED
+        elif epStatus in (UNAIRED, UNKNOWN):
+            return Overview.UNAIRED
+        elif epStatus in (SKIPPED, IGNORED):
+            return Overview.SKIPPED
+        elif epStatus == ARCHIVED:
+            return Overview.GOOD
+        elif epStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
+            epStatus, curQuality = Quality.splitCompositeStatus(epStatus)
+            
+            # if they don't want re-downloads then we call it good if they have anything
+            if maxBestQuality == None:
+                return Overview.GOOD
+            # if they have one but it's not the best they want then mark it as qual
+            elif curQuality < maxBestQuality:
+                return Overview.QUAL
+            # if it's >= maxBestQuality then it's good
+            else:
+                return Overview.GOOD
+
         
 class TVEpisode:
 
@@ -1036,18 +1101,18 @@ class TVEpisode:
             logger.log("The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
 
-        logger.log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + statusStrings[self.status] + " and existence of " + self.location, logger.DEBUG)
+        logger.log(str(self.show.tvdbid) + ": Setting status for " + str(season) + "x" + str(episode) + " based on status " + str(self.status) + " and existence of " + self.location, logger.DEBUG)
         
         if not ek.ek(os.path.isfile, self.location):
 
             # if we don't have the file
-            if self.airdate >= datetime.date.today() and self.status not in (SNATCHED, SNATCHED_PROPER, SNATCHED_BACKLOG, PREDOWNLOADED):
+            if self.airdate >= datetime.date.today() and self.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER:
                 # and it hasn't aired yet set the status to UNAIRED
                 logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
             else:
                 if self.status == UNAIRED:
-                    self.status = MISSED
+                    self.status = WANTED
     
                 # if we somehow are still UNKNOWN then just skip it
                 elif self.status == UNKNOWN:
@@ -1056,9 +1121,9 @@ class TVEpisode:
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
             # leave propers alone, you have to either post-process them or manually change them back
-            if self.status not in (SNATCHED_PROPER, PREDOWNLOADED):
-                logger.log("5 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
-                self.status = DOWNLOADED
+            if self.status not in Quality.SNATCHED_PROPER + Quality.DOWNLOADED + Quality.SNATCHED:
+                logger.log("5 Status changes from " + str(self.status) + " to " + str(Quality.statusFromName(self.location)), logger.DEBUG)
+                self.status = Quality.statusFromName(self.location)
 
         # shouldn't get here probably
         else:
@@ -1083,8 +1148,8 @@ class TVEpisode:
         
             if self.status == UNKNOWN:
                 if sickbeard.helpers.isMediaFile(self.location):
-                    logger.log("7 Status changes from " + str(self.status) + " to " + str(DOWNLOADED), logger.DEBUG)
-                    self.status = DOWNLOADED
+                    logger.log("7 Status changes from " + str(self.status) + " to " + str(Quality.statusFromName(self.location)), logger.DEBUG)
+                    self.status = Quality.statusFromName(self.location)
         
             nfoFile = sickbeard.helpers.replaceExtension(self.location, "nfo")
             logger.log(str(self.show.tvdbid) + ": Using NFO name " + nfoFile, logger.DEBUG)
@@ -1391,9 +1456,6 @@ class TVEpisode:
         if self in sickbeard.comingList:
             logger.log("Removing myself from the coming list", logger.DEBUG)
             sickbeard.comingList.remove(self)
-        if self in sickbeard.missingList:
-            logger.log("Removing myself from the missing list", logger.DEBUG)
-            sickbeard.missingList.remove(self)
         
         # delete myself from the DB
         logger.log("Deleting myself from the database", logger.DEBUG)
@@ -1432,8 +1494,11 @@ class TVEpisode:
         else:
             return os.path.join(self.show.location, self.location)
         
+    def getOverview(self):
+        return self.show.getOverview(self.status)
+        
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
-                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None):
+                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):
         
         regex = "(.*) \(\d\)"
 
@@ -1486,6 +1551,9 @@ class TVEpisode:
         if naming_use_periods == None:
             naming_use_periods = sickbeard.NAMING_USE_PERIODS
         
+        if naming_quality == None:
+            naming_quality = sickbeard.NAMING_QUALITY
+        
         goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
         
         for relEp in self.relatedEps:
@@ -1503,6 +1571,11 @@ class TVEpisode:
 
         if naming_ep_name:
             finalName += goodName
+
+        if naming_quality:
+            epStatus, epQual = Quality.splitCompositeStatus(self.status)
+            if epQual != Quality.NONE:
+                finalName += config.naming_sep_type[naming_sep_type] + Quality.qualityStrings[epQual]
         
         if naming_use_periods:
             finalName = re.sub("\s+", ".", finalName)

@@ -136,6 +136,21 @@ def makeSceneShowSearchStrings(show):
 	return map(sanitizeSceneName, showNames)
 
 
+def makeSceneSeasonSearchString (show, season):
+
+	seasonStrings = ["S%02d" % season]
+
+	showNames = set(makeSceneShowSearchStrings(show))
+
+	toReturn = []
+
+	for curShow in showNames:
+		for curSeasonString in seasonStrings:
+			toReturn.append(curShow + "." + curSeasonString)
+
+	return toReturn
+
+
 def makeSceneSearchString (episode):
 
 	# see if we should use dates instead of episodes
@@ -144,7 +159,7 @@ def makeSceneSearchString (episode):
 	else:
 		epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
 
-	showNames = makeSceneShowSearchStrings(episode.show)
+	showNames = set(makeSceneShowSearchStrings(episode.show))
 
 	toReturn = []
 
@@ -389,8 +404,9 @@ def getShowImage(url, imgNum=None):
 
 	return imgData
 
-def guessSceneEpisodeQuality(name):
-	if '720p' in name or '1080p' in name:
-		return HD
-	else:
-		return SD
+
+def sizeof_fmt(num):
+	for x in ['bytes','KB','MB','GB','TB']:
+		if num < 1024.0:
+			return "%3.1f %s" % (num, x)
+		num /= 1024.0

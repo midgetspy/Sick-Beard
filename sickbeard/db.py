@@ -53,11 +53,12 @@ class DBConnection:
 				# get out of the connection attempt loop since we were successful
 				break
 			except sqlite3.OperationalError, e:
-				logger.log("DB error: "+str(e), logger.ERROR)
 				if "unable to open database file" in str(e):
+					logger.log("DB error: "+str(e), logger.WARNING)
 					attempt += 1
 					time.sleep(1)
 				else:
+					logger.log("DB error: "+str(e), logger.ERROR)
 					raise
 			except sqlite3.DatabaseError, e:
 				logger.log("Fatal error executing query: " + str(e), logger.ERROR)
@@ -141,3 +142,14 @@ class SchemaUpgrade (object):
 		self.connection.action("ALTER TABLE %s ADD %s %s" % (table, column, type))
 		self.connection.action("UPDATE %s SET %s = ?" % (table, column), (default,))
 
+	def checkDBVersion(self):
+		result = self.connection.select("SELECT db_version FROM db_version")
+		if result:
+			return int(result[0]["db_version"])
+		else:
+			return 0
+
+	def incDBVersion(self):
+		curVersion = self.checkDBVersion()
+		self.connection.action("UPDATE db_version SET db_version = ?", [curVersion+1])
+		return curVersion+1

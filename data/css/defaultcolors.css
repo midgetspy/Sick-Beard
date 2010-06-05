@@ -74,9 +74,22 @@ tr.odd {
     color:white;
 }
 
-tr.oddLine {
+tr.oddLine, tr.skipped, span.skipped, tr.unaired {
 	background-color: #F5F1E4;
 }
+
+tr.good, span.good{
+	background-color: #C3E3C8;
+}
+
+tr.qual, span.qual{
+	background-color: #FFDA8A;
+}
+
+tr.wanted, span.wanted{
+	background-color: #FFCFCF;
+}
+
 
 h1 {
   border-bottom: 1px solid #4e4e4e;

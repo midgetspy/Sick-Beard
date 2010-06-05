@@ -34,6 +34,12 @@ class Scheduler:
     def timeLeft(self):
         return self.cycleTime - (datetime.datetime.now() - self.lastRun)
     
+    def forceRun(self):
+        if not self.action.amActive:
+            self.lastRun = datetime.datetime.fromordinal(1)
+            return True
+        return False
+    
     def runAction(self):
         
         while True:

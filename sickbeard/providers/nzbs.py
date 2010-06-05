@@ -36,8 +36,12 @@ from sickbeard.common import *
 from sickbeard import logger
 from sickbeard import tvcache
 
+from lib.tvnamer.utils import FileParser
+from lib.tvnamer import tvnamer_exceptions
+
 providerType = "nzb"
 providerName = "NZBs"
+delimiter = "."
 
 def isActive():
 	return sickbeard.NZBS and sickbeard.USE_NZB
@@ -74,61 +78,29 @@ def downloadNZB (nzb):
 	fileOut.close()
 
 	return True
-	
-	
-def findEpisode (episode, forceQuality=None, manualSearch=False):
 
-	if episode.status == DISCBACKLOG:
-		logger.log("NZBs.org doesn't support disc backlog. Use newzbin or download it manually from NZBs.org")
-		return []
+
+def searchRSS():
+	myCache = NZBsCache()
+	myCache.updateCache()
+	return myCache.findNeededEpisodes()
+	
+def findEpisode (episode, manualSearch=False):
 
 	if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
 		raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
 
 	logger.log("Searching NZBs.org for " + episode.prettyName(True))
 
-	if forceQuality != None:
-		epQuality = forceQuality
-	elif episode.show.quality == BEST:
-		epQuality = ANY
-	else:
-		epQuality = episode.show.quality
-	
-	if epQuality == SD:
-		quality = {"catid": 1}
-	elif epQuality == HD:
-		quality = {"catid": 14}
-	else:
-		quality = {"type": 1}
-		
-		
 	myCache = NZBsCache()
 	myCache.updateCache()
-	
-	cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
-	logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
-
-	nzbResults = []
-
-	for curResult in cacheResults:
-		
-		title = curResult["name"]
-		url = curResult["url"]
-	
-		logger.log("Found result " + title + " at " + url)
-
-		result = classes.NZBSearchResult(episode)
-		result.provider = providerName.lower()
-		result.url = url 
-		result.extraInfo = [title]
-		result.quality = epQuality
-		
-		nzbResults.append(result)
+	nzbResults = myCache.searchCache(episode)
+	logger.log("Cache results: "+str(nzbResults), logger.DEBUG)
 
 	# if we got some results then use them no matter what.
 	# OR
 	# return anyway unless we're doing a backlog/missing or manual search
-	if nzbResults or not (episode.status in (BACKLOG, MISSED) or manualSearch):
+	if nzbResults or not manualSearch:
 		return nzbResults
 
 	sceneSearchStrings = set(helpers.makeSceneSearchString(episode))
@@ -138,37 +110,100 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	for curString in sceneSearchStrings:
 
-		itemList += _doSearch("^"+curString, quality)
+		itemList += _doSearch("^"+curString)
 		
-		if len(itemList) > 0:
-			break
 
 	for item in itemList:
 		
 		title = item.findtext('title')
 		url = item.findtext('link')
 		
-		if epQuality == HD and ("720p" not in title or "itouch" in title.lower()):
-			logger.log("Ignoring result "+title+" because it doesn't contain 720p in the name or is an iTouch release", logger.DEBUG)
+		quality = Quality.nameQuality(title)
+		
+		if not episode.show.wantEpisode(episode.season, episode.episode, quality):
+			logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 			continue
 		
 		logger.log("Found result " + title + " at " + url, logger.DEBUG)
 		
 		result = classes.NZBSearchResult(episode)
 		result.provider = providerName.lower()
-		result.url = url 
+		result.url = url
 		result.extraInfo = [title]
-		result.quality = epQuality
+		result.quality = quality
 		
 		results.append(result)
 		
 	return results
+
+
+def findSeasonResults(show, season):
+	
+	itemList = []
+	results = {}
+
+	for curString in helpers.makeSceneSeasonSearchString(show, season):
+		itemList += _doSearch("^"+curString)
+
+	for item in itemList:
+
+		title = item.findtext('title')
+		url = item.findtext('link')
+		
+		quality = Quality.nameQuality(title)
+		
+		# parse the file name
+		try:
+			myParser = FileParser(title)
+			epInfo = myParser.parse()
+		except tvnamer_exceptions.InvalidFilename:
+			logger.log("Unable to parse the filename "+title+" into a valid episode", logger.ERROR)
+			continue
+		
+		if epInfo.seasonnumber != season:
+			logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+			continue
+		
+		# make sure we want the episode
+		wantEp = True
+		for epNo in epInfo.episodenumbers:
+			if not show.wantEpisode(season, epNo, quality):
+				logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+				wantEp = False
+				break
+		if not wantEp:
+			continue
+		
+		logger.log("Found result " + title + " at " + url, logger.DEBUG)
+		
+		# make a result object
+		epNum = epInfo.episodenumbers[0]
+		epObj = show.getEpisode(season, epNum)
+		
+		result = classes.NZBSearchResult(epObj)
+		result.provider = providerName.lower()
+		result.url = url
+		result.extraInfo = [title]
+		result.quality = quality
+	
+		if epNum in results:
+			results[epNum].append(result)
+		else:
+			results[epNum] = [result]
+		
+	return results
 		
 
-def _doSearch(curString, quality):
+def _doSearch(curString):
 
-	params = {"action": "search", "q": curString.encode('utf-8'), "dl": 1, "i": sickbeard.NZBS_UID, "h": sickbeard.NZBS_HASH, "age": sickbeard.USENET_RETENTION}
-	params.update(quality)
+	params = {"action": "search",
+			  "q": curString.encode('utf-8'),
+			  "dl": 1,
+			  "i": sickbeard.NZBS_UID,
+			  "h": sickbeard.NZBS_HASH,
+			  "age": sickbeard.USENET_RETENTION,
+			  "num": 100,
+			  "type": 1}
 	
 	searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
 
@@ -199,10 +234,8 @@ def _doSearch(curString, quality):
 			logger.log("The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 			continue
 
-		if "subpack" in title.lower():
-			logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
-			continue
-		
+		url = url.replace('&amp;','&')
+
 		if "&i=" not in url and "&h=" not in url:
 			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
 		
@@ -216,7 +249,7 @@ def findPropers(date=None):
 	
 	for curString in (".PROPER.", ".REPACK."):
 	
-		for curResult in _doSearch(curString, {"type": 1}):
+		for curResult in _doSearch(curString):
 
 			resultDate = datetime.datetime.strptime(curResult.findtext('pubDate'), "%a, %d %b %Y %H:%M:%S +0000")
 			
@@ -229,8 +262,8 @@ class NZBsCache(tvcache.TVCache):
 	
 	def __init__(self):
 
-		# only poll NZBMatrix every 10 minutes max
-		self.minTime = 25
+		# only poll NZBs.org every 10 minutes max
+		self.minTime = 1
 		
 		tvcache.TVCache.__init__(self, providerName.lower())
 	
@@ -277,16 +310,11 @@ class NZBsCache(tvcache.TVCache):
 				logger.log("The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 				continue
 			
-			if "subpack" in title.lower():
-				logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
-				continue
-			
+			url = url.replace('&amp;','&')
+
 			if "&i=" not in url and "&h=" not in url:
 				raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
-
-			url = url.replace('&amp;','&')
 
 			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 
 			self._addCacheEntry(title, url)
-

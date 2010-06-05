@@ -1,17 +1,27 @@
 #import sickbeard
+#import sickbeard.helpers
 #from sickbeard.common import *
-#import os.path
+#import os.path, os
 #import datetime
 #set global $title=$show.name
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
 
-<!--#set global $topmenu="home"#-->
+<!--#set global $topmenu="manageShows"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <input type="hidden" id="sbRoot" value="$sbRoot">
 
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+
+<b>Change Show:</b>
+<select id="pickShow">
+#for $curShow in $sickbeard.showList:
+<option value="$curShow.tvdbid" #if $curShow == $show then "SELECTED" else ""#>$curShow.name
+#end for
+</select><br />
+<br />
+<br />
 
 Airs: $show.airs on $show.network<br />
 Status: $show.status<br />
@@ -23,48 +33,70 @@ Location: $showLoc[0]
 #end if
 <br />
 
-Quality: $qualityStrings[int($show.quality)]<br />
+#set $anyQualities, $bestQualities = $Quality.splitQuality(int($show.quality))
+Quality:
+#if $show.quality in $qualityPresets:
+$qualityPresetStrings[$show.quality]
+#else:
+#if $anyQualities:
+initially download <b><%=", ".join([Quality.qualityStrings[x] for x in anyQualities])%></b> #if $bestQualities then " + " else ""#
+#end if
+#if $bestQualities:
+replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
+#end if 
+#end if
+<br />
+
 Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 <br />
-
 Change selected episodes to 
 <select id="statusSelect">
-#for $curStatus in ($BACKLOG, $DISCBACKLOG, $MISSED, $SKIPPED, $DOWNLOADED)
-<option value="$curStatus">$sickbeard.statusStrings[$curStatus]
+#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
+#if $curStatus == $DOWNLOADED:
+#continue
+#end if
+<option value="$curStatus">$statusStrings[$curStatus]
 #end for
 </select>
 <input type="hidden" id="showID" value="$show.tvdbid">
 <input type="button" id="changeStatus" value="Go"><br />
 <br />
-<b>NOTE:</b> Episodes can only be changed to "Downloaded" if they are currently "Predownloaded" or "Snatched (Proper)".<br />
-All other statuses will automatically update to Downloaded on a show refresh.<br />
+<b>NOTE:</b> Episodes can only be changed to a "Downloaded ..." status if they are already either "Downloaded ..." or "Snatched ..."<br />
+All other statuses will automatically update to the appropriate "Downloaded ..." status on a show refresh.<br />
 
 #set $curSeason = -1
 #set $odd = 0
+
+<div align="right" id="checkboxControls">
+<span class="wanted">Wanted: <b>$epCounts[$Overview.WANTED]</b> <input type="checkbox" id="wanted" CHECKED></span>
+<span class="qual">Low Quality: <b>$epCounts[$Overview.QUAL]</b> <input type="checkbox" id="qual" CHECKED></span>
+<span class="good">Downloaded: <b>$epCounts[$Overview.GOOD]</b> <input type="checkbox" id="good" CHECKED></span>
+<span class="skipped">Skipped: <b>$epCounts[$Overview.SKIPPED]</b> <input type="checkbox" id="skipped" CHECKED></span>
+<br />
+<br />
+</div>
 
 <table class="sickbeardTable">
     
 #for $epResult in $sqlResults:
    
     #if int($epResult["season"]) != $curSeason:
-  <tr class="seasonheader">
+  <tr class="seasonheader" id="season-$epResult["season"]">
     <td colspan=8>
 	<br />
 	<h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#
-	<!--(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$BACKLOG">add to backlog</a>)
-	(<a href="setStatus/?show=$show.tvdbid&season=$epResult["season"]&status=$DISCBACKLOG">add to disc backlog</a>)-->
 	<br />
 	</h2></td>
   </tr>
-  <tr><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
-    #set $odd = not $odd#
-  <tr class="#if $odd then "odd" else "even"#Line">
+  #set $epStr = str($epResult["season"]) + "x" + str($epResult["episode"])
+  <tr class="$Overview.overviewStrings[$epCats[$epStr]] season-$curSeason">
     <td width="1%">
 #if int($epResult["status"]) != $UNAIRED
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>">

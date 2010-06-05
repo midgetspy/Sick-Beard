@@ -1,19 +1,19 @@
 #import sickbeard
 #from sickbeard import common
 #from sickbeard import exceptions
-#set global $title="Edit "+$show.name
-#set global $header=$show.name
+#set global $title="Mass Edit"
+#set global $header="Mass Edit"
 
 #set global $sbPath=".."
 
 <!--#set global $topmenu="home"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($show.quality))
+#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($qualityValue))
 <script>
 \$(document).ready(function(){
 
-  if (#if $show.quality in $common.qualityPresets then "1" else "0"#) {
+  if (#if $qualityValue in $common.qualityPresets then "1" else "0"#) {
       \$('#customQuality').hide();
   }
 
@@ -47,16 +47,17 @@
 </script>
 
 
-<form action="editShow" method="post">
-<input type="hidden" name="show" value="$show.tvdbid">
-Location: <input type="text" name="location" id="location" value="$show._location" size="50"><br />
+<form action="massEditSubmit" method="post">
+<input type="hidden" name="toEdit" value="$showList">
+<input type="hidden" name="oldCommonPath" value="$commonPath">
+Common path prefix: <input type="text" name="newCommonPath" id="newCommonPath" value="$commonPath" size="50">*<br />
 <br />
 Quality:
 #set $selected = None
 <select id="qualityPreset">
 <option value="0">Custom
 #for $curPreset in sorted($common.qualityPresets):
-<option value="$curPreset" #if $curPreset == $show.quality then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
+<option value="$curPreset" #if $curPreset == $qualityValue then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
 #end for
 </select><br />
 <br />
@@ -79,11 +80,13 @@ Then Re-download the episodes in any or all of these qualities as they are avail
 <br />
 <br />
 </div>
-Use Season Folders: <input type="checkbox" name="seasonfolders" #if $show.seasonfolders == 1 then "CHECKED" else ""#><br /><br />
-Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "CHECKED" else ""#><br /><br />
+Use Season Folders: <input type="checkbox" name="seasonfolders" #if $seasonfoldersValue == 1 then "CHECKED" else ""#>*<br /><br />
+Paused: <input type="checkbox" name="paused" #if $pausedValue then "CHECKED" else ""#><br /><br />
 <input type="submit" value="Submit">
 </form>
-
+<br />
+<br />
+* Note: Changing the show paths or season folders value will cause all selected shows to be refreshed.<br />
 <script type="text/javascript" charset="utf-8">
     jQuery('#location').fileBrowser({ title: 'Select Show Location' });
 </script>

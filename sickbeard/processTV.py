@@ -325,7 +325,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         if showInfo:
             tvdb_id = showInfo[0]
-            
+
+
         # if we couldn't get the necessary info from either of the above methods, try the next name
         if tvdb_id == None or season == None or episodes == []:
             continue
@@ -335,15 +336,17 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             showResults = helpers.findCertainShow(sickbeard.showList, showInfo[0])
         except exceptions.MultipleShowObjectsException:
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
-        
+
         if showResults != None:
             returnStr += logHelper("Found the show in our list, continuing", logger.DEBUG)
             break
     
     # end for
-        
+
     # if we came out of the loop with not enough info then give up
     if tvdb_id == None or season == None or episodes == []:
+        # if we have a good enough result then fine, use it
+        
         returnStr += logHelper("Unable to figure out what this episode is, giving up", logger.DEBUG)
         return returnStr
 
@@ -359,6 +362,27 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     if season == -1:
         return returnStr
+
+    # search all possible names for our new quality, in case the file or dir doesn't have it
+    newQuality = Quality.UNKNOWN
+    for curName in finalNameList:
+        curNewQuality = Quality.nameQuality(curName)
+        logger.log("Looking up quality for name "+curName+", got "+Quality.qualityStrings[curNewQuality], logger.DEBUG)
+        # just remember if we find a good quality
+        if curNewQuality != Quality.UNKNOWN and newQuality == Quality.UNKNOWN:
+            newQuality = curNewQuality
+            logger.log("saved quality "+Quality.qualityStrings[newQuality], logger.DEBUG)
+
+    # if we didn't get a quality from one of the names above, try assuming from each of the names
+    for curName in finalNameList:
+        if newQuality != Quality.UNKNOWN:
+            break
+        newQuality = Quality.assumeQuality(curName)
+        logger.log("Guessing quality for name "+curName+", got "+Quality.qualityStrings[curNewQuality], logger.DEBUG)
+        if newQuality != Quality.UNKNOWN:
+            break
+
+    returnStr += logHelper("Unless we're told otherwise, assuming the quality is "+Quality.qualityStrings[newQuality], logger.DEBUG)
 
     rootEp = None
     for curEpisode in episodes:
@@ -378,6 +402,14 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             rootEp.relatedEps = []
         else:
             rootEp.relatedEps.append(curEp)
+
+    # make sure the quality is set right before we continue
+    if rootEp.status in Quality.SNATCHED:
+        oldStatus, newQuality = Quality.splitCompositeStatus(rootEp.status)
+        returnStr += logHelper("The old status had a quality in it, using that: "+Quality.qualityStrings[newQuality], logger.DEBUG)
+    else:
+        for curEp in [rootEp] + rootEp.relatedEps:
+            curEp.status = Quality.compositeStatus(SNATCHED, newQuality)
 
     # figure out the new filename
     biggestFileName = os.path.basename(fileName)
@@ -427,7 +459,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     
     # see if the existing file is bigger - if it is, bail (unless it's a proper in which case we're forcing an overwrite)
     if existingResult > 0:
-        if rootEp.status == SNATCHED_PROPER:
+        if rootEp.status in Quality.SNATCHED_PROPER:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
         else:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
@@ -461,23 +493,34 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Unable to move the file: " + str(e), logger.ERROR)
             return returnStr
 
-    # if the file existed and was smaller then lets delete it
+    # if the file existed and was smaller/same then lets delete it
     # OR if the file existed, was bigger, but we want to replace it anyway cause it's a PROPER snatch
-    if existingResult < 0 or (existingResult > 0 and rootEp.status == SNATCHED_PROPER):
+    if existingResult <= 0 or (existingResult > 0 and rootEp.status in Quality.SNATCHED_PROPER):
+        existingFile = None
         # if we're deleting a file with a different name then just go ahead
         if existingResult in (-2, 2):
             existingFile = rootEp.location
-            if rootEp.status == SNATCHED_PROPER:
+            if rootEp.status in Quality.SNATCHED_PROPER:
                 returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
             else:
                 returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
             #TODO: delete old metadata?
-        else:
-            returnStr += logHelper(newFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
+        elif ek.ek(os.path.isfile, newFile):
+            returnStr += logHelper(newFile + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
             existingFile = newFile
-        
-        os.remove(existingFile)
+
+        if existingFile:
+            os.remove(existingFile)
             
+    # update the statuses before we rename so the quality goes into the name properly
+    for curEp in [rootEp] + rootEp.relatedEps:
+        with curEp.lock:
+            curEp.location = newFile
+            
+            curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
+            
+            curEp.saveToDB()
+
     if sickbeard.RENAME_EPISODES:
         try:
             os.rename(curFile, newFile)
@@ -490,15 +533,6 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         returnStr += logHelper("Renaming is disabled, leaving file as "+curFile, logger.DEBUG)
         newFile = curFile
 
-    for curEp in [rootEp] + rootEp.relatedEps:
-        with curEp.lock:
-            curEp.location = newFile
-            
-            # don't mess up the status - if this is a legit download it should be SNATCHED
-            if curEp.status != PREDOWNLOADED:
-                curEp.status = DOWNLOADED
-            curEp.saveToDB()
-
     # log it to history
     history.logDownload(rootEp, fileName)
 
@@ -509,11 +543,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     rootEp.createMetaFiles()
     rootEp.saveToDB()
 
-    # we don't want to put predownloads in the library until we can deal with removing them
+
     # try updating just show path first
-    if sickbeard.XBMC_UPDATE_LIBRARY == True and rootEp.status != PREDOWNLOADED:
+    if sickbeard.XBMC_UPDATE_LIBRARY:
         for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-            if not notifiers.xbmc.updateLibrary(curHost, rootEp.show.name) and sickbeard.XBMC_UPDATE_FULL:
+            if not notifiers.xbmc.updateLibrary(curHost, showName=rootEp.show.name) and sickbeard.XBMC_UPDATE_FULL:
                 # do a full update if requested
                 returnStr += logHelper("Update of show directory failed on " + curHost + ", trying full update as requested")
                 notifiers.xbmc.updateLibrary(curHost)

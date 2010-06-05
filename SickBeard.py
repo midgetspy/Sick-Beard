@@ -150,7 +150,6 @@ def main():
 	# set up the lists
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
-	sickbeard.updateMissingList()
 	
 	# fire up all our threads
 	sickbeard.start()

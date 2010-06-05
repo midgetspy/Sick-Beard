@@ -5,7 +5,7 @@
 #set global $sbPath="../.."
 
 
-<!--#set global $topmenu="home"#-->
+<!--#set global $topmenu="manageShows"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
@@ -33,12 +33,13 @@
 \$(document).ready(function() 
 { 
     \$("#massUpdateTable").tablesorter({
-        sortList: [[2,1],[0,0]],
+        sortList: [[3,1],[1,0]],
         headers: {
-            0: { sorter: 'showNames'},
-            4: { sorter: false},
+            0: { sorter: false},
+            1: { sorter: 'showNames'},
             5: { sorter: false},
-            6: { sorter: false}
+            6: { sorter: false},
+            7: { sorter: false}
         }
     }); 
 });
@@ -51,13 +52,14 @@
 
   <thead>
     <tr>
+      <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck"></th>
       <th>Show</th>
       <th>Quality</th>
       <th>Active</th>
       <th>Status</th>
-      <th>Update <input type="checkbox" class="bulkCheck" id="updateCheck"></th>
-      <th>Refresh <input type="checkbox" class="bulkCheck" id="refreshCheck"></th>
-      <th>Rename <input type="checkbox" class="bulkCheck" id="renameCheck"></th>
+      <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck"></th>
+      <th width="1%">Refresh&nbsp;<input type="checkbox" class="bulkCheck" id="refreshCheck"></th>
+      <th width="1%">Rename&nbsp;<input type="checkbox" class="bulkCheck" id="renameCheck"></th>
 <!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck"></th>-->
     </tr>
   </thead>
@@ -87,8 +89,15 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end if
 
   <tr class="evenLine">
+    <td align=center><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid">
     <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-    <td align="center">$qualityStrings[int($curShow.quality)]</td>
+    <td align="center">
+#if $curShow.quality in $qualityPresets:
+$qualityPresetStrings[$curShow.quality]
+#else:
+Custom
+#end if 
+    </td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>
@@ -100,7 +109,10 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end for
 </tbody>
 <tfoot>
-  <tr class="evenLine"><td colspan="7" align="center"><input type="button" value="Submit" id="submitMassUpdate"></td></tr>
+  <tr class="evenLine">
+    <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit"></td>
+    <td colspan="7" align="center"><input type="button" value="Submit" id="submitMassUpdate"></td>
+  </tr>
 </tfoot>
 </table>
 

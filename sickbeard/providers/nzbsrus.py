@@ -76,49 +76,30 @@ def downloadNZB (nzb):
 	return True
 	
 	
-def findEpisode (episode, forceQuality=None, manualSearch=False):
-
-	if episode.status == DISCBACKLOG:
-		logger.log("NZBs'R'US doesn't support disc backlog. Use newzbin or download it manually from NZBs'R'US")
-		return []
+def searchRSS():
+	myCache = NZBsRUSCache()
+	myCache.updateCache()
+	return myCache.findNeededEpisodes()
+	
+def findEpisode (episode, manualSearch=False):
 
 	if sickbeard.NZBSRUS_UID in (None, "") or sickbeard.NZBSRUS_HASH in (None, ""):
 		raise exceptions.AuthException("NZBs'R'US authentication details are empty, check your config")
 
 	logger.log("Searching NZBs'R'US for " + episode.prettyName(True))
 
-	if forceQuality != None:
-		epQuality = forceQuality
-	elif episode.show.quality == BEST:
-		epQuality = ANY
-	else:
-		epQuality = episode.show.quality
-	
 	myCache = NZBsRUSCache()
 	myCache.updateCache()
 	
-	cacheResults = myCache.searchCache(episode.show, episode.season, episode.episode, epQuality)
-	logger.log("Cache results: "+str(cacheResults), logger.DEBUG)
-
-	nzbResults = []
-
-	for curResult in cacheResults:
-		
-		title = curResult["name"]
-		url = curResult["url"]
-	
-		logger.log("Found result " + title + " at " + url)
-
-		result = classes.NZBSearchResult(episode)
-		result.provider = providerName.lower()
-		result.url = url 
-		result.extraInfo = [title]
-		result.quality = epQuality
-		
-		nzbResults.append(result)
+	nzbResults = myCache.searchCache(episode)
+	logger.log("Cache results: "+str(nzbResults), logger.DEBUG)
 
 	return nzbResults
 		
+
+def findSeasonResults(show, season):
+	
+	return {}		
 
 def findPropers(date=None):
 
@@ -130,10 +111,11 @@ class NZBsRUSCache(tvcache.TVCache):
 	
 	def __init__(self):
 
-		# only poll NZBs'R'US every 15 minutes max
-		self.minTime = 15
-		
 		tvcache.TVCache.__init__(self, providerName.lower())
+
+		# only poll NZBs'R'US every 15 minutes max
+		self.minTime = 1
+		
 	
 	def updateCache(self):
 
@@ -176,10 +158,6 @@ class NZBsRUSCache(tvcache.TVCache):
 
 			if not title or not url:
 				logger.log("The XML returned from the NZBs'R'US RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-				continue
-			
-			if "subpack" in title.lower():
-				logger.log("This result appears to be a subtitle pack, ignoring: "+title, logger.ERROR)
 				continue
 			
 			url = url.replace('&amp;','&')

@@ -1,5 +1,6 @@
 #import sickbeard
 #import datetime
+#from sickbeard.common import *
 #set $oneWeek = datetime.timedelta(days=7)
 #set global $title="Coming Episodes"
 
@@ -57,7 +58,13 @@
           <p class="noMargin">
             <span class="title">Status:</span> <span class="info ">$curEp.show.status</span><br />
             <span class="title">Airs:</span> <span class="info ">$curEp.show.airs on $curEp.show.network</span><br />
-            <span class="title">Format:</span> <span class="info ">$qualityStrings[$curEp.show.quality]</span><br />
+            <span class="title">Format:</span> <span class="info ">
+#if $curEp.show.quality in $qualityPresets:
+$qualityPresetStrings[$curEp.show.quality]
+#else:
+Custom
+#end if 
+</span><br />
           </p>
         </div>
       </div>

@@ -78,49 +78,88 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
 	history.logSnatch(result)
 
-	# don't notify when we snatch a backlog episode, that's just annoying
-	if endStatus != SNATCHED_BACKLOG:
+	# don't notify when we re-download an episode
+	if result.episode.status in Quality.DOWNLOADED:
 		notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
 	
 	with result.episode.lock:
-		if result.predownloaded == True:
-			logger.log("changing status from " + str(result.episode.status) + " to " + str(PREDOWNLOADED), logger.DEBUG)
-			result.episode.status = PREDOWNLOADED
-		else:
-			logger.log("changing status from " + str(result.episode.status) + " to " + str(endStatus), logger.DEBUG)
-			result.episode.status = endStatus
+		result.episode.status = Quality.compositeStatus(endStatus, result.quality)
 		result.episode.saveToDB()
 
-	sickbeard.updateMissingList()
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
 
-def _doSearch(episode, provider, manualSearch):
+def searchForNeededEpisodes():
+	
+	logger.log("Searching all providers for any needed episodes")
 
-	# if we already got the SD then only try HD on BEST episodes
-	if episode.show.quality == BEST and episode.status == PREDOWNLOADED:
-		foundEps = provider.findEpisode(episode, HD, manualSearch)
-	else:
-		foundEps = provider.findEpisode(episode, manualSearch=manualSearch)
+	foundResults = {}
 
-	# if we found something and we're on BEST, retry to see if we can guarantee HD.
-	if len(foundEps) > 0 and episode.show.quality == BEST and episode.status != PREDOWNLOADED:
-			moreFoundEps = provider.findEpisode(episode, HD, manualSearch)
+	didSearch = False
+
+	# ask all providers for any episodes it finds
+	for curProvider in providers.getAllModules():
+		
+		if not curProvider.isActive():
+			continue
+		
+		curFoundResults = {}
+		
+		try:
+			curFoundResults = curProvider.searchRSS()
+		except exceptions.AuthException, e:
+			logger.log("Authentication error: "+str(e), logger.ERROR)
+			continue
+		except Exception, e:
+			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			logger.log(traceback.format_exc(), logger.DEBUG)
+			continue
+
+		didSearch = True
+		
+		# pick a single result for each episode, respecting existing results
+		for curEp in curFoundResults:
 			
-			# if we couldn't find a definitive HD version then mark the original ones as predownloaded
-			if len(moreFoundEps) == 0:
-				for curResult in foundEps:
-					curResult.predownloaded = True
-			else:
-				return moreFoundEps
+			if curEp.show.paused:
+				logger.log("Show "+curEp.show.name+" is paused, ignoring all RSS items for "+curEp.prettyName(True), logger.DEBUG)
+				continue
+			
+			# find the best result for the current episode
+			bestResult = None
+			for curResult in curFoundResults[curEp]:
+				if not bestResult or bestResult.quality < curResult.quality:
+					bestResult = curResult
+			
+			bestResult = pickBestResult(curFoundResults[curEp])
+			
+			# if it's already in the list (from another provider) and the newly found quality is no better then skip it
+			if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
+				continue
 
-	return foundEps
+			foundResults[curEp] = bestResult
+
+	if not didSearch:
+		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
+
+	return foundResults.values()
+
+
+def pickBestResult(results):
+
+	# find the best result for the current episode
+	bestResult = None
+	for curResult in results:
+		if not bestResult or bestResult.quality < curResult.quality:
+			bestResult = curResult
+	
+	return bestResult
+
 
 def findEpisode(episode, manualSearch=False):
 
 	logger.log("Searching for " + episode.prettyName(True))
 
-	foundEps = []
+	foundResults = []
 
 	didSearch = False
 
@@ -130,7 +169,7 @@ def findEpisode(episode, manualSearch=False):
 			continue
 		
 		try:
-			foundEps = _doSearch(episode, curProvider, manualSearch)
+			foundResults = curProvider.findEpisode(episode, manualSearch=manualSearch)
 		except exceptions.AuthException, e:
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
@@ -141,10 +180,61 @@ def findEpisode(episode, manualSearch=False):
 		
 		didSearch = True
 		
-		if len(foundEps) > 0:
+		# skip non-tv crap
+		foundResults = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), foundResults)
+		
+		if len(foundResults) > 0:
+			break
+	
+	if not didSearch:
+		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
+
+	bestResult = pickBestResult(foundResults)
+	
+	return bestResult
+
+def findSeason(show, season):
+	
+	logger.log("Searching for stuff we need from "+show.name+" season "+str(season))
+	
+	foundResults = {}
+	
+	for curProvider in providers.getAllModules():
+		
+		if not curProvider.isActive():
+			continue
+		
+		try:
+			curResults = curProvider.findSeasonResults(show, season)
+
+			for curEp in curResults:
+				# skip non-tv crap
+				curResults[curEp] = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), curResults[curEp])
+				
+				if curEp in foundResults:
+					foundResults[curEp] += curResults[curEp]
+				else:
+					foundResults[curEp] = curResults[curEp]
+		except exceptions.AuthException, e:
+			logger.log("Authentication error: "+str(e), logger.ERROR)
+			continue
+		except Exception, e:
+			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			logger.log(traceback.format_exc(), logger.DEBUG)
+			continue
+		
+		didSearch = True
+		
+		if len(foundResults) > 0:
 			break
 	
 	if not didSearch:
 		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
 	
-	return foundEps
+	finalResults = []
+	for curEp in foundResults:
+		if len(foundResults[curEp]) == 0:
+			continue
+		finalResults.append(pickBestResult(foundResults[curEp]))
+	
+	return finalResults

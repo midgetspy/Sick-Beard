@@ -29,6 +29,12 @@ from sickbeard import classes
 
 from lib.tvdb_api import tvdb_exceptions
 
+class ProgressIndicator():
+
+    def __init__(self, percentComplete=0, currentStatus={'title': ''}):
+        self.percentComplete = percentComplete
+        self.currentStatus = currentStatus
+
 class ProgressIndicators():
     _pi = {'massUpdate': [],
            'massAdd': [],

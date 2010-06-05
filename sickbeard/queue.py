@@ -293,7 +293,6 @@ class QueueItemAdd(QueueItem):
         
         sickbeard.updateAiringList()
         sickbeard.updateComingList()
-        sickbeard.updateMissingList()
         
 
     def _finishEarly(self):
