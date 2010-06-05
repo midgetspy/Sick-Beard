@@ -899,7 +899,7 @@ class TVShow(object):
     
         if epStatus == WANTED:
             return Overview.WANTED
-        elif epStatus == UNAIRED:
+        elif epStatus in (UNAIRED, UNKNOWN):
             return Overview.UNAIRED
         elif epStatus in (SKIPPED, IGNORED):
             return Overview.SKIPPED
