@@ -947,10 +947,11 @@ class HomeAddShows:
     def addShow(self, showDir=None, showName=None, seriesList=None):
         
         if showDir != None and type(showDir) is not list:
+            logger.log("Single show dir: "+showDir+", checking that it's an absolute path")
             # make sure they didn't put something retarded in
-            #if not os.path.isabs(showDir) or not ek.ek(os.path.isdir, showDir):
-                #flash.error('Error', 'Enter an actual folder!')
-                #redirect('/home/addShows')
+            if not os.path.isabs(urllib.unquote_plus(showDir)):
+                flash.error('Error', 'Please enter a full path or use the folder browser to find the folder you want')
+                redirect('/home/addShows')
             
             showDir = [showDir]
         
