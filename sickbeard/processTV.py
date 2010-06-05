@@ -299,10 +299,23 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Filename "+curName+" has no series name, unable to use this name for processing", logger.DEBUG)
             continue
 
+        # reverse-lookup the scene exceptions
+        sceneID = None
+        for exceptionID in sceneExceptions:
+            if curName == sceneExceptions[exceptionID]:
+                sceneID = exceptionID
+                break
+
         try:
             returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
-            showObj = t[result.seriesname]
+
+            # get the tvdb object from either the scene exception ID or the series name
+            if sceneID:
+                showObj = t[sceneID]
+            else:
+                showObj = t[result.seriesname]
+            
             showInfo = (int(showObj["id"]), showObj["seriesname"])
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
