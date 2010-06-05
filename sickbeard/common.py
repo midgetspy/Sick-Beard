@@ -215,11 +215,13 @@ class Overview:
     WANTED = 2
     QUAL = 3
     GOOD = 4
+    UNAIRED = 5
     
     overviewStrings = {SKIPPED: "skipped",
                        WANTED: "wanted",
                        QUAL: "qual",
-                       GOOD: "good"}
+                       GOOD: "good",
+                       UNAIRED: "unaired"}
 
 # Get our xml namespaces correct for lxml
 XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 

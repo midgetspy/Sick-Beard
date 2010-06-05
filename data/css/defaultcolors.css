@@ -74,7 +74,7 @@ tr.odd {
     color:white;
 }
 
-tr.oddLine, tr.skipped, span.skipped {
+tr.oddLine, tr.skipped, span.skipped, tr.unaired {
 	background-color: #F5F1E4;
 }
 

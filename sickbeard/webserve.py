@@ -1263,6 +1263,7 @@ class Home:
         epCounts[Overview.WANTED] = 0
         epCounts[Overview.QUAL] = 0
         epCounts[Overview.GOOD] = 0
+        epCounts[Overview.UNAIRED] = 0
 
         for curResult in sqlResults:
 
