@@ -148,58 +148,8 @@ def _getEpisode(show, season, episode):
 
 ManageShowsMenu = [
             { 'title': 'Manage Searches', 'path': 'manageShows/manageSearches' },
-            #{ 'title': 'Episode Overview', 'path': 'manageShows/episodeOverview' }
+           #{ 'title': 'Episode Overview', 'path': 'manageShows/episodeOverview' },
             ]
-
-class ManageShowsEpisodeOverview:
-
-    @cherrypy.expose
-    def index(self):
-        t = PageTemplate(file="manageShows_episodeOverview.tmpl")
-        
-        myDB = db.DBConnection()
-        
-        allEps = {}
-        epCats = {}
-        skippedEpCounts = {}
-        wantedEpCounts = {}
-        qualEpCounts = {}
-        goodEpCounts = {}
-        
-        for curShow in sickbeard.showList:
-            epCats[curShow.tvdbid] = {}
-            skippedEpCounts[curShow.tvdbid] = 0
-            wantedEpCounts[curShow.tvdbid] = 0
-            qualEpCounts[curShow.tvdbid] = 0
-            goodEpCounts[curShow.tvdbid] = 0
-            allEps[curShow.tvdbid] = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(curShow.tvdbid) + " AND status != "+str(UNAIRED)+" ORDER BY season*1000+episode DESC")
-
-            for curResult in allEps[curShow.tvdbid]:
-
-                curEpCat = curShow.getOverview(int(curResult["status"]))
-
-                epCats[curShow.tvdbid][str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
-
-                if curEpCat == Overview.WANTED:
-                    wantedEpCounts[curShow.tvdbid] += 1
-                elif curEpCat == Overview.GOOD:
-                    goodEpCounts[curShow.tvdbid] += 1
-                elif curEpCat == Overview.QUAL:
-                    qualEpCounts[curShow.tvdbid] += 1
-                elif curEpCat == Overview.SKIPPED:
-                    skippedEpCounts[curShow.tvdbid] += 1
-        
-        
-        t.allEps = allEps
-        t.skippedEpCounts = skippedEpCounts
-        t.wantedEpCounts = wantedEpCounts
-        t.qualEpCounts = qualEpCounts
-        t.goodEpCounts = goodEpCounts
-        t.epCats = epCats
-        t.submenu = ManageShowsMenu
-        
-        return _munge(t)
-        
 
 class ManageShowsManageSearches:
 
@@ -238,8 +188,6 @@ class ManageShowsManageSearches:
 class ManageShows:
 
     manageSearches = ManageShowsManageSearches()
-
-    episodeOverview = ManageShowsEpisodeOverview()
 
     @cherrypy.expose
     def index(self):
@@ -1271,8 +1219,6 @@ class Home:
 
         myDB = db.DBConnection()
         
-        logger.log(str(showObj.tvdbid) + ": Displaying all episodes from the database")
-    
         sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC")
 
         t = PageTemplate(file="displayShow.tmpl")
@@ -1305,9 +1251,29 @@ class Home:
                 t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s'%showObj.name, 'requires': haveXBMC })
             t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid        })
+        
         t.show = showObj
         t.sqlResults = sqlResults
         
+        myDB = db.DBConnection()
+        
+        epCounts = {}
+        epCats = {}
+        epCounts[Overview.SKIPPED] = 0
+        epCounts[Overview.WANTED] = 0
+        epCounts[Overview.QUAL] = 0
+        epCounts[Overview.GOOD] = 0
+
+        for curResult in sqlResults:
+
+            curEpCat = showObj.getOverview(int(curResult["status"]))
+            epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
+            epCounts[curEpCat] += 1
+        
+        
+        t.epCounts = epCounts
+        t.epCats = epCats
+
         return _munge(t)
 
     @cherrypy.expose
