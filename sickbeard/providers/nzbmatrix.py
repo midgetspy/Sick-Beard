@@ -221,11 +221,20 @@ def findPropers(date=None):
 	
 	for curResult in _doSearch("(PROPER,REPACK)"):
 
-		resultDate = datetime.datetime.strptime(curResult["INDEX_DATE"], "%Y-%m-%d %H:%M:%S")
+		title = curResult.findtext('title')
+		url = curResult.findtext('link').replace('&amp;','&')
 		
+		descriptionStr = curResult.findtext('description')
+		dateStr = re.search('<b>Added:</b> (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)', descriptionStr).group(1)
+		if not dateStr:
+			logger.log("Unable to figure out the date for entry "+title+", skipping it")
+			continue
+		else:
+			resultDate = datetime.datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S")
+
 		if date == None or resultDate > date:
-			results.append(classes.Proper(curResult["NZBNAME"], curResult["SBURL"], resultDate))
-	
+			results.append(classes.Proper(title, url, resultDate))
+
 	return results
 
 
