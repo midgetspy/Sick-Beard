@@ -92,7 +92,7 @@ def findEpisode (episode, manualSearch=False):
 		title = item.findtext('title')
 		url = item.findtext('link').replace('&amp;','&')
 		
-		quality = Quality.nameQuality(title, True)
+		quality = Quality.nameQuality(title)
 		
 		if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
 			logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
@@ -124,7 +124,7 @@ def findSeasonResults(show, season):
 		title = item.findtext('title')
 		url = item.findtext('link')
 		
-		quality = Quality.nameQuality(title, True)
+		quality = Quality.nameQuality(title)
 		
 		# parse the file name
 		try:

@@ -19,6 +19,7 @@
 import sickbeard
 import os.path
 import operator
+import re
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -101,7 +102,7 @@ class Quality:
         return (anyQualities, bestQualities)
 
     @staticmethod
-    def nameQuality(name, nzbMatrix=False):
+    def nameQuality(name):
         
         name = os.path.basename(name)
         
@@ -110,25 +111,19 @@ class Quality:
             if Quality.qualityStrings[x] in name:
                 return x
         
-        if nzbMatrix:
-            fixName = lambda x: x.replace("."," ").replace("-"," ")
-        else:
-            fixName = lambda x: x
-        
-        containsOne = lambda list: any([fixName(x) in name.lower() for x in list])
-        containsAll = lambda list: all([fixName(x) in name.lower() for x in list])
+        checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
     
-        if containsOne(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"]):
+        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any):
             return Quality.SDTV
-        elif containsOne(["dvdrip.xvid", "bdrip.xvid"]):
+        elif checkName(["dvdrip.xvid", "bdrip.xvid"], any):
             return Quality.SDDVD
-        elif containsAll(["720p", "hdtv", "x264"]):
+        elif checkName(["720p", "hdtv", "x264"], all):
             return Quality.HDTV
-        elif containsAll(["720p", "web-dl"]):
+        elif checkName(["720p", "web.dl"], all):
             return Quality.HDWEBDL
-        elif containsAll(["720p", "bluray", "x264"]):
+        elif checkName(["720p", "bluray", "x264"], all):
             return Quality.HDBLURAY
-        elif containsAll(["1080p", "bluray", "x264"]):
+        elif checkName(["1080p", "bluray", "x264"], all):
             return Quality.FULLHDBLURAY
         else:
             return Quality.UNKNOWN
