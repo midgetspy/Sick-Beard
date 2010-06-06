@@ -34,6 +34,8 @@ from sickbeard.common import *
 
 from sickbeard.tv import TVEpisode
 
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
+
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
@@ -129,6 +131,17 @@ class ProperFinder():
                 # if we found something in the inner for loop break out of this one
                 if curProper.tvdbid != -1:
                     break
+
+            # if we have an air-by-date show then get the real season/episode numbers
+            if curProper.season == -1 and curProper.tvdbid:
+                try:
+                    t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                    epObj = t[curProper.tvdbid].airedOn(curProper.episode)[0]
+                    season = int(epObj["seasonnumber"])
+                    episodes = [int(epObj["episodenumber"])]
+                except tvdb_exceptions.tvdb_episodenotfound, e:
+                    logger.log("Unable to find episode with date "+str(curProper.episode)+" for show "+epInfo.seriesname+", skipping", logger.WARNING)
+                    continue
 
             # check if we actually want this proper (if it's the right quality)
             sqlResults = db.DBConnection().select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [curProper.tvdbid, curProper.season, curProper.episode])
