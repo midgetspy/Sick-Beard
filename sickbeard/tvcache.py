@@ -15,6 +15,8 @@ from sickbeard.common import *
 
 from sickbeard import helpers, classes
 
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
+
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
@@ -157,6 +159,17 @@ class TVCache():
             season = epInfo.seasonnumber
         if not episodes:
             episodes = epInfo.episodenumbers
+
+        # if we have an air-by-date show then get the real season/episode numbers
+        if season == -1 and tvdb_id:
+            try:
+                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                epObj = t[tvdb_id].airedOn(episodes[0])[0]
+                season = int(epObj["seasonnumber"])
+                episodes = [int(epObj["episodenumber"])]
+            except tvdb_exceptions.tvdb_episodenotfound, e:
+                logger.log("Unable to find episode with date "+str(episodes[0])+" for show "+epInfo.seriesname+", skipping", logger.WARNING)
+                return False
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
         

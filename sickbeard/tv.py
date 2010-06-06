@@ -480,9 +480,21 @@ class TVShow(object):
 
         # for now lets assume that any episode in the show dir belongs to that show
         season = epInfo.seasonnumber
+        episodes = epInfo.episodenumbers
         rootEp = None
 
-        for curEpNum in epInfo.episodenumbers:
+        # if we have an air-by-date show then get the real season/episode numbers
+        if season == -1:
+            try:
+                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                epObj = t[self.tvdbid].airedOn(episodes[0])[0]
+                season = int(epObj["seasonnumber"])
+                episodes = [int(epObj["episodenumber"])]
+            except tvdb_exceptions.tvdb_episodenotfound, e:
+                logger.log("Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
+                return None
+
+        for curEpNum in episodes:
 
             episode = int(curEpNum)
             
@@ -1442,7 +1454,7 @@ class TVEpisode:
 
     def deleteEpisode(self):
 
-        logger.log("Deleting "+self.show.name+" "+str(self.season)+"x"+str(self.episode))
+        logger.log("Deleting "+self.show.name+" "+str(self.season)+"x"+str(self.episode)+" from the DB", logger.DEBUG)
         
         # remove myself from the show dictionary
         if self.show.getEpisode(self.season, self.episode, noCreate=True) == self:
@@ -1554,7 +1566,10 @@ class TVEpisode:
         if naming_quality == None:
             naming_quality = sickbeard.NAMING_QUALITY
         
-        goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
+        if "Talk Show" in self.show.genre:
+            goodEpString = str(self.airdate)
+        else:
+            goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
         
         for relEp in self.relatedEps:
             goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}

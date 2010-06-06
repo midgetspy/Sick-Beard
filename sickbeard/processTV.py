@@ -289,8 +289,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Attempting to parse name "+curName, logger.DEBUG)
             myParser = FileParser(curName)
             result = myParser.parse()
+
             season = result.seasonnumber
             episodes = result.episodenumbers
+            
         except tvnamer_exceptions.InvalidFilename:
             returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
             continue
@@ -326,6 +328,15 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         if showInfo:
             tvdb_id = showInfo[0]
 
+        # if it is an air-by-date show and we successfully found it on TVDB, convert the date into a season/episode
+        if season == -1 and showObj:
+            try:
+                epObj = showObj.airedOn(episodes[0])[0]
+                season = int(epObj["seasonnumber"])
+                episodes = [int(epObj["episodenumber"])]
+            except tvdb_exceptions.tvdb_episodenotfound, e:
+                returnStr += logHelper("Unable to find episode with date "+str(episodes[0])+" for show "+showObj["seriesname"]+", skipping", logger.DEBUG)
+                continue
 
         # if we couldn't get the necessary info from either of the above methods, try the next name
         if tvdb_id == None or season == None or episodes == []:
