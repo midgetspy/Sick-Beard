@@ -117,6 +117,8 @@ class BacklogSearcher:
                         break
 
                 if not wantSeason:
+                    numSeasonsDone += 1.0
+                    self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
                     logger.log("Nothing in season "+str(curSeason)+" needs to be downloaded, skipping this season", logger.DEBUG)
                     continue
                 
