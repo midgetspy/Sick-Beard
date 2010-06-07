@@ -158,7 +158,7 @@ defaults = {
              [Ee]?[0-9]+
         )*
              [\-]                                # separator
-             (?P<episodenumberend>[0-9]+)        # final episode num
+             [Ee]?(?P<episodenumberend>[0-9]+)        # final episode num
         [\.\- ]                                  # must have a separator (prevents s01e01-720p from being 720 episodes)
         [^\/]*$''',
 
