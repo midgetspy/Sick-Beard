@@ -66,8 +66,6 @@ class BacklogSearcher:
             logger.log("Backlog is still running, not starting it again", logger.DEBUG)
             return
         
-        self.amActive = True
-        
         self._get_lastBacklog()
         
         curDate = datetime.date.today().toordinal()
@@ -75,6 +73,8 @@ class BacklogSearcher:
         if not curDate - self._lastBacklog >= self.cycleTime:
             return
 
+        self.amActive = True
+        
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes eps, tv_shows shows WHERE season != 0 AND eps.showid = shows.tvdb_id AND shows.paused = 0")
 
