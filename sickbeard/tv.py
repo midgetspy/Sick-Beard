@@ -211,7 +211,7 @@ class TVShow(object):
             for curFile in ek.ek(os.listdir, unicode(self._location)):
                 if not ek.ek(os.path.isdir, ek.ek(os.path.join, self._location, curFile)):
                     continue
-                match = re.match("[Ss]eason\s*(\d+)", curFile)
+                match = re.match(".*[Ss]eason\s*(\d+)", curFile)
                 if match != None:
                     files += [ek.ek(os.path.join, curFile, x) for x in ek.ek(os.listdir, unicode(ek.ek(os.path.join, self._location, curFile)))]
 

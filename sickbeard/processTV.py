@@ -437,7 +437,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 continue
             
             # if it's a season folder, check if it's the one we want
-            match = re.match("[Ss]eason\s*(\d+)", curDir)
+            match = re.match(".*[Ss]eason\s*(\d+)", curDir)
             if match != None:
                 # if it's the correct season folder then stop looking
                 if int(match.group(1)) == int(rootEp.season):
