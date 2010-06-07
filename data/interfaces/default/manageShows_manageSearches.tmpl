@@ -16,7 +16,7 @@
 #if $backlogPI == None:
 Not in progress (<a href="$sbRoot/manageShows/manageSearches/forceBacklog">force</a>)<br />
 #else:
-$str("{0:.2f}%").format($backlogPI.percentComplete) % complete<br />
+$str("{0:.2f}%").format($backlogPI.percentComplete) complete<br />
 $backlogPI.currentStatus['title']<br />
 #end if
 <br />
