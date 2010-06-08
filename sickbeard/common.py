@@ -241,7 +241,9 @@ sceneExceptions = {72546: ['CSI'],
                    71256: ['The Daily Show'],
                    75692: ['Law & Order: SVU'],
                    71489: ['Law & Order: Criminal Intent', 'Law & Order: CI'],
-                   79590: ['Dancing With The Stars (US)']
+                   79590: ['Dancing With The Stars (US)'],
+                   71256: ['The Daily Show'],
+                   73387: ['Craig Ferguson']
                    }
 
 countryList = {'Australia': 'AU',
