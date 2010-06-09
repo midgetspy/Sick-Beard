@@ -170,7 +170,7 @@ def findEpisode(episode, manualSearch=False):
 			continue
 		
 		try:
-			foundResults = curProvider.findEpisode(episode, manualSearch=manualSearch)
+			curFoundResults = curProvider.findEpisode(episode, manualSearch=manualSearch)
 		except exceptions.AuthException, e:
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
@@ -182,16 +182,15 @@ def findEpisode(episode, manualSearch=False):
 		didSearch = True
 		
 		# skip non-tv crap
-		foundResults = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), foundResults)
+		curFoundResults = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), curFoundResults)
+
+		foundResults += curFoundResults
 		
-		if len(foundResults) > 0:
-			break
-	
 	if not didSearch:
 		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
 
 	bestResult = pickBestResult(foundResults)
-	
+
 	return bestResult
 
 def findSeason(show, season):
