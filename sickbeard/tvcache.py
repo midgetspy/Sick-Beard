@@ -244,7 +244,7 @@ class TVCache():
             
                 logger.log("Found result " + title + " at " + url)
         
-                result = classes.NZBSearchResult(epObj)
+                result = classes.NZBSearchResult([epObj])
                 result.provider = self.providerName.lower()
                 result.url = url 
                 result.extraInfo = [title]

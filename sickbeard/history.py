@@ -19,22 +19,24 @@ def _logHistoryItem(action, showid, season, episode, quality, resource, provider
 
 def logSnatch(searchResult):
     
-    showid = int(searchResult.episode.show.tvdbid)
-    season = int(searchResult.episode.season)
-    episode = int(searchResult.episode.episode)
-    quality = searchResult.quality
-    
-    providerModule = providers.getProviderModule(searchResult.provider)
-    if providerModule != None:
-        provider = providerModule.providerName
-    else:
-        provider = "unknown"
-    
-    action = Quality.compositeStatus(SNATCHED, searchResult.quality)
+    for curEpObj in searchResult.episodes:
 
-    resource = searchResult.extraInfo[0]
-    
-    _logHistoryItem(action, showid, season, episode, quality, resource, provider)
+        showid = int(curEpObj.show.tvdbid)
+        season = int(curEpObj.season)
+        episode = int(curEpObj.episode)
+        quality = searchResult.quality
+        
+        providerModule = providers.getProviderModule(searchResult.provider)
+        if providerModule != None:
+            provider = providerModule.providerName
+        else:
+            provider = "unknown"
+        
+        action = Quality.compositeStatus(SNATCHED, searchResult.quality)
+        
+        resource = searchResult.extraInfo[0]
+        
+        _logHistoryItem(action, showid, season, episode, quality, resource, provider)
 
 def logDownload(episode, filename):
     

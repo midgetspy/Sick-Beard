@@ -79,12 +79,13 @@ def snatchEpisode(result, endStatus=SNATCHED):
 	history.logSnatch(result)
 
 	# don't notify when we re-download an episode
-	if result.episode.status in Quality.DOWNLOADED:
-		notifiers.notify(NOTIFY_SNATCH, result.episode.prettyName(True))
+	for curEpObj in result.episodes:
+		if curEpObj.status in Quality.DOWNLOADED:
+			notifiers.notify(NOTIFY_SNATCH, curEpObj.prettyName(True))
 	
-	with result.episode.lock:
-		result.episode.status = Quality.compositeStatus(endStatus, result.quality)
-		result.episode.saveToDB()
+		with curEpObj.lock:
+			curEpObj.status = Quality.compositeStatus(endStatus, result.quality)
+			curEpObj.saveToDB()
 
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
@@ -232,9 +233,51 @@ def findSeason(show, season):
 		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
 	
 	finalResults = []
+
+	# go through multi-ep results and see if we really want them or not, get rid of the rest
+	if -1 in foundResults:
+		for multiResult in foundResults[-1]:
+			
+			logger.log("Seeing if we want to bother with multi-episode result "+multiResult.extraInfo[0], logger.DEBUG)
+			
+			# see how many of the eps that this result covers aren't covered by single results
+			neededEps = []
+			notNeededEps = []
+			for epObj in multiResult.episodes:
+				epNum = epObj.episode
+				# if we have results for the episode
+				if epNum in foundResults and len(foundResults[epNum]) > 0:
+					# but the multi-ep is worse quality, we don't want it
+					if False and multiResult.quality <= pickBestResult(foundResults[epNum]):
+						notNeededEps.append(epNum)
+					else:
+						neededEps.append(epNum)
+				else:
+					neededEps.append(epNum)
+	
+			logger.log("Result is neededEps: "+str(neededEps)+", notNeededEps: "+str(notNeededEps), logger.DEBUG)
+	
+			if not neededEps:
+				logger.log("All of these episodes were covered by single nzbs, ignoring this multi-ep result", logger.DEBUG)
+				continue
+			
+			# don't bother with the single result if we're going to get it with a multi result
+			for epObj in multiResult.episodes:
+				epNum = epObj.episode
+				if epNum in foundResults:
+					logger.log("A needed multi-episode result overlaps with episode "+str(epNum)+", removing its results from the list", logger.DEBUG)
+					del foundResults[epNum]
+			
+			finalResults.append(multiResult)
+	
+	# of all the single ep results narrow it down to the best one for each episode
 	for curEp in foundResults:
+		if curEp == -1:
+			continue
+		
 		if len(foundResults[curEp]) == 0:
 			continue
+		
 		finalResults.append(pickBestResult(foundResults[curEp]))
 	
 	return finalResults

@@ -126,7 +126,7 @@ def findEpisode (episode, manualSearch=False):
 		
 		logger.log("Found result " + title + " at " + url, logger.DEBUG)
 		
-		result = classes.NZBSearchResult(episode)
+		result = classes.NZBSearchResult([episode])
 		result.provider = providerName.lower()
 		result.url = url
 		result.extraInfo = [title]
@@ -177,8 +177,9 @@ def findSeasonResults(show, season):
 		logger.log("Found result " + title + " at " + url, logger.DEBUG)
 		
 		# make a result object
-		epNum = epInfo.episodenumbers[0]
-		epObj = show.getEpisode(season, epNum)
+		epObj = []
+		for curEp in epInfo.episodenumbers:
+			epObj.append(show.getEpisode(season, curEp))
 		
 		result = classes.NZBSearchResult(epObj)
 		result.provider = providerName.lower()
@@ -186,10 +187,18 @@ def findSeasonResults(show, season):
 		result.extraInfo = [title]
 		result.quality = quality
 	
+		# store multi-results under the -1 index so we can go through them separately
+		if len(epObj) == 1:
+			epNum = epObj[0].episode
+		else:
+			epNum = -1
+			logger.log("Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
+	
 		if epNum in results:
 			results[epNum].append(result)
 		else:
 			results[epNum] = [result]
+
 		
 	return results
 		

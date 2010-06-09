@@ -47,11 +47,11 @@ class AuthURLOpener(urllib.FancyURLopener):
 
 class SearchResult:
 
-    def __init__(self, episode):
+    def __init__(self, episodes):
         self.provider = -1
         self.url = ""
         self.extraInfo = []
-        self.episode = episode
+        self.episodes = episodes
         self.predownloaded = False
         self.quality = -1
 
@@ -69,7 +69,7 @@ class SearchResult:
         return myString
 
     def fileName(self):
-        return self.episode.prettyName(True) + "." + self.resultType
+        return self.episodes[0].prettyName(True) + "." + self.resultType
 
 class NZBSearchResult(SearchResult):
     resultType = "nzb"
