@@ -47,6 +47,7 @@ class BacklogSearcher:
         self.cycleTime = 3
         self.lock = threading.Lock()
         self.amActive = False
+        self.amPaused = False
         
         self._resetPI()
         
@@ -74,6 +75,7 @@ class BacklogSearcher:
             return
 
         self.amActive = True
+        self.amPaused = False
         
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes eps, tv_shows shows WHERE season != 0 AND eps.showid = shows.tvdb_id AND shows.paused = 0")
@@ -95,6 +97,10 @@ class BacklogSearcher:
 
             for curSeasonResult in sqlResults:
                 curSeason = int(curSeasonResult["season"])
+
+                # support pause
+                while self.amPaused:
+                    time.sleep(1)
 
                 logger.log("Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
                 self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
@@ -125,6 +131,11 @@ class BacklogSearcher:
                 results = search.findSeason(curShow, curSeason)
                 
                 for curResult in results:
+
+                    # support pause
+                    while self.amPaused:
+                        time.sleep(1)
+
                     search.snatchEpisode(curResult)
                     time.sleep(5)
                 

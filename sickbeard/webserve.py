@@ -157,6 +157,7 @@ class ManageShowsManageSearches:
     def index(self):
         t = PageTemplate(file="manageShows_manageSearches.tmpl")
         t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
+        t.backlogPaused = sickbeard.backlogSearchScheduler.action.amPaused
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
         t.submenu = ManageShowsMenu
         
@@ -183,6 +184,18 @@ class ManageShowsManageSearches:
                           'Note: RSS feeds may not be updated if they have been retrieved too recently')
         
         redirect("/manageShows/manageSearches")
+
+    @cherrypy.expose
+    def pauseBacklog(self, paused=None):
+        if paused == "1":
+            setPaused = True
+        else:
+            setPaused = False
+        
+        sickbeard.backlogSearchScheduler.action.amPaused = setPaused
+        
+        redirect("/manageShows/manageSearches")
+
 
 
 class ManageShows:
