@@ -500,6 +500,7 @@ class TVShow(object):
             
             logger.log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), logger.DEBUG)
 
+            checkQualityAgain = False
             curEp = self.getEpisode(season, episode)
             
             if curEp == None:
@@ -508,7 +509,11 @@ class TVShow(object):
                 except exceptions.EpisodeNotFoundException:
                     logger.log(str(self.tvdbid) + ": Unable to figure out what this file is, skipping", logger.ERROR)
                     continue
+
             else:
+                if ek.ek(os.path.normpath, curEp.location) != ek.ek(os.path.normpath, file):
+                    logger.log("The old episode had a file associated with it, I will re-check the quality based on the new filename "+file, logger.DEBUG)
+                    checkQualityAgain = True
                 with curEp.lock:
                     curEp.location = file
                     curEp.checkForMetaFiles()
@@ -518,7 +523,15 @@ class TVShow(object):
             else:
                 rootEp.relatedEps.append(curEp)
 
-            if sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
+            # if they replace a file on me I'll make some attempt at re-checking the quality
+            if checkQualityAgain:
+                newQuality = Quality.nameQuality(file)
+                logger.log("Since this file has been renamed, I checked "+file+" and found quality "+Quality.qualityStrings[newQuality], logger.DEBUG)
+                if newQuality != Quality.UNKNOWN:
+                    curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
+
+
+            elif sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
                 with curEp.lock:
                     logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.statusFromName(file)), logger.DEBUG)
                     curEp.status = Quality.statusFromName(file)
