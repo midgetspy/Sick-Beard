@@ -49,7 +49,7 @@ def sendToXBMC(command, host, username=None, password=None):
     if not password:
         password = sickbeard.XBMC_PASSWORD    
 
-    enc_command = urllib.urlencode(command)
+    enc_command = urllib.urlencode(command.encode('utf-8'))
     logger.log("Encoded command is " + enc_command, logger.DEBUG)
     # Web server doesn't like POST, GET is the way to go
     url = 'http://%s/xbmcCmds/xbmcHttp/?%s' % (host, enc_command)
