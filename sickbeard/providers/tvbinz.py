@@ -96,6 +96,11 @@ def findEpisode (episode, manualSearch=False):
 	nzbResults = myCache.searchCache(episode, manualSearch)
 	logger.log("Cache results: "+str(nzbResults), logger.DEBUG)
 
+	# append auth
+	urlParams = {'i': sickbeard.TVBINZ_SABUID, 'h': sickbeard.TVBINZ_HASH}
+	for curResult in nzbResults:
+		curResult.url += "&" + urllib.urlencode(urlParams) 
+
 	return nzbResults
 		
 
