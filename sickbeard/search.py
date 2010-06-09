@@ -200,6 +200,8 @@ def findSeason(show, season):
 	
 	foundResults = {}
 	
+	didSearch = False
+	
 	for curProvider in providers.getAllModules():
 		
 		if not curProvider.isActive():
@@ -208,6 +210,7 @@ def findSeason(show, season):
 		try:
 			curResults = curProvider.findSeasonResults(show, season)
 
+			# make a list of all the results for this provider
 			for curEp in curResults:
 				# skip non-tv crap
 				curResults[curEp] = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), curResults[curEp])
@@ -216,6 +219,7 @@ def findSeason(show, season):
 					foundResults[curEp] += curResults[curEp]
 				else:
 					foundResults[curEp] = curResults[curEp]
+		
 		except exceptions.AuthException, e:
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
