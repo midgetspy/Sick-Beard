@@ -120,7 +120,7 @@ def findEpisode (episode, manualSearch=False):
 		
 		quality = Quality.nameQuality(title)
 		
-		if not episode.show.wantEpisode(episode.season, episode.episode, quality):
+		if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
 			logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 			continue
 		
