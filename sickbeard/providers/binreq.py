@@ -80,7 +80,7 @@ def findEpisode (episode, forceQuality=None, manualSearch=False):
 
 	myCache = BinReqCache()
 	myCache.updateCache()
-	nzbResults = myCache.searchCache(episode)
+	nzbResults = myCache.searchCache(episode, manualSearch)
 	logger.log("Cache results: "+str(nzbResults), logger.DEBUG)
 
 	return nzbResults
