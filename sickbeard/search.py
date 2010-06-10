@@ -308,7 +308,7 @@ def findSeason(show, season):
 	
 	# of all the single ep results narrow it down to the best one for each episode
 	for curEp in foundResults:
-		if curEp == MULTI_EP_RESULT:
+		if curEp in (MULTI_EP_RESULT, SEASON_RESULT):
 			continue
 		
 		if len(foundResults[curEp]) == 0:
