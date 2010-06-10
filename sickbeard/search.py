@@ -30,6 +30,7 @@ from common import *
 from sickbeard import logger
 from sickbeard import sab
 from sickbeard import history
+from sickbeard import db
 
 from sickbeard import notifiers 
 from sickbeard import exceptions
@@ -151,7 +152,7 @@ def pickBestResult(results):
 	# find the best result for the current episode
 	bestResult = None
 	for curResult in results:
-		if not bestResult or bestResult.quality < curResult.quality:
+		if not bestResult or bestResult.quality < curResult.quality and curResult.quality != Quality.UNKNOWN:
 			bestResult = curResult
 	
 	return bestResult
@@ -230,17 +231,48 @@ def findSeason(show, season):
 		
 		didSearch = True
 		
-		if len(foundResults) > 0:
-			break
-	
 	if not didSearch:
 		logger.log("No providers were used for the search - check your settings and ensure that either NZB/Torrents is selected and at least one NZB provider is being used.", logger.ERROR)
 	
 	finalResults = []
 
+	# pick the best season NZB
+	bestSeasonNZB = None
+	if SEASON_RESULT in foundResults:
+		bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT])
+	
+	# see if every episode is wanted
+	if bestSeasonNZB:
+		
+		# get the quality of the season nzb
+		seasonQual = Quality.nameQuality(bestSeasonNZB.extraInfo[0])
+		logger.log("The quality of the season NZB is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
+		
+		myDB = db.DBConnection()
+		allEps = [int(x["episode"]) for x in myDB.select("SELECT episode FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])]
+		logger.log("Episode list: "+str(allEps), logger.DEBUG)
+		
+		allWanted = True
+		for curEpNum in allEps:
+			if not show.wantEpisode(season, curEpNum, seasonQual):
+				allWanted = False
+				break
+
+		# if we need every ep in the season then just download this and be done with it
+		if allWanted:
+			logger.log("Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.extraInfo[0], logger.DEBUG)
+			epObjs = []
+			for curEpNum in allEps:
+				epObjs.append(show.getEpisode(season, curEpNum))
+			bestSeasonNZB.episodes = epObjs
+			return [bestSeasonNZB]
+
+		# if not, do other stuff
+
+
 	# go through multi-ep results and see if we really want them or not, get rid of the rest
-	if -1 in foundResults:
-		for multiResult in foundResults[-1]:
+	if MULTI_EP_RESULT in foundResults:
+		for multiResult in foundResults[MULTI_EP_RESULT]:
 			
 			logger.log("Seeing if we want to bother with multi-episode result "+multiResult.extraInfo[0], logger.DEBUG)
 			
@@ -276,7 +308,7 @@ def findSeason(show, season):
 	
 	# of all the single ep results narrow it down to the best one for each episode
 	for curEp in foundResults:
-		if curEp == -1:
+		if curEp == MULTI_EP_RESULT:
 			continue
 		
 		if len(foundResults[curEp]) == 0:

@@ -28,6 +28,10 @@ mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
 
 resultFilters = ("subpack", "nlsub", "samplefix", "nfofix", "sample")
 
+### Other constants
+MULTI_EP_RESULT = -1
+SEASON_RESULT = -2
+
 ### Notification Types
 NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2

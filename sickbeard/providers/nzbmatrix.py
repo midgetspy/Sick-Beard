@@ -144,6 +144,8 @@ def findSeasonResults(show, season):
 		# make sure we want the episode
 		wantEp = True
 		for epNo in epInfo.episodenumbers:
+			if epNo == -1:
+				continue
 			if not show.wantEpisode(season, epNo, quality):
 				logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 				wantEp = False
@@ -156,6 +158,8 @@ def findSeasonResults(show, season):
 		# make a result object
 		epObj = []
 		for curEp in epInfo.episodenumbers:
+			if curEp == -1:
+				continue
 			epObj.append(show.getEpisode(season, curEp))
 		
 		result = classes.NZBSearchResult(epObj)
@@ -164,11 +168,14 @@ def findSeasonResults(show, season):
 		result.extraInfo = [title]
 		result.quality = quality
 	
-		# store multi-results under the -1 index so we can go through them separately
 		if len(epObj) == 1:
 			epNum = epObj[0].episode
+		elif len(epObj) > 1:
+			epNum = MULTI_EP_RESULT
+			logger.log("Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
 		else:
-			epNum = -1
+			epNum = SEASON_RESULT
+			logger.log("Separating full season result to check for later", logger.DEBUG)
 	
 		if epNum in results:
 			results[epNum].append(result)
