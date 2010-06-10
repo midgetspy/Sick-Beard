@@ -17,7 +17,7 @@ import shutil
 import logging
 import platform
 
-from lib.tvdb_api.tvdb_api import (tvdb_error, tvdb_shownotfound, tvdb_seasonnotfound,
+from lib.tvdb_api.tvdb_api import (tvdb_error, tvdb_shownotfound, tvdb_seasonnotfound, 
 tvdb_episodenotfound, tvdb_attributenotfound, tvdb_userabort)
 
 from unicode_helper import p
@@ -286,6 +286,9 @@ class FileParser(object):
                 elif 'episodenumber' in namedgroups:
                     episodenumbers = [int(match.group('episodenumber')), ]
 
+                elif 'seasonnumberonly' in namedgroups:
+                    episodenumbers = [-1]
+
                 elif 'year' in namedgroups or 'month' in namedgroups or 'day' in namedgroups:
                     if not all(['year' in namedgroups, 'month' in namedgroups, 'day' in namedgroups]):
                         raise ConfigValueError(
@@ -307,6 +310,8 @@ class FileParser(object):
                     seasonnumber = int(match.group('seasonnumber'))
                 elif 'year' in namedgroups and 'month' in namedgroups and 'day' in namedgroups:
                     seasonnumber = -1
+                elif 'seasonnumberonly' in namedgroups:
+                    seasonnumber = int(match.group('seasonnumberonly'))
                 else:
                     # No season number specified, usually for Anime
                     seasonnumber = None
@@ -320,10 +325,16 @@ class FileParser(object):
                 if seriesname != None:
                     seriesname = cleanRegexedSeriesName(seriesname)
 
+                if 'episodename' in namedgroups:
+                    episodename = match.group('episodename')
+                else:
+                    episodename = None
+
                 episode = EpisodeInfo(
                     seriesname = seriesname,
                     seasonnumber = seasonnumber,
                     episodenumbers = episodenumbers,
+                    episodename = episodename,
                     filename = self.path)
                 return episode
         else:
@@ -531,10 +542,10 @@ class EpisodeInfo(object):
             'ext': prep_extension}
 
         if self.episodename is None:
-            if self.seasonnumber is None:
+            if self.seasonnumber in (None, -1):
                 fname = Config['filename_without_episode_no_season'] % epdata
-            elif self.seasonnumber == -1:
-                fname = Config['filename_with_date_without_episode'] % epdata
+            elif len(self.episodenumbers) == 1 and self.episodenumbers[0] == -1:
+                fname = Config['filename_season_only_without_episode'] % epdata
             else:
                 fname = Config['filename_without_episode'] % epdata
         else:
@@ -544,10 +555,10 @@ class EpisodeInfo(object):
                     join_with = Config['multiep_join_name_with']
                 )
 
-            if self.seasonnumber is None:
+            if self.seasonnumber in (None, -1):
                 fname = Config['filename_with_episode_no_season'] % epdata
-            elif self.seasonnumber == -1:
-                fname = Config['filename_with_date_and_episode'] % epdata
+            elif len(self.episodenumbers) == 1 and self.episodenumbers[0] == -1:
+                fname = Config['filename_season_only_with_episode'] % epdata
             else:
                 fname = Config['filename_with_episode'] % epdata
 
