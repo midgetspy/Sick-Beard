@@ -94,6 +94,19 @@ def findEpisode (episode, manualSearch=False):
 		title = item.findtext('title')
 		url = item.findtext('link').replace('&amp;','&')
 		
+		# parse the file name
+		try:
+			myParser = FileParser(title)
+			epInfo = myParser.parse()
+		except tvnamer_exceptions.InvalidFilename:
+			logger.log("Unable to parse the filename "+title+" into a valid episode", logger.ERROR)
+			continue
+		
+		
+		if epInfo.seasonnumber != episode.season and len(epInfo.episodeNumbers) == 0 and epInfo.episodeNumbers[0] == episode.episode:
+			logger.log("The result "+title+" doesn't seem to be a valid episode for this episode, ignoring")
+			continue
+
 		quality = Quality.nameQuality(title)
 		
 		if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
@@ -118,7 +131,7 @@ def findSeasonResults(show, season):
 	itemList = []
 	results = {}
 
-	for curString in helpers.makeSceneSeasonSearchString(show, season):
+	for curString in helpers.makeSceneSeasonSearchString(show, season, "nzbmatrix"):
 		itemList += _doSearch(curString)
 
 	for item in itemList:

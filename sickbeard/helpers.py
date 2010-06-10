@@ -138,7 +138,7 @@ def makeSceneShowSearchStrings(show):
 	return map(sanitizeSceneName, showNames)
 
 
-def makeSceneSeasonSearchString (show, season):
+def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 
 	seasonStrings = ["S%02d" % season]
 
@@ -148,7 +148,10 @@ def makeSceneSeasonSearchString (show, season):
 
 	for curShow in showNames:
 		for curSeasonString in seasonStrings:
-			toReturn.append(curShow + "." + curSeasonString)
+			if not extraSearchType:
+				toReturn.append(curShow + "." + curSeasonString)
+			elif extraSearchType == "nzbmatrix":
+				toReturn.append("+\""+curShow+"\" +"+curSeasonString+"*")
 
 	return toReturn
 
