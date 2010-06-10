@@ -87,7 +87,7 @@ def findEpisode (episode, manualSearch=False):
 	itemList = []
 
 	for curString in sceneSearchStrings:
-		itemList += _doSearch(curString)
+		itemList += _doSearch(curString, quotes=True)
 		
 	for item in itemList:
 		
@@ -185,9 +185,13 @@ def findSeasonResults(show, season):
 	return results
 
 
-def _doSearch(curString):
+def _doSearch(curString, quotes=False):
 
-	params = {"term": "\""+curString+"\"".replace("."," ").encode('utf-8'),
+	term = curString.replace("."," ").encode('utf-8')
+	if quotes:
+		term = "\""+term+"\""
+
+	params = {"term": term,
 			  "age": sickbeard.USENET_RETENTION,
 			  "page": "download",
 			  "username": sickbeard.NZBMATRIX_USERNAME,
