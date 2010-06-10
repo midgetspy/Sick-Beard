@@ -29,7 +29,7 @@ import re
 import sickbeard
 
 from sickbeard.exceptions import *
-from sickbeard import logger
+from sickbeard import logger, classes
 from sickbeard.common import *
 
 from sickbeard import db
@@ -39,6 +39,8 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 import xml.etree.cElementTree as etree
 
 import string
+
+urllib._urlopen = classes.SickBeardURLOpener()
 
 def indentXML(elem, level=0):
 	'''

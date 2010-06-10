@@ -19,7 +19,6 @@
 
 
 import urllib
-import urllib2
 import os.path
 import sys
 import datetime
@@ -39,6 +38,8 @@ from sickbeard import tvcache
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
+urllib._urlopen = classes.SickBeardURLOpener()
+
 providerType = "nzb"
 providerName = "NZBs"
 delimiter = "."
@@ -51,7 +52,7 @@ def getNZBsURL (url):
 	result = None
 
 	try:
-		f = urllib2.urlopen(url)
+		f = urllib.urlopen(url)
 		result = "".join(f.readlines())
 	except (urllib.ContentTooShortError, IOError), e:
 		logger.log("Error loading NZBs.org URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
@@ -271,8 +272,8 @@ class NZBsCache(tvcache.TVCache):
 	
 	def __init__(self):
 
-		# only poll NZBs.org every 10 minutes max
-		self.minTime = 1
+		# only poll NZBs.org every 15 minutes max
+		self.minTime = 15
 		
 		tvcache.TVCache.__init__(self, providerName.lower())
 	

@@ -19,7 +19,6 @@
 
 
 import urllib
-import urllib2
 import os.path
 import sys
 import datetime
@@ -39,6 +38,8 @@ from sickbeard import tvcache
 providerType = "nzb"
 providerName = "BinReq"
 
+urllib._urlopen = classes.SickBeardURLOpener()
+
 def isActive():
 	return sickbeard.BINREQ and sickbeard.USE_NZB
 
@@ -47,7 +48,7 @@ def getBinReqURL (url):
 	result = None
 
 	try:
-		f = urllib2.urlopen(url)
+		f = urllib.urlopen(url)
 		result = "".join(f.readlines())
 	except (urllib.ContentTooShortError, IOError), e:
 		logger.log("Error loading Bin-Req URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)

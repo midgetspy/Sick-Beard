@@ -1,11 +1,6 @@
 import time
 import datetime
 import sqlite3
-import urllib
-
-import gzip
-import urllib2
-import StringIO
 
 import sickbeard
 
@@ -19,6 +14,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
+
 
 class CacheDBConnection(db.DBConnection):
 
