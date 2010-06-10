@@ -80,12 +80,13 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
 	# don't notify when we re-download an episode
 	for curEpObj in result.episodes:
-		if curEpObj.status in Quality.DOWNLOADED:
-			notifiers.notify(NOTIFY_SNATCH, curEpObj.prettyName(True))
-	
 		with curEpObj.lock:
 			curEpObj.status = Quality.compositeStatus(endStatus, result.quality)
 			curEpObj.saveToDB()
+
+		if curEpObj.status not in Quality.DOWNLOADED:
+			notifiers.notify(NOTIFY_SNATCH, curEpObj.prettyName(True))
+	
 
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
