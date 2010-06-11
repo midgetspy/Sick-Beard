@@ -60,8 +60,16 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         os.unlink(srcFile)
 
+def deleteAssociatedFiles(file):
+    
+    if not ek.ek(os.path.isfile, file):
+        return
 
+    baseName = file.rpartition('.')[0]
 
+    for curFile in ek.ek(glob.glob, baseName+'.*'):
+        os.remove(curFile)
+        
 def _checkForExistingFile(newFile, oldFile):
 
     # if the new file exists, return the appropriate code depending on the size
@@ -470,13 +478,13 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
             else:
                 returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
-            #TODO: delete old metadata?
+
         elif ek.ek(os.path.isfile, newFile):
             returnStr += logHelper(newFile + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
             existingFile = newFile
 
         if existingFile:
-            os.remove(existingFile)
+            deleteAssociatedFiles(existingFile)
             
     # update the statuses before we rename so the quality goes into the name properly
     for curEp in [rootEp] + rootEp.relatedEps:
