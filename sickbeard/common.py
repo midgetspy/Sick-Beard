@@ -112,7 +112,7 @@ class Quality:
         
         # if we have our exact text then assume we put it there 
         for x in Quality.qualityStrings:
-            if x == UNKNOWN:
+            if x == Quality.UNKNOWN:
                 continue
             if Quality.qualityStrings[x] in name:
                 return x
