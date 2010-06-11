@@ -80,19 +80,20 @@ def _checkForExistingFile(newFile, oldFile):
 
 def findInHistory(nzbName):
 
-    nzbName = nzbName.rpartition(".")[0]
+    names = [nzbName, nzbName.rpartition(".")[0]]
     
     if not nzbName:
         return None
     
     myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM history WHERE resource = ?", [nzbName])
     
-    if len(sqlResults) == 1:
-        return (int(sqlResults[0]["showid"]), int(sqlResults[0]["season"]), int(sqlResults[0]["episode"]))
+    for curName in names:
+        sqlResults = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", curName)])
+        
+        if len(sqlResults) == 1:
+            return (int(sqlResults[0]["showid"]), int(sqlResults[0]["season"]), int(sqlResults[0]["episode"]))
 
-    else:
-        return None
+    return None
             
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
