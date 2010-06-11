@@ -1454,8 +1454,13 @@ class Home:
     @cherrypy.expose
     def updateXBMC(self, showName=None):
 
+        if showName:
+            encShowName = urllib.quote_plus(showName)
+        else:
+            encShowName = None
+
         for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-            if xbmc.updateLibrary(curHost, showName=showName):
+            if xbmc.updateLibrary(curHost, showName=encShowName):
                 flash.message("Command sent to XBMC host " + curHost + " to update library")
             else:
                 flash.error("Unable to contact XBMC host " + curHost)
