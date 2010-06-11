@@ -41,7 +41,7 @@ def sendNZB(nzb):
 
     # if it aired recently make it high priority
     for curEp in nzb.episodes:
-        if curEp.airdate - datetime.date.today() <= datetime.timedelta(days=7):
+        if datetime.date.today() - curEp.airdate <= datetime.timedelta(days=7):
             params['priority'] = 1
 
     params['mode'] = 'addurl'
