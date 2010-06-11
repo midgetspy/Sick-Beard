@@ -68,7 +68,7 @@ def downloadNZB (nzb):
 	if data == None:
 		return False
 	
-	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb")
+	fileName = os.path.join(sickbeard.NZB_DIR, nzb.name + ".nzb")
 	
 	logger.log("Saving to " + fileName, logger.DEBUG)
 	

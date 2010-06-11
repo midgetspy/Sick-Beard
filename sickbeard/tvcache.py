@@ -243,7 +243,7 @@ class TVCache():
                 result = classes.NZBSearchResult([epObj])
                 result.provider = self.providerName.lower()
                 result.url = url 
-                result.extraInfo = [title]
+                result.name = title
                 result.quality = curQuality
                 
                 # add it to the list

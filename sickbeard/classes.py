@@ -57,6 +57,7 @@ class SearchResult:
         self.episodes = episodes
         self.predownloaded = False
         self.quality = -1
+        self.name = ""
 
     def __str__(self):
         

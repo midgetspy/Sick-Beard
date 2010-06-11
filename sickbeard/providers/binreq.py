@@ -61,7 +61,7 @@ def downloadNZB (nzb):
 
 	logger.log("Downloading an NZB from Bin-Req at " + nzb.url)
 
-	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb.gz")
+	fileName = os.path.join(sickbeard.NZB_DIR, nzb.name + ".nzb.gz")
 	
 	logger.log("Saving to " + fileName, logger.DEBUG)
 

@@ -118,12 +118,13 @@ def findEpisode(episode, forceQuality=None, manualSearch=False):
         result = sickbeard.classes.TorrentSearchResult(episode)
         result.provider = 'eztv'
         result.url = url 
-        result.extraInfo = [title, filesize]
+        result.extraInfo = [filesize]
+        result.name = title
         
         results.append(result)
         
     # this shouldn't be necessary but can't hurt
-    results.sort(lambda x,y: cmp(y.extraInfo[1], x.extraInfo[1]))
+    results.sort(lambda x,y: cmp(y.extraInfo[0], x.extraInfo[0]))
         
     return results
 

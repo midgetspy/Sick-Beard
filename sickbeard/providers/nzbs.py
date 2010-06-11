@@ -70,7 +70,7 @@ def downloadNZB (nzb):
 	if data == None:
 		return False
 	
-	fileName = os.path.join(sickbeard.NZB_DIR, nzb.extraInfo[0] + ".nzb")
+	fileName = os.path.join(sickbeard.NZB_DIR, nzb.name + ".nzb")
 	
 	logger.log("Saving to " + fileName, logger.DEBUG)
 	
@@ -130,7 +130,7 @@ def findEpisode (episode, manualSearch=False):
 		result = classes.NZBSearchResult([episode])
 		result.provider = providerName.lower()
 		result.url = url
-		result.extraInfo = [title]
+		result.name = title
 		result.quality = quality
 		
 		results.append(result)
@@ -189,7 +189,7 @@ def findSeasonResults(show, season):
 		result = classes.NZBSearchResult(epObj)
 		result.provider = providerName.lower()
 		result.url = url
-		result.extraInfo = [title]
+		result.name = title
 		result.quality = quality
 	
 		if len(epObj) == 1:

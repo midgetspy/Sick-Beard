@@ -245,7 +245,7 @@ def findSeason(show, season):
 	if bestSeasonNZB:
 		
 		# get the quality of the season nzb
-		seasonQual = Quality.nameQuality(bestSeasonNZB.extraInfo[0])
+		seasonQual = Quality.nameQuality(bestSeasonNZB.name)
 		logger.log("The quality of the season NZB is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
 		
 		myDB = db.DBConnection()
@@ -260,7 +260,7 @@ def findSeason(show, season):
 
 		# if we need every ep in the season then just download this and be done with it
 		if allWanted:
-			logger.log("Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.extraInfo[0], logger.DEBUG)
+			logger.log("Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.name, logger.DEBUG)
 			epObjs = []
 			for curEpNum in allEps:
 				epObjs.append(show.getEpisode(season, curEpNum))
@@ -274,7 +274,7 @@ def findSeason(show, season):
 	if MULTI_EP_RESULT in foundResults:
 		for multiResult in foundResults[MULTI_EP_RESULT]:
 			
-			logger.log("Seeing if we want to bother with multi-episode result "+multiResult.extraInfo[0], logger.DEBUG)
+			logger.log("Seeing if we want to bother with multi-episode result "+multiResult.name, logger.DEBUG)
 			
 			# see how many of the eps that this result covers aren't covered by single results
 			neededEps = []

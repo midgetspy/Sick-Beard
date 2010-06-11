@@ -34,7 +34,7 @@ def logSnatch(searchResult):
         
         action = Quality.compositeStatus(SNATCHED, searchResult.quality)
         
-        resource = searchResult.extraInfo[0]
+        resource = searchResult.name
         
         _logHistoryItem(action, showid, season, episode, quality, resource, provider)
 

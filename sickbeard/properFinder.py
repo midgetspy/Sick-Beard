@@ -200,7 +200,7 @@ class ProperFinder():
                 result.url = curProper.url
                 result.provider = curProper.provider.providerName.lower()
                 result.resultType = curProper.provider.providerType
-                result.extraInfo = [curProper.name]
+                result.name = curProper.name
                 result.quality = curProper.quality
                 
                 # snatch it
