@@ -197,8 +197,9 @@ def findSeasonResults(show, season):
 		elif len(epObj) > 1:
 			epNum = MULTI_EP_RESULT
 			logger.log("Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
-		else:
+		elif len(epObj) == 0:
 			epNum = SEASON_RESULT
+			result.extraInfo = [show]
 			logger.log("Separating full season result to check for later", logger.DEBUG)
 	
 		if epNum in results:

@@ -30,9 +30,8 @@ from common import *
 from sickbeard import logger, db, sceneHelpers, exceptions
 from sickbeard import sab
 from sickbeard import history
-
-from sickbeard import notifiers 
-from sickbeard import exceptions
+from sickbeard import notifiers
+from sickbeard import nzbSplitter 
 
 from sickbeard.providers import *
 from sickbeard import providers
@@ -47,8 +46,23 @@ def _downloadResult(result):
 		logger.log("Invalid provider name - this is a coding error, report it please", logger.ERROR)
 		return False
 
-	if resProvider.providerType == "nzb":
+	if result.resultType == "nzb":
 		newResult = resProvider.downloadNZB(result)
+	elif result.resultType == "nzbdata":
+		fileName = os.path.join(sickbeard.NZB_DIR, result.name + ".nzb")
+		
+		logger.log("Saving NZB to " + fileName)
+		
+		newResult = True
+
+		try:
+			fileOut = open(fileName, "w")
+			fileOut.write(result.extraInfo[0])
+			fileOut.close()
+		except IOError, e:
+			logger.log("Error trying to save NZB to black hole: "+str(e), logger.ERROR)
+			newResult = False
+		
 	elif resProvider.providerType == "torrent":
 		newResult = resProvider.downloadTorrent(result)
 	else:
@@ -59,7 +73,7 @@ def _downloadResult(result):
 
 def snatchEpisode(result, endStatus=SNATCHED):
 
-	if result.resultType == "nzb":
+	if result.resultType in ("nzb", "nzbdata"):
 		if sickbeard.NZB_METHOD == "blackhole":
 			dlResult = _downloadResult(result)
 		elif sickbeard.NZB_METHOD == "sabnzbd":
@@ -148,11 +162,17 @@ def searchForNeededEpisodes():
 
 def pickBestResult(results):
 
+	logger.log("Picking the best result out of "+str([x.name for x in results]), logger.DEBUG)
+
 	# find the best result for the current episode
 	bestResult = None
 	for curResult in results:
 		if not bestResult or bestResult.quality < curResult.quality and curResult.quality != Quality.UNKNOWN:
 			bestResult = curResult
+		elif bestResult.quality == curResult.quality and ("proper" in curResult.name.lower() or "repack" in curResult.name.lower()):
+			bestResult = curResult
+	
+	logger.log("Picked "+bestResult.name+" as the best", logger.DEBUG)
 	
 	return bestResult
 
@@ -252,10 +272,12 @@ def findSeason(show, season):
 		logger.log("Episode list: "+str(allEps), logger.DEBUG)
 		
 		allWanted = True
+		anyWanted = False
 		for curEpNum in allEps:
 			if not show.wantEpisode(season, curEpNum, seasonQual):
 				allWanted = False
-				break
+			else:
+				anyWanted = True
 
 		# if we need every ep in the season then just download this and be done with it
 		if allWanted:
@@ -266,7 +288,25 @@ def findSeason(show, season):
 			bestSeasonNZB.episodes = epObjs
 			return [bestSeasonNZB]
 
-		# if not, do other stuff
+		elif not anyWanted:
+			logger.log("No eps from this season are wanted at this quality, ignoring this result", logger.DEBUG)
+			
+		else:
+
+			logger.log("Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
+
+			# if not, break it apart and add them as the lowest priority results
+			individualResults = nzbSplitter.splitResult(bestSeasonNZB)
+			for curResult in individualResults:
+				if len(curResult.episodes) == 1:
+					epNum = curResult.episodes[0].episode
+				elif len(curResult.episodes) > 1:
+					epNum = MULTI_EP_RESULT
+				
+				if epNum in foundResults:
+					foundResults[epNum].append(curResult)
+				else:
+					foundResults[epNum] = [curResult] 
 
 
 	# go through multi-ep results and see if we really want them or not, get rid of the rest
