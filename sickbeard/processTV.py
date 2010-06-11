@@ -46,23 +46,6 @@ from lib.tvnamer import tvnamer_exceptions
 
 sample_ratio = 0.3
 
-def renameFile(curFile, newName):
-
-    filePath = os.path.split(curFile)
-    oldFile = os.path.splitext(filePath[1])
-
-    newFilename = ek.ek(os.path.join, filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
-    
-    logger.log("Renaming from " + curFile + " to " + newFilename)
-
-    try:
-        ek.ek(os.rename, curFile, newFilename)
-    except (OSError, IOError), e:
-        logger.log("Failed renaming " + curFile + " to " + os.path.basename(newFilename) + ": " + str(e), logger.ERROR)
-        return False
-
-    return newFilename
-
 def copyFile(srcFile, destFile):
     shutil.copyfile(srcFile, destFile)
     try:
@@ -77,33 +60,6 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         os.unlink(srcFile)
 
-
-# #########################
-# Find the file we're dealing with
-# #########################
-def findMainFile (show_dir):
-    # init vars
-    biggest_file = None
-    biggest_file_size = 0
-    next_biggest_file_size = 0
-
-    # find the biggest file in the folder
-    for file in filter(helpers.isMediaFile, ek.ek(os.listdir, show_dir)):
-        cur_size = os.path.getsize(os.path.join(show_dir, file))
-        if cur_size > biggest_file_size:
-            biggest_file = file
-            next_biggest_file_size = biggest_file_size
-            biggest_file_size = cur_size
-
-    if biggest_file == None:
-        return biggest_file
-
-    # it should be by far the biggest file in the folder. If it isn't, we have a problem (multi-show nzb or something, not going to deal with it)
-    if float(next_biggest_file_size) / float(biggest_file_size) > sample_ratio:
-        logger.log("Multiple files in the folder are comparably large, giving up", logger.ERROR)
-        return None
-
-    return os.path.join(show_dir, biggest_file)
 
 
 def _checkForExistingFile(newFile, oldFile):
