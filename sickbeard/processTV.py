@@ -333,18 +333,18 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     newQuality = Quality.UNKNOWN
     for curName in finalNameList:
         curNewQuality = Quality.nameQuality(curName)
-        logger.log("Looking up quality for name "+curName+", got "+Quality.qualityStrings[curNewQuality], logger.DEBUG)
+        returnStr += logHelper("Looking up quality for name "+curName+", got "+Quality.qualityStrings[curNewQuality], logger.DEBUG)
         # just remember if we find a good quality
         if curNewQuality != Quality.UNKNOWN and newQuality == Quality.UNKNOWN:
             newQuality = curNewQuality
-            logger.log("saved quality "+Quality.qualityStrings[newQuality], logger.DEBUG)
+            returnStr += logHelper("saved quality "+Quality.qualityStrings[newQuality], logger.DEBUG)
 
     # if we didn't get a quality from one of the names above, try assuming from each of the names
     for curName in finalNameList:
         if newQuality != Quality.UNKNOWN:
             break
         newQuality = Quality.assumeQuality(curName)
-        logger.log("Guessing quality for name "+curName+", got "+Quality.qualityStrings[curNewQuality], logger.DEBUG)
+        returnStr += logHelper("Guessing quality for name "+curName+", got "+Quality.qualityStrings[curNewQuality], logger.DEBUG)
         if newQuality != Quality.UNKNOWN:
             break
 
