@@ -101,11 +101,6 @@ def findEpisode (episode, manualSearch=False):
 			logger.log("Unable to parse the filename "+title+" into a valid episode", logger.ERROR)
 			continue
 		
-		
-		if epInfo.seasonnumber != episode.season and len(epInfo.episodeNumbers) == 0 and epInfo.episodeNumbers[0] == episode.episode:
-			logger.log("The result "+title+" doesn't seem to be a valid episode for this episode, ignoring")
-			continue
-
 		quality = Quality.nameQuality(title)
 		
 		if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
