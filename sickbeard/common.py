@@ -26,8 +26,6 @@ mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'm2ts', 'm4v', 'ts', 'flv', 'f4v',
                    'mov', 'rmvb']
 
-resultFilters = ("subpack", "nlsub", "samplefix", "nfofix", "sample")
-
 ### Other constants
 MULTI_EP_RESULT = -1
 SEASON_RESULT = -2

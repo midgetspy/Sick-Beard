@@ -27,10 +27,9 @@ import sickbeard
 
 from common import *
 
-from sickbeard import logger
+from sickbeard import logger, db, sceneHelpers, exceptions
 from sickbeard import sab
 from sickbeard import history
-from sickbeard import db
 
 from sickbeard import notifiers 
 from sickbeard import exceptions
@@ -184,7 +183,7 @@ def findEpisode(episode, manualSearch=False):
 		didSearch = True
 		
 		# skip non-tv crap
-		curFoundResults = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), curFoundResults)
+		curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name), curFoundResults)
 
 		foundResults += curFoundResults
 		
@@ -214,7 +213,7 @@ def findSeason(show, season):
 			# make a list of all the results for this provider
 			for curEp in curResults:
 				# skip non-tv crap
-				curResults[curEp] = filter(lambda x: all([y not in x.extraInfo[0].lower() for y in resultFilters]), curResults[curEp])
+				curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name), curResults[curEp])
 				
 				if curEp in foundResults:
 					foundResults[curEp] += curResults[curEp]

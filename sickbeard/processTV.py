@@ -22,16 +22,14 @@ import os
 import shutil
 import sys
 import re
+import glob
 from shutil import Error
 
 from sickbeard import notifiers
 from sickbeard import exceptions
-from sickbeard import helpers
 from sickbeard import notifiers
-from sickbeard import sqlite3
-from sickbeard import db
+from sickbeard import db, classes, helpers, sceneHelpers
 from sickbeard import history
-from sickbeard import classes
 
 from sickbeard import encodingKludge as ek
 
@@ -251,7 +249,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     for curName in (fileName, folderName, nzbName):
         if curName != None:
-            for curSceneName in helpers.sceneToNormalShowNames(curName):
+            for curSceneName in sceneHelpers.sceneToNormalShowNames(curName):
                 if curSceneName not in finalNameList:
                     finalNameList.append(curSceneName)
 

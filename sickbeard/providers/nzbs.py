@@ -28,7 +28,7 @@ import xml.etree.cElementTree as etree
 
 import sickbeard
 
-from sickbeard import helpers, classes
+from sickbeard import classes, sceneHelpers
 
 from sickbeard import exceptions
 from sickbeard.common import *
@@ -104,7 +104,7 @@ def findEpisode (episode, manualSearch=False):
 	if nzbResults or not manualSearch:
 		return nzbResults
 
-	sceneSearchStrings = set(helpers.makeSceneSearchString(episode))
+	sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(episode))
 	
 	itemList = []
 	results = []
@@ -143,7 +143,7 @@ def findSeasonResults(show, season):
 	itemList = []
 	results = {}
 
-	for curString in helpers.makeSceneSeasonSearchString(show, season):
+	for curString in sceneHelpers.makeSceneSeasonSearchString(show, season):
 		itemList += _doSearch("^"+curString)
 
 	for item in itemList:

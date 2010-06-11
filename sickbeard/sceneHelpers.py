@@ -1,0 +1,133 @@
+# Author: Nic Wolfe <nic@wolfeden.ca>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
+from sickbeard.common import *
+from sickbeard import logger
+
+import re
+
+from lib.tvnamer.utils import FileParser 
+from lib.tvnamer import tvnamer_exceptions
+
+resultFilters = ("subpack", "nlsub", "samplefix", "nfofix", "sample", "subbed", "extras", "special")
+
+def filterBadReleases(name):
+
+    try:
+        fp = FileParser(name)
+        epInfo = fp.parse()
+    except tvnamer_exceptions.InvalidFilename:
+        logger.log("Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
+        return False
+    
+    # if there's no info after the season info then assume it's fine
+    if not epInfo.episodename:
+        return True
+    
+    # if any of the bad strings are in the name then say no
+    for x in resultFilters:
+        if x in epInfo.episodename.lower():
+            logger.log("Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
+            return False
+
+    return True
+
+def sanitizeSceneName (name):
+    for x in ":()'!":
+        name = name.replace(x, "")
+
+    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and")
+    name = re.sub("\.\.*", ".", name)    
+    
+    return name
+        
+def sceneToNormalShowNames(name):
+    
+    return [name, name.replace(".and.", ".&.")]
+
+def makeSceneShowSearchStrings(show):
+
+    showNames = allPossibleShowNames(show)
+
+    # eliminate duplicates and scenify the names
+    return map(sanitizeSceneName, showNames)
+
+
+def makeSceneSeasonSearchString (show, season, extraSearchType=None):
+
+    seasonStrings = ["S%02d" % season]
+
+    showNames = set(makeSceneShowSearchStrings(show))
+
+    toReturn = []
+
+    for curShow in showNames:
+        for curSeasonString in seasonStrings:
+            if not extraSearchType:
+                toReturn.append(curShow + "." + curSeasonString)
+            elif extraSearchType == "nzbmatrix":
+                toReturn.append("+\""+curShow+"\" +"+curSeasonString+"*")
+
+    return toReturn
+
+
+def makeSceneSearchString (episode):
+
+    # see if we should use dates instead of episodes
+    if "Talk Show" in episode.show.genre:
+        epString = '.' + str(episode.airdate).replace('-', '.')
+    else:
+        epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
+
+    showNames = set(makeSceneShowSearchStrings(episode.show))
+
+    toReturn = []
+
+    for curShow in showNames:
+        toReturn.append(curShow + epString)
+
+    return toReturn
+    
+def allPossibleShowNames(show):
+
+    showNames = [show.name]
+
+    if int(show.tvdbid) in sceneExceptions:
+        showNames += sceneExceptions[int(show.tvdbid)]
+    
+    # if we have a tvrage name then use it
+    if show.tvrname != "" and show.tvrname != None:
+        showNames.append(show.tvrname)
+
+    newShowNames = []
+
+    # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
+    # any countries defined in common.countryList
+    for curName in showNames:
+        for curCountry in countryList:
+            if curName.endswith(' '+curCountry):
+                logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
+                newShowNames.append(curName.replace(' '+curCountry, ' ('+countryList[curCountry]+')'))
+            elif curName.endswith(' ('+curCountry+')'):
+                logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
+                newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+countryList[curCountry]+')'))
+
+    showNames += newShowNames
+
+    return showNames
+

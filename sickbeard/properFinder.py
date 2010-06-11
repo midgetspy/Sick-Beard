@@ -22,11 +22,8 @@ import operator
 import sickbeard
 
 from sickbeard import db
-from sickbeard import classes
-from sickbeard import common
+from sickbeard import classes, common, helpers, logger, sceneHelpers
 from sickbeard import providers
-from sickbeard import helpers
-from sickbeard import logger
 from sickbeard import search
 from sickbeard import history
 
@@ -113,7 +110,7 @@ class ProperFinder():
                 genericName = self._genericName(epInfo.seriesname)
         
                 # get the scene name masks
-                sceneNames = set(helpers.makeSceneShowSearchStrings(curShow))
+                sceneNames = set(sceneHelpers.makeSceneShowSearchStrings(curShow))
         
                 # for each scene name mask
                 for curSceneName in sceneNames:

@@ -20,7 +20,6 @@
 
 import os.path
 import re
-import sqlite3
 import time
 import urllib
 import datetime
@@ -29,7 +28,7 @@ import xml.etree.cElementTree as etree
 
 import sickbeard
 
-from sickbeard import exceptions, helpers, classes
+from sickbeard import exceptions, classes, sceneHelpers
 from sickbeard import db, tvcache
 from sickbeard.common import *
 from sickbeard import logger
@@ -81,7 +80,7 @@ def findEpisode (episode, manualSearch=False):
 	if nzbResults or not manualSearch:
 		return nzbResults
 	
-	sceneSearchStrings = set(sickbeard.helpers.makeSceneSearchString(episode))
+	sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(episode))
 	
 	results = []
 	itemList = []
@@ -131,7 +130,7 @@ def findSeasonResults(show, season):
 	itemList = []
 	results = {}
 
-	for curString in helpers.makeSceneSeasonSearchString(show, season, "nzbmatrix"):
+	for curString in sceneHelpers.makeSceneSeasonSearchString(show, season, "nzbmatrix"):
 		itemList += _doSearch(curString)
 
 	for item in itemList:

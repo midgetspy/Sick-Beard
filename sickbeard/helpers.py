@@ -19,10 +19,7 @@
 
 import StringIO
 import gzip
-import os.path
-import os
-import sqlite3
-import codecs
+import os.path, os, glob
 import urllib, urllib2
 import re
 
@@ -37,8 +34,6 @@ from sickbeard import db
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
-
-import string
 
 urllib._urlopen = classes.SickBeardURLOpener()
 
@@ -81,15 +76,6 @@ def isMediaFile (file):
 	else:
 		return False
 
-def sanitizeSceneName (name):
-	for x in ":()'!":
-		name = name.replace(x, "")
-
-	name = name.replace("- ", ".").replace(" ", ".").replace("&", "and")
-	name = re.sub("\.\.*", ".", name)	
-	
-	return name
-		
 def sanitizeFileName (name):
 	for x in "\\/*":
 		name = name.replace(x, "-")
@@ -98,81 +84,6 @@ def sanitizeFileName (name):
 	return name
 		
 
-def sceneToNormalShowNames(name):
-	
-	return [name, name.replace(".and.", ".&.")]
-
-def allPossibleShowNames(show):
-
-	showNames = [show.name]
-
-	if int(show.tvdbid) in sceneExceptions:
-		showNames += sceneExceptions[int(show.tvdbid)]
-	
-	# if we have a tvrage name then use it
-	if show.tvrname != "" and show.tvrname != None:
-		showNames.append(show.tvrname)
-
-	newShowNames = []
-
-	# if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
-	# any countries defined in common.countryList
-	for curName in showNames:
-		for curCountry in countryList:
-			if curName.endswith(' '+curCountry):
-				logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
-				newShowNames.append(curName.replace(' '+curCountry, ' ('+countryList[curCountry]+')'))
-			elif curName.endswith(' ('+curCountry+')'):
-				logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
-				newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+countryList[curCountry]+')'))
-
-	showNames += newShowNames
-
-	return showNames
-
-def makeSceneShowSearchStrings(show):
-
-	showNames = allPossibleShowNames(show)
-
-	# eliminate duplicates and scenify the names
-	return map(sanitizeSceneName, showNames)
-
-
-def makeSceneSeasonSearchString (show, season, extraSearchType=None):
-
-	seasonStrings = ["S%02d" % season]
-
-	showNames = set(makeSceneShowSearchStrings(show))
-
-	toReturn = []
-
-	for curShow in showNames:
-		for curSeasonString in seasonStrings:
-			if not extraSearchType:
-				toReturn.append(curShow + "." + curSeasonString)
-			elif extraSearchType == "nzbmatrix":
-				toReturn.append("+\""+curShow+"\" +"+curSeasonString+"*")
-
-	return toReturn
-
-
-def makeSceneSearchString (episode):
-
-	# see if we should use dates instead of episodes
-	if "Talk Show" in episode.show.genre:
-		epString = '.' + str(episode.airdate).replace('-', '.')
-	else:
-		epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
-
-	showNames = set(makeSceneShowSearchStrings(episode.show))
-
-	toReturn = []
-
-	for curShow in showNames:
-		toReturn.append(curShow + epString)
-
-	return toReturn
-	
 def getGZippedURL (f):
 	compressedResponse = f.read()
 	compressedStream = StringIO.StringIO(compressedResponse)
