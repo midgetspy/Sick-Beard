@@ -881,7 +881,7 @@ class TVShow(object):
         anyQualities, bestQualities = Quality.splitQuality(self.quality)
         logger.log("A,B = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
         
-        if quality not in anyQualities and quality not in bestQualities:
+        if quality not in anyQualities + bestQualities:
             return False
 
         myDB = db.DBConnection()
@@ -899,7 +899,7 @@ class TVShow(object):
             return False
 
         # if it's one of these then we want it as long as it's in our allowed initial qualities
-        if epStatus in (WANTED, UNAIRED, SKIPPED) and quality in anyQualities:
+        if epStatus in (WANTED, UNAIRED, SKIPPED) and quality in anyQualities + bestQualities:
             logger.log("Ep is wanted/unaired/skipped, definitely get it", logger.DEBUG)
             return True
         
@@ -1146,7 +1146,7 @@ class TVEpisode:
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
             # leave propers alone, you have to either post-process them or manually change them back
-            if self.status not in Quality.SNATCHED_PROPER + Quality.DOWNLOADED + Quality.SNATCHED:
+            if self.status not in Quality.SNATCHED_PROPER + Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED]:
                 logger.log("5 Status changes from " + str(self.status) + " to " + str(Quality.statusFromName(self.location)), logger.DEBUG)
                 self.status = Quality.statusFromName(self.location)
 
