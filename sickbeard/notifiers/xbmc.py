@@ -121,8 +121,11 @@ def updateLibrary(host, showName=None):
         # Set output back to default
         resetCommand = {'command': 'SetResponseFormat()'}
     
-        # Get our path for show
+        # Set xml response format, if this fails then don't bother with the rest
         request = sendToXBMC(xmlCommand, host)
+        if not request:
+            return False
+
         sqlXML = sendToXBMC(sqlCommand, host)
         request = sendToXBMC(resetCommand, host)
 
