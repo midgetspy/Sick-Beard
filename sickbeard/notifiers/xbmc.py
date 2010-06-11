@@ -133,7 +133,8 @@ def updateLibrary(host, showName=None):
             logger.log("Invalid response for " + showName + " on " + host, logger.DEBUG)
             return False
 
-        et = etree.fromstring(sqlXML)
+        encSqlXML = urllib.quote(sqlXML,'/<>')
+        et = etree.fromstring(encSqlXML)
         paths = et.findall('field')
     
         if not paths:
@@ -141,8 +142,10 @@ def updateLibrary(host, showName=None):
             return False
     
         for path in paths:
-            logger.log("XBMC Updating " + showName + " on " + host + " at " + path.text, logger.DEBUG)
-            updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (path.text)}
+            # Don't need it double-encoded, gawd this is dumb
+            unEncPath = urllib.unquote(path.text)
+            logger.log("XBMC Updating " + showName + " on " + host + " at " + unEncPath, logger.DEBUG)
+            updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (unEncPath)}
             request = sendToXBMC(updateCommand, host)
             if not request:
                 return False
