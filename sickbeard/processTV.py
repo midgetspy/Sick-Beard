@@ -46,6 +46,23 @@ from lib.tvnamer import tvnamer_exceptions
 
 sample_ratio = 0.3
 
+def renameFile(curFile, newName):
+
+    filePath = os.path.split(curFile)
+    oldFile = os.path.splitext(filePath[1])
+
+    newFilename = ek.ek(os.path.join, filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
+
+    logger.log("Renaming from " + curFile + " to " + newFilename)
+
+    try:
+        ek.ek(os.rename, curFile, newFilename)
+    except (OSError, IOError), e:
+        logger.log("Failed renaming " + curFile + " to " + os.path.basename(newFilename) + ": " + str(e), logger.ERROR)
+        return False
+
+    return newFilename
+
 def copyFile(srcFile, destFile):
     shutil.copyfile(srcFile, destFile)
     try:
