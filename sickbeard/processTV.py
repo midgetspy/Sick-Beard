@@ -267,6 +267,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Filename "+curName+" has no series name, unable to use this name for processing", logger.DEBUG)
             continue
 
+        if not episodes:
+            returnStr += logHelper("Unable to find an episode number in the filename "+curName+", skipping", logger.DEBUG)
+            continue
+
         # reverse-lookup the scene exceptions
         sceneID = None
         for exceptionID in sceneExceptions:

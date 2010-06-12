@@ -101,7 +101,7 @@ def splitResult(result):
         if epInfo.seasonnumber != season:
             logger.log("Found "+newNZB+" inside "+result.name+" but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
             continue
-        elif len(epInfo.episodenumbers) == 1 and epInfo.episodenumbers[0] == -1:
+        elif len(epInfo.episodenumbers) == 0:
             logger.log("Found "+newNZB+" inside "+result.name+" but it doesn't seem to be a valid episode NZB, ignoring it", logger.WARNING)
             continue
 
