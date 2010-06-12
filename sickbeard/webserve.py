@@ -1605,7 +1605,7 @@ class WebInterface:
             return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
         
         else:
-            print "No poster" #TODO: make it return a standard image
+            logger.log("No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
     def comingEpisodes(self):
