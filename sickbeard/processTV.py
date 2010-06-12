@@ -495,7 +495,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             
             curEp.saveToDB()
 
-    if sickbeard.RENAME_EPISODES:
+    if sickbeard.RENAME_EPISODES and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, newFile):
         try:
             os.rename(curFile, newFile)
             returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
