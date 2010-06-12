@@ -172,7 +172,10 @@ def pickBestResult(results):
 		elif bestResult.quality == curResult.quality and ("proper" in curResult.name.lower() or "repack" in curResult.name.lower()):
 			bestResult = curResult
 	
-	logger.log("Picked "+bestResult.name+" as the best", logger.DEBUG)
+	if bestResult:
+		logger.log("Picked "+bestResult.name+" as the best", logger.DEBUG)
+	else:
+		logger.log("No result picked.", logger.DEBUG)
 	
 	return bestResult
 
