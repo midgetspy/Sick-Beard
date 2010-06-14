@@ -287,7 +287,7 @@ class FileParser(object):
                     episodenumbers = [int(match.group('episodenumber')), ]
 
                 elif 'seasonnumberonly' in namedgroups:
-                    episodenumbers = [-1]
+                    episodenumbers = []
 
                 elif 'year' in namedgroups or 'month' in namedgroups or 'day' in namedgroups:
                     if not all(['year' in namedgroups, 'month' in namedgroups, 'day' in namedgroups]):
@@ -544,7 +544,7 @@ class EpisodeInfo(object):
         if self.episodename is None:
             if self.seasonnumber in (None, -1):
                 fname = Config['filename_without_episode_no_season'] % epdata
-            elif len(self.episodenumbers) == 1 and self.episodenumbers[0] == -1:
+            elif not self.episodenumbers:
                 fname = Config['filename_season_only_without_episode'] % epdata
             else:
                 fname = Config['filename_without_episode'] % epdata
@@ -557,7 +557,7 @@ class EpisodeInfo(object):
 
             if self.seasonnumber in (None, -1):
                 fname = Config['filename_with_episode_no_season'] % epdata
-            elif len(self.episodenumbers) == 1 and self.episodenumbers[0] == -1:
+            elif not self.episodenumbers:
                 fname = Config['filename_season_only_with_episode'] % epdata
             else:
                 fname = Config['filename_with_episode'] % epdata

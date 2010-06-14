@@ -151,7 +151,10 @@ def processDir (dirName, nzbName=None, recurse=False):
     if dirName.startswith('_FAILED_'):
         returnStr += logHelper("The directory name indicates it failed to extract, cancelling", logger.DEBUG)
         return returnStr
-    
+    elif dirName.startswith('_UNDERSIZED_'):
+        returnStr += logHelper("The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
+        return returnStr
+
     # make sure the dir isn't inside a show dir
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
@@ -279,6 +282,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         if not result.seriesname:
             returnStr += logHelper("Filename "+curName+" has no series name, unable to use this name for processing", logger.DEBUG)
+            continue
+
+        if not episodes:
+            returnStr += logHelper("Unable to find an episode number in the filename "+curName+", skipping", logger.DEBUG)
             continue
 
         # reverse-lookup the scene exceptions
@@ -454,6 +461,19 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
         else:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
+
+            # tag the dir so we know what happened
+            if downloadDir:
+                try:
+                    oldDirName = os.path.abspath(downloadDir)
+                    baseDirPath = os.path.dirname(oldDirName)
+                    endDirPath = os.path.basename(oldDirName)
+                    newDirPath = ek.ek(os.path.join, baseDirPath, '_UNDERSIZED_'+endDirPath)
+                    returnStr += logHelper("Renaming the parent folder to indicate that the post process was failed: "+downloadDir+" -> "+newDirPath, logger.DEBUG)
+                    os.rename(oldDirName, newDirPath)
+                except (OSError, IOError), e:
+                    returnStr += logHelper("Failed renaming " + oldDirName + " to " + newDirPath + ": " + str(e), logger.ERROR)
+            
             return returnStr
         
     # if the dir doesn't exist (new season folder) then make it

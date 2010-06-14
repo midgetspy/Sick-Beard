@@ -478,6 +478,10 @@ class TVShow(object):
             logger.log("Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 
+        if len(epInfo.episodenumbers) == 0:
+            logger.log("No episode number found in "+file+", ignoring it", logger.ERROR)
+            return None
+
         # for now lets assume that any episode in the show dir belongs to that show
         season = epInfo.seasonnumber
         episodes = epInfo.episodenumbers

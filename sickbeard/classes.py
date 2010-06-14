@@ -78,6 +78,8 @@ class SearchResult:
 class NZBSearchResult(SearchResult):
     resultType = "nzb"
 
+class NZBDataSearchResult(SearchResult):
+    resultType = "nzbdata"
 
 class TorrentSearchResult(SearchResult):
     resultType = "torrent"
