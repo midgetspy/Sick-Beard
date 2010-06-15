@@ -41,7 +41,7 @@ class DBConnection:
 		sqlResult = None
 		attempt = 0
 
-		while attempt < 3:
+		while attempt < 5:
 			try:
 				if args == None:
 					logger.log(self.dbFileName+": "+query, logger.DEBUG)
@@ -53,7 +53,7 @@ class DBConnection:
 				# get out of the connection attempt loop since we were successful
 				break
 			except sqlite3.OperationalError, e:
-				if "unable to open database file" in str(e):
+				if "unable to open database file" in str(e) or "database is locked" in str(e):
 					logger.log("DB error: "+str(e), logger.WARNING)
 					attempt += 1
 					time.sleep(1)
