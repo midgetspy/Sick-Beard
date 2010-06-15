@@ -219,4 +219,3 @@ class DropOldHistoryTable(NewQualitySettings):
 	def execute(self):
 		self.connection.action("DROP TABLE history_old")
 		self.incDBVersion()
-		

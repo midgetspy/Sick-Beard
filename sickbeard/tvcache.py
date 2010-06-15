@@ -9,6 +9,7 @@ from sickbeard import logger
 from sickbeard.common import *
 
 from sickbeard import helpers, classes
+from sickbeard import providers
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -243,7 +244,13 @@ class TVCache():
             
                 logger.log("Found result " + title + " at " + url)
         
-                result = classes.NZBSearchResult([epObj])
+                resProvider = providers.getProviderModule(self.providerName.lower())
+                resultType = resProvider.providerType
+
+                if resultType == "nzb":
+                    result = classes.NZBSearchResult([epObj])
+                elif resultType == "torrent":
+                    result = classes.TorrentSearchResult([epObj])
                 result.provider = self.providerName.lower()
                 result.url = url 
                 result.name = title

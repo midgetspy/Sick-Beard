@@ -1,10 +1,14 @@
 import urllib
 import sys
 import os.path
+import re
+import datetime
 
 import xml.etree.cElementTree as etree
+
 from sickbeard.common import *
-from sickbeard import logger, helpers
+from sickbeard import logger, helpers, classes
+from sickbeard import tvcache
 
 providerType = "torrent"
 providerName = "EZTV"
@@ -20,7 +24,7 @@ def _getEZTVURL (url):
         f = urllib.urlopen(url)
         result = "".join(f.readlines())
     except (urllib.ContentTooShortError, IOError), e:
-        logger.log("Error loading EZTV URL: " + sys.exc_info() + " - " + str(e), logger.ERROR)
+        logger.log("Error loading EZTV@BT-Chat URL: " + sys.exc_info() + " - " + str(e), logger.ERROR)
         return None
 
     return result
@@ -28,15 +32,14 @@ def _getEZTVURL (url):
 
 def downloadTorrent (torrent):
     
-    logger.log("Downloading a torrent from EZTV at " + torrent.url)
+    logger.log("Downloading a torrent from EZTV@BT-Chat at " + torrent.url)
 
     data = _getEZTVURL(torrent.url)
     
     if data == None:
         return False
     
-    fileName = os.path.join(sickbeard.TORRENT_DIR, helpers.sanitizeFileName(torrent.fileName()))
-    #fileName = os.path.join(sickbeard.TORRENT_DIR, os.path.basename(torrent.url))
+    fileName = os.path.join(sickbeard.TORRENT_DIR, helpers.sanitizeFileName(torrent.name)+".torrent")
     
     logger.log("Saving to " + fileName, logger.DEBUG)
     
@@ -47,86 +50,92 @@ def downloadTorrent (torrent):
     return True
 
 
-
-def findEpisode(episode, forceQuality=None, manualSearch=False):
-
-    if episode.status == DISCBACKLOG:
-        logger.log("EZTV doesn't support disc backlog. Download it manually.")
-        return []
-
-    logger.log("Searching EZTV for " + episode.prettyName(True))
-
-    if forceQuality != None:
-        epQuality = forceQuality
-    elif episode.show.quality == BEST:
-        epQuality = ANY
-    else:
-        epQuality = episode.show.quality
+def searchRSS():
+    myCache = EZTVCache()
+    myCache.updateCache()
+    return myCache.findNeededEpisodes()
     
-    if epQuality == HD:
-        quality = '720p'
-    else:
-        quality = ''
+def findEpisode (episode, manualSearch=False):
 
-    params = {'show_name': episode.show.name,
-              'quality': quality,
-              'season': episode.season,
-              'episode': episode.episode,
-              'mode': 'rss'}
+    logger.log("Searching EZTV@BT-Chat for " + episode.prettyName(True))
+
+    myCache = EZTVCache()
+    myCache.updateCache()
     
-    searchURL = "http://ezrss.it/search/index.php?" + urllib.urlencode(params)
+    torrentResults = myCache.searchCache(episode, manualSearch)
+    logger.log("Cache results: "+str(torrentResults), logger.DEBUG)
 
-    logger.log("Search string: "+searchURL, logger.DEBUG)
+    return torrentResults
 
-    data = _getEZTVURL(searchURL)
-
-    if data == None:
-        return []
-
-    results = []
+def findSeasonResults(show, season):
     
-    try:
-        responseSoup = etree.ElementTree(element = etree.XML(data))
-        items = responseSoup.getiterator('item')
-    except Exception, e:
-        logger.log("Error trying to load EZTV RSS feed: "+str(e), logger.ERROR)
-        return []
-
-    for item in items:
-        
-        title = item.findtext('title')
-        url = item.findtext('link')
-        filesize = item.find('enclosure').attrib['length']
-        
-        if title == None or url == None:
-            logger.log("The XML returned from the EZTV RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-            continue
-        
-        # if we are looking for an SD episode pass on anything with 720p in it
-        if epQuality == SD and ('720p' in title.lower() or '720p' in url.lower()):
-            logger.log("Looking for SD episode on EZTV but found HD. Title: " + title + " URL: " + url)
-            continue
-        
-        try:
-            filesize = int(filesize)
-        except ValueError:
-            logger.log("The file size from EZTV is invalid. Filesize" + filesize +  " Title: " + title + " URL: " + url)
-            filesize = 0
-        
-        logger.log("Found result " + title + " at " + url, logger.DEBUG)
-
-        result = sickbeard.classes.TorrentSearchResult(episode)
-        result.provider = 'eztv'
-        result.url = url 
-        result.extraInfo = [filesize]
-        result.name = title
-        
-        results.append(result)
-        
-    # this shouldn't be necessary but can't hurt
-    results.sort(lambda x,y: cmp(y.extraInfo[0], x.extraInfo[0]))
-        
-    return results
+    return {}        
 
 def findPropers(date=None):
-    return []
+
+    results = EZTVCache().listPropers(date)
+    
+    return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
+
+class EZTVCache(tvcache.TVCache):
+    
+    def __init__(self):
+
+        tvcache.TVCache.__init__(self, providerName.lower())
+
+        # only poll NZBs'R'US every 15 minutes max
+        self.minTime = 15
+        
+    
+    def updateCache(self):
+
+        if not self.shouldUpdate():
+            return
+        
+        url = 'http://rss.bt-chat.com/?group=3&cat=9'
+        urlArgs = {'group': 3,
+                   'cat': 9}
+
+        url += urllib.urlencode(urlArgs)
+        
+        logger.log("EZTV@BT-Chat cache update URL: "+ url, logger.DEBUG)
+        
+        data = _getEZTVURL(url)
+        
+        # as long as the http request worked we count this as an update
+        if data:
+            self.setLastUpdate()
+        
+        # now that we've loaded the current RSS feed lets delete the old cache
+        logger.log("Clearing cache and updating with new information")
+        self._clearCache()
+        
+        try:
+            responseSoup = etree.ElementTree(etree.XML(data))
+            items = responseSoup.getiterator('item')
+        except Exception, e:
+            logger.log("Error trying to load EZTV@BT-Chat RSS feed: "+str(e), logger.ERROR)
+            return []
+            
+        for item in items:
+
+            title = item.findtext('title')
+            url = item.findtext('link')
+
+            if not title or not url:
+                logger.log("The XML returned from the EZTV@BT-Chat RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+                continue
+            
+            # hack off the .[eztv].torrent stuff
+            titleMatch = re.search("(.*)\.\[[\w_\.\-]+?\]\.torrent", title)
+            
+            if not titleMatch:
+                logger.log("Unable to parse the result "+title+" into a valid EZTV torrent result, ignoring it", logger.ERROR)
+                continue
+            
+            title = titleMatch.group(1)
+            
+            logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)            
+
+            self._addCacheEntry(title, url)
+
