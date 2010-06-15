@@ -220,7 +220,10 @@ class TVCache():
             curSeason = int(curResult["season"])
             if curSeason == -1:
                 continue
-            curEp = int(curResult["episodes"].split("|")[1])
+            curEp = curResult["episodes"].split("|")[1]
+            if not curEp:
+                continue
+            curEp = int(curEp)
             curQuality = int(curResult["quality"])
 
             # if the show says we want that episode then add it to the list
