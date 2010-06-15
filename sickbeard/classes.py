@@ -27,10 +27,10 @@ from common import *
 
 from sickbeard import providers
 
-class SickBeardURLOpener(urllib.FancyURLopener):
+class SickBeardURLopener(urllib.FancyURLopener):
     version = "Sick Beard/alpha2"
 
-class AuthURLOpener(SickBeardURLOpener):
+class AuthURLOpener(SickBeardURLopener):
     def __init__(self, user, pw):
         self.username = user
         self.password = pw
@@ -46,7 +46,7 @@ class AuthURLOpener(SickBeardURLOpener):
 
     def openit(self, url):
         self.numTries = 0
-        return SickBeardURLOpener.open(self, url)
+        return SickBeardURLopener.open(self, url)
 
 class SearchResult:
 

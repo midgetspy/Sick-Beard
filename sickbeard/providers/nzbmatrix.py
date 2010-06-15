@@ -36,7 +36,7 @@ from sickbeard import logger
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
-urllib._urlopen = classes.SickBeardURLOpener()
+urllib._urlopener = classes.SickBeardURLopener()
 
 providerType = "nzb"
 providerName = "NZBMatrix"

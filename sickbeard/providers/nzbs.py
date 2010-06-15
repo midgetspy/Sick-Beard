@@ -38,7 +38,7 @@ from sickbeard import tvcache
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
-urllib._urlopen = classes.SickBeardURLOpener()
+urllib._urlopener = classes.SickBeardURLopener()
 
 providerType = "nzb"
 providerName = "NZBs"

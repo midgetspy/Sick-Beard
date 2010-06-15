@@ -38,7 +38,7 @@ from sickbeard import tvcache
 providerType = "nzb"
 providerName = "BinReq"
 
-urllib._urlopen = classes.SickBeardURLOpener()
+urllib._urlopener = classes.SickBeardURLopener()
 
 def isActive():
 	return sickbeard.BINREQ and sickbeard.USE_NZB

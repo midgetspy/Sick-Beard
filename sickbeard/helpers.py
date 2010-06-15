@@ -35,7 +35,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
 
-urllib._urlopen = classes.SickBeardURLOpener()
+urllib._urlopener = classes.SickBeardURLopener()
 
 def indentXML(elem, level=0):
 	'''

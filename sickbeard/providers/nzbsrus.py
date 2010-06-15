@@ -38,7 +38,7 @@ from sickbeard import tvcache
 providerType = "nzb"
 providerName = "NZBsRUS"
 
-urllib._urlopen = classes.SickBeardURLOpener()
+urllib._urlopener = classes.SickBeardURLopener()
 
 def isActive():
 	return sickbeard.NZBSRUS and sickbeard.USE_NZB
@@ -115,7 +115,7 @@ class NZBsRUSCache(tvcache.TVCache):
 		tvcache.TVCache.__init__(self, providerName.lower())
 
 		# only poll NZBs'R'US every 15 minutes max
-		self.minTime = 1
+		self.minTime = 15
 		
 	
 	def updateCache(self):
