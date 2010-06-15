@@ -91,6 +91,7 @@ class NewQualitySettings (NumericProviders):
 			try:
 				logger.log("Attempting to back up your sickbeard.db file before migration...")
 				shutil.copy(ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db'), ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0'))
+				logger.log("Done backup, proceeding with migration.")
 				break
 			except Exception, e:
 				logger.log("Error while trying to back up your sickbeard.db: "+str(e))
