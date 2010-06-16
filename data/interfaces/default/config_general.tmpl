@@ -148,10 +148,13 @@ Then Re-download the episodes in any or all of these qualities as they are avail
 <br />
 </div>
 
-<input type="checkbox" name="season_folders_default" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "CHECKED" else ""#> <strong>Use Season Folders</strong><br />
-Whether shows should use season folders by default<br />
+<label for="season_folders_default"><input type="checkbox" name="season_folders_default" id="season_folders_default" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "CHECKED" else ""#> <strong>Use Season Folders</strong></label><br />
+Whether show should be created with season<br />
+folders enabled or disabled<br />
 <br />
-
+<strong>NOTE: The above settings to NOT change<br />
+the settings in your existing shows!</strong><br />
+<br />
 </fieldset>
 </div>
 
@@ -171,7 +174,7 @@ Whether shows should use season folders by default<br />
 If checked all spaces will be replaced with periods<br />
 <br />
 
-<input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "CHECKED" else ""#> <strong>Include quality</strong><br />
+<label for="naming_quality"><input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "CHECKED" else ""#> <strong>Include quality</strong></label><br />
 If checked the episode quality will be appended to the end of the file name<br />
 <br />
 
