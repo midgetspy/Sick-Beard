@@ -32,13 +32,7 @@ class ShowUpdater():
             
             try:
             
-                # either update or refresh depending on the time
-                if curShow.status == "Ended":
-                    #TODO: maybe I should still update specials?
-                    logger.log("Doing refresh only for show "+curShow.name+" because it's marked as ended.", logger.DEBUG)
-                    curQueueItem = sickbeard.showQueueScheduler.action.refreshShow(curShow)
-                else:
-                    curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)
+                curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)
                 
                 piList.append(curQueueItem)
 
