@@ -515,9 +515,11 @@ class TVShow(object):
                     continue
 
             else:
+                # if there is a new file associated with this ep then re-check the quality
                 if ek.ek(os.path.normpath, curEp.location) != ek.ek(os.path.normpath, file):
-                    logger.log("The old episode had a file associated with it, I will re-check the quality based on the new filename "+file, logger.DEBUG)
+                    logger.log("The old episode had a different file associated with it, I will re-check the quality based on the new filename "+file, logger.DEBUG)
                     checkQualityAgain = True
+                    
                 with curEp.lock:
                     curEp.location = file
                     curEp.checkForMetaFiles()
@@ -535,10 +537,29 @@ class TVShow(object):
                     curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
 
 
-            elif sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
-                with curEp.lock:
-                    logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.statusFromName(file)), logger.DEBUG)
-                    curEp.status = Quality.statusFromName(file)
+            elif sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.DOWNLOADED:
+                
+                oldStatus, oldQuality = Quality.splitCompositeStatus(curEp.status)
+                newQuality = Quality.nameQuality(file)
+                newStatus = None
+                
+                # if it was snatched and now exists then set the status correctly
+                if oldStatus == SNATCHED and oldQuality <= newQuality:
+                    logger.log("STATUS: this ep used to be snatched with quality "+Quality.qualityStrings[oldQuality]+" but a file exists with quality "+Quality.qualityStrings[newQuality]+" so I'm setting the status to DOWNLOADED", logger.DEBUG)
+                    newStatus = DOWNLOADED
+                
+                # if it was snatched proper and we found a higher quality one then allow the status change
+                elif oldStatus == SNATCHED_PROPER and oldQuality < newQuality:
+                    logger.log("STATUS: this ep used to be snatched proper with quality "+Quality.qualityStrings[oldQuality]+" but a file exists with quality "+Quality.qualityStrings[newQuality]+" so I'm setting the status to DOWNLOADED", logger.DEBUG)
+                    newStatus = DOWNLOADED
+
+                elif oldStatus not in (SNATCHED, SNATCHED_PROPER):
+                    newStatus = DOWNLOADED
+                
+                if newStatus != None:
+                    with curEp.lock:
+                        logger.log("STATUS: we have an associated file, so setting the status from "+str(curEp.status)+" to DOWNLOADED/" + str(Quality.statusFromName(file)), logger.DEBUG)
+                        curEp.status = Quality.compositeStatus(newStatus, newQuality)
                         
             with curEp.lock:
                 curEp.saveToDB()
