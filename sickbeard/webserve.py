@@ -589,6 +589,7 @@ class ConfigGeneral:
         class TVShow():
             def __init__(self):
                 self.name = "Show Name"
+                self.genre = "Comedy"
         
         # fake a TVShow (hack since new TVShow is coming anyway)
         class TVEpisode(tv.TVEpisode):
