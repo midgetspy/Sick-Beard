@@ -20,6 +20,7 @@ from sickbeard.common import *
 from sickbeard import logger
 
 import re
+import datetime
 
 from lib.tvnamer.utils import FileParser 
 from lib.tvnamer import tvnamer_exceptions
@@ -89,7 +90,7 @@ def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 def makeSceneSearchString (episode):
 
     # see if we should use dates instead of episodes
-    if "Talk Show" in episode.show.genre:
+    if "Talk Show" in episode.show.genre and episode.airdate != datetime.date.fromordinal(1):
         epString = '.' + str(episode.airdate).replace('-', '.')
     else:
         epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))

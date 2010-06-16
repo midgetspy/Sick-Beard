@@ -1101,7 +1101,7 @@ class TVEpisode:
         except (tvdb_exceptions.tvdb_error, IOError), e:
             logger.log("TVDB threw up an error: "+str(e), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
-            if self.name != "" and self.airdate != datetime.date.fromordinal(1):
+            if self.name:
                 logger.log("TVDB timed out but we have enough info from other sources, allowing the error", logger.DEBUG)
                 return
             else:
@@ -1115,7 +1115,7 @@ class TVEpisode:
             return
 
             
-        if myEp["firstaired"] == None and season == 0:
+        if not myEp["firstaired"]:
             myEp["firstaired"] = str(datetime.date.fromordinal(1))
             
         if myEp["episodename"] == None or myEp["episodename"] == "":
@@ -1125,13 +1125,6 @@ class TVEpisode:
                 self.deleteEpisode()
             return False
 
-        if myEp["firstaired"] == None or myEp["firstaired"] == "":
-            logger.log("This episode ("+self.show.name+" - "+str(season)+"x"+str(episode)+") has no air date on TVDB")
-            # if I'm incomplete on TVDB but I once was complete then just delete myself from the DB for now
-            if self.tvdbid != -1:
-                self.deleteEpisode()
-            return False
-        
         #NAMEIT logger.log("BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
         self.name = myEp["episodename"]
         self.season = season
@@ -1164,6 +1157,9 @@ class TVEpisode:
                 # and it hasn't aired yet set the status to UNAIRED
                 logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
+            elif self.airdate == datetime.date.fromordinal(1):
+                logger.log("Episode has no air date, automatically marking it skipped", logger.DEBUG)
+                self.status = SKIPPED
             else:
                 if self.status == UNAIRED:
                     self.status = WANTED
@@ -1236,8 +1232,12 @@ class TVEpisode:
                     if self.description == None:
                         self.description = ""
                     
-                    rawAirdate = [int(x) for x in epDetails.findtext('aired').split("-")]
-                    self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+                    if epDetails.findtext('aired'):
+                        rawAirdate = [int(x) for x in epDetails.findtext('aired').split("-")]
+                        self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+                    else:
+                        self.airdate = datetime.date.fromordinal(1)
+                        
                     self.hasnfo = True
             else:
                 self.hasnfo = False
@@ -1360,7 +1360,10 @@ class TVEpisode:
             episodenum.text = str(curEpToWrite.episode)
             
             aired = etree.SubElement( episode, "aired" )
-            aired.text = str(curEpToWrite.airdate)
+            if curEpToWrite.airdate != datetime.date.fromordinal(1):
+                aired.text = str(curEpToWrite.airdate)
+            else:
+                aired.text = ''
     
             plot = etree.SubElement( episode, "plot" )
             if curEpToWrite.description != None:
