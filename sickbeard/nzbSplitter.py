@@ -15,7 +15,7 @@ def getSeasonNZBs(name, fileObj, season):
     try:
         showXML = etree.ElementTree(file = fileObj)
     except SyntaxError:
-        logger.log("Unable to parse the XML of "+file+", not splitting it", logger.ERROR)
+        logger.log("Unable to parse the XML of "+name+", not splitting it", logger.ERROR)
         return ({},'')
 
     filename = name.replace(".nzb", "")
