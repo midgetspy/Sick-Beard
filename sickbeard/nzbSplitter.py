@@ -22,11 +22,17 @@ def getSeasonNZBs(name, fileObj, season):
 
     nzbElement = showXML.getroot()
     
-    regex = '([\w\._]+)\.S%02d\.([\w\._\-]+)\-([\w_\-]+)' % season
+    regex = '([\w\._\ ]+)[\. ]S%02d[\. ]([\w\._\-\ ]+)[\- ]([\w_\-\ ]+?)' % season
     
-    showName, qualitySection, groupName = re.search(regex, filename, re.I).groups()
+    sceneNameMatch = re.search(regex, filename, re.I)
+    if sceneNameMatch: 
+        showName, qualitySection, groupName = sceneNameMatch.groups()
+    else:
+        logger.log("Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
+        return ({},'')
     
     regex = '(' + re.escape(showName) + '\.S%02d(?:[E0-9]+)\.[\w\.\-_]+' % season + ')'
+    regex = regex.replace(' ', '.')
 
     epFiles = {}
     xmlns = None
