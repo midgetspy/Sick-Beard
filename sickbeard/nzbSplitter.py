@@ -22,7 +22,11 @@ def getSeasonNZBs(name, fileObj, season):
 
     nzbElement = showXML.getroot()
     
-    regex = "("+re.escape(filename).replace("S%02d" % season, "S%02d(?:[E0-9]+)(?:\.REPACK|\.PROPER)?" % season).replace("\ ", ".")+")"
+    regex = '([\w\._]+)\.S%02d\.([\w\._\-]+)\-([\w_\-]+)' % season
+    
+    showName, qualitySection, groupName = re.search(regex, filename, re.I).groups()
+    
+    regex = '(' + re.escape(showName) + '\.S%02d(?:[E0-9]+)\.[\w\.\-_]+' % season + ')'
 
     epFiles = {}
     xmlns = None
