@@ -541,6 +541,8 @@ class TVShow(object):
                 
                 oldStatus, oldQuality = Quality.splitCompositeStatus(curEp.status)
                 newQuality = Quality.nameQuality(file)
+                if newQuality == Quality.UNKNOWN:
+                    newQuality = Quality.assumeQuality(file)
                 newStatus = None
                 
                 # if it was snatched and now exists then set the status correctly
