@@ -12,7 +12,11 @@ from sickbeard.common import *
 
 def getSeasonNZBs(name, fileObj, season):
 
-    showXML = etree.ElementTree(file = fileObj)
+    try:
+        showXML = etree.ElementTree(file = fileObj)
+    except SyntaxError:
+        logger.log("Unable to parse the XML of "+file+", not splitting it", logger.ERROR)
+        return ({},'')
 
     filename = name.replace(".nzb", "")
 
