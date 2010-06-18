@@ -27,7 +27,7 @@ import sickbeard
 
 from common import *
 
-from sickbeard import logger, db, sceneHelpers, exceptions
+from sickbeard import logger, db, sceneHelpers, exceptions, helpers
 from sickbeard import sab
 from sickbeard import history
 from sickbeard import notifiers
@@ -237,11 +237,8 @@ def findSeason(show, season):
 			for curEp in curResults:
 				
 				# skip non-tv crap
-				curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name), curResults[curEp])
+				curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and isGoodResult(x, show), curResults[curEp])
 
-				# skip wrong-show results from NZBMatrix
-				curResults[curEp] = filter(lambda x: isGoodResult(x, show), curResults[curEp])
-				
 				if curEp in foundResults:
 					foundResults[curEp] += curResults[curEp]
 				else:
@@ -304,6 +301,9 @@ def findSeason(show, season):
 
 			# if not, break it apart and add them as the lowest priority results
 			individualResults = nzbSplitter.splitResult(bestSeasonNZB)
+
+			individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and isGoodResult(x, show), individualResults)
+
 			for curResult in individualResults:
 				if len(curResult.episodes) == 1:
 					epNum = curResult.episodes[0].episode
