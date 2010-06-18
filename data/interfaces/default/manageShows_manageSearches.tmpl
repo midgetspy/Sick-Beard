@@ -17,7 +17,8 @@
 Not in progress (<a href="$sbRoot/manageShows/manageSearches/forceBacklog">force</a>)<br />
 #else:
 #if $backlogPaused then "Paused: " else ""#
-$str("{0:.2f}%").format($backlogPI.percentComplete) complete<br />
+#set $aoeu = "%.2f%%" % $backlogPI.percentComplete
+$aoeu complete<br />
 $backlogPI.currentStatus['title']<br />
 <a href="$sbRoot/manageShows/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#">#if $backlogPaused then "Unpause" else "Pause"#</a><br />
 #end if
