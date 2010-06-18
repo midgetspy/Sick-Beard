@@ -45,7 +45,9 @@ def isActive():
 
 def getTVBinzURL (url):
 
-	searchHeaders = {"Cookie": "uid=" + sickbeard.TVBINZ_UID + ";hash=" + sickbeard.TVBINZ_HASH + ";auth=" + sickbeard.TVBINZ_AUTH, 'Accept-encoding': 'gzip'}
+	searchHeaders = {"Cookie": "uid=" + sickbeard.TVBINZ_UID + ";hash=" + sickbeard.TVBINZ_HASH + ";auth=" + sickbeard.TVBINZ_AUTH,
+					 'Accept-encoding': 'gzip',
+					 'User-Agent': classes.SickBeardURLopener().version}
 	req = urllib2.Request(url=url, headers=searchHeaders)
 	
 	try:

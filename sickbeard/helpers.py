@@ -299,7 +299,8 @@ def getShowImage(url, imgNum=None):
 
 	logger.log("Getting show image at "+tempURL, logger.DEBUG)
 	try:
-		imgFile = urllib2.urlopen(tempURL)
+		req = urllib2.Request(tempURL, headers={'User-Agent': classes.SickBeardURLopener().version})
+		imgFile = urllib2.urlopen(req)
 	except urllib2.URLError, e:
 		logger.log("There was an error trying to retrieve the image, aborting", logger.ERROR)
 		return None
@@ -326,5 +327,4 @@ def sizeof_fmt(num):
 		if num < 1024.0:
 			return "%3.1f %s" % (num, x)
 		num /= 1024.0
-
 

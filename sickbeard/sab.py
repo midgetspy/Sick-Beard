@@ -27,7 +27,7 @@ from lib import MultipartPostHandler
 import urllib2, cookielib
 
 from sickbeard.common import *
-from sickbeard import logger
+from sickbeard import logger, classes
 
 def sendNZB(nzb):
     
@@ -72,7 +72,11 @@ def sendNZB(nzb):
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
                                           MultipartPostHandler.MultipartPostHandler)
 
-            f = opener.open(url, multiPartParams)
+            req = urllib2.Request(url,
+                                  multiPartParams,
+                                  headers={'User-Agent': classes.SickBeardURLopener().version})
+
+            f = opener.open(req)
             
     except IOError, e:
         logger.log("Unable to connect to SAB: "+str(e), logger.ERROR)

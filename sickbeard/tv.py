@@ -23,7 +23,6 @@ import datetime
 import sqlite3
 import threading
 import urllib
-import urllib2
 import re
 import glob
 

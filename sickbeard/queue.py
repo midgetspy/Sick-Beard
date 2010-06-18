@@ -355,7 +355,6 @@ class QueueItemUpdate(QueueItem):
             logger.log("Not updating episodes for show "+self.show.name+" because it's marked as ended.", logger.DEBUG)
             sickbeard.showQueueScheduler.action.refreshShow(self.show, True)
             return
-
         
         # get episode list from DB
         logger.log("Loading all episodes from the database", logger.DEBUG)
