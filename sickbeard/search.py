@@ -235,8 +235,12 @@ def findSeason(show, season):
 
 			# make a list of all the results for this provider
 			for curEp in curResults:
+				
 				# skip non-tv crap
 				curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name), curResults[curEp])
+
+				# skip wrong-show results from NZBMatrix
+				curResults[curEp] = filter(lambda x: isGoodResult(x, show), curResults[curEp])
 				
 				if curEp in foundResults:
 					foundResults[curEp] += curResults[curEp]
@@ -334,7 +338,7 @@ def findSeason(show, season):
 					neededEps.append(epNum)
 	
 			logger.log("Result is neededEps: "+str(neededEps)+", notNeededEps: "+str(notNeededEps), logger.DEBUG)
-	
+
 			if not neededEps:
 				logger.log("All of these episodes were covered by single nzbs, ignoring this multi-ep result", logger.DEBUG)
 				continue
@@ -359,3 +363,23 @@ def findSeason(show, season):
 		finalResults.append(pickBestResult(foundResults[curEp]))
 	
 	return finalResults
+
+
+def isGoodResult(result, show):
+	"""
+	Use an automatically-created regex to make sure the result actually is the show it claims to be
+	"""
+	
+	showNames = map(sceneHelpers.sanitizeSceneName, sceneHelpers.allPossibleShowNames(show))
+	
+	for curName in set(showNames):
+		curRegex = '^' + curName + '.S\d\d'
+		logger.log("Checking if show "+result.name+" matches " + curRegex, logger.DEBUG)
+		
+		match = re.search(curRegex, result.name)
+		
+		if match:
+			return True
+	
+	logger.log("Provider gave result "+result.name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+	return False

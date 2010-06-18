@@ -65,7 +65,7 @@ def makeSceneShowSearchStrings(show):
 
     showNames = allPossibleShowNames(show)
 
-    # eliminate duplicates and scenify the names
+    # scenify the names
     return map(sanitizeSceneName, showNames)
 
 
