@@ -234,7 +234,7 @@ defaults = {
         [Ee][ ]?(?P<episodenumber>[0-9]+)
         [^\\/]*$''',
 
-        # scene.name.s02.etc (whole season, episode = -1)
+        # scene.name.s02.etc (whole season, episode = empty list)
         '''^((?P<seriesname>.+?)[ \._])?
         [Ss](?P<seasonnumberonly>[0-9]+)[\.\_ ]+?
         ((?P<episodename>.+?)(\.(?P<ext>\w{3,4}))?$)?           # get the episode name & extension if it is available
@@ -281,6 +281,14 @@ defaults = {
         [ \._\-]                                 # Padding
         [Ee](?P<episodenumber>[0-9]+)            # E123
         [\._ -][^\\/]*$                          # More padding, then anything
+        ''',
+
+        # match stupid scene names like tpz-abc123.avi
+        '''
+        ^(?:[A-Za-z]{3,})\-(?P<seriesname>\w+?)  # get series name (even though it's probably a meaningless acronym)
+        (?P<seasonnumber>\d{1,2})                # season number is either the first one or two digits
+        (?P<episodenumber>\d\d)                  # ep number is always the last 2 digits
+        \.\w+$                                   # dirnames should never be this stupid so require an extension
         ''',
 
     ],
