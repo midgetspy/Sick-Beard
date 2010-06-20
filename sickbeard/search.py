@@ -376,7 +376,7 @@ def isGoodResult(result, show):
 		curRegex = '^' + curName + '.S\d\d'
 		logger.log("Checking if show "+result.name+" matches " + curRegex, logger.DEBUG)
 		
-		match = re.search(curRegex, result.name)
+		match = re.search(curRegex, result.name, re.I)
 		
 		if match:
 			return True
