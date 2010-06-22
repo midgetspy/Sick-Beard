@@ -18,7 +18,7 @@
 
 
 
-import urllib
+import urllib, httplib
 import datetime
 
 import sickbeard
@@ -81,7 +81,11 @@ def sendNZB(nzb):
     except IOError, e:
         logger.log("Unable to connect to SAB: "+str(e), logger.ERROR)
         return False
-    
+
+    except httplib.InvalidURL, e:
+        logger.log("Invalid SAB host, check your config: "+str(e), logger.ERROR)
+        return False
+        
     if f == None:
         logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
         return False
