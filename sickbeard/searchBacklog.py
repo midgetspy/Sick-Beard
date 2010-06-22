@@ -148,18 +148,6 @@ class BacklogSearcher:
         self._resetPI()
 
 
-    def _searchBacklogForEp(self, curEp):
-    
-        foundResult = search.findEpisode(curEp)
-        
-        if not foundResult:
-            logger.log("Unable to find NZB for " + curEp.prettyName(True))
-        
-        else:
-            # just use the first result for now
-            search.snatchEpisode(foundResult)
-
-    
     def _get_lastBacklog(self):
     
         logger.log("Retrieving the last check time from the DB", logger.DEBUG)
