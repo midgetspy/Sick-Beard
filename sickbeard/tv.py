@@ -49,11 +49,12 @@ from sickbeard import logger
 
 class TVShow(object):
 
-    def __init__ (self, showdir):
+    def __init__ (self, tvdbid):
     
-        self._location = os.path.normpath(showdir)
+        self.tvdbid = tvdbid
+
+        self._location = ""
         self.name = ""
-        self.tvdbid = 0
         self.tvrid = 0
         self.tvrname = ""
         self.network = ""
@@ -72,47 +73,11 @@ class TVShow(object):
         
         self.episodes = {}
 
-        # if the location doesn't exist, try the DB
-        if not os.path.isdir(self._location):
-            
-            self._isDirGood = False
-            
-            logger.log("The show dir "+self._location+" doesn't exist! This show will be inactive until the dir is created.", logger.ERROR)
-            
-            myDB = db.DBConnection()
-            sqlResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [self._location])
-    
-            # if the location is in the DB, load it from the DB only
-            if len(sqlResults) > 0:
-                self.tvdbid = int(sqlResults[0]["tvdb_id"])
-                self.loadFromDB()
-            else:
-                raise exceptions.NoNFOException("Show folder doesn't exist")
-        
-        elif not ek.ek(os.path.isfile, ek.ek(os.path.join, self._location, "tvshow.nfo")):
-            
-            raise exceptions.NoNFOException("No NFO found in show dir")
-        
-        # if the location does exist then start with the NFO and load extra stuff from the DB
-        else:
-            
-            self._isDirGood = True
-            
-            self.loadNFO()
-
-            self.loadFromDB()
-    
         otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdbid)
         if otherShow != None:
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
         
-        #try:
-        #    t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-        #    t[self.tvdbid]
-        #except tvdb_exceptions.tvdb_shownotfound, e:
-        #    raise exceptions.ShowNotFoundException(str(e))
-        #except tvdb_exceptions.tvdb_error, e:
-        #    logger.log("Unable to contact theTVDB.com, it might be down: "+str(e), logger.ERROR)
+        self.loadFromDB()
         
         self.saveToDB()
     
@@ -130,7 +95,7 @@ class TVShow(object):
 
     def _setLocation(self, newLocation):
         logger.log("Setter sets location to " + newLocation, logger.DEBUG)
-        if ek.ek(os.path.isdir, newLocation) and ek.ek(os.path.isfile, ek.ek(os.path.join, newLocation, "tvshow.nfo")):
+        if ek.ek(os.path.isdir, newLocation):
             self._location = newLocation
             self._isDirGood = True
         else:
@@ -610,10 +575,11 @@ class TVShow(object):
             self.quality = int(sqlResults[0]["quality"])
             self.seasonfolders = int(sqlResults[0]["seasonfolders"])
             self.paused = int(sqlResults[0]["paused"])
+            try:
+                self.location = sqlResults[0]["location"]
+            except exceptions.NoNFOException:
+                pass
 
-            if self.tvdbid == 0:
-                self.tvdbid = int(sqlResults[0]["tvdb_id"])
-                
             if self.tvrid == 0:
                 self.tvrid = int(sqlResults[0]["tvr_id"])
     
@@ -631,6 +597,11 @@ class TVShow(object):
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
         myEp = t[self.tvdbid]
         
+        self.name = myEp["seriesname"]
+
+        self.genre = myEp['genre']
+        self.network = myEp['network']
+    
         if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
             self.airs = myEp["airs_dayofweek"] + " " + myEp["airs_time"]
 
@@ -1646,3 +1617,44 @@ class TVEpisode:
         
         
         
+
+def getTVDBIDFromNFO(dir):
+
+    if not ek.ek(os.path.isdir, dir):
+        logger.log("Show dir doesn't exist, can't load NFO")
+        raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
+    
+    logger.log("Loading show info from NFO")
+
+    xmlFile = ek.ek(os.path.join, dir, "tvshow.nfo")
+    
+    try:
+        xmlFileObj = ek.ek(open, xmlFile, 'r')
+        showXML = etree.ElementTree(file = xmlFileObj)
+
+        if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
+            raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id):" \
+                + str(showXML.findtext('title')) + " " \
+                + str(showXML.findtext('tvdbid')) + " " \
+                + str(showXML.findtext('id')))
+        
+        name = showXML.findtext('title')
+        if showXML.findtext('tvdbid') != None:
+            tvdb_id = int(showXML.findtext('tvdbid'))
+        elif showXML.findtext('id'):
+            tvdb_id = int(showXML.findtext('id'))
+        else:
+            raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
+
+    except (exceptions.NoNFOException, SyntaxError), e:
+        logger.log("There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
+        logger.log("Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
+
+        try:
+            xmlFileObj.close()
+            ek.ek(os.rename, xmlFile, xmlFile + ".old")
+        except Exception, e:
+            logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
+        raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
+
+    return tvdb_id
