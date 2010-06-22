@@ -66,7 +66,7 @@ class ProperFinder():
         propers = {}
         
         # for each provider get a list of the propers
-        for curProvider in providers.getAllModules():
+        for curProvider in providers.getProviderList():
             
             if not curProvider.isActive():
                 continue

@@ -9,12 +9,37 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <style type="text/css">
-#provider_order_list { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+#provider_order_list { list-style-type: none; margin: 0; padding: 0; width: 80%; }
 #provider_order_list li { margin: 0 5px 5px 5px; padding: 5px; font-size: 1.2em; height: 1.5em; }
 html>body #provider_order_list li { height: 1.5em; line-height: 1.2em; }
 .ui-state-highlight { height: 1.5em; line-height: 1.2em; }
 </style>
 <script type="text/javascript">
+\$(document).ready(function(){
+
+  $.fn.showHideProviders = function() {
+    \$('.providerDiv').each(function(){
+      var providerName = \$(this).attr('id');
+      var isEnabled = \$('#enable_' + providerName).attr('checked')
+      
+      if (isEnabled)
+        \$(this).show();
+      else
+        \$(this).hide();
+      
+    });
+  } 
+
+  \$('.enabler').change(function(){
+
+    \$(this).showHideProviders();
+
+  });
+
+  \$(this).showHideProviders();
+
+});
+
 \$(function() {
     \$("#provider_order_list").sortable({
         placeholder: 'ui-state-highlight',
@@ -41,7 +66,8 @@ you want them to be searched<br />
     #if $curProvider.providerName == 'TVBinz' and not $sickbeard.SHOW_TVBINZ
         #continue
     #end if
-    <li class="ui-state-default" id="$curProvider.providerName.lower()">$curProvider.providerName</li>
+    #set $curName = $curProvider.providerName.lower()
+    <li class="ui-state-default" id="$curName"><input type="checkbox" name="$curName" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "CHECKED" else ""#> $curProvider.providerName</li>
 #end for
 </ul>
 <br />
@@ -52,7 +78,7 @@ you want them to be searched<br />
 
 
 #if $sickbeard.SHOW_TVBINZ
-<div class="EntryBlock">
+<div class="EntryBlock providerDiv" id="tvbinz">
 <fieldset class="EntryFieldSet">
 
 <legend>TVBinz</legend>
@@ -86,7 +112,7 @@ TVBinz auth string<br />
 </div>
 #end if
 
-<div class="EntryBlock">
+<div class="EntryBlock providerDiv" id="nzbs">
 <fieldset class="EntryFieldSet">
 
 <legend>NZBs.org</legend>
@@ -111,7 +137,7 @@ NZBs.org hash<br />
 
 
 
-<div class="EntryBlock">
+<div class="EntryBlock providerDiv" id="nzbsrus">
 <fieldset class="EntryFieldSet">
 
 <legend>NZBs'R'US</legend>
@@ -135,7 +161,7 @@ NZBs'R'US hash<br />
 </div>
 
 
-<div class="EntryBlock">
+<div class="EntryBlock providerDiv" id="binreq">
 <fieldset class="EntryFieldSet">
 
 <legend>Bin-Req</legend>
@@ -150,7 +176,7 @@ Check to search Bin-Req.net for episodes<br />
 
 
 
-<div class="EntryBlock">
+<div class="EntryBlock providerDiv" id="nzbmatrix">
 <fieldset class="EntryFieldSet">
 
 <legend>NZBMatrix</legend>

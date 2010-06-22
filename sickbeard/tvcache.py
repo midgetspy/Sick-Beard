@@ -8,8 +8,10 @@ from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import *
 
-from sickbeard import helpers, classes
+from sickbeard import helpers, classes, exceptions
 from sickbeard import providers
+
+import xml.etree.cElementTree as etree
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -42,9 +44,10 @@ class CacheDBConnection(db.DBConnection):
 
 class TVCache():
     
-    def __init__(self, providerName):
+    def __init__(self, provider):
     
-        self.providerName = providerName
+        self.provider = provider
+        self.providerName = self.provider.providerName
         self.minTime = 10
 
     def _getDB(self):
@@ -57,11 +60,68 @@ class TVCache():
         
         myDB.action("DELETE FROM "+self.providerName+" WHERE 1")
     
+    def _getRSSData(self):
+        
+        data = None
+
+        return data
+    
+    def _checkAuth(self, data):
+        return True
+    
+    def _checkItemAuth(self, title, url):
+        return True
+    
     def updateCache(self):
         
-        print "This should be overridden by implementing classes" 
+        if not self.shouldUpdate():
+            return
         
-        pass
+        data = self._getRSSData()
+        
+        # as long as the http request worked we count this as an update
+        if data:
+            self.setLastUpdate()
+        else:
+            return []
+        
+        # now that we've loaded the current RSS feed lets delete the old cache
+        logger.log("Clearing cache and updating with new information")
+        self._clearCache()
+        
+        if not self._checkAuth(data):
+            raise exceptions.AuthException("Your authentication info for "+self.provider.providerName+" is incorrect.")
+        
+        try:
+            responseSoup = etree.ElementTree(etree.XML(data))
+            items = responseSoup.getiterator('item')
+        except Exception, e:
+            logger.log("Error trying to load "+self.provider.providerName+" RSS feed: "+str(e), logger.ERROR)
+            return []
+            
+        for item in items:
+
+            self._parseItem(item)
+
+    def _translateLinkURL(self, url):
+        return url.replace('&amp;','&')
+
+    def _parseItem(self, item):
+
+        title = item.findtext('title')
+        url = item.findtext('link')
+
+        self._checkItemAuth(title, url)
+
+        if not title or not url:
+            logger.log("The XML returned from the "+self.provider.providerName+" feed is incomplete, this result is unusable", logger.ERROR)
+            continue
+        
+        url = self._translateLinkURL(url)
+        
+        logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)            
+
+        self._addCacheEntry(title, url)
 
     def _getLastUpdate(self):
         myDB = self._getDB()
@@ -244,13 +304,7 @@ class TVCache():
             
                 logger.log("Found result " + title + " at " + url)
         
-                resProvider = providers.getProviderModule(self.providerName.lower())
-                resultType = resProvider.providerType
-
-                if resultType == "nzb":
-                    result = classes.NZBSearchResult([epObj])
-                elif resultType == "torrent":
-                    result = classes.TorrentSearchResult([epObj])
+                result = self.provider.getResult([epObj])
                 result.provider = self.providerName.lower()
                 result.url = url 
                 result.name = title

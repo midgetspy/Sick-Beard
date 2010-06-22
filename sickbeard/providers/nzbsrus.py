@@ -19,110 +19,44 @@
 
 
 import urllib
-import os.path
-import sys
-import datetime
-import time
-
-import xml.etree.cElementTree as etree
 
 import sickbeard
 
-from sickbeard import helpers, classes
+from sickbeard import exceptions, logger
 
-from sickbeard import exceptions
 from sickbeard.common import *
-from sickbeard import logger
 from sickbeard import tvcache
 
-providerType = "nzb"
-providerName = "NZBsRUS"
+import generic
 
-urllib._urlopener = classes.SickBeardURLopener()
-
-def isActive():
-	return sickbeard.NZBSRUS and sickbeard.USE_NZB
-
-def getNZBsURL (url):
-
-	result = None
-
-	try:
-		f = urllib.urlopen(url)
-		result = "".join(f.readlines())
-	except (urllib.ContentTooShortError, IOError), e:
-		logger.log("Error loading NZBs'R'US URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
-		return None
-
-	return result
-
-						
-def downloadNZB (nzb):
-
-	logger.log("Downloading an NZB from NZBs'R'US at " + nzb.url)
-
-	data = getNZBsURL(nzb.url)
+class NZBsRUSProvider(generic.NZBProvider):
 	
-	if data == None:
-		return False
-	
-	fileName = os.path.join(sickbeard.NZB_DIR, nzb.name + ".nzb")
-	
-	logger.log("Saving to " + fileName, logger.DEBUG)
-	
-	fileOut = open(fileName, "w")
-	fileOut.write(data)
-	fileOut.close()
-
-	return True
-	
-	
-def searchRSS():
-	myCache = NZBsRUSCache()
-	myCache.updateCache()
-	return myCache.findNeededEpisodes()
-	
-def findEpisode (episode, manualSearch=False):
-
-	if sickbeard.NZBSRUS_UID in (None, "") or sickbeard.NZBSRUS_HASH in (None, ""):
-		raise exceptions.AuthException("NZBs'R'US authentication details are empty, check your config")
-
-	logger.log("Searching NZBs'R'US for " + episode.prettyName(True))
-
-	myCache = NZBsRUSCache()
-	myCache.updateCache()
-	
-	nzbResults = myCache.searchCache(episode, manualSearch)
-	logger.log("Cache results: "+str(nzbResults), logger.DEBUG)
-
-	return nzbResults
+	def __init__(self):
 		
+		generic.NZBProvider.__init__(self, "NZBsRUS")
+		
+		self.cache = NZBsRUSCache(self)
 
-def findSeasonResults(show, season):
-	
-	return {}		
+	def isEnabled(self):
+		return sickbeard.NZBSRUS
 
-def findPropers(date=None):
-
-	results = NZBsRUSCache().listPropers(date)
-	
-	return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
+	def _checkAuth(self):
+		if sickbeard.NZBSRUS_UID in (None, "") or sickbeard.NZBSRUS_HASH in (None, ""):
+			raise exceptions.AuthException("NZBs'R'US authentication details are empty, check your config")	
+		
 
 class NZBsRUSCache(tvcache.TVCache):
 	
-	def __init__(self):
+	def __init__(self, provider):
 
-		tvcache.TVCache.__init__(self, providerName.lower())
+		tvcache.TVCache.__init__(self, provider)
 
 		# only poll NZBs'R'US every 15 minutes max
 		self.minTime = 15
 		
 	
-	def updateCache(self):
+	def _getRSSData(self):
 
-		if not self.shouldUpdate():
-			return
-		
 		url = 'http://www.nzbsrus.com/rssfeed.php?'
 		urlArgs = {'cat': '91,75',
 				   'i': sickbeard.NZBSRUS_UID,
@@ -132,38 +66,11 @@ class NZBsRUSCache(tvcache.TVCache):
 		
 		logger.log("NZBs'R'US cache update URL: "+ url, logger.DEBUG)
 		
-		data = getNZBsURL(url)
+		data = self.provider.getURL(url)
 		
-		# as long as the http request worked we count this as an update
-		if data:
-			self.setLastUpdate()
-		
-		# now that we've loaded the current RSS feed lets delete the old cache
-		logger.log("Clearing cache and updating with new information")
-		self._clearCache()
-		
-		if data == 'Invalid Link':
-			raise exceptions.AuthException("Your UID/hash for NZBs'R'US is incorrect.")
-		
-		try:
-			responseSoup = etree.ElementTree(etree.XML(data))
-			items = responseSoup.getiterator('item')
-		except Exception, e:
-			logger.log("Error trying to load NZBs'R'US RSS feed: "+str(e), logger.ERROR)
-			return []
-			
-		for item in items:
+		return data
+	
+	def _checkAuth(self, data):
+		return data != 'Invalid Link'
 
-			title = item.findtext('title')
-			url = item.findtext('link')
-
-			if not title or not url:
-				logger.log("The XML returned from the NZBs'R'US RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-				continue
-			
-			url = url.replace('&amp;','&')
-
-			logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
-
-			self._addCacheEntry(title, url)
-
+provider = NZBsRUSProvider()

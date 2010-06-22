@@ -1855,7 +1855,7 @@ class Home:
             # just use the first result for now
             logger.log("Downloading episode from " + foundEpisode.url + "<br />\n")
             result = search.snatchEpisode(foundEpisode)
-            providerModule = providers.getProviderModule(foundEpisode.provider)
+            providerModule = providers.getProviderClass(foundEpisode.provider)
             if providerModule == None:
                 flash.error('Provider is configured incorrectly, unable to download')
             else: 

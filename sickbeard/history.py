@@ -26,9 +26,9 @@ def logSnatch(searchResult):
         episode = int(curEpObj.episode)
         quality = searchResult.quality
         
-        providerModule = providers.getProviderModule(searchResult.provider)
-        if providerModule != None:
-            provider = providerModule.providerName
+        providerClass = providers.getProviderClass(searchResult.provider)
+        if providerClass != None:
+            provider = providerClass.providerName
         else:
             provider = "unknown"
         

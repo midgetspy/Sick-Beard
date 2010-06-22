@@ -38,7 +38,7 @@ from sickbeard import providers
 
 def _downloadResult(result):
 
-	resProvider = providers.getProviderModule(result.provider)
+	resProvider = providers.getProviderClass(result.provider)
 
 	newResult = False
 
@@ -47,7 +47,7 @@ def _downloadResult(result):
 		return False
 
 	if result.resultType == "nzb":
-		newResult = resProvider.downloadNZB(result)
+		newResult = resProvider.downloadResult(result)
 	elif result.resultType == "nzbdata":
 		fileName = os.path.join(sickbeard.NZB_DIR, result.name + ".nzb")
 		
@@ -64,7 +64,7 @@ def _downloadResult(result):
 			newResult = False
 		
 	elif resProvider.providerType == "torrent":
-		newResult = resProvider.downloadTorrent(result)
+		newResult = resProvider.downloadResult(result)
 	else:
 		logger.log("Invalid provider type - this is a coding error, report it please", logger.ERROR)
 		return False
@@ -114,7 +114,7 @@ def searchForNeededEpisodes():
 	didSearch = False
 
 	# ask all providers for any episodes it finds
-	for curProvider in providers.getAllModules():
+	for curProvider in providers.getProviderList():
 		
 		if not curProvider.isActive():
 			continue
@@ -188,7 +188,7 @@ def findEpisode(episode, manualSearch=False):
 
 	didSearch = False
 
-	for curProvider in providers.getAllModules():
+	for curProvider in providers.getProviderList():
 		
 		if not curProvider.isActive():
 			continue
@@ -225,7 +225,7 @@ def findSeason(show, season):
 	
 	didSearch = False
 	
-	for curProvider in providers.getAllModules():
+	for curProvider in providers.getProviderList():
 		
 		if not curProvider.isActive():
 			continue
