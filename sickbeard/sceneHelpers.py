@@ -71,18 +71,18 @@ def makeSceneShowSearchStrings(show):
 
 def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 
-    seasonStrings = ["S%02d" % season]
+    seasonStrings = ["S%02d" % season, "%ix" % season]
 
     showNames = set(makeSceneShowSearchStrings(show))
 
     toReturn = []
 
     for curShow in showNames:
-        for curSeasonString in seasonStrings:
-            if not extraSearchType:
-                toReturn.append(curShow + "." + curSeasonString)
-            elif extraSearchType == "nzbmatrix":
-                toReturn.append("+\""+curShow+"\" +"+curSeasonString+"*")
+        if not extraSearchType:
+            toReturn.append(curShow + "." + seasonStrings[0])
+        elif extraSearchType == "nzbmatrix":
+            seasonString = ','.join([x+'*' for x in seasonStrings])
+            toReturn.append('+"'+curShow+'" +('+seasonString+')')
 
     return toReturn
 
@@ -91,16 +91,18 @@ def makeSceneSearchString (episode):
 
     # see if we should use dates instead of episodes
     if "Talk Show" in episode.show.genre and episode.airdate != datetime.date.fromordinal(1):
-        epString = '.' + str(episode.airdate).replace('-', '.')
+        epStrings = [str(episode.airdate).replace('-', '.')]
     else:
-        epString = ".S%02iE%02i" % (int(episode.season), int(episode.episode))
+        epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
+                    "%ix%02i" % (int(episode.season), int(episode.episode))]
 
     showNames = set(makeSceneShowSearchStrings(episode.show))
 
     toReturn = []
 
     for curShow in showNames:
-        toReturn.append(curShow + epString)
+        for curEpString in epStrings:
+            toReturn.append(curShow + '.' + curEpString)
 
     return toReturn
     

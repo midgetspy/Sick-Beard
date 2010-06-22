@@ -110,9 +110,7 @@ def findEpisode (episode, manualSearch=False):
 	results = []
 
 	for curString in sceneSearchStrings:
-
 		itemList += _doSearch("^"+curString)
-		
 
 	for item in itemList:
 		

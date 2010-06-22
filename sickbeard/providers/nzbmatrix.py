@@ -83,11 +83,11 @@ def findEpisode (episode, manualSearch=False):
 	sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(episode))
 	
 	results = []
-	itemList = []
 
-	for curString in sceneSearchStrings:
-		itemList += _doSearch(curString, quotes=True)
-		
+	# search for all show names and episode numbers like ("a","b","c") in a single search
+	nzbMatrixSearchString = '("' + '","'.join(sceneSearchStrings) + '")'
+	itemList = _doSearch(nzbMatrixSearchString)
+
 	for item in itemList:
 		
 		title = item.findtext('title')
