@@ -1583,7 +1583,7 @@ class TVEpisode:
         if naming_quality == None:
             naming_quality = sickbeard.NAMING_QUALITY
         
-        if "Talk Show" in self.show.genre:
+        if "Talk Show" in self.show.genre and sickbeard.NAMING_DATES:
             goodEpString = str(self.airdate)
         else:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}

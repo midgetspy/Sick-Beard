@@ -178,6 +178,11 @@ If checked all spaces will be replaced with periods<br />
 If checked the episode quality will be appended to the end of the file name<br />
 <br />
 
+<label for="naming_dates"><input type="checkbox" name="naming_dates" id="naming_dates" #if $sickbeard.NAMING_DATES then "CHECKED" else ""#> <strong>Use dates for air-by-date shows</strong></label><br />
+If checked the date string will be used instead of the<br />
+season/episode for air-by-date shows (eg. 2010-02-15 vs S12E23)<br />
+<br />
+
 <strong>Separator Style</strong><br />
 <select name="naming_sep_type" id="naming_sep_type">
 #for ($i, $ex) in enumerate($config.naming_sep_type_text):

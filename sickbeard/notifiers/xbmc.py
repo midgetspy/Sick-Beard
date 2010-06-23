@@ -50,7 +50,7 @@ def sendToXBMC(command, host, username=None, password=None):
         password = sickbeard.XBMC_PASSWORD    
 
     for key in command:
-        if type(command[key]) == str:
+        if type(command[key]) == unicode:
             command[key] = command[key].encode('utf-8')
 
     enc_command = urllib.urlencode(command)
