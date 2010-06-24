@@ -1,7 +1,7 @@
 #import sickbeard
 #import os.path
 #import urllib
-#set global $title="Add Show from "+$urllib.unquote_plus($showToAdd)
+#set global $title="Add Show from "+$showToAdd
 
 #set global $sbPath="../.."
 
@@ -53,7 +53,7 @@
 });
 </script>
 
-<form id="addShowForm" method="POST" action="$sbRoot/home/addShows/addSingleShow">
+<form id="addShowForm" method="POST" action="$sbRoot/home/addShows/addSingleShow" accept-charset="utf-8">
 <input type="submit" value="Continue" id="addShow"> <input type="button" value="Skip" id="skipShow"><br /><br />
 
 <div id="searchResults" width="250"></div>

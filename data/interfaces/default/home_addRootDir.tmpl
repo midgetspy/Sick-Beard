@@ -1,12 +1,13 @@
 #import sickbeard
 #import urllib
 #import os.path
+#from sickbeard import encodingKludge as ek
 #set global $title="Add Shows"
 
 #set global $sbPath="../../.."
 
 <!--#set global $topmenu="home"#-->
-#import os.path
+
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script>
@@ -35,7 +36,7 @@
     if (dirArr.length == 0)
       return false
 
-    url = 'addShow?showDir='+dirArr.join('&showDir=')
+    url = 'addShowsNew?showDirs='+dirArr.join('&showDirs=')
 
     window.location.href = url
 
@@ -59,10 +60,11 @@
   <thead><tr><th width="1%"><input type="checkbox" id="checkAll" CHECKED></th><th>Dir Name</th><th width="1%">Has tvshow.nfo</td></tr></thead>
   <tbody>
 #for $curDir in $showDirs:
+<% hasNFO = ek.ek(os.path.isfile, ek.ek(os.path.join, urllib.unquote_plus(curDir), "tvshow.nfo")) %>
   <tr class="evenLine">
 	<td><input type="checkbox" id="$curDir" class="dirCheck" CHECKED></td>
-	<td><label for="$curDir"><%=os.path.normpath(urllib.unquote_plus(curDir)).split(os.sep)[-1]%></label></td>
-	<td align="center"><img src="$sbRoot/images/#if $os.path.isfile($os.path.join($urllib.unquote_plus($curDir), "tvshow.nfo")) then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+	<td><label for="$curDir"><%=os.path.normpath(urllib.unquote_plus(curDir).decode('utf-8')).split(os.sep)[-1]%></label></td>
+	<td align="center"><img src="$sbRoot/images/#if $hasNFO then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
   </tr>
 #end for
   </tbody>

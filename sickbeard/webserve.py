@@ -927,7 +927,7 @@ class NewHomeAddShows:
         
         url = "http://thetvdb.com/api/GetSeries.php?seriesname=%s&language=en"
         
-        urlObj = urllib.urlopen(url % name)
+        urlObj = urllib.urlopen(url % name.encode('utf-8'))
         
         seriesXML = etree.ElementTree(file = urlObj)
         
@@ -980,13 +980,13 @@ class NewHomeAddShows:
         if not helpers.makeDir(showToAdd):
             flash.error("Warning", "Unable to create dir "+showToAdd+", skipping")
             # recursively continue on our way, encoding the input as though we came from the web form
-            return self.addShowsNew([urllib.quote_plus(x) for x in restOfShowDirs])
+            return self.addShowsNew([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
         
         # if there's a tvshow.nfo then try to get a TVDB ID out of it
         if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo")):
             tvdb_id = None
             try:
-                tvdb_id = tv.getTVDBIDFromNFO(showToAdd)
+                tvdb_id = metadata.getTVDBIDFromNFO(showToAdd)
             except exceptions.NoNFOException, e:
                 # we couldn't get a tvdb id from the file so let them know and just print the search page
                 if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo.old")):
@@ -996,410 +996,24 @@ class NewHomeAddShows:
                 # encode the input as though we came from the web form
                 else:
                     flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo and unable to rename it - you will need to remove it manually')
-                    return self.addShowsNew([urllib.quote_plus(x) for x in restOfShowDirs])
+                    return self.addShowsNew([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
         
             # if we got a TVDB ID then make a show out of it
             if tvdb_id:
                 sickbeard.showQueueScheduler.action.addShow(tvdb_id, showToAdd)
                 flash.message('Show added', 'Auto-added show from tvshow.nfo in '+showToAdd)
                 # no need to display anything now that we added the show, so continue on to the next show
-                return self.addShowsNew([urllib.quote_plus(x) for x in restOfShowDirs])
+                return self.addShowsNew([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
         
         # encode any info we send to the web page
-        t.showToAdd = urllib.quote_plus(showToAdd)
+        t.showToAdd = showToAdd
         t.showNameToAdd = os.path.split(showToAdd)[1]
         
         # get the rest so we can pass them along
-        t.showDirs = [urllib.quote_plus(x) for x in restOfShowDirs]
+        t.showDirs = [x for x in restOfShowDirs]
         
         return _munge(t)
         
-
-    @cherrypy.expose
-    def addRootDir(self, dir=None):
-        if dir == None:
-            redirect("/home/addShows")
-
-        if not os.path.isdir(dir):
-            logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
-            flash.error("Unable to find the directory <tt>%s</tt>" % dir)
-            redirect("/home/addShows")
-        
-        showDirs = []
-        
-        for curDir in os.listdir(unicode(dir)):
-            curPath = os.path.join(dir, curDir)
-            if os.path.isdir(curPath):
-                logger.log("Adding "+curPath+" to the showDir list", logger.DEBUG)
-                showDirs.append(curPath)
-        
-        if len(showDirs) == 0:
-            logger.log("The provided directory "+dir+" has no shows in it", logger.ERROR)
-            flash.error("The provided root folder <tt>%s</tt> has no shows in it." % dir)
-            redirect("/home/addShows")
-        
-        #result = ui.addShowsFromRootDir(dir)
-        
-        myTemplate = PageTemplate(file="home_addRootDir.tmpl")
-        myTemplate.showDirs = [urllib.quote_plus(x.encode('utf-8')) for x in showDirs]
-        myTemplate.submenu = HomeMenu
-        return _munge(myTemplate)       
-        
-        url = "/home/addShows/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
-        logger.log("Redirecting to URL "+url, logger.DEBUG)
-        redirect(url)
-
-        #return _genericMessage("Adding root directory", result)
-
-    #TODO: this function is a disgrace, I need to break it up and make it much much clearer
-    @cherrypy.expose
-    def addShow(self, showDir=None, showName=None, seriesList=None):
-        
-        if showDir != None and type(showDir) is not list:
-            showDir = [showDir]
-        
-        # unquote it no matter what
-        showDir = [os.path.normpath(urllib.unquote_plus(x)) for x in showDir]
-        
-        logger.log("showDir: "+str(showDir), logger.DEBUG)
-        
-        myTemplate = PageTemplate(file="home_addShow.tmpl")
-        myTemplate.submenu    = HomeMenu
-        myTemplate.resultList = None
-        myTemplate.showName   = showName or os.path.split(showDir[0])[1]
-        myTemplate.showDir    = [urllib.quote_plus(x) for x in showDir]
-        
-        # if no showDir then start at the beginning
-        if showDir == None:
-            redirect("/home/addShows")
-
-        # if we have a dir and a name it means we're mid-search, so get our TVDB list and forward them to the selection screen
-        if showDir != None and showName != None:
-            logger.log("Getting list of possible shows and asking user to choose one", logger.DEBUG)
-            try:
-                t = tvdb_api.Tvdb(custom_ui=TVDBWebUI, **sickbeard.TVDB_API_PARMS)
-                t.config['_showDir'] = [urllib.quote_plus(x) for x in showDir]
-                s = t[showName] # this will throw a cherrypy exception
-            except tvdb_exceptions.tvdb_shownotfound:
-                flash.error("Couldn't find that show on theTVDB. Try a more general search.")
-            except tvdb_exceptions.tvdb_error, e:
-                flash.error("TVDB error, unable to search for show title/info: "+str(e))
-
-        curShowDir = showDir[0]
-        logger.log("curShowDir: "+curShowDir, logger.DEBUG)
-
-        if seriesList != None:
-            showIDs = seriesList.split(",")
-        else:
-            showIDs = []
-
-        # if we have a folder but no ID specified then we try scanning it for NFO
-        if len(showIDs) == 0:
-
-            logger.log("Folder has been provided but we have no show ID, scanning it for an NFO", logger.DEBUG)
-
-            showAdded = False
-
-            try:
-                #newShowAdder = ui.ShowAdder(showDir)
-                sickbeard.showQueueScheduler.action.addShow(curShowDir)
-                showAdded = True
-                del showDir[0]
-            except exceptions.NoNFOException:
-                logger.log("The show queue said we need to create an NFO for this show", logger.DEBUG)
-                myTemplate.resultList = []
-                myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
-                return _munge(myTemplate)
-            except exceptions.MultipleShowObjectsException:
-                # showAdded is already false so we can pass this exception and deal with the redirect below
-                flash.error("The show in "+curShowDir+" is already loaded.")
-                del showDir[0]
-                pass 
-
-            # if the show list is empty, go to the show page
-            if len(showDir) == 0:
-                # if we added a show and it's loading then visit its page
-                if curShowDir in sickbeard.loadingShowList and sickbeard.loadingShowList[curShowDir].show != None:
-                    redirect("/home/displayShow?show="+str(sickbeard.loadingShowList[curShowDir].show.tvdbid))
-                # if we added a show but it's not loading yet then go to the home page
-                else:
-                    time.sleep(3)
-                    redirect("/home")
-
-            # if we have at least one show left to add then redirect
-            else:
-                newCallList = [urllib.quote_plus(x) for x in showDir]
-                logger.log("There are still shows left to add, so recursively calling myself with showDir="+str(newCallList))
-                return self.addShow(newCallList)
-                                    
-        
-        # if we have a single ID then just make a show with that ID
-        elif len(showIDs) == 1:
-            
-            logger.log("We have a single show ID, creating a show with that ID", logger.DEBUG)
-            
-            # if the dir doesn't exist then give up
-            if not helpers.makeDir(curShowDir):
-                return _genericMessage("Error", "Show dir doesn't exist and I'm unable to create it")
-
-    
-            # if the folder exists then make the show there
-            try:
-                if not helpers.makeShowNFO(showIDs[0], curShowDir):
-                    return _genericMessage("Error", "Unable to make tvshow.nfo?")
-            except tvdb_exceptions.tvdb_exception, e:
-                return _genericMessage("Error", "Unable to make tvshow.nfo: "+str(e))
-            
-            # just go do the normal show creation now that we have the NFO
-            #url ="addShow?"+ "&".join(["showDir="+urllib.quote_plus(x) for x in showDir])
-            #logger.log("Redirecting to "+url, logger.DEBUG)
-            #raise cherrypy.HTTPRedirect(url)
-            newCallList = [urllib.quote_plus(x) for x in showDir]
-            logger.log("We now have an NFO for the show, so recursively calling myself with showDir="+str(newCallList))
-            a = self.addShow(newCallList)
-            #logger.log("HOW DID WE GET HERE: "+a)
-            return a
-            
-        
-        # if we have multiple IDs then let them pick
-        else:
-
-            logger.log("Presenting a list of shows to the user: "+str(showIDs), logger.DEBUG)
-            
-            try:
-                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-                resultList = []
-                for x in showIDs:
-                    try:
-                        resultList.append(t[int(x)])
-                    except tvdb_exceptions.tvdb_exception, e:
-                        logger.log("There was some kind of error with TVDB when trying to select show "+str(x)+": "+str(e), logger.ERROR)
-                        continue
-
-                if len(resultList) == 0:
-
-                    flash.error("TVDB error while trying to add the show, skipping the show in "+str(showDir[0]))
-
-                    if len(showDir) > 1:
-                        del showDir[0]
-                        newCallList = [urllib.quote_plus(x) for x in showDir]
-                        logger.log("There are still shows left to add, so recursively calling myself with showDir="+str(newCallList))
-                        return self.addShow(newCallList)
-                    else:
-                        redirect("/home")
-                
-                elif len(resultList) == 1:
-                    return self.addShow(showDir, resultList[0])
-                    
-                myTemplate.resultList = resultList
-                myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
-            except tvdb_exceptions.tvdb_exception, e:
-                logger.log("Error trying to search shows, skipping show: "+str(e), logger.ERROR)
-                flash.error("TVDB error while trying to add shows, unable to proceed: "+str(e))
-                redirect("/home")
-              
-            return _munge(myTemplate)
-
-class HomeAddShows:
-    
-    @cherrypy.expose
-    def index(self):
-        
-        t = PageTemplate(file="home_addShows.tmpl")
-        t.submenu = HomeMenu
-        return _munge(t)
-
-    @cherrypy.expose
-    def addRootDir(self, dir=None):
-        if dir == None:
-            redirect("/home/addShows")
-
-        if not os.path.isdir(dir):
-            logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
-            flash.error("Unable to find the directory <tt>%s</tt>" % dir)
-            redirect("/home/addShows")
-        
-        showDirs = []
-        
-        for curDir in os.listdir(unicode(dir)):
-            curPath = os.path.join(dir, curDir)
-            if os.path.isdir(curPath):
-                logger.log("Adding "+curPath+" to the showDir list", logger.DEBUG)
-                showDirs.append(curPath)
-        
-        if len(showDirs) == 0:
-            logger.log("The provided directory "+dir+" has no shows in it", logger.ERROR)
-            flash.error("The provided root folder <tt>%s</tt> has no shows in it." % dir)
-            redirect("/home/addShows")
-        
-        #result = ui.addShowsFromRootDir(dir)
-        
-        myTemplate = PageTemplate(file="home_addRootDir.tmpl")
-        myTemplate.showDirs = [urllib.quote_plus(x.encode('utf-8')) for x in showDirs]
-        myTemplate.submenu = HomeMenu
-        return _munge(myTemplate)       
-        
-        url = "/home/addShows/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
-        logger.log("Redirecting to URL "+url, logger.DEBUG)
-        redirect(url)
-
-        #return _genericMessage("Adding root directory", result)
-
-    #TODO: this function is a disgrace, I need to break it up and make it much much clearer
-    @cherrypy.expose
-    def addShow(self, showDir=None, showName=None, seriesList=None):
-        
-        if showDir != None and type(showDir) is not list:
-            logger.log("Single show dir: "+showDir+", checking that it's an absolute path")
-            # make sure they didn't put something retarded in
-            if not os.path.isabs(urllib.unquote_plus(showDir)):
-                flash.error('Error', 'Please enter a full path or use the folder browser to find the folder you want')
-                redirect('/home/addShows')
-            
-            showDir = [showDir]
-        
-        # unquote it no matter what
-        showDir = [os.path.normpath(urllib.unquote_plus(x)) for x in showDir]
-        
-        logger.log("showDir: "+str(showDir), logger.DEBUG)
-        
-        myTemplate = PageTemplate(file="home_addShow.tmpl")
-        myTemplate.submenu    = HomeMenu
-        myTemplate.resultList = None
-        myTemplate.showName   = showName or os.path.split(showDir[0])[1]
-        myTemplate.showDir    = [urllib.quote_plus(x) for x in showDir]
-        
-        # if no showDir then start at the beginning
-        if showDir == None:
-            redirect("/home/addShows")
-
-        # if we have a dir and a name it means we're mid-search, so get our TVDB list and forward them to the selection screen
-        if showDir != None and showName != None:
-            logger.log("Getting list of possible shows and asking user to choose one", logger.DEBUG)
-            try:
-                t = tvdb_api.Tvdb(custom_ui=TVDBWebUI, **sickbeard.TVDB_API_PARMS)
-                t.config['_showDir'] = [urllib.quote_plus(x) for x in showDir]
-                s = t[showName] # this will throw a cherrypy exception
-            except tvdb_exceptions.tvdb_shownotfound:
-                flash.error("Couldn't find that show on theTVDB. Try a more general search.")
-            except tvdb_exceptions.tvdb_error, e:
-                flash.error("TVDB error, unable to search for show title/info: "+str(e))
-
-        curShowDir = showDir[0]
-        logger.log("curShowDir: "+curShowDir, logger.DEBUG)
-
-        if seriesList != None:
-            showIDs = seriesList.split(",")
-        else:
-            showIDs = []
-
-        # if we have a folder but no ID specified then we try scanning it for NFO
-        if len(showIDs) == 0:
-
-            logger.log("Folder has been provided but we have no show ID, scanning it for an NFO", logger.DEBUG)
-
-            showAdded = False
-
-            try:
-                #newShowAdder = ui.ShowAdder(showDir)
-                sickbeard.showQueueScheduler.action.addShow(curShowDir)
-                showAdded = True
-                del showDir[0]
-            except exceptions.NoNFOException:
-                logger.log("The show queue said we need to create an NFO for this show", logger.DEBUG)
-                myTemplate.resultList = []
-                myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
-                return _munge(myTemplate)
-            except exceptions.MultipleShowObjectsException:
-                # showAdded is already false so we can pass this exception and deal with the redirect below
-                flash.error("The show in "+curShowDir+" is already loaded.")
-                del showDir[0]
-                pass 
-
-            # if the show list is empty, go to the show page
-            if len(showDir) == 0:
-                # if we added a show and it's loading then visit its page
-                if curShowDir in sickbeard.loadingShowList and sickbeard.loadingShowList[curShowDir].show != None:
-                    redirect("/home/displayShow?show="+str(sickbeard.loadingShowList[curShowDir].show.tvdbid))
-                # if we added a show but it's not loading yet then go to the home page
-                else:
-                    time.sleep(3)
-                    redirect("/home")
-
-            # if we have at least one show left to add then redirect
-            else:
-                newCallList = [urllib.quote_plus(x) for x in showDir]
-                logger.log("There are still shows left to add, so recursively calling myself with showDir="+str(newCallList))
-                return self.addShow(newCallList)
-                                    
-        
-        # if we have a single ID then just make a show with that ID
-        elif len(showIDs) == 1:
-            
-            logger.log("We have a single show ID, creating a show with that ID", logger.DEBUG)
-            
-            # if the dir doesn't exist then give up
-            if not helpers.makeDir(curShowDir):
-                return _genericMessage("Error", "Show dir doesn't exist and I'm unable to create it")
-
-    
-            # if the folder exists then make the show there
-            try:
-                if not helpers.makeShowNFO(showIDs[0], curShowDir):
-                    return _genericMessage("Error", "Unable to make tvshow.nfo?")
-            except tvdb_exceptions.tvdb_exception, e:
-                return _genericMessage("Error", "Unable to make tvshow.nfo: "+str(e))
-            
-            # just go do the normal show creation now that we have the NFO
-            #url ="addShow?"+ "&".join(["showDir="+urllib.quote_plus(x) for x in showDir])
-            #logger.log("Redirecting to "+url, logger.DEBUG)
-            #raise cherrypy.HTTPRedirect(url)
-            newCallList = [urllib.quote_plus(x) for x in showDir]
-            logger.log("We now have an NFO for the show, so recursively calling myself with showDir="+str(newCallList))
-            a = self.addShow(newCallList)
-            #logger.log("HOW DID WE GET HERE: "+a)
-            return a
-            
-        
-        # if we have multiple IDs then let them pick
-        else:
-
-            logger.log("Presenting a list of shows to the user: "+str(showIDs), logger.DEBUG)
-            
-            try:
-                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-                resultList = []
-                for x in showIDs:
-                    try:
-                        resultList.append(t[int(x)])
-                    except tvdb_exceptions.tvdb_exception, e:
-                        logger.log("There was some kind of error with TVDB when trying to select show "+str(x)+": "+str(e), logger.ERROR)
-                        continue
-
-                if len(resultList) == 0:
-
-                    flash.error("TVDB error while trying to add the show, skipping the show in "+str(showDir[0]))
-
-                    if len(showDir) > 1:
-                        del showDir[0]
-                        newCallList = [urllib.quote_plus(x) for x in showDir]
-                        logger.log("There are still shows left to add, so recursively calling myself with showDir="+str(newCallList))
-                        return self.addShow(newCallList)
-                    else:
-                        redirect("/home")
-                
-                elif len(resultList) == 1:
-                    return self.addShow(showDir, resultList[0])
-                    
-                myTemplate.resultList = resultList
-                myTemplate.showDir = [urllib.quote_plus(x) for x in showDir]
-            except tvdb_exceptions.tvdb_exception, e:
-                logger.log("Error trying to search shows, skipping show: "+str(e), logger.ERROR)
-                flash.error("TVDB error while trying to add shows, unable to proceed: "+str(e))
-                redirect("/home")
-              
-            return _munge(myTemplate)
-
 
 
 ErrorLogsMenu = [

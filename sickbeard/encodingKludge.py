@@ -1,9 +1,6 @@
 import os
 import os.path
-import glob
-import sys
 
-from sickbeard import helpers
 from sickbeard import logger
 
 # This module tries to deal with the apparently random behavior of python when dealing with unicode <-> utf-8
@@ -35,14 +32,14 @@ def fixListEncodings(x):
 def ek(func, *args):
     result = None
 
-    if os.name == 'nt':
-        result = func(*args)
+    if os.path.supports_unicode_filenames:
+        return func(*args)
     else:
         result = func(*[x.encode('UTF-8') for x in args])
     
-    if type(result) == list:
-        return fixListEncodings(result)
-    elif type(result) == str:
-        return fixStupidEncodings(result)
-    else:
-        return result
+        if type(result) == list:
+            return fixListEncodings(result)
+        elif type(result) == str:
+            return fixStupidEncodings(result)
+        else:
+            return result
