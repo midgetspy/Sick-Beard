@@ -96,6 +96,7 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
     #end if    
 
   #set $epStr = str($epResult["season"]) + "x" + str($epResult["episode"])
+  #set $epLoc = $epResult["location"]
   <tr class="$Overview.overviewStrings[$epCats[$epStr]] season-$curSeason">
     <td width="1%">
 #if int($epResult["status"]) != $UNAIRED
@@ -112,7 +113,7 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
         #end if
     </td>
     <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
-    <td>$os.path.basename($epResult["location"])</td>
+    <td>#if $epLoc then $epLoc[len($show._location)+1:] else ""#</td>
     <td>$statusStrings[int($epResult["status"])]</td>
     <td align="center">
     #if int($epResult["season"]) != 0: 
