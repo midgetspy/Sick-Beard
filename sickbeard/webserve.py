@@ -948,13 +948,13 @@ class NewHomeAddShows:
 
         # if they intentionally skipped the show then oblige them
         if skipShow == "1":
-            return self.addShowsNew(showDirs)
+            return self.addShows(showDirs)
 
         # if we got a TVDB ID then make a show out of it
         sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd)
         flash.message('Show added', 'Adding the specified show into '+showToAdd)
         # no need to display anything now that we added the show, so continue on to the next show
-        return self.addShowsNew(showDirs)
+        return self.addShows(showDirs)
 
     @cherrypy.expose
     def addShowsNew(self, showDirs=[]):
@@ -966,7 +966,7 @@ class NewHomeAddShows:
         if len(showDirs) == 0:
             redirect("/home")
         
-        t = PageTemplate(file="home_addShow_new.tmpl")
+        t = PageTemplate(file="home_addShow.tmpl")
         t.submenu = HomeMenu
 
         # make sure everything's unescaped
@@ -980,7 +980,7 @@ class NewHomeAddShows:
         if not helpers.makeDir(showToAdd):
             flash.error("Warning", "Unable to create dir "+showToAdd+", skipping")
             # recursively continue on our way, encoding the input as though we came from the web form
-            return self.addShowsNew([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
+            return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
         
         # if there's a tvshow.nfo then try to get a TVDB ID out of it
         if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo")):
@@ -996,14 +996,14 @@ class NewHomeAddShows:
                 # encode the input as though we came from the web form
                 else:
                     flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo and unable to rename it - you will need to remove it manually')
-                    return self.addShowsNew([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
+                    return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
         
             # if we got a TVDB ID then make a show out of it
             if tvdb_id:
                 sickbeard.showQueueScheduler.action.addShow(tvdb_id, showToAdd)
                 flash.message('Show added', 'Auto-added show from tvshow.nfo in '+showToAdd)
                 # no need to display anything now that we added the show, so continue on to the next show
-                return self.addShowsNew([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
+                return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
         
         # encode any info we send to the web page
         t.showToAdd = showToAdd
