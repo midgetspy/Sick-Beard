@@ -84,7 +84,16 @@ def downloadNZB (nzb):
 def searchRSS():
 	myCache = TVBinzCache()
 	myCache.updateCache()
-	return myCache.findNeededEpisodes()
+	foundResults = myCache.findNeededEpisodes()
+	
+	# append auth
+	urlParams = {'i': sickbeard.TVBINZ_SABUID, 'h': sickbeard.TVBINZ_HASH}
+
+	for curEp in foundResults:
+		for curResult in foundResults[curEp]:
+			curResult.url += "&" + urllib.urlencode(urlParams)			
+
+	return foundResults
 	
 def findEpisode (episode, manualSearch=False):
 
