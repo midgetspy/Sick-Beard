@@ -230,7 +230,7 @@ class QueueItemAdd(QueueItem):
             self.show.quality = sickbeard.QUALITY_DEFAULT
             self.show.seasonfolders = sickbeard.SEASON_FOLDERS_DEFAULT
             self.show.paused = False
-
+            
         except tvdb_exceptions.tvdb_exception, e:
             logger.log("Unable to add show due to an error with TVDB: "+str(e), logger.ERROR)
             webserve.flash.error("Unable to add "+str(self.initialShow.name)+" due to an error with TVDB")
@@ -261,6 +261,8 @@ class QueueItemAdd(QueueItem):
         try:
             self.show.loadEpisodesFromTVDB()
             self.show.setTVRID()
+
+            self.show.writeMetadata()
         except Exception, e:
             logger.log("Error with TVDB, not creating episode list: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
@@ -297,8 +299,7 @@ class QueueItemRefresh(QueueItem):
         logger.log("Performing refresh on "+self.show.name)
 
         self.show.refreshDir()
-        self.show.getImages()
-        self.show.writeEpisodeNFOs()
+        self.show.writeMetadata()
         
         self.inProgress = False
         

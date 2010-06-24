@@ -32,15 +32,9 @@ import cherrypy
 import cherrypy.lib
 
 from sickbeard import config
-from sickbeard import db
-from sickbeard import history
-from sickbeard import notifiers
-from sickbeard import processTV
-from sickbeard import search
-from sickbeard import classes
-from sickbeard import providers
-from sickbeard import tv
-from sickbeard import logger, helpers, exceptions
+from sickbeard import history, notifiers, processTV, search, providers
+from sickbeard import tv, metadata
+from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 
 from sickbeard.notifiers import xbmc

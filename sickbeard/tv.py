@@ -20,7 +20,6 @@ from __future__ import with_statement
 
 import os.path
 import datetime
-import sqlite3
 import threading
 import urllib
 import re
@@ -35,17 +34,15 @@ from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
 from sickbeard import db
-from sickbeard import helpers
-from sickbeard import exceptions
+from sickbeard import helpers, exceptions, logger
 from sickbeard import processTV
-from sickbeard import classes
 from sickbeard import tvrage
 from sickbeard import config
+from sickbeard import metadata
 
 from sickbeard import encodingKludge as ek
 
 from common import *
-from sickbeard import logger
 
 class TVShow(object):
 
@@ -140,10 +137,39 @@ class TVShow(object):
         
         return self.episodes[season][episode]
 
+    def writeShowNFO(self):
+
+        if not ek.ek(os.path.isdir, self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+            return
+
+        xmlData = metadata.makeShowNFO(self.tvdbid)
+            
+        # Make it purdy
+        helpers.indentXML( xmlData )
+    
+        nfo_fh = ek.ek(open, ek.ek(os.path.join, self._location, "tvshow.nfo"), 'w')
+        nfo = etree.ElementTree( xmlData )
+        nfo.write( nfo_fh, encoding="utf-8" )
+        nfo_fh.close()
+
+    def writeMetadata(self):
+        
+        if not ek.ek(os.path.isdir, self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+            return
+
+        if sickbeard.CREATE_IMAGES:
+            self.getImages()
+        
+        if sickbeard.CREATE_METADATA:
+            self.writeShowNFO()
+            self.writeEpisodeNFOs()
+
 
     def writeEpisodeNFOs (self):
         
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
             return
         
