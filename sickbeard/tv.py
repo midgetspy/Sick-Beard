@@ -194,22 +194,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Loading all episodes from the show directory " + self._location)
 
         # get file list
-        files = []
-        if not self.seasonfolders:
-            files = ek.ek(os.listdir, unicode(self._location))
-        else:
-            for curFile in ek.ek(os.listdir, unicode(self._location)):
-                if not ek.ek(os.path.isdir, ek.ek(os.path.join, self._location, curFile)):
-                    continue
-                match = re.match(".*[Ss]eason\s*(\d+)", curFile)
-                if match != None:
-                    files += [ek.ek(os.path.join, curFile, x) for x in ek.ek(os.listdir, unicode(ek.ek(os.path.join, self._location, curFile)))]
-
-        # check for season folders
-        #logger.log("Resulting file list: "+str(files))
-    
-        # find all media files
-        mediaFiles = filter(sickbeard.helpers.isMediaFile, files)
+        mediaFiles = helpers.listMediaFiles(self._location)
 
         # create TVEpisodes from each media file (if possible)
         for mediaFile in mediaFiles:
@@ -761,14 +746,8 @@ class TVShow(object):
                 logger.log("The episode was deleted while we were refreshing it, moving on to the next one", logger.DEBUG)
                 continue
             
-            # if the path doesn't exist
-            # or if there's no season folders and it's not inside our show dir 
-            # or if there are season folders and it's in the main dir:
-            # or if it's not in our show dir at all
-            if not ek.ek(os.path.isfile, curLoc) or \
-            (not self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) != os.path.normpath(self.location)) or \
-            (self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) == os.path.normpath(self.location)) or \
-            os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
+            # if the path doesn't exist or if it's not in our show dir
+            if not ek.ek(os.path.isfile, curLoc) or not os.path.normpath(curLoc).startswith(os.path.normpath(self.location)):
             
                 logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
                 with curEp.lock:

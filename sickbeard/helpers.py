@@ -329,3 +329,20 @@ def sizeof_fmt(num):
 			return "%3.1f %s" % (num, x)
 		num /= 1024.0
 
+def listMediaFiles(dir):
+
+	if not dir or not ek.ek(os.path.isdir, dir):
+		return []
+
+	files = []
+	for curFile in ek.ek(os.listdir, dir):
+		fullCurFile = ek.ek(os.path.join, dir, curFile)
+
+		# if it's a dir do it recursively
+		if ek.ek(os.path.isdir, fullCurFile):
+			files += listMediaFiles(fullCurFile)
+	
+		elif isMediaFile(curFile):
+			files.append(fullCurFile)
+
+	return files
