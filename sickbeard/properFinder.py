@@ -66,14 +66,14 @@ class ProperFinder():
         propers = {}
         
         # for each provider get a list of the propers
-        for curProvider in providers.getProviderList():
+        for curProvider in providers.sortedProviderList():
             
             if not curProvider.isActive():
                 continue
 
             date = datetime.datetime.today() - datetime.timedelta(days=2)
 
-            logger.log("Searching for any new PROPER releases from "+curProvider.providerName)
+            logger.log("Searching for any new PROPER releases from "+curProvider.name)
             curPropers = curProvider.findPropers(date)
             
             # if they haven't been added by a different provider than add the proper to the list
@@ -195,7 +195,7 @@ class ProperFinder():
                 # make the result object
                 result = classes.SearchResult(epObj)
                 result.url = curProper.url
-                result.provider = curProper.provider.providerName.lower()
+                result.provider = curProper.provider.getID()
                 result.resultType = curProper.provider.providerType
                 result.name = curProper.name
                 result.quality = curProper.quality

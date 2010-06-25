@@ -41,9 +41,11 @@ class NZBsProvider(generic.NZBProvider):
 	
 	def __init__(self):
 		
-		generic.NZBProvider.__init__(self, "NZBsRUS")
+		generic.NZBProvider.__init__(self, "NZBs")
 		
 		self.cache = NZBsCache(self)
+		
+		self.url = 'http://www.nzbs.org/'
 
 	def isEnabled(self):
 		return sickbeard.NZBS
@@ -84,7 +86,7 @@ class NZBsProvider(generic.NZBProvider):
 			logger.log("Found result " + title + " at " + url, logger.DEBUG)
 			
 			result = self.getResult([episode])
-			result.provider = self.providerName.lower()
+			result.provider = self.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality
@@ -139,7 +141,7 @@ class NZBsProvider(generic.NZBProvider):
 				epObj.append(show.getEpisode(season, curEp))
 			
 			result = self.getResult(epObj)
-			result.provider = self.provider.providerName.lower()
+			result.provider = self.provider.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality
@@ -174,7 +176,7 @@ class NZBsProvider(generic.NZBProvider):
 				  "num": 100,
 				  "type": 1}
 		
-		searchURL = "http://www.nzbs.org/rss.php?" + urllib.urlencode(params)
+		searchURL = self.url + "rss.php?" + urllib.urlencode(params)
 	
 		logger.log("Search string: " + searchURL, logger.DEBUG)
 	
@@ -237,7 +239,7 @@ class NZBsCache(tvcache.TVCache):
 		tvcache.TVCache.__init__(self, provider)
 	
 	def _getRSSData(self):
-		url = 'http://www.nzbs.org/rss.php?'
+		url = self.url + 'rss.php?'
 		urlArgs = {'type': 1,
 				   'dl': 1,
 				   'num': 100,

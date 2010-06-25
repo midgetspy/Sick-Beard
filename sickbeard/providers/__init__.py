@@ -4,38 +4,66 @@ import sickbeard
 
 from os import sys
 
+def sortedProviderList():
+    
+    initialList = sickbeard.providerList + sickbeard.newznabProviderList
+    providerDict = dict(zip([x.getID() for x in initialList], initialList))
+    
+    newList = []
+    
+    # add all modules in the priority list, in order
+    for curModule in sickbeard.PROVIDER_ORDER:
+        if curModule in providerDict:
+            newList.append(providerDict[curModule])
+    
+    # add any modules that are missing from that list
+    for curModule in providerDict:
+        if providerDict[curModule] not in newList:
+            newList.append(providerDict[curModule])
+
+    return newList
+
 def getProviderList():
     
-    sortedProviderList = []
-
-    # add all the modules in our priority list, in order
-    for curModule in sickbeard.PROVIDER_ORDER:
-        if curModule in __all__:
-            sortedProviderList.append(curModule)
-
     # add any modules that are missing from that list
-    for curModule in __all__:
-        if curModule not in sortedProviderList:
-            sortedProviderList.append(curModule)
+    return filter(lambda x: x != None, [getProviderClass(y) for y in __all__])
 
-    return filter(lambda x: x != None, [getProviderClass(y) for y in sortedProviderList])
+def getNewznabProviderList(data):
 
-    return sortedProviderList
-
-def getAllModules():
-    sortedModuleList = []
+    defaultList = [makeNewznabProvider(x) for x in getDefaultNewznabProviders().split('!!!')]
+    providerList = filter(lambda x: x, [makeNewznabProvider(x) for x in data.split('!!!')])
     
-    # add all the modules in our priority list, in order
-    for curModule in sickbeard.PROVIDER_ORDER:
-        if curModule in __all__:
-            sortedModuleList.append(curModule)
+    providerDict = dict(zip([x.name for x in providerList], providerList))
     
-    # add any modules that are missing from that list
-    for curModule in __all__:
-        if curModule not in sortedModuleList:
-            sortedModuleList.append(curModule)
+    for curDefault in defaultList:
+        if curDefault.name not in providerDict:
+            curDefault.default = True
+            providerList.append(curDefault)
+        else:
+            providerDict[curDefault.name].default = True
 
-    return filter(lambda x: x != None, [getProviderModule(y) for y in sortedModuleList])
+    return filter(lambda x: x, providerList)
+    
+
+def makeNewznabProvider(configString):
+    
+    if not configString:
+        return None
+    
+    name, url, uid, hash, enabled = configString.split('|')
+    
+    newznab = sys.modules['sickbeard.providers.newznab']
+
+    newProvider = newznab.NewznabProvider(name, url)
+    newProvider.uid = uid
+    newProvider.hash = hash
+    newProvider.enabled = enabled == '1'
+
+    return newProvider
+
+def getDefaultNewznabProviders():
+    return 'NZB.su|http://www.nzb.su/|||1'
+
 
 def getProviderModule(name):
     name = name.lower()

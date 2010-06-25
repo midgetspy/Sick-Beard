@@ -36,6 +36,8 @@ class NZBsRUSProvider(generic.NZBProvider):
 		generic.NZBProvider.__init__(self, "NZBsRUS")
 		
 		self.cache = NZBsRUSCache(self)
+		
+		self.url = 'http://www.nzbsrus.com/'
 
 	def isEnabled(self):
 		return sickbeard.NZBSRUS
@@ -57,7 +59,7 @@ class NZBsRUSCache(tvcache.TVCache):
 	
 	def _getRSSData(self):
 
-		url = 'http://www.nzbsrus.com/rssfeed.php?'
+		url = self.url + 'rssfeed.php?'
 		urlArgs = {'cat': '91,75',
 				   'i': sickbeard.NZBSRUS_UID,
 				   'h': sickbeard.NZBSRUS_HASH}

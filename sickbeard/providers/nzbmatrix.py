@@ -41,6 +41,8 @@ class NZBMatrixProvider(generic.NZBProvider):
 		generic.NZBProvider.__init__(self, "NZBMatrix")
 		
 		self.cache = NZBMatrixCache(self)
+		
+		self.url = 'http://www.nzbmatrix.com/'
 
 	def isEnabled(self):
 		return sickbeard.NZBS
@@ -86,7 +88,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 			logger.log("Found result " + title + " at " + url, logger.DEBUG)
 			
 			result = self.getResult([episode])
-			result.provider = self.providerName.lower()
+			result.provider = self.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality
@@ -142,7 +144,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 				epObj.append(show.getEpisode(season, curEp))
 			
 			result = self.getResult(epObj)
-			result.provider = self.providerName.lower()
+			result.provider = self.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality

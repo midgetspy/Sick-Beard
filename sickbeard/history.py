@@ -28,7 +28,7 @@ def logSnatch(searchResult):
         
         providerClass = providers.getProviderClass(searchResult.provider)
         if providerClass != None:
-            provider = providerClass.providerName
+            provider = providerClass.name
         else:
             provider = "unknown"
         

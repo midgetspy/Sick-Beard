@@ -38,9 +38,11 @@ class TVBinzProvider(generic.NZBProvider):
 		generic.NZBProvider.__init__(self, "TVBinz")
 		
 		self.cache = TVBinzCache(self)
+		
+		self.url = 'http://www.tvbinz.net/'
 
 	def isEnabled(self):
-		return sickbeard.TVBinz
+		return sickbeard.TVBINZ
 
 	def _checkAuth(self):
 		if sickbeard.TVBINZ_UID in (None, "") or sickbeard.TVBINZ_HASH in (None, "") or sickbeard.TVBINZ_AUTH in (None, ""):
@@ -84,11 +86,11 @@ class TVBinzCache(tvcache.TVCache):
 		# only poll TVBinz every 10 minutes max
 		self.minTime = 10
 		
-		tvcache.TVCache.__init__(self, "tvbinz")
+		tvcache.TVCache.__init__(self, provider)
 	
 	def getRSSData(self):
 		# get all records since the last timestamp
-		url = "https://tvbinz.net/rss.php?"
+		url = self.url + "rss.php?"
 		
 		urlArgs = {'normalize': 1012,
 				   'n': 100,
@@ -112,7 +114,7 @@ class TVBinzCache(tvcache.TVCache):
 
 		if item.findtext('title') == None or item.findtext('link') == None:
 			logger.log("The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+str(item), logger.ERROR)
-			continue
+			return
 
 		title = item.findtext('title')
 		url = item.findtext('link').replace('&amp;', '&')
@@ -120,7 +122,7 @@ class TVBinzCache(tvcache.TVCache):
 		sInfo = item.find('{http://tvbinz.net/rss/tvb/}seriesInfo')
 		if sInfo == None:
 			logger.log("No series info, this is some kind of non-standard release, ignoring it", logger.DEBUG)
-			continue
+			return
 
 		logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
 

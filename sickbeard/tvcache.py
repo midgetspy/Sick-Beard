@@ -47,18 +47,18 @@ class TVCache():
     def __init__(self, provider):
     
         self.provider = provider
-        self.providerName = self.provider.providerName
+        self.providerID = self.provider.getID()
         self.minTime = 10
 
     def _getDB(self):
         
-        return CacheDBConnection(self.providerName)
+        return CacheDBConnection(self.providerID)
 
     def _clearCache(self):
         
         myDB = self._getDB()
         
-        myDB.action("DELETE FROM "+self.providerName+" WHERE 1")
+        myDB.action("DELETE FROM "+self.providerID+" WHERE 1")
     
     def _getRSSData(self):
         
@@ -90,13 +90,13 @@ class TVCache():
         self._clearCache()
         
         if not self._checkAuth(data):
-            raise exceptions.AuthException("Your authentication info for "+self.provider.providerName+" is incorrect.")
+            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect.")
         
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log("Error trying to load "+self.provider.providerName+" RSS feed: "+str(e), logger.ERROR)
+            logger.log("Error trying to load "+self.provider.name+" RSS feed: "+str(e), logger.ERROR)
             return []
             
         for item in items:
@@ -114,8 +114,8 @@ class TVCache():
         self._checkItemAuth(title, url)
 
         if not title or not url:
-            logger.log("The XML returned from the "+self.provider.providerName+" feed is incomplete, this result is unusable", logger.ERROR)
-            continue
+            logger.log("The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
+            return
         
         url = self._translateLinkURL(url)
         
@@ -125,7 +125,7 @@ class TVCache():
 
     def _getLastUpdate(self):
         myDB = self._getDB()
-        sqlResults = myDB.select("SELECT time FROM lastUpdate WHERE provider = ?", [self.providerName])
+        sqlResults = myDB.select("SELECT time FROM lastUpdate WHERE provider = ?", [self.providerID])
         
         if sqlResults:
             lastTime = int(sqlResults[0]["time"])
@@ -236,7 +236,7 @@ class TVCache():
         
         quality = Quality.nameQuality(name)
         
-        myDB.action("INSERT INTO "+self.providerName+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
+        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
                     [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
         
         
@@ -248,7 +248,7 @@ class TVCache():
         
         myDB = self._getDB()
         
-        sql = "SELECT * FROM "+self.providerName+" WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
+        sql = "SELECT * FROM "+self.providerID+" WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
         
         if date != None:
             sql += " AND time >= "+str(int(time.mktime(date.timetuple())))
@@ -265,9 +265,9 @@ class TVCache():
         myDB = self._getDB()
         
         if not episode:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerName)
+            sqlResults = myDB.select("SELECT * FROM "+self.providerID)
         else:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerName+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "|"+str(episode.episode)+"|"])
+            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "|"+str(episode.episode)+"|"])
 
         # for each cache entry
         for curResult in sqlResults:
@@ -305,7 +305,7 @@ class TVCache():
                 logger.log("Found result " + title + " at " + url)
         
                 result = self.provider.getResult([epObj])
-                result.provider = self.providerName.lower()
+                result.provider = self.providerID
                 result.url = url 
                 result.name = title
                 result.quality = curQuality

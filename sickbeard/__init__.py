@@ -27,8 +27,9 @@ import os
 
 from threading import Lock
 
-# apparently py2exe won't build these unless they're imported somewhere 
-from providers import eztv, nzbs, nzbmatrix, tvbinz, nzbsrus, binreq
+# apparently py2exe won't build these unless they're imported somewhere
+from sickbeard import providers 
+from providers import eztv, nzbs, nzbmatrix, tvbinz, nzbsrus, binreq, newznab
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, queue, scheduler
@@ -59,6 +60,9 @@ loadingShowList = None
 
 airingList = None
 comingList = None
+
+providerList = []
+newznabProviderList = []
 
 NEWEST_VERSION = None
 VERSION_NOTIFY = None
@@ -255,7 +259,7 @@ def initialize(consoleLogging=True):
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList
 
         
         if __INITIALIZED__:
@@ -379,10 +383,14 @@ def initialize(consoleLogging=True):
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
 
-        
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
+
+        newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
+        newznabProviderList = providers.getNewznabProviderList(newznabData)
+        
+        providerList = providers.getProviderList()
         
         logger.initLogging(consoleLogging=consoleLogging)
 
@@ -595,7 +603,7 @@ def save_config():
     CFG['General']['use_nzb'] = int(USE_NZB)
     CFG['General']['quality_default'] = int(QUALITY_DEFAULT)
     CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
-    CFG['General']['provider_order'] = ' '.join(PROVIDER_ORDER)
+    CFG['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     CFG['General']['version_notify'] = int(VERSION_NOTIFY)
     CFG['General']['naming_ep_name'] = int(NAMING_EP_NAME)
     CFG['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
@@ -646,6 +654,8 @@ def save_config():
     CFG['Growl']['use_growl'] = int(USE_GROWL)
     CFG['Growl']['growl_host'] = GROWL_HOST
     CFG['Growl']['growl_password'] = GROWL_PASSWORD
+    
+    CFG['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
     
     CFG.write()
 

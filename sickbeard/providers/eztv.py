@@ -7,16 +7,15 @@ from sickbeard.common import *
 from sickbeard import logger
 from sickbeard import tvcache
 
-providerType = "torrent"
-providerName = "EZTV"
-
 class EZTVProvider(generic.TorrentProvider):
     
     def __init__(self):
         
-        generic.NZBProvider.__init__(self, "NZBsRUS")
+        generic.TorrentProvider.__init__(self, "EZTV@BT-Chat")
         
         self.cache = EZTVCache(self)
+        
+        self.url = 'http://www.eztv.it/'
 
     def isEnabled(self):
         return sickbeard.USE_TORRENT
@@ -52,14 +51,14 @@ class EZTVCache(tvcache.TVCache):
 
         if not title or not url:
             logger.log("The XML returned from the EZTV@BT-Chat RSS feed is incomplete, this result is unusable", logger.ERROR)
-            continue
+            return
         
         # hack off the .[eztv].torrent stuff
         titleMatch = re.search("(.*)\.\[[\w_\.\-]+?\]\.torrent", title)
         
         if not titleMatch:
             logger.log("Unable to parse the result "+title+" into a valid EZTV torrent result, ignoring it", logger.ERROR)
-            continue
+            return
         
         title = titleMatch.group(1)
         
@@ -67,3 +66,4 @@ class EZTVCache(tvcache.TVCache):
 
         self._addCacheEntry(title, url)
 
+provider = EZTVProvider()

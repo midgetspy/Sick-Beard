@@ -114,7 +114,7 @@ def searchForNeededEpisodes():
 	didSearch = False
 
 	# ask all providers for any episodes it finds
-	for curProvider in providers.getProviderList():
+	for curProvider in providers.sortedProviderList():
 		
 		if not curProvider.isActive():
 			continue
@@ -127,7 +127,7 @@ def searchForNeededEpisodes():
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
 		except Exception, e:
-			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			logger.log("Error while searching "+curProvider.name+", skipping: "+str(e), logger.ERROR)
 			logger.log(traceback.format_exc(), logger.DEBUG)
 			continue
 
@@ -188,7 +188,7 @@ def findEpisode(episode, manualSearch=False):
 
 	didSearch = False
 
-	for curProvider in providers.getProviderList():
+	for curProvider in providers.sortedProviderList():
 		
 		if not curProvider.isActive():
 			continue
@@ -199,7 +199,7 @@ def findEpisode(episode, manualSearch=False):
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
 		except Exception, e:
-			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			logger.log("Error while searching "+curProvider.name+", skipping: "+str(e), logger.ERROR)
 			logger.log(traceback.format_exc(), logger.DEBUG)
 			continue
 		
@@ -225,7 +225,7 @@ def findSeason(show, season):
 	
 	didSearch = False
 	
-	for curProvider in providers.getProviderList():
+	for curProvider in providers.sortedProviderList():
 		
 		if not curProvider.isActive():
 			continue
@@ -248,7 +248,7 @@ def findSeason(show, season):
 			logger.log("Authentication error: "+str(e), logger.ERROR)
 			continue
 		except Exception, e:
-			logger.log("Error while searching "+curProvider.providerName+", skipping: "+str(e), logger.ERROR)
+			logger.log("Error while searching "+curProvider.name+", skipping: "+str(e), logger.ERROR)
 			logger.log(traceback.format_exc(), logger.DEBUG)
 			continue
 		

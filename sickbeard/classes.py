@@ -66,7 +66,7 @@ class SearchResult:
         if providerClass == None:
             return "Invalid provider, unable to print self"
         
-        myString = providerClass.providerName + " @ " + self.url + "\n"
+        myString = providerClass.name + " @ " + self.url + "\n"
         myString += "Extra Info:\n"
         for extra in self.extraInfo:
             myString += "  " + extra + "\n"

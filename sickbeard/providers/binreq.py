@@ -35,6 +35,8 @@ class BinReqProvider(generic.NZBProvider):
 		generic.NZBProvider.__init__(self, "BinReq")
 		
 		self.cache = BinReqCache(self)
+		
+		self.url = 'http://www.bin-req.net/'
 
 	def isEnabled(self):
 		return sickbeard.BINREQ
@@ -50,7 +52,7 @@ class BinReqCache(tvcache.TVCache):
 		tvcache.TVCache.__init__(self, provider)
 
 	def _getRSSData(self):
-		url = 'http://www.bin-req.net/rss.php?'
+		url = self.url + 'rss.php?'
 		urlArgs = {'id': 3}
 
 		url += urllib.urlencode(urlArgs)

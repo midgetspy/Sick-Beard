@@ -1859,7 +1859,7 @@ class Home:
             if providerModule == None:
                 flash.error('Provider is configured incorrectly, unable to download')
             else: 
-                flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.providerName))
+                flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
             
             #TODO: check if the download was successful
 
