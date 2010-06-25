@@ -113,7 +113,14 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
         #end if
     </td>
     <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
-    <td>#if $epLoc then $epLoc[len($show._location)+1:] else ""#</td>
+    <td>
+#if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
+$epLoc[len($show._location)+1:]
+#elif $epLoc and (not $epLoc.lower().startswith($show._location.lower()) or not $show._location):
+$epLoc
+#end if
+
+    </td>
     <td>$statusStrings[int($epResult["status"])]</td>
     <td align="center">
     #if int($epResult["season"]) != 0: 
