@@ -99,6 +99,10 @@ class ProperFinder():
                 logger.log("Unable to parse the filename "+curProper.name+" into a valid episode", logger.ERROR)
                 continue
     
+            if not epInfo.episodenumbers:
+                logger.log("Ignoring "+curProper.name+" because it's for a full season rather than specific episode", logger.DEBUG)
+                continue
+    
             # populate our Proper instance
             curProper.season = epInfo.seasonnumber
             curProper.episode = epInfo.episodenumbers[0]
