@@ -440,7 +440,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     destDir = os.path.join(rootEp.show.location, seasonFolder)
     
     curFile = os.path.join(destDir, biggestFileName)
-    newFile = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
+    if sickbeard.RENAME_EPISODES:
+        newFile = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
+    else:
+        newFile = curFile
     returnStr += logHelper("The ultimate destination for " + fileName + " is " + newFile, logger.DEBUG)
 
     existingResult = _checkForExistingFile(newFile, fileName)
@@ -527,12 +530,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     for curEp in [rootEp] + rootEp.relatedEps:
         with curEp.lock:
             curEp.location = newFile
-            
             curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
-            
             curEp.saveToDB()
 
-    if sickbeard.RENAME_EPISODES and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, newFile):
+    if ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, newFile):
         try:
             os.rename(curFile, newFile)
             returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
@@ -541,7 +542,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             return returnStr
 
     else:
-        returnStr += logHelper("Renaming is disabled, leaving file as "+curFile, logger.DEBUG)
+        returnStr += logHelper("Renaming is disabled or file is already named correctly, leaving file as "+curFile, logger.DEBUG)
         newFile = curFile
 
     # log it to history
