@@ -53,6 +53,38 @@ html>body #provider_order_list li { height: 1.5em; line-height: 1.2em; }
     \$(this).showHideNewznabProviders();
   });
 
+  \$('.newznab_update').click(function(){
+
+    var which_id = \$(this).parent().attr('id');
+    var totalString = new Array();
+    
+    \$('.newznabProviderDiv').each(function(){
+      
+      var provider_id = \$(this).attr('id');
+
+      if (provider_id == 'addNewznab' && which_id != 'addNewznab')
+        return;
+        
+      var provider_name = \$('#'+provider_id+'_name').val();
+      var provider_url = \$('#'+provider_id+'_url').val();
+      var provider_username = \$('#'+provider_id+'_username').val();
+      var provider_hash = \$('#'+provider_id+'_hash').val();
+
+      if (provider_name == '' || provider_url == '') {
+        alert('You must fill out at least name & url to add a provider.');
+        return;
+      }
+
+      var newznabString = provider_name + '|' + provider_url + '|' + provider_username + '|' + provider_hash + '|1';
+      
+      totalString.push(newznabString);
+    });
+    
+    \$('#newznab_providers').val(totalString.join('!!!'));
+    
+    alert(\$('#newznab_providers').val());
+  });
+
   \$(this).showHideProviders();
   \$(this).showHideNewznabProviders();
   
@@ -207,8 +239,9 @@ NZBs'R'US hash<br />
 
 <legend>Manage Newznab Providers</legend>
 
+<input type="hidden" name="newznab_providers" id="newznab_providers" value="<%='!!!'.join([x.configStr() for x in sickbeard.newznabProviderList])%>">
 <select id="editANewznabProvider">
-<option value="addNew">-- add new provider --
+<option value="addNewznab">-- add new provider --
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
 <option value="$curNewznabProvider.getID()">$curNewznabProvider.name
 #end for
@@ -216,16 +249,16 @@ NZBs'R'US hash<br />
 <br />
 <br />
 
-<div class="newznabProviderDiv" id="addNew">
+<div class="newznabProviderDiv" id="addNewznab">
 
 <strong>Provider Name</strong><br />
 <input type="text" id="addNewznab_name"><br />
 <strong>Site URL</strong><br /><input type="text" id="addNewznab_url"><br />
 <br />
-<strong>Username</strong><br /><input type="text" id="addNewznab_uid"><br />
+<strong>Username</strong><br /><input type="text" id="addNewznab_username"><br />
 <strong>Hash</strong><br /><input type="text" id="addNewznab_hash"><br />
 (leave blank if not required)<br />
-<input type="button" id="addNewznab_submit" value="Add"><br />
+<input type="button" class="newznab_update" value="Add"><br />
 </div>
 
 #for $curNewznabProvider in $sickbeard.newznabProviderList:

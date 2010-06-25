@@ -44,6 +44,7 @@ from sickbeard import logger, helpers, exceptions
 from sickbeard import encodingKludge as ek
 
 from sickbeard.notifiers import xbmc
+from sickbeard.providers import newznab
 from sickbeard.common import *
 
 from lib.tvdb_api import tvdb_exceptions
@@ -723,6 +724,44 @@ class ConfigProviders:
         t = PageTemplate(file="config_providers.tmpl")
         t.submenu = ConfigMenu
         return _munge(t)
+
+
+    @cherrypy.expose
+    def addNewznabProvider(self, name=None, url=None, username='', hash=''):
+        
+        if not name or not url:
+            return '0'
+        
+        providerDict = dict(zip([x.name for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+
+        if name in providerDict:
+            providerDict[name].name = name
+            providerDict[name].url = url
+            
+            if username and hash:
+                providerDict[name].username = username
+                providerDict[name].hash = hash
+
+            return '1'
+        
+        else:
+        
+            newProvider = newznab.NewznabProvider(name, url, username, hash)
+            sickbeard.newznabProviderList.append(newProvider)
+
+        return '1'
+
+    
+    @cherrypy.expose
+    def deleteNewznabProvider(self, providerName=None, apiURL=None, uid='', hash=''):
+        
+        if not providerName or not apiURL:
+            return '0'
+        
+        newProvider = newznab.NewznabProvider(providerName, apiURL, uid, hash)
+        sickbeard.newznabProviderList.append(newProvider)
+
+        return '1'
 
     
     @cherrypy.expose
