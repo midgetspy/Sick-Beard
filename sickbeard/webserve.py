@@ -941,6 +941,40 @@ class NewHomeAddShows:
         return json.dumps({'results': results})
 
     @cherrypy.expose
+    def addRootDir(self, dir=None):
+        if dir == None:
+            redirect("/home/addShows")
+
+        if not os.path.isdir(dir):
+            logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
+            flash.error("Unable to find the directory <tt>%s</tt>" % dir)
+            redirect("/home/addShows")
+        
+        showDirs = []
+        
+        for curDir in os.listdir(unicode(dir)):
+            curPath = os.path.join(dir, curDir)
+            if os.path.isdir(curPath):
+                logger.log("Adding "+curPath+" to the showDir list", logger.DEBUG)
+                showDirs.append(curPath)
+        
+        if len(showDirs) == 0:
+            logger.log("The provided directory "+dir+" has no shows in it", logger.ERROR)
+            flash.error("The provided root folder <tt>%s</tt> has no shows in it." % dir)
+            redirect("/home/addShows")
+        
+        #result = ui.addShowsFromRootDir(dir)
+        
+        myTemplate = PageTemplate(file="home_addRootDir.tmpl")
+        myTemplate.showDirs = [urllib.quote_plus(x.encode('utf-8')) for x in showDirs]
+        myTemplate.submenu = HomeMenu
+        return _munge(myTemplate)       
+        
+        url = "/home/addShows/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
+        logger.log("Redirecting to URL "+url, logger.DEBUG)
+        redirect(url)
+    
+    @cherrypy.expose
     def addSingleShow(self, showToAdd, whichSeries=None, skipShow=False, showDirs=[]):
         
         # we don't need to unquote the rest of the showDirs cause we're going to pass them straight through 
@@ -957,7 +991,7 @@ class NewHomeAddShows:
         return self.addShows(showDirs)
 
     @cherrypy.expose
-    def addShowsNew(self, showDirs=[]):
+    def addShows(self, showDirs=[]):
         
         if showDirs and type(showDirs) != list:
             showDirs = [showDirs]
