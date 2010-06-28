@@ -17,88 +17,18 @@ html>body #provider_order_list li { height: 1.5em; line-height: 1.2em; }
 .providerDiv { display: none; }
 </style>
 <script type="text/javascript">
+sbRoot = '$sbRoot'; 
+</script>
+<script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
+<script type="text/javascript">
 \$(document).ready(function(){
 
-  $.fn.showHideProviders = function() {
-    \$('.providerDiv').each(function(){
-      var providerName = \$(this).attr('id');
-      var selectedProvider = \$('#editAProvider :selected').val();
-      
-      if (selectedProvider == providerName)
-        \$(this).show();
-      else
-        \$(this).hide();
-      
-    });
-  } 
+#for $curNewznabProvider in $sickbeard.newznabProviderList:
+    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
+#end for
 
-  $.fn.showHideNewznabProviders = function() {
-    \$('.newznabProviderDiv').each(function(){
-      var providerName = \$(this).attr('id');
-      var selectedProvider = \$('#editANewznabProvider :selected').val();
-      
-      if (selectedProvider == providerName)
-        \$(this).show();
-      else
-        \$(this).hide();
-      
-    });
-  } 
-
-  \$('#editAProvider').change(function(){
-    \$(this).showHideProviders();
-  });
-
-  \$('#editANewznabProvider').change(function(){
-    \$(this).showHideNewznabProviders();
-  });
-
-  \$('.newznab_update').click(function(){
-
-    var which_id = \$(this).parent().attr('id');
-    var totalString = new Array();
-    
-    \$('.newznabProviderDiv').each(function(){
-      
-      var provider_id = \$(this).attr('id');
-
-      if (provider_id == 'addNewznab' && which_id != 'addNewznab')
-        return;
-        
-      var provider_name = \$('#'+provider_id+'_name').val();
-      var provider_url = \$('#'+provider_id+'_url').val();
-      var provider_username = \$('#'+provider_id+'_username').val();
-      var provider_hash = \$('#'+provider_id+'_hash').val();
-
-      if (provider_name == '' || provider_url == '') {
-        alert('You must fill out at least name & url to add a provider.');
-        return;
-      }
-
-      var newznabString = provider_name + '|' + provider_url + '|' + provider_username + '|' + provider_hash + '|1';
-      
-      totalString.push(newznabString);
-    });
-    
-    \$('#newznab_providers').val(totalString.join('!!!'));
-    
-    alert(\$('#newznab_providers').val());
-  });
-
-  \$(this).showHideProviders();
-  \$(this).showHideNewznabProviders();
-  
 });
 
-\$(function() {
-    \$("#provider_order_list").sortable({
-        placeholder: 'ui-state-highlight',
-        update: function (event, ui) {
-              \$("#provider_order").val(\$("#provider_order_list").sortable('toArray').join(" "));
-        }
-    });
-    \$("#provider_order_list").disableSelection();
-});
 </script>
 
 <form action="saveProviders" method="POST">
@@ -123,14 +53,14 @@ you want them to be searched<br />
       #set $imgName = $curName + '.gif'
     #end if
   <li class="ui-state-default" id="$curName">
-    <input type="checkbox" name="$curName" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "CHECKED" else ""#>
+    <input type="checkbox" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "CHECKED" else ""#>
     <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" width="16" height="16"></a>
     $curProvider.name
   </li>
 #end for
 </ul>
 <br />
-<input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join(sickbeard.PROVIDER_ORDER)%>">
+<input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>">
 
 </fieldset>
 </div>
@@ -151,9 +81,6 @@ you want them to be searched<br />
 
 #if $sickbeard.SHOW_TVBINZ:
 <div class="providerDiv" id="tvbinz">
-
-<a href="http://www.tvbinz.net" class="imgLink" target="_new"><img src="$sbRoot/images/providers/tvbinz.gif" alt="TVBinz" width="16" height="16"></a><br />
-<br />
 
 <strong>Cookie UID:</strong><br />
 TVBinz cookie UID<br />
@@ -180,9 +107,6 @@ TVBinz auth string<br />
 
 <div class="providerDiv" id="nzbs">
 
-<a href="http://www.nzbs.org" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbs.gif" alt="NZBs.org" width="16" height="16"></a><br />
-<br />
-
 <strong>UID:</strong><br />
 NZBs.org UID<br />
 <input type="text" name="nzbs_uid" value="$sickbeard.NZBS_UID" size="6"><br />
@@ -197,9 +121,6 @@ NZBs.org hash<br />
 
 
 <div class="providerDiv" id="nzbmatrix">
-
-<a href="http://www.nzbmatrix.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbmatrix.gif" alt="NZBMatrix" width="16" height="16"></a><br />
-<br />
 
 <strong>Username:</strong><br />
 NZBMatrix username<br />
@@ -237,13 +158,12 @@ NZBs'R'US hash<br />
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
 
-<legend>Manage Newznab Providers</legend>
-
-<input type="hidden" name="newznab_providers" id="newznab_providers" value="<%='!!!'.join([x.configStr() for x in sickbeard.newznabProviderList])%>">
+<legend>Newznab Providers</legend>
+<input type="hidden" name="newznab_string" id="newznab_string">
 <select id="editANewznabProvider">
-<option value="addNewznab">-- add new provider --
+<option value="addNewznab">-- add new provider --</option>
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-<option value="$curNewznabProvider.getID()">$curNewznabProvider.name
+<!--<option value="$curNewznabProvider.getID()">$curNewznabProvider.name-->
 #end for
 </select>
 <br />
@@ -252,34 +172,15 @@ NZBs'R'US hash<br />
 <div class="newznabProviderDiv" id="addNewznab">
 
 <strong>Provider Name</strong><br />
-<input type="text" id="addNewznab_name"><br />
-<strong>Site URL</strong><br /><input type="text" id="addNewznab_url"><br />
+<input type="text" id="newznab_name"><br />
+<strong>Site URL</strong><br /><input type="text" id="newznab_url"><br />
 <br />
-<strong>Username</strong><br /><input type="text" id="addNewznab_username"><br />
-<strong>Hash</strong><br /><input type="text" id="addNewznab_hash"><br />
+<strong>RSS Key</strong><br /><input type="text" id="newznab_key"><br />
 (leave blank if not required)<br />
-<input type="button" class="newznab_update" value="Add"><br />
-</div>
-
-#for $curNewznabProvider in $sickbeard.newznabProviderList:
-#set $curID = $curNewznabProvider.getID()
-<div class="newznabProviderDiv" id="$curID">
-
-<strong>Provider Name</strong><br />
-<input type="text" id="$(curID)_name" value="$curNewznabProvider.name" #if $curNewznabProvider.default then "disabled" else ""#><br />
-<strong>Site URL</strong><br />
-<input type="text" id="$(curID)_url" value="$curNewznabProvider.url" #if $curNewznabProvider.default then "disabled" else ""#><br />
+<div id="newznab_add_div"><input type="button" class="newznab_save" id="newznab_add" value="Add"></div>
+<div id="newznab_update_div" style="display: none;"><input type="button" class="newznab_delete" id="newznab_delete" value="Delete"></div> 
 <br />
-<strong>UID</strong><br />
-<input type="text" id="$(curID)_username" value="$curNewznabProvider.username"><br />
-<strong>Hash</strong><br />
-<input type="text" id="$(curID)_hash" value="$curNewznabProvider.hash"><br />
-(leave blank if not required)<br />
-<input type="button" class="newznab_update" value="Update">
-<input type="button" class="newznab_delete" value="Delete" #if $curNewznabProvider.default then "disabled" else ""#><br />
-
 </div>
-#end for
 
 </fieldset>
 </div>

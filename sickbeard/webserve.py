@@ -725,80 +725,127 @@ class ConfigProviders:
         t.submenu = ConfigMenu
         return _munge(t)
 
+    @cherrypy.expose
+    def canAddNewznabProvider(self, name):
+        
+        if not name:
+            return json.dumps({'error': 'Invalid name specified'})
+        
+        providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+
+        tempProvider = newznab.NewznabProvider(name, '')
+            
+        if tempProvider.getID() in providerDict:
+            return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
+        else:
+            return json.dumps({'success': tempProvider.getID()})
 
     @cherrypy.expose
-    def addNewznabProvider(self, name=None, url=None, username='', hash=''):
+    def saveNewznabProvider(self, name, url, key=''):
         
         if not name or not url:
             return '0'
         
+        if not url.endswith('/'):
+            url = url + '/'
+        
         providerDict = dict(zip([x.name for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
 
         if name in providerDict:
-            providerDict[name].name = name
-            providerDict[name].url = url
-            
-            if username and hash:
-                providerDict[name].username = username
-                providerDict[name].hash = hash
+            if not providerDict[name].default:
+                providerDict[name].name = name
+                providerDict[name].url = url
+            providerDict[name].key = key
 
-            return '1'
+            return providerDict[name].getID() + '|' + providerDict[name].configStr()
         
         else:
         
-            newProvider = newznab.NewznabProvider(name, url, username, hash)
+            newProvider = newznab.NewznabProvider(name, url, key)
             sickbeard.newznabProviderList.append(newProvider)
+            return newProvider.getID() + '|' + newProvider.configStr()
 
-        return '1'
 
     
     @cherrypy.expose
-    def deleteNewznabProvider(self, providerName=None, apiURL=None, uid='', hash=''):
+    def deleteNewznabProvider(self, id):
+
+        providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
         
-        if not providerName or not apiURL:
+        if id not in providerDict or providerDict[id].default:
             return '0'
+
+        # delete it from the list
+        sickbeard.newznabProviderList.remove(providerDict[id])
         
-        newProvider = newznab.NewznabProvider(providerName, apiURL, uid, hash)
-        sickbeard.newznabProviderList.append(newProvider)
+        if id in sickbeard.PROVIDER_ORDER:
+            sickbeard.PROVIDER_ORDER.remove(id)
 
         return '1'
 
     
     @cherrypy.expose
-    def saveProviders(self, tvbinz=None, tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None,
-                      nzbs_hash=None, nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
-                      tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None, nzbsrus=None,
-                      nzbsrus_uid=None, nzbsrus_hash=None, binreq=None):
+    def saveProviders(self, tvbinz_uid=None, tvbinz_hash=None, nzbs_uid=None,
+                      nzbs_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
+                      tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None,
+                      nzbsrus_uid=None, nzbsrus_hash=None, newznab_string=None):
 
         results = []
 
-        if tvbinz == "on":
-            tvbinz = 1
-        elif sickbeard.SHOW_TVBINZ:
-            tvbinz = 0
+        provider_str_list = provider_order.split()
+        provider_list = []
+        
+        newznabProviderDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+
+        finishedNames = []
+
+        # add all the newznab info we got into our list
+        for curNewznabProviderStr in newznab_string.split('!!!'):
+            curName, curURL, curKey = curNewznabProviderStr.split('|')
+
+            newProvider = newznab.NewznabProvider(curName, curURL, curKey)
             
-        if nzbs == "on":
-            nzbs = 1
-        else:
-            nzbs = 0
+            curID = newProvider.getID()
+            
+            # if it already exists then update it
+            if curID in newznabProviderDict:
+                newznabProviderDict[curID].name = curName
+                newznabProviderDict[curID].url = curURL
+                newznabProviderDict[curID].key = curKey
+            else:
+                sickbeard.newznabProviderList.append(newProvider)
 
-        if nzbsrus == "on":
-            nzbsrus = 1
-        else:
-            nzbsrus = 0
+            finishedNames.append(curID)
 
-        if nzbmatrix == "on":
-            nzbmatrix = 1
-        else:
-            nzbmatrix = 0
 
-        if binreq == "on":
-            binreq = 1
-        else:
-            binreq = 0
+        # delete anything that is missing
+        for curProvider in sickbeard.newznabProviderList:
+            if curProvider.getID() not in finishedNames:
+                sickbeard.newznabProviderList.remove(curProvider)
 
-        if tvbinz != None:
-            sickbeard.TVBINZ = tvbinz
+        # do the enable/disable
+        for curProviderStr in provider_str_list:
+            curProvider, curEnabled = curProviderStr.split(':')
+            curEnabled = int(curEnabled)
+            
+            provider_list.append(curProvider)
+            
+            if curProvider == 'tvbinz':
+                if curEnabled or sickbeard.SHOW_TVBINZ:
+                    sickbeard.TVBINZ = curEnabled
+            elif curProvider == 'nzbs':
+                sickbeard.NZBS = curEnabled
+            elif curProvider == 'nzbsrus':
+                sickbeard.NZBSRUS = curEnabled
+            elif curProvider == 'nzbmatrix':
+                sickbeard.NZBMATRIX = curEnabled
+            elif curProvider == 'binreq':
+                sickbeard.BINREQ = curEnabled
+            elif curProvider in newznabProviderDict:
+                newznabProviderDict[curProvider].enabled = bool(curEnabled)
+            else:
+                logger.log("don't know what "+curProvider+" is, skipping")
+
         if tvbinz_uid:
             sickbeard.TVBINZ_UID = tvbinz_uid.strip()
         if tvbinz_sabuid:
@@ -808,21 +855,16 @@ class ConfigProviders:
         if tvbinz_auth:
             sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
         
-        sickbeard.NZBS = nzbs
         sickbeard.NZBS_UID = nzbs_uid.strip()
         sickbeard.NZBS_HASH = nzbs_hash.strip()
         
-        sickbeard.NZBSRUS = nzbsrus
         sickbeard.NZBSRUS_UID = nzbsrus_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbsrus_hash.strip()
         
-        sickbeard.NZBMATRIX = nzbmatrix
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()
         
-        sickbeard.BINREQ = binreq
-        
-        sickbeard.PROVIDER_ORDER = provider_order.split()
+        sickbeard.PROVIDER_ORDER = provider_list
         
         sickbeard.save_config()
         

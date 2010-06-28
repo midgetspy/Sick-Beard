@@ -41,6 +41,8 @@ def getNewznabProviderList(data):
             providerList.append(curDefault)
         else:
             providerDict[curDefault.name].default = True
+            providerDict[curDefault.name].name = curDefault.name
+            providerDict[curDefault.name].url = curDefault.url
 
     return filter(lambda x: x, providerList)
     
@@ -50,19 +52,18 @@ def makeNewznabProvider(configString):
     if not configString:
         return None
     
-    name, url, uid, hash, enabled = configString.split('|')
+    name, url, key, enabled = configString.split('|')
     
     newznab = sys.modules['sickbeard.providers.newznab']
 
     newProvider = newznab.NewznabProvider(name, url)
-    newProvider.uid = uid
-    newProvider.hash = hash
+    newProvider.key = key
     newProvider.enabled = enabled == '1'
 
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'NZB.su|http://www.nzb.su/|||1'
+    return 'NZB.su|http://www.nzb.su/||1'
 
 
 def getProviderModule(name):
