@@ -59,7 +59,7 @@ class NZBsRUSCache(tvcache.TVCache):
 	
 	def _getRSSData(self):
 
-		url = self.url + 'rssfeed.php?'
+		url = self.provider.url + 'rssfeed.php?'
 		urlArgs = {'cat': '91,75',
 				   'i': sickbeard.NZBSRUS_UID,
 				   'h': sickbeard.NZBSRUS_HASH}

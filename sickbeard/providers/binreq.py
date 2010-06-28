@@ -52,7 +52,7 @@ class BinReqCache(tvcache.TVCache):
 		tvcache.TVCache.__init__(self, provider)
 
 	def _getRSSData(self):
-		url = self.url + 'rss.php?'
+		url = self.provider.url + 'rss.php?'
 		urlArgs = {'id': 3}
 
 		url += urllib.urlencode(urlArgs)

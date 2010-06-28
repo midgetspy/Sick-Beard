@@ -176,7 +176,7 @@ class NZBsProvider(generic.NZBProvider):
 				  "num": 100,
 				  "type": 1}
 		
-		searchURL = self.url + "rss.php?" + urllib.urlencode(params)
+		searchURL = self.provider.url + "rss.php?" + urllib.urlencode(params)
 	
 		logger.log("Search string: " + searchURL, logger.DEBUG)
 	
@@ -239,7 +239,7 @@ class NZBsCache(tvcache.TVCache):
 		tvcache.TVCache.__init__(self, provider)
 	
 	def _getRSSData(self):
-		url = self.url + 'rss.php?'
+		url = self.provider.url + 'rss.php?'
 		urlArgs = {'type': 1,
 				   'dl': 1,
 				   'num': 100,
@@ -256,7 +256,7 @@ class NZBsCache(tvcache.TVCache):
 		return data
 	
 	def _checkItemAuth(self, title, url):
-		if "&amp;i=" not in url and "&amp;h=" not in url:
+		if "&i=" not in url and "&h=" not in url:
 			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
 	
 provider = NZBsProvider()
