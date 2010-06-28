@@ -785,10 +785,10 @@ class ConfigProviders:
 
     
     @cherrypy.expose
-    def saveProviders(self, tvbinz_uid=None, tvbinz_hash=None, nzbs_uid=None,
-                      nzbs_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
+    def saveProviders(self, tvbinz_uid=None, tvbinz_hash=None, nzbs_org_uid=None,
+                      nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None,
-                      nzbsrus_uid=None, nzbsrus_hash=None, newznab_string=None):
+                      nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None):
 
         results = []
 
@@ -833,14 +833,16 @@ class ConfigProviders:
             if curProvider == 'tvbinz':
                 if curEnabled or sickbeard.SHOW_TVBINZ:
                     sickbeard.TVBINZ = curEnabled
-            elif curProvider == 'nzbs':
+            elif curProvider == 'nzbs_org':
                 sickbeard.NZBS = curEnabled
-            elif curProvider == 'nzbsrus':
+            elif curProvider == 'nzbs_r_us':
                 sickbeard.NZBSRUS = curEnabled
             elif curProvider == 'nzbmatrix':
                 sickbeard.NZBMATRIX = curEnabled
-            elif curProvider == 'binreq':
+            elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
+            elif curProvider == 'eztv_bt_chat':
+                sickbeard.USE_TORRENT = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -855,11 +857,11 @@ class ConfigProviders:
         if tvbinz_auth:
             sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
         
-        sickbeard.NZBS_UID = nzbs_uid.strip()
-        sickbeard.NZBS_HASH = nzbs_hash.strip()
+        sickbeard.NZBS_UID = nzbs_org_uid.strip()
+        sickbeard.NZBS_HASH = nzbs_org_hash.strip()
         
-        sickbeard.NZBSRUS_UID = nzbsrus_uid.strip()
-        sickbeard.NZBSRUS_HASH = nzbsrus_hash.strip()
+        sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
+        sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
         
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()

@@ -72,9 +72,9 @@ you want them to be searched<br />
 
 <b>Edit: </b> <select id="editAProvider">
 #if $sickbeard.SHOW_TVBINZ then "<option value=\"tvbinz\">TVBinz" else ""#
-<option value="nzbs">NZBs.org
+<option value="nzbs_org">NZBs.org
 <option value="nzbmatrix">NZBMatrix
-<option value="nzbsrus">NZBs'R'US
+<option value="nzbs_r_us">NZBs'R'US
 </select>
 <br />
 <br />
@@ -105,16 +105,16 @@ TVBinz auth string<br />
 </div>
 #end if
 
-<div class="providerDiv" id="nzbs">
+<div class="providerDiv" id="nzbs_org">
 
 <strong>UID:</strong><br />
 NZBs.org UID<br />
-<input type="text" name="nzbs_uid" value="$sickbeard.NZBS_UID" size="6"><br />
+<input type="text" name="nzbs_org_uid" value="$sickbeard.NZBS_UID" size="6"><br />
 <br />
 
 <strong>Hash:</strong><br />
 NZBs.org hash<br />
-<input type="text" name="nzbs_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
+<input type="text" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
 <br />
 
 </div>
@@ -134,19 +134,16 @@ NZBMatrix API Key<br />
 
 </div>
 
-<div class="providerDiv" id="nzbsrus">
-
-<a href="http://www.nzbsrus.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbsrus.gif" alt="NZBs'R'US" width="16" height="16"></a><br />
-<br />
+<div class="providerDiv" id="nzbs_r_us">
 
 <strong>UID:</strong><br />
 NZBs'R'US UID<br />
-<input type="text" name="nzbsrus_uid" value="$sickbeard.NZBSRUS_UID" size="6"><br />
+<input type="text" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="6"><br />
 <br />
 
 <strong>Hash:</strong><br />
 NZBs'R'US hash<br />
-<input type="text" name="nzbsrus_hash" value="$sickbeard.NZBSRUS_HASH" size="35"><br />
+<input type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="35"><br />
 <br />
 
 </div>
@@ -177,6 +174,7 @@ NZBs'R'US hash<br />
 <br />
 <strong>RSS Key</strong><br /><input type="text" id="newznab_key"><br />
 (leave blank if not required)<br />
+<br />
 <div id="newznab_add_div"><input type="button" class="newznab_save" id="newznab_add" value="Add"></div>
 <div id="newznab_update_div" style="display: none;"><input type="button" class="newznab_delete" id="newznab_delete" value="Delete"></div> 
 <br />

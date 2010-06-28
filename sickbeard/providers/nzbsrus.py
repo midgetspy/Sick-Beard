@@ -33,7 +33,7 @@ class NZBsRUSProvider(generic.NZBProvider):
 	
 	def __init__(self):
 		
-		generic.NZBProvider.__init__(self, "NZBsRUS")
+		generic.NZBProvider.__init__(self, "NZBs'R'US")
 		
 		self.cache = NZBsRUSCache(self)
 		

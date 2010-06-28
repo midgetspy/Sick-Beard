@@ -106,8 +106,6 @@ $(document).ready(function(){
         
         $('#newznab_string').val(provStrings.join('!!!'))
         
-        alert('newznab_string: '+$('#newznab_string').val())
-        
     }
     
     $.fn.refreshProviderList = function() {
@@ -117,7 +115,7 @@ $(document).ready(function(){
                     var checked = + $('#enable_'+val).attr('checked') ? '1' : '0';
                     finalArr.push(val + ':' + checked);
             });
-            alert('provider list: ' +finalArr.join(' '))
+
             $("#provider_order").val(finalArr.join(' '));
     }
 

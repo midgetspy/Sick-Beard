@@ -32,7 +32,7 @@ class BinReqProvider(generic.NZBProvider):
 	
 	def __init__(self):
 		
-		generic.NZBProvider.__init__(self, "BinReq")
+		generic.NZBProvider.__init__(self, "Bin-Req")
 		
 		self.cache = BinReqCache(self)
 		

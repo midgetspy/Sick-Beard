@@ -41,7 +41,7 @@ class NZBsProvider(generic.NZBProvider):
 	
 	def __init__(self):
 		
-		generic.NZBProvider.__init__(self, "NZBs")
+		generic.NZBProvider.__init__(self, "NZBs.org")
 		
 		self.cache = NZBsCache(self)
 		

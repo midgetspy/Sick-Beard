@@ -86,7 +86,7 @@ class TVCache():
             return []
         
         # now that we've loaded the current RSS feed lets delete the old cache
-        logger.log("Clearing cache and updating with new information")
+        logger.log("Clearing "+self.provider.name+" cache and updating with new information")
         self._clearCache()
         
         if not self._checkAuth(data):
