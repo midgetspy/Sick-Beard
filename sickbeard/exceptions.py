@@ -30,6 +30,9 @@ class LaterException(SickBeardException):
 class NoNFOException(SickBeardException):
 	"No NFO was found!"
 
+class NoShowDirException(SickBeardException):
+	"Unable to find the show's directory"
+
 class FileNotFoundException(SickBeardException):
 	"The specified file doesn't exist"
 

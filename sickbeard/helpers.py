@@ -30,6 +30,7 @@ from sickbeard import logger, classes
 from sickbeard.common import *
 
 from sickbeard import db
+from sickbeard import encodingKludge as ek
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -120,9 +121,9 @@ def findCertainTVRageShow (showList, tvrid):
 	
 	
 def makeDir (dir):
-	if not os.path.isdir(dir.encode('utf-8')):
+	if not ek.ek(os.path.isdir, dir):
 		try:
-			os.makedirs(dir.encode('utf-8'))
+			ek.ek(os.makedirs, dir)
 		except OSError:
 			return False
 	return True
@@ -328,3 +329,20 @@ def sizeof_fmt(num):
 			return "%3.1f %s" % (num, x)
 		num /= 1024.0
 
+def listMediaFiles(dir):
+
+	if not dir or not ek.ek(os.path.isdir, dir):
+		return []
+
+	files = []
+	for curFile in ek.ek(os.listdir, dir):
+		fullCurFile = ek.ek(os.path.join, dir, curFile)
+
+		# if it's a dir do it recursively
+		if ek.ek(os.path.isdir, fullCurFile):
+			files += listMediaFiles(fullCurFile)
+	
+		elif isMediaFile(curFile):
+			files.append(fullCurFile)
+
+	return files

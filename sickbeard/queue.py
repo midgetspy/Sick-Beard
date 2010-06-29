@@ -128,8 +128,8 @@ class ShowQueue:
         
         return queueItemObj
     
-    def addShow(self, showDir):
-        queueItemObj = QueueItemAdd(showDir)
+    def addShow(self, tvdb_id, showDir):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir)
         self.queue.append(queueItemObj)
         
         return queueItemObj
@@ -189,22 +189,15 @@ class QueueItem:
         self.inProgress = False
         
 class QueueItemAdd(QueueItem):
-    def __init__(self, show=None):
+    def __init__(self, tvdb_id, showDir):
 
-        self.showDir = show
+        self.tvdb_id = tvdb_id
+        self.showDir = showDir
 
-        # if we can't create the dir, bail
-        if not os.path.isdir(self.showDir):
-            if not helpers.makeDir(self.showDir):
-                raise exceptions.NoNFOException("Unable to create the show dir " + self.showDir)
-
-        if not os.path.isfile(os.path.join(self.showDir, "tvshow.nfo")):
-            raise exceptions.NoNFOException("No tvshow.nfo found")
+        self.show = None
 
         # this will initialize self.show to None
         QueueItem.__init__(self, QueueActions.ADD)
-
-        self.initialShow = TVShow(self.showDir)
 
     def _getName(self):
         if self.show == None:
@@ -226,15 +219,17 @@ class QueueItemAdd(QueueItem):
 
         logger.log("Starting to add show "+self.showDir)
 
-        otherShow = helpers.findCertainShow(sickbeard.showList, self.initialShow.tvdbid)
-        if otherShow != None:
-            logger.log("Show is already in your list, not adding it again")
-            self.finish()
-            return
-
         try:
-            self.initialShow.getImages()
-            self.initialShow.loadFromTVDB()
+            newShow = TVShow(self.tvdb_id)
+            newShow.loadFromTVDB()
+            
+            self.show = newShow
+            
+            # set up initial values
+            self.show.location = self.showDir
+            self.show.quality = sickbeard.QUALITY_DEFAULT
+            self.show.seasonfolders = sickbeard.SEASON_FOLDERS_DEFAULT
+            self.show.paused = False
             
         except tvdb_exceptions.tvdb_exception, e:
             logger.log("Unable to add show due to an error with TVDB: "+str(e), logger.ERROR)
@@ -242,29 +237,18 @@ class QueueItemAdd(QueueItem):
             self._finishEarly()
             return
             
-        except exceptions.NoNFOException:
-            logger.log("Unable to load show from NFO", logger.ERROR)
-            webserve.flash.error("Unable to add "+str(self.initialShow.name)+" from NFO, skipping")
-            self._finishEarly()
-            return
-            
-        except exceptions.ShowNotFoundException:
-            logger.log("The show in " + self.showDir + " couldn't be found on theTVDB, skipping", logger.ERROR)
-            webserve.flash.message("The show in " + self.showDir + " couldn't be found on theTVDB, skipping")
-            self._finishEarly()
-            return
-    
         except exceptions.MultipleShowObjectsException:
             logger.log("The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
+            webserve.flash.error("The show in " + self.showDir + " is already in your show list, skipping")
             self._finishEarly()
             return
         
-        except Exception:
+        except Exception, e:
+            logger.log("Error trying to add show: "+str(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
             self._finishEarly()
             raise
     
-        self.show = self.initialShow
-
         # add it to the show list
         sickbeard.showList.append(self.show)
 
@@ -277,6 +261,8 @@ class QueueItemAdd(QueueItem):
         try:
             self.show.loadEpisodesFromTVDB()
             self.show.setTVRID()
+
+            self.show.writeMetadata()
         except Exception, e:
             logger.log("Error with TVDB, not creating episode list: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
@@ -299,9 +285,6 @@ class QueueItemAdd(QueueItem):
         if self.show != None:
             self.show.deleteShow()
         
-        if self.initialShow != None:
-            self.initialShow.deleteShow()
-        
         self.finish()
 
 
@@ -316,8 +299,7 @@ class QueueItemRefresh(QueueItem):
         logger.log("Performing refresh on "+self.show.name)
 
         self.show.refreshDir()
-        self.show.getImages()
-        self.show.writeEpisodeNFOs()
+        self.show.writeMetadata()
         
         self.inProgress = False
         

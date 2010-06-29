@@ -20,7 +20,6 @@ from __future__ import with_statement
 
 import os.path
 import datetime
-import sqlite3
 import threading
 import urllib
 import re
@@ -35,25 +34,24 @@ from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
 from sickbeard import db
-from sickbeard import helpers
-from sickbeard import exceptions
+from sickbeard import helpers, exceptions, logger
 from sickbeard import processTV
-from sickbeard import classes
 from sickbeard import tvrage
 from sickbeard import config
+from sickbeard import metadata
 
 from sickbeard import encodingKludge as ek
 
 from common import *
-from sickbeard import logger
 
 class TVShow(object):
 
-    def __init__ (self, showdir):
+    def __init__ (self, tvdbid):
     
-        self._location = os.path.normpath(showdir)
+        self.tvdbid = tvdbid
+
+        self._location = ""
         self.name = ""
-        self.tvdbid = 0
         self.tvrid = 0
         self.tvrname = ""
         self.network = ""
@@ -72,47 +70,11 @@ class TVShow(object):
         
         self.episodes = {}
 
-        # if the location doesn't exist, try the DB
-        if not os.path.isdir(self._location):
-            
-            self._isDirGood = False
-            
-            logger.log("The show dir "+self._location+" doesn't exist! This show will be inactive until the dir is created.", logger.ERROR)
-            
-            myDB = db.DBConnection()
-            sqlResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [self._location])
-    
-            # if the location is in the DB, load it from the DB only
-            if len(sqlResults) > 0:
-                self.tvdbid = int(sqlResults[0]["tvdb_id"])
-                self.loadFromDB()
-            else:
-                raise exceptions.NoNFOException("Show folder doesn't exist")
-        
-        elif not ek.ek(os.path.isfile, ek.ek(os.path.join, self._location, "tvshow.nfo")):
-            
-            raise exceptions.NoNFOException("No NFO found in show dir")
-        
-        # if the location does exist then start with the NFO and load extra stuff from the DB
-        else:
-            
-            self._isDirGood = True
-            
-            self.loadNFO()
-
-            self.loadFromDB()
-    
         otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdbid)
         if otherShow != None:
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
         
-        #try:
-        #    t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-        #    t[self.tvdbid]
-        #except tvdb_exceptions.tvdb_shownotfound, e:
-        #    raise exceptions.ShowNotFoundException(str(e))
-        #except tvdb_exceptions.tvdb_error, e:
-        #    logger.log("Unable to contact theTVDB.com, it might be down: "+str(e), logger.ERROR)
+        self.loadFromDB()
         
         self.saveToDB()
     
@@ -130,7 +92,7 @@ class TVShow(object):
 
     def _setLocation(self, newLocation):
         logger.log("Setter sets location to " + newLocation, logger.DEBUG)
-        if ek.ek(os.path.isdir, newLocation) and ek.ek(os.path.isfile, ek.ek(os.path.join, newLocation, "tvshow.nfo")):
+        if ek.ek(os.path.isdir, newLocation):
             self._location = newLocation
             self._isDirGood = True
         else:
@@ -175,10 +137,39 @@ class TVShow(object):
         
         return self.episodes[season][episode]
 
+    def writeShowNFO(self):
+
+        if not ek.ek(os.path.isdir, self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+            return
+
+        xmlData = metadata.makeShowNFO(self.tvdbid)
+            
+        # Make it purdy
+        helpers.indentXML( xmlData )
+    
+        nfo_fh = ek.ek(open, ek.ek(os.path.join, self._location, "tvshow.nfo"), 'w')
+        nfo = etree.ElementTree( xmlData )
+        nfo.write( nfo_fh, encoding="utf-8" )
+        nfo_fh.close()
+
+    def writeMetadata(self):
+        
+        if not ek.ek(os.path.isdir, self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+            return
+
+        if sickbeard.CREATE_IMAGES:
+            self.getImages()
+        
+        if sickbeard.CREATE_METADATA:
+            self.writeShowNFO()
+            self.writeEpisodeNFOs()
+
 
     def writeEpisodeNFOs (self):
         
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
             return
         
@@ -203,22 +194,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Loading all episodes from the show directory " + self._location)
 
         # get file list
-        files = []
-        if not self.seasonfolders:
-            files = ek.ek(os.listdir, unicode(self._location))
-        else:
-            for curFile in ek.ek(os.listdir, unicode(self._location)):
-                if not ek.ek(os.path.isdir, ek.ek(os.path.join, self._location, curFile)):
-                    continue
-                match = re.match(".*[Ss]eason\s*(\d+)", curFile)
-                if match != None:
-                    files += [ek.ek(os.path.join, curFile, x) for x in ek.ek(os.listdir, unicode(ek.ek(os.path.join, self._location, curFile)))]
-
-        # check for season folders
-        #logger.log("Resulting file list: "+str(files))
-    
-        # find all media files
-        mediaFiles = filter(sickbeard.helpers.isMediaFile, files)
+        mediaFiles = helpers.listMediaFiles(self._location)
 
         # create TVEpisodes from each media file (if possible)
         for mediaFile in mediaFiles:
@@ -610,10 +586,11 @@ class TVShow(object):
             self.quality = int(sqlResults[0]["quality"])
             self.seasonfolders = int(sqlResults[0]["seasonfolders"])
             self.paused = int(sqlResults[0]["paused"])
+            try:
+                self.location = sqlResults[0]["location"]
+            except exceptions.NoNFOException:
+                pass
 
-            if self.tvdbid == 0:
-                self.tvdbid = int(sqlResults[0]["tvdb_id"])
-                
             if self.tvrid == 0:
                 self.tvrid = int(sqlResults[0]["tvr_id"])
     
@@ -631,6 +608,11 @@ class TVShow(object):
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
         myEp = t[self.tvdbid]
         
+        self.name = myEp["seriesname"]
+
+        self.genre = myEp['genre']
+        self.network = myEp['network']
+    
         if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
             self.airs = myEp["airs_dayofweek"] + " " + myEp["airs_time"]
 
@@ -764,14 +746,8 @@ class TVShow(object):
                 logger.log("The episode was deleted while we were refreshing it, moving on to the next one", logger.DEBUG)
                 continue
             
-            # if the path doesn't exist
-            # or if there's no season folders and it's not inside our show dir 
-            # or if there are season folders and it's in the main dir:
-            # or if it's not in our show dir at all
-            if not ek.ek(os.path.isfile, curLoc) or \
-            (not self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) != os.path.normpath(self.location)) or \
-            (self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) == os.path.normpath(self.location)) or \
-            os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
+            # if the path doesn't exist or if it's not in our show dir
+            if not ek.ek(os.path.isfile, curLoc) or not os.path.normpath(curLoc).startswith(os.path.normpath(self.location)):
             
                 logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
                 with curEp.lock:
@@ -1642,7 +1618,5 @@ class TVEpisode:
             finalName = re.sub("\s+", ".", finalName)
 
         return finalName
-        
-        
         
         
