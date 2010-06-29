@@ -187,8 +187,6 @@ class TVBinzCache(tvcache.TVCache):
 
 			quality = Quality.nameQuality(title)
 			
-			season = int(sInfo.findtext('{http://tvbinz.net/rss/tvb/}seasonNum'))
-
 			if sInfo.findtext('{http://tvbinz.net/rss/tvb/}tvrID') == None:
 				tvrid = 0
 			else:
@@ -196,4 +194,4 @@ class TVBinzCache(tvcache.TVCache):
 			
 			# since TVBinz normalizes the scene names it's more reliable to parse the episodes out myself
 			# than to rely on it, because it doesn't support multi-episode numbers in the feed
-			self._addCacheEntry(title, url, season, tvrage_id=tvrid, quality=quality)
+			self._addCacheEntry(title, url, tvrage_id=tvrid, quality=quality)
