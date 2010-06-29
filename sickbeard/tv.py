@@ -20,7 +20,6 @@ from __future__ import with_statement
 
 import os.path
 import datetime
-import sqlite3
 import threading
 import urllib
 import re
@@ -35,17 +34,15 @@ from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
 from sickbeard import db
-from sickbeard import helpers
-from sickbeard import exceptions
+from sickbeard import helpers, exceptions, logger
 from sickbeard import processTV
-from sickbeard import classes
 from sickbeard import tvrage
 from sickbeard import config
+from sickbeard import metadata
 
 from sickbeard import encodingKludge as ek
 
 from common import *
-from sickbeard import logger
 
 class TVShow(object):
 
@@ -140,10 +137,39 @@ class TVShow(object):
         
         return self.episodes[season][episode]
 
+    def writeShowNFO(self):
+
+        if not ek.ek(os.path.isdir, self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+            return
+
+        xmlData = metadata.makeShowNFO(self.tvdbid)
+            
+        # Make it purdy
+        helpers.indentXML( xmlData )
+    
+        nfo_fh = ek.ek(open, ek.ek(os.path.join, self._location, "tvshow.nfo"), 'w')
+        nfo = etree.ElementTree( xmlData )
+        nfo.write( nfo_fh, encoding="utf-8" )
+        nfo_fh.close()
+
+    def writeMetadata(self):
+        
+        if not ek.ek(os.path.isdir, self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+            return
+
+        if sickbeard.CREATE_IMAGES:
+            self.getImages()
+        
+        if sickbeard.CREATE_METADATA:
+            self.writeShowNFO()
+            self.writeEpisodeNFOs()
+
 
     def writeEpisodeNFOs (self):
         
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
             return
         
@@ -168,22 +194,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Loading all episodes from the show directory " + self._location)
 
         # get file list
-        files = []
-        if not self.seasonfolders:
-            files = ek.ek(os.listdir, unicode(self._location))
-        else:
-            for curFile in ek.ek(os.listdir, unicode(self._location)):
-                if not ek.ek(os.path.isdir, ek.ek(os.path.join, self._location, curFile)):
-                    continue
-                match = re.match(".*[Ss]eason\s*(\d+)", curFile)
-                if match != None:
-                    files += [ek.ek(os.path.join, curFile, x) for x in ek.ek(os.listdir, unicode(ek.ek(os.path.join, self._location, curFile)))]
-
-        # check for season folders
-        #logger.log("Resulting file list: "+str(files))
-    
-        # find all media files
-        mediaFiles = filter(sickbeard.helpers.isMediaFile, files)
+        mediaFiles = helpers.listMediaFiles(self._location)
 
         # create TVEpisodes from each media file (if possible)
         for mediaFile in mediaFiles:
@@ -735,14 +746,8 @@ class TVShow(object):
                 logger.log("The episode was deleted while we were refreshing it, moving on to the next one", logger.DEBUG)
                 continue
             
-            # if the path doesn't exist
-            # or if there's no season folders and it's not inside our show dir 
-            # or if there are season folders and it's in the main dir:
-            # or if it's not in our show dir at all
-            if not ek.ek(os.path.isfile, curLoc) or \
-            (not self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) != os.path.normpath(self.location)) or \
-            (self.seasonfolders and os.path.normpath(os.path.dirname(curLoc)) == os.path.normpath(self.location)) or \
-            os.path.normpath(os.path.commonprefix([os.path.normpath(x) for x in (curLoc, self.location)])) != os.path.normpath(self.location):
+            # if the path doesn't exist or if it's not in our show dir
+            if not ek.ek(os.path.isfile, curLoc) or not os.path.normpath(curLoc).startswith(os.path.normpath(self.location)):
             
                 logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
                 with curEp.lock:
@@ -1583,7 +1588,7 @@ class TVEpisode:
         if naming_quality == None:
             naming_quality = sickbeard.NAMING_QUALITY
         
-        if "Talk Show" in self.show.genre:
+        if "Talk Show" in self.show.genre and sickbeard.NAMING_DATES:
             goodEpString = str(self.airdate)
         else:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
@@ -1615,46 +1620,3 @@ class TVEpisode:
         return finalName
         
         
-        
-        
-
-def getTVDBIDFromNFO(dir):
-
-    if not ek.ek(os.path.isdir, dir):
-        logger.log("Show dir doesn't exist, can't load NFO")
-        raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
-    
-    logger.log("Loading show info from NFO")
-
-    xmlFile = ek.ek(os.path.join, dir, "tvshow.nfo")
-    
-    try:
-        xmlFileObj = ek.ek(open, xmlFile, 'r')
-        showXML = etree.ElementTree(file = xmlFileObj)
-
-        if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
-            raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id):" \
-                + str(showXML.findtext('title')) + " " \
-                + str(showXML.findtext('tvdbid')) + " " \
-                + str(showXML.findtext('id')))
-        
-        name = showXML.findtext('title')
-        if showXML.findtext('tvdbid') != None:
-            tvdb_id = int(showXML.findtext('tvdbid'))
-        elif showXML.findtext('id'):
-            tvdb_id = int(showXML.findtext('id'))
-        else:
-            raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
-
-    except (exceptions.NoNFOException, SyntaxError), e:
-        logger.log("There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
-        logger.log("Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
-
-        try:
-            xmlFileObj.close()
-            ek.ek(os.rename, xmlFile, xmlFile + ".old")
-        except Exception, e:
-            logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
-        raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
-
-    return tvdb_id

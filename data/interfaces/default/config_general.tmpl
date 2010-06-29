@@ -67,12 +67,12 @@ Directory where Sick Beard should place its logs<br />
 <br />
 
 <label for="create_metadata"><input type="checkbox" name="create_metadata" id="create_metadata" #if $sickbeard.CREATE_METADATA then "CHECKED" else ""#> <strong>Create metadata</strong></label><br />
-If checked Sick Beard will create nfo files<br />
+If checked Sick Beard will create nfo/tbn files<br />
 for all your media<br />
 <br />
 
 <label for="create_images"><input type="checkbox" name="create_images" id="create_images" #if $sickbeard.CREATE_IMAGES then "CHECKED" else ""#> <strong>Create images</strong></label><br />
-If checked Sick Beard will create tbn/fanart/posters<br />
+If checked Sick Beard will create fanart/posters/season thumbs<br />
 for all your media<br />
 <br />
 
@@ -176,6 +176,11 @@ If checked all spaces will be replaced with periods<br />
 
 <label for="naming_quality"><input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "CHECKED" else ""#> <strong>Include quality</strong></label><br />
 If checked the episode quality will be appended to the end of the file name<br />
+<br />
+
+<label for="naming_dates"><input type="checkbox" name="naming_dates" id="naming_dates" #if $sickbeard.NAMING_DATES then "CHECKED" else ""#> <strong>Use dates for air-by-date shows</strong></label><br />
+If checked the date string will be used instead of the<br />
+season/episode for air-by-date shows (eg. 2010-02-15 vs S12E23)<br />
 <br />
 
 <strong>Separator Style</strong><br />

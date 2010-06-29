@@ -25,7 +25,7 @@ import datetime
 from lib.tvnamer.utils import FileParser 
 from lib.tvnamer import tvnamer_exceptions
 
-resultFilters = ("subpack", "nlsub", "samplefix", "nfofix", "sample", "subbed", "extras", "special")
+resultFilters = ("subpack", "nlsub", "samplefix", "nfofix", "sample", "subbed", "extras", "special", "subs")
 
 def filterBadReleases(name):
 
