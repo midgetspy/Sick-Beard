@@ -90,7 +90,7 @@ class TVCache():
         self._clearCache()
         
         if not self._checkAuth(data):
-            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect.")
+            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
         
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
@@ -99,6 +99,10 @@ class TVCache():
             logger.log("Error trying to load "+self.provider.name+" RSS feed: "+str(e), logger.ERROR)
             return []
             
+        if responseSoup.getroot().tag != 'rss':
+            logger.log("Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
+            return []
+        
         for item in items:
 
             self._parseItem(item)

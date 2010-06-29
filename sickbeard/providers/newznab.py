@@ -20,7 +20,7 @@
 
 import urllib
 import datetime
-import time
+import re
 
 import xml.etree.cElementTree as etree
 
@@ -37,24 +37,30 @@ from sickbeard import tvcache
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
-class NZBsProvider(generic.NZBProvider):
+class NewznabProvider(generic.NZBProvider):
 	
-	def __init__(self):
+	def __init__(self, name, url, key=''):
 		
-		generic.NZBProvider.__init__(self, "NZBs.org")
+		generic.NZBProvider.__init__(self, name)
 		
-		self.cache = NZBsCache(self)
+		self.cache = NewznabCache(self)
 		
-		self.url = 'http://www.nzbs.org/'
+		self.url = url
+		self.key = key
+		
+		self.enabled = True
+		
+		self.default = False
+
+	def configStr(self):
+		return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled)) 
 
 	def isEnabled(self):
-		return sickbeard.NZBS
-
-	def _checkAuth(self):
-		if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
-			raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
+		return self.enabled
 
 	def findEpisode (self, episode, manualSearch=False):
+	
+		return []
 	
 		nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
 	
@@ -64,13 +70,13 @@ class NZBsProvider(generic.NZBProvider):
 		if nzbResults or not manualSearch:
 			return nzbResults
 	
-		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(episode))
+		sceneShowSearchStrings = set(sceneHelpers.makeSceneShowSearchStrings(episode.show))
 		
 		itemList = []
 		results = []
 	
-		for curString in sceneSearchStrings:
-			itemList += self._doSearch("^"+curString)
+		for curString in sceneShowSearchStrings:
+			itemList += self._doSearch('^"'+curString+'"', episode.season, episode.episode)
 	
 		for item in itemList:
 			
@@ -98,11 +104,13 @@ class NZBsProvider(generic.NZBProvider):
 
 	def findSeasonResults(self, show, season):
 		
+		return {}
+	
 		itemList = []
 		results = {}
 	
-		for curString in sceneHelpers.makeSceneSeasonSearchString(show, season):
-			itemList += self._doSearch("^"+curString)
+		for curString in sceneHelpers.makeSceneShowSearchStrings(show):
+			itemList += self._doSearch('^"'+curString+'"', season)
 	
 		for item in itemList:
 	
@@ -165,25 +173,25 @@ class NZBsProvider(generic.NZBProvider):
 		return results
 		
 
-	def _doSearch(self, curString):
+	def _doSearch(self, showName, season, episode=None):
 	
-		params = {"action": "search",
-				  "q": curString.encode('utf-8'),
-				  "dl": 1,
-				  "i": sickbeard.NZBS_UID,
-				  "h": sickbeard.NZBS_HASH,
+		params = {"t": "tvsearch",
+				  "q": showName.encode('utf-8'),
+				  "season": season,
 				  "age": sickbeard.USENET_RETENTION,
-				  "num": 100,
-				  "type": 1}
+				  "cat": '5030,5040'}
+
+		if self.key:
+			params['apikey'] = self.key
 		
-		searchURL = self.provider.url + "rss.php?" + urllib.urlencode(params)
+		if episode:
+			params['episode'] = episode
+
+		searchURL = self.url + 'api?' + urllib.urlencode(params)
 	
 		logger.log("Search string: " + searchURL, logger.DEBUG)
 	
 		data = self.getURL(searchURL)
-	
-		# Pause to avoid 503's
-		time.sleep(5)
 	
 		if data == None:
 			return []
@@ -192,9 +200,25 @@ class NZBsProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log("Error trying to load NZBs.org RSS feed: "+str(e), logger.ERROR)
+			logger.log("Error trying to load "+self.name+" RSS feed: "+str(e), logger.ERROR)
 			return []
 			
+		if responseSoup.getroot().tag == 'error':
+			code = responseSoup.getroot().get('code')
+			if code == '100':
+				raise exceptions.AuthException("Your API key for "+self.name+" is incorrect, check your config.")
+			elif code == '101':
+				raise exceptions.AuthException("Your account on "+self.name+" has been suspended, contact the administrator.")
+			elif code == '102':
+				raise exceptions.AuthException("Your account isn't allowed to use the API on "+self.name+", contact the administrator")
+			else:
+				logger.log("Unknown error given from "+self.name+": "+responseSoup.getroot().get('description'), logger.ERROR)
+				return []
+				
+		if responseSoup.getroot().tag != 'rss':
+			logger.log("Resulting XML from "+self.name+" isn't RSS, not parsing it", logger.ERROR)
+			return []
+
 		results = []
 		
 		for curItem in items:
@@ -202,23 +226,22 @@ class NZBsProvider(generic.NZBProvider):
 			url = curItem.findtext('link')
 	
 			if not title or not url:
-				logger.log("The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+				logger.log("The XML returned from the "+self.name+" RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 				continue
 	
 			url = url.replace('&amp;','&')
 	
-			if "&i=" not in url and "&h=" not in url:
-				raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
-			
 			results.append(curItem)
 		
 		return results
 
 	def findPropers(self, date=None):
 	
+		return []
+	
 		results = []
 		
-		for curString in (".PROPER.", ".REPACK."):
+		for curString in ("PROPER", "REPACK"):
 		
 			for curResult in self._doSearch(curString):
 	
@@ -233,7 +256,7 @@ class NZBsProvider(generic.NZBProvider):
 		
 		return results
 
-class NZBsCache(tvcache.TVCache):
+class NewznabCache(tvcache.TVCache):
 	
 	def __init__(self, provider):
 
@@ -243,24 +266,41 @@ class NZBsCache(tvcache.TVCache):
 		tvcache.TVCache.__init__(self, provider)
 	
 	def _getRSSData(self):
-		url = self.provider.url + 'rss.php?'
-		urlArgs = {'type': 1,
-				   'dl': 1,
-				   'num': 100,
-				   'i': sickbeard.NZBS_UID,
-				   'h': sickbeard.NZBS_HASH,
-				   'age': sickbeard.USENET_RETENTION}
-
-		url += urllib.urlencode(urlArgs)
 		
-		logger.log("NZBs cache update URL: "+ url, logger.DEBUG)
+		return None
+		
+		params = {"t": "tvsearch",
+				  "age": sickbeard.USENET_RETENTION,
+				  "cat": '5040,5030'}
+
+		if self.provider.key:
+			params['apikey'] = self.provider.key
+
+		url = self.provider.url + 'api?' + urllib.urlencode(params)
+		
+		logger.log(self.provider.name + " cache update URL: "+ url, logger.DEBUG)
 		
 		data = self.provider.getURL(url)
 		
 		return data
 	
-	def _checkItemAuth(self, title, url):
-		if "&i=" not in url and "&h=" not in url:
-			raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
-	
-provider = NZBsProvider()
+	def _checkAuth(self, data):
+
+		try:
+			responseSoup = etree.ElementTree(etree.XML(data))
+		except Exception, e:
+			return True
+			
+		if responseSoup.getroot().tag == 'error':
+			code = responseSoup.getroot().get('code')
+			if code == '100':
+				raise exceptions.AuthException("Your API key for "+self.name+" is incorrect, check your config.")
+			elif code == '101':
+				raise exceptions.AuthException("Your account on "+self.name+" has been suspended, contact the administrator.")
+			elif code == '102':
+				raise exceptions.AuthException("Your account isn't allowed to use the API on "+self.name+", contact the administrator")
+			else:
+				logger.log("Unknown error given from "+self.name+": "+responseSoup.getroot().get('description'), logger.ERROR)
+				return False
+		
+		return True
