@@ -133,6 +133,9 @@ class ProperFinder():
                 if curProper.tvdbid != -1:
                     break
 
+            if curProper.tvdbid == -1:
+                continue
+
             # if we have an air-by-date show then get the real season/episode numbers
             if curProper.season == -1 and curProper.tvdbid:
                 try:
@@ -169,7 +172,7 @@ class ProperFinder():
 
             # make sure the episode has been downloaded before
             myDB = db.DBConnection() 
-            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action IN ("+",".join(common.SNATCHED)+") AND date >= ?",
+            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action IN ("+",".join(Quality.SNATCHED)+") AND date >= ?",
                         [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, historyLimit.strftime(history.dateFormat)])
              
             # if we didn't download this episode in the first place we don't know what quality to use for the proper so we can't do it
