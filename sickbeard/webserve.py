@@ -925,11 +925,18 @@ class NewHomeAddShows:
     @cherrypy.expose
     def searchTVDBForShowName(self, name):
         
-        url = "http://thetvdb.com/api/GetSeries.php?seriesname=%s&language=en"
+        url = "http://thetvdb.com/api/GetSeries.php?seriesname=%s&language=en" % name
         
-        urlObj = urllib.urlopen(url % name.encode('utf-8'))
+        logger.log("Looking up "+name+" at "+url, logger.DEBUG)
         
-        seriesXML = etree.ElementTree(file = urlObj)
+        urlObj = urllib.urlopen(url.encode('utf-8'))
+        urlData = "".join(urlObj.readlines())
+        
+        try:
+            seriesXML = etree.ElementTree(etree.XML(urlData))
+        except Exception, e:
+            logger.log("Unable to parse XML for some reason: "+str(e)+" from XML: "+urlData, logger.ERROR)
+            return ''
         
         series = seriesXML.getiterator('Series')
         
