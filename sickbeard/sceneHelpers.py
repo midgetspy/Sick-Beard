@@ -44,7 +44,7 @@ def filterBadReleases(name):
     
     # if any of the bad strings are in the name then say no
     for x in resultFilters:
-        if re.search('(^|\W)'+x+'($|\W)', epInfo.episodename, re.I):
+        if re.search('(^|[\W_])'+x+'($|[\W_])', epInfo.episodename, re.I):
             logger.log("Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
 
