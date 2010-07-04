@@ -925,11 +925,14 @@ class NewHomeAddShows:
     @cherrypy.expose
     def searchTVDBForShowName(self, name):
         
-        url = "http://thetvdb.com/api/GetSeries.php?seriesname=%s&language=en" % name
+        baseURL = "http://thetvdb.com/api/GetSeries.php?" 
         
-        logger.log("Looking up "+name+" at "+url, logger.DEBUG)
+        params = {'seriesname': name.encode('utf-8'),
+                  'language': 'en'}
         
-        urlObj = urllib.urlopen(url.encode('utf-8'))
+        finalURL = baseURL + urllib.urlencode(params)
+        
+        urlObj = urllib.urlopen(finalURL)
         urlData = "".join(urlObj.readlines())
         
         try:
