@@ -144,7 +144,9 @@ class BacklogSearcher:
                 numSeasonsDone += 1.0
                 self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
 
-        self._set_lastBacklog(curDate)
+        # don't consider this an actual backlog search if we only did recent eps
+        if fromDate == datetime.date.fromordinal(1):
+            self._set_lastBacklog(curDate)
             
         self.amActive = False
         self._resetPI()
