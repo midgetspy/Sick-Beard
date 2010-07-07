@@ -176,7 +176,7 @@ class NZBsProvider(generic.NZBProvider):
 				  "num": 100,
 				  "type": 1}
 		
-		searchURL = self.provider.url + "rss.php?" + urllib.urlencode(params)
+		searchURL = self.url + "rss.php?" + urllib.urlencode(params)
 	
 		logger.log("Search string: " + searchURL, logger.DEBUG)
 	
