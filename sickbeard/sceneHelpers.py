@@ -25,7 +25,9 @@ import datetime
 from lib.tvnamer.utils import FileParser 
 from lib.tvnamer import tvnamer_exceptions
 
-resultFilters = ("subpack", "nlsub", "samplefix", "nfofix", "sample", "subbed", "extras", "special", "subs")
+resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
+                 "dirfix", "samplefix", "nfofix",
+                 "sample", "extras", "special")
 
 def filterBadReleases(name):
 
@@ -42,7 +44,7 @@ def filterBadReleases(name):
     
     # if any of the bad strings are in the name then say no
     for x in resultFilters:
-        if x in epInfo.episodename.lower():
+        if re.search('(^|[\W_])'+x+'($|[\W_])', epInfo.episodename, re.I):
             logger.log("Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
 

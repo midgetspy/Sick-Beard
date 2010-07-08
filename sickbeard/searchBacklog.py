@@ -70,15 +70,17 @@ class BacklogSearcher:
         self._get_lastBacklog()
         
         curDate = datetime.date.today().toordinal()
+        fromDate = datetime.date.fromordinal(1)
         
         if not curDate - self._lastBacklog >= self.cycleTime:
-            return
+            logger.log("Running limited backlog on recently missed episodes only")
+            fromDate = datetime.date.today() - datetime.timedelta(days=7)
 
         self.amActive = True
         self.amPaused = False
         
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes eps, tv_shows shows WHERE season != 0 AND eps.showid = shows.tvdb_id AND shows.paused = 0")
+        sqlResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes ep, tv_shows show WHERE season != 0 AND ep.showid = show.tvdb_id AND show.paused = 0 AND ep.airdate > ?", [fromDate.toordinal()])
 
         totalSeasons = float(len(sqlResults))
         numSeasonsDone = 0.0
@@ -93,7 +95,7 @@ class BacklogSearcher:
 
             anyQualities, bestQualities = Quality.splitQuality(curShow.quality)
             
-            sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0", [curShow.tvdbid])
+            sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0 and airdate > ?", [curShow.tvdbid, fromDate.toordinal()])
 
             for curSeasonResult in sqlResults:
                 curSeason = int(curSeasonResult["season"])
@@ -142,7 +144,9 @@ class BacklogSearcher:
                 numSeasonsDone += 1.0
                 self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
 
-        self._set_lastBacklog(curDate)
+        # don't consider this an actual backlog search if we only did recent eps
+        if fromDate == datetime.date.fromordinal(1):
+            self._set_lastBacklog(curDate)
             
         self.amActive = False
         self._resetPI()
