@@ -200,7 +200,7 @@ class ProperFinder():
                 epObj = showObj.getEpisode(curProper.season, curProper.episode)
                 
                 # make the result object
-                result = classes.SearchResult(epObj)
+                result = classes.SearchResult([epObj])
                 result.url = curProper.url
                 result.provider = curProper.provider.providerName.lower()
                 result.resultType = curProper.provider.providerType
