@@ -203,7 +203,7 @@ def _doSearch(curString, quotes=False):
 			  "subcat": "6,41",
 			  "english": 1}
 	
-	searchURL = "http://services.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
+	searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
 	logger.log("Search string: " + searchURL, logger.DEBUG)
 
@@ -277,7 +277,7 @@ class NZBMatrixCache(tvcache.TVCache):
 			return
 		
 		# get all records since the last timestamp
-		url = "http://services.nzbmatrix.com/rss.php?"
+		url = "http://rss.nzbmatrix.com/rss.php?"
 
 		urlArgs = {'page': 'download',
 				   'username': sickbeard.NZBMATRIX_USERNAME,
