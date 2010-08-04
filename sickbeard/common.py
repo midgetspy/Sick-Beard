@@ -249,7 +249,9 @@ sceneExceptions = {72546: ['CSI'],
                    71256: ['The Daily Show'],
                    73387: ['Craig Ferguson'],
                    85355: ['Jimmy Fallon'],
-                   75088: ['David Letterman']
+                   75088: ['David Letterman'],
+                   76706: ['Big Brother (US)'],
+                   105521: ['The Colony', 'The Colony (US)']
                    }
 
 countryList = {'Australia': 'AU',

@@ -172,7 +172,7 @@ class ProperFinder():
 
             # make sure the episode has been downloaded before
             myDB = db.DBConnection() 
-            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action IN ("+",".join(Quality.SNATCHED)+") AND date >= ?",
+            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action IN ("+",".join([str(x) for x in Quality.SNATCHED])+") AND date >= ?",
                         [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, historyLimit.strftime(history.dateFormat)])
              
             # if we didn't download this episode in the first place we don't know what quality to use for the proper so we can't do it
@@ -200,7 +200,7 @@ class ProperFinder():
                 epObj = showObj.getEpisode(curProper.season, curProper.episode)
                 
                 # make the result object
-                result = classes.SearchResult(epObj)
+                result = classes.SearchResult([epObj])
                 result.url = curProper.url
                 result.provider = curProper.provider.getID()
                 result.resultType = curProper.provider.providerType

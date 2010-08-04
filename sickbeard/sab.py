@@ -90,7 +90,11 @@ def sendNZB(nzb):
         logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
         return False
     
-    result = f.readlines()
+    try:
+        result = f.readlines()
+    except Exception, e:
+        logger.log("Error trying to get result from SAB, NZB not sent: " + str(e), logger.ERROR)
+        return False
 
     if len(result) == 0:
         logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
