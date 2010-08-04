@@ -520,7 +520,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper(newFile + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
             existingFile = newFile
 
-        if existingFile:
+        if existingFile and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, existingFile):
             deleteAssociatedFiles(existingFile)
             
     # update the statuses before we rename so the quality goes into the name properly
