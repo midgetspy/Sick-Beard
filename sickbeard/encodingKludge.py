@@ -32,14 +32,14 @@ def fixListEncodings(x):
 def ek(func, *args):
     result = None
 
-    if os.path.supports_unicode_filenames:
-        return func(*args)
+    if os.name == 'nt':
+        result = func(*args)
     else:
         result = func(*[x.encode('UTF-8') for x in args])
     
-        if type(result) == list:
-            return fixListEncodings(result)
-        elif type(result) == str:
-            return fixStupidEncodings(result)
-        else:
-            return result
+    if type(result) == list:
+        return fixListEncodings(result)
+    elif type(result) == str:
+        return fixStupidEncodings(result)
+    else:
+        return result
