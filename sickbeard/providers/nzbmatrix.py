@@ -230,8 +230,11 @@ def _doSearch(curString, quotes=False):
 		title = curItem.findtext('title')
 		url = curItem.findtext('link')
 
+		if title == 'Error: No Results Found For Your Search':
+			continue
+
 		if not title or not url:
-			logger.log("The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+			logger.log("The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable: "+searchResult, logger.ERROR)
 			continue
 
 		results.append(curItem)
