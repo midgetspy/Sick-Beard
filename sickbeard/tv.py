@@ -512,7 +512,7 @@ class TVShow(object):
                     curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
 
 
-            elif sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.DOWNLOADED:
+            elif sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.DOWNLOADED + [ARCHIVED]:
                 
                 oldStatus, oldQuality = Quality.splitCompositeStatus(curEp.status)
                 newQuality = Quality.nameQuality(file)
