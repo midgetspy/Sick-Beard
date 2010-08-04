@@ -586,10 +586,8 @@ class TVShow(object):
             self.quality = int(sqlResults[0]["quality"])
             self.seasonfolders = int(sqlResults[0]["seasonfolders"])
             self.paused = int(sqlResults[0]["paused"])
-            try:
-                self.location = sqlResults[0]["location"]
-            except exceptions.NoNFOException:
-                pass
+
+            self._location = sqlResults[0]["location"]
 
             if self.tvrid == 0:
                 self.tvrid = int(sqlResults[0]["tvr_id"])
