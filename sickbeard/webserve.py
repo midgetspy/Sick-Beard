@@ -1587,16 +1587,15 @@ class Home:
         
         if not foundEpisode:
             message = 'No downloads were found'
-            flash.error(message,
-                        "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
+            flash.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
             logger.log(message)
         
         else:
 
             # just use the first result for now
-            logger.log("Downloading episode from " + foundEpisode.url + "<br />\n")
+            logger.log("Downloading episode from " + foundEpisode.url)
             result = search.snatchEpisode(foundEpisode)
-            providerModule = providers.getProviderClass(foundEpisode.provider)
+            providerModule = foundEpisode.provider
             if providerModule == None:
                 flash.error('Provider is configured incorrectly, unable to download')
             else: 

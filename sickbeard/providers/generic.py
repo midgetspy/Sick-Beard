@@ -76,11 +76,15 @@ class GenericProvider:
         """
         
         if self.providerType == GenericProvider.NZB:
-            return classes.NZBSearchResult(episodes)
+            result = classes.NZBSearchResult(episodes)
         elif self.providerType == GenericProvider.TORRENT:
-            return classes.TorrentSearchResult(episodes)
+            result = classes.TorrentSearchResult(episodes)
         else:
-            return classes.SearchResult(episodes)
+            result = classes.SearchResult(episodes)
+        
+        result.provider = self
+        
+        return result
 
 
     def getURL(self, url):

@@ -86,7 +86,6 @@ class NZBsProvider(generic.NZBProvider):
 			logger.log("Found result " + title + " at " + url, logger.DEBUG)
 			
 			result = self.getResult([episode])
-			result.provider = self.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality
@@ -141,7 +140,6 @@ class NZBsProvider(generic.NZBProvider):
 				epObj.append(show.getEpisode(season, curEp))
 			
 			result = self.getResult(epObj)
-			result.provider = self.provider.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality

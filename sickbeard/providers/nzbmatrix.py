@@ -88,7 +88,6 @@ class NZBMatrixProvider(generic.NZBProvider):
 			logger.log("Found result " + title + " at " + url, logger.DEBUG)
 			
 			result = self.getResult([episode])
-			result.provider = self.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality
@@ -144,7 +143,6 @@ class NZBMatrixProvider(generic.NZBProvider):
 				epObj.append(show.getEpisode(season, curEp))
 			
 			result = self.getResult(epObj)
-			result.provider = self.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality
@@ -207,6 +205,9 @@ class NZBMatrixProvider(generic.NZBProvider):
 		for curItem in items:
 			title = curItem.findtext('title')
 			url = curItem.findtext('link')
+
+			if title == 'Error: No Results Found For Your Search':
+				continue
 	
 			if not title or not url:
 				logger.log("The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable", logger.ERROR)

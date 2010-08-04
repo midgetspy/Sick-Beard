@@ -309,7 +309,6 @@ class TVCache():
                 logger.log("Found result " + title + " at " + url)
         
                 result = self.provider.getResult([epObj])
-                result.provider = self.providerID
                 result.url = url 
                 result.name = title
                 result.quality = curQuality

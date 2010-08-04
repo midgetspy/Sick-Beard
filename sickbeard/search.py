@@ -38,7 +38,7 @@ from sickbeard import providers
 
 def _downloadResult(result):
 
-	resProvider = providers.getProviderClass(result.provider)
+	resProvider = result.provider
 
 	newResult = False
 

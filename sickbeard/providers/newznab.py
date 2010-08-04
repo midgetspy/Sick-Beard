@@ -60,9 +60,8 @@ class NewznabProvider(generic.NZBProvider):
 
 	def findEpisode (self, episode, manualSearch=False):
 	
-		return []
-	
 		nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
+		return nzbResults
 	
 		# if we got some results then use them no matter what.
 		# OR
@@ -267,8 +266,6 @@ class NewznabCache(tvcache.TVCache):
 	
 	def _getRSSData(self):
 		
-		return None
-		
 		params = {"t": "tvsearch",
 				  "age": sickbeard.USENET_RETENTION,
 				  "cat": '5040,5030'}
@@ -294,13 +291,13 @@ class NewznabCache(tvcache.TVCache):
 		if responseSoup.getroot().tag == 'error':
 			code = responseSoup.getroot().get('code')
 			if code == '100':
-				raise exceptions.AuthException("Your API key for "+self.name+" is incorrect, check your config.")
+				raise exceptions.AuthException("Your API key for "+self.provider.name+" is incorrect, check your config.")
 			elif code == '101':
-				raise exceptions.AuthException("Your account on "+self.name+" has been suspended, contact the administrator.")
+				raise exceptions.AuthException("Your account on "+self.provider.name+" has been suspended, contact the administrator.")
 			elif code == '102':
-				raise exceptions.AuthException("Your account isn't allowed to use the API on "+self.name+", contact the administrator")
+				raise exceptions.AuthException("Your account isn't allowed to use the API on "+self.provider.name+", contact the administrator")
 			else:
-				logger.log("Unknown error given from "+self.name+": "+responseSoup.getroot().get('description'), logger.ERROR)
+				logger.log("Unknown error given from "+self.provider.name+": "+responseSoup.getroot().get('description'), logger.ERROR)
 				return False
 		
 		return True
