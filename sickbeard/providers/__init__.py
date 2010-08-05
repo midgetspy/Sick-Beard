@@ -36,6 +36,9 @@ def getNewznabProviderList(data):
     providerDict = dict(zip([x.name for x in providerList], providerList))
     
     for curDefault in defaultList:
+        if not curDefault:
+            continue
+        
         if curDefault.name not in providerDict:
             curDefault.default = True
             providerList.append(curDefault)
@@ -63,7 +66,6 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return ''
     return 'NZB.su|http://www.nzb.su/||1'
 
 

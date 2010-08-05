@@ -46,9 +46,9 @@
 	  #end if
 	#else
       #if $hItem["provider"] > 0
-        #set $providerModule = $providers.getProviderModule($hItem["provider"])
-        #if $providerModule != None: 
-        <img src="$sbRoot/images/providers/<%=providerModule.providerName.lower()%>.gif" width="16" height="16" alt="$providerModule.providerName">
+        #set $provider = $providers.getProviderClass($hItem["provider"])
+        #if $provider != None: 
+        <img src="$sbRoot/images/providers/<%=provider.getID()%>.gif" width="16" height="16" alt="$provider.name">
         #end if
       #end if
     #end if
