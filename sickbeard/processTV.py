@@ -18,7 +18,7 @@
 
 from __future__ import with_statement
 
-import os
+import os, subprocess
 import shutil
 import sys
 import re
@@ -555,7 +555,6 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     rootEp.createMetaFiles()
     rootEp.saveToDB()
 
-
     # try updating just show path first
     if sickbeard.XBMC_UPDATE_LIBRARY:
         for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
@@ -563,6 +562,13 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 # do a full update if requested
                 returnStr += logHelper("Update of show directory failed on " + curHost + ", trying full update as requested")
                 notifiers.xbmc.updateLibrary(curHost)
+
+    for curScriptName in sickbeard.EXTRA_SCRIPTS:
+        args = [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode)]
+        returnStr += logHelper("Executing script "+curScriptName+" with args "+str(args))
+        p = subprocess.Popen([curScriptName]+args)
+        out, err = p.communicate()
+        returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
 
     returnStr += logHelper("Post processing finished successfully", logger.DEBUG)
 

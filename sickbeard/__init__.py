@@ -161,6 +161,8 @@ USE_GROWL = False
 GROWL_HOST = None
 GROWL_PASSWORD = None
 
+EXTRA_SCRIPTS = []
+
 __INITIALIZED__ = False
 
 def CheckSection(sec):
@@ -263,7 +265,7 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES
+                NAMING_DATES, EXTRA_SCRIPTS
 
         
         if __INITIALIZED__:
@@ -391,6 +393,8 @@ def initialize(consoleLogging=True):
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
+
+        EXTRA_SCRIPTS = check_setting_str(CFG, 'General', 'extra_scripts', '').split('|')
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
