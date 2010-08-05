@@ -61,12 +61,10 @@ class SearchResult:
 
     def __str__(self):
         
-        providerClass = providers.getProviderClass(self.provider)
-        
-        if providerClass == None:
+        if self.provider == None:
             return "Invalid provider, unable to print self"
         
-        myString = providerClass.name + " @ " + self.url + "\n"
+        myString = self.provider.name + " @ " + self.url + "\n"
         myString += "Extra Info:\n"
         for extra in self.extraInfo:
             myString += "  " + extra + "\n"
