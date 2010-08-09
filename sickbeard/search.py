@@ -285,7 +285,7 @@ def findSeason(show, season):
 
 		# if we need every ep in the season then just download this and be done with it
 		if allWanted:
-			logger.log("Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.name, logger.DEBUG)
+			logger.log("Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.name)
 			epObjs = []
 			for curEpNum in allEps:
 				epObjs.append(show.getEpisode(season, curEpNum))
@@ -293,7 +293,7 @@ def findSeason(show, season):
 			return [bestSeasonNZB]
 
 		elif not anyWanted:
-			logger.log("No eps from this season are wanted at this quality, ignoring this result", logger.DEBUG)
+			logger.log("No eps from this season are wanted at this quality, ignoring the result of "+bestSeasonNZB.name, logger.DEBUG)
 			
 		else:
 
