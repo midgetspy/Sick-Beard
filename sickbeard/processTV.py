@@ -18,7 +18,7 @@
 
 from __future__ import with_statement
 
-import os, subprocess
+import os, subprocess, shlex
 import shutil
 import sys
 import re
@@ -521,7 +521,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper(newFile + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
             existingFile = newFile
 
-        if existingFile:
+        if existingFile and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, existingFile):
             deleteAssociatedFiles(existingFile)
             
     # update the statuses before we rename so the quality goes into the name properly
@@ -564,9 +564,9 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 notifiers.xbmc.updateLibrary(curHost)
 
     for curScriptName in sickbeard.EXTRA_SCRIPTS:
-        args = [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode)]
-        returnStr += logHelper("Executing script "+curScriptName+" with args "+str(args))
-        p = subprocess.Popen([curScriptName]+args)
+        script_cmd = shlex.split(curScriptName) + [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode)]
+        returnStr += logHelper("Executing command "+str(script_cmd))
+        p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         out, err = p.communicate()
         returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
 
