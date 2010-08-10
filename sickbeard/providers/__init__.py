@@ -82,4 +82,12 @@ def getProviderClass(name):
     if provider:
         return provider.provider
     else:
+        
+        providerMatch = [x for x in sickbeard.newznabProviderList if x.name == name]
+        
+        if len(providerMatch) != 1:
+            return None
+        else:
+            return providerMatch[0]
+
         return None

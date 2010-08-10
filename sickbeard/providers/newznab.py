@@ -55,6 +55,9 @@ class NewznabProvider(generic.NZBProvider):
 	def configStr(self):
 		return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled)) 
 
+	def imageName(self):
+		return 'newznab.gif'
+
 	def isEnabled(self):
 		return self.enabled
 

@@ -53,6 +53,9 @@ class GenericProvider:
     def getID(self):
         return re.sub("[^\w\d_]", "_", self.name).lower()
 
+    def imageName(self):
+        return self.getID() + '.gif'
+
     def _checkAuth(self):
         return
 
