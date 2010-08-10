@@ -18,7 +18,7 @@
 
 from __future__ import with_statement
 
-import os, subprocess
+import os, subprocess, shlex
 import shutil
 import sys
 import re
@@ -563,9 +563,9 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 notifiers.xbmc.updateLibrary(curHost)
 
     for curScriptName in sickbeard.EXTRA_SCRIPTS:
-        args = [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode)]
-        returnStr += logHelper("Executing script "+curScriptName+" with args "+str(args))
-        p = subprocess.Popen([curScriptName]+args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        script_cmd = shlex.split(curScriptName) + [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode)]
+        returnStr += logHelper("Executing command "+str(script_cmd))
+        p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         out, err = p.communicate()
         returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
 
