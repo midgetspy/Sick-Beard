@@ -146,7 +146,7 @@ class TVCache():
         myDB = self._getDB()
         myDB.upsert("lastUpdate",
                     {'time': int(time.mktime(toDate.timetuple()))},
-                    {'provider': self.provider.name})
+                    {'provider': self.providerID})
     
     lastUpdate = property(_getLastUpdate)
     
