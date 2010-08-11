@@ -51,7 +51,11 @@ class GenericProvider:
         urllib._urlopener = classes.SickBeardURLopener()
 
     def getID(self):
-        return re.sub("[^\w\d_]", "_", self.name).lower()
+        return GenericProvider.makeID(self.name)
+    
+    @staticmethod
+    def makeID(name):
+        return re.sub("[^\w\d_]", "_", name).lower()
 
     def imageName(self):
         return self.getID() + '.gif'

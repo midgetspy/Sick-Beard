@@ -1,4 +1,4 @@
-__all__ = ['eztv','nzbmatrix','nzbs','tvbinz','nzbsrus','binreq']
+__all__ = ['eztv','nzbmatrix','nzbs_org','tvbinz','nzbsrus','binreq']
 
 import sickbeard
 
@@ -23,10 +23,9 @@ def sortedProviderList():
 
     return newList
 
-def getProviderList():
+def makeProviderList():
     
-    # add any modules that are missing from that list
-    return filter(lambda x: x != None, [getProviderClass(y) for y in __all__])
+    return [x.provider for x in [getProviderModule(y) for y in __all__] if x]
 
 def getNewznabProviderList(data):
 
@@ -77,17 +76,11 @@ def getProviderModule(name):
     else:
         return None
 
-def getProviderClass(name):
-    provider = getProviderModule(name)
-    if provider:
-        return provider.provider
-    else:
-        
-        providerMatch = [x for x in sickbeard.newznabProviderList if x.name == name]
-        
-        if len(providerMatch) != 1:
-            return None
-        else:
-            return providerMatch[0]
-
+def getProviderClass(id):
+    
+    providerMatch = [x for x in sickbeard.providerList+sickbeard.newznabProviderList if x.getID() == id]
+    
+    if len(providerMatch) != 1:
         return None
+    else:
+        return providerMatch[0]

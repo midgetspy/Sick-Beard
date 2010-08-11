@@ -11,7 +11,7 @@
 # Sick Beard is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#  GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
@@ -29,7 +29,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers 
-from providers import eztv, nzbs, nzbmatrix, tvbinz, nzbsrus, binreq, newznab
+from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, queue, scheduler
@@ -399,7 +399,7 @@ def initialize(consoleLogging=True):
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
         
-        providerList = providers.getProviderList()
+        providerList = providers.makeProviderList()
         
         logger.initLogging(consoleLogging=consoleLogging)
 
