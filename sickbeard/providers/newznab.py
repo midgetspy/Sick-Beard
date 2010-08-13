@@ -64,7 +64,6 @@ class NewznabProvider(generic.NZBProvider):
 	def findEpisode (self, episode, manualSearch=False):
 	
 		nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
-		return nzbResults
 	
 		# if we got some results then use them no matter what.
 		# OR
@@ -72,13 +71,10 @@ class NewznabProvider(generic.NZBProvider):
 		if nzbResults or not manualSearch:
 			return nzbResults
 	
-		sceneShowSearchStrings = set(sceneHelpers.makeSceneShowSearchStrings(episode.show))
-		
 		itemList = []
 		results = []
 	
-		for curString in sceneShowSearchStrings:
-			itemList += self._doSearch('^"'+curString+'"', episode.season, episode.episode)
+		itemList += self._doSearch(episode.show, episode.season, episode.episode)
 	
 		for item in itemList:
 			
@@ -94,7 +90,6 @@ class NewznabProvider(generic.NZBProvider):
 			logger.log("Found result " + title + " at " + url, logger.DEBUG)
 			
 			result = self.getResult([episode])
-			result.provider = self.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality
@@ -106,13 +101,9 @@ class NewznabProvider(generic.NZBProvider):
 
 	def findSeasonResults(self, show, season):
 		
-		return {}
-	
-		itemList = []
 		results = {}
 	
-		for curString in sceneHelpers.makeSceneShowSearchStrings(show):
-			itemList += self._doSearch('^"'+curString+'"', season)
+		itemList = self._doSearch(show, season)
 	
 		for item in itemList:
 	
@@ -151,7 +142,6 @@ class NewznabProvider(generic.NZBProvider):
 				epObj.append(show.getEpisode(season, curEp))
 			
 			result = self.getResult(epObj)
-			result.provider = self.provider.getID()
 			result.url = url
 			result.name = title
 			result.quality = quality
@@ -175,13 +165,21 @@ class NewznabProvider(generic.NZBProvider):
 		return results
 		
 
-	def _doSearch(self, showName, season, episode=None):
+	def _doSearch(self, show, season=None, episode=None, search=None):
 	
 		params = {"t": "tvsearch",
-				  "q": showName.encode('utf-8'),
-				  "season": season,
-				  "age": sickbeard.USENET_RETENTION,
+				  "maxage": sickbeard.USENET_RETENTION,
+				  "limit": 100,
 				  "cat": '5030,5040'}
+
+		if show:
+			params['rid'] = show.tvrid
+			if season != None:
+				params['season'] = season
+		elif search:
+			params['q'] = search
+		else:
+			return []
 
 		if self.key:
 			params['apikey'] = self.key
@@ -191,7 +189,7 @@ class NewznabProvider(generic.NZBProvider):
 
 		searchURL = self.url + 'api?' + urllib.urlencode(params)
 	
-		logger.log("Search string: " + searchURL, logger.DEBUG)
+		logger.log("Search url: " + searchURL, logger.DEBUG)
 	
 		data = self.getURL(searchURL)
 	
@@ -243,18 +241,16 @@ class NewznabProvider(generic.NZBProvider):
 	
 		results = []
 		
-		for curString in ("PROPER", "REPACK"):
-		
-			for curResult in self._doSearch(curString):
-	
-				match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
-				if not match:
-					continue
+		for curResult in self._doSearch(None, search="proper repack"):
 
-				resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
-				
-				if date == None or resultDate > date:
-					results.append(classes.Proper(curResult.findtext('title'), curResult.findtext('link'), resultDate))
+			match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
+			if not match:
+				continue
+
+			resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
+			
+			if date == None or resultDate > date:
+				results.append(classes.Proper(curResult.findtext('title'), curResult.findtext('link'), resultDate))
 		
 		return results
 
