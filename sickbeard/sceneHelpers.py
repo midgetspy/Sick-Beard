@@ -51,7 +51,7 @@ def filterBadReleases(name):
     return True
 
 def sanitizeSceneName (name):
-    for x in ":()'!":
+    for x in ",:()'!":
         name = name.replace(x, "")
 
     name = name.replace("- ", ".").replace(" ", ".").replace("&", "and")
