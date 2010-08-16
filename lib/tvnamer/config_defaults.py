@@ -283,6 +283,13 @@ defaults = {
         [\._ -][^\\/]*$                          # More padding, then anything
         ''',
 
+        # Show name Part 1
+        '''^(?P<seriesname>.+?)                  # Show name
+        [ \._\-]                                 # Padding
+        [Pp]art[\._ -]?(?P<episodenumber>[0-9]+) # Part 1 
+        [\._ -][^\\/]*$                          # More padding, then anything
+        ''',
+
         # match stupid scene names like tpz-abc123.avi
         '''
         ^(?:[A-Za-z]{3,})\-(?P<seriesname>\w+?)  # get series name (even though it's probably a meaningless acronym)
