@@ -233,7 +233,10 @@ class QueueItemAdd(QueueItem):
             
         except tvdb_exceptions.tvdb_exception, e:
             logger.log("Unable to add show due to an error with TVDB: "+str(e), logger.ERROR)
-            webserve.flash.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
+            if self.show:
+                webserve.flash.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
+            else:
+                webserve.flash.error("Unable to add show due to an error with TVDB")
             self._finishEarly()
             return
             
