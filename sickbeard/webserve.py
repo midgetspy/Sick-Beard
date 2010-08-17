@@ -1006,6 +1006,9 @@ class NewHomeAddShows:
         if showDirs and type(showDirs) != list:
             showDirs = [showDirs]
 
+        # don't allow blank shows
+        showDirs = [x for x in showDirs if x]
+
         # if there's nothing left to add, go home
         if len(showDirs) == 0:
             redirect("/home")
