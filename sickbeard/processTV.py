@@ -276,6 +276,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             season = result.seasonnumber
             episodes = result.episodenumbers
             
+            returnStr += logHelper("Ended up with season "+season+" and episodes "+episodes, logger.DEBUG)
+            
         except tvnamer_exceptions.InvalidFilename:
             returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
             continue
@@ -305,6 +307,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             else:
                 showObj = t[result.seriesname]
             
+            returnStr += logHelper("Got tvdb_id "+int(showObj["id"])+" and showObj "+showObj["seriesname"]+" from TVDB", logger.DEBUG)
+            
             showInfo = (int(showObj["id"]), showObj["seriesname"])
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
@@ -317,6 +321,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         # if it is an air-by-date show and we successfully found it on TVDB, convert the date into a season/episode
         if season == -1 and showObj:
+            returnStr += logHelper("Looks like this is an air-by-date show, attempting to parse...", logger.DEBUG)
             try:
                 epObj = showObj.airedOn(episodes[0])[0]
                 season = int(epObj["seasonnumber"])
@@ -327,6 +332,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         # if we couldn't get the necessary info from either of the above methods, try the next name
         if tvdb_id == None or season == None or episodes == []:
+            returnStr += logHelper("Unable to get all the necessary info, ended up with tvdb_id "+tvdb_id+", season "+season+", and episodes "+episodes+". Skipping to the next name...", logger.DEBUG)
             continue
 
         # find the show in the showlist
@@ -345,7 +351,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if tvdb_id == None or season == None or episodes == []:
         # if we have a good enough result then fine, use it
         
-        returnStr += logHelper("Unable to figure out what this episode is, giving up", logger.DEBUG)
+        returnStr += logHelper("Unable to figure out what this episode is, giving up.  Ended up with tvdb_id "+tvdb_id+", season "+season+", and episodes "+episodes+".", logger.DEBUG)
         return returnStr
 
     # if we found enough info but it wasn't a show we know about, give up
