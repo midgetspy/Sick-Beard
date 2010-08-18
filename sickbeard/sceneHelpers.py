@@ -26,7 +26,7 @@ from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
 resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
-                 "dirfix", "samplefix", "nfofix",
+                 "dirfix", "samplefix", "nfofix", "dvdextras",
                  "sample", "extras", "special")
 
 def filterBadReleases(name):
