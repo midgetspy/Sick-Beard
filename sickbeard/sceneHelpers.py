@@ -92,7 +92,7 @@ def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 def makeSceneSearchString (episode):
 
     # see if we should use dates instead of episodes
-    if "Talk Show" in episode.show.genre and episode.airdate != datetime.date.fromordinal(1):
+    if episode.show.genre and "Talk Show" in episode.show.genre and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate).replace('-', '.')]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
