@@ -310,6 +310,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Got tvdb_id {0} and showObj {1} from TVDB".format(int(showObj["id"]), showObj["seriesname"]), logger.DEBUG)
             
             showInfo = (int(showObj["id"]), showObj["seriesname"])
+            
+            if (len(showObj.episodes) == 1) & season == None:
+                returnStr += logHelper("Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
+                season = 1
+                
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
             returnStr += logHelper("Unable to look up show on TVDB: "+str(e), logger.DEBUG)
