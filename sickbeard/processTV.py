@@ -307,7 +307,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             else:
                 showObj = t[result.seriesname]
             
-            returnStr += logHelper("Got tvdb_id {0} and showObj {1} with seasons {2} from TVDB".format(int(showObj["id"]), showObj["seriesname"], showObj["instance"]), logger.DEBUG)
+            returnStr += logHelper("Got tvdb_id {0} and showObj {1} with seasons {2} from TVDB".format(int(showObj["id"]), showObj["seriesname"], len(showObj.values())), logger.DEBUG)
             
             showInfo = (int(showObj["id"]), showObj["seriesname"])
             
