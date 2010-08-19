@@ -311,10 +311,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             
             showInfo = (int(showObj["id"]), showObj["seriesname"])
             
-            if showObj:
-                returnStr += logHelper("showObj is not None", logger.DEBUG)
-            else:
-                returnStr += logHelper("showObj is None", logger.DEBUG)
+            #if showObj:
+            #    returnStr += logHelper("showObj is not None", logger.DEBUG)
+            #else:
+            #    returnStr += logHelper("showObj is None", logger.DEBUG)
             
             #if (len(showObj.episodes) == 1) & season == None:
             #    returnStr += logHelper("Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
