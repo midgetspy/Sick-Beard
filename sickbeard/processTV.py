@@ -311,7 +311,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             
             showInfo = (int(showObj["id"]), showObj["seriesname"])
             
-            if showObj & (len(showObj.values()) == 1) & season == None:
+            if (showObj and (len(showObj.values()) == 1) and season == None):
                 returnStr += logHelper("Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
                 season = 1
                 
