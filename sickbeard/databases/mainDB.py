@@ -235,3 +235,11 @@ class UpgradeHistoryForGenericProviders(DropOldHistoryTable):
 			self.connection.action("UPDATE history SET provider = ? WHERE provider = ?", [providerMap[oldProvider], oldProvider])
 		
 		self.incDBVersion()
+
+class AddAirByDateOption(UpgradeHistoryForGenericProviders):
+	def test(self):
+		return self.checkDBVersion() >= 4
+	
+	def execute(self):
+		self.connection.action("ALTER TABLE tv_shows ADD air_by_date NUMERIC")
+		self.incDBVersion()
