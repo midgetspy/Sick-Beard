@@ -94,6 +94,8 @@ def makeSceneSearchString (episode):
     myDB = db.DBConnection()
     numseasons = myDB.select("SELECT COUNT(DISTINCT season) FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
 
+    logger.log("This show appears to have {0} seasons.".format(numseasons), logger.DEBUG)
+
     # see if we should use dates instead of episodes
     if episode.show.air_by_date or (episode.show.genre and "Talk Show" in episode.show.genre and episode.airdate != datetime.date.fromordinal(1)):
         epStrings = [str(episode.airdate).replace('-', '.')]
