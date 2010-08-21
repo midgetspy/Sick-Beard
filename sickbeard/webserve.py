@@ -801,6 +801,10 @@ class ConfigProviders:
 
         # add all the newznab info we got into our list
         for curNewznabProviderStr in newznab_string.split('!!!'):
+
+            if not curNewznabProviderStr:
+                continue
+
             curName, curURL, curKey = curNewznabProviderStr.split('|')
 
             newProvider = newznab.NewznabProvider(curName, curURL, curKey)
