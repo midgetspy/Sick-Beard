@@ -4,6 +4,7 @@
 #import re
 #from sickbeard import history
 #from sickbeard import providers
+#from sickbeard.providers import generic
 #from sickbeard.common import *
 #set global $title="History"
 
@@ -46,9 +47,9 @@
 	  #end if
 	#else
       #if $hItem["provider"] > 0
-        #set $providerModule = $providers.getProviderModule($hItem["provider"])
-        #if $providerModule != None: 
-        <img src="$sbRoot/images/providers/<%=providerModule.providerName.lower()%>.gif" width="16" height="16" alt="$providerModule.providerName">
+        #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
+        #if $provider != None: 
+        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name">
         #end if
       #end if
     #end if

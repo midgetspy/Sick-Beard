@@ -219,3 +219,19 @@ class DropOldHistoryTable(NewQualitySettings):
 	def execute(self):
 		self.connection.action("DROP TABLE history_old")
 		self.incDBVersion()
+
+class UpgradeHistoryForGenericProviders(DropOldHistoryTable):
+	def test(self):
+		return self.checkDBVersion() >= 3
+	
+	def execute(self):
+		
+		providerMap = {'NZBs': 'NZBs.org',
+					   'BinReq': 'Bin-Req',
+					   'NZBsRUS': '''NZBs'R'US''',
+					   'EZTV': 'EZTV@BT-Chat'}
+		
+		for oldProvider in providerMap:
+			self.connection.action("UPDATE history SET provider = ? WHERE provider = ?", [providerMap[oldProvider], oldProvider])
+		
+		self.incDBVersion()

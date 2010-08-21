@@ -9,21 +9,26 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <style type="text/css">
-#provider_order_list { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+#provider_order_list { list-style-type: none; margin: 0; padding: 0; width: 250px; }
 #provider_order_list li { margin: 0 5px 5px 5px; padding: 5px; font-size: 1.2em; height: 1.5em; }
 html>body #provider_order_list li { height: 1.5em; line-height: 1.2em; }
 .ui-state-highlight { height: 1.5em; line-height: 1.2em; }
+
+.providerDiv { display: none; }
 </style>
 <script type="text/javascript">
-\$(function() {
-    \$("#provider_order_list").sortable({
-        placeholder: 'ui-state-highlight',
-        update: function (event, ui) {
-              \$("#provider_order").val(\$("#provider_order_list").sortable('toArray').join(" "));
-        }
-    });
-    \$("#provider_order_list").disableSelection();
+sbRoot = '$sbRoot'; 
+</script>
+<script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
+<script type="text/javascript">
+\$(document).ready(function(){
+
+#for $curNewznabProvider in $sickbeard.newznabProviderList:
+    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
+#end for
+
 });
+
 </script>
 
 <form action="saveProviders" method="POST">
@@ -37,30 +42,45 @@ Drag the providers into the order<br />
 you want them to be searched<br />
 <br />
 <ul id="provider_order_list">
-#for $curProvider in $sickbeard.providers.getAllModules():
-    #if $curProvider.providerName == 'TVBinz' and not $sickbeard.SHOW_TVBINZ
+#for $curProvider in $sickbeard.providers.sortedProviderList():
+    #if $curProvider.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
         #continue
     #end if
-    <li class="ui-state-default" id="$curProvider.providerName.lower()">$curProvider.providerName</li>
+    #set $curName = $curProvider.getID()
+    #if $curProvider in $sickbeard.newznabProviderList:
+      #set $imgName = 'newznab.gif'
+    #else:
+      #set $imgName = $curName + '.gif'
+    #end if
+  <li class="ui-state-default" id="$curName">
+    <input type="checkbox" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "CHECKED" else ""#>
+    <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" width="16" height="16"></a>
+    $curProvider.name
+  </li>
 #end for
 </ul>
 <br />
-<input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join(sickbeard.PROVIDER_ORDER)%>">
+<input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>">
 
 </fieldset>
 </div>
 
-
-#if $sickbeard.SHOW_TVBINZ
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
 
-<legend>TVBinz</legend>
+<legend>Providers</legend>
 
-<label for="tvbinz"><input type="checkbox" name="tvbinz" id="tvbinz" #if $sickbeard.TVBINZ then "CHECKED" else ""#> <strong>Enable TVBinz</strong></label>
-<a href="http://www.tvbinz.net" class="imgLink" target="_new"><img src="$sbRoot/images/providers/tvbinz.gif" alt="TVBinz" width="16" height="16"></a><br />
-Check to search TVBinz for episodes<br />
+<b>Edit: </b> <select id="editAProvider">
+#if $sickbeard.SHOW_TVBINZ then "<option value=\"tvbinz\">TVBinz" else ""#
+<option value="nzbs_org">NZBs.org
+<option value="nzbmatrix">NZBMatrix
+<option value="nzbs_r_us">NZBs'R'US
+</select>
 <br />
+<br />
+
+#if $sickbeard.SHOW_TVBINZ:
+<div class="providerDiv" id="tvbinz">
 
 <strong>Cookie UID:</strong><br />
 TVBinz cookie UID<br />
@@ -82,83 +102,25 @@ TVBinz auth string<br />
 <input type="text" name="tvbinz_auth" value="$sickbeard.TVBINZ_AUTH" size="35"><br />
 <br />
 
-</fieldset>
 </div>
 #end if
 
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>NZBs.org</legend>
-
-<label for="nzbs"><input type="checkbox" name="nzbs" id="nzbs" #if $sickbeard.NZBS then "CHECKED" else ""#> <strong>Enable NZBs.org</strong></label>
-<a href="http://www.nzbs.org" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbs.gif" alt="NZBs.org" width="16" height="16"></a><br />
-Check to search NZBs.org for episodes<br />
-<br />
+<div class="providerDiv" id="nzbs_org">
 
 <strong>UID:</strong><br />
 NZBs.org UID<br />
-<input type="text" name="nzbs_uid" value="$sickbeard.NZBS_UID" size="6"><br />
+<input type="text" name="nzbs_org_uid" value="$sickbeard.NZBS_UID" size="6"><br />
 <br />
 
 <strong>Hash:</strong><br />
 NZBs.org hash<br />
-<input type="text" name="nzbs_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
+<input type="text" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
 <br />
 
-</fieldset>
 </div>
 
 
-
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>NZBs'R'US</legend>
-
-<label for="nzbsrus"><input type="checkbox" name="nzbsrus" id="nzbsrus" #if $sickbeard.NZBSRUS then "CHECKED" else ""#> <strong>Enable NZBs'R'US</strong></label>
-<a href="http://www.nzbsrus.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbsrus.gif" alt="NZBs'R'US" width="16" height="16"></a><br />
-Check to search NZBsRus.com for episodes<br />
-<br />
-
-<strong>UID:</strong><br />
-NZBs'R'US UID<br />
-<input type="text" name="nzbsrus_uid" value="$sickbeard.NZBSRUS_UID" size="6"><br />
-<br />
-
-<strong>Hash:</strong><br />
-NZBs'R'US hash<br />
-<input type="text" name="nzbsrus_hash" value="$sickbeard.NZBSRUS_HASH" size="35"><br />
-<br />
-
-</fieldset>
-</div>
-
-
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>Bin-Req</legend>
-
-<label for="binreq"><input type="checkbox" name="binreq" id="binreq" #if $sickbeard.BINREQ then "CHECKED" else ""#> <strong>Enable Bin-Req</strong></label>
-<a href="http://www.bin-req.net" class="imgLink" target="_new"><img src="$sbRoot/images/providers/binreq.gif" alt="Bin-Req" width="16" height="16"></a><br />
-Check to search Bin-Req.net for episodes<br />
-<br />
-
-</fieldset>
-</div>
-
-
-
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>NZBMatrix</legend>
-
-<label for="nzbmatrix"><input type="checkbox" name="nzbmatrix" id="nzbmatrix" #if $sickbeard.NZBMATRIX then "CHECKED" else ""#> <strong>Enable NZBMatrix</strong></label>
-<a href="http://www.nzbmatrix.com" class="imgLink" target="_new"><img src="$sbRoot/images/providers/nzbmatrix.gif" alt="NZBMatrix" width="16" height="16"></a><br />
-Check to search NZBMatrix for episodes<br />
-<br />
+<div class="providerDiv" id="nzbmatrix">
 
 <strong>Username:</strong><br />
 NZBMatrix username<br />
@@ -170,8 +132,57 @@ NZBMatrix API Key<br />
 <input type="text" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="35"><br />
 <br />
 
+</div>
+
+<div class="providerDiv" id="nzbs_r_us">
+
+<strong>UID:</strong><br />
+NZBs'R'US UID<br />
+<input type="text" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="6"><br />
+<br />
+
+<strong>Hash:</strong><br />
+NZBs'R'US hash<br />
+<input type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="35"><br />
+<br />
+
+</div>
+
 </fieldset>
 </div>
+
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Newznab Providers</legend>
+<input type="hidden" name="newznab_string" id="newznab_string">
+<select id="editANewznabProvider">
+<option value="addNewznab">-- add new provider --</option>
+#for $curNewznabProvider in $sickbeard.newznabProviderList:
+<!--<option value="$curNewznabProvider.getID()">$curNewznabProvider.name-->
+#end for
+</select>
+<br />
+<br />
+
+<div class="newznabProviderDiv" id="addNewznab">
+
+<strong>Provider Name</strong><br />
+<input type="text" id="newznab_name"><br />
+<strong>Site URL</strong><br /><input type="text" id="newznab_url"><br />
+<br />
+<strong>RSS Key</strong><br /><input type="text" id="newznab_key"><br />
+(leave blank if not required)<br />
+<br />
+<div id="newznab_add_div"><input type="button" class="newznab_save" id="newznab_add" value="Add"></div>
+<div id="newznab_update_div" style="display: none;"><input type="button" class="newznab_delete" id="newznab_delete" value="Delete"></div> 
+<br />
+</div>
+
+</fieldset>
+</div>
+
 
 
 
