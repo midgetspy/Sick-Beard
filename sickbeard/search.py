@@ -169,8 +169,11 @@ def pickBestResult(results):
 	for curResult in results:
 		if not bestResult or bestResult.quality < curResult.quality and curResult.quality != Quality.UNKNOWN:
 			bestResult = curResult
-		elif bestResult.quality == curResult.quality and ("proper" in curResult.name.lower() or "repack" in curResult.name.lower()):
-			bestResult = curResult
+		elif bestResult.quality == curResult.quality:
+			if "proper" in curResult.name.lower() or "repack" in curResult.name.lower():
+				bestResult = curResult
+			elif "internal" in bestResult.name.lower() and "internal" not in curResult.name.lower():
+				bestResult = curResult
 	
 	if bestResult:
 		logger.log("Picked "+bestResult.name+" as the best", logger.DEBUG)
