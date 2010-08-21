@@ -16,8 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
+import re
 import time
 import urllib
 import datetime
@@ -167,7 +166,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 	
 	def _doSearch(self, curString, quotes=False):
 	
-		term = curString.replace("."," ").encode('utf-8')
+		term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
 		if quotes:
 			term = "\""+term+"\""
 	
