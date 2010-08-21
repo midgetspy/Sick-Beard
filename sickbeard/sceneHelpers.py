@@ -92,7 +92,8 @@ def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 def makeSceneSearchString (episode):
 
     myDB = db.DBConnection()
-    numseasons = x[1] = myDB.select("SELECT COUNT(DISTINCT season) FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
+    numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
+    numseasons = int(numseasonsSQlResult["numseasons"])
 
     logger.log("This show appears to have {0} seasons.".format(numseasons), logger.DEBUG)
 
