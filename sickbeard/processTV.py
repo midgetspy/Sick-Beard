@@ -321,7 +321,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         if showInfo:
             tvdb_id = showInfo[0]
             myDB = db.DBConnection()
-            numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_d])
+            numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
             numseasons = numseasonsSQlResult[0][0]
             if (numseasons == 1 and season == None):
                 returnStr += logHelper("Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
