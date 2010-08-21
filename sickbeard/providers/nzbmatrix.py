@@ -45,7 +45,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 		self.url = 'http://www.nzbmatrix.com/'
 
 	def isEnabled(self):
-		return sickbeard.NZBS
+		return sickbeard.NZBMATRIX
 
 	
 	def findEpisode (self, episode, manualSearch=False):
