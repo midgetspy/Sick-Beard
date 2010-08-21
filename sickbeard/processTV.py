@@ -311,10 +311,6 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Got tvdb_id {0} and series name {1} from TVDB".format(int(showObj["id"]), showObj["seriesname"]), logger.DEBUG)
             
             showInfo = (int(showObj["id"]), showObj["seriesname"])
-            
-            if (showObj and (len(showObj.values()) == 1) and season == None):
-                returnStr += logHelper("Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
-                season = 1
                 
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
@@ -324,6 +320,13 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         if showInfo:
             tvdb_id = showInfo[0]
+            myDB = db.DBConnection()
+            numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_d])
+            numseasons = numseasonsSQlResult[0][0]
+            if (numseasons == 1 and season == None):
+                returnStr += logHelper("Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
+                season = 1
+
 
         # if it is an air-by-date show and we successfully found it on TVDB, convert the date into a season/episode
         if season == -1 and showObj:
