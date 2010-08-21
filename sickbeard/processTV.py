@@ -133,7 +133,7 @@ def processDir (dirName, nzbName=None, recurse=False):
     returnStr += logHelper("Processing folder "+dirName, logger.DEBUG)
 
     # if they passed us a real dir then assume it's the one we want
-    if os.path.isdir(dirName):
+    if ek.ek(os.path.isdir, dirName):
         dirName = ek.ek(os.path.realpath, dirName)
     
     # if they've got a download dir configured then use it
@@ -148,10 +148,10 @@ def processDir (dirName, nzbName=None, recurse=False):
         return returnStr
 
     # TODO: check if it's failed and deal with it if it is
-    if dirName.startswith('_FAILED_'):
+    if os.path.basename(dirName).startswith('_FAILED_'):
         returnStr += logHelper("The directory name indicates it failed to extract, cancelling", logger.DEBUG)
         return returnStr
-    elif dirName.startswith('_UNDERSIZED_'):
+    elif os.path.basename(dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper("The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
         return returnStr
 
