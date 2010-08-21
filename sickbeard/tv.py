@@ -64,6 +64,7 @@ class TVShow(object):
         self.airs = ""
         self.startyear = 0
         self.paused = 0
+        self.air_by_date = 0
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -583,6 +584,10 @@ class TVShow(object):
             if self.startyear == None:
                 self.startyear = 0
 
+            self.air_by_date = sqlResults[0]["air_by_date"]
+            if self.air_by_date == None:
+                self.air_by_date = 0
+
             self.quality = int(sqlResults[0]["quality"])
             self.seasonfolders = int(sqlResults[0]["seasonfolders"])
             self.paused = int(sqlResults[0]["paused"])
@@ -848,6 +853,7 @@ class TVShow(object):
                         "status": self.status,
                         "seasonfolders": self.seasonfolders,
                         "paused": self.paused,
+                        "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname
                         }

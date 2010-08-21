@@ -133,7 +133,7 @@ def processDir (dirName, nzbName=None, recurse=False):
     returnStr += logHelper("Processing folder "+dirName, logger.DEBUG)
 
     # if they passed us a real dir then assume it's the one we want
-    if os.path.isdir(dirName):
+    if ek.ek(os.path.isdir, dirName):
         dirName = ek.ek(os.path.realpath, dirName)
     
     # if they've got a download dir configured then use it
@@ -148,10 +148,10 @@ def processDir (dirName, nzbName=None, recurse=False):
         return returnStr
 
     # TODO: check if it's failed and deal with it if it is
-    if dirName.startswith('_FAILED_'):
+    if os.path.basename(dirName).startswith('_FAILED_'):
         returnStr += logHelper("The directory name indicates it failed to extract, cancelling", logger.DEBUG)
         return returnStr
-    elif dirName.startswith('_UNDERSIZED_'):
+    elif os.path.basename(dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper("The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
         return returnStr
 
@@ -297,6 +297,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 sceneID = exceptionID
                 break
 
+        showObj = None
         try:
             returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
@@ -413,7 +414,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             rootEp.relatedEps.append(curEp)
 
     # make sure the quality is set right before we continue
-    if rootEp.status in Quality.SNATCHED:
+    if rootEp.status in Quality.SNATCHED + Quality.SNATCHED_PROPER:
         oldStatus, newQuality = Quality.splitCompositeStatus(rootEp.status)
         returnStr += logHelper("The old status had a quality in it, using that: "+Quality.qualityStrings[newQuality], logger.DEBUG)
     else:
@@ -466,10 +467,12 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     
     returnStr += logHelper("Existing result: "+str(existingResult), logger.DEBUG)
     
-    # see if the existing file is bigger - if it is, bail (unless it's a proper in which case we're forcing an overwrite)
+    # see if the existing file is bigger - if it is, bail (unless it's a proper or better quality in which case we're forcing an overwrite)
     if existingResult > 0:
         if rootEp.status in Quality.SNATCHED_PROPER:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
+        elif newQuality > rootEp.quality:
+            returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it because this one is supposed to be higher quality", logger.DEBUG)
         else:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
 
@@ -515,24 +518,22 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Unable to move the file: " + str(e), logger.ERROR)
             return returnStr
 
-    # if the file existed and was smaller/same then lets delete it
-    # OR if the file existed, was bigger, but we want to replace it anyway cause it's a PROPER snatch
-    if existingResult <= 0 or (existingResult > 0 and rootEp.status in Quality.SNATCHED_PROPER):
-        existingFile = None
-        # if we're deleting a file with a different name then just go ahead
-        if existingResult in (-2, 2):
-            existingFile = rootEp.location
-            if rootEp.status in Quality.SNATCHED_PROPER:
-                returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
-            else:
-                returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
+    existingFile = None
+    
+    # if we're deleting a file with a different name then just go ahead
+    if existingResult in (-2, 2):
+        existingFile = rootEp.location
+        if rootEp.status in Quality.SNATCHED_PROPER:
+            returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
+        else:
+            returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
 
-        elif ek.ek(os.path.isfile, newFile):
-            returnStr += logHelper(newFile + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
-            existingFile = newFile
+    elif ek.ek(os.path.isfile, newFile):
+        returnStr += logHelper(newFile + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
+        existingFile = newFile
 
-        if existingFile and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, existingFile):
-            deleteAssociatedFiles(existingFile)
+    if existingFile and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, existingFile):
+        deleteAssociatedFiles(existingFile)
             
     # update the statuses before we rename so the quality goes into the name properly
     for curEp in [rootEp] + rootEp.relatedEps:

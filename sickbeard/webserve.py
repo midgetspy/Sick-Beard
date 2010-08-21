@@ -38,6 +38,7 @@ from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 
 from sickbeard.notifiers import xbmc
+from sickbeard.providers import newznab
 from sickbeard.common import *
 
 from lib.tvdb_api import tvdb_exceptions
@@ -724,42 +725,133 @@ class ConfigProviders:
         t.submenu = ConfigMenu
         return _munge(t)
 
+    @cherrypy.expose
+    def canAddNewznabProvider(self, name):
+        
+        if not name:
+            return json.dumps({'error': 'Invalid name specified'})
+        
+        providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+
+        tempProvider = newznab.NewznabProvider(name, '')
+            
+        if tempProvider.getID() in providerDict:
+            return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
+        else:
+            return json.dumps({'success': tempProvider.getID()})
+
+    @cherrypy.expose
+    def saveNewznabProvider(self, name, url, key=''):
+        
+        if not name or not url:
+            return '0'
+        
+        if not url.endswith('/'):
+            url = url + '/'
+        
+        providerDict = dict(zip([x.name for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+
+        if name in providerDict:
+            if not providerDict[name].default:
+                providerDict[name].name = name
+                providerDict[name].url = url
+            providerDict[name].key = key
+
+            return providerDict[name].getID() + '|' + providerDict[name].configStr()
+        
+        else:
+        
+            newProvider = newznab.NewznabProvider(name, url, key)
+            sickbeard.newznabProviderList.append(newProvider)
+            return newProvider.getID() + '|' + newProvider.configStr()
+
+
     
     @cherrypy.expose
-    def saveProviders(self, tvbinz=None, tvbinz_uid=None, tvbinz_hash=None, nzbs=None, nzbs_uid=None,
-                      nzbs_hash=None, nzbmatrix=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
-                      tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None, nzbsrus=None,
-                      nzbsrus_uid=None, nzbsrus_hash=None, binreq=None):
+    def deleteNewznabProvider(self, id):
+
+        providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+        
+        if id not in providerDict or providerDict[id].default:
+            return '0'
+
+        # delete it from the list
+        sickbeard.newznabProviderList.remove(providerDict[id])
+        
+        if id in sickbeard.PROVIDER_ORDER:
+            sickbeard.PROVIDER_ORDER.remove(id)
+
+        return '1'
+
+    
+    @cherrypy.expose
+    def saveProviders(self, tvbinz_uid=None, tvbinz_hash=None, nzbs_org_uid=None,
+                      nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
+                      tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None,
+                      nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None):
 
         results = []
 
-        if tvbinz == "on":
-            tvbinz = 1
-        elif sickbeard.SHOW_TVBINZ:
-            tvbinz = 0
+        provider_str_list = provider_order.split()
+        provider_list = []
+        
+        newznabProviderDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+
+        finishedNames = []
+
+        # add all the newznab info we got into our list
+        for curNewznabProviderStr in newznab_string.split('!!!'):
+
+            if not curNewznabProviderStr:
+                continue
+
+            curName, curURL, curKey = curNewznabProviderStr.split('|')
+
+            newProvider = newznab.NewznabProvider(curName, curURL, curKey)
             
-        if nzbs == "on":
-            nzbs = 1
-        else:
-            nzbs = 0
+            curID = newProvider.getID()
+            
+            # if it already exists then update it
+            if curID in newznabProviderDict:
+                newznabProviderDict[curID].name = curName
+                newznabProviderDict[curID].url = curURL
+                newznabProviderDict[curID].key = curKey
+            else:
+                sickbeard.newznabProviderList.append(newProvider)
 
-        if nzbsrus == "on":
-            nzbsrus = 1
-        else:
-            nzbsrus = 0
+            finishedNames.append(curID)
 
-        if nzbmatrix == "on":
-            nzbmatrix = 1
-        else:
-            nzbmatrix = 0
 
-        if binreq == "on":
-            binreq = 1
-        else:
-            binreq = 0
+        # delete anything that is missing
+        for curProvider in sickbeard.newznabProviderList:
+            if curProvider.getID() not in finishedNames:
+                sickbeard.newznabProviderList.remove(curProvider)
 
-        if tvbinz != None:
-            sickbeard.TVBINZ = tvbinz
+        # do the enable/disable
+        for curProviderStr in provider_str_list:
+            curProvider, curEnabled = curProviderStr.split(':')
+            curEnabled = int(curEnabled)
+            
+            provider_list.append(curProvider)
+            
+            if curProvider == 'tvbinz':
+                if curEnabled or sickbeard.SHOW_TVBINZ:
+                    sickbeard.TVBINZ = curEnabled
+            elif curProvider == 'nzbs_org':
+                sickbeard.NZBS = curEnabled
+            elif curProvider == 'nzbs_r_us':
+                sickbeard.NZBSRUS = curEnabled
+            elif curProvider == 'nzbmatrix':
+                sickbeard.NZBMATRIX = curEnabled
+            elif curProvider == 'bin_req':
+                sickbeard.BINREQ = curEnabled
+            elif curProvider == 'eztv_bt_chat':
+                sickbeard.USE_TORRENT = curEnabled
+            elif curProvider in newznabProviderDict:
+                newznabProviderDict[curProvider].enabled = bool(curEnabled)
+            else:
+                logger.log("don't know what "+curProvider+" is, skipping")
+
         if tvbinz_uid:
             sickbeard.TVBINZ_UID = tvbinz_uid.strip()
         if tvbinz_sabuid:
@@ -769,21 +861,16 @@ class ConfigProviders:
         if tvbinz_auth:
             sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
         
-        sickbeard.NZBS = nzbs
-        sickbeard.NZBS_UID = nzbs_uid.strip()
-        sickbeard.NZBS_HASH = nzbs_hash.strip()
+        sickbeard.NZBS_UID = nzbs_org_uid.strip()
+        sickbeard.NZBS_HASH = nzbs_org_hash.strip()
         
-        sickbeard.NZBSRUS = nzbsrus
-        sickbeard.NZBSRUS_UID = nzbsrus_uid.strip()
-        sickbeard.NZBSRUS_HASH = nzbsrus_hash.strip()
+        sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
+        sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
         
-        sickbeard.NZBMATRIX = nzbmatrix
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()
         
-        sickbeard.BINREQ = binreq
-        
-        sickbeard.PROVIDER_ORDER = provider_order.split()
+        sickbeard.PROVIDER_ORDER = provider_list
         
         sickbeard.save_config()
         
@@ -1248,7 +1335,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None):
         
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -1285,6 +1372,11 @@ class Home:
         else:
             paused = 0
 
+        if air_by_date == "on":
+            air_by_date = 1
+        else:
+            air_by_date = 0
+
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
 
@@ -1304,6 +1396,7 @@ class Home:
                     errors.append("Unable to refresh this show: "+str(e))
 
             showObj.paused = paused
+            showObj.air_by_date = air_by_date
                         
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
@@ -1507,8 +1600,7 @@ class Home:
         
         if not foundEpisode:
             message = 'No downloads were found'
-            flash.error(message,
-                        "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
+            flash.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
             logger.log(message)
         
         else:
@@ -1516,11 +1608,11 @@ class Home:
             # just use the first result for now
             logger.log("Downloading episode from " + foundEpisode.url)
             result = search.snatchEpisode(foundEpisode)
-            providerModule = providers.getProviderModule(foundEpisode.provider)
+            providerModule = foundEpisode.provider
             if providerModule == None:
                 flash.error('Provider is configured incorrectly, unable to download')
             else: 
-                flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.providerName))
+                flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
             
             #TODO: check if the download was successful
 

@@ -8,8 +8,10 @@ from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import *
 
-from sickbeard import helpers, classes
+from sickbeard import helpers, classes, exceptions
 from sickbeard import providers
+
+import xml.etree.cElementTree as etree
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -42,30 +44,92 @@ class CacheDBConnection(db.DBConnection):
 
 class TVCache():
     
-    def __init__(self, providerName):
+    def __init__(self, provider):
     
-        self.providerName = providerName
+        self.provider = provider
+        self.providerID = self.provider.getID()
         self.minTime = 10
 
     def _getDB(self):
         
-        return CacheDBConnection(self.providerName)
+        return CacheDBConnection(self.providerID)
 
     def _clearCache(self):
         
         myDB = self._getDB()
         
-        myDB.action("DELETE FROM "+self.providerName+" WHERE 1")
+        myDB.action("DELETE FROM "+self.providerID+" WHERE 1")
+    
+    def _getRSSData(self):
+        
+        data = None
+
+        return data
+    
+    def _checkAuth(self, data):
+        return True
+    
+    def _checkItemAuth(self, title, url):
+        return True
     
     def updateCache(self):
         
-        print "This should be overridden by implementing classes" 
+        if not self.shouldUpdate():
+            return
         
-        pass
+        data = self._getRSSData()
+        
+        # as long as the http request worked we count this as an update
+        if data:
+            self.setLastUpdate()
+        else:
+            return []
+        
+        # now that we've loaded the current RSS feed lets delete the old cache
+        logger.log("Clearing "+self.provider.name+" cache and updating with new information")
+        self._clearCache()
+        
+        if not self._checkAuth(data):
+            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
+        
+        try:
+            responseSoup = etree.ElementTree(etree.XML(data))
+            items = responseSoup.getiterator('item')
+        except Exception, e:
+            logger.log("Error trying to load "+self.provider.name+" RSS feed: "+str(e), logger.ERROR)
+            return []
+            
+        if responseSoup.getroot().tag != 'rss':
+            logger.log("Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
+            return []
+        
+        for item in items:
+
+            self._parseItem(item)
+
+    def _translateLinkURL(self, url):
+        return url.replace('&amp;','&')
+
+    def _parseItem(self, item):
+
+        title = item.findtext('title')
+        url = item.findtext('link')
+
+        self._checkItemAuth(title, url)
+
+        if not title or not url:
+            logger.log("The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
+            return
+        
+        url = self._translateLinkURL(url)
+        
+        logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)            
+
+        self._addCacheEntry(title, url)
 
     def _getLastUpdate(self):
         myDB = self._getDB()
-        sqlResults = myDB.select("SELECT time FROM lastUpdate WHERE provider = ?", [self.providerName])
+        sqlResults = myDB.select("SELECT time FROM lastUpdate WHERE provider = ?", [self.providerID])
         
         if sqlResults:
             lastTime = int(sqlResults[0]["time"])
@@ -82,7 +146,7 @@ class TVCache():
         myDB = self._getDB()
         myDB.upsert("lastUpdate",
                     {'time': int(time.mktime(toDate.timetuple()))},
-                    {'provider': self.providerName})
+                    {'provider': self.providerID})
     
     lastUpdate = property(_getLastUpdate)
     
@@ -176,7 +240,7 @@ class TVCache():
         
         quality = Quality.nameQuality(name)
         
-        myDB.action("INSERT INTO "+self.providerName+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
+        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
                     [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
         
         
@@ -188,7 +252,7 @@ class TVCache():
         
         myDB = self._getDB()
         
-        sql = "SELECT * FROM "+self.providerName+" WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
+        sql = "SELECT * FROM "+self.providerID+" WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
         
         if date != None:
             sql += " AND time >= "+str(int(time.mktime(date.timetuple())))
@@ -205,9 +269,9 @@ class TVCache():
         myDB = self._getDB()
         
         if not episode:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerName)
+            sqlResults = myDB.select("SELECT * FROM "+self.providerID)
         else:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerName+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "|"+str(episode.episode)+"|"])
+            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "|"+str(episode.episode)+"|"])
 
         # for each cache entry
         for curResult in sqlResults:
@@ -244,14 +308,7 @@ class TVCache():
             
                 logger.log("Found result " + title + " at " + url)
         
-                resProvider = providers.getProviderModule(self.providerName.lower())
-                resultType = resProvider.providerType
-
-                if resultType == "nzb":
-                    result = classes.NZBSearchResult([epObj])
-                elif resultType == "torrent":
-                    result = classes.TorrentSearchResult([epObj])
-                result.provider = self.providerName.lower()
+                result = self.provider.getResult([epObj])
                 result.url = url 
                 result.name = title
                 result.quality = curQuality
