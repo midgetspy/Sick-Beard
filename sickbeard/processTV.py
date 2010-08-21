@@ -402,7 +402,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             rootEp.relatedEps.append(curEp)
 
     # make sure the quality is set right before we continue
-    if rootEp.status in Quality.SNATCHED:
+    if rootEp.status in Quality.SNATCHED + Quality.SNATCHED_PROPER:
         oldStatus, newQuality = Quality.splitCompositeStatus(rootEp.status)
         returnStr += logHelper("The old status had a quality in it, using that: "+Quality.qualityStrings[newQuality], logger.DEBUG)
     else:
