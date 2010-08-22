@@ -460,8 +460,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if existingResult > 0:
         if rootEp.status in Quality.SNATCHED_PROPER:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
-        elif newQuality > rootEp.quality:
-            returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it because this one is supposed to be higher quality", logger.DEBUG)
+        #elif newQuality > rootEp.quality:
+        #    returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it because this one is supposed to be higher quality", logger.DEBUG)
         else:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
 
