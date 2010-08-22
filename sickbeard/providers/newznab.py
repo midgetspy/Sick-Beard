@@ -117,7 +117,7 @@ class NewznabProvider(generic.NZBProvider):
 				myParser = FileParser(title)
 				epInfo = myParser.parse()
 			except tvnamer_exceptions.InvalidFilename:
-				logger.log("Unable to parse the filename "+title+" into a valid episode", logger.ERROR)
+				logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
 				continue
 			
 			if epInfo.seasonnumber != season:
