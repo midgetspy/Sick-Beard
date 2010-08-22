@@ -402,6 +402,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         else:
             rootEp.relatedEps.append(curEp)
 
+    oldStatus = None
     # make sure the quality is set right before we continue
     if rootEp.status in Quality.SNATCHED + Quality.SNATCHED_PROPER:
         oldStatus, newQuality = Quality.splitCompositeStatus(rootEp.status)
@@ -460,8 +461,8 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if existingResult > 0:
         if rootEp.status in Quality.SNATCHED_PROPER:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
-        #elif newQuality > rootEp.quality:
-        #    returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it because this one is supposed to be higher quality", logger.DEBUG)
+        elif oldStatus != None:
+            returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it because this one seems to have been downloaded on purpose", logger.DEBUG)
         else:
             returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
 
