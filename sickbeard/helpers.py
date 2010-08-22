@@ -339,7 +339,7 @@ def listMediaFiles(dir):
 		fullCurFile = ek.ek(os.path.join, dir, curFile)
 
 		# if it's a dir do it recursively
-		if ek.ek(os.path.isdir, fullCurFile) and not curFile.startswith('.'):
+		if ek.ek(os.path.isdir, fullCurFile) and not curFile.startswith('.') and not curFile == 'Extras':
 			files += listMediaFiles(fullCurFile)
 	
 		elif isMediaFile(curFile):
