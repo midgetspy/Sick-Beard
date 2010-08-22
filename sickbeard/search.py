@@ -376,7 +376,9 @@ def isGoodResult(result, show):
 	showNames = map(sceneHelpers.sanitizeSceneName, sceneHelpers.allPossibleShowNames(show))
 	
 	for curName in set(showNames):
-		curRegex = '^' + curName + '.(?:(?:S\d\d)|(?:\dx)|(?:[Pp]art[\._ -]?\d))'
+
+		curRegex = '^' + curName.replace('.', '\W+') + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:[Pp]art[\._ -]?\d))'
+
 		logger.log("Checking if show "+result.name+" matches " + curRegex, logger.DEBUG)
 		
 		match = re.search(curRegex, result.name, re.I)

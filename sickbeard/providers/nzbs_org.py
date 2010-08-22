@@ -165,6 +165,8 @@ class NZBsProvider(generic.NZBProvider):
 
 	def _doSearch(self, curString):
 	
+		curString = curString.replace('.', ' ')
+	
 		params = {"action": "search",
 				  "q": curString.encode('utf-8'),
 				  "dl": 1,
