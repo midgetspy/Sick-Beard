@@ -55,7 +55,10 @@ def sanitizeSceneName (name):
         name = name.replace(x, "")
 
     name = name.replace("- ", ".").replace(" ", ".").replace("&", "and")
-    name = re.sub("\.\.", ".", name)    
+    name = re.sub("\.\.*", ".", name)
+    
+    if name.endswith('.'):
+        name = name[:-1]
     
     return name
         
