@@ -23,7 +23,11 @@
             } else {
             
                 \$.each(data.results, function(index, obj){
-                    resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '"> '
+                    if (resultStr == '')
+                        checked = ' checked';
+                    else
+                        checked = '';
+                    resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '"' + checked + ' /> '
                     resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" target="_new"><b>' + obj[1] + '</b></a>'
                     if (obj[2] != null)
                         resultStr += ' (started on ' + obj[2] + ')'
