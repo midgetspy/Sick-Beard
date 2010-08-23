@@ -632,8 +632,7 @@ class ConfigEpisodeDownloads:
                        sab_apikey=None, sab_category=None, sab_host=None, use_nzb=None,
                        use_torrent=None, torrent_dir=None, nzb_method=None, usenet_retention=None,
                        search_frequency=None, backlog_search_frequency=None, tv_download_dir=None,
-                       keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                       keep_processed_file=None):
+                       keep_processed_dir=None, process_automatically=None, rename_episodes=None):
 
         results = []
 
@@ -665,11 +664,6 @@ class ConfigEpisodeDownloads:
         else:
             keep_processed_dir = 0
             
-        if keep_processed_file == "on":
-            keep_processed_file = 1
-        else:
-            keep_processed_file = 0
-            
         if use_nzb == "on":
             use_nzb = 1
         else:
@@ -685,7 +679,6 @@ class ConfigEpisodeDownloads:
 
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
-        sickbeard.KEEP_PROCESSED_FILE = keep_processed_file
         sickbeard.RENAME_EPISODES = rename_episodes
 
         sickbeard.NZB_METHOD = nzb_method

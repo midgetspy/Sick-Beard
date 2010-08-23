@@ -190,7 +190,7 @@ def processDir (dirName, nzbName=None, recurse=False):
             if type(result) == list:
                 returnStr += result[0]
 
-                if not sickbeard.KEEP_PROCESSED_DIR and not sickbeard.KEEP_PROCESSED_FILE and \
+                if not sickbeard.KEEP_PROCESSED_DIR and \
                     os.path.normpath(dirName) != os.path.normpath(sickbeard.TV_DOWNLOAD_DIR) and \
                     len(remainingFolders) == 0:
                     
@@ -491,7 +491,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         returnStr += logHelper("Season folder didn't exist, creating it", logger.DEBUG)
         os.mkdir(destDir)
 
-    if sickbeard.KEEP_PROCESSED_FILE:
+    if sickbeard.KEEP_PROCESSED_DIR:
         returnStr += logHelper("Copying from " + fileName + " to " + destDir, logger.DEBUG)
         try:
             copyFile(fileName, movedFilePath)

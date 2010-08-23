@@ -119,7 +119,6 @@ TORRENT_DIR = None
 RENAME_EPISODES = False
 PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
-KEEP_PROCESSED_FILE = False
 TV_DOWNLOAD_DIR = None
 
 SHOW_TVBINZ = False
@@ -263,7 +262,7 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                KEEP_PROCESSED_FILE, CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
+                CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS
 
@@ -354,7 +353,6 @@ def initialize(consoleLogging=True):
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
-        KEEP_PROCESSED_FILE = check_setting_int(CFG, 'General', 'keep_processed_file', 0)
         
         TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
         TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
@@ -595,7 +593,7 @@ def save_config():
         NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
         PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB, TVBINZ_AUTH, TVBINZ_SABUID, \
         NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES, PROVIDER_ORDER, \
-        KEEP_PROCESSED_FILE, CREATE_IMAGES
+        CREATE_IMAGES
 
 
         
@@ -629,7 +627,6 @@ def save_config():
     CFG['General']['cache_dir'] = CACHE_DIR
     CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
-    CFG['General']['keep_processed_file'] = int(KEEP_PROCESSED_FILE)
     CFG['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     CFG['General']['rename_episodes'] = int(RENAME_EPISODES)
     CFG['Blackhole']['nzb_dir'] = NZB_DIR

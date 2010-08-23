@@ -131,8 +131,8 @@ if SAB and Sick Beard are on different PCs)<br />
 <br />
 
 <label for="keep_processed_dir"><input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""#> <strong>Keep folder</strong></label><br />
-If checked Sick Beard won't delete the episode folder<br />
-and any extra files (original nfo, sfv, etc)<br />
+If checked Sick Beard will keep the original files after<br />
+they've been processed<br />
 <br />
 
 <label for="rename_episodes"><input type="checkbox" name="rename_episodes" id="rename_episodes"#if $sickbeard.RENAME_EPISODES == True then "CHECKED" else ""#> <strong>Rename episodes</strong></label><br />
