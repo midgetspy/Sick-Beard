@@ -46,22 +46,22 @@ from lib.tvnamer import tvnamer_exceptions
 
 sample_ratio = 0.3
 
-def renameFile(curFile, newName):
+def renameFile(movedFilePath, newName):
 
-    filePath = os.path.split(curFile)
+    filePath = os.path.split(movedFilePath)
     oldFile = os.path.splitext(filePath[1])
 
-    newFilename = ek.ek(os.path.join, filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
+    renamedFilePathname = ek.ek(os.path.join, filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
 
-    logger.log("Renaming from " + curFile + " to " + newFilename)
+    logger.log("Renaming from " + movedFilePath + " to " + renamedFilePathname)
 
     try:
-        ek.ek(os.rename, curFile, newFilename)
+        ek.ek(os.rename, movedFilePath, renamedFilePathname)
     except (OSError, IOError), e:
-        logger.log("Failed renaming " + curFile + " to " + os.path.basename(newFilename) + ": " + str(e), logger.ERROR)
+        logger.log("Failed renaming " + movedFilePath + " to " + os.path.basename(renamedFilePathname) + ": " + str(e), logger.ERROR)
         return False
 
-    return newFilename
+    return renamedFilePathname
 
 def copyFile(srcFile, destFile):
     shutil.copyfile(srcFile, destFile)
@@ -84,16 +84,16 @@ def deleteAssociatedFiles(file):
 
     baseName = file.rpartition('.')[0]
 
-    for curFile in ek.ek(glob.glob, baseName+'.*'):
-        os.remove(curFile)
+    for movedFilePath in ek.ek(glob.glob, baseName+'.*'):
+        os.remove(movedFilePath)
         
-def _checkForExistingFile(newFile, oldFile):
+def _checkForExistingFile(renamedFilePath, oldFile):
 
     # if the new file exists, return the appropriate code depending on the size
-    if ek.ek(os.path.isfile, newFile):
+    if ek.ek(os.path.isfile, renamedFilePath):
         
         # see if it's bigger than our old file
-        if ek.ek(os.path.getsize, newFile) > ek.ek(os.path.getsize, oldFile):
+        if ek.ek(os.path.getsize, renamedFilePath) > ek.ek(os.path.getsize, oldFile):
             return 1
         
         else:
@@ -177,14 +177,14 @@ def processDir (dirName, nzbName=None, recurse=False):
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
     # process any files in the dir
-    for curFile in videoFiles:
+    for movedFilePath in videoFiles:
         
-        curFile = ek.ek(os.path.join, dirName, curFile)
+        movedFilePath = ek.ek(os.path.join, dirName, movedFilePath)
         
         # if there's only one video file in the dir we can use the dirname to process too
         if len(videoFiles) == 1:
-            returnStr += logHelper("Auto processing file: "+curFile+" ("+dirName+")")
-            result = processFile(curFile, dirName, nzbName)
+            returnStr += logHelper("Auto processing file: "+movedFilePath+" ("+dirName+")")
+            result = processFile(movedFilePath, dirName, nzbName)
 
             # as long as the postprocessing was successful delete the old folder unless the config wants us not to
             if type(result) == list:
@@ -201,21 +201,21 @@ def processDir (dirName, nzbName=None, recurse=False):
                     except (OSError, IOError), e:
                         returnStr += logHelper("Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
 
-                returnStr += logHelper("Processing succeeded for "+curFile)
+                returnStr += logHelper("Processing succeeded for "+movedFilePath)
 
             else:
                 returnStr += result
-                returnStr += logHelper("Processing failed for "+curFile)
+                returnStr += logHelper("Processing failed for "+movedFilePath)
             
         else:
-            returnStr += logHelper("Auto processing file: "+curFile)
-            result = processFile(curFile, None, nzbName)
+            returnStr += logHelper("Auto processing file: "+movedFilePath)
+            result = processFile(movedFilePath, None, nzbName)
             if type(result) == list:
                 returnStr += result[0]
-                returnStr += logHelper("Processing succeeded for "+curFile)
+                returnStr += logHelper("Processing succeeded for "+movedFilePath)
             else:
                 returnStr += result
-                returnStr += logHelper("Processing failed for "+curFile)
+                returnStr += logHelper("Processing failed for "+movedFilePath)
 
     return returnStr
             
@@ -437,15 +437,21 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         if seasonFolder == '':
             seasonFolder = 'Season ' + str(rootEp.season)
 
-    returnStr += logHelper("Seasonfolders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder, logger.DEBUG)
+    returnStr += logHelper("Season folders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder, logger.DEBUG)
 
     destDir = os.path.join(rootEp.show.location, seasonFolder)
     
-    curFile = os.path.join(destDir, biggestFileName)
-    newFile = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
-    returnStr += logHelper("The ultimate destination for " + fileName + " is " + newFile, logger.DEBUG)
+    # movedFilePath is the full path to where we will move the file 
+    movedFilePath = os.path.join(destDir, biggestFileName)
 
-    existingResult = _checkForExistingFile(newFile, fileName)
+    # renamedFilePath is the full path to the renamed file's eventual location 
+    if sickbeard.RENAME_EPISODES:
+        renamedFilePath = os.path.join(destDir, helpers.sanitizeFileName(rootEp.prettyName())+biggestFileExt)
+    else:
+        renamedFilePath = movedFilePath
+    returnStr += logHelper("The ultimate destination for " + fileName + " is " + renamedFilePath, logger.DEBUG)
+
+    existingResult = _checkForExistingFile(renamedFilePath, fileName)
     
     # if there's no file with that exact filename then check for a different episode file (in case we're going to delete it)
     if existingResult == 0:
@@ -460,11 +466,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     # see if the existing file is bigger - if it is, bail (unless it's a proper or better quality in which case we're forcing an overwrite)
     if existingResult > 0:
         if rootEp.status in Quality.SNATCHED_PROPER:
-            returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
+            returnStr += logHelper("There is already a file that's bigger at "+renamedFilePath+" but I'm going to overwrite it with a PROPER", logger.DEBUG)
         elif oldStatus != None:
-            returnStr += logHelper("There is already a file that's bigger at "+newFile+" but I'm going to overwrite it because this one seems to have been downloaded on purpose", logger.DEBUG)
+            returnStr += logHelper("There is already a file that's bigger at "+renamedFilePath+" but I'm going to overwrite it because this one seems to have been downloaded on purpose", logger.DEBUG)
         else:
-            returnStr += logHelper("There is already a file that's bigger at "+newFile+" - not processing this episode.", logger.DEBUG)
+            returnStr += logHelper("There is already a file that's bigger at "+renamedFilePath+" - not processing this episode.", logger.DEBUG)
 
             # tag the dir so we know what happened
             if downloadDir:
@@ -488,7 +494,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if sickbeard.KEEP_PROCESSED_FILE:
         returnStr += logHelper("Copying from " + fileName + " to " + destDir, logger.DEBUG)
         try:
-            copyFile(fileName, curFile)
+            copyFile(fileName, movedFilePath)
            
             returnStr += logHelper("File was copied successfully", logger.DEBUG)
             
@@ -500,7 +506,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         returnStr += logHelper("Moving from " + fileName + " to " + destDir, logger.DEBUG)
         try:
-            moveFile(fileName, curFile)
+            moveFile(fileName, movedFilePath)
             
             returnStr += logHelper("File was moved successfully", logger.DEBUG)
             
@@ -518,33 +524,33 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         else:
             returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
 
-    elif ek.ek(os.path.isfile, newFile):
-        returnStr += logHelper(newFile + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
-        existingFile = newFile
+    elif ek.ek(os.path.isfile, renamedFilePath):
+        returnStr += logHelper(renamedFilePath + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
+        existingFile = renamedFilePath
 
-    if existingFile and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, existingFile):
+    if existingFile and ek.ek(os.path.normpath, movedFilePath) != ek.ek(os.path.normpath, existingFile):
         deleteAssociatedFiles(existingFile)
             
     # update the statuses before we rename so the quality goes into the name properly
     for curEp in [rootEp] + rootEp.relatedEps:
         with curEp.lock:
-            curEp.location = newFile
+            curEp.location = renamedFilePath
             
             curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
             
             curEp.saveToDB()
 
-    if sickbeard.RENAME_EPISODES and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, newFile):
+    if ek.ek(os.path.normpath, movedFilePath) != ek.ek(os.path.normpath, renamedFilePath):
         try:
-            ek.ek(os.rename, curFile, newFile)
-            returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
+            ek.ek(os.rename, movedFilePath, renamedFilePath)
+            returnStr += logHelper("Renaming the file " + movedFilePath + " to " + renamedFilePath, logger.DEBUG)
         except (OSError, IOError), e:
-            returnStr += logHelper("Failed renaming " + curFile + " to " + newFile + ": " + str(e), logger.ERROR)
+            returnStr += logHelper("Failed renaming " + movedFilePath + " to " + renamedFilePath + ": " + str(e), logger.ERROR)
             return returnStr
 
     else:
-        returnStr += logHelper("Renaming is disabled, leaving file as "+curFile, logger.DEBUG)
-        newFile = curFile
+        returnStr += logHelper("Renaming is disabled, leaving file as "+movedFilePath, logger.DEBUG)
+        renamedFilePath = movedFilePath
 
     # log it to history
     history.logDownload(rootEp, fileName)
