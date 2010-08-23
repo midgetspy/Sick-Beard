@@ -536,7 +536,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     if sickbeard.RENAME_EPISODES and ek.ek(os.path.normpath, curFile) != ek.ek(os.path.normpath, newFile):
         try:
-            os.rename(curFile, newFile)
+            ek.ek(os.rename, curFile, newFile)
             returnStr += logHelper("Renaming the file " + curFile + " to " + newFile, logger.DEBUG)
         except (OSError, IOError), e:
             returnStr += logHelper("Failed renaming " + curFile + " to " + newFile + ": " + str(e), logger.ERROR)
