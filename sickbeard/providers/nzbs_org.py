@@ -118,7 +118,7 @@ class NZBsProvider(generic.NZBProvider):
 				logger.log("Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
 				continue
 			
-			if epInfo.seasonnumber != season or (epInfo.seasonnumber == None and season != 1):
+			if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
 				logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
 				continue
 			

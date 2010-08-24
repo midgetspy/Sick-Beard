@@ -377,7 +377,7 @@ def isGoodResult(result, show):
 	
 	for curName in set(showNames):
 
-		curRegex = '^' + curName.replace('.', '\W+') + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:part[\._ -]?(\d|[ivx])))'
+		curRegex = '^' + curName.replace('.', '\W+') + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx])))'
 
 		logger.log("Checking if show "+result.name+" matches " + curRegex, logger.DEBUG)
 		
