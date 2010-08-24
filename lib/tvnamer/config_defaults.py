@@ -298,6 +298,15 @@ defaults = {
         \.\w+$                                   # dirnames should never be this stupid so require an extension
         ''',
 
+        # Show.Name.Part.1
+        '''^(?i)
+        (?P<seriesname>.+?)                      # Show name
+        [ \._\-]                                 # Padding
+        (?:part|pt)[\._ -]?
+        (?P<episodenumber>[0-9]+|[ivx]+)         # Part 1 
+        [\._ -][^\\/]*$                          # More padding, then anything
+        ''',
+        
     ],
 
     # Formats for renamed files. Variations for with/without episode,
