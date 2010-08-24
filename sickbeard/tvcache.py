@@ -217,7 +217,7 @@ class TVCache():
             
             
         if not season:
-            season = epInfo.seasonnumber
+            season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
         if not episodes:
             episodes = epInfo.episodenumbers
 

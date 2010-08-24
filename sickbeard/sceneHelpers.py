@@ -17,7 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 from sickbeard.common import *
-from sickbeard import logger, db
+from sickbeard import logger
 
 import re
 import datetime
@@ -94,21 +94,9 @@ def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 
 def makeSceneSearchString (episode):
 
-    myDB = db.DBConnection()
-    numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
-    numseasons = numseasonsSQlResult[0][0]
-
     # see if we should use dates instead of episodes
     if episode.show.air_by_date or (episode.show.genre and "Talk Show" in episode.show.genre and episode.airdate != datetime.date.fromordinal(1)):
         epStrings = [str(episode.airdate).replace('-', '.')]
-    elif numseasons == 1:
-        logger.log("Looks like this show only has 1 season and could be a mini-series, searching for it using 'Part' as the episode identifier", logger.DEBUG)
-        epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
-                    "%ix%02i" % (int(episode.season), int(episode.episode)),
-                    "Part %i" % (int(episode.episode)), 
-                    "Part%i" % (int(episode.episode)),
-                    "Pt %i" % (int(episode.episode)),
-                    "Pt%i" % (int(episode.episode))]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
                     "%ix%02i" % (int(episode.season), int(episode.episode))]

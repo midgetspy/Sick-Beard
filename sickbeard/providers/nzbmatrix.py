@@ -79,8 +79,10 @@ class NZBMatrixProvider(generic.NZBProvider):
 				continue
 			
 			quality = Quality.nameQuality(title)
+
+			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
 			
-			if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
+			if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
 				logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 				continue
 			
@@ -120,7 +122,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 				continue
 			
 			
-			if epInfo.seasonnumber != season:
+			if epInfo.seasonnumber != season or (epInfo.seasonnumber == None and season != 1):
 				logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
 				continue
 	

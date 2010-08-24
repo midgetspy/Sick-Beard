@@ -94,7 +94,8 @@ def splitResult(result):
         return False
 
     # bust it up
-    season = epInfo.seasonnumber
+    season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
+    
     separateNZBs, xmlns = getSeasonNZBs(result.name, fileObj, season)
 
     resultList = []
@@ -112,7 +113,7 @@ def splitResult(result):
             return False
 
         # make sure the result is sane
-        if epInfo.seasonnumber != season:
+        if epInfo.seasonnumber != season or (epInfo.seasonnumber == None and season != 1):
             logger.log("Found "+newNZB+" inside "+result.name+" but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
             continue
         elif len(epInfo.episodenumbers) == 0:

@@ -273,7 +273,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             myParser = FileParser(curName)
             result = myParser.parse()
 
-            season = result.seasonnumber
+            season = result.seasonnumber if result.seasonnumber != None else 1
             episodes = result.episodenumbers
             
             returnStr += logHelper("Ended up with season {0} and episodes {1}".format(season, episodes), logger.DEBUG)
@@ -318,15 +318,14 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Looking up show in DB instead", logger.DEBUG)
             showInfo = helpers.searchDBForShow(result.seriesname)
 
-        if showInfo:
+        if showInfo and season == None:
             tvdb_id = showInfo[0]
             myDB = db.DBConnection()
             numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
             numseasons = numseasonsSQlResult[0][0]
-            if (numseasons == 1 and season == None):
+            if numseasons == 1 and season == None:
                 returnStr += logHelper("Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
                 season = 1
-
 
         # if it is an air-by-date show and we successfully found it on TVDB, convert the date into a season/episode
         if season == -1 and showObj:
