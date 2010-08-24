@@ -18,6 +18,7 @@
 
 from sickbeard.common import *
 from sickbeard import logger
+from sickbeard import db
 
 import re
 import datetime
@@ -76,6 +77,10 @@ def makeSceneShowSearchStrings(show):
 
 def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 
+    myDB = db.DBConnection()
+    numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
+    numseasons = numseasonsSQlResult[0][0]
+    
     seasonStrings = ["S%02d" % season, "%ix" % season]
 
     showNames = set(makeSceneShowSearchStrings(show))
@@ -84,10 +89,16 @@ def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 
     for curShow in showNames:
         if not extraSearchType:
-            toReturn.append(curShow + "." + seasonStrings[0])
+            if numseasons == 1:
+                toReturn.append(curShow)
+            else:
+                toReturn.append(curShow + "." + seasonStrings[0])
         elif extraSearchType == "nzbmatrix":
-            seasonString = ','.join([x+'*' for x in seasonStrings])
-            toReturn.append('+"'+curShow+'" +('+seasonString+')')
+            if numseasons == 1:
+                toReturn.append('+"'+curShow+'"')
+            else:
+                seasonString = ','.join([x+'*' for x in seasonStrings])
+                toReturn.append('+"'+curShow+'" +('+seasonString+')')
 
     return toReturn
 
