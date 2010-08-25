@@ -17,7 +17,7 @@ def initWebServer(options = {}):
         # cherrypy setup
         cherrypy.config.update({
                 'server.socket_port': options['port'],
-                'server.socket_host': '::',
+                'server.socket_host': '0.0.0.0',
                 'log.screen':         False,
         })
 
