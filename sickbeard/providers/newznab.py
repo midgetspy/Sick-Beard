@@ -185,7 +185,7 @@ class NewznabProvider(generic.NZBProvider):
 			params['apikey'] = self.key
 		
 		if episode:
-			params['episode'] = episode
+			params['ep'] = episode
 
 		searchURL = self.url + 'api?' + urllib.urlencode(params)
 	
