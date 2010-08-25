@@ -66,7 +66,7 @@ class Quality:
                       UNKNOWN: "Unknown",
                       SDTV: "SD TV",
                       SDDVD: "SD DVD",
-                      HDTV: "720p TV",
+                      HDTV: "HD TV",
                       HDWEBDL: "720p WEB-DL",
                       HDBLURAY: "720p BluRay",
                       FULLHDBLURAY: "1080p BluRay"}
@@ -117,11 +117,11 @@ class Quality:
         
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
     
-        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid", "hr.ws.pdtv.x264"], any):
+        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any):
             return Quality.SDTV
         elif checkName(["dvdrip.xvid", "bdrip.xvid"], any):
             return Quality.SDDVD
-        elif checkName(["720p", "hdtv", "x264"], all):
+        elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
             return Quality.HDTV
         elif checkName(["720p", "web.dl"], all):
             return Quality.HDWEBDL
