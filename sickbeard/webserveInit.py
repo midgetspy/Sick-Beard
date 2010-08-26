@@ -7,6 +7,7 @@ from sickbeard.webserve import WebInterface
 
 def initWebServer(options = {}):
         options.setdefault('port',      8081)
+        options.setdefault('host',      '0.0.0.0')
         options.setdefault('log_dir',   None)
         options.setdefault('username',    '')
         options.setdefault('password',    '')
@@ -17,7 +18,7 @@ def initWebServer(options = {}):
         # cherrypy setup
         cherrypy.config.update({
                 'server.socket_port': options['port'],
-                'server.socket_host': '0.0.0.0',
+                'server.socket_host': options['host'],
                 'log.screen':         False,
         })
 

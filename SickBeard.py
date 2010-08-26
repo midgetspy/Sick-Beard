@@ -128,6 +128,7 @@ def main():
 	try:
 		initWebServer({
 		        'port':      startPort,
+		        'host':      sickbeard.WEB_HOST,
 		        'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
 		        'web_root':  sickbeard.WEB_ROOT,
 		        'log_dir':   sickbeard.LOG_DIR if sickbeard.WEB_LOG else None,

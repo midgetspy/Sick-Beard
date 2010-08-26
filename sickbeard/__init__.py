@@ -77,6 +77,8 @@ WEB_LOG = None
 WEB_ROOT = None
 WEB_USERNAME = None
 WEB_PASSWORD = None 
+WEB_HOST = None
+
 LAUNCH_BROWSER = None
 CREATE_METADATA = None
 CREATE_IMAGES = None
@@ -246,8 +248,8 @@ def initialize(consoleLogging=True):
     
     with INIT_LOCK:
         
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, NZB_METHOD, NZB_DIR, \
-                TVBINZ, TVBINZ_UID, TVBINZ_HASH, \
+        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, \
+                NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
@@ -292,6 +294,7 @@ def initialize(consoleLogging=True):
         if WEB_PORT < 21 or WEB_PORT > 65535:
             WEB_PORT = 8081
 
+        WEB_HOST = check_setting_str(CFG, 'General', 'web_host', '0.0.0.0')
         WEB_ROOT = check_setting_str(CFG, 'General', 'web_root', '').rstrip("/")
         WEB_LOG = bool(check_setting_int(CFG, 'General', 'web_log', 0))
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
@@ -583,22 +586,10 @@ def saveAndShutdown():
 
 
 def save_config():
-    global LOG_DIR, WEB_PORT, WEB_LOG, WEB_USERNAME, WEB_PASSWORD, NZB_METHOD, NZB_DIR, \
-        NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, TVBINZ, TVBINZ_UID, TVBINZ_HASH, \
-        SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
-        XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
-        XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_PASSWORD, XBMC_USERNAME, CFG, LAUNCH_BROWSER, CREATE_METADATA, USE_NZB, \
-        USE_TORRENT, TORRENT_DIR, USENET_RETENTION, SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-        QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, USE_GROWL, GROWL_HOST, GROWL_PASSWORD, \
-        NZBMATRIX, NZBMATRIX_USERNAME, NZBMATRIX_APIKEY, VERSION_NOTIFY, TV_DOWNLOAD_DIR, \
-        PROCESS_AUTOMATICALLY, KEEP_PROCESSED_DIR, TVNZB, TVBINZ_AUTH, TVBINZ_SABUID, \
-        NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, RENAME_EPISODES, PROVIDER_ORDER, \
-        CREATE_IMAGES
-
-
         
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
+    CFG['General']['web_host'] = WEB_HOST
     CFG['General']['web_log'] = int(WEB_LOG)
     CFG['General']['web_root'] = WEB_ROOT
     CFG['General']['web_username'] = WEB_USERNAME
