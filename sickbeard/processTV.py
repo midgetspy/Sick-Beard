@@ -504,7 +504,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     else:
 
-        returnStr += logHelper("Moving from " + fileName + " to " + destDir, logger.DEBUG)
+        returnStr += logHelper("Moving from " + fileName + " to " + movedFilePath, logger.DEBUG)
         try:
             moveFile(fileName, movedFilePath)
             
@@ -550,13 +550,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
     else:
         returnStr += logHelper("Renaming is disabled, leaving file as "+movedFilePath, logger.DEBUG)
-        renamedFilePath = movedFilePath
 
     # log it to history
     history.logDownload(rootEp, fileName)
 
     notifiers.notify(NOTIFY_DOWNLOAD, rootEp.prettyName(True))
-
     
     # generate nfo/tbn
     rootEp.createMetaFiles()
