@@ -37,6 +37,10 @@ class CurrentSearcher():
     def searchForTodaysEpisodes(self):
 
         self.amActive = True
+        
+        # pause the backlog to prevent race conditions downloading 2 episodes
+        logger.log("Pausing backlog so it doesn't collide with episode search", logger.DEBUG)
+        sickbeard.backlogSearchScheduler.action.amPaused = True
 
         self._changeMissingEpisodes()
 
@@ -62,6 +66,9 @@ class CurrentSearcher():
         sickbeard.updateAiringList()
         sickbeard.updateComingList()
 
+        logger.log("Search is done, resuming backlog", logger.DEBUG)
+        sickbeard.backlogSearchScheduler.action.amPaused = False
+        
         self.amActive = False
 
     def _changeMissingEpisodes(self):
