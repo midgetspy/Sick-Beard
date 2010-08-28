@@ -569,7 +569,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 notifiers.xbmc.updateLibrary(curHost)
 
     for curScriptName in sickbeard.EXTRA_SCRIPTS:
-        script_cmd = shlex.split(curScriptName) + [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode)]
+        script_cmd = shlex.split(curScriptName) + [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode), str(rootEp.airdate)]
         returnStr += logHelper("Executing command "+str(script_cmd))
         p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         out, err = p.communicate()
