@@ -2,6 +2,7 @@ import sickbeard
 
 import xbmc
 import growl
+import tweet
 
 from sickbeard.common import * 
 
@@ -12,6 +13,9 @@ def testGrowl(host, password):
 def testXBMC(host, username, password):
     xbmc.notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password)
 
+def testTwitter(username, password):
+    tweet.notifyTwitter("This is a test notification from Sick Beard", username, password)
+
 def notify(type, message):
     
     if type == NOTIFY_DOWNLOAD and sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
@@ -21,3 +25,5 @@ def notify(type, message):
             xbmc.notifyXBMC(message, notifyStrings[type])
 
     growl.sendGrowl(notifyStrings[type], message)
+
+    tweet.notifyTwitter(message)
