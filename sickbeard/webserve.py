@@ -888,7 +888,7 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, 
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, ):
+                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None, twitter_username=None, twitter_password=None, ):
 
         results = []
 
@@ -917,6 +917,11 @@ class ConfigNotifications:
         else:
             use_growl = 0
 
+	if use_twitter == "on":
+	    use_twitter = 1
+	else:
+	    use_twitter = 0
+
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch 
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
@@ -924,12 +929,15 @@ class ConfigNotifications:
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
-
         
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
-        
+       
+        sickbeard.USE_TWITTER = use_twitter
+        sickbeard.TWITTER_USERNAME = twitter_username
+        sickbeard.TWITTER_PASSWORD = twitter_password
+
         sickbeard.save_config()
         
         if len(results) > 0:
@@ -1238,7 +1246,12 @@ class Home:
     def testGrowl(self, host=None, password=None):
         notifiers.testGrowl(host, password)
         return "Tried sending growl to "+host+" with password "+password
-        
+       
+    @cherrypy.expose
+    def testTwitter(self, username=None, password=None):
+        notifiers.testTwitter(username, password)
+        return "Tried sending twitter to "+username+" with password "+password
+ 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
         notifiers.testXBMC(urllib.unquote_plus(host), username, password)

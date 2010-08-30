@@ -27,6 +27,15 @@
     \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
     
   });
+
+  \$('#testTwitter').click(function(){
+
+    var twitter_username = \$("#twitter_username").val();
+    var twitter_password = \$("#twitter_password").val();
+    \$.get("$sbRoot/home/testTwitter", {'username': twitter_username, 'password': twitter_password});
+
+  });
+
 });  
       
 </script>
@@ -98,6 +107,31 @@ blank, but if the hosts are different Growl <b>requires</b> a password.<br />
 
 </fieldset>
 </div>
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Twitter</legend>
+
+<label for="use_twitter"><input type="checkbox" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "CHECKED" else ""#> <strong>Enable Twitter Notifications</strong></label><br />
+Should Sick Beard send Twitter notifications?<br />
+<br />
+
+<strong>Twitter Username:</strong><br />
+Your Twitter Username<br />
+<input type="text" name="twitter_username" id="twitter_username" value="$sickbeard.TWITTER_USERNAME" size="35"><br />
+<br />
+
+<strong>Twitter Password:</strong><br />
+Your Twitter Password<br />
+<input type="text" name="twitter_password" id="twitter_password" value="$sickbeard.TWITTER_PASSWORD" size="35"><br />
+<br />
+
+<input type="button" value="Test Twitter" id="testTwitter">
+
+</fieldset>
+</div>
+
 
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
