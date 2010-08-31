@@ -13,6 +13,12 @@ def testGrowl(host, password):
 def testXBMC(host, username, password):
     xbmc.notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password)
 
+def testTwitter1():
+    tweet.get_authorization()
+
+def testTwitter2(key):
+    tweet.get_credentials(key)
+
 def testTwitter(username, password):
     tweet.notifyTwitter("This is a test notification from Sick Beard", username, password)
 
