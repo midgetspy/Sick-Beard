@@ -888,7 +888,7 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, 
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None, twitter_username=None, twitter_password=None, ):
+                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None, twitter_key=None, ):
 
         results = []
 
@@ -935,8 +935,6 @@ class ConfigNotifications:
         sickbeard.GROWL_PASSWORD = growl_password
        
         sickbeard.USE_TWITTER = use_twitter
-        sickbeard.TWITTER_USERNAME = twitter_username
-        sickbeard.TWITTER_PASSWORD = twitter_password
 
         sickbeard.save_config()
         
