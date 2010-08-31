@@ -21,18 +21,38 @@
   \$('#testXBMC').click(function(){
 
     var xbmc_host = \$("#xbmc_host").val();
-	var xbmc_username = \$("#xbmc_username").val();
+    var xbmc_username = \$("#xbmc_username").val();
     var xbmc_password = \$("#xbmc_password").val();
 
     \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
     
   });
 
+  \$('#twitterStep1').click(function(){
+
+    \$.get("$sbRoot/home/twitterStep1", {});
+    document.getElementById('twitterStep1').disabled = true;
+    document.getElementById('twitterStep2').disabled = true;
+    document.getElementById('testTwitter').disabled = true;
+    setTimeout(function(){window.location.href = "$sbRoot/errorlogs/viewlog";}, 1250);
+
+  });
+
+  \$('#twitterStep2').click(function(){
+
+    var twitter_key = \$("#twitter_key").val();
+    \$.get("$sbRoot/home/twitterStep2", {'key': twitter_key});
+    document.getElementById('twitterStep1').disabled = true;
+    document.getElementById('twitterStep2').disabled = true;
+    document.getElementById('testTwitter').disabled = true; 
+    setTimeout(function(){window.location.href = "$sbRoot/errorlogs/viewlog";}, 1250);
+
+
+  });
+
   \$('#testTwitter').click(function(){
 
-    var twitter_username = \$("#twitter_username").val();
-    var twitter_password = \$("#twitter_password").val();
-    \$.get("$sbRoot/home/testTwitter", {'username': twitter_username, 'password': twitter_password});
+    \$.get("$sbRoot/home/testTwitter", {});
 
   });
 
@@ -116,17 +136,17 @@ blank, but if the hosts are different Growl <b>requires</b> a password.<br />
 <label for="use_twitter"><input type="checkbox" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "CHECKED" else ""#> <strong>Enable Twitter Notifications</strong></label><br />
 Should Sick Beard send Twitter notifications?<br />
 <br />
-
-<strong>Twitter Username:</strong><br />
-Your Twitter Username<br />
-<input type="text" name="twitter_username" id="twitter_username" value="$sickbeard.TWITTER_USERNAME" size="35"><br />
+<strong>Step One:</strong><br />
+Click the "Request Authorization" button.  Copy the twitter URL from the log into your browser.<br />
+<input type="button" value="Request Authorization" id="twitterStep1"><br />
 <br />
-
-<strong>Twitter Password:</strong><br />
-Your Twitter Password<br />
-<input type="text" name="twitter_password" id="twitter_password" value="$sickbeard.TWITTER_PASSWORD" size="35"><br />
+<strong>Step Two:</strong><br />
+Enter the key Twitter gave you below, and click "Verify Key".<br />
+<input type="text" name="twitter_key" id="twitter_key" value="" size="35"><br />
 <br />
-
+<input type="button" value="Verify Key" id="twitterStep2">
+<br />
+Finally, Test Twitter.<br />
 <input type="button" value="Test Twitter" id="testTwitter">
 
 </fieldset>

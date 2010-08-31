@@ -1245,11 +1245,21 @@ class Home:
     def testGrowl(self, host=None, password=None):
         notifiers.testGrowl(host, password)
         return "Tried sending growl to "+host+" with password "+password
-       
+      
+    @cherrypy.expose
+    def twitterStep1(self):
+        notifiers.testTwitter1()
+        return "Getting Twitter Authorization"
+
+    @cherrypy.expose
+    def twitterStep2(self, key):
+        notifiers.testTwitter2(key)
+        return "Getting Twitter creds with key "+key
+
     @cherrypy.expose
     def testTwitter(self, username=None, password=None):
         notifiers.testTwitter(username, password)
-        return "Tried sending twitter to "+username+" with password "+password
+        return "Tried sending tweet"
  
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
