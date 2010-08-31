@@ -42,7 +42,7 @@ try:
 except ImportError:
   try:
     # Python < 2.6
-    import lib.simplejson
+    import lib.simplejson as simplejson
   except ImportError:
     try:
       # Google App Engine
