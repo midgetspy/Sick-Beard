@@ -283,6 +283,13 @@ defaults = {
         [\._ -][^\\/]*$                          # More padding, then anything
         ''',
 
+        # Show name Part 1
+        '''^(?P<seriesname>.+?)                              # Show name
+        [ \._\-]                                             # Padding
+        [Pp][Aa]?[Rr]?[Tt][\._ -]?(?P<episodenumber>[0-9]+)  # Part 1 
+        [\._ -][^\\/]*$                                      # More padding, then anything
+        ''',
+
         # match stupid scene names like tpz-abc123.avi
         '''
         ^(?:[A-Za-z]{3,})\-(?P<seriesname>\w+?)  # get series name (even though it's probably a meaningless acronym)
@@ -291,6 +298,15 @@ defaults = {
         \.\w+$                                   # dirnames should never be this stupid so require an extension
         ''',
 
+        # Show.Name.Part.1
+        '''^(?i)
+        (?P<seriesname>.+?)                      # Show name
+        [ \._\-]                                 # Padding
+        (?:part|pt)[\._ -]?
+        (?P<episodenumber>[0-9]+|[ivx]+)         # Part 1 
+        [\._ -][^\\/]*$                          # More padding, then anything
+        ''',
+        
     ],
 
     # Formats for renamed files. Variations for with/without episode,

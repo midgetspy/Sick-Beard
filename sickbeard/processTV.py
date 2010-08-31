@@ -273,8 +273,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             myParser = FileParser(curName)
             result = myParser.parse()
 
-            season = result.seasonnumber
+            season = result.seasonnumber if result.seasonnumber != None else 1
             episodes = result.episodenumbers
+            
+            returnStr += logHelper("Ended up with season {0} and episodes {1}".format(season, episodes), logger.DEBUG)
             
         except tvnamer_exceptions.InvalidFilename:
             returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
@@ -306,18 +308,28 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             else:
                 showObj = t[result.seriesname]
             
+            returnStr += logHelper("Got tvdb_id {0} and series name {1} from TVDB".format(int(showObj["id"]), showObj["seriesname"]), logger.DEBUG)
+            
             showInfo = (int(showObj["id"]), showObj["seriesname"])
+                
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
             returnStr += logHelper("Unable to look up show on TVDB: "+str(e), logger.DEBUG)
             returnStr += logHelper("Looking up show in DB instead", logger.DEBUG)
             showInfo = helpers.searchDBForShow(result.seriesname)
 
-        if showInfo:
+        if showInfo and season == None:
             tvdb_id = showInfo[0]
+            myDB = db.DBConnection()
+            numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
+            numseasons = numseasonsSQlResult[0][0]
+            if numseasons == 1 and season == None:
+                returnStr += logHelper("Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
+                season = 1
 
         # if it is an air-by-date show and we successfully found it on TVDB, convert the date into a season/episode
         if season == -1 and showObj:
+            returnStr += logHelper("Looks like this is an air-by-date show, attempting to parse...", logger.DEBUG)
             try:
                 epObj = showObj.airedOn(episodes[0])[0]
                 season = int(epObj["seasonnumber"])
@@ -328,6 +340,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         # if we couldn't get the necessary info from either of the above methods, try the next name
         if tvdb_id == None or season == None or episodes == []:
+            returnStr += logHelper("Unable to get all the necessary info, ended up with tvdb_id {0}, season {1}, and episodes {2}. Skipping to the next name...".format(tvdb_id, season, episodes), logger.DEBUG)
             continue
 
         # find the show in the showlist
@@ -346,7 +359,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if tvdb_id == None or season == None or episodes == []:
         # if we have a good enough result then fine, use it
         
-        returnStr += logHelper("Unable to figure out what this episode is, giving up", logger.DEBUG)
+        returnStr += logHelper("Unable to figure out what this episode is, giving up.  Ended up with tvdb_id {0}, season {1}, and episodes {2}.".format(tvdb_id, season, episodes), logger.DEBUG)
         return returnStr
 
     # if we found enough info but it wasn't a show we know about, give up

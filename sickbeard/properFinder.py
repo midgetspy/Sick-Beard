@@ -104,10 +104,10 @@ class ProperFinder():
                 continue
     
             # populate our Proper instance
-            curProper.season = epInfo.seasonnumber
+            curProper.season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
             curProper.episode = epInfo.episodenumbers[0]
             curProper.quality = Quality.nameQuality(curProper.name)
-    
+
             # for each show in our list
             for curShow in sickbeard.showList:
         
