@@ -79,10 +79,14 @@ def send_tweet(options,message=None):
 
     api = twitter.Api(username, password, access_token_key, access_token_secret)
 
-    status = api.PostUpdate(message)
+    try:
+	status = api.PostUpdate(message)
+    except:
+	logger.log("Error Sending Tweet")
+	return False;
+
     logger.log("Twitter Updated")
-    print status; 
-    return true;
+    return True;
 
 def notifyTwitter(message=None, username=None, password=None):
 
@@ -107,4 +111,5 @@ def notifyTwitter(message=None, username=None, password=None):
                 prefix = "DVR has recorded: "
 
 	logger.log("Sending tweet from "+opts['tname']+" Password "+str(opts['password'])+": "+prefix+message)
+
 	send_tweet(opts, prefix+message)
