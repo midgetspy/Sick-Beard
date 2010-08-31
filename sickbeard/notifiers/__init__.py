@@ -32,4 +32,5 @@ def notify(type, message):
 
     growl.sendGrowl(notifyStrings[type], message)
 
-    tweet.notifyTwitter(message)
+    if type == NOTIFY_DOWNLOAD:
+	tweet.notifyTwitter(message)
