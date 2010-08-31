@@ -108,7 +108,7 @@ def notifyTwitter(message=None, username=None, password=None):
         if message == "This is a test notification from Sick Beard":
                 prefix = ""
         else:
-                prefix = "DVR has recorded: "
+                prefix = "DVR is recording: "
 
 	logger.log("Sending tweet from "+opts['tname']+" Password "+str(opts['password'])+": "+prefix+message)
 
