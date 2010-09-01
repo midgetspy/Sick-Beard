@@ -283,13 +283,6 @@ defaults = {
         [\._ -][^\\/]*$                          # More padding, then anything
         ''',
 
-        # Show name Part 1
-        '''^(?P<seriesname>.+?)                              # Show name
-        [ \._\-]                                             # Padding
-        [Pp][Aa]?[Rr]?[Tt][\._ -]?(?P<episodenumber>[0-9]+)  # Part 1 
-        [\._ -][^\\/]*$                                      # More padding, then anything
-        ''',
-
         # match stupid scene names like tpz-abc123.avi
         '''
         ^(?:[A-Za-z]{3,})\-(?P<seriesname>\w+?)  # get series name (even though it's probably a meaningless acronym)
@@ -297,8 +290,23 @@ defaults = {
         (?P<episodenumber>\d\d)                  # ep number is always the last 2 digits
         \.\w+$                                   # dirnames should never be this stupid so require an extension
         ''',
-
-        # Show.Name.Part.1
+        
+        # Show.Name.Part.1.and.Part.2
+        '''^(?i)
+        (?P<seriesname>.+?)                      # Show name
+        [ \._\-]                                 # Padding
+        (?:part|pt)?[\._ -]
+        (?P<episodenumberstart>[0-9]+|[ivx]+)    # Part 1 
+        (?:[ \._-](?:and|&|to)                            # and
+        [ \._-](?:part|pt)?            # Part 2
+        [ \._-](?:[0-9]+|[ivx]+))*                      # (middle group, optional)
+        [ \._-](?:and|&|to)                             # and
+        [ \._-]?(?:part|pt)?            # Part 3
+        [ \._-](?P<episodenumberend>[0-9]+|[ivx]+)      # last episode number, save it 
+        [\._ -][^\\/]*$                          # More padding, then anything
+        ''',
+        
+        # Show.Name.Part.1 or Part.VII
         '''^(?i)
         (?P<seriesname>.+?)                      # Show name
         [ \._\-]                                 # Padding

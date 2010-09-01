@@ -277,8 +277,13 @@ class FileParser(object):
 
                 elif 'episodenumberstart' in namedgroups:
                     # Multiple episodes, regex specifies start and end number
-                    start = int(match.group('episodenumberstart'))
-                    end = int(match.group('episodenumberend'))
+                    try:
+                        start = int(match.group('episodenumberstart'))
+                        end = int(match.group('episodenumberend'))
+                    except ValueError:
+                        start = roman.roman_to_int(match.group('episodenumberstart'))
+                        end = roman.roman_to_int(match.group('episodenumberend'))
+
                     if start > end:
                         # Swap start and end
                         start, end = end, start
