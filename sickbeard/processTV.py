@@ -268,19 +268,22 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         season = None
         episodes = []
         
+        result = None
+        
         try:
             returnStr += logHelper("Attempting to parse name "+curName, logger.DEBUG)
             myParser = FileParser(curName)
             result = myParser.parse()
 
-            season = result.seasonnumber if result.seasonnumber != None else 1
-            episodes = result.episodenumbers
-            
-            returnStr += logHelper("Ended up with season {0} and episodes {1}".format(season, episodes), logger.DEBUG)
-            
-        except tvnamer_exceptions.InvalidFilename:
-            returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
+        except Exception, err:
+            returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode, error message: {0}".format(err), logger.DEBUG)
             continue
+            
+        season = result.seasonnumber if result.seasonnumber != None else 1
+        episodes = result.episodenumbers
+            
+        returnStr += logHelper("Ended up with season {0} and episodes {1}".format(season, episodes), logger.DEBUG)
+        
 
         if not result.seriesname:
             returnStr += logHelper("Filename "+curName+" has no series name, unable to use this name for processing", logger.DEBUG)
