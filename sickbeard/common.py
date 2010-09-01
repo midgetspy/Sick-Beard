@@ -252,7 +252,9 @@ sceneExceptions = {72546: ['CSI'],
                    75088: ['David Letterman'],
                    76706: ['Big Brother (US)'],
                    105521: ['The Colony', 'The Colony (US)'],
-                   76235: ['America\'s Funniest Home Videos', 'AFHV']
+                   76235: ['America\'s Funniest Home Videos', 'AFHV'],
+                   139941: ['Childrens Hospital (US)', 'Childrens Hospital'],
+                   83123: ['Merlin', 'Merlin (2008)']
                    }
 
 countryList = {'Australia': 'AU',

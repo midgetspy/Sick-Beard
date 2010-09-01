@@ -16,6 +16,7 @@ import sys
 import shutil
 import logging
 import platform
+import roman
 
 from lib.tvdb_api.tvdb_api import (tvdb_error, tvdb_shownotfound, tvdb_seasonnotfound, 
 tvdb_episodenotfound, tvdb_attributenotfound, tvdb_userabort)
@@ -276,15 +277,23 @@ class FileParser(object):
 
                 elif 'episodenumberstart' in namedgroups:
                     # Multiple episodes, regex specifies start and end number
-                    start = int(match.group('episodenumberstart'))
-                    end = int(match.group('episodenumberend'))
+                    try:
+                        start = int(match.group('episodenumberstart'))
+                        end = int(match.group('episodenumberend'))
+                    except ValueError:
+                        start = roman.roman_to_int(match.group('episodenumberstart'))
+                        end = roman.roman_to_int(match.group('episodenumberend'))
+
                     if start > end:
                         # Swap start and end
                         start, end = end, start
                     episodenumbers = range(start, end + 1)
 
                 elif 'episodenumber' in namedgroups:
-                    episodenumbers = [int(match.group('episodenumber')), ]
+                    try:
+                        episodenumbers = [int(match.group('episodenumber')), ]
+                    except ValueError:
+                        episodenumbers = [roman.roman_to_int(match.group('episodenumber')), ]
 
                 elif 'seasonnumberonly' in namedgroups:
                     episodenumbers = []
