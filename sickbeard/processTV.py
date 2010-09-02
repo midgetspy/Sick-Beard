@@ -276,7 +276,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             season = result.seasonnumber if result.seasonnumber != None else 1
             episodes = result.episodenumbers
             
-            returnStr += logHelper("Ended up with season {0} and episodes {1}".format(season, episodes), logger.DEBUG)
+            returnStr += logHelper("Ended up with season "+str(season)+" and episodes "+str(episodes), logger.DEBUG)
             
         except tvnamer_exceptions.InvalidFilename:
             returnStr += logHelper("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
@@ -308,7 +308,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             else:
                 showObj = t[result.seriesname]
             
-            returnStr += logHelper("Got tvdb_id {0} and series name {1} from TVDB".format(int(showObj["id"]), showObj["seriesname"]), logger.DEBUG)
+            returnStr += logHelper("Got tvdb_id "+str(showObj["id"])+" and series name "+str(showObj["seriesname"])+" from TVDB", logger.DEBUG)
             
             showInfo = (int(showObj["id"]), showObj["seriesname"])
                 
@@ -318,8 +318,10 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             returnStr += logHelper("Looking up show in DB instead", logger.DEBUG)
             showInfo = helpers.searchDBForShow(result.seriesname)
 
-        if showInfo and season == None:
+        if showInfo:
             tvdb_id = showInfo[0]
+
+        if showInfo and season == None:
             myDB = db.DBConnection()
             numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
             numseasons = numseasonsSQlResult[0][0]
@@ -340,7 +342,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
 
         # if we couldn't get the necessary info from either of the above methods, try the next name
         if tvdb_id == None or season == None or episodes == []:
-            returnStr += logHelper("Unable to get all the necessary info, ended up with tvdb_id {0}, season {1}, and episodes {2}. Skipping to the next name...".format(tvdb_id, season, episodes), logger.DEBUG)
+            returnStr += logHelper("Unable to get all the necessary info, ended up with tvdb_id "+str(tvdb_id)+", season "+str(season)+", and episodes "+str(episodes)+". Skipping to the next name...", logger.DEBUG)
             continue
 
         # find the show in the showlist
@@ -359,7 +361,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if tvdb_id == None or season == None or episodes == []:
         # if we have a good enough result then fine, use it
         
-        returnStr += logHelper("Unable to figure out what this episode is, giving up.  Ended up with tvdb_id {0}, season {1}, and episodes {2}.".format(tvdb_id, season, episodes), logger.DEBUG)
+        returnStr += logHelper("Unable to figure out what this episode is, giving up.  Ended up with tvdb_id "+str(tvdb_id)+", season "+str(season)+", and episodes "+str(episodes)+".", logger.DEBUG)
         return returnStr
 
     # if we found enough info but it wasn't a show we know about, give up
