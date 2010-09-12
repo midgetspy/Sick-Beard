@@ -1357,6 +1357,7 @@ class TVEpisode:
         	'title',
         	'episodeTitle',
         	'originalAirDate',
+        	'time',
         	'description',
         	'isEpisode',
         	'seriesId',
@@ -1387,6 +1388,7 @@ class TVEpisode:
                 return None
             
             myEp["isEpisode"] = 'true'
+            myEp["time"] = 'OAD'
             metadataText = ''
             
             for tvTag in pyTivoMetadataOrder:
