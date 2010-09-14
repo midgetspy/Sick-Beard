@@ -1408,7 +1408,10 @@ class TVEpisode:
                     logger.log("Unable to find episode data", logger.DEBUG)
                 
                 if ( tvTag == 'originalAirDate' ):
-                    text = parser.parse(myEp["firstaired"] + ' ' + myShow["airs_time"]).strftime("%Y-%m-%dT%H:%M:%SZ")
+                    if ( myEp["firstaired"] and (myShow["airs_time"])):
+                        text = parser.parse(myEp["firstaired"] + ' ' + myShow["airs_time"]).strftime("%Y-%m-%dT%H:%M:%SZ")
+                    else:
+                        text = parser.parse(myEp["firstaired"]).strftime("%Y-%m-%dT%H:%M:%SZ")
 
                 # Only check to see if Season is > 0, allow EpNum to be 0 for things like "1x00 - Bonus content"
                 if tvTag == 'episodeNumber' and myEp['episodenumber'] and int(myEp['seasonnumber']):
@@ -1428,7 +1431,7 @@ class TVEpisode:
                 if metadataText:
                 
                     if ek.ek(os.path.isfile, self.location):
-                        txtFilename = str(self.location) + '.txt'
+                        txtFilename = str(self.location).encode('utf-8') + '.txt'
                     else:
                         txtFilename = helpers.sanitizeFileName(self.prettyName() + '.txt')
 
