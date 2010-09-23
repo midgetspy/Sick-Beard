@@ -1711,9 +1711,19 @@ class WebInterface:
     
         posterFilename = os.path.abspath(os.path.join(showObj.location, "folder.jpg"))
         if os.path.isfile(posterFilename):
-            
-            return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
-        
+            try:
+                from PIL import Image
+                from cStringIO import StringIO
+            except ImportError: # PIL isn't installed
+                return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
+            else:
+                im = Image.open(posterFilename)
+                if im.mode == 'P': # Convert GIFs to RGB
+                    im = im.convert('RGB')
+                im.thumbnail((100, 147), Image.ANTIALIAS)
+                buffer = StringIO()
+                im.save(buffer, 'JPEG')
+                return buffer.getvalue()
         else:
             logger.log("No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
