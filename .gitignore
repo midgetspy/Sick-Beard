@@ -1,6 +1,9 @@
 *.pyc
+._*
 cache/*
 cache.db
 config.ini
 Logs/*
 sickbeard.db*
+*.old
+*.out
