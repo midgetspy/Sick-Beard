@@ -1348,9 +1348,6 @@ class TVEpisode:
         	'vChoreographer' : 'choreographer',
         }
 
-        #for pyTivoTag in pyTivoMetadata.keys():
-        #	print "%s : %s" % (pyTivoTag, pyTivoMetadata[pyTivoTag])
-
         # pyTivo Metadata tag order
         pyTivoMetadataOrder = [
         	'seriesTitle',
@@ -1399,14 +1396,23 @@ class TVEpisode:
                     text = unicode(myEp[pyTivoMetadata[tvTag]]).translate(transtable)
 
                 elif ( myShow.data.has_key(pyTivoMetadata[tvTag]) ):
-
                     # got data to work with
                     line = ""
                     text = unicode(myShow[pyTivoMetadata[tvTag]]).translate(transtable)
                 
                 else:
                     logger.log("Unable to find episode data", logger.DEBUG)
+                    continue
                 
+                if ( tvTag == 'seriesId' ):
+                    if ( not myEp.has_key("zap2it_id") ):
+                        if ( myEp.has_key("seriesid") and myEp['seriesid'] ):
+                            text = 'SH' + unicode(myEp["seriesid"]).translate(transtable)
+                        
+                    else:
+                        print "No series ID values found. Show grouping disabled."
+                        continue
+                        
                 if ( tvTag == 'originalAirDate' ):
                     if ( myEp["firstaired"] and (myShow["airs_time"])):
                         text = parser.parse(myEp["firstaired"] + ' ' + myShow["airs_time"]).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -1416,7 +1422,7 @@ class TVEpisode:
                 # Only check to see if Season is > 0, allow EpNum to be 0 for things like "1x00 - Bonus content"
                 if tvTag == 'episodeNumber' and myEp['episodenumber'] and int(myEp['seasonnumber']):
                     text = "%d%02d" % (int(myEp['seasonnumber']), int(myEp['episodenumber']))
-
+                
                 if '|' in text:
                     people = text.strip('|').split('|')
                     for person in people:
