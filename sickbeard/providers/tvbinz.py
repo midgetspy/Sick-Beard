@@ -88,9 +88,9 @@ class TVBinzCache(tvcache.TVCache):
 		
 		tvcache.TVCache.__init__(self, provider)
 	
-	def getRSSData(self):
+	def _getRSSData(self):
 		# get all records since the last timestamp
-		url = self.url + "rss.php?"
+		url = self.provider.url + "rss.php?"
 		
 		urlArgs = {'normalize': 1012,
 				   'n': 100,
