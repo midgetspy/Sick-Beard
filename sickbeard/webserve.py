@@ -1728,18 +1728,27 @@ class WebInterface:
             logger.log("No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
-    def comingEpisodes(self):
+    def comingEpisodes(self, sort="date"):
 
         epList = sickbeard.comingList
 
         # sort by air date
-        epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))
+        sorts = {
+            'date': (lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal())),
+            'show': (lambda a, b: cmp(a.name, b.name)),
+            'network': (lambda a, b: cmp(a.show.network, b.show.network)),
+        }
+        if sort not in sorts:
+            sort = 'date'
+        epList.sort(sorts[sort])
         
         t = PageTemplate(file="comingEpisodes.tmpl")
         t.submenu = [
-            { 'title': 'Sort by Date', 'path': 'comingEpisodes/#' },
-            { 'title': 'Sort by Show', 'path': 'comingEpisodes/#' },
+            { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
+            { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
+            { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
         ]
+        t.sort = sort
         t.epList = epList
         
         return _munge(t)
