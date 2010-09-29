@@ -125,13 +125,18 @@ def main():
 	
 	logger.log("Starting Sick Beard on http://localhost:"+str(startPort))
 
+	if sickbeard.WEB_LOG:
+		log_dir = sickbeard.LOG_DIR
+	else:
+		log_dir = None
+
 	try:
 		initWebServer({
 		        'port':      startPort,
 		        'host':      sickbeard.WEB_HOST,
 		        'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
 		        'web_root':  sickbeard.WEB_ROOT,
-		        'log_dir':   sickbeard.LOG_DIR if sickbeard.WEB_LOG else None,
+		        'log_dir':   log_dir,
 		        'username':  sickbeard.WEB_USERNAME,
 		        'password':  sickbeard.WEB_PASSWORD,
 		})
