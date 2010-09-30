@@ -18,8 +18,7 @@
 
 
 
-import urllib
-import sqlite3
+import urllib, urllib2
 import datetime
 import traceback
 
@@ -29,7 +28,7 @@ from sickbeard import logger
 from sickbeard.common import *
 
 from sickbeard import db
-from sickbeard import exceptions
+from sickbeard import exceptions, helpers
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -227,12 +226,12 @@ class TVRage:
         logger.log("Loading TVRage info from URL: " + url, logger.DEBUG)
 
         try:
-            urlObj = urllib.urlopen(url)
-        except (urllib.ContentTooShortError, IOError), e:
+            result = helpers.getURL(url)
+        except (urllib2.HTTPError, IOError), e:
             logger.log("Unable to load TVRage info: " + str(e))
             raise exceptions.TVRageException("urlopen call to " + url + " failed")
         
-        urlData = [x.decode('utf-8') for x in urlObj.readlines()]
+        urlData = [x.decode('utf-8') for x in result.splitlines()]
         
         info = {}
         

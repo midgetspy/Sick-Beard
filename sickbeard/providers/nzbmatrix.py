@@ -187,9 +187,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 		logger.log("Sleeping 10 seconds to respect NZBMatrix's rules")
 		time.sleep(10)
 	
-		f = urllib.urlopen(searchURL)
-		searchResult = "".join(f.readlines())
-		f.close()
+		searchResult = self.getURL(searchURL)
 		
 		if not searchResult:
 			return []

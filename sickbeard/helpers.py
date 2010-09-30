@@ -17,8 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import StringIO
-import gzip
+import StringIO, zlib, gzip
 import os.path, os, glob
 import urllib, urllib2
 import re
@@ -85,16 +84,30 @@ def sanitizeFileName (name):
 	return name
 		
 
-def getGZippedURL (f):
-	compressedResponse = f.read()
-	compressedStream = StringIO.StringIO(compressedResponse)
-	gzipper = gzip.GzipFile(fileobj=compressedStream)
-	try:
-		data = None
-		data = gzipper.read()
-	except IOError, e:
-		logger.log("Exception encountered trying to read gzip: "+str(e), logger.ERROR)
-	return data
+def getURL (url, headers=[]):
+	
+	opener = urllib2.build_opener()
+	opener.addheaders = [('User-Agent', 'Sick Beard/alpha2'), ('Accept-Encoding', 'gzip,deflate')]
+	for cur_header in headers:
+		opener.addheaders.append(cur_header)
+	usock = opener.open(url)
+	url = usock.geturl()
+
+	encoding = usock.info().get("Content-Encoding")
+
+	if encoding in ('gzip', 'x-gzip', 'deflate'):
+		content = usock.read()
+		if encoding == 'deflate':
+			data = StringIO.StringIO(zlib.decompress(content))
+		else:
+			data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
+		result = data.read()
+
+	else:
+		result = usock.read()
+		usock.close()
+
+	return result
 
 def findCertainShow (showList, tvdbid):
 	results = filter(lambda x: x.tvdbid == tvdbid, showList)
