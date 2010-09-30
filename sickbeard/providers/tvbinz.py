@@ -50,18 +50,9 @@ class TVBinzProvider(generic.NZBProvider):
 
 	def getURL (self, url):
 	
-		searchHeaders = {"Cookie": "uid=" + sickbeard.TVBINZ_UID + ";hash=" + sickbeard.TVBINZ_HASH + ";auth=" + sickbeard.TVBINZ_AUTH,
-						 'Accept-encoding': 'gzip',
-						 'User-Agent': classes.SickBeardURLopener().version}
-		req = urllib2.Request(url=url, headers=searchHeaders)
-		
-		try:
-			f = urllib2.urlopen(req)
-		except (urllib.ContentTooShortError, IOError), e:
-			logger.log("Error loading TVBinz URL: " + str(sys.exc_info()) + " - " + str(e))
-			return None
-	
-		result = helpers.getGZippedURL(f)
+		cookie_header = ("Cookie", "uid=" + sickbeard.TVBINZ_UID + ";hash=" + sickbeard.TVBINZ_HASH + ";auth=" + sickbeard.TVBINZ_AUTH)
+
+		result = generic.NZBProvider.getURL(self, url, [cookie_header])
 	
 		return result
 

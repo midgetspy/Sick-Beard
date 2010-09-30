@@ -18,7 +18,7 @@
 
 
 
-import urllib
+import urllib2
 import os.path
 import sys
 import datetime
@@ -47,8 +47,6 @@ class GenericProvider:
         self.url = ''
 
         self.cache = tvcache.TVCache(self)
-
-        urllib._urlopener = classes.SickBeardURLopener()
 
     def getID(self):
         return GenericProvider.makeID(self.name)
@@ -94,7 +92,7 @@ class GenericProvider:
         return result
 
 
-    def getURL(self, url):
+    def getURL(self, url, headers=[]):
         """
         By default this is just a simple urlopen call but this method should be overridden
         for providers with special URL requirements (like cookies)
@@ -103,9 +101,8 @@ class GenericProvider:
         result = None
 
         try:
-            f = urllib.urlopen(url)
-            result = "".join(f.readlines())
-        except (urllib.ContentTooShortError, IOError), e:
+            result = helpers.getURL(url, headers)
+        except (urllib2.HTTPError, IOError), e:
             logger.log("Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
             return None
     

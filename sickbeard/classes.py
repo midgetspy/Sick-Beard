@@ -28,7 +28,7 @@ from common import *
 from sickbeard import providers
 
 class SickBeardURLopener(urllib.FancyURLopener):
-    version = "Sick Beard/alpha2"
+    version = USER_AGENT
 
 class AuthURLOpener(SickBeardURLopener):
     def __init__(self, user, pw):

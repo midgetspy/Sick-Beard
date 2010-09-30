@@ -7,13 +7,13 @@ import re
 from lib.tvnamer.utils import FileParser 
 from lib.tvnamer import tvnamer_exceptions
 
-from sickbeard import logger, classes
+from sickbeard import logger, classes, helpers
 from sickbeard.common import *
 
-def getSeasonNZBs(name, fileObj, season):
+def getSeasonNZBs(name, urlData, season):
 
     try:
-        showXML = etree.ElementTree(file = fileObj)
+        showXML = etree.ElementTree(etree.XML(urlData))
     except SyntaxError:
         logger.log("Unable to parse the XML of "+name+", not splitting it", logger.ERROR)
         return ({},'')
@@ -83,7 +83,7 @@ def stripNS(element, ns):
 
 def splitResult(result):
     
-    fileObj = urllib.urlopen(result.url)
+    urlData = helpers.getURL(result.url)
     
     # parse the season ep name
     try:
@@ -96,7 +96,7 @@ def splitResult(result):
     # bust it up
     season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
     
-    separateNZBs, xmlns = getSeasonNZBs(result.name, fileObj, season)
+    separateNZBs, xmlns = getSeasonNZBs(result.name, urlData, season)
 
     resultList = []
     

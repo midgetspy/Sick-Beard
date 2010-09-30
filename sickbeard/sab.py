@@ -74,7 +74,7 @@ def sendNZB(nzb):
 
             req = urllib2.Request(url,
                                   multiPartParams,
-                                  headers={'User-Agent': classes.SickBeardURLopener().version})
+                                  headers={'User-Agent': USER_AGENT})
 
             f = opener.open(req)
             

@@ -21,6 +21,8 @@ import os.path
 import operator
 import re
 
+USER_AGENT = 'Sick Beard/alpha2'
+
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
                    'm2ts', 'm4v', 'ts', 'flv', 'f4v',
