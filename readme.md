@@ -5,6 +5,8 @@ Sick Beard
 
 Sick Beard is a PVR for newsgroup users (with limited torrent support). It watches for new episodes of your favorite shows and when they are posted it downloads them, sorts and renames them, and optionally generates metadata for them. It currently supports NZBs.org, NZBMatrix, Bin-Req, NZBs'R'Us, EZTV.it, and any Newznab installation and retrieves show information from theTVDB.com and TVRage.com.
 
+THIS IS A CLONE OF SICK-BEARD GIT REPO - refer to [SickBeard][SickBeard] for current master
+
 Features include:
 
 * automatic episode downloads for torrents and NZBs from any number of the 6 different supported index sites
@@ -30,7 +32,6 @@ Sick Beard makes use of the following projects:
 * [Python GNTP][pythongntp]
 * [Pytz][pytz]
 
-
 ## Dependencies
 
 To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+ and Pytz. The [binary releases][googledownloads] are standalone.
@@ -39,6 +40,7 @@ To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+ and P
 
 If you find a bug please report it or it'll never get fixed. Verify that it hasn't [already been submitted][googleissues] and then [log a new bug][googlenewissue]. Be sure to provide as much information as possible.
 
+[SickBeard]: http://github.com/midgetspy/Sick-Beard
 [pytz]: http://pytz.sourceforge.net/
 [cherrypy]: http://www.cherrypy.org
 [cheetah]: http://www.cheetahtemplate.org/
