@@ -14,6 +14,7 @@ Features include:
 * available for any platform, uses simple HTTP interface
 * can notify XBMC or use Growl to notify any Windows PC when new episodes are downloaded
 * specials and double episode support
+* Timezone support for comming episodes
 
 
 Sick Beard makes use of the following projects:
@@ -27,15 +28,18 @@ Sick Beard makes use of the following projects:
 * [SABnzbd+][sabnzbd]
 * [jQuery][jquery]
 * [Python GNTP][pythongntp]
+* [Pytz][pytz]
+
 
 ## Dependencies
 
-To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+. The [binary releases][googledownloads] are standalone.
+To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+ and Pytz. The [binary releases][googledownloads] are standalone.
 
 ## Bugs
 
 If you find a bug please report it or it'll never get fixed. Verify that it hasn't [already been submitted][googleissues] and then [log a new bug][googlenewissue]. Be sure to provide as much information as possible.
 
+[pytz]: http://pytz.sourceforge.net/
 [cherrypy]: http://www.cherrypy.org
 [cheetah]: http://www.cheetahtemplate.org/
 [simplejson]: http://code.google.com/p/simplejson/ 

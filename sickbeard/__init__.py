@@ -162,6 +162,9 @@ USE_GROWL = False
 GROWL_HOST = None
 GROWL_PASSWORD = None
 
+TZ_USER = None
+TZ_EPS = None
+
 EXTRA_SCRIPTS = []
 
 __INITIALIZED__ = False
@@ -266,7 +269,7 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS
+                NAMING_DATES, EXTRA_SCRIPTS, TZ_USER, TZ_EPS
 
         
         if __INITIALIZED__:
@@ -394,6 +397,9 @@ def initialize(consoleLogging=True):
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
+        
+        TZ_USER = check_setting_str(CFG, 'Timezone', 'timezone_user', '')
+        TZ_EPS = check_setting_str(CFG, 'Timezone', 'timezone_eps', '')
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
@@ -652,6 +658,8 @@ def save_config():
     CFG['Growl']['use_growl'] = int(USE_GROWL)
     CFG['Growl']['growl_host'] = GROWL_HOST
     CFG['Growl']['growl_password'] = GROWL_PASSWORD
+    CFG['Timezone']['timezone_user'] = TZ_USER
+    CFG['Timezone']['timezone_eps'] = TZ_EPS
     
     CFG['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
     

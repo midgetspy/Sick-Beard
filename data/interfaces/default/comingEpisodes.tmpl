@@ -1,6 +1,8 @@
 #import sickbeard
 #import datetime
 #from sickbeard.common import *
+#import pytz
+#from pytz import timezone
 #set $oneWeek = datetime.timedelta(days=7)
 #set global $title="Coming Episodes"
 
@@ -57,8 +59,27 @@
           </p>
           <p class="noMargin">
             <span class="title">Status:</span> <span class="info ">$curEp.show.status</span><br />
-            <span class="title">Airs:</span> <span class="info ">$curEp.show.airs on $curEp.show.network</span><br />
-            <span class="title">Format:</span> <span class="info ">
+            <span class="title">Airs:</span> <span class="info ">$curEp.show.airs $sickbeard.TZ_EPS on $curEp.show.network</span><br />
+            
+            #set t1 = $curEp.airdate.__str__() + " " + $curEp.show.airs
+            #if t1.count(":") > 0:
+            #set fmt1 = "%Y-%m-%d %A %I:%M %p"
+            #else
+            #set fmt1 = "%Y-%m-%d %A %I %p"
+            #end if
+            
+            #set raw_dt = datetime.datetime(*time.strptime($t1, fmt1)[0:5])
+            #set fmt2 = "%A %I:%M %p %d/%m/%Y"            
+            #set ep_tz = timezone(sickbeard.TZ_EPS)
+            #set ep_dt1 = ep_tz.localize(raw_dt)
+            #set usr_tz = timezone($sickbeard.TZ_USER)
+            #set usr_dt1 = usr_tz.normalize(ep_dt1.astimezone(usr_tz))
+            #set usr_dt2 = usr_dt1 + datetime.timedelta(hours=+2)
+            
+            <span class="title">$usr_tz</span> <span class="info ">$usr_dt1.strftime(fmt2)</span><br />
+            <span class="title">Approx download</span> <span class="info ">$usr_dt2.strftime(fmt2)</span><br />
+            
+            <span class="title">Format:</span> <span class="info ">       
 #if $curEp.show.quality in $qualityPresets:
 $qualityPresetStrings[$curEp.show.quality]
 #else:

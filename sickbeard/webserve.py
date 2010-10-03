@@ -415,6 +415,7 @@ ConfigMenu = [
     { 'title': 'Episode Downloads', 'path': 'config/episodedownloads/' },
     { 'title': 'Search Providers',  'path': 'config/providers/'        },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
+    { 'title': 'Timezones',         'path': 'config/timezones/'        },
 ]
 
 class ConfigGeneral:
@@ -942,6 +943,34 @@ class ConfigNotifications:
         
         redirect("/config/notifications/")
 
+class ConfigTimezones:
+    
+    @cherrypy.expose
+    def index(self):
+        t = PageTemplate(file="config_timezones.tmpl")
+        t.submenu = ConfigMenu
+        return _munge(t)
+    
+    @cherrypy.expose
+    def saveTimezones(self, timezone_user=None, timezone_eps=None ):
+
+        results = []
+
+        sickbeard.TZ_USER = timezone_user
+        sickbeard.TZ_EPS = timezone_eps
+
+        
+        sickbeard.save_config()
+        
+        if len(results) > 0:
+            for x in results:
+                logger.log(x, logger.ERROR)
+            flash.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
+        else:
+            flash.message('Configuration Saved')
+        
+        redirect("/config/timezones/")
 
 class Config:
 
@@ -959,6 +988,8 @@ class Config:
     providers = ConfigProviders()
     
     notifications = ConfigNotifications()
+    
+    timezones = ConfigTimezones()
 
 def haveXBMC():
     return sickbeard.XBMC_HOST != None and len(sickbeard.XBMC_HOST) > 0
@@ -1012,7 +1043,8 @@ class NewHomeAddShows:
         
         finalURL = baseURL + urllib.urlencode(params)
         
-        urlData = helpers.getURL(finalURL)
+        urlObj = urllib.urlopen(finalURL)
+        urlData = "".join(urlObj.readlines())
         
         try:
             seriesXML = etree.ElementTree(etree.XML(urlData))

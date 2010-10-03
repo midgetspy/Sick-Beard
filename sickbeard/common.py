@@ -21,8 +21,6 @@ import os.path
 import operator
 import re
 
-USER_AGENT = 'Sick Beard/alpha2'
-
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
                    'm2ts', 'm4v', 'ts', 'flv', 'f4v',
@@ -39,6 +37,10 @@ NOTIFY_DOWNLOAD = 2
 notifyStrings = {}
 notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
+
+### Timezone info
+TZ_USER = ""
+TZ_EPS = ""
 
 ### Episode statuses
 UNKNOWN = -1 # should never happen
