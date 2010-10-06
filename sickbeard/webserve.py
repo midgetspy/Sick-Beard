@@ -1018,8 +1018,7 @@ class NewHomeAddShows:
         
         finalURL = baseURL + urllib.urlencode(params)
         
-        urlObj = urllib.urlopen(finalURL)
-        urlData = "".join(urlObj.readlines())
+        urlData = helpers.getURL(finalURL)
         
         try:
             seriesXML = etree.ElementTree(etree.XML(urlData))

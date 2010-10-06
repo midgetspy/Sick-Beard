@@ -18,8 +18,10 @@
 
 import sickbeard
 import os.path
-import operator
+import operator, platform
 import re
+
+USER_AGENT = 'Sick Beard/alpha2 ('+platform.system()+' '+platform.release()+')'
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -254,7 +256,8 @@ sceneExceptions = {72546: ['CSI'],
                    105521: ['The Colony', 'The Colony (US)'],
                    76235: ['America\'s Funniest Home Videos', 'AFHV'],
                    139941: ['Childrens Hospital (US)', 'Childrens Hospital'],
-                   83123: ['Merlin', 'Merlin (2008)']
+                   83123: ['Merlin', 'Merlin (2008)'],
+                   76779: ['WWW Monday Night RAW']
                    }
 
 countryList = {'Australia': 'AU',
