@@ -87,7 +87,7 @@ def sanitizeFileName (name):
 def getURL (url, headers=[]):
 	
 	opener = urllib2.build_opener()
-	opener.addheaders = [('User-Agent', 'Sick Beard/alpha2'), ('Accept-Encoding', 'gzip,deflate')]
+	opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
 	for cur_header in headers:
 		opener.addheaders.append(cur_header)
 	usock = opener.open(url)
