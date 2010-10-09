@@ -56,17 +56,16 @@ class TVBinzProvider(generic.NZBProvider):
 	
 		return result
 
-
-def findEpisode (episode, manualSearch=False):
-
-	nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
-
-	# append auth
-	urlParams = {'i': sickbeard.TVBINZ_SABUID, 'h': sickbeard.TVBINZ_HASH}
-	for curResult in nzbResults:
-		curResult.url += "&" + urllib.urlencode(urlParams) 
-
-	return nzbResults
+	def findEpisode (self, episode, forceQuality=None, manualSearch=False):
+	
+		nzbResults = generic.NZBProvider.findEpisode(self, episode, forceQuality, manualSearch)
+	
+		# append auth
+		urlParams = {'i': sickbeard.TVBINZ_SABUID, 'h': sickbeard.TVBINZ_HASH}
+		for curResult in nzbResults:
+			curResult.url += "&" + urllib.urlencode(urlParams) 
+	
+		return nzbResults
 		
 
 

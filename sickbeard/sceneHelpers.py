@@ -28,7 +28,8 @@ from lib.tvnamer import tvnamer_exceptions
 
 resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
                  "dirfix", "samplefix", "nfofix", "dvdextras",
-                 "sample", "extras", "special", "dubbed", "german")
+                 "sample", "extras", "special", "dubbed", "german",
+                "french")
 
 def filterBadReleases(name):
 
