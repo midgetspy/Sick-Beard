@@ -58,7 +58,19 @@ def indentXML(elem, level=0):
 		if level and (not elem.tail or not elem.tail.strip()):
 			elem.tail = i
 
-def replaceExtension (file, newExt):
+def replaceExtension(file, newExt):
+	'''
+	>>> replaceExtension('foo.avi', 'mkv')
+	'foo.mkv'
+	>>> replaceExtension('.vimrc', 'arglebargle')
+	'.vimrc'
+	>>> replaceExtension('a.b.c', 'd')
+	'a.b.d'
+	>>> replaceExtension('', 'a')
+	''
+	>>> replaceExtension('foo.bar', '')
+	'foo.'
+	'''
 	sepFile = file.rpartition(".")
 	if sepFile[0] == "":
 		return file
@@ -77,6 +89,14 @@ def isMediaFile (file):
 		return False
 
 def sanitizeFileName (name):
+	'''
+	>>> sanitizeFileName('a/b/c')
+	'a-b-c'
+	>>> sanitizeFileName('abc')
+	'abc'
+	>>> sanitizeFileName('a"b')
+	'ab'
+	'''
 	for x in "\\/*":
 		name = name.replace(x, "-")
 	for x in ":\"<>|?":
@@ -151,10 +171,6 @@ def makeShowNFO(showID, showDir):
 
 	t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
 	
-	tvNode = etree.Element( "tvshow" )
-	for ns in XML_NSMAP.keys():
-		tvNode.set(ns, XML_NSMAP[ns])
-
 	try:
 		myShow = t[int(showID)]
 	except tvdb_exceptions.tvdb_shownotfound:
@@ -175,7 +191,43 @@ def makeShowNFO(showID, showDir):
  		logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
 		return False
+
+	tvNode = buildNFOXML(myShow)
+	# Make it purdy
+	indentXML( tvNode )
+	nfo = etree.ElementTree( tvNode )
+
+ 	logger.log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
+	nfo_filename = os.path.join(showDir, "tvshow.nfo").encode('utf-8')
+	with open(nfo_filename, 'w') as nfo_fh:
+		nfo.write( nfo_fh, encoding="utf-8" )
+
+	return True
 	
+def buildNFOXML(myShow):
+	'''
+	Build an etree.Element of the root node of an NFO file with the
+	data from `myShow`, a TVDB show object.
+
+	>>> from collections import defaultdict
+	>>> from xml.etree.cElementTree import tostring
+	>>> show = defaultdict(lambda: None, _actors=[])
+	>>> tostring(buildNFOXML(show))
+	'<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title /><rating /><plot /><episodeguide><url /></episodeguide><mpaa /><id /><genre /><premiered /><studio /></tvshow>'
+	>>> show['seriesname'] = 'Peaches'
+	>>> tostring(buildNFOXML(show))
+	'<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa /><id /><genre /><premiered /><studio /></tvshow>'
+	>>> show['contentrating'] = 'PG'
+	>>> tostring(buildNFOXML(show))
+	'<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa>PG</mpaa><id /><genre /><premiered /><studio /></tvshow>'
+	>>> show['genre'] = 'Fruit|Edibles'
+	>>> tostring(buildNFOXML(show))
+	'<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa>PG</mpaa><id /><genre>Fruit / Edibles</genre><premiered /><studio /></tvshow>'
+	'''
+	tvNode = etree.Element( "tvshow" )
+	for ns in XML_NSMAP.keys():
+		tvNode.set(ns, XML_NSMAP[ns])
+
 	title = etree.SubElement( tvNode, "title" )
 	if myShow["seriesname"] != None:
 		title.text = myShow["seriesname"]
@@ -232,18 +284,7 @@ def makeShowNFO(showID, showDir):
 		if cur_actor_thumb_text != None:
 			cur_actor_thumb.text = cur_actor_thumb_text
 
- 	logger.log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
-
-
-	# Make it purdy
-	indentXML( tvNode )
-
-	nfo_fh = open(os.path.join(showDir, "tvshow.nfo").encode('utf-8'), 'w')
-	nfo = etree.ElementTree( tvNode )
-	nfo.write( nfo_fh, encoding="utf-8" )
-	nfo_fh.close()
-
-	return True
+	return tvNode
 
 
 def searchDBForShow(regShowName):
@@ -322,6 +363,18 @@ def getShowImage(url, imgNum=None):
 
 
 def sizeof_fmt(num):
+	'''
+	>>> sizeof_fmt(2)
+	'2.0 bytes'
+	>>> sizeof_fmt(1024)
+	'1.0 KB'
+	>>> sizeof_fmt(2048)
+	'2.0 KB'
+	>>> sizeof_fmt(2**20)
+	'1.0 MB'
+	>>> sizeof_fmt(1234567)
+	'1.2 MB'
+	'''
 	for x in ['bytes','KB','MB','GB','TB']:
 		if num < 1024.0:
 			return "%3.1f %s" % (num, x)
@@ -344,3 +397,9 @@ def listMediaFiles(dir):
 			files.append(fullCurFile)
 
 	return files
+
+if __name__ == '__main__':
+	import doctest
+	doctest.testmod()
+
+# vim: noet
