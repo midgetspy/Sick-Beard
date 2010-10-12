@@ -131,8 +131,6 @@ def searchForNeededEpisodes():
 			logger.log(traceback.format_exc(), logger.DEBUG)
 			continue
 
-		curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name) and isGoodResult(x, episode.show), curFoundResults)
-
 		didSearch = True
 		
 		# pick a single result for each episode, respecting existing results
