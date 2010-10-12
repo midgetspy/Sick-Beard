@@ -25,7 +25,7 @@ import re
 import sickbeard
 
 from sickbeard.exceptions import *
-from sickbeard import logger, classes
+from sickbeard import logger, classes, sceneHelpers
 from sickbeard.common import *
 
 from sickbeard import db
@@ -271,6 +271,12 @@ def searchDBForShow(regShowName):
 				sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
 	
 			if len(sqlResults) == 0:
+                                logger.log("Attempting to match "+showName.rstrip('%')+" against all possible names for known shows in the database.", logger.DEBUG)
+                                for curShow in sickbeard.showList:
+                                        if isShowMatch(showName.rstrip('%'), curShow):
+                                                logger.log("Match found for "+showName.rstrip('%')+" with "+curShow.name+".", logger.DEBUG)
+                                                return (curShow.tvdbid, curShow.name)
+                                        
 				logger.log("Unable to match a record in the DB for "+showName, logger.DEBUG)
 				continue
 			elif len(sqlResults) > 1:
@@ -359,3 +365,18 @@ def listMediaFiles(dir):
 			files.append(fullCurFile)
 
 	return files
+
+def isShowMatch(result, show):
+	"""
+	Use an automatically-created regex to make sure the result actually is the show it claims to be
+	"""
+	
+	showNames = map(sceneHelpers.sanitizeSceneName, sceneHelpers.allPossibleShowNames(show))
+	
+	for curName in set(showNames):
+		curRegex = '^' + re.sub('[\.\-]', '\W+', curName)
+		match = re.search(curRegex, result, re.I)
+		if match:
+			return True
+	
+	return False
