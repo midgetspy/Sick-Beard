@@ -257,7 +257,8 @@ sceneExceptions = {72546: ['CSI'],
                    76235: ['America\'s Funniest Home Videos', 'AFHV'],
                    139941: ['Childrens Hospital (US)', 'Childrens Hospital'],
                    83123: ['Merlin', 'Merlin (2008)'],
-                   76779: ['WWW Monday Night RAW']
+                   76779: ['WWW Monday Night RAW'],
+                   164951: ['Shit My Dad Says']
                    }
 
 countryList = {'Australia': 'AU',
