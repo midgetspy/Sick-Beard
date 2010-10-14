@@ -258,7 +258,9 @@ sceneExceptions = {72546: ['CSI'],
                    139941: ['Childrens Hospital (US)', 'Childrens Hospital'],
                    83123: ['Merlin', 'Merlin (2008)'],
                    76779: ['WWW Monday Night RAW'],
-                   164951: ['Shit My Dad Says']
+                   164951: ['Shit My Dad Says'],
+                   83714: ['Genius with Dave Gorman'],
+                   168161: ['Law & Order: Los Angeles', 'Law & Order: LA']
                    }
 
 countryList = {'Australia': 'AU',
