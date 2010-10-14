@@ -209,7 +209,7 @@ def findEpisode(episode, manualSearch=False):
 		didSearch = True
 		
 		# skip non-tv crap
-		curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name) and isGoodResult(x, episode.show), curFoundResults)
+		curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, episode.show), curFoundResults)
 
 		foundResults += curFoundResults
 		
@@ -240,7 +240,7 @@ def findSeason(show, season):
 			for curEp in curResults:
 				
 				# skip non-tv crap
-				curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and isGoodResult(x, show), curResults[curEp])
+				curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), curResults[curEp])
 
 				if curEp in foundResults:
 					foundResults[curEp] += curResults[curEp]
@@ -305,7 +305,7 @@ def findSeason(show, season):
 			# if not, break it apart and add them as the lowest priority results
 			individualResults = nzbSplitter.splitResult(bestSeasonNZB)
 
-			individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and isGoodResult(x, show), individualResults)
+			individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), individualResults)
 
 			for curResult in individualResults:
 				if len(curResult.episodes) == 1:
@@ -368,21 +368,3 @@ def findSeason(show, season):
 	return finalResults
 
 
-def isGoodResult(result, show):
-	"""
-	Use an automatically-created regex to make sure the result actually is the show it claims to be
-	"""
-	
-	showNames = map(sceneHelpers.sanitizeSceneName, sceneHelpers.allPossibleShowNames(show))
-	
-	for curName in set(showNames):
-		curRegex = '^' + re.sub('[\.\-]', '\W+', curName) + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx])))'
-		logger.log("Checking if show "+result.name+" matches " + curRegex, logger.DEBUG)
-		
-		match = re.search(curRegex, result.name, re.I)
-		
-		if match:
-			return True
-	
-	logger.log("Provider gave result "+result.name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
-	return False
