@@ -8,7 +8,7 @@ from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import *
 
-from sickbeard import helpers, classes, exceptions
+from sickbeard import helpers, classes, exceptions, sceneHelpers
 from sickbeard import providers
 
 import xml.etree.cElementTree as etree
@@ -275,6 +275,10 @@ class TVCache():
 
         # for each cache entry
         for curResult in sqlResults:
+
+            # skip non-tv crap
+            if not sceneHelpers.filterBadReleases(x.name):
+                continue
 
             # get the show object, or if it's not one of our shows then ignore it
             showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
