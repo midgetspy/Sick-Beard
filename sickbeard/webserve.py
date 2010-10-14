@@ -93,7 +93,7 @@ class PageTemplate (Template):
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
             { 'title': 'History',         'key': 'history'        },
-            { 'title': 'Manage Shows',    'key': 'manageShows'    },
+            { 'title': 'Manage',          'key': 'manage'         },
             { 'title': 'Config',          'key': 'config'         },
             { 'title': logPageTitle,      'key': 'errorlogs'      },
         ]
@@ -143,20 +143,20 @@ def _getEpisode(show, season, episode):
 
     return epObj
 
-ManageShowsMenu = [
-            { 'title': 'Manage Searches', 'path': 'manageShows/manageSearches' },
+ManageMenu = [
+            { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
            #{ 'title': 'Episode Overview', 'path': 'manageShows/episodeOverview' },
             ]
 
-class ManageShowsManageSearches:
+class ManageSearches:
 
     @cherrypy.expose
     def index(self):
-        t = PageTemplate(file="manageShows_manageSearches.tmpl")
+        t = PageTemplate(file="manage_manageSearches.tmpl")
         t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
         t.backlogPaused = sickbeard.backlogSearchScheduler.action.amPaused
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
-        t.submenu = ManageShowsMenu
+        t.submenu = ManageMenu
         
         return _munge(t)
         
@@ -168,7 +168,7 @@ class ManageShowsManageSearches:
         logger.log("Backlog search started in background")
         flash.message('Backlog search started',
                       'The backlog search has begun and will run in the background')
-        redirect("/manageShows/manageSearches")
+        redirect("/manage/manageSearches")
 
     @cherrypy.expose
     def forceSearch(self):
@@ -180,7 +180,7 @@ class ManageShowsManageSearches:
             flash.message('Episode search started',
                           'Note: RSS feeds may not be updated if they have been retrieved too recently')
         
-        redirect("/manageShows/manageSearches")
+        redirect("/manage/manageSearches")
 
     @cherrypy.expose
     def pauseBacklog(self, paused=None):
@@ -191,29 +191,29 @@ class ManageShowsManageSearches:
         
         sickbeard.backlogSearchScheduler.action.amPaused = setPaused
         
-        redirect("/manageShows/manageSearches")
+        redirect("/manage/manageSearches")
 
 
 
-class ManageShows:
+class Manage:
 
-    manageSearches = ManageShowsManageSearches()
+    manageSearches = ManageSearches()
 
     @cherrypy.expose
     def index(self):
         
-        t = PageTemplate(file="manageShows.tmpl")
-        t.submenu = ManageShowsMenu
+        t = PageTemplate(file="manage.tmpl")
+        t.submenu = ManageMenu
         return _munge(t)
 
     @cherrypy.expose
     def massEdit(self, toEdit=None):
         
-        t = PageTemplate(file="manageShows_massEdit.tmpl")
-        t.submenu = ManageShowsMenu
+        t = PageTemplate(file="manage_massEdit.tmpl")
+        t.submenu = ManageMenu
 
         if not toEdit:
-            redirect("/manageShows")
+            redirect("/manage")
         
         showIDs = toEdit.split("|")
         showList = []
@@ -285,7 +285,7 @@ class ManageShows:
             flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
                         "<br />\n".join(errors))
 
-        redirect("/manageShows")
+        redirect("/manage")
 
     @cherrypy.expose
     def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toMetadata=None):
@@ -369,7 +369,7 @@ class ManageShows:
             flash.message("The following actions were queued:<br /><br />",
                           messageDetail)
 
-        redirect("/manageShows")
+        redirect("/manage")
 
 
 class History:
@@ -1659,7 +1659,7 @@ class WebInterface:
         
         return _munge(t)
 
-    manageShows = ManageShows()
+    manage = Manage()
 
     history = History()
 

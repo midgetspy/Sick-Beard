@@ -5,7 +5,7 @@
 
 #set global $sbPath=".."
 
-<!--#set global $topmenu="manageShows"#-->
+<!--#set global $topmenu="manage"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
@@ -14,18 +14,18 @@
 <b>Backlog Search:</b><br />
 
 #if $backlogPI == None:
-Not in progress (<a href="$sbRoot/manageShows/manageSearches/forceBacklog">force</a>)<br />
+Not in progress (<a href="$sbRoot/manage/manageSearches/forceBacklog">force</a>)<br />
 #else:
 #if $backlogPaused then "Paused: " else ""#
 #set $aoeu = "%.2f%%" % $backlogPI.percentComplete
 $aoeu complete<br />
 $backlogPI.currentStatus['title']<br />
-<a href="$sbRoot/manageShows/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#">#if $backlogPaused then "Unpause" else "Pause"#</a><br />
+<a href="$sbRoot/manage/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#">#if $backlogPaused then "Unpause" else "Pause"#</a><br />
 #end if
 <br />
 <b>Daily Episode Search:</b><br />
 #if not $searchStatus:
-Not in progress (<a href="$sbRoot/manageShows/manageSearches/forceSearch">force</a>)<br />
+Not in progress (<a href="$sbRoot/manage/manageSearches/forceSearch">force</a>)<br />
 #else:
 In Progress
 #end if
