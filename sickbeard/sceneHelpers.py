@@ -151,3 +151,23 @@ def allPossibleShowNames(show):
 
     return showNames
 
+def isGoodResult(name, show, log=True):
+    """
+    Use an automatically-created regex to make sure the result actually is the show it claims to be
+    """
+    
+    showNames = map(sanitizeSceneName, allPossibleShowNames(show))
+    
+    for curName in set(showNames):
+        curRegex = '^' + re.sub('[\.\-]', '\W+', curName) + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx])))'
+        if log:
+            logger.log("Checking if show "+name+" matches " + curRegex, logger.DEBUG)
+        
+        match = re.search(curRegex, name, re.I)
+        
+        if match:
+            return True
+
+    if log:
+        logger.log("Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+    return False

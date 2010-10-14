@@ -8,7 +8,7 @@ from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import *
 
-from sickbeard import helpers, classes, exceptions
+from sickbeard import helpers, classes, exceptions, sceneHelpers
 from sickbeard import providers
 
 import xml.etree.cElementTree as etree
@@ -209,6 +209,16 @@ class TVCache():
                 if showResult:
                     logger.log(epInfo.seriesname+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
                     tvdb_id = showResult[0]
+
+                else:
+                    logger.log("Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
+                    for curShow in sickbeard.showList:
+                        if sceneHelpers.isGoodResult(name, curShow, False):
+                            logger.log("Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
+                            tvdb_id = curShow.tvdbid 
+                
+                if tvdb_id:
+                    
                     showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
                     if not showObj:
                         logger.log("This should never have happened, post a bug about this!", logger.ERROR)
@@ -275,6 +285,10 @@ class TVCache():
 
         # for each cache entry
         for curResult in sqlResults:
+
+            # skip non-tv crap
+            if not sceneHelpers.filterBadReleases(curResult["name"]):
+                continue
 
             # get the show object, or if it's not one of our shows then ignore it
             showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
