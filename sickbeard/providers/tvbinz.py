@@ -67,6 +67,16 @@ class TVBinzProvider(generic.NZBProvider):
 	
 		return nzbResults
 		
+	def searchRSS (self):
+		
+		results = generic.NZBProvider.searchRSS(self)
+		
+		urlParams = {'i': sickbeard.TVBINZ_SABUID, 'h': sickbeard.TVBINZ_HASH}
+		for curEp in results:
+			for curResult in results[curEp]:
+				# append auth
+				curResult.url += "&" + urllib.urlencode(urlParams) 
+
 
 
 class TVBinzCache(tvcache.TVCache):
