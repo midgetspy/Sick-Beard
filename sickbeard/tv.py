@@ -1139,8 +1139,11 @@ class TVEpisode:
                 logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
             elif self.airdate == datetime.date.fromordinal(1):
-                logger.log("Episode has no air date, automatically marking it skipped", logger.DEBUG)
-                self.status = SKIPPED
+                if self.status != IGNORED:
+                    logger.log("Episode has no air date, automatically marking it skipped", logger.DEBUG)
+                    self.status = SKIPPED
+                else:
+                    logger.log("Episode has no air date, but it's already marked as ignored", logger.DEBUG)
             else:
                 if self.status == UNAIRED:
                     self.status = WANTED
