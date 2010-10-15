@@ -126,7 +126,6 @@ TV_DOWNLOAD_DIR = None
 SHOW_TVBINZ = False
 TVBINZ = False
 TVBINZ_UID = None
-TVBINZ_SABUID = None
 TVBINZ_HASH = None
 TVBINZ_AUTH = None
 
@@ -261,7 +260,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, TVBINZ_SABUID, showQueueScheduler, \
+                MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
@@ -359,7 +358,6 @@ def initialize(consoleLogging=True):
         
         TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
         TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
-        TVBINZ_SABUID = check_setting_str(CFG, 'TVBinz', 'tvbinz_sabuid', '')
         TVBINZ_HASH = check_setting_str(CFG, 'TVBinz', 'tvbinz_hash', '')
         TVBINZ_AUTH = check_setting_str(CFG, 'TVBinz', 'tvbinz_auth', '')
         
@@ -624,7 +622,6 @@ def save_config():
     CFG['Blackhole']['torrent_dir'] = TORRENT_DIR
     CFG['TVBinz']['tvbinz'] = int(TVBINZ)
     CFG['TVBinz']['tvbinz_uid'] = TVBINZ_UID
-    CFG['TVBinz']['tvbinz_sabuid'] = TVBINZ_SABUID
     CFG['TVBinz']['tvbinz_hash'] = TVBINZ_HASH
     CFG['TVBinz']['tvbinz_auth'] = TVBINZ_AUTH
     CFG['NZBs']['nzbs'] = int(NZBS)

@@ -780,7 +780,7 @@ class ConfigProviders:
     @cherrypy.expose
     def saveProviders(self, tvbinz_uid=None, tvbinz_hash=None, nzbs_org_uid=None,
                       nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
-                      tvbinz_auth=None, tvbinz_sabuid=None, provider_order=None,
+                      tvbinz_auth=None, provider_order=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None):
 
         results = []
@@ -847,8 +847,6 @@ class ConfigProviders:
 
         if tvbinz_uid:
             sickbeard.TVBINZ_UID = tvbinz_uid.strip()
-        if tvbinz_sabuid:
-            sickbeard.TVBINZ_SABUID = tvbinz_sabuid.strip()
         if tvbinz_hash:
             sickbeard.TVBINZ_HASH = tvbinz_hash.strip()
         if tvbinz_auth:
