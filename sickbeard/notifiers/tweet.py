@@ -40,7 +40,7 @@ def get_authorization():
         sickbeard.TWITTER_USERNAME = request_token['oauth_token']
         sickbeard.TWITTER_PASSWORD = request_token['oauth_token_secret']
     
-        return AUTHORIZATION_URL+"?oath_token="+ request_token['oauth_token']
+        return AUTHORIZATION_URL+"?oauth_token="+ request_token['oauth_token']
 
 def get_credentials(key):
     request_token = {}
@@ -80,12 +80,12 @@ def send_tweet(options,message=None):
 
     try:
         status = api.PostUpdate(message)
-    except:
-        logger.log("Error Sending Tweet")
-        return False;
+    except e:
+        logger.log("Error Sending Tweet: "+str(e), logger.ERROR)
+        return False
 
     logger.log("Twitter Updated")
-    return True;
+    return True
 
 def notifyTwitter(message=None, username=None, password=None):
 
@@ -103,8 +103,6 @@ def notifyTwitter(message=None, username=None, password=None):
         opts['tname'] = sickbeard.TWITTER_USERNAME
     else:
         opts['tname'] = username
-
-    message = "DVR is recording: " + message
 
     logger.log("Sending tweet from "+opts['tname']+" Password "+str(opts['password'])+": "+message)
 
