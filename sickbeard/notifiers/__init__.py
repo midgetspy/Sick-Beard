@@ -14,7 +14,7 @@ def testXBMC(host, username, password):
     xbmc.notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password)
 
 def testTwitter1():
-    tweet.get_authorization()
+    return tweet.get_authorization()
 
 def testTwitter2(key):
     tweet.get_credentials(key)

@@ -1246,8 +1246,7 @@ class Home:
       
     @cherrypy.expose
     def twitterStep1(self):
-        notifiers.testTwitter1()
-        return "Getting Twitter Authorization"
+        return notifiers.testTwitter1()
 
     @cherrypy.expose
     def twitterStep2(self, key):

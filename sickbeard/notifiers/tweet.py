@@ -14,8 +14,8 @@ except:
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
 
-consumer_key = "sBD0atiSA1TY5tv4ru3Cyw"
-consumer_secret = "eWeyr7uyVJZpr2AnBW4s4NKRm2WjyHDV2omyq88CeFc"
+consumer_key = "vHHtcB6WzpWDG6KYlBMr8g"
+consumer_secret = "zMqq5CB3f8cWKiRO2KzWPTlBanYmV0VYxSXZ0Pxds0E"
 
 REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
 ACCESS_TOKEN_URL  = 'https://api.twitter.com/oauth/access_token'
@@ -33,15 +33,14 @@ def get_authorization():
     resp, content = oauth_client.request(REQUEST_TOKEN_URL, 'GET')
 
     if resp['status'] != '200':
-	logger.log('Invalid respond from Twitter requesting temp token: %s' % resp['status'])
+        logger.log('Invalid respond from Twitter requesting temp token: %s' % resp['status'])
     else:
-	request_token = dict(parse_qsl(content))
+        request_token = dict(parse_qsl(content))
 
-    sickbeard.TWITTER_USERNAME = request_token['oauth_token']
-    sickbeard.TWITTER_PASSWORD = request_token['oauth_token_secret']
-
-    logger.log('%s?oauth_token=%s' % (AUTHORIZATION_URL, request_token['oauth_token']))
-    logger.log('Please visit this Twitter page and retrieve the key to be used in the next step to obtaining an Authentication Token:')
+        sickbeard.TWITTER_USERNAME = request_token['oauth_token']
+        sickbeard.TWITTER_PASSWORD = request_token['oauth_token_secret']
+    
+        return AUTHORIZATION_URL+"?oath_token="+ request_token['oauth_token']
 
 def get_credentials(key):
     request_token = {}
@@ -62,13 +61,13 @@ def get_credentials(key):
     access_token  = dict(parse_qsl(content))
 
     if resp['status'] != '200':
-	logger.log('The request for a Token did not succeed: %s' % resp['status'])
-	logger.log(access_token)
+        logger.log('The request for a Token did not succeed: %s' % resp['status'])
+        logger.log(access_token)
     else:
-	logger.log('Your Twitter Access Token key: %s' % access_token['oauth_token'])
-	logger.log('Access Token secret: %s' % access_token['oauth_token_secret'])
-	sickbeard.TWITTER_USERNAME = access_token['oauth_token']
-	sickbeard.TWITTER_PASSWORD = access_token['oauth_token_secret']
+        logger.log('Your Twitter Access Token key: %s' % access_token['oauth_token'])
+        logger.log('Access Token secret: %s' % access_token['oauth_token_secret'])
+        sickbeard.TWITTER_USERNAME = access_token['oauth_token']
+        sickbeard.TWITTER_PASSWORD = access_token['oauth_token_secret']
 
 
 def send_tweet(options,message=None):
@@ -80,36 +79,33 @@ def send_tweet(options,message=None):
     api = twitter.Api(username, password, access_token_key, access_token_secret)
 
     try:
-	status = api.PostUpdate(message)
+        status = api.PostUpdate(message)
     except:
-	logger.log("Error Sending Tweet")
-	return False;
+        logger.log("Error Sending Tweet")
+        return False;
 
     logger.log("Twitter Updated")
     return True;
 
 def notifyTwitter(message=None, username=None, password=None):
 
-	if not sickbeard.USE_TWITTER:
-		return False
+    if not sickbeard.USE_TWITTER:
+        return False
 
-	opts = {}
+    opts = {}
 
-	if password == None:
-		opts['password'] = sickbeard.TWITTER_PASSWORD
-	else:
-		opts['password'] = password
+    if password == None:
+        opts['password'] = sickbeard.TWITTER_PASSWORD
+    else:
+        opts['password'] = password
 
-        if username == None:
-                opts['tname'] = sickbeard.TWITTER_USERNAME
-        else:
-                opts['tname'] = username
+    if username == None:
+        opts['tname'] = sickbeard.TWITTER_USERNAME
+    else:
+        opts['tname'] = username
 
-        if message == "This is a test notification from Sick Beard":
-                prefix = ""
-        else:
-                prefix = "DVR is recording: "
+    message = "DVR is recording: " + message
 
-	logger.log("Sending tweet from "+opts['tname']+" Password "+str(opts['password'])+": "+prefix+message)
+    logger.log("Sending tweet from "+opts['tname']+" Password "+str(opts['password'])+": "+message)
 
-	send_tweet(opts, prefix+message)
+    send_tweet(opts, message)

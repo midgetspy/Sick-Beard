@@ -30,12 +30,9 @@
 
   \$('#twitterStep1').click(function(){
 
-    \$.get("$sbRoot/home/twitterStep1", {});
-    document.getElementById('twitterStep1').disabled = true;
-    document.getElementById('twitterStep2').disabled = true;
-    document.getElementById('testTwitter').disabled = true;
-    document.getElementById('form').submit();
-
+    \$.get("$sbRoot/home/twitterStep1", function (data){window.open(data)});
+    return false;
+    
   });
 
   \$('#twitterStep2').click(function(){
@@ -136,7 +133,9 @@ blank, but if the hosts are different Growl <b>requires</b> a password.<br />
 Should Sick Beard send Twitter notifications?<br />
 <br />
 <strong>Step One:</strong><br />
-Click the "Request Authorization" button.  Copy the twitter URL from the <a href=$sbRoot/errorlogs/viewlog>log</a> into your browser.<br />
+Click the "Request Authorization" button. This will<br />
+open a new page containing an auth key.<br />
+Note: if nothing happens check your popup blocker.<br />
 <input type="button" value="Request Authorization" id="twitterStep1"><br />
 <br />
 <strong>Step Two:</strong><br />
