@@ -260,7 +260,9 @@ sceneExceptions = {72546: ['CSI'],
                    76779: ['WWW Monday Night RAW'],
                    164951: ['Shit My Dad Says'],
                    83714: ['Genius with Dave Gorman'],
-                   168161: ['Law & Order: Los Angeles', 'Law & Order: LA']
+                   168161: ['Law & Order: Los Angeles', 'Law & Order: LA'],
+                   77526: ['Star Trek: TOS'],
+                   72194: ['The Ellen Degeneres Show', 'Ellen Degeneres']
                    }
 
 countryList = {'Australia': 'AU',
