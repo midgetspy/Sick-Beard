@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "alpha2 chaosloth mod"
+SICKBEARD_VERSION = "alpha2"
