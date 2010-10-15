@@ -34,7 +34,7 @@
     document.getElementById('twitterStep1').disabled = true;
     document.getElementById('twitterStep2').disabled = true;
     document.getElementById('testTwitter').disabled = true;
-    setTimeout(function(){window.location.href = "$sbRoot/errorlogs/viewlog";}, 1250);
+    document.getElementById('form').submit();
 
   });
 
@@ -45,8 +45,7 @@
     document.getElementById('twitterStep1').disabled = true;
     document.getElementById('twitterStep2').disabled = true;
     document.getElementById('testTwitter').disabled = true; 
-    setTimeout(function(){window.location.href = "$sbRoot/errorlogs/viewlog";}, 1250);
-
+    document.getElementById('form').submit();
 
   });
 
@@ -60,7 +59,7 @@
       
 </script>
 
-<form action="saveNotifications" method="POST">
+<form id="form" action="saveNotifications" method="POST">
 
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">
@@ -137,7 +136,7 @@ blank, but if the hosts are different Growl <b>requires</b> a password.<br />
 Should Sick Beard send Twitter notifications?<br />
 <br />
 <strong>Step One:</strong><br />
-Click the "Request Authorization" button.  Copy the twitter URL from the log into your browser.<br />
+Click the "Request Authorization" button.  Copy the twitter URL from the <a href=$sbRoot/errorlogs/viewlog>log</a> into your browser.<br />
 <input type="button" value="Request Authorization" id="twitterStep1"><br />
 <br />
 <strong>Step Two:</strong><br />
