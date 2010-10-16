@@ -154,6 +154,9 @@ def processDir (dirName, nzbName=None, recurse=False):
     elif os.path.basename(dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper("The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
         return returnStr
+    elif os.path.basename(dirName).startswith('_UNPACK_'):
+        returnStr += logHelper("The directory name indicates that this release is in the processof being unpacked, skipping", logger.DEBUG)
+        return returnStr
 
     # make sure the dir isn't inside a show dir
     myDB = db.DBConnection()
