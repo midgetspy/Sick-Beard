@@ -93,7 +93,7 @@ def _checkForExistingFile(renamedFilePath, oldFile):
     if ek.ek(os.path.isfile, renamedFilePath):
         
         # see if it's bigger than our old file
-        if ek.ek(os.path.getsize, renamedFilePath) > ek.ek(os.path.getsize, oldFile):
+        if ek.ek(os.path.getsize, renamedFilePath) >= ek.ek(os.path.getsize, oldFile):
             return 1
         
         else:
@@ -535,7 +535,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     if existingResult in (-2, 2):
         existingFile = rootEp.location
         if rootEp.status in Quality.SNATCHED_PROPER:
-            returnStr += logHelper(existingFile + " already exists and is larger but I'm deleting it to make way for the proper", logger.DEBUG)
+            returnStr += logHelper(existingFile + " already exists and is the same size or larger but I'm deleting it to make way for the proper", logger.DEBUG)
         else:
             returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
 
