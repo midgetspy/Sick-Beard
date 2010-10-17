@@ -65,6 +65,7 @@ providerList = []
 newznabProviderList = []
 
 NEWEST_VERSION = None
+NEWEST_VERSION_STRING = None
 VERSION_NOTIFY = None
 
 INIT_LOCK = Lock()

@@ -57,7 +57,7 @@
 </span>
 #end if
 
-#if $sickbeard.VERSION_NOTIFY and $sickbeard.version.SICKBEARD_VERSION != "trunk" and $sickbeard.NEWEST_VERSION != None and int($sickbeard.version.SICKBEARD_VERSION[6:]) < $sickbeard.NEWEST_VERSION:
+#if $sickbeard.VERSION_NOTIFY and $sickbeard.NEWEST_VERSION_STRING:
 <div class="message ui-state-highlight ui-corner-all">
     <p><span class="ui-icon ui-icon-alert"></span>There is a <a href="http://code.google.com/p/sickbeard/downloads/list" target="_new">newer version available (build $sickbeard.NEWEST_VERSION)</a></p>
 </div>
