@@ -43,6 +43,9 @@ class ProperFinder():
         self.updateInterval = datetime.timedelta(hours=1) 
 
     def run(self):
+
+        if not sickbeard.DOWNLOAD_PROPERS:
+            return
     
         # look for propers every night at 1 AM
         updateTime = datetime.time(hour=1)
