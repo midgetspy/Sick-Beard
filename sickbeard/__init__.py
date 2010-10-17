@@ -163,6 +163,10 @@ USE_GROWL = False
 GROWL_HOST = None
 GROWL_PASSWORD = None
 
+USE_TWITTER = False
+TWITTER_USERNAME = None
+TWITTER_PASSWORD = None
+
 EXTRA_SCRIPTS = []
 
 __INITIALIZED__ = False
@@ -259,7 +263,7 @@ def initialize(consoleLogging=True):
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
+		USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, \
@@ -267,7 +271,7 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS
+                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD
 
         
         if __INITIALIZED__:
@@ -282,6 +286,7 @@ def initialize(consoleLogging=True):
         CheckSection('SABnzbd')
         CheckSection('XBMC')
         CheckSection('Growl')
+	CheckSection('Twitter')
         
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -396,6 +401,10 @@ def initialize(consoleLogging=True):
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
+
+        USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
+        TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
+        TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
@@ -654,7 +663,10 @@ def save_config():
     CFG['Growl']['use_growl'] = int(USE_GROWL)
     CFG['Growl']['growl_host'] = GROWL_HOST
     CFG['Growl']['growl_password'] = GROWL_PASSWORD
-    
+    CFG['Twitter']['use_twitter'] = int(USE_TWITTER)
+    CFG['Twitter']['twitter_username'] = TWITTER_USERNAME
+    CFG['Twitter']['twitter_password'] = TWITTER_PASSWORD
+ 
     CFG['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
     
     CFG.write()

@@ -936,7 +936,7 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, 
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, ):
+                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None):
 
         results = []
 
@@ -965,6 +965,11 @@ class ConfigNotifications:
         else:
             use_growl = 0
 
+        if use_twitter == "on":
+            use_twitter = 1
+        else:
+            use_twitter = 0
+
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch 
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
@@ -972,12 +977,13 @@ class ConfigNotifications:
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
-
         
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
-        
+       
+        sickbeard.USE_TWITTER = use_twitter
+
         sickbeard.save_config()
         
         if len(results) > 0:
@@ -1285,7 +1291,28 @@ class Home:
     def testGrowl(self, host=None, password=None):
         notifiers.testGrowl(host, password)
         return "Tried sending growl to "+host+" with password "+password
-        
+      
+    @cherrypy.expose
+    def twitterStep1(self):
+        return notifiers.testTwitter1()
+
+    @cherrypy.expose
+    def twitterStep2(self, key):
+        result = notifiers.testTwitter2(key)
+        logger.log("result: "+str(result))
+        if result:
+            return "Key verification successful"
+        else:
+            return "Unable to verify key"
+
+    @cherrypy.expose
+    def testTwitter(self):
+        result = notifiers.testTwitter()
+        if result:
+            return "Tweet successful, check your twitter to make sure it worked"
+        else:
+            return "Error sending tweet"
+ 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
         notifiers.testXBMC(urllib.unquote_plus(host), username, password)
