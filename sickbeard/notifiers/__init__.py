@@ -17,10 +17,10 @@ def testTwitter1():
     return tweet.get_authorization()
 
 def testTwitter2(key):
-    tweet.get_credentials(key)
+    return tweet.get_credentials(key)
 
-def testTwitter(username, password):
-    tweet.notifyTwitter("This is a test notification from Sick Beard", username, password)
+def testTwitter():
+    return tweet.notifyTwitter("This is a test notification from Sick Beard", force=True)
 
 def notify(type, message):
     
@@ -33,4 +33,4 @@ def notify(type, message):
     growl.sendGrowl(notifyStrings[type], message)
 
     if type == NOTIFY_DOWNLOAD:
-	tweet.notifyTwitter(message)
+        tweet.notifyTwitter(message)

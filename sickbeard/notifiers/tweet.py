@@ -52,58 +52,53 @@ def get_credentials(key):
     token = oauth.Token(request_token['oauth_token'], request_token['oauth_token_secret'])
     token.set_verifier(key)
 
-    logger.log('Generating and signing request for an access token')
+    logger.log('Generating and signing request for an access token using key '+key)
 
     signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1()
     oauth_consumer             = oauth.Consumer(key=consumer_key, secret=consumer_secret)
+    logger.log('oauth_consumer: '+str(oauth_consumer))
     oauth_client  = oauth.Client(oauth_consumer, token)
+    logger.log('oauth_client: '+str(oauth_client))
     resp, content = oauth_client.request(ACCESS_TOKEN_URL, method='POST', body='oauth_verifier=%s' % key)
-    access_token  = dict(parse_qsl(content))
+    logger.log('resp, content: '+str(resp)+','+str(content))
 
+    access_token  = dict(parse_qsl(content))
+    logger.log('access_token: '+str(access_token))
+
+    logger.log('resp[status] = '+str(resp['status']))
     if resp['status'] != '200':
-        logger.log('The request for a Token did not succeed: %s' % resp['status'])
-        logger.log(access_token)
+        logger.log('The request for a token with did not succeed: '+str(resp['status']), logger.ERROR)
+        return False
     else:
         logger.log('Your Twitter Access Token key: %s' % access_token['oauth_token'])
         logger.log('Access Token secret: %s' % access_token['oauth_token_secret'])
         sickbeard.TWITTER_USERNAME = access_token['oauth_token']
         sickbeard.TWITTER_PASSWORD = access_token['oauth_token_secret']
+        return True
 
 
-def send_tweet(options,message=None):
+def send_tweet(message=None):
+
     username=consumer_key
     password=consumer_secret
     access_token_key=sickbeard.TWITTER_USERNAME
     access_token_secret=sickbeard.TWITTER_PASSWORD
 
+    logger.log("Sending tweet: "+message)
+
     api = twitter.Api(username, password, access_token_key, access_token_secret)
 
     try:
         status = api.PostUpdate(message)
-    except e:
+    except Exception, e:
         logger.log("Error Sending Tweet: "+str(e), logger.ERROR)
         return False
 
-    logger.log("Twitter Updated")
     return True
 
-def notifyTwitter(message=None, username=None, password=None):
+def notifyTwitter(message='', force=False):
 
-    if not sickbeard.USE_TWITTER:
+    if not sickbeard.USE_TWITTER and not force:
         return False
 
-    opts = {}
-
-    if password == None:
-        opts['password'] = sickbeard.TWITTER_PASSWORD
-    else:
-        opts['password'] = password
-
-    if username == None:
-        opts['tname'] = sickbeard.TWITTER_USERNAME
-    else:
-        opts['tname'] = username
-
-    logger.log("Sending tweet from "+opts['tname']+" Password "+str(opts['password'])+": "+message)
-
-    send_tweet(opts, message)
+    return send_tweet('Sick Beard: '+message)

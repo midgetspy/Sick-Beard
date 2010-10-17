@@ -38,17 +38,14 @@
   \$('#twitterStep2').click(function(){
 
     var twitter_key = \$("#twitter_key").val();
-    \$.get("$sbRoot/home/twitterStep2", {'key': twitter_key});
-    document.getElementById('twitterStep1').disabled = true;
-    document.getElementById('twitterStep2').disabled = true;
-    document.getElementById('testTwitter').disabled = true; 
-    document.getElementById('form').submit();
+    \$.get("$sbRoot/home/twitterStep2", {'key': twitter_key}, function (data){alert(data)});
+    return false;
 
   });
 
   \$('#testTwitter').click(function(){
 
-    \$.get("$sbRoot/home/testTwitter", {});
+    \$.get("$sbRoot/home/testTwitter", function (data){alert(data)});
 
   });
 
@@ -141,27 +138,11 @@ Note: if nothing happens check your popup blocker.<br />
 <br />
 <strong>Step Two:</strong><br />
 Enter the key Twitter gave you below, and click "Verify Key".<br />
-<input type="text" name="twitter_key" id="twitter_key" value="" size="35"><br />
+<input type="text" id="twitter_key" value="" size="35"><br />
 <input type="button" value="Verify Key" id="twitterStep2"><br />
 <br />
 <strong>Step Three:</strong><br />
 <input type="button" value="Test Twitter" id="testTwitter">
-
-</fieldset>
-</div>
-
-
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>Email</legend>
-
-Not Implemented<br />
-<br />
-<br />
-<br />
-<br />
-<br />
 
 </fieldset>
 </div>
