@@ -8,6 +8,30 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script type="text/javascript">
+\$(document).ready(function(){
+
+    \$.fn.nzb_method_handler = function() {
+        
+        var selectedProvider = \$('#nzb_method :selected').val();
+
+        if (selectedProvider == "blackhole") {
+            \$('#blackhole_settings').show();
+            \$('#sabnzbd_settings').hide();
+        } else {
+            \$('#blackhole_settings').hide();
+            \$('#sabnzbd_settings').show();
+        }
+
+    }
+
+    \$('#nzb_method').change(\$(this).nzb_method_handler);
+    
+    \$(this).nzb_method_handler();
+
+});
+</script>
+
 <form action="saveEpisodeDownloads" method="POST">
 
 All non-absolute folder locations are relative to $sickbeard.PROG_DIR<br /><br />
@@ -35,6 +59,15 @@ Time between backlog searches (in days)<br />
 <input type="text" name="backlog_search_frequency" value="$sickbeard.BACKLOG_SEARCH_FREQUENCY" size="4"><br />
 <br />
 
+<strong>Usenet Retention:</strong><br />
+How old should a report be before we don't download it<br />
+<input type="text" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="4"><br />
+<br />
+
+<label for="download_propers"><input type="checkbox" name="download_propers" id="download_propers" #if $sickbeard.DOWNLOAD_PROPERS == True then "CHECKED" else ""#> <strong>Download Propers</strong></label><br />
+If checked SB will re-download "Proper" releases<br />
+if the original is nuked.<br />
+<br />
 </fieldset>
 </div>
 
@@ -47,7 +80,7 @@ Time between backlog searches (in days)<br />
 
 <strong>NZB Action</strong><br />
 What to do with found NZBs<br />
-<select name="nzb_method">
+<select name="nzb_method" id="nzb_method">
 #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd"}
 #for $curAction in ('sabnzbd', 'blackhole'):
   #if $sickbeard.NZB_METHOD == $curAction:
@@ -60,18 +93,13 @@ What to do with found NZBs<br />
 </select><br />
 <br />
 
+<div id="blackhole_settings">
 <strong>NZB Black Hole:</strong><br />
 The directory where Sick Beard should store<br />
 your NZB files<br />
 <input type="text" name="nzb_dir" id="nzb_dir" value="$sickbeard.NZB_DIR" size="35"><br />
 <br />
-<br />
-
-<strong>Usenet Retention:</strong><br />
-How old should a report be before we don't download it<br />
-<input type="text" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="4"><br />
-<br />
-
+</div>
 
 <strong>Torrent Black Hole:</strong><br />
 The directory where Sick Beard should store<br />
@@ -79,16 +107,7 @@ your torrent files<br />
 <input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="35"><br />
 <br />
 
-</fieldset>
-</div>
-
-
-
-<div class="EntryBlock">
-<fieldset class="EntryFieldSet">
-
-<legend>SABnzbd</legend>
-
+<div id="sabnzbd_settings">
 <strong>Username:</strong><br />
 Your SABnzbd authentication username<br />
 <input type="text" name="sab_username" value="$sickbeard.SAB_USERNAME" size="10"><br />
@@ -113,9 +132,11 @@ The category you want your downloads to go in (default is TV)<br />
 Address of your SABnzbd server (IP:port, eg. 192.168.1.100:8080)<br />
 <input type="text" name="sab_host" value="$sickbeard.SAB_HOST" size="35"><br />
 <br />
+</div>
 
 </fieldset>
 </div>
+
 
 
 <div class="EntryBlock">

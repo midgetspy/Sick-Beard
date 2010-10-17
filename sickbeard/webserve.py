@@ -632,7 +632,8 @@ class ConfigEpisodeDownloads:
                        sab_apikey=None, sab_category=None, sab_host=None, use_nzb=None,
                        use_torrent=None, torrent_dir=None, nzb_method=None, usenet_retention=None,
                        search_frequency=None, backlog_search_frequency=None, tv_download_dir=None,
-                       keep_processed_dir=None, process_automatically=None, rename_episodes=None):
+                       keep_processed_dir=None, process_automatically=None, rename_episodes=None,
+                       download_propers=None):
 
         results = []
 
@@ -649,6 +650,11 @@ class ConfigEpisodeDownloads:
 
         config.change_BACKLOG_SEARCH_FREQUENCY(backlog_search_frequency)
 
+        if download_propers == "on":
+            download_propers = 1
+        else:
+            download_propers = 0
+            
         if process_automatically == "on":
             process_automatically = 1
         else:
@@ -684,6 +690,8 @@ class ConfigEpisodeDownloads:
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
         sickbeard.SEARCH_FREQUENCY = int(search_frequency)
+
+        sickbeard.DOWNLOAD_PROPERS = download_propers
 
         sickbeard.USE_NZB = use_nzb
         sickbeard.USE_TORRENT = use_torrent

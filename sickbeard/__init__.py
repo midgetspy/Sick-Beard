@@ -105,6 +105,7 @@ USE_NZB = False
 NZB_METHOD = None 
 NZB_DIR = None
 USENET_RETENTION = None
+DOWNLOAD_PROPERS = None
 
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = None
@@ -248,7 +249,7 @@ def initialize(consoleLogging=True):
     with INIT_LOCK:
         
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, \
-                NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, \
+                NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
@@ -335,6 +336,8 @@ def initialize(consoleLogging=True):
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd'):
             NZB_METHOD = 'blackhole'
+
+        DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
         
         USE_NZB = bool(check_setting_int(CFG, 'General', 'use_nzb', 1))
         USE_TORRENT = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
@@ -597,6 +600,7 @@ def save_config():
     CFG['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     CFG['General']['backlog_search_frequency'] = int(BACKLOG_SEARCH_FREQUENCY)
     CFG['General']['use_nzb'] = int(USE_NZB)
+    CFG['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     CFG['General']['quality_default'] = int(QUALITY_DEFAULT)
     CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     CFG['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])

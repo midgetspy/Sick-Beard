@@ -177,7 +177,6 @@ $(document).ready(function(){
 
     });
 
-
     // initialization stuff
 
     $(this).showHideProviders();
