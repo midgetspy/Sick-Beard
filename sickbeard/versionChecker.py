@@ -23,7 +23,6 @@ from sickbeard import logger
 import subprocess, re, sys, os, datetime
 from lib.pygithub import github
 
-
 class CheckVersion():
     
     def run(self):
@@ -56,7 +55,7 @@ class CheckVersion():
             sickbeard.NEWEST_VERSION = latestBuild
 
             if int(sickbeard.version.SICKBEARD_VERSION[6:]) < sickbeard.NEWEST_VERSION:
-                sickbeard.NEWEST_VERSION_STRING = 'build '+str(latestBuild)
+                set_newest_text('http://code.google.com/p/sickbeard/downloads/list', 'build '+str(latestBuild))
         
         else:
             
@@ -124,4 +123,7 @@ def check_git_for_update(commit_hash, commit_date=None):
 
     # if we're up to date then don't set this
     if num_commits_behind:
-        sickbeard.NEWEST_VERSION_STRING = str(num_commits_behind)+' commits and '+str(days_old)+' ahead'
+        set_newest_text('http://github.com/midgetspy/Sick-Beard/commit/', str(num_commits_behind)+' commits and '+str(days_old)+' days ahead')
+
+def set_newest_text(url, extra_text):
+    sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available ('+extra_text+')</a>'
