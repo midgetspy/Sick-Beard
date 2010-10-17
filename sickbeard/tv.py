@@ -926,12 +926,6 @@ class TVShow(object):
         
     def getOverview(self, epStatus):
 
-        anyQualities, bestQualities = Quality.splitQuality(self.quality)
-        if bestQualities:
-            maxBestQuality = max(bestQualities)
-        else:
-            maxBestQuality = None 
-    
         if epStatus == WANTED:
             return Overview.WANTED
         elif epStatus in (UNAIRED, UNKNOWN):
@@ -941,6 +935,13 @@ class TVShow(object):
         elif epStatus == ARCHIVED:
             return Overview.GOOD
         elif epStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
+
+            anyQualities, bestQualities = Quality.splitQuality(self.quality)
+            if bestQualities:
+                maxBestQuality = max(bestQualities)
+            else:
+                maxBestQuality = None 
+        
             epStatus, curQuality = Quality.splitCompositeStatus(epStatus)
             
             # if they don't want re-downloads then we call it good if they have anything

@@ -145,7 +145,8 @@ def _getEpisode(show, season, episode):
 
 ManageMenu = [
             { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
-           #{ 'title': 'Episode Overview', 'path': 'manageShows/episodeOverview' },
+           #{ 'title': 'Episode Overview', 'path': 'manage/episodeOverview' },
+           { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             ]
 
 class ManageSearches:
@@ -157,7 +158,7 @@ class ManageSearches:
         t.backlogPaused = sickbeard.backlogSearchScheduler.action.amPaused
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
         t.submenu = ManageMenu
-        
+
         return _munge(t)
         
     @cherrypy.expose
@@ -204,6 +205,46 @@ class Manage:
         
         t = PageTemplate(file="manage.tmpl")
         t.submenu = ManageMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def backlogOverview(self):
+
+        t = PageTemplate(file="manage_backlogOverview.tmpl")
+        t.submenu = ManageMenu
+
+        myDB = db.DBConnection()
+        
+        showCounts = {}
+        showCats = {}
+        showSQLResults = {}
+        
+        for curShow in sickbeard.showList:
+
+            epCounts = {}
+            epCats = {}
+            epCounts[Overview.SKIPPED] = 0
+            epCounts[Overview.WANTED] = 0
+            epCounts[Overview.QUAL] = 0
+            epCounts[Overview.GOOD] = 0
+            epCounts[Overview.UNAIRED] = 0
+
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC", [curShow.tvdbid])
+
+            for curResult in sqlResults:
+    
+                curEpCat = curShow.getOverview(int(curResult["status"]))
+                epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
+                epCounts[curEpCat] += 1
+
+            showCounts[curShow.tvdbid] = epCounts
+            showCats[curShow.tvdbid] = epCats
+            showSQLResults[curShow.tvdbid] = sqlResults
+        
+        t.showCounts = showCounts
+        t.showCats = showCats
+        t.showSQLResults = showSQLResults
+        
         return _munge(t)
 
     @cherrypy.expose
@@ -1304,8 +1345,6 @@ class Home:
         
         t.show = showObj
         t.sqlResults = sqlResults
-        
-        myDB = db.DBConnection()
         
         epCounts = {}
         epCats = {}
