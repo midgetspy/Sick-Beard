@@ -885,7 +885,7 @@ class TVShow(object):
 
         # if the quality isn't one we want under any circumstances then just say no
         anyQualities, bestQualities = Quality.splitQuality(self.quality)
-        logger.log("A,B = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
+        logger.log("any,best = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
         
         if quality not in anyQualities + bestQualities:
             return False
@@ -899,6 +899,8 @@ class TVShow(object):
         
         epStatus = int(sqlResults[0]["status"])
 
+        logger.log("current episode status: "+epStatus, logger.DEBUG)
+        
         # if we know we don't want it then just say no
         if epStatus in (SKIPPED, IGNORED, ARCHIVED) and not manualSearch:
             logger.log("Ep is skipped, not bothering", logger.DEBUG)
