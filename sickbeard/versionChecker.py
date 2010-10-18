@@ -38,6 +38,7 @@ class CheckVersion():
         # if we're running from source try to specify the version
         if install_type == 'source':
             (cur_commit_hash, cur_commit_date) = check_git_version()
+            logger.log("Got git info as being: "+cur_commit_hash+" @ "+str(cur_commit_date), logger.DEBUG)
 
         if not sickbeard.VERSION_NOTIFY:
             logger.log("Version checking is disabled, not checking for the newest version")
@@ -123,7 +124,7 @@ def check_git_for_update(commit_hash, commit_date=None):
 
     # if we're up to date then don't set this
     if num_commits_behind:
-        set_newest_text('http://github.com/midgetspy/Sick-Beard/commit/', str(num_commits_behind)+' commits and '+str(days_old)+' days ahead')
+        set_newest_text('http://github.com/midgetspy/Sick-Beard/commits/', str(num_commits_behind)+' commits and '+str(days_old)+' days ahead')
 
 def set_newest_text(url, extra_text):
     sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available ('+extra_text+')</a>'
