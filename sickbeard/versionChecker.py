@@ -38,7 +38,7 @@ class CheckVersion():
         # if we're running from source try to specify the version
         if install_type == 'source':
             (cur_commit_hash, cur_commit_date) = check_git_version()
-            logger.log("Got git info as being: "+cur_commit_hash+" @ "+str(cur_commit_date), logger.DEBUG)
+            logger.log("Got git info as being: "+str(cur_commit_hash)+" @ "+str(cur_commit_date), logger.DEBUG)
 
         if not sickbeard.VERSION_NOTIFY:
             logger.log("Version checking is disabled, not checking for the newest version")
@@ -126,14 +126,14 @@ def check_git_for_update(commit_hash, commit_date=None):
     if num_commits_behind == 35:
         message = "or else you're ahead of master"
         
-    elif num_commits_behind:
+    elif num_commits_behind > 0:
         message = str(num_commits_behind)+' commits'
         if days_old:
             message += ' and '+str(days_old)+' days'
         message += ' ahead'
 
     else:
-        message = ''
+        return
 
     set_newest_text('http://github.com/midgetspy/Sick-Beard/commits/', message)
 
