@@ -124,10 +124,20 @@ def check_git_for_update(commit_hash, commit_date=None):
 
     # if we're up to date then don't set this
     if num_commits_behind == 35:
-        set_newest_text('http://github.com/midgetspy/Sick-Beard/commits/', "or else you're ahead of master")
+        message = "or else you're ahead of master"
         
     elif num_commits_behind:
-        set_newest_text('http://github.com/midgetspy/Sick-Beard/commits/', str(num_commits_behind)+' commits and '+str(days_old)+' days ahead')
+        message = str(num_commits_behind)+' commits'
+        if days_old:
+            message += ' and '+str(days_old)+' days'
+        message += ' ahead'
+
+    else:
+        message = ''
+
+    set_newest_text('http://github.com/midgetspy/Sick-Beard/commits/', message)
+
+        set_newest_text('http://github.com/midgetspy/Sick-Beard/commits/', )
 
 def set_newest_text(url, extra_text):
     sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available</a> ('+extra_text+')'
