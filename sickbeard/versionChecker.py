@@ -137,7 +137,5 @@ def check_git_for_update(commit_hash, commit_date=None):
 
     set_newest_text('http://github.com/midgetspy/Sick-Beard/commits/', message)
 
-        set_newest_text('http://github.com/midgetspy/Sick-Beard/commits/', )
-
 def set_newest_text(url, extra_text):
     sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available</a> ('+extra_text+')'
