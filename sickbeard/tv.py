@@ -1141,19 +1141,24 @@ class TVEpisode:
                 # and it hasn't aired yet set the status to UNAIRED
                 logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
+            # if there's no airdate then set it to skipped (and respect ignored)
             elif self.airdate == datetime.date.fromordinal(1):
-                if self.status != IGNORED:
+                if self.status == IGNORED:
+                    logger.log("Episode has no air date, but it's already marked as ignored", logger.DEBUG)
+                else:
                     logger.log("Episode has no air date, automatically marking it skipped", logger.DEBUG)
                     self.status = SKIPPED
-                else:
-                    logger.log("Episode has no air date, but it's already marked as ignored", logger.DEBUG)
+            # if we don't have the file and the airdate is in the past
             else:
                 if self.status == UNAIRED:
                     self.status = WANTED
     
                 # if we somehow are still UNKNOWN then just skip it
                 elif self.status == UNKNOWN:
-                        self.status = SKIPPED
+                    self.status = SKIPPED
+                
+                else:
+                    logger.log("Not touching status because we have no ep file, the airdate is in the past, and the status is "+str(self.status), logger.DEBUG)
 
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):
