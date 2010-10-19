@@ -589,9 +589,12 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     for curScriptName in sickbeard.EXTRA_SCRIPTS:
         script_cmd = shlex.split(curScriptName) + [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode), str(rootEp.airdate)]
         returnStr += logHelper("Executing command "+str(script_cmd))
-        p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        out, err = p.communicate()
-        returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
+        try:
+            p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            out, err = p.communicate()
+            returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
+        except OSError, e:
+            returnStr += logHelper("Unable to run extra_script: "+str(e))
 
     returnStr += logHelper("Post processing finished successfully", logger.DEBUG)
 
