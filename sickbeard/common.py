@@ -114,7 +114,10 @@ class Quality:
         for x in Quality.qualityStrings:
             if x == Quality.UNKNOWN:
                 continue
-            if Quality.qualityStrings[x] in name:
+
+            regex = Quality.qualityStrings[x].replace(' ','\W?')
+            regex_match = re.match(regex, name, re.I)
+            if regex_match:
                 return x
         
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
