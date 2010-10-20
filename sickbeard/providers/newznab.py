@@ -201,6 +201,7 @@ class NewznabProvider(generic.NZBProvider):
 			items = responseSoup.getiterator('item')
 		except Exception, e:
 			logger.log("Error trying to load "+self.name+" RSS feed: "+str(e), logger.ERROR)
+			logger.log("RSS data: "+data, logger.DEBUG)
 			return []
 			
 		if responseSoup.getroot().tag == 'error':
