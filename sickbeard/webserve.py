@@ -888,6 +888,8 @@ class ConfigProviders:
                 sickbeard.NZBMATRIX = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
+            elif curProvider == 'womble':
+                sickbeard.WOMBLE = curEnabled
             elif curProvider == 'eztv_bt_chat':
                 sickbeard.USE_TORRENT = curEnabled
             elif curProvider in newznabProviderDict:
