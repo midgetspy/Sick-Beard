@@ -82,10 +82,15 @@ def deleteAssociatedFiles(file):
     if not ek.ek(os.path.isfile, file):
         return
 
-    baseName = file.rpartition('.')[0]
+    baseName = file.rpartition('.')[0]+'.'
 
-    for movedFilePath in ek.ek(glob.glob, baseName+'.*'):
-        os.remove(movedFilePath)
+    for associatedFilePath in ek.ek(glob.glob, baseName+'*'):
+        # only delete it if the only non-shared part is the extension
+        if '.' in associatedFilePath[len(baseName):]:
+            logger.log("Not deleting file "+associatedFilePath+" because it looks like it's not related", logger.DEBUG)
+            continue
+        logger.log("Deleting file "+associatedFilePath+" because it is associated with "+file, logger.DEBUG)
+        ek.ek(os.remove, associatedFilePath)
         
 def _checkForExistingFile(renamedFilePath, oldFile):
 
