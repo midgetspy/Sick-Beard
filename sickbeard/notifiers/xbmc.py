@@ -133,9 +133,9 @@ def updateLibrary(host, showName=None):
             logger.log("Invalid response for " + showName + " on " + host, logger.DEBUG)
             return False
 
-        encSqlXML = urllib.quote(sqlXML,'/<>')
+        encSqlXML = urllib.quote(sqlXML,':\\/<>')
         et = etree.fromstring(encSqlXML)
-        paths = et.findall('field')
+        paths = et.findall('.//field')
     
         if not paths:
             logger.log("No valid paths found for " + showName + " on " + host, logger.DEBUG)
