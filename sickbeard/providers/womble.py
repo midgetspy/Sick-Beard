@@ -49,7 +49,7 @@ class WombleCache(tvcache.TVCache):
 
         tvcache.TVCache.__init__(self, provider)
 
-        # only poll NZBs'R'US every 15 minutes max
+        # only poll Womble's Index every 15 minutes max
         self.minTime = 15
         
     

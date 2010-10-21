@@ -259,7 +259,7 @@ class NewznabCache(tvcache.TVCache):
 	
 	def __init__(self, provider):
 
-		# only poll NZBs.org every 15 minutes max
+		# only poll newznab providers every 15 minutes max
 		self.minTime = 15
 		
 		tvcache.TVCache.__init__(self, provider)
