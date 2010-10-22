@@ -1340,7 +1340,10 @@ class Home:
 
         myDB = db.DBConnection()
         
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC")
+        sqlResults = myDB.select(
+            "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC",
+            [showObj.tvdbid]
+        )
 
         t = PageTemplate(file="displayShow.tmpl")
         t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]

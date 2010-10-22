@@ -705,7 +705,7 @@ def updateAiringList():
     curDate = datetime.date.today().toordinal()
 
     myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status == " + str(UNAIRED) + " AND airdate <= " + str(curDate))
+    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status == ? AND airdate <= ?", [UNAIRED, curDate])
     
     epList = []
 
@@ -759,14 +759,16 @@ def getEpList(epIDs, showid=None):
     
     if epIDs == None or len(epIDs) == 0:
         return []
+
+    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(["?" for x in epIDs]),)
+    params = epIDs
     
     if showid != None:
-        showStr = " AND showid = "+str(showid)
-    else:
-        showStr = ""
+        query += " AND showid = ?"
+        params.append(showid)
     
     myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE tvdbid in (" + ",".join([str(x) for x in epIDs]) + ")"+showStr)
+    sqlResults = myDB.select(query, params)
 
     epList = []
 
