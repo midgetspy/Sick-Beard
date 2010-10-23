@@ -193,6 +193,7 @@ class ProperFinder():
                         isSame = True
                         break
                 if isSame:
+                    logger.log("This proper is already in history, skipping it", logger.DEBUG)
                     continue
         
                 # get the episode object
