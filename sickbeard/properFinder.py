@@ -177,10 +177,9 @@ class ProperFinder():
             myDB = db.DBConnection() 
             historyResults = myDB.select(
                 "SELECT resource FROM history"
-                "WHERE showid = ? AND season = ?  AND episode = ?  AND quality = ?  AND date >= ?"
+                "WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND date >= ?"
                 "AND action IN (" + ",".join([str(x) for x in Quality.SNATCHED]) + ")",
                         [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, historyLimit.strftime(history.dateFormat)])
-                        [x for x in Quality.SNATCHED] +
              
             # if we didn't download this episode in the first place we don't know what quality to use for the proper so we can't do it
             if len(historyResults) == 0:
