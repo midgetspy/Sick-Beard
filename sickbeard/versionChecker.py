@@ -151,7 +151,7 @@ def set_newest_text(url, extra_text):
 
 def find_latest_build():
 
-    regex = "SickBeard\-win32\-build(\d+)\.zip"
+    regex = "http://sickbeard.googlecode.com/files/SickBeard\-win32\-alpha\-build(\d+)\.zip"
     
     svnFile = urllib.urlopen("http://code.google.com/p/sickbeard/downloads/list")
     
