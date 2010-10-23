@@ -299,10 +299,14 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             continue
 
         # reverse-lookup the scene exceptions
+        returnStr += logHelper("Checking scene exceptions for "+result.seriesname, logger.DEBUG)
         sceneID = None
         for exceptionID in sceneExceptions:
-            if curName == sceneExceptions[exceptionID]:
-                sceneID = exceptionID
+            for curException in sceneExceptions[exceptionID]:
+                if result.seriesname == curException:
+                    sceneID = exceptionID
+                    break
+            if sceneID:
                 break
 
         showObj = None
