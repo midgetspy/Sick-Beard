@@ -20,7 +20,7 @@ import sickbeard
 from sickbeard import helpers, version
 from sickbeard import logger
 
-import subprocess, re, sys, os, datetime
+import subprocess, re, sys, os, datetime, urllib
 from lib.pygithub import github
 
 class CheckVersion():
@@ -46,9 +46,9 @@ class CheckVersion():
 
         if install_type == 'win':
         
-            latestBuild = helpers.findLatestBuild()
+            latestBuild = find_latest_build()
             
-            if latestBuild == None:
+            if not latestBuild:
                 return
             
             logger.log("Setting NEWEST_VERSION to "+str(latestBuild))
@@ -148,3 +148,19 @@ def check_git_for_update(commit_hash, commit_date=None):
 
 def set_newest_text(url, extra_text):
     sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available</a> ('+extra_text+')'
+
+def find_latest_build():
+
+    regex = "SickBeard\-win32\-build(\d+)\.zip"
+    
+    svnFile = urllib.urlopen("http://code.google.com/p/sickbeard/downloads/list")
+    
+    for curLine in svnFile.readlines():
+        match = re.search(regex, curLine)
+        if match:
+            groups = match.groups()
+            return int(groups[0])
+
+    return None
+
+

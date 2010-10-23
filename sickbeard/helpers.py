@@ -282,21 +282,6 @@ def searchDBForShow(regShowName):
 	
 	return None
 
-def findLatestBuild():
-
-	regex = "http\://sickbeard\.googlecode\.com/files/SickBeard\-win32\-build(\d+)\.zip"
-	
-	svnFile = urllib.urlopen("http://code.google.com/p/sickbeard/downloads/list")
-	
-	for curLine in svnFile.readlines():
-		match = re.search(regex, curLine)
-		if match:
-			groups = match.groups()
-			return int(groups[0])
-
-	return None
-
-
 def getShowImage(url, imgNum=None):
 	
 	imgFile = None
