@@ -307,17 +307,19 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                     sceneID = exceptionID
                     break
             if sceneID:
+                returnStr += logHelper("Scene exception lookup got tvdb id "+str(sceneID)+", using that", logger.DEBUG)
                 break
 
         showObj = None
         try:
-            returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
 
             # get the tvdb object from either the scene exception ID or the series name
             if sceneID:
+                returnStr += logHelper("Looking up ID "+str(sceneID)+" on TVDB", logger.DEBUG)
                 showObj = t[sceneID]
             else:
+                returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
                 showObj = t[result.seriesname]
             
             returnStr += logHelper("Got tvdb_id "+str(showObj["id"])+" and series name "+str(showObj["seriesname"])+" from TVDB", logger.DEBUG)
