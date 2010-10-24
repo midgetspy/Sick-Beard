@@ -265,7 +265,8 @@ sceneExceptions = {72546: ['CSI'],
                    83714: ['Genius with Dave Gorman'],
                    168161: ['Law & Order: Los Angeles', 'Law & Order: LA'],
                    77526: ['Star Trek: TOS'],
-                   72194: ['The Ellen Degeneres Show', 'Ellen Degeneres']
+                   72194: ['The Ellen Degeneres Show', 'Ellen Degeneres'],
+                   72073: ['Star Trek DS9']
                    }
 
 countryList = {'Australia': 'AU',
