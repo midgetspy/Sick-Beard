@@ -49,6 +49,7 @@ class NewznabProvider(generic.NZBProvider):
 		self.key = key
 		
 		self.enabled = True
+		self.supportsBacklog = True
 		
 		self.default = False
 

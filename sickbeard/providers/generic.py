@@ -46,6 +46,8 @@ class GenericProvider:
         self.name = name
         self.url = ''
 
+        self.supportsBacklog = False
+
         self.cache = tvcache.TVCache(self)
 
     def getID(self):

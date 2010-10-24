@@ -56,6 +56,7 @@ you want them to be searched<br />
     <input type="checkbox" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "CHECKED" else ""#>
     <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" width="16" height="16"></a>
     $curProvider.name
+    #if not $curProvider.supportsBacklog then "*" else ""#
   </li>
 #end for
 </ul>
@@ -179,9 +180,8 @@ NZBs'R'US hash<br />
 
 
 
-<p>
-<input type="submit" value="Save Changes">
-</p>
+<p>* This provider doesn't support backlog, it provides new episodes via RSS only</p>
+<p><input type="submit" value="Save Changes"></p>
 </form>
 
 
