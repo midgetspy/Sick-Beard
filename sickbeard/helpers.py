@@ -199,8 +199,8 @@ def makeShowNFO(showID, showDir):
 
  	logger.log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
 	nfo_filename = os.path.join(showDir, "tvshow.nfo").encode('utf-8')
-	with open(nfo_filename, 'w') as nfo_fh:
-		nfo.write( nfo_fh, encoding="utf-8" )
+	nfo_fh = open(nfo_filename, 'w')
+	nfo.write( nfo_fh, encoding="utf-8" )
 
 	return True
 	
