@@ -78,7 +78,7 @@ class CurrentSearcher():
         curDate = datetime.date.today().toordinal()
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status=" + str(UNAIRED) + " AND airdate < " + str(curDate))
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate < ?", [UNAIRED, curDate])
         
         for sqlEp in sqlResults:
             

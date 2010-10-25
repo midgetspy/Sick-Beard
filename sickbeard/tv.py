@@ -177,7 +177,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Writing NFOs for all episodes")
         
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
         
         for epResult in sqlResults:
             logger.log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), logger.DEBUG)
@@ -221,8 +221,8 @@ class TVShow(object):
         logger.log("Loading all episodes from the DB")
     
         myDB = db.DBConnection()
-        sql = "SELECT * FROM tv_episodes WHERE showid="+str(self.tvdbid)
-        sqlResults = myDB.select(sql)
+        sql = "SELECT * FROM tv_episodes WHERE showid = ?"
+        sqlResults = myDB.select(sql, [self.tvdbid])
         
         scannedEps = {}
         
@@ -556,7 +556,7 @@ class TVShow(object):
 
         myDB = db.DBConnection()
         
-        sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
+        sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = ?", [self.tvdbid])
 
         if len(sqlResults) > 1:
             raise exceptions.MultipleDBShowsException()
@@ -690,9 +690,11 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Finding the episode which airs next", logger.DEBUG) 
 
         myDB = db.DBConnection()
-        innerQuery = "SELECT airdate FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND status = " + str(UNAIRED) + " ORDER BY airdate ASC LIMIT 1"
-        query = "SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND airdate >= " + str(datetime.date.today().toordinal()) + " AND airdate <= ("+innerQuery+") and status = " + str(UNAIRED)
-        sqlResults = myDB.select(query)
+        innerQuery = "SELECT airdate FROM tv_episodes WHERE showid = ? AND airdate >= ? AND status = ? ORDER BY airdate ASC LIMIT 1"
+        innerParams = [self.tvdbid, datetime.date.today().toordinal(), UNAIRED]
+        query = "SELECT * FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= (" + innerQuery + ") and status = ?"
+        params = [self.tvdbid, datetime.date.today().toordinal()] + innerParams + [UNAIRED]
+        sqlResults = myDB.select(query, params)
     
         if sqlResults == None or len(sqlResults) == 0:
             logger.log(str(self.tvdbid) + ": No episode found... need to implement tvrage and also show status", logger.DEBUG)
@@ -717,8 +719,8 @@ class TVShow(object):
     def deleteShow(self):
         
         myDB = db.DBConnection()
-        myDB.action("DELETE FROM tv_episodes WHERE showid = " + str(self.tvdbid))
-        myDB.action("DELETE FROM tv_shows WHERE tvdb_id = " + str(self.tvdbid))
+        myDB.action("DELETE FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        myDB.action("DELETE FROM tv_shows WHERE tvdb_id = ?", [self.tvdbid])
         
         # remove self from show list
         sickbeard.showList = [x for x in sickbeard.showList if x.tvdbid != self.tvdbid]
@@ -736,7 +738,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
         
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
         
         for ep in sqlResults:
             curLoc = os.path.normpath(ep["location"])
@@ -775,7 +777,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
         
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.tvdbid) + " AND location != ''")
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
         
         # build list of locations
         fileLocations = {}
@@ -885,7 +887,7 @@ class TVShow(object):
 
         # if the quality isn't one we want under any circumstances then just say no
         anyQualities, bestQualities = Quality.splitQuality(self.quality)
-        logger.log("A,B = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
+        logger.log("any,best = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
         
         if quality not in anyQualities + bestQualities:
             return False
@@ -899,6 +901,8 @@ class TVShow(object):
         
         epStatus = int(sqlResults[0]["status"])
 
+        logger.log("current episode status: "+str(epStatus), logger.DEBUG)
+        
         # if we know we don't want it then just say no
         if epStatus in (SKIPPED, IGNORED, ARCHIVED) and not manualSearch:
             logger.log("Ep is skipped, not bothering", logger.DEBUG)
@@ -1032,7 +1036,7 @@ class TVEpisode:
         logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND season = " + str(season) + " AND episode = " + str(episode))
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, season, episode])
 
         if len(sqlResults) > 1:
             raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
@@ -1139,19 +1143,24 @@ class TVEpisode:
                 # and it hasn't aired yet set the status to UNAIRED
                 logger.log("Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
+            # if there's no airdate then set it to skipped (and respect ignored)
             elif self.airdate == datetime.date.fromordinal(1):
-                if self.status != IGNORED:
+                if self.status == IGNORED:
+                    logger.log("Episode has no air date, but it's already marked as ignored", logger.DEBUG)
+                else:
                     logger.log("Episode has no air date, automatically marking it skipped", logger.DEBUG)
                     self.status = SKIPPED
-                else:
-                    logger.log("Episode has no air date, but it's already marked as ignored", logger.DEBUG)
+            # if we don't have the file and the airdate is in the past
             else:
                 if self.status == UNAIRED:
                     self.status = WANTED
     
                 # if we somehow are still UNKNOWN then just skip it
                 elif self.status == UNKNOWN:
-                        self.status = SKIPPED
+                    self.status = SKIPPED
+                
+                else:
+                    logger.log("Not touching status because we have no ep file, the airdate is in the past, and the status is "+str(self.status), logger.DEBUG)
 
         # if we have a media file then it's downloaded
         elif sickbeard.helpers.isMediaFile(self.location):

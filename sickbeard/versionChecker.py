@@ -20,7 +20,7 @@ import sickbeard
 from sickbeard import helpers, version
 from sickbeard import logger
 
-import subprocess, re, sys, os, datetime
+import subprocess, re, sys, os, datetime, urllib
 from lib.pygithub import github
 
 class CheckVersion():
@@ -38,6 +38,7 @@ class CheckVersion():
         # if we're running from source try to specify the version
         if install_type == 'source':
             (cur_commit_hash, cur_commit_date) = check_git_version()
+            logger.log("Got git info as being: "+str(cur_commit_hash)+" @ "+str(cur_commit_date), logger.DEBUG)
 
         if not sickbeard.VERSION_NOTIFY:
             logger.log("Version checking is disabled, not checking for the newest version")
@@ -45,9 +46,9 @@ class CheckVersion():
 
         if install_type == 'win':
         
-            latestBuild = helpers.findLatestBuild()
+            latestBuild = find_latest_build()
             
-            if latestBuild == None:
+            if not latestBuild:
                 return
             
             logger.log("Setting NEWEST_VERSION to "+str(latestBuild))
@@ -107,10 +108,14 @@ def check_git_for_update(commit_hash, commit_date=None):
         return
     
     num_commits_behind = 0
+    newest_commit_hash = ''
 
     gh = github.GitHub()
     
     for curCommit in gh.commits.forBranch('midgetspy', 'Sick-Beard'):
+        if not newest_commit_hash:
+            newest_commit_hash = curCommit.id
+        
         if curCommit.id == commit_hash:
             break
     
@@ -122,8 +127,40 @@ def check_git_for_update(commit_hash, commit_date=None):
         days_old = how_old.days
 
     # if we're up to date then don't set this
-    if num_commits_behind:
-        set_newest_text('http://github.com/midgetspy/Sick-Beard/commit/', str(num_commits_behind)+' commits and '+str(days_old)+' days ahead')
+    if num_commits_behind == 35:
+        message = "or else you're ahead of master"
+        
+    elif num_commits_behind > 0:
+        message = str(num_commits_behind)+' commits'
+        if days_old:
+            message += ' and '+str(days_old)+' days'
+        message += ' ahead'
+
+    else:
+        return
+
+    if newest_commit_hash:
+        url = 'http://github.com/midgetspy/Sick-Beard/compare/'+commit_hash+'...'+newest_commit_hash
+    else:
+        url = 'http://github.com/midgetspy/Sick-Beard/commits/'
+    
+    set_newest_text(url, message)
 
 def set_newest_text(url, extra_text):
-    sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available ('+extra_text+')</a>'
+    sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available</a> ('+extra_text+')'
+
+def find_latest_build():
+
+    regex = "http://sickbeard.googlecode.com/files/SickBeard\-win32\-alpha\-build(\d+)\.zip"
+    
+    svnFile = urllib.urlopen("http://code.google.com/p/sickbeard/downloads/list")
+    
+    for curLine in svnFile.readlines():
+        match = re.search(regex, curLine)
+        if match:
+            groups = match.groups()
+            return int(groups[0])
+
+    return None
+
+

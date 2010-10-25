@@ -29,7 +29,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers 
-from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab
+from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, queue, scheduler
@@ -136,6 +136,8 @@ NZBS_UID = None
 NZBS_HASH = None
 
 BINREQ = False
+
+WOMBLE = False
 
 NZBSRUS = False
 NZBSRUS_UID = None
@@ -270,7 +272,7 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
+                CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX
 
@@ -287,7 +289,7 @@ def initialize(consoleLogging=True):
         CheckSection('SABnzbd')
         CheckSection('XBMC')
         CheckSection('Growl')
-	CheckSection('Twitter')
+        CheckSection('Twitter')
         
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -385,6 +387,8 @@ def initialize(consoleLogging=True):
         
         BINREQ = bool(check_setting_int(CFG, 'Bin-Req', 'binreq', 1))
 
+        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
+
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
@@ -426,7 +430,7 @@ def initialize(consoleLogging=True):
                                                      runImmediately=True)
         
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
-                                                                      cycleTime=datetime.timedelta(hours=1),
+                                                                      cycleTime=datetime.timedelta(minutes=67),
                                                                       threadName="BACKLOG",
                                                                       runImmediately=False)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
@@ -650,6 +654,7 @@ def save_config():
     CFG['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
     CFG['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
     CFG['Bin-Req']['binreq'] = int(BINREQ)
+    CFG['Womble']['womble'] = int(WOMBLE)
     CFG['SABnzbd']['sab_username'] = SAB_USERNAME
     CFG['SABnzbd']['sab_password'] = SAB_PASSWORD
     CFG['SABnzbd']['sab_apikey'] = SAB_APIKEY
@@ -703,7 +708,7 @@ def updateAiringList():
     curDate = datetime.date.today().toordinal()
 
     myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status == " + str(UNAIRED) + " AND airdate <= " + str(curDate))
+    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status == ? AND airdate <= ?", [UNAIRED, curDate])
     
     epList = []
 
@@ -757,14 +762,16 @@ def getEpList(epIDs, showid=None):
     
     if epIDs == None or len(epIDs) == 0:
         return []
+
+    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(["?" for x in epIDs]),)
+    params = epIDs
     
     if showid != None:
-        showStr = " AND showid = "+str(showid)
-    else:
-        showStr = ""
+        query += " AND showid = ?"
+        params.append(showid)
     
     myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE tvdbid in (" + ",".join([str(x) for x in epIDs]) + ")"+showStr)
+    sqlResults = myDB.select(query, params)
 
     epList = []
 

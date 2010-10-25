@@ -114,7 +114,10 @@ class Quality:
         for x in Quality.qualityStrings:
             if x == Quality.UNKNOWN:
                 continue
-            if Quality.qualityStrings[x] in name:
+
+            regex = Quality.qualityStrings[x].replace(' ','\W?')
+            regex_match = re.match(regex, name, re.I)
+            if regex_match:
                 return x
         
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
@@ -257,12 +260,13 @@ sceneExceptions = {72546: ['CSI'],
                    76235: ['America\'s Funniest Home Videos', 'AFHV'],
                    139941: ['Childrens Hospital (US)', 'Childrens Hospital'],
                    83123: ['Merlin', 'Merlin (2008)'],
-                   76779: ['WWW Monday Night RAW'],
+                   76779: ['WWE Monday Night RAW'],
                    164951: ['Shit My Dad Says'],
                    83714: ['Genius with Dave Gorman'],
                    168161: ['Law & Order: Los Angeles', 'Law & Order: LA'],
                    77526: ['Star Trek: TOS'],
-                   72194: ['The Ellen Degeneres Show', 'Ellen Degeneres']
+                   72194: ['The Ellen Degeneres Show', 'Ellen Degeneres'],
+                   72073: ['Star Trek DS9']
                    }
 
 countryList = {'Australia': 'AU',

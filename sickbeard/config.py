@@ -141,6 +141,6 @@ def change_VERSION_NOTIFY(version_notify):
 
     sickbeard.VERSION_NOTIFY = version_notify 
 
-    if oldSetting == True and version_notify == False:
+    if oldSetting == False and version_notify == True:
         sickbeard.versionCheckScheduler.action.run()
 

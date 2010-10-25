@@ -298,7 +298,7 @@ class TVRage:
         myDB = db.DBConnection()
         
         # double check that it's not already in there
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(self.show.tvdbid) + " AND season = " + str(self.nextEpInfo['season']) + " AND episode = " + str(self.nextEpInfo['episode']))
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, self.nextEpInfo['season'], self.nextEpInfo['episode']])
         
         if len(sqlResults) > 0:
             raise exceptions.TVRageException("Show is already in database, not adding the TVRage info")

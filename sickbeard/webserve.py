@@ -888,6 +888,8 @@ class ConfigProviders:
                 sickbeard.NZBMATRIX = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
+            elif curProvider == 'womble_s_index':
+                sickbeard.WOMBLE = curEnabled
             elif curProvider == 'eztv_bt_chat':
                 sickbeard.USE_TORRENT = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1338,7 +1340,10 @@ class Home:
 
         myDB = db.DBConnection()
         
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = " + str(showObj.tvdbid) + " ORDER BY season*1000+episode DESC")
+        sqlResults = myDB.select(
+            "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC",
+            [showObj.tvdbid]
+        )
 
         t = PageTemplate(file="displayShow.tmpl")
         t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
@@ -1709,25 +1714,44 @@ class WebInterface:
     
         posterFilename = os.path.abspath(os.path.join(showObj.location, "folder.jpg"))
         if os.path.isfile(posterFilename):
-            
-            return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
-        
+            try:
+                from PIL import Image
+                from cStringIO import StringIO
+            except ImportError: # PIL isn't installed
+                return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
+            else:
+                im = Image.open(posterFilename)
+                if im.mode == 'P': # Convert GIFs to RGB
+                    im = im.convert('RGB')
+                im.thumbnail((100, 147), Image.ANTIALIAS)
+                buffer = StringIO()
+                im.save(buffer, 'JPEG')
+                return buffer.getvalue()
         else:
             logger.log("No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
-    def comingEpisodes(self):
+    def comingEpisodes(self, sort="date"):
 
         epList = sickbeard.comingList
 
         # sort by air date
-        epList.sort(lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal()))
+        sorts = {
+            'date': (lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal())),
+            'show': (lambda a, b: cmp(a.name, b.name)),
+            'network': (lambda a, b: cmp(a.show.network, b.show.network)),
+        }
+        if sort not in sorts:
+            sort = 'date'
+        epList.sort(sorts[sort])
         
         t = PageTemplate(file="comingEpisodes.tmpl")
         t.submenu = [
-            { 'title': 'Sort by Date', 'path': 'comingEpisodes/#' },
-            { 'title': 'Sort by Show', 'path': 'comingEpisodes/#' },
+            { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
+            { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
+            { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
         ]
+        t.sort = sort
         t.epList = epList
         
         return _munge(t)

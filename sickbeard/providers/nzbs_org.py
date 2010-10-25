@@ -43,6 +43,8 @@ class NZBsProvider(generic.NZBProvider):
 		
 		generic.NZBProvider.__init__(self, "NZBs.org")
 		
+		self.supportsBacklog = True
+
 		self.cache = NZBsCache(self)
 		
 		self.url = 'http://www.nzbs.org/'

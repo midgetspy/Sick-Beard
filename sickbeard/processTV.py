@@ -82,10 +82,15 @@ def deleteAssociatedFiles(file):
     if not ek.ek(os.path.isfile, file):
         return
 
-    baseName = file.rpartition('.')[0]
+    baseName = file.rpartition('.')[0]+'.'
 
-    for movedFilePath in ek.ek(glob.glob, baseName+'.*'):
-        os.remove(movedFilePath)
+    for associatedFilePath in ek.ek(glob.glob, baseName+'*'):
+        # only delete it if the only non-shared part is the extension
+        if '.' in associatedFilePath[len(baseName):]:
+            logger.log("Not deleting file "+associatedFilePath+" because it looks like it's not related", logger.DEBUG)
+            continue
+        logger.log("Deleting file "+associatedFilePath+" because it is associated with "+file, logger.DEBUG)
+        ek.ek(os.remove, associatedFilePath)
         
 def _checkForExistingFile(renamedFilePath, oldFile):
 
@@ -294,21 +299,27 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             continue
 
         # reverse-lookup the scene exceptions
+        returnStr += logHelper("Checking scene exceptions for "+result.seriesname, logger.DEBUG)
         sceneID = None
         for exceptionID in sceneExceptions:
-            if curName == sceneExceptions[exceptionID]:
-                sceneID = exceptionID
+            for curException in sceneExceptions[exceptionID]:
+                if result.seriesname == curException:
+                    sceneID = exceptionID
+                    break
+            if sceneID:
+                returnStr += logHelper("Scene exception lookup got tvdb id "+str(sceneID)+", using that", logger.DEBUG)
                 break
 
         showObj = None
         try:
-            returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
 
             # get the tvdb object from either the scene exception ID or the series name
             if sceneID:
+                returnStr += logHelper("Looking up ID "+str(sceneID)+" on TVDB", logger.DEBUG)
                 showObj = t[sceneID]
             else:
+                returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
                 showObj = t[result.seriesname]
             
             returnStr += logHelper("Got tvdb_id "+str(showObj["id"])+" and series name "+str(showObj["seriesname"])+" from TVDB", logger.DEBUG)
@@ -589,9 +600,12 @@ def processFile(fileName, downloadDir=None, nzbName=None):
     for curScriptName in sickbeard.EXTRA_SCRIPTS:
         script_cmd = shlex.split(curScriptName) + [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode), str(rootEp.airdate)]
         returnStr += logHelper("Executing command "+str(script_cmd))
-        p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        out, err = p.communicate()
-        returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
+        try:
+            p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            out, err = p.communicate()
+            returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
+        except OSError, e:
+            returnStr += logHelper("Unable to run extra_script: "+str(e))
 
     returnStr += logHelper("Post processing finished successfully", logger.DEBUG)
 

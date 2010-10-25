@@ -38,7 +38,7 @@ import StringIO
 
 try:
   # Python >= 2.6
-  import lib.json as simplejson
+  import json as simplejson
 except ImportError:
   try:
     # Python < 2.6
