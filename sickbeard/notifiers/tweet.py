@@ -97,8 +97,9 @@ def send_tweet(message=None):
     return True
 
 def notifyTwitter(message='', force=False):
+    prefix = sickbeard.TWITTER_PREFIX
 
     if not sickbeard.USE_TWITTER and not force:
         return False
 
-    return send_tweet('Sick Beard: '+message)
+    return send_tweet(prefix+": "+message)

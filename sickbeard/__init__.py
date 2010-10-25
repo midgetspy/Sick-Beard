@@ -166,6 +166,7 @@ GROWL_PASSWORD = None
 USE_TWITTER = False
 TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
+TWITTER_PREFIX = None  
 
 EXTRA_SCRIPTS = []
 
@@ -271,7 +272,7 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD
+                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX
 
         
         if __INITIALIZED__:
@@ -405,6 +406,7 @@ def initialize(consoleLogging=True):
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
+	TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sickbeard: ')
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
@@ -666,6 +668,7 @@ def save_config():
     CFG['Twitter']['use_twitter'] = int(USE_TWITTER)
     CFG['Twitter']['twitter_username'] = TWITTER_USERNAME
     CFG['Twitter']['twitter_password'] = TWITTER_PASSWORD
+    CFG['Twitter']['twitter_prefix'] = TWITTER_PREFIX
  
     CFG['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
     
