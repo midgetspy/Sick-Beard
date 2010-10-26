@@ -23,7 +23,7 @@ import webbrowser
 import sqlite3
 import datetime
 import socket
-import os
+import os, sys, subprocess
 
 from threading import Lock
 
@@ -46,6 +46,7 @@ CFG = None
 PROG_DIR = None
 MY_FULLNAME = None
 MY_NAME = None
+MY_ARGS = []
 
 backlogSearchScheduler = None
 currentSearchScheduler = None
@@ -513,6 +514,9 @@ def halt ():
 
             logger.log("Aborting all threads")
             
+            logger.log("Killing cherrypy")
+            cherrypy.engine.exit()
+            
             # abort all the threads
 
             currentSearchScheduler.abort = True
@@ -570,7 +574,6 @@ def halt ():
 
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
-        #logging.warning('[%s] Signal %s caught, saving and exiting...', __NAME__, signum)
         logger.log("Signal %i caught, saving and exiting..." % int(signum))
         cherrypy.engine.exit()
         saveAndShutdown()
@@ -590,13 +593,22 @@ def saveAll():
     save_config()
     
 
-def saveAndShutdown():
+def saveAndShutdown(restart=False):
 
     halt()
 
     saveAll()
+
+    if restart:
+        popen_list = [ sys.executable, sickbeard.MY_FULLNAME] + sickbeard.MY_ARGS
+        logger.log("Restarting Sickbeard with " + str(popen_list))
+        subprocess.Popen(popen_list, cwd=os.getcwd())
     
     os._exit(0)
+
+
+def restart():
+    saveAndShutdown(True)
 
 
 
@@ -677,16 +689,6 @@ def save_config():
     CFG.write()
 
 
-def restart():
-    
-    halt()
-
-    saveAll()
-    
-    INIT_OK = initialize()
-    if INIT_OK:
-        start()
-    
 def launchBrowser():
     browserURL = 'http://localhost:%d%s' % (WEB_PORT, WEB_ROOT)
     try:

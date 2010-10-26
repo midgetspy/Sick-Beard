@@ -1023,6 +1023,7 @@ HomeMenu = [
     { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
+    { 'title': 'Restart',                'path': 'home/shutdown/?restart=True'              },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
 ]
 
@@ -1321,10 +1322,18 @@ class Home:
         return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
         
     @cherrypy.expose
-    def shutdown(self):
+    def shutdown(self, restart=False):
 
-        threading.Timer(2, sickbeard.saveAndShutdown).start()
-        return _genericMessage("Shutting down", "Sick Beard is shutting down...")
+        threading.Timer(2, sickbeard.saveAndShutdown, [bool(restart)]).start()
+        if restart:
+            title = "Restarting"
+            message = "Sick Beard is restarting, refresh in 30 seconds."
+        else:
+            title = "Shutting down"
+            message = "Sick Beard is shutting down..."
+        
+        return _genericMessage(title, message)
+
 
     @cherrypy.expose
     def displayShow(self, show=None):
