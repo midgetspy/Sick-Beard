@@ -102,8 +102,6 @@ def check_git_version():
         logger.log("Unable to find a version number in the git output")
         return (None, None)
 
-    version.SICKBEARD_VERSION = 'master'
-
     return (cur_commit_hash, cur_commit_date)
     
 
@@ -179,6 +177,7 @@ def update_with_git():
     
     try:
         popen_str = 'git pull origin '+sickbeard.version.SICKBEARD_VERSION
+        logger.log("Executing command: "+popen_str, logger.DEBUG)
         p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
         output, err = p.communicate()
     except OSError, e:
@@ -220,9 +219,10 @@ def update_from_google_code():
     if not new_link:
         logger.log("Unable to find a new version link on google code, not updating")
 
+    # download the zip to a temp folder
+
     # unzip it
     
     # write a bat file
     
     # shut down
-    
