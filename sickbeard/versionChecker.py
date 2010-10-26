@@ -219,10 +219,10 @@ def update_from_google_code():
     if not new_link:
         logger.log("Unable to find a new version link on google code, not updating")
 
-    # download the zip to a temp folder
+    # download the zip to the SB folder
 
-    # unzip it
+    # unzip it to a temp folder
     
-    # write a bat file
+    # write a bat file that extracts it over the existing files
     
     # shut down

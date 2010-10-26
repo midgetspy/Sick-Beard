@@ -514,9 +514,6 @@ def halt ():
 
             logger.log("Aborting all threads")
             
-            logger.log("Killing cherrypy")
-            cherrypy.engine.exit()
-            
             # abort all the threads
 
             currentSearchScheduler.abort = True
@@ -595,6 +592,9 @@ def saveAll():
 
 def saveAndShutdown(restart=False):
 
+    logger.log("Killing cherrypy")
+    cherrypy.engine.exit()
+            
     halt()
 
     saveAll()
@@ -607,8 +607,18 @@ def saveAndShutdown(restart=False):
     os._exit(0)
 
 
-def restart():
-    saveAndShutdown(True)
+def restart(soft=True):
+    
+    if soft:
+        halt()
+        saveAll()
+        #logger.log("Restarting cherrypy")
+        #cherrypy.engine.restart()
+        logger.log("Re-initializing all data")
+        initialize()
+    
+    else:
+        saveAndShutdown(restart=True)
 
 
 
