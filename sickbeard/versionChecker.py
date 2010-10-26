@@ -169,7 +169,7 @@ def update_with_git():
     output = None
     
     try:
-        p = subprocess.Popen('git pull', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
+        p = subprocess.Popen('git pull origin '+sickbeard.version.SICKBEARD_VERSION, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
         output, err = p.communicate()
     except OSError, e:
         #logger.log("Unable to find git, can't tell what version you're running")
