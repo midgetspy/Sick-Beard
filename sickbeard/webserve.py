@@ -33,7 +33,7 @@ import cherrypy.lib
 
 from sickbeard import config
 from sickbeard import history, notifiers, processTV, search, providers
-from sickbeard import tv, metadata
+from sickbeard import tv, metadata, versionChecker
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 
@@ -1334,6 +1334,16 @@ class Home:
         
         return _genericMessage(title, message)
 
+    @cherrypy.expose
+    def update(self):
+
+        updated = versionChecker.update_with_git()
+
+        if updated:
+            threading.Timer(2, sickbeard.restart).start()
+            return _genericMessage("Restarting","Sick Beard is restarting, refresh in 30 seconds.")
+        else:
+            return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
 
     @cherrypy.expose
     def displayShow(self, show=None):

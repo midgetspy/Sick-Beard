@@ -164,3 +164,38 @@ def find_latest_build():
     return None
 
 
+def update_with_git():
+
+    output = None
+    
+    try:
+        p = subprocess.Popen('git pull', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
+        output, err = p.communicate()
+    except OSError, e:
+        #logger.log("Unable to find git, can't tell what version you're running")
+        logger.log('Error calling git pull: '+str(e), logger.ERROR)
+        return False
+    
+    pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
+    
+    (files, insertions, deletions) = (None, None, None)
+    
+    for line in output.split('\n'):
+    
+        if 'Already up-to-date.' in line:
+            logger.log("No update available, not updating")
+            return False
+        elif line.endswith('Aborting.'):
+            logger.log("Unable to update from git: "+line, logger.ERROR)
+            return False
+    
+        match = re.search(pull_regex, line)
+        if match:
+            (files, insertions, deletions) = match.groups()
+            break
+
+    if None in (files, insertions, deletions):
+        logger.log("Didn't find indication of success in output, assuming git pull failed", logger.ERROR)
+        return False
+    
+    return True
