@@ -27,13 +27,7 @@ class CheckVersion():
     
     def run(self):
 
-        # check if we're a windows build
-        if version.SICKBEARD_VERSION.startswith('build '):
-            install_type = 'win'
-        elif version.SICKBEARD_VERSION == 'master':
-            install_type = 'source'
-        else:
-            logger.log("Unknown install type, not doing any version checking", logger.ERROR)
+        install_type = install_type()
 
         # if we're running from source try to specify the version
         if install_type == 'source':
@@ -60,7 +54,21 @@ class CheckVersion():
         
         else:
             
-            check_git_for_update(cur_commit_hash, cur_commit_date)
+            check_git_for_update(cur_commit_hash, cur_commit_date, find_latest_build(True))
+
+def install_type():
+
+    # check if we're a windows build
+    if version.SICKBEARD_VERSION.startswith('build '):
+        install_type = 'win'
+    elif version.SICKBEARD_VERSION == 'master':
+        install_type = 'source'
+    else:
+        logger.log("Unknown install type, not doing any version checking", logger.ERROR)
+        return ''
+
+    return install_type
+
     
 def check_git_version():
 
@@ -131,10 +139,10 @@ def check_git_for_update(commit_hash, commit_date=None):
         message = "or else you're ahead of master"
         
     elif num_commits_behind > 0:
-        message = str(num_commits_behind)+' commits'
+        message = "you're "+str(num_commits_behind)+' commits'
         if days_old:
             message += ' and '+str(days_old)+' days'
-        message += ' ahead'
+        message += ' behind'
 
     else:
         return
@@ -144,12 +152,13 @@ def check_git_for_update(commit_hash, commit_date=None):
     else:
         url = 'http://github.com/midgetspy/Sick-Beard/commits/'
     
-    set_newest_text(url, message)
+    set_newest_text(url, message, sickbeard.WEB_ROOT+"/home/update")
 
-def set_newest_text(url, extra_text):
+def set_newest_text(url, extra_text, update_url):
     sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available</a> ('+extra_text+')'
+    sickbeard.NEWEST_VERSION_STRING += " <a href=\""+update_url+"/home/update\">Update Now</a>"
 
-def find_latest_build():
+def find_latest_build(whole_link=False):
 
     regex = "http://sickbeard.googlecode.com/files/SickBeard\-win32\-alpha\-build(\d+)\.zip"
     
@@ -159,7 +168,10 @@ def find_latest_build():
         match = re.search(regex, curLine)
         if match:
             groups = match.groups()
-            return int(groups[0])
+            if whole_link:
+                return match.group(0)
+            else:
+                return int(match.group(1))
 
     return None
 
@@ -199,3 +211,16 @@ def update_with_git():
         return False
     
     return True
+
+def update_from_google_code():
+    
+    new_link = find_latest_build(True)
+    
+    if not new_link:
+        logger.log("Unable to find a new version link on google code, not updating")
+
+    # unzip it
+    
+    # write a bat file
+    
+    # shut down
