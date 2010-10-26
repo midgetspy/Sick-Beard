@@ -27,10 +27,10 @@ class CheckVersion():
     
     def run(self):
 
-        install_type = install_type()
+        cur_install_type = install_type()
 
         # if we're running from source try to specify the version
-        if install_type == 'source':
+        if cur_install_type == 'source':
             (cur_commit_hash, cur_commit_date) = check_git_version()
             logger.log("Got git info as being: "+str(cur_commit_hash)+" @ "+str(cur_commit_date), logger.DEBUG)
 
@@ -38,7 +38,7 @@ class CheckVersion():
             logger.log("Version checking is disabled, not checking for the newest version")
             return
 
-        if install_type == 'win':
+        if cur_install_type == 'win':
         
             latestBuild = find_latest_build()
             
