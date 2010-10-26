@@ -153,7 +153,7 @@ def check_git_for_update(commit_hash, commit_date=None):
 
 def set_newest_text(url, extra_text, update_url):
     sickbeard.NEWEST_VERSION_STRING = 'There is a <a href="'+url+'" target="_new">newer version available</a> ('+extra_text+')'
-    sickbeard.NEWEST_VERSION_STRING += " <a href=\""+update_url+"/home/update\">Update Now</a>"
+    sickbeard.NEWEST_VERSION_STRING += " <a href=\""+update_url+"\">Update Now</a>"
 
 def find_latest_build(whole_link=False):
 
@@ -178,7 +178,8 @@ def update_with_git():
     output = None
     
     try:
-        p = subprocess.Popen('git pull origin '+sickbeard.version.SICKBEARD_VERSION, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
+        popen_str = 'git pull origin '+sickbeard.version.SICKBEARD_VERSION
+        p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
         output, err = p.communicate()
     except OSError, e:
         #logger.log("Unable to find git, can't tell what version you're running")
@@ -193,9 +194,11 @@ def update_with_git():
     
         if 'Already up-to-date.' in line:
             logger.log("No update available, not updating")
+            logger.log("Output: "+str(output))
             return False
         elif line.endswith('Aborting.'):
             logger.log("Unable to update from git: "+line, logger.ERROR)
+            logger.log("Output: "+str(output))
             return False
     
         match = re.search(pull_regex, line)
@@ -205,6 +208,7 @@ def update_with_git():
 
     if None in (files, insertions, deletions):
         logger.log("Didn't find indication of success in output, assuming git pull failed", logger.ERROR)
+        logger.log("Output: "+str(output))
         return False
     
     return True
