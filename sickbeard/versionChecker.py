@@ -50,22 +50,19 @@ class CheckVersion():
             sickbeard.NEWEST_VERSION = latestBuild
 
             if int(sickbeard.version.SICKBEARD_VERSION[6:]) < sickbeard.NEWEST_VERSION:
-                set_newest_text('http://code.google.com/p/sickbeard/downloads/list', 'build '+str(latestBuild))
+                set_newest_text('http://code.google.com/p/sickbeard/downloads/list', 'build '+str(latestBuild), find_latest_build(True))
         
         else:
             
-            check_git_for_update(cur_commit_hash, cur_commit_date, find_latest_build(True))
+            check_git_for_update(cur_commit_hash, cur_commit_date)
 
 def install_type():
 
     # check if we're a windows build
     if version.SICKBEARD_VERSION.startswith('build '):
         install_type = 'win'
-    elif version.SICKBEARD_VERSION == 'master':
-        install_type = 'source'
     else:
-        logger.log("Unknown install type, not doing any version checking", logger.ERROR)
-        return ''
+        install_type = 'source'
 
     return install_type
 
