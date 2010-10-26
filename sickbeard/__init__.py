@@ -600,9 +600,24 @@ def saveAndShutdown(restart=False):
     saveAll()
 
     if restart:
-        popen_list = [ sys.executable, sickbeard.MY_FULLNAME] + sickbeard.MY_ARGS
-        logger.log("Restarting Sickbeard with " + str(popen_list))
-        subprocess.Popen(popen_list, cwd=os.getcwd())
+        install_type = versionChecker.install_type()
+
+        popen_list = []
+        
+        if install_type == 'source':
+            popen_list = [ sys.executable, sickbeard.MY_FULLNAME]
+        elif install_type == 'win':
+            if hasattr(sys, 'frozen'):
+                # c:\dir\to\updater.exe 12345 c:\dir\to\sickbeard.exe
+                popen_list = [ os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(os.getpid()), sys.executable ]
+            else:
+                logger.log("Unknown SB launch method, please file a bug report about this", logger.ERROR)
+                popen_list = [ sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(os.getpid()), sys.executable, sickbeard.MY_FULLNAME ]
+
+        if popen_list:
+            popen_list += sickbeard.MY_ARGS
+            logger.log("Restarting Sick Beard with " + str(popen_list))
+            subprocess.Popen(popen_list, cwd=os.getcwd())
     
     os._exit(0)
 
