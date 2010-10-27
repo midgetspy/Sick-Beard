@@ -7,12 +7,14 @@ Sick Beard is a PVR for newsgroup users (with limited torrent support). It watch
 
 Features include:
 
-* automatic episode downloads for torrents and NZBs from any number of the 6 different supported index sites
+* automatically retrieves new episode torrent or nzb files
+* can scan your existing library and then download any old seasons or episodes you're missing
+* can watch for better versions and upgrade your existing episodes (to from TV DVD/BluRay for example)
 * XBMC library updates, poster/fanart downloads, and NFO/TBN generation
-* renames episode files for any show
+* configurable episode renaming
 * sends NZBs directly to SABnzbd, prioritizes and categorizes them properly
 * available for any platform, uses simple HTTP interface
-* can notify XBMC or use Growl to notify any Windows PC when new episodes are downloaded
+* can notify XBMC, Growl, or Twitter when new episodes are downloaded
 * specials and double episode support
 
 
