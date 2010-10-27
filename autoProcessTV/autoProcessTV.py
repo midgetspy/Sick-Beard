@@ -46,6 +46,11 @@ def processEpisode(dirName, nzbName=None):
     config = ConfigParser.ConfigParser()
     configFilename = os.path.join(os.path.dirname(sys.argv[0]), "autoProcessTV.cfg")
     print "Loading config from", configFilename
+    
+    if not os.path.isfile(configFilename):
+        print "ERROR: You need an autoProcessTV.cfg file - did you rename and edit the .sample?"
+        sys.exit(-1)
+    
     config.read(configFilename)
     
     host = config.get("SickBeard", "host")
@@ -70,10 +75,12 @@ def processEpisode(dirName, nzbName=None):
     
     url = "http://" + host + ":" + port + web_root + "/home/postprocess/processEpisode?" + urllib.urlencode(params)
     
+    print "Opening URL:", url
+    
     try:
         urlObj = myOpener.openit(url)
     except IOError:
-        print "Unable to open URL " + url
+        print "Unable to open URL"
         sys.exit()
     
     result = urlObj.readlines()

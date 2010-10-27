@@ -43,6 +43,9 @@ class ProperFinder():
         self.updateInterval = datetime.timedelta(hours=1) 
 
     def run(self):
+
+        if not sickbeard.DOWNLOAD_PROPERS:
+            return
     
         # look for propers every night at 1 AM
         updateTime = datetime.time(hour=1)
@@ -172,7 +175,10 @@ class ProperFinder():
 
             # make sure the episode has been downloaded before
             myDB = db.DBConnection() 
-            historyResults = myDB.select("SELECT resource FROM history WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND action IN ("+",".join([str(x) for x in Quality.SNATCHED])+") AND date >= ?",
+            historyResults = myDB.select(
+                "SELECT resource FROM history"
+                "WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND date >= ?"
+                "AND action IN (" + ",".join([str(x) for x in Quality.SNATCHED]) + ")",
                         [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, historyLimit.strftime(history.dateFormat)])
              
             # if we didn't download this episode in the first place we don't know what quality to use for the proper so we can't do it
@@ -190,6 +196,7 @@ class ProperFinder():
                         isSame = True
                         break
                 if isSame:
+                    logger.log("This proper is already in history, skipping it", logger.DEBUG)
                     continue
         
                 # get the episode object

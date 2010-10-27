@@ -12,34 +12,38 @@
 
 <div id="outerWrapper">
   <div id="listingWrapper">
-    #set $curDay = None
-    #set $missed = False
-    #for $curEp in $epList
-        #if $curEp.show.paused:
-          #continue
-        #end if
-        #if $curEp.airdate < datetime.date.today() and $curDay == None:
-		  #if $missed == False
-    <br /><h1 class="day">Missing</h1>
-            #set $missed = True
-          #end if
-        #elif $curDay == None or ($curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() < $oneWeek):
-            #set $curDay = curEp.airdate
-    <br /><h1 class="day">$curEp.airdate.strftime("%A")</h1>
-        #elif $curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() >= $oneWeek:
-            #set $curDay = datetime.date(datetime.MAXYEAR, 1, 1)
-    <br /><h1 class="day">More than one week</h1>
-        #end if
-        
-        #if $curEp.airdate == datetime.date.today()
-            #set $showDiv = "listing_current"
-        #elif $curEp.airdate < datetime.date.today()
-            #set $showDiv = "listing_overdue"
-        #elif $curEp.airdate - datetime.date.today() >= $oneWeek
-            #set $showDiv = "listing_toofar"
-        #else
-            #set $showDiv = ""
-        #end if
+	#set $curDay = None
+	#set $missed = False
+	#for $curEp in $epList
+		#if $sort == "date"
+			#if $curEp.show.paused:
+			  #continue
+			#end if
+			#if $curEp.airdate < datetime.date.today() and $curDay == None:
+			  #if $missed == False
+		<br /><h1 class="day">Missing</h1>
+				#set $missed = True
+			  #end if
+			#elif $curDay == None or ($curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() < $oneWeek):
+				#set $curDay = curEp.airdate
+		<br /><h1 class="day">$curEp.airdate.strftime("%A")</h1>
+			#elif $curEp.airdate > $curDay and $curEp.airdate - datetime.date.today() >= $oneWeek:
+				#set $curDay = datetime.date(datetime.MAXYEAR, 1, 1)
+		<br /><h1 class="day">More than one week</h1>
+			#end if
+			
+			#if $curEp.airdate == datetime.date.today()
+				#set $showDiv = "listing_current"
+			#elif $curEp.airdate < datetime.date.today()
+				#set $showDiv = "listing_overdue"
+			#elif $curEp.airdate - datetime.date.today() >= $oneWeek
+				#set $showDiv = "listing_toofar"
+			#else
+				#set $showDiv = ""
+			#end if
+	#else
+		#set $showDiv = ""
+	#end if
     <div class="$showDiv">
       <div class="listing" id="listing_$curEp.show.tvdbid">
         <a name="$curEp.show.name"></a>

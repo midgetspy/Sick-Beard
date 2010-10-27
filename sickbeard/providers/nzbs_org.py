@@ -43,6 +43,8 @@ class NZBsProvider(generic.NZBProvider):
 		
 		generic.NZBProvider.__init__(self, "NZBs.org")
 		
+		self.supportsBacklog = True
+
 		self.cache = NZBsCache(self)
 		
 		self.url = 'http://www.nzbs.org/'
@@ -165,7 +167,7 @@ class NZBsProvider(generic.NZBProvider):
 
 	def _doSearch(self, curString):
 	
-		curString = curString.replace('.', ' ')
+		curString = curString.replace('.', ' ').replace('-', '.')
 	
 		params = {"action": "search",
 				  "q": curString.encode('utf-8'),

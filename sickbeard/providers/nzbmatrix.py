@@ -38,6 +38,8 @@ class NZBMatrixProvider(generic.NZBProvider):
 	def __init__(self):
 		
 		generic.NZBProvider.__init__(self, "NZBMatrix")
+
+		self.supportsBacklog = True
 		
 		self.cache = NZBMatrixCache(self)
 		

@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "alpha2"
+SICKBEARD_VERSION = "master"

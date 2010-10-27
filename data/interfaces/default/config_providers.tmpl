@@ -56,6 +56,7 @@ you want them to be searched<br />
     <input type="checkbox" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "CHECKED" else ""#>
     <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" width="16" height="16"></a>
     $curProvider.name
+    #if not $curProvider.supportsBacklog then "*" else ""#
   </li>
 #end for
 </ul>
@@ -87,11 +88,6 @@ TVBinz cookie UID<br />
 <input type="text" name="tvbinz_uid" value="$sickbeard.TVBINZ_UID" size="6"><br />
 <br />
 
-<strong>SAB UID:</strong><br />
-SAB UID (only required if sending NZBs directly to SAB)<br />
-<input type="text" name="tvbinz_sabuid" value="$sickbeard.TVBINZ_SABUID" size="6"><br />
-<br />
-
 <strong>Hash:</strong><br />
 TVBinz hash string<br />
 <input type="text" name="tvbinz_hash" value="$sickbeard.TVBINZ_HASH" size="35"><br />
@@ -115,8 +111,6 @@ NZBs.org UID<br />
 <strong>Hash:</strong><br />
 NZBs.org hash<br />
 <input type="text" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="35"><br />
-<br />
-
 </div>
 
 
@@ -172,7 +166,7 @@ NZBs'R'US hash<br />
 <input type="text" id="newznab_name"><br />
 <strong>Site URL</strong><br /><input type="text" id="newznab_url"><br />
 <br />
-<strong>RSS Key</strong><br /><input type="text" id="newznab_key"><br />
+<strong>API Key</strong><br /><input type="text" id="newznab_key"><br />
 (leave blank if not required)<br />
 <br />
 <div id="newznab_add_div"><input type="button" class="newznab_save" id="newznab_add" value="Add"></div>
@@ -186,9 +180,8 @@ NZBs'R'US hash<br />
 
 
 
-<p>
-<input type="submit" value="Save Changes">
-</p>
+<p>* This provider doesn't support backlog, it provides new episodes via RSS only</p>
+<p><input type="submit" value="Save Changes"></p>
 </form>
 
 
