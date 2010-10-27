@@ -353,7 +353,7 @@ class SourceUpdateManager(GitUpdateManager):
         # retrieve file
         try:
             logger.log("Downloading update from "+tar_download_url)
-            data = urllib2.urlopen(tar_download_url, timeout=10)
+            data = urllib2.urlopen(tar_download_url)
         except (IOError, URLError):
             logger.log("Unable to retrieve new version from "+tar_download_url+", can't update", logger.ERROR)
             return False
