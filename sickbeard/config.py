@@ -23,7 +23,8 @@ import os.path
 import datetime
 
 from sickbeard import helpers
-from sickbeard import logger 
+from sickbeard import logger
+from sickbeard import searchBacklog
 
 import sickbeard
 
@@ -120,6 +121,7 @@ def change_SEARCH_FREQUENCY(freq):
     sickbeard.SEARCH_FREQUENCY = freq
     
     sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
+    sickbeard.backlogSearchScheduler.cycleTime = datetime.timedelta(minutes=searchBacklog.get_cycle_time())
     
 def change_BACKLOG_SEARCH_FREQUENCY(freq):
     

@@ -428,7 +428,7 @@ def initialize(consoleLogging=True):
                                                      runImmediately=True)
         
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
-                                                                      cycleTime=datetime.timedelta(minutes=67),
+                                                                      cycleTime=datetime.timedelta(minutes=searchBacklog.get_cycle_time()),
                                                                       threadName="BACKLOG",
                                                                       runImmediately=False)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
