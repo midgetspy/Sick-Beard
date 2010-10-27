@@ -378,9 +378,9 @@ class SourceUpdateManager(GitUpdateManager):
         os.remove(tar_download_path)
         
         # find update dir name
-        update_dir_contents = filter(os.path.isdir, os.listdir(sb_update_dir))
+        update_dir_contents = [x for x in os.listdir(sb_update_dir) if os.path.isdir(os.path.join(sb_update_dir, x))]
         if len(update_dir_contents) != 1:
-            logger.log("Invalid update data, update failed.", logger.ERROR)
+            logger.log("Invalid update data, update failed: "+str(update_dir_contents), logger.ERROR)
             return False
         content_dir = os.path.join(sb_update_dir, update_dir_contents[0])
     
