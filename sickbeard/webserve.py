@@ -1023,7 +1023,7 @@ HomeMenu = [
     { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
-    { 'title': 'Restart',                'path': 'home/restart/'                            },
+    { 'title': 'Restart',                'path': 'home/restart/?pid='+str(os.getpid())      },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
 ]
 
@@ -1332,7 +1332,10 @@ class Home:
         return _genericMessage(title, message)
 
     @cherrypy.expose
-    def restart(self):
+    def restart(self, pid=None):
+
+        if str(pid) != str(os.getpid()):
+            redirect("/home")
 
         # do a soft restart
         threading.Timer(2, sickbeard.restart, [False]).start()
@@ -1343,7 +1346,10 @@ class Home:
         return _genericMessage(title, message)
 
     @cherrypy.expose
-    def update(self):
+    def update(self, pid=None):
+
+        if str(pid) != str(os.getpid()):
+            redirect("/home")
 
         updated = sickbeard.versionCheckScheduler.action.update()
 
