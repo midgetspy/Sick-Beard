@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -50,10 +50,10 @@ class WrongShowException(SickBeardException):
 
 class ShowNotFoundException(SickBeardException):
 	"The show wasn't found on theTVDB"
-	
+
 class EpisodeNotFoundException(SickBeardException):
 	"The episode wasn't found on theTVDB"
-	
+
 class NewzbinAPIThrottled(SickBeardException):
 	"Newzbin has throttled us, deal with it"
 
@@ -62,10 +62,10 @@ class TVRageException(SickBeardException):
 
 class ShowDirNotFoundException(SickBeardException):
 	"The show dir doesn't exist"
-	
+
 class AuthException(SickBeardException):
 	"Your authentication information is incorrect"
-	
+
 class EpisodeDeletedException(SickBeardException):
 	"This episode has been deleted"
 

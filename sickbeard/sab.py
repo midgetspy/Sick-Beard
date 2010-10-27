@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -30,9 +30,9 @@ from sickbeard.common import *
 from sickbeard import logger, classes
 
 def sendNZB(nzb):
-    
+
     params = {}
-    
+
     if sickbeard.SAB_USERNAME != None:
         params['ma_username'] = sickbeard.SAB_USERNAME
     if sickbeard.SAB_PASSWORD != None:
@@ -51,7 +51,7 @@ def sendNZB(nzb):
     if nzb.resultType == "nzb":
         params['mode'] = 'addurl'
         params['name'] = nzb.url
-    
+
     # if we get a raw data result we want to upload it to SAB
     elif nzb.resultType == "nzbdata":
         params['mode'] = 'addfile'
@@ -64,7 +64,7 @@ def sendNZB(nzb):
     logger.log("URL: " + url, logger.DEBUG)
 
     try:
-        
+
         if nzb.resultType == "nzb":
             f = urllib.urlopen(url)
         elif nzb.resultType == "nzbdata":
@@ -77,7 +77,7 @@ def sendNZB(nzb):
                                   headers={'User-Agent': USER_AGENT})
 
             f = opener.open(req)
-            
+
     except IOError, e:
         logger.log("Unable to connect to SAB: "+str(e), logger.ERROR)
         return False
@@ -85,11 +85,11 @@ def sendNZB(nzb):
     except httplib.InvalidURL, e:
         logger.log("Invalid SAB host, check your config: "+str(e), logger.ERROR)
         return False
-        
+
     if f == None:
         logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
         return False
-    
+
     try:
         result = f.readlines()
     except Exception, e:
@@ -99,11 +99,11 @@ def sendNZB(nzb):
     if len(result) == 0:
         logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
         return False
-    
+
     sabText = result[0].strip()
-    
+
     logger.log("Result text from SAB: " + sabText, logger.DEBUG)
-    
+
     if sabText == "ok":
         logger.log("NZB sent to SAB successfully", logger.DEBUG)
         return True

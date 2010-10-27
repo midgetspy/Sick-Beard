@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -47,7 +47,7 @@ def initLogging(consoleLogging=True):
     global logFile
 
     logFile = os.path.join(sickbeard.LOG_DIR, 'sickbeard.log')
-            
+
     fileHandler = logging.handlers.RotatingFileHandler(
                   logFile,
                   maxBytes=25000000,
@@ -57,26 +57,26 @@ def initLogging(consoleLogging=True):
     fileHandler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
 
     logging.getLogger('sickbeard').addHandler(fileHandler)
-    
+
     # define a Handler which writes INFO messages or higher to the sys.stderr
     if consoleLogging:
         console = logging.StreamHandler()
-        
+
         console.setLevel(logging.INFO)
-    
+
         # set a format which is simpler for console use
         console.setFormatter(logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'))
-    
+
         # add the handler to the root logger
         logging.getLogger('sickbeard').addHandler(console)
 
     logging.getLogger('sickbeard').setLevel(logging.DEBUG)
-    
+
 def log(toLog, logLevel=MESSAGE):
-    
+
     meThread = threading.currentThread().getName()
     message = meThread + " :: " + toLog
-    
+
     outLine = message.encode('utf-8')
 
     sbLogger = logging.getLogger('sickbeard')
@@ -89,7 +89,7 @@ def log(toLog, logLevel=MESSAGE):
         sbLogger.warning(outLine)
     elif logLevel == ERROR:
         sbLogger.error(outLine)
-        
+
         # add errors to the UI logger
         classes.ErrorViewer.add(classes.UIError(message))
     else:

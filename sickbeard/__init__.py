@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -28,7 +28,7 @@ import os
 from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
-from sickbeard import providers 
+from sickbeard import providers
 from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -77,7 +77,7 @@ WEB_PORT = None
 WEB_LOG = None
 WEB_ROOT = None
 WEB_USERNAME = None
-WEB_PASSWORD = None 
+WEB_PASSWORD = None
 WEB_HOST = None
 
 LAUNCH_BROWSER = None
@@ -103,7 +103,7 @@ TVDB_BASE_URL = None
 TVDB_API_PARMS = {}
 
 USE_NZB = False
-NZB_METHOD = None 
+NZB_METHOD = None
 NZB_DIR = None
 USENET_RETENTION = None
 DOWNLOAD_PROPERS = None
@@ -257,9 +257,9 @@ def get_backlog_cycle_time():
 
 
 def initialize(consoleLogging=True):
-    
+
     with INIT_LOCK:
-        
+
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, \
                 NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
@@ -280,12 +280,12 @@ def initialize(consoleLogging=True):
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD
 
-        
+
         if __INITIALIZED__:
             return False
-        
+
         socket.setdefaulttimeout(SOCKET_TIMEOUT)
-        
+
         CheckSection('General')
         CheckSection('Blackhole')
         CheckSection('Newzbin')
@@ -294,7 +294,7 @@ def initialize(consoleLogging=True):
         CheckSection('XBMC')
         CheckSection('Growl')
         CheckSection('Twitter')
-        
+
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
             logger.log("!!! No log folder, logging to screen only!", logger.ERROR)
@@ -328,7 +328,7 @@ def initialize(consoleLogging=True):
                           'cache_dir': False}
         if CACHE_DIR:
             TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
-        
+
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
@@ -351,11 +351,11 @@ def initialize(consoleLogging=True):
             NZB_METHOD = 'blackhole'
 
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
-        
+
         USE_NZB = bool(check_setting_int(CFG, 'General', 'use_nzb', 1))
         USE_TORRENT = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
-        
+
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
         if SEARCH_FREQUENCY < MIN_SEARCH_FREQUENCY:
             SEARCH_FREQUENCY = MIN_SEARCH_FREQUENCY
@@ -366,29 +366,29 @@ def initialize(consoleLogging=True):
 
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
-        
+
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
-        
+
         TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
         TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
         TVBINZ_HASH = check_setting_str(CFG, 'TVBinz', 'tvbinz_hash', '')
         TVBINZ_AUTH = check_setting_str(CFG, 'TVBinz', 'tvbinz_auth', '')
-        
+
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
-        
+
         NZBSRUS = bool(check_setting_int(CFG, 'NZBsRUS', 'nzbsrus', 0))
         NZBSRUS_UID = check_setting_str(CFG, 'NZBsRUS', 'nzbsrus_uid', '')
         NZBSRUS_HASH = check_setting_str(CFG, 'NZBsRUS', 'nzbsrus_hash', '')
-        
+
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
         NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
-        
+
         BINREQ = bool(check_setting_int(CFG, 'Bin-Req', 'binreq', 1))
 
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
@@ -419,9 +419,9 @@ def initialize(consoleLogging=True):
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
-        
+
         providerList = providers.makeProviderList()
-        
+
         logger.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
@@ -431,13 +431,13 @@ def initialize(consoleLogging=True):
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
                                                      runImmediately=True)
-        
+
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
                                                                       runImmediately=False)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
-        
+
         # the interval for this is stored inside the ShowUpdater class
         showUpdaterInstance = showUpdater.ShowUpdater()
         showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
@@ -449,7 +449,7 @@ def initialize(consoleLogging=True):
                                                      cycleTime=datetime.timedelta(hours=12),
                                                      threadName="CHECKVERSION",
                                                      runImmediately=True)
-        
+
         showQueueScheduler = scheduler.Scheduler(queue.ShowQueue(),
                                                cycleTime=datetime.timedelta(seconds=3),
                                                threadName="SHOWQUEUE",
@@ -460,16 +460,16 @@ def initialize(consoleLogging=True):
                                                      cycleTime=properFinderInstance.updateInterval,
                                                      threadName="FINDPROPERS",
                                                      runImmediately=False)
-        
+
         autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="POSTPROCESSER",
                                                      runImmediately=True)
-        
-        
+
+
         showList = []
         loadingShowList = {}
-        
+
         airingList = []
         comingList = []
 
@@ -477,21 +477,21 @@ def initialize(consoleLogging=True):
         return True
 
 def start():
-    
+
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler
-    
+
     with INIT_LOCK:
-        
+
         if __INITIALIZED__:
-        
+
             # start the search scheduler
             currentSearchScheduler.thread.start()
-        
+
             # start the backlog scheduler
             backlogSearchScheduler.thread.start()
-        
+
             # start the show updater
             showUpdateScheduler.thread.start()
 
@@ -508,16 +508,16 @@ def start():
             autoPostProcesserScheduler.thread.start()
 
 def halt ():
-    
+
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler
-    
+
     with INIT_LOCK:
-        
+
         if __INITIALIZED__:
 
             logger.log("Aborting all threads")
-            
+
             # abort all the threads
 
             currentSearchScheduler.abort = True
@@ -526,7 +526,7 @@ def halt ():
                 currentSearchScheduler.thread.join(10)
             except:
                 pass
-            
+
             backlogSearchScheduler.abort = True
             logger.log("Waiting for the BACKLOG thread to exit")
             try:
@@ -540,36 +540,36 @@ def halt ():
                 showUpdateScheduler.thread.join(10)
             except:
                 pass
-            
+
             versionCheckScheduler.abort = True
             logger.log("Waiting for the VERSIONCHECKER thread to exit")
             try:
                 versionCheckScheduler.thread.join(10)
             except:
                 pass
-            
+
             showQueueScheduler.abort = True
             logger.log("Waiting for the SHOWQUEUE thread to exit")
             try:
                 showQueueScheduler.thread.join(10)
             except:
                 pass
-            
+
             autoPostProcesserScheduler.abort = True
             logger.log("Waiting for the POSTPROCESSER thread to exit")
             try:
                 autoPostProcesserScheduler.thread.join(10)
             except:
                 pass
-            
+
             properFinderScheduler.abort = True
             logger.log("Waiting for the PROPERFINDER thread to exit")
             try:
                 properFinderScheduler.thread.join(10)
             except:
                 pass
-            
-            
+
+
             __INITIALIZED__ = False
 
 
@@ -579,34 +579,34 @@ def sig_handler(signum=None, frame=None):
         logger.log("Signal %i caught, saving and exiting..." % int(signum))
         cherrypy.engine.exit()
         saveAndShutdown()
-    
+
 
 def saveAll():
-    
+
     global showList
-    
+
     # write all shows
     logger.log("Saving all shows to the database")
     for show in showList:
         show.saveToDB()
-    
+
     # save config
     logger.log("Saving config file to disk")
     save_config()
-    
+
 
 def saveAndShutdown():
 
     halt()
 
     saveAll()
-    
+
     os._exit(0)
 
 
 
 def save_config():
-        
+
     CFG['General']['log_dir'] = LOG_DIR
     CFG['General']['web_port'] = WEB_PORT
     CFG['General']['web_host'] = WEB_HOST
@@ -676,22 +676,22 @@ def save_config():
     CFG['Twitter']['use_twitter'] = int(USE_TWITTER)
     CFG['Twitter']['twitter_username'] = TWITTER_USERNAME
     CFG['Twitter']['twitter_password'] = TWITTER_PASSWORD
- 
+
     CFG['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
-    
+
     CFG.write()
 
 
 def restart():
-    
+
     halt()
 
     saveAll()
-    
+
     INIT_OK = initialize()
     if INIT_OK:
         start()
-    
+
 def launchBrowser():
     browserURL = 'http://localhost:%d%s' % (WEB_PORT, WEB_ROOT)
     try:
@@ -704,22 +704,22 @@ def launchBrowser():
 
 
 def updateAiringList():
-    
+
     logger.log("Searching DB and building list of airing episodes")
-    
+
     curDate = datetime.date.today().toordinal()
 
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status == ? AND airdate <= ?", [UNAIRED, curDate])
-    
+
     epList = []
 
     for sqlEp in sqlResults:
-        
+
         try:
             show = helpers.findCertainShow (sickbeard.showList, int(sqlEp["showid"]))
         except exceptions.MultipleShowObjectsException:
-            logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
+            logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"])
             return None
         except exceptions.SickBeardException, e:
             logger.log("Unexpected exception: "+str(e), logger.ERROR)
@@ -728,12 +728,12 @@ def updateAiringList():
         # we aren't ever downloading specials
         if int(sqlEp["season"]) == 0:
             continue
-        
+
         if show == None:
             continue
-        
+
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
-        
+
         if ep == None:
             logger.log("Somehow "+show.name+" - "+str(sqlEp["season"])+"x"+str(sqlEp["episode"])+" is None", logger.ERROR)
         else:
@@ -744,7 +744,7 @@ def updateAiringList():
 def updateComingList():
 
     epList = []
-    
+
     for curShow in sickbeard.showList:
 
         curEps = None
@@ -753,7 +753,7 @@ def updateComingList():
             curEps = curShow.nextEpisode()
         except exceptions.NoNFOException, e:
             logger.log("Unable to retrieve episode from show: "+str(e), logger.ERROR)
-        
+
         for myEp in curEps:
             if myEp.season != 0:
                 epList.append(myEp)
@@ -761,17 +761,17 @@ def updateComingList():
     sickbeard.comingList = epList
 
 def getEpList(epIDs, showid=None):
-    
+
     if epIDs == None or len(epIDs) == 0:
         return []
 
     query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(["?" for x in epIDs]),)
     params = epIDs
-    
+
     if showid != None:
         query += " AND showid = ?"
         params.append(showid)
-    
+
     myDB = db.DBConnection()
     sqlResults = myDB.select(query, params)
 
@@ -781,5 +781,5 @@ def getEpList(epIDs, showid=None):
         curShowObj = helpers.findCertainShow(sickbeard.showList, int(curEp["showid"]))
         curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]))
         epList.append(curEpObj)
-    
-    return epList  
+
+    return epList

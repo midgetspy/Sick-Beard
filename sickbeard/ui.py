@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -40,7 +40,7 @@ class ProgressIndicators():
            'massAdd': [],
            'dailyUpdate': []
            }
-    
+
     @staticmethod
     def getIndicator(name):
         if name not in ProgressIndicators._pi:
@@ -65,7 +65,7 @@ class QueueProgressIndicator():
     def __init__(self, name, queueItemList):
         self.queueItemList = queueItemList
         self.name = name
-    
+
     def numTotal(self):
         return len(self.queueItemList)
 
@@ -79,13 +79,13 @@ class QueueProgressIndicator():
         for curItem in [sickbeard.showQueueScheduler.action.currentItem]+sickbeard.showQueueScheduler.action.queue:
             if curItem in self.queueItemList:
                 return curItem.name
-        
+
         return "Unknown"
 
     def percentComplete(self):
         numFinished = self.numFinished()
         numTotal = self.numTotal()
-        
+
         if numTotal == 0:
             return 0
         else:
@@ -95,14 +95,14 @@ class LoadingTVShow():
     def __init__(self, dir):
         self.dir = dir
         self.show = None
-        
+
 def addShowsFromRootDir(dir):
-    
+
     returnStr = ""
-    
+
     if not os.path.isdir(dir):
         return "Couldn't find directory " + dir
-    
+
     for curDir in os.listdir(unicode(dir)):
         showDir = os.path.join(dir, curDir)
         logStr = "Attempting to load show in " + showDir
