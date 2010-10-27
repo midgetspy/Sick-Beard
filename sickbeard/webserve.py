@@ -1345,7 +1345,7 @@ class Home:
     @cherrypy.expose
     def update(self):
 
-        updated = versionChecker.update_with_git()
+        updated = sickbeard.versionCheckScheduler.action.update()
 
         if updated:
             # do a hard restart
