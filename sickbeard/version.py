@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "auto_update"
+SICKBEARD_VERSION = "master"
