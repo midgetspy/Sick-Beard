@@ -219,7 +219,7 @@ class GitUpdateManager(UpdateManager):
         
             self._num_commits_behind += 1
 
-        logger.log("newest: "+str(self._newest_commit_hash)+" and current: "+str(self._cur_commit_hash)+" and num_commits: "+str(self._num_commits_behind))
+        logger.log("newest: "+str(self._newest_commit_hash)+" and current: "+str(self._cur_commit_hash)+" and num_commits: "+str(self._num_commits_behind), logger.DEBUG)
 
     def set_newest_text(self):
 
@@ -247,7 +247,7 @@ class GitUpdateManager(UpdateManager):
         self._find_installed_version()
         self._check_github_for_update()
 
-        logger.log("After checking, cur_commit = "+str(self._cur_commit_hash)+", newest_commit = "+str(self._newest_commit_hash)+", num_commits_behind = "+str(self._num_commits_behind))
+        logger.log("After checking, cur_commit = "+str(self._cur_commit_hash)+", newest_commit = "+str(self._newest_commit_hash)+", num_commits_behind = "+str(self._num_commits_behind), logger.DEBUG)
 
         if self._num_commits_behind > 0:
             return True
