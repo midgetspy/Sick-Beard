@@ -266,7 +266,8 @@ sceneExceptions = {72546: ['CSI'],
                    168161: ['Law & Order: Los Angeles', 'Law & Order: LA'],
                    77526: ['Star Trek: TOS'],
                    72194: ['The Ellen Degeneres Show', 'Ellen Degeneres'],
-                   72073: ['Star Trek DS9']
+                   72073: ['Star Trek DS9'],
+                   195831: ['Zane Lamprey\'s Drinking Made Easy']
                    }
 
 countryList = {'Australia': 'AU',
