@@ -81,8 +81,8 @@ class UpdateManager():
 class WindowsUpdateManager(UpdateManager):
     
     def __init__(self):
-        self.cur_version = None
-        self.newest_version = None
+        self._cur_version = None
+        self._newest_version = None
         
         self.gc_url = 'http://code.google.com/p/sickbeard/downloads/list'
     
@@ -96,7 +96,7 @@ class WindowsUpdateManager(UpdateManager):
         
         whole_link: If True, returns the entire URL to the release. If False, it returns
                     only the build number. default: False
-            """
+        """
     
         regex = "http://sickbeard.googlecode.com/files/SickBeard\-win32\-alpha\-build(\d+)(?:\.\d+)?\.zip"
         
@@ -113,14 +113,14 @@ class WindowsUpdateManager(UpdateManager):
         return None
 
     def need_update(self):
-        self.cur_version = self._find_installed_version()
-        self.newest_version = self._find_newest_version()
+        self._cur_version = self._find_installed_version()
+        self._newest_version = self._find_newest_version()
         
-        if self.newest_version > self.cur_version:
+        if self._newest_version > self._cur_version:
             return True
 
     def set_newest_text(self):
-        new_str = 'There is a <a href="'+self.gc_url+'" target="_new">newer version available</a> (build '+str(self.newest_version)+')'
+        new_str = 'There is a <a href="'+self.gc_url+'" target="_new">newer version available</a> (build '+str(self._newest_version)+')'
         new_str += " <a href=\""+sickbeard.WEB_ROOT+"/home/update\">Update Now</a>"
         sickbeard.NEWEST_VERSION_STRING = new_str
 
