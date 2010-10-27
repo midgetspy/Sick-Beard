@@ -40,7 +40,7 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 
 [cherrypy]: http://www.cherrypy.org
 [cheetah]: http://www.cheetahtemplate.org/
-[simplejson]: http://code.google.com/p/simplejson/ 
+[simplejson]: http://code.google.com/p/simplejson/
 [tvdb_api]: http://github.com/dbr/tvdb_api
 [tvnamer]: http://github.com/dbr/tvnamer
 [configobj]: http://www.voidspace.org.uk/python/configobj.html

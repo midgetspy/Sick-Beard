@@ -25,14 +25,14 @@
     var xbmc_password = \$("#xbmc_password").val();
 
     \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
-    
+
   });
 
   \$('#twitterStep1').click(function(){
 
     \$.get("$sbRoot/home/twitterStep1", function (data){window.open(data)});
     return false;
-    
+
   });
 
   \$('#twitterStep2').click(function(){
@@ -49,8 +49,8 @@
 
   });
 
-});  
-      
+});
+
 </script>
 
 <form id="form" action="saveNotifications" method="POST">

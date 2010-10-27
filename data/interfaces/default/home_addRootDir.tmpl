@@ -11,27 +11,27 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script>
-\$(document).ready(function() 
-{ 
+\$(document).ready(function()
+{
     \$("#addRootDirTable").tablesorter({
     	sortList: [[1,0]],
     	headers: {
     		0: { sorter: false }
     	}
-    }); 
+    });
 
 
   \$('#submitShowDirs').click(function(){
-  
+
     var dirArr = new Array()
 
     \$('.dirCheck').each(function() {
-      
+
       if (this.checked == true) {
         dirArr.push(\$(this).attr('id'))
       }
-      
-    });  
+
+    });
 
     if (dirArr.length == 0)
       return false
@@ -43,11 +43,11 @@
   });
 
   \$('#checkAll').click(function(){
-    
+
     var seasCheck = this;
 
     \$('.dirCheck').each(function(){
-      this.checked = seasCheck.checked 
+      this.checked = seasCheck.checked
     });
   });
 

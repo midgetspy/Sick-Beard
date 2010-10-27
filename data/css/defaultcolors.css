@@ -102,12 +102,12 @@ h1 {
 }
 
 #progressBar {
-  background-color: #cdf; 
-  border: 1px solid blue; 
+  background-color: #cdf;
+  border: 1px solid blue;
 }
 
 #percentageBar {
-  background-color: #9bf; 
+  background-color: #9bf;
 }
 
 .queuelink{color:black;}

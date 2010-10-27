@@ -11,17 +11,17 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" charset="utf-8">
-\$(document).ready(function() 
-{ 
+\$(document).ready(function()
+{
 
   \$('#searchName').click(function(){
         \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val()}, function(data){
             var resultStr = ''
-            
+
             if (data.results.length == 0) {
                 resultStr = '<b>No results found, try a different search.</b>';
             } else {
-            
+
                 \$.each(data.results, function(index, obj){
                     if (resultStr == '')
                         checked = ' checked';
@@ -37,7 +37,7 @@
             }
             \$('#searchResults').html(resultStr)
         });
-    });  
+    });
 
     \$('#searchName').click()
 
@@ -49,7 +49,7 @@
 
         return true;
     });
- 
+
     \$('#skipShow').click(function(){
         \$('#skipShowItem').val(1);
         \$('#addShowForm').submit();
@@ -67,6 +67,6 @@
 <input type="text" id="nameToSearch" value="$showNameToAdd"> <input type="button" id="searchName" value="Search"><br />
 #for $curShow in $showDirs:
 <input type="hidden" name="showDirs" value="$curShow">
-#end for 
+#end for
 </form>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

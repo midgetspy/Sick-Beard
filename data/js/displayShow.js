@@ -1,17 +1,17 @@
 $(document).ready(function(){
 
     $('#changeStatus').click(function(){
-  
+
         var sbRoot = $('#sbRoot').val()
         var epArr = new Array()
 
         $('.epCheck').each(function() {
-      
+
             if (this.checked == true) {
                 epArr.push($(this).attr('id'))
             }
-      
-        });  
+
+        });
 
         if (epArr.length == 0)
             return false
@@ -23,7 +23,7 @@ $(document).ready(function(){
     });
 
     $('.seasonCheck').click(function(){
-    
+
         var seasCheck = this;
         var seasNo = $(seasCheck).attr('id');
 
@@ -31,11 +31,11 @@ $(document).ready(function(){
             var epParts = $(this).attr('id').split('x')
 
             if (epParts[0] == seasNo) {
-                this.checked = seasCheck.checked 
-            } 
+                this.checked = seasCheck.checked
+            }
         });
     });
-  
+
     // handle the show selection dropbox
     $('#pickShow').change(function(){
         var sbRoot = $('#sbRoot').val()
@@ -54,7 +54,7 @@ $(document).ready(function(){
         $('tr.'+whichClass).each(function(i){
             $(this).toggle();
         });
-    });        
+    });
 
     // initially show/hide all the rows according to the checkboxes
     $("#checkboxControls input").each(function(e){
@@ -67,7 +67,7 @@ $(document).ready(function(){
             }
         });
     });
-    
+
     $.fn.showHideRows = function(whichClass){
 
         var status = $('#checkboxControls > input, #'+whichClass).attr('checked')
@@ -93,8 +93,8 @@ $(document).ready(function(){
                 $(this).show()
                 $('#'+seasonNo+'-cols').show()
             }
-         
+
          });
-                                             
+
     }
 });

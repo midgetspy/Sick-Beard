@@ -26,7 +26,7 @@
 
 
 <table class="sickbeardTable">
-    
+
 #for $curShow in sorted($sickbeard.showList, key=operator.attrgetter('name')):
 
 #if $showCounts[$curShow.tvdbid][$Overview.QUAL]+$showCounts[$curShow.tvdbid][$Overview.WANTED] == 0:
@@ -59,7 +59,7 @@
 
 #end for
 
-#end for  
+#end for
 
 
 </table><br /><br />

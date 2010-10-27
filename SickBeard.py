@@ -13,7 +13,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -52,7 +52,7 @@ def loadShowsFromDB():
 
 	myDB = db.DBConnection()
 	sqlResults = myDB.select("SELECT * FROM tv_shows")
-	
+
 	for sqlShow in sqlResults:
 		try:
 			curShow = TVShow(int(sqlShow["tvdb_id"]))
@@ -60,7 +60,7 @@ def loadShowsFromDB():
 		except Exception, e:
 			logger.log("There was an error creating the show in "+sqlShow["location"]+": "+str(e), logger.ERROR)
 			logger.log(traceback.format_exc(), logger.DEBUG)
-			
+
 		#TODO: make it update the existing shows if the showlist has something in it
 
 def main():
@@ -83,10 +83,10 @@ def main():
 	except getopt.GetoptError:
 		print "Available options: --quiet, --forceupdate, --port"
 		sys.exit()
-	
+
 	forceUpdate = False
 	forcedPort = None
-	
+
 	for o, a in opts:
 		# for now we'll just silence the logging
 		if (o in ('-q', '--quiet')):
@@ -94,18 +94,18 @@ def main():
 		# for now we'll just silence the logging
 		if (o in ('--tvbinz')):
 			sickbeard.SHOW_TVBINZ = True
-	
+
 		# should we update right away?
 		if (o in ('-f', '--forceupdate')):
 			forceUpdate = True
-	
+
 		# should we update right away?
 		if (o in ('-p', '--port')):
 			forcedPort = int(a)
-	
+
 	if consoleLogging:
 		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
-	
+
 	# load the config and publish it to the sickbeard package
 	if not os.path.isfile(config_file):
 		logger.log("Unable to find config.ini, all settings will be default", logger.ERROR)
@@ -116,13 +116,13 @@ def main():
 	sickbeard.initialize(consoleLogging=consoleLogging)
 
 	sickbeard.showList = []
-	
+
 	if forcedPort:
 		logger.log("Forcing web server to port "+str(forcedPort))
 		startPort = forcedPort
 	else:
 		startPort = sickbeard.WEB_PORT
-	
+
 	logger.log("Starting Sick Beard on http://localhost:"+str(startPort))
 
 	if sickbeard.WEB_LOG:
@@ -154,7 +154,7 @@ def main():
 	# set up the lists
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
-	
+
 	# fire up all our threads
 	sickbeard.start()
 
@@ -168,11 +168,11 @@ def main():
 
 	# stay alive while my threads do the work
 	while (True):
-		
+
 		time.sleep(1)
-	
+
 	return
-		
+
 if __name__ == "__main__":
 	if sys.hexversion >= 0x020600F0:
 		freeze_support()

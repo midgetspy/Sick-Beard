@@ -43,7 +43,7 @@ initially download <b><%=", ".join([Quality.qualityStrings[x] for x in anyQualit
 #end if
 #if $bestQualities:
 replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
-#end if 
+#end if
 #end if
 <br />
 
@@ -55,7 +55,7 @@ Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=
 Force air-by-date: <img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 #end if
 <br />
-Change selected episodes to 
+Change selected episodes to
 <select id="statusSelect">
 #for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
 #if $curStatus == $DOWNLOADED:
@@ -83,9 +83,9 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
 </div>
 
 <table class="sickbeardTable">
-    
+
 #for $epResult in $sqlResults:
-   
+
     #if int($epResult["season"]) != $curSeason:
   <tr class="seasonheader" id="season-$epResult["season"]">
     <td colspan=8>
@@ -96,7 +96,7 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
   </tr>
   <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
         #set $curSeason = int($epResult["season"])
-    #end if    
+    #end if
 
   #set $epStr = str($epResult["season"]) + "x" + str($epResult["episode"])
   #set $epLoc = $epResult["location"]
@@ -126,14 +126,14 @@ $epLoc
     </td>
     <td>$statusStrings[int($epResult["status"])]</td>
     <td align="center">
-    #if int($epResult["season"]) != 0: 
+    #if int($epResult["season"]) != 0:
     <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a>
     #end if
     </td>
    <tr>
-   
-#end for            
+
+#end for
 </table><br /><br />
-            
+
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

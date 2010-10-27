@@ -23,7 +23,7 @@
         return
       } else
         \$('#customQuality').hide();
-  
+
       \$('#anyQualities option').each(function(i) {
           var result = preset & \$(this).val()
           if (result > 0) \$(this).attr('selected', 'selected');
@@ -38,7 +38,7 @@
 
       return
   }
-  
+
   \$('#qualityPreset').change(function(){
         \$(this).setFromPresets(\$('#qualityPreset :selected').val());
   });

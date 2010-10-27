@@ -39,7 +39,7 @@ def get_authorization():
 
         sickbeard.TWITTER_USERNAME = request_token['oauth_token']
         sickbeard.TWITTER_PASSWORD = request_token['oauth_token_secret']
-    
+
         return AUTHORIZATION_URL+"?oauth_token="+ request_token['oauth_token']
 
 def get_credentials(key):

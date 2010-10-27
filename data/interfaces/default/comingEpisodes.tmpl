@@ -31,7 +31,7 @@
 				#set $curDay = datetime.date(datetime.MAXYEAR, 1, 1)
 		<br /><h1 class="day">More than one week</h1>
 			#end if
-			
+
 			#if $curEp.airdate == datetime.date.today()
 				#set $showDiv = "listing_current"
 			#elif $curEp.airdate < datetime.date.today()
@@ -67,7 +67,7 @@
 $qualityPresetStrings[$curEp.show.quality]
 #else:
 Custom
-#end if 
+#end if
 </span><br />
           </p>
         </div>

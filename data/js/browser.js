@@ -67,7 +67,7 @@
 					fileBrowserDialog.dialog("close");
 				}
 			});
-			
+
 			initialDir = options.field.val() || (options.key && $.cookie('fileBrowser-' + options.key)) || '';
 			browse(initialDir, options.url)
 			fileBrowserDialog.dialog('open');
