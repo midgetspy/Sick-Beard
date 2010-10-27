@@ -267,7 +267,8 @@ sceneExceptions = {72546: ['CSI'],
                    77526: ['Star Trek: TOS'],
                    72194: ['The Ellen Degeneres Show', 'Ellen Degeneres'],
                    72073: ['Star Trek DS9'],
-                   195831: ['Zane Lamprey\'s Drinking Made Easy']
+                   195831: ['Zane Lamprey\'s Drinking Made Easy'],
+                   76133: ['Poirot', 'Agatha Christie\'s Poirot'],
                    }
 
 countryList = {'Australia': 'AU',
