@@ -27,10 +27,6 @@ from sickbeard import logger
 from sickbeard import ui
 from sickbeard.common import *
 
-def get_cycle_time():
-    cycletime = sickbeard.SEARCH_FREQUENCY*2+7
-    return min([cycletime, 60])
-
 class BacklogSearchScheduler(scheduler.Scheduler):
 
     def forceSearch(self):

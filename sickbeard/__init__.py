@@ -251,6 +251,11 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     return my_val
 
 
+def get_backlog_cycle_time():
+    cycletime = sickbeard.SEARCH_FREQUENCY*2+7
+    return min([cycletime, 60])
+
+
 def initialize(consoleLogging=True):
     
     with INIT_LOCK:
@@ -428,7 +433,7 @@ def initialize(consoleLogging=True):
                                                      runImmediately=True)
         
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
-                                                                      cycleTime=datetime.timedelta(minutes=searchBacklog.get_cycle_time()),
+                                                                      cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
                                                                       runImmediately=False)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
