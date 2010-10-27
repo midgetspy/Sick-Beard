@@ -333,7 +333,7 @@ class SourceUpdateManager(GitUpdateManager):
         if not self._cur_commit_hash:
             logger.log("Unknown current version, don't know if we should update or not", logger.DEBUG)
         
-            new_str = "Unknown version: If you've never updated then Sick Beard doesn't know what version it has."
+            new_str = "Unknown version: If you've never used the Sick Beard upgrade system then I don't know what version you have."
             new_str += " <a href=\""+self.get_update_url()+"\">Update Now</a>"
             
             sickbeard.NEWEST_VERSION_STRING = new_str
@@ -378,7 +378,7 @@ class SourceUpdateManager(GitUpdateManager):
         os.remove(tar_download_path)
         
         # find update dir name
-        update_dir_contents = os.listdir(sb_update_dir)
+        update_dir_contents = filter(os.path.isdir, os.listdir(sb_update_dir))
         if len(update_dir_contents) != 1:
             logger.log("Invalid update data, update failed.", logger.ERROR)
             return False
