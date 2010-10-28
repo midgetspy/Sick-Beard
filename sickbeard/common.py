@@ -115,7 +115,7 @@ class Quality:
             if x == Quality.UNKNOWN:
                 continue
 
-            regex = Quality.qualityStrings[x].replace(' ','\W?')
+            regex = Quality.qualityStrings[x]
             regex_match = re.match(regex, name, re.I)
             if regex_match:
                 return x
@@ -266,7 +266,9 @@ sceneExceptions = {72546: ['CSI'],
                    168161: ['Law & Order: Los Angeles', 'Law & Order: LA'],
                    77526: ['Star Trek: TOS'],
                    72194: ['The Ellen Degeneres Show', 'Ellen Degeneres'],
-                   72073: ['Star Trek DS9']
+                   72073: ['Star Trek DS9'],
+                   195831: ['Zane Lamprey\'s Drinking Made Easy'],
+                   76133: ['Poirot', 'Agatha Christie\'s Poirot'],
                    }
 
 countryList = {'Australia': 'AU',

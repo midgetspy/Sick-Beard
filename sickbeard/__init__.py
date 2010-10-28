@@ -23,7 +23,7 @@ import webbrowser
 import sqlite3
 import datetime
 import socket
-import os
+import os, sys, subprocess
 
 from threading import Lock
 
@@ -46,6 +46,7 @@ CFG = None
 PROG_DIR = None
 MY_FULLNAME = None
 MY_NAME = None
+MY_ARGS = []
 
 backlogSearchScheduler = None
 currentSearchScheduler = None
@@ -252,6 +253,11 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     return my_val
 
 
+def get_backlog_cycle_time():
+    cycletime = sickbeard.SEARCH_FREQUENCY*2+7
+    return min([cycletime, 60])
+
+
 def initialize(consoleLogging=True):
     
     with INIT_LOCK:
@@ -430,7 +436,7 @@ def initialize(consoleLogging=True):
                                                      runImmediately=True)
         
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
-                                                                      cycleTime=datetime.timedelta(minutes=67),
+                                                                      cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
                                                                       runImmediately=False)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
@@ -572,7 +578,6 @@ def halt ():
 
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
-        #logging.warning('[%s] Signal %s caught, saving and exiting...', __NAME__, signum)
         logger.log("Signal %i caught, saving and exiting..." % int(signum))
         cherrypy.engine.exit()
         saveAndShutdown()
@@ -592,13 +597,50 @@ def saveAll():
     save_config()
     
 
-def saveAndShutdown():
+def saveAndShutdown(restart=False):
 
+    logger.log("Killing cherrypy")
+    cherrypy.engine.exit()
+            
     halt()
 
     saveAll()
+
+    if restart:
+        install_type = sickbeard.versionCheckScheduler.action.install_type
+
+        popen_list = []
+        
+        if install_type in ('git', 'source'):
+            popen_list = [sys.executable, sickbeard.MY_FULLNAME]
+        elif install_type == 'win':
+            if hasattr(sys, 'frozen'):
+                # c:\dir\to\updater.exe 12345 c:\dir\to\sickbeard.exe
+                popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(os.getpid()), sys.executable]
+            else:
+                logger.log("Unknown SB launch method, please file a bug report about this", logger.ERROR)
+                popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(os.getpid()), sys.executable, sickbeard.MY_FULLNAME ]
+
+        if popen_list:
+            popen_list += sickbeard.MY_ARGS
+            logger.log("Restarting Sick Beard with " + str(popen_list))
+            subprocess.Popen(popen_list, cwd=os.getcwd())
     
     os._exit(0)
+
+
+def restart(soft=True):
+    
+    if soft:
+        halt()
+        saveAll()
+        #logger.log("Restarting cherrypy")
+        #cherrypy.engine.restart()
+        logger.log("Re-initializing all data")
+        initialize()
+    
+    else:
+        saveAndShutdown(restart=True)
 
 
 
@@ -680,16 +722,6 @@ def save_config():
     CFG.write()
 
 
-def restart():
-    
-    halt()
-
-    saveAll()
-    
-    INIT_OK = initialize()
-    if INIT_OK:
-        start()
-    
 def launchBrowser():
     browserURL = 'http://localhost:%d%s' % (WEB_PORT, WEB_ROOT)
     try:
