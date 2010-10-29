@@ -116,7 +116,7 @@ class Quality:
                 continue
 
             regex = Quality.qualityStrings[x].replace(' ','\W')
-            regex_match = re.match(regex, name, re.I)
+            regex_match = re.search(regex, name, re.I)
             if regex_match:
                 return x
         
