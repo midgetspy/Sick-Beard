@@ -269,6 +269,7 @@ sceneExceptions = {72546: ['CSI'],
                    72073: ['Star Trek DS9'],
                    195831: ['Zane Lamprey\'s Drinking Made Easy'],
                    76133: ['Poirot', 'Agatha Christie\'s Poirot'],
+                   70780: ['The Real World Road Rules Challenge', 'The Challenge Cutthroat'],
                    }
 
 countryList = {'Australia': 'AU',
