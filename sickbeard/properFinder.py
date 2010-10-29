@@ -99,7 +99,7 @@ class ProperFinder():
                 myParser = FileParser(curProper.name)
                 epInfo = myParser.parse()
             except tvnamer_exceptions.InvalidFilename:
-                logger.log("Unable to parse the filename "+curProper.name+" into a valid episode", logger.ERROR)
+                logger.log("Unable to parse the filename "+curProper.name+" into a valid episode", logger.DEBUG)
                 continue
     
             if not epInfo.episodenumbers:
