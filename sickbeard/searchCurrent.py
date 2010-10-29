@@ -41,6 +41,10 @@ class CurrentSearcher():
         # pause the backlog to prevent race conditions downloading 2 episodes
         logger.log("Pausing backlog so it doesn't collide with episode search", logger.DEBUG)
         sickbeard.backlogSearchScheduler.action.amPaused = True
+        while not sickbeard.backlogSearchScheduler.action.amWaiting:
+            time.sleep(1)
+        
+        logger.log("Backlog has stopped, running search now", logger.DEBUG)
 
         self._changeMissingEpisodes()
 

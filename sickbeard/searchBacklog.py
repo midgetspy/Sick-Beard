@@ -48,6 +48,7 @@ class BacklogSearcher:
         self.lock = threading.Lock()
         self.amActive = False
         self.amPaused = False
+        self.amWaiting = False
         
         self._resetPI()
         
@@ -60,6 +61,12 @@ class BacklogSearcher:
             return ui.ProgressIndicator(self.percentDone, self.currentSearchInfo)
         else:
             return None
+
+    def wait_paused(self):
+        while self.amPaused:
+            self.amWaiting = True
+            time.sleep(1)
+        self.amWaiting = False
 
     def searchBacklog(self):
 
@@ -101,8 +108,7 @@ class BacklogSearcher:
                 curSeason = int(curSeasonResult["season"])
 
                 # support pause
-                while self.amPaused:
-                    time.sleep(1)
+                self.wait_paused()
 
                 logger.log("Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
                 self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
@@ -133,10 +139,6 @@ class BacklogSearcher:
                 results = search.findSeason(curShow, curSeason)
                 
                 for curResult in results:
-
-                    # support pause
-                    while self.amPaused:
-                        time.sleep(1)
 
                     search.snatchEpisode(curResult)
                     time.sleep(5)
