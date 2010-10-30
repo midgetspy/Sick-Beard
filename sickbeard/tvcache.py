@@ -154,7 +154,7 @@ class TVCache():
     def shouldUpdate(self):
         # if we've updated recently then skip the update
         if datetime.datetime.today() - self.lastUpdate < datetime.timedelta(minutes=self.minTime):
-            logger.log("Last update was too soon, using old cache", logger.DEBUG)
+            logger.log("Last update was too soon, using old cache: today()-"+str(self.lastUpdate)+"<"+str(datetime.timedelta(minutes=self.minTime)), logger.DEBUG)
             return False
     
         return True
@@ -249,7 +249,8 @@ class TVCache():
         # get the current timestamp
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
         
-        quality = Quality.nameQuality(name)
+        if not quality:
+            quality = Quality.nameQuality(name)
         
         myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
                     [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
@@ -287,8 +288,8 @@ class TVCache():
         # for each cache entry
         for curResult in sqlResults:
 
-            # skip non-tv crap
-            if not sceneHelpers.filterBadReleases(curResult["name"]):
+            # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
+            if self.providerID != 'newzbin' and not sceneHelpers.filterBadReleases(curResult["name"]):
                 continue
 
             # get the show object, or if it's not one of our shows then ignore it

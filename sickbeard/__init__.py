@@ -29,7 +29,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers 
-from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble
+from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, queue, scheduler
@@ -147,6 +147,10 @@ NZBSRUS_HASH = None
 NZBMATRIX = False
 NZBMATRIX_USERNAME = None
 NZBMATRIX_APIKEY = None
+
+NEWZBIN = False
+NEWZBIN_USERNAME = None
+NEWZBIN_PASSWORD = None
 
 SAB_USERNAME = None
 SAB_PASSWORD = None
@@ -272,7 +276,7 @@ def initialize(consoleLogging=True):
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, \
-		USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
+                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, \
@@ -280,7 +284,8 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX
+                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD
 
         
         if __INITIALIZED__:
@@ -390,6 +395,10 @@ def initialize(consoleLogging=True):
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
         NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
+        
+        NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
+        NEWZBIN_USERNAME = check_setting_str(CFG, 'Newzbin', 'newzbin_username', '')
+        NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
         
         BINREQ = bool(check_setting_int(CFG, 'Bin-Req', 'binreq', 1))
 
@@ -695,6 +704,9 @@ def save_config():
     CFG['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
     CFG['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
     CFG['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
+    CFG['Newzbin']['newzbin'] = int(NEWZBIN)
+    CFG['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
+    CFG['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
     CFG['Bin-Req']['binreq'] = int(BINREQ)
     CFG['Womble']['womble'] = int(WOMBLE)
     CFG['SABnzbd']['sab_username'] = SAB_USERNAME
