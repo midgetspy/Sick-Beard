@@ -68,7 +68,13 @@ class BacklogSearcher:
             time.sleep(1)
         self.amWaiting = False
 
+    def am_running(self):
+        return not self.amWaiting and self.amActive
+
     def searchBacklog(self):
+
+        # support pause
+        self.wait_paused()
 
         if self.amActive == True:
             logger.log("Backlog is still running, not starting it again", logger.DEBUG)
