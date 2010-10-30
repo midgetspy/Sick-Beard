@@ -246,10 +246,11 @@ class NZBMatrixCache(tvcache.TVCache):
 	
 	def __init__(self, provider):
 
+		tvcache.TVCache.__init__(self, provider)
+
 		# only poll NZBMatrix every 25 minutes max
 		self.minTime = 25
 		
-		tvcache.TVCache.__init__(self, provider)
 	
 	def _getRSSData(self):
 		# get all records since the last timestamp

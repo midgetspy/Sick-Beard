@@ -62,11 +62,11 @@ class TVBinzCache(tvcache.TVCache):
 	
 	def __init__(self, provider):
 
+		tvcache.TVCache.__init__(self, provider)
+	
 		# only poll TVBinz every 10 minutes max
 		self.minTime = 10
 		
-		tvcache.TVCache.__init__(self, provider)
-	
 	def _getRSSData(self):
 		# get all records since the last timestamp
 		url = self.provider.url + "rss.php?"
