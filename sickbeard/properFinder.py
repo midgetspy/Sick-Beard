@@ -176,8 +176,8 @@ class ProperFinder():
             # make sure the episode has been downloaded before
             myDB = db.DBConnection() 
             historyResults = myDB.select(
-                "SELECT resource FROM history"
-                "WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND date >= ?"
+                "SELECT resource FROM history "
+                "WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND date >= ? "
                 "AND action IN (" + ",".join([str(x) for x in Quality.SNATCHED]) + ")",
                         [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, historyLimit.strftime(history.dateFormat)])
              
