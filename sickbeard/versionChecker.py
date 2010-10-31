@@ -190,7 +190,7 @@ class GitUpdateManager(UpdateManager):
             return None
 
         if 'git: not found' in output:
-            logger.log("Unable to find git, can't tell what version you're running. Maybe specify the path to get in your config.ini?")
+            logger.log("Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
             return None
         
         commit_regex = '^commit ([a-f0-9]+)$'
