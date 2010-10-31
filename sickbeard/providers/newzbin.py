@@ -304,7 +304,7 @@ class NewzbinProvider(generic.NZBProvider):
         nameList = set(sceneHelpers.allPossibleShowNames(show))
         
         searchTerms = ['^"'+x+' - '+str(season)+'x"' for x in nameList]
-        searchTerms += ['^"'+x+' - Season '+str(season)+'"' for x in nameList]
+        #searchTerms += ['^"'+x+' - Season '+str(season)+'"' for x in nameList]
         searchStr = " OR ".join(searchTerms)
         
         logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
