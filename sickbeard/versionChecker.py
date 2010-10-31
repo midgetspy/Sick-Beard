@@ -175,12 +175,21 @@ class GitUpdateManager(UpdateManager):
         """ 
     
         output = None
+
+        if sickbeard.GIT_PATH:
+            git = sickbeard.GIT_PATH
+        else:
+            git = 'git'
         
         try:
-            p = subprocess.Popen('git show', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
+            p = subprocess.Popen(git+' show', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
             output, err = p.communicate()
         except OSError, e:
             logger.log("Unable to find git, can't tell what version you're running")
+            return None
+
+        if 'git: not found' in output:
+            logger.log("Unable to find git, can't tell what version you're running. Maybe specify the path to get in your config.ini?")
             return None
         
         commit_regex = '^commit ([a-f0-9]+)$'
@@ -267,8 +276,13 @@ class GitUpdateManager(UpdateManager):
     
         output = None
         
+        if sickbeard.GIT_PATH:
+            git = sickbeard.GIT_PATH
+        else:
+            git = 'git'
+        
         try:
-            popen_str = 'git pull origin '+sickbeard.version.SICKBEARD_VERSION
+            popen_str = git+' pull origin '+sickbeard.version.SICKBEARD_VERSION
             logger.log("Executing command: "+popen_str, logger.DEBUG)
             p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
             output, err = p.communicate()
