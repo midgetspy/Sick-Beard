@@ -110,6 +110,8 @@ class NewzbinProvider(generic.NZBProvider):
         else:
             quality = Quality.UNKNOWN
 
+        logger.log("Resulting quality: "+str(quality), logger.DEBUG)
+
         return quality
         
     def _is_SDTV(self, attrs):
@@ -300,7 +302,10 @@ class NewzbinProvider(generic.NZBProvider):
         results = {}
     
         nameList = set(sceneHelpers.allPossibleShowNames(show))
-        searchStr = " OR ".join(['^"'+x+' - '+str(season)+'x"' for x in nameList])
+        
+        searchTerms = ['^"'+x+' - '+str(season)+'x"' for x in nameList]
+        searchTerms += ['^"'+x+' - Season '+str(season)+'"' for x in nameList]
+        searchStr = " OR ".join(searchTerms)
         
         logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
 

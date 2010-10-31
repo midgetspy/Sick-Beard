@@ -167,6 +167,7 @@ def pickBestResult(results):
 	# find the best result for the current episode
 	bestResult = None
 	for curResult in results:
+		logger.log("Quality of "+curResult.name+" is "+str(curResult.quality))
 		if not bestResult or bestResult.quality < curResult.quality and curResult.quality != Quality.UNKNOWN:
 			bestResult = curResult
 		elif bestResult.quality == curResult.quality:
@@ -272,6 +273,7 @@ def findSeason(show, season):
 		
 		# get the quality of the season nzb
 		seasonQual = Quality.nameQuality(bestSeasonNZB.name)
+		seasonQual = bestSeasonNZB.quality
 		logger.log("The quality of the season NZB is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
 		
 		myDB = db.DBConnection()
