@@ -913,8 +913,8 @@ class TVShow(object):
             if epStatus in (WANTED, UNAIRED, SKIPPED):
                 logger.log("Ep is wanted/unaired/skipped, definitely get it", logger.DEBUG)
                 return True
-            elif epStatus in (IGNORED, ARCHIVED) and manualSearch:
-                logger.log("Ep is ignored/archived and you manually searched so overriding the default and allowing the quality", logger.DEBUG)
+            elif manualSearch:
+                logger.log("Usually I would ignore this ep but because you forced the search I'm overriding the default and allowing the quality", logger.DEBUG)
                 return True
         
         curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
