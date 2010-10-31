@@ -27,7 +27,7 @@ import sickbeard
 import generic
 
 import sickbeard.encodingKludge as ek
-from sickbeard import classes, logger, helpers, exceptions
+from sickbeard import classes, logger, helpers, exceptions, sceneHelpers
 from sickbeard import tvcache
 from sickbeard.common import *
 
@@ -74,8 +74,43 @@ class NewzbinProvider(generic.NZBProvider):
         
         self.url = 'http://www.newzbin.com/'
         
+        self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
+
+    def _report(self, name):
+        return '{'+self.NEWZBIN_NS+'}'+name
+    
     def isEnabled(self):
         return True
+
+    def getQuality(self, item):
+        attributes = item.find(self._report('attributes'))
+        attr_dict = {}
+
+        for attribute in attributes.getiterator(self._report('attribute')):
+            cur_attr = attribute.attrib['type']
+            if cur_attr not in attr_dict:
+                attr_dict[cur_attr] = [attribute.text]
+            else:
+                attr_dict[cur_attr].append(attribute.text)
+
+        logger.log("Finding quality of item based on attributes "+str(attr_dict), logger.DEBUG)
+        
+        if self._is_SDTV(attr_dict):
+            quality = Quality.SDTV
+        elif self._is_SDDVD(attr_dict):
+            quality = Quality.SDDVD
+        elif self._is_HDTV(attr_dict):
+            quality = Quality.HDTV
+        elif self._is_WEBDL(attr_dict):
+            quality = Quality.HDWEBDL
+        elif self._is_720pBluRay(attr_dict):
+            quality = Quality.HDBLURAY
+        elif self._is_1080pBluRay(attr_dict):
+            quality = Quality.FULLHDBLURAY
+        else:
+            quality = Quality.UNKNOWN
+
+        return quality
         
     def _is_SDTV(self, attrs):
     
@@ -192,7 +227,7 @@ class NewzbinProvider(generic.NZBProvider):
 
         myOpener = classes.AuthURLOpener(sickbeard.NEWZBIN_USERNAME, sickbeard.NEWZBIN_PASSWORD)
         try:
-            f = myOpener.openit(searchStr)
+            f = myOpener.openit(url)
         except (urllib.ContentTooShortError, IOError), e:
             logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
             return None
@@ -200,30 +235,147 @@ class NewzbinProvider(generic.NZBProvider):
         data = f.read()
         f.close()
         
-        logger.log("newzbin data: "+str(data), logger.DEBUG)
-
         return data
 
-class NewzbinCache(tvcache.TVCache):
+    def findEpisode (self, episode, manualSearch=False):
     
-    def __init__(self, provider):
-
-        tvcache.TVCache.__init__(self, provider)
-    
-        # only poll Newzbin every 10 mins max
-        self.minTime = 1
+        nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
         
-        self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
-
-    def _report(self, name):
-        return '{'+self.NEWZBIN_NS+'}'+name
-    
-    def _getRSSData(self):
+        # if we got some results then use them no matter what.
+        # OR
+        # return anyway unless we're doing a manual search
+        if nzbResults or not manualSearch:
+            return nzbResults
         
-        f = open('nbrss.txt', 'r')
-        data = f.read()
-        f.close()
-        return data
+        nameList = set(sceneHelpers.allPossibleShowNames(episode.show))
+        searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(episode.season, episode.episode) for x in nameList])
+        
+        logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
+
+        data = self._getRSSData(searchStr)
+        
+        results = []
+    
+        try:
+            responseSoup = etree.ElementTree(etree.XML(data))
+            items = responseSoup.getiterator('item')
+        except Exception, e:
+            logger.log("Error trying to load Newzbin RSS feed: "+str(e), logger.ERROR)
+            return results
+
+        for item in items:
+            
+            title = item.findtext('title')
+            url = item.findtext('link').replace('&amp;','&')
+            
+            # parse the file name
+            try:
+                myParser = FileParser(title)
+                epInfo = myParser.parse()
+            except tvnamer_exceptions.InvalidFilename:
+                logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
+                continue
+            
+            quality = self.getQuality(item)
+
+            season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
+            
+            if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
+                logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+                continue
+            
+            logger.log("Found result " + title + " at " + url, logger.DEBUG)
+            
+            result = self.getResult([episode])
+            result.url = url
+            result.name = title
+            result.quality = quality
+            
+            results.append(result)
+            
+        return results
+
+    def findSeasonResults(self, show, season):
+        
+        results = {}
+    
+        nameList = set(sceneHelpers.allPossibleShowNames(show))
+        searchStr = " OR ".join(['^"'+x+' - '+str(season)+'x"' for x in nameList])
+        
+        logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
+
+        data = self._getRSSData(searchStr)
+
+        try:
+            responseSoup = etree.ElementTree(etree.XML(data))
+            items = responseSoup.getiterator('item')
+        except Exception, e:
+            logger.log("Error trying to load Newzbin RSS feed: "+str(e), logger.ERROR)
+            return results
+
+        for item in items:
+    
+            title = item.findtext('title')
+            url = item.findtext('link')
+            
+            quality = self.getQuality(item)
+            
+            # parse the file name
+            try:
+                myParser = FileParser(title)
+                epInfo = myParser.parse()
+            except tvnamer_exceptions.InvalidFilename:
+                logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
+                continue
+            
+            
+            if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
+                logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+                continue
+    
+            # make sure we want the episode
+            wantEp = True
+            for epNo in epInfo.episodenumbers:
+                if not show.wantEpisode(season, epNo, quality):
+                    logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+                    wantEp = False
+                    break
+            if not wantEp:
+                continue
+            
+            logger.log("Found result " + title + " at " + url, logger.DEBUG)
+            
+            # make a result object
+            epObj = []
+            for curEp in epInfo.episodenumbers:
+                epObj.append(show.getEpisode(season, curEp))
+            
+            result = self.getResult(epObj)
+            result.url = url
+            result.name = title
+            result.quality = quality
+        
+            if len(epObj) == 1:
+                epNum = epObj[0].episode
+            elif len(epObj) > 1:
+                epNum = MULTI_EP_RESULT
+                logger.log("Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
+            elif len(epObj) == 0:
+                epNum = SEASON_RESULT
+                result.extraInfo = [show]
+                logger.log("Separating full season result to check for later", logger.DEBUG)
+        
+            if epNum in results:
+                results[epNum].append(result)
+            else:
+                results[epNum] = [result]
+
+        logger.log("backlog results: "+str(results), logger.DEBUG)
+            
+        return results
+
+
+    def _getRSSData(self, search=None):
 
         params = {
                 'searchaction': 'Search',
@@ -243,14 +395,30 @@ class NewzbinCache(tvcache.TVCache):
                 'feed': 'rss',
                 'hauth': 1,
         }
+
+        if search:
+            params['q'] = search
         
         url = "http://www.newzbin.com/search/?%s" % urllib.urlencode(params)
-        logger.log("Newzbin update URL: " + url, logger.DEBUG)
+        logger.log("Newzbin search URL: " + url, logger.DEBUG)
 
-        data = self.provider.getURL(url)
+        data = self.getURL(url)
         
-        logger.log("newzbin data: "+str(data), logger.DEBUG)
+        return data
 
+class NewzbinCache(tvcache.TVCache):
+    
+    def __init__(self, provider):
+
+        tvcache.TVCache.__init__(self, provider)
+    
+        # only poll Newzbin every 10 mins max
+        self.minTime = 10
+        
+    def _getRSSData(self):
+        
+        data = self.provider._getRSSData()
+        
         return data
 
     def _parseItem(self, item):
@@ -266,33 +434,8 @@ class NewzbinCache(tvcache.TVCache):
             logger.log("The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
             return
 
-        attributes = item.find(self._report('attributes'))
-        attr_dict = {}
-        
-        for attribute in attributes.getiterator(self._report('attribute')):
-            cur_attr = attribute.attrib['type']
-            if cur_attr not in attr_dict:
-                attr_dict[cur_attr] = [attribute.text]
-            else:
-                attr_dict[cur_attr].append(attribute.text)
+        quality = self.provider.getQuality(item)
 
-        logger.log("Finding quality of item based on attributes "+str(attr_dict), logger.DEBUG)
-
-        if self.provider._is_SDTV(attr_dict):
-            quality = Quality.SDTV
-        elif self.provider._is_SDDVD(attr_dict):
-            quality = Quality.SDDVD
-        elif self.provider._is_HDTV(attr_dict):
-            quality = Quality.HDTV
-        elif self.provider._is_WEBDL(attr_dict):
-            quality = Quality.HDWEBDL
-        elif self.provider._is_720pBluRay(attr_dict):
-            quality = Quality.HDBLURAY
-        elif self.provider._is_1080pBluRay(attr_dict):
-            quality = Quality.FULLHDBLURAY
-        else:
-            quality = Quality.UNKNOWN
-        
         logger.log("Found quality "+str(quality), logger.DEBUG)
         
         logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)            
