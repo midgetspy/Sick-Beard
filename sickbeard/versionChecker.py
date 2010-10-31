@@ -182,6 +182,7 @@ class GitUpdateManager(UpdateManager):
             git = 'git'
         
         try:
+            logger.log("Executing "+git+" show with your shell in "+os.getcwd(), logger.DEBUG)
             p = subprocess.Popen(git+' show', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
             output, err = p.communicate()
         except OSError, e:
@@ -283,7 +284,7 @@ class GitUpdateManager(UpdateManager):
         
         try:
             popen_str = git+' pull origin '+sickbeard.version.SICKBEARD_VERSION
-            logger.log("Executing command: "+popen_str, logger.DEBUG)
+            logger.log("Executing command: "+popen_str+" with your shell in "+os.getcwd(), logger.DEBUG)
             p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=os.getcwd())
             output, err = p.communicate()
         except OSError, e:
