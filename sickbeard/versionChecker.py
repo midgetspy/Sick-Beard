@@ -193,6 +193,10 @@ class GitUpdateManager(UpdateManager):
             if match:
                 self._cur_commit_hash = match.group(1)
                 break
+
+        if not self._cur_commit_hash:
+            logger.log("The commit output wasn't the format we expected, couldn't figure out what version this is", logger.ERROR)
+            logger.log("Git output: "+str(output), logger.DEBUG)
     
 
     def _check_github_for_update(self):
