@@ -243,3 +243,12 @@ class AddAirByDateOption(UpgradeHistoryForGenericProviders):
 	def execute(self):
 		self.connection.action("ALTER TABLE tv_shows ADD air_by_date NUMERIC")
 		self.incDBVersion()
+		
+class AddAbsoluteNumberingOption(AddAirByDateOption):
+	def test(self):
+		return self.checkDBVersion() >= 5
+	
+	def execute(self):
+		self.connection.action("ALTER TABLE tv_shows ADD abs_numbering NUMERIC")
+		self.incDBVersion()
+		
