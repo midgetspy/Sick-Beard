@@ -96,7 +96,7 @@ def parseproxyuri(proxyurl):
 
         (protocol, addr, port) = parseproxyuri(uri)
     """
-    groups = PROXY_REGEX.match(uri).groups()
+    groups = PROXY_REGEX.match(proxyurl).groups()
     return (groups[1], groups[3], groups[4])
 
 def setdefaultproxy(proxytype=None, addr=None, port=None, rdns=True, username=None, password=None):
