@@ -63,42 +63,67 @@ class NZBMatrixProvider(generic.NZBProvider):
 		
 		results = []
 	
-		# search for all show names and episode numbers like ("a","b","c") in a single search
-		nzbMatrixSearchString = '("' + '","'.join(sceneSearchStrings) + '")'
-		itemList = self._doSearch(nzbMatrixSearchString)
-	
-		for item in itemList:
+		if episode.show.absolute_numbering != 1:
 			
-			title = item.findtext('title')
-			url = item.findtext('link').replace('&amp;','&')
+			# search for all show names and episode numbers like ("a","b","c") in a single search
+			nzbMatrixSearchString = '("' + '","'.join(sceneSearchStrings) + '")'
+			itemList = self._doSearch(nzbMatrixSearchString)
 			
-			# parse the file name
-			try:
-				myParser = FileParser(title)
-				epInfo = myParser.parse()
-			except tvnamer_exceptions.InvalidFilename:
-				logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
-				continue
-			
-			quality = Quality.nameQuality(title)
+			for item in itemList:
 
-			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
+				# Parse the result and add it to the result list				
+				result = self.parseSearchResultItem(episode, manualSearch, item)
+				if result != None:
+					results.append(result)
+		
+		else:
 			
-			if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
-				logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-				continue
+			# search for terms in multiple searches because the search API does not seem to handle lone numbers properly
+			for searchString in sceneSearchStrings:
 			
-			logger.log("Found result " + title + " at " + url, logger.DEBUG)
+				# don't filter for English only results as this was probably be used mostly for Anime
+				itemList = self._doSearch(searchString, False, False)
 			
-			result = self.getResult([episode])
-			result.url = url
-			result.name = title
-			result.quality = quality
-			
-			results.append(result)
+				for item in itemList:
+	
+					# Parse the result and add it to the result list				
+					result = self.parseSearchResultItem(episode, manualSearch, item, True)
+					if result != None:
+						results.append(result)
 			
 		return results
 	
+	def parseSearchResultItem(self, episode, manualSearch, item, absolute_numbering=False):
+		title = item.findtext('title')
+		url = item.findtext('link').replace('&amp;','&')
+		
+		# parse the file name
+		try:
+			myParser = FileParser(title)
+			epInfo = myParser.parse()
+		except tvnamer_exceptions.InvalidFilename:
+			logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
+			return None
+		
+		quality = Quality.nameQuality(title)
+
+		if absolute_numbering:
+			season = -1
+		else:
+			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
+		
+		if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
+			logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+			return None
+		
+		logger.log("Found result " + title + " at " + url, logger.DEBUG)
+		
+		result = self.getResult([episode])
+		result.url = url
+		result.name = title
+		result.quality = quality
+		
+		return result
 	
 	def findSeasonResults(self, show, season):
 		
@@ -168,7 +193,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 		return results
 	
 	
-	def _doSearch(self, curString, quotes=False):
+	def _doSearch(self, curString, quotes=False, english=True):
 	
 		term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
 		if quotes:
@@ -179,8 +204,10 @@ class NZBMatrixProvider(generic.NZBProvider):
 				  "page": "download",
 				  "username": sickbeard.NZBMATRIX_USERNAME,
 				  "apikey": sickbeard.NZBMATRIX_APIKEY,
-				  "subcat": "6,41",
-				  "english": 1}
+				  "subcat": "6,41,28"}
+		
+		if english:
+			params["english"] = 1
 		
 		searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 	
