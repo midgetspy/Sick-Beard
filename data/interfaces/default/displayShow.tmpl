@@ -54,6 +54,8 @@ Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=
 #if ($show.genre and "Talk Show" not in $show.genre) or not $show.genre:
 Force air-by-date: <img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 #end if
+
+Absolute Numbering: <img src="$sbRoot/images/#if int($show.absolute_numbering) == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 <br />
 Change selected episodes to 
 <select id="statusSelect">
@@ -108,7 +110,11 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
     </td>
   	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
   	<td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+    #if int($show.absolute_numbering) == 1:
+    <td align="center">$epResult["absolute_episode"]</td>
+    #else
     <td align="center">$epResult["episode"]</td>
+    #end if
     <td>
         $epResult["name"]
         #if $epResult["description"] != "" and $epResult["description"] != None:

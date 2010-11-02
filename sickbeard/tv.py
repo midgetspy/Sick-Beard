@@ -65,6 +65,7 @@ class TVShow(object):
         self.startyear = 0
         self.paused = 0
         self.air_by_date = 0
+        self.absolute_numbering = 0
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -587,6 +588,10 @@ class TVShow(object):
             self.air_by_date = sqlResults[0]["air_by_date"]
             if self.air_by_date == None:
                 self.air_by_date = 0
+                
+            self.absolute_numbering = sqlResults[0]["absolute_numbering"]
+            if self.absolute_numbering == None:
+                self.absolute_numbering = 0
 
             self.quality = int(sqlResults[0]["quality"])
             self.seasonfolders = int(sqlResults[0]["seasonfolders"])
@@ -857,7 +862,8 @@ class TVShow(object):
                         "paused": self.paused,
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
-                        "tvr_name": self.tvrname
+                        "tvr_name": self.tvrname,
+                        "absolute_numbering": self.absolute_numbering
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
@@ -966,6 +972,7 @@ class TVEpisode:
         self.name = ""
         self.season = season
         self.episode = episode
+        self.absolute_episode = 0
         self.description = ""
         self.airdate = datetime.date.fromordinal(1)
         self.hasnfo = False
@@ -1049,6 +1056,8 @@ class TVEpisode:
                 self.name = sqlResults[0]["name"] 
             self.season = season
             self.episode = episode
+            if sqlResults[0]["absolute_episode"] != None:
+                self.absolute_episode = int(sqlResults[0]["absolute_episode"])
             self.description = sqlResults[0]["description"]
             if self.description == None:
                 self.description = ""
@@ -1115,6 +1124,7 @@ class TVEpisode:
         self.name = myEp["episodename"]
         self.season = season
         self.episode = episode
+        self.absolute_episode = myEp["absolute_number"]
         self.description = myEp["overview"]
         if self.description == None:
             self.description = ""
@@ -1530,7 +1540,8 @@ class TVEpisode:
                         "hasnfo": self.hasnfo,
                         "hastbn": self.hastbn,
                         "status": self.status,
-                        "location": self.location}
+                        "location": self.location,
+                        "absolute_episode": self.absolute_episode}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}
