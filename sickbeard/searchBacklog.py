@@ -193,4 +193,8 @@ class BacklogSearcher:
         
 
     def run(self):
-        self.searchBacklog()
+        try:
+            self.searchBacklog()
+        except:
+            self.amActive = False
+            raise
