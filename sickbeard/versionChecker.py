@@ -180,10 +180,12 @@ class GitUpdateManager(UpdateManager):
             git = sickbeard.GIT_PATH
         else:
             git = 'git'
+
+        cmd = [git, 'show']
         
         try:
-            logger.log("Executing "+git+" show with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
-            p = subprocess.Popen(git+' show', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
+            logger.log("Executing "+str(cmd)+" show with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
             output, err = p.communicate()
         except OSError, e:
             logger.log("Unable to find git, can't tell what version you're running")
@@ -282,10 +284,12 @@ class GitUpdateManager(UpdateManager):
         else:
             git = 'git'
         
+        cmd = [git, 'pull', 'origin', sickbeard.version.SICKBEARD_VERSION]
+        
         try:
-            popen_str = git+' pull origin '+sickbeard.version.SICKBEARD_VERSION
-            logger.log("Executing command: "+popen_str+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
-            p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
+            
+            logger.log("Executing command: "+str(cmd)+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
             output, err = p.communicate()
         except OSError, e:
             #logger.log("Unable to find git, can't tell what version you're running")
