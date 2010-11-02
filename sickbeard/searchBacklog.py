@@ -69,7 +69,8 @@ class BacklogSearcher:
         self.amWaiting = False
 
     def am_running(self):
-        return not self.amWaiting and self.amActive
+        logger.log("amWaiting: "+str(self.amWaiting)+", amActive: "+str(self.amActive), logger.DEBUG)
+        return (not self.amWaiting) and self.amActive
 
     def searchBacklog(self):
 
