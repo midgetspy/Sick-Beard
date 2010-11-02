@@ -249,6 +249,7 @@ class AddAbsoluteNumberingOption(AddAirByDateOption):
 		return self.checkDBVersion() >= 5
 	
 	def execute(self):
-		self.connection.action("ALTER TABLE tv_shows ADD abs_numbering NUMERIC")
+		self.connection.action("ALTER TABLE tv_shows ADD absolute_numbering NUMERIC")
+		self.connection.action("ALTER TABLE tv_episodes add absolute_episode NUMERIC")
 		self.incDBVersion()
 		
