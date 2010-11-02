@@ -612,6 +612,9 @@ class TVShow(object):
 
         if not cache:
             ltvdb_api_parms['cache'] = 'recache'
+            
+        if sickbeard.HTTP_PROXY != '':
+            ltvdb_api_parms['http_proxy'] = sickbeard.HTTP_PROXY
 
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
         myEp = t[self.tvdbid]
