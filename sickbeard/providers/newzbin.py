@@ -402,7 +402,11 @@ class NewzbinProvider(generic.NZBProvider):
         }
 
         if search:
-            params['q'] = search
+            params['q'] = search + " AND "
+        else:
+            params['q'] = ''
+
+        params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
         
         url = "http://www.newzbin.com/search/?%s" % urllib.urlencode(params)
         logger.log("Newzbin search URL: " + url, logger.DEBUG)
