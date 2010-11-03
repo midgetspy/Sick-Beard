@@ -271,6 +271,7 @@ sceneExceptions = {72546: ['CSI'],
                    76133: ['Poirot', 'Agatha Christie\'s Poirot'],
                    70780: ['The Real World Road Rules Challenge', 'The Challenge Cutthroat'],
                    77444: ['This Old House Program'],
+                   73290: ['60 Minutes (US)'],
                    }
 
 countryList = {'Australia': 'AU',
