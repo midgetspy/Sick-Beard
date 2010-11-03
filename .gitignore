@@ -5,5 +5,9 @@ cache.db
 config.ini
 Logs/*
 sickbeard.db*
+<<<<<<< HEAD
 *.old
 *.out
+=======
+autoProcessTV/autoProcessTV.cfg
+>>>>>>> a97c23b110294eaecc7b3b86f6f10ec0879aa968

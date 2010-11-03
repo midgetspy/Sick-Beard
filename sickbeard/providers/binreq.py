@@ -46,10 +46,10 @@ class BinReqCache(tvcache.TVCache):
 	
 	def __init__(self, provider):
 
+		tvcache.TVCache.__init__(self, provider)
+
 		# only poll Bin-Req every 15 minutes max
 		self.minTime = 15
-		
-		tvcache.TVCache.__init__(self, provider)
 
 	def _getRSSData(self):
 		url = self.provider.url + 'rss.php?'

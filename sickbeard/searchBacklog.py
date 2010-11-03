@@ -48,6 +48,7 @@ class BacklogSearcher:
         self.lock = threading.Lock()
         self.amActive = False
         self.amPaused = False
+        self.amWaiting = False
         
         self._resetPI()
         
@@ -61,7 +62,20 @@ class BacklogSearcher:
         else:
             return None
 
+    def wait_paused(self):
+        while self.amPaused:
+            self.amWaiting = True
+            time.sleep(1)
+        self.amWaiting = False
+
+    def am_running(self):
+        logger.log("amWaiting: "+str(self.amWaiting)+", amActive: "+str(self.amActive), logger.DEBUG)
+        return (not self.amWaiting) and self.amActive
+
     def searchBacklog(self):
+
+        # support pause
+        self.wait_paused()
 
         if self.amActive == True:
             logger.log("Backlog is still running, not starting it again", logger.DEBUG)
@@ -101,8 +115,7 @@ class BacklogSearcher:
                 curSeason = int(curSeasonResult["season"])
 
                 # support pause
-                while self.amPaused:
-                    time.sleep(1)
+                self.wait_paused()
 
                 logger.log("Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
                 self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
@@ -133,10 +146,6 @@ class BacklogSearcher:
                 results = search.findSeason(curShow, curSeason)
                 
                 for curResult in results:
-
-                    # support pause
-                    while self.amPaused:
-                        time.sleep(1)
 
                     search.snatchEpisode(curResult)
                     time.sleep(5)
@@ -184,4 +193,8 @@ class BacklogSearcher:
         
 
     def run(self):
-        self.searchBacklog()
+        try:
+            self.searchBacklog()
+        except:
+            self.amActive = False
+            raise

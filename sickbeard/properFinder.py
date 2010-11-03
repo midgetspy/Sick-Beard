@@ -99,7 +99,7 @@ class ProperFinder():
                 myParser = FileParser(curProper.name)
                 epInfo = myParser.parse()
             except tvnamer_exceptions.InvalidFilename:
-                logger.log("Unable to parse the filename "+curProper.name+" into a valid episode", logger.ERROR)
+                logger.log("Unable to parse the filename "+curProper.name+" into a valid episode", logger.DEBUG)
                 continue
     
             if not epInfo.episodenumbers:
@@ -176,8 +176,8 @@ class ProperFinder():
             # make sure the episode has been downloaded before
             myDB = db.DBConnection() 
             historyResults = myDB.select(
-                "SELECT resource FROM history"
-                "WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND date >= ?"
+                "SELECT resource FROM history "
+                "WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND date >= ? "
                 "AND action IN (" + ",".join([str(x) for x in Quality.SNATCHED]) + ")",
                         [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, historyLimit.strftime(history.dateFormat)])
              

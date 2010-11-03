@@ -33,7 +33,7 @@ import cherrypy.lib
 
 from sickbeard import config
 from sickbeard import history, notifiers, processTV, search, providers
-from sickbeard import tv, metadata
+from sickbeard import tv, metadata, versionChecker
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 
@@ -1023,6 +1023,7 @@ HomeMenu = [
     { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
+    { 'title': 'Restart',                'path': 'home/restart/?pid='+str(os.getpid())      },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
 ]
 
@@ -1324,7 +1325,40 @@ class Home:
     def shutdown(self):
 
         threading.Timer(2, sickbeard.saveAndShutdown).start()
-        return _genericMessage("Shutting down", "Sick Beard is shutting down...")
+
+        title = "Shutting down"
+        message = "Sick Beard is shutting down..."
+        
+        return _genericMessage(title, message)
+
+    @cherrypy.expose
+    def restart(self, pid=None):
+
+        if str(pid) != str(os.getpid()):
+            redirect("/home")
+
+        # do a soft restart
+        threading.Timer(2, sickbeard.restart, [False]).start()
+
+        title = "Restarting"
+        message = "Sick Beard is restarting, refresh in 30 seconds."
+        
+        return _genericMessage(title, message)
+
+    @cherrypy.expose
+    def update(self, pid=None):
+
+        if str(pid) != str(os.getpid()):
+            redirect("/home")
+
+        updated = sickbeard.versionCheckScheduler.action.update()
+
+        if updated:
+            # do a hard restart
+            threading.Timer(2, sickbeard.restart, [False]).start()
+            return _genericMessage("Restarting","Sick Beard is restarting, refresh in 30 seconds.")
+        else:
+            return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
 
     @cherrypy.expose
     def displayShow(self, show=None):

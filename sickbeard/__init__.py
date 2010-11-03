@@ -23,7 +23,7 @@ import webbrowser
 import sqlite3
 import datetime
 import socket
-import os
+import os, sys, subprocess
 
 from threading import Lock
 
@@ -46,6 +46,7 @@ CFG = None
 PROG_DIR = None
 MY_FULLNAME = None
 MY_NAME = None
+MY_ARGS = []
 
 backlogSearchScheduler = None
 currentSearchScheduler = None
@@ -168,8 +169,11 @@ GROWL_PASSWORD = None
 USE_TWITTER = False
 TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
+TWITTER_PREFIX = None  
 
 EXTRA_SCRIPTS = []
+
+GIT_PATH = None
 
 __INITIALIZED__ = False
 
@@ -278,7 +282,8 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD
+                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                GIT_PATH
 
         
         if __INITIALIZED__:
@@ -414,6 +419,9 @@ def initialize(consoleLogging=True):
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
+        TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
+
+        GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
@@ -575,7 +583,6 @@ def halt ():
 
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
-        #logging.warning('[%s] Signal %s caught, saving and exiting...', __NAME__, signum)
         logger.log("Signal %i caught, saving and exiting..." % int(signum))
         cherrypy.engine.exit()
         saveAndShutdown()
@@ -595,13 +602,50 @@ def saveAll():
     save_config()
     
 
-def saveAndShutdown():
+def saveAndShutdown(restart=False):
 
+    logger.log("Killing cherrypy")
+    cherrypy.engine.exit()
+            
     halt()
 
     saveAll()
+
+    if restart:
+        install_type = sickbeard.versionCheckScheduler.action.install_type
+
+        popen_list = []
+        
+        if install_type in ('git', 'source'):
+            popen_list = [sys.executable, sickbeard.MY_FULLNAME]
+        elif install_type == 'win':
+            if hasattr(sys, 'frozen'):
+                # c:\dir\to\updater.exe 12345 c:\dir\to\sickbeard.exe
+                popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(os.getpid()), sys.executable]
+            else:
+                logger.log("Unknown SB launch method, please file a bug report about this", logger.ERROR)
+                popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(os.getpid()), sys.executable, sickbeard.MY_FULLNAME ]
+
+        if popen_list:
+            popen_list += sickbeard.MY_ARGS
+            logger.log("Restarting Sick Beard with " + str(popen_list))
+            subprocess.Popen(popen_list, cwd=os.getcwd())
     
     os._exit(0)
+
+
+def restart(soft=True):
+    
+    if soft:
+        halt()
+        saveAll()
+        #logger.log("Restarting cherrypy")
+        #cherrypy.engine.restart()
+        logger.log("Re-initializing all data")
+        initialize()
+    
+    else:
+        saveAndShutdown(restart=True)
 
 
 
@@ -676,22 +720,13 @@ def save_config():
     CFG['Twitter']['use_twitter'] = int(USE_TWITTER)
     CFG['Twitter']['twitter_username'] = TWITTER_USERNAME
     CFG['Twitter']['twitter_password'] = TWITTER_PASSWORD
+    CFG['Twitter']['twitter_prefix'] = TWITTER_PREFIX
  
     CFG['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
     
     CFG.write()
 
 
-def restart():
-    
-    halt()
-
-    saveAll()
-    
-    INIT_OK = initialize()
-    if INIT_OK:
-        start()
-    
 def launchBrowser():
     browserURL = 'http://localhost:%d%s' % (WEB_PORT, WEB_ROOT)
     try:

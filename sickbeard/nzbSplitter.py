@@ -1,4 +1,4 @@
-import urllib
+import urllib2
 
 import xml.etree.cElementTree as etree
 import xml.etree
@@ -82,9 +82,13 @@ def stripNS(element, ns):
 
 
 def splitResult(result):
-    
-    urlData = helpers.getURL(result.url)
-    
+
+    try:
+        urlData = helpers.getURL(result.url)
+    except urllib2.URLError, e:
+        logger.log("Unable to load url "+result.url+", can't download season NZB", logger.ERROR)
+        return False
+     
     # parse the season ep name
     try:
         fp = FileParser(result.name)
