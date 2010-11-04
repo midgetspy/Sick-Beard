@@ -329,13 +329,7 @@ def initialize(consoleLogging=True):
             logger.log("!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
 
-        # Set our common tvdb_api options here
-        TVDB_API_PARMS = {'cache': True,
-                          'apikey': TVDB_API_KEY,
-                          'language': 'en',
-                          'cache_dir': False}
-        if CACHE_DIR:
-            TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
+        initializeTvdbApiParams()
         
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
@@ -730,6 +724,18 @@ def save_config():
     
     CFG.write()
 
+def initializeTvdbApiParams():
+    global TVDB_API_PARMS
+        
+    # Set our common tvdb_api options here
+    TVDB_API_PARMS = {'cache': True,
+                      'apikey': TVDB_API_KEY,
+                      'language': 'en',
+                      'cache_dir': False,
+                      'http_proxy': HTTP_PROXY}
+    
+    if CACHE_DIR:
+        TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
 
 def launchBrowser():
     browserURL = 'http://localhost:%d%s' % (WEB_PORT, WEB_ROOT)

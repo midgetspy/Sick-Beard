@@ -564,6 +564,8 @@ class ConfigGeneral:
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
         sickbeard.HTTP_PROXY = http_proxy
+        
+        sickbeard.initializeTvdbApiParams()
 
         config.change_VERSION_NOTIFY(version_notify)
 
