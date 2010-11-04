@@ -37,7 +37,7 @@ def filterBadReleases(name):
         fp = FileParser(name)
         epInfo = fp.parse()
     except tvnamer_exceptions.InvalidFilename:
-        logger.log("Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
+        logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
     
     # if there's no info after the season info then assume it's fine
@@ -47,7 +47,7 @@ def filterBadReleases(name):
     # if any of the bad strings are in the name then say no
     for x in resultFilters:
         if re.search('(^|[\W_])'+x+'($|[\W_])', epInfo.episodename, re.I):
-            logger.log("Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
+            logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
 
     return True
@@ -141,10 +141,10 @@ def allPossibleShowNames(show):
     for curName in showNames:
         for curCountry in countryList:
             if curName.endswith(' '+curCountry):
-                logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
+                logger.log(u"Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' '+curCountry, ' ('+countryList[curCountry]+')'))
             elif curName.endswith(' ('+curCountry+')'):
-                logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
+                logger.log(u"Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+countryList[curCountry]+')'))
 
     showNames += newShowNames
@@ -161,7 +161,7 @@ def isGoodResult(name, show, log=True):
     for curName in set(showNames):
         curRegex = '^' + re.sub('[\.\-]', '\W+', curName) + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx])))'
         if log:
-            logger.log("Checking if show "+name+" matches " + curRegex, logger.DEBUG)
+            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
         
         match = re.search(curRegex, name, re.I)
         
@@ -169,5 +169,5 @@ def isGoodResult(name, show, log=True):
             return True
 
     if log:
-        logger.log("Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
     return False

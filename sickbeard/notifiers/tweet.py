@@ -84,14 +84,14 @@ def send_tweet(message=None):
     access_token_key=sickbeard.TWITTER_USERNAME
     access_token_secret=sickbeard.TWITTER_PASSWORD
 
-    logger.log("Sending tweet: "+message)
+    logger.log(u"Sending tweet: "+message)
 
     api = twitter.Api(username, password, access_token_key, access_token_secret)
 
     try:
         status = api.PostUpdate(message)
     except Exception, e:
-        logger.log("Error Sending Tweet: "+str(e), logger.ERROR)
+        logger.log(u"Error Sending Tweet: "+str(e).decode('utf-8'), logger.ERROR)
         return False
 
     return True

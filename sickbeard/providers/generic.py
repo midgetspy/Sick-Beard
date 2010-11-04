@@ -105,14 +105,14 @@ class GenericProvider:
         try:
             result = helpers.getURL(url, headers)
         except (urllib2.HTTPError, IOError), e:
-            logger.log("Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
+            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
             return None
     
         return result
 
     def downloadResult (self, result):
     
-        logger.log("Downloading a result from " + self.name+" at " + result.url)
+        logger.log(u"Downloading a result from " + self.name+" at " + result.url)
     
         data = self.getURL(result.url)
         
@@ -130,7 +130,7 @@ class GenericProvider:
         
         fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
         
-        logger.log("Saving to " + fileName, logger.DEBUG)
+        logger.log(u"Saving to " + fileName, logger.DEBUG)
         
         fileOut = open(fileName, writeMode)
         fileOut.write(data)
@@ -146,11 +146,11 @@ class GenericProvider:
     
         self._checkAuth()
     
-        logger.log("Searching "+self.name+" for " + episode.prettyName(True))
+        logger.log(u"Searching "+self.name+" for " + episode.prettyName(True))
     
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)
-        logger.log("Cache results: "+str(results), logger.DEBUG)
+        logger.log(u"Cache results: "+str(results), logger.DEBUG)
     
         return results
 

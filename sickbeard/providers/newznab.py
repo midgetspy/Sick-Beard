@@ -85,10 +85,10 @@ class NewznabProvider(generic.NZBProvider):
 			quality = Quality.nameQuality(title)
 			
 			if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
-				logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 				continue
 			
-			logger.log("Found result " + title + " at " + url, logger.DEBUG)
+			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 			
 			result = self.getResult([episode])
 			result.url = url
@@ -118,24 +118,24 @@ class NewznabProvider(generic.NZBProvider):
 				myParser = FileParser(title)
 				epInfo = myParser.parse()
 			except tvnamer_exceptions.InvalidFilename:
-				logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
+				logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
 				continue
 			
 			if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
-				logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+				logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
 				continue
 			
 			# make sure we want the episode
 			wantEp = True
 			for epNo in epInfo.episodenumbers:
 				if not show.wantEpisode(season, epNo, quality):
-					logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+					logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 					wantEp = False
 					break
 			if not wantEp:
 				continue
 			
-			logger.log("Found result " + title + " at " + url, logger.DEBUG)
+			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 			
 			# make a result object
 			epObj = []
@@ -151,11 +151,11 @@ class NewznabProvider(generic.NZBProvider):
 				epNum = epObj[0].episode
 			elif len(epObj) > 1:
 				epNum = MULTI_EP_RESULT
-				logger.log("Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
+				logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
 			elif len(epObj) == 0:
 				epNum = SEASON_RESULT
 				result.extraInfo = [show]
-				logger.log("Separating full season result to check for later", logger.DEBUG)
+				logger.log(u"Separating full season result to check for later", logger.DEBUG)
 		
 			if epNum in results:
 				results[epNum].append(result)
@@ -190,7 +190,7 @@ class NewznabProvider(generic.NZBProvider):
 
 		searchURL = self.url + 'api?' + urllib.urlencode(params)
 	
-		logger.log("Search url: " + searchURL, logger.DEBUG)
+		logger.log(u"Search url: " + searchURL, logger.DEBUG)
 	
 		data = self.getURL(searchURL)
 	
@@ -201,8 +201,8 @@ class NewznabProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log("Error trying to load "+self.name+" RSS feed: "+str(e), logger.ERROR)
-			logger.log("RSS data: "+data, logger.DEBUG)
+			logger.log(u"Error trying to load "+self.name+" RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+			logger.log(u"RSS data: "+data, logger.DEBUG)
 			return []
 			
 		if responseSoup.getroot().tag == 'error':
@@ -214,11 +214,11 @@ class NewznabProvider(generic.NZBProvider):
 			elif code == '102':
 				raise exceptions.AuthException("Your account isn't allowed to use the API on "+self.name+", contact the administrator")
 			else:
-				logger.log("Unknown error given from "+self.name+": "+responseSoup.getroot().get('description'), logger.ERROR)
+				logger.log(u"Unknown error given from "+self.name+": "+responseSoup.getroot().get('description'), logger.ERROR)
 				return []
 				
 		if responseSoup.getroot().tag != 'rss':
-			logger.log("Resulting XML from "+self.name+" isn't RSS, not parsing it", logger.ERROR)
+			logger.log(u"Resulting XML from "+self.name+" isn't RSS, not parsing it", logger.ERROR)
 			return []
 
 		results = []
@@ -228,7 +228,7 @@ class NewznabProvider(generic.NZBProvider):
 			url = curItem.findtext('link')
 	
 			if not title or not url:
-				logger.log("The XML returned from the "+self.name+" RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+				logger.log(u"The XML returned from the "+self.name+" RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 				continue
 	
 			url = url.replace('&amp;','&')
@@ -298,7 +298,7 @@ class NewznabCache(tvcache.TVCache):
 			elif code == '102':
 				raise exceptions.AuthException("Your account isn't allowed to use the API on "+self.provider.name+", contact the administrator")
 			else:
-				logger.log("Unknown error given from "+self.provider.name+": "+responseSoup.getroot().get('description'), logger.ERROR)
+				logger.log(u"Unknown error given from "+self.provider.name+": "+responseSoup.getroot().get('description'), logger.ERROR)
 				return False
 		
 		return True

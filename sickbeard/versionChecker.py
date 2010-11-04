@@ -60,12 +60,12 @@ class CheckVersion():
     def check_for_new_version(self):
 
         if not sickbeard.VERSION_NOTIFY:
-            logger.log("Version checking is disabled, not checking for the newest version")
+            logger.log(u"Version checking is disabled, not checking for the newest version")
             return
 
-        logger.log("Checking if "+self.install_type+" needs an update")
+        logger.log(u"Checking if "+self.install_type+" needs an update")
         if not self.updater.need_update():
-            logger.log("No update needed")
+            logger.log(u"No update needed")
             return
         
         self.updater.set_newest_text()
@@ -130,27 +130,27 @@ class WindowsUpdateManager(UpdateManager):
         new_link = self._find_newest_version(True)
         
         if not new_link:
-            logger.log("Unable to find a new version link on google code, not updating")
+            logger.log(u"Unable to find a new version link on google code, not updating")
             return False
     
         # download the zip
         try:
-            logger.log("Downloading update file from "+str(new_link))
+            logger.log(u"Downloading update file from "+str(new_link))
             (filename, headers) = urllib.urlretrieve(new_link)
             
             # unzip it to sb-update
             sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
-            logger.log("Unzipping from "+str(filename)+" to "+sb_update_dir)
+            logger.log(u"Unzipping from "+str(filename)+" to "+sb_update_dir)
             update_zip = zipfile.ZipFile(filename, 'r')
             update_zip.extractall(sb_update_dir)
             update_zip.close()
     
         except Exception, e:
-            logger.log("Error while trying to update: "+str(e), logger.ERROR)
+            logger.log(u"Error while trying to update: "+str(e).decode('utf-8'), logger.ERROR)
             return False
     
         # delete the zip
-        logger.log("Deleting old update file from "+str(filename))
+        logger.log(u"Deleting old update file from "+str(filename))
         os.remove(filename)
         
         return True
@@ -182,15 +182,15 @@ class GitUpdateManager(UpdateManager):
             git = 'git'
         
         try:
-            logger.log("Executing "+git+" show with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
+            logger.log(u"Executing "+git+" show with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
             p = subprocess.Popen(git+' show', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
             output, err = p.communicate()
         except OSError, e:
-            logger.log("Unable to find git, can't tell what version you're running")
+            logger.log(u"Unable to find git, can't tell what version you're running")
             return None
 
         if 'git: not found' in output or "'git' is not recognized as an internal or external command" in output:
-            logger.log("Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
+            logger.log(u"Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
             return None
         
         commit_regex = '^commit ([a-f0-9]+)$'
@@ -205,8 +205,8 @@ class GitUpdateManager(UpdateManager):
                 break
 
         if not self._cur_commit_hash:
-            logger.log("The commit output wasn't the format we expected, couldn't figure out what version this is", logger.ERROR)
-            logger.log("Git output: "+str(output), logger.DEBUG)
+            logger.log(u"The commit output wasn't the format we expected, couldn't figure out what version this is", logger.ERROR)
+            logger.log(u"Git output: "+str(output), logger.DEBUG)
     
 
     def _check_github_for_update(self):
@@ -234,7 +234,7 @@ class GitUpdateManager(UpdateManager):
         
             self._num_commits_behind += 1
 
-        logger.log("newest: "+str(self._newest_commit_hash)+" and current: "+str(self._cur_commit_hash)+" and num_commits: "+str(self._num_commits_behind), logger.DEBUG)
+        logger.log(u"newest: "+str(self._newest_commit_hash)+" and current: "+str(self._cur_commit_hash)+" and num_commits: "+str(self._num_commits_behind), logger.DEBUG)
 
     def set_newest_text(self):
 
@@ -262,7 +262,7 @@ class GitUpdateManager(UpdateManager):
         self._find_installed_version()
         self._check_github_for_update()
 
-        logger.log("After checking, cur_commit = "+str(self._cur_commit_hash)+", newest_commit = "+str(self._newest_commit_hash)+", num_commits_behind = "+str(self._num_commits_behind), logger.DEBUG)
+        logger.log(u"After checking, cur_commit = "+str(self._cur_commit_hash)+", newest_commit = "+str(self._newest_commit_hash)+", num_commits_behind = "+str(self._num_commits_behind), logger.DEBUG)
 
         if self._num_commits_behind > 0:
             return True
@@ -284,12 +284,12 @@ class GitUpdateManager(UpdateManager):
         
         try:
             popen_str = git+' pull origin '+sickbeard.version.SICKBEARD_VERSION
-            logger.log("Executing command: "+popen_str+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
+            logger.log(u"Executing command: "+popen_str+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
             p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
             output, err = p.communicate()
         except OSError, e:
-            #logger.log("Unable to find git, can't tell what version you're running")
-            logger.log('Error calling git pull: '+str(e), logger.ERROR)
+            #logger.log(u"Unable to find git, can't tell what version you're running")
+            logger.log('Error calling git pull: '+str(e).decode('utf-8'), logger.ERROR)
             return False
         
         pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
@@ -299,12 +299,12 @@ class GitUpdateManager(UpdateManager):
         for line in output.split('\n'):
         
             if 'Already up-to-date.' in line:
-                logger.log("No update available, not updating")
-                logger.log("Output: "+str(output))
+                logger.log(u"No update available, not updating")
+                logger.log(u"Output: "+str(output))
                 return False
             elif line.endswith('Aborting.'):
-                logger.log("Unable to update from git: "+line, logger.ERROR)
-                logger.log("Output: "+str(output))
+                logger.log(u"Unable to update from git: "+line, logger.ERROR)
+                logger.log(u"Output: "+str(output))
                 return False
         
             match = re.search(pull_regex, line)
@@ -313,8 +313,8 @@ class GitUpdateManager(UpdateManager):
                 break
     
         if None in (files, insertions, deletions):
-            logger.log("Didn't find indication of success in output, assuming git pull failed", logger.ERROR)
-            logger.log("Output: "+str(output))
+            logger.log(u"Didn't find indication of success in output, assuming git pull failed", logger.ERROR)
+            logger.log(u"Output: "+str(output))
             return False
         
         return True
@@ -350,7 +350,7 @@ class SourceUpdateManager(GitUpdateManager):
     
     def set_newest_text(self):
         if not self._cur_commit_hash:
-            logger.log("Unknown current version, don't know if we should update or not", logger.DEBUG)
+            logger.log(u"Unknown current version, don't know if we should update or not", logger.DEBUG)
         
             new_str = "Unknown version: If you've never used the Sick Beard upgrade system then I don't know what version you have."
             new_str += " <a href=\""+self.get_update_url()+"\">Update Now</a>"
@@ -371,10 +371,10 @@ class SourceUpdateManager(GitUpdateManager):
         
         # retrieve file
         try:
-            logger.log("Downloading update from "+tar_download_url)
+            logger.log(u"Downloading update from "+tar_download_url)
             data = urllib2.urlopen(tar_download_url)
         except (IOError, URLError):
-            logger.log("Unable to retrieve new version from "+tar_download_url+", can't update", logger.ERROR)
+            logger.log(u"Unable to retrieve new version from "+tar_download_url+", can't update", logger.ERROR)
             return False
     
         download_name = data.geturl().split('/')[-1]
@@ -387,19 +387,19 @@ class SourceUpdateManager(GitUpdateManager):
         f.close()
         
         # extract to temp folder
-        logger.log("Extracting file "+tar_download_path)
+        logger.log(u"Extracting file "+tar_download_path)
         tar = tarfile.open(tar_download_path)
         tar.extractall(sb_update_dir)
         tar.close()
                
         # delete .tar.gz
-        logger.log("Deleting file "+tar_download_path)
+        logger.log(u"Deleting file "+tar_download_path)
         os.remove(tar_download_path)
         
         # find update dir name
         update_dir_contents = [x for x in os.listdir(sb_update_dir) if os.path.isdir(os.path.join(sb_update_dir, x))]
         if len(update_dir_contents) != 1:
-            logger.log("Invalid update data, update failed: "+str(update_dir_contents), logger.ERROR)
+            logger.log(u"Invalid update data, update failed: "+str(update_dir_contents), logger.ERROR)
             return False
         content_dir = os.path.join(sb_update_dir, update_dir_contents[0])
     
@@ -420,7 +420,7 @@ class SourceUpdateManager(GitUpdateManager):
             ver_file.write(self._newest_commit_hash)
             ver_file.close()
         except IOError, e:
-            logger.log("Unable to write version file, update not complete: "+str(e), logger.ERROR)
+            logger.log(u"Unable to write version file, update not complete: "+str(e).decode('utf-8'), logger.ERROR)
             return False
         
         return True

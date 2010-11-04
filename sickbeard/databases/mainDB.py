@@ -89,18 +89,18 @@ class NewQualitySettings (NumericProviders):
 				break
 
 			try:
-				logger.log("Attempting to back up your sickbeard.db file before migration...")
+				logger.log(u"Attempting to back up your sickbeard.db file before migration...")
 				shutil.copy(ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db'), ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0'))
-				logger.log("Done backup, proceeding with migration.")
+				logger.log(u"Done backup, proceeding with migration.")
 				break
 			except Exception, e:
-				logger.log("Error while trying to back up your sickbeard.db: "+str(e))
+				logger.log(u"Error while trying to back up your sickbeard.db: "+str(e).decode('utf-8'))
 				numTries += 1
 				time.sleep(1)
-				logger.log("Trying again.")
+				logger.log(u"Trying again.")
 			
 			if numTries >= 10:
-				logger.log("Unable to back up your sickbeard.db file, please do it manually.")
+				logger.log(u"Unable to back up your sickbeard.db file, please do it manually.")
 				sys.exit(1)
 		
 		# old stuff that's been removed from common but we need it to upgrade
@@ -176,7 +176,7 @@ class NewQualitySettings (NumericProviders):
 			elif int(curUpdate["quality"]) == BEST:
 				newQuality = common.BEST
 			else:
-				logger.log("Unknown show quality: "+str(curUpdate["quality"]), logger.WARNING)
+				logger.log(u"Unknown show quality: "+str(curUpdate["quality"]), logger.WARNING)
 				newQuality = None
 			
 			if newQuality:

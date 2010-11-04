@@ -39,13 +39,13 @@ class CurrentSearcher():
         self.amActive = True
         
         # pause the backlog to prevent race conditions downloading 2 episodes
-        logger.log("Pausing backlog so it doesn't collide with episode search", logger.DEBUG)
+        logger.log(u"Pausing backlog so it doesn't collide with episode search", logger.DEBUG)
         sickbeard.backlogSearchScheduler.action.amPaused = True
         while sickbeard.backlogSearchScheduler.action.am_running():
-            logger.log("Backlog isn't waiting yet, trying again in 1s", logger.DEBUG)
+            logger.log(u"Backlog isn't waiting yet, trying again in 1s", logger.DEBUG)
             time.sleep(1)
         
-        logger.log("Backlog has stopped, running search now", logger.DEBUG)
+        logger.log(u"Backlog has stopped, running search now", logger.DEBUG)
 
         self._changeMissingEpisodes()
 
@@ -55,12 +55,12 @@ class CurrentSearcher():
 
         with self.lock:
             
-            logger.log("Beginning search for new episodes on RSS")
+            logger.log(u"Beginning search for new episodes on RSS")
 
             foundResults = search.searchForNeededEpisodes()
             
             if not len(foundResults):
-                logger.log("No needed episodes found on the RSS feeds")
+                logger.log(u"No needed episodes found on the RSS feeds")
             else:
                 for curResult in foundResults:
                     search.snatchEpisode(curResult)
@@ -71,14 +71,14 @@ class CurrentSearcher():
         sickbeard.updateAiringList()
         sickbeard.updateComingList()
 
-        logger.log("Search is done, resuming backlog", logger.DEBUG)
+        logger.log(u"Search is done, resuming backlog", logger.DEBUG)
         sickbeard.backlogSearchScheduler.action.amPaused = False
         
         self.amActive = False
 
     def _changeMissingEpisodes(self):
         
-        logger.log("Changing all old missing episodes to status WANTED")
+        logger.log(u"Changing all old missing episodes to status WANTED")
         
         curDate = datetime.date.today().toordinal()
 
@@ -90,11 +90,11 @@ class CurrentSearcher():
             try:
                 show = helpers.findCertainShow(sickbeard.showList, int(sqlEp["showid"]))
             except exceptions.MultipleShowObjectsException:
-                logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
+                logger.log(u"ERROR: expected to find a single show matching " + sqlEp["showid"]) 
                 return None
             
             if show == None:
-                logger.log("Unable to find the show with ID "+str(sqlEp["showid"])+" in your show list! DB value was "+str(sqlEp), logger.ERROR)
+                logger.log(u"Unable to find the show with ID "+str(sqlEp["showid"])+" in your show list! DB value was "+str(sqlEp), logger.ERROR)
                 return None
             
             ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])

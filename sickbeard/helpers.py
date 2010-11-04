@@ -163,10 +163,10 @@ def makeDir (dir):
 
 def makeShowNFO(showID, showDir):
 
-	logger.log("Making NFO for show "+str(showID)+" in dir "+showDir, logger.DEBUG)
+	logger.log(u"Making NFO for show "+str(showID)+" in dir "+showDir, logger.DEBUG)
 
 	if not makeDir(showDir):
-		logger.log("Unable to create show dir, can't make NFO", logger.ERROR)
+		logger.log(u"Unable to create show dir, can't make NFO", logger.ERROR)
 		return False
 
 	t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
@@ -174,21 +174,21 @@ def makeShowNFO(showID, showDir):
 	try:
 		myShow = t[int(showID)]
 	except tvdb_exceptions.tvdb_shownotfound:
- 		logger.log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 		logger.log(u"Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 		raise
 
 	except tvdb_exceptions.tvdb_error:
- 		logger.log("TVDB is down, can't use its data to add this show", logger.ERROR)
+ 		logger.log(u"TVDB is down, can't use its data to add this show", logger.ERROR)
  		raise
 
 	# check for title and id
 	try:
 		if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
- 			logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 			logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
 			return False
 	except tvdb_exceptions.tvdb_attributenotfound:
- 		logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 		logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
 		return False
 
@@ -197,7 +197,7 @@ def makeShowNFO(showID, showDir):
 	indentXML( tvNode )
 	nfo = etree.ElementTree( tvNode )
 
- 	logger.log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
+ 	logger.log(u"Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
 	nfo_filename = os.path.join(showDir, "tvshow.nfo").encode('utf-8')
 	nfo_fh = open(nfo_filename, 'w')
 	nfo.write( nfo_fh, encoding="utf-8" )
@@ -308,14 +308,14 @@ def searchDBForShow(regShowName):
 			# if we didn't get exactly one result then try again with the year stripped off if possible
 			match = re.match(yearRegex, showName)
 			if match:
-				logger.log("Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
+				logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
 				sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
 	
 			if len(sqlResults) == 0:
-				logger.log("Unable to match a record in the DB for "+showName, logger.DEBUG)
+				logger.log(u"Unable to match a record in the DB for "+showName, logger.DEBUG)
 				continue
 			elif len(sqlResults) > 1:
-				logger.log("Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
+				logger.log(u"Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
 				continue
 			else:
 				return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
@@ -337,26 +337,26 @@ def getShowImage(url, imgNum=None):
 	else:
 		tempURL = url
 
-	logger.log("Getting show image at "+tempURL, logger.DEBUG)
+	logger.log(u"Getting show image at "+tempURL, logger.DEBUG)
 	try:
 		req = urllib2.Request(tempURL, headers={'User-Agent': classes.SickBeardURLopener().version})
 		imgFile = urllib2.urlopen(req)
 	except urllib2.URLError, e:
-		logger.log("There was an error trying to retrieve the image, aborting", logger.ERROR)
+		logger.log(u"There was an error trying to retrieve the image, aborting", logger.ERROR)
 		return None
 	except urllib2.HTTPError, e:
-		logger.log("Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e), logger.ERROR)
+		logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e).decode('utf-8'), logger.ERROR)
 		return None
 
 	if imgFile == None:
-		logger.log("Something bad happened and we have no URL data somehow", logger.ERROR)
+		logger.log(u"Something bad happened and we have no URL data somehow", logger.ERROR)
 		return None
 
 	# get the image
 	try:
 		imgData = imgFile.read()		
 	except (urllib2.URLError, urllib2.HTTPError), e:
-		logger.log("There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
+		logger.log(u"There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
 		return None
 
 	return imgData

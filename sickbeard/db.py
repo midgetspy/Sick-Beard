@@ -54,14 +54,14 @@ class DBConnection:
 				break
 			except sqlite3.OperationalError, e:
 				if "unable to open database file" in str(e) or "database is locked" in str(e):
-					logger.log("DB error: "+str(e), logger.WARNING)
+					logger.log(u"DB error: "+str(e).decode('utf-8'), logger.WARNING)
 					attempt += 1
 					time.sleep(1)
 				else:
-					logger.log("DB error: "+str(e), logger.ERROR)
+					logger.log(u"DB error: "+str(e).decode('utf-8'), logger.ERROR)
 					raise
 			except sqlite3.DatabaseError, e:
-				logger.log("Fatal error executing query: " + str(e), logger.ERROR)
+				logger.log(u"Fatal error executing query: " + str(e), logger.ERROR)
 				raise
 		
 		return sqlResult
@@ -104,7 +104,7 @@ class DBConnection:
 # ===============
 
 def upgradeDatabase(connection, schema):
-	logger.log("Checking database structure...", logger.MESSAGE)
+	logger.log(u"Checking database structure...", logger.MESSAGE)
 	_processUpgrade(connection, schema)
 
 def prettyName(str):
@@ -112,9 +112,9 @@ def prettyName(str):
 
 def _processUpgrade(connection, upgradeClass):
 	instance = upgradeClass(connection)
-	logger.log("Checking " + prettyName(upgradeClass.__name__) + " database upgrade", logger.DEBUG)
+	logger.log(u"Checking " + prettyName(upgradeClass.__name__) + " database upgrade", logger.DEBUG)
 	if not instance.test():
-		logger.log("Database upgrade required: " + prettyName(upgradeClass.__name__), logger.MESSAGE)
+		logger.log(u"Database upgrade required: " + prettyName(upgradeClass.__name__), logger.MESSAGE)
 		try:
 			instance.execute()
 		except sqlite3.DatabaseError, e:

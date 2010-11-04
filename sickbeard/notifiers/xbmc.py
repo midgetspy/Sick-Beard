@@ -54,7 +54,7 @@ def sendToXBMC(command, host, username=None, password=None):
             command[key] = command[key].encode('utf-8')
 
     enc_command = urllib.urlencode(command)
-    logger.log("Encoded command is " + enc_command, logger.DEBUG)
+    logger.log(u"Encoded command is " + enc_command, logger.DEBUG)
     # Web server doesn't like POST, GET is the way to go
     url = 'http://%s/xbmcCmds/xbmcHttp/?%s' % (host, enc_command)
 
@@ -62,18 +62,18 @@ def sendToXBMC(command, host, username=None, password=None):
         # If we have a password, use authentication
         req = urllib2.Request(url)
         if password:
-            logger.log("Adding Password to XBMC url", logger.DEBUG)
+            logger.log(u"Adding Password to XBMC url", logger.DEBUG)
             base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
             authheader =  "Basic %s" % base64string
             req.add_header("Authorization", authheader)
 
-        logger.log("Contacting XBMC via url: " + url, logger.DEBUG)
+        logger.log(u"Contacting XBMC via url: " + url, logger.DEBUG)
         handle = urllib2.urlopen(req)
         response = handle.read()
-        logger.log("response: " + response, logger.DEBUG)
+        logger.log(u"response: " + response, logger.DEBUG)
     except IOError, e:
         # print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
-        logger.log("Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
+        logger.log(u"Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
         response = ''
 
     return response
@@ -89,20 +89,20 @@ def notifyXBMC(input, title="midgetPVR", host=None, username=None, password=None
     if not password:
         password = sickbeard.XBMC_PASSWORD    
 
-    logger.log("Sending notification for " + input, logger.DEBUG)
+    logger.log(u"Sending notification for " + input, logger.DEBUG)
     
     fileString = title + "," + input
     
     for curHost in [x.strip() for x in host.split(",")]:
         command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' +fileString + ')' }
-        logger.log("Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
+        logger.log(u"Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
         request = sendToXBMC(command, curHost, username, password)
     
 def updateLibrary(host, showName=None):
 
     global XBMC_TIMEOUT
 
-    logger.log("Updating library in XBMC", logger.DEBUG)
+    logger.log(u"Updating library in XBMC", logger.DEBUG)
     
     if not host:
         logger.log('No host specified, no updates done', logger.DEBUG)
@@ -130,7 +130,7 @@ def updateLibrary(host, showName=None):
         request = sendToXBMC(resetCommand, host)
 
         if not sqlXML:
-            logger.log("Invalid response for " + showName + " on " + host, logger.DEBUG)
+            logger.log(u"Invalid response for " + showName + " on " + host, logger.DEBUG)
             return False
 
         encSqlXML = urllib.quote(sqlXML,':\\/<>')
@@ -138,13 +138,13 @@ def updateLibrary(host, showName=None):
         paths = et.findall('.//field')
     
         if not paths:
-            logger.log("No valid paths found for " + showName + " on " + host, logger.DEBUG)
+            logger.log(u"No valid paths found for " + showName + " on " + host, logger.DEBUG)
             return False
     
         for path in paths:
             # Don't need it double-encoded, gawd this is dumb
             unEncPath = urllib.unquote(path.text)
-            logger.log("XBMC Updating " + showName + " on " + host + " at " + unEncPath, logger.DEBUG)
+            logger.log(u"XBMC Updating " + showName + " on " + host + " at " + unEncPath, logger.DEBUG)
             updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (unEncPath)}
             request = sendToXBMC(updateCommand, host)
             if not request:
@@ -154,7 +154,7 @@ def updateLibrary(host, showName=None):
             if len(paths) > 1:
                 time.sleep(5)
     else:
-        logger.log("XBMC Updating " + host, logger.DEBUG)
+        logger.log(u"XBMC Updating " + host, logger.DEBUG)
         updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
         request = sendToXBMC(updateCommand, host)
 

@@ -47,12 +47,12 @@ def change_LOG_DIR(log_dir):
         if helpers.makeDir(log_dir):
             sickbeard.LOG_DIR = os.path.normpath(log_dir)
             logger.initLogging()
-            logger.log("Initialized new log file in " + log_dir)
+            logger.log(u"Initialized new log file in " + log_dir)
 
             cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
             cherrypy.config.update({'log.access_file': cherry_log})
             
-            logger.log("Changed cherry log file to " + cherry_log)
+            logger.log(u"Changed cherry log file to " + cherry_log)
             
         else:
             return False
@@ -68,7 +68,7 @@ def change_NZB_DIR(nzb_dir):
     if os.path.normpath(sickbeard.NZB_DIR) != os.path.normpath(nzb_dir):
         if helpers.makeDir(nzb_dir):
             sickbeard.NZB_DIR = os.path.normpath(nzb_dir)
-            logger.log("Changed NZB folder to " + nzb_dir)
+            logger.log(u"Changed NZB folder to " + nzb_dir)
         else:
             return False
 
@@ -84,7 +84,7 @@ def change_TORRENT_DIR(torrent_dir):
     if os.path.normpath(sickbeard.TORRENT_DIR) != os.path.normpath(torrent_dir):
         if helpers.makeDir(torrent_dir):
             sickbeard.TORRENT_DIR = os.path.normpath(torrent_dir)
-            logger.log("Changed torrent folder to " + torrent_dir)
+            logger.log(u"Changed torrent folder to " + torrent_dir)
         else:
             return False
 
@@ -100,7 +100,7 @@ def change_TV_DOWNLOAD_DIR(tv_download_dir):
     if os.path.normpath(sickbeard.TV_DOWNLOAD_DIR) != os.path.normpath(tv_download_dir):
         if helpers.makeDir(tv_download_dir):
             sickbeard.TV_DOWNLOAD_DIR = os.path.normpath(tv_download_dir)
-            logger.log("Changed TV download folder to " + tv_download_dir)
+            logger.log(u"Changed TV download folder to " + tv_download_dir)
         else:
             return False
 

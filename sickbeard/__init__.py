@@ -302,7 +302,7 @@ def initialize(consoleLogging=True):
         
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
-            logger.log("!!! No log folder, logging to screen only!", logger.ERROR)
+            logger.log(u"!!! No log folder, logging to screen only!", logger.ERROR)
 
         try:
             WEB_PORT = check_setting_int(CFG, 'General', 'web_port', 8081)
@@ -323,7 +323,7 @@ def initialize(consoleLogging=True):
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         if not helpers.makeDir(CACHE_DIR):
-            logger.log("!!! Creating local cache dir failed, using system default", logger.ERROR)
+            logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
 
         # Set our common tvdb_api options here
@@ -524,54 +524,54 @@ def halt ():
         
         if __INITIALIZED__:
 
-            logger.log("Aborting all threads")
+            logger.log(u"Aborting all threads")
             
             # abort all the threads
 
             currentSearchScheduler.abort = True
-            logger.log("Waiting for the SEARCH thread to exit")
+            logger.log(u"Waiting for the SEARCH thread to exit")
             try:
                 currentSearchScheduler.thread.join(10)
             except:
                 pass
             
             backlogSearchScheduler.abort = True
-            logger.log("Waiting for the BACKLOG thread to exit")
+            logger.log(u"Waiting for the BACKLOG thread to exit")
             try:
                 backlogSearchScheduler.thread.join(10)
             except:
                 pass
 
             showUpdateScheduler.abort = True
-            logger.log("Waiting for the SHOWUPDATER thread to exit")
+            logger.log(u"Waiting for the SHOWUPDATER thread to exit")
             try:
                 showUpdateScheduler.thread.join(10)
             except:
                 pass
             
             versionCheckScheduler.abort = True
-            logger.log("Waiting for the VERSIONCHECKER thread to exit")
+            logger.log(u"Waiting for the VERSIONCHECKER thread to exit")
             try:
                 versionCheckScheduler.thread.join(10)
             except:
                 pass
             
             showQueueScheduler.abort = True
-            logger.log("Waiting for the SHOWQUEUE thread to exit")
+            logger.log(u"Waiting for the SHOWQUEUE thread to exit")
             try:
                 showQueueScheduler.thread.join(10)
             except:
                 pass
             
             autoPostProcesserScheduler.abort = True
-            logger.log("Waiting for the POSTPROCESSER thread to exit")
+            logger.log(u"Waiting for the POSTPROCESSER thread to exit")
             try:
                 autoPostProcesserScheduler.thread.join(10)
             except:
                 pass
             
             properFinderScheduler.abort = True
-            logger.log("Waiting for the PROPERFINDER thread to exit")
+            logger.log(u"Waiting for the PROPERFINDER thread to exit")
             try:
                 properFinderScheduler.thread.join(10)
             except:
@@ -583,7 +583,7 @@ def halt ():
 
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
-        logger.log("Signal %i caught, saving and exiting..." % int(signum))
+        logger.log(u"Signal %i caught, saving and exiting..." % int(signum))
         cherrypy.engine.exit()
         saveAndShutdown()
     
@@ -593,18 +593,18 @@ def saveAll():
     global showList
     
     # write all shows
-    logger.log("Saving all shows to the database")
+    logger.log(u"Saving all shows to the database")
     for show in showList:
         show.saveToDB()
     
     # save config
-    logger.log("Saving config file to disk")
+    logger.log(u"Saving config file to disk")
     save_config()
     
 
 def saveAndShutdown(restart=False):
 
-    logger.log("Killing cherrypy")
+    logger.log(u"Killing cherrypy")
     cherrypy.engine.exit()
             
     halt()
@@ -623,12 +623,12 @@ def saveAndShutdown(restart=False):
                 # c:\dir\to\updater.exe 12345 c:\dir\to\sickbeard.exe
                 popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(os.getpid()), sys.executable]
             else:
-                logger.log("Unknown SB launch method, please file a bug report about this", logger.ERROR)
+                logger.log(u"Unknown SB launch method, please file a bug report about this", logger.ERROR)
                 popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(os.getpid()), sys.executable, sickbeard.MY_FULLNAME ]
 
         if popen_list:
             popen_list += sickbeard.MY_ARGS
-            logger.log("Restarting Sick Beard with " + str(popen_list))
+            logger.log(u"Restarting Sick Beard with " + str(popen_list))
             subprocess.Popen(popen_list, cwd=os.getcwd())
     
     os._exit(0)
@@ -639,9 +639,9 @@ def restart(soft=True):
     if soft:
         halt()
         saveAll()
-        #logger.log("Restarting cherrypy")
+        #logger.log(u"Restarting cherrypy")
         #cherrypy.engine.restart()
-        logger.log("Re-initializing all data")
+        logger.log(u"Re-initializing all data")
         initialize()
     
     else:
@@ -735,12 +735,12 @@ def launchBrowser():
         try:
             webbrowser.open(browserURL, 1, 1)
         except:
-            logger.log("Unable to launch a browser", logger.ERROR)
+            logger.log(u"Unable to launch a browser", logger.ERROR)
 
 
 def updateAiringList():
     
-    logger.log("Searching DB and building list of airing episodes")
+    logger.log(u"Searching DB and building list of airing episodes")
     
     curDate = datetime.date.today().toordinal()
 
@@ -754,10 +754,10 @@ def updateAiringList():
         try:
             show = helpers.findCertainShow (sickbeard.showList, int(sqlEp["showid"]))
         except exceptions.MultipleShowObjectsException:
-            logger.log("ERROR: expected to find a single show matching " + sqlEp["showid"]) 
+            logger.log(u"ERROR: expected to find a single show matching " + sqlEp["showid"]) 
             return None
         except exceptions.SickBeardException, e:
-            logger.log("Unexpected exception: "+str(e), logger.ERROR)
+            logger.log(u"Unexpected exception: "+str(e).decode('utf-8'), logger.ERROR)
             continue
 
         # we aren't ever downloading specials
@@ -770,7 +770,7 @@ def updateAiringList():
         ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
         
         if ep == None:
-            logger.log("Somehow "+show.name+" - "+str(sqlEp["season"])+"x"+str(sqlEp["episode"])+" is None", logger.ERROR)
+            logger.log(u"Somehow "+show.name+" - "+str(sqlEp["season"])+"x"+str(sqlEp["episode"])+" is None", logger.ERROR)
         else:
             epList.append(ep)
 
@@ -787,7 +787,7 @@ def updateComingList():
         try:
             curEps = curShow.nextEpisode()
         except exceptions.NoNFOException, e:
-            logger.log("Unable to retrieve episode from show: "+str(e), logger.ERROR)
+            logger.log(u"Unable to retrieve episode from show: "+str(e).decode('utf-8'), logger.ERROR)
         
         for myEp in curEps:
             if myEp.season != 0:

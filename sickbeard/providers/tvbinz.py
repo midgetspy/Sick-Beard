@@ -81,7 +81,7 @@ class TVBinzCache(tvcache.TVCache):
 
 		url += urllib.urlencode(urlArgs)
 		
-		logger.log("TVBinz cache update URL: "+ url, logger.DEBUG)
+		logger.log(u"TVBinz cache update URL: "+ url, logger.DEBUG)
 		
 		data = self.provider.getURL(url)
 		
@@ -93,7 +93,7 @@ class TVBinzCache(tvcache.TVCache):
 			raise exceptions.AuthException("TVBinz authentication details are incorrect, check your config")
 
 		if item.findtext('title') == None or item.findtext('link') == None:
-			logger.log("The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+str(item), logger.ERROR)
+			logger.log(u"The XML returned from the TVBinz RSS feed is incomplete, this result is unusable: "+str(item), logger.ERROR)
 			return
 
 		title = item.findtext('title')
@@ -101,10 +101,10 @@ class TVBinzCache(tvcache.TVCache):
 
 		sInfo = item.find('{http://tvbinz.net/rss/tvb/}seriesInfo')
 		if sInfo == None:
-			logger.log("No series info, this is some kind of non-standard release, ignoring it", logger.DEBUG)
+			logger.log(u"No series info, this is some kind of non-standard release, ignoring it", logger.DEBUG)
 			return
 
-		logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)			
+		logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)			
 
 		quality = Quality.nameQuality(title)
 		
