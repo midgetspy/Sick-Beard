@@ -57,7 +57,7 @@ class BinReqCache(tvcache.TVCache):
 
 		url += urllib.urlencode(urlArgs)
 		
-		logger.log("Bin-Req cache update URL: "+ url, logger.DEBUG)
+		logger.log(u"Bin-Req cache update URL: "+ url, logger.DEBUG)
 		
 		data = self.provider.getURL(url)
 		

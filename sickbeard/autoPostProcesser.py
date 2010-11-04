@@ -34,11 +34,11 @@ class PostProcesser():
             return
 
         if not ek.ek(os.path.isdir, sickbeard.TV_DOWNLOAD_DIR):
-            logger.log("Automatic post-processing attempted but dir "+sickbeard.TV_DOWNLOAD_DIR+" doesn't exist", logger.ERROR)
+            logger.log(u"Automatic post-processing attempted but dir "+sickbeard.TV_DOWNLOAD_DIR+" doesn't exist", logger.ERROR)
             return
         
         if not ek.ek(os.path.isabs, sickbeard.TV_DOWNLOAD_DIR):
-            logger.log("Automatic post-processing attempted but dir "+sickbeard.TV_DOWNLOAD_DIR+" is relative (and probably not what you really want to process)", logger.ERROR)
+            logger.log(u"Automatic post-processing attempted but dir "+sickbeard.TV_DOWNLOAD_DIR+" is relative (and probably not what you really want to process)", logger.ERROR)
             return
         
         myDB = db.DBConnection()

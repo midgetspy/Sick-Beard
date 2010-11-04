@@ -38,7 +38,7 @@ class EZTVCache(tvcache.TVCache):
 
         url += urllib.urlencode(urlArgs)
         
-        logger.log("EZTV@BT-Chat cache update URL: "+ url, logger.DEBUG)
+        logger.log(u"EZTV@BT-Chat cache update URL: "+ url, logger.DEBUG)
         
         data = self.provider.getURL(url)
         
@@ -50,19 +50,19 @@ class EZTVCache(tvcache.TVCache):
         url = item.findtext('link')
 
         if not title or not url:
-            logger.log("The XML returned from the EZTV@BT-Chat RSS feed is incomplete, this result is unusable", logger.ERROR)
+            logger.log(u"The XML returned from the EZTV@BT-Chat RSS feed is incomplete, this result is unusable", logger.ERROR)
             return
         
         # hack off the .[eztv].torrent stuff
         titleMatch = re.search("(.*)\.\[[\w_\.\-]+?\]\.torrent", title)
         
         if not titleMatch:
-            logger.log("Unable to parse the result "+title+" into a valid EZTV torrent result, ignoring it", logger.ERROR)
+            logger.log(u"Unable to parse the result "+title+" into a valid EZTV torrent result, ignoring it", logger.ERROR)
             return
         
         title = titleMatch.group(1)
         
-        logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)            
+        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)            
 
         self._addCacheEntry(title, url)
 

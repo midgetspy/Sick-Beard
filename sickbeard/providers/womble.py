@@ -57,7 +57,7 @@ class WombleCache(tvcache.TVCache):
 
         url = self.provider.url + 'rss/?sec=TV&fr=false'
         
-        logger.log("Womble's Index cache update URL: "+ url, logger.DEBUG)
+        logger.log(u"Womble's Index cache update URL: "+ url, logger.DEBUG)
         
         data = self.provider.getURL(url)
         

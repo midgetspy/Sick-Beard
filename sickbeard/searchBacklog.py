@@ -69,7 +69,8 @@ class BacklogSearcher:
         self.amWaiting = False
 
     def am_running(self):
-        return not self.amWaiting and self.amActive
+        logger.log(u"amWaiting: "+str(self.amWaiting)+", amActive: "+str(self.amActive), logger.DEBUG)
+        return (not self.amWaiting) and self.amActive
 
     def searchBacklog(self):
 
@@ -77,7 +78,7 @@ class BacklogSearcher:
         self.wait_paused()
 
         if self.amActive == True:
-            logger.log("Backlog is still running, not starting it again", logger.DEBUG)
+            logger.log(u"Backlog is still running, not starting it again", logger.DEBUG)
             return
         
         self._get_lastBacklog()
@@ -86,7 +87,7 @@ class BacklogSearcher:
         fromDate = datetime.date.fromordinal(1)
         
         if not curDate - self._lastBacklog >= self.cycleTime:
-            logger.log("Running limited backlog on recently missed episodes only")
+            logger.log(u"Running limited backlog on recently missed episodes only")
             fromDate = datetime.date.today() - datetime.timedelta(days=7)
 
         self.amActive = True
@@ -104,7 +105,7 @@ class BacklogSearcher:
             if curShow.paused:
                 continue
 
-            logger.log("Checking backlog for show "+curShow.name)
+            logger.log(u"Checking backlog for show "+curShow.name)
 
             anyQualities, bestQualities = Quality.splitQuality(curShow.quality)
             
@@ -116,7 +117,7 @@ class BacklogSearcher:
                 # support pause
                 self.wait_paused()
 
-                logger.log("Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
+                logger.log(u"Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
                 self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
 
                 # see if there is anything in this season worth searching for
@@ -139,7 +140,7 @@ class BacklogSearcher:
                 if not wantSeason:
                     numSeasonsDone += 1.0
                     self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
-                    logger.log("Nothing in season "+str(curSeason)+" needs to be downloaded, skipping this season", logger.DEBUG)
+                    logger.log(u"Nothing in season "+str(curSeason)+" needs to be downloaded, skipping this season", logger.DEBUG)
                     continue
                 
                 results = search.findSeason(curShow, curSeason)
@@ -162,7 +163,7 @@ class BacklogSearcher:
 
     def _get_lastBacklog(self):
     
-        logger.log("Retrieving the last check time from the DB", logger.DEBUG)
+        logger.log(u"Retrieving the last check time from the DB", logger.DEBUG)
         
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT * FROM info")
@@ -180,7 +181,7 @@ class BacklogSearcher:
     
     def _set_lastBacklog(self, when):
     
-        logger.log("Setting the last backlog in the DB to " + str(when), logger.DEBUG)
+        logger.log(u"Setting the last backlog in the DB to " + str(when), logger.DEBUG)
         
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT * FROM info")
@@ -192,4 +193,8 @@ class BacklogSearcher:
         
 
     def run(self):
-        self.searchBacklog()
+        try:
+            self.searchBacklog()
+        except:
+            self.amActive = False
+            raise

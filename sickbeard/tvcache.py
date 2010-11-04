@@ -86,7 +86,7 @@ class TVCache():
             return []
         
         # now that we've loaded the current RSS feed lets delete the old cache
-        logger.log("Clearing "+self.provider.name+" cache and updating with new information")
+        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
         self._clearCache()
         
         if not self._checkAuth(data):
@@ -96,12 +96,12 @@ class TVCache():
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log("Error trying to load "+self.provider.name+" RSS feed: "+str(e), logger.ERROR)
-            logger.log("Feed contents: "+str(data), logger.DEBUG)
+            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Feed contents: "+str(data), logger.DEBUG)
             return []
             
         if responseSoup.getroot().tag != 'rss':
-            logger.log("Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
+            logger.log(u"Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
             return []
         
         for item in items:
@@ -119,12 +119,12 @@ class TVCache():
         self._checkItemAuth(title, url)
 
         if not title or not url:
-            logger.log("The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
+            logger.log(u"The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
             return
         
         url = self._translateLinkURL(url)
         
-        logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)            
+        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)            
 
         self._addCacheEntry(title, url)
 
@@ -154,7 +154,7 @@ class TVCache():
     def shouldUpdate(self):
         # if we've updated recently then skip the update
         if datetime.datetime.today() - self.lastUpdate < datetime.timedelta(minutes=self.minTime):
-            logger.log("Last update was too soon, using old cache: today()-"+str(self.lastUpdate)+"<"+str(datetime.timedelta(minutes=self.minTime)), logger.DEBUG)
+            logger.log(u"Last update was too soon, using old cache: today()-"+str(self.lastUpdate)+"<"+str(datetime.timedelta(minutes=self.minTime)), logger.DEBUG)
             return False
     
         return True
@@ -171,15 +171,15 @@ class TVCache():
                 myParser = FileParser(curName)
                 epInfo = myParser.parse()
             except tvnamer_exceptions.InvalidFilename:
-                logger.log("Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
+                logger.log(u"Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
                 continue
         
         if not epInfo:
-            logger.log("Giving up because I'm unable to figure out what show/etc this is: "+name, logger.DEBUG)
+            logger.log(u"Giving up because I'm unable to figure out what show/etc this is: "+name, logger.DEBUG)
             return False
         
         if not epInfo.seriesname:
-            logger.log("No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
+            logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
             return False
 
         # if we need tvdb_id or tvrage_id then search the DB for them
@@ -191,7 +191,7 @@ class TVCache():
                 if showObj:
                     tvrage_id = showObj.tvrid
                 else:
-                    logger.log("We were given a TVDB id "+str(tvdb_id)+" but it doesn't match a show we have in our list, so leaving tvrage_id empty", logger.DEBUG)
+                    logger.log(u"We were given a TVDB id "+str(tvdb_id)+" but it doesn't match a show we have in our list, so leaving tvrage_id empty", logger.DEBUG)
                     tvrage_id = 0 
             
             # if we have only a tvrage_id then use the database
@@ -200,7 +200,7 @@ class TVCache():
                 if showObj:
                     tvdb_id = showObj.tvdbid
                 else:
-                    logger.log("We were given a TVRage id "+str(tvrage_id)+" but it doesn't match a show we have in our list, so leaving tvdb_id empty", logger.DEBUG)
+                    logger.log(u"We were given a TVRage id "+str(tvrage_id)+" but it doesn't match a show we have in our list, so leaving tvdb_id empty", logger.DEBUG)
                     tvdb_id = 0 
             
             # if they're both empty then fill out as much info as possible by searching the show name
@@ -212,17 +212,17 @@ class TVCache():
                     tvdb_id = showResult[0]
 
                 else:
-                    logger.log("Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
+                    logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
                     for curShow in sickbeard.showList:
                         if sceneHelpers.isGoodResult(name, curShow, False):
-                            logger.log("Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
+                            logger.log(u"Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
                             tvdb_id = curShow.tvdbid 
                 
                 if tvdb_id:
                     
                     showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
                     if not showObj:
-                        logger.log("This should never have happened, post a bug about this!", logger.ERROR)
+                        logger.log(u"This should never have happened, post a bug about this!", logger.ERROR)
                         raise Exception("BAD STUFF HAPPENED")
                     tvrage_id = showObj.tvrid
             
@@ -240,7 +240,7 @@ class TVCache():
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound, e:
-                logger.log("Unable to find episode with date "+str(episodes[0])+" for show "+epInfo.seriesname+", skipping", logger.WARNING)
+                logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+epInfo.seriesname+", skipping", logger.WARNING)
                 return False
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
@@ -309,7 +309,7 @@ class TVCache():
 
             # if the show says we want that episode then add it to the list
             if not showObj.wantEpisode(curSeason, curEp, curQuality, manualSearch):
-                logger.log("Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
+                logger.log(u"Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
             
             else:
                 
@@ -322,7 +322,7 @@ class TVCache():
                 title = curResult["name"]
                 url = curResult["url"]
             
-                logger.log("Found result " + title + " at " + url)
+                logger.log(u"Found result " + title + " at " + url)
         
                 result = self.provider.getResult([epObj])
                 result.url = url 

@@ -68,14 +68,14 @@ def sendNZB(nzb):
 
     url = 'http://' + sickbeard.SAB_HOST + "/sabnzbd/api?" + urllib.urlencode(params)
 
-    logger.log("Sending NZB to SABnzbd")
+    logger.log(u"Sending NZB to SABnzbd")
 
-    logger.log("URL: " + url, logger.DEBUG)
+    logger.log(u"URL: " + url, logger.DEBUG)
 
     try:
         
         if nzb.resultType == "nzb":
-            f = urllib.urlopen(url)
+                f = urllib.urlopen(url)
         elif nzb.resultType == "nzbdata":
             cookies = cookielib.CookieJar()
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
@@ -87,38 +87,38 @@ def sendNZB(nzb):
 
             f = opener.open(req)
             
-    except IOError, e:
-        logger.log("Unable to connect to SAB: "+str(e), logger.ERROR)
+    except (EOFError, IOError), e:
+        logger.log(u"Unable to connect to SAB: "+str(e).decode('utf-8'), logger.ERROR)
         return False
 
     except httplib.InvalidURL, e:
-        logger.log("Invalid SAB host, check your config: "+str(e), logger.ERROR)
+        logger.log(u"Invalid SAB host, check your config: "+str(e).decode('utf-8'), logger.ERROR)
         return False
         
     if f == None:
-        logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
+        logger.log(u"No data returned from SABnzbd, NZB not sent", logger.ERROR)
         return False
     
     try:
         result = f.readlines()
     except Exception, e:
-        logger.log("Error trying to get result from SAB, NZB not sent: " + str(e), logger.ERROR)
+        logger.log(u"Error trying to get result from SAB, NZB not sent: " + str(e), logger.ERROR)
         return False
 
     if len(result) == 0:
-        logger.log("No data returned from SABnzbd, NZB not sent", logger.ERROR)
+        logger.log(u"No data returned from SABnzbd, NZB not sent", logger.ERROR)
         return False
     
     sabText = result[0].strip()
     
-    logger.log("Result text from SAB: " + sabText, logger.DEBUG)
+    logger.log(u"Result text from SAB: " + sabText, logger.DEBUG)
     
     if sabText == "ok":
-        logger.log("NZB sent to SAB successfully", logger.DEBUG)
+        logger.log(u"NZB sent to SAB successfully", logger.DEBUG)
         return True
     elif sabText == "Missing authentication":
-        logger.log("Incorrect username/password sent to SAB, NZB not sent", logger.ERROR)
+        logger.log(u"Incorrect username/password sent to SAB, NZB not sent", logger.ERROR)
         return False
     else:
-        logger.log("Unknown failure sending NZB to sab. Return text is: " + sabText, logger.ERROR)
+        logger.log(u"Unknown failure sending NZB to sab. Return text is: " + sabText, logger.ERROR)
         return False

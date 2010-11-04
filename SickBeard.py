@@ -58,7 +58,7 @@ def loadShowsFromDB():
 			curShow = TVShow(int(sqlShow["tvdb_id"]))
 			sickbeard.showList.append(curShow)
 		except Exception, e:
-			logger.log("There was an error creating the show in "+sqlShow["location"]+": "+str(e), logger.ERROR)
+			logger.log(u"There was an error creating the show in "+sqlShow["location"]+": "+str(e).decode('utf-8'), logger.ERROR)
 			logger.log(traceback.format_exc(), logger.DEBUG)
 			
 		#TODO: make it update the existing shows if the showlist has something in it
@@ -109,7 +109,7 @@ def main():
 	
 	# load the config and publish it to the sickbeard package
 	if not os.path.isfile(config_file):
-		logger.log("Unable to find config.ini, all settings will be default", logger.ERROR)
+		logger.log(u"Unable to find config.ini, all settings will be default", logger.ERROR)
 
 	sickbeard.CFG = ConfigObj(config_file)
 
@@ -119,12 +119,12 @@ def main():
 	sickbeard.showList = []
 	
 	if forcedPort:
-		logger.log("Forcing web server to port "+str(forcedPort))
+		logger.log(u"Forcing web server to port "+str(forcedPort))
 		startPort = forcedPort
 	else:
 		startPort = sickbeard.WEB_PORT
 	
-	logger.log("Starting Sick Beard on http://localhost:"+str(startPort))
+	logger.log(u"Starting Sick Beard on http://localhost:"+str(startPort))
 
 	if sickbeard.WEB_LOG:
 		log_dir = sickbeard.LOG_DIR
@@ -142,14 +142,14 @@ def main():
 		        'password':  sickbeard.WEB_PASSWORD,
 		})
 	except IOError:
-		logger.log("Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)
+		logger.log(u"Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)
 		if sickbeard.LAUNCH_BROWSER:
-			logger.log("Launching browser and exiting", logger.ERROR)
+			logger.log(u"Launching browser and exiting", logger.ERROR)
 			sickbeard.launchBrowser()
 		sys.exit()
 
 	# build from the DB to start with
-	logger.log("Loading initial show list")
+	logger.log(u"Loading initial show list")
 	loadShowsFromDB()
 
 	# set up the lists

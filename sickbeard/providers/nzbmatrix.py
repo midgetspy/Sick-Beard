@@ -77,7 +77,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 				myParser = FileParser(title)
 				epInfo = myParser.parse()
 			except tvnamer_exceptions.InvalidFilename:
-				logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
+				logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
 				continue
 			
 			quality = Quality.nameQuality(title)
@@ -85,10 +85,10 @@ class NZBMatrixProvider(generic.NZBProvider):
 			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
 			
 			if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
-				logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 				continue
 			
-			logger.log("Found result " + title + " at " + url, logger.DEBUG)
+			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 			
 			result = self.getResult([episode])
 			result.url = url
@@ -120,25 +120,25 @@ class NZBMatrixProvider(generic.NZBProvider):
 				myParser = FileParser(title)
 				epInfo = myParser.parse()
 			except tvnamer_exceptions.InvalidFilename:
-				logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
+				logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
 				continue
 			
 			
 			if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
-				logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+				logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
 				continue
 	
 			# make sure we want the episode
 			wantEp = True
 			for epNo in epInfo.episodenumbers:
 				if not show.wantEpisode(season, epNo, quality):
-					logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+					logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 					wantEp = False
 					break
 			if not wantEp:
 				continue
 			
-			logger.log("Found result " + title + " at " + url, logger.DEBUG)
+			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 			
 			# make a result object
 			epObj = []
@@ -154,11 +154,11 @@ class NZBMatrixProvider(generic.NZBProvider):
 				epNum = epObj[0].episode
 			elif len(epObj) > 1:
 				epNum = MULTI_EP_RESULT
-				logger.log("Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
+				logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
 			elif len(epObj) == 0:
 				epNum = SEASON_RESULT
 				result.extraInfo = [show]
-				logger.log("Separating full season result to check for later", logger.DEBUG)
+				logger.log(u"Separating full season result to check for later", logger.DEBUG)
 		
 			if epNum in results:
 				results[epNum].append(result)
@@ -184,9 +184,9 @@ class NZBMatrixProvider(generic.NZBProvider):
 		
 		searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 	
-		logger.log("Search string: " + searchURL, logger.DEBUG)
+		logger.log(u"Search string: " + searchURL, logger.DEBUG)
 	
-		logger.log("Sleeping 10 seconds to respect NZBMatrix's rules")
+		logger.log(u"Sleeping 10 seconds to respect NZBMatrix's rules")
 		time.sleep(10)
 	
 		searchResult = self.getURL(searchURL)
@@ -198,7 +198,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(searchResult))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log("Error trying to load NZBMatrix RSS feed: "+str(e), logger.ERROR)
+			logger.log(u"Error trying to load NZBMatrix RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
 			return []
 			
 		results = []
@@ -211,7 +211,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 				continue
 	
 			if not title or not url:
-				logger.log("The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable", logger.ERROR)
+				logger.log(u"The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable", logger.ERROR)
 				continue
 	
 			results.append(curItem)
@@ -231,7 +231,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 			descriptionStr = curResult.findtext('description')
 			dateStr = re.search('<b>Added:</b> (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)', descriptionStr).group(1)
 			if not dateStr:
-				logger.log("Unable to figure out the date for entry "+title+", skipping it")
+				logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
 				continue
 			else:
 				resultDate = datetime.datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S")
@@ -265,7 +265,7 @@ class NZBMatrixCache(tvcache.TVCache):
 
 		url += urllib.urlencode(urlArgs)
 		
-		logger.log("NZBMatrix cache update URL: "+ url, logger.DEBUG)
+		logger.log(u"NZBMatrix cache update URL: "+ url, logger.DEBUG)
 		
 		data = self.provider.getURL(url)
 		

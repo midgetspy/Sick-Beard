@@ -66,7 +66,7 @@ class NZBsRUSCache(tvcache.TVCache):
 
 		url += urllib.urlencode(urlArgs)
 		
-		logger.log("NZBs'R'US cache update URL: "+ url, logger.DEBUG)
+		logger.log(u"NZBs'R'US cache update URL: "+ url, logger.DEBUG)
 		
 		data = self.provider.getURL(url)
 		

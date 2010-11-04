@@ -53,12 +53,12 @@ def renameFile(movedFilePath, newName):
 
     renamedFilePathname = ek.ek(os.path.join, filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
 
-    logger.log("Renaming from " + movedFilePath + " to " + renamedFilePathname)
+    logger.log(u"Renaming from " + movedFilePath + " to " + renamedFilePathname)
 
     try:
         ek.ek(os.rename, movedFilePath, renamedFilePathname)
     except (OSError, IOError), e:
-        logger.log("Failed renaming " + movedFilePath + " to " + os.path.basename(renamedFilePathname) + ": " + str(e), logger.ERROR)
+        logger.log(u"Failed renaming " + movedFilePath + " to " + os.path.basename(renamedFilePathname) + ": " + str(e), logger.ERROR)
         return False
 
     return renamedFilePathname
@@ -87,9 +87,9 @@ def deleteAssociatedFiles(file):
     for associatedFilePath in ek.ek(glob.glob, baseName+'*'):
         # only delete it if the only non-shared part is the extension
         if '.' in associatedFilePath[len(baseName):]:
-            logger.log("Not deleting file "+associatedFilePath+" because it looks like it's not related", logger.DEBUG)
+            logger.log(u"Not deleting file "+associatedFilePath+" because it looks like it's not related", logger.DEBUG)
             continue
-        logger.log("Deleting file "+associatedFilePath+" because it is associated with "+file, logger.DEBUG)
+        logger.log(u"Deleting file "+associatedFilePath+" because it is associated with "+file, logger.DEBUG)
         ek.ek(os.remove, associatedFilePath)
         
 def _checkForExistingFile(renamedFilePath, oldFile):
@@ -328,7 +328,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 
         except (tvdb_exceptions.tvdb_exception, IOError), e:
 
-            returnStr += logHelper("Unable to look up show on TVDB: "+str(e), logger.DEBUG)
+            returnStr += logHelper("Unable to look up show on TVDB: "+str(e).decode('utf-8'), logger.DEBUG)
             returnStr += logHelper("Looking up show in DB instead", logger.DEBUG)
             showInfo = helpers.searchDBForShow(result.seriesname)
 
@@ -422,7 +422,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         try:        
             curEp = showResults.getEpisode(season, episode)
         except exceptions.EpisodeNotFoundException, e:
-            returnStr += logHelper("Unable to create episode: "+str(e), logger.DEBUG)
+            returnStr += logHelper("Unable to create episode: "+str(e).decode('utf-8'), logger.DEBUG)
             return returnStr
         
         if rootEp == None:
@@ -605,7 +605,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
             out, err = p.communicate()
             returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
         except OSError, e:
-            returnStr += logHelper("Unable to run extra_script: "+str(e))
+            returnStr += logHelper("Unable to run extra_script: "+str(e).decode('utf-8'))
 
     returnStr += logHelper("Post processing finished successfully", logger.DEBUG)
 

@@ -22,21 +22,21 @@ def makeShowNFO(showID):
     try:
         myShow = t[int(showID)]
     except tvdb_exceptions.tvdb_shownotfound:
-        logger.log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+        logger.log(u"Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
         raise
 
     except tvdb_exceptions.tvdb_error:
-        logger.log("TVDB is down, can't use its data to add this show", logger.ERROR)
+        logger.log(u"TVDB is down, can't use its data to add this show", logger.ERROR)
         raise
 
     # check for title and id
     try:
         if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
-            logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+            logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
             return False
     except tvdb_exceptions.tvdb_attributenotfound:
-        logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+        logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
         return False
     
@@ -104,10 +104,10 @@ def makeShowNFO(showID):
 def getTVDBIDFromNFO(dir):
 
     if not ek.ek(os.path.isdir, dir):
-        logger.log("Show dir doesn't exist, can't load NFO")
+        logger.log(u"Show dir doesn't exist, can't load NFO")
         raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
     
-    logger.log("Loading show info from NFO")
+    logger.log(u"Loading show info from NFO")
 
     xmlFile = ek.ek(os.path.join, dir, "tvshow.nfo")
     
@@ -130,14 +130,14 @@ def getTVDBIDFromNFO(dir):
             raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
     except (exceptions.NoNFOException, SyntaxError), e:
-        logger.log("There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
-        logger.log("Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
+        logger.log(u"There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
+        logger.log(u"Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 
         try:
             xmlFileObj.close()
             ek.ek(os.rename, xmlFile, xmlFile + ".old")
         except Exception, e:
-            logger.log("Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
+            logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
         raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
     return tvdb_id

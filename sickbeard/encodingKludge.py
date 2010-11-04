@@ -12,12 +12,12 @@ def fixStupidEncodings(x):
         try:
             return x.decode('utf-8')
         except UnicodeDecodeError:
-            logger.log("Unable to decode value: "+str(repr(x)), logger.ERROR)
+            logger.log(u"Unable to decode value: "+str(repr(x)), logger.ERROR)
             return None
     elif type(x) == unicode:
         return x
     else:
-        logger.log("Unknown value passed in, ignoring it: "+str(type(x)), logger.ERROR)
+        logger.log(u"Unknown value passed in, ignoring it: "+str(type(x)), logger.ERROR)
         return None
 
     return None

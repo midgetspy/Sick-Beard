@@ -166,7 +166,7 @@ class ManageSearches:
 
         # force it to run the next time it looks
         sickbeard.backlogSearchScheduler.forceSearch()
-        logger.log("Backlog search started in background")
+        logger.log(u"Backlog search started in background")
         flash.message('Backlog search started',
                       'The backlog search has begun and will run in the background')
         redirect("/manage/manageSearches")
@@ -177,7 +177,7 @@ class ManageSearches:
         # force it to run the next time it looks
         result = sickbeard.currentSearchScheduler.forceRun()
         if result:
-            logger.log("Search forced")
+            logger.log(u"Search forced")
             flash.message('Episode search started',
                           'Note: RSS feeds may not be updated if they have been retrieved too recently')
         
@@ -319,7 +319,7 @@ class Manage:
             curErrors += Home().editShow(curShow, newLocation, anyQualities, bestQualities, seasonfolders, paused, True)
 
             if curErrors:
-                logger.log("Errors: "+str(curErrors))
+                logger.log(u"Errors: "+str(curErrors))
                 errors.append('<b>%s:</b><br />\n<ul>' % showObj.name + '\n'.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
         
         if len(errors) > 0:
@@ -371,14 +371,14 @@ class Manage:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True)
                     updates.append(showObj.name)
                 except exceptions.CantUpdateException, e:
-                    errors.append("Unable to update show "+showObj.name+": "+str(e))
+                    errors.append("Unable to update show "+showObj.name+": "+str(e).decode('utf-8'))
             
             if curShowID in toRefresh and curShowID not in toUpdate:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)
                     refreshes.append(showObj.name)
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh show "+showObj.name+": "+str(e))
+                    errors.append("Unable to refresh show "+showObj.name+": "+str(e).decode('utf-8'))
 
             if curShowID in toRename:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
@@ -895,7 +895,7 @@ class ConfigProviders:
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
-                logger.log("don't know what "+curProvider+" is, skipping")
+                logger.log(u"don't know what "+curProvider+" is, skipping")
 
         if tvbinz_uid:
             sickbeard.TVBINZ_UID = tvbinz_uid.strip()
@@ -1074,7 +1074,7 @@ class NewHomeAddShows:
         try:
             seriesXML = etree.ElementTree(etree.XML(urlData))
         except Exception, e:
-            logger.log("Unable to parse XML for some reason: "+str(e)+" from XML: "+urlData, logger.ERROR)
+            logger.log(u"Unable to parse XML for some reason: "+str(e).decode('utf-8')+" from XML: "+urlData, logger.ERROR)
             return ''
         
         series = seriesXML.getiterator('Series')
@@ -1092,7 +1092,7 @@ class NewHomeAddShows:
             redirect("/home/addShows")
 
         if not os.path.isdir(dir):
-            logger.log("The provided directory "+dir+" doesn't exist", logger.ERROR)
+            logger.log(u"The provided directory "+dir+" doesn't exist", logger.ERROR)
             flash.error("Unable to find the directory <tt>%s</tt>" % dir)
             redirect("/home/addShows")
         
@@ -1101,11 +1101,11 @@ class NewHomeAddShows:
         for curDir in os.listdir(unicode(dir)):
             curPath = os.path.join(dir, curDir)
             if os.path.isdir(curPath):
-                logger.log("Adding "+curPath+" to the showDir list", logger.DEBUG)
+                logger.log(u"Adding "+curPath+" to the showDir list", logger.DEBUG)
                 showDirs.append(curPath)
         
         if len(showDirs) == 0:
-            logger.log("The provided directory "+dir+" has no shows in it", logger.ERROR)
+            logger.log(u"The provided directory "+dir+" has no shows in it", logger.ERROR)
             flash.error("The provided root folder <tt>%s</tt> has no shows in it." % dir)
             redirect("/home/addShows")
         
@@ -1117,7 +1117,7 @@ class NewHomeAddShows:
         return _munge(myTemplate)       
         
         url = "/home/addShows/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
-        logger.log("Redirecting to URL "+url, logger.DEBUG)
+        logger.log(u"Redirecting to URL "+url, logger.DEBUG)
         redirect(url)
     
     @cherrypy.expose
@@ -1302,7 +1302,7 @@ class Home:
     @cherrypy.expose
     def twitterStep2(self, key):
         result = notifiers.testTwitter2(key)
-        logger.log("result: "+str(result))
+        logger.log(u"result: "+str(result))
         if result:
             return "Key verification successful"
         else:
@@ -1497,7 +1497,7 @@ class Home:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh this show: "+str(e))
+                    errors.append("Unable to refresh this show: "+str(e).decode('utf-8'))
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
@@ -1514,7 +1514,7 @@ class Home:
                         try:
                             sickbeard.showQueueScheduler.action.refreshShow(showObj)
                         except exceptions.CantRefreshException, e:
-                            errors.append("Unable to refresh this show:"+str(e))
+                            errors.append("Unable to refresh this show:"+str(e).decode('utf-8'))
                         # grab updated info from TVDB
                         #showObj.loadEpisodesFromTVDB()
                         # rescan the episodes in the new folder
@@ -1661,7 +1661,7 @@ class Home:
 
             for curEp in eps.split('|'):
 
-                logger.log("Attempting to set status on episode "+curEp+" to "+status, logger.DEBUG)
+                logger.log(u"Attempting to set status on episode "+curEp+" to "+status, logger.DEBUG)
 
                 epInfo = curEp.split('x')
 
@@ -1673,11 +1673,11 @@ class Home:
                 with epObj.lock:
                     # don't let them mess up UNAIRED episodes
                     if epObj.status == UNAIRED:
-                        logger.log("Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
+                        logger.log(u"Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
                     
                     if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
-                        logger.log("Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
+                        logger.log(u"Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
                         continue
 
                     epObj.status = int(status)
@@ -1710,7 +1710,7 @@ class Home:
         else:
 
             # just use the first result for now
-            logger.log("Downloading episode from " + foundEpisode.url)
+            logger.log(u"Downloading episode from " + foundEpisode.url)
             result = search.snatchEpisode(foundEpisode)
             providerModule = foundEpisode.provider
             if providerModule == None:
@@ -1762,7 +1762,7 @@ class WebInterface:
                 im.save(buffer, 'JPEG')
                 return buffer.getvalue()
         else:
-            logger.log("No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
+            logger.log(u"No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
     def comingEpisodes(self, sort="date"):

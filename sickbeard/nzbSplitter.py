@@ -1,4 +1,4 @@
-import urllib
+import urllib2
 
 import xml.etree.cElementTree as etree
 import xml.etree
@@ -15,7 +15,7 @@ def getSeasonNZBs(name, urlData, season):
     try:
         showXML = etree.ElementTree(etree.XML(urlData))
     except SyntaxError:
-        logger.log("Unable to parse the XML of "+name+", not splitting it", logger.ERROR)
+        logger.log(u"Unable to parse the XML of "+name+", not splitting it", logger.ERROR)
         return ({},'')
 
     filename = name.replace(".nzb", "")
@@ -28,7 +28,7 @@ def getSeasonNZBs(name, urlData, season):
     if sceneNameMatch: 
         showName, qualitySection, groupName = sceneNameMatch.groups()
     else:
-        logger.log("Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
+        logger.log(u"Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
         return ({},'')
     
     regex = '(' + re.escape(showName) + '\.S%02d(?:[E0-9]+)\.[\w\._]+\-\w+' % season + ')'
@@ -82,15 +82,19 @@ def stripNS(element, ns):
 
 
 def splitResult(result):
-    
-    urlData = helpers.getURL(result.url)
-    
+
+    try:
+        urlData = helpers.getURL(result.url)
+    except urllib2.URLError, e:
+        logger.log(u"Unable to load url "+result.url+", can't download season NZB", logger.ERROR)
+        return False
+     
     # parse the season ep name
     try:
         fp = FileParser(result.name)
         epInfo = fp.parse()
     except tvnamer_exceptions.InvalidFilename:
-        logger.log("Unable to parse the filename "+result.name+" into a valid episode", logger.WARNING)
+        logger.log(u"Unable to parse the filename "+result.name+" into a valid episode", logger.WARNING)
         return False
 
     # bust it up
@@ -102,22 +106,22 @@ def splitResult(result):
     
     for newNZB in separateNZBs:
 
-        logger.log("Split out "+newNZB+" from "+result.name, logger.DEBUG)
+        logger.log(u"Split out "+newNZB+" from "+result.name, logger.DEBUG)
 
         # parse the name
         try:
             fp = FileParser(newNZB)
             epInfo = fp.parse()
         except tvnamer_exceptions.InvalidFilename:
-            logger.log("Unable to parse the filename "+newNZB+" into a valid episode", logger.WARNING)
+            logger.log(u"Unable to parse the filename "+newNZB+" into a valid episode", logger.WARNING)
             return False
 
         # make sure the result is sane
         if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
-            logger.log("Found "+newNZB+" inside "+result.name+" but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
+            logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
             continue
         elif len(epInfo.episodenumbers) == 0:
-            logger.log("Found "+newNZB+" inside "+result.name+" but it doesn't seem to be a valid episode NZB, ignoring it", logger.WARNING)
+            logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to be a valid episode NZB, ignoring it", logger.WARNING)
             continue
 
         wantEp = True
@@ -125,7 +129,7 @@ def splitResult(result):
             if epNo == -1:
                 continue
             if not result.extraInfo[0].wantEpisode(season, epNo, result.quality):
-                logger.log("Ignoring result "+newNZB+" because we don't want an episode that is "+Quality.qualityStrings[result.quality], logger.DEBUG)
+                logger.log(u"Ignoring result "+newNZB+" because we don't want an episode that is "+Quality.qualityStrings[result.quality], logger.DEBUG)
                 wantEp = False
                 break
         if not wantEp:
