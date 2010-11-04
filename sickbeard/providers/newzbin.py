@@ -80,7 +80,7 @@ class NewzbinProvider(generic.NZBProvider):
         return '{'+self.NEWZBIN_NS+'}'+name
     
     def isEnabled(self):
-        return True
+        return sickbeard.NEWZBIN
 
     def getQuality(self, item):
         attributes = item.find(self._report('attributes'))

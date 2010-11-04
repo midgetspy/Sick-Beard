@@ -831,7 +831,8 @@ class ConfigProviders:
     def saveProviders(self, tvbinz_uid=None, tvbinz_hash=None, nzbs_org_uid=None,
                       nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       tvbinz_auth=None, provider_order=None,
-                      nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None):
+                      nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+                      newzbin_username=None, newzbin_password=None):
 
         results = []
 
@@ -886,6 +887,8 @@ class ConfigProviders:
                 sickbeard.NZBSRUS = curEnabled
             elif curProvider == 'nzbmatrix':
                 sickbeard.NZBMATRIX = curEnabled
+            elif curProvider == 'newzbin':
+                sickbeard.NEWZBIN = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
@@ -912,6 +915,9 @@ class ConfigProviders:
         
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()
+        
+        sickbeard.NEWZBIN_USERNAME = newzbin_username
+        sickbeard.NEWZBIN_PASSWORD = newzbin_password
         
         sickbeard.PROVIDER_ORDER = provider_list
         
