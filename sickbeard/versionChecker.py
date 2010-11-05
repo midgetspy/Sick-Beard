@@ -177,13 +177,15 @@ class GitUpdateManager(UpdateManager):
         output = None
 
         if sickbeard.GIT_PATH:
-            git = sickbeard.GIT_PATH
+            git = '"'+sickbeard.GIT_PATH+'"'
         else:
             git = 'git'
         
+        cmd = git+' rev-parse HEAD'
+        
         try:
-            logger.log(u"Executing "+git+" show with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
-            p = subprocess.Popen(git+' show', stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
+            logger.log(u"Executing "+cmd+"with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
             output, err = p.communicate()
         except OSError, e:
             logger.log(u"Unable to find git, can't tell what version you're running")
@@ -193,20 +195,13 @@ class GitUpdateManager(UpdateManager):
             logger.log(u"Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
             return None
         
-        commit_regex = '^commit ([a-f0-9]+)$'
-        
-        self._cur_commit_hash = None
-        
-        for line in output.split('\n'):
-        
-            match = re.match(commit_regex, line)
-            if match:
-                self._cur_commit_hash = match.group(1)
-                break
+        if 'fatal:' in output or err:
+            logger.log(u"Git returned bad info, are you sure this is a git installation?", logger.ERROR)
+            return None
 
-        if not self._cur_commit_hash:
-            logger.log(u"The commit output wasn't the format we expected, couldn't figure out what version this is", logger.ERROR)
-            logger.log(u"Git output: "+str(output), logger.DEBUG)
+        self._cur_commit_hash = output.strip()
+        
+        logger.log(u"Git output: "+str(output), logger.DEBUG)
     
 
     def _check_github_for_update(self):
@@ -278,7 +273,7 @@ class GitUpdateManager(UpdateManager):
         output = None
         
         if sickbeard.GIT_PATH:
-            git = sickbeard.GIT_PATH
+            git = '"'+sickbeard.GIT_PATH+'"'
         else:
             git = 'git'
         
