@@ -322,7 +322,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
                 showObj = t[result.seriesname]
             
-            returnStr += logHelper("Got tvdb_id "+str(showObj["id"])+" and series name "+str(showObj["seriesname"])+" from TVDB", logger.DEBUG)
+            returnStr += logHelper("Got tvdb_id "+str(showObj["id"])+" and series name "+showObj["seriesname"].decode('utf-8')+" from TVDB", logger.DEBUG)
             
             showInfo = (int(showObj["id"]), showObj["seriesname"])
                 
