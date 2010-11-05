@@ -99,7 +99,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 		
 		# parse the file name
 		try:
-			myParser = FileParser(title)
+			myParser = FileParser(title, absolute_numbering)
 			epInfo = myParser.parse()
 		except tvnamer_exceptions.InvalidFilename:
 			logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
@@ -112,7 +112,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 		else:
 			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
 		
-		if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
+		if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch, absolute_numbering):
 			logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 			return None
 		

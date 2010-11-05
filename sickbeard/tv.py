@@ -887,7 +887,7 @@ class TVShow(object):
         return toReturn
 
         
-    def wantEpisode(self, season, episode, quality, manualSearch=False):
+    def wantEpisode(self, season, episode, quality, manualSearch=False, absolute_numbering=False):
         
         logger.log("Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
 
@@ -899,7 +899,11 @@ class TVShow(object):
             return False
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
+        
+        if absolute_numbering:
+            sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [self.tvdbid, episode])
+        else:
+            sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
         
         if not sqlResults or not len(sqlResults):
             logger.log("Unable to find the episode", logger.DEBUG)

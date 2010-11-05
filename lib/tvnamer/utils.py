@@ -234,16 +234,22 @@ class FileParser(object):
     """Deals with parsing of filenames
     """
 
-    def __init__(self, path):
+    def __init__(self, path, absolute_numbering=False):
         self.path = path
         self.compiled_regexs = []
-        self._compileRegexs()
+        self._compileRegexs(absolute_numbering)
 
-    def _compileRegexs(self):
+    def _compileRegexs(self, absolute_numbering):
         """Takes episode_patterns from config, compiles them all
         into self.compiled_regexs
         """
-        for cpattern in Config['filename_patterns']:
+        
+        if absolute_numbering:
+            uncompiled_regex = Config['absolute_filename_patterns']
+        else:
+            uncompiled_regex = Config['filename_patterns']        
+        
+        for cpattern in uncompiled_regex:
             try:
                 cregex = re.compile(cpattern, re.VERBOSE)
             except re.error, errormsg:

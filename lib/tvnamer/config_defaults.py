@@ -316,6 +316,22 @@ defaults = {
         ''',
         
     ],
+    
+    # Patterns to parse input filenames with, checking for series that use absolute numbering and not seasons
+    'absolute_filename_patterns': [
+    
+        # [group] foo.103*
+        '''^\[.+?\][ ]?                           # group name
+        (?P<seriesname>.+)[ \._\-]                # Show name
+        (?P<episodenumber>[0-9]+)                 # Episode number
+        ''',
+    
+        # foo.103*
+        '''^(?P<seriesname>.+)[ \._\-]            # Show name
+        (?P<episodenumber>[0-9]+)                 # Episode number
+        ''',
+        
+    ],
 
     # Formats for renamed files. Variations for with/without episode,
     # and with/without season number.
