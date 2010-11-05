@@ -110,9 +110,9 @@ def updateLibrary(host, showName=None):
 
     # if we're doing per-show
     if showName:
-        pathSql = 'select path.strPath from path, tvshow, tvshowlinkpath where \
-            tvshow.c00 = "%s" and tvshowlinkpath.idShow = tvshow.idShow \
-            and tvshowlinkpath.idPath = path.idPath' % (showName)
+        pathSql = 'select path.strPath from path, tvshow, tvshowlinkpath where ' \
+            'tvshow.c00 = "%s" and tvshowlinkpath.idShow = tvshow.idShow ' \
+            'and tvshowlinkpath.idPath = path.idPath' % (showName)
 
         # Use this to get xml back for the path lookups
         xmlCommand = {'command': 'SetResponseFormat(webheader;false;webfooter;false;header;<xml>;footer;</xml>;opentag;<tag>;closetag;</tag>;closefinaltag;false)'}
