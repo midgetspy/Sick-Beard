@@ -474,7 +474,7 @@ class ConfigGeneral:
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, create_images=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
-                    anyQualities = [], bestQualities = [], naming_dates=None, http_proxy = None):
+                    anyQualities = [], bestQualities = [], naming_dates=None):
 
         results = []
 
@@ -563,9 +563,6 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
-        sickbeard.HTTP_PROXY = http_proxy
-        
-        sickbeard.initializeTvdbApiParams()
 
         config.change_VERSION_NOTIFY(version_notify)
 

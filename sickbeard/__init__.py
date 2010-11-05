@@ -24,6 +24,7 @@ import sqlite3
 import datetime
 import socket
 import os, sys, subprocess
+import urllib
 
 from threading import Lock
 
@@ -80,8 +81,6 @@ WEB_ROOT = None
 WEB_USERNAME = None
 WEB_PASSWORD = None 
 WEB_HOST = None
-
-HTTP_PROXY = None
 
 LAUNCH_BROWSER = None
 CREATE_METADATA = None
@@ -266,7 +265,7 @@ def initialize(consoleLogging=True):
     
     with INIT_LOCK:
         
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, HTTP_PROXY, \
+        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, \
                 NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
@@ -319,7 +318,6 @@ def initialize(consoleLogging=True):
         WEB_LOG = bool(check_setting_int(CFG, 'General', 'web_log', 0))
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
-        HTTP_PROXY = check_setting_str(CFG, 'General', 'http_proxy', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
         CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
         CREATE_IMAGES = bool(check_setting_int(CFG, 'General', 'create_images', 1))
@@ -655,7 +653,6 @@ def save_config():
     CFG['General']['web_root'] = WEB_ROOT
     CFG['General']['web_username'] = WEB_USERNAME
     CFG['General']['web_password'] = WEB_PASSWORD
-    CFG['General']['http_proxy'] = HTTP_PROXY
     CFG['General']['nzb_method'] = NZB_METHOD
     CFG['General']['usenet_retention'] = int(USENET_RETENTION)
     CFG['General']['search_frequency'] = int(SEARCH_FREQUENCY)
@@ -727,12 +724,19 @@ def save_config():
 def initializeTvdbApiParams():
     global TVDB_API_PARMS
         
+    proxies = urllib.getproxies()
+    proxy_url = None
+    if 'http' in proxies:
+        proxy_url = proxies['http']
+    elif 'ftp' in proxies:
+        proxy_url = proxies['ftp']
+        
     # Set our common tvdb_api options here
     TVDB_API_PARMS = {'cache': True,
                       'apikey': TVDB_API_KEY,
                       'language': 'en',
                       'cache_dir': False,
-                      'http_proxy': HTTP_PROXY}
+                      'http_proxy': proxy_url}
     
     if CACHE_DIR:
         TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
