@@ -62,7 +62,6 @@ you want them to be searched<br />
 </ul>
 <br />
 <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>">
-
 </fieldset>
 </div>
 
@@ -168,9 +167,6 @@ NZBs'R'US hash<br />
 <input type="hidden" name="newznab_string" id="newznab_string">
 <select id="editANewznabProvider">
 <option value="addNewznab">-- add new provider --</option>
-#for $curNewznabProvider in $sickbeard.newznabProviderList:
-<!--<option value="$curNewznabProvider.getID()">$curNewznabProvider.name-->
-#end for
 </select>
 <br />
 <br />
