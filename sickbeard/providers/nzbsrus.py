@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -30,13 +30,13 @@ from sickbeard import tvcache
 import generic
 
 class NZBsRUSProvider(generic.NZBProvider):
-	
+
 	def __init__(self):
-		
+
 		generic.NZBProvider.__init__(self, "NZBs'R'US")
-		
+
 		self.cache = NZBsRUSCache(self)
-		
+
 		self.url = 'http://www.nzbsrus.com/'
 
 	def isEnabled(self):
@@ -44,19 +44,19 @@ class NZBsRUSProvider(generic.NZBProvider):
 
 	def _checkAuth(self):
 		if sickbeard.NZBSRUS_UID in (None, "") or sickbeard.NZBSRUS_HASH in (None, ""):
-			raise exceptions.AuthException("NZBs'R'US authentication details are empty, check your config")	
-		
+			raise exceptions.AuthException("NZBs'R'US authentication details are empty, check your config")
+
 
 class NZBsRUSCache(tvcache.TVCache):
-	
+
 	def __init__(self, provider):
 
 		tvcache.TVCache.__init__(self, provider)
 
 		# only poll NZBs'R'US every 15 minutes max
 		self.minTime = 15
-		
-	
+
+
 	def _getRSSData(self):
 
 		url = self.provider.url + 'rssfeed.php?'
@@ -65,13 +65,13 @@ class NZBsRUSCache(tvcache.TVCache):
 				   'h': sickbeard.NZBSRUS_HASH}
 
 		url += urllib.urlencode(urlArgs)
-		
+
 		logger.log(u"NZBs'R'US cache update URL: "+ url, logger.DEBUG)
-		
+
 		data = self.provider.getURL(url)
-		
+
 		return data
-	
+
 	def _checkAuth(self, data):
 		return data != 'Invalid Link'
 

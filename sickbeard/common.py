@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -63,7 +63,7 @@ class Quality:
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
     UNKNOWN = 1<<15
-    
+
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
                       SDTV: "SD TV",
@@ -102,15 +102,15 @@ class Quality:
                 anyQualities.append(curQual)
             if curQual<<16 & quality:
                 bestQualities.append(curQual)
-        
+
         return (anyQualities, bestQualities)
 
     @staticmethod
     def nameQuality(name):
-        
+
         name = os.path.basename(name)
-        
-        # if we have our exact text then assume we put it there 
+
+        # if we have our exact text then assume we put it there
         for x in Quality.qualityStrings:
             if x == Quality.UNKNOWN:
                 continue
@@ -119,9 +119,9 @@ class Quality:
             regex_match = re.search(regex, name, re.I)
             if regex_match:
                 return x
-        
+
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
-    
+
         if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any):
             return Quality.SDTV
         elif checkName(["dvdrip.xvid", "bdrip.xvid"], any):
@@ -139,7 +139,7 @@ class Quality:
 
     @staticmethod
     def assumeQuality(name):
-        
+
         if name.endswith(".avi"):
             return Quality.SDTV
         elif name.endswith(".mkv"):
@@ -161,7 +161,7 @@ class Quality:
         for x in sorted(Quality.qualityStrings.keys(), reverse=True):
             if status > x*100:
                 return (status-x*100, x)
-        
+
         return (Quality.NONE, status)
 
     @staticmethod
@@ -176,7 +176,7 @@ Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qu
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
-HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], []) 
+HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
 ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV], [Quality.SDTV, Quality.HDTV])
@@ -220,7 +220,7 @@ class Overview:
     QUAL = 3
     GOOD = 4
     UNAIRED = 5
-    
+
     overviewStrings = {SKIPPED: "skipped",
                        WANTED: "wanted",
                        QUAL: "qual",
@@ -228,7 +228,7 @@ class Overview:
                        UNAIRED: "unaired"}
 
 # Get our xml namespaces correct for lxml
-XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance', 
+XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
              'xsd': 'http://www.w3.org/2001/XMLSchema'}
 
 

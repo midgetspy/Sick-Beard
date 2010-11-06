@@ -14,7 +14,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 def makeShowNFO(showID):
 
     t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
-    
+
     tvNode = etree.Element( "tvshow" )
     for ns in XML_NSMAP.keys():
         tvNode.set(ns, XML_NSMAP[ns])
@@ -39,11 +39,11 @@ def makeShowNFO(showID):
         logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
         return False
-    
+
     title = etree.SubElement( tvNode, "title" )
     if myShow["seriesname"] != None:
         title.text = myShow["seriesname"]
-        
+
     rating = etree.SubElement( tvNode, "rating" )
     if myShow["rating"] != None:
         rating.text = myShow["rating"]
@@ -59,7 +59,7 @@ def makeShowNFO(showID):
         showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
         episodeguideurl.text = showurl
         episodeguideurl2.text = showurl
-        
+
     mpaa = etree.SubElement( tvNode, "mpaa" )
     if myShow["contentrating"] != None:
         mpaa.text = myShow["contentrating"]
@@ -67,19 +67,19 @@ def makeShowNFO(showID):
     tvdbid = etree.SubElement( tvNode, "id" )
     if myShow["id"] != None:
         tvdbid.text = myShow["id"]
-        
+
     genre = etree.SubElement( tvNode, "genre" )
     if myShow["genre"] != None:
         genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
-        
+
     premiered = etree.SubElement( tvNode, "premiered" )
     if myShow["firstaired"] != None:
         premiered.text = myShow["firstaired"]
-        
+
     studio = etree.SubElement( tvNode, "studio" )
     if myShow["network"] != None:
         studio.text = myShow["network"]
-    
+
     for actor in myShow['_actors']:
 
         cur_actor = etree.SubElement( tvNode, "actor" )
@@ -106,11 +106,11 @@ def getTVDBIDFromNFO(dir):
     if not ek.ek(os.path.isdir, dir):
         logger.log(u"Show dir doesn't exist, can't load NFO")
         raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
-    
+
     logger.log(u"Loading show info from NFO")
 
     xmlFile = ek.ek(os.path.join, dir, "tvshow.nfo")
-    
+
     try:
         xmlFileObj = ek.ek(open, xmlFile, 'r')
         showXML = etree.ElementTree(file = xmlFileObj)
@@ -120,7 +120,7 @@ def getTVDBIDFromNFO(dir):
                 + str(showXML.findtext('title')) + " " \
                 + str(showXML.findtext('tvdbid')) + " " \
                 + str(showXML.findtext('id')))
-        
+
         name = showXML.findtext('title')
         if showXML.findtext('tvdbid') != None:
             tvdb_id = int(showXML.findtext('tvdbid'))

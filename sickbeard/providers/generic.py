@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -35,12 +35,12 @@ from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 
 class GenericProvider:
-    
+
     NZB = "nzb"
     TORRENT = "torrent"
-    
+
     def __init__(self, name):
-        
+
         # these need to be set in the subclass
         self.providerType = None
         self.name = name
@@ -52,7 +52,7 @@ class GenericProvider:
 
     def getID(self):
         return GenericProvider.makeID(self.name)
-    
+
     @staticmethod
     def makeID(name):
         return re.sub("[^\w\d_]", "_", name).lower()
@@ -70,7 +70,7 @@ class GenericProvider:
             return self.isEnabled() and sickbeard.USE_TORRENT
         else:
             return False
-    
+
     def isEnabled(self):
         """
         This should be overridden and should return the config setting eg. sickbeard.MYPROVIDER
@@ -81,16 +81,16 @@ class GenericProvider:
         """
         Returns a result of the correct type for this provider
         """
-        
+
         if self.providerType == GenericProvider.NZB:
             result = classes.NZBSearchResult(episodes)
         elif self.providerType == GenericProvider.TORRENT:
             result = classes.TorrentSearchResult(episodes)
         else:
             result = classes.SearchResult(episodes)
-        
+
         result.provider = self
-        
+
         return result
 
 
@@ -107,18 +107,18 @@ class GenericProvider:
         except (urllib2.HTTPError, IOError), e:
             logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
             return None
-    
+
         return result
 
     def downloadResult (self, result):
-    
+
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
-    
+
         data = self.getURL(result.url)
-        
+
         if data == None:
             return False
-        
+
         if self.providerType == GenericProvider.NZB:
             saveDir = sickbeard.NZB_DIR
             writeMode = 'w'
@@ -127,56 +127,56 @@ class GenericProvider:
             writeMode = 'wb'
         else:
             return False
-        
+
         fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
-        
+
         logger.log(u"Saving to " + fileName, logger.DEBUG)
-        
+
         fileOut = open(fileName, writeMode)
         fileOut.write(data)
         fileOut.close()
-    
+
         return True
 
     def searchRSS(self):
         self.cache.updateCache()
         return self.cache.findNeededEpisodes()
-    
+
     def findEpisode (self, episode, forceQuality=None, manualSearch=False):
-    
+
         self._checkAuth()
-    
+
         logger.log(u"Searching "+self.name+" for " + episode.prettyName(True))
-    
+
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)
         logger.log(u"Cache results: "+str(results), logger.DEBUG)
-    
+
         return results
 
     def findSeasonResults(self, show, season):
-        
-        return {}        
+
+        return {}
 
     def findPropers(self, date=None):
-    
+
         results = self.cache.listPropers(date)
-        
+
         return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
 
 
 class NZBProvider(GenericProvider):
-    
+
     def __init__(self, name):
-        
+
         GenericProvider.__init__(self, name)
-        
+
         self.providerType = GenericProvider.NZB
 
 class TorrentProvider(GenericProvider):
-    
+
     def __init__(self, name):
-        
+
         GenericProvider.__init__(self, name)
-        
+
         self.providerType = GenericProvider.TORRENT

@@ -82,7 +82,7 @@ class NewQualitySettings (NumericProviders):
 		return self.hasTable("db_version")
 
 	def execute(self):
-		
+
 		numTries = 0
 		while not ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0')):
 			if not ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db')):
@@ -98,11 +98,11 @@ class NewQualitySettings (NumericProviders):
 				numTries += 1
 				time.sleep(1)
 				logger.log(u"Trying again.")
-			
+
 			if numTries >= 10:
 				logger.log(u"Unable to back up your sickbeard.db file, please do it manually.")
 				sys.exit(1)
-		
+
 		# old stuff that's been removed from common but we need it to upgrade
 		HD = 1
 		SD = 3
@@ -147,7 +147,7 @@ class NewQualitySettings (NumericProviders):
 			if newStatus != None:
 				self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ? ", [newStatus, curUpdate["episode_id"]])
 				continue
-			
+
 			# if we get here status should be == DOWNLOADED
 			if not curUpdate["location"]:
 				continue
@@ -163,12 +163,12 @@ class NewQualitySettings (NumericProviders):
 		### Update show qualities
 		toUpdate = self.connection.select("SELECT * FROM tv_shows")
 		for curUpdate in toUpdate:
-			
+
 			if not curUpdate["quality"]:
 				continue
-			
+
 			if int(curUpdate["quality"]) == HD:
-				newQuality = common.HD 
+				newQuality = common.HD
 			elif int(curUpdate["quality"]) == SD:
 				newQuality = common.SD
 			elif int(curUpdate["quality"]) == ANY:
@@ -178,15 +178,15 @@ class NewQualitySettings (NumericProviders):
 			else:
 				logger.log(u"Unknown show quality: "+str(curUpdate["quality"]), logger.WARNING)
 				newQuality = None
-			
+
 			if newQuality:
 				self.connection.action("UPDATE tv_shows SET quality = ? WHERE show_id = ?", [newQuality, curUpdate["show_id"]])
-			
-			
+
+
 		### Update history
 		toUpdate = self.connection.select("SELECT * FROM history")
 		for curUpdate in toUpdate:
-			
+
 			newAction = None
 			newStatus = None
 			if int(curUpdate["action"] == ACTION_SNATCHED):
@@ -223,23 +223,23 @@ class DropOldHistoryTable(NewQualitySettings):
 class UpgradeHistoryForGenericProviders(DropOldHistoryTable):
 	def test(self):
 		return self.checkDBVersion() >= 3
-	
+
 	def execute(self):
-		
+
 		providerMap = {'NZBs': 'NZBs.org',
 					   'BinReq': 'Bin-Req',
 					   'NZBsRUS': '''NZBs'R'US''',
 					   'EZTV': 'EZTV@BT-Chat'}
-		
+
 		for oldProvider in providerMap:
 			self.connection.action("UPDATE history SET provider = ? WHERE provider = ?", [providerMap[oldProvider], oldProvider])
-		
+
 		self.incDBVersion()
 
 class AddAirByDateOption(UpgradeHistoryForGenericProviders):
 	def test(self):
 		return self.checkDBVersion() >= 4
-	
+
 	def execute(self):
 		self.connection.action("ALTER TABLE tv_shows ADD air_by_date NUMERIC")
 		self.incDBVersion()

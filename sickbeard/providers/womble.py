@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -30,39 +30,39 @@ from sickbeard import tvcache
 import generic
 
 class WombleProvider(generic.NZBProvider):
-    
+
     def __init__(self):
-        
+
         generic.NZBProvider.__init__(self, "Womble's Index")
-        
+
         self.cache = WombleCache(self)
-        
+
         self.url = 'http://nzb.isasecret.com/'
 
     def isEnabled(self):
         return sickbeard.WOMBLE
-        
+
 
 class WombleCache(tvcache.TVCache):
-    
+
     def __init__(self, provider):
 
         tvcache.TVCache.__init__(self, provider)
 
         # only poll Womble's Index every 15 minutes max
         self.minTime = 15
-        
-    
+
+
     def _getRSSData(self):
 
         url = self.provider.url + 'rss/?sec=TV&fr=false'
-        
+
         logger.log(u"Womble's Index cache update URL: "+ url, logger.DEBUG)
-        
+
         data = self.provider.getURL(url)
-        
+
         return data
-    
+
     def _checkAuth(self, data):
         return data != 'Invalid Link'
 

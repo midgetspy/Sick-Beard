@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -81,7 +81,7 @@ def isMediaFile (file):
 	# ignore samples
 	if re.search('(^|[\W_])sample\d*[\W_]', file):
 		return False
-	
+
 	sepFile = file.rpartition(".")
 	if sepFile[2].lower() in mediaExtensions:
 		return True
@@ -102,10 +102,10 @@ def sanitizeFileName (name):
 	for x in ":\"<>|?":
 		name = name.replace(x, "")
 	return name
-		
+
 
 def getURL (url, headers=[]):
-	
+
 	opener = urllib2.build_opener()
 	opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
 	for cur_header in headers:
@@ -137,7 +137,7 @@ def findCertainShow (showList, tvdbid):
 		raise MultipleShowObjectsException()
 	else:
 		return results[0]
-	
+
 def findCertainTVRageShow (showList, tvrid):
 
 	if tvrid == 0:
@@ -151,8 +151,8 @@ def findCertainTVRageShow (showList, tvrid):
 		raise MultipleShowObjectsException()
 	else:
 		return results[0]
-	
-	
+
+
 def makeDir (dir):
 	if not ek.ek(os.path.isdir, dir):
 		try:
@@ -170,7 +170,7 @@ def makeShowNFO(showID, showDir):
 		return False
 
 	t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
-	
+
 	try:
 		myShow = t[int(showID)]
 	except tvdb_exceptions.tvdb_shownotfound:
@@ -203,7 +203,7 @@ def makeShowNFO(showID, showDir):
 	nfo.write( nfo_fh, encoding="utf-8" )
 
 	return True
-	
+
 def buildNFOXML(myShow):
 	'''
 	Build an etree.Element of the root node of an NFO file with the
@@ -231,7 +231,7 @@ def buildNFOXML(myShow):
 	title = etree.SubElement( tvNode, "title" )
 	if myShow["seriesname"] != None:
 		title.text = myShow["seriesname"]
-		
+
 	rating = etree.SubElement( tvNode, "rating" )
 	if myShow["rating"] != None:
 		rating.text = myShow["rating"]
@@ -245,7 +245,7 @@ def buildNFOXML(myShow):
 	if myShow["id"] != None:
 		showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
 		episodeguideurl.text = showurl
-		
+
 	mpaa = etree.SubElement( tvNode, "mpaa" )
 	if myShow["contentrating"] != None:
 		mpaa.text = myShow["contentrating"]
@@ -253,19 +253,19 @@ def buildNFOXML(myShow):
 	tvdbid = etree.SubElement( tvNode, "id" )
 	if myShow["id"] != None:
 		tvdbid.text = myShow["id"]
-		
+
 	genre = etree.SubElement( tvNode, "genre" )
 	if myShow["genre"] != None:
 		genre.text = " / ".join([x for x in myShow["genre"].split('|') if x != ''])
-		
+
 	premiered = etree.SubElement( tvNode, "premiered" )
 	if myShow["firstaired"] != None:
 		premiered.text = myShow["firstaired"]
-		
+
 	studio = etree.SubElement( tvNode, "studio" )
 	if myShow["network"] != None:
 		studio.text = myShow["network"]
-	
+
 	for actor in myShow['_actors']:
 
 		cur_actor = etree.SubElement( tvNode, "actor" )
@@ -288,29 +288,29 @@ def buildNFOXML(myShow):
 
 
 def searchDBForShow(regShowName):
-	
+
 	showNames = set([regShowName+'%', regShowName.replace(' ','_')+'%'])
-	
+
 	# if tvdb fails then try looking it up in the db
 	myDB = db.DBConnection()
 
 	yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
 
 	for showName in showNames:
-	
+
 		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
-		
+
 		if len(sqlResults) == 1:
 			return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
 		else:
-	
+
 			# if we didn't get exactly one result then try again with the year stripped off if possible
 			match = re.match(yearRegex, showName)
 			if match:
 				logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
 				sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
-	
+
 			if len(sqlResults) == 0:
 				logger.log(u"Unable to match a record in the DB for "+showName, logger.DEBUG)
 				continue
@@ -320,17 +320,17 @@ def searchDBForShow(regShowName):
 			else:
 				return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
-	
+
 	return None
 
 def getShowImage(url, imgNum=None):
-	
+
 	imgFile = None
 	imgData = None
-	
+
 	if url == None:
 		return None
-	
+
 	# if they provided a fanart number try to use it instead
 	if imgNum != None:
 		tempURL = url.split('-')[0] + "-" + str(imgNum) + ".jpg"
@@ -354,7 +354,7 @@ def getShowImage(url, imgNum=None):
 
 	# get the image
 	try:
-		imgData = imgFile.read()		
+		imgData = imgFile.read()
 	except (urllib2.URLError, urllib2.HTTPError), e:
 		logger.log(u"There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
 		return None
@@ -392,7 +392,7 @@ def listMediaFiles(dir):
 		# if it's a dir do it recursively
 		if ek.ek(os.path.isdir, fullCurFile) and not curFile.startswith('.') and not curFile == 'Extras':
 			files += listMediaFiles(fullCurFile)
-	
+
 		elif isMediaFile(curFile):
 			files.append(fullCurFile)
 

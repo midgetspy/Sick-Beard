@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -27,14 +27,14 @@ from sickbeard import logger
 
 class DBConnection:
 	def __init__(self, dbFileName="sickbeard.db"):
-		
+
 		self.dbFileName = dbFileName
-		
+
 		self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, self.dbFileName), 20)
 		self.connection.row_factory = sqlite3.Row
 
  	def action(self, query, args=None):
-		
+
 		if query == None:
 			return
 
@@ -63,9 +63,9 @@ class DBConnection:
 			except sqlite3.DatabaseError, e:
 				logger.log(u"Fatal error executing query: " + str(e), logger.ERROR)
 				raise
-		
+
 		return sqlResult
-		
+
 
 	def select(self, query, args=None):
 
@@ -73,22 +73,22 @@ class DBConnection:
 
 		if sqlResults == None:
 			return []
-		
+
 		return sqlResults
-	
+
 	def upsert(self, tableName, valueDict, keyDict):
-		
+
 		changesBefore = self.connection.total_changes
-		
+
 		genParams = lambda myDict : [x + " = ?" for x in myDict.keys()]
-		
+
 		query = "UPDATE "+tableName+" SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
-		
+
 		self.action(query, valueDict.values() + keyDict.values())
 
 		if self.connection.total_changes == changesBefore:
 			query = "INSERT INTO "+tableName+" (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + \
-			         " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")" 
+			         " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")"
 			self.action(query, valueDict.values() + keyDict.values())
 
 	def tableInfo(self, tableName):

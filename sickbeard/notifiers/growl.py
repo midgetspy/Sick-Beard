@@ -13,20 +13,20 @@ def send_growl(options,message=None):
 	register = gntp.GNTPRegister()
 	register.add_header('Application-Name',options['app'])
 	register.add_notification(options['name'],True)
-	
+
 	if options['password']:
 		register.set_password(options['password'])
-	
+
 	_send(options['host'],options['port'],register.encode(),options['debug'])
-	
+
 	#Send Notification
 	notice = gntp.GNTPNotice()
-	
+
 	#Required
 	notice.add_header('Application-Name',options['app'])
 	notice.add_header('Notification-Name',options['name'])
 	notice.add_header('Notification-Title',options['title'])
-	
+
 	if options['password']:
 		notice.set_password(options['password'])
 
@@ -37,21 +37,21 @@ def send_growl(options,message=None):
 		notice.add_header('Notification-Priority',options['priority'])
 	if options['icon']:
 		notice.add_header('Notification-Icon',options['icon'])
-	
+
 	if message:
 		notice.add_header('Notification-Text',message)
-	
+
 	_send(options['host'],options['port'],notice.encode(),options['debug'])
 
 def _send(host,port,data,debug=False):
 	if debug: print '<Sending>\n',data,'\n</Sending>'
-	
+
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((host,port))
 	s.send(data)
 	response = gntp.parse_gntp(s.recv(1024))
 	s.close()
-	
+
 	if debug: print '<Recieved>\n',response,'\n</Recieved>'
 
 def sendGrowl(title="Sick Beard Notification", message=None, name=None, host=None, password=None):
@@ -77,7 +77,7 @@ def sendGrowl(title="Sick Beard Notification", message=None, name=None, host=Non
 	opts = {}
 
 	opts['name'] = name
-		
+
 	opts['title'] = title
 	opts['app'] = 'SickBeard'
 

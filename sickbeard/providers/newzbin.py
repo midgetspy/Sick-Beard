@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -38,47 +38,47 @@ class NewzbinDownloader(urllib.FancyURLopener):
 
     def __init__(self):
         urllib.FancyURLopener.__init__(self)
-    
+
     def http_error_default(self, url, fp, errcode, errmsg, headers):
-    
+
         # if newzbin is throttling us, wait seconds and try again
         if errcode == 400:
-        
+
             newzbinErrCode = int(headers.getheader('X-DNZB-RCode'))
-        
+
             if newzbinErrCode == 450:
                 rtext = str(headers.getheader('X-DNZB-RText'))
                 result = re.search("wait (\d+) seconds", rtext)
 
             elif newzbinErrCode == 401:
                 raise exceptions.AuthException("Newzbin username or password incorrect")
-    
+
             elif newzbinErrCode == 402:
                 raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
 
             logger.log("Newzbin throttled our NZB downloading, pausing for " + result.group() + "seconds")
-            
+
             time.sleep(int(result.group()))
-        
+
             raise exceptions.NewzbinAPIThrottled()
 
 class NewzbinProvider(generic.NZBProvider):
-    
+
     def __init__(self):
-        
+
         generic.NZBProvider.__init__(self, "Newzbin")
 
         self.supportsBacklog = True
-        
+
         self.cache = NewzbinCache(self)
-        
+
         self.url = 'http://www.newzbin.com/'
-        
+
         self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
 
     def _report(self, name):
         return '{'+self.NEWZBIN_NS+'}'+name
-    
+
     def isEnabled(self):
         return sickbeard.NEWZBIN
 
@@ -94,7 +94,7 @@ class NewzbinProvider(generic.NZBProvider):
                 attr_dict[cur_attr].append(attribute.text)
 
         logger.log("Finding quality of item based on attributes "+str(attr_dict), logger.DEBUG)
-        
+
         if self._is_SDTV(attr_dict):
             quality = Quality.SDTV
         elif self._is_SDDVD(attr_dict):
@@ -113,81 +113,81 @@ class NewzbinProvider(generic.NZBProvider):
         logger.log("Resulting quality: "+str(quality), logger.DEBUG)
 
         return quality
-        
+
     def _is_SDTV(self, attrs):
-    
+
         # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
         video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
                             and ('1080p' not in attrs['Video Fmt'])
-        
+
         # Source: TV Cap or HDTV or (None)
         source = 'Source' not in attrs or 'TV Cap' in attrs['Source'] or 'HDTV' in attrs['Source']
-    
+
         # Subtitles: (None)
         subs = 'Subtitles' not in attrs
-        
+
         return video_fmt and source and subs
-    
+
     def _is_SDDVD(self, attrs):
-    
+
         # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
         video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
                             and ('1080p' not in attrs['Video Fmt'])
-    
+
         # Source: DVD
         source = 'Source' in attrs and 'DVD' in attrs['Source']
-    
+
         # Subtitles: (None)
         subs = 'Subtitles' not in attrs
-        
+
         return video_fmt and source and subs
-    
+
     def _is_HDTV(self, attrs):
         # Video Fmt: x264, 720p
         video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
-    
+
         # Source: TV Cap or HDTV or (None)
         source = 'Source' not in attrs or 'TV Cap' in attrs['Source'] or 'HDTV' in attrs['Source']
-    
+
         # Subtitles: (None)
         subs = 'Subtitles' not in attrs
-        
+
         return video_fmt and source and subs
-    
+
     def _is_WEBDL(self, attrs):
-    
+
         # Video Fmt: H.264, 720p
         video_fmt = 'Video Fmt' in attrs and ('H.264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
-    
+
         # Subtitles: (None)
         subs = 'Subtitles' not in attrs
-    
+
         return video_fmt and subs
-    
+
     def _is_720pBluRay(self, attrs):
-        
+
         # Video Fmt: x264, 720p
         video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
-    
+
         # Source: Blu-ray or HD-DVD
         source = 'Source' in attrs and ('Blu-ray' in attrs['Source'] or 'HD-DVD' in attrs['Source'])
-    
+
         return video_fmt and source
-    
+
     def _is_1080pBluRay(self, attrs):
-    
+
         # Video Fmt: x264, 1080p
         video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
                             and ('1080p' in attrs['Video Fmt'])
-    
+
         # Source: Blu-ray or HD-DVD
         source = 'Source' in attrs and ('Blu-ray' in attrs['Source'] or 'HD-DVD' in attrs['Source'])
-    
+
         return video_fmt and source
 
 
@@ -200,19 +200,19 @@ class NewzbinProvider(generic.NZBProvider):
             return id_match.group(1)
 
     def downloadResult(self, nzb):
-    
+
         id = self.getIDFromURL(nzb.url)
         if not id:
             logger.log("Unable to get an ID from "+str(nzb.url)+", can't download from Newzbin's API", logger.ERROR)
             return False
-    
+
         logger.log("Downloading an NZB from newzbin with id "+id, logger.DEBUG)
-    
+
         fileName = ek.ek(os.path.join, sickbeard.NZB_DIR, helpers.sanitizeFileName(nzb.name)+'.nzb')
         logger.log("Saving to " + fileName, logger.DEBUG)
-    
+
         urllib._urlopener = NewzbinDownloader()
-    
+
         params = urllib.urlencode({"username": sickbeard.NEWZBIN_USERNAME, "password": sickbeard.NEWZBIN_PASSWORD, "reportid": id})
         try:
             urllib.urlretrieve("http://www.newzbin.com/api/dnzb/", fileName, data=params)
@@ -222,7 +222,7 @@ class NewzbinProvider(generic.NZBProvider):
         except (urllib.ContentTooShortError, IOError), e:
             logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
             return False
-        
+
         return True
 
     def getURL(self, url):
@@ -236,28 +236,28 @@ class NewzbinProvider(generic.NZBProvider):
 
         data = f.read()
         f.close()
-        
+
         return data
 
     def findEpisode (self, episode, manualSearch=False):
-    
+
         nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
-        
+
         # if we got some results then use them no matter what.
         # OR
         # return anyway unless we're doing a manual search
         if nzbResults or not manualSearch:
             return nzbResults
-        
+
         nameList = set(sceneHelpers.allPossibleShowNames(episode.show))
         searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(episode.season, episode.episode) for x in nameList])
-        
+
         logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
 
         data = self._getRSSData(searchStr)
-        
+
         results = []
-    
+
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
@@ -266,10 +266,10 @@ class NewzbinProvider(generic.NZBProvider):
             return results
 
         for item in items:
-            
+
             title = item.findtext('title')
             url = item.findtext('link').replace('&amp;','&')
-            
+
             # parse the file name
             try:
                 myParser = FileParser(title)
@@ -277,38 +277,38 @@ class NewzbinProvider(generic.NZBProvider):
             except tvnamer_exceptions.InvalidFilename:
                 logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
                 continue
-            
+
             quality = self.getQuality(item)
 
             season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-            
+
             if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
                 logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
                 continue
-            
+
             logger.log("Found result " + title + " at " + url, logger.DEBUG)
-            
+
             result = self.getResult([episode])
             result.url = url
             result.name = title
             result.quality = quality
-            
+
             results.append(result)
-            
+
         return results
 
     def findSeasonResults(self, show, season):
-        
+
         results = {}
-    
+
         nameList = set(sceneHelpers.allPossibleShowNames(show))
-        
+
         searchTerms = ['^"'+x+' - '+str(season)+'x"' for x in nameList]
         #searchTerms += ['^"'+x+' - Season '+str(season)+'"' for x in nameList]
         searchStr = " OR ".join(searchTerms)
 
         searchStr += " -subpack -extras"
-        
+
         logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
 
         data = self._getRSSData(searchStr)
@@ -321,12 +321,12 @@ class NewzbinProvider(generic.NZBProvider):
             return results
 
         for item in items:
-    
+
             title = item.findtext('title')
             url = item.findtext('link')
-            
+
             quality = self.getQuality(item)
-            
+
             # parse the file name
             try:
                 myParser = FileParser(title)
@@ -334,12 +334,12 @@ class NewzbinProvider(generic.NZBProvider):
             except tvnamer_exceptions.InvalidFilename:
                 logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
                 continue
-            
-            
+
+
             if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
                 logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
                 continue
-    
+
             # make sure we want the episode
             wantEp = True
             for epNo in epInfo.episodenumbers:
@@ -349,19 +349,19 @@ class NewzbinProvider(generic.NZBProvider):
                     break
             if not wantEp:
                 continue
-            
+
             logger.log("Found result " + title + " at " + url, logger.DEBUG)
-            
+
             # make a result object
             epObj = []
             for curEp in epInfo.episodenumbers:
                 epObj.append(show.getEpisode(season, curEp))
-            
+
             result = self.getResult(epObj)
             result.url = url
             result.name = title
             result.quality = quality
-        
+
             if len(epObj) == 1:
                 epNum = epObj[0].episode
             elif len(epObj) > 1:
@@ -371,14 +371,14 @@ class NewzbinProvider(generic.NZBProvider):
                 epNum = SEASON_RESULT
                 result.extraInfo = [show]
                 logger.log("Separating full season result to check for later", logger.DEBUG)
-        
+
             if epNum in results:
                 results[epNum].append(result)
             else:
                 results[epNum] = [result]
 
         logger.log("backlog results: "+str(results), logger.DEBUG)
-            
+
         return results
 
 
@@ -409,27 +409,27 @@ class NewzbinProvider(generic.NZBProvider):
             params['q'] = ''
 
         params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
-        
+
         url = "http://www.newzbin.com/search/?%s" % urllib.urlencode(params)
         logger.log("Newzbin search URL: " + url, logger.DEBUG)
 
         data = self.getURL(url)
-        
+
         return data
 
 class NewzbinCache(tvcache.TVCache):
-    
+
     def __init__(self, provider):
 
         tvcache.TVCache.__init__(self, provider)
-    
+
         # only poll Newzbin every 10 mins max
         self.minTime = 10
-        
+
     def _getRSSData(self):
-        
+
         data = self.provider._getRSSData()
-        
+
         return data
 
     def _parseItem(self, item):
@@ -448,10 +448,10 @@ class NewzbinCache(tvcache.TVCache):
         quality = self.provider.getQuality(item)
 
         logger.log("Found quality "+str(quality), logger.DEBUG)
-        
-        logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)            
+
+        logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)
 
         self._addCacheEntry(title, url, quality=quality)
-    
+
 
 provider = NewzbinProvider()

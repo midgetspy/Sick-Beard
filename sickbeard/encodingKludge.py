@@ -21,7 +21,7 @@ def fixStupidEncodings(x):
         return None
 
     return None
-    
+
 def fixListEncodings(x):
     if type(x) != list:
         return x
@@ -36,7 +36,7 @@ def ek(func, *args):
         result = func(*args)
     else:
         result = func(*[x.encode('UTF-8') for x in args])
-    
+
     if type(result) == list:
         return fixListEncodings(result)
     elif type(result) == str:

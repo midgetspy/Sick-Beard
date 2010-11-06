@@ -4,7 +4,7 @@ import xml.etree.cElementTree as etree
 import xml.etree
 import re
 
-from lib.tvnamer.utils import FileParser 
+from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
 from sickbeard import logger, classes, helpers
@@ -21,22 +21,22 @@ def getSeasonNZBs(name, urlData, season):
     filename = name.replace(".nzb", "")
 
     nzbElement = showXML.getroot()
-    
+
     regex = '([\w\._\ ]+)[\. ]S%02d[\. ]([\w\._\-\ ]+)[\- ]([\w_\-\ ]+?)' % season
-    
+
     sceneNameMatch = re.search(regex, filename, re.I)
-    if sceneNameMatch: 
+    if sceneNameMatch:
         showName, qualitySection, groupName = sceneNameMatch.groups()
     else:
         logger.log(u"Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
         return ({},'')
-    
+
     regex = '(' + re.escape(showName) + '\.S%02d(?:[E0-9]+)\.[\w\._]+\-\w+' % season + ')'
     regex = regex.replace(' ', '.')
 
     epFiles = {}
     xmlns = None
-    
+
     for curFile in nzbElement.getchildren():
         xmlnsMatch = re.match("\{(http:\/\/[A-Za-z0-9_\.\/]+\/nzb)\}file", curFile.tag)
         if not xmlnsMatch:
@@ -53,14 +53,14 @@ def getSeasonNZBs(name, urlData, season):
         else:
             epFiles[curEp].append(curFile)
 
-    return (epFiles, xmlns) 
+    return (epFiles, xmlns)
 
 def createNZBString(fileElements, xmlns):
 
     rootElement = etree.Element("nzb")
     if xmlns:
         rootElement.set("xmlns", xmlns)
-    
+
     for curFile in fileElements:
         rootElement.append(stripNS(curFile, xmlns))
 
@@ -77,7 +77,7 @@ def stripNS(element, ns):
     element.tag = element.tag.replace("{"+ns+"}", "")
     for curChild in element.getchildren():
         stripNS(curChild, ns)
-    
+
     return element
 
 
@@ -88,7 +88,7 @@ def splitResult(result):
     except urllib2.URLError, e:
         logger.log(u"Unable to load url "+result.url+", can't download season NZB", logger.ERROR)
         return False
-     
+
     # parse the season ep name
     try:
         fp = FileParser(result.name)
@@ -99,11 +99,11 @@ def splitResult(result):
 
     # bust it up
     season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-    
+
     separateNZBs, xmlns = getSeasonNZBs(result.name, urlData, season)
 
     resultList = []
-    
+
     for newNZB in separateNZBs:
 
         logger.log(u"Split out "+newNZB+" from "+result.name, logger.DEBUG)

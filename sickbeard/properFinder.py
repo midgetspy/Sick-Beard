@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -38,22 +38,22 @@ from lib.tvnamer import tvnamer_exceptions
 
 
 class ProperFinder():
-    
+
     def __init__(self):
-        self.updateInterval = datetime.timedelta(hours=1) 
+        self.updateInterval = datetime.timedelta(hours=1)
 
     def run(self):
 
         if not sickbeard.DOWNLOAD_PROPERS:
             return
-    
+
         # look for propers every night at 1 AM
         updateTime = datetime.time(hour=1)
-        
+
         logger.log(u"Checking proper time", logger.DEBUG)
 
         hourDiff = datetime.datetime.today().time().hour - updateTime.hour
-        
+
         # if it's less than an interval after the update time then do an update
         if hourDiff >= 0 and hourDiff < self.updateInterval.seconds/3600:
             logger.log(u"Beginning the search for new propers")
@@ -61,16 +61,16 @@ class ProperFinder():
             return
 
         propers = self._getProperList()
-        
+
         self._downloadPropers(propers)
-    
+
     def _getProperList(self):
-    
+
         propers = {}
-        
+
         # for each provider get a list of the propers
         for curProvider in providers.sortedProviderList():
-            
+
             if not curProvider.isActive():
                 continue
 
@@ -78,7 +78,7 @@ class ProperFinder():
 
             logger.log(u"Searching for any new PROPER releases from "+curProvider.name)
             curPropers = curProvider.findPropers(date)
-            
+
             # if they haven't been added by a different provider than add the proper to the list
             for x in curPropers:
                 name = self._genericName(x.name)
@@ -88,7 +88,7 @@ class ProperFinder():
                     x.provider = curProvider
                     propers[name] = x
 
-        # take the list of unique propers and get it sorted by 
+        # take the list of unique propers and get it sorted by
         sortedPropers = sorted(propers.values(), key=operator.attrgetter('date'), reverse=True)
         finalPropers = []
 
@@ -101,11 +101,11 @@ class ProperFinder():
             except tvnamer_exceptions.InvalidFilename:
                 logger.log(u"Unable to parse the filename "+curProper.name+" into a valid episode", logger.DEBUG)
                 continue
-    
+
             if not epInfo.episodenumbers:
                 logger.log(u"Ignoring "+curProper.name+" because it's for a full season rather than specific episode", logger.DEBUG)
                 continue
-    
+
             # populate our Proper instance
             curProper.season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
             curProper.episode = epInfo.episodenumbers[0]
@@ -113,25 +113,25 @@ class ProperFinder():
 
             # for each show in our list
             for curShow in sickbeard.showList:
-        
+
                 genericName = self._genericName(epInfo.seriesname)
-        
+
                 # get the scene name masks
                 sceneNames = set(sceneHelpers.makeSceneShowSearchStrings(curShow))
-        
+
                 # for each scene name mask
                 for curSceneName in sceneNames:
-        
+
                     # if it matches
                     if genericName == self._genericName(curSceneName):
                         logger.log(u"Successful match! Result "+epInfo.seriesname+" matched to show "+curShow.name, logger.DEBUG)
-                        
+
                         # set the tvdbid in the db to the show's tvdbid
                         curProper.tvdbid = curShow.tvdbid
-                        
+
                         # since we found it, break out
                         break
-                
+
                 # if we found something in the inner for loop break out of this one
                 if curProper.tvdbid != -1:
                     break
@@ -155,8 +155,8 @@ class ProperFinder():
             if not sqlResults:
                 continue
             oldStatus, oldQuality = Quality.splitCompositeStatus(int(sqlResults[0]["status"]))
-            
-            # only keep the proper if we have already retrieved the same quality ep (don't get better/worse ones) 
+
+            # only keep the proper if we have already retrieved the same quality ep (don't get better/worse ones)
             if oldStatus not in (DOWNLOADED, SNATCHED) or oldQuality != curProper.quality:
                 continue
 
@@ -164,7 +164,7 @@ class ProperFinder():
             if curProper.tvdbid != -1 and (curProper.tvdbid, curProper.season, curProper.episode) not in map(operator.attrgetter('tvdbid', 'season', 'episode'), finalPropers):
                 logger.log(u"Found a proper that we need: "+str(curProper.name))
                 finalPropers.append(curProper)
-        
+
         return finalPropers
 
     def _downloadPropers(self, properList):
@@ -174,13 +174,13 @@ class ProperFinder():
             historyLimit = datetime.datetime.today() - datetime.timedelta(days=30)
 
             # make sure the episode has been downloaded before
-            myDB = db.DBConnection() 
+            myDB = db.DBConnection()
             historyResults = myDB.select(
                 "SELECT resource FROM history "
                 "WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND date >= ? "
                 "AND action IN (" + ",".join([str(x) for x in Quality.SNATCHED]) + ")",
                         [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, historyLimit.strftime(history.dateFormat)])
-             
+
             # if we didn't download this episode in the first place we don't know what quality to use for the proper so we can't do it
             if len(historyResults) == 0:
                 logger.log(u"Unable to find an original history entry for proper "+curProper.name+" so I'm not downloading it.")
@@ -198,23 +198,23 @@ class ProperFinder():
                 if isSame:
                     logger.log(u"This proper is already in history, skipping it", logger.DEBUG)
                     continue
-        
+
                 # get the episode object
                 showObj = helpers.findCertainShow(sickbeard.showList, curProper.tvdbid)
                 if showObj == None:
                     logger.log(u"Unable to find the show with tvdbid "+str(curProper.tvdbid)+" so unable to download the proper", logger.ERROR)
                     continue
                 epObj = showObj.getEpisode(curProper.season, curProper.episode)
-                
+
                 # make the result object
                 result = curProper.provider.getResult([epObj])
                 result.url = curProper.url
                 result.name = curProper.name
                 result.quality = curProper.quality
-                
+
                 # snatch it
                 downloadResult = search.snatchEpisode(result, SNATCHED_PROPER)
-        
+
     def _genericName(self, name):
         return name.replace(".", " ").replace("-"," ").replace("_"," ").lower()
-        
+
