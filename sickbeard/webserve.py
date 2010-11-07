@@ -31,9 +31,11 @@ from Cheetah.Template import Template
 import cherrypy
 import cherrypy.lib
 
+import metadata.helpers
+
 from sickbeard import config
 from sickbeard import history, notifiers, processTV, search, providers
-from sickbeard import tv, metadata, versionChecker
+from sickbeard import tv, versionChecker
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 
@@ -1175,7 +1177,7 @@ class NewHomeAddShows:
         if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo")):
             tvdb_id = None
             try:
-                tvdb_id = metadata.getTVDBIDFromNFO(showToAdd)
+                tvdb_id = metadata.helpers.getTVDBIDFromNFO(showToAdd)
             except exceptions.NoNFOException, e:
                 # we couldn't get a tvdb id from the file so let them know and just print the search page
                 if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo.old")):

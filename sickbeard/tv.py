@@ -141,23 +141,21 @@ class TVShow(object):
     def writeShowNFO(self):
 
         if not ek.ek(os.path.isdir, self._location):
-            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
-            return
+            logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
+            return False
 
-        xmlData = metadata.makeShowNFO(self.tvdbid)
+        if not sickbeard.metadata_generator:
+            logger.log(u"No valid metadata generator: "+str(sickbeard.METADATA_TYPE), logger.ERROR)
+            return False
 
-        # Make it purdy
-        helpers.indentXML( xmlData )
+        result = sickbeard.metadata_generator.write_show_file(self, self._location)
 
-        nfo_fh = ek.ek(open, ek.ek(os.path.join, self._location, "tvshow.nfo"), 'w')
-        nfo = etree.ElementTree( xmlData )
-        nfo.write( nfo_fh, encoding="utf-8" )
-        nfo_fh.close()
+        return result
 
     def writeMetadata(self):
 
         if not ek.ek(os.path.isdir, self._location):
-            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, skipping NFO generation")
+            logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
             return
 
         if sickbeard.CREATE_IMAGES:
@@ -1266,7 +1264,7 @@ class TVEpisode:
         shouldSave = self.checkForMetaFiles()
 
         if sickbeard.CREATE_METADATA or force:
-            result = self.createNFOs(epsToWrite, force)
+            result = self.createNFOs(force)
             if result == None:
                 return False
             elif result == True:
@@ -1284,27 +1282,11 @@ class TVEpisode:
             self.saveToDB()
 
 
-    def createNFOs(self, epsToWrite, force=False):
+    def createNFOs(self, force=False):
+
+        eps_to_write = eps_to_write = [self] + self.relatedEps
 
         shouldSave = False
-
-        try:
-            t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
-            myShow = t[self.show.tvdbid]
-        except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
-        except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+str(e).decode('utf-8'), logger.ERROR)
-            return
-
-        if len(epsToWrite) > 1:
-            rootNode = etree.Element( "xbmcmultiepisode" )
-        else:
-            rootNode = etree.Element( "episodedetails" )
-
-        # Set our namespace correctly
-        for ns in XML_NSMAP.keys():
-            rootNode.set(ns, XML_NSMAP[ns])
 
         needsNFO = not self.hasnfo
         if force:
@@ -1312,136 +1294,32 @@ class TVEpisode:
 
         # if we're not forcing then we want to make an NFO unless every related ep already has one
         else:
-            for curEp in epsToWrite:
+            for curEp in eps_to_write:
                 if not curEp.hasnfo:
                     break
                 needsNFO = False
 
-        # write an NFO containing info for all matching episodes
-        for curEpToWrite in epsToWrite:
+        if not needsNFO:
+            return False
 
-            try:
-                myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
-            except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-                logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
-                return None
+        # if somehow the ep file doesn't exist just put the nfo somewhere that makes sense
+        if ek.ek(os.path.isfile, self.location):
+            ep_file_name = self.location
+        else:
+            ep_file_name = self.prettyName() + '.nfo'
 
-            if myEp["firstaired"] == None and self.season == 0:
-                myEp["firstaired"] = str(datetime.date.fromordinal(1))
+        if not sickbeard.metadata_generator:
+            return False
 
-            if myEp["episodename"] == None or myEp["firstaired"] == None:
-                return None
+        # generate the nfo
+        result = sickbeard.metadata_generator.write_ep_file(self, ep_file_name)
 
-            if not needsNFO:
-                logger.log(u"Skipping metadata generation for myself ("+str(self.season)+"x"+str(self.episode)+")", logger.DEBUG)
-                continue
-            else:
-                logger.log(u"Creating metadata for myself ("+str(self.season)+"x"+str(self.episode)+")", logger.DEBUG)
+        if not result:
+            return False
 
-            if len(epsToWrite) > 1:
-                episode = etree.SubElement( rootNode, "episodedetails" )
-            else:
-                episode = rootNode
-
-            title = etree.SubElement( episode, "title" )
-            if curEpToWrite.name != None:
-                title.text = curEpToWrite.name
-
-            season = etree.SubElement( episode, "season" )
-            season.text = str(curEpToWrite.season)
-
-            episodenum = etree.SubElement( episode, "episode" )
-            episodenum.text = str(curEpToWrite.episode)
-
-            aired = etree.SubElement( episode, "aired" )
-            if curEpToWrite.airdate != datetime.date.fromordinal(1):
-                aired.text = str(curEpToWrite.airdate)
-            else:
-                aired.text = ''
-
-            plot = etree.SubElement( episode, "plot" )
-            if curEpToWrite.description != None:
-                plot.text = curEpToWrite.description
-
-            displayseason = etree.SubElement( episode, "displayseason" )
-            if myEp.has_key('airsbefore_season'):
-                displayseason_text = myEp['airsbefore_season']
-                if displayseason_text != None:
-                    displayseason.text = displayseason_text
-
-            displayepisode = etree.SubElement( episode, "displayepisode" )
-            if myEp.has_key('airsbefore_episode'):
-                displayepisode_text = myEp['airsbefore_episode']
-                if displayepisode_text != None:
-                    displayepisode.text = displayepisode_text
-
-            thumb = etree.SubElement( episode, "thumb" )
-            thumb_text = myEp['filename']
-            if thumb_text != None:
-                thumb.text = thumb_text
-
-            watched = etree.SubElement( episode, "watched" )
-            watched.text = 'false'
-
-            credits = etree.SubElement( episode, "credits" )
-            credits_text = myEp['writer']
-            if credits_text != None:
-                credits.text = credits_text
-
-            director = etree.SubElement( episode, "director" )
-            director_text = myEp['director']
-            if director_text != None:
-                director.text = director_text
-
-            rating = etree.SubElement( episode, "rating" )
-            rating_text = myEp['rating']
-            if rating_text != None:
-                rating.text = rating_text
-
-            gueststar_text = myEp['gueststars']
-            if gueststar_text != None:
-                for actor in gueststar_text.split('|'):
-                    cur_actor = etree.SubElement( episode, "actor" )
-                    cur_actor_name = etree.SubElement(
-                        cur_actor, "name"
-                        )
-                    cur_actor_name.text = actor
-
-            for actor in myShow['_actors']:
-                cur_actor = etree.SubElement( episode, "actor" )
-
-                cur_actor_name = etree.SubElement( cur_actor, "name" )
-                cur_actor_name.text = actor['name']
-
-                cur_actor_role = etree.SubElement( cur_actor, "role" )
-                cur_actor_role_text = actor['role']
-                if cur_actor_role_text != None:
-                    cur_actor_role.text = cur_actor_role_text
-
-                cur_actor_thumb = etree.SubElement( cur_actor, "thumb" )
-                cur_actor_thumb_text = actor['image']
-                if cur_actor_thumb_text != None:
-                    cur_actor_thumb.text = cur_actor_thumb_text
-
-            if ek.ek(os.path.isfile, self.location):
-                nfoFilename = helpers.replaceExtension(self.location, 'nfo')
-            else:
-                nfoFilename = helpers.sanitizeFileName(self.prettyName() + '.nfo')
-
-            logger.log('Writing nfo to ' + nfoFilename)
-            #
-            # Make it purdy
-            helpers.indentXML( rootNode )
-
-            nfo = etree.ElementTree( rootNode )
-            nfo_fh = ek.ek(open, nfoFilename, 'w')
-            nfo.write( nfo_fh, encoding="utf-8" )
-            nfo_fh.close()
-
-            for epToWrite in epsToWrite:
-                epToWrite.hasnfo = True
-                shouldSave = True
-        # end if needsNFO
+        for ep_to_write in eps_to_write:
+            ep_to_write.hasnfo = True
+            shouldSave = True
 
         return shouldSave
 

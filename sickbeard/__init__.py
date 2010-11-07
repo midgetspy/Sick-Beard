@@ -25,6 +25,8 @@ import datetime
 import socket
 import os, sys, subprocess
 
+import metadata.xbmc
+
 from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
@@ -64,6 +66,7 @@ comingList = None
 
 providerList = []
 newznabProviderList = []
+metadata_generator = None
 
 NEWEST_VERSION = None
 NEWEST_VERSION_STRING = None
@@ -85,6 +88,10 @@ LAUNCH_BROWSER = None
 CREATE_METADATA = None
 CREATE_IMAGES = None
 CACHE_DIR = None
+
+METADATA_TYPE = None
+METADATA_SHOW = None
+METADATA_EPISODE = None
 
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_DEFAULT = None
@@ -287,6 +294,7 @@ def initialize(consoleLogging=True):
                 CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH
 
 
@@ -433,10 +441,16 @@ def initialize(consoleLogging=True):
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
+        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', 'xbmc')
+        METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
+        METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
+
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
 
         providerList = providers.makeProviderList()
+        
+        metadata_generator = metadata.getMetadataClass(METADATA_TYPE)
 
         logger.initLogging(consoleLogging=consoleLogging)
 
@@ -686,6 +700,9 @@ def save_config():
     CFG['General']['naming_dates'] = int(NAMING_DATES)
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    CFG['General']['metadata_type'] = METADATA_TYPE
+    CFG['General']['metadata_show'] = int(METADATA_SHOW)
+    CFG['General']['metadata_episode'] = int(METADATA_EPISODE)
     CFG['General']['create_metadata'] = int(CREATE_METADATA)
     CFG['General']['create_images'] = int(CREATE_IMAGES)
     CFG['General']['cache_dir'] = CACHE_DIR
