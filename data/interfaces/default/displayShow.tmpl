@@ -51,7 +51,11 @@ Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.
 
 Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
-#set $air_by_date = $show.air_by_date or ($show.genre and "Talk Show" in $show.genre)
+#if $show.air_by_date or ($show.genre and "Talk Show" in $show.genre):
+#set $air_by_date = True
+#else
+#set $air_by_date = False
+#end if
 Air by date: <img src="$sbRoot/images/#if int($air_by_date) == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 <br />
 Change selected episodes to 
