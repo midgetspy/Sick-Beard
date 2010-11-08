@@ -601,7 +601,7 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         script_cmd = shlex.split(curScriptName) + [rootEp.location, biggestFileName, str(tvdb_id), str(season), str(episode), str(rootEp.airdate)]
         returnStr += logHelper("Executing command "+str(script_cmd))
         try:
-            p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
             out, err = p.communicate()
             returnStr += logHelper("Script result: "+str(out), logger.DEBUG)
         except OSError, e:
