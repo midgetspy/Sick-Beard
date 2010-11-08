@@ -449,7 +449,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
         try:
-            myParser = FileParser(file)
+            myParser = FileParser(file,self.absolute_numbering)
             epInfo = myParser.parse()
         except tvnamer_exceptions.InvalidFilename:
             logger.log("Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
@@ -475,6 +475,17 @@ class TVShow(object):
                 logger.log("Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
                 return None
 
+        # if we have an absolute numbered show than get the real season/episode numbers
+        if self.absolute_numbering:
+            try:
+                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                epObj = t[self.tvdbid].absoluteEpisode(episodes[0])[0]
+                season = int(epObj["seasonnumber"])
+                episodes = [int(epObj["episodenumber"])]
+            except tvdb_exceptions.tvdb_episodenotfound, e:
+                logger.log("Unable to find episode with absolute episode number "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
+                return None
+
         for curEpNum in episodes:
 
             episode = int(curEpNum)
@@ -493,7 +504,7 @@ class TVShow(object):
 
             else:
                 # if there is a new file associated with this ep then re-check the quality
-                if ek.ek(os.path.normpath, curEp.location) != ek.ek(os.path.normpath, file):
+                if ek.ek(os.path.normpath, curEp.location) != ek.ek(os.path.normpath, file) and curEp.location != '':
                     logger.log("The old episode had a different file associated with it, I will re-check the quality based on the new filename "+file, logger.DEBUG)
                     checkQualityAgain = True
                     
@@ -1623,7 +1634,7 @@ class TVEpisode:
         if ((self.show.genre and "Talk Show" in self.show.genre) or self.show.air_by_date) and sickbeard.NAMING_DATES:
             goodEpString = str(self.airdate)
         elif self.show.absolute_numbering and self.absolute_episode != None and self.absolute_episode != 0:
-            goodEpString = str(self.absolute_episode)
+            goodEpString = "%03d" % int(self.absolute_episode)
         else:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
         

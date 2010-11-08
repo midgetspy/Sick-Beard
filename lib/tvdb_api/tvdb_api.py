@@ -133,6 +133,12 @@ class Show(dict):
             raise tvdb_episodenotfound("Could not find any episodes that aired on %s" % date)
         return ret
 
+    def absoluteEpisode(self, absEpNumber):
+        ret = self.search(str(absEpNumber), 'absolute_number')
+        if len(ret) == 0:
+            raise tvdb_episodenotfound("Could not find any episodes with the absolute episode number %s" % date)
+        return ret
+
     def search(self, term = None, key = None):
         """
         Search all episodes in show. Can search all data, or a specific key (for
