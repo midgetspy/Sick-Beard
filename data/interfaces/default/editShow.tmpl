@@ -85,9 +85,9 @@ Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "CHECKED
 Air by date:
 #if ($show.genre and "Talk Show" not in $show.genre) or not $show.genre:
 <input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "CHECKED" else ""#><br />
-(check this if the show is released as Show.03.02.2010 rather than Show.S02E03)
+(check this if the show is released as Show.03.02.2010 rather than Show.S02E03)<br /><br />
 #else
-<input type="checkbox" DISABLED CHECKED>
+<input type="checkbox" DISABLED CHECKED><br /><br />
 #end if
 Use Absolute Numbering: <input type="checkbox" name="absolute_numbering" #if $show.absolute_numbering == 1 then "CHECKED" else ""#><br />
 (check this if the show is released as Show.183 rather than Show.S07E04)<br /><br />
