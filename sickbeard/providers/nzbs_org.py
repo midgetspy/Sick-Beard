@@ -29,9 +29,8 @@ import generic
 
 from sickbeard import classes, sceneHelpers
 
-from sickbeard import exceptions
+from sickbeard import exceptions, logger, db
 from sickbeard.common import *
-from sickbeard import logger
 from sickbeard import tvcache
 
 from lib.tvnamer.utils import FileParser
@@ -120,17 +119,39 @@ class NZBsProvider(generic.NZBProvider):
 				logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
 				continue
 
-			if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
-				logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
-				continue
+			# this check is meaningless for non-season searches
+			if not show.is_air_by_date:
+				if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
+					logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+					continue
+
+				# we just use the existing info for normal searches
+				actual_season = season
+				actual_episodes = epInfo.episodenumbers
+			
+			else:
+				if epInfo.seasonnumber != -1 or len(epInfo.episodenumbers) != 1:
+					logger.log(u"This is supposed to be an air-by-date search but the result "+title+" didn't parse as one, skipping it", logger.DEBUG)
+					continue
+				
+				myDB = db.DBConnection()
+				sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [show.tvdbid, epInfo.episodenumbers[0].toordinal()])
+
+				if len(sql_results) != 1:
+					logger.log(u"Tried to look up the date for the episode "+title+" but the database didn't give proper results, skipping it", logger.ERROR)
+					continue
+				
+				actual_season = int(sql_results[0]["season"])
+				actual_episodes = [int(sql_results[0]["episode"])]
 
 			# make sure we want the episode
 			wantEp = True
-			for epNo in epInfo.episodenumbers:
-				if not show.wantEpisode(season, epNo, quality):
+			for epNo in actual_episodes:
+				if not show.wantEpisode(actual_season, epNo, quality):
 					logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 					wantEp = False
 					break
+			
 			if not wantEp:
 				continue
 
@@ -138,8 +159,8 @@ class NZBsProvider(generic.NZBProvider):
 
 			# make a result object
 			epObj = []
-			for curEp in epInfo.episodenumbers:
-				epObj.append(show.getEpisode(season, curEp))
+			for curEp in actual_episodes:
+				epObj.append(show.getEpisode(actual_season, curEp))
 
 			result = self.getResult(epObj)
 			result.url = url
@@ -183,6 +204,8 @@ class NZBsProvider(generic.NZBProvider):
 		logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
 		data = self.getURL(searchURL)
+
+		logger.log(u"data: "+str(data), logger.DEBUG)
 
 		# Pause to avoid 503's
 		time.sleep(5)
