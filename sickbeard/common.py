@@ -128,7 +128,7 @@ class Quality:
             return Quality.SDDVD
         elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
             return Quality.HDTV
-        elif checkName(["720p", "web.dl"], all):
+        elif checkName(["720p.web.dl", "720p.itunes.h264"], any):
             return Quality.HDWEBDL
         elif checkName(["720p", "bluray", "x264"], all):
             return Quality.HDBLURAY
