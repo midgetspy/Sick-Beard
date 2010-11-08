@@ -62,7 +62,6 @@ you want them to be searched<br />
 </ul>
 <br />
 <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>">
-
 </fieldset>
 </div>
 
@@ -74,8 +73,9 @@ you want them to be searched<br />
 <b>Edit: </b> <select id="editAProvider">
 #if $sickbeard.SHOW_TVBINZ then "<option value=\"tvbinz\">TVBinz" else ""#
 <option value="nzbs_org">NZBs.org
-<option value="nzbmatrix">NZBMatrix
 <option value="nzbs_r_us">NZBs'R'US
+<option value="newzbin">Newzbin
+<option value="nzbmatrix">NZBMatrix
 </select>
 <br />
 <br />
@@ -128,6 +128,20 @@ NZBMatrix API Key<br />
 
 </div>
 
+<div class="providerDiv" id="newzbin">
+
+<strong>Username:</strong><br />
+Newzbin username<br />
+<input type="text" name="newzbin_username" value="$sickbeard.NEWZBIN_USERNAME" size="6"><br />
+<br />
+
+<strong>Password:</strong><br />
+Newzbin Password<br />
+<input type="password" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="6"><br />
+<br />
+
+</div>
+
 <div class="providerDiv" id="nzbs_r_us">
 
 <strong>UID:</strong><br />
@@ -153,9 +167,6 @@ NZBs'R'US hash<br />
 <input type="hidden" name="newznab_string" id="newznab_string">
 <select id="editANewznabProvider">
 <option value="addNewznab">-- add new provider --</option>
-#for $curNewznabProvider in $sickbeard.newznabProviderList:
-<!--<option value="$curNewznabProvider.getID()">$curNewznabProvider.name-->
-#end for
 </select>
 <br />
 <br />

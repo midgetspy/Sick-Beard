@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -36,7 +36,7 @@ class AuthURLOpener(SickBeardURLopener):
         self.password = pw
         self.numTries = 0
         urllib.FancyURLopener.__init__(self)
-    
+
     def prompt_user_passwd(self, host, realm):
         if self.numTries == 0:
             self.numTries = 1
@@ -60,10 +60,10 @@ class SearchResult:
         self.name = ""
 
     def __str__(self):
-        
+
         if self.provider == None:
             return "Invalid provider, unable to print self"
-        
+
         myString = self.provider.name + " @ " + self.url + "\n"
         myString += "Extra Info:\n"
         for extra in self.extraInfo:
@@ -95,7 +95,7 @@ class ShowListUI:
         for curShow in allSeries:
             if int(curShow['id']) in idList:
                 return curShow
-        
+
         # if nothing matches then just go with the first match I guess
         return allSeries[0]
 
@@ -106,19 +106,19 @@ class Proper:
         self.date = date
         self.provider = None
         self.quality = -1
-        
+
         self.tvdbid = -1
         self.season = -1
         self.episode = -1
-    
+
     def __str__(self):
         return str(self.date)+" "+self.name+" "+str(self.season)+"x"+str(self.episode)+" of "+str(self.tvdbid)
-    
-    
+
+
 class ErrorViewer():
-    
+
     errors = []
-    
+
     def __init__(self):
         ErrorViewer.errors = []
 

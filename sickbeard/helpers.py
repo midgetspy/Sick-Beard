@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -81,7 +81,7 @@ def isMediaFile (file):
 	# ignore samples
 	if re.search('(^|[\W_])sample\d*[\W_]', file):
 		return False
-	
+
 	sepFile = file.rpartition(".")
 	if sepFile[2].lower() in mediaExtensions:
 		return True
@@ -102,10 +102,10 @@ def sanitizeFileName (name):
 	for x in ":\"<>|?":
 		name = name.replace(x, "")
 	return name
-		
+
 
 def getURL (url, headers=[]):
-	
+
 	opener = urllib2.build_opener()
 	opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
 	for cur_header in headers:
@@ -137,7 +137,7 @@ def findCertainShow (showList, tvdbid):
 		raise MultipleShowObjectsException()
 	else:
 		return results[0]
-	
+
 def findCertainTVRageShow (showList, tvrid):
 
 	if tvrid == 0:
@@ -151,8 +151,8 @@ def findCertainTVRageShow (showList, tvrid):
 		raise MultipleShowObjectsException()
 	else:
 		return results[0]
-	
-	
+
+
 def makeDir (dir):
 	if not ek.ek(os.path.isdir, dir):
 		try:
@@ -163,32 +163,32 @@ def makeDir (dir):
 
 def makeShowNFO(showID, showDir):
 
-	logger.log("Making NFO for show "+str(showID)+" in dir "+showDir, logger.DEBUG)
+	logger.log(u"Making NFO for show "+str(showID)+" in dir "+showDir, logger.DEBUG)
 
 	if not makeDir(showDir):
-		logger.log("Unable to create show dir, can't make NFO", logger.ERROR)
+		logger.log(u"Unable to create show dir, can't make NFO", logger.ERROR)
 		return False
 
 	t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
-	
+
 	try:
 		myShow = t[int(showID)]
 	except tvdb_exceptions.tvdb_shownotfound:
- 		logger.log("Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 		logger.log(u"Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 		raise
 
 	except tvdb_exceptions.tvdb_error:
- 		logger.log("TVDB is down, can't use its data to add this show", logger.ERROR)
+ 		logger.log(u"TVDB is down, can't use its data to add this show", logger.ERROR)
  		raise
 
 	# check for title and id
 	try:
 		if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
- 			logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 			logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
 			return False
 	except tvdb_exceptions.tvdb_attributenotfound:
- 		logger.log("Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+ 		logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
 		return False
 
@@ -197,13 +197,13 @@ def makeShowNFO(showID, showDir):
 	indentXML( tvNode )
 	nfo = etree.ElementTree( tvNode )
 
- 	logger.log("Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
+ 	logger.log(u"Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
 	nfo_filename = os.path.join(showDir, "tvshow.nfo").encode('utf-8')
 	nfo_fh = open(nfo_filename, 'w')
 	nfo.write( nfo_fh, encoding="utf-8" )
 
 	return True
-	
+
 def buildNFOXML(myShow):
 	'''
 	Build an etree.Element of the root node of an NFO file with the
@@ -231,7 +231,7 @@ def buildNFOXML(myShow):
 	title = etree.SubElement( tvNode, "title" )
 	if myShow["seriesname"] != None:
 		title.text = myShow["seriesname"]
-		
+
 	rating = etree.SubElement( tvNode, "rating" )
 	if myShow["rating"] != None:
 		rating.text = myShow["rating"]
@@ -245,7 +245,7 @@ def buildNFOXML(myShow):
 	if myShow["id"] != None:
 		showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
 		episodeguideurl.text = showurl
-		
+
 	mpaa = etree.SubElement( tvNode, "mpaa" )
 	if myShow["contentrating"] != None:
 		mpaa.text = myShow["contentrating"]
@@ -253,19 +253,19 @@ def buildNFOXML(myShow):
 	tvdbid = etree.SubElement( tvNode, "id" )
 	if myShow["id"] != None:
 		tvdbid.text = myShow["id"]
-		
+
 	genre = etree.SubElement( tvNode, "genre" )
 	if myShow["genre"] != None:
 		genre.text = " / ".join([x for x in myShow["genre"].split('|') if x != ''])
-		
+
 	premiered = etree.SubElement( tvNode, "premiered" )
 	if myShow["firstaired"] != None:
 		premiered.text = myShow["firstaired"]
-		
+
 	studio = etree.SubElement( tvNode, "studio" )
 	if myShow["network"] != None:
 		studio.text = myShow["network"]
-	
+
 	for actor in myShow['_actors']:
 
 		cur_actor = etree.SubElement( tvNode, "actor" )
@@ -288,75 +288,75 @@ def buildNFOXML(myShow):
 
 
 def searchDBForShow(regShowName):
-	
+
 	showNames = set([regShowName+'%', regShowName.replace(' ','_')+'%'])
-	
+
 	# if tvdb fails then try looking it up in the db
 	myDB = db.DBConnection()
 
 	yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
 
 	for showName in showNames:
-	
+
 		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
-		
+
 		if len(sqlResults) == 1:
 			return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
 		else:
-	
+
 			# if we didn't get exactly one result then try again with the year stripped off if possible
 			match = re.match(yearRegex, showName)
 			if match:
-				logger.log("Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
+				logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
 				sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
-	
+
 			if len(sqlResults) == 0:
-				logger.log("Unable to match a record in the DB for "+showName, logger.DEBUG)
+				logger.log(u"Unable to match a record in the DB for "+showName, logger.DEBUG)
 				continue
 			elif len(sqlResults) > 1:
-				logger.log("Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
+				logger.log(u"Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
 				continue
 			else:
 				return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
-	
+
 	return None
 
 def getShowImage(url, imgNum=None):
-	
+
 	imgFile = None
 	imgData = None
-	
+
 	if url == None:
 		return None
-	
+
 	# if they provided a fanart number try to use it instead
 	if imgNum != None:
 		tempURL = url.split('-')[0] + "-" + str(imgNum) + ".jpg"
 	else:
 		tempURL = url
 
-	logger.log("Getting show image at "+tempURL, logger.DEBUG)
+	logger.log(u"Getting show image at "+tempURL, logger.DEBUG)
 	try:
 		req = urllib2.Request(tempURL, headers={'User-Agent': classes.SickBeardURLopener().version})
 		imgFile = urllib2.urlopen(req)
 	except urllib2.URLError, e:
-		logger.log("There was an error trying to retrieve the image, aborting", logger.ERROR)
+		logger.log(u"There was an error trying to retrieve the image, aborting", logger.ERROR)
 		return None
 	except urllib2.HTTPError, e:
-		logger.log("Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e), logger.ERROR)
+		logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e).decode('utf-8'), logger.ERROR)
 		return None
 
 	if imgFile == None:
-		logger.log("Something bad happened and we have no URL data somehow", logger.ERROR)
+		logger.log(u"Something bad happened and we have no URL data somehow", logger.ERROR)
 		return None
 
 	# get the image
 	try:
-		imgData = imgFile.read()		
+		imgData = imgFile.read()
 	except (urllib2.URLError, urllib2.HTTPError), e:
-		logger.log("There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
+		logger.log(u"There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
 		return None
 
 	return imgData
@@ -392,7 +392,7 @@ def listMediaFiles(dir):
 		# if it's a dir do it recursively
 		if ek.ek(os.path.isdir, fullCurFile) and not curFile.startswith('.') and not curFile == 'Extras':
 			files += listMediaFiles(fullCurFile)
-	
+
 		elif isMediaFile(curFile):
 			files.append(fullCurFile)
 

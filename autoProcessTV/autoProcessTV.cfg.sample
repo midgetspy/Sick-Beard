@@ -3,3 +3,4 @@ host=localhost
 port=8081
 username=
 password=
+web_root=

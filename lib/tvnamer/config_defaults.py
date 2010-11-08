@@ -235,9 +235,9 @@ defaults = {
         [^\\/]*$''',
 
         # scene.name.s02.etc (whole season, episode = empty list)
-        '''^((?P<seriesname>.+?)[ \._])?
-        [Ss](?P<seasonnumberonly>[0-9]+)[\.\_ ]+?
-        ((?P<episodename>.+?)(\.(?P<ext>\w{3,4}))?$)?           # get the episode name & extension if it is available
+        '''^(?P<seriesname>.+?)[ \._-]*
+        [Ss](eason[ \._-]+)?(?P<seasonnumberonly>\d+)[ \._-]*
+        ((?P<episodename>.*?)(\.(?P<ext>\w{3,4}))?$)?
         [^\/]*$''',
 
         # Show - Episode 9999 [S 12 - Ep 131] - etc

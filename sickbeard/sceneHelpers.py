@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,7 +23,7 @@ from sickbeard import db
 import re
 import datetime
 
-from lib.tvnamer.utils import FileParser 
+from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
 
 resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
@@ -37,17 +37,17 @@ def filterBadReleases(name):
         fp = FileParser(name)
         epInfo = fp.parse()
     except tvnamer_exceptions.InvalidFilename:
-        logger.log("Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
+        logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
-    
+
     # if there's no info after the season info then assume it's fine
     if not epInfo.episodename:
         return True
-    
+
     # if any of the bad strings are in the name then say no
     for x in resultFilters:
         if re.search('(^|[\W_])'+x+'($|[\W_])', epInfo.episodename, re.I):
-            logger.log("Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
+            logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
 
     return True
@@ -58,14 +58,14 @@ def sanitizeSceneName (name):
 
     name = name.replace("- ", ".").replace(" ", ".").replace("&", "and")
     name = re.sub("\.\.*", ".", name)
-    
+
     if name.endswith('.'):
         name = name[:-1]
-    
+
     return name
-        
+
 def sceneToNormalShowNames(name):
-    
+
     return [name, name.replace(".and.", ".&.")]
 
 def makeSceneShowSearchStrings(show):
@@ -81,7 +81,7 @@ def makeSceneSeasonSearchString (show, season, extraSearchType=None):
     myDB = db.DBConnection()
     numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
     numseasons = numseasonsSQlResult[0][0]
-    
+
     seasonStrings = ["S%02d" % season, "%ix" % season]
 
     showNames = set(makeSceneShowSearchStrings(show))
@@ -124,14 +124,14 @@ def makeSceneSearchString (episode):
             toReturn.append(curShow + '.' + curEpString)
 
     return toReturn
-    
+
 def allPossibleShowNames(show):
 
     showNames = [show.name]
 
     if int(show.tvdbid) in sceneExceptions:
         showNames += sceneExceptions[int(show.tvdbid)]
-    
+
     # if we have a tvrage name then use it
     if show.tvrname != "" and show.tvrname != None:
         showNames.append(show.tvrname)
@@ -143,10 +143,10 @@ def allPossibleShowNames(show):
     for curName in showNames:
         for curCountry in countryList:
             if curName.endswith(' '+curCountry):
-                logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
+                logger.log(u"Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' '+curCountry, ' ('+countryList[curCountry]+')'))
             elif curName.endswith(' ('+curCountry+')'):
-                logger.log("Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
+                logger.log(u"Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+countryList[curCountry]+')'))
 
     showNames += newShowNames
@@ -157,19 +157,19 @@ def isGoodResult(name, show, log=True):
     """
     Use an automatically-created regex to make sure the result actually is the show it claims to be
     """
-    
+
     showNames = map(sanitizeSceneName, allPossibleShowNames(show))
-    
+
     for curName in set(showNames):
-        curRegex = '^(\[.+?\][ ])?' + re.sub('[\.\-]', '\W+', curName) + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d\d?\d?\s)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx])))'
+        curRegex = '^(\[.+?\][ ])?' + re.sub('[\.\-]', '\W+', curName) + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d\d?\d?\s)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+)'
         if log:
-            logger.log("Checking if show "+name+" matches " + curRegex, logger.DEBUG)
-        
+            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
+
         match = re.search(curRegex, name, re.I)
-        
+
         if match:
             return True
 
     if log:
-        logger.log("Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
     return False
