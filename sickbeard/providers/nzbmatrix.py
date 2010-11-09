@@ -87,19 +87,19 @@ class NZBMatrixProvider(generic.NZBProvider):
 				for item in itemList:
 	
 					# Parse the result and add it to the result list				
-					result = self.parseSearchResultItem(episode, manualSearch, item, True)
+					result = self.parseSearchResultItem(episode, manualSearch, item)
 					if result != None:
 						results.append(result)
 			
 		return results
 	
-	def parseSearchResultItem(self, episode, manualSearch, item, absolute_numbering=False):
+	def parseSearchResultItem(self, episode, manualSearch, item):
 		title = item.findtext('title')
 		url = item.findtext('link').replace('&amp;','&')
 		
 		# parse the file name
 		try:
-			myParser = FileParser(title, absolute_numbering)
+			myParser = FileParser(title, episode.show.absolute_numbering)
 			epInfo = myParser.parse()
 		except tvnamer_exceptions.InvalidFilename:
 			logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
@@ -107,12 +107,12 @@ class NZBMatrixProvider(generic.NZBProvider):
 		
 		quality = Quality.nameQuality(title)
 
-		if absolute_numbering:
+		if episode.show.absolute_numbering:
 			season = -1
 		else:
 			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
 		
-		if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch, absolute_numbering):
+		if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
 			logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 			return None
 		

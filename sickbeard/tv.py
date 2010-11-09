@@ -905,7 +905,7 @@ class TVShow(object):
         toReturn += "quality: " + str(self.quality) + "\n"
         return toReturn
 
-    def wantEpisode(self, season, episode, quality, manualSearch=False, absolute_numbering=False):
+    def wantEpisode(self, season, episode, quality, manualSearch=False):
 
         logger.log(u"Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
 
@@ -918,7 +918,7 @@ class TVShow(object):
 
         myDB = db.DBConnection()
 
-        if absolute_numbering:
+        if self.absolute_numbering:
             sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [self.tvdbid, episode])
         else:
             sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
