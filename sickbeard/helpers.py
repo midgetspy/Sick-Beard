@@ -105,6 +105,9 @@ def sanitizeFileName (name):
 
 
 def getURL (url, headers=[]):
+	"""
+	Returns a byte-string retrieved from the url provider.
+	"""
 
 	opener = urllib2.build_opener()
 	opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
@@ -126,9 +129,6 @@ def getURL (url, headers=[]):
 	else:
 		result = usock.read()
 		usock.close()
-
-	# use unicode ONLY!
-	result = result.decode('utf-8')
 
 	return result
 
