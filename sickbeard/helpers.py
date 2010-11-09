@@ -128,7 +128,7 @@ def getURL (url, headers=[]):
 		usock.close()
 
 	# use unicode ONLY!
-	result = result.decade('utf-8')
+	result = result.decode('utf-8')
 
 	return result
 
