@@ -127,6 +127,9 @@ def getURL (url, headers=[]):
 		result = usock.read()
 		usock.close()
 
+	# use unicode ONLY!
+	result = result.decade('utf-8')
+
 	return result
 
 def findCertainShow (showList, tvdbid):
