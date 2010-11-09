@@ -27,7 +27,7 @@ import sickbeard
 import generic
 
 import sickbeard.encodingKludge as ek
-from sickbeard import classes, logger, helpers, exceptions, sceneHelpers
+from sickbeard import classes, logger, helpers, exceptions, sceneHelpers, db
 from sickbeard import tvcache
 from sickbeard.common import *
 
@@ -206,10 +206,10 @@ class NewzbinProvider(generic.NZBProvider):
             logger.log("Unable to get an ID from "+str(nzb.url)+", can't download from Newzbin's API", logger.ERROR)
             return False
 
-        logger.log("Downloading an NZB from newzbin with id "+id, logger.DEBUG)
+        logger.log("Downloading an NZB from newzbin with id "+id)
 
         fileName = ek.ek(os.path.join, sickbeard.NZB_DIR, helpers.sanitizeFileName(nzb.name)+'.nzb')
-        logger.log("Saving to " + fileName, logger.DEBUG)
+        logger.log("Saving to " + fileName)
 
         urllib._urlopener = NewzbinDownloader()
 
@@ -297,89 +297,46 @@ class NewzbinProvider(generic.NZBProvider):
 
         return results
 
-    def findSeasonResults(self, show, season):
-
-        results = {}
+    def _get_season_search_strings(self, show, season):
 
         nameList = set(sceneHelpers.allPossibleShowNames(show))
 
-        searchTerms = ['^"'+x+' - '+str(season)+'x"' for x in nameList]
+        if show.is_air_by_date:
+            suffix = ''
+        else:
+            suffix = 'x'
+        searchTerms = ['^"'+x+' - '+str(season)+suffix+'"' for x in nameList]
         #searchTerms += ['^"'+x+' - Season '+str(season)+'"' for x in nameList]
         searchStr = " OR ".join(searchTerms)
 
         searchStr += " -subpack -extras"
 
         logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
+        
+        return [searchStr]
+
+
+    def _doSearch(self, searchStr):
 
         data = self._getRSSData(searchStr)
+        
+        item_list = []
 
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
             logger.log("Error trying to load Newzbin RSS feed: "+str(e), logger.ERROR)
-            return results
+            return []
 
-        for item in items:
+        for cur_item in items:
+            title = cur_item.findtext('title')
+            if title == 'Feed Error':
+                raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
 
-            title = item.findtext('title')
-            url = item.findtext('link')
+            item_list.append(cur_item)
 
-            quality = self.getQuality(item)
-
-            # parse the file name
-            try:
-                myParser = FileParser(title)
-                epInfo = myParser.parse()
-            except tvnamer_exceptions.InvalidFilename:
-                logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
-                continue
-
-
-            if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
-                logger.log("The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
-                continue
-
-            # make sure we want the episode
-            wantEp = True
-            for epNo in epInfo.episodenumbers:
-                if not show.wantEpisode(season, epNo, quality):
-                    logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-                    wantEp = False
-                    break
-            if not wantEp:
-                continue
-
-            logger.log("Found result " + title + " at " + url, logger.DEBUG)
-
-            # make a result object
-            epObj = []
-            for curEp in epInfo.episodenumbers:
-                epObj.append(show.getEpisode(season, curEp))
-
-            result = self.getResult(epObj)
-            result.url = url
-            result.name = title
-            result.quality = quality
-
-            if len(epObj) == 1:
-                epNum = epObj[0].episode
-            elif len(epObj) > 1:
-                epNum = MULTI_EP_RESULT
-                logger.log("Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
-            elif len(epObj) == 0:
-                epNum = SEASON_RESULT
-                result.extraInfo = [show]
-                logger.log("Separating full season result to check for later", logger.DEBUG)
-
-            if epNum in results:
-                results[epNum].append(result)
-            else:
-                results[epNum] = [result]
-
-        logger.log("backlog results: "+str(results), logger.DEBUG)
-
-        return results
+        return item_list
 
 
     def _getRSSData(self, search=None):
