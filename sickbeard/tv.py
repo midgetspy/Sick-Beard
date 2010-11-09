@@ -479,9 +479,17 @@ class TVShow(object):
         if self.absolute_numbering:
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-                epObj = t[self.tvdbid].absoluteEpisode(episodes[0])[0]
-                season = int(epObj["seasonnumber"])
-                episodes = [int(epObj["episodenumber"])]
+                
+                # translate all absolute numbers into season & episode
+                translatedEpisodes = []
+                for absEpNum in episodes:
+                    epObj = t[self.tvdbid].absoluteEpisode(absEpNum)[0]
+                    if epObj != None:
+                        season = int(epObj["seasonnumber"])
+                        translatedEpisodes.append( int(epObj["episodenumber"]) )
+                
+                episodes = translatedEpisodes
+                
             except tvdb_exceptions.tvdb_episodenotfound, e:
                 logger.log("Unable to find episode with absolute episode number "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
                 return None
@@ -1638,7 +1646,10 @@ class TVEpisode:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
 
         for relEp in self.relatedEps:
-            goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
+            if self.show.absolute_numbering and relEp.absolute_episode != None and relEp.absolute_episode != 0:
+                goodEpString += "-%03d" % int(relEp.absolute_episode)
+            else:
+                goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
 
         if goodName != '':
             goodName = config.naming_sep_type[naming_sep_type] + goodName
