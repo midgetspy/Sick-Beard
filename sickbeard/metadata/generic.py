@@ -28,6 +28,9 @@ class GenericMetadata():
     def __init__(self):
         self._show_file_name = "tvshow.nfo"
         self._ep_nfo_extension = "nfo"
+        
+        self.poster_name = "folder.jpg"
+        self.fanart_name = "fanart.jpg"
 
         self.generate_show_metadata = True
         self.generate_ep_metadata = True

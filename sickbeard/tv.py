@@ -38,7 +38,9 @@ from sickbeard import helpers, exceptions, logger
 from sickbeard import processTV
 from sickbeard import tvrage
 from sickbeard import config
-from sickbeard import metadata
+
+import metadata
+import metadata.art
 
 from sickbeard import encodingKludge as ek
 
@@ -158,12 +160,10 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
             return
 
-        if sickbeard.CREATE_IMAGES:
-            self.getImages()
+        self.getImages()
 
-        if sickbeard.CREATE_METADATA:
-            self.writeShowNFO()
-            self.writeEpisodeNFOs()
+        self.writeShowNFO()
+        self.writeEpisodeNFOs()
 
 
     def writeEpisodeNFOs (self):
@@ -312,110 +312,19 @@ class TVShow(object):
 
     def getImages(self, fanart=None, poster=None):
 
-        if not sickbeard.CREATE_IMAGES:
-            logger.log(u"Skipping image retrieval since metadata creation is turned off", logger.DEBUG)
-            return
+        poster_path = ek.ek(os.path.join, self.location, sickbeard.metadata_generator.poster_name)
+        fanart_path = ek.ek(os.path.join, self.location, sickbeard.metadata_generator.fanart_name)
 
-        try:
-            t = tvdb_api.Tvdb(banners=True, **sickbeard.TVDB_API_PARMS)
-            myShow = t[self.tvdbid]
-        except (tvdb_exceptions.tvdb_error, IOError), e:
-            logger.log(u"Unable to look up show on TVDB, not downloading images: "+str(e).decode('utf-8'), logger.ERROR)
-            return None
+        if sickbeard.ART_POSTER:
+            poster_result = metadata.art.save_poster(self, poster_path, poster)
 
-        fanartURL = myShow['fanart']
-        posterURL = myShow['poster']
+        if sickbeard.ART_FANART:
+            fanart_result = metadata.art.save_fanart(self, fanart_path, poster)
+        
+        if sickbeard.ART_SEASON_THUMBNAILS:
+            season_thumb_result = metadata.art.save_season_thumbs(self, self.location)
 
-        # get the image data
-        if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.location, "fanart.jpg")):
-            fanartData = None
-            if fanart != None:
-                fanartData = helpers.getShowImage(fanartURL, fanart)
-
-            # if we had a custom image number that failed OR we had no custom number then get the default one
-            if fanartData == None:
-                fanartData = helpers.getShowImage(fanartURL)
-
-            if fanartData == None:
-                logger.log(u"Unable to retrieve fanart, skipping", logger.WARNING)
-            else:
-                try:
-                    outFile = ek.ek(open, ek.ek(os.path.join, self.location, "fanart.jpg"), 'wb')
-                    outFile.write(fanartData)
-                    outFile.close()
-                except IOError, e:
-                    logger.log(u"Unable to write fanart to "+ek.ek(os.path.join, self.location, "fanart.jpg")+" - are you sure the show folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
-
-        # get the image data
-        if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.location, "folder.jpg")):
-            posterData = None
-            if poster != None:
-                posterData = helpers.getShowImage(posterURL, poster)
-
-            # if we had a custom image number that failed OR we had no custom number then get the default one
-            if posterData == None:
-                posterData = helpers.getShowImage(posterURL)
-
-            if posterData == None:
-                logger.log(u"Unable to retrieve poster, skipping", logger.WARNING)
-            else:
-                try:
-                    outFile = ek.ek(open, ek.ek(os.path.join, self.location, "folder.jpg"), 'wb')
-                    outFile.write(posterData)
-                    outFile.close()
-                except IOError, e:
-                    logger.log(u"Unable to write poster to "+ek.ek(os.path.join, self.location, "folder.jpg")+" - are you sure the show folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
-
-        seasonData = None
-        #  How many seasons?
-        numOfSeasons = len(myShow)
-
-        # if we have no season banners then just finish
-        if 'season' not in myShow['_banners'] or 'season' not in myShow['_banners']['season']:
-            return
-
-        # Give us just the normal poster-style season graphics
-        seasonsArtObj = myShow['_banners']['season']['season']
-
-        # This holds our resulting dictionary of season art
-        seasonsDict = {}
-
-        # Returns a nested dictionary of season art with the season
-        # number as primary key. It's really overkill but gives the option
-        # to present to user via ui to pick down the road.
-        for seasonNum in range(numOfSeasons):
-            # dumb, but we do have issues with types here so make it
-            # strings for now
-            seasonNum = str(seasonNum)
-            seasonsDict[seasonNum] = {}
-            for seasonArtID in seasonsArtObj.keys():
-                seasonArtID = str(seasonArtID)
-                if seasonsArtObj[seasonArtID]['season'] == seasonNum and seasonsArtObj[seasonArtID]['language'] == 'en':
-                    seasonsDict[seasonNum][seasonArtID] = seasonsArtObj[seasonArtID]['_bannerpath']
-            if len(seasonsDict[seasonNum]) > 0:
-                # Just grab whatever's there for now
-                season, seasonURL = seasonsDict[seasonNum].popitem()
-
-                # Our specials thumbnail is, well, special
-                if seasonNum == '0':
-                    seasonFileName = 'season-specials'
-                else:
-                    seasonFileName = 'season' + seasonNum.zfill(2)
-
-                # Let's do the check before we pull the file
-                if not ek.ek(os.path.isfile, ek.ek(os.path.join, self.location, seasonFileName+'.tbn')):
-
-                    seasonData = helpers.getShowImage(seasonURL)
-
-                    if seasonData == None:
-                        logger.log(u"Unable to retrieve season poster, skipping", logger.ERROR)
-                    else:
-                        try:
-                            outFile = ek.ek(open, ek.ek(os.path.join, self.location, seasonFileName+'.tbn'), 'wb')
-                            outFile.write(seasonData)
-                            outFile.close()
-                        except IOError, e:
-                            logger.log(u"Unable to write fanart - are you sure the show folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
+        return poster_result or fanart_result or season_thumb_result
 
 
     def loadLatestFromTVRage(self):
@@ -1263,15 +1172,15 @@ class TVEpisode:
 
         shouldSave = self.checkForMetaFiles()
 
-        if sickbeard.CREATE_METADATA or force:
-            result = self.createNFOs(force)
+        if sickbeard.METADATA_SHOW:
+            result = self.createNFO(force)
             if result == None:
                 return False
             elif result == True:
                 shouldSave = True
 
-        if sickbeard.CREATE_IMAGES or force:
-            result = self.createArt(epsToWrite, force)
+        if sickbeard.ART_THUMBNAILS or force:
+            result = self.createThumbnail(epsToWrite, force)
             if result == None:
                 return False
             elif result == True:
@@ -1282,7 +1191,7 @@ class TVEpisode:
             self.saveToDB()
 
 
-    def createNFOs(self, force=False):
+    def createNFO(self, force=False):
 
         eps_to_write = eps_to_write = [self] + self.relatedEps
 
@@ -1324,50 +1233,19 @@ class TVEpisode:
         return shouldSave
 
 
-    def createArt(self, epsToWrite, force=False):
+    def createThumbnail(self, epsToWrite, force=False):
 
-        shouldSave = False
+        if self.hastbn and not force:
+            return False
 
-        try:
-            t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
-            myShow = t[self.show.tvdbid]
-        except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
-        except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+str(e).decode('utf-8'), logger.ERROR)
-            return
+        if ek.ek(os.path.isfile, self.location):
+            tbn_filename = helpers.replaceExtension(self.location, 'tbn')
+        else:
+            tbn_filename = ek.ek(os.path.join, self.show.location, helpers.sanitizeFileName(self.prettyName() + '.tbn'))
 
-        thumbFilename = None
-
-        # write an NFO containing info for all matching episodes
-        for curEpToWrite in epsToWrite:
-
-            try:
-                myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
-            except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-                logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
-                return None
-
-            if curEpToWrite == self:
-                thumbFilename = myEp["filename"]
-
-        if not self.hastbn or force:
-            if thumbFilename != None:
-                if ek.ek(os.path.isfile, self.location):
-                    tbnFilename = helpers.replaceExtension(self.location, 'tbn')
-                else:
-                    tbnFilename = helpers.sanitizeFileName(self.prettyName() + '.tbn')
-                logger.log('Writing thumb to ' + tbnFilename)
-                try:
-                    ek.ek(urllib.urlretrieve, thumbFilename, tbnFilename)
-                except IOError:
-                    logger.log(u"Unable to download thumbnail from "+thumbFilename, logger.ERROR)
-                    return None
-                #TODO: check that it worked
-                self.hastbn = True
-                shouldSave = True
-
-        return shouldSave
+        result = metadata.art.save_thumbnail(self, tbn_filename)
+        
+        return result
 
     def deleteEpisode(self):
 
