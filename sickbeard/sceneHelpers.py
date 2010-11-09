@@ -31,10 +31,10 @@ resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
                  "sample", "extras", "special", "dubbed", "german",
                 "french", "core2hd")
 
-def filterBadReleases(name):
+def filterBadReleases(name,absolute_numbering=False):
 
     try:
-        fp = FileParser(name)
+        fp = FileParser(name,absolute_numbering)
         epInfo = fp.parse()
     except tvnamer_exceptions.InvalidFilename:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)

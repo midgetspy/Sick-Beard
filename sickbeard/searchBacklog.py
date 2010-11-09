@@ -120,36 +120,71 @@ class BacklogSearcher:
                 logger.log(u"Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
                 self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
 
-                # see if there is anything in this season worth searching for
-                wantSeason = False
-                statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [curShow.tvdbid, curSeason])
-                for curStatusResult in statusResults:
-                    curCompositeStatus = int(curStatusResult["status"])
-                    curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
+                if curShow.absolute_numbering:
+                    # check absolutely numbered shows individually because there are no seasons to parse for
+                    statusResults = myDB.select("SELECT season, episode, status FROM tv_episodes WHERE showid = ? AND season = ?", [curShow.tvdbid, curSeason])
+                    episodesToFetch = []
 
-                    if bestQualities:
-                        highestBestQuality = max(bestQualities)
-                    else:
-                        highestBestQuality = 0
-
-                    # if we need a better one then say yes
-                    if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
-                        wantSeason = True
-                        break
-
-                if not wantSeason:
-                    numSeasonsDone += 1.0
-                    self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
-                    logger.log(u"Nothing in season "+str(curSeason)+" needs to be downloaded, skipping this season", logger.DEBUG)
-                    continue
-
-                results = search.findSeason(curShow, curSeason)
-
+                    # check each episode to see if it needs to be downloaded
+                    for curStatusResult in statusResults:
+                        curCompositeStatus = int(curStatusResult["status"])
+                        curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
+        
+                        if bestQualities:
+                            highestBestQuality = max(bestQualities)
+                        else:
+                            highestBestQuality = 0
+        
+                        # if we need a better one then add it to the list of episodes to fetch
+                        if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
+                            season = int(curStatusResult["season"])
+                            episode = int(curStatusResult["episode"])
+                
+                            try:
+                                curEp = curShow.getEpisode(season, episode)
+                                episodesToFetch.append(curEp)
+                            except exceptions.EpisodeDeletedException:
+                                logger.log(u"The episode was deleted while we were refreshing it, moving on to the next one", logger.DEBUG)
+                                continue
+                        
+                    # search for the episodes that need downloading
+                    results = []
+                    for episodeToFetch in episodesToFetch:
+                        result = search.findEpisode(episodeToFetch)
+                        if results != None:
+                            results.append( result )
+                else:
+                    # see if there is anything in this season worth searching for
+                    wantSeason = False
+                    statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [curShow.tvdbid, curSeason])
+                    for curStatusResult in statusResults:
+                        curCompositeStatus = int(curStatusResult["status"])
+                        curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
+        
+                        if bestQualities:
+                            highestBestQuality = max(bestQualities)
+                        else:
+                            highestBestQuality = 0
+        
+                        # if we need a better one then say yes
+                        if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
+                            wantSeason = True
+                            break
+        
+                    if not wantSeason:
+                        numSeasonsDone += 1.0
+                        self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
+                        logger.log(u"Nothing in season "+str(curSeason)+" needs to be downloaded, skipping this season", logger.DEBUG)
+                        continue
+        
+                    results = search.findSeason(curShow, curSeason)
+        
                 for curResult in results:
-
-                    search.snatchEpisode(curResult)
-                    time.sleep(5)
-
+        
+                    if curResult != None:
+                            search.snatchEpisode(curResult)
+                            time.sleep(5)
+        
                 numSeasonsDone += 1.0
                 self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
 

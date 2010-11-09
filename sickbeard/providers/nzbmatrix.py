@@ -56,7 +56,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 		# if we got some results then use them no matter what.
 		# OR
 		# return anyway unless we're doing a manual search
-		if nzbResults or not manualSearch:
+		if nzbResults or ( not manualSearch and not episode.show.absolute_numbering ):
 			return nzbResults
 
 		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(episode))
@@ -108,13 +108,15 @@ class NZBMatrixProvider(generic.NZBProvider):
 		quality = Quality.nameQuality(title)
 
 		if episode.show.absolute_numbering:
-			season = -1
+			if not episode.show.wantEpisode(-1, episode.absolute_episode, quality, manualSearch):
+				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+				return None
 		else:
 			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
 		
-		if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
-			logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-			return None
+			if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
+				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+				return None
 		
 		logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 		

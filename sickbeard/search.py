@@ -210,7 +210,7 @@ def findEpisode(episode, manualSearch=False):
 		didSearch = True
 
 		# skip non-tv crap
-		curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, episode.show), curFoundResults)
+		curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name,episode.show.absolute_numbering) and sceneHelpers.isGoodResult(x.name, episode.show), curFoundResults)
 
 		foundResults += curFoundResults
 
