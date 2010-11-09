@@ -262,11 +262,11 @@ class XBMCMetadata(generic.GenericMetadata):
                 if cur_actor_thumb_text != None:
                     cur_actor_thumb.text = cur_actor_thumb_text
 
-            #
-            # Make it purdy
-            helpers.indentXML( rootNode )
+        #
+        # Make it purdy
+        helpers.indentXML( rootNode )
 
-            data = etree.ElementTree( rootNode )
+        data = etree.ElementTree( rootNode )
 
         return data
 
