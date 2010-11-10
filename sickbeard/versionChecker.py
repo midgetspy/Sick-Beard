@@ -164,6 +164,12 @@ class GitUpdateManager(UpdateManager):
 
         self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
 
+    def _git_error(self):
+        error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" target="_new">set git_path in your config.ini</a> to enable updates.'
+        sickbeard.NEWEST_VERSION_STRING = error_message
+        
+        return None
+
     def _find_installed_version(self):
         """
         Attempts to find the currently installed version of Sick Beard.
@@ -175,7 +181,7 @@ class GitUpdateManager(UpdateManager):
         """
 
         output = None
-
+        
         if sickbeard.GIT_PATH:
             git = '"'+sickbeard.GIT_PATH+'"'
         else:
@@ -189,19 +195,25 @@ class GitUpdateManager(UpdateManager):
             output, err = p.communicate()
         except OSError, e:
             logger.log(u"Unable to find git, can't tell what version you're running")
-            return None
+            return self._git_error()
+
 
         if 'not found' in output or "not recognized as an internal or external command" in output:
             logger.log(u"Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
-            return None
+            return self._git_error()
 
         if 'fatal:' in output or err:
             logger.log(u"Git returned bad info, are you sure this is a git installation?", logger.ERROR)
-            return None
-
-        self._cur_commit_hash = output.strip()
+            return self._git_error()
 
         logger.log(u"Git output: "+str(output), logger.DEBUG)
+        cur_commit_hash = output.strip()
+
+        if not re.match('^[a-z0-9]+$', cur_commit_hash):
+            logger.log(u"Output doesn't look like a hash, not using it", logger.ERROR)
+            return self._git_error()
+            
+        return True
 
 
     def _check_github_for_update(self):
@@ -283,8 +295,7 @@ class GitUpdateManager(UpdateManager):
             p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
             output, err = p.communicate()
         except OSError, e:
-            #logger.log(u"Unable to find git, can't tell what version you're running")
-            logger.log('Error calling git pull: '+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u'Error calling git pull: '+str(e).decode('utf-8'), logger.ERROR)
             return False
 
         pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
