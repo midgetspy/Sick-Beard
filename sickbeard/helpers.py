@@ -105,6 +105,9 @@ def sanitizeFileName (name):
 
 
 def getURL (url, headers=[]):
+	"""
+	Returns a byte-string retrieved from the url provider.
+	"""
 
 	opener = urllib2.build_opener()
 	opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]

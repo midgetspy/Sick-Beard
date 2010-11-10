@@ -226,12 +226,12 @@ class TVRage:
         logger.log(u"Loading TVRage info from URL: " + url, logger.DEBUG)
 
         try:
-            result = helpers.getURL(url)
+            result = helpers.getURL(url).decode('utf-8')
         except (urllib2.HTTPError, IOError), e:
             logger.log(u"Unable to load TVRage info: " + str(e))
             raise exceptions.TVRageException("urlopen call to " + url + " failed")
 
-        urlData = [x.decode('utf-8') for x in result.splitlines()]
+        urlData = result.splitlines()
 
         info = {}
 
