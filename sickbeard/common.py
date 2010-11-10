@@ -272,6 +272,7 @@ sceneExceptions = {72546: ['CSI'],
                    70870: ['The Real World Road Rules Challenge', 'The Challenge Cutthroat'],
                    77444: ['This Old House Program'],
                    73290: ['60 Minutes (US)'],
+                   194751: ['Conan', 'Conan (2010)'],
                    }
 
 countryList = {'Australia': 'AU',
