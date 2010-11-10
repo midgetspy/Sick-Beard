@@ -48,6 +48,18 @@ class NZBMatrixProvider(generic.NZBProvider):
 	def isEnabled(self):
 		return sickbeard.NZBMATRIX
 
+	def findSeasonResults(self, show, season):
+		
+		results = {}
+		
+		if show.is_air_by_date:
+			logger.log(u"NZBMatrix doesn't support air-by-date backlog because of a bug in their RSS search. Pressure them to fix it!", logger.WARNING)
+			return results
+		
+		results = generic.NZBProvider.findSeasonResults(self, show, season)
+		
+		return results
+
 
 	def findEpisode (self, episode, manualSearch=False):
 
