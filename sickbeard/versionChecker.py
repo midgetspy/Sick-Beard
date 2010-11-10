@@ -191,7 +191,7 @@ class GitUpdateManager(UpdateManager):
             logger.log(u"Unable to find git, can't tell what version you're running")
             return None
 
-        if 'git: not found' in output or "'git' is not recognized as an internal or external command" in output:
+        if 'not found' in output or "not recognized as an internal or external command" in output:
             logger.log(u"Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
             return None
 
