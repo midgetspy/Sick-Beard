@@ -2,6 +2,7 @@
 #import sickbeard
 #from sickbeard.common import *
 #from sickbeard import config
+#from sickbeard import metadata
 #set global $title  = "Config - General"
 #set global $header = "General Configuration"
 
@@ -66,16 +67,6 @@ Directory where Sick Beard should place its logs<br />
 <input type="text" name="log_dir" id="log_dir" value="$sickbeard.LOG_DIR" size="30"><br />
 <br />
 
-<label for="create_metadata"><input type="checkbox" name="create_metadata" id="create_metadata" #if $sickbeard.CREATE_METADATA then "CHECKED" else ""#> <strong>Create metadata</strong></label><br />
-If checked Sick Beard will create nfo/tbn files<br />
-for all your media<br />
-<br />
-
-<label for="create_images"><input type="checkbox" name="create_images" id="create_images" #if $sickbeard.CREATE_IMAGES then "CHECKED" else ""#> <strong>Create images</strong></label><br />
-If checked Sick Beard will create fanart/posters/season thumbs<br />
-for all your media<br />
-<br />
-
 <label for="launch_browser"><input type="checkbox" name="launch_browser" id="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "CHECKED" else ""#> <strong>Launch browser on startup</strong></label><br />
 Should Sick Beard open its home page in your<br />browser when you start it?<br />
 <br />
@@ -86,6 +77,47 @@ Only works for windows builds and git installations
 
 </fieldset>
 </div>
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Metadata</legend>
+
+#set $m_dict = $metadata.getMetadataGeneratorList()
+<select name="metadata_type">
+#for $cur_generator in $m_dict:
+<option value="$cur_generator" #if $cur_generator == $sickbeard.METADATA_TYPE then "SELECTED" else ""#>$m_dict[$cur_generator]<br />
+#end for
+</select><br />
+<br />
+
+<label for="metadata_show"><input type="checkbox" name="metadata_show" id="metadata_show" #if $sickbeard.METADATA_SHOW then "CHECKED" else ""#> <strong>Create show metadata file</strong></label><br />
+Eg. tvshow.nfo, series.xml<br />
+<br />
+
+<label for="metadata_episode"><input type="checkbox" name="metadata_episode" id="metadata_episode" #if $sickbeard.METADATA_EPISODE then "CHECKED" else ""#> <strong>Create episode metadata files</strong></label><br />
+Eg. <episode filename>.nfo<br />
+<br />
+
+<label for="art_poster"><input type="checkbox" name="art_poster" id="art_poster" #if $sickbeard.ART_POSTER then "CHECKED" else ""#> <strong>Create show posters</strong></label><br />
+Eg. folder.jpg<br />
+<br />
+
+<label for="art_fanart"><input type="checkbox" name="art_fanart" id="art_fanart" #if $sickbeard.ART_FANART then "CHECKED" else ""#> <strong>Create show fanart</strong></label><br />
+Eg. fanart.jpg<br />
+<br />
+
+<label for="art_thumbnails"><input type="checkbox" name="art_thumbnails" id="art_thumbnails" #if $sickbeard.ART_THUMBNAILS then "CHECKED" else ""#> <strong>Create episode thumbnails</strong></label><br />
+Eg. <episode filename>.tbn<br />
+<br />
+
+<label for="art_season_thumbnails"><input type="checkbox" name="art_season_thumbnails" id="art_season_thumbnails" #if $sickbeard.ART_SEASON_THUMBNAILS then "CHECKED" else ""#> <strong>Create season thumbnails</strong></label><br />
+Eg. season01.tbn<br />
+<br />
+
+</fieldset>
+</div>
+
 
 <div class="EntryBlock">
 <fieldset class="EntryFieldSet">

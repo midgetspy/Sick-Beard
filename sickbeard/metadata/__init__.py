@@ -22,3 +22,14 @@ def getMetadataClass(name):
         return None
     
     return module.metadata_class()
+
+def getMetadataGeneratorList():
+    result = {}
+    for cur_generator_id in available_generators():
+        cur_module = getMetadataClass(cur_generator_id)
+        if not cur_module:
+            continue
+        result[cur_generator_id] = cur_module.name
+    
+    return result
+        
