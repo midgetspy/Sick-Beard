@@ -20,8 +20,8 @@ import sickbeard
 from sickbeard import helpers, version
 from sickbeard import logger
 
-import os, os.path
-import subprocess, re, datetime
+import os, os.path, platform
+import subprocess, re
 import urllib, urllib2
 import zipfile, tarfile
 
@@ -170,31 +170,46 @@ class GitUpdateManager(UpdateManager):
         
         return None
 
+    def _run_git(self, args):
+        
+        if sickbeard.GIT_PATH:
+            git_locations = ['"'+sickbeard.GIT_PATH+'"']
+        else:
+            git_locations = ['git']
+        
+        # osx people who start SB from launchd have a broken path, so try a hail-mary attempt for them
+        if platform.system().lower() == 'darwin':
+            git_locations.append('/usr/local/git/bin/git')
+
+        output = None
+
+        for cur_git in git_locations:
+
+            cmd = cur_git+' '+args
+        
+            try:
+                logger.log(u"Executing "+cmd+"with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
+                output, err = p.communicate()
+            except OSError, e:
+                logger.log(u"Command "+cmd+" didn't work, couldn't find git.")
+                continue
+
+        return (output, err)
+
+    
     def _find_installed_version(self):
         """
         Attempts to find the currently installed version of Sick Beard.
 
         Uses git show to get commit version.
 
-        Returns: a tuple containing the commit hash and a datetime object of the commit date.
-                 Both will be None if we can't retrieve them.
+        Returns: True for success or False for failure
         """
 
-        output = None
-        
-        if sickbeard.GIT_PATH:
-            git = '"'+sickbeard.GIT_PATH+'"'
-        else:
-            git = 'git'
+        output, err = self._run_git('rev-parse HEAD')
 
-        cmd = git+' rev-parse HEAD'
-
-        try:
-            logger.log(u"Executing "+cmd+"with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
-            output, err = p.communicate()
-        except OSError, e:
-            logger.log(u"Unable to find git, can't tell what version you're running")
+        if not output:
             return self._git_error()
 
 
@@ -282,21 +297,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output = None
-
-        if sickbeard.GIT_PATH:
-            git = '"'+sickbeard.GIT_PATH+'"'
-        else:
-            git = 'git'
-
-        try:
-            popen_str = git+' pull origin '+sickbeard.version.SICKBEARD_VERSION
-            logger.log(u"Executing command: "+popen_str+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
-            p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
-            output, err = p.communicate()
-        except OSError, e:
-            logger.log(u'Error calling git pull: '+str(e).decode('utf-8'), logger.ERROR)
-            return False
+        output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION)
 
         pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
 
