@@ -139,6 +139,12 @@ class XBMCMetadata(generic.GenericMetadata):
         return data
     
     def _ep_data(self, ep_obj):
+        """
+        Creates an elementTree XML structure for an XBMC-style episode.nfo and
+        returns the resulting data object.
+        
+        show_obj: a TVEpisode instance to create the NFO for
+        """
 
         eps_to_write = [ep_obj] + ep_obj.relatedEps
 
@@ -270,5 +276,5 @@ class XBMCMetadata(generic.GenericMetadata):
 
         return data
 
+# present a standard "interface" from the module
 metadata_class = XBMCMetadata
-

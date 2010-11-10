@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
+import datetime, re
 
 import sickbeard
 
@@ -30,17 +30,105 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 import xml.etree.cElementTree as etree
 
 class MediaBrowserMetadata(generic.GenericMetadata):
+    """
+    Metadata generation class for Media Browser. All xml formatting and
+    file naming information was contributed by users in the following
+    ticket's comments:
+    
+    http://code.google.com/p/sickbeard/issues/detail?id=311
+    
+    The following file structure is used:
+    
+    show_root/series.xml                           (show metadata)
+    show_root/folder.jpg                           (poster)
+    show_root/fanart.jpg                           (fanart)
+    show_root/Season 01/folder.jpg                 (season thumb)
+    show_root/Season 01/show - 1x01 - episode.avi  (* example of existing ep of course)
+    show_root/Season 01/show - 1x01 - episode.xml  (episode metadata)
+    show_root/metadata/show - 1x01 - episode.jpg   (episode thumb)
+    """
     
     def __init__(self):
         generic.GenericMetadata.__init__(self)
         
-        self._ep_nfo_extension = "nfo"
+        self._show_file_name = 'series.xml'
+        self._ep_nfo_extension = 'xml'
 
         self.name = 'MediaBrowser'
     
+    def get_episode_file_path(self, ep_obj):
+        """
+        Returns a full show dir/metadata/episode.xml path for MediaBrowser
+        episode metadata files
+        
+        ep_obj: a TVEpisode object to get the path for
+        """
+
+        if ek.ek(os.path.isfile, ep_obj.location):
+            xml_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), self._ep_nfo_extension)
+            metadata_dir_name = ek.ek(os.path.join, ep_obj.show.location, 'metadata')
+            xml_file_path = ek.ek(os.path.join, metadata_dir_name, xml_file_name)
+        else:
+            return None
+        
+        return xml_file_path
+
+    def get_episode_thumb_path(self, ep_obj):
+        """
+        Returns a full show dir/metadata/episode.jpg path for MediaBrowser
+        episode thumbs.
+        
+        ep_obj: a TVEpisode object to get the path from
+        """
+
+        if ek.ek(os.path.isfile, ep_obj.location):
+            tbn_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), 'jpg')
+            metadata_dir_name = ek.ek(os.path.join, ep_obj.show.location, 'metadata')
+            tbn_file_path = ek.ek(os.path.join, metadata_dir_name, tbn_file_name)
+        else:
+            return None
+        
+        return tbn_file_path
+    
+    def get_season_thumb_path(self, show_obj, season):
+        """
+        Season thumbs for MediaBrowser go in Show Dir/Season X/folder.jpg
+        
+        If no season folder exists, None is returned
+        """
+        
+        dir_list = [x for x in ek.ek(os.listdir, show_obj.location) if ek.ek(os.path.isdir, ek.ek(os.path.join, show_obj.location, x))]
+        
+        season_dir_regex = '^Season\s+(\d+)$'
+        
+        season_dir = None
+        
+        for cur_dir in dir_list:
+            if season == 0 and cur_dir == 'Specials':
+                season_dir = cur_dir
+                break
+            
+            match = re.match(season_dir_regex, cur_dir, re.I)
+            if not match:
+                continue
+        
+            cur_season = int(match.group(1))
+            
+            if cur_season == season:
+                season_dir = cur_dir
+                break
+
+        if not season_dir:
+            logger.log(u"Unable to find a season dir for season "+str(season), logger.DEBUG)
+            return None
+
+        logger.log(u"Using "+str(season_dir)+"/folder.jpg as season dir for season "+str(season), logger.DEBUG)
+
+        return ek.ek(os.path.join, show_obj.location, season_dir, 'folder.jpg')
+
     def _show_data(self, show_obj):
         """
-        Creates an elementTree XML structure for a MediaBrowser-style
+        Creates an elementTree XML structure for a MediaBrowser-style series.xml
         returns the resulting data object.
         
         show_obj: a TVShow instance to create the NFO for
@@ -59,7 +147,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             raise
     
         except tvdb_exceptions.tvdb_error:
-            logger.log("TVDB is down, can't use its data to add this show", logger.ERROR)
+            logger.log("TVDB is down, can't use its data to make the NFO", logger.ERROR)
             raise
     
         # check for title and id
@@ -136,55 +224,20 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         return data
 
 
-    def write_ep_file(self, ep_obj, file_name_path):
-        """
-        Generates and writes ep_obj's metadata under the given path with the
-        given filename root.
-        
-        ep_obj: TVEpisode object for which to create the metadata
-        
-        file_name_path: The file name to use for this metadata. Note that the extension
-                will be automatically added based on _ep_nfo_extension. This should
-                include an absolute path.
-        
-        Note that this method expects that _ep_data will return an ElementTree
-        object. If your _ep_data returns data in another format you'll need to
-        override this method.
-        """
-        
-        data = self._ep_data(ep_obj)
-        
-        if not data:
-            return False
-        
-        # Create metadata directory
-        metadata_dir = ek.ek(os.path.join, ek.ek(os.path.dirname, file_name_path), 'metadata')
-        if not os.path.exists(metadata_dir):
-            ek.ek(os.makedirs, metadata_dir)
-
-        # get the ep file name
-        ep_file_name = helpers.replaceExtension(ek.ek(os.path.basename, file_name_path), self._ep_nfo_extension)
-        
-        # get the full path to the eventual metadata file
-        metadata_file_path = ek.ek(os.path.join, ep_file_name)
-
-        logger.log(u"Writing episode xml file to "+metadata_file_path)
-        
-        metadata_file = open(metadata_file_path, 'w')
-
-        data.write(metadata_file, encoding="utf-8")
-        metadata_file.close()
-        
-        return True
-
     def _ep_data(self, ep_obj):
+        """
+        Creates an elementTree XML structure for a MediaBrowser style episode.xml
+        and returns the resulting data object.
+        
+        show_obj: a TVShow instance to create the NFO for
+        """
         
         eps_to_write = [ep_obj] + ep_obj.relatedEps
         
         shouldSave = False
         try:
             t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
-            myShow = t[self.show.tvdbid]
+            myShow = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(str(e))
         except tvdb_exceptions.tvdb_error, e:
@@ -206,18 +259,12 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                 logger.log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
                 return None
             
-            if myEp["firstaired"] == None and self.season == 0:
+            if myEp["firstaired"] == None and ep_obj.season == 0:
                 myEp["firstaired"] = str(datetime.date.fromordinal(1))
             
             if myEp["episodename"] == None or myEp["firstaired"] == None:
                 return None
                 
-            if not needsMediaBrowserXML:
-                logger.log("Skipping metadata generation for myself ("+str(self.season)+"x"+str(self.episode)+")", logger.DEBUG)
-                continue
-            else:
-                logger.log("Creating metadata for myself ("+str(self.season)+"x"+str(self.episode)+")", logger.DEBUG)
-            
             if len(eps_to_write) > 1:
                 episode = etree.SubElement(rootNode, "Item")
             else:
@@ -301,9 +348,18 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             seriesid.text = str(curEpToWrite.show.tvdbid)
   
             thumb = etree.SubElement(episode, "filename")
+            
+            # just write this to the NFO regardless of whether it actually exists or not
+            # note: renaming files after nfo generation will break this, tough luck
+            thumb_text = self.get_episode_thumb_path(ep_obj)
+            if thumb_text:
+                thumb.text = thumb_text
 
             # Make it purdy
             helpers.indentXML(rootNode)
             data = etree.ElementTree(rootNode)
 
         return data
+    
+# present a standard "interface"
+metadata_class = MediaBrowserMetadata

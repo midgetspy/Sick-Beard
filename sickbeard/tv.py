@@ -39,9 +39,6 @@ from sickbeard import processTV
 from sickbeard import tvrage
 from sickbeard import config
 
-import metadata
-import metadata.art
-
 from sickbeard import encodingKludge as ek
 
 from common import *
@@ -150,7 +147,11 @@ class TVShow(object):
             logger.log(u"No valid metadata generator: "+str(sickbeard.METADATA_TYPE), logger.ERROR)
             return False
 
-        result = sickbeard.metadata_generator.write_show_file(self, self._location)
+        if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_show_file_path(self)):
+            logger.log(u"Show's metadata file already exists, not generating it", logger.DEBUG)
+            return False
+
+        result = sickbeard.metadata_generator.write_show_file(self)
 
         return result
 
@@ -312,17 +313,22 @@ class TVShow(object):
 
     def getImages(self, fanart=None, poster=None):
 
-        poster_path = ek.ek(os.path.join, self.location, sickbeard.metadata_generator.poster_name)
-        fanart_path = ek.ek(os.path.join, self.location, sickbeard.metadata_generator.fanart_name)
-
         if sickbeard.ART_POSTER:
-            poster_result = metadata.art.save_poster(self, poster_path, poster)
+            if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_poster_path(self)):
+                logger.log(u"Poster already exists, not downloading", logger.DEBUG)
+                poster_result = False
+            else:
+                poster_result = sickbeard.metadata_generator.save_poster(self)
 
         if sickbeard.ART_FANART:
-            fanart_result = metadata.art.save_fanart(self, fanart_path, poster)
+            if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_fanart_path(self)):
+                logger.log(u"Fanart already exists, not downloading", logger.DEBUG)
+                fanart_result = False
+            else:
+                fanart_result = sickbeard.metadata_generator.save_fanart(self)
         
         if sickbeard.ART_SEASON_THUMBNAILS:
-            season_thumb_result = metadata.art.save_season_thumbs(self, self.location)
+            season_thumb_result = sickbeard.metadata_generator.save_season_thumbs(self)
 
         return poster_result or fanart_result or season_thumb_result
 
@@ -899,12 +905,12 @@ class TVEpisode:
 
         # check for nfo and tbn
         if ek.ek(os.path.isfile, self.location):
-            if ek.ek(os.path.isfile, ek.ek(os.path.join, self.show.location, helpers.replaceExtension(self.location, 'nfo'))):
+            if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_episode_file_path(self)):
                 self.hasnfo = True
             else:
                 self.hasnfo = False
 
-            if ek.ek(os.path.isfile, ek.ek(os.path.join, self.show.location, helpers.replaceExtension(self.location, 'tbn'))):
+            if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_episode_thumb_path(self)):
                 self.hastbn = True
             else:
                 self.hastbn = False
@@ -1211,17 +1217,15 @@ class TVEpisode:
         if not needsNFO:
             return False
 
-        # if somehow the ep file doesn't exist just put the nfo somewhere that makes sense
-        if ek.ek(os.path.isfile, self.location):
-            ep_file_name = self.location
-        else:
-            ep_file_name = self.prettyName() + '.nfo'
-
         if not sickbeard.metadata_generator:
             return False
 
+        if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_episode_file_path(self)):
+            logger.log(u"Episode metadata file already exists, not writing a new one", logger.DEBUG)
+            return False
+
         # generate the nfo
-        result = sickbeard.metadata_generator.write_ep_file(self, ep_file_name)
+        result = sickbeard.metadata_generator.write_ep_file(self)
 
         if not result:
             return False
@@ -1238,12 +1242,11 @@ class TVEpisode:
         if self.hastbn and not force:
             return False
 
-        if ek.ek(os.path.isfile, self.location):
-            tbn_filename = helpers.replaceExtension(self.location, 'tbn')
-        else:
-            tbn_filename = ek.ek(os.path.join, self.show.location, helpers.sanitizeFileName(self.prettyName() + '.tbn'))
+        if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_episode_thumb_path(self)):
+            logger.log(u"Episode metadata thumbnail already exists, not writing a new one", logger.DEBUG)
+            return False
 
-        result = metadata.art.save_thumbnail(self, tbn_filename)
+        result = sickbeard.metadata_generator.save_thumbnail(self)
         
         return result
 

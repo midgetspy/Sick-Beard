@@ -71,8 +71,7 @@ def getTVDBIDFromNFO(dir):
 
 def getShowImage(url, imgNum=None):
 
-    imgFile = None
-    imgData = None
+    image_data = None
 
     if url == None:
         return None
@@ -85,8 +84,7 @@ def getShowImage(url, imgNum=None):
 
     logger.log(u"Getting show image at "+tempURL, logger.DEBUG)
     try:
-        req = urllib2.Request(tempURL, headers={'User-Agent': USER_AGENT})
-        imgFile = urllib2.urlopen(req)
+        image_data = helpers.getURL(tempURL)
     except urllib2.URLError, e:
         logger.log(u"There was an error trying to retrieve the image, aborting", logger.ERROR)
         return None
@@ -94,17 +92,6 @@ def getShowImage(url, imgNum=None):
         logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e).decode('utf-8'), logger.ERROR)
         return None
 
-    if imgFile == None:
-        logger.log(u"Something bad happened and we have no URL data somehow", logger.ERROR)
-        return None
-
-    # get the image
-    try:
-        imgData = imgFile.read()
-    except (urllib2.URLError, urllib2.HTTPError), e:
-        logger.log(u"There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
-        return None
-
-    return imgData
+    return image_data
 
 
