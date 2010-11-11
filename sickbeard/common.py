@@ -128,7 +128,7 @@ class Quality:
             return Quality.HDBLURAY
         elif checkName(["720p.web.dl", "720p.itunes.h264"], any):
             return Quality.HDWEBDL
-        elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264","1280x720","720P","720p"], any):
+        elif checkName(["hr.ws.pdtv.x264","1280x720","720p"], any):
             return Quality.HDTV
         elif checkName(["dvdrip.xvid", "bdrip.xvid"], any):
             return Quality.SDDVD
@@ -272,6 +272,7 @@ sceneExceptions = {72546: ['CSI'],
                    70870: ['The Real World Road Rules Challenge', 'The Challenge Cutthroat'],
                    77444: ['This Old House Program'],
                    73290: ['60 Minutes (US)'],
+                   194751: ['Conan', 'Conan (2010)'],
                    }
 
 countryList = {'Australia': 'AU',

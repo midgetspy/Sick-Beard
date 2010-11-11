@@ -20,8 +20,8 @@ import sickbeard
 from sickbeard import helpers, version
 from sickbeard import logger
 
-import os, os.path
-import subprocess, re, datetime
+import os, os.path, platform
+import subprocess, re
 import urllib, urllib2
 import zipfile, tarfile
 
@@ -164,44 +164,74 @@ class GitUpdateManager(UpdateManager):
 
         self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
 
+    def _git_error(self):
+        error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" target="_new">set git_path in your config.ini</a> to enable updates.'
+        sickbeard.NEWEST_VERSION_STRING = error_message
+        
+        return None
+
+    def _run_git(self, args):
+        
+        if sickbeard.GIT_PATH:
+            git_locations = ['"'+sickbeard.GIT_PATH+'"']
+        else:
+            git_locations = ['git']
+        
+        # osx people who start SB from launchd have a broken path, so try a hail-mary attempt for them
+        if platform.system().lower() == 'darwin':
+            git_locations.append('/usr/local/git/bin/git')
+
+        output = None
+
+        for cur_git in git_locations:
+
+            cmd = cur_git+' '+args
+        
+            try:
+                logger.log(u"Executing "+cmd+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
+                output, err = p.communicate()
+            except OSError, e:
+                logger.log(u"Command "+cmd+" didn't work, couldn't find git.")
+                continue
+            
+            if 'not found' in output or "not recognized as an internal or external command" in output:
+                logger.log(u"Unable to find git with command "+cmd, logger.DEBUG)
+                output = None
+            elif 'fatal:' in output or err:
+                logger.log(u"Git returned bad info, are you sure this is a git installation?", logger.ERROR)
+                output = None
+            elif output:
+                break
+
+
+        return (output, err)
+
+    
     def _find_installed_version(self):
         """
         Attempts to find the currently installed version of Sick Beard.
 
         Uses git show to get commit version.
 
-        Returns: a tuple containing the commit hash and a datetime object of the commit date.
-                 Both will be None if we can't retrieve them.
+        Returns: True for success or False for failure
         """
 
-        output = None
+        output, err = self._run_git('rev-parse HEAD')
 
-        if sickbeard.GIT_PATH:
-            git = '"'+sickbeard.GIT_PATH+'"'
-        else:
-            git = 'git'
-
-        cmd = git+' rev-parse HEAD'
-
-        try:
-            logger.log(u"Executing "+cmd+"with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
-            output, err = p.communicate()
-        except OSError, e:
-            logger.log(u"Unable to find git, can't tell what version you're running")
-            return None
-
-        if 'git: not found' in output or "'git' is not recognized as an internal or external command" in output:
-            logger.log(u"Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
-            return None
-
-        if 'fatal:' in output or err:
-            logger.log(u"Git returned bad info, are you sure this is a git installation?", logger.ERROR)
-            return None
-
-        self._cur_commit_hash = output.strip()
+        if not output:
+            return self._git_error()
 
         logger.log(u"Git output: "+str(output), logger.DEBUG)
+        cur_commit_hash = output.strip()
+
+        if not re.match('^[a-z0-9]+$', cur_commit_hash):
+            logger.log(u"Output doesn't look like a hash, not using it", logger.ERROR)
+            return self._git_error()
+        
+        self._cur_commit_hash = cur_commit_hash
+            
+        return True
 
 
     def _check_github_for_update(self):
@@ -270,22 +300,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output = None
-
-        if sickbeard.GIT_PATH:
-            git = '"'+sickbeard.GIT_PATH+'"'
-        else:
-            git = 'git'
-
-        try:
-            popen_str = git+' pull origin '+sickbeard.version.SICKBEARD_VERSION
-            logger.log(u"Executing command: "+popen_str+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
-            p = subprocess.Popen(popen_str, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
-            output, err = p.communicate()
-        except OSError, e:
-            #logger.log(u"Unable to find git, can't tell what version you're running")
-            logger.log('Error calling git pull: '+str(e).decode('utf-8'), logger.ERROR)
-            return False
+        output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION)
 
         pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
 

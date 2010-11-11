@@ -268,6 +268,13 @@ def findSeason(show, season):
 	if SEASON_RESULT in foundResults:
 		bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT])
 
+	highest_quality_overall = 0
+	for cur_season in foundResults:
+		for cur_result in foundResults[cur_season]:
+			if cur_result.quality != Quality.UNKNOWN and cur_result.quality > highest_quality_overall:
+				highest_quality_overall = cur_result.quality
+	logger.log(u"The highest quality of any match is "+Quality.qualityStrings[highest_quality_overall], logger.DEBUG)
+
 	# see if every episode is wanted
 	if bestSeasonNZB:
 
@@ -288,8 +295,8 @@ def findSeason(show, season):
 			else:
 				anyWanted = True
 
-		# if we need every ep in the season then just download this and be done with it
-		if allWanted:
+		# if we need every ep in the season and there's nothing better then just download this and be done with it
+		if allWanted and bestSeasonNZB.quality == highest_quality_overall:
 			logger.log(u"Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.name)
 			epObjs = []
 			for curEpNum in allEps:

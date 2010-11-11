@@ -71,7 +71,7 @@ def main():
 	sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
 	sickbeard.MY_ARGS = sys.argv[1:]
 
-	config_file = os.path.join(sickbeard.PROG_DIR, "config.ini")
+	sickbeard.CONFIG_FILE = os.path.join(sickbeard.PROG_DIR, "config.ini")
 
 	# need console logging for SickBeard.py and SickBeard-console.exe
 	consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
@@ -105,13 +105,13 @@ def main():
 			forcedPort = int(a)
 
 	if consoleLogging:
-		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + config_file
+		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
 
 	# load the config and publish it to the sickbeard package
-	if not os.path.isfile(config_file):
+	if not os.path.isfile(sickbeard.CONFIG_FILE):
 		logger.log(u"Unable to find config.ini, all settings will be default", logger.ERROR)
 
-	sickbeard.CFG = ConfigObj(config_file)
+	sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
 	# initialize the config and our threads
 	sickbeard.initialize(consoleLogging=consoleLogging)

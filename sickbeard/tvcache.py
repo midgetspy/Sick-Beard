@@ -97,7 +97,7 @@ class TVCache():
             items = responseSoup.getiterator('item')
         except Exception, e:
             logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
-            logger.log(u"Feed contents: "+str(data), logger.DEBUG)
+            logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
             return []
 
         if responseSoup.getroot().tag != 'rss':

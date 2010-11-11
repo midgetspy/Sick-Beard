@@ -29,7 +29,7 @@ import urllib
 from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
-from sickbeard import providers
+from sickbeard import providers, metadata
 from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -40,9 +40,12 @@ from sickbeard.common import *
 
 from sickbeard.databases import mainDB
 
+from lib.configobj import ConfigObj
+
 SOCKET_TIMEOUT = 30
 
 CFG = None
+CONFIG_FILE = None
 
 PROG_DIR = None
 MY_FULLNAME = None
@@ -65,6 +68,7 @@ comingList = None
 
 providerList = []
 newznabProviderList = []
+metadata_generator = None
 
 NEWEST_VERSION = None
 NEWEST_VERSION_STRING = None
@@ -83,9 +87,16 @@ WEB_PASSWORD = None
 WEB_HOST = None
 
 LAUNCH_BROWSER = None
-CREATE_METADATA = None
-CREATE_IMAGES = None
 CACHE_DIR = None
+
+METADATA_TYPE = None
+METADATA_SHOW = None
+METADATA_EPISODE = None
+
+ART_POSTER = None
+ART_FANART = None
+ART_THUMBNAILS = None
+ART_SEASON_THUMBNAILS = None
 
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_DEFAULT = None
@@ -275,7 +286,7 @@ def initialize(consoleLogging=True):
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, \
-                airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, \
+                airingList, comingList, loadingShowList, SOCKET_TIMEOUT, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, \
@@ -285,9 +296,11 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
+                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
+                ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH
 
 
@@ -323,15 +336,28 @@ def initialize(consoleLogging=True):
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
-        CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
-        CREATE_IMAGES = bool(check_setting_int(CFG, 'General', 'create_images', 1))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         if not helpers.makeDir(CACHE_DIR):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
 
-        initializeTvdbApiParams()
+        proxies = urllib.getproxies()
+        proxy_url = None
+        if 'http' in proxies:
+            proxy_url = proxies['http']
+        elif 'ftp' in proxies:
+            proxy_url = proxies['ftp']
+        
+        # Set our common tvdb_api options here
+        TVDB_API_PARMS = {'cache': True,
+                          'apikey': TVDB_API_KEY,
+                          'language': 'en',
+                          'cache_dir': False,
+                          'http_proxy': proxy_url}
+    
+        if CACHE_DIR:
+            TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
         
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
@@ -428,10 +454,38 @@ def initialize(consoleLogging=True):
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
+        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', 'xbmc')
+        METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
+        METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
+
+        ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
+        ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
+        ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
+        ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
+
+        # try setting defaults if possible
+        try:
+            TEMP_CREATE_METADATA = bool(int(CFG['General']['create_metadata']))
+            METADATA_SHOW = TEMP_CREATE_METADATA
+            METADATA_EPISODE = TEMP_CREATE_METADATA
+        except:
+            pass
+        
+        try:
+            TEMP_CREATE_IMAGES = bool(int(CFG['General']['create_images']))
+            ART_POSTER = TEMP_CREATE_IMAGES 
+            ART_FANART = TEMP_CREATE_IMAGES
+            ART_THUMBNAILS = TEMP_CREATE_IMAGES
+            ART_SEASON_THUMBNAILS = TEMP_CREATE_IMAGES
+        except:
+            pass
+
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
 
         providerList = providers.makeProviderList()
+        
+        metadata_generator = metadata.getMetadataClass(METADATA_TYPE)
 
         logger.initLogging(consoleLogging=consoleLogging)
 
@@ -654,102 +708,117 @@ def restart(soft=True):
 
 def save_config():
 
-    CFG['General']['log_dir'] = LOG_DIR
-    CFG['General']['web_port'] = WEB_PORT
-    CFG['General']['web_host'] = WEB_HOST
-    CFG['General']['web_log'] = int(WEB_LOG)
-    CFG['General']['web_root'] = WEB_ROOT
-    CFG['General']['web_username'] = WEB_USERNAME
-    CFG['General']['web_password'] = WEB_PASSWORD
-    CFG['General']['nzb_method'] = NZB_METHOD
-    CFG['General']['usenet_retention'] = int(USENET_RETENTION)
-    CFG['General']['search_frequency'] = int(SEARCH_FREQUENCY)
-    CFG['General']['backlog_search_frequency'] = int(BACKLOG_SEARCH_FREQUENCY)
-    CFG['General']['use_nzb'] = int(USE_NZB)
-    CFG['General']['download_propers'] = int(DOWNLOAD_PROPERS)
-    CFG['General']['quality_default'] = int(QUALITY_DEFAULT)
-    CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
-    CFG['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
-    CFG['General']['version_notify'] = int(VERSION_NOTIFY)
-    CFG['General']['naming_ep_name'] = int(NAMING_EP_NAME)
-    CFG['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
-    CFG['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
-    CFG['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
-    CFG['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
-    CFG['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
-    CFG['General']['naming_quality'] = int(NAMING_QUALITY)
-    CFG['General']['naming_dates'] = int(NAMING_DATES)
-    CFG['General']['use_torrent'] = int(USE_TORRENT)
-    CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
-    CFG['General']['create_metadata'] = int(CREATE_METADATA)
-    CFG['General']['create_images'] = int(CREATE_IMAGES)
-    CFG['General']['cache_dir'] = CACHE_DIR
-    CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
-    CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
-    CFG['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
-    CFG['General']['rename_episodes'] = int(RENAME_EPISODES)
-    CFG['Blackhole']['nzb_dir'] = NZB_DIR
-    CFG['Blackhole']['torrent_dir'] = TORRENT_DIR
-    CFG['TVBinz']['tvbinz'] = int(TVBINZ)
-    CFG['TVBinz']['tvbinz_uid'] = TVBINZ_UID
-    CFG['TVBinz']['tvbinz_hash'] = TVBINZ_HASH
-    CFG['TVBinz']['tvbinz_auth'] = TVBINZ_AUTH
-    CFG['NZBs']['nzbs'] = int(NZBS)
-    CFG['NZBs']['nzbs_uid'] = NZBS_UID
-    CFG['NZBs']['nzbs_hash'] = NZBS_HASH
-    CFG['NZBsRUS']['nzbsrus'] = int(NZBSRUS)
-    CFG['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
-    CFG['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
-    CFG['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
-    CFG['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
-    CFG['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
-    CFG['Newzbin']['newzbin'] = int(NEWZBIN)
-    CFG['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
-    CFG['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
-    CFG['Bin-Req']['binreq'] = int(BINREQ)
-    CFG['Womble']['womble'] = int(WOMBLE)
-    CFG['SABnzbd']['sab_username'] = SAB_USERNAME
-    CFG['SABnzbd']['sab_password'] = SAB_PASSWORD
-    CFG['SABnzbd']['sab_apikey'] = SAB_APIKEY
-    CFG['SABnzbd']['sab_category'] = SAB_CATEGORY
-    CFG['SABnzbd']['sab_host'] = SAB_HOST
-    CFG['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
-    CFG['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
-    CFG['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
-    CFG['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
-    CFG['XBMC']['xbmc_host'] = XBMC_HOST
-    CFG['XBMC']['xbmc_username'] = XBMC_USERNAME
-    CFG['XBMC']['xbmc_password'] = XBMC_PASSWORD
-    CFG['Growl']['use_growl'] = int(USE_GROWL)
-    CFG['Growl']['growl_host'] = GROWL_HOST
-    CFG['Growl']['growl_password'] = GROWL_PASSWORD
-    CFG['Twitter']['use_twitter'] = int(USE_TWITTER)
-    CFG['Twitter']['twitter_username'] = TWITTER_USERNAME
-    CFG['Twitter']['twitter_password'] = TWITTER_PASSWORD
-    CFG['Twitter']['twitter_prefix'] = TWITTER_PREFIX
-    CFG['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+    new_config = ConfigObj()
+    new_config.filename = sickbeard.CONFIG_FILE
 
-    CFG.write()
+    new_config['General'] = {}
+    new_config['General']['log_dir'] = LOG_DIR
+    new_config['General']['web_port'] = WEB_PORT
+    new_config['General']['web_host'] = WEB_HOST
+    new_config['General']['web_log'] = int(WEB_LOG)
+    new_config['General']['web_root'] = WEB_ROOT
+    new_config['General']['web_username'] = WEB_USERNAME
+    new_config['General']['web_password'] = WEB_PASSWORD
+    new_config['General']['nzb_method'] = NZB_METHOD
+    new_config['General']['usenet_retention'] = int(USENET_RETENTION)
+    new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
+    new_config['General']['backlog_search_frequency'] = int(BACKLOG_SEARCH_FREQUENCY)
+    new_config['General']['use_nzb'] = int(USE_NZB)
+    new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
+    new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
+    new_config['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
+    new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
+    new_config['General']['version_notify'] = int(VERSION_NOTIFY)
+    new_config['General']['naming_ep_name'] = int(NAMING_EP_NAME)
+    new_config['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
+    new_config['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
+    new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
+    new_config['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
+    new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
+    new_config['General']['naming_quality'] = int(NAMING_QUALITY)
+    new_config['General']['naming_dates'] = int(NAMING_DATES)
+    new_config['General']['use_torrent'] = int(USE_TORRENT)
+    new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    new_config['General']['metadata_type'] = METADATA_TYPE
+    new_config['General']['metadata_show'] = int(METADATA_SHOW)
+    new_config['General']['metadata_episode'] = int(METADATA_EPISODE)
+    new_config['General']['art_poster'] = int(ART_POSTER)
+    new_config['General']['art_fanart'] = int(ART_FANART)
+    new_config['General']['art_thumbnails'] = int(ART_THUMBNAILS)
+    new_config['General']['art_season_thumbnails'] = int(ART_SEASON_THUMBNAILS)
+    new_config['General']['cache_dir'] = CACHE_DIR
+    new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
+    new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
+    new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
+    new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
 
-def initializeTvdbApiParams():
-    global TVDB_API_PARMS
-        
-    proxies = urllib.getproxies()
-    proxy_url = None
-    if 'http' in proxies:
-        proxy_url = proxies['http']
-    elif 'ftp' in proxies:
-        proxy_url = proxies['ftp']
-        
-    # Set our common tvdb_api options here
-    TVDB_API_PARMS = {'cache': True,
-                      'apikey': TVDB_API_KEY,
-                      'language': 'en',
-                      'cache_dir': False,
-                      'http_proxy': proxy_url}
-    
-    if CACHE_DIR:
-        TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
+    new_config['Blackhole'] = {}
+    new_config['Blackhole']['nzb_dir'] = NZB_DIR
+    new_config['Blackhole']['torrent_dir'] = TORRENT_DIR
+
+    new_config['TVBinz'] = {}
+    new_config['TVBinz']['tvbinz'] = int(TVBINZ)
+    new_config['TVBinz']['tvbinz_uid'] = TVBINZ_UID
+    new_config['TVBinz']['tvbinz_hash'] = TVBINZ_HASH
+    new_config['TVBinz']['tvbinz_auth'] = TVBINZ_AUTH
+
+    new_config['NZBs'] = {}
+    new_config['NZBs']['nzbs'] = int(NZBS)
+    new_config['NZBs']['nzbs_uid'] = NZBS_UID
+    new_config['NZBs']['nzbs_hash'] = NZBS_HASH
+
+    new_config['NZBsRUS'] = {}
+    new_config['NZBsRUS']['nzbsrus'] = int(NZBSRUS)
+    new_config['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
+    new_config['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
+
+    new_config['NZBMatrix'] = {}
+    new_config['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
+    new_config['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
+    new_config['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
+
+    new_config['Newzbin'] = {}
+    new_config['Newzbin']['newzbin'] = int(NEWZBIN)
+    new_config['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
+    new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
+
+    new_config['Bin-Req'] = {}
+    new_config['Bin-Req']['binreq'] = int(BINREQ)
+
+    new_config['Womble'] = {}
+    new_config['Womble']['womble'] = int(WOMBLE)
+
+    new_config['SABnzbd'] = {}
+    new_config['SABnzbd']['sab_username'] = SAB_USERNAME
+    new_config['SABnzbd']['sab_password'] = SAB_PASSWORD
+    new_config['SABnzbd']['sab_apikey'] = SAB_APIKEY
+    new_config['SABnzbd']['sab_category'] = SAB_CATEGORY
+    new_config['SABnzbd']['sab_host'] = SAB_HOST
+
+    new_config['XBMC'] = {}
+    new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
+    new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
+    new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
+    new_config['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
+    new_config['XBMC']['xbmc_host'] = XBMC_HOST
+    new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
+    new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
+
+    new_config['Growl'] = {}
+    new_config['Growl']['use_growl'] = int(USE_GROWL)
+    new_config['Growl']['growl_host'] = GROWL_HOST
+    new_config['Growl']['growl_password'] = GROWL_PASSWORD
+
+    new_config['Twitter'] = {}
+    new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
+    new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
+    new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
+    new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
+
+    new_config['Newznab'] = {}
+    new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+
+    new_config.write()
 
 def launchBrowser():
     browserURL = 'http://localhost:%d%s' % (WEB_PORT, WEB_ROOT)

@@ -120,8 +120,17 @@ def findInHistory(nzbName):
     for curName in names:
         sqlResults = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", curName)])
 
-        if len(sqlResults) == 1:
-            return (int(sqlResults[0]["showid"]), int(sqlResults[0]["season"]), int(sqlResults[0]["episode"]))
+        if len(sqlResults) == 0:
+            continue
+
+        tvdb_id = int(sqlResults[0]["showid"])
+        season = int(sqlResults[0]["season"])
+        episodes = []
+
+        for cur_result in sqlResults:
+            episodes.append(int(cur_result["episode"]))            
+
+        return (tvdb_id, season, episodes)
 
     return None
 
@@ -217,7 +226,7 @@ def processDir (dirName, nzbName=None, recurse=False):
 
         else:
             returnStr += logHelper("Auto processing file: "+movedFilePath)
-            result = processFile(movedFilePath, None, nzbName)
+            result = processFile(movedFilePath, dirName, nzbName, multi_file=True)
             if type(result) == list:
                 returnStr += result[0]
                 returnStr += logHelper("Processing succeeded for "+movedFilePath)
@@ -228,7 +237,7 @@ def processDir (dirName, nzbName=None, recurse=False):
     return returnStr
 
 
-def processFile(fileName, downloadDir=None, nzbName=None):
+def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
 
     returnStr = ''
 
@@ -259,10 +268,14 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         historyResult = findInHistory(curName)
         if historyResult:
             returnStr += logHelper("Result from history: "+str(historyResult)+" from "+curName, logger.DEBUG)
-            (tvdb_id, season, episode) = historyResult
-            episodes = [episode]
+            (tvdb_id, season, episodes) = historyResult
             showResults = helpers.findCertainShow(sickbeard.showList, tvdb_id)
             break
+
+    # if we're parsing a multi-file folder then the folder name doesn't reflect the correct episode so ignore it
+    if multi_file and episodes:
+        returnStr += logHelper("Multi-file dir "+downloadDir+" doesn't reflect all episode names, only using name & season", logger.DEBUG)
+        episodes = []
 
     # if that didn't work then try manually parsing and searching them on TVDB
     for curName in finalNameList:
@@ -271,9 +284,11 @@ def processFile(fileName, downloadDir=None, nzbName=None):
         if tvdb_id != None and season != None and episodes != []:
             break
 
-        # set all search stuff to defaults so we don't carry results over from the last iteration
-        tvdb_id = None
-        season = None
+        # if we're doing a multi-file dir and we already got the tvdb_id/season but no episodes then assume it's right and carry it forward 
+        # otherwise, reset it every time
+        if not (tvdb_id and season and not episodes and multi_file):
+            tvdb_id = None
+            season = None
         episodes = []
 
         try:
@@ -310,14 +325,17 @@ def processFile(fileName, downloadDir=None, nzbName=None):
                 returnStr += logHelper("Scene exception lookup got tvdb id "+str(sceneID)+", using that", logger.DEBUG)
                 break
 
+        if sceneID:
+            tvdb_id = sceneID
+
         showObj = None
         try:
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
 
             # get the tvdb object from either the scene exception ID or the series name
-            if sceneID:
-                returnStr += logHelper("Looking up ID "+str(sceneID)+" on TVDB", logger.DEBUG)
-                showObj = t[sceneID]
+            if tvdb_id:
+                returnStr += logHelper("Looking up ID "+str(tvdb_id)+" on TVDB", logger.DEBUG)
+                showObj = t[tvdb_id]
             else:
                 returnStr += logHelper("Looking up name "+result.seriesname+" on TVDB", logger.DEBUG)
                 showObj = t[result.seriesname]
