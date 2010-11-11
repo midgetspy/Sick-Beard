@@ -28,7 +28,7 @@ import os, sys, subprocess
 from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
-from sickbeard import providers
+from sickbeard import providers, metadata
 from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -64,6 +64,7 @@ comingList = None
 
 providerList = []
 newznabProviderList = []
+metadata_generator = None
 
 NEWEST_VERSION = None
 NEWEST_VERSION_STRING = None
@@ -82,9 +83,16 @@ WEB_PASSWORD = None
 WEB_HOST = None
 
 LAUNCH_BROWSER = None
-CREATE_METADATA = None
-CREATE_IMAGES = None
 CACHE_DIR = None
+
+METADATA_TYPE = None
+METADATA_SHOW = None
+METADATA_EPISODE = None
+
+ART_POSTER = None
+ART_FANART = None
+ART_THUMBNAILS = None
+ART_SEASON_THUMBNAILS = None
 
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_DEFAULT = None
@@ -274,7 +282,7 @@ def initialize(consoleLogging=True):
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, \
-                airingList, comingList, loadingShowList, CREATE_METADATA, SOCKET_TIMEOUT, \
+                airingList, comingList, loadingShowList, SOCKET_TIMEOUT, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, \
@@ -284,9 +292,11 @@ def initialize(consoleLogging=True):
                 MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                CREATE_IMAGES, NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
+                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
+                ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH
 
 
@@ -322,8 +332,6 @@ def initialize(consoleLogging=True):
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
-        CREATE_METADATA = bool(check_setting_int(CFG, 'General', 'create_metadata', 1))
-        CREATE_IMAGES = bool(check_setting_int(CFG, 'General', 'create_images', 1))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         if not helpers.makeDir(CACHE_DIR):
@@ -433,10 +441,21 @@ def initialize(consoleLogging=True):
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
+        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', 'xbmc')
+        METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
+        METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
+
+        ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
+        ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
+        ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
+        ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
+
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
 
         providerList = providers.makeProviderList()
+        
+        metadata_generator = metadata.getMetadataClass(METADATA_TYPE)
 
         logger.initLogging(consoleLogging=consoleLogging)
 
@@ -686,8 +705,13 @@ def save_config():
     CFG['General']['naming_dates'] = int(NAMING_DATES)
     CFG['General']['use_torrent'] = int(USE_TORRENT)
     CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
-    CFG['General']['create_metadata'] = int(CREATE_METADATA)
-    CFG['General']['create_images'] = int(CREATE_IMAGES)
+    CFG['General']['metadata_type'] = METADATA_TYPE
+    CFG['General']['metadata_show'] = int(METADATA_SHOW)
+    CFG['General']['metadata_episode'] = int(METADATA_EPISODE)
+    CFG['General']['art_poster'] = int(ART_POSTER)
+    CFG['General']['art_fanart'] = int(ART_FANART)
+    CFG['General']['art_thumbnails'] = int(ART_THUMBNAILS)
+    CFG['General']['art_season_thumbnails'] = int(ART_SEASON_THUMBNAILS)
     CFG['General']['cache_dir'] = CACHE_DIR
     CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)

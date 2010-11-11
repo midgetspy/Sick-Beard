@@ -326,45 +326,6 @@ def searchDBForShow(regShowName):
 
 	return None
 
-def getShowImage(url, imgNum=None):
-
-	imgFile = None
-	imgData = None
-
-	if url == None:
-		return None
-
-	# if they provided a fanart number try to use it instead
-	if imgNum != None:
-		tempURL = url.split('-')[0] + "-" + str(imgNum) + ".jpg"
-	else:
-		tempURL = url
-
-	logger.log(u"Getting show image at "+tempURL, logger.DEBUG)
-	try:
-		req = urllib2.Request(tempURL, headers={'User-Agent': classes.SickBeardURLopener().version})
-		imgFile = urllib2.urlopen(req)
-	except urllib2.URLError, e:
-		logger.log(u"There was an error trying to retrieve the image, aborting", logger.ERROR)
-		return None
-	except urllib2.HTTPError, e:
-		logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e).decode('utf-8'), logger.ERROR)
-		return None
-
-	if imgFile == None:
-		logger.log(u"Something bad happened and we have no URL data somehow", logger.ERROR)
-		return None
-
-	# get the image
-	try:
-		imgData = imgFile.read()
-	except (urllib2.URLError, urllib2.HTTPError), e:
-		logger.log(u"There was an error trying to retrieve the image, skipping download: " + str(e), logger.ERROR)
-		return None
-
-	return imgData
-
-
 def sizeof_fmt(num):
 	'''
 	>>> sizeof_fmt(2)

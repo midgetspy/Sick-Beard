@@ -31,9 +31,11 @@ from Cheetah.Template import Template
 import cherrypy
 import cherrypy.lib
 
+import metadata.helpers
+
 from sickbeard import config
 from sickbeard import history, notifiers, processTV, search, providers
-from sickbeard import tv, metadata, versionChecker
+from sickbeard import tv, versionChecker
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 
@@ -469,12 +471,14 @@ class ConfigGeneral:
 
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None,
-                    launch_browser=None, create_metadata=None, web_username=None,
+                    launch_browser=None, web_username=None,
                     web_password=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None, create_images=None, naming_ep_name=None,
+                    naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
-                    anyQualities = [], bestQualities = [], naming_dates=None):
+                    anyQualities = [], bestQualities = [], naming_dates=None,
+                    metadata_type=None, metadata_show=None, metadata_episode=None,
+                    art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None):
 
         results = []
 
@@ -488,15 +492,35 @@ class ConfigGeneral:
         else:
             launch_browser = 0
 
-        if create_metadata == "on":
-            create_metadata = 1
+        if metadata_show == "on":
+            metadata_show = 1
         else:
-            create_metadata = 0
+            metadata_show = 0
 
-        if create_images == "on":
-            create_images = 1
+        if metadata_episode == "on":
+            metadata_episode = 1
         else:
-            create_images = 0
+            metadata_episode = 0
+
+        if art_poster == "on":
+            art_poster = 1
+        else:
+            art_poster = 0
+
+        if art_fanart == "on":
+            art_fanart = 1
+        else:
+            art_fanart = 0
+
+        if art_thumbnails == "on":
+            art_thumbnails = 1
+        else:
+            art_thumbnails = 0
+
+        if art_season_thumbnails == "on":
+            art_season_thumbnails = 1
+        else:
+            art_season_thumbnails = 0
 
         if season_folders_default == "on":
             season_folders_default = 1
@@ -545,8 +569,18 @@ class ConfigGeneral:
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
         sickbeard.LAUNCH_BROWSER = launch_browser
-        sickbeard.CREATE_METADATA = create_metadata
-        sickbeard.CREATE_IMAGES = create_images
+
+        sickbeard.METADATA_TYPE = metadata_type
+        sickbeard.METADATA_SHOW = metadata_show
+        sickbeard.METADATA_EPISODE = metadata_episode
+
+        sickbeard.metadata_generator = metadata.getMetadataClass(sickbeard.METADATA_TYPE)
+
+        sickbeard.ART_POSTER = art_poster
+        sickbeard.ART_FANART = art_fanart
+        sickbeard.ART_THUMBNAILS = art_thumbnails
+        sickbeard.ART_SEASON_THUMBNAILS = art_season_thumbnails
+
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = newQuality
 
@@ -1175,7 +1209,7 @@ class NewHomeAddShows:
         if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo")):
             tvdb_id = None
             try:
-                tvdb_id = metadata.getTVDBIDFromNFO(showToAdd)
+                tvdb_id = metadata.helpers.getTVDBIDFromNFO(showToAdd)
             except exceptions.NoNFOException, e:
                 # we couldn't get a tvdb id from the file so let them know and just print the search page
                 if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo.old")):
