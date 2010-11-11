@@ -26,7 +26,7 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard import classes, logger, sceneHelpers
+from sickbeard import classes, logger, sceneHelpers, db
 from sickbeard import tvcache
 from sickbeard.common import *
 
@@ -47,6 +47,18 @@ class NZBMatrixProvider(generic.NZBProvider):
 
 	def isEnabled(self):
 		return sickbeard.NZBMATRIX
+
+	def findSeasonResults(self, show, season):
+		
+		results = {}
+		
+		if show.is_air_by_date:
+			logger.log(u"NZBMatrix doesn't support air-by-date backlog because of a bug in their RSS search. Pressure them to fix it!", logger.WARNING)
+			return results
+		
+		results = generic.NZBProvider.findSeasonResults(self, show, season)
+		
+		return results
 
 
 	def findEpisode (self, episode, manualSearch=False):
@@ -85,115 +97,43 @@ class NZBMatrixProvider(generic.NZBProvider):
 			
 		for item in itemList:
 
-			# Parse the result and add it to the result list				
-			result = self.parseSearchResultItem(episode, manualSearch, item)
-			if result != None:
-				results.append(result)
-			
-		return results
-	
-	def parseSearchResultItem(self, episode, manualSearch, item):
-		title = item.findtext('title')
-		url = item.findtext('link').replace('&amp;','&')
-		
-		# parse the file name
-		try:
-			myParser = FileParser(title, episode.show.absolute_numbering)
-			epInfo = myParser.parse()
-		except tvnamer_exceptions.InvalidFilename:
-			logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
-			return None
-		
-		quality = Quality.nameQuality(title)
-
-		if episode.show.absolute_numbering:
-			if not episode.show.wantEpisode(-1, episode.absolute_episode, quality, manualSearch):
-				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-				return None
-		else:
-			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-		
-			if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
-				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-				return None
-		
-		logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
-		
-		result = self.getResult([episode])
-		result.url = url
-		result.name = title
-		result.quality = quality
-		
-		return result
-	
-
-	def findSeasonResults(self, show, season):
-
-		itemList = []
-		results = {}
-
-		for curString in sceneHelpers.makeSceneSeasonSearchString(show, season, "nzbmatrix"):
-			itemList += self._doSearch(curString)
-
-		for item in itemList:
-
 			title = item.findtext('title')
-			url = item.findtext('link')
-
-			quality = Quality.nameQuality(title)
+			url = item.findtext('link').replace('&amp;','&')
 
 			# parse the file name
 			try:
-				myParser = FileParser(title)
+				myParser = FileParser(title,episode.show.absolute_numbering)
 				epInfo = myParser.parse()
 			except tvnamer_exceptions.InvalidFilename:
 				logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
 				continue
 
+			quality = self.getQuality(item)
 
-			if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
-				logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
-				continue
+			if episode.show.absolute_numbering:
+				season = episode.season
+			else:
+				season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
+		
+			if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
+				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
 
-			# make sure we want the episode
-			wantEp = True
-			for epNo in epInfo.episodenumbers:
-				if not show.wantEpisode(season, epNo, quality):
-					logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-					wantEp = False
-					break
-			if not wantEp:
 				continue
 
 			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 
-			# make a result object
-			epObj = []
-			for curEp in epInfo.episodenumbers:
-				epObj.append(show.getEpisode(season, curEp))
-
-			result = self.getResult(epObj)
+			result = self.getResult([episode])
 			result.url = url
 			result.name = title
 			result.quality = quality
 
-			if len(epObj) == 1:
-				epNum = epObj[0].episode
-			elif len(epObj) > 1:
-				epNum = MULTI_EP_RESULT
-				logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
-			elif len(epObj) == 0:
-				epNum = SEASON_RESULT
-				result.extraInfo = [show]
-				logger.log(u"Separating full season result to check for later", logger.DEBUG)
-
-			if epNum in results:
-				results[epNum].append(result)
-			else:
-				results[epNum] = [result]
+			results.append(result)
 
 		return results
 
+
+	def _get_season_search_strings(self, show, season):
+		return sceneHelpers.makeSceneSeasonSearchString(show, season, "nzbmatrix")
 
 	def _doSearch(self, curString, quotes=False, english=True):
 

@@ -79,7 +79,11 @@ class TVShow(object):
 
         self.saveToDB()
 
-
+    def _is_air_by_date(self):
+        return self.air_by_date or (self.genre and "Talk Show" in self.genre)
+    
+    is_air_by_date = property(_is_air_by_date)
+    
     def _getLocation(self):
         if ek.ek(os.path.isdir, self._location):
             return self._location
@@ -835,10 +839,7 @@ class TVShow(object):
 
         myDB = db.DBConnection()
 
-        if self.absolute_numbering:
-            sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [self.tvdbid, episode])
-        else:
-            sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
+        sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
 
         if not sqlResults or not len(sqlResults):
             logger.log(u"Unable to find the episode", logger.DEBUG)
