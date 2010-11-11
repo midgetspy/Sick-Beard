@@ -159,7 +159,7 @@ def isGoodResult(name, show, log=True):
     showNames = map(sanitizeSceneName, allPossibleShowNames(show))
 
     for curName in set(showNames):
-        curRegex = '^' + re.sub('[\.\-]', '\W+', curName) + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+)'
+        curRegex = '^' + re.sub('[\.\-]', '\W+', curName) + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:
             logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
 
