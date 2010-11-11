@@ -39,9 +39,12 @@ from sickbeard.common import *
 
 from sickbeard.databases import mainDB
 
+from lib.configobj import ConfigObj
+
 SOCKET_TIMEOUT = 30
 
 CFG = None
+CONFIG_FILE = None
 
 PROG_DIR = None
 MY_FULLNAME = None
@@ -678,88 +681,117 @@ def restart(soft=True):
 
 def save_config():
 
-    CFG['General']['log_dir'] = LOG_DIR
-    CFG['General']['web_port'] = WEB_PORT
-    CFG['General']['web_host'] = WEB_HOST
-    CFG['General']['web_log'] = int(WEB_LOG)
-    CFG['General']['web_root'] = WEB_ROOT
-    CFG['General']['web_username'] = WEB_USERNAME
-    CFG['General']['web_password'] = WEB_PASSWORD
-    CFG['General']['nzb_method'] = NZB_METHOD
-    CFG['General']['usenet_retention'] = int(USENET_RETENTION)
-    CFG['General']['search_frequency'] = int(SEARCH_FREQUENCY)
-    CFG['General']['backlog_search_frequency'] = int(BACKLOG_SEARCH_FREQUENCY)
-    CFG['General']['use_nzb'] = int(USE_NZB)
-    CFG['General']['download_propers'] = int(DOWNLOAD_PROPERS)
-    CFG['General']['quality_default'] = int(QUALITY_DEFAULT)
-    CFG['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
-    CFG['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
-    CFG['General']['version_notify'] = int(VERSION_NOTIFY)
-    CFG['General']['naming_ep_name'] = int(NAMING_EP_NAME)
-    CFG['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
-    CFG['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
-    CFG['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
-    CFG['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
-    CFG['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
-    CFG['General']['naming_quality'] = int(NAMING_QUALITY)
-    CFG['General']['naming_dates'] = int(NAMING_DATES)
-    CFG['General']['use_torrent'] = int(USE_TORRENT)
-    CFG['General']['launch_browser'] = int(LAUNCH_BROWSER)
-    CFG['General']['metadata_type'] = METADATA_TYPE
-    CFG['General']['metadata_show'] = int(METADATA_SHOW)
-    CFG['General']['metadata_episode'] = int(METADATA_EPISODE)
-    CFG['General']['art_poster'] = int(ART_POSTER)
-    CFG['General']['art_fanart'] = int(ART_FANART)
-    CFG['General']['art_thumbnails'] = int(ART_THUMBNAILS)
-    CFG['General']['art_season_thumbnails'] = int(ART_SEASON_THUMBNAILS)
-    CFG['General']['cache_dir'] = CACHE_DIR
-    CFG['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
-    CFG['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
-    CFG['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
-    CFG['General']['rename_episodes'] = int(RENAME_EPISODES)
-    CFG['Blackhole']['nzb_dir'] = NZB_DIR
-    CFG['Blackhole']['torrent_dir'] = TORRENT_DIR
-    CFG['TVBinz']['tvbinz'] = int(TVBINZ)
-    CFG['TVBinz']['tvbinz_uid'] = TVBINZ_UID
-    CFG['TVBinz']['tvbinz_hash'] = TVBINZ_HASH
-    CFG['TVBinz']['tvbinz_auth'] = TVBINZ_AUTH
-    CFG['NZBs']['nzbs'] = int(NZBS)
-    CFG['NZBs']['nzbs_uid'] = NZBS_UID
-    CFG['NZBs']['nzbs_hash'] = NZBS_HASH
-    CFG['NZBsRUS']['nzbsrus'] = int(NZBSRUS)
-    CFG['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
-    CFG['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
-    CFG['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
-    CFG['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
-    CFG['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
-    CFG['Newzbin']['newzbin'] = int(NEWZBIN)
-    CFG['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
-    CFG['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
-    CFG['Bin-Req']['binreq'] = int(BINREQ)
-    CFG['Womble']['womble'] = int(WOMBLE)
-    CFG['SABnzbd']['sab_username'] = SAB_USERNAME
-    CFG['SABnzbd']['sab_password'] = SAB_PASSWORD
-    CFG['SABnzbd']['sab_apikey'] = SAB_APIKEY
-    CFG['SABnzbd']['sab_category'] = SAB_CATEGORY
-    CFG['SABnzbd']['sab_host'] = SAB_HOST
-    CFG['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
-    CFG['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
-    CFG['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
-    CFG['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
-    CFG['XBMC']['xbmc_host'] = XBMC_HOST
-    CFG['XBMC']['xbmc_username'] = XBMC_USERNAME
-    CFG['XBMC']['xbmc_password'] = XBMC_PASSWORD
-    CFG['Growl']['use_growl'] = int(USE_GROWL)
-    CFG['Growl']['growl_host'] = GROWL_HOST
-    CFG['Growl']['growl_password'] = GROWL_PASSWORD
-    CFG['Twitter']['use_twitter'] = int(USE_TWITTER)
-    CFG['Twitter']['twitter_username'] = TWITTER_USERNAME
-    CFG['Twitter']['twitter_password'] = TWITTER_PASSWORD
-    CFG['Twitter']['twitter_prefix'] = TWITTER_PREFIX
+    new_config = ConfigObj()
+    new_config.filename = sickbeard.CONFIG_FILE
 
-    CFG['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+    new_config['General'] = {}
+    new_config['General']['log_dir'] = LOG_DIR
+    new_config['General']['web_port'] = WEB_PORT
+    new_config['General']['web_host'] = WEB_HOST
+    new_config['General']['web_log'] = int(WEB_LOG)
+    new_config['General']['web_root'] = WEB_ROOT
+    new_config['General']['web_username'] = WEB_USERNAME
+    new_config['General']['web_password'] = WEB_PASSWORD
+    new_config['General']['nzb_method'] = NZB_METHOD
+    new_config['General']['usenet_retention'] = int(USENET_RETENTION)
+    new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
+    new_config['General']['backlog_search_frequency'] = int(BACKLOG_SEARCH_FREQUENCY)
+    new_config['General']['use_nzb'] = int(USE_NZB)
+    new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
+    new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
+    new_config['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
+    new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
+    new_config['General']['version_notify'] = int(VERSION_NOTIFY)
+    new_config['General']['naming_ep_name'] = int(NAMING_EP_NAME)
+    new_config['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
+    new_config['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
+    new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
+    new_config['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
+    new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
+    new_config['General']['naming_quality'] = int(NAMING_QUALITY)
+    new_config['General']['naming_dates'] = int(NAMING_DATES)
+    new_config['General']['use_torrent'] = int(USE_TORRENT)
+    new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    new_config['General']['metadata_type'] = METADATA_TYPE
+    new_config['General']['metadata_show'] = int(METADATA_SHOW)
+    new_config['General']['metadata_episode'] = int(METADATA_EPISODE)
+    new_config['General']['art_poster'] = int(ART_POSTER)
+    new_config['General']['art_fanart'] = int(ART_FANART)
+    new_config['General']['art_thumbnails'] = int(ART_THUMBNAILS)
+    new_config['General']['art_season_thumbnails'] = int(ART_SEASON_THUMBNAILS)
+    new_config['General']['cache_dir'] = CACHE_DIR
+    new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
+    new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
+    new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
+    new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
 
-    CFG.write()
+    new_config['Blackhole'] = {}
+    new_config['Blackhole']['nzb_dir'] = NZB_DIR
+    new_config['Blackhole']['torrent_dir'] = TORRENT_DIR
+
+    new_config['TVBinz'] = {}
+    new_config['TVBinz']['tvbinz'] = int(TVBINZ)
+    new_config['TVBinz']['tvbinz_uid'] = TVBINZ_UID
+    new_config['TVBinz']['tvbinz_hash'] = TVBINZ_HASH
+    new_config['TVBinz']['tvbinz_auth'] = TVBINZ_AUTH
+
+    new_config['NZBs'] = {}
+    new_config['NZBs']['nzbs'] = int(NZBS)
+    new_config['NZBs']['nzbs_uid'] = NZBS_UID
+    new_config['NZBs']['nzbs_hash'] = NZBS_HASH
+
+    new_config['NZBsRUS'] = {}
+    new_config['NZBsRUS']['nzbsrus'] = int(NZBSRUS)
+    new_config['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
+    new_config['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
+
+    new_config['NZBMatrix'] = {}
+    new_config['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
+    new_config['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
+    new_config['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
+
+    new_config['Newzbin'] = {}
+    new_config['Newzbin']['newzbin'] = int(NEWZBIN)
+    new_config['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
+    new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
+
+    new_config['Bin-Req'] = {}
+    new_config['Bin-Req']['binreq'] = int(BINREQ)
+
+    new_config['Womble'] = {}
+    new_config['Womble']['womble'] = int(WOMBLE)
+
+    new_config['SABnzbd'] = {}
+    new_config['SABnzbd']['sab_username'] = SAB_USERNAME
+    new_config['SABnzbd']['sab_password'] = SAB_PASSWORD
+    new_config['SABnzbd']['sab_apikey'] = SAB_APIKEY
+    new_config['SABnzbd']['sab_category'] = SAB_CATEGORY
+    new_config['SABnzbd']['sab_host'] = SAB_HOST
+
+    new_config['XBMC'] = {}
+    new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
+    new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
+    new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
+    new_config['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
+    new_config['XBMC']['xbmc_host'] = XBMC_HOST
+    new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
+    new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
+
+    new_config['Growl'] = {}
+    new_config['Growl']['use_growl'] = int(USE_GROWL)
+    new_config['Growl']['growl_host'] = GROWL_HOST
+    new_config['Growl']['growl_password'] = GROWL_PASSWORD
+
+    new_config['Twitter'] = {}
+    new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
+    new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
+    new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
+    new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
+
+    new_config['Newznab'] = {}
+    new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+
+    new_config.write()
 
 
 def launchBrowser():
