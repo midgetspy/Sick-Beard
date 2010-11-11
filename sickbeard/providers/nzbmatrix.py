@@ -67,29 +67,28 @@ class NZBMatrixProvider(generic.NZBProvider):
 			
 			# search for all show names and episode numbers like ("a","b","c") in a single search
 			nzbMatrixSearchString = '("' + '","'.join(sceneSearchStrings) + '")'
+			
 			itemList = self._doSearch(nzbMatrixSearchString)
 			
-			for item in itemList:
-
-				# Parse the result and add it to the result list				
-				result = self.parseSearchResultItem(episode, manualSearch, item)
-				if result != None:
-					results.append(result)
-		
 		else:
+			# search for all show names and episode numbers like (%2b"show-a"%2b"episode-a")+(%2b"show-b"%2b"episode-b") in a single search
+			fixedSearchStrings = []
 			
-			# search for terms in multiple searches because the search API does not seem to handle lone numbers properly
 			for searchString in sceneSearchStrings:
+				searchWords = searchString.split('.')
+				fixedSearchStrings.append('(+"' + '"+"'.join(searchWords) + '")')
 			
-				# don't filter for English only results as this was probably be used mostly for Anime
-				itemList = self._doSearch(searchString, False, False)
+			nzbMatrixSearchString = '.'.join(fixedSearchStrings)
 			
-				for item in itemList:
-	
-					# Parse the result and add it to the result list				
-					result = self.parseSearchResultItem(episode, manualSearch, item)
-					if result != None:
-						results.append(result)
+			# search for more than just english (Don't exclude Anime)
+			itemList = self._doSearch(nzbMatrixSearchString, False, False)
+			
+		for item in itemList:
+
+			# Parse the result and add it to the result list				
+			result = self.parseSearchResultItem(episode, manualSearch, item)
+			if result != None:
+				results.append(result)
 			
 		return results
 	
