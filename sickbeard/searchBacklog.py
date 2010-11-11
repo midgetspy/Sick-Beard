@@ -94,12 +94,23 @@ class BacklogSearcher:
         self.amPaused = False
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes ep, tv_shows show WHERE season != 0 AND ep.showid = show.tvdb_id AND show.paused = 0 AND ep.airdate > ?", [fromDate.toordinal()])
+        numSeasonResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes ep, tv_shows show WHERE season != 0 AND ep.showid = show.tvdb_id AND show.paused = 0 AND ep.airdate > ?", [fromDate.toordinal()])
 
-        totalSeasons = float(len(sqlResults))
+        # get separate lists of the season/date shows
+        season_shows = [x for x in sickbeard.showList if not x.is_air_by_date]
+        air_by_date_shows = [x for x in sickbeard.showList if x.is_air_by_date]
+
+        # figure out how many segments of air by date shows we're going to do
+        air_by_date_segments = []
+        for cur_id in [x.tvdbid for x in air_by_date_shows]:
+            air_by_date_segments += self._get_air_by_date_segments(cur_id, fromDate) 
+
+        logger.log(u"Air-by-date segments: "+str(air_by_date_segments), logger.DEBUG)
+
+        totalSeasons = float(len(numSeasonResults) + len(air_by_date_segments))
         numSeasonsDone = 0.0
 
-        # go through every show and see if it needs any episodes
+        # go through non air-by-date shows and see if they need any episodes
         for curShow in sickbeard.showList:
 
             if curShow.paused:
@@ -109,44 +120,47 @@ class BacklogSearcher:
 
             anyQualities, bestQualities = Quality.splitQuality(curShow.quality)
 
-            sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0 and airdate > ?", [curShow.tvdbid, fromDate.toordinal()])
+            if curShow.is_air_by_date:
+                segments = [x[1] for x in self._get_air_by_date_segments(curShow.tvdbid, fromDate)]
+            else:
+                segments = self._get_season_segments(curShow.tvdbid, fromDate)
 
-            for curSeasonResult in sqlResults:
-                curSeason = int(curSeasonResult["season"])
+            for cur_segment in segments:
 
                 # support pause
                 self.wait_paused()
 
-                logger.log(u"Seeing if we need any episodes from "+curShow.name+" season "+str(curSeason))
-                self.currentSearchInfo = {'title': curShow.name + " Season "+str(curSeason)}
+                logger.log(u"Seeing if we need any episodes from "+curShow.name+" season "+str(cur_segment))
+                self.currentSearchInfo = {'title': curShow.name + " Season "+str(cur_segment)}
 
                 # see if there is anything in this season worth searching for
-                wantSeason = False
-                statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [curShow.tvdbid, curSeason])
-                for curStatusResult in statusResults:
-                    curCompositeStatus = int(curStatusResult["status"])
-                    curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
+                if not curShow.is_air_by_date:
+                    statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [curShow.tvdbid, cur_segment])
+                else:
+                    segment_year, segment_month = map(int, cur_segment.split('-'))
+                    min_date = datetime.date(segment_year, segment_month, 1)
 
-                    if bestQualities:
-                        highestBestQuality = max(bestQualities)
+                    # it's easier to just hard code this than to worry about rolling the year over or making a month length map
+                    if segment_month == 12:
+                        max_date = datetime.date(segment_year, 12, 31)
                     else:
-                        highestBestQuality = 0
+                        max_date = datetime.date(segment_year, segment_month+1, 1) - datetime.timedelta(days=1)
 
-                    # if we need a better one then say yes
-                    if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
-                        wantSeason = True
-                        break
+                    statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ?",
+                                                [curShow.tvdbid, min_date.toordinal(), max_date.toordinal()])
+                    
+                wantSeason = self._need_any_episodes(statusResults, bestQualities)
 
                 if not wantSeason:
                     numSeasonsDone += 1.0
                     self.percentDone = (numSeasonsDone / totalSeasons) * 100.0
-                    logger.log(u"Nothing in season "+str(curSeason)+" needs to be downloaded, skipping this season", logger.DEBUG)
+                    logger.log(u"Nothing in season "+str(cur_segment)+" needs to be downloaded, skipping this season", logger.DEBUG)
                     continue
 
-                results = search.findSeason(curShow, curSeason)
+                results = search.findSeason(curShow, cur_segment)
 
+                # download whatever we find
                 for curResult in results:
-
                     search.snatchEpisode(curResult)
                     time.sleep(5)
 
@@ -160,6 +174,51 @@ class BacklogSearcher:
         self.amActive = False
         self._resetPI()
 
+
+    def _need_any_episodes(self, statusResults, bestQualities):
+
+        wantSeason = False
+        
+        # check through the list of statuses to see if we want any
+        for curStatusResult in statusResults:
+            curCompositeStatus = int(curStatusResult["status"])
+            curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
+
+            if bestQualities:
+                highestBestQuality = max(bestQualities)
+            else:
+                highestBestQuality = 0
+
+            # if we need a better one then say yes
+            if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
+                wantSeason = True
+                break
+
+        return wantSeason
+
+    def _get_season_segments(self, tvdb_id, fromDate):
+        myDB = db.DBConnection()
+        sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0 and airdate > ?", [tvdb_id, fromDate.toordinal()])
+        return [int(x["season"]) for x in sqlResults]
+
+    def _get_air_by_date_segments(self, tvdb_id, fromDate):
+        # query the DB for all dates for this show
+        myDB = db.DBConnection()
+        num_air_by_date_results = myDB.select("SELECT airdate, showid FROM tv_episodes ep, tv_shows show WHERE season != 0 AND ep.showid = show.tvdb_id AND show.paused = 0 ANd ep.airdate > ? AND ep.showid = ?",
+                                 [fromDate.toordinal(), tvdb_id])
+
+        # break them apart into month/year strings
+        air_by_date_segments = []
+        for cur_result in num_air_by_date_results:
+            cur_date = datetime.date.fromordinal(int(cur_result["airdate"]))
+            cur_date_str = str(cur_date)[:7]
+            cur_tvdb_id = int(cur_result["showid"])
+            
+            cur_result_tuple = (cur_tvdb_id, cur_date_str)
+            if cur_result_tuple not in air_by_date_segments:
+                air_by_date_segments.append(cur_result_tuple)
+        
+        return air_by_date_segments
 
     def _get_lastBacklog(self):
 

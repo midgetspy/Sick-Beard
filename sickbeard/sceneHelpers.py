@@ -76,30 +76,51 @@ def makeSceneShowSearchStrings(show):
     return map(sanitizeSceneName, showNames)
 
 
-def makeSceneSeasonSearchString (show, season, extraSearchType=None):
+def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
 
     myDB = db.DBConnection()
-    numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
-    numseasons = numseasonsSQlResult[0][0]
 
-    seasonStrings = ["S%02d" % season, "%ix" % season]
+    if show.is_air_by_date:
+        numseasons = 0
+        
+        # the search string for air by date shows is just 
+        seasonStrings = [segment]
+    
+    else:
+        numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
+        numseasons = numseasonsSQlResult[0][0]
+
+        seasonStrings = ["S%02d" % segment]
+        # since nzbmatrix allows more than one search per request we search SxEE results too
+        if extraSearchType == "nzbmatrix":
+            seasonStrings.append("%ix" % segment)
 
     showNames = set(makeSceneShowSearchStrings(show))
 
     toReturn = []
 
+    # search each show name
     for curShow in showNames:
+        # most providers all work the same way
         if not extraSearchType:
+            # if there's only one season then we can just use the show name straight up
             if numseasons == 1:
                 toReturn.append(curShow)
+            # for providers that don't allow multiple searches in one request we only search for Sxx style stuff
             else:
-                toReturn.append(curShow + "." + seasonStrings[0])
+                for cur_season in seasonStrings:
+                    toReturn.append(curShow + "." + cur_season)
+        
+        # nzbmatrix is special, we build a search string just for them
         elif extraSearchType == "nzbmatrix":
             if numseasons == 1:
                 toReturn.append('+"'+curShow+'"')
             else:
-                seasonString = ','.join([x+'*' for x in seasonStrings])
-                toReturn.append('+"'+curShow+'" +('+seasonString+')')
+                term_list = [x+'*' for x in seasonStrings]
+                if show.is_air_by_date:
+                    term_list = ['"'+x+'"' for x in term_list]
+
+                toReturn.append('+"'+curShow+'" +('+','.join(term_list)+')')
 
     return toReturn
 
@@ -107,7 +128,7 @@ def makeSceneSeasonSearchString (show, season, extraSearchType=None):
 def makeSceneSearchString (episode):
 
     # see if we should use dates instead of episodes
-    if episode.show.air_by_date or (episode.show.genre and "Talk Show" in episode.show.genre and episode.airdate != datetime.date.fromordinal(1)):
+    if episode.show.is_air_by_date and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate)]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),

@@ -82,7 +82,7 @@ class NewznabProvider(generic.NZBProvider):
 			title = item.findtext('title')
 			url = item.findtext('link')
 
-			quality = Quality.nameQuality(title)
+			quality = self.getQuality(item)
 
 			if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
 				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
@@ -100,93 +100,45 @@ class NewznabProvider(generic.NZBProvider):
 		return results
 
 
-	def findSeasonResults(self, show, season):
+	def _get_season_search_strings(self, show, season=None, episode=None):
 
-		results = {}
+		params = {}
 
-		itemList = self._doSearch(show, season)
+		if not show:
+			return params
+		
+		# search directly by tvrage id
+		params['rid'] = show.tvrid
 
-		for item in itemList:
-
-			title = item.findtext('title')
-			url = item.findtext('link')
-
-			quality = Quality.nameQuality(title)
-
-			# parse the file name
-			try:
-				myParser = FileParser(title)
-				epInfo = myParser.parse()
-			except tvnamer_exceptions.InvalidFilename:
-				logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
-				continue
-
-			if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
-				logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
-				continue
-
-			# make sure we want the episode
-			wantEp = True
-			for epNo in epInfo.episodenumbers:
-				if not show.wantEpisode(season, epNo, quality):
-					logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-					wantEp = False
-					break
-			if not wantEp:
-				continue
-
-			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
-
-			# make a result object
-			epObj = []
-			for curEp in epInfo.episodenumbers:
-				epObj.append(show.getEpisode(season, curEp))
-
-			result = self.getResult(epObj)
-			result.url = url
-			result.name = title
-			result.quality = quality
-
-			if len(epObj) == 1:
-				epNum = epObj[0].episode
-			elif len(epObj) > 1:
-				epNum = MULTI_EP_RESULT
-				logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
-			elif len(epObj) == 0:
-				epNum = SEASON_RESULT
-				result.extraInfo = [show]
-				logger.log(u"Separating full season result to check for later", logger.DEBUG)
-
-			if epNum in results:
-				results[epNum].append(result)
+		if season != None:
+			# air-by-date means &season=2010&q=2010.03, no other way to do it atm
+			if show.is_air_by_date:
+				params['season'] = season.split('-')[0]
+				params['q'] = season.replace('-', '.')
 			else:
-				results[epNum] = [result]
+				params['season'] = season
 
+			if episode:
+				params['ep'] = episode
+		
+		return [params]
 
-		return results
+	def _doGeneralSearch(self, search_string):
+		return self._doSearch({'q': search_string})
 
-
-	def _doSearch(self, show, season=None, episode=None, search=None):
+	#def _doSearch(self, show, season=None, episode=None, search=None):
+	def _doSearch(self, search_params):
 
 		params = {"t": "tvsearch",
 				  "maxage": sickbeard.USENET_RETENTION,
 				  "limit": 100,
 				  "cat": '5030,5040'}
 
-		if show:
-			params['rid'] = show.tvrid
-			if season != None:
-				params['season'] = season
-		elif search:
-			params['q'] = search
-		else:
-			return []
+		if search_params:
+			params.update(search_params)
 
 		if self.key:
 			params['apikey'] = self.key
-
-		if episode:
-			params['ep'] = episode
 
 		searchURL = self.url + 'api?' + urllib.urlencode(params)
 
@@ -243,7 +195,7 @@ class NewznabProvider(generic.NZBProvider):
 
 		results = []
 
-		for curResult in self._doSearch(None, search="proper repack"):
+		for curResult in self._doGeneralSearch("proper repack"):
 
 			match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
 			if not match:
