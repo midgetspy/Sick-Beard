@@ -151,6 +151,7 @@ class TVShow(object):
             logger.log(u"Show's metadata file already exists, not generating it", logger.DEBUG)
             return False
 
+        logger.log(u"Telling metadata generator to create show file", logger.DEBUG)
         result = sickbeard.metadata_generator.write_show_file(self)
 
         return result
@@ -318,6 +319,7 @@ class TVShow(object):
                 logger.log(u"Poster already exists, not downloading", logger.DEBUG)
                 poster_result = False
             else:
+                logger.log(u"Telling metadata generator to generate poster", logger.DEBUG)
                 poster_result = sickbeard.metadata_generator.save_poster(self)
 
         if sickbeard.ART_FANART:
@@ -326,9 +328,11 @@ class TVShow(object):
                 fanart_result = False
             else:
                 fanart_result = sickbeard.metadata_generator.save_fanart(self)
+                logger.log(u"Telling metadata generator to generate fanart", logger.DEBUG)
         
         if sickbeard.ART_SEASON_THUMBNAILS:
             season_thumb_result = sickbeard.metadata_generator.save_season_thumbs(self)
+            logger.log(u"Telling metadata generator to generate season thumbs", logger.DEBUG)
 
         return poster_result or fanart_result or season_thumb_result
 
@@ -1225,6 +1229,7 @@ class TVEpisode:
             return False
 
         # generate the nfo
+        logger.log(u"Telling metadata generator to generate episode file", logger.DEBUG)
         result = sickbeard.metadata_generator.write_ep_file(self)
 
         if not result:
@@ -1246,6 +1251,7 @@ class TVEpisode:
             logger.log(u"Episode metadata thumbnail already exists, not writing a new one", logger.DEBUG)
             return False
 
+        logger.log(u"Telling metadata generator to generate episode thumbnail", logger.DEBUG)
         result = sickbeard.metadata_generator.save_thumbnail(self)
         
         return result
