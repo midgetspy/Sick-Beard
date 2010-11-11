@@ -188,12 +188,22 @@ class GitUpdateManager(UpdateManager):
             cmd = cur_git+' '+args
         
             try:
-                logger.log(u"Executing "+cmd+"with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
+                logger.log(u"Executing "+cmd+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
                 output, err = p.communicate()
             except OSError, e:
                 logger.log(u"Command "+cmd+" didn't work, couldn't find git.")
                 continue
+            
+            if 'not found' in output or "not recognized as an internal or external command" in output:
+                logger.log(u"Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
+                output = None
+            elif 'fatal:' in output or err:
+                logger.log(u"Git returned bad info, are you sure this is a git installation?", logger.ERROR)
+                output = None
+            elif output:
+                break
+
 
         return (output, err)
 
@@ -212,21 +222,14 @@ class GitUpdateManager(UpdateManager):
         if not output:
             return self._git_error()
 
-
-        if 'not found' in output or "not recognized as an internal or external command" in output:
-            logger.log(u"Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
-            return self._git_error()
-
-        if 'fatal:' in output or err:
-            logger.log(u"Git returned bad info, are you sure this is a git installation?", logger.ERROR)
-            return self._git_error()
-
         logger.log(u"Git output: "+str(output), logger.DEBUG)
         cur_commit_hash = output.strip()
 
         if not re.match('^[a-z0-9]+$', cur_commit_hash):
             logger.log(u"Output doesn't look like a hash, not using it", logger.ERROR)
             return self._git_error()
+        
+        self._cur_commit_hash = cur_commit_hash
             
         return True
 
