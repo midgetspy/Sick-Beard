@@ -94,11 +94,14 @@ class GenericProvider:
         return result
 
 
-    def getURL(self, url, headers=[]):
+    def getURL(self, url, headers=None):
         """
         By default this is just a simple urlopen call but this method should be overridden
         for providers with special URL requirements (like cookies)
         """
+
+        if not headers:
+            headers = []
 
         result = None
 
