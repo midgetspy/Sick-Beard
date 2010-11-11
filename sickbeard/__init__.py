@@ -453,6 +453,23 @@ def initialize(consoleLogging=True):
         ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
         ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
 
+        # try setting defaults if possible
+        try:
+            TEMP_CREATE_METADATA = bool(int(CFG['General']['create_metadata']))
+            METADATA_SHOW = TEMP_CREATE_METADATA
+            METADATA_EPISODE = TEMP_CREATE_METADATA
+        except:
+            pass
+        
+        try:
+            TEMP_CREATE_IMAGES = bool(int(CFG['General']['create_images']))
+            ART_POSTER = TEMP_CREATE_IMAGES 
+            ART_FANART = TEMP_CREATE_IMAGES
+            ART_THUMBNAILS = TEMP_CREATE_IMAGES
+            ART_SEASON_THUMBNAILS = TEMP_CREATE_IMAGES
+        except:
+            pass
+
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
 
