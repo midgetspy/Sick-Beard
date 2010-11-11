@@ -196,7 +196,7 @@ class GitUpdateManager(UpdateManager):
                 continue
             
             if 'not found' in output or "not recognized as an internal or external command" in output:
-                logger.log(u"Unable to find git, can't tell what version you're running. Maybe specify the path to git in git_path in your config.ini?")
+                logger.log(u"Unable to find git with command "+cmd, logger.DEBUG)
                 output = None
             elif 'fatal:' in output or err:
                 logger.log(u"Git returned bad info, are you sure this is a git installation?", logger.ERROR)
