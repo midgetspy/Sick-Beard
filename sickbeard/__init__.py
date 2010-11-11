@@ -741,6 +741,11 @@ def save_config():
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
+    
+    new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
+    new_config['General']['git_path'] = GIT_PATH
+    new_config['General']['web_host'] = WEB_HOST
+    new_config['General']['web_root'] = WEB_ROOT
 
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
