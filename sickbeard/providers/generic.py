@@ -176,6 +176,9 @@ class GenericProvider:
         itemList = []
         results = {}
 
+        if not self.supportsBacklog:
+            return results
+
         for curString in self._get_season_search_strings(show, season):
             itemList += self._doSearch(curString)
 
