@@ -121,8 +121,6 @@ class NewznabProvider(generic.NZBProvider):
 			if episode:
 				params['ep'] = episode
 		
-		logger.log("using "+str(params))
-
 		return [params]
 
 	def _doGeneralSearch(self, search_string):
@@ -135,8 +133,6 @@ class NewznabProvider(generic.NZBProvider):
 				  "maxage": sickbeard.USENET_RETENTION,
 				  "limit": 100,
 				  "cat": '5030,5040'}
-
-		logger.log("params: "+str(params)+" search_params: "+str(search_params))
 
 		if search_params:
 			params.update(search_params)

@@ -82,7 +82,7 @@ class ProperFinder():
             # if they haven't been added by a different provider than add the proper to the list
             for x in curPropers:
                 name = self._genericName(x.name)
-
+                
                 if not name in propers:
                     logger.log(u"Found new proper: "+x.name, logger.DEBUG)
                     x.provider = curProvider
@@ -137,6 +137,10 @@ class ProperFinder():
                     break
 
             if curProper.tvdbid == -1:
+                continue
+            
+            if not sceneHelpers.filterBadReleases(curProper.name):
+                logger.log(u"Proper "+curProper.name+" isn't a valid scene release that we want, igoring it", logger.DEBUG)
                 continue
 
             # if we have an air-by-date show then get the real season/episode numbers
