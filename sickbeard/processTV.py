@@ -383,6 +383,31 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
         except exceptions.MultipleShowObjectsException:
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
 
+        # if this show uses absolute numbering, it should be reparsed with the proper flag
+        if showResults and showResults.absolute_numbering:
+            returnStr += logHelper("Looks like this is an absolute numbering show, attempting to re-parse episode number...", logger.DEBUG)
+            
+            absoluteParser = FileParser(curName,True)
+            absoluteResult = myParser.parse()
+            
+            if len(absoluteResult.episodenumbers) < 1:
+                returnStr += logHelper("Unable to parse absolute episode number from file name, skipping" + curName, logger.DEBUG)
+                continue
+                    
+            actual_episodes = []
+            myDB = db.DBConnection()
+            for episodeNumber in absoluteResult.episodenumbers:
+                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [showResults.tvdbid, episodeNumber])
+                
+                if len(sql_results) != 1:
+                    logger.log(u"Tried to look up the actual episode number for the episode "+showResults.name+" - "+episodeNumber+" but the database didn't give proper results, skipping it", logger.DEBUG)
+                    continue
+            
+                season = int(sql_results[0]["season"])
+                actual_episodes.append(int(sql_results[0]["episode"]))
+                
+            episodes = actual_episodes
+
         if showResults != None:
             returnStr += logHelper("Found the show in our list, continuing", logger.DEBUG)
             break
