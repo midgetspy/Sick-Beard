@@ -191,6 +191,7 @@ class GitUpdateManager(UpdateManager):
                 logger.log(u"Executing "+cmd+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
                 output, err = p.communicate()
+                logger.log(u"git output: "+output, logger.DEBUG)
             except OSError, e:
                 logger.log(u"Command "+cmd+" didn't work, couldn't find git.")
                 continue
@@ -203,7 +204,6 @@ class GitUpdateManager(UpdateManager):
                 output = None
             elif output:
                 break
-
 
         return (output, err)
 
