@@ -314,7 +314,7 @@ def findSeason(show, season):
 			# if not, break it apart and add them as the lowest priority results
 			individualResults = nzbSplitter.splitResult(bestSeasonNZB)
 
-			individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), individualResults)
+			individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name,show.absolute_numbering) and sceneHelpers.isGoodResult(x.name, show), individualResults)
 
 			for curResult in individualResults:
 				if len(curResult.episodes) == 1:

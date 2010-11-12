@@ -208,12 +208,13 @@ class GenericProvider:
                 for episodeNumber in epInfo.episodenumbers:
                     sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [show.tvdbid, episodeNumber])
                     
-                    if len(sql_results) != 1:
-                        logger.log(u"Tried to look up the date for the episode "+title+" but the database didn't give proper results, skipping it", logger.ERROR)
-                        continue
+                    if len(sql_results) > 0:
+                        actual_season = int(sql_results[0]["season"])
+                        actual_episodes.append(int(sql_results[0]["episode"]))
                     
-                    actual_season = int(sql_results[0]["season"])
-                    actual_episodes.append(int(sql_results[0]["episode"]))
+                if len(actual_episodes) < 1:
+                    logger.log(u"Tried to look up the real episode number for episode "+title+" but the database didn't give proper results, skipping it", logger.ERROR)
+                    continue
             
             elif show.is_air_by_date:
             	if epInfo.seasonnumber != -1 or len(epInfo.episodenumbers) != 1:
