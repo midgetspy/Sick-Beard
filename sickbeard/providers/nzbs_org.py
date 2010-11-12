@@ -99,7 +99,7 @@ class NZBsProvider(generic.NZBProvider):
 	def _get_season_search_strings(self, show, season):
 		return ['^'+x for x in sceneHelpers.makeSceneSeasonSearchString(show, season)]
 
-	def _doSearch(self, curString):
+	def _doSearch(self, curString, quotes=False, english=True):
 
 		curString = curString.replace('.', ' ').replace('-', '.')
 

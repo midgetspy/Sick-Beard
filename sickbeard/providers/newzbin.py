@@ -316,7 +316,7 @@ class NewzbinProvider(generic.NZBProvider):
         return [searchStr]
 
 
-    def _doSearch(self, searchStr):
+    def _doSearch(self, searchStr, quotes=False, english=True):
 
         data = self._getRSSData(searchStr)
         
