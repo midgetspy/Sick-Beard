@@ -131,10 +131,20 @@ def main():
 	else:
 		log_dir = None
 
+	# sickbeard.WEB_HOST is available as a configuration value in various
+	# places but is not configurable. It is supported here for historic
+	# reasons.
+	if sickbeard.WEB_HOST:
+		webhost = sickbeard.WEB_HOST
+		if sickbeard.WEB_IPV6:
+			webhost = '::'
+		else:
+			webhost = '0.0.0.0'
+
 	try:
 		initWebServer({
 		        'port':      startPort,
-		        'host':      sickbeard.WEB_HOST,
+		        'host':      webhost,
 		        'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
 		        'web_root':  sickbeard.WEB_ROOT,
 		        'log_dir':   log_dir,
