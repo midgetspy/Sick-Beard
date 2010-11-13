@@ -84,6 +84,7 @@ WEB_ROOT = None
 WEB_USERNAME = None
 WEB_PASSWORD = None
 WEB_HOST = None
+WEB_IPV6 = None
 
 LAUNCH_BROWSER = None
 CACHE_DIR = None
@@ -279,7 +280,7 @@ def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, \
+        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, \
                 NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
@@ -330,6 +331,7 @@ def initialize(consoleLogging=True):
             WEB_PORT = 8081
 
         WEB_HOST = check_setting_str(CFG, 'General', 'web_host', '0.0.0.0')
+        WEB_IPV6 = bool(check_setting_int(CFG, 'General', 'web_ipv6', 0))
         WEB_ROOT = check_setting_str(CFG, 'General', 'web_root', '').rstrip("/")
         WEB_LOG = bool(check_setting_int(CFG, 'General', 'web_log', 0))
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
@@ -705,6 +707,7 @@ def save_config():
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
+    new_config['General']['web_ipv6'] = WEB_IPV6
     new_config['General']['web_log'] = int(WEB_LOG)
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME
@@ -744,8 +747,6 @@ def save_config():
     
     new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
     new_config['General']['git_path'] = GIT_PATH
-    new_config['General']['web_host'] = WEB_HOST
-    new_config['General']['web_root'] = WEB_ROOT
 
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
