@@ -153,7 +153,16 @@ class GenericProvider:
         quality = Quality.nameQuality(title)
         return quality
 
-    def findEpisode (self, episode, forceQuality=None, manualSearch=False):
+    def _doSearch(self):
+        return []
+
+    def _get_season_search_strings(self, show, season, episode=None):
+        return []
+
+    def _get_episode_search_strings(self, ep_obj):
+        pass
+    
+    def findEpisode (self, episode, manualSearch=False):
 
         self._checkAuth()
 
@@ -163,21 +172,45 @@ class GenericProvider:
         results = self.cache.searchCache(episode, manualSearch)
         logger.log(u"Cache results: "+str(results), logger.DEBUG)
 
+        # if we got some results then use them no matter what.
+        # OR
+        # return anyway unless we're doing a manual search
+        if results or not manualSearch:
+            return results
+
+        itemList = []
+
+        for cur_search_string in self._get_episode_search_strings(episode):
+            itemList += self._doSearch(cur_search_string)
+
+        for item in itemList:
+
+            title = item.findtext('title')
+            url = item.findtext('link').replace('&amp;','&')
+
+            quality = self.getQuality(item)
+
+            if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
+                logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+                continue
+
+            logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
+
+            result = self.getResult([episode])
+            result.url = url
+            result.name = title
+            result.quality = quality
+
+            results.append(result)
+
         return results
 
-    def _doSearch(self):
-        return []
 
-    def _get_search_strings(self, show, season):
-        return []
 
     def findSeasonResults(self, show, season):
 
         itemList = []
         results = {}
-
-        if not self.supportsBacklog:
-            return results
 
         for curString in self._get_season_search_strings(show, season):
             itemList += self._doSearch(curString)

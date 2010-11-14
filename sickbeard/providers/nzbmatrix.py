@@ -61,59 +61,15 @@ class NZBMatrixProvider(generic.NZBProvider):
 		return results
 
 
-	def findEpisode (self, episode, manualSearch=False):
-
-		nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
-
-		# if we got some results then use them no matter what.
-		# OR
-		# return anyway unless we're doing a manual search
-		if nzbResults or not manualSearch:
-			return nzbResults
-
-		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(episode))
-
-		results = []
-
-		# search for all show names and episode numbers like ("a","b","c") in a single search
-		nzbMatrixSearchString = '("' + '","'.join(sceneSearchStrings) + '")'
-		itemList = self._doSearch(nzbMatrixSearchString)
-
-		for item in itemList:
-
-			title = item.findtext('title')
-			url = item.findtext('link').replace('&amp;','&')
-
-			# parse the file name
-			try:
-				myParser = FileParser(title)
-				epInfo = myParser.parse()
-			except tvnamer_exceptions.InvalidFilename:
-				logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
-				continue
-
-			quality = self.getQuality(item)
-
-			season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-
-			if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
-				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-				continue
-
-			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
-
-			result = self.getResult([episode])
-			result.url = url
-			result.name = title
-			result.quality = quality
-
-			results.append(result)
-
-		return results
-
-
 	def _get_season_search_strings(self, show, season):
 		return sceneHelpers.makeSceneSeasonSearchString(show, season, "nzbmatrix")
+
+	def _get_episode_search_strings(self, ep_obj):
+
+		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(ep_obj))
+
+		# search for all show names and episode numbers like ("a","b","c") in a single search
+		return ['("' + '","'.join(sceneSearchStrings) + '")']
 
 	def _doSearch(self, curString, quotes=False):
 
