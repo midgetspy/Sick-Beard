@@ -260,6 +260,7 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
 
     tvdb_id = None
     season = None
+    sfyear = None
     episodes = []
 
     # first try looking up every name in our history
@@ -366,6 +367,7 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
             returnStr += logHelper(u"Looks like this is an air-by-date show, attempting to parse...", logger.DEBUG)
             try:
                 epObj = showObj.airedOn(episodes[0])[0]
+                sfyear = episodes[0].year
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound, e:
@@ -483,6 +485,10 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
         # if we couldn't find the right one then just assume "Season X" format is what we want
         if seasonFolder == '':
             seasonFolder = 'Season ' + str(rootEp.season)
+            
+        # if air-by-date then use year.
+        if sfyear != None and sickbeard.NAMING_SFYEAR:
+            seasonFolder = str(sfyear)
 
     returnStr += logHelper(u"Season folders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder, logger.DEBUG)
 

@@ -220,6 +220,11 @@ If checked the date string will be used instead of the<br />
 season/episode for air-by-date shows (eg. 2010-02-15 vs S12E23)<br />
 <br />
 
+<label for="naming_sfyear"><input type="checkbox" name="naming_sfyear" id="naming_sfyear" #if $sickbeard.NAMING_SFYEAR then "CHECKED" else ""#> <strong>Use year for air-by-date shows season folders</strong></label><br />
+If season folders are enabled then air-by-date shows will be <br />
+placed in yearly directories instead of Season xx.<br />
+<br />
+
 <strong>Separator Style</strong><br />
 <select name="naming_sep_type" id="naming_sep_type">
 #for ($i, $ex) in enumerate($config.naming_sep_type_text):
