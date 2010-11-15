@@ -487,7 +487,7 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
             seasonFolder = 'Season ' + str(rootEp.season)
             
         # if air-by-date then use year.
-        if sfyear != None and sickbeard.NAMING_SFYEAR:
+        if sfyear != None:
             seasonFolder = str(sfyear)
 
     returnStr += logHelper(u"Season folders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder, logger.DEBUG)

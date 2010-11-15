@@ -476,7 +476,7 @@ class ConfigGeneral:
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
-                    anyQualities = [], bestQualities = [], naming_dates=None, naming_sfyear=None,
+                    anyQualities = [], bestQualities = [], naming_dates=None,
                     metadata_type=None, metadata_show=None, metadata_episode=None,
                     art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None):
 
@@ -562,11 +562,6 @@ class ConfigGeneral:
         else:
             naming_dates = 0
 
-        if naming_sfyear == "on":
-            naming_sfyear = 1
-        else:
-            naming_sfyear = 0
-
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
 
@@ -599,7 +594,6 @@ class ConfigGeneral:
         sickbeard.NAMING_USE_PERIODS = naming_use_periods
         sickbeard.NAMING_QUALITY = naming_quality
         sickbeard.NAMING_DATES = naming_dates
-        sickbeard.NAMING_SFYEAR = naming_sfyear
         sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
         sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
         sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
