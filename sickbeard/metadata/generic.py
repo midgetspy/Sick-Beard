@@ -141,7 +141,7 @@ class GenericMetadata():
 
         logger.log(u"Writing show nfo file to "+nfo_file_path)
         
-        nfo_file = open(nfo_file_path, 'w')
+        nfo_file = ek.ek(open, nfo_file_path, 'w')
 
         data.write(nfo_file, encoding="utf-8")
         nfo_file.close()
@@ -174,7 +174,7 @@ class GenericMetadata():
         
         logger.log(u"Writing episode nfo file to "+nfo_file_path)
         
-        nfo_file = open(nfo_file_path, 'w')
+        nfo_file = ek.ek(open, nfo_file_path, 'w')
 
         data.write(nfo_file, encoding="utf-8")
         nfo_file.close()

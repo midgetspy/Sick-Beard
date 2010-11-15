@@ -61,79 +61,19 @@ class NZBMatrixProvider(generic.NZBProvider):
 		return results
 
 
-	def findEpisode (self, episode, manualSearch=False):
-
-		nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
-
-		# if we got some results then use them no matter what.
-		# OR
-		# return anyway unless we're doing a manual search
-		if nzbResults or ( not manualSearch and not episode.show.absolute_numbering ):
-			return nzbResults
-
-		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(episode))
-
-		results = []
-	
-		if episode.show.absolute_numbering != 1:
-			
-			# search for all show names and episode numbers like ("a","b","c") in a single search
-			nzbMatrixSearchString = '("' + '","'.join(sceneSearchStrings) + '")'
-			
-			itemList = self._doSearch(nzbMatrixSearchString)
-			
-		else:
-			# search for all show names and episode numbers like (%2b"show-a"%2b"episode-a")+(%2b"show-b"%2b"episode-b") in a single search
-			fixedSearchStrings = []
-			
-			for searchString in sceneSearchStrings:
-				searchWords = searchString.split('.')
-				fixedSearchStrings.append('(+"' + '"+"'.join(searchWords) + '")')
-			
-			nzbMatrixSearchString = '.'.join(fixedSearchStrings)
-			
-			# search for more than just english (Don't exclude Anime)
-			itemList = self._doSearch(nzbMatrixSearchString, False, False)
-			
-		for item in itemList:
-
-			title = item.findtext('title')
-			url = item.findtext('link').replace('&amp;','&')
-
-			# parse the file name
-			try:
-				myParser = FileParser(title,episode.show.absolute_numbering)
-				epInfo = myParser.parse()
-			except tvnamer_exceptions.InvalidFilename:
-				logger.log(u"Unable to parse the name "+title+" into a valid episode", logger.WARNING)
-				continue
-
-			quality = self.getQuality(item)
-
-			if episode.show.absolute_numbering:
-				season = episode.season
-			else:
-				season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-		
-			if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
-				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-
-				continue
-
-			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
-
-			result = self.getResult([episode])
-			result.url = url
-			result.name = title
-			result.quality = quality
-
-			results.append(result)
-
-		return results
-
-
 	def _get_season_search_strings(self, show, season):
 		return sceneHelpers.makeSceneSeasonSearchString(show, season, "nzbmatrix")
+
+	def _get_episode_search_strings(self, ep_obj):
+
+		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(ep_obj))
+
+		nzbMatrixSearchStrings = []
+		for searchString in sceneSearchStrings:
+			searchWords = searchString.split('.')
+			nzbMatrixSearchStrings.append('(+"' + '"+"'.join(searchWords) + '")')
+			
+		return ['.'.join(nzbMatrixSearchStrings)]
 
 	def _doSearch(self, curString, quotes=False, english=True):
 

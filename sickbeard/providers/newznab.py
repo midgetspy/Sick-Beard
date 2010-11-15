@@ -62,45 +62,7 @@ class NewznabProvider(generic.NZBProvider):
 	def isEnabled(self):
 		return self.enabled
 
-	def findEpisode (self, episode, manualSearch=False):
-
-		nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
-
-		# if we got some results then use them no matter what.
-		# OR
-		# return anyway unless we're doing a backlog/missing or manual search
-		if nzbResults or not manualSearch:
-			return nzbResults
-
-		itemList = []
-		results = []
-
-		itemList += self._doSearch(episode.show, episode.season, episode.episode)
-
-		for item in itemList:
-
-			title = item.findtext('title')
-			url = item.findtext('link')
-
-			quality = self.getQuality(item)
-
-			if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
-				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-				continue
-
-			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
-
-			result = self.getResult([episode])
-			result.url = url
-			result.name = title
-			result.quality = quality
-
-			results.append(result)
-
-		return results
-
-
-	def _get_season_search_strings(self, show, season=None, episode=None):
+	def _get_season_search_strings(self, show, season=None):
 
 		params = {}
 
@@ -118,10 +80,29 @@ class NewznabProvider(generic.NZBProvider):
 			else:
 				params['season'] = season
 
-			if episode:
-				params['ep'] = episode
-		
 		return [params]
+
+	def _get_episode_search_strings(self, ep_obj):
+		
+		params = {}
+
+		if not ep_obj:
+			return params
+		
+		# search directly by tvrage id
+		params['rid'] = ep_obj.show.tvrid
+
+		if ep_obj.show.is_air_by_date:
+			date_str = str(ep_obj.airdate)
+			
+			params['season'] = date_str.partition('-')[0]
+			params['ep'] = date_str.partition('-')[2].replace('-','/')
+		else:
+			params['season'] = ep_obj.season
+			params['ep'] = ep_obj.episode
+
+		return [params]
+
 
 	def _doGeneralSearch(self, search_string):
 		return self._doSearch({'q': search_string})
