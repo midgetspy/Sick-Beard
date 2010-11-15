@@ -68,6 +68,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 
 		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(ep_obj))
 
+		# search for all show names and episode numbers like (%2b"show-a"%2b"episode-a")+(%2b"show-b"%2b"episode-b") in a single search
 		nzbMatrixSearchStrings = []
 		for searchString in sceneSearchStrings:
 			searchWords = searchString.split('.')
