@@ -1,3 +1,4 @@
+from __future__ import with_statement 
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
