@@ -134,8 +134,9 @@ def main():
 	# sickbeard.WEB_HOST is available as a configuration value in various
 	# places but is not configurable. It is supported here for historic
 	# reasons.
-	if sickbeard.WEB_HOST:
+	if sickbeard.WEB_HOST != '0.0.0.0':
 		webhost = sickbeard.WEB_HOST
+	else:
 		if sickbeard.WEB_IPV6:
 			webhost = '::'
 		else:
