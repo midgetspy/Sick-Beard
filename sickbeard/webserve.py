@@ -423,7 +423,7 @@ class History:
         myDB = db.DBConnection()
 
 #        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC LIMIT "+str(numPerPage*(p-1))+", "+str(numPerPage))
-        sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+        sqlResults = myDB.select("SELECT h.*, s.show_name, s.absolute_numbering, e.absolute_episode FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.episode=e.episode AND h.season=e.season ORDER BY date DESC")
 
         t = PageTemplate(file="history.tmpl")
         t.historyResults = sqlResults
