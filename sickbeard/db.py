@@ -21,9 +21,13 @@ import os.path
 import re
 import sqlite3
 import time
+import threading
 
 import sickbeard
+
 from sickbeard import logger
+
+db_lock = threading.Lock()
 
 class DBConnection:
 	def __init__(self, dbFileName="sickbeard.db"):
@@ -35,36 +39,38 @@ class DBConnection:
 
  	def action(self, query, args=None):
 
-		if query == None:
-			return
+ 		with db_lock:
 
-		sqlResult = None
-		attempt = 0
-
-		while attempt < 5:
-			try:
-				if args == None:
-					logger.log(self.dbFileName+": "+query, logger.DEBUG)
-					sqlResult = self.connection.execute(query)
-				else:
-					logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
-					sqlResult = self.connection.execute(query, args)
-				self.connection.commit()
-				# get out of the connection attempt loop since we were successful
-				break
-			except sqlite3.OperationalError, e:
-				if "unable to open database file" in str(e) or "database is locked" in str(e):
-					logger.log(u"DB error: "+str(e).decode('utf-8'), logger.WARNING)
-					attempt += 1
-					time.sleep(1)
-				else:
-					logger.log(u"DB error: "+str(e).decode('utf-8'), logger.ERROR)
+			if query == None:
+				return
+	
+			sqlResult = None
+			attempt = 0
+	
+			while attempt < 5:
+				try:
+					if args == None:
+						logger.log(self.dbFileName+": "+query, logger.DEBUG)
+						sqlResult = self.connection.execute(query)
+					else:
+						logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
+						sqlResult = self.connection.execute(query, args)
+					self.connection.commit()
+					# get out of the connection attempt loop since we were successful
+					break
+				except sqlite3.OperationalError, e:
+					if "unable to open database file" in str(e) or "database is locked" in str(e):
+						logger.log(u"DB error: "+str(e).decode('utf-8'), logger.WARNING)
+						attempt += 1
+						time.sleep(1)
+					else:
+						logger.log(u"DB error: "+str(e).decode('utf-8'), logger.ERROR)
+						raise
+				except sqlite3.DatabaseError, e:
+					logger.log(u"Fatal error executing query: " + str(e), logger.ERROR)
 					raise
-			except sqlite3.DatabaseError, e:
-				logger.log(u"Fatal error executing query: " + str(e), logger.ERROR)
-				raise
-
-		return sqlResult
+	
+			return sqlResult
 
 
 	def select(self, query, args=None):
