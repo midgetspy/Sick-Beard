@@ -160,7 +160,7 @@ class GenericProvider:
         return []
 
     def _get_episode_search_strings(self, ep_obj):
-        pass
+        return []
     
     def findEpisode (self, episode, manualSearch=False):
 
