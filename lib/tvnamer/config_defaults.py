@@ -316,6 +316,67 @@ defaults = {
         ''',
         
     ],
+    
+    # Patterns to parse input filenames with, checking for series that use absolute numbering and not seasons
+    'absolute_filename_patterns': [
+    
+        # [group] foo.103-104
+        '''^\[.+?\][ ]?                           # group name
+        (?P<seriesname>.+)[ \._\-]                # Show name
+        (?P<episodenumberstart>[0-9]{3})          # Episode number
+        -(?P<episodenumberend>[0-9]{3})           # Episode end
+        (\s|$|[ \._\-])                           # Trailing whitespace/seperator/eol
+        ''',
+    
+        # foo.103-104
+        '''^(?P<seriesname>.+)[ \._\-]            # Show name
+        (?P<episodenumberstart>[0-9]{3})          # Episode number
+        -(?P<episodenumberend>[0-9]{3})           # Episode end
+        (\s|$|[ \._\-])                           # Trailing whitespace/seperator/eol
+        ''',
+    
+        # [group] foo.103*
+        '''^\[.+?\][ ]?                           # group name
+        (?P<seriesname>.+)[ \._\-]                # Show name
+        (?P<episodenumber>[0-9]{3})               # Episode number
+        (\s|$|[ \._\-])                           # Trailing whitespace/seperator/eol
+        ''',
+    
+        # foo.103*
+        '''^(?P<seriesname>.+)[ \._\-]            # Show name
+        (?P<episodenumber>[0-9]{3})               # Episode number
+        (\s|$|[ \._\-])                           # Trailing whitespace/seperator/eol
+        ''',
+        
+        # [group] foo.13-14
+        '''^\[.+?\][ ]?                           # group name
+        (?P<seriesname>.+)[ \._\-]                # Show name
+        (?P<episodenumberstart>[0-9]{2})          # Episode number
+        -(?P<episodenumberend>[0-9]{2})           # Episode end
+        (\s|$|[ \._\-])                           # Trailing whitespace/seperator/eol
+        ''',
+    
+        # foo.13-14
+        '''^(?P<seriesname>.+)[ \._\-]            # Show name
+        (?P<episodenumberstart>[0-9]{2})          # Episode number
+        -(?P<episodenumberend>[0-9]{2})           # Episode end
+        (\s|$|[ \._\-])                           # Trailing whitespace/seperator/eol
+        ''',
+        
+        # [group] foo.10*
+        '''^\[.+?\][ ]?                           # group name
+        (?P<seriesname>.+)[ \._\-]                # Show name
+        (?P<episodenumber>[0-9]{2})               # Episode number
+        (\s|$|[ \._\-])                           # Trailing whitespace/seperator/eol
+        ''',
+    
+        # foo.10*
+        '''^(?P<seriesname>.+)[ \._\-]            # Show name
+        (?P<episodenumber>[0-9]{2})               # Episode number
+        (\s|$|[ \._\-])                           # Trailing whitespace/seperator/eol
+        ''',
+        
+    ],
 
     # Formats for renamed files. Variations for with/without episode,
     # and with/without season number.

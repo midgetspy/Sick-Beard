@@ -423,7 +423,7 @@ class History:
         myDB = db.DBConnection()
 
 #        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC LIMIT "+str(numPerPage*(p-1))+", "+str(numPerPage))
-        sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+        sqlResults = myDB.select("SELECT h.*, s.show_name, s.absolute_numbering, e.absolute_episode FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.episode=e.episode AND h.season=e.season ORDER BY date DESC")
 
         t = PageTemplate(file="history.tmpl")
         t.historyResults = sqlResults
@@ -1485,8 +1485,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None):
-
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, absolute_numbering=None):
         if show == None:
             errString = "Invalid show ID: "+str(show)
             if directCall:
@@ -1526,6 +1525,11 @@ class Home:
             air_by_date = 1
         else:
             air_by_date = 0
+            
+        if absolute_numbering == "on":
+            absolute_numbering = 1
+        else:
+            absolute_numbering = 0
 
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
@@ -1547,6 +1551,7 @@ class Home:
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
+            showObj.absolute_numbering = absolute_numbering
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):

@@ -181,7 +181,7 @@ class GenericProvider:
         itemList = []
 
         for cur_search_string in self._get_episode_search_strings(episode):
-            itemList += self._doSearch(cur_search_string)
+            itemList += self._doSearch(cur_search_string,False,(not episode.show.absolute_numbering))
 
         for item in itemList:
 
@@ -213,7 +213,7 @@ class GenericProvider:
         results = {}
 
         for curString in self._get_season_search_strings(show, season):
-            itemList += self._doSearch(curString)
+            itemList += self._doSearch(curString,False,(not show.absolute_numbering))
 
         for item in itemList:
 
@@ -224,24 +224,33 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = FileParser(title)
+                myParser = FileParser(title,show.absolute_numbering)
                 epInfo = myParser.parse()
             except tvnamer_exceptions.InvalidFilename:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-            if not show.is_air_by_date:
-                # this check is meaningless for non-season searches
-                if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
-                    logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+	    if show.absolute_numbering:
+	    	if len(epInfo.episodenumbers) != 1:
+                    logger.log(u"The result "+title+" doesn't seem to be a valid episode, ignoring")
                     continue
-
-                # we just use the existing info for normal searches
-                actual_season = season
-                actual_episodes = epInfo.episodenumbers
+                
+                myDB = db.DBConnection()
+                
+                actual_episodes = []
+                for episodeNumber in epInfo.episodenumbers:
+                    sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [show.tvdbid, episodeNumber])
+                    
+                    if len(sql_results) > 0:
+                        actual_season = int(sql_results[0]["season"])
+                        actual_episodes.append(int(sql_results[0]["episode"]))
+                    
+                if len(actual_episodes) < 1:
+                    logger.log(u"Tried to look up the real episode number for episode "+title+" but the database didn't give proper results, skipping it", logger.ERROR)
+                    continue
             
-            else:
-                if epInfo.seasonnumber != -1 or len(epInfo.episodenumbers) != 1:
+            elif show.is_air_by_date:
+            	if epInfo.seasonnumber != -1 or len(epInfo.episodenumbers) != 1:
                     logger.log(u"This is supposed to be an air-by-date search but the result "+title+" didn't parse as one, skipping it", logger.DEBUG)
                     continue
                 
@@ -254,6 +263,16 @@ class GenericProvider:
                 
                 actual_season = int(sql_results[0]["season"])
                 actual_episodes = [int(sql_results[0]["episode"])]
+                
+            else:
+                # this check is meaningless for non-season searches
+                if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
+                    logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+                    continue
+
+                # we just use the existing info for normal searches
+                actual_season = season
+                actual_episodes = epInfo.episodenumbers
 
             # make sure we want the episode
             wantEp = True

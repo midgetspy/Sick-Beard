@@ -57,7 +57,12 @@
           <a href="$sbRoot/home/displayShow?show=$curEp.show.tvdbid">$curEp.show.name</a>
           </h1>
           <p class="next">
-            <span class="title">Next Episode:</span> <span class="info "><%=str(curEp.season)+"x"+"%02i" % int(curEp.episode) %> - $curEp.name airs $curEp.airdate</span>
+            <span class="title">Next Episode:</span> <span class="info ">
+              #if $curEp.show.absolute_numbering
+                <%=str(curEp.absolute_episode) %> - $curEp.name airs $curEp.airdate</span>
+              #else
+                <%=str(curEp.season)+"x"+"%02i" % int(curEp.episode) %> - $curEp.name airs $curEp.airdate</span>
+              #end if
           </p>
           <p class="noMargin">
             <span class="title">Status:</span> <span class="info ">$curEp.show.status</span><br />

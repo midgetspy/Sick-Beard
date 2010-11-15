@@ -31,10 +31,10 @@ resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
                  "sample", "extras", "special", "dubbed", "german",
                 "french", "core2hd")
 
-def filterBadReleases(name):
+def filterBadReleases(name,absolute_numbering=False):
 
     try:
-        fp = FileParser(name)
+        fp = FileParser(name,absolute_numbering)
         epInfo = fp.parse()
     except tvnamer_exceptions.InvalidFilename:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
@@ -86,6 +86,30 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         # the search string for air by date shows is just 
         seasonStrings = [segment]
     
+    elif show.absolute_numbering:
+        numseasons = 0
+        episodeNumbersSQLResult = myDB.select("SELECT absolute_episode, status FROM tv_episodes WHERE showid = ? and season = ?", [show.tvdbid, segment])
+        
+        # get show qualities
+        anyQualities, bestQualities = Quality.splitQuality(show.quality)
+        
+        # compile a list of all the episode numbers we need in this 'season'
+        seasonStrings = []
+        for episodeNumberResult in episodeNumbersSQLResult:
+            
+            # get quality of the episode
+            curCompositeStatus = int(episodeNumberResult["status"])
+            curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
+            
+            if bestQualities:
+                highestBestQuality = max(bestQualities)
+            else:
+                highestBestQuality = 0
+        
+            # if we need a better one then add it to the list of episodes to fetch
+            if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
+                seasonStrings.append("%d" % episodeNumberResult["absolute_episode"])
+            
     else:
         numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
         numseasons = numseasonsSQlResult[0][0]
@@ -116,11 +140,15 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
             if numseasons == 1:
                 toReturn.append('+"'+curShow+'"')
             else:
-                term_list = [x+'*' for x in seasonStrings]
-                if show.is_air_by_date:
-                    term_list = ['"'+x+'"' for x in term_list]
+                if show.absolute_numbering:
+                    term_list = ['(+"'+curShow+'"+"'+x+'")' for x in seasonStrings]
+                    toReturn.append('.'.join(term_list))
+                else:
+                    term_list = [x+'*' for x in seasonStrings]
+                    if show.is_air_by_date:
+                        term_list = ['"'+x+'"' for x in term_list]
 
-                toReturn.append('+"'+curShow+'" +('+','.join(term_list)+')')
+                    toReturn.append('+"'+curShow+'" +('+','.join(term_list)+')')
 
     return toReturn
 
@@ -130,6 +158,8 @@ def makeSceneSearchString (episode):
     # see if we should use dates instead of episodes
     if episode.show.is_air_by_date and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate)]
+    elif episode.show.absolute_numbering:
+        epStrings = ["%i" % int(episode.absolute_episode)]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
                     "%ix%02i" % (int(episode.season), int(episode.episode))]
@@ -181,7 +211,7 @@ def isGoodResult(name, show, log=True):
 
     for curName in set(showNames):
         escaped_name = re.sub('\\\\[.-]', '\W+', re.escape(curName))
-        curRegex = '^' + escaped_name + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
+        curRegex = '^' + escaped_name + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d\d?\d?[$\s])|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:
             logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
 
