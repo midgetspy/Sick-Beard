@@ -177,7 +177,7 @@ def isGoodResult(name, show, log=True):
     Use an automatically-created regex to make sure the result actually is the show it claims to be
     """
 
-    showNames = map(sanitizeSceneName, allPossibleShowNames(show))
+    showNames = map(sanitizeSceneName, allPossibleShowNames(show)) + allPossibleShowNames(show)
 
     for curName in set(showNames):
         escaped_name = re.sub('\\\\[.-]', '\W+', re.escape(curName))
