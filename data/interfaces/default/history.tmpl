@@ -50,7 +50,7 @@
             $match.group(1).upper()
           #end if
         #else:
-          #set $match = $re.search("^\[(.+?)\][ ]", $os.path.basename($hItem["resource"]))
+          #set $match = $re.search("^\[(.+?)\][ ]?", $os.path.basename($hItem["resource"]))
           #if $match
             $match.group(1).upper()
           #end if
