@@ -507,7 +507,11 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
 
         # if we couldn't find the right one then just assume "Season X" format is what we want
         if seasonFolder == '':
-            seasonFolder = 'Season ' + str(rootEp.season)
+            # for air-by-date shows use the year as the season folder
+            if rootEp.show.is_air_by_date:
+                seasonFolder = str(rootEp.airdate.year)
+            else:
+                seasonFolder = 'Season ' + str(rootEp.season)
 
     returnStr += logHelper(u"Season folders were " + str(rootEp.show.seasonfolders) + " which gave " + seasonFolder, logger.DEBUG)
 
