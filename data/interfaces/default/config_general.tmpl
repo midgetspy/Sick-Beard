@@ -72,7 +72,8 @@ Should Sick Beard open its home page in your<br />browser when you start it?<br 
 <br />
 
 <label for="version_notify"><input type="checkbox" name="version_notify" id="version_notify" #if $sickbeard.VERSION_NOTIFY then "CHECKED" else ""#> <strong>Notify when new versions are available</strong></label><br />
-Only works for windows builds and git installations
+Checks on startup and every 12 hrs after that for a new version and allows you<br />
+to automatically update to the newest version available<br />
 <br />
 
 </fieldset>
@@ -129,9 +130,8 @@ Web port Sick Beard should listen on<br />
 <input type="text" name="web_port" value="$sickbeard.WEB_PORT" size="10"><br />
 <br />
 
-<strong>Listen on IPv6</strong><br />
+<label for="web_ipv6"><input type="checkbox" name="web_ipv6" id="web_ipv6" #if $sickbeard.WEB_IPV6 then "CHECKED" else ""#> <strong>Listen on IPv6</strong><br />
 Will make Sick Beard's web built in web interface available on IPv6 interfaces<br />
-<input type="checkbox" name="web_ipv6" #if $sickbeard.WEB_IPV6 then "CHECKED" else ""#><br />
 <br />
 
 <label for="web_log"><input type="checkbox" name="web_log" id="web_log" #if $sickbeard.WEB_LOG then "CHECKED" else ""#> <strong>Enable HTTP log</strong></label><br />
