@@ -38,28 +38,33 @@
       #end if
     <td align="center">$statusStrings[$curStatus]</td>
     <td align="center">
-	#if $curStatus == DOWNLOADED:
-	  #set $match = $re.search("\-(\w+)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
-	  #if $match
-	  	#if $match.group(1).upper() in ("X264", "720P"):
-	  	  #set $match = $re.search("(\w+)\-.*\-"+$match.group(1)+"\.\w{3}\Z", $os.path.basename($hItem["resource"]), re.IGNORECASE)
-	  	  #if $match
-		  	  $match.group(1).upper()
-		  #end if
-	  	#else:
-          $match.group(1).upper()
-        #end if
-	  #end if
-	#else
-      #if $hItem["provider"] > 0
-        #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
-        #if $provider != None: 
-        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name">
+      #if $curStatus == DOWNLOADED:
+	#set $match = $re.search("\-(\w+)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
+	#if $match
+	  #if $match.group(1).upper() in ("X264", "720P"):
+	    #set $match = $re.search("(\w+)\-.*\-"+$match.group(1)+"\.\w{3}\Z", $os.path.basename($hItem["resource"]), re.IGNORECASE)
+	      #if $match
+	        $match.group(1).upper()
+	      #end if
+	  #else:
+            $match.group(1).upper()
+          #end if
+        #else:
+          #set $match = $re.search("^\[(.+?)\][ ]", $os.path.basename($hItem["resource"]))
+          #if $match
+            $match.group(1).upper()
+          #end if
+	#end if
+      #else
+        #if $hItem["provider"] > 0
+          #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
+          #if $provider != None: 
+            <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name">
+          #end if
         #end if
       #end if
-    #end if
-	</td>
-	<td align="center">$Quality.qualityStrings[$curQuality]</td>
+      </td>
+    <td align="center">$Quality.qualityStrings[$curQuality]</td>
   </tr>
 #end for
   </tbody>
