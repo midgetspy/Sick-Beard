@@ -470,7 +470,7 @@ class ConfigGeneral:
         return _munge(t)
 
     @cherrypy.expose
-    def saveGeneral(self, log_dir=None, web_port=None, web_log=None,
+    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
                     web_password=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
@@ -481,6 +481,11 @@ class ConfigGeneral:
                     art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None):
 
         results = []
+
+        if web_ipv6 == "on":
+            web_ipv6 = 1
+        else:
+            web_ipv6 = 0
 
         if web_log == "on":
             web_log = 1
@@ -594,6 +599,7 @@ class ConfigGeneral:
         sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
 
         sickbeard.WEB_PORT = int(web_port)
+        sickbeard.WEB_IPV6 = web_ipv6
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
