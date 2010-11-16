@@ -274,6 +274,7 @@ sceneExceptions = {72546: ['CSI'],
                    73290: ['60 Minutes (US)'],
                    194751: ['Conan', 'Conan (2010)'],
                    164451: ['Carlos (2010)'],
+                   70726: ['Babylon 5', 'Babylon5'],
                    }
 
 countryList = {'Australia': 'AU',
