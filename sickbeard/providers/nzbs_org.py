@@ -55,49 +55,11 @@ class NZBsProvider(generic.NZBProvider):
 		if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
 			raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
 
-	def findEpisode (self, episode, manualSearch=False):
-
-		nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
-
-		# if we got some results then use them no matter what.
-		# OR
-		# return anyway unless we're doing a backlog/missing or manual search
-		if nzbResults or not manualSearch:
-			return nzbResults
-
-		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(episode))
-
-		itemList = []
-		results = []
-
-		for curString in sceneSearchStrings:
-			itemList += self._doSearch("^"+curString)
-
-		for item in itemList:
-
-			title = item.findtext('title')
-			url = item.findtext('link')
-
-			quality = self.getQuality(item)
-
-			if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
-				logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-				continue
-
-			logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
-
-			result = self.getResult([episode])
-			result.url = url
-			result.name = title
-			result.quality = quality
-
-			results.append(result)
-
-		return results
-
-
 	def _get_season_search_strings(self, show, season):
 		return ['^'+x for x in sceneHelpers.makeSceneSeasonSearchString(show, season)]
+
+	def _get_episode_search_strings(self, ep_obj):
+		return ['^'+x for x in sceneHelpers.makeSceneSearchString(ep_obj)]
 
 	def _doSearch(self, curString):
 

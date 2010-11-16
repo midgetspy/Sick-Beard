@@ -1,3 +1,4 @@
+from __future__ import with_statement 
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -15,8 +16,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
-
-
 
 
 import os.path
@@ -42,6 +41,8 @@ reverseNames = {u'ERROR': ERROR,
                 u'DEBUG': DEBUG}
 
 logFile = ''
+
+log_lock = threading.Lock()
 
 def initLogging(consoleLogging=True):
     global logFile
@@ -74,23 +75,25 @@ def initLogging(consoleLogging=True):
 
 def log(toLog, logLevel=MESSAGE):
 
-    meThread = threading.currentThread().getName()
-    message = meThread + " :: " + toLog
+    with log_lock:
 
-    outLine = message.encode('utf-8')
-
-    sbLogger = logging.getLogger('sickbeard')
-
-    if logLevel == DEBUG:
-        sbLogger.debug(outLine)
-    elif logLevel == MESSAGE:
-        sbLogger.info(outLine)
-    elif logLevel == WARNING:
-        sbLogger.warning(outLine)
-    elif logLevel == ERROR:
-        sbLogger.error(outLine)
-
-        # add errors to the UI logger
-        classes.ErrorViewer.add(classes.UIError(message))
-    else:
-        sbLogger.log(logLevel, outLine)
+        meThread = threading.currentThread().getName()
+        message = meThread + u" :: " + toLog
+    
+        outLine = message.encode('utf-8')
+    
+        sbLogger = logging.getLogger('sickbeard')
+    
+        if logLevel == DEBUG:
+            sbLogger.debug(outLine)
+        elif logLevel == MESSAGE:
+            sbLogger.info(outLine)
+        elif logLevel == WARNING:
+            sbLogger.warning(outLine)
+        elif logLevel == ERROR:
+            sbLogger.error(outLine)
+    
+            # add errors to the UI logger
+            classes.ErrorViewer.add(classes.UIError(message))
+        else:
+            sbLogger.log(logLevel, outLine)

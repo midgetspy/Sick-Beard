@@ -239,64 +239,6 @@ class NewzbinProvider(generic.NZBProvider):
 
         return data
 
-    def findEpisode (self, episode, manualSearch=False):
-
-        nzbResults = generic.NZBProvider.findEpisode(self, episode, manualSearch)
-
-        # if we got some results then use them no matter what.
-        # OR
-        # return anyway unless we're doing a manual search
-        if nzbResults or not manualSearch:
-            return nzbResults
-
-        nameList = set(sceneHelpers.allPossibleShowNames(episode.show))
-        searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(episode.season, episode.episode) for x in nameList])
-
-        logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
-
-        data = self._getRSSData(searchStr)
-
-        results = []
-
-        try:
-            responseSoup = etree.ElementTree(etree.XML(data))
-            items = responseSoup.getiterator('item')
-        except Exception, e:
-            logger.log("Error trying to load Newzbin RSS feed: "+str(e), logger.ERROR)
-            return results
-
-        for item in items:
-
-            title = item.findtext('title')
-            url = item.findtext('link').replace('&amp;','&')
-
-            # parse the file name
-            try:
-                myParser = FileParser(title)
-                epInfo = myParser.parse()
-            except tvnamer_exceptions.InvalidFilename:
-                logger.log("Unable to parse the name "+title+" into a valid episode", logger.WARNING)
-                continue
-
-            quality = self.getQuality(item)
-
-            season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-
-            if not episode.show.wantEpisode(season, episode.episode, quality, manualSearch):
-                logger.log("Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
-                continue
-
-            logger.log("Found result " + title + " at " + url, logger.DEBUG)
-
-            result = self.getResult([episode])
-            result.url = url
-            result.name = title
-            result.quality = quality
-
-            results.append(result)
-
-        return results
-
     def _get_season_search_strings(self, show, season):
 
         nameList = set(sceneHelpers.allPossibleShowNames(show))
@@ -315,6 +257,14 @@ class NewzbinProvider(generic.NZBProvider):
         
         return [searchStr]
 
+    def _get_episode_search_strings(self, ep_obj):
+
+        nameList = set(sceneHelpers.allPossibleShowNames(ep_obj.show))
+        if not ep_obj.show.is_air_by_date:
+            searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(ep_obj.season, ep_obj.episode) for x in nameList])
+        else:
+            searchStr = " OR ".join(['^"'+x+' - '+str(ep_obj.airdate)+'"' for x in nameList])
+        return [searchStr]
 
     def _doSearch(self, searchStr):
 
