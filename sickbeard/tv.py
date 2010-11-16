@@ -318,10 +318,11 @@ class TVShow(object):
 
     def getImages(self, fanart=None, poster=None):
 
+        poster_result = fanart_result = season_thumb_result = False
+
         if sickbeard.ART_POSTER:
             if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_poster_path(self)):
                 logger.log(u"Poster already exists, not downloading", logger.DEBUG)
-                poster_result = False
             else:
                 logger.log(u"Telling metadata generator to generate poster", logger.DEBUG)
                 poster_result = sickbeard.metadata_generator.save_poster(self)
@@ -329,7 +330,6 @@ class TVShow(object):
         if sickbeard.ART_FANART:
             if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_fanart_path(self)):
                 logger.log(u"Fanart already exists, not downloading", logger.DEBUG)
-                fanart_result = False
             else:
                 fanart_result = sickbeard.metadata_generator.save_fanart(self)
                 logger.log(u"Telling metadata generator to generate fanart", logger.DEBUG)
