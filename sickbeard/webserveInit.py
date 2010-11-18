@@ -22,6 +22,14 @@ def initWebServer(options = {}):
                 'log.screen':         False,
         })
 
+        #HTTP Errors
+        def http_error_401_hander(status, message, traceback, version):
+            args = [status, message, traceback, version]
+            logger.log(u"CherryPy caught an error: %s %s" % (status, message), logger.ERROR)
+            logger.log(traceback, logger.DEBUG)
+            return "<html><body><h1>Error %s</h1>Something unexpected has happened. Please check the log.</body></html>" % args[0]
+        cherrypy.config.update({'error_page.401' : http_error_401_hander})
+
         # setup cherrypy logging
         if options['log_dir'] and os.path.isdir(options['log_dir']):
                 cherrypy.config.update({ 'log.access_file': os.path.join(options['log_dir'], "cherrypy.log") })
