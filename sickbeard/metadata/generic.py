@@ -138,13 +138,22 @@ class GenericMetadata():
             return False
         
         nfo_file_path = self.get_show_file_path(show_obj)
+        nfo_file_dir = ek.ek(os.path.dirname, nfo_file_path)
 
-        logger.log(u"Writing show nfo file to "+nfo_file_path)
-        
-        nfo_file = ek.ek(open, nfo_file_path, 'w')
-
-        data.write(nfo_file, encoding="utf-8")
-        nfo_file.close()
+        try:
+            if not ek.ek(os.path.isdir, nfo_file_dir):
+                logger.log("Metadata dir didn't exist, creating it at "+nfo_file_dir, logger.DEBUG)
+                ek.ek(os.makedirs, nfo_file_dir)
+    
+            logger.log(u"Writing show nfo file to "+nfo_file_path)
+            
+            nfo_file = ek.ek(open, nfo_file_path, 'w')
+    
+            data.write(nfo_file, encoding="utf-8")
+            nfo_file.close()
+        except IOError, e:
+            logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
+            return False
         
         return True
 
@@ -171,13 +180,22 @@ class GenericMetadata():
             return False
         
         nfo_file_path = self.get_episode_file_path(ep_obj)
+        nfo_file_dir = ek.ek(os.path.dirname, nfo_file_path)
         
-        logger.log(u"Writing episode nfo file to "+nfo_file_path)
-        
-        nfo_file = ek.ek(open, nfo_file_path, 'w')
-
-        data.write(nfo_file, encoding="utf-8")
-        nfo_file.close()
+        try:
+            if not ek.ek(os.path.isdir, nfo_file_dir):
+                logger.log("Metadata dir didn't exist, creating it at "+nfo_file_dir, logger.DEBUG)
+                ek.ek(os.makedirs, nfo_file_dir)
+            
+            logger.log(u"Writing episode nfo file to "+nfo_file_path)
+            
+            nfo_file = ek.ek(open, nfo_file_path, 'w')
+    
+            data.write(nfo_file, encoding="utf-8")
+            nfo_file.close()
+        except IOError, e:
+            logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
+            return False
         
         return True
 
@@ -307,7 +325,13 @@ class GenericMetadata():
             logger.log(u"Unable to retrieve image, skipping", logger.WARNING)
             return False
 
+        image_dir = ek.ek(os.path.dirname, image_path)
+        
         try:
+            if not ek.ek(os.path.isdir, image_dir):
+                logger.log("Metadata dir didn't exist, creating it at "+image_dir, logger.DEBUG)
+                ek.ek(os.makedirs, image_dir)
+
             outFile = ek.ek(open, image_path, 'wb')
             outFile.write(image_data)
             outFile.close()
