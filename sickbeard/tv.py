@@ -155,8 +155,9 @@ class TVShow(object):
             logger.log(u"Show's metadata file already exists, not generating it", logger.DEBUG)
             return False
 
-        logger.log(u"Telling metadata generator to create show file", logger.DEBUG)
-        result = sickbeard.metadata_generator.write_show_file(self)
+        if sickbeard.METADATA_SHOW:
+            logger.log(u"Telling metadata generator to create show file", logger.DEBUG)
+            result = sickbeard.metadata_generator.write_show_file(self)
 
         return result
 
@@ -1186,7 +1187,7 @@ class TVEpisode:
 
         shouldSave = self.checkForMetaFiles()
 
-        if sickbeard.METADATA_SHOW:
+        if sickbeard.METADATA_EPISODE:
             result = self.createNFO(force)
             if result == None:
                 return False
