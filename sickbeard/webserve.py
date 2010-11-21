@@ -1792,8 +1792,8 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
 
-        posterFilename = os.path.abspath(os.path.join(showObj.location, "folder.jpg"))
-        if os.path.isfile(posterFilename):
+        posterFilename = os.path.abspath(ek.ek(os.path.join, showObj.location, "folder.jpg"))
+        if ek.ek(os.path.isfile, posterFilename):
             try:
                 from PIL import Image
                 from cStringIO import StringIO
