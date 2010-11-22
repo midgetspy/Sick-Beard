@@ -20,12 +20,10 @@ from __future__ import with_statement
 
 import os, subprocess, shlex, os.path
 import shutil
-import sys
 import re
 import glob
 from shutil import Error
 
-from sickbeard import notifiers
 from sickbeard import exceptions
 from sickbeard import notifiers
 from sickbeard import db, classes, helpers, sceneHelpers
@@ -130,7 +128,7 @@ def findInHistory(nzbName):
         for cur_result in sqlResults:
             episodes.append(int(cur_result["episode"]))            
 
-        return (tvdb_id, season, episodes)
+        return (tvdb_id, season, list(set(episodes)))
 
     return None
 
@@ -402,7 +400,7 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
         return returnStr
 
     # if we DO know about the show but its dir is offline, give up
-    if not os.path.isdir(showResults._location):
+    if not ek.ek(os.path.isdir, showResults._location):
         returnStr += logHelper(u"The show dir doesn't exist, canceling postprocessing", logger.DEBUG)
         return returnStr
 
