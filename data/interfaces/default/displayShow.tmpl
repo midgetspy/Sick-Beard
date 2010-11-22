@@ -3,6 +3,17 @@
 #from sickbeard.common import *
 #import os.path, os
 #import datetime
+
+#try:
+	#import periscope
+	#set $periscopeImport = 1
+
+#except ImportError:
+	#set $periscopeImport = 0
+
+#end try
+#from sickbeard import encodingKludge as ek
+
 #set global $title=$show.name
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
 
@@ -131,6 +142,14 @@ $epLoc
     <td align="center">
     #if int($epResult["season"]) != 0: 
     <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a>
+    #end if
+    #set $srtFile = sickbeard.helpers.replaceExtension($epLoc, "srt")
+    #if $epLoc and ek.ek(os.path.isfile, srtFile):
+    	
+    #else
+        #if $periscopeImport == 1:
+	<a href="subtitleEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">get&nbsp;sub</a>
+	#end if
     #end if
     </td>
    <tr>

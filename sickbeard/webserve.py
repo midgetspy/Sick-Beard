@@ -57,6 +57,12 @@ import sickbeard
 
 from sickbeard import browser
 
+try:
+    import periscope
+    periscopeImport = 1
+
+except ImportError:
+    periscopeImport = 0
 
 class Flash:
     _messages = []
@@ -1769,6 +1775,36 @@ class Home:
             # update our lists to reflect the result if this search
             sickbeard.updateAiringList()
             sickbeard.updateComingList()
+
+        redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
+
+
+    @cherrypy.expose
+    def subtitleEpisode(self, show=None, season=None, episode=None):
+
+        outStr = ""
+        epObj = _getEpisode(show, season, episode)
+
+        if isinstance(epObj, str):
+            return _genericMessage("Error", epObj)
+
+        tempStr = "PERISCOPE :: Periscoping " + epObj.prettyName(True)
+        logger.log(tempStr)
+        outStr += tempStr + "<br />\n"
+        foundSubtitle = periscope.Periscope().downloadSubtitle(epObj.location, ['fr', 'en'])
+
+        if not foundSubtitle:
+            message = 'No subtitles were found'
+            flash.error(message,
+                        "Couldn't find a subtitle for <i>%s</i>" % epObj.prettyName(True))
+            logger.log("PERISCOPE :: " + message)
+
+        else:
+            # just use the first result for now
+	    message = 'Subtitle foud'
+            flash.message(message,
+			"Found a sub in language <b>%s</b> for <i>%s</i>" % ( foundSubtitle['lang'] , epObj.prettyName(True) ))
+            logger.log("PERISCOPE :: Found a sub from %s in language %s, downloaded to %s" % ( foundSubtitle['plugin'], foundSubtitle['lang'], foundSubtitle['subtitlepath'] ))
 
         redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
 
