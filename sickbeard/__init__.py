@@ -817,8 +817,10 @@ def save_config():
     new_config.write()
 
 
-def launchBrowser():
-    browserURL = 'http://localhost:%d%s' % (WEB_PORT, WEB_ROOT)
+def launchBrowser(startPort=None):
+    if not startPort:
+        startPort = WEB_PORT
+    browserURL = 'http://localhost:%d%s' % (startPort, WEB_ROOT)
     try:
         webbrowser.open(browserURL, 2, 1)
     except:

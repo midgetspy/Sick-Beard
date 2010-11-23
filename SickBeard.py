@@ -156,7 +156,7 @@ def main():
 		logger.log(u"Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)
 		if sickbeard.LAUNCH_BROWSER:
 			logger.log(u"Launching browser and exiting", logger.ERROR)
-			sickbeard.launchBrowser()
+			sickbeard.launchBrowser(startPort)
 		sys.exit()
 
 	# build from the DB to start with
@@ -172,7 +172,7 @@ def main():
 
 	# launch browser if we're supposed to
 	if sickbeard.LAUNCH_BROWSER:
-		sickbeard.launchBrowser()
+		sickbeard.launchBrowser(startPort)
 
 	# start an update if we're supposed to
 	if forceUpdate:
