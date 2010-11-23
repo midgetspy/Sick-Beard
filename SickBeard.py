@@ -153,7 +153,7 @@ def main():
 		        'password':  sickbeard.WEB_PASSWORD,
 		})
 	except IOError:
-		logger.log(u"Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)
+		logger.log(u"Unable to start web server, is something else running on port %d?" % startPort, logger.ERROR)
 		if sickbeard.LAUNCH_BROWSER:
 			logger.log(u"Launching browser and exiting", logger.ERROR)
 			sickbeard.launchBrowser(startPort)
