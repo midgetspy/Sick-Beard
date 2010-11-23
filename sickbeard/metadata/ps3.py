@@ -24,26 +24,23 @@ import generic
 
 from sickbeard.common import *
 from sickbeard import logger, exceptions, helpers
-from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class PS3Metadata(generic.GenericMetadata):
     """
     Metadata generation class for Sony PS3.
-    
+
     The following file structure is used:
     
     show_root/cover.jpg                                      (poster)
-    show_root/fanart.jpg                                     (fanart)
-    show_root/Season 01/season.jpg                           (season thumb)
-    show_root/Season 01/show - 1x01 - episode.avi            (* example of existing ep
-                                                                of course)
-    show_root/Season 01/show - 1x01 - episode.avi.cover.jpg   (episode thumb)
+    show_root/Season 01/show - 1x01 - episode.avi            (existing video)
+    show_root/Season 01/show - 1x01 - episode.avi.cover.jpg  (episode thumb)
     """
     
     def __init__(self):
         generic.GenericMetadata.__init__(self)
 
+	self.poster_name = 'cover.jpg'
         self.name = 'PS3'
 
     def get_episode_thumb_path(self, ep_obj):
@@ -59,23 +56,6 @@ class PS3Metadata(generic.GenericMetadata):
             return None
         
         return tbn_filename
-    
-    def get_season_thumb_path(self, show_obj, season):
-        """
-        Returns the full path to the file for a given season thumb.
-        
-        show_obj: a TVShow instance for which to generate the path
-        season: a season number to be used for the path. Note that sesaon 0
-                means specials.
-        """
-
-        # Our specials thumbnail is, well, special
-        if season == 0:
-            season_thumb_file_path = 'season-specials'
-        else:
-            season_thumb_file_path = 'season' + str(season).zfill(2)
-        
-        return ek.ek(os.path.join, show_obj.location, season_thumb_file_path+'.jpg')
     
 # present a standard "interface"
 metadata_class = PS3Metadata
