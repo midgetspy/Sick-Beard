@@ -66,7 +66,12 @@ def sanitizeSceneName (name):
 
 def sceneToNormalShowNames(name):
 
-    return [name, name.replace(".and.", ".&.")]
+    results = [name]
+    
+    if '.and.' in name:
+        results.append(name.replace('.and.', '&'))
+
+    return results
 
 def makeSceneShowSearchStrings(show):
 
