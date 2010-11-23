@@ -472,7 +472,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
-                    web_password=None, season_folders_default=None,
+                    web_password=None, season_folders_format=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
@@ -586,6 +586,7 @@ class ConfigGeneral:
         sickbeard.ART_THUMBNAILS = art_thumbnails
         sickbeard.ART_SEASON_THUMBNAILS = art_season_thumbnails
 
+        sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = newQuality
 
