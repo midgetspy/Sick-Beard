@@ -26,6 +26,8 @@ from sickbeard.common import *
 from sickbeard import logger, exceptions, helpers
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
+from sickbeard import encodingKludge as ek
+
 class PS3Metadata(generic.GenericMetadata):
     """
     Metadata generation class for Sony PS3.
@@ -40,7 +42,7 @@ class PS3Metadata(generic.GenericMetadata):
     def __init__(self):
         generic.GenericMetadata.__init__(self)
 
-	self.poster_name = 'cover.jpg'
+        self.poster_name = 'cover.jpg'
         self.name = 'PS3'
 
     def get_episode_thumb_path(self, ep_obj):
