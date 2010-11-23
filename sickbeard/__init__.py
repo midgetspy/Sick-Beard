@@ -99,6 +99,7 @@ ART_THUMBNAILS = None
 ART_SEASON_THUMBNAILS = None
 
 QUALITY_DEFAULT = None
+SEASON_FOLDERS_FORMAT = 'Season %02d'
 SEASON_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = []
 
@@ -289,7 +290,7 @@ def initialize(consoleLogging=True):
                 airingList, comingList, loadingShowList, SOCKET_TIMEOUT, \
                 NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_DEFAULT, \
+                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
@@ -353,6 +354,7 @@ def initialize(consoleLogging=True):
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
+        SEASON_FOLDERS_FORMAT = check_setting_str(CFG, 'General', 'season_folders_format', '')
         SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
@@ -719,6 +721,7 @@ def save_config():
     new_config['General']['use_nzb'] = int(USE_NZB)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
+    new_config['General']['season_folders_format'] = SEASON_FOLDERS_FORMAT
     new_config['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
