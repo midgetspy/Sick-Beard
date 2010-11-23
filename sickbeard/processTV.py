@@ -485,8 +485,8 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
             # for air-by-date shows use the year as the season folder
             if rootEp.show.is_air_by_date:
                 seasonFolder = str(rootEp.airdate.year)
-            elif sickbeard.TV_DOWNLOAD_DIR != "":
-                seasonFolder = sickbeard.TV_DOWNLOAD_DIR % (rootEp.season)
+            elif sickbeard.SEASON_FOLDERS_FORMAT != "":
+                seasonFolder = sickbeard.SEASON_FOLDERS_FORMAT % (rootEp.season)
             else:
                 seasonFolder = 'Season ' + str(rootEp.season)
 
