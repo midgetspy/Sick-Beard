@@ -188,6 +188,13 @@ TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
 
+USE_JABBER = False
+JABBER_USERNAME = None
+JABBER_PASSWORD = None
+JABBER_SERVER = None
+JABBER_PORT = None
+JABBER_RECIPIENT = None
+
 EXTRA_SCRIPTS = []
 
 GIT_PATH = None
@@ -302,8 +309,9 @@ def initialize(consoleLogging=True):
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
                 ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH
-
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, \
+                USE_JABBER, JABBER_USERNAME, JABBER_PASSWORD, JABBER_SERVER, \
+                JABBER_PORT, JABBER_RECIPIENT
 
         if __INITIALIZED__:
             return False
@@ -318,6 +326,7 @@ def initialize(consoleLogging=True):
         CheckSection('XBMC')
         CheckSection('Growl')
         CheckSection('Twitter')
+        CheckSection('Jabber')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -443,6 +452,13 @@ def initialize(consoleLogging=True):
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
+
+        USE_JABBER = bool(check_setting_int(CFG, 'Jabber', 'use_jabber', 0))
+        JABBER_USERNAME = check_setting_str(CFG, 'Jabber', 'jabber_username', '')
+        JABBER_PASSWORD = check_setting_str(CFG, 'Jabber', 'jabber_password', '')
+        JABBER_SERVER = check_setting_str(CFG, 'Jabber', 'jabber_server', '')
+        JABBER_PORT = check_setting_int(CFG, 'Jabber', 'jabber_port', 5223)
+        JABBER_RECIPIENT = check_setting_str(CFG, 'Jabber', 'jabber_recipient', '')
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -813,6 +829,14 @@ def save_config():
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
+
+    new_config['Jabber'] = {}
+    new_config['Jabber']['use_jabber'] = int(USE_JABBER)
+    new_config['Jabber']['jabber_username'] = JABBER_USERNAME
+    new_config['Jabber']['jabber_password'] = JABBER_PASSWORD
+    new_config['Jabber']['jabber_server'] = JABBER_SERVER
+    new_config['Jabber']['jabber_port'] = JABBER_PORT
+    new_config['Jabber']['jabber_recipient'] = JABBER_RECIPIENT
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])

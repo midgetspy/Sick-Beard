@@ -49,6 +49,15 @@
 
   });
 
+  \$('#testJabber').click(function(){
+    var jabber_username = \$("#jabber_username").val();
+    var jabber_password = \$("#jabber_password").val();
+    var jabber_server = \$("#jabber_server").val();
+    var jabber_port = \$("#jabber_port").val();
+    var jabber_recipient = \$("#jabber_recipient").val();
+
+    \$.get("$sbRoot/home/testJabber", {'username': jabber_username, 'password': jabber_password, 'server': jabber_server, 'port': jabber_port, 'recipient': jabber_recipient}, function (data){alert(data)});
+  });
 });  
       
 </script>
@@ -143,6 +152,42 @@ Enter the key Twitter gave you below, and click "Verify Key".<br />
 <br />
 <strong>Step Three:</strong><br />
 <input type="button" value="Test Twitter" id="testTwitter">
+
+</fieldset>
+</div>
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Jabber/XMPP</legend>
+
+<label for="use_jabber"><input type="checkbox" name="use_jabber" id="use_jabber" #if $sickbeard.USE_JABBER then "CHECKED" else ""#> <strong>Enable Jabber Notifications</strong></label><br />
+Should Sick Beard send Jabber notifications?<br />
+<br />
+
+<strong>Jabber Username:</strong><br />
+Username of the Jabber account that sends the<br/>
+message (including the domain)<br />
+<input type="text" name="jabber_username" id="jabber_username" value="$sickbeard.JABBER_USERNAME" size="35"><br />
+<br />
+<strong>Jabber Password:</strong><br />
+Password of the Jabber account.<br />
+<input type="password" name="jabber_password" id="jabber_password" value="$sickbeard.JABBER_PASSWORD" size="35"><br />
+<br />
+<strong>Jabber Server & Port:</strong><br />
+The Jabber server and port to connect to.<br />
+<input type="text" name="jabber_server" id="jabber_server" value="$sickbeard.JABBER_SERVER" size="35"><input type="text" name="jabber_port" id="jabber_port" value="$sickbeard.JABBER_PORT" size="5"><br />
+<br />
+<strong>Recipient:</strong><br />
+The address of the recipient of the notification.<br />
+<input type="text" name="jabber_recipient" id="jabber_recipient" value="$sickbeard.JABBER_RECIPIENT" size="35"><br />
+<br />
+<strong>Note:</strong> Not all servers allow you to message<br />
+yourself and you might have to add the <br>
+sending address to your friendlist.<br />
+<br />
+
+<input type="button" value="Test Jabber" id="testJabber">
 
 </fieldset>
 </div>

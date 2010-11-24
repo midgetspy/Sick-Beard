@@ -985,7 +985,8 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None):
+                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None, use_jabber=None, jabber_username=None,
+                          jabber_password=None, jabber_server=None, jabber_port=None, jabber_recipient=None):
 
         results = []
 
@@ -1018,6 +1019,11 @@ class ConfigNotifications:
             use_twitter = 1
         else:
             use_twitter = 0
+            
+        if use_jabber == "on":
+            use_jabber = 1
+        else:
+            use_jabber = 0
 
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1032,7 +1038,14 @@ class ConfigNotifications:
         sickbeard.GROWL_PASSWORD = growl_password
 
         sickbeard.USE_TWITTER = use_twitter
-
+        
+        sickbeard.USE_JABBER = use_jabber
+        sickbeard.JABBER_USERNAME = jabber_username
+        sickbeard.JABBER_PASSWORD = jabber_password
+        sickbeard.JABBER_SERVER = jabber_server
+        sickbeard.JABBER_PORT = jabber_port
+        sickbeard.JABBER_RECIPIENT = jabber_recipient
+        
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -1367,6 +1380,10 @@ class Home:
     def testXBMC(self, host=None, username=None, password=None):
         notifiers.testXBMC(urllib.unquote_plus(host), username, password)
         return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
+
+    @cherrypy.expose
+    def testJabber(self, username=None, password=None, server=None, port=None, recipient=None):
+        return notifiers.testJabber(username, password, server, port, recipient)
 
     @cherrypy.expose
     def shutdown(self):

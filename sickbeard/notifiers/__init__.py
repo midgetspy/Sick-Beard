@@ -3,6 +3,7 @@ import sickbeard
 import xbmc
 import growl
 import tweet
+import jabber
 
 from sickbeard.common import *
 
@@ -22,8 +23,10 @@ def testTwitter2(key):
 def testTwitter():
     return tweet.notifyTwitter("This is a test notification from Sick Beard", force=True)
 
-def notify(type, message):
+def testJabber(username, password, server, port, recipient):
+    return jabber.sendJabberMessage(username, password, server, port, recipient, "Test notification from Sick Beard")
 
+def notify(type, message):
     if type == NOTIFY_DOWNLOAD and sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
             xbmc.notifyXBMC(message, notifyStrings[type])
 
@@ -31,6 +34,7 @@ def notify(type, message):
             xbmc.notifyXBMC(message, notifyStrings[type])
 
     growl.sendGrowl(notifyStrings[type], message)
+    jabber.sendJabber(message)
 
     if type == NOTIFY_DOWNLOAD:
         tweet.notifyTwitter(message)
