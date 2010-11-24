@@ -5,8 +5,12 @@ import lib.xmpp as xmpp
 
 from sickbeard import logger
 
-def sendJabber(message):
-    sendJabberMessage(sickbeard.JABBER_USERNAME, sickbeard.JABBER_PASSWORD, sickbeard.JABBER_SERVER, sickbeard.JABBER_PORT, sickbeard.JABBER_RECIPIENT, message)
+def sendJabber(type, message):
+    if not sickbeard.USE_JABBER:
+        return False
+
+    msg = str(type) + " of " + message
+    sendJabberMessage(sickbeard.JABBER_USERNAME, sickbeard.JABBER_PASSWORD, sickbeard.JABBER_SERVER, sickbeard.JABBER_PORT, sickbeard.JABBER_RECIPIENT, msg)
 
 def sendJabberMessage(username, password, server, port, recipient, message):
     #Make sure port is a number
@@ -15,7 +19,7 @@ def sendJabberMessage(username, password, server, port, recipient, message):
     #Get the username and domain
     (user, domain) = username.split("@")
     
-    logger.log("[Jabber] Connecting " + user + "@" + domain + " (" + password +") at " + server + ":" + str(port))
+    logger.log("[Jabber] Connecting " + user + "@" + domain + " at " + server + ":" + str(port))
     
     try:
         #Create a new client, to debug xmpp;

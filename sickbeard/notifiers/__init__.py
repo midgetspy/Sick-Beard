@@ -34,7 +34,7 @@ def notify(type, message):
             xbmc.notifyXBMC(message, notifyStrings[type])
 
     growl.sendGrowl(notifyStrings[type], message)
-    jabber.sendJabber(message)
+    jabber.sendJabber(notifyStrings[type], message)
 
     if type == NOTIFY_DOWNLOAD:
         tweet.notifyTwitter(message)
