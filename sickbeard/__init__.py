@@ -340,6 +340,9 @@ def initialize(consoleLogging=True):
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
+        # fix bad configs due to buggy code
+        if CACHE_DIR == 'None':
+            CACHE_DIR = 'cache'
         if not helpers.makeDir(CACHE_DIR):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
@@ -742,7 +745,7 @@ def save_config():
     new_config['General']['art_fanart'] = int(ART_FANART)
     new_config['General']['art_thumbnails'] = int(ART_THUMBNAILS)
     new_config['General']['art_season_thumbnails'] = int(ART_SEASON_THUMBNAILS)
-    new_config['General']['cache_dir'] = CACHE_DIR
+    new_config['General']['cache_dir'] = CACHE_DIR if CACHE_DIR else 'cache'
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
