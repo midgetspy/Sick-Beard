@@ -93,7 +93,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
     
     else:
         numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
-        numseasons = numseasonsSQlResult[0][0]
+        numseasons = int(numseasonsSQlResult[0][0])
 
         seasonStrings = ["S%02d" % segment]
         # since nzbmatrix allows more than one search per request we search SxEE results too
@@ -132,12 +132,20 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
 
 def makeSceneSearchString (episode):
 
+    myDB = db.DBConnection()
+    numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
+    numseasons = int(numseasonsSQlResult[0][0])
+
     # see if we should use dates instead of episodes
     if episode.show.is_air_by_date and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate)]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
                     "%ix%02i" % (int(episode.season), int(episode.episode))]
+
+    # for single-season shows just search for the show name
+    if numseasons == 1:
+        epStrings = ['']
 
     showNames = set(makeSceneShowSearchStrings(episode.show))
 
