@@ -13,7 +13,7 @@
 <br />
 <b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> |
 <!--<b>Update</b>: <a%a=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%> | -->
-<b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%A") <br />
+<b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d") <br />
 </div>
 </body>
 </html>

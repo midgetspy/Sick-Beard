@@ -121,19 +121,19 @@ class Quality:
                 return x
 
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
-    
-        if checkName(["1080p", "bluray", "x264"], all):
-            return Quality.FULLHDBLURAY
+
+        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any):
+            return Quality.SDTV
+        elif checkName(["dvdrip.xvid", "bdrip.xvid", "dvdrip.divx"], any):
+            return Quality.SDDVD
+        elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
+            return Quality.HDTV
+        elif checkName(["720p", "web.dl"], all) or checkName(["720p", "itunes", "h.?264"], all):
+            return Quality.HDWEBDL
         elif checkName(["720p", "bluray", "x264"], all):
             return Quality.HDBLURAY
-        elif checkName(["720p.web.dl", "720p.itunes.h264"], any):
-            return Quality.HDWEBDL
-        elif checkName(["hr.ws.pdtv.x264","1280x720","720p"], any):
-            return Quality.HDTV
-        elif checkName(["dvdrip.xvid", "bdrip.xvid"], any):
-            return Quality.SDDVD
-        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid", "480p"], any):
-            return Quality.SDTV
+        elif checkName(["1080p", "bluray", "x264"], all):
+            return Quality.FULLHDBLURAY
         else:
             return Quality.UNKNOWN
 
@@ -274,6 +274,8 @@ sceneExceptions = {72546: ['CSI'],
                    73290: ['60 Minutes (US)'],
                    194751: ['Conan', 'Conan (2010)'],
                    164451: ['Carlos (2010)'],
+                   70726: ['Babylon 5', 'Babylon5'],
+                   83714: ['Genius', 'Genius With Dave  Gormand'],
                    }
 
 countryList = {'Australia': 'AU',
