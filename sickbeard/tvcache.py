@@ -217,6 +217,7 @@ class TVCache():
                         if sceneHelpers.isGoodResult(name, curShow, False):
                             logger.log(u"Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
                             tvdb_id = curShow.tvdbid
+                            break
 
                 if tvdb_id:
 
