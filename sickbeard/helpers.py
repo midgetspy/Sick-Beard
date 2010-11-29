@@ -292,7 +292,7 @@ def buildNFOXML(myShow):
 
 def searchDBForShow(regShowName):
 
-	showNames = set([regShowName+'%', regShowName.replace(' ','_')+'%'])
+	showNames = [regShowName.replace(' ','_')]
 
 	# if tvdb fails then try looking it up in the db
 	myDB = db.DBConnection()

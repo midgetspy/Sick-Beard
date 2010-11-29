@@ -156,8 +156,9 @@ class TVShow(object):
             logger.log(u"Show's metadata file already exists, not generating it", logger.DEBUG)
             return False
 
-        logger.log(u"Telling metadata generator to create show file", logger.DEBUG)
-        result = sickbeard.metadata_generator.write_show_file(self)
+        if sickbeard.METADATA_SHOW:
+            logger.log(u"Telling metadata generator to create show file", logger.DEBUG)
+            result = sickbeard.metadata_generator.write_show_file(self)
 
         return result
 
@@ -835,6 +836,7 @@ class TVShow(object):
         logger.log(u"any,best = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
 
         if quality not in anyQualities + bestQualities:
+            logger.log(u"I know for sure I don't want this episode, saying no", logger.DEBUG)
             return False
 
         myDB = db.DBConnection()
@@ -862,6 +864,8 @@ class TVShow(object):
             elif manualSearch:
                 logger.log(u"Usually I would ignore this ep but because you forced the search I'm overriding the default and allowing the quality", logger.DEBUG)
                 return True
+            else:
+                logger.log(u"This quality looks like something we might want but I don't know for sure yet", logger.DEBUG)
 
         curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
@@ -1215,7 +1219,7 @@ class TVEpisode:
 
         shouldSave = self.checkForMetaFiles()
 
-        if sickbeard.METADATA_SHOW:
+        if sickbeard.METADATA_EPISODE:
             result = self.createNFO(force)
             if result == None:
                 return False
