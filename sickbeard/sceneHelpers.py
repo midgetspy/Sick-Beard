@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from sickbeard.common import *
+from sickbeard.common import countryList, getSceneExceptions
 from sickbeard import logger
 from sickbeard import db
 
@@ -160,9 +160,7 @@ def makeSceneSearchString (episode):
 def allPossibleShowNames(show):
 
     showNames = [show.name]
-
-    if int(show.tvdbid) in sceneExceptions:
-        showNames += sceneExceptions[int(show.tvdbid)]
+    showNames += [name for name, in getSceneExceptions(show.tvdbid)]
 
     # if we have a tvrage name then use it
     if show.tvrname != "" and show.tvrname != None:

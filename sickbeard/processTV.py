@@ -24,19 +24,18 @@ import re
 import glob
 from shutil import Error
 
+import sickbeard
 from sickbeard import exceptions
 from sickbeard import notifiers
 from sickbeard import db, classes, helpers, sceneHelpers
 from sickbeard import history
 
 from sickbeard import encodingKludge as ek
+from sickbeard.common import Quality, getSceneExceptionByName, SNATCHED, DOWNLOADED, NOTIFY_DOWNLOAD
 
 from sickbeard import logger
-from sickbeard.common import *
 
-from sickbeard.notifiers import xbmc
-
-from lib.tvdb_api import tvnamer, tvdb_api, tvdb_exceptions
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from lib.tvnamer.utils import FileParser
 from lib.tvnamer import tvnamer_exceptions
@@ -318,17 +317,9 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
 
         # reverse-lookup the scene exceptions
         returnStr += logHelper(u"Checking scene exceptions for "+result.seriesname, logger.DEBUG)
-        sceneID = None
-        for exceptionID in sceneExceptions:
-            for curException in sceneExceptions[exceptionID]:
-                if result.seriesname == curException:
-                    sceneID = exceptionID
-                    break
-            if sceneID:
-                returnStr += logHelper(u"Scene exception lookup got tvdb id "+str(sceneID)+u", using that", logger.DEBUG)
-                break
-
+        sceneID = getSceneExceptionByName(result.seriesname)
         if sceneID:
+            returnStr += logHelper(u"Scene exception lookup got tvdb id "+str(sceneID)+u", using that", logger.DEBUG)
             tvdb_id = sceneID
 
         showObj = None

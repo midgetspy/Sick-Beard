@@ -171,7 +171,6 @@ class Quality:
             quality = Quality.assumeQuality(name)
         return Quality.compositeStatus(DOWNLOADED, quality)
 
-
 Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
@@ -231,54 +230,30 @@ class Overview:
 XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
              'xsd': 'http://www.w3.org/2001/XMLSchema'}
 
-
-
-#####################################################################
-###
-###  DO NOT EDIT THIS MANUALLY! If you find a show that isn't
-###  being found please submit a ticket on google code so that
-###  I can fix the problem for everybody:
-###  http://code.google.com/p/sickbeard/issues/entry
-###
-#####################################################################
-
-sceneExceptions = {72546: ['CSI'],
-                   73696: ['CSI: New York'],
-                   110381: ['Archer'],
-                   83897: ['Life After People: The Series'],
-                   80552: ['Kitchen Nightmares (US)'],
-                   71256: ['The Daily Show'],
-                   75692: ['Law & Order: SVU'],
-                   71489: ['Law & Order: Criminal Intent', 'Law & Order: CI'],
-                   79590: ['Dancing With The Stars (US)'],
-                   71256: ['The Daily Show'],
-                   73387: ['Craig Ferguson'],
-                   85355: ['Jimmy Fallon'],
-                   75088: ['David Letterman'],
-                   76706: ['Big Brother (US)'],
-                   105521: ['The Colony', 'The Colony (US)'],
-                   76235: ['America\'s Funniest Home Videos', 'AFHV'],
-                   139941: ['Childrens Hospital (US)', 'Childrens Hospital'],
-                   83123: ['Merlin', 'Merlin (2008)'],
-                   76779: ['WWE Monday Night RAW'],
-                   164951: ['Shit My Dad Says'],
-                   83714: ['Genius with Dave Gorman'],
-                   168161: ['Law & Order: Los Angeles', 'Law & Order: LA'],
-                   77526: ['Star Trek: TOS'],
-                   72194: ['The Ellen Degeneres Show', 'Ellen Degeneres'],
-                   72073: ['Star Trek DS9'],
-                   195831: ['Zane Lamprey\'s Drinking Made Easy'],
-                   76133: ['Poirot', 'Agatha Christie\'s Poirot'],
-                   70870: ['The Real World Road Rules Challenge', 'The Challenge Cutthroat'],
-                   77444: ['This Old House Program'],
-                   73290: ['60 Minutes (US)'],
-                   194751: ['Conan', 'Conan (2010)'],
-                   164451: ['Carlos (2010)'],
-                   70726: ['Babylon 5', 'Babylon5'],
-                   83714: ['Genius', 'Genius With Dave  Gormand'],
-                   }
-
 countryList = {'Australia': 'AU',
                'Canada': 'CA',
                'USA': 'US'
                }
+
+def getSceneExceptions(tvdb_id):
+    """
+    Given a tvdb_id, return a list of all the scene exceptions.
+    """
+    from sickbeard import db
+
+    myDB = db.DBConnection()
+    exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+    return [name for name, in exceptions]
+
+def getSceneExceptionByName(show_name):
+    """
+    Given a show name, return the tvdbid of the exception, None if no exception
+    is present.
+    """
+    from sickbeard import db
+
+    myDB = db.DBConnection()
+    exceptions = myDB.select("SELECT tvdb_id FROM scene_exceptions WHERE show_name = ?", [show_name])
+    for tvdb_id, in exceptions:
+        return tvdb_id
+    return None
