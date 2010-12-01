@@ -34,8 +34,7 @@ from sickbeard.common import *
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 class GenericProvider:
 
@@ -224,29 +223,29 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = FileParser(title)
-                epInfo = myParser.parse()
-            except tvnamer_exceptions.InvalidFilename:
+                myParser = NameParser(False)
+                parse_result = myParser.parse(title)
+            except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
             if not show.is_air_by_date:
                 # this check is meaningless for non-season searches
-                if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
+                if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
                     continue
 
                 # we just use the existing info for normal searches
                 actual_season = season
-                actual_episodes = epInfo.episodenumbers
+                actual_episodes = parse_result.episode_numbers
             
             else:
-                if epInfo.seasonnumber != -1 or len(epInfo.episodenumbers) != 1:
+                if not parse_result.air_by_date:
                     logger.log(u"This is supposed to be an air-by-date search but the result "+title+" didn't parse as one, skipping it", logger.DEBUG)
                     continue
                 
                 myDB = db.DBConnection()
-                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [show.tvdbid, epInfo.episodenumbers[0].toordinal()])
+                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [show.tvdbid, parse_result.air_date.toordinal()])
 
                 if len(sql_results) != 1:
                     logger.log(u"Tried to look up the date for the episode "+title+" but the database didn't give proper results, skipping it", logger.ERROR)
@@ -282,7 +281,7 @@ class GenericProvider:
                 epNum = epObj[0].episode
             elif len(epObj) > 1:
                 epNum = MULTI_EP_RESULT
-                logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(epInfo.episodenumbers), logger.DEBUG)
+                logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(parse_result.episode_numbers), logger.DEBUG)
             elif len(epObj) == 0:
                 epNum = SEASON_RESULT
                 result.extraInfo = [show]

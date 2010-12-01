@@ -36,11 +36,9 @@ from sickbeard.common import *
 
 from sickbeard.notifiers import xbmc
 
-from lib.tvdb_api import tvnamer, tvdb_api, tvdb_exceptions
+from name_parser.parser import NameParser, InvalidNameException
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
-#from tvdb_api.nfogen import createXBMCInfo
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 sample_ratio = 0.3
 
@@ -296,19 +294,19 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
 
         try:
             returnStr += logHelper(u"Attempting to parse name "+curName, logger.DEBUG)
-            myParser = FileParser(curName)
-            result = myParser.parse()
+            myParser = NameParser()
+            result = myParser.parse(curName)
 
-            season = result.seasonnumber if result.seasonnumber != None else 1
-            episodes = result.episodenumbers
+            season = result.season_number if result.season_number != None else 1
+            episodes = result.episode_numbers
 
             returnStr += logHelper(u"Ended up with season "+str(season)+u" and episodes "+str(episodes), logger.DEBUG)
 
-        except tvnamer_exceptions.InvalidFilename:
+        except InvalidNameException:
             returnStr += logHelper(u"Unable to parse the filename "+curName+u" into a valid episode", logger.DEBUG)
             continue
 
-        if not result.seriesname:
+        if not result.series_name:
             returnStr += logHelper(u"Filename "+curName+u" has no series name, unable to use this name for processing", logger.DEBUG)
             continue
 
@@ -317,11 +315,11 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
             continue
 
         # reverse-lookup the scene exceptions
-        returnStr += logHelper(u"Checking scene exceptions for "+result.seriesname, logger.DEBUG)
+        returnStr += logHelper(u"Checking scene exceptions for "+result.series_name, logger.DEBUG)
         sceneID = None
         for exceptionID in sceneExceptions:
             for curException in sceneExceptions[exceptionID]:
-                if result.seriesname == curException:
+                if result.series_name == curException:
                     sceneID = exceptionID
                     break
             if sceneID:
@@ -340,8 +338,8 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
                 returnStr += logHelper(u"Looking up ID "+str(tvdb_id)+u" on TVDB", logger.DEBUG)
                 showObj = t[tvdb_id]
             else:
-                returnStr += logHelper(u"Looking up name "+result.seriesname+u" on TVDB", logger.DEBUG)
-                showObj = t[result.seriesname]
+                returnStr += logHelper(u"Looking up name "+result.series_name+u" on TVDB", logger.DEBUG)
+                showObj = t[result.series_name]
 
             returnStr += logHelper(u"Got tvdb_id "+str(showObj["id"])+u" and series name "+showObj["seriesname"].decode('utf-8')+u" from TVDB", logger.DEBUG)
 
@@ -351,7 +349,7 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
 
             returnStr += logHelper(u"Unable to look up show on TVDB: "+str(e).decode('utf-8'), logger.DEBUG)
             returnStr += logHelper(u"Looking up show in DB instead", logger.DEBUG)
-            showInfo = helpers.searchDBForShow(result.seriesname)
+            showInfo = helpers.searchDBForShow(result.series_name)
 
         if showInfo:
             tvdb_id = showInfo[0]
@@ -365,14 +363,14 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
                 season = 1
 
         # if it is an air-by-date show and we successfully found it on TVDB, convert the date into a season/episode
-        if season == -1 and showObj:
+        if result.air_by_date and showObj:
             returnStr += logHelper(u"Looks like this is an air-by-date show, attempting to parse...", logger.DEBUG)
             try:
-                epObj = showObj.airedOn(episodes[0])[0]
+                epObj = showObj.airedOn(result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound, e:
-                returnStr += logHelper(u"Unable to find episode with date "+str(episodes[0])+u" for show "+showObj["seriesname"]+u", skipping", logger.DEBUG)
+                returnStr += logHelper(u"Unable to find episode with date "+str(result.air_date)+u" for show "+showObj["seriesname"]+u", skipping", logger.DEBUG)
                 continue
 
         # if we couldn't get the necessary info from either of the above methods, try the next name
@@ -407,9 +405,6 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
     # if we DO know about the show but its dir is offline, give up
     if not ek.ek(os.path.isdir, showResults._location):
         returnStr += logHelper(u"The show dir doesn't exist, canceling postprocessing", logger.DEBUG)
-        return returnStr
-
-    if season == -1:
         return returnStr
 
     # search all possible names for our new quality, in case the file or dir doesn't have it

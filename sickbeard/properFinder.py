@@ -29,12 +29,9 @@ from sickbeard import history
 
 from sickbeard.common import *
 
-from sickbeard.tv import TVEpisode
-
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
+from name_parser.parser import NameParser, InvalidNameException
 
 
 class ProperFinder():
@@ -96,25 +93,25 @@ class ProperFinder():
 
             # parse the file name
             try:
-                myParser = FileParser(curProper.name)
-                epInfo = myParser.parse()
-            except tvnamer_exceptions.InvalidFilename:
+                myParser = NameParser(False)
+                parse_result = myParser.parse(curProper.name)
+            except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+curProper.name+" into a valid episode", logger.DEBUG)
                 continue
 
-            if not epInfo.episodenumbers:
+            if not parse_result.episode_numbers:
                 logger.log(u"Ignoring "+curProper.name+" because it's for a full season rather than specific episode", logger.DEBUG)
                 continue
 
             # populate our Proper instance
-            curProper.season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-            curProper.episode = epInfo.episodenumbers[0]
+            curProper.season = parse_result.season_number if parse_result.season_number != None else 1
+            curProper.episode = parse_result.episode_numbers[0]
             curProper.quality = Quality.nameQuality(curProper.name)
 
             # for each show in our list
             for curShow in sickbeard.showList:
 
-                genericName = self._genericName(epInfo.seriesname)
+                genericName = self._genericName(parse_result.series_name)
 
                 # get the scene name masks
                 sceneNames = set(sceneHelpers.makeSceneShowSearchStrings(curShow))
@@ -124,7 +121,7 @@ class ProperFinder():
 
                     # if it matches
                     if genericName == self._genericName(curSceneName):
-                        logger.log(u"Successful match! Result "+epInfo.seriesname+" matched to show "+curShow.name, logger.DEBUG)
+                        logger.log(u"Successful match! Result "+parse_result.series_name+" matched to show "+curShow.name, logger.DEBUG)
 
                         # set the tvdbid in the db to the show's tvdbid
                         curProper.tvdbid = curShow.tvdbid
@@ -151,7 +148,7 @@ class ProperFinder():
                     season = int(epObj["seasonnumber"])
                     episodes = [int(epObj["episodenumber"])]
                 except tvdb_exceptions.tvdb_episodenotfound, e:
-                    logger.log(u"Unable to find episode with date "+str(curProper.episode)+" for show "+epInfo.seriesname+", skipping", logger.WARNING)
+                    logger.log(u"Unable to find episode with date "+str(curProper.episode)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                     continue
 
             # check if we actually want this proper (if it's the right quality)

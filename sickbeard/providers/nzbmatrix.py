@@ -30,9 +30,6 @@ from sickbeard import classes, logger, sceneHelpers, db
 from sickbeard import tvcache
 from sickbeard.common import *
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
-
 class NZBMatrixProvider(generic.NZBProvider):
 
 	def __init__(self):

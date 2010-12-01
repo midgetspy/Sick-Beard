@@ -29,9 +29,9 @@ import sickbeard
 
 import xml.etree.cElementTree as etree
 
-from lib.tvdb_api import tvdb_api, tvnamer, tvdb_exceptions
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
+from name_parser.parser import NameParser, InvalidNameException
+
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
@@ -370,23 +370,23 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
         try:
-            myParser = FileParser(file)
-            epInfo = myParser.parse()
-        except tvnamer_exceptions.InvalidFilename:
+            myParser = NameParser()
+            parse_result = myParser.parse(file)
+        except InvalidNameException:
             logger.log(u"Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 
-        if len(epInfo.episodenumbers) == 0:
+        if len(parse_result.episode_numbers) == 0:
             logger.log(u"No episode number found in "+file+", ignoring it", logger.ERROR)
             return None
 
         # for now lets assume that any episode in the show dir belongs to that show
-        season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-        episodes = epInfo.episodenumbers
+        season = parse_result.season_number if parse_result.season_number != None else 1
+        episodes = parse_result.episode_numbers
         rootEp = None
 
         # if we have an air-by-date show then get the real season/episode numbers
-        if season == -1:
+        if parse_result.air_by_date:
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
                 epObj = t[self.tvdbid].airedOn(episodes[0])[0]

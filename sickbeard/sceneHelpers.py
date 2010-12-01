@@ -23,8 +23,7 @@ from sickbeard import db
 import re
 import datetime
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
+from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
                  "dirfix", "samplefix", "nfofix", "dvdextras",
@@ -34,19 +33,19 @@ resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
 def filterBadReleases(name):
 
     try:
-        fp = FileParser(name)
-        epInfo = fp.parse()
-    except tvnamer_exceptions.InvalidFilename:
+        fp = NameParser()
+        parse_result = fp.parse(name)
+    except InvalidNameException:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
 
     # if there's no info after the season info then assume it's fine
-    if not epInfo.episodename:
+    if not parse_result.extra_info:
         return True
 
     # if any of the bad strings are in the name then say no
     for x in resultFilters:
-        if re.search('(^|[\W_])'+x+'($|[\W_])', epInfo.episodename, re.I):
+        if re.search('(^|[\W_])'+x+'($|[\W_])', parse_result.extra_info, re.I):
             logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
 

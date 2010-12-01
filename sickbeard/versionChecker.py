@@ -302,6 +302,9 @@ class GitUpdateManager(UpdateManager):
 
         output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION)
 
+        if not output:
+            return self._git_error()
+
         pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
 
         (files, insertions, deletions) = (None, None, None)
