@@ -389,7 +389,7 @@ class TVShow(object):
         if parse_result.air_by_date:
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-                epObj = t[self.tvdbid].airedOn(episodes[0])[0]
+                epObj = t[self.tvdbid].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound, e:

@@ -112,7 +112,6 @@ ep_regexes = [
                ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
                s(eason[\. _-])?                            # S01/Season 01
                (?P<season_num>\d+)[\. _-]*                 # S01 and optional separator
-               ([\. _-]*[e-](?P<extra_ep_num>\d+))*        # additional E03/etc
                ([\. _-]+(?P<extra_info>.+?))?              # Source.Quality.Etc
                (-(?P<release_group>\w+))?$                 # Group
                '''

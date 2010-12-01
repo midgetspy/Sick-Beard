@@ -104,8 +104,12 @@ class ProperFinder():
                 continue
 
             # populate our Proper instance
-            curProper.season = parse_result.season_number if parse_result.season_number != None else 1
-            curProper.episode = parse_result.episode_numbers[0]
+            if parse_result.air_by_date:
+                curProper.season == -1
+                curProper.episode = parse_result.air_date
+            else:
+                curProper.season = parse_result.season_number if parse_result.season_number != None else 1
+                curProper.episode = parse_result.episode_numbers[0]
             curProper.quality = Quality.nameQuality(curProper.name)
 
             # for each show in our list

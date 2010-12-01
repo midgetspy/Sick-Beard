@@ -67,7 +67,7 @@ simple_test_cases = {
               }
 
 combination_test_cases = [
-                          ('Season 02/03 - Ep Name.avi',
+                          ('/test/path/to/Season 02/03 - Ep Name.avi',
                            parser.ParseResult(None, None, 2, [3], 'Ep Name'),
                            ['no_season', 'season_only']),
                           

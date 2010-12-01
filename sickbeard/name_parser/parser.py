@@ -36,8 +36,6 @@ class NameParser(object):
             result = ParseResult(name)
             result.which_regex = [cur_regex_name]
             
-            #print cur_regex_name, match.groupdict()
-            
             named_groups = match.groupdict().keys()
             
             if 'series_name' in named_groups:
@@ -130,6 +128,9 @@ class NameParser(object):
             base_file_name = ext_match.group(1)
         else:
             base_file_name = file_name
+        
+        # use only the direct parent dir
+        dir_name = os.path.basename(dir_name)
         
         # set up a result to use
         final_result = ParseResult(name)
