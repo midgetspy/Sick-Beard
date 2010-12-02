@@ -13,6 +13,28 @@ class NameParser(object):
         self.compiled_regexes = []
         self._compile_regexes()
 
+    def clean_series_name(self, series_name):
+        """Cleans up series name by removing any . and _
+        characters, along with any trailing hyphens.
+    
+        Is basically equivalent to replacing all _ and . with a
+        space, but handles decimal numbers in string, for example:
+    
+        >>> cleanRegexedSeriesName("an.example.1.0.test")
+        'an example 1.0 test'
+        >>> cleanRegexedSeriesName("an_example_1.0_test")
+        'an example 1.0 test'
+        
+        Stolen from dbr's tvnamer
+        """
+        
+        series_name = re.sub("(\D)\.(?!\s)(\D)", "\\1 \\2", series_name)
+        series_name = re.sub("(\D)\.(?!\s)", "\\1 ", series_name)
+        series_name = re.sub("\.(?!\s)(\D)", " \\1", series_name)
+        series_name = series_name.replace("_", " ")
+        series_name = re.sub("-$", "", series_name)
+        return series_name.strip()
+
     def _compile_regexes(self):
         for (cur_pattern_name, cur_pattern) in regexes.ep_regexes:
             try:
@@ -40,6 +62,8 @@ class NameParser(object):
             
             if 'series_name' in named_groups:
                 result.series_name = match.group('series_name')
+                if result.series_name:
+                    result.series_name = self.clean_series_name(result.series_name)
             
             if 'season_num' in named_groups:
                 result.season_number = int(match.group('season_num'))
@@ -161,6 +185,10 @@ class NameParser(object):
             if dir_name_result:
                 final_result.which_regex += dir_name_result.which_regex
 
+        # if there's no useful info in it then raise an exception
+        if final_result.season_number == None and not final_result.episode_numbers and not final_result.series_name:
+            raise InvalidNameException("Unable to parse "+name)
+
         # return it
         return final_result
 
@@ -213,11 +241,11 @@ class ParseResult(object):
         to_return = str(self.series_name) + ' - '
         if self.season_number != None:
             to_return += 'S'+str(self.season_number)
-        if len(self.episode_numbers):
+        if self.episode_numbers and len(self.episode_numbers):
             for e in self.episode_numbers:
                 to_return += 'E'+str(e)
 
-        if self.season_number == None and len(self.episode_numbers) == 0 and self.air_date:
+        if self.season_number == None and not self.episode_numbers and self.air_date:
             to_return += str(self.air_date)
 
         if self.extra_info:
