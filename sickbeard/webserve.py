@@ -35,7 +35,7 @@ import metadata.helpers
 
 from sickbeard import config
 from sickbeard import history, notifiers, processTV, search, providers
-from sickbeard import tv, versionChecker
+from sickbeard import tv, versionChecker, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 
@@ -58,28 +58,6 @@ import sickbeard
 from sickbeard import browser
 
 
-class Flash:
-    _messages = []
-    _errors = []
-
-    def message(self, title, detail=''):
-        Flash._messages.append((title, detail))
-
-    def error(self, title, detail=''):
-        Flash._errors.append((title, detail))
-
-    def messages(self):
-        tempMessages = Flash._messages
-        Flash._messages = []
-        return tempMessages
-
-    def errors(self):
-        tempErrors = Flash._errors
-        Flash._errors = []
-        return tempErrors
-
-flash = Flash()
-
 class PageTemplate (Template):
     def __init__(self, *args, **KWs):
         KWs['file'] = os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
@@ -99,7 +77,7 @@ class PageTemplate (Template):
             { 'title': 'Config',          'key': 'config'         },
             { 'title': logPageTitle,      'key': 'errorlogs'      },
         ]
-        self.flash = Flash()
+        self.flash = ui.Flash()
 
 def redirect(abspath, *args, **KWs):
     assert abspath[0] == '/'
@@ -123,7 +101,7 @@ def _munge(string):
 
 def _genericMessage(subject, message):
     t = PageTemplate(file="genericMessage.tmpl")
-    t.submenu = HomeMenu
+    t.submenu = HomeMenu()
     t.subject = subject
     t.message = message
     return _munge(t)
@@ -1066,13 +1044,14 @@ class Config:
 def haveXBMC():
     return sickbeard.XBMC_HOST != None and len(sickbeard.XBMC_HOST) > 0
 
-HomeMenu = [
+def HomeMenu():
+    return [
     { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
-    { 'title': 'Restart',                'path': 'home/restart/?pid='+str(os.getpid())      },
+    { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
-]
+    ]
 
 class HomePostProcess:
 
@@ -1080,7 +1059,7 @@ class HomePostProcess:
     def index(self):
 
         t = PageTemplate(file="home_postprocess.tmpl")
-        t.submenu = HomeMenu
+        t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1103,7 +1082,7 @@ class NewHomeAddShows:
     def index(self):
 
         t = PageTemplate(file="home_addShows.tmpl")
-        t.submenu = HomeMenu
+        t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1160,7 +1139,7 @@ class NewHomeAddShows:
 
         myTemplate = PageTemplate(file="home_addRootDir.tmpl")
         myTemplate.showDirs = [urllib.quote_plus(x.encode('utf-8')) for x in showDirs]
-        myTemplate.submenu = HomeMenu
+        myTemplate.submenu = HomeMenu()
         return _munge(myTemplate)
 
         url = "/home/addShows/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
@@ -1197,7 +1176,7 @@ class NewHomeAddShows:
             redirect("/home")
 
         t = PageTemplate(file="home_addShow.tmpl")
-        t.submenu = HomeMenu
+        t.submenu = HomeMenu()
 
         # make sure everything's unescaped
         showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
@@ -1330,7 +1309,7 @@ class Home:
     def index(self):
 
         t = PageTemplate(file="home.tmpl")
-        t.submenu = HomeMenu
+        t.submenu = HomeMenu()
         return _munge(t)
 
     addShows = NewHomeAddShows()
@@ -1381,7 +1360,7 @@ class Home:
     @cherrypy.expose
     def restart(self, pid=None):
 
-        if str(pid) != str(os.getpid()):
+        if str(pid) != str(sickbeard.PID):
             redirect("/home")
 
         # do a soft restart
@@ -1395,7 +1374,7 @@ class Home:
     @cherrypy.expose
     def update(self, pid=None):
 
-        if str(pid) != str(os.getpid()):
+        if str(pid) != str(sickbeard.PID):
             redirect("/home")
 
         updated = sickbeard.versionCheckScheduler.action.update()
@@ -1507,7 +1486,7 @@ class Home:
         if not location and not anyQualities and not bestQualities and not seasonfolders:
 
             t = PageTemplate(file="editShow.tmpl")
-            t.submenu = HomeMenu
+            t.submenu = HomeMenu()
             with showObj.lock:
                 t.show = showObj
 
