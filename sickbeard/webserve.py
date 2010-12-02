@@ -147,7 +147,7 @@ class ManageSearches:
         # force it to run the next time it looks
         sickbeard.backlogSearchScheduler.forceSearch()
         logger.log(u"Backlog search started in background")
-        flash.message('Backlog search started',
+        ui.flash.message('Backlog search started',
                       'The backlog search has begun and will run in the background')
         redirect("/manage/manageSearches")
 
@@ -158,7 +158,7 @@ class ManageSearches:
         result = sickbeard.currentSearchScheduler.forceRun()
         if result:
             logger.log(u"Search forced")
-            flash.message('Episode search started',
+            ui.flash.message('Episode search started',
                           'Note: RSS feeds may not be updated if they have been retrieved too recently')
 
         redirect("/manage/manageSearches")
@@ -303,7 +303,7 @@ class Manage:
                 errors.append('<b>%s:</b><br />\n<ul>' % showObj.name + '\n'.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
 
         if len(errors) > 0:
-            flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
+            ui.flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
                         "<br />\n".join(errors))
 
         redirect("/manage")
@@ -366,7 +366,7 @@ class Manage:
 
 
         if len(errors) > 0:
-            flash.error("Errors encountered",
+            ui.flash.error("Errors encountered",
                         '<br >\n'.join(errors))
 
         messageDetail = ""
@@ -387,7 +387,7 @@ class Manage:
             messageDetail += "</li>\n</ul>\n<br />"
 
         if len(updates+refreshes+renames) > 0:
-            flash.message("The following actions were queued:<br /><br />",
+            ui.flash.message("The following actions were queued:<br /><br />",
                           messageDetail)
 
         redirect("/manage")
@@ -418,7 +418,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
-        flash.message('History cleared')
+        ui.flash.message('History cleared')
         redirect("/history")
 
 
@@ -427,7 +427,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
-        flash.message('Removed all history entries greater than 30 days old')
+        ui.flash.message('Removed all history entries greater than 30 days old')
         redirect("/history")
 
 
@@ -590,10 +590,10 @@ class ConfigGeneral:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            flash.error('Error(s) Saving Configuration',
+            ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved')
 
         redirect("/config/general/")
 
@@ -772,10 +772,10 @@ class ConfigEpisodeDownloads:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            flash.error('Error(s) Saving Configuration',
+            ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved')
 
         redirect("/config/episodedownloads/")
 
@@ -945,10 +945,10 @@ class ConfigProviders:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            flash.error('Error(s) Saving Configuration',
+            ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved')
 
         redirect("/config/providers/")
 
@@ -1016,10 +1016,10 @@ class ConfigNotifications:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            flash.error('Error(s) Saving Configuration',
+            ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved')
 
         redirect("/config/notifications/")
 
@@ -1119,7 +1119,7 @@ class NewHomeAddShows:
 
         if not os.path.isdir(dir):
             logger.log(u"The provided directory "+dir+" doesn't exist", logger.ERROR)
-            flash.error("Unable to find the directory <tt>%s</tt>" % dir)
+            ui.flash.error("Unable to find the directory <tt>%s</tt>" % dir)
             redirect("/home/addShows")
 
         showDirs = []
@@ -1132,7 +1132,7 @@ class NewHomeAddShows:
 
         if len(showDirs) == 0:
             logger.log(u"The provided directory "+dir+" has no shows in it", logger.ERROR)
-            flash.error("The provided root folder <tt>%s</tt> has no shows in it." % dir)
+            ui.flash.error("The provided root folder <tt>%s</tt> has no shows in it." % dir)
             redirect("/home/addShows")
 
         #result = ui.addShowsFromRootDir(dir)
@@ -1158,7 +1158,7 @@ class NewHomeAddShows:
 
         # if we got a TVDB ID then make a show out of it
         sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd)
-        flash.message('Show added', 'Adding the specified show into '+showToAdd)
+        ui.flash.message('Show added', 'Adding the specified show into '+showToAdd)
         # no need to display anything now that we added the show, so continue on to the next show
         return self.addShows(showDirs)
 
@@ -1187,7 +1187,7 @@ class NewHomeAddShows:
 
         # if the dir we're given doesn't exist and we can't create it then skip it
         if not helpers.makeDir(showToAdd):
-            flash.error("Warning", "Unable to create dir "+showToAdd+", skipping")
+            ui.flash.error("Warning", "Unable to create dir "+showToAdd+", skipping")
             # recursively continue on our way, encoding the input as though we came from the web form
             return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
 
@@ -1199,18 +1199,18 @@ class NewHomeAddShows:
             except exceptions.NoNFOException, e:
                 # we couldn't get a tvdb id from the file so let them know and just print the search page
                 if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo.old")):
-                    flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo, renamed it to tvshow.nfo.old and ignoring it')
+                    ui.flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo, renamed it to tvshow.nfo.old and ignoring it')
 
                 # no tvshow.nfo.old means we couldn't rename it and we can't continue adding this show
                 # encode the input as though we came from the web form
                 else:
-                    flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo and unable to rename it - you will need to remove it manually')
+                    ui.flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo and unable to rename it - you will need to remove it manually')
                     return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
 
             # if we got a TVDB ID then make a show out of it
             if tvdb_id:
                 sickbeard.showQueueScheduler.action.addShow(tvdb_id, showToAdd)
-                flash.message('Show added', 'Auto-added show from tvshow.nfo in '+showToAdd)
+                ui.flash.message('Show added', 'Auto-added show from tvshow.nfo in '+showToAdd)
                 # no need to display anything now that we added the show, so continue on to the next show
                 return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
 
@@ -1414,19 +1414,19 @@ class Home:
             t.showLoc = (showObj._location, False)
 
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
-            flash.message('This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.')
+            ui.flash.message('This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.')
 
         elif sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
-            flash.message('The information below is in the process of being updated.')
+            ui.flash.message('The information below is in the process of being updated.')
 
         elif sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
-            flash.message('The episodes below are currently being refreshed from disk')
+            ui.flash.message('The episodes below are currently being refreshed from disk')
 
         elif sickbeard.showQueueScheduler.action.isInRefreshQueue(showObj):
-            flash.message('This show is queued to be refreshed.')
+            ui.flash.message('This show is queued to be refreshed.')
 
         elif sickbeard.showQueueScheduler.action.isInUpdateQueue(showObj):
-            flash.message('This show is queued and awaiting an update.')
+            ui.flash.message('This show is queued and awaiting an update.')
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
@@ -1554,7 +1554,7 @@ class Home:
             return errors
 
         if len(errors) > 0:
-            flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
+            ui.flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
                         '<ul>' + '\n'.join(['<li>%s</li>' % error for error in errors]) + "</ul>")
 
         redirect("/home/displayShow?show=" + show)
@@ -1576,7 +1576,7 @@ class Home:
 
         showObj.deleteShow()
 
-        flash.message('<b>%s</b> has been deleted' % showObj.name)
+        ui.flash.message('<b>%s</b> has been deleted' % showObj.name)
         redirect("/home")
 
     @cherrypy.expose
@@ -1594,7 +1594,7 @@ class Home:
         try:
             sickbeard.showQueueScheduler.action.refreshShow(showObj)
         except exceptions.CantRefreshException, e:
-            flash.error("Unable to refresh this show.",
+            ui.flash.error("Unable to refresh this show.",
                         str(e))
 
         time.sleep(3)
@@ -1616,7 +1616,7 @@ class Home:
         try:
             sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force))
         except exceptions.CantUpdateException, e:
-            flash.error("Unable to update this show.",
+            ui.flash.error("Unable to update this show.",
                         str(e))
 
         # just give it some time
@@ -1630,9 +1630,9 @@ class Home:
 
         for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
             if xbmc.updateLibrary(curHost, showName=showName):
-                flash.message("Command sent to XBMC host " + curHost + " to update library")
+                ui.flash.message("Command sent to XBMC host " + curHost + " to update library")
             else:
-                flash.error("Unable to contact XBMC host " + curHost)
+                ui.flash.error("Unable to contact XBMC host " + curHost)
         redirect('/home')
 
 
@@ -1660,7 +1660,7 @@ class Home:
         if show == None or eps == None or status == None:
             errMsg = "You must specify a show and at least one episode"
             if direct:
-                flash.error('Error', errMsg)
+                ui.flash.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -1668,7 +1668,7 @@ class Home:
         if not statusStrings.has_key(int(status)):
             errMsg = "Invalid status"
             if direct:
-                flash.error('Error', errMsg)
+                ui.flash.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -1678,7 +1678,7 @@ class Home:
         if showObj == None:
             errMsg = "Error", "Show not in show list"
             if direct:
-                flash.error('Error', errMsg)
+                ui.flash.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -1730,7 +1730,7 @@ class Home:
 
         if not foundEpisode:
             message = 'No downloads were found'
-            flash.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
+            ui.flash.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
             logger.log(message)
 
         else:
@@ -1740,9 +1740,9 @@ class Home:
             result = search.snatchEpisode(foundEpisode)
             providerModule = foundEpisode.provider
             if providerModule == None:
-                flash.error('Provider is configured incorrectly, unable to download')
+                ui.flash.error('Provider is configured incorrectly, unable to download')
             else:
-                flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
+                ui.flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
 
             #TODO: check if the download was successful
 
