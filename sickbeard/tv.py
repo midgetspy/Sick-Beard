@@ -1232,6 +1232,7 @@ class TVEpisode:
         if not sickbeard.metadata_generator:
             return False
 
+        logger.log(u"Metadata file is "+sickbeard.metadata_generator.get_episode_file_path(self), logger.DEBUG)
         if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_episode_file_path(self)):
             logger.log(u"Episode metadata file already exists, not writing a new one", logger.DEBUG)
             return False

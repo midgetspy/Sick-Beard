@@ -68,7 +68,7 @@ def sceneToNormalShowNames(name):
     results = [name]
     
     if '.and.' in name:
-        results.append(name.replace('.and.', '&'))
+        results.append(name.replace('.and.', '.&.'))
 
     return results
 

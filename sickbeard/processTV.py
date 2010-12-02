@@ -26,6 +26,7 @@ from shutil import Error
 
 from sickbeard import exceptions
 from sickbeard import notifiers
+from sickbeard import postProcessor
 from sickbeard import db, classes, helpers, sceneHelpers
 from sickbeard import history
 
@@ -190,45 +191,33 @@ def processDir (dirName, nzbName=None, recurse=False):
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
     # process any files in the dir
-    for movedFilePath in videoFiles:
+    for cur_video_file_path in videoFiles:
 
-        movedFilePath = ek.ek(os.path.join, dirName, movedFilePath)
+        cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file_path)
 
-        # if there's only one video file in the dir we can use the dirname to process too
-        if len(videoFiles) == 1:
-            returnStr += logHelper(u"Auto processing file: "+movedFilePath+u" ("+dirName+u")")
-            result = processFile(movedFilePath, dirName, nzbName)
+        processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
+        process_result = processor.process()
+        returnStr += processor.log 
 
-            # as long as the postprocessing was successful delete the old folder unless the config wants us not to
-            if type(result) == list:
-                returnStr += result[0]
+        # as long as the postprocessing was successful delete the old folder unless the config wants us not to
+        if process_result:
 
-                if not sickbeard.KEEP_PROCESSED_DIR and \
-                    ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR) and \
-                    len(remainingFolders) == 0:
+            returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
+            
+            if len(videoFiles) == 1 and not sickbeard.KEEP_PROCESSED_DIR and \
+                ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR) and \
+                len(remainingFolders) == 0:
 
-                    returnStr += logHelper(u"Deleting folder " + dirName, logger.DEBUG)
+                returnStr += logHelper(u"Deleting folder " + dirName, logger.DEBUG)
 
-                    try:
-                        shutil.rmtree(dirName)
-                    except (OSError, IOError), e:
-                        returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + str(e), logger.ERROR)
+                try:
+                    shutil.rmtree(dirName)
+                except (OSError, IOError), e:
+                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + str(e).decode('utf-8'), logger.ERROR)
 
-                returnStr += logHelper(u"Processing succeeded for "+movedFilePath)
-
-            else:
-                returnStr += result
-                returnStr += logHelper(u"Processing failed for "+movedFilePath)
 
         else:
-            returnStr += logHelper(u"Auto processing file: "+movedFilePath)
-            result = processFile(movedFilePath, dirName, nzbName, multi_file=True)
-            if type(result) == list:
-                returnStr += result[0]
-                returnStr += logHelper(u"Processing succeeded for "+movedFilePath)
-            else:
-                returnStr += result
-                returnStr += logHelper(u"Processing failed for "+movedFilePath)
+            returnStr += logHelper(u"Processing failed for "+cur_video_file_path)
 
     return returnStr
 
