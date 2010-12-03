@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.custom.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />	
     <script type="text/javascript" src="$sbRoot/js/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter.min.js"></script>
@@ -29,6 +30,7 @@
     $.Browser.defaults.url             = '$sbRoot/browser/';
     $.Browser.defaults.autocompleteURL = '$sbRoot/browser/complete';
     </script>
+	
 </head>
 <body>
 <div id="header">
@@ -71,13 +73,13 @@
 <div class="message ui-state-highlight ui-corner-all">
     <p><span class="ui-icon ui-icon-info"></span>$curMessage[0]</p>
     $curMessage[1]
-</div>
+</div><br />
 #end for
-<br />
+
+
 #for $curError in $flash.errors():
 <div class="message ui-state-error ui-corner-all">
     <p><span class="ui-icon ui-icon-alert"></span>$curError[0]</p>
     $curError[1]
-</div>
+</div><br />
 #end for
-<br />
