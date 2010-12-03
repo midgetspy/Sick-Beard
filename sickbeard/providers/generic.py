@@ -189,6 +189,18 @@ class GenericProvider:
 
             quality = self.getQuality(item)
 
+            # parse the file name
+            try:
+                myParser = NameParser(title)
+                parse_result = myParser.parse()
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                continue
+
+            if parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
+                logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
+                continue
+
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
                 continue
