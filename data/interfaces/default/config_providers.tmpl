@@ -189,7 +189,7 @@ sbRoot = '$sbRoot';
 
 					<fieldset class="component-group-list">
 						<div class="field-pair">
-							<label class="clearfix" for="edit_provider">
+							<label class="clearfix">
 								<span class="component-title" style="font-size: 16px;">Select Provider:</span>
 								<span class="component-desc">
 									<input type="hidden" name="newznab_string" id="newznab_string">
@@ -201,6 +201,12 @@ sbRoot = '$sbRoot';
 						</div>		
 
 <div class="newznabProviderDiv" id="addNewznab">
+						<div class="field-pair">
+							<label class="clearfix">
+								<span class="component-title">Provider Name:</span>
+								<input class="component-desc" type="text" id="newznab_name" size="40">
+							</label>			
+						</div>
 						<div class="field-pair">
 							<label class="clearfix">
 								<span class="component-title">Site URL:</span>
@@ -217,8 +223,12 @@ sbRoot = '$sbRoot';
 								<span class="component-desc">(leave blank if not required)</span>
 							</label>							
 						</div>							
-			<div id="newznab_add_div"><input type="button" class="newznab_save" id="newznab_add" value="Add"></div>
-			<div id="newznab_update_div" style="display: none;"><input type="button" class="newznab_delete" id="newznab_delete" value="Delete"></div> 					
+			<div id="newznab_add_div">
+				<input type="button" class="newznab_save" id="newznab_add" value="Add">
+			</div>
+			<div id="newznab_update_div" style="display: none;">
+				<input type="button" class="newznab_delete" id="newznab_delete" value="Delete">
+			</div> 	
 </div>
 						
 					</fieldset>					
