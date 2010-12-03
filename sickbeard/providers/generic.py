@@ -188,9 +188,21 @@ class GenericProvider:
             title = item.findtext('title')
             url = item.findtext('link').replace('&amp;','&')
 
+            # parse the file name
+            try:
+                myParser = FileParser(title)
+                epInfo = myParser.parse()
+            except tvnamer_exceptions.InvalidFilename:
+                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                continue
+
+            if epInfo.seasonnumber != episode.season or episode.episode not in epInfo.episodenumbers:
+                logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
+                continue
+
             quality = self.getQuality(item)
 
-            if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
+            if not episode.show.wantEpisode(epInfo.seasonnumber, epInfo.episodenumbers[0], quality, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
                 continue
 
