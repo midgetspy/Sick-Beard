@@ -86,7 +86,10 @@ class NameParser(object):
                     month = day
                     day = tmp_month
 
-                result.air_date = datetime.date(year, month, day)
+                try:
+                    result.air_date = datetime.date(year, month, day)
+                except ValueError, e:
+                    raise InvalidNameException(str(e))
 
             if 'extra_info' in named_groups:
                 result.extra_info = match.group('extra_info')
