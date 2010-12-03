@@ -123,6 +123,10 @@ class NewznabProvider(generic.NZBProvider):
 		logger.log(u"Search url: " + searchURL, logger.DEBUG)
 
 		data = self.getURL(searchURL)
+		
+		# hack this in until it's fixed server side
+		if not data.startswith('<?xml'):
+			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
 		if data == None:
 			return []
@@ -209,6 +213,10 @@ class NewznabCache(tvcache.TVCache):
 		logger.log(self.provider.name + " cache update URL: "+ url, logger.DEBUG)
 
 		data = self.provider.getURL(url)
+
+		# hack this in until it's fixed server side
+		if not data.startswith('<?xml'):
+			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
 		return data
 

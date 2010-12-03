@@ -65,6 +65,9 @@ def loadShowsFromDB():
 
 def main():
 
+	# use this pid for everything
+	sickbeard.PID = os.getpid()
+
 	# do some preliminary stuff
 	sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(sys.argv[0]))
 	sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)

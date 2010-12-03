@@ -43,6 +43,8 @@ from lib.configobj import ConfigObj
 
 SOCKET_TIMEOUT = 30
 
+PID = None
+
 CFG = None
 CONFIG_FILE = None
 
@@ -677,10 +679,10 @@ def saveAndShutdown(restart=False):
         elif install_type == 'win':
             if hasattr(sys, 'frozen'):
                 # c:\dir\to\updater.exe 12345 c:\dir\to\sickbeard.exe
-                popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(os.getpid()), sys.executable]
+                popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(sickbeard.PID), sys.executable]
             else:
                 logger.log(u"Unknown SB launch method, please file a bug report about this", logger.ERROR)
-                popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(os.getpid()), sys.executable, sickbeard.MY_FULLNAME ]
+                popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(sickbeard.PID), sys.executable, sickbeard.MY_FULLNAME ]
 
         if popen_list:
             popen_list += sickbeard.MY_ARGS

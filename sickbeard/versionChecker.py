@@ -77,7 +77,7 @@ class CheckVersion():
 
 class UpdateManager():
     def get_update_url(self):
-        return sickbeard.WEB_ROOT+"/home/update/?pid="+str(os.getpid())
+        return sickbeard.WEB_ROOT+"/home/update/?pid="+str(sickbeard.PID)
 
 class WindowsUpdateManager(UpdateManager):
 
