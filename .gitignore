@@ -5,3 +5,11 @@ config.ini
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
+dist/*
+build/*
+autoProcessTV/dist/*
+autoProcessTV/build/*
+SickBeard-win32-*.zip
+*.exe
+gc.ini
+CHANGELOG.txt
