@@ -312,7 +312,10 @@ class FileParser(object):
                         month = day
                         day = tmp_month
 
-                    episodenumbers = [datetime.date(int(match.group('year')), month, day)]
+                    try:
+                        episodenumbers = [datetime.date(int(match.group('year')), month, day)]
+                    except ValueError, e:
+                        raise InvalidFilename(str(e))
 
                 else:
                     raise ConfigValueError(
