@@ -929,6 +929,8 @@ class ConfigProviders:
                 sickbeard.WOMBLE = curEnabled
             elif curProvider == 'eztv_bt_chat':
                 sickbeard.USE_TORRENT = curEnabled
+            elif curProvider == 'ezrss':
+                sickbeard.USE_TORRENT = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:

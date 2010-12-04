@@ -5,3 +5,4 @@ config.ini
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
+*.bak
