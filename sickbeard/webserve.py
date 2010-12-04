@@ -1762,7 +1762,7 @@ class WebInterface:
         redirect("/home")
 
     @cherrypy.expose
-    def showPoster(self, show=None):
+    def showPoster(self, show=None, season=1):
 
         if show == None:
             return "Invalid show" #TODO: make it return a standard image
@@ -1772,7 +1772,7 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
 
-        posterFilename = os.path.abspath(sickbeard.metadata_generator.get_poster_path(showObj))
+        posterFilename = os.path.abspath(sickbeard.metadata_generator.get_season_thumb_path(showObj,season))
         if ek.ek(os.path.isfile, posterFilename):
             try:
                 from PIL import Image
