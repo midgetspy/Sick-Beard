@@ -5,9 +5,12 @@
 #config h4 { font-size:1em; color:#333; text-transform: uppercase; margin:0 0 .2em; }
 #config p, #config li { font-size:1.2em; line-height:1.3; }
 
+#config .path { font-size:1em; color:#333; font-family: Verdana;}
+
 #config-content { float:left; width:100%; padding:0 0 40px; clear: both; }
 
 #config-components { float: left; width: auto; }
+#config-components-border { float: left; width: auto; border-top: 1px solid #999999; padding: 5px 0;}
 
 #config .component-group { border-bottom: 1px dotted #666; padding: 15px 15px 25px; position: relative; }
 #config .component-group-desc { float: left; width: 230px; }
@@ -25,10 +28,9 @@
 #config label span.component-title { font-size: 1.2em; font-weight: bold; float: left; width: 140px; margin-right: 10px;}
 #config label span.component-desc { font-size: 1.1em;  }
 
-#config div.field-pair #editAProvider, 
-#config div.field-pair #editANewznabProvider { font-size: 1.2em; }
-#config div.field-pair #editAProvider option,
-#config div.field-pair #editANewznabProvider option { padding: 0 10px; line-height: 1.4; }
+#config div.field-pair select { font-size: 1.1em; }
+#config div.field-pair select option { padding: 0 10px; line-height: 1.4; }
+
 
 #config-settings { float: right; width: 200px; background: #fffae5; border-bottom: 1px dotted #666; border-top: 1px solid #999;padding: 20px 0 30px; margin-right: 20px; }
 #config-settings .config-settings-group { margin: 0 15px 15px; border-bottom: 1px dotted #999; padding-bottom: 15px; }
@@ -47,7 +49,6 @@
 #provider_order_list { list-style-type: none; margin: 0; padding: 0; width: 250px; }
 #provider_order_list li { margin: 0 5px 5px 5px; padding: 5px; font-size: 1.3em; height: 1.5em; font-family: Verdana; }
 html>body #provider_order_list li { height: 1.5em; line-height: 1.3em; }
-.ui-state-highlight { height: 1.5em; line-height: 1.3em; }
 #config div.providerDiv { padding-left: 40px; }
 .providerDiv { display: none; padding-left: 40px; }
 	
