@@ -56,9 +56,9 @@ class NewzbinDownloader(urllib.FancyURLopener):
             elif newzbinErrCode == 402:
                 raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
 
-            logger.log("Newzbin throttled our NZB downloading, pausing for " + result.group() + "seconds")
+            logger.log("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
 
-            time.sleep(int(result.group()))
+            time.sleep(int(result.group(1)))
 
             raise exceptions.NewzbinAPIThrottled()
 

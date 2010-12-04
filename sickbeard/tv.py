@@ -812,6 +812,7 @@ class TVShow(object):
         logger.log(u"any,best = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
 
         if quality not in anyQualities + bestQualities:
+            logger.log(u"I know for sure I don't want this episode, saying no", logger.DEBUG)
             return False
 
         myDB = db.DBConnection()
@@ -838,6 +839,8 @@ class TVShow(object):
             elif manualSearch:
                 logger.log(u"Usually I would ignore this ep but because you forced the search I'm overriding the default and allowing the quality", logger.DEBUG)
                 return True
+            else:
+                logger.log(u"This quality looks like something we might want but I don't know for sure yet", logger.DEBUG)
 
         curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 

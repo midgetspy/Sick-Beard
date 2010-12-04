@@ -12,7 +12,7 @@ from sickbeard.tv import TVShow
 from sickbeard import exceptions
 from sickbeard import helpers
 from sickbeard import logger
-from sickbeard import webserve
+from sickbeard import ui
 
 
 class ShowQueue:
@@ -234,15 +234,15 @@ class QueueItemAdd(QueueItem):
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to add show due to an error with TVDB: "+str(e).decode('utf-8'), logger.ERROR)
             if self.show:
-                webserve.flash.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
+                ui.flash.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
             else:
-                webserve.flash.error("Unable to add show due to an error with TVDB")
+                ui.flash.error("Unable to add show due to an error with TVDB")
             self._finishEarly()
             return
 
         except exceptions.MultipleShowObjectsException:
             logger.log(u"The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
-            webserve.flash.error("The show in " + self.showDir + " is already in your show list, skipping")
+            ui.flash.error("The show in " + self.showDir + " is already in your show list, skipping")
             self._finishEarly()
             return
 

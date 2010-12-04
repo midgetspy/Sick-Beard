@@ -65,6 +65,9 @@ def loadShowsFromDB():
 
 def main():
 
+	# use this pid for everything
+	sickbeard.PID = os.getpid()
+
 	# do some preliminary stuff
 	sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(sys.argv[0]))
 	sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
@@ -153,10 +156,10 @@ def main():
 		        'password':  sickbeard.WEB_PASSWORD,
 		})
 	except IOError:
-		logger.log(u"Unable to start web server, is something else running on port %d?" % sickbeard.WEB_PORT, logger.ERROR)
+		logger.log(u"Unable to start web server, is something else running on port %d?" % startPort, logger.ERROR)
 		if sickbeard.LAUNCH_BROWSER:
 			logger.log(u"Launching browser and exiting", logger.ERROR)
-			sickbeard.launchBrowser()
+			sickbeard.launchBrowser(startPort)
 		sys.exit()
 
 	# build from the DB to start with
@@ -172,7 +175,7 @@ def main():
 
 	# launch browser if we're supposed to
 	if sickbeard.LAUNCH_BROWSER:
-		sickbeard.launchBrowser()
+		sickbeard.launchBrowser(startPort)
 
 	# start an update if we're supposed to
 	if forceUpdate:

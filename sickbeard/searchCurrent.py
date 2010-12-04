@@ -38,14 +38,16 @@ class CurrentSearcher():
 
         self.amActive = True
 
-        # pause the backlog to prevent race conditions downloading 2 episodes
-        logger.log(u"Pausing backlog so it doesn't collide with episode search", logger.DEBUG)
-        sickbeard.backlogSearchScheduler.action.amPaused = True
-        while sickbeard.backlogSearchScheduler.action.am_running():
-            logger.log(u"Backlog isn't waiting yet, trying again in 1s", logger.DEBUG)
-            time.sleep(1)
+        backlogPaused = sickbeard.backlogSearchScheduler.action.amPaused
+        if not backlogPaused:
+            # pause the backlog to prevent race conditions downloading 2 episodes
+            logger.log(u"Pausing backlog so it doesn't collide with episode search", logger.DEBUG)
+            sickbeard.backlogSearchScheduler.action.amPaused = True
+            while sickbeard.backlogSearchScheduler.action.am_running():
+                logger.log(u"Backlog isn't waiting yet, trying again in 1s", logger.DEBUG)
+                time.sleep(1)
 
-        logger.log(u"Backlog has stopped, running search now", logger.DEBUG)
+        logger.log(u"Backlog is stopped, running search now", logger.DEBUG)
 
         self._changeMissingEpisodes()
 
@@ -71,8 +73,11 @@ class CurrentSearcher():
         sickbeard.updateAiringList()
         sickbeard.updateComingList()
 
-        logger.log(u"Search is done, resuming backlog", logger.DEBUG)
-        sickbeard.backlogSearchScheduler.action.amPaused = False
+        if not backlogPaused:
+            logger.log(u"Search is done, resuming backlog", logger.DEBUG)
+            sickbeard.backlogSearchScheduler.action.amPaused = False
+        else:
+            logger.log(u"Search is done, leaving backlog paused", logger.DEBUG)
 
         self.amActive = False
 

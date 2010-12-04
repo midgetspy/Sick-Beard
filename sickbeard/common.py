@@ -275,6 +275,7 @@ sceneExceptions = {72546: ['CSI'],
                    194751: ['Conan', 'Conan (2010)'],
                    164451: ['Carlos (2010)'],
                    70726: ['Babylon 5', 'Babylon5'],
+                   83714: ['Genius', 'Genius With Dave  Gormand'],
                    }
 
 countryList = {'Australia': 'AU',

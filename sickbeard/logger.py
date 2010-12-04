@@ -83,17 +83,20 @@ def log(toLog, logLevel=MESSAGE):
         outLine = message.encode('utf-8')
     
         sbLogger = logging.getLogger('sickbeard')
-    
-        if logLevel == DEBUG:
-            sbLogger.debug(outLine)
-        elif logLevel == MESSAGE:
-            sbLogger.info(outLine)
-        elif logLevel == WARNING:
-            sbLogger.warning(outLine)
-        elif logLevel == ERROR:
-            sbLogger.error(outLine)
-    
-            # add errors to the UI logger
-            classes.ErrorViewer.add(classes.UIError(message))
-        else:
-            sbLogger.log(logLevel, outLine)
+
+        try:
+            if logLevel == DEBUG:
+                sbLogger.debug(outLine)
+            elif logLevel == MESSAGE:
+                sbLogger.info(outLine)
+            elif logLevel == WARNING:
+                sbLogger.warning(outLine)
+            elif logLevel == ERROR:
+                sbLogger.error(outLine)
+        
+                # add errors to the UI logger
+                classes.ErrorViewer.add(classes.UIError(message))
+            else:
+                sbLogger.log(logLevel, outLine)
+        except ValueError, e:
+            pass
