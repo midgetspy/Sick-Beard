@@ -266,3 +266,9 @@ if "noup" not in oldArgs:
     print "Uploading zip to google code"
     googlecode_upload.upload(os.path.abspath(zipFilename+".zip"), "sickbeard", gc_username, gc_password, "Win32 alpha build "+str(currentBuildNumber)+" (unstable/development release)", ["Featured","Type-Executable","OpSys-Windows"])
  
+# tag commit as a new build and push changes to github
+print 'Tagging commit and pushing'
+p = subprocess.Popen('git tag -a "build-'+str(currentBuildNumber)+'" -m "Windows build '+zipFilename+'"', shell=True, cwd=compile_dir)
+o,e = p.communicate()
+p = subprocess.Popen('git push --tags origin windows_binaries', shell=True, cwd=compile_dir)
+o,e = p.communicate()
