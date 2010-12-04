@@ -43,6 +43,8 @@ from lib.configobj import ConfigObj
 
 SOCKET_TIMEOUT = 30
 
+PID = None
+
 CFG = None
 CONFIG_FILE = None
 
@@ -447,7 +449,7 @@ def initialize(consoleLogging=True):
 
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onsnatch', 0))
-        GROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Growl', 'growl_notify_ondownload', 0))        
+        GROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Growl', 'growl_notify_ondownload', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
 
@@ -686,10 +688,10 @@ def saveAndShutdown(restart=False):
         elif install_type == 'win':
             if hasattr(sys, 'frozen'):
                 # c:\dir\to\updater.exe 12345 c:\dir\to\sickbeard.exe
-                popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(os.getpid()), sys.executable]
+                popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(sickbeard.PID), sys.executable]
             else:
                 logger.log(u"Unknown SB launch method, please file a bug report about this", logger.ERROR)
-                popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(os.getpid()), sys.executable, sickbeard.MY_FULLNAME ]
+                popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(sickbeard.PID), sys.executable, sickbeard.MY_FULLNAME ]
 
         if popen_list:
             popen_list += sickbeard.MY_ARGS
@@ -819,16 +821,16 @@ def save_config():
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
 
     new_config['Growl'] = {}
-    new_config['Growl']['use_growl'] = int(USE_GROWL)    
+    new_config['Growl']['use_growl'] = int(USE_GROWL)
     new_config['Growl']['growl_notify_onsnatch'] = int(GROWL_NOTIFY_ONSNATCH)
-    new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD)    
+    new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD) 
     new_config['Growl']['growl_host'] = GROWL_HOST
     new_config['Growl']['growl_password'] = GROWL_PASSWORD
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
     new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)
-    new_config['Twitter']['twitter_notify_ondownload'] = int(TWITTER_NOTIFY_ONDOWNLOAD)        
+    new_config['Twitter']['twitter_notify_ondownload'] = int(TWITTER_NOTIFY_ONDOWNLOAD)
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
