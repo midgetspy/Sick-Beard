@@ -121,9 +121,9 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
     <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
-$epLoc[len($show._location)+1:]
+<a href="$epLoc">$epLoc[len($show._location)+1:]</a>
 #elif $epLoc and (not $epLoc.lower().startswith($show._location.lower()) or not $show._location):
-$epLoc
+<a href="$epLoc">$epLoc</a>
 #end if
 
     </td>
