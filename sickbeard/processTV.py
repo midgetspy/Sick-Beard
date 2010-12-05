@@ -520,23 +520,9 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
     # see if the existing file is bigger - if it is, bail (unless it's a proper or better quality in which case we're forcing an overwrite)
     if existingResult > 0:
         if rootEp.status in Quality.SNATCHED_PROPER:
-            returnStr += logHelper(u"There is already a file that's bigger at "+renamedFilePath+u" but I'm going to overwrite it with a PROPER", logger.DEBUG)
-        elif oldStatus != None:
-            returnStr += logHelper(u"There is already a file that's bigger at "+renamedFilePath+u" but I'm going to overwrite it because this one seems to have been downloaded on purpose", logger.DEBUG)
+            returnStr += logHelper(u"There is already a file that's the same size or bigger at "+renamedFilePath+u" but I'm going to overwrite it with a PROPER", logger.DEBUG)
         else:
-            returnStr += logHelper(u"There is already a file that's bigger at "+renamedFilePath+u" - not processing this episode.", logger.DEBUG)
-
-            # tag the dir so we know what happened
-            if downloadDir:
-                try:
-                    oldDirName = ek.ek(os.path.abspath, downloadDir)
-                    baseDirPath = ek.ek(os.path.dirname, oldDirName)
-                    endDirPath = ek.ek(os.path.basename, oldDirName)
-                    newDirPath = ek.ek(os.path.join, baseDirPath, '_UNDERSIZED_'+endDirPath)
-                    returnStr += logHelper(u"Renaming the parent folder to indicate that the post process was failed: "+downloadDir+u" -> "+newDirPath, logger.DEBUG)
-                    os.rename(oldDirName, newDirPath)
-                except (OSError, IOError), e:
-                    returnStr += logHelper(u"Failed renaming " + oldDirName + " to " + newDirPath + ": " + str(e), logger.ERROR)
+            returnStr += logHelper(u"There is already a file that's the same size or bigger at "+renamedFilePath+u" - not processing this episode.", logger.DEBUG)
 
             return returnStr
 
@@ -579,7 +565,7 @@ def processFile(fileName, downloadDir=None, nzbName=None, multi_file=False):
             returnStr += logHelper(existingFile + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
 
     elif ek.ek(os.path.isfile, renamedFilePath):
-        returnStr += logHelper(renamedFilePath + " already exists but it's smaller or the same size as the new file so I'm replacing it", logger.DEBUG)
+        returnStr += logHelper(renamedFilePath + " already exists but it's smaller than the new file so I'm replacing it", logger.DEBUG)
         existingFile = renamedFilePath
 
     if existingFile and ek.ek(os.path.normpath, movedFilePath) != ek.ek(os.path.normpath, existingFile):
