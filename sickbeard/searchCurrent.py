@@ -68,7 +68,6 @@ class CurrentSearcher():
                     search.snatchEpisode(curResult)
                     time.sleep(2)
 
-
         # update our lists to reflect any changes we just made
         sickbeard.updateAiringList()
         sickbeard.updateComingList()

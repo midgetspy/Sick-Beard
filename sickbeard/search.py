@@ -88,7 +88,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
 		dlResult = False
 
 	if dlResult == False:
-		return
+		return False
 
 	history.logSnatch(result)
 
@@ -104,6 +104,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
+	
+	return True
 
 def searchForNeededEpisodes():
 
