@@ -30,6 +30,13 @@ Not in progress (<a href="$sbRoot/manage/manageSearches/forceSearch">force</a>)<
 In Progress
 #end if
 <br />
+<b>Version Check:</b><br />
+#if not $versionStatus:
+Not in progress (<a href="$sbRoot/manage/manageSearches/forceVersionCheck">force</a>)<br />
+#else:
+In Progress
+#end if
+<br />
 <br />
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
