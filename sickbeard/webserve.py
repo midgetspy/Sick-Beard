@@ -178,7 +178,7 @@ class ManageSearches:
     def forceVersionCheck(self):
 
         # force a check to see if there is a new version
-        result = sickbeard.versionCheckScheduler.check_for_new_version()
+        result = sickbeard.versionCheckScheduler.action.check_for_new_version()
         if result:
             logger.log(u"Check forced")
 
