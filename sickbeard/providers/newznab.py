@@ -97,7 +97,11 @@ class NewznabProvider(generic.NZBProvider):
 			return params
 		
 		# search directly by tvrage id
-		params['rid'] = ep_obj.show.tvrid
+		if ep_obj.show.tvrid:
+			params['rid'] = ep_obj.show.tvrid
+		# if we can't then fall back on a very basic name search
+		else:
+			params['q'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name)
 
 		if ep_obj.show.is_air_by_date:
 			date_str = str(ep_obj.airdate)
