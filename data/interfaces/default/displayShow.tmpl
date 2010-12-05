@@ -85,6 +85,12 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
 <br />
 </div>
 
+Jump To:
+#for $seasonNum in $seasonResults:
+    <a href="#season-$seasonNum["season"]">
+    #if int($seasonNum["season"]) == 0 then "Specials</a>" else "Season "+str($seasonNum["season"])+"</a> |"
+#end for
+
 <table class="sickbeardTable">
     
 #for $epResult in $sqlResults:

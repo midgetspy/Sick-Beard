@@ -1400,6 +1400,11 @@ class Home:
 
         myDB = db.DBConnection()
 
+        seasonResults = myDB.select(
+            "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season desc",
+            [showObj.tvdbid]
+        )
+
         sqlResults = myDB.select(
             "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC",
             [showObj.tvdbid]
@@ -1438,6 +1443,7 @@ class Home:
 
         t.show = showObj
         t.sqlResults = sqlResults
+        t.seasonResults = seasonResults
 
         epCounts = {}
         epCats = {}
