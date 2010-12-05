@@ -1739,7 +1739,9 @@ class Home:
             logger.log(u"Downloading episode from " + foundEpisode.url)
             result = search.snatchEpisode(foundEpisode)
             providerModule = foundEpisode.provider
-            if providerModule == None:
+            if not result:
+                ui.flash.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')
+            elif providerModule == None:
                 ui.flash.error('Provider is configured incorrectly, unable to download')
             else:
                 ui.flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))

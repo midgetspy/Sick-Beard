@@ -116,7 +116,7 @@ class GenericProvider:
 
         return result
 
-    def downloadResult (self, result):
+    def downloadResult(self, result):
 
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
 
@@ -138,9 +138,13 @@ class GenericProvider:
 
         logger.log(u"Saving to " + fileName, logger.DEBUG)
 
-        fileOut = open(fileName, writeMode)
-        fileOut.write(data)
-        fileOut.close()
+        try:
+            fileOut = open(fileName, writeMode)
+            fileOut.write(data)
+            fileOut.close()
+        except IOError, e:
+            logger.log("Unable to save the NZB: "+str(e).decode('utf-8'), logger.ERROR)
+            return False
 
         return True
 
