@@ -92,13 +92,27 @@ LAUNCH_BROWSER = None
 CACHE_DIR = None
 
 METADATA_TYPE = None
-METADATA_SHOW = None
-METADATA_EPISODE = None
 
-ART_POSTER = None
-ART_FANART = None
-ART_THUMBNAILS = None
-ART_SEASON_THUMBNAILS = None
+MB_METADATA_SHOW = None
+MB_METADATA_EPISODE = None
+MB_ART_POSTER = None
+MB_ART_FANART = None
+MB_ART_THUMBNAILS = None
+MB_ART_SEASON_THUMBNAILS = None
+
+PS3_METADATA_SHOW = None
+PS3_METADATA_EPISODE = None
+PS3_ART_POSTER = None
+PS3_ART_FANART = None
+PS3_ART_THUMBNAILS = None
+PS3_ART_SEASON_THUMBNAILS = None
+
+XBMC_METADATA_SHOW = None
+XBMC_METADATA_EPISODE = None
+XBMC_ART_POSTER = None
+XBMC_ART_FANART = None
+XBMC_ART_THUMBNAILS = None
+XBMC_ART_SEASON_THUMBNAILS = None
 
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_FORMAT = None
@@ -308,8 +322,10 @@ def initialize(consoleLogging=True):
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
-                ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
+                METADATA_TYPE, metadata_generator, \
+                MB_METADATA_SHOW, MB_METADATA_EPISODE, MB_ART_POSTER, MB_ART_FANART, MB_ART_THUMBNAILS, MB_ART_SEASON_THUMBNAILS, \
+                PS3_METADATA_SHOW, PS3_METADATA_EPISODE, PS3_ART_POSTER, PS3_ART_FANART, PS3_ART_THUMBNAILS, PS3_ART_SEASON_THUMBNAILS, \
+                XBMC_METADATA_SHOW, XBMC_METADATA_EPISODE, XBMC_ART_POSTER, XBMC_ART_FANART, XBMC_ART_THUMBNAILS, XBMC_ART_SEASON_THUMBNAILS, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH
 
 
@@ -465,28 +481,52 @@ def initialize(consoleLogging=True):
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
         METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', 'xbmc')
-        METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
-        METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
 
-        ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
-        ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
-        ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
-        ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
+        MB_METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'mb_metadata_show', 1))
+        MB_METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'mb_metadata_episode', 1))
+        MB_ART_POSTER = bool(check_setting_int(CFG, 'General', 'mb_art_poster', 1))
+        MB_ART_FANART = bool(check_setting_int(CFG, 'General', 'mb_art_fanart', 1))
+        MB_ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'mb_art_thumbnails', 1))
+        MB_ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'mb_art_season_thumbnails', 1))
 
+        PS3_METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'ps3_metadata_show', 1))
+        PS3_METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'ps3_metadata_episode', 1))
+        PS3_ART_POSTER = bool(check_setting_int(CFG, 'General', 'ps3_art_poster', 1))
+        PS3_ART_FANART = bool(check_setting_int(CFG, 'General', 'ps3_art_fanart', 1))
+        PS3_ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'ps3_art_thumbnails', 1))
+        PS3_ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'ps3_art_season_thumbnails', 1))
+
+        XBMC_METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'xbmc_metadata_show', 1))
+        XBMC_METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'xbmc_metadata_episode', 1))
+        XBMC_ART_POSTER = bool(check_setting_int(CFG, 'General', 'xbmc_art_poster', 1))
+        XBMC_ART_FANART = bool(check_setting_int(CFG, 'General', 'xbmc_art_fanart', 1))
+        XBMC_ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'xbmc_art_thumbnails', 1))
+        XBMC_ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'xbmc_art_season_thumbnails', 1))
+        
         # try setting defaults if possible
         try:
             TEMP_CREATE_METADATA = bool(int(CFG['General']['create_metadata']))
             METADATA_SHOW = TEMP_CREATE_METADATA
-            METADATA_EPISODE = TEMP_CREATE_METADATA
+            MB_METADATA_EPISODE = TEMP_CREATE_METADATA
+            PS3_METADATA_EPISODE = TEMP_CREATE_METADATA
+            XBMC_METADATA_EPISODE = TEMP_CREATE_METADATA
         except:
             pass
         
         try:
             TEMP_CREATE_IMAGES = bool(int(CFG['General']['create_images']))
-            ART_POSTER = TEMP_CREATE_IMAGES 
-            ART_FANART = TEMP_CREATE_IMAGES
-            ART_THUMBNAILS = TEMP_CREATE_IMAGES
-            ART_SEASON_THUMBNAILS = TEMP_CREATE_IMAGES
+            MB_ART_POSTER = TEMP_CREATE_IMAGES 
+            MB_ART_FANART = TEMP_CREATE_IMAGES
+            MB_ART_THUMBNAILS = TEMP_CREATE_IMAGES
+            MB_ART_SEASON_THUMBNAILS = TEMP_CREATE_IMAGES
+            PS3_ART_POSTER = TEMP_CREATE_IMAGES 
+            PS3_ART_FANART = TEMP_CREATE_IMAGES
+            PS3_ART_THUMBNAILS = TEMP_CREATE_IMAGES
+            PS3_ART_SEASON_THUMBNAILS = TEMP_CREATE_IMAGES
+            XBMC_ART_POSTER = TEMP_CREATE_IMAGES 
+            XBMC_ART_FANART = TEMP_CREATE_IMAGES
+            XBMC_ART_THUMBNAILS = TEMP_CREATE_IMAGES
+            XBMC_ART_SEASON_THUMBNAILS = TEMP_CREATE_IMAGES
         except:
             pass
 
@@ -752,12 +792,29 @@ def save_config():
     new_config['General']['use_torrent'] = int(USE_TORRENT)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
     new_config['General']['metadata_type'] = METADATA_TYPE
-    new_config['General']['metadata_show'] = int(METADATA_SHOW)
-    new_config['General']['metadata_episode'] = int(METADATA_EPISODE)
-    new_config['General']['art_poster'] = int(ART_POSTER)
-    new_config['General']['art_fanart'] = int(ART_FANART)
-    new_config['General']['art_thumbnails'] = int(ART_THUMBNAILS)
-    new_config['General']['art_season_thumbnails'] = int(ART_SEASON_THUMBNAILS)
+    
+    new_config['General']['mb_metadata_show'] = int(MB_METADATA_SHOW)
+    new_config['General']['mb_metadata_episode'] = int(MB_METADATA_EPISODE)
+    new_config['General']['mb_art_poster'] = int(MB_ART_POSTER)
+    new_config['General']['mb_art_fanart'] = int(MB_ART_FANART)
+    new_config['General']['mb_art_thumbnails'] = int(MB_ART_THUMBNAILS)
+    new_config['General']['mb_art_season_thumbnails'] = int(MB_ART_SEASON_THUMBNAILS)
+
+    new_config['General']['ps3_metadata_show'] = int(PS3_METADATA_SHOW)
+    new_config['General']['ps3_metadata_episode'] = int(PS3_METADATA_EPISODE)
+    new_config['General']['ps3_art_poster'] = int(PS3_ART_POSTER)
+    new_config['General']['ps3_art_fanart'] = int(PS3_ART_FANART)
+    new_config['General']['ps3_art_thumbnails'] = int(PS3_ART_THUMBNAILS)
+    new_config['General']['ps3_art_season_thumbnails'] = int(PS3_ART_SEASON_THUMBNAILS)
+
+    new_config['General']['xbmc_metadata_show'] = int(XBMC_METADATA_SHOW)
+    new_config['General']['xbmc_metadata_episode'] = int(XBMC_METADATA_EPISODE)
+    new_config['General']['xbmc_art_poster'] = int(XBMC_ART_POSTER)
+    new_config['General']['xbmc_art_fanart'] = int(XBMC_ART_FANART)
+    new_config['General']['xbmc_art_thumbnails'] = int(XBMC_ART_THUMBNAILS)
+    new_config['General']['xbmc_art_season_thumbnails'] = int(XBMC_ART_SEASON_THUMBNAILS)
+
+    
     new_config['General']['cache_dir'] = CACHE_DIR if CACHE_DIR else 'cache'
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)

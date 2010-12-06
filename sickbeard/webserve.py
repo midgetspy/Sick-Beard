@@ -464,8 +464,10 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    metadata_type=None, metadata_show=None, metadata_episode=None,
-                    art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None):
+                    mb_metadata_show=None, mb_metadata_episode=None, mb_art_poster=None, mb_art_fanart=None, mb_art_thumbnails=None, mb_art_season_thumbnails=None,
+                    ps3_metadata_show=None, ps3_metadata_episode=None, ps3_art_poster=None, ps3_art_fanart=None, ps3_art_thumbnails=None, ps3_art_season_thumbnails=None,
+                    xbmc_metadata_show=None, xbmc_metadata_episode=None, xbmc_art_poster=None, xbmc_art_fanart=None, xbmc_art_thumbnails=None, xbmc_art_season_thumbnails=None,
+                    metadata_type=None ):
 
         results = []
 
@@ -484,35 +486,95 @@ class ConfigGeneral:
         else:
             launch_browser = 0
 
-        if metadata_show == "on":
-            metadata_show = 1
+        if mb_metadata_show == "on":
+            mb_metadata_show = 1
         else:
-            metadata_show = 0
+            mb_metadata_show = 0
 
-        if metadata_episode == "on":
-            metadata_episode = 1
+        if mb_metadata_episode == "on":
+            mb_metadata_episode = 1
         else:
-            metadata_episode = 0
+            mb_metadata_episode = 0
 
-        if art_poster == "on":
-            art_poster = 1
+        if mb_art_poster == "on":
+            mb_art_poster = 1
         else:
-            art_poster = 0
+            mb_art_poster = 0
 
-        if art_fanart == "on":
-            art_fanart = 1
+        if mb_art_fanart == "on":
+            mb_art_fanart = 1
         else:
-            art_fanart = 0
+            mb_art_fanart = 0
 
-        if art_thumbnails == "on":
-            art_thumbnails = 1
+        if mb_art_thumbnails == "on":
+            mb_art_thumbnails = 1
         else:
-            art_thumbnails = 0
+            mb_art_thumbnails = 0
 
-        if art_season_thumbnails == "on":
-            art_season_thumbnails = 1
+        if mb_art_season_thumbnails == "on":
+            mb_art_season_thumbnails = 1
         else:
-            art_season_thumbnails = 0
+            mb_art_season_thumbnails = 0
+
+        if ps3_metadata_show == "on":
+            ps3_metadata_show = 1
+        else:
+            ps3_metadata_show = 0
+
+        if ps3_metadata_episode == "on":
+            ps3_metadata_episode = 1
+        else:
+            ps3_metadata_episode = 0
+
+        if ps3_art_poster == "on":
+            ps3_art_poster = 1
+        else:
+            ps3_art_poster = 0
+
+        if ps3_art_fanart == "on":
+            ps3_art_fanart = 1
+        else:
+            ps3_art_fanart = 0
+
+        if ps3_art_thumbnails == "on":
+            ps3_art_thumbnails = 1
+        else:
+            ps3_art_thumbnails = 0
+
+        if ps3_art_season_thumbnails == "on":
+            ps3_art_season_thumbnails = 1
+        else:
+            ps3_art_season_thumbnails = 0
+            
+        if xbmc_metadata_show == "on":
+            xbmc_metadata_show = 1
+        else:
+            xbmc_metadata_show = 0
+
+        if xbmc_metadata_episode == "on":
+            xbmc_metadata_episode = 1
+        else:
+            xbmc_metadata_episode = 0
+
+        if xbmc_art_poster == "on":
+            xbmc_art_poster = 1
+        else:
+            xbmc_art_poster = 0
+
+        if xbmc_art_fanart == "on":
+            xbmc_art_fanart = 1
+        else:
+            xbmc_art_fanart = 0
+
+        if xbmc_art_thumbnails == "on":
+            xbmc_art_thumbnails = 1
+        else:
+            xbmc_art_thumbnails = 0
+
+        if xbmc_art_season_thumbnails == "on":
+            xbmc_art_season_thumbnails = 1
+        else:
+            xbmc_art_season_thumbnails = 0
 
         if season_folders_default == "on":
             season_folders_default = 1
@@ -563,16 +625,30 @@ class ConfigGeneral:
         sickbeard.LAUNCH_BROWSER = launch_browser
 
         sickbeard.METADATA_TYPE = metadata_type
-        sickbeard.METADATA_SHOW = metadata_show
-        sickbeard.METADATA_EPISODE = metadata_episode
 
         sickbeard.metadata_generator = metadata.getMetadataClass(sickbeard.METADATA_TYPE)
 
-        sickbeard.ART_POSTER = art_poster
-        sickbeard.ART_FANART = art_fanart
-        sickbeard.ART_THUMBNAILS = art_thumbnails
-        sickbeard.ART_SEASON_THUMBNAILS = art_season_thumbnails
+        sickbeard.MB_METADATA_SHOW = mb_metadata_show
+        sickbeard.MB_METADATA_EPISODE = mb_metadata_episode        
+        sickbeard.MB_ART_POSTER = mb_art_poster
+        sickbeard.MB_ART_FANART = mb_art_fanart
+        sickbeard.MB_ART_THUMBNAILS = mb_art_thumbnails
+        sickbeard.MB_ART_SEASON_THUMBNAILS = mb_art_season_thumbnails
 
+        sickbeard.PS3_METADATA_SHOW = ps3_metadata_show
+        sickbeard.PS3_METADATA_EPISODE = ps3_metadata_episode        
+        sickbeard.PS3_ART_POSTER = ps3_art_poster
+        sickbeard.PS3_ART_FANART = ps3_art_fanart
+        sickbeard.PS3_ART_THUMBNAILS = ps3_art_thumbnails
+        sickbeard.PS3_ART_SEASON_THUMBNAILS = ps3_art_season_thumbnails
+
+        sickbeard.XBMC_METADATA_SHOW = xbmc_metadata_show
+        sickbeard.XBMC_METADATA_EPISODE = xbmc_metadata_episode        
+        sickbeard.XBMC_ART_POSTER = xbmc_art_poster
+        sickbeard.XBMC_ART_FANART = xbmc_art_fanart
+        sickbeard.XBMC_ART_THUMBNAILS = xbmc_art_thumbnails
+        sickbeard.XBMC_ART_SEASON_THUMBNAILS = xbmc_art_season_thumbnails
+        
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = newQuality
