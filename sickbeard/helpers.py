@@ -376,6 +376,22 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
+def rename_file(old_path, new_name):
+
+    old_path_list = ek.ek(os.path.split, old_path)
+    old_file_ext = ek.ek(os.path.splitext, old_path_list[1])[1]
+
+    new_path = ek.ek(os.path.join, old_path_list[0], sanitizeFileName(new_name) + old_file_ext)
+
+    logger.log(u"Renaming from " + old_path + " to " + new_path)
+
+    try:
+        ek.ek(os.rename, old_path, new_path)
+    except (OSError, IOError), e:
+        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + str(e), logger.ERROR)
+        return False
+
+    return new_path
 
 if __name__ == '__main__':
     import doctest
