@@ -174,6 +174,7 @@ class NameParser(object):
         final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
         final_result.episode_numbers = self._combine_results(file_name_result, dir_name_result, 'episode_numbers')
         final_result.extra_info = self._combine_results(file_name_result, dir_name_result, 'extra_info')
+        final_result.air_date = self._combine_results(file_name_result, dir_name_result, 'air_date')
         
         # if the dirname has a release group I believe it over the filename
         final_result.release_group = self._combine_results(dir_name_result, file_name_result, 'release_group')
@@ -218,10 +219,10 @@ class ParseResult(object):
         self.extra_info = extra_info
         self.release_group = release_group
         
-        self.air_date = None
+        self.air_date = air_date
         
         self.which_regex = None
-    
+        
     def __eq__(self, other):
         if not other:
             return False
@@ -249,7 +250,7 @@ class ParseResult(object):
             for e in self.episode_numbers:
                 to_return += 'E'+str(e)
 
-        if self.season_number == None and not self.episode_numbers and self.air_date:
+        if self.air_by_date:
             to_return += str(self.air_date)
 
         if self.extra_info:
@@ -260,7 +261,9 @@ class ParseResult(object):
         return to_return 
 
     def _is_air_by_date(self):
-        return self.season_number == None and len(self.episode_numbers) == 0 and self.air_date
+        if self.season_number == None and len(self.episode_numbers) == 0 and self.air_date:
+            return True
+        return False
     air_by_date = property(_is_air_by_date)
 
 class InvalidNameException(Exception):

@@ -6,8 +6,7 @@ sys.path.append(os.path.abspath('..'))
 
 from sickbeard.name_parser import parser
 
-DEBUG = False
-VERBOSE = False
+DEBUG = VERBOSE = False
 
 simple_test_cases = {
               'standard': {
@@ -69,7 +68,7 @@ simple_test_cases = {
               'scene_date_format': {
               'Show.Name.2010.11.23.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [], 'Source.Quality.Etc', 'Group', datetime.date(2010,11,23)),
               'Show.Name.2010.23.11.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [], 'Source.Quality.Etc', 'Group', datetime.date(2010,11,23)),
-              'Show Name - 2010-11-23 - Ep Name': parser.ParseResult(None, 'Show Name', extra_info = 'Ep Name', air_date = datetime.date(2010,11,26)),
+              'Show Name - 2010-11-23 - Ep Name': parser.ParseResult(None, 'Show Name', extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
                }
               }
 
@@ -111,9 +110,9 @@ class ComboTests(unittest.TestCase):
 
 class BasicTests(unittest.TestCase):
 
-    def _test_names(self, np, section, transform=None):
+    def _test_names(self, np, section, transform=None, verbose=False):
 
-        if VERBOSE:
+        if VERBOSE or verbose:
             print
             print 'Running', section, 'tests'
         for cur_test_base in simple_test_cases[section]:
@@ -121,14 +120,16 @@ class BasicTests(unittest.TestCase):
                 cur_test = transform(cur_test_base)
             else:
                 cur_test = cur_test_base
-            if VERBOSE:
+            if VERBOSE or verbose:
                 print 'Testing', cur_test
             test_result = np.parse(cur_test)
-            if DEBUG:
+            result = simple_test_cases[section][cur_test_base]
+            if DEBUG or verbose:
+                print 'air_by_date:', test_result.air_by_date, 'air_date:', test_result.air_date
                 print test_result
-                print simple_test_cases[section][cur_test_base]
+                print result
             self.assertEqual(test_result.which_regex, [section])
-            self.assertEqual(test_result, simple_test_cases[section][cur_test_base])
+            self.assertEqual(test_result, result)
 
     def test_standard_names(self):
         np = parser.NameParser(False)
@@ -162,6 +163,10 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser(False)
         self._test_names(np, 'season_only')
 
+    def test_scene_date_format_names(self):
+        np = parser.NameParser(False)
+        self._test_names(np, 'scene_date_format')
+
     def test_standard_file_names(self):
         np = parser.NameParser()
         self._test_names(np, 'standard', lambda x: x + '.avi')
@@ -194,9 +199,16 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser()
         self._test_names(np, 'season_only', lambda x: x + '.avi')
 
+    def test_scene_date_format_file_names(self):
+        np = parser.NameParser()
+        self._test_names(np, 'scene_date_format', lambda x: x + '.avi')
 
     def test_combination_names(self):
         pass
 
 if __name__ == '__main__':
-    unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(BasicTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
