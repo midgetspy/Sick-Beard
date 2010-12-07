@@ -46,8 +46,8 @@ sample_ratio = 0.3
 
 def renameFile(movedFilePath, newName):
 
-    filePath = ek.ek(os.path.split, movedFilePath)
-    oldFile = ek.ek(os.path.splitext, filePath[1])
+    filePath = os.path.split(movedFilePath)
+    oldFile = os.path.splitext(filePath[1])
 
     renamedFilePathname = ek.ek(os.path.join, filePath[0], helpers.sanitizeFileName(newName) + oldFile[1])
 

@@ -69,7 +69,7 @@ def sceneToNormalShowNames(name):
     results = [name]
     
     if '.and.' in name:
-        results.append(name.replace('.and.', '&'))
+        results.append(name.replace('.and.', '.&.'))
 
     return results
 
@@ -170,16 +170,20 @@ def allPossibleShowNames(show):
 
     newShowNames = []
 
+    country_list = countryList
+    country_list.update(dict(zip(countryList.values(), countryList.keys())))
+
     # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
     # any countries defined in common.countryList
-    for curName in showNames:
-        for curCountry in countryList:
+    # (and vice versa)
+    for curName in set(showNames):
+        for curCountry in country_list:
             if curName.endswith(' '+curCountry):
-                logger.log(u"Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
-                newShowNames.append(curName.replace(' '+curCountry, ' ('+countryList[curCountry]+')'))
+                logger.log(u"Show name "+str(curName)+" ends with "+curCountry+", so trying to add ("+country_list[curCountry]+") to it as well", logger.DEBUG)
+                newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
             elif curName.endswith(' ('+curCountry+')'):
-                logger.log(u"Show names ends with "+curCountry+", so trying to add ("+countryList[curCountry]+") to it as well", logger.DEBUG)
-                newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+countryList[curCountry]+')'))
+                logger.log(u"Show name "+str(curName)+" ends with "+curCountry+", so trying to add ("+country_list[curCountry]+") to it as well", logger.DEBUG)
+                newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+country_list[curCountry]+')'))
 
     showNames += newShowNames
 

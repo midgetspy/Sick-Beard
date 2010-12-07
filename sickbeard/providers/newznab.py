@@ -70,13 +70,20 @@ class NewznabProvider(generic.NZBProvider):
 			return params
 		
 		# search directly by tvrage id
-		params['rid'] = show.tvrid
+		if show.tvrid:
+			params['rid'] = show.tvrid
+		# if we can't then fall back on a very basic name search
+		else:
+			params['q'] = sceneHelpers.sanitizeSceneName(show.name)
 
 		if season != None:
 			# air-by-date means &season=2010&q=2010.03, no other way to do it atm
 			if show.is_air_by_date:
 				params['season'] = season.split('-')[0]
-				params['q'] = season.replace('-', '.')
+				if 'q' in params:
+					params['q'] += '.' + season.replace('-', '.')
+				else:
+					params['q'] = season.replace('-', '.')
 			else:
 				params['season'] = season
 
@@ -90,7 +97,11 @@ class NewznabProvider(generic.NZBProvider):
 			return params
 		
 		# search directly by tvrage id
-		params['rid'] = ep_obj.show.tvrid
+		if ep_obj.show.tvrid:
+			params['rid'] = ep_obj.show.tvrid
+		# if we can't then fall back on a very basic name search
+		else:
+			params['q'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name)
 
 		if ep_obj.show.is_air_by_date:
 			date_str = str(ep_obj.airdate)
@@ -126,6 +137,10 @@ class NewznabProvider(generic.NZBProvider):
 		logger.log(u"Search url: " + searchURL, logger.DEBUG)
 
 		data = self.getURL(searchURL)
+		
+		# hack this in until it's fixed server side
+		if not data.startswith('<?xml'):
+			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
 		if data == None:
 			return []
@@ -212,6 +227,10 @@ class NewznabCache(tvcache.TVCache):
 		logger.log(self.provider.name + " cache update URL: "+ url, logger.DEBUG)
 
 		data = self.provider.getURL(url)
+
+		# hack this in until it's fixed server side
+		if not data.startswith('<?xml'):
+			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
 		return data
 
