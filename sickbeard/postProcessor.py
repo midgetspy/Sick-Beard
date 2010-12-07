@@ -510,10 +510,11 @@ class PostProcessor(object):
         
         # if renaming is turned on then rename the episode (and associated files, if necessary)
         if sickbeard.RENAME_EPISODES:
-            self._rename(self.file_path, ep_obj.prettyName(), sickbeard.MOVE_ASSOCIATED_FILES)
+            new_file_name = helpers.sanitizeFileName(ep_obj.prettyName())
+            self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
 
             # remember the new name of the file
-            new_file_path = ek.ek(os.path.join, self.folder_path, ep_obj.prettyName() + '.' + self.file_name.rpartition('.')[-1])
+            new_file_path = ek.ek(os.path.join, self.folder_path, new_file_name + '.' + self.file_name.rpartition('.')[-1])
         else:
             new_file_path = self.file_path
 
