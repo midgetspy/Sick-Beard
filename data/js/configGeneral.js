@@ -57,4 +57,32 @@ $(document).ready(function(){
         $(this).setExampleText();
     });  
 
+	// -- start of metadata options div toggle code --
+    $('#metadataType').change(function(){
+        $(this).showHideMetadata();
+    });
+	
+	$.fn.showHideMetadata = function() {
+        $('.metadataDiv').each(function(){
+            var targetName = $(this).attr('id');
+            var selectedTarget = $('#metadataType :selected').val();
+            
+            if (selectedTarget == targetName)
+                $(this).show();
+            else
+                $(this).hide();
+            
+        });
+   } 
+	//initalize to show the div
+	$(this).showHideMetadata();	
+	// -- end of metadata options div toggle code --
+
+	/*	inverse checkbox selection
+    $('.metadataDiv2').click(function(){
+       var $checkbox = $(this).find(':checkbox');
+       $checkbox.attr('checked', !$checkbox[0].checked);
+    });
+	*/
+	
 });

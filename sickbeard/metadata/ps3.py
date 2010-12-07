@@ -43,7 +43,7 @@ class PS3Metadata(generic.GenericMetadata):
         generic.GenericMetadata.__init__(self)
 
         self.poster_name = 'cover.jpg'
-        self.name = 'PS3'
+        self.name = 'Sony PS3'
 
     def get_episode_thumb_path(self, ep_obj):
         """
