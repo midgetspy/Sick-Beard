@@ -19,6 +19,8 @@ from sickbeard import sceneHelpers
 
 from sickbeard import encodingKludge as ek
 
+from sickbeard.notifiers import xbmc
+
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -58,7 +60,7 @@ class PostProcessor(object):
     def _checkForExistingFile(self, existing_file):
     
         if not existing_file:
-            self._log("There is no existing file so there's no worries about replacing it", logger.DEBUG)
+            self._log(u"There is no existing file so there's no worries about replacing it", logger.DEBUG)
             return PostProcessor.DOESNT_EXIST
     
         # if the new file exists, return the appropriate code depending on the size
@@ -66,19 +68,19 @@ class PostProcessor(object):
     
             # see if it's bigger than our old file
             if ek.ek(os.path.getsize, existing_file) > ek.ek(os.path.getsize, self.file_path):
-                self._log("File "+existing_file+" is larger than "+self.file_path, logger.DEBUG)
+                self._log(u"File "+existing_file+" is larger than "+self.file_path, logger.DEBUG)
                 return PostProcessor.EXISTS_LARGER
 
             elif ek.ek(os.path.getsize, existing_file) == ek.ek(os.path.getsize, self.file_path):
-                self._log("File "+existing_file+" is the same size as "+self.file_path, logger.DEBUG)
+                self._log(u"File "+existing_file+" is the same size as "+self.file_path, logger.DEBUG)
                 return PostProcessor.EXISTS_SAME
     
             else:
-                self._log("File "+existing_file+" is smaller than "+self.file_path, logger.DEBUG)
+                self._log(u"File "+existing_file+" is smaller than "+self.file_path, logger.DEBUG)
                 return PostProcessor.EXISTS_SMALL
     
         else:
-            self._log("File "+existing_file+" doesn't exist so there's no worries about replacing it", logger.DEBUG)
+            self._log(u"File "+existing_file+" doesn't exist so there's no worries about replacing it", logger.DEBUG)
             return PostProcessor.DOESNT_EXIST
 
     def _list_associated_files(self, file_path):
@@ -115,11 +117,11 @@ class PostProcessor(object):
             file_list = [file_path]
 
         if not file_list:
-            self._log("There were no files associated with "+file_path+", not deleting anything", logger.DEBUG)
+            self._log(u"There were no files associated with "+file_path+", not deleting anything", logger.DEBUG)
             return
         
         for cur_file in file_list:
-            self._log("Deleting file "+cur_file, logger.DEBUG)
+            self._log(u"Deleting file "+cur_file, logger.DEBUG)
             ek.ek(os.remove, cur_file)
 
     def _rename(self, file_path, new_base_name, associated_files=False):
@@ -130,7 +132,7 @@ class PostProcessor(object):
             file_list = [file_path]
 
         if not file_list:
-            self._log("There were no files associated with "+file_path+", not renaming anything", logger.DEBUG)
+            self._log(u"There were no files associated with "+file_path+", not renaming anything", logger.DEBUG)
             return
         
         for cur_file_path in file_list:
@@ -145,10 +147,10 @@ class PostProcessor(object):
             new_path = ek.ek(os.path.join, ek.ek(os.path.dirname, cur_file_path), new_base_name+'.'+cur_extension)
             
             if ek.ek(os.path.abspath, cur_file_path) == ek.ek(os.path.abspath, new_path):
-                self._log("File "+cur_file_path+" is already named properly, no rename needed", logger.DEBUG)
+                self._log(u"File "+cur_file_path+" is already named properly, no rename needed", logger.DEBUG)
                 continue
             
-            self._log("Renaming file "+cur_file_path+" to "+new_path, logger.DEBUG)
+            self._log(u"Renaming file "+cur_file_path+" to "+new_path, logger.DEBUG)
             ek.ek(os.rename, cur_file_path, new_path)
 
     def _move(self, file_path, new_path, associated_files=False):
@@ -159,7 +161,7 @@ class PostProcessor(object):
             file_list = [file_path]
 
         if not file_list:
-            self._log("There were no files associated with "+file_path+", not moving anything", logger.DEBUG)
+            self._log(u"There were no files associated with "+file_path+", not moving anything", logger.DEBUG)
             return
         
         for cur_file_path in file_list:
@@ -167,7 +169,7 @@ class PostProcessor(object):
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             new_file_path = ek.ek(os.path.join, new_path, cur_file_name)
 
-            self._log("Moving file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
+            self._log(u"Moving file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
                 helpers.moveFile(cur_file_path, new_file_path)
             except (IOError, OSError), e:
@@ -181,7 +183,7 @@ class PostProcessor(object):
             file_list = [file_path]
 
         if not file_list:
-            self._log("There were no files associated with "+file_path+", not copying anything", logger.DEBUG)
+            self._log(u"There were no files associated with "+file_path+", not copying anything", logger.DEBUG)
             return
         
         for cur_file_path in file_list:
@@ -189,7 +191,7 @@ class PostProcessor(object):
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             new_file_path = ek.ek(os.path.join, new_path, cur_file_name)
 
-            self._log("Copying file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
+            self._log(u"Copying file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
                 helpers.copyFile(cur_file_path, new_file_path)
             except (IOError, OSError), e:
@@ -368,7 +370,7 @@ class PostProcessor(object):
                     epObj = t[cur_tvdb_id].airedOn(episodes[0])[0]
                     season = int(epObj["seasonnumber"])
                     episodes = [int(epObj["episodenumber"])]
-                    self._log("Got season "+str(season)+" episodes "+str(episodes), logger.DEBUG)
+                    self._log(u"Got season "+str(season)+" episodes "+str(episodes), logger.DEBUG)
                 except tvdb_exceptions.tvdb_episodenotfound, e:
                     self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(cur_tvdb_id)+u", skipping", logger.DEBUG)
                     continue
@@ -388,7 +390,7 @@ class PostProcessor(object):
     
     def _get_ep_obj(self, tvdb_id, season, episodes):
 
-        self._log("Loading show object for tvdb_id "+str(tvdb_id), logger.DEBUG)
+        self._log(u"Loading show object for tvdb_id "+str(tvdb_id), logger.DEBUG)
         # find the show in the showlist
         try:
             show_obj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
@@ -481,9 +483,11 @@ class PostProcessor(object):
         
         # get the quality of the episode we're processing
         ep_quality = self._get_quality(ep_obj)
+        logger.log("Quality of the episode we're processing: "+common.qualityPresetStrings[ep_quality], logger.DEBUG)
         
         # see if this is a priority download (is it snatched, in history, or PROPER)
         priority_download = self.in_history or ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER
+        self._log(u"Is ep a priority download: "+str(priority_download), logger.DEBUG)
         
         # set the status of the episodes
         for curEp in [ep_obj] + ep_obj.relatedEps:
@@ -493,12 +497,15 @@ class PostProcessor(object):
         existing_file_status = self._checkForExistingFile(ep_obj.location)
         
         # if there's an existing file and we don't want to replace it then stop here
-        if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME, PostProcessor.EXISTS_SMALLER) and not priority_download:
-            self._log("File exists and we are not going to replace it, quitting post-processing", logger.DEBUG)
+        if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME, PostProcessor.EXISTS_SMALLER):
+            if not priority_download:
+                self._log(u"File exists and we are not going to replace it, quitting post-processing", logger.DEBUG)
+                return False
+            else:
+                self._log(u"File exists but this is a priority download so I'm going to replace it anyway", logger.DEBUG)
         
         # if renaming is turned on then rename the episode (and associated files, if necessary)
         if sickbeard.RENAME_EPISODES:
-            self._log("Renaming all associated files", logger.DEBUG)
             self._rename(self.file_path, ep_obj.prettyName(), sickbeard.MOVE_ASSOCIATED_FILES)
 
             # remember the new name of the file
@@ -512,6 +519,7 @@ class PostProcessor(object):
         
         # find the destination folder
         dest_path = self._find_ep_destination_folder(ep_obj)
+        self._log(u"Destination folder for this episode: "+str(dest_path), logger.DEBUG)
         
         # if the dir doesn't exist (new season folder) then make it
         if not ek.ek(os.path.isdir, dest_path):
@@ -545,10 +553,10 @@ class PostProcessor(object):
         if sickbeard.XBMC_UPDATE_LIBRARY:
             for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
                 # do a per-show update first, if possible
-                if not notifiers.xbmc.updateLibrary(curHost, showName=ep_obj.show.name) and sickbeard.XBMC_UPDATE_FULL:
+                if not xbmc.updateLibrary(curHost, showName=ep_obj.show.name) and sickbeard.XBMC_UPDATE_FULL:
                     # do a full update if requested
                     self._log(u"Update of show directory failed on " + curHost + ", trying full update as requested")
-                    notifiers.xbmc.updateLibrary(curHost)
+                    xbmc.updateLibrary(curHost)
 
         # run extra_scripts
         self._run_extra_scripts(ep_obj)
