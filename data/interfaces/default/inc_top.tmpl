@@ -31,6 +31,7 @@
     </script>
 </head>
 <body>
+<a name="top">
 <div id="header">
     <span id="logo"><a href="$sbRoot/home/" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard_small.png" width="150"></a></span>
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
@@ -57,27 +58,29 @@
 </span>
 #end if
 
-#if $sickbeard.VERSION_NOTIFY and $sickbeard.NEWEST_VERSION_STRING:
+#if $sickbeard.NEWEST_VERSION_STRING:
+<br />
 <div class="message ui-state-highlight ui-corner-all">
     <p><span class="ui-icon ui-icon-alert"></span>$sickbeard.NEWEST_VERSION_STRING</a></p>
 </div>
-<br />
 #end if
 
 
 <h1>#if $varExists('header') then $header else $title#</h1>
 
 #for $curMessage in $flash.messages():
+<br />
 <div class="message ui-state-highlight ui-corner-all">
     <p><span class="ui-icon ui-icon-info"></span>$curMessage[0]</p>
     $curMessage[1]
 </div>
 #end for
-<br />
+
 #for $curError in $flash.errors():
+<br />
 <div class="message ui-state-error ui-corner-all">
     <p><span class="ui-icon ui-icon-alert"></span>$curError[0]</p>
     $curError[1]
 </div>
 #end for
-<br />
+

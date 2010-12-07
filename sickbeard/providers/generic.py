@@ -115,7 +115,7 @@ class GenericProvider:
 
         return result
 
-    def downloadResult (self, result):
+    def downloadResult(self, result):
 
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
 
@@ -137,9 +137,13 @@ class GenericProvider:
 
         logger.log(u"Saving to " + fileName, logger.DEBUG)
 
-        fileOut = open(fileName, writeMode)
-        fileOut.write(data)
-        fileOut.close()
+        try:
+            fileOut = open(fileName, writeMode)
+            fileOut.write(data)
+            fileOut.close()
+        except IOError, e:
+            logger.log("Unable to save the NZB: "+str(e).decode('utf-8'), logger.ERROR)
+            return False
 
         return True
 
@@ -197,9 +201,15 @@ class GenericProvider:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-            if parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
+            if episode.show.is_air_by_date:
+                if parse_result.air_date != episode.airdate:
+                    logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
+                    continue
+            elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
                 logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
                 continue
+
+            quality = self.getQuality(item)
 
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)

@@ -57,18 +57,19 @@ class CheckVersion():
 
         return install_type
 
-    def check_for_new_version(self):
+    def check_for_new_version(self, force=False):
 
-        if not sickbeard.VERSION_NOTIFY:
+        if not sickbeard.VERSION_NOTIFY and not force:
             logger.log(u"Version checking is disabled, not checking for the newest version")
-            return
+            return False
 
         logger.log(u"Checking if "+self.install_type+" needs an update")
         if not self.updater.need_update():
             logger.log(u"No update needed")
-            return
+            return False
 
         self.updater.set_newest_text()
+        return True
 
     def update(self):
 

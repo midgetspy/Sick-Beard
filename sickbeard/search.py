@@ -85,7 +85,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
 		dlResult = False
 
 	if dlResult == False:
-		return
+		return False
 
 	history.logSnatch(result)
 
@@ -101,6 +101,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
 	sickbeard.updateAiringList()
 	sickbeard.updateComingList()
+	
+	return True
 
 def searchForNeededEpisodes():
 
@@ -326,6 +328,7 @@ def findSeason(show, season):
 
 
 	# go through multi-ep results and see if we really want them or not, get rid of the rest
+	multiResults = {}
 	if MULTI_EP_RESULT in foundResults:
 		for multiResult in foundResults[MULTI_EP_RESULT]:
 
@@ -339,27 +342,48 @@ def findSeason(show, season):
 				# if we have results for the episode
 				if epNum in foundResults and len(foundResults[epNum]) > 0:
 					# but the multi-ep is worse quality, we don't want it
-					if False and multiResult.quality <= pickBestResult(foundResults[epNum]):
-						notNeededEps.append(epNum)
-					else:
-						neededEps.append(epNum)
+					# TODO: wtf is this False for
+					#if False and multiResult.quality <= pickBestResult(foundResults[epNum]):
+					#	notNeededEps.append(epNum)
+					#else:
+					neededEps.append(epNum)
 				else:
 					neededEps.append(epNum)
 
-			logger.log(u"Result is neededEps: "+str(neededEps)+", notNeededEps: "+str(notNeededEps), logger.DEBUG)
+			logger.log(u"Single-ep check result is neededEps: "+str(neededEps)+", notNeededEps: "+str(notNeededEps), logger.DEBUG)
 
 			if not neededEps:
 				logger.log(u"All of these episodes were covered by single nzbs, ignoring this multi-ep result", logger.DEBUG)
 				continue
 
+			# check if these eps are already covered by another multi-result
+			multiNeededEps = []
+			multiNotNeededEps = []
+			for epObj in multiResult.episodes:
+				epNum = epObj.episode
+				if epNum in multiResults:
+					multiNotNeededEps.append(epNum)
+				else:
+					multiNeededEps.append(epNum)
+
+			logger.log(u"Multi-ep check result is multiNeededEps: "+str(multiNeededEps)+", multiNotNeededEps: "+str(multiNotNeededEps), logger.DEBUG)
+
+			if not neededEps:
+				logger.log(u"All of these episodes were covered by another multi-episode nzbs, ignoring this multi-ep result", logger.DEBUG)
+				continue
+
+			# if we're keeping this multi-result then remember it
+			for epObj in multiResult.episodes:
+				multiResults[epObj.episode] = multiResult
+
 			# don't bother with the single result if we're going to get it with a multi result
 			for epObj in multiResult.episodes:
 				epNum = epObj.episode
 				if epNum in foundResults:
-					logger.log(u"A needed multi-episode result overlaps with episode "+str(epNum)+", removing its results from the list", logger.DEBUG)
+					logger.log(u"A needed multi-episode result overlaps with a single-episode result for ep #"+str(epNum)+", removing the single-episode results from the list", logger.DEBUG)
 					del foundResults[epNum]
 
-			finalResults.append(multiResult)
+	finalResults += set(multiResults.values())
 
 	# of all the single ep results narrow it down to the best one for each episode
 	for curEp in foundResults:
