@@ -50,6 +50,7 @@ class PostProcessor(object):
     
         self.in_history = False
         self.release_group = None
+        self.is_proper = False
     
         self.log = ''
     
@@ -297,13 +298,17 @@ class PostProcessor(object):
         # do a scene reverse-lookup to get a list of all possible names
         name_list = sceneHelpers.sceneToNormalShowNames(parse_result.series_name)
         
+        def _finalize(parse_result):
+            self.release_group = parse_result.release_group
+            self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
+        
         # reverse-lookup the scene exceptions
         for exceptionID in common.sceneExceptions:
             for curException in common.sceneExceptions[exceptionID]:
                 for cur_name in name_list:
                     if cur_name == curException:
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
-                        self.release_group = parse_result.release_group
+                        _finalize(parse_result)
                         return (exceptionID, season, episodes)
 
         # see if we can find the name directly in the DB, if so use it
@@ -312,7 +317,7 @@ class PostProcessor(object):
             db_result = helpers.searchDBForShow(cur_name)
             if db_result:
                 self._log(u"Lookup successful, using tvdb id "+str(db_result[0]), logger.DEBUG)
-                self.release_group = parse_result.release_group
+                _finalize(parse_result)
                 return (int(db_result[0]), season, episodes)
         
         # see if we can find the name with a TVDB lookup
@@ -326,7 +331,7 @@ class PostProcessor(object):
                 continue
             
             self._log(u"Lookup successful, using tvdb id "+str(showObj["id"]), logger.DEBUG)
-            self.release_group = parse_result.release_group
+            _finalize(parse_result)
             return (int(showObj["id"]), season, episodes)
     
         return to_return
@@ -465,6 +470,25 @@ class PostProcessor(object):
             except OSError, e:
                 self._log(u"Unable to run extra_script: "+str(e).decode('utf-8'))
     
+    def _is_priority(self, ep_obj, new_ep_quality):
+        
+        # if SB downloaded this on purpose then this is a priority download
+        if self.in_history or ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
+            self._log(u"SB snatched this episode so I'm marking it as priority", logger.DEBUG)
+            return True
+        
+        # if the user downloaded it manually and it's higher quality than the existing episode then it's priority
+        if new_ep_quality > ep_obj and new_ep_quality != common.Quality.UNKNOWN:
+            self._log(u"This was manually downloaded but it appears to be better quality than what we have so I'm marking it as priority", logger.DEBUG)
+            return True
+        
+        # if the user downloaded it manually and it appears to be a PROPER/REPACK then it's priority
+        if self.is_proper and new_ep_quality <= ep_obj.quality:
+            self._log(u"This was manually downloaded but it appears to a proper so I'm marking it as priority", logger.DEBUG)
+            return True 
+        
+        return False
+    
     def process(self):
         """
         Post-process a given file
@@ -486,27 +510,36 @@ class PostProcessor(object):
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
         
         # get the quality of the episode we're processing
-        ep_quality = self._get_quality(ep_obj)
-        logger.log(u"Quality of the episode we're processing: "+str(ep_quality), logger.DEBUG)
+        new_ep_quality = self._get_quality(ep_obj)
+        logger.log(u"Quality of the episode we're processing: "+str(new_ep_quality), logger.DEBUG)
         
         # see if this is a priority download (is it snatched, in history, or PROPER)
-        priority_download = self.in_history or ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER
+        priority_download = self._is_priority(ep_obj, new_ep_quality) 
         self._log(u"Is ep a priority download: "+str(priority_download), logger.DEBUG)
         
         # set the status of the episodes
         for curEp in [ep_obj] + ep_obj.relatedEps:
-            curEp.status = common.Quality.compositeStatus(common.SNATCHED, ep_quality)
+            curEp.status = common.Quality.compositeStatus(common.SNATCHED, new_ep_quality)
         
         # check for an existing file
         existing_file_status = self._checkForExistingFile(ep_obj.location)
+
+        # if it's not priority then we don't want to replace smaller files in case it was a mistake
+        if not priority_download:
         
-        # if there's an existing file and we don't want to replace it then stop here
-        if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME, PostProcessor.EXISTS_SMALLER):
-            if not priority_download:
-                self._log(u"File exists and we are not going to replace it, quitting post-processing", logger.DEBUG)
+            # if there's an existing file that we don't want to replace stop here
+            if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
+                self._log(u"File exists and we are not going to replace it because it's not smaller, quitting post-processing", logger.DEBUG)
                 return False
-            else:
-                self._log(u"File exists but this is a priority download so I'm going to replace it anyway", logger.DEBUG)
+            elif existing_file_status == PostProcessor.EXISTS_SMALLER:
+                self._log(u"File exists and is smaller than the new file so I'm going to replace it", logger.DEBUG)
+            elif existing_file_status != PostProcessor.DOESNT_EXIST:
+                self._log(u"Unknown existing file status. This should never happen, please log this as a bug.", logger.ERROR)
+                return False
+        
+        # if the file is priority then we're going to replace it even if it exists
+        else:
+            self._log(u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
         
         # if renaming is turned on then rename the episode (and associated files, if necessary)
         if sickbeard.RENAME_EPISODES:
@@ -541,7 +574,7 @@ class PostProcessor(object):
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
                 cur_ep.location = ek.ek(os.path.join, dest_path, self._destination_file_name(ep_obj.prettyName()))
-                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, ep_quality)
+                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
                 cur_ep.saveToDB()
         
         # log it to history
