@@ -29,6 +29,7 @@ class NameParser(object):
         """
         
         series_name = re.sub("(\D)\.(?!\s)(\D)", "\\1 \\2", series_name)
+        series_name = re.sub("(\d)\.(\d{4})", "\\1 \\2", series_name) # if it ends in a year then don't keep the dot
         series_name = re.sub("(\D)\.(?!\s)", "\\1 ", series_name)
         series_name = re.sub("\.(?!\s)(\D)", " \\1", series_name)
         series_name = series_name.replace("_", " ")
