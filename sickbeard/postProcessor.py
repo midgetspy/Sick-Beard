@@ -261,6 +261,7 @@ class PostProcessor(object):
                 episodes.append(int(cur_result["episode"]))            
 
             self.in_history = True
+            self._log("Found result in history: "+str(tvdb_id)+", "+str(season)+", "+str(set(episodes)), logger.DEBUG)
             return (tvdb_id, season, list(set(episodes)))
         
         self.in_history = False
@@ -282,7 +283,8 @@ class PostProcessor(object):
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
         parse_result = np.parse(name)
-    
+        self._log("Parsed "+name+" into "+str(parse_result), logger.DEBUG)
+
         if parse_result.air_by_date:
             season = -1
             episodes = [parse_result.air_date]
@@ -483,7 +485,7 @@ class PostProcessor(object):
         
         # get the quality of the episode we're processing
         ep_quality = self._get_quality(ep_obj)
-        logger.log("Quality of the episode we're processing: "+str(ep_quality), logger.DEBUG)
+        logger.log(u"Quality of the episode we're processing: "+str(ep_quality), logger.DEBUG)
         
         # see if this is a priority download (is it snatched, in history, or PROPER)
         priority_download = self.in_history or ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER
