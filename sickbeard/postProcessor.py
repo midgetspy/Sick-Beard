@@ -103,6 +103,7 @@ class PostProcessor(object):
 
     def _destination_file_name(self, new_name):
         existing_extension = self.file_name.rpartition('.')[-1]
+        new_name = helpers.sanitizeFileName(new_name)
         
         if sickbeard.RENAME_EPISODES:
             return new_name + '.' + existing_extension
