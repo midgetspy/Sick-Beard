@@ -40,6 +40,11 @@ simple_test_cases = {
               'Show.Name.102.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2], 'Source.Quality.Etc', 'Group'),
               },
               
+              'stupid': {
+              'tpz-abc102': parser.ParseResult(None, None, 1, [2], None, 'tpz'),
+              'tpz-abc.102': parser.ParseResult(None, None, 1, [2], None, 'tpz'),
+              },
+              
               'no_season': {
               'Show Name - 01 - Ep Name': parser.ParseResult(None, 'Show Name', None, [1], 'Ep Name'),
               '01 - Ep Name': parser.ParseResult(None, None, None, [1], 'Ep Name'),
@@ -144,6 +149,10 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser(False)
         self._test_names(np, 'bare')
 
+    def test_stupid_names(self):
+        np = parser.NameParser(False)
+        self._test_names(np, 'stupid')
+
     def test_no_season_names(self):
         np = parser.NameParser(False)
         self._test_names(np, 'no_season')
@@ -171,6 +180,10 @@ class BasicTests(unittest.TestCase):
     def test_bare_file_names(self):
         np = parser.NameParser()
         self._test_names(np, 'bare', lambda x: x + '.avi')
+
+    def test_stupid_file_names(self):
+        np = parser.NameParser()
+        self._test_names(np, 'stupid', lambda x: x + '.avi')
 
     def test_no_season_file_names(self):
         np = parser.NameParser()
