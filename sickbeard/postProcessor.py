@@ -123,7 +123,8 @@ class PostProcessor(object):
         
         for cur_file in file_list:
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
-            ek.ek(os.remove, cur_file)
+            if ek.ek(os.path.isfile, cur_file):
+                ek.ek(os.remove, cur_file)
 
     def _rename(self, file_path, new_base_name, associated_files=False):
         
