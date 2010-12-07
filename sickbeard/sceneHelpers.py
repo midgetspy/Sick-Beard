@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from sickbeard.common import *
+from sickbeard import common
 from sickbeard import logger
 from sickbeard import db
 
@@ -65,12 +65,26 @@ def sanitizeSceneName (name):
 
 def sceneToNormalShowNames(name):
 
-    results = [name]
+    name_list = [name]
     
-    if '.and.' in name:
-        results.append(name.replace('.and.', '.&.'))
+    # use both and and &
+    new_name = re.sub('([\. ])and([\. ])', '\\1&\\2', name, re.I)
+    if new_name not in name_list:
+        name_list.append(new_name)
 
-    return results
+    results = []
+
+    # add brackets around the year
+    for cur_name in name_list:
+        results.append(re.sub('(\D)(\d{4})$', '\\1(\\2)', cur_name))
+    
+        # add brackets around a year
+        country_match_str = '|'.join(common.countryList.values())
+        results.append(re.sub('([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
+
+    results += name_list
+
+    return list(set(results))
 
 def makeSceneShowSearchStrings(show):
 
@@ -160,8 +174,8 @@ def allPossibleShowNames(show):
 
     showNames = [show.name]
 
-    if int(show.tvdbid) in sceneExceptions:
-        showNames += sceneExceptions[int(show.tvdbid)]
+    if int(show.tvdbid) in common.sceneExceptions:
+        showNames += common.sceneExceptions[int(show.tvdbid)]
 
     # if we have a tvrage name then use it
     if show.tvrname != "" and show.tvrname != None:
@@ -169,8 +183,8 @@ def allPossibleShowNames(show):
 
     newShowNames = []
 
-    country_list = countryList
-    country_list.update(dict(zip(countryList.values(), countryList.keys())))
+    country_list = common.countryList
+    country_list.update(dict(zip(common.countryList.values(), common.countryList.keys())))
 
     # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
     # any countries defined in common.countryList
