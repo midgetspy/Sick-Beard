@@ -78,7 +78,7 @@ class PostProcessor(object):
     
             else:
                 self._log(u"File "+existing_file+" is smaller than "+self.file_path, logger.DEBUG)
-                return PostProcessor.EXISTS_SMALL
+                return PostProcessor.EXISTS_SMALLER
     
         else:
             self._log(u"File "+existing_file+" doesn't exist so there's no worries about replacing it", logger.DEBUG)
