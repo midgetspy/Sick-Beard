@@ -737,7 +737,7 @@ class TVShow(object):
                 continue
 
             with rootEp.lock:
-                result = helpers.renameFile(rootEp.location, rootEp.prettyName())
+                result = helpers.rename_file(rootEp.location, rootEp.prettyName())
                 if result != False:
                     rootEp.location = result
                     for relEp in rootEp.relatedEps:
@@ -746,7 +746,7 @@ class TVShow(object):
             fileList = ek.ek(glob.glob, ek.ek(os.path.join, curEpDir, actualName[0] + "*").replace("[","*").replace("]","*"))
 
             for file in fileList:
-                result = helpers.renameFile(file, rootEp.prettyName())
+                result = helpers.rename_file(file, rootEp.prettyName())
                 if result == False:
                     logger.log(str(self.tvdbid) + ": Unable to rename file "+file, logger.ERROR)
 
