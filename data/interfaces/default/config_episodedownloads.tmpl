@@ -41,14 +41,6 @@ All non-absolute folder locations are relative to $sickbeard.PROG_DIR<br /><br /
 
 <legend>Episode Search</legend>
 
-<label for="use_nzb"><input type="checkbox" name="use_nzb" id="use_nzb" #if $sickbeard.USE_NZB == True then "CHECKED" else ""#> <strong>NZBs</strong></label><br />
-Whether or not we should search NZB sites<br />
-<br />
-
-<label for="use_torrent"><input type="checkbox" name="use_torrent" id="use_torrent" #if $sickbeard.USE_TORRENT == True then "CHECKED" else ""#> <strong>Torrents</strong></label><br />
-Whether or not we should search Torrent sites<br />
-<br />
-
 <strong>Search Frequency:</strong><br />
 Time between searches (in minutes)<br />
 <input type="text" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="4"><br />
