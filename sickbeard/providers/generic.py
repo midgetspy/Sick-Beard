@@ -67,9 +67,9 @@ class GenericProvider:
 
     def isActive(self):
         if self.providerType == GenericProvider.NZB:
-            return self.isEnabled() and sickbeard.USE_NZB
+            return self.isEnabled()
         elif self.providerType == GenericProvider.TORRENT:
-            return self.isEnabled() and sickbeard.USE_TORRENT
+            return self.isEnabled()
         else:
             return False
 
@@ -195,8 +195,8 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = NameParser(title)
-                parse_result = myParser.parse()
+                myParser = NameParser()
+                parse_result = myParser.parse(title)
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
