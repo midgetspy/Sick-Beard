@@ -20,7 +20,7 @@ import sickbeard
 from sickbeard import helpers, version
 from sickbeard import logger
 
-import os, os.path, platform
+import os, os.path, platform, shutil, time
 import subprocess, re
 import urllib, urllib2
 import zipfile, tarfile
@@ -139,20 +139,37 @@ class WindowsUpdateManager(UpdateManager):
             logger.log(u"Downloading update file from "+str(new_link))
             (filename, headers) = urllib.urlretrieve(new_link)
 
-            # unzip it to sb-update
+            # prepare the update dir
             sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
+            logger.log(u"Clearing out update folder "+sb_update_dir+" before unzipping")
+            if os.path.isdir(sb_update_dir):
+                shutil.rmtree(sb_update_dir)
+
+            # unzip it to sb-update
             logger.log(u"Unzipping from "+str(filename)+" to "+sb_update_dir)
             update_zip = zipfile.ZipFile(filename, 'r')
             update_zip.extractall(sb_update_dir)
             update_zip.close()
+            
+            # find update dir name
+            update_dir_contents = os.listdir(sb_update_dir)
+            if len(update_dir_contents) != 1:
+                logger.log("Invalid update data, update failed.", logger.ERROR)
+                return False
+
+            content_dir = os.path.join(sb_update_dir, update_dir_contents[0])
+            old_update_path = os.path.join(content_dir, 'updater.exe')
+            new_update_path = os.path.join(sickbeard.PROG_DIR, 'updater.exe')
+            logger.log(u"Copying new update.exe file from "+old_update_path+" to "+new_update_path)
+            shutil.move(old_update_path, new_update_path)
+
+            # delete the zip
+            logger.log(u"Deleting zip file from "+str(filename))
+            os.remove(filename)
 
         except Exception, e:
             logger.log(u"Error while trying to update: "+str(e).decode('utf-8'), logger.ERROR)
             return False
-
-        # delete the zip
-        logger.log(u"Deleting old update file from "+str(filename))
-        os.remove(filename)
 
         return True
 
