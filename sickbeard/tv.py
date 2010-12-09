@@ -143,6 +143,8 @@ class TVShow(object):
 
     def writeShowNFO(self):
 
+        result = False
+
         if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
             return False
@@ -1379,7 +1381,7 @@ class TVEpisode:
             naming_quality = sickbeard.NAMING_QUALITY
 
         if ((self.show.genre and "Talk Show" in self.show.genre) or self.show.air_by_date) and sickbeard.NAMING_DATES:
-            goodEpString = str(self.airdate)
+            goodEpString = self.airdate.strftime("%Y.%m.%d")
         else:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
 

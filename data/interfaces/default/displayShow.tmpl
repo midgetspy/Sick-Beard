@@ -85,6 +85,12 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
 <br />
 </div>
 
+Jump To:
+#for $seasonNum in $seasonResults:
+    <a href="#season-$seasonNum["season"]">
+    #if int($seasonNum["season"]) == 0 then "Specials</a>" else "Season "+str($seasonNum["season"])+"</a> |"
+#end for
+
 <table class="sickbeardTable">
     
 #for $epResult in $sqlResults:
@@ -94,8 +100,7 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
     <td colspan=8>
 	<br />
 	<h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#
-	<br />
-	</h2></td>
+	</h2><font size="-3"><a href="#top">[top]</a></font></td>
   </tr>
   <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
         #set $curSeason = int($epResult["season"])
@@ -133,7 +138,7 @@ $epLoc
     <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a>
     #end if
     </td>
-   <tr>
+   </tr>
    
 #end for            
 </table><br /><br />

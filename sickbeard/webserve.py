@@ -174,6 +174,15 @@ class ManageSearches:
 
         redirect("/manage/manageSearches")
 
+    @cherrypy.expose
+    def forceVersionCheck(self):
+
+        # force a check to see if there is a new version
+        result = sickbeard.versionCheckScheduler.action.check_for_new_version(force=True)
+        if result:
+            logger.log(u"Forcing version check")
+
+        redirect("/manage/manageSearches")
 
 
 class Manage:
@@ -1400,6 +1409,11 @@ class Home:
 
         myDB = db.DBConnection()
 
+        seasonResults = myDB.select(
+            "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season desc",
+            [showObj.tvdbid]
+        )
+
         sqlResults = myDB.select(
             "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC",
             [showObj.tvdbid]
@@ -1438,6 +1452,7 @@ class Home:
 
         t.show = showObj
         t.sqlResults = sqlResults
+        t.seasonResults = seasonResults
 
         epCounts = {}
         epCats = {}
@@ -1739,7 +1754,9 @@ class Home:
             logger.log(u"Downloading episode from " + foundEpisode.url)
             result = search.snatchEpisode(foundEpisode)
             providerModule = foundEpisode.provider
-            if providerModule == None:
+            if not result:
+                ui.flash.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')
+            elif providerModule == None:
                 ui.flash.error('Provider is configured incorrectly, unable to download')
             else:
                 ui.flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
