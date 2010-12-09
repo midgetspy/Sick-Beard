@@ -143,6 +143,8 @@ class TVShow(object):
 
     def writeShowNFO(self):
 
+        result = False
+
         if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
             return False
