@@ -54,7 +54,8 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
 <div id="config">
 <div id="config-content" class="clearfix">
-<h4>NOTE: Manual restart needed for web server related changes!</h4>
+<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.PROG_DIR</span> "</h5>
+
 <form action="saveGeneral" method="POST">
 
 			<div id="config-components">
@@ -64,6 +65,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 					<div class="component-group-desc">
 						<h3>Misc</h3>
 						<p>Startup options.</p>
+						<p><b>Some options may require a manual restart to take effect.</b></p>						
 					</div>
 
 					<fieldset class="component-group-list">							
@@ -91,10 +93,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 							<label class="nocheck clearfix" for="log_dir">
 								<span class="component-title">Logging Directory</span>
 								<input type="text" name="log_dir" id="log_dir" value="$sickbeard.LOG_DIR" size="45">
-							</label>
-							<label class="clearfix">
-								<p>Folder path is relative to "<span class="path">$sickbeard.PROG_DIR</span>" unless specified.</p>								
-							</label>							
+							</label>						
 						</div>		
 						
 						<input type="submit" value="Save Changes">
@@ -125,6 +124,12 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 							<span>Toggle the metadata options that you wish to be created. <b>Multiple targets may be used.</b></span>	
 						</div>
 
+						<div id="metadataLegend">
+						<div style="width: 190px; float: left;">Create:</div>
+						<div style="width: 260px; float: left;">Results:</div>
+						</div>
+						<div class="clearfix"></div>
+						
 <div class="metadataDiv" id="mediabrowser">		
 	<div class="metadata_options">
 		<label for="metadata_show"><input name="metadata_show" type="checkbox" id="metadata_show" #if $sickbeard.METADATA_SHOW then "CHECKED" else ""#/>&nbsp;Show Metadata</label>
