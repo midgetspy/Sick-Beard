@@ -38,7 +38,7 @@
 #config-settings .config-settings-group { margin: 0 15px 15px; border-bottom: 1px dotted #999; padding-bottom: 15px; }
 #config-settings .config-settings-group h2 { margin-bottom: 0; }
 #config-settings .config-settings-group p {font-size: 1.1em; color: #666; margin: .6em 0 1em; }
-#config-settings .config-settings-group div.field-pair { margin: 1.2em 0 .6em;  }
+#config-settings .config-settings-group div.field-pair { margin: 1.2em 0 .6em; }
 #config-settings .config-settings-group input {float: left;}
 
 .clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
@@ -54,7 +54,6 @@ html>body #provider_order_list li { height: 1.5em; line-height: 1.3em; }
 #config div.providerDiv, #config div #customQuality { padding-left: 20px; }
 .providerDiv { display: none; padding-left: 20px; }
 
-#config div #metadataLegend { font-size: 14px; font-family: Verdana; font-weight: 900; display: block; width: auto; text-align: center; padding-bottom: 3px;}
 #config div.metadataDiv {display: none; }	
 #config div.metadata_options { float: left; font-size: 14px; font-family: Verdana; width: 185px; color: #003366; padding: 7px; background: #F5F1E4; overflow: auto; border-left: 1px solid #404040; border-top: 1px solid #404040; border-bottom: 1px solid #d4d0c8; border-right:1px solid #d4d0c8; }
 #config div.metadata_options label:hover { background-color:#99ff99; }
@@ -63,3 +62,4 @@ html>body #provider_order_list li { height: 1.5em; line-height: 1.3em; }
 #config div.metadata_example label { display: block; color: #000000; line-height: 1.5em;}
 
 #config div.metadataDiv .disabled {color: #ccc;}
+#config div #metadataLegend { font-size: 14px; font-family: Verdana; font-weight: 900; display: block; width: auto; text-align: center; padding-bottom: 3px;}
