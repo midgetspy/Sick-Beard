@@ -77,14 +77,16 @@ if os.path.isdir('dist'):
 # root source dir
 compile_dir = os.path.dirname(os.path.normpath(os.path.abspath(sys.argv[0])))
 
-# pull new source from git
-print 'Updating source from git'
-p = subprocess.Popen('git pull origin master', shell=True, cwd=compile_dir)
-o,e = p.communicate()
+if not 'nogit' in oldArgs:
+    # pull new source from git
+    print 'Updating source from git'
+    p = subprocess.Popen('git pull origin master', shell=True, cwd=compile_dir)
+    o,e = p.communicate()
 
 # figure out what build this is going to be
 latestBuild = findLatestBuild()
 currentBuildNumber = latestBuild+1
+currentBuildNumber = 468
 
 # write the version file before we compile
 versionFile = open("sickbeard/version.py", "w")
@@ -266,9 +268,10 @@ if "noup" not in oldArgs:
     print "Uploading zip to google code"
     googlecode_upload.upload(os.path.abspath(zipFilename+".zip"), "sickbeard", gc_username, gc_password, "Win32 alpha build "+str(currentBuildNumber)+" (unstable/development release)", ["Featured","Type-Executable","OpSys-Windows"])
  
-# tag commit as a new build and push changes to github
-print 'Tagging commit and pushing'
-p = subprocess.Popen('git tag -a "build-'+str(currentBuildNumber)+'" -m "Windows build '+zipFilename+'"', shell=True, cwd=compile_dir)
-o,e = p.communicate()
-p = subprocess.Popen('git push --tags origin windows_binaries', shell=True, cwd=compile_dir)
-o,e = p.communicate()
+if not 'nogit' in oldArgs:
+    # tag commit as a new build and push changes to github
+    print 'Tagging commit and pushing'
+    p = subprocess.Popen('git tag -a "build-'+str(currentBuildNumber)+'" -m "Windows build '+zipFilename+'"', shell=True, cwd=compile_dir)
+    o,e = p.communicate()
+    p = subprocess.Popen('git push --tags origin windows_binaries', shell=True, cwd=compile_dir)
+    o,e = p.communicate()
