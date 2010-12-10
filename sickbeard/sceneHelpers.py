@@ -133,6 +133,8 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         elif extraSearchType == "nzbmatrix":
             if numseasons == 1:
                 toReturn.append('+"'+curShow+'"')
+            elif numseasons == 0:
+                toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
             else:
                 term_list = [x+'*' for x in seasonStrings]
                 if show.is_air_by_date:
