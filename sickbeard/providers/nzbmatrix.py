@@ -32,144 +32,134 @@ from sickbeard.common import *
 
 class NZBMatrixProvider(generic.NZBProvider):
 
-	def __init__(self):
+    def __init__(self):
 
-		generic.NZBProvider.__init__(self, "NZBMatrix")
+        generic.NZBProvider.__init__(self, "NZBMatrix")
 
-		self.supportsBacklog = True
+        self.supportsBacklog = True
 
-		self.cache = NZBMatrixCache(self)
+        self.cache = NZBMatrixCache(self)
 
-		self.url = 'http://www.nzbmatrix.com/'
+        self.url = 'http://www.nzbmatrix.com/'
 
-	def isEnabled(self):
-		return sickbeard.NZBMATRIX
+    def isEnabled(self):
+        return sickbeard.NZBMATRIX
 
-	def findSeasonResults(self, show, season):
-		
-		results = {}
-		
-		if show.is_air_by_date:
-			logger.log(u"NZBMatrix doesn't support air-by-date backlog because of a bug in their RSS search. Pressure them to fix it!", logger.WARNING)
-			return results
-		
-		results = generic.NZBProvider.findSeasonResults(self, show, season)
-		
-		return results
+    def _get_season_search_strings(self, show, season):
+        sceneSearchStrings = set(sceneHelpers.makeSceneSeasonSearchString(show, season, "nzbmatrix"))
 
+        # search for all show names and episode numbers like ("a","b","c") in a single search
+        return ['("' + '","'.join(sceneSearchStrings) + '")']
 
-	def _get_season_search_strings(self, show, season):
-		return sceneHelpers.makeSceneSeasonSearchString(show, season, "nzbmatrix")
+    def _get_episode_search_strings(self, ep_obj):
 
-	def _get_episode_search_strings(self, ep_obj):
+        sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(ep_obj))
 
-		sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(ep_obj))
+        # search for all show names and episode numbers like ("a","b","c") in a single search
+        return ['("' + '","'.join(sceneSearchStrings) + '")']
 
-		# search for all show names and episode numbers like ("a","b","c") in a single search
-		return ['("' + '","'.join(sceneSearchStrings) + '")']
+    def _doSearch(self, curString, quotes=False):
 
-	def _doSearch(self, curString, quotes=False):
+        term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
+        if quotes:
+            term = "\""+term+"\""
 
-		term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
-		if quotes:
-			term = "\""+term+"\""
+        params = {"term": term,
+                  "age": sickbeard.USENET_RETENTION,
+                  "page": "download",
+                  "username": sickbeard.NZBMATRIX_USERNAME,
+                  "apikey": sickbeard.NZBMATRIX_APIKEY,
+                  "subcat": "6,41",
+                  "english": 1}
 
-		params = {"term": term,
-				  "age": sickbeard.USENET_RETENTION,
-				  "page": "download",
-				  "username": sickbeard.NZBMATRIX_USERNAME,
-				  "apikey": sickbeard.NZBMATRIX_APIKEY,
-				  "subcat": "6,41",
-				  "english": 1}
+        searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
-		searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
+        logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
-		logger.log(u"Search string: " + searchURL, logger.DEBUG)
+        logger.log(u"Sleeping 10 seconds to respect NZBMatrix's rules")
+        time.sleep(10)
 
-		logger.log(u"Sleeping 10 seconds to respect NZBMatrix's rules")
-		time.sleep(10)
+        searchResult = self.getURL(searchURL)
 
-		searchResult = self.getURL(searchURL)
+        if not searchResult:
+            return []
 
-		if not searchResult:
-			return []
+        try:
+            responseSoup = etree.ElementTree(etree.XML(searchResult))
+            items = responseSoup.getiterator('item')
+        except Exception, e:
+            logger.log(u"Error trying to load NZBMatrix RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            return []
 
-		try:
-			responseSoup = etree.ElementTree(etree.XML(searchResult))
-			items = responseSoup.getiterator('item')
-		except Exception, e:
-			logger.log(u"Error trying to load NZBMatrix RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
-			return []
+        results = []
 
-		results = []
+        for curItem in items:
+            title = curItem.findtext('title')
+            url = curItem.findtext('link')
 
-		for curItem in items:
-			title = curItem.findtext('title')
-			url = curItem.findtext('link')
+            if title == 'Error: No Results Found For Your Search':
+                continue
 
-			if title == 'Error: No Results Found For Your Search':
-				continue
+            if not title or not url:
+                logger.log(u"The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable", logger.ERROR)
+                continue
 
-			if not title or not url:
-				logger.log(u"The XML returned from the NZBMatrix RSS feed is incomplete, this result is unusable", logger.ERROR)
-				continue
+            results.append(curItem)
 
-			results.append(curItem)
-
-		return results
+        return results
 
 
-	def findPropers(self, date=None):
+    def findPropers(self, date=None):
 
-		results = []
+        results = []
 
-		for curResult in self._doSearch("(PROPER,REPACK)"):
+        for curResult in self._doSearch("(PROPER,REPACK)"):
 
-			title = curResult.findtext('title')
-			url = curResult.findtext('link').replace('&amp;','&')
+            title = curResult.findtext('title')
+            url = curResult.findtext('link').replace('&amp;','&')
 
-			descriptionStr = curResult.findtext('description')
-			dateStr = re.search('<b>Added:</b> (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)', descriptionStr).group(1)
-			if not dateStr:
-				logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
-				continue
-			else:
-				resultDate = datetime.datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S")
+            descriptionStr = curResult.findtext('description')
+            dateStr = re.search('<b>Added:</b> (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)', descriptionStr).group(1)
+            if not dateStr:
+                logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
+                continue
+            else:
+                resultDate = datetime.datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S")
 
-			if date == None or resultDate > date:
-				results.append(classes.Proper(title, url, resultDate))
+            if date == None or resultDate > date:
+                results.append(classes.Proper(title, url, resultDate))
 
-		return results
+        return results
 
 
 class NZBMatrixCache(tvcache.TVCache):
 
-	def __init__(self, provider):
+    def __init__(self, provider):
 
-		tvcache.TVCache.__init__(self, provider)
+        tvcache.TVCache.__init__(self, provider)
 
-		# only poll NZBMatrix every 25 minutes max
-		self.minTime = 25
+        # only poll NZBMatrix every 25 minutes max
+        self.minTime = 25
 
 
-	def _getRSSData(self):
-		# get all records since the last timestamp
-		url = "http://rss.nzbmatrix.com/rss.php?"
+    def _getRSSData(self):
+        # get all records since the last timestamp
+        url = "http://rss.nzbmatrix.com/rss.php?"
 
-		urlArgs = {'page': 'download',
-				   'username': sickbeard.NZBMATRIX_USERNAME,
-				   'apikey': sickbeard.NZBMATRIX_APIKEY,
-				   'english': 1,
-				   'scenename': 1,
-				   'subcat': '6,41'}
+        urlArgs = {'page': 'download',
+                   'username': sickbeard.NZBMATRIX_USERNAME,
+                   'apikey': sickbeard.NZBMATRIX_APIKEY,
+                   'english': 1,
+                   'scenename': 1,
+                   'subcat': '6,41'}
 
-		url += urllib.urlencode(urlArgs)
+        url += urllib.urlencode(urlArgs)
 
-		logger.log(u"NZBMatrix cache update URL: "+ url, logger.DEBUG)
+        logger.log(u"NZBMatrix cache update URL: "+ url, logger.DEBUG)
 
-		data = self.provider.getURL(url)
+        data = self.provider.getURL(url)
 
-		return data
+        return data
 
 
 provider = NZBMatrixProvider()

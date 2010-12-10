@@ -68,19 +68,19 @@ def sceneToNormalShowNames(name):
     name_list = [name]
     
     # use both and and &
-    new_name = re.sub('([\. ])and([\. ])', '\\1&\\2', name, re.I)
+    new_name = re.sub('(?i)([\. ])and([\. ])', '\\1&\\2', name, re.I)
     if new_name not in name_list:
         name_list.append(new_name)
 
     results = []
 
-    # add brackets around the year
     for cur_name in name_list:
+        # add brackets around the year
         results.append(re.sub('(\D)(\d{4})$', '\\1(\\2)', cur_name))
     
-        # add brackets around a year
+        # add brackets around the country
         country_match_str = '|'.join(common.countryList.values())
-        results.append(re.sub('([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
+        results.append(re.sub('(?i)([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
 
     results += name_list
 
@@ -133,6 +133,8 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         elif extraSearchType == "nzbmatrix":
             if numseasons == 1:
                 toReturn.append('+"'+curShow+'"')
+            elif numseasons == 0:
+                toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
             else:
                 term_list = [x+'*' for x in seasonStrings]
                 if show.is_air_by_date:
@@ -192,10 +194,8 @@ def allPossibleShowNames(show):
     for curName in set(showNames):
         for curCountry in country_list:
             if curName.endswith(' '+curCountry):
-                logger.log(u"Show name "+str(curName)+" ends with "+curCountry+", so trying to add ("+country_list[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
             elif curName.endswith(' ('+curCountry+')'):
-                logger.log(u"Show name "+str(curName)+" ends with "+curCountry+", so trying to add ("+country_list[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+country_list[curCountry]+')'))
 
     showNames += newShowNames
@@ -207,7 +207,8 @@ def isGoodResult(name, show, log=True):
     Use an automatically-created regex to make sure the result actually is the show it claims to be
     """
 
-    showNames = map(sanitizeSceneName, allPossibleShowNames(show)) + allPossibleShowNames(show)
+    all_show_names = allPossibleShowNames(show)
+    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
 
     for curName in set(showNames):
         escaped_name = re.sub('\\\\[.-]', '\W+', re.escape(curName))

@@ -113,6 +113,9 @@ class PostProcessor(object):
 
     def _delete(self, file_path, associated_files=False):
         
+        if not file_path:
+            return
+        
         if associated_files:
             file_list = self._list_associated_files(file_path)
         else:
@@ -302,11 +305,13 @@ class PostProcessor(object):
             self.release_group = parse_result.release_group
             self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
         
-        # reverse-lookup the scene exceptions
-        for exceptionID in common.sceneExceptions:
-            for curException in common.sceneExceptions[exceptionID]:
-                for cur_name in name_list:
-                    if cur_name == curException:
+        # for each possible interpretation of that scene name
+        for cur_name in name_list:
+            self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
+            for exceptionID in common.sceneExceptions:
+                # for each exception name
+                for curException in common.sceneExceptions[exceptionID]:
+                    if cur_name.lower() == curException.lower():
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
                         _finalize(parse_result)
                         return (exceptionID, season, episodes)
@@ -548,12 +553,13 @@ class PostProcessor(object):
 
             # remember the new name of the file
             new_file_path = ek.ek(os.path.join, self.folder_path, new_file_name + '.' + self.file_name.rpartition('.')[-1])
+            self._log(u"After renaming the new file path is "+new_file_path, logger.DEBUG)
         else:
             new_file_path = self.file_path
 
-
         # delete the existing file (and company)
-        self._delete(ep_obj.location, associated_files=True)
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            self._delete(cur_ep.location, associated_files=True)
         
         # find the destination folder
         dest_path = self._find_ep_destination_folder(ep_obj)
