@@ -194,10 +194,8 @@ def allPossibleShowNames(show):
     for curName in set(showNames):
         for curCountry in country_list:
             if curName.endswith(' '+curCountry):
-                logger.log(u"Show name "+str(curName)+" ends with "+curCountry+", so trying to add ("+country_list[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
             elif curName.endswith(' ('+curCountry+')'):
-                logger.log(u"Show name "+str(curName)+" ends with "+curCountry+", so trying to add ("+country_list[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+country_list[curCountry]+')'))
 
     showNames += newShowNames
@@ -209,7 +207,8 @@ def isGoodResult(name, show, log=True):
     Use an automatically-created regex to make sure the result actually is the show it claims to be
     """
 
-    showNames = map(sanitizeSceneName, allPossibleShowNames(show)) + allPossibleShowNames(show)
+    all_show_names = allPossibleShowNames(show)
+    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
 
     for curName in set(showNames):
         escaped_name = re.sub('\\\\[.-]', '\W+', re.escape(curName))
