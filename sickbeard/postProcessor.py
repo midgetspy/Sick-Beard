@@ -305,11 +305,13 @@ class PostProcessor(object):
             self.release_group = parse_result.release_group
             self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
         
-        # reverse-lookup the scene exceptions
-        for exceptionID in common.sceneExceptions:
-            for curException in common.sceneExceptions[exceptionID]:
-                for cur_name in name_list:
-                    if cur_name == curException:
+        # for each possible interpretation of that scene name
+        for cur_name in name_list:
+            self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
+            for exceptionID in common.sceneExceptions:
+                # for each exception name
+                for curException in common.sceneExceptions[exceptionID]:
+                    if cur_name.lower() == curException.lower():
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
                         _finalize(parse_result)
                         return (exceptionID, season, episodes)

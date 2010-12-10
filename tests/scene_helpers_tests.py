@@ -23,6 +23,7 @@ class SceneTests(unittest.TestCase):
                 self.tvdbid = tvdbid
                 self.tvrname = tvrname
         
+        
         result = sceneHelpers.allPossibleShowNames(Show(name, tvdbid, tvrname))
         self.assertTrue(len(set(expected).intersection(set(result))) == len(expected))
 
@@ -33,6 +34,8 @@ class SceneTests(unittest.TestCase):
         self._test_sceneToNormalShowNames('Show Name CA', ['Show Name CA', 'Show Name (CA)'])
         self._test_sceneToNormalShowNames('Show and Name', ['Show and Name', 'Show & Name'])
         self._test_sceneToNormalShowNames('Show and Name 2010', ['Show and Name 2010', 'Show & Name 2010', 'Show and Name (2010)', 'Show & Name (2010)'])
+        self._test_sceneToNormalShowNames('show name us', ['show name us', 'show name (us)'])
+        self._test_sceneToNormalShowNames('Show And Name', ['Show And Name', 'Show & Name'])
         
         # failure cases
         self._test_sceneToNormalShowNames('Show Name 90210', ['Show Name 90210'])

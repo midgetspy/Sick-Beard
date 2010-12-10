@@ -68,19 +68,19 @@ def sceneToNormalShowNames(name):
     name_list = [name]
     
     # use both and and &
-    new_name = re.sub('([\. ])and([\. ])', '\\1&\\2', name, re.I)
+    new_name = re.sub('(?i)([\. ])and([\. ])', '\\1&\\2', name, re.I)
     if new_name not in name_list:
         name_list.append(new_name)
 
     results = []
 
-    # add brackets around the year
     for cur_name in name_list:
+        # add brackets around the year
         results.append(re.sub('(\D)(\d{4})$', '\\1(\\2)', cur_name))
     
-        # add brackets around a year
+        # add brackets around the country
         country_match_str = '|'.join(common.countryList.values())
-        results.append(re.sub('([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
+        results.append(re.sub('(?i)([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
 
     results += name_list
 
