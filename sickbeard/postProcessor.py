@@ -113,6 +113,9 @@ class PostProcessor(object):
 
     def _delete(self, file_path, associated_files=False):
         
+        if not file_path:
+            return
+        
         if associated_files:
             file_list = self._list_associated_files(file_path)
         else:
@@ -548,12 +551,13 @@ class PostProcessor(object):
 
             # remember the new name of the file
             new_file_path = ek.ek(os.path.join, self.folder_path, new_file_name + '.' + self.file_name.rpartition('.')[-1])
+            self._log(u"After renaming the new file path is "+new_file_path, logger.DEBUG)
         else:
             new_file_path = self.file_path
 
-
         # delete the existing file (and company)
-        self._delete(ep_obj.location, associated_files=True)
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            self._delete(cur_ep.location, associated_files=True)
         
         # find the destination folder
         dest_path = self._find_ep_destination_folder(ep_obj)
