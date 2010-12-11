@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "name_parser"
+SICKBEARD_VERSION = "master"
