@@ -170,13 +170,13 @@ class NameParser(object):
         dir_name_result = self._parse_string(dir_name)
         
         # build the ParseResult object
-        final_result.series_name = self._combine_results(file_name_result, dir_name_result, 'series_name')
         final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
         final_result.episode_numbers = self._combine_results(file_name_result, dir_name_result, 'episode_numbers')
-        final_result.extra_info = self._combine_results(file_name_result, dir_name_result, 'extra_info')
         final_result.air_date = self._combine_results(file_name_result, dir_name_result, 'air_date')
         
-        # if the dirname has a release group I believe it over the filename
+        # if the dirname has a release group/show name I believe it over the filename
+        final_result.series_name = self._combine_results(dir_name_result, file_name_result, 'series_name')
+        final_result.extra_info = self._combine_results(dir_name_result, file_name_result, 'extra_info')
         final_result.release_group = self._combine_results(dir_name_result, file_name_result, 'release_group')
 
         final_result.which_regex = []
