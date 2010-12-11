@@ -356,6 +356,15 @@ class PostProcessor(object):
                         # try to analyze the episode name
                         lambda: self._analyze_name(self.file_path),
 
+                        # try to analyze the file name
+                        lambda: self._analyze_name(self.file_name),
+
+                        # try to analyze the dir name
+                        lambda: self._analyze_name(self.folder_name),
+
+                        # try to analyze the file+dir names together
+                        lambda: self._analyze_name(self.file_path),
+
                         # try to analyze the nzb name
                         lambda: self._analyze_name(self.nzb_name),
                         ]
