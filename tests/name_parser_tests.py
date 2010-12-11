@@ -164,6 +164,10 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser(False)
         self._test_names(np, 'no_season')
 
+    def test_no_season_general_names(self):
+        np = parser.NameParser(False)
+        self._test_names(np, 'no_season_general')
+
     def test_season_only_names(self):
         np = parser.NameParser(False)
         self._test_names(np, 'season_only')
@@ -212,7 +216,10 @@ class BasicTests(unittest.TestCase):
         pass
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(BasicTests)
+    if len(sys.argv) > 1:
+        suite = unittest.TestLoader().loadTestsFromName('name_parser_tests.BasicTests.test_'+sys.argv[1])
+    else:
+        suite = unittest.TestLoader().loadTestsFromTestCase(BasicTests)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)

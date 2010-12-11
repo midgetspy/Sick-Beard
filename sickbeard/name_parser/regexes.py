@@ -126,17 +126,6 @@ ep_regexes = [
                (-(?P<release_group>\w+))?$                 # Group
                '''
                ),
-               
-              ('no_season',
-               # Show Name - 01 - Ep Name
-               # 01 - Ep Name
-               '''
-               ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
-               (?P<ep_num>\d{2})                           # 02
-               ([\. _-]+(?P<extra_info>.+?))?              # separater and Ep Name
-               (-(?P<release_group>.+))?$                  # Group
-               '''
-               ),
 
               ('no_season_general',
                # Show.Name.E23.Test
@@ -152,6 +141,18 @@ ep_regexes = [
                (?P<extra_ep_num>[\divx]+))*                # second ep num
                ([\. _-]+(?P<extra_info>.+?))?              # Ep Name/etc
                (-(?P<release_group>.+))?$                  # Group               '''
+               ),
+
+               
+              ('no_season',
+               # Show Name - 01 - Ep Name
+               # 01 - Ep Name
+               '''
+               ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
+               (?P<ep_num>\d{2})                           # 02
+               ([\. _-]+(?P<extra_info>.+?))?              # separater and Ep Name
+               (-(?P<release_group>.+))?$                  # Group
+               '''
                ),
               ]
 
