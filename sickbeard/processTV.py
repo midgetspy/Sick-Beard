@@ -22,7 +22,7 @@ import os, os.path
 import shutil
 
 from sickbeard import postProcessor
-from sickbeard import db, helpers
+from sickbeard import db, helpers, exceptions
 
 from sickbeard import encodingKludge as ek
 
@@ -91,8 +91,12 @@ def processDir (dirName, nzbName=None, recurse=False):
 
         cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file_path)
 
-        processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
-        process_result = processor.process()
+        try:
+            processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
+            process_result = processor.process()
+        except exceptions.PostProcessingFailed:
+            process_result = False
+
         returnStr += processor.log 
 
         # as long as the postprocessing was successful delete the old folder unless the config wants us not to
