@@ -401,7 +401,8 @@ def initialize(consoleLogging=True):
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
 
         EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
-        EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
+        if not EZRSS:
+            EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
 
         TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
         TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
