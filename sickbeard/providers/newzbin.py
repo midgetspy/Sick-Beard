@@ -31,9 +31,6 @@ from sickbeard import classes, logger, helpers, exceptions, sceneHelpers, db
 from sickbeard import tvcache
 from sickbeard.common import *
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
-
 class NewzbinDownloader(urllib.FancyURLopener):
 
     def __init__(self):
