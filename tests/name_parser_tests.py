@@ -80,6 +80,11 @@ combination_test_cases = [
                           ('Show.Name.S02.Source.Quality.Etc-Group/tpz-sn203.avi',
                            parser.ParseResult(None, 'Show Name', 2, [3], 'Source.Quality.Etc', 'Group'),
                            ['stupid', 'season_only']),
+
+                          ('MythBusters.S08E16.720p.HDTV.x264-aAF\\aaf-mb.s08e16.720p.mkv',
+                           parser.ParseResult(None, 'MythBusters', 8, [16], '720p.HDTV.x264', 'aAF'),
+                           ['standard']),
+                          
                           ]
 
 class ComboTests(unittest.TestCase):
