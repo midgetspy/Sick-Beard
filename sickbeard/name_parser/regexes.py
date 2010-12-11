@@ -65,7 +65,7 @@ ep_regexes = [
                # Show Name - S01E02-03 - My Ep Name
                # Show.Name.S01.E02.E03
                '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
+               ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
                s(?P<season_num>\d+)[\. _-]*                # S01 and optional separator
                e(?P<ep_num>\d+)                            # E02 and separator
                ([\. _-]*[e-](?P<extra_ep_num>\d+))*        # additional E03/etc
@@ -79,7 +79,7 @@ ep_regexes = [
                # Show_Name.1x02x03x04.Source_Quality_Etc-Group
                # Show Name - 1x02-03-04 - My Ep Name
                '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
+               ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
                (?P<season_num>\d+)x                        # 1x
                (?P<ep_num>\d+)                             # 02 and separator
                ([\. _-]*[x-](?P<extra_ep_num>\d+))*        # additional E03/etc
