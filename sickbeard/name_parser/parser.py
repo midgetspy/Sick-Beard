@@ -145,23 +145,23 @@ class NameParser(object):
     def _convert_number(self, number):
         if type(number) == int:
             return number
-        
+
         # the lazy way
-        if number == 'i': return 1
-        if number == 'ii': return 2
-        if number == 'iii': return 3
-        if number == 'iv': return 4
-        if number == 'v': return 5
-        if number == 'vi': return 6
-        if number == 'vii': return 7
-        if number == 'viii': return 8
-        if number == 'ix': return 9
-        if number == 'x': return 10
-        if number == 'xi': return 11
-        if number == 'xii': return 12
-        if number == 'xiii': return 13
-        if number == 'xiv': return 14
-        if number == 'xv': return 15
+        if number.lower() == 'i': return 1
+        if number.lower() == 'ii': return 2
+        if number.lower() == 'iii': return 3
+        if number.lower() == 'iv': return 4
+        if number.lower() == 'v': return 5
+        if number.lower() == 'vi': return 6
+        if number.lower() == 'vii': return 7
+        if number.lower() == 'viii': return 8
+        if number.lower() == 'ix': return 9
+        if number.lower() == 'x': return 10
+        if number.lower() == 'xi': return 11
+        if number.lower() == 'xii': return 12
+        if number.lower() == 'xiii': return 13
+        if number.lower() == 'xiv': return 14
+        if number.lower() == 'xv': return 15
 
         return int(number)
 
