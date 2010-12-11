@@ -464,8 +464,8 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    metadata_type=None, metadata_show=None, metadata_episode=None,
-                    art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None):
+                    metadata_show=None, metadata_episode=None, art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None,                    
+                    metadata_type=None ):
 
         results = []
 
@@ -565,14 +565,14 @@ class ConfigGeneral:
         sickbeard.METADATA_TYPE = metadata_type
         sickbeard.METADATA_SHOW = metadata_show
         sickbeard.METADATA_EPISODE = metadata_episode
-
+        
         sickbeard.metadata_generator = metadata.getMetadataClass(sickbeard.METADATA_TYPE)
 
         sickbeard.ART_POSTER = art_poster
         sickbeard.ART_FANART = art_fanart
         sickbeard.ART_THUMBNAILS = art_thumbnails
         sickbeard.ART_SEASON_THUMBNAILS = art_season_thumbnails
-
+        
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = newQuality
@@ -963,9 +963,10 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
+    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None):
+                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
+						  use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
 
         results = []
 
@@ -989,16 +990,40 @@ class ConfigNotifications:
         else:
             xbmc_update_full = 0
 
+        if use_xbmc == "on":
+            use_xbmc = 1
+        else:
+            use_xbmc = 0
+            
+        if growl_notify_onsnatch == "on":
+            growl_notify_onsnatch = 1
+        else:
+            growl_notify_onsnatch = 0
+
+        if growl_notify_ondownload == "on":
+            growl_notify_ondownload = 1
+        else:
+            growl_notify_ondownload = 0
         if use_growl == "on":
             use_growl = 1
         else:
             use_growl = 0
 
+        if twitter_notify_onsnatch == "on":
+            twitter_notify_onsnatch = 1
+        else:
+            twitter_notify_onsnatch = 0
+
+        if twitter_notify_ondownload == "on":
+            twitter_notify_ondownload = 1
+        else:
+            twitter_notify_ondownload = 0
         if use_twitter == "on":
             use_twitter = 1
         else:
             use_twitter = 0
 
+        sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
@@ -1008,10 +1033,14 @@ class ConfigNotifications:
         sickbeard.XBMC_PASSWORD = xbmc_password
 
         sickbeard.USE_GROWL = use_growl
+        sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
+        sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
 
         sickbeard.USE_TWITTER = use_twitter
+        sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
+        sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
 
         sickbeard.save_config()
 
