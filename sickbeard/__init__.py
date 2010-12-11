@@ -29,7 +29,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import eztv, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble, newzbin
+from providers import ezrss, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, queue, scheduler
@@ -118,7 +118,6 @@ TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
 TVDB_API_PARMS = {}
 
-USE_NZB = False
 NZB_METHOD = None
 NZB_DIR = None
 USENET_RETENTION = None
@@ -133,7 +132,7 @@ MIN_BACKLOG_SEARCH_FREQUENCY = 7
 DEFAULT_SEARCH_FREQUENCY = 60
 DEFAULT_BACKLOG_SEARCH_FREQUENCY = 21
 
-USE_TORRENT = False
+EZRSS = False
 TORRENT_DIR = None
 
 RENAME_EPISODES = False
@@ -291,7 +290,7 @@ def initialize(consoleLogging=True):
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, \
                 airingList, comingList, loadingShowList, SOCKET_TIMEOUT, \
-                NZBS, NZBS_UID, NZBS_HASH, USE_NZB, USE_TORRENT, TORRENT_DIR, USENET_RETENTION, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
@@ -382,8 +381,6 @@ def initialize(consoleLogging=True):
 
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
 
-        USE_NZB = bool(check_setting_int(CFG, 'General', 'use_nzb', 1))
-        USE_TORRENT = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
 
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
@@ -402,6 +399,9 @@ def initialize(consoleLogging=True):
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
+
+        EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
+        EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
 
         TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
         TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
@@ -725,7 +725,6 @@ def save_config():
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     new_config['General']['backlog_search_frequency'] = int(BACKLOG_SEARCH_FREQUENCY)
-    new_config['General']['use_nzb'] = int(USE_NZB)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['season_folders_format'] = SEASON_FOLDERS_FORMAT
@@ -740,7 +739,6 @@ def save_config():
     new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
-    new_config['General']['use_torrent'] = int(USE_TORRENT)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
     new_config['General']['metadata_type'] = METADATA_TYPE
     new_config['General']['metadata_show'] = int(METADATA_SHOW)
@@ -762,6 +760,9 @@ def save_config():
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
     new_config['Blackhole']['torrent_dir'] = TORRENT_DIR
+
+    new_config['EZRSS'] = {}
+    new_config['EZRSS']['ezrss'] = int(EZRSS)
 
     new_config['TVBinz'] = {}
     new_config['TVBinz']['tvbinz'] = int(TVBINZ)
