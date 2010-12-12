@@ -27,7 +27,7 @@ from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
                  "dirfix", "samplefix", "nfofix", "dvdextras",
-                 "sample", "extras", "special", "dubbed", "german",
+                 "sample", "extras", "dubbed", "german",
                 "french", "core2hd")
 
 def filterBadReleases(name):
@@ -64,6 +64,9 @@ def sanitizeSceneName (name):
     return name
 
 def sceneToNormalShowNames(name):
+
+    if not name:
+        return []
 
     name_list = [name]
     
