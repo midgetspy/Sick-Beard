@@ -433,12 +433,18 @@ class PostProcessor(object):
     
     def _get_ep_obj(self, tvdb_id, season, episodes):
 
+        show_obj = None
+
         self._log(u"Loading show object for tvdb_id "+str(tvdb_id), logger.DEBUG)
         # find the show in the showlist
         try:
             show_obj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
         except exceptions.MultipleShowObjectsException:
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
+
+        if not show_obj:
+            self._log(u"This show isn't in your list, you need to add it to SB before post-processing an episode", logger.ERROR)
+            raise exceptions.PostProcessingFailed()
 
         root_ep = None
         for cur_episode in episodes:
