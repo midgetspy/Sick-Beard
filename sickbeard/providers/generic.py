@@ -165,6 +165,12 @@ class GenericProvider:
     def _get_episode_search_strings(self, ep_obj):
         return []
     
+    def _get_title_and_url(self, item):
+        title = item.findtext('title')
+        url = item.findtext('link').replace('&amp;','&')
+        
+        return (title, url)
+    
     def findEpisode (self, episode, manualSearch=False):
 
         self._checkAuth()
@@ -188,8 +194,7 @@ class GenericProvider:
 
         for item in itemList:
 
-            title = item.findtext('title')
-            url = item.findtext('link').replace('&amp;','&')
+            (title, url) = self._get_title_and_url(item)
 
             quality = self.getQuality(item)
 

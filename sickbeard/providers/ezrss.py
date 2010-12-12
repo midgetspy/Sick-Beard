@@ -101,26 +101,31 @@ class EZRSSProvider(generic.TorrentProvider):
         results = []
 
         for curItem in items:
-            title = curItem.findtext('title')
-            url = curItem.findtext('link')
-
-            new_title = self._extract_name_from_url(url)
-            if new_title:
-                title = new_title
-                logger.log(u"Extracted the name "+title+" from the torrent link", logger.DEBUG)
-    
+            
+            (title, url) = self._get_title_and_url(curItem)
+            
             if not title or not url:
                 logger.log(u"The XML returned from the EZRSS RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
                 continue
-    
-            url = url.replace('&amp;','&')
     
             results.append(curItem)
 
         return results
 
+    def _get_title_and_url(self, item):
+        title = item.findtext('title')
+        url = item.findtext('link').replace('&amp;','&')
+        
+        new_title = self._extract_name_from_url(url)
+        if new_title:
+            title = new_title
+            logger.log(u"Extracted the name "+title+" from the torrent link", logger.DEBUG)
+
+        return (title, url)
+
     def _extract_name_from_url(self, url):
         name_regex = '.*/(.*)\.\[.*]\.torrent$'
+        logger.log(u"Comparing "+name_regex+" against "+url, logger.DEBUG)
         match = re.match(name_regex, url, re.I)
         if match:
             return match.group(1)
