@@ -65,6 +65,9 @@ def sanitizeSceneName (name):
 
 def sceneToNormalShowNames(name):
 
+    if not name:
+        return []
+
     name_list = [name]
     
     # use both and and &
