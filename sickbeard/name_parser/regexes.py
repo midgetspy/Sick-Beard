@@ -19,18 +19,6 @@
 # all regexes are case insensitive
 
 ep_regexes = [
-              ('scene_date_format',
-               # Show.Name.2010.11.23.Source.Quality.Etc-Group
-               # Show Name - 2010-11-23 - Ep Name
-               '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
-               (?P<air_year>\d{4})[\. _-]+                 # 2010 and separator
-               (?P<air_month>\d{2})[\. _-]+                # 11 and separator
-               (?P<air_day>\d{2})[\. _-]+                  # 23 and separator
-               (?P<extra_info>.+?)                         # Source.Quality.Etc
-               (-(?P<release_group>.+))?$                  # Group
-               '''),
-              
               ('standard_repeat',
                # Show.Name.S01E02.S01E03.Source.Quality.Etc-Group
                # Show Name - S01E02 - S01E03 - S01E04 - Ep Name
@@ -87,6 +75,18 @@ ep_regexes = [
                (-(?P<release_group>.+))?$                  # Group
                '''),
         
+              ('scene_date_format',
+               # Show.Name.2010.11.23.Source.Quality.Etc-Group
+               # Show Name - 2010-11-23 - Ep Name
+               '''
+               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
+               (?P<air_year>\d{4})[\. _-]+                 # 2010 and separator
+               (?P<air_month>\d{2})[\. _-]+                # 11 and separator
+               (?P<air_day>\d{2})[\. _-]+                  # 23 and separator
+               (?P<extra_info>.+?)                         # Source.Quality.Etc
+               (-(?P<release_group>.+))?$                  # Group
+               '''),
+              
               ('bare',
                # Show.Name.102.Source.Quality.Etc-Group
                '''

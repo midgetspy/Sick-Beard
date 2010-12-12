@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath('..'))
 
 from sickbeard.name_parser import parser
 
-DEBUG = VERBOSE = False
+DEBUG = VERBOSE = True
 
 simple_test_cases = {
               'standard': {
@@ -18,6 +18,7 @@ simple_test_cases = {
               'Show.Name.S01.E02.E03': parser.ParseResult(None, 'Show Name', 1, [2,3]),
               'Show.Name-0.2010.S01E02.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name-0 2010', 1, [2], 'Source.Quality.Etc', 'Group'),
               'S01E02 Ep Name': parser.ParseResult(None, None, 1, [2], 'Ep Name'),
+              'Show Name - S06E01 - 2009-12-20 - Ep Name': parser.ParseResult(None, 'Show Name', 6, [1], '2009-12-20 - Ep Name'),
               },
               
               'fov': {
