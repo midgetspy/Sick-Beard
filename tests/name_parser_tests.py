@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath('..'))
 
 from sickbeard.name_parser import parser
 
-DEBUG = VERBOSE = True
+DEBUG = VERBOSE = False
 
 simple_test_cases = {
               'standard': {
