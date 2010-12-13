@@ -503,6 +503,8 @@ class PostProcessor(object):
         if ep_quality != common.Quality.UNKNOWN:
             logger.log(self.file_name+u" looks like it has quality "+common.Quality.qualityStrings[ep_quality]+", using that", logger.DEBUG)
             return ep_quality
+        
+        return ep_quality
     
     def _run_extra_scripts(self, ep_obj):
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
