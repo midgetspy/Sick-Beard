@@ -259,8 +259,7 @@ class PostProcessor(object):
         """
         Look up the NZB name in the history and see if it contains a record for self.nzb_name
         
-        Returns a (tvdb_id, season, [episodes]) tuple. The first two may be None and episodes may be []
-        if none were found.
+        Returns a (tvdb_id, season, []) tuple. The first two may be None if none were found.
         """
         
         to_return = (None, None, [])
@@ -281,16 +280,9 @@ class PostProcessor(object):
     
             tvdb_id = int(sql_results[0]["showid"])
             season = int(sql_results[0]["season"])
-            episodes = []
-    
-            for cur_result in sql_results:
-                episodes.append(int(cur_result["episode"]))            
 
             self.in_history = True
-            if len(set(episodes)) == 1:
-                to_return = (tvdb_id, season, list(set(episodes)))
-            else:
-                to_return = (tvdb_id, season, [])
+            to_return = (tvdb_id, season, [])
             self._log("Found result in history: "+str(to_return), logger.DEBUG)
             return to_return
         
