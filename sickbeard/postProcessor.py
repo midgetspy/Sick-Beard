@@ -271,10 +271,10 @@ class PostProcessor(object):
         names = []
         if self.nzb_name:
             names.append(self.nzb_name)
+            if '.' in self.nzb_name:
+                names.append(self.nzb_name.rpartition(".")[0])
         if self.folder_name:
             names.append(self.folder_name)
-        if '.' in self.nzb_name:
-            names.append(self.nzb_name.rpartition(".")[0])
 
         myDB = db.DBConnection()
     
