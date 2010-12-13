@@ -268,8 +268,10 @@ class PostProcessor(object):
             self.in_history = False
             return to_return
     
-        names = [self.nzb_name, self.nzb_name.rpartition(".")[0], self.folder_name]
-    
+        names = [self.nzb_name, self.folder_name]
+        if '.' in self.nzb_name:
+            names.append(self.nzb_name.rpartition(".")[0])
+
         myDB = db.DBConnection()
     
         for curName in names:
