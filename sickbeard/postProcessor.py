@@ -265,11 +265,11 @@ class PostProcessor(object):
         
         to_return = (None, None, [])
         
-        if not self.nzb_name:
+        if not self.nzb_name and not self.folder_name:
             self.in_history = False
             return to_return
     
-        names = [self.nzb_name, self.nzb_name.rpartition(".")[0]]
+        names = [self.nzb_name, self.nzb_name.rpartition(".")[0], self.folder_name]
     
         myDB = db.DBConnection()
     
@@ -287,8 +287,12 @@ class PostProcessor(object):
                 episodes.append(int(cur_result["episode"]))            
 
             self.in_history = True
-            self._log("Found result in history: "+str(tvdb_id)+", "+str(season)+", "+str(set(episodes)), logger.DEBUG)
-            return (tvdb_id, season, list(set(episodes)))
+            if len(set(episodes)) == 1:
+                to_return = (tvdb_id, season, list(set(episodes)))
+            else:
+                to_return = (tvdb_id, season, [])
+            self._log("Found result in history: "+str(to_return), logger.DEBUG)
+            return to_return
         
         self.in_history = False
         return to_return
