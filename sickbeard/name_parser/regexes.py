@@ -100,7 +100,7 @@ ep_regexes = [
               ('stupid',
                # tpz-abc102
                '''
-               (?P<release_group>.+?)-[A-Za-z]+?[\. ]?     # tpz-abc
+               (?P<release_group>.+?)-\w+?[\. ]?     # tpz-abc
                (?P<season_num>\d{1,2})                     # 1
                (?P<ep_num>\d{2})$                          # 02
                '''),
