@@ -267,8 +267,12 @@ class PostProcessor(object):
         if not self.nzb_name and not self.folder_name:
             self.in_history = False
             return to_return
-    
-        names = [self.nzb_name, self.folder_name]
+
+        names = []
+        if self.nzb_name:
+            names.append(self.nzb_name)
+        if self.folder_name:
+            names.append(self.folder_name)
         if '.' in self.nzb_name:
             names.append(self.nzb_name.rpartition(".")[0])
 
