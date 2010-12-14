@@ -594,7 +594,10 @@ class PostProcessor(object):
         # if renaming is turned on then rename the episode (and associated files, if necessary)
         if sickbeard.RENAME_EPISODES:
             new_file_name = helpers.sanitizeFileName(ep_obj.prettyName())
-            self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
+            try:
+                self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to rename the files")
 
             # remember the new name of the file
             new_file_path = ek.ek(os.path.join, self.folder_path, new_file_name + '.' + self.file_name.rpartition('.')[-1])
@@ -604,7 +607,10 @@ class PostProcessor(object):
 
         # delete the existing file (and company)
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            self._delete(cur_ep.location, associated_files=True)
+            try:
+                self._delete(cur_ep.location, associated_files=True)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
         dest_path = self._find_ep_destination_folder(ep_obj)
@@ -613,13 +619,19 @@ class PostProcessor(object):
         # if the dir doesn't exist (new season folder) then make it
         if not ek.ek(os.path.isdir, dest_path):
             self._log(u"Season folder didn't exist, creating it", logger.DEBUG)
-            ek.ek(os.mkdir, dest_path)
+            try:
+                ek.ek(os.mkdir, dest_path)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+str(dest_path))
 
-        # move the episode to the show dir
-        if sickbeard.KEEP_PROCESSED_DIR:
-            self._copy(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
-        else:
-            self._move(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
+        try:
+            # move the episode to the show dir
+            if sickbeard.KEEP_PROCESSED_DIR:
+                self._copy(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
+            else:
+                self._move(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
+        except OSError, IOError:
+            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         
         # update the statuses before we rename so the quality goes into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
