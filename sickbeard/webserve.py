@@ -464,8 +464,7 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    metadata_show=None, metadata_episode=None, art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None,                    
-                    metadata_type=None ):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
 
         results = []
 
@@ -483,36 +482,6 @@ class ConfigGeneral:
             launch_browser = 1
         else:
             launch_browser = 0
-
-        if metadata_show == "on":
-            metadata_show = 1
-        else:
-            metadata_show = 0
-
-        if metadata_episode == "on":
-            metadata_episode = 1
-        else:
-            metadata_episode = 0
-
-        if art_poster == "on":
-            art_poster = 1
-        else:
-            art_poster = 0
-
-        if art_fanart == "on":
-            art_fanart = 1
-        else:
-            art_fanart = 0
-
-        if art_thumbnails == "on":
-            art_thumbnails = 1
-        else:
-            art_thumbnails = 0
-
-        if art_season_thumbnails == "on":
-            art_season_thumbnails = 1
-        else:
-            art_season_thumbnails = 0
 
         if season_folders_default == "on":
             season_folders_default = 1
@@ -562,17 +531,10 @@ class ConfigGeneral:
 
         sickbeard.LAUNCH_BROWSER = launch_browser
 
-        sickbeard.METADATA_TYPE = metadata_type
-        sickbeard.METADATA_SHOW = metadata_show
-        sickbeard.METADATA_EPISODE = metadata_episode
-        
-        sickbeard.metadata_generator = metadata.getMetadataClass(sickbeard.METADATA_TYPE)
+        sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
+        sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
+        sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
 
-        sickbeard.ART_POSTER = art_poster
-        sickbeard.ART_FANART = art_fanart
-        sickbeard.ART_THUMBNAILS = art_thumbnails
-        sickbeard.ART_SEASON_THUMBNAILS = art_season_thumbnails
-        
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = newQuality

@@ -48,13 +48,33 @@ class MediaBrowserMetadata(generic.GenericMetadata):
     show_root/metadata/show - 1x01 - episode.jpg   (episode thumb)
     """
     
-    def __init__(self):
-        generic.GenericMetadata.__init__(self)
+    def __init__(self,
+                 show_metadata=False,
+                 episode_metadata=False,
+                 poster=False,
+                 fanart=False,
+                 episode_thumbnails=False,
+                 season_thumbnails=False):
+
+        generic.GenericMetadata.__init__(self,
+                                         show_metadata,
+                                         episode_metadata,
+                                         poster,
+                                         fanart,
+                                         episode_thumbnails,
+                                         season_thumbnails)
         
         self._show_file_name = 'series.xml'
         self._ep_nfo_extension = 'xml'
 
         self.name = 'MediaBrowser'
+
+        self.eg_show_metadata = "series.xml"
+        self.eg_episode_metadata = "metadata\\<i>filename</i>.xml"
+        self.eg_fanart = "fanart.jpg"
+        self.eg_poster = "folder.jpg"
+        self.eg_episode_thumbnails = "metadata\\<i>filename</i>.jpg"
+        self.eg_season_thumbnails = "Season##\\folder.jpg"
     
     def get_episode_file_path(self, ep_obj):
         """

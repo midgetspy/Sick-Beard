@@ -3,6 +3,7 @@
 #from sickbeard.common import *
 #from sickbeard import config
 #from sickbeard import metadata
+#from sickbeard.metadata.generic import GenericMetadata
 #set global $title  = "Config - General"
 #set global $header = "General Configuration"
 
@@ -113,10 +114,10 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 							<label class="clearfix" for="metadataTarget">
 								<span class="component-title jumbo">Select Target:</span>
 								<span class="component-desc">
-									#set $m_dict = $metadata.getMetadataGeneratorList()
-									<select id="metadataType" name="metadata_type">
-									#for $cur_generator in $m_dict:
-									<option value="$cur_generator" #if $cur_generator == $sickbeard.METADATA_TYPE then "SELECTED" else ""#>$m_dict[$cur_generator]<br />
+									#set $m_dict = $metadata.get_metadata_generator_dict()
+									<select id="metadataType">
+									#for ($cur_name, $cur_generator) in $m_dict.items():
+									<option value="$GenericMetadata.makeID($cur_name)">$cur_name<br />
 									#end for
 									</select>
 								</span>		
@@ -130,60 +131,29 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 						</div>
 						<div class="clearfix"></div>
 						
-<div class="metadataDiv" id="mediabrowser">		
+#for ($cur_name, $cur_generator) in $m_dict.items(): 
+#set $cur_metadata_inst = $sickbeard.metadata_provider_dict[$cur_generator.name]
+#set $cur_id = $GenericMetadata.makeID($cur_name)
+<div class="metadataDiv" id="$cur_id">
 	<div class="metadata_options">
-		<label for="metadata_show"><input name="metadata_show" type="checkbox" id="metadata_show" #if $sickbeard.METADATA_SHOW then "CHECKED" else ""#/>&nbsp;Show Metadata</label>
-		<label for="metadata_episode"><input name="metadata_episode" type="checkbox" id="metadata_episode" #if $sickbeard.METADATA_EPISODE then "CHECKED" else ""#/>&nbsp;Episode Metadata</label>
-		<label for="art_fanart"><input name="art_fanart" type="checkbox" id="art_fanart" #if $sickbeard.ART_FANART then "CHECKED" else ""#/>&nbsp;Show Fanart Image</label>		
-		<label for="art_poster"><input name="art_poster" type="checkbox" id="art_poster" #if $sickbeard.ART_POSTER then "CHECKED" else ""#/>&nbsp;Show Folder Image</label>
-		<label for="art_thumbnails"><input name="art_thumbnails" type="checkbox" id="art_thumbnails" #if $sickbeard.ART_THUMBNAILS then "CHECKED" else ""#/>&nbsp;Episode Thumbnail</label>	
-		<label for="art_season_thumbnails"><input name="art_season_thumbnails" type="checkbox" id="art_season_thumbnails" #if $sickbeard.ART_SEASON_THUMBNAILS then "CHECKED" else ""#/>&nbsp;Season Thumbnail</label>		
+		<label for="metadata_show"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_show_metadata" #if $cur_metadata_inst.show_metadata then "CHECKED" else ""#/>&nbsp;Show Metadata</label>
+		<label for="metadata_episode"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_episode_metadata" #if $cur_metadata_inst.episode_metadata then "CHECKED" else ""#/>&nbsp;Episode Metadata</label>
+		<label for="art_fanart"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_fanart" #if $cur_metadata_inst.fanart then "CHECKED" else ""#/>&nbsp;Show Fanart Image</label>		
+		<label for="art_poster"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_poster" #if $cur_metadata_inst.poster then "CHECKED" else ""#/>&nbsp;Show Folder Image</label>
+		<label for="art_thumbnails"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_episode_thumbnails" #if $cur_metadata_inst.episode_thumbnails then "CHECKED" else ""#/>&nbsp;Episode Thumbnail</label>	
+		<label for="art_season_thumbnails"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_season_thumbnails" #if $cur_metadata_inst.season_thumbnails then "CHECKED" else ""#/>&nbsp;Season Thumbnail</label>		
 	</div>	
 	<div class="metadata_example">
-		<label for="metadata_show">#if $sickbeard.METADATA_SHOW then "series.xml" else "<span class='disabled'>series.xml</span>"#</label>
-		<label for="metadata_episode">#if $sickbeard.METADATA_EPISODE then "metadata\\<i>filename</i>.xml" else "<span class='disabled'>metadata\\<i>filename</i>.xml</span>"#</label>
-		<label for="art_fanart">#if $sickbeard.ART_FANART then "fanart.jpg" else "<span class='disabled'>fanart.jpg</span>"#</label>		
-		<label for="art_poster">#if $sickbeard.ART_POSTER then "folder.jpg" else "<span class='disabled'>folder.jpg</span>"#</label>
-		<label for="art_thumbnails">#if $sickbeard.ART_THUMBNAILS then "metadata\\<i>filename</i>.jpg" else "<span class='disabled'>metadata\\<i>filename</i>.jpg</span>"#</label>	
-		<label for="art_season_thumbnails">#if $sickbeard.ART_SEASON_THUMBNAILS then "Season##\\folder.jpg" else "<span class='disabled'>Season##\\folder.jpg</span>"#</label>		
-	</div>	
-</div>	
-<div class="metadataDiv" id="ps3">		
-	<div class="metadata_options">
-		<label for="metadata_show"><input name="metadata_show" type="checkbox" id="metadata_show" #if $sickbeard.METADATA_SHOW then "CHECKED" else ""# disabled/>&nbsp;Show Metadata</label>
-		<label for="metadata_episode"><input name="metadata_episode" type="checkbox" id="metadata_episode" #if $sickbeard.METADATA_EPISODE then "CHECKED" else ""# disabled/>&nbsp;Episode Metadata</label>
-		<label for="art_fanart"><input name="art_fanart" type="checkbox" id="art_fanart" #if $sickbeard.ART_FANART then "CHECKED" else ""#/>&nbsp;Show Fanart Image</label>		
-		<label for="art_poster"><input name="art_poster" type="checkbox" id="art_poster" #if $sickbeard.ART_POSTER then "CHECKED" else ""#/>&nbsp;Show Folder Image</label>
-		<label for="art_thumbnails"><input name="art_thumbnails" type="checkbox" id="art_thumbnails" #if $sickbeard.ART_THUMBNAILS then "CHECKED" else ""#/>&nbsp;Episode Thumbnail</label>	
-		<label for="art_season_thumbnails"><input name="art_season_thumbnails" type="checkbox" id="art_season_thumbnails" #if $sickbeard.ART_SEASON_THUMBNAILS then "CHECKED" else ""#/>&nbsp;Season Thumbnail</label>		
-	</div>	
-	<div class="metadata_example">
-		<label for="metadata_show">#if $sickbeard.METADATA_SHOW then "<i>not supported</i>" else "&nbsp;"#</label>
-		<label for="metadata_episode">#if $sickbeard.METADATA_EPISODE then "<i>not supported</i>" else "&nbsp;"#</label>
-		<label for="art_fanart">#if $sickbeard.ART_FANART then "fanart.jpg" else "<span class='disabled'>fanart.jpg</span>"#</label>		
-		<label for="art_poster">#if $sickbeard.ART_POSTER then "cover.jpg" else "<span class='disabled'>cover.jpg</span>"#</label>
-		<label for="art_thumbnails">#if $sickbeard.ART_THUMBNAILS then "Season##\\<i>filename</i>.ext.cover.jpg" else "<span class='disabled'>Season##\\<i>filename</i>.ext.cover.jpg</span>"#</label>	
-		<label for="art_season_thumbnails">#if $sickbeard.ART_SEASON_THUMBNAILS then "season##.tbn" else "<span class='disabled'>season##.tbn</span>"#</label>		
-	</div>	
-</div>	
-<div class="metadataDiv" id="xbmc">		
-	<div class="metadata_options">
-		<label for="metadata_show"><input name="metadata_show" type="checkbox" id="metadata_show" #if $sickbeard.METADATA_SHOW then "CHECKED" else ""#/>&nbsp;Show Metadata</label>
-		<label for="metadata_episode"><input name="metadata_episode" type="checkbox" id="metadata_episode" #if $sickbeard.METADATA_EPISODE then "CHECKED" else ""#/>&nbsp;Episode Metadata</label>
-		<label for="art_fanart"><input name="art_fanart" type="checkbox" id="art_fanart" #if $sickbeard.ART_FANART then "CHECKED" else ""#/>&nbsp;Show Fanart Image</label>		
-		<label for="art_poster"><input name="art_poster" type="checkbox" id="art_poster" #if $sickbeard.ART_POSTER then "CHECKED" else ""#/>&nbsp;Show Folder Image</label>
-		<label for="art_thumbnails"><input name="art_thumbnails" type="checkbox" id="art_thumbnails" #if $sickbeard.ART_THUMBNAILS then "CHECKED" else ""#/>&nbsp;Episode Thumbnail</label>	
-		<label for="art_season_thumbnails"><input name="art_season_thumbnails" type="checkbox" id="art_season_thumbnails" #if $sickbeard.ART_SEASON_THUMBNAILS then "CHECKED" else ""#/>&nbsp;Season Thumbnail</label>		
-	</div>	
-	<div class="metadata_example">
-		<label for="metadata_show">#if $sickbeard.METADATA_SHOW then "tvshow.nfo" else "<span class='disabled'>tvshow.nfo</span>"#</label>
-		<label for="metadata_episode">#if $sickbeard.METADATA_EPISODE then "Season##\\<i>filename</i>.nfo" else "<span class='disabled'>Season##\\<i>filename</i>.nfo</span>"#</label>
-		<label for="art_fanart">#if $sickbeard.ART_FANART then "fanart.jpg" else "<span class='disabled'>fanart.jpg</span>"#</label>		
-		<label for="art_poster">#if $sickbeard.ART_POSTER then "folder.jpg" else "<span class='disabled'>folder.jpg</span>"#</label>
-		<label for="art_thumbnails">#if $sickbeard.ART_THUMBNAILS then "season##.tbn" else "<span class='disabled'>season##.tbn</span>"#</label>	
-		<label for="art_season_thumbnails">#if $sickbeard.ART_SEASON_THUMBNAILS then "Season##\\<i>filename</i>.tbn" else "<span class='disabled'>Season##\\<i>filename</i>.tbn</span>"#</label>		
-	</div>	
-</div>					
+		<label for="metadata_show"><span id="${cur_id}_eg_show_metadata">$cur_metadata_inst.eg_show_metadata</span></label>
+		<label for="metadata_episode"><span id="${cur_id}_eg_episode_metadata">$cur_metadata_inst.eg_episode_metadata</span></label>
+		<label for="art_fanart"><span id="${cur_id}_eg_fanart">$cur_metadata_inst.eg_fanart</span></label>		
+		<label for="art_poster"><span id="${cur_id}_eg_poster">$cur_metadata_inst.eg_poster</span></label>
+		<label for="art_thumbnails"><span id="${cur_id}_eg_episode_thumbnails">$cur_metadata_inst.eg_episode_thumbnails</span></label>	
+		<label for="art_season_thumbnails"><span id="${cur_id}_eg_season_thumbnails">$cur_metadata_inst.eg_season_thumbnails</span></label>		
+	</div>
+	<input type="hidden" name="${cur_id}_data" id="${cur_id}_data" value="$cur_metadata_inst.get_config()">
+</div>
+#end for
 
 						<div class="clearfix"></div>
 
