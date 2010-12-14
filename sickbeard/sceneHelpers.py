@@ -25,10 +25,18 @@ import datetime
 
 from name_parser.parser import NameParser, InvalidNameException
 
+# AW: Deleted german and dubbed
 resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
                  "dirfix", "samplefix", "nfofix", "dvdextras",
-                 "sample", "extras", "dubbed", "german",
-                "french", "core2hd")
+                 "sample", "extras",
+                 # AW: commented out: "dubbed",
+                 # AW: commented out: "german",
+                 # AW: added " sub "
+                 " sub ",
+                 "french", "core2hd")
+
+# AW: Added a good results filter
+goodResultsFilters = ("german", "ger")
 
 def filterBadReleases(name):
 
@@ -51,6 +59,29 @@ def filterBadReleases(name):
 
     return True
 
+# AW: Added a filterGoodReleases method
+def filterGoodReleases(name):
+
+    try:
+        fp = NameParser(name)
+        parse_result = fp.parse(name)
+    except InvalidNameException:
+        logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
+        return False
+
+    # if there's no info after the season info then assume it's bad (english)
+    if not parse_result.extra_info:
+        logger.log(u"No info after the season info for "+name+", ignoring it", logger.MESSAGE)
+        return False
+
+    # if any of the bad strings are in the name then say no
+    for x in goodResultsFilters:
+        if re.search('(^|[\W_])'+x+'($|[\W_])', parse_result.extra_info, re.I):
+            logger.log(u"Good scene release: "+name+" contains "+x+", adding it", logger.MESSAGE)
+            return True
+        else:
+            logger.log(u"Bad scene release: "+name+" does not contain "+x+", ignoring it", logger.MESSAGE)
+
 def sanitizeSceneName (name):
     for x in ",:()'!":
         name = name.replace(x, "")
@@ -69,7 +100,7 @@ def sceneToNormalShowNames(name):
         return []
 
     name_list = [name]
-    
+
     # use both and and &
     new_name = re.sub('(?i)([\. ])and([\. ])', '\\1&\\2', name, re.I)
     if new_name not in name_list:
@@ -80,7 +111,7 @@ def sceneToNormalShowNames(name):
     for cur_name in name_list:
         # add brackets around the year
         results.append(re.sub('(\D)(\d{4})$', '\\1(\\2)', cur_name))
-    
+
         # add brackets around the country
         country_match_str = '|'.join(common.countryList.values())
         results.append(re.sub('(?i)([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
@@ -103,10 +134,10 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
 
     if show.is_air_by_date:
         numseasons = 0
-        
-        # the search string for air by date shows is just 
+
+        # the search string for air by date shows is just
         seasonStrings = [segment]
-    
+
     else:
         numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
         numseasons = int(numseasonsSQlResult[0][0])
@@ -131,7 +162,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
             else:
                 for cur_season in seasonStrings:
                     toReturn.append(curShow + "." + cur_season)
-        
+
         # nzbmatrix is special, we build a search string just for them
         elif extraSearchType == "nzbmatrix":
             if numseasons == 1:
@@ -222,7 +253,11 @@ def isGoodResult(name, show, log=True):
         match = re.search(curRegex, name, re.I)
 
         if match:
-            return True
+            # AW: Check if it has the correct language
+            if filterGoodReleases(name):
+                return True
+            else:
+                return False
 
     if log:
         logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")

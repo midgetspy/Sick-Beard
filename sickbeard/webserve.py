@@ -1093,7 +1093,7 @@ class NewHomeAddShows:
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
 
         params = {'seriesname': name.encode('utf-8'),
-                  'language': 'en'}
+                  'language': LANGUAGE_SHORT}
 
         finalURL = baseURL + urllib.urlencode(params)
 

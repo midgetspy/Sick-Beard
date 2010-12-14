@@ -230,6 +230,7 @@ class QueueItemAdd(QueueItem):
             self.show.quality = sickbeard.QUALITY_DEFAULT
             self.show.seasonfolders = sickbeard.SEASON_FOLDERS_DEFAULT
             self.show.paused = False
+            self.show.language = sickbeard.LANGUAGE_SHORT
 
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to add show due to an error with TVDB: "+str(e).decode('utf-8'), logger.ERROR)

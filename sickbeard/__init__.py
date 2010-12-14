@@ -88,6 +88,8 @@ WEB_PASSWORD = None
 WEB_HOST = None
 WEB_IPV6 = None
 
+LANGUAGE_SHORT = None
+
 LAUNCH_BROWSER = None
 CACHE_DIR = None
 
@@ -304,7 +306,10 @@ def initialize(consoleLogging=True):
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
                 ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                LANGUAGE_SHORT
+                # AW: added LANGUAGE_SHORT
+
 
 
         if __INITIALIZED__:
@@ -349,10 +354,13 @@ def initialize(consoleLogging=True):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
 
+        # AW: Language settings
+        LANGUAGE_SHORT = check_setting_str(CFG, 'General', 'language_short', 'en')
+
         # Set our common tvdb_api options here
         TVDB_API_PARMS = {'cache': True,
                           'apikey': TVDB_API_KEY,
-                          'language': 'en',
+                          'language': LANGUAGE_SHORT,
                           'cache_dir': False}
         if CACHE_DIR:
             TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
@@ -472,10 +480,10 @@ def initialize(consoleLogging=True):
             METADATA_EPISODE = TEMP_CREATE_METADATA
         except:
             pass
-        
+
         try:
             TEMP_CREATE_IMAGES = bool(int(CFG['General']['create_images']))
-            ART_POSTER = TEMP_CREATE_IMAGES 
+            ART_POSTER = TEMP_CREATE_IMAGES
             ART_FANART = TEMP_CREATE_IMAGES
             ART_THUMBNAILS = TEMP_CREATE_IMAGES
             ART_SEASON_THUMBNAILS = TEMP_CREATE_IMAGES
@@ -486,7 +494,7 @@ def initialize(consoleLogging=True):
         newznabProviderList = providers.getNewznabProviderList(newznabData)
 
         providerList = providers.makeProviderList()
-        
+
         metadata_generator = metadata.getMetadataClass(METADATA_TYPE)
 
         logger.initLogging(consoleLogging=consoleLogging)
@@ -754,7 +762,7 @@ def save_config():
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
-    
+
     new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
     new_config['General']['git_path'] = GIT_PATH
 

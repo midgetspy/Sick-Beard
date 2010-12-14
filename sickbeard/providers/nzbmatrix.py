@@ -69,8 +69,10 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "page": "download",
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
-                  "subcat": "6,41",
-                  "english": 1}
+                  "subcat": "6,41"}        
+        # AW: english = 1 only if lang is 'en'
+        if sickbeard.LANGUAGE_SHORT == 'en':
+            params['english'] = 1
 
         searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
@@ -149,7 +151,7 @@ class NZBMatrixCache(tvcache.TVCache):
         urlArgs = {'page': 'download',
                    'username': sickbeard.NZBMATRIX_USERNAME,
                    'apikey': sickbeard.NZBMATRIX_APIKEY,
-                   'english': 1,
+                   # AW: commented out: 'english': 1,
                    'scenename': 1,
                    'subcat': '6,41'}
 
