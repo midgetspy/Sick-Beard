@@ -230,27 +230,26 @@ class GenericProvider:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-	    if show.absolute_numbering:
-	    	if len(epInfo.episodenumbers) != 1:
+            if show.absolute_numbering:
+                if len(epInfo.episodenumbers) != 1:
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode, ignoring")
                     continue
                 
                 myDB = db.DBConnection()
                 
                 actual_episodes = []
-                for episodeNumber in epInfo.episodenumbers:
-                    sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [show.tvdbid, episodeNumber])
+                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [show.tvdbid, episodeNumber])
+                
+                if len(sql_results) > 0:
+                    actual_season = int(sql_results[0]["season"])
+                    actual_episodes = [int(sql_results[0]["episode"])]
                     
-                    if len(sql_results) > 0:
-                        actual_season = int(sql_results[0]["season"])
-                        actual_episodes.append(int(sql_results[0]["episode"]))
-                    
-                if len(actual_episodes) < 1:
+                if not len(actual_episodes):
                     logger.log(u"Tried to look up the real episode number for episode "+title+" but the database didn't give proper results, skipping it", logger.ERROR)
                     continue
             
             elif show.is_air_by_date:
-            	if epInfo.seasonnumber != -1 or len(epInfo.episodenumbers) != 1:
+                if epInfo.seasonnumber != -1 or len(epInfo.episodenumbers) != 1:
                     logger.log(u"This is supposed to be an air-by-date search but the result "+title+" didn't parse as one, skipping it", logger.DEBUG)
                     continue
                 

@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import StringIO, zlib, gzip
 import os.path, os, glob
 import urllib, urllib2
@@ -361,6 +360,12 @@ def listMediaFiles(dir):
 			files.append(fullCurFile)
 
 	return files
+
+def lookup_absolute(absolute_ep_num, show_obj):
+    epObj = t[self.tvdbid].absoluteEpisode(absEpNum)[0]
+    if epObj != None:
+        season = int(epObj["seasonnumber"])
+        translatedEpisodes.append( int(epObj["episodenumber"]) )
 
 if __name__ == '__main__':
 	import doctest
