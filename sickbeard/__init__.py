@@ -89,6 +89,8 @@ WEB_HOST = None
 WEB_IPV6 = None
 
 LANGUAGE_SHORT = None
+LANGUAGE_LONG = None
+RESULT_FILTERS = None
 
 LAUNCH_BROWSER = None
 CACHE_DIR = None
@@ -307,8 +309,7 @@ def initialize(consoleLogging=True):
                 METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
                 ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                LANGUAGE_SHORT
-                # AW: added LANGUAGE_SHORT
+                LANGUAGE_SHORT, LANGUAGE_LONG, RESULT_FILTERS
 
 
 
@@ -356,6 +357,10 @@ def initialize(consoleLogging=True):
 
         # AW: Language settings
         LANGUAGE_SHORT = check_setting_str(CFG, 'General', 'language_short', 'en')
+        LANGUAGE_LONG = check_setting_str(CFG, 'General', 'language_long', '')
+        
+        #AW: Result Filters put into config
+        RESULT_FILTERS = check_setting_str(CFG, 'General', 'result_filters', 'subpack nlsub swesub subbed subs dirfix samplefix nfofix dvdextras sample extras core2hd dubbed german french').split()
 
         # Set our common tvdb_api options here
         TVDB_API_PARMS = {'cache': True,
@@ -748,6 +753,9 @@ def save_config():
     new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
+    new_config['General']['language_long'] = LANGUAGE_LONG
+    new_config['General']['language_short'] = LANGUAGE_SHORT
+    new_config['General']['result_filters'] = ' '.join([x for x in RESULT_FILTERS])
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
     new_config['General']['metadata_type'] = METADATA_TYPE
     new_config['General']['metadata_show'] = int(METADATA_SHOW)
