@@ -127,3 +127,26 @@ def addShowsFromRootDir(dir):
             del sickbeard.loadingShowList[showDir]
 
     return returnStr
+
+class Flash:
+    _messages = []
+    _errors = []
+
+    def message(self, title, detail=''):
+        Flash._messages.append((title, detail))
+
+    def error(self, title, detail=''):
+        Flash._errors.append((title, detail))
+
+    def messages(self):
+        tempMessages = Flash._messages
+        Flash._messages = []
+        return tempMessages
+
+    def errors(self):
+        tempErrors = Flash._errors
+        Flash._errors = []
+        return tempErrors
+
+flash = Flash()
+

@@ -33,9 +33,6 @@ from sickbeard import exceptions, logger, db
 from sickbeard.common import *
 from sickbeard import tvcache
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
-
 class NZBsProvider(generic.NZBProvider):
 
 	def __init__(self):

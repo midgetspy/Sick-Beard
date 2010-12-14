@@ -29,9 +29,9 @@ import sickbeard
 
 import xml.etree.cElementTree as etree
 
-from lib.tvdb_api import tvdb_api, tvnamer, tvdb_exceptions
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
+from name_parser.parser import NameParser, InvalidNameException
+
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
@@ -143,6 +143,8 @@ class TVShow(object):
         return self.episodes[season][episode]
 
     def writeShowNFO(self):
+
+        result = False
 
         if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
@@ -371,26 +373,26 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
         try:
-            myParser = FileParser(file,self.absolute_numbering)
-            epInfo = myParser.parse()
-        except tvnamer_exceptions.InvalidFilename:
+            myParser = NameParser(absolute=self.absolute_numbering)
+            parse_result = myParser.parse(file)
+        except InvalidNameException:
             logger.log(u"Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 
-        if len(epInfo.episodenumbers) == 0:
+        if len(parse_result.episode_numbers) == 0:
             logger.log(u"No episode number found in "+file+", ignoring it", logger.ERROR)
             return None
 
         # for now lets assume that any episode in the show dir belongs to that show
-        season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
-        episodes = epInfo.episodenumbers
+        season = parse_result.season_number if parse_result.season_number != None else 1
+        episodes = parse_result.episode_numbers
         rootEp = None
 
         # if we have an air-by-date show then get the real season/episode numbers
-        if season == -1:
+        if parse_result.air_by_date:
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-                epObj = t[self.tvdbid].airedOn(episodes[0])[0]
+                epObj = t[self.tvdbid].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound, e:
@@ -761,7 +763,7 @@ class TVShow(object):
                 continue
 
             with rootEp.lock:
-                result = processTV.renameFile(rootEp.location, rootEp.prettyName())
+                result = helpers.rename_file(rootEp.location, rootEp.prettyName())
                 if result != False:
                     rootEp.location = result
                     for relEp in rootEp.relatedEps:
@@ -770,7 +772,7 @@ class TVShow(object):
             fileList = ek.ek(glob.glob, ek.ek(os.path.join, curEpDir, actualName[0] + "*").replace("[","*").replace("]","*"))
 
             for file in fileList:
-                result = processTV.renameFile(file, rootEp.prettyName())
+                result = helpers.rename_file(file, rootEp.prettyName())
                 if result == False:
                     logger.log(str(self.tvdbid) + ": Unable to rename file "+file, logger.ERROR)
 
@@ -1261,6 +1263,7 @@ class TVEpisode:
         if not sickbeard.metadata_generator:
             return False
 
+        logger.log(u"Metadata file is "+sickbeard.metadata_generator.get_episode_file_path(self), logger.DEBUG)
         if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_episode_file_path(self)):
             logger.log(u"Episode metadata file already exists, not writing a new one", logger.DEBUG)
             return False
@@ -1409,7 +1412,7 @@ class TVEpisode:
             naming_quality = sickbeard.NAMING_QUALITY
 
         if ((self.show.genre and "Talk Show" in self.show.genre) or self.show.air_by_date) and sickbeard.NAMING_DATES:
-            goodEpString = str(self.airdate)
+            goodEpString = self.airdate.strftime("%Y.%m.%d")
         elif self.show.absolute_numbering and self.absolute_episode != None and self.absolute_episode != 0:
             goodEpString = "%03d" % int(self.absolute_episode)
         else:

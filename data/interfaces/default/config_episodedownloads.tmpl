@@ -41,14 +41,6 @@ All non-absolute folder locations are relative to $sickbeard.PROG_DIR<br /><br /
 
 <legend>Episode Search</legend>
 
-<label for="use_nzb"><input type="checkbox" name="use_nzb" id="use_nzb" #if $sickbeard.USE_NZB == True then "CHECKED" else ""#> <strong>NZBs</strong></label><br />
-Whether or not we should search NZB sites<br />
-<br />
-
-<label for="use_torrent"><input type="checkbox" name="use_torrent" id="use_torrent" #if $sickbeard.USE_TORRENT == True then "CHECKED" else ""#> <strong>Torrents</strong></label><br />
-Whether or not we should search Torrent sites<br />
-<br />
-
 <strong>Search Frequency:</strong><br />
 Time between searches (in minutes)<br />
 <input type="text" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="4"><br />
@@ -151,9 +143,14 @@ if SAB and Sick Beard are on different PCs)<br />
 <input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="30"><br />
 <br />
 
-<label for="keep_processed_dir"><input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""#> <strong>Keep folder</strong></label><br />
+<label for="keep_processed_dir"><input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""#> <strong>Keep original files</strong></label><br />
 If checked Sick Beard will keep the original files after<br />
 they've been processed<br />
+<br />
+
+<label for="move_associated_files"><input type="checkbox" name="move_associated_files" id="move_associated_files" #if $sickbeard.MOVE_ASSOCIATED_FILES == True then "CHECKED" else ""#> <strong>Move associated files</strong></label><br />
+Sick Beard will move srr/srt/sfv/etc files with the episode.<br />
+NOTE: .nfo will be renamed .nfo-orig<br />
 <br />
 
 <label for="rename_episodes"><input type="checkbox" name="rename_episodes" id="rename_episodes"#if $sickbeard.RENAME_EPISODES == True then "CHECKED" else ""#> <strong>Rename episodes</strong></label><br />

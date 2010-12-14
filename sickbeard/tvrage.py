@@ -47,16 +47,21 @@ class TVRage:
         if self.show.tvrid == 0:
 
             # if it's the right show then use the tvrage ID that the last lookup found (cached in self._trvid)
-            if self.confirmShow() or self.checkSync():
+            show_is_right = self.confirmShow() or self.checkSync()
 
-                if self._tvrid == 0 or self._tvrname == None:
-                    raise exceptions.TVRageException("We confirmed sync but got invalid data (no ID/name)")
+            if not show_is_right:
+                raise exceptions.TVRageException("Shows aren't the same, aborting")
+
+            if self._tvrid == 0 or self._tvrname == None:
+                raise exceptions.TVRageException("We confirmed sync but got invalid data (no ID/name)")
+
+            if show_is_right:
 
                 logger.log(u"Setting TVRage ID for "+show.name+" to "+str(self._tvrid))
                 self.show.tvrid = self._tvrid
                 self.show.saveToDB()
 
-        if self.show.tvrname == "" or self.show.tvrname == None:
+        if not self.show.tvrname:
 
             if self._tvrname == None:
                 self._getTVRageInfo()

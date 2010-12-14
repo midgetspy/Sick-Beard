@@ -74,3 +74,6 @@ class CantRefreshException(SickBeardException):
 
 class CantUpdateException(SickBeardException):
 	"The show can't be updated right now"
+
+class PostProcessingFailed(SickBeardException):
+	"Post-processing the episode failed"
