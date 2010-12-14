@@ -147,8 +147,8 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
             return False
 
-        for cur_provider in sickbeard.metadata_provider_list:
-            result = result or cur_provider.create_show_metadata(self)
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            result = cur_provider.create_show_metadata(self) or result
 
         return result
 
@@ -312,13 +312,13 @@ class TVShow(object):
 
         poster_result = fanart_result = season_thumb_result = False
 
-        for cur_provider in sickbeard.metadata_provider_list:
-            poster_result = poster_result or cur_provider.create_poster(self)
-            fanart_result = fanart_result or cur_provider.create_fanart(self)
-            season_thumb_result = season_thumb_result or cur_provider.create_season_thumbs(self)
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            logger.log("Running season folders for "+cur_provider.name)
+            poster_result = cur_provider.create_poster(self) or poster_result
+            fanart_result = cur_provider.create_fanart(self) or fanart_result
+            season_thumb_result = cur_provider.create_season_thumbs(self) or season_thumb_result
 
         return poster_result or fanart_result or season_thumb_result
-
 
     def loadLatestFromTVRage(self):
 
@@ -895,8 +895,9 @@ class TVEpisode:
 
         # check for nfo and tbn
         if ek.ek(os.path.isfile, self.location):
-            self.hasnfo = any([x.create_episode_metadata(self) for x in sickbeard.metadata_provider_list])
-            self.hastbn = any([x.create_episode_thumb(self) for x in sickbeard.metadata_provider_list])
+            for cur_provider in sickbeard.metadata_provider_dict.values():
+                self.hasnfo = cur_provider.create_episode_metadata(self) or self.hasnfo
+                self.hastbn = cur_provider.create_episode_thumb(self)or self.hastbn
 
         # if either setting has changed return true, if not return false
         return oldhasnfo != self.hasnfo or oldhastbn != self.hastbn
@@ -1161,19 +1162,17 @@ class TVEpisode:
 
         shouldSave = self.checkForMetaFiles()
 
-        if sickbeard.METADATA_EPISODE:
-            result = self.createNFO(force)
-            if result == None:
-                return False
-            elif result == True:
-                shouldSave = True
+        result = self.createNFO(force)
+        if result == None:
+            return False
+        elif result == True:
+            shouldSave = True
 
-        if sickbeard.ART_THUMBNAILS or force:
-            result = self.createThumbnail(epsToWrite, force)
-            if result == None:
-                return False
-            elif result == True:
-                shouldSave = True
+        result = self.createThumbnail(epsToWrite, force)
+        if result == None:
+            return False
+        elif result == True:
+            shouldSave = True
 
         # save our new NFO statuses to the DB
         if shouldSave:
@@ -1202,8 +1201,8 @@ class TVEpisode:
 
         result = False
 
-        for cur_provider in sickbeard.metadata_provider_list:
-            result = result or cur_provider.create_episode_metadata(self)
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            result = cur_provider.create_episode_metadata(self) or result
 
         if not result:
             return False
@@ -1222,8 +1221,8 @@ class TVEpisode:
 
         result = False
 
-        for cur_provider in sickbeard.metadata_provider_list:
-            result = result or cur_provider.create_episode_thumb(self)
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            result = cur_provider.create_episode_thumb(self) or result
 
         return result
 
