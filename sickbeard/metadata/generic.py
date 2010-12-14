@@ -86,7 +86,7 @@ class GenericMetadata():
         return re.sub("[^\w\d_]", "_", name).lower()
 
     def set_config(self, string):
-        config_list = [int(x) for x in string.split('|')]
+        config_list = [bool(int(x)) for x in string.split('|')]
         self.show_metadata = config_list[0]
         self.episode_metadata = config_list[1]
         self.poster = config_list[2]
@@ -119,7 +119,6 @@ class GenericMetadata():
         result = location != None and ek.ek(os.path.isfile, location)
         logger.log("Checking if "+str(location)+" exists: "+str(result), logger.DEBUG)
         return result
-
     
     def _has_season_thumb(self, show_obj, season):
         location = self.get_season_thumb_path(show_obj, season)

@@ -86,7 +86,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         if ek.ek(os.path.isfile, ep_obj.location):
             xml_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), self._ep_nfo_extension)
-            metadata_dir_name = ek.ek(os.path.join, ep_obj.show.location, 'metadata')
+            metadata_dir_name = ek.ek(os.path.join, ek.ek(os.path.dirname, ep_obj.location), 'metadata')
             xml_file_path = ek.ek(os.path.join, metadata_dir_name, xml_file_name)
         else:
             logger.log(u"Episode location doesn't exist: "+str(ep_obj.location), logger.DEBUG)
@@ -104,7 +104,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         if ek.ek(os.path.isfile, ep_obj.location):
             tbn_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), 'jpg')
-            metadata_dir_name = ek.ek(os.path.join, ep_obj.show.location, 'metadata')
+            metadata_dir_name = ek.ek(os.path.join, ek.ek(os.path.dirname, ep_obj.location), 'metadata')
             tbn_file_path = ek.ek(os.path.join, metadata_dir_name, tbn_file_name)
         else:
             return None
