@@ -171,6 +171,9 @@ class Quality:
             quality = Quality.assumeQuality(name)
         return Quality.compositeStatus(DOWNLOADED, quality)
 
+    DOWNLOADED = None
+    SNATCHED = None
+    SNATCHED_PROPER = None
 
 Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
@@ -275,7 +278,7 @@ sceneExceptions = {72546: ['CSI'],
                    194751: ['Conan', 'Conan (2010)'],
                    164451: ['Carlos (2010)'],
                    70726: ['Babylon 5', 'Babylon5'],
-                   83714: ['Genius', 'Genius With Dave  Gormand'],
+                   83714: ['Genius', 'Genius With Dave Gormand'],
                    }
 
 countryList = {'Australia': 'AU',
