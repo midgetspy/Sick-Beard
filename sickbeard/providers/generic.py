@@ -261,7 +261,7 @@ class GenericProvider:
                 continue
 
             if show.absolute_numbering:
-                if len(epInfo.episodenumbers) != 1:
+                if len(parse_result.episodenumbers) != 1:
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode, ignoring")
                     continue
                 
