@@ -200,7 +200,7 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = NameParser(True,episode.show.absolute_numbering)
+                myParser = NameParser()
                 parse_result = myParser.parse(title)
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
@@ -211,7 +211,7 @@ class GenericProvider:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
                     continue
             elif episode.show.absolute_numbering:
-                if episode.absolute_episode not in parse_result.episode_numbers:
+                if episode.absolute_episode not in parse_result.absolute_numbers:
                     logger.log("Episode "+title+" isn't "+str(episode.absolute_episode)+", skipping it", logger.DEBUG)
                     continue
             elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
@@ -254,7 +254,7 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = NameParser(False,show.absolute_numbering)
+                myParser = NameParser(False)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
@@ -268,7 +268,7 @@ class GenericProvider:
                 myDB = db.DBConnection()
                 
                 actual_episodes = []
-                for episodeNumber in parse_result.episode_numbers:
+                for episodeNumber in parse_result.absolute_numbers:
                     sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [show.tvdbid, episodeNumber])
                     
                     if len(sql_results) > 0:

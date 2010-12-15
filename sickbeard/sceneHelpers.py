@@ -33,7 +33,7 @@ resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
 def filterBadReleases(name,absolute_numbering=False):
 
     try:
-        fp = NameParser(False,absolute_numbering)
+        fp = NameParser()
         parse_result = fp.parse(name)
     except InvalidNameException:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)

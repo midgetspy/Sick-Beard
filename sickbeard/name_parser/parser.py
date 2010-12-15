@@ -25,11 +25,11 @@ import regexes
 from sickbeard import logger
 
 class NameParser(object):
-    def __init__(self, file_name=True, absolute_numbering=False):
+    def __init__(self, file_name=True):
 
         self.file_name = file_name
         self.compiled_regexes = []
-        self._compile_regexes(absolute_numbering)
+        self._compile_regexes()
 
     def clean_series_name(self, series_name):
         """Cleans up series name by removing any . and _
@@ -54,14 +54,9 @@ class NameParser(object):
         series_name = re.sub("-$", "", series_name)
         return series_name.strip()
 
-    def _compile_regexes(self, absolute_numbering):
+    def _compile_regexes(self):
             
-        if absolute_numbering:
-            uncompiled_regex = regexes.abs_ep_regexes
-        else:
-            uncompiled_regex = regexes.ep_regexes
-        
-        for (cur_pattern_name, cur_pattern) in uncompiled_regex:
+        for (cur_pattern_name, cur_pattern) in regexes.ep_regexes:
             try:
                 cur_regex = re.compile(cur_pattern, re.VERBOSE | re.IGNORECASE)
             except re.error, errormsg:
@@ -99,6 +94,20 @@ class NameParser(object):
                     result.episode_numbers = range(ep_num, self._convert_number(match.group('extra_ep_num'))+1)
                 else:
                     result.episode_numbers = [ep_num]
+                    
+                # generate the absolute episode numbers we believe this is
+                try:
+                    if 'season_num' in named_groups:
+                        abs_ep_num = '%d%s' % (result.season_number, match.group('ep_num'))
+                        if 'extra_ep_num' in named_groups and match.group('extra_ep_num'):
+                            abs_extra_ep_num = '%d%s' % (result.season_number, match.group('extra_ep_num'))
+                            result.absolute_numbers = range(int(abs_ep_num), int(abs_extra_ep_num)+1)
+                        else:
+                            result.absolute_numbers = [int(abs_ep_num)]
+                    else:
+                        result.absolute_numbers = result.episode_numbers
+                except ValueError, e:
+                    result.absolute_numbers = None
 
             if 'air_year' in named_groups and 'air_month' in named_groups and 'air_day' in named_groups:
                 year = int(match.group('air_year'))
@@ -197,6 +206,7 @@ class NameParser(object):
         final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
         final_result.episode_numbers = self._combine_results(file_name_result, dir_name_result, 'episode_numbers')
         final_result.air_date = self._combine_results(file_name_result, dir_name_result, 'air_date')
+        final_result.absolute_numbers = self._combine_results(file_name_result, dir_name_result, 'absolute_numbers')
         
         # if the dirname has a release group/show name I believe it over the filename
         final_result.series_name = self._combine_results(dir_name_result, file_name_result, 'series_name')
@@ -229,7 +239,8 @@ class ParseResult(object):
                  episode_numbers=None,
                  extra_info=None,
                  release_group=None,
-                 air_date=None
+                 air_date=None,
+                 absolute_numbers=None
                  ):
         self.original_name = original_name
         
@@ -244,6 +255,8 @@ class ParseResult(object):
         self.release_group = release_group
         
         self.air_date = air_date
+        
+        self.absolute_numbers = absolute_numbers
         
         self.which_regex = None
         
@@ -262,6 +275,8 @@ class ParseResult(object):
         if self.release_group != other.release_group:
             return False
         if self.air_date != other.air_date:
+            return False
+        if self.absolute_numbers != other.absolute_numbers:
             return False
         
         return True

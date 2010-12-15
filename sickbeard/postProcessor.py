@@ -262,7 +262,7 @@ class PostProcessor(object):
         Returns a (tvdb_id, season, []) tuple. The first two may be None if none were found.
         """
         
-        to_return = (None, None, [])
+        to_return = (None, None, [], [])
         
         if not self.nzb_name and not self.folder_name:
             self.in_history = False
@@ -288,7 +288,7 @@ class PostProcessor(object):
             season = int(sql_results[0]["season"])
 
             self.in_history = True
-            to_return = (tvdb_id, season, [])
+            to_return = (tvdb_id, season, [], [])
             self._log("Found result in history: "+str(to_return), logger.DEBUG)
             return to_return
         
@@ -305,7 +305,7 @@ class PostProcessor(object):
 
         logger.log(u"Analyzing name "+repr(name))
     
-        to_return = (None, None, [])
+        to_return = (None, None, [], [])
     
         if not name:
             return to_return
@@ -318,15 +318,17 @@ class PostProcessor(object):
         if parse_result.air_by_date:
             season = -1
             episodes = [parse_result.air_date]
+            abs_episodes = [parse_result.air_date]
         else:
             season = parse_result.season_number
-            episodes = parse_result.episode_numbers 
+            episodes = parse_result.episode_numbers
+            abs_episodes = parse_result.absolute_numbers
     
         # do a scene reverse-lookup to get a list of all possible names
         name_list = sceneHelpers.sceneToNormalShowNames(parse_result.series_name)
 
         if not name_list:
-            return (None, season, episodes)
+            return (None, season, episodes, abs_episodes)
         
         def _finalize(parse_result):
             self.release_group = parse_result.release_group
@@ -342,7 +344,7 @@ class PostProcessor(object):
                     if cur_name.lower() == curException.lower():
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
                         _finalize(parse_result)
-                        return (exceptionID, season, episodes)
+                        return (exceptionID, season, episodes, abs_episodes)
 
         # see if we can find the name directly in the DB, if so use it
         for cur_name in name_list:
@@ -351,7 +353,7 @@ class PostProcessor(object):
             if db_result:
                 self._log(u"Lookup successful, using tvdb id "+str(db_result[0]), logger.DEBUG)
                 _finalize(parse_result)
-                return (int(db_result[0]), season, episodes)
+                return (int(db_result[0]), season, episodes, abs_episodes)
         
         # see if we can find the name with a TVDB lookup
         for cur_name in name_list:
@@ -365,7 +367,7 @@ class PostProcessor(object):
             
             self._log(u"Lookup successful, using tvdb id "+str(showObj["id"]), logger.DEBUG)
             _finalize(parse_result)
-            return (int(showObj["id"]), season, episodes)
+            return (int(showObj["id"]), season, episodes, abs_episodes)
     
         return to_return
     
@@ -401,7 +403,7 @@ class PostProcessor(object):
         for cur_attempt in attempt_list:
             
             try:
-                (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
+                (cur_tvdb_id, cur_season, cur_episodes, cur_abs_episodes) = cur_attempt()
             except InvalidNameException, e:
                 logger.log(u"Unable to parse, skipping: "+str(e), logger.DEBUG)
                 continue
@@ -412,6 +414,31 @@ class PostProcessor(object):
                 season = cur_season
             if cur_episodes:
                 episodes = cur_episodes
+            if cur_abs_episodes:
+                abs_episodes = cur_abs_episodes
+            
+            # for absolute_numbering shows we need to look up the actual/episode from the database
+            if cur_abs_episodes and tvdb_id:
+                myDB = db.DBConnection()
+                absoluteNumberingSQlResult = myDB.select("SELECT absolute_numbering FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
+                if len(absoluteNumberingSQlResult) > 0 and int(absoluteNumberingSQlResult[0][0]) == 1:
+                    
+                    # this is an absolute numbering show, lets convert the episode numbers
+                    actual_episodes = []
+                    for episodeNumber in abs_episodes:
+                        sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [tvdb_id, episodeNumber])
+                        
+                        if len(sql_results) > 0:
+                            season = int(sql_results[0]["season"])
+                            actual_episodes.append(int(sql_results[0]["episode"]))
+                        else:
+                            logger.log(u"Unable to find episode with absolute number "+str(episodeNumber)+u", skipping", logger.DEBUG)
+                    
+                    if len(actual_episodes) >= 1:
+                        episodes = actual_episodes
+                    else:
+                        logger.log(u"Unable to convert absolute numbering episodes for show "+str(cur_tvdb_id)+u".", logger.DEBUG)
+                        continue
             
             # for air-by-date shows we need to look up the season/episode from tvdb
             if season == -1 and tvdb_id:

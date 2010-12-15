@@ -373,7 +373,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
         try:
-            myParser = NameParser(True,self.absolute_numbering)
+            myParser = NameParser()
             parse_result = myParser.parse(file)
         except InvalidNameException:
             logger.log(u"Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
@@ -400,13 +400,13 @@ class TVShow(object):
                 return None
 
         # if we have an absolute numbered show than get the real season/episode numbers
-        if self.absolute_numbering:
+        elif self.absolute_numbering:
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
                 
                 # translate all absolute numbers into season & episode
                 translatedEpisodes = []
-                for absEpNum in episodes:
+                for absEpNum in parse_result.absolute_numbers:
                     epObj = t[self.tvdbid].absoluteEpisode(absEpNum)[0]
                     if epObj != None:
                         season = int(epObj["seasonnumber"])
