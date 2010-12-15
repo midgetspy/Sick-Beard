@@ -39,6 +39,9 @@ class EZRSSProvider(generic.TorrentProvider):
         if show.is_air_by_date:
             logger.log(u"EZRSS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
             return results
+        elif show.absolute_numbering:
+            logger.log(u"EZRSS doesn't support absolute numbered backlog", logger.WARNING)
+            return results
         
         results = generic.TorrentProvider.findSeasonResults(self, show, season)
         
@@ -74,7 +77,7 @@ class EZRSSProvider(generic.TorrentProvider):
     
         return [params]
 
-    def _doSearch(self, search_params):
+    def _doSearch(self, search_params, *args):
     
         params = {"mode": "rss"}
     

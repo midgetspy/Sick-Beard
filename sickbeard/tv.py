@@ -400,7 +400,7 @@ class TVShow(object):
                 return None
 
         # if we have an absolute numbered show than get the real season/episode numbers
-        if self.absolute_numbering:
+        elif parse_result.absolute:
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
                 
