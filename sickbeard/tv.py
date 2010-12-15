@@ -1070,7 +1070,7 @@ class TVEpisode:
         self.name = myEp["episodename"]
         self.season = season
         self.episode = episode
-        self.absolute_episode = myEp["absolute_number"]
+        self.absolute_episode = int(myEp["absolute_number"])
         self.description = myEp["overview"]
         if self.description == None:
             self.description = ""

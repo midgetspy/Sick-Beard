@@ -200,7 +200,7 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = NameParser()
+                myParser = NameParser(True,episode.show.absolute_numbering)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
@@ -209,6 +209,10 @@ class GenericProvider:
             if episode.show.is_air_by_date:
                 if parse_result.air_date != episode.airdate:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
+                    continue
+            elif episode.show.absolute_numbering:
+                if episode.absolute_episode not in parse_result.episode_numbers:
+                    logger.log("Episode "+title+" isn't "+str(episode.absolute_episode)+", skipping it", logger.DEBUG)
                     continue
             elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
                 logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
@@ -298,16 +302,15 @@ class GenericProvider:
                 
                 actual_season = int(sql_results[0]["season"])
                 actual_episodes = [int(sql_results[0]["episode"])]
-                
             else:
                 # this check is meaningless for non-season searches
-                if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
+                if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
                     continue
 
                 # we just use the existing info for normal searches
                 actual_season = season
-                actual_episodes = epInfo.episodenumbers
+                actual_episodes = parse_result.episode_numbers
 
             # make sure we want the episode
             wantEp = True

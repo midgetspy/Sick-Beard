@@ -30,7 +30,7 @@ class NameParser(object):
         self.file_name = file_name
         self.absolute = absolute
         self.compiled_regexes = []
-        self._compile_regexes()
+        self._compile_regexes(self.absolute)
 
     def clean_series_name(self, series_name):
         """Cleans up series name by removing any . and _
@@ -55,8 +55,14 @@ class NameParser(object):
         series_name = re.sub("-$", "", series_name)
         return series_name.strip()
 
-    def _compile_regexes(self):
-        for (cur_pattern_name, cur_pattern) in regexes.ep_regexes:
+    def _compile_regexes(self, absolute_numbering):
+            
+        if absolute_numbering:
+            uncompiled_regex = regexes.abs_ep_regexes
+        else:
+            uncompiled_regex = regexes.ep_regexes
+        
+        for (cur_pattern_name, cur_pattern) in uncompiled_regex:
             try:
                 cur_regex = re.compile(cur_pattern, re.VERBOSE | re.IGNORECASE)
             except re.error, errormsg:

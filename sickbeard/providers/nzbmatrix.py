@@ -57,7 +57,6 @@ class NZBMatrixProvider(generic.NZBProvider):
 
         # search for all show names and episode numbers like ("a","b","c") in a single search
         return ['("' + '","'.join(sceneSearchStrings) + '")']
-
         # search for all show names and episode numbers like (%2b"show-a"%2b"episode-a")+(%2b"show-b"%2b"episode-b") in a single search
         nzbMatrixSearchStrings = []
         for searchString in sceneSearchStrings:
@@ -72,13 +71,6 @@ class NZBMatrixProvider(generic.NZBProvider):
         if quotes:
             term = "\""+term+"\""
 
-        params = {"term": term,
-                  "age": sickbeard.USENET_RETENTION,
-                  "page": "download",
-                  "username": sickbeard.NZBMATRIX_USERNAME,
-                  "apikey": sickbeard.NZBMATRIX_APIKEY,
-                  "subcat": "6,41",
-                  "english": 1}
 
         params = {"term": term,
                   "age": sickbeard.USENET_RETENTION,
