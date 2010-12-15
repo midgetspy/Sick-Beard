@@ -112,7 +112,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         episodeNumbersSQLResult = myDB.select("SELECT absolute_episode, status FROM tv_episodes WHERE showid = ? and season = ?", [show.tvdbid, segment])
         
         # get show qualities
-        anyQualities, bestQualities = Quality.splitQuality(show.quality)
+        anyQualities, bestQualities = common.Quality.splitQuality(show.quality)
         
         # compile a list of all the episode numbers we need in this 'season'
         seasonStrings = []
@@ -120,7 +120,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
             
             # get quality of the episode
             curCompositeStatus = int(episodeNumberResult["status"])
-            curStatus, curQuality = Quality.splitCompositeStatus(curCompositeStatus)
+            curStatus, curQuality = common.Quality.splitCompositeStatus(curCompositeStatus)
             
             if bestQualities:
                 highestBestQuality = max(bestQualities)
