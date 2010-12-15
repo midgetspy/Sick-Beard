@@ -261,14 +261,14 @@ class GenericProvider:
                 continue
 
             if show.absolute_numbering:
-                if len(parse_result.episodenumbers) != 1:
+                if len(parse_result.episode_numbers) != 1:
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode, ignoring")
                     continue
                 
                 myDB = db.DBConnection()
                 
                 actual_episodes = []
-                for episodeNumber in parse_result.episodenumbers:
+                for episodeNumber in parse_result.episode_numbers:
                     sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND absolute_episode = ?", [show.tvdbid, episodeNumber])
                     
                     if len(sql_results) > 0:
