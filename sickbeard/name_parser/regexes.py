@@ -28,8 +28,8 @@ ep_regexes = [
                e(?P<ep_num>\d+)                            # E02 and separator
                ([\. _-]+s(?P=season_num)[\. _-]*           # S01 and optional separator
                e(?P<extra_ep_num>\d+))+                    # E03/etc and separator
-               [\. _-]+(?P<extra_info>.+?)                 # Source.Quality.Etc
-               (-(?P<release_group>.+))?$                  # Group
+               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               (-(?P<release_group>.+))?)?$                # Group
                '''),
               
               ('fov_repeat',
@@ -41,8 +41,8 @@ ep_regexes = [
                (?P<ep_num>\d+)                             # 02 and separator
                ([\. _-]+(?P=season_num)x                   # 1x
                (?P<extra_ep_num>\d+))+                     # 03/etc and separator
-               [\. _-]+(?P<extra_info>.+?)              # Source_Quality_Etc
-               (-(?P<release_group>.+))?$                  # Group
+               ([\. _-]+(?P<extra_info>.+?)                # Source_Quality_Etc
+               (-(?P<release_group>.+))?)?$                # Group
                '''),
               
               ('standard',
@@ -57,8 +57,8 @@ ep_regexes = [
                s(?P<season_num>\d+)[\. _-]*                # S01 and optional separator
                e(?P<ep_num>\d+)                            # E02 and separator
                ([\. _-]*[e-](?P<extra_ep_num>\d+))*        # additional E03/etc
-               ([\. _-]+(?P<extra_info>.+?))?              # Source.Quality.Etc
-               (-(?P<release_group>\w+))?$                 # Group
+               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               (-(?P<release_group>\w+))?)?$               # Group
                '''),
 
               ('fov',
@@ -70,9 +70,9 @@ ep_regexes = [
                ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
                (?P<season_num>\d+)x                        # 1x
                (?P<ep_num>\d+)                             # 02 and separator
-               ([\. _-]*[x-](?P<extra_ep_num>\d+))*        # additional E03/etc
-               [\. _-]+(?P<extra_info>[^-]+?)              # Source_Quality_Etc-
-               (-(?P<release_group>.+))?$                  # Group
+               ([\. _-]*[x-](?P<extra_ep_num>\d+))*        # additional x03/etc
+               ([\. _-]+(?P<extra_info>[^-]+?)             # Source_Quality_Etc-
+               (-(?P<release_group>.+))?)?$                # Group
                '''),
         
               ('scene_date_format',
@@ -87,22 +87,22 @@ ep_regexes = [
                (-(?P<release_group>.+))?$                  # Group
                '''),
               
-              ('bare',
-               # Show.Name.102.Source.Quality.Etc-Group
-               '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
-               (?P<season_num>\d{1,2})                     # 1
-               (?P<ep_num>\d{2})[\. _-]+                   # 02 and separator
-               (?P<extra_info>[^-]+)                       # Source_Quality_Etc-
-               (-(?P<release_group>.+))?$                  # Group
-               '''),
-              
               ('stupid',
                # tpz-abc102
                '''
                (?P<release_group>.+?)-\w+?[\. ]?     # tpz-abc
                (?P<season_num>\d{1,2})                     # 1
                (?P<ep_num>\d{2})$                          # 02
+               '''),
+              
+              ('bare',
+               # Show.Name.102.Source.Quality.Etc-Group
+               '''
+               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
+               (?P<season_num>\d{1,2})                     # 1
+               (?P<ep_num>\d{2})                           # 02 and separator
+               ([\. _-]+(?P<extra_info>[^-]+)              # Source_Quality_Etc-
+               (-(?P<release_group>.+))?)?$                # Group
                '''),
               
               ('verbose',
