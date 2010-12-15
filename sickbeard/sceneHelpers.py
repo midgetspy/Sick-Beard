@@ -128,7 +128,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                 highestBestQuality = 0
         
             # if we need a better one then add it to the list of episodes to fetch
-            if (curStatus in (DOWNLOADED, SNATCHED) and curQuality < highestBestQuality) or curStatus == WANTED:
+            if (curStatus in (common.DOWNLOADED, common.SNATCHED) and curQuality < highestBestQuality) or curStatus == common.WANTED:
                 seasonStrings.append("%d" % episodeNumberResult["absolute_episode"])
             
     else:
