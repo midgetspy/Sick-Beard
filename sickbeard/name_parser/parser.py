@@ -58,7 +58,7 @@ class NameParser(object):
     def _compile_regexes(self, absolute_numbering):
             
         if absolute_numbering:
-            uncompiled_regex = regexes.abs_ep_regexes
+            uncompiled_regex = regexes.abs_ep_regexes + regexes.ep_regexes
         else:
             uncompiled_regex = regexes.ep_regexes
         
@@ -85,7 +85,6 @@ class NameParser(object):
             result.which_regex = [cur_regex_name]
             
             named_groups = match.groupdict().keys()
-            print cur_regex_name, match.groupdict()
             
             if 'series_name' in named_groups:
                 result.series_name = match.group('series_name')

@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath('..'))
 
 from sickbeard.name_parser import parser
 
-DEBUG = VERBOSE = True
+DEBUG = VERBOSE = False
 
 simple_test_cases = {
               'standard': {
@@ -94,14 +94,25 @@ combination_test_cases = [
                           
                           ]
 
-absolute_test_cases = [
-                       ('Show.Name.102.Source.Quality.Etc-Group',
-                        parser.ParseResult(None, 'Show Name', None, [102], 'Source.Quality.Etc', 'Group')),
-                       ('[group] foo.103-104',
-                        parser.ParseResult(None, 'foo', None, [103,104], '[group]')),
-                       ('[GRP] Show Name 123',
-                        parser.ParseResult(None, 'Show Name', None, [123], None, 'GRP')),
-                       ]
+absolute_test_cases = {
+                       'abs_3digit_episode': {
+                       '[Group Name] Show Name.103-104': parser.ParseResult(None, 'Show Name', None, [103, 104], None, 'Group Name'),
+                       '[Group Name] Show Name - 103-104': parser.ParseResult(None, 'Show Name', None, [103, 104], None, 'Group Name'),
+                       'Show Name 103-104': parser.ParseResult(None, 'Show Name', None, [103, 104]),
+                       '[Group Name] Show Name.103': parser.ParseResult(None, 'Show Name', None, [103], None, 'Group Name'),
+                       '[Group Name] Show Name - 103': parser.ParseResult(None, 'Show Name', None, [103], None, 'Group Name'),
+                       'Show Name 103': parser.ParseResult(None, 'Show Name', None, [103]),
+                       },
+                       
+                       'abs_2digit_episode': {
+                       '[Group Name] Show Name.13-14': parser.ParseResult(None, 'Show Name', None, [13, 14], None, 'Group Name'),
+                       '[Group Name] Show Name - 13-14': parser.ParseResult(None, 'Show Name', None, [13, 14], None, 'Group Name'),
+                       'Show Name 13-14': parser.ParseResult(None, 'Show Name', None, [13, 14]),
+                       '[Group Name] Show Name.13': parser.ParseResult(None, 'Show Name', None, [13], None, 'Group Name'),
+                       '[Group Name] Show Name - 13': parser.ParseResult(None, 'Show Name', None, [13], None, 'Group Name'),
+                       'Show Name 13': parser.ParseResult(None, 'Show Name', None, [13]),
+                       }
+                      }
 
 class ComboTests(unittest.TestCase):
     
@@ -131,25 +142,31 @@ class ComboTests(unittest.TestCase):
 
 class AbsoluteTests(unittest.TestCase):
     
-    def _test_absolute(self, name, result):
-        
-        if VERBOSE:
-            print
-            print 'Testing', name 
-        
-        np = parser.NameParser(absolute=True)
-        test_result = np.parse(name)
-        
-        if DEBUG:
-            print test_result
-            print result
-            
-        self.assertEqual(test_result, result)
+    def _test_names(self, np, section, verbose=False):
 
-    def test_absolute(self):
-        
-        for (name, result) in absolute_test_cases:
-            self._test_absolute(name, result)
+        if VERBOSE or verbose:
+            print
+            print 'Running', section, 'tests'
+
+        for cur_test in absolute_test_cases[section]:
+            if VERBOSE or verbose:
+                print 'Testing', cur_test
+            test_result = np.parse(cur_test)
+            result = absolute_test_cases[section][cur_test]
+            if DEBUG or verbose:
+                print test_result
+                print result
+            self.assertEqual(test_result.which_regex, [section])
+            self.assertEqual(test_result, result)
+
+    def test_2digit_episode(self):
+        np = parser.NameParser(False, absolute=True)
+        self._test_names(np, 'abs_2digit_episode')
+
+    def test_3digit_episode(self):
+        np = parser.NameParser(False, absolute=True)
+        self._test_names(np, 'abs_3digit_episode')
+
 
 class BasicTests(unittest.TestCase):
 
