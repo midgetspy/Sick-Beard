@@ -1058,6 +1058,9 @@ class TVEpisode:
 
         if not myEp["firstaired"]:
             myEp["firstaired"] = str(datetime.date.fromordinal(1))
+			
+        if not myEp["absolute_number"]:
+            myEp["absolute_number"] = 0
 
         if myEp["episodename"] == None or myEp["episodename"] == "":
             logger.log(u"This episode ("+self.show.name+" - "+str(season)+"x"+str(episode)+") has no name on TVDB")
