@@ -40,9 +40,9 @@ class EZRSSProvider(generic.TorrentProvider):
             logger.log(u"EZRSS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
             return results
 		
-		elif show.absolute_numbering:
-		    logger.log(u"EZRSS doesn't support absolute numbered backlog", logger.WARNING)
-		    return results
+        elif show.absolute_numbering:
+            logger.log(u"EZRSS doesn't support absolute numbered backlog", logger.WARNING)
+            return results
         
         results = generic.TorrentProvider.findSeasonResults(self, show, season)
         
