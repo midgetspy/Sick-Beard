@@ -2,6 +2,8 @@ import urllib
 
 import xml.etree.cElementTree as etree
 
+from email.utils import parsedate
+
 import sickbeard
 import generic
 
@@ -43,6 +45,7 @@ class EZRSSProvider(generic.TorrentProvider):
         results = generic.TorrentProvider.findSeasonResults(self, show, season)
         
         return results
+        
     def _get_season_search_strings(self, show, season=None):
     
         params = {}
@@ -50,7 +53,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = show.name       
+        params.update(self._get_show_params(show.name))
           
         if season != None:
             params['season'] = season
@@ -64,7 +67,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = ep_obj.show.name
+        params.update(self._get_show_params(ep_obj.show.name))
         
         if ep_obj.show.is_air_by_date:
             params['date'] = str(ep_obj.airdate)
@@ -73,6 +76,22 @@ class EZRSSProvider(generic.TorrentProvider):
             params['episode'] = ep_obj.episode
     
         return [params]
+        
+    def _get_show_params(self, show):
+    
+        params = {}
+        
+        show_s = ['CSI: NY','CSI: Crime Scene Investigation']
+        show_r = ['CSI: New York','CSI']
+
+        try:
+            i = show_s.index(show)
+            params['show_name'] = show_r[i]
+            params['show_name_exact'] = 'true'
+        except ValueError:
+            params['show_name'] = show
+    
+        return params    
 
     def _doSearch(self, search_params):
     
@@ -130,6 +149,24 @@ class EZRSSProvider(generic.TorrentProvider):
         if match:
             return match.group(1)
         return None
+
+    def findPropers(self, date=None):
+
+        results = []
+        params = {}      
+        params['modifier'] =  "PROPER"
+        params['date'] = date
+
+        for curResult in self._doSearch(params):
+
+            (title, url) = self._get_title_and_url(curResult)
+            pubDate = curResult.findtext('pubDate')
+
+            d = parsedate(pubDate)
+            resultDate = datetime.datetime(d[0], d[1], d[2], d[3], d[4], d[5])
+            results.append(classes.Proper(title, url, resultDate))
+
+        return results 
 
 
 class EZRSSCache(tvcache.TVCache):
