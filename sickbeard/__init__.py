@@ -194,6 +194,8 @@ EXTRA_SCRIPTS = []
 
 GIT_PATH = None
 
+CE_SEASON_THUMB = None
+
 __INITIALIZED__ = False
 
 def CheckSection(sec):
@@ -304,7 +306,7 @@ def initialize(consoleLogging=True):
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
                 ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, CE_SEASON_THUMB
 
 
         if __INITIALIZED__:
@@ -340,6 +342,7 @@ def initialize(consoleLogging=True):
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
+        CE_SEASON_THUMB = bool(check_setting_int(CFG, 'General', 'ce_season_thumb', 0))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         # fix bad configs due to buggy code
@@ -741,6 +744,7 @@ def save_config():
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    new_config['General']['ce_season_thumb'] = int(CE_SEASON_THUMB)
     new_config['General']['metadata_type'] = METADATA_TYPE
     new_config['General']['metadata_show'] = int(METADATA_SHOW)
     new_config['General']['metadata_episode'] = int(METADATA_EPISODE)

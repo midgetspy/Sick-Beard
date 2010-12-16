@@ -465,7 +465,8 @@ class ConfigGeneral:
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
                     metadata_type=None, metadata_show=None, metadata_episode=None,
-                    art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None):
+                    art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None,
+                    ce_season_thumb = None):
 
         results = []
 
@@ -483,6 +484,11 @@ class ConfigGeneral:
             launch_browser = 1
         else:
             launch_browser = 0
+
+        if ce_season_thumb == "on":
+            ce_season_thumb = 1
+        else:
+            ce_season_thumb = 0
 
         if metadata_show == "on":
             metadata_show = 1
@@ -561,6 +567,8 @@ class ConfigGeneral:
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
         sickbeard.LAUNCH_BROWSER = launch_browser
+
+        sickbeard.CE_SEASON_THUMB = ce_season_thumb
 
         sickbeard.METADATA_TYPE = metadata_type
         sickbeard.METADATA_SHOW = metadata_show
@@ -1772,7 +1780,7 @@ class WebInterface:
         redirect("/home")
 
     @cherrypy.expose
-    def showPoster(self, show=None):
+    def showPoster(self, show=None, season=None):
 
         if show == None:
             return "Invalid show" #TODO: make it return a standard image
@@ -1782,7 +1790,11 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
 
-        posterFilename = os.path.abspath(sickbeard.metadata_generator.get_poster_path(showObj))
+        if sickbeard.CE_SEASON_THUMB:
+            posterFilename = os.path.abspath(sickbeard.metadata_generator.get_season_thumb_path(showObj,season))      
+        else:
+            posterFilename = os.path.abspath(sickbeard.metadata_generator.get_poster_path(showObj))
+        
         if ek.ek(os.path.isfile, posterFilename):
             try:
                 from PIL import Image
