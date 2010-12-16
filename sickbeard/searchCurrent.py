@@ -51,10 +51,6 @@ class CurrentSearcher():
 
         self._changeMissingEpisodes()
 
-        # make sure our lists are up to date
-        sickbeard.updateAiringList()
-        sickbeard.updateComingList()
-
         with self.lock:
 
             logger.log(u"Beginning search for new episodes on RSS")
@@ -67,10 +63,6 @@ class CurrentSearcher():
                 for curResult in foundResults:
                     search.snatchEpisode(curResult)
                     time.sleep(2)
-
-        # update our lists to reflect any changes we just made
-        sickbeard.updateAiringList()
-        sickbeard.updateComingList()
 
         if not backlogPaused:
             logger.log(u"Search is done, resuming backlog", logger.DEBUG)

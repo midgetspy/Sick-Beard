@@ -1756,10 +1756,6 @@ class Home:
 
             #TODO: check if the download was successful
 
-            # update our lists to reflect the result if this search
-            sickbeard.updateAiringList()
-            sickbeard.updateComingList()
-
         redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
 
 

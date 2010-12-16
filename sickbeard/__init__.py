@@ -64,9 +64,6 @@ autoPostProcesserScheduler = None
 showList = None
 loadingShowList = None
 
-airingList = None
-comingList = None
-
 providerList = []
 newznabProviderList = []
 metadata_generator = None
@@ -289,7 +286,7 @@ def initialize(consoleLogging=True):
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, \
-                airingList, comingList, loadingShowList, SOCKET_TIMEOUT, \
+                loadingShowList, SOCKET_TIMEOUT, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
@@ -536,9 +533,6 @@ def initialize(consoleLogging=True):
 
         showList = []
         loadingShowList = {}
-
-        airingList = []
-        comingList = []
 
         __INITIALIZED__ = True
         return True
@@ -841,64 +835,6 @@ def launchBrowser(startPort=None):
             webbrowser.open(browserURL, 1, 1)
         except:
             logger.log(u"Unable to launch a browser", logger.ERROR)
-
-
-def updateAiringList():
-
-    logger.log(u"Searching DB and building list of airing episodes")
-
-    curDate = datetime.date.today().toordinal()
-
-    myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status == ? AND airdate <= ?", [UNAIRED, curDate])
-
-    epList = []
-
-    for sqlEp in sqlResults:
-
-        try:
-            show = helpers.findCertainShow (sickbeard.showList, int(sqlEp["showid"]))
-        except exceptions.MultipleShowObjectsException:
-            logger.log(u"ERROR: expected to find a single show matching " + sqlEp["showid"])
-            return None
-        except exceptions.SickBeardException, e:
-            logger.log(u"Unexpected exception: "+str(e).decode('utf-8'), logger.ERROR)
-            continue
-
-        # we aren't ever downloading specials
-        if int(sqlEp["season"]) == 0:
-            continue
-
-        if show == None:
-            continue
-
-        ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
-
-        if ep == None:
-            logger.log(u"Somehow "+show.name+" - "+str(sqlEp["season"])+"x"+str(sqlEp["episode"])+" is None", logger.ERROR)
-        else:
-            epList.append(ep)
-
-    sickbeard.airingList = epList
-
-def updateComingList():
-
-    epList = []
-
-    for curShow in sickbeard.showList:
-
-        curEps = None
-
-        try:
-            curEps = curShow.nextEpisode()
-        except exceptions.NoNFOException, e:
-            logger.log(u"Unable to retrieve episode from show: "+str(e).decode('utf-8'), logger.ERROR)
-
-        for myEp in curEps:
-            if myEp.season != 0:
-                epList.append(myEp)
-
-    sickbeard.comingList = epList
 
 def getEpList(epIDs, showid=None):
 
