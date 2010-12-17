@@ -24,7 +24,6 @@ import os.path
 import re
 import shlex
 import subprocess
-import string
 
 import sickbeard
 
@@ -317,11 +316,13 @@ class PostProcessor(object):
         self._log("Parsed "+name+" into "+str(parse_result), logger.DEBUG)
 
         if parse_result.air_by_date:
-            season = -1
+            season = None
             episodes = [parse_result.air_date]
         else:
             season = parse_result.season_number
             episodes = parse_result.episode_numbers 
+
+        to_return = (None, season, episodes)
     
         # do a scene reverse-lookup to get a list of all possible names
         name_list = sceneHelpers.sceneToNormalShowNames(parse_result.series_name)
@@ -340,7 +341,7 @@ class PostProcessor(object):
             for exceptionID in common.sceneExceptions:
                 # for each exception name
                 for curException in common.sceneExceptions[exceptionID]:
-                    if cur_name.lower() == string.translate(curException.lower(), None, ':'):
+                    if cur_name.lower() == curException.lower():
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
                         _finalize(parse_result)
                         return (exceptionID, season, episodes)
@@ -368,6 +369,7 @@ class PostProcessor(object):
             _finalize(parse_result)
             return (int(showObj["id"]), season, episodes)
     
+        _finalize(parse_result)
         return to_return
     
     
