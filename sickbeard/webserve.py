@@ -1775,7 +1775,6 @@ class Home:
 
         if direct:
             return json.dumps({"status": status, "message": message})
-            #{"result": "success", "status": status, "message": message}
         else:
             redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
 
