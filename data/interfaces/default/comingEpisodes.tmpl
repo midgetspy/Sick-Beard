@@ -12,14 +12,13 @@
 <div id="outerWrapper">
   <div id="listingWrapper">
 
-
 	#set $cur_segment = None
 	#set $too_late_header = False
 	#set $missed_header = False
 	#set $show_div = ""
 
 	#for $cur_result in $sql_results:
-        #if False and int($cur_result["paused"]):
+        #if int($cur_result["paused"]):
             #continue
         #end if
         
@@ -39,7 +38,7 @@
                     <br /><h1 class="day">Later</h1>
                     #set $show_div = "listing_toofar"
                     #set $too_late_header = True
-                #elif $cur_ep_airdate < $next_week:
+                #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
                     <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A")</h1>
                     #if $cur_ep_airdate == $today:
                         #set $show_div = "listing_current"
