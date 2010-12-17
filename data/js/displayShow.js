@@ -35,6 +35,40 @@ $(document).ready(function(){
             } 
         });
     });
+    $('.epSearch').click(function(){
+      var parent = $(this).parent();
+      parent.empty();
+      parent.append($("<img/>").attr("src", "/images/indicator.gif"));
+      
+      $.ajax({
+            url: $(this).attr('href'),
+            type: "POST",
+            dataType: "json",
+            async: true,
+            success: function(data){
+              var img = "/images/";
+              if(data.status == "e") img += "error.png"
+              else if (data.status == "n") img += "delete.png"
+              else if (data.status == "f") img += "save.png"
+              
+              parent.empty();
+              parent.append($("<img/>").attr({"src": img, "height": "16"}).tooltip(
+              {
+                      position:     'bottom left',
+                      delay:        100,
+                      effect:       'fade',
+                      tip:          '#tooltip',
+                      onBeforeShow: function(e){$('#tooltip').html(data.message);}
+              }));
+            },
+            error: function(data){
+              alert("Error: " + data);
+            }
+         }
+      )
+  
+      return false;
+    })
   
     // handle the show selection dropbox
     $('#pickShow').change(function(){
