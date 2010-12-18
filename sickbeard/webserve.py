@@ -1714,36 +1714,49 @@ class Home:
             redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
-    def searchEpisode(self, show=None, season=None, episode=None):
-
-        outStr = ""
+    def searchEpisode(self, show=None, season=None, episode=None, direct=False):
+        
+        # possible status's: n = Not found; f = Found (downloading); e = Error
+        status = ""
+        message = ""
         epObj = _getEpisode(show, season, episode)
 
         if isinstance(epObj, str):
             return _genericMessage("Error", epObj)
-
-        tempStr = "Searching for download for " + epObj.prettyName(True)
-        logger.log(tempStr)
-        outStr += tempStr + "<br />\n"
+        
+        logger.log("Searching for download for " + epObj.prettyName(True))
         foundEpisode = search.findEpisode(epObj, manualSearch=True)
 
         if not foundEpisode:
-            message = 'No downloads were found'
-            ui.flash.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
+            status = "n"
+            message = 'No downloads were found.'
+            if not direct: 
+                ui.flash.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
+                
             logger.log(message)
 
         else:
-
+            
             # just use the first result for now
             logger.log(u"Downloading episode from " + foundEpisode.url)
             result = search.snatchEpisode(foundEpisode)
             providerModule = foundEpisode.provider
             if not result:
-                ui.flash.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')
+                status = "e"
+                message = "Error while attempting to snatch " + foundEpisode.name + ", check your logs."
             elif providerModule == None:
-                ui.flash.error('Provider is configured incorrectly, unable to download')
+                status = "e"
+                message = "Provider is configured incorrectly, unable to download."
             else:
-                ui.flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
+                status = "f"
+                message = "Episode <b>%s</b> snatched from <b>%s</b>." % (foundEpisode.name, providerModule.name)
+
+            # spit out message
+            if not direct:
+                if status == "e":
+                    ui.flash.error(message)
+                else:
+                    ui.flash.message(message)
 
             #TODO: check if the download was successful
 
@@ -1751,7 +1764,10 @@ class Home:
             sickbeard.updateAiringList()
             sickbeard.updateComingList()
 
-        redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
+        if direct:
+            return json.dumps({"status": status, "message": message})
+        else:
+            redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
 
 
 

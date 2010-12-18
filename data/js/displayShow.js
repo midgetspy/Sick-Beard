@@ -35,6 +35,33 @@ $(document).ready(function(){
             } 
         });
     });
+    
+    $('.epSearch').click(function(){
+      var t = $(this);
+      var p = $("<img/>").attr("src", "/images/indicator.gif");
+      t.hide();
+      t.parent().append(p);
+      
+      $.ajax({
+        url: t.attr('href'), type: "POST", dataType: "json", async: true,
+        success: function(data){
+          var img = "/images/", nType;
+          if(data.status == "e"){img += "error.png"; nType=2;} 
+          else if (data.status == "n"){img += "delete.png"; nType=2;}
+          else if (data.status == "f"){img += "save.png"; nType=1;}
+          
+          t.parent().append($("<img/>").attr({"src": img, "height": "16"}).tooltip({position: 'bottom left', delay: 100, effect: 'fade', tip: '#tooltip', onBeforeShow: function(e){$('#tooltip').html(data.message);}}));
+          $("#notification-container").notify("create", nType, {text: data.message},{expires: 10000});
+          p.remove();
+        },
+        error: function(data){
+          $("#notification-container").notify("create", 2, {text: "Error while attempting to search, please check your logs."}, {expires: 10000});
+          p.hide();
+          t.show();
+        }
+      })
+      return false;
+    });
   
     // handle the show selection dropbox
     $('#pickShow').change(function(){
