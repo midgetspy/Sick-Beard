@@ -316,7 +316,7 @@ class PostProcessor(object):
         self._log("Parsed "+name+" into "+str(parse_result), logger.DEBUG)
 
         if parse_result.air_by_date:
-            season = None
+            season = -1
             episodes = [parse_result.air_date]
         else:
             season = parse_result.season_number
