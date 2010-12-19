@@ -57,6 +57,7 @@ you want them to be searched<br />
     <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" width="16" height="16"></a>
     $curProvider.name
     #if not $curProvider.supportsBacklog then "*" else ""#
+    #if $curProvider.name == "EZRSS" then "**" else ""#
   </li>
 #end for
 </ul>
@@ -192,6 +193,7 @@ NZBs'R'US hash<br />
 
 
 <p>* This provider doesn't support backlog, it provides new episodes via RSS only</p>
+<p>** This provider supports <b>limited</b> backlog searches, all episodes/qualities are not available</p>
 <p><input type="submit" value="Save Changes"></p>
 </form>
 

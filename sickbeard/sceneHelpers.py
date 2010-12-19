@@ -16,37 +16,36 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from sickbeard.common import *
+from sickbeard import common
 from sickbeard import logger
 from sickbeard import db
 
 import re
 import datetime
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
+from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
                  "dirfix", "samplefix", "nfofix", "dvdextras",
-                 "sample", "extras", "special", "dubbed", "german",
+                 "sample", "extras", "dubbed", "german",
                 "french", "core2hd")
 
 def filterBadReleases(name):
 
     try:
-        fp = FileParser(name)
-        epInfo = fp.parse()
-    except tvnamer_exceptions.InvalidFilename:
+        fp = NameParser()
+        parse_result = fp.parse(name)
+    except InvalidNameException:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
 
     # if there's no info after the season info then assume it's fine
-    if not epInfo.episodename:
+    if not parse_result.extra_info:
         return True
 
     # if any of the bad strings are in the name then say no
     for x in resultFilters:
-        if re.search('(^|[\W_])'+x+'($|[\W_])', epInfo.episodename, re.I):
+        if re.search('(^|[\W_])'+x+'($|[\W_])', parse_result.extra_info, re.I):
             logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
 
@@ -66,12 +65,29 @@ def sanitizeSceneName (name):
 
 def sceneToNormalShowNames(name):
 
-    results = [name]
-    
-    if '.and.' in name:
-        results.append(name.replace('.and.', '.&.'))
+    if not name:
+        return []
 
-    return results
+    name_list = [name]
+    
+    # use both and and &
+    new_name = re.sub('(?i)([\. ])and([\. ])', '\\1&\\2', name, re.I)
+    if new_name not in name_list:
+        name_list.append(new_name)
+
+    results = []
+
+    for cur_name in name_list:
+        # add brackets around the year
+        results.append(re.sub('(\D)(\d{4})$', '\\1(\\2)', cur_name))
+    
+        # add brackets around the country
+        country_match_str = '|'.join(common.countryList.values())
+        results.append(re.sub('(?i)([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
+
+    results += name_list
+
+    return list(set(results))
 
 def makeSceneShowSearchStrings(show):
 
@@ -120,6 +136,8 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         elif extraSearchType == "nzbmatrix":
             if numseasons == 1:
                 toReturn.append('+"'+curShow+'"')
+            elif numseasons == 0:
+                toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
             else:
                 term_list = [x+'*' for x in seasonStrings]
                 if show.is_air_by_date:
@@ -161,8 +179,8 @@ def allPossibleShowNames(show):
 
     showNames = [show.name]
 
-    if int(show.tvdbid) in sceneExceptions:
-        showNames += sceneExceptions[int(show.tvdbid)]
+    if int(show.tvdbid) in common.sceneExceptions:
+        showNames += common.sceneExceptions[int(show.tvdbid)]
 
     # if we have a tvrage name then use it
     if show.tvrname != "" and show.tvrname != None:
@@ -170,8 +188,8 @@ def allPossibleShowNames(show):
 
     newShowNames = []
 
-    country_list = countryList
-    country_list.update(dict(zip(countryList.values(), countryList.keys())))
+    country_list = common.countryList
+    country_list.update(dict(zip(common.countryList.values(), common.countryList.keys())))
 
     # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
     # any countries defined in common.countryList
@@ -179,10 +197,8 @@ def allPossibleShowNames(show):
     for curName in set(showNames):
         for curCountry in country_list:
             if curName.endswith(' '+curCountry):
-                logger.log(u"Show name "+str(curName)+" ends with "+curCountry+", so trying to add ("+country_list[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
             elif curName.endswith(' ('+curCountry+')'):
-                logger.log(u"Show name "+str(curName)+" ends with "+curCountry+", so trying to add ("+country_list[curCountry]+") to it as well", logger.DEBUG)
                 newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+country_list[curCountry]+')'))
 
     showNames += newShowNames
@@ -194,7 +210,8 @@ def isGoodResult(name, show, log=True):
     Use an automatically-created regex to make sure the result actually is the show it claims to be
     """
 
-    showNames = map(sanitizeSceneName, allPossibleShowNames(show)) + allPossibleShowNames(show)
+    all_show_names = allPossibleShowNames(show)
+    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
 
     for curName in set(showNames):
         escaped_name = re.sub('\\\\[.-]', '\W+', re.escape(curName))

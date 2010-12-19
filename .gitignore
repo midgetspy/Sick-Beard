@@ -5,6 +5,7 @@ config.ini
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
+*.bak
 dist/*
 build/*
 autoProcessTV/dist/*

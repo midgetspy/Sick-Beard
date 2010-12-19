@@ -20,9 +20,6 @@ from __future__ import with_statement
 
 import traceback
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
-
 import sickbeard
 
 from common import *

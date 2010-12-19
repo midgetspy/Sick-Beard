@@ -15,8 +15,7 @@ import xml.etree.cElementTree as etree
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
+from name_parser.parser import NameParser, InvalidNameException
 
 
 class CacheDBConnection(db.DBConnection):
@@ -163,22 +162,22 @@ class TVCache():
 
         myDB = self._getDB()
 
-        epInfo = None
+        parse_result = None
 
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
             try:
-                myParser = FileParser(curName)
-                epInfo = myParser.parse()
-            except tvnamer_exceptions.InvalidFilename:
+                myParser = NameParser()
+                parse_result = myParser.parse(curName)
+            except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
                 continue
 
-        if not epInfo:
-            logger.log(u"Giving up because I'm unable to figure out what show/etc this is: "+name, logger.DEBUG)
+        if not parse_result:
+            logger.log(u"Giving up because I'm unable to parse this name: "+name, logger.DEBUG)
             return False
 
-        if not epInfo.seriesname:
+        if not parse_result.series_name:
             logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
             return False
 
@@ -206,9 +205,9 @@ class TVCache():
             # if they're both empty then fill out as much info as possible by searching the show name
             else:
 
-                showResult = helpers.searchDBForShow(epInfo.seriesname)
+                showResult = helpers.searchDBForShow(parse_result.series_name)
                 if showResult:
-                    logger.log(epInfo.seriesname+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
+                    logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
                     tvdb_id = showResult[0]
 
                 else:
@@ -229,19 +228,19 @@ class TVCache():
 
 
         if not season:
-            season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
+            season = parse_result.season_number if parse_result.season_number != None else 1
         if not episodes:
-            episodes = epInfo.episodenumbers
+            episodes = parse_result.episode_numbers
 
         # if we have an air-by-date show then get the real season/episode numbers
-        if season == -1 and tvdb_id:
+        if parse_result.air_by_date and tvdb_id:
             try:
                 t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
-                epObj = t[tvdb_id].airedOn(episodes[0])[0]
+                epObj = t[tvdb_id].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound, e:
-                logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+epInfo.seriesname+", skipping", logger.WARNING)
+                logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                 return False
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
