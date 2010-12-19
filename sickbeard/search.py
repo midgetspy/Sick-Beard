@@ -98,10 +98,6 @@ def snatchEpisode(result, endStatus=SNATCHED):
 		if curEpObj.status not in Quality.DOWNLOADED:
 			notifiers.notify(NOTIFY_SNATCH, curEpObj.prettyName(True))
 
-
-	sickbeard.updateAiringList()
-	sickbeard.updateComingList()
-	
 	return True
 
 def searchForNeededEpisodes():
