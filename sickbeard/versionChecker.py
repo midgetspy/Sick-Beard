@@ -123,7 +123,7 @@ class WindowsUpdateManager(UpdateManager):
 
     def set_newest_text(self):
         new_str = 'There is a <a href="'+self.gc_url+'" target="_new">newer version available</a> (build '+str(self._newest_version)+')'
-        new_str += " <a href=\""+self.get_update_url()+"\">Update Now</a>"
+        new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
         sickbeard.NEWEST_VERSION_STRING = new_str
 
     def update(self):
@@ -297,7 +297,7 @@ class GitUpdateManager(UpdateManager):
             url = 'http://github.com/midgetspy/Sick-Beard/commits/'
 
         new_str = 'There is a <a href="'+url+'" target="_new">newer version available</a> ('+message+')'
-        new_str += " <a href=\""+self.get_update_url()+"\">Update Now</a>"
+        new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
 
         sickbeard.NEWEST_VERSION_STRING = new_str
 
@@ -384,7 +384,7 @@ class SourceUpdateManager(GitUpdateManager):
             logger.log(u"Unknown current version, don't know if we should update or not", logger.DEBUG)
 
             new_str = "Unknown version: If you've never used the Sick Beard upgrade system then I don't know what version you have."
-            new_str += " <a href=\""+self.get_update_url()+"\">Update Now</a>"
+            new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
 
             sickbeard.NEWEST_VERSION_STRING = new_str
 

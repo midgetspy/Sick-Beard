@@ -144,7 +144,7 @@
 
     \$("#showListTable").tablesorter({
         sortList: sortList,
-        widgets: ['cookie'],
+        widgets: ['cookie','zebra'],
         headers: {
             0: { sorter: 'nextAirDate'},
             1: { sorter: 'loadingNames'},
@@ -156,15 +156,7 @@
 
 });
 </script>
-<style>
-.ui-progressbar {
-   height:1.25em;
-   text-align:left;
-}
-td {
-   padding: 3px;
-}
-</style>
+
 <table id="showListTable" class="sickbeardTable tablesorter">
 
   <thead><tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
@@ -238,7 +230,7 @@ Custom
            value: parseInt($nom) * 100 / parseInt($den)
        });
        //\$("\#progressbar$curShow.tvdbid .ui-progressbar-value").html( "<div style='width:100%;'>$dlStat</div>" )
-       \$("\#progressbar$curShow.tvdbid").append( "<!--$dlStat--><div style='position:relative;text-align:center;top:-17px;width:100%;'>$dlStat</div>" )
+       \$("\#progressbar$curShow.tvdbid").append( "<!--$dlStat--><div style='position:relative;text-align:center;top:-18px;width:100%;'>$dlStat</div>" )
        \$("\#progressbar$curShow.tvdbid .ui-progressbar-value").css( "text-align", "center" )
        \$("\#progressbar$curShow.tvdbid .ui-progressbar-value").css( "overflow", "visible" )
    });

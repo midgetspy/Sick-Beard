@@ -242,7 +242,7 @@ class QueueItemAdd(QueueItem):
 
         except exceptions.MultipleShowObjectsException:
             logger.log(u"The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
-            ui.flash.error("The show in " + self.showDir + " is already in your show list, skipping")
+            ui.flash.error('Show skipped', "The show in " + self.showDir + " is already in your show list")
             self._finishEarly()
             return
 

@@ -8,35 +8,41 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <link rel="SHORTCUT ICON" href="$sbRoot/images/favicon.ico"/>
     <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png"/>
+	<link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />	
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css"/>
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/defaultcolors.css"/>
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.custom.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.7.custom.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />	
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
-    <script type="text/javascript" src="$sbRoot/js/jquery-1.4.2.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.custom.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />	
+    <script type="text/javascript" src="$sbRoot/js/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.7.custom.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.0.5b.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.selectboxes.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.json-2.2.min.js"></script>
-    <script type='text/javascript' src='$sbRoot/js/tools.tooltip-1.1.3.min.js'></script>
-    <script type='text/javascript' src='$sbRoot/js/jquery.autocomplete.min.js'></script>
+    <script type='text/javascript' src='$sbRoot/js/tools.tooltip-1.2.5.min.js'></script>
+	<script type='text/javascript' src='$sbRoot/js/jquery.autocomplete.min.js'></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
-    <script type="text/javascript" charset="utf-8">
-    $.Browser.defaults.url             = '$sbRoot/browser/';
-    $.Browser.defaults.autocompleteURL = '$sbRoot/browser/complete';
-    </script>
+	
 </head>
+
 <body>
 <a name="top">
+#if $sickbeard.VERSION_NOTIFY or $sickbeard.NEWEST_VERSION_STRING:
+<div id="upgrade-notification">
+	<div>
+		<span class="notify-text">$sickbeard.NEWEST_VERSION_STRING</span>
+	</div>
+</div>
+<div id="header-fix"></div>
+#end if
 <div id="header">
     <span id="logo"><a href="$sbRoot/home/" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard_small.png" width="150"></a></span>
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
-    <span id="tagline"><br /><a class="imgLink" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JA8M7VDY89SQ4" target="_new"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0"></a></span>
 </div>
 <span class="MainMenu">
     #for $menuItem in $menu:
@@ -48,7 +54,7 @@
     #end for
     <br />
 </span>
-
+    <span id="tagline"><a class="imgLink" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JA8M7VDY89SQ4" target="_new"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0"></a></span>	
 #if $varExists('submenu'):
 <span class="SubMenu">
 #for $menuItem in $submenu:
@@ -59,15 +65,8 @@
 </span>
 #end if
 
-#if $sickbeard.NEWEST_VERSION_STRING:
-<br />
-<div class="message ui-state-highlight ui-corner-all">
-    <p><span class="ui-icon ui-icon-alert"></span>$sickbeard.NEWEST_VERSION_STRING</a></p>
-</div>
-#end if
-
-
-<h1>#if $varExists('header') then $header else $title#</h1>
+<div style="padding: 15px;">
+<h1>#if $varExists('header') then $header else $title#</h1>	
 
 #for $curMessage in $flash.messages():
 <br />

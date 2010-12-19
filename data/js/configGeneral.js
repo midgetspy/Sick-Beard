@@ -23,6 +23,7 @@ $(document).ready(function(){
                   $('#multiExampleText').text(data);
         });
 
+
         return
 
     };
@@ -57,4 +58,64 @@ $(document).ready(function(){
         $(this).setExampleText();
     });  
 
+	// -- start of metadata options div toggle code --
+    $('#metadataType').change(function(){
+        $(this).showHideMetadata();
+    });
+	
+	$.fn.showHideMetadata = function() {
+        $('.metadataDiv').each(function(){
+            var targetName = $(this).attr('id');
+            var selectedTarget = $('#metadataType :selected').val();
+            
+            if (selectedTarget == targetName)
+                $(this).show();
+            else
+                $(this).hide();
+            
+        });
+   } 
+	//initalize to show the div
+	$(this).showHideMetadata();	
+	// -- end of metadata options div toggle code --
+    
+    $('.metadata_checkbox').click(function(){
+        $(this).refreshMetadataConfig();
+    });
+
+    $.fn.refreshMetadataConfig = function() {
+        var idArr = $("#provider_order_list").sortable('toArray');
+        
+        $('.metadataDiv').each(function(){
+            var generator_name = $(this).attr('id');
+
+            var config_arr = new Array();
+            var show_metadata = $("#"+generator_name+"_show_metadata").attr('checked');
+            var episode_metadata = $("#"+generator_name+"_episode_metadata").attr('checked');
+            var fanart = $("#"+generator_name+"_fanart").attr('checked');
+            var poster = $("#"+generator_name+"_poster").attr('checked');
+            var episode_thumbnails = $("#"+generator_name+"_episode_thumbnails").attr('checked');
+            var season_thumbnails = $("#"+generator_name+"_season_thumbnails").attr('checked');
+
+            config_arr.push(show_metadata ? '1':'0');
+            config_arr.push(episode_metadata ? '1':'0');
+            config_arr.push(poster ? '1':'0');
+            config_arr.push(fanart ? '1':'0');
+            config_arr.push(episode_thumbnails ? '1':'0');
+            config_arr.push(season_thumbnails ? '1':'0');
+            
+            $("#"+generator_name+"_eg_show_metadata").attr('class', show_metadata ? 'enabled' : 'disabled');
+            $("#"+generator_name+"_eg_episode_metadata").attr('class', episode_metadata ? 'enabled' : 'disabled');
+            $("#"+generator_name+"_eg_poster").attr('class', poster ? 'enabled' : 'disabled');
+            $("#"+generator_name+"_eg_fanart").attr('class', fanart ? 'enabled' : 'disabled');
+            $("#"+generator_name+"_eg_episode_thumbnails").attr('class', episode_thumbnails ? 'enabled' : 'disabled');
+            $("#"+generator_name+"_eg_season_thumbnails").attr('class', season_thumbnails ? 'enabled' : 'disabled');
+            
+            $("#"+generator_name+"_data").val(config_arr.join('|'))
+            
+        });
+    }
+	
+    $(this).refreshMetadataConfig();
+    
 });

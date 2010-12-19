@@ -216,6 +216,10 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser()
         self._test_names(np, 'no_season', lambda x: x + '.avi')
 
+    def test_no_season_general_file_names(self):
+        np = parser.NameParser()
+        self._test_names(np, 'no_season_general', lambda x: x + '.avi')
+
     def test_season_only_file_names(self):
         np = parser.NameParser()
         self._test_names(np, 'season_only', lambda x: x + '.avi')

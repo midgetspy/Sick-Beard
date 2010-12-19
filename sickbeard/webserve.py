@@ -159,7 +159,7 @@ class ManageSearches:
         if result:
             logger.log(u"Search forced")
             ui.flash.message('Episode search started',
-                          'Note: RSS feeds may not be updated if they have been retrieved too recently')
+                          'Note: RSS feeds may not be updated if retrieved recently')
 
         redirect("/manage/manageSearches")
 
@@ -436,7 +436,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
-        ui.flash.message('Removed all history entries greater than 30 days old')
+        ui.flash.message('Removed history entries greater than 30 days old')
         redirect("/history")
 
 
@@ -464,8 +464,7 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    metadata_type=None, metadata_show=None, metadata_episode=None,
-                    art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
 
         results = []
 
@@ -483,36 +482,6 @@ class ConfigGeneral:
             launch_browser = 1
         else:
             launch_browser = 0
-
-        if metadata_show == "on":
-            metadata_show = 1
-        else:
-            metadata_show = 0
-
-        if metadata_episode == "on":
-            metadata_episode = 1
-        else:
-            metadata_episode = 0
-
-        if art_poster == "on":
-            art_poster = 1
-        else:
-            art_poster = 0
-
-        if art_fanart == "on":
-            art_fanart = 1
-        else:
-            art_fanart = 0
-
-        if art_thumbnails == "on":
-            art_thumbnails = 1
-        else:
-            art_thumbnails = 0
-
-        if art_season_thumbnails == "on":
-            art_season_thumbnails = 1
-        else:
-            art_season_thumbnails = 0
 
         if season_folders_default == "on":
             season_folders_default = 1
@@ -562,16 +531,9 @@ class ConfigGeneral:
 
         sickbeard.LAUNCH_BROWSER = launch_browser
 
-        sickbeard.METADATA_TYPE = metadata_type
-        sickbeard.METADATA_SHOW = metadata_show
-        sickbeard.METADATA_EPISODE = metadata_episode
-
-        sickbeard.metadata_generator = metadata.getMetadataClass(sickbeard.METADATA_TYPE)
-
-        sickbeard.ART_POSTER = art_poster
-        sickbeard.ART_FANART = art_fanart
-        sickbeard.ART_THUMBNAILS = art_thumbnails
-        sickbeard.ART_SEASON_THUMBNAILS = art_season_thumbnails
+        sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
+        sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
+        sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
 
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
@@ -602,7 +564,7 @@ class ConfigGeneral:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/general/")
 
@@ -777,7 +739,7 @@ class ConfigEpisodeDownloads:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/episodedownloads/")
 
@@ -950,7 +912,7 @@ class ConfigProviders:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/providers/")
 
@@ -963,9 +925,10 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
+    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None):
+                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
+						  use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
 
         results = []
 
@@ -989,16 +952,40 @@ class ConfigNotifications:
         else:
             xbmc_update_full = 0
 
+        if use_xbmc == "on":
+            use_xbmc = 1
+        else:
+            use_xbmc = 0
+            
+        if growl_notify_onsnatch == "on":
+            growl_notify_onsnatch = 1
+        else:
+            growl_notify_onsnatch = 0
+
+        if growl_notify_ondownload == "on":
+            growl_notify_ondownload = 1
+        else:
+            growl_notify_ondownload = 0
         if use_growl == "on":
             use_growl = 1
         else:
             use_growl = 0
 
+        if twitter_notify_onsnatch == "on":
+            twitter_notify_onsnatch = 1
+        else:
+            twitter_notify_onsnatch = 0
+
+        if twitter_notify_ondownload == "on":
+            twitter_notify_ondownload = 1
+        else:
+            twitter_notify_ondownload = 0
         if use_twitter == "on":
             use_twitter = 1
         else:
             use_twitter = 0
 
+        sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
@@ -1008,10 +995,14 @@ class ConfigNotifications:
         sickbeard.XBMC_PASSWORD = xbmc_password
 
         sickbeard.USE_GROWL = use_growl
+        sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
+        sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
 
         sickbeard.USE_TWITTER = use_twitter
+        sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
+        sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
 
         sickbeard.save_config()
 
@@ -1021,7 +1012,7 @@ class ConfigNotifications:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/notifications/")
 
@@ -1160,7 +1151,7 @@ class NewHomeAddShows:
 
         # if we got a TVDB ID then make a show out of it
         sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd)
-        ui.flash.message('Show added', 'Adding the specified show into '+showToAdd)
+        ui.flash.message('Show added', 'Adding the specified show into '+ showToAdd)
         # no need to display anything now that we added the show, so continue on to the next show
         return self.addShows(showDirs)
 

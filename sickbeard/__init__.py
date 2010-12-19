@@ -66,7 +66,7 @@ loadingShowList = None
 
 providerList = []
 newznabProviderList = []
-metadata_generator = None
+metadata_provider_dict = {}
 
 NEWEST_VERSION = None
 NEWEST_VERSION_STRING = None
@@ -88,14 +88,9 @@ WEB_IPV6 = None
 LAUNCH_BROWSER = None
 CACHE_DIR = None
 
-METADATA_TYPE = None
-METADATA_SHOW = None
-METADATA_EPISODE = None
-
-ART_POSTER = None
-ART_FANART = None
-ART_THUMBNAILS = None
-ART_SEASON_THUMBNAILS = None
+METADATA_XBMC = None
+METADATA_MEDIABROWSER = None
+METADATA_PS3 = None
 
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_FORMAT = None
@@ -170,6 +165,7 @@ SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = None
 
+USE_XBMC = False
 XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
 XBMC_UPDATE_LIBRARY = False
@@ -179,10 +175,14 @@ XBMC_USERNAME = None
 XBMC_PASSWORD = None
 
 USE_GROWL = False
+GROWL_NOTIFY_ONSNATCH = False
+GROWL_NOTIFY_ONDOWNLOAD = False
 GROWL_HOST = None
 GROWL_PASSWORD = None
 
 USE_TWITTER = False
+TWITTER_NOTIFY_ONSNATCH = False
+TWITTER_NOTIFY_ONDOWNLOAD = False
 TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
@@ -290,6 +290,7 @@ def initialize(consoleLogging=True):
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
+                USE_XBMC, GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
@@ -299,8 +300,7 @@ def initialize(consoleLogging=True):
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
-                ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
+                METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES
 
 
@@ -432,6 +432,7 @@ def initialize(consoleLogging=True):
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', 'tv')
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
 
+        USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0)) 
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
         XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
@@ -441,10 +442,14 @@ def initialize(consoleLogging=True):
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
 
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
+        GROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onsnatch', 0))
+        GROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Growl', 'growl_notify_ondownload', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
 
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
+        TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
+        TWITTER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_ondownload', 0))        
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
@@ -453,39 +458,62 @@ def initialize(consoleLogging=True):
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
-        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', 'xbmc')
-        METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
-        METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
+        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
 
-        ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
-        ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
-        ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
-        ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
-
-        # try setting defaults if possible
-        try:
-            TEMP_CREATE_METADATA = bool(int(CFG['General']['create_metadata']))
-            METADATA_SHOW = TEMP_CREATE_METADATA
-            METADATA_EPISODE = TEMP_CREATE_METADATA
-        except:
-            pass
+        metadata_provider_dict = metadata.get_metadata_generator_dict()
         
-        try:
-            TEMP_CREATE_IMAGES = bool(int(CFG['General']['create_images']))
-            ART_POSTER = TEMP_CREATE_IMAGES 
-            ART_FANART = TEMP_CREATE_IMAGES
-            ART_THUMBNAILS = TEMP_CREATE_IMAGES
-            ART_SEASON_THUMBNAILS = TEMP_CREATE_IMAGES
-        except:
-            pass
+        # if this exists it's legacy, use the info to upgrade metadata to the new settings
+        if METADATA_TYPE:
+
+            old_metadata_class = None
+
+            if METADATA_TYPE == 'xbmc':
+                old_metadata_class = metadata.xbmc.metadata_class
+            elif METADATA_TYPE == 'mediabrowser':
+                old_metadata_class = metadata.mediabrowser.metadata_class
+            elif METADATA_TYPE == 'ps3':
+                old_metadata_class = metadata.ps3.metadata_class
+        
+            if old_metadata_class:
+                
+                METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
+                METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
+            
+                ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
+                ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
+                ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
+                ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
+
+                new_metadata_class = old_metadata_class(METADATA_SHOW,
+                                                        METADATA_EPISODE,
+                                                        ART_POSTER,
+                                                        ART_FANART,
+                                                        ART_THUMBNAILS,
+                                                        ART_SEASON_THUMBNAILS)
+                
+                metadata_provider_dict[new_metadata_class.name] = new_metadata_class
+
+        # this is the normal codepath for metadata config
+        else:
+            METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
+            METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
+            METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
+            
+            for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
+                                       (METADATA_MEDIABROWSER, metadata.mediabrowser),
+                                       (METADATA_PS3, metadata.ps3),
+                                       ]:
+
+                (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
+                tmp_provider = cur_metadata_class.metadata_class()
+                tmp_provider.set_config(cur_metadata_config)
+                metadata_provider_dict[tmp_provider.name] = tmp_provider
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
 
         providerList = providers.makeProviderList()
         
-        metadata_generator = metadata.getMetadataClass(METADATA_TYPE)
-
         logger.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
@@ -735,13 +763,11 @@ def save_config():
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
-    new_config['General']['metadata_type'] = METADATA_TYPE
-    new_config['General']['metadata_show'] = int(METADATA_SHOW)
-    new_config['General']['metadata_episode'] = int(METADATA_EPISODE)
-    new_config['General']['art_poster'] = int(ART_POSTER)
-    new_config['General']['art_fanart'] = int(ART_FANART)
-    new_config['General']['art_thumbnails'] = int(ART_THUMBNAILS)
-    new_config['General']['art_season_thumbnails'] = int(ART_SEASON_THUMBNAILS)
+    
+    new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
+    new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
+    new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
+
     new_config['General']['cache_dir'] = CACHE_DIR if CACHE_DIR else 'cache'
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
@@ -799,6 +825,7 @@ def save_config():
     new_config['SABnzbd']['sab_host'] = SAB_HOST
 
     new_config['XBMC'] = {}
+    new_config['XBMC']['use_xbmc'] = int(USE_XBMC)    
     new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
     new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
     new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
@@ -809,11 +836,15 @@ def save_config():
 
     new_config['Growl'] = {}
     new_config['Growl']['use_growl'] = int(USE_GROWL)
+    new_config['Growl']['growl_notify_onsnatch'] = int(GROWL_NOTIFY_ONSNATCH)
+    new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD) 
     new_config['Growl']['growl_host'] = GROWL_HOST
     new_config['Growl']['growl_password'] = GROWL_PASSWORD
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
+    new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)
+    new_config['Twitter']['twitter_notify_ondownload'] = int(TWITTER_NOTIFY_ONDOWNLOAD)
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX

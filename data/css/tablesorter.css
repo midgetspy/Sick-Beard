@@ -1,9 +1,14 @@
 /* tables */
 table.tablesorter thead tr .header {
-	background-image: url(../images/tablesorter/bg.gif);
-	background-repeat: no-repeat;
-	background-position: center right;
-	cursor: pointer;
+    background-image: url(../images/tablesorter/bg.gif);     
+    cursor: pointer; 
+    background-repeat: no-repeat; 
+    background-position: center right; 
+    padding-right: 18px; 
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+	border: 1px solid #241109;
+	padding: 2px;
 }
 table.tablesorter thead tr .headerSortUp {
 	background-image: url(../images/tablesorter/asc.gif);
@@ -13,4 +18,12 @@ table.tablesorter thead tr .headerSortDown {
 }
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
     background-color: #57442B;
+}
+table.tablesorter tbody tr.even td {
+	background-color:#f5f1e4;
+	color: #000000;
+}
+table.tablesorter tbody tr.odd td {
+	background-color:#dfdacf;
+	color: #000000;
 }

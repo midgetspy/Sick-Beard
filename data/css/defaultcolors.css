@@ -75,18 +75,22 @@ tr.odd {
 }
 
 tr.oddLine, tr.skipped, span.skipped, tr.unaired {
+	padding: 2px;
 	background-color: #F5F1E4;
 }
 
 tr.good, span.good{
+	padding: 2px;
 	background-color: #C3E3C8;
 }
 
 tr.qual, span.qual{
+	padding: 2px;
 	background-color: #FFDA8A;
 }
 
 tr.wanted, span.wanted{
+	padding: 2px;
 	background-color: #FFCFCF;
 }
 
