@@ -27,6 +27,10 @@ class SceneTests(unittest.TestCase):
         result = sceneHelpers.allPossibleShowNames(Show(name, tvdbid, tvrname))
         self.assertTrue(len(set(expected).intersection(set(result))) == len(expected))
 
+    def _test_filterBadReleases(self, name, expected):
+        result = sceneHelpers.filterBadReleases(name)
+        self.assertEqual(result, expected)
+
     def test_sceneToNormalShowNames(self):
         self._test_sceneToNormalShowNames('Show Name 2010', ['Show Name 2010', 'Show Name (2010)'])
         self._test_sceneToNormalShowNames('Show Name US', ['Show Name US', 'Show Name (US)'])
@@ -53,6 +57,13 @@ class SceneTests(unittest.TestCase):
         self._test_allPossibleShowNames('Show Name Full Country Name', expected=['Show Name Full Country Name', 'Show Name (FCN)'])
         self._test_allPossibleShowNames('Show Name (Full Country Name)', expected=['Show Name (Full Country Name)', 'Show Name (FCN)'])
         self._test_allPossibleShowNames('Show Name (FCN)', -1, 'TVRage Name', expected=['Show Name (FCN)', 'Show Name (Full Country Name)', 'Exception Test', 'TVRage Name'])
+
+    def test_filterBadReleases(self):
+        
+        self._test_filterBadReleases('Show.S02.German.Stuff-Grp', False)
+        self._test_filterBadReleases('Show.S02.Some.German.Stuff-Grp', False)
+        self._test_filterBadReleases('German.Show.S02.Some.Stuff-Grp', True)
+        self._test_filterBadReleases('Show.S02.This.Is.German', False)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:

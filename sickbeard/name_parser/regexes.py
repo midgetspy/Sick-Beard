@@ -19,6 +19,62 @@
 # all regexes are case insensitive
 
 ep_regexes = [
+              ('standard_repeat',
+               # Show.Name.S01E02.S01E03.Source.Quality.Etc-Group
+               # Show Name - S01E02 - S01E03 - S01E04 - Ep Name
+               '''
+               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
+               s(?P<season_num>\d+)[\. _-]*                # S01 and optional separator
+               e(?P<ep_num>\d+)                            # E02 and separator
+               ([\. _-]+s(?P=season_num)[\. _-]*           # S01 and optional separator
+               e(?P<extra_ep_num>\d+))+                    # E03/etc and separator
+               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               (-(?P<release_group>.+))?)?$                # Group
+               '''),
+              
+              ('fov_repeat',
+               # Show.Name.1x02.1x03.Source.Quality.Etc-Group
+               # Show Name - 1x02 - 1x03 - 1x04 - Ep Name
+               '''
+               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
+               (?P<season_num>\d+)x                        # 1x
+               (?P<ep_num>\d+)                             # 02 and separator
+               ([\. _-]+(?P=season_num)x                   # 1x
+               (?P<extra_ep_num>\d+))+                     # 03/etc and separator
+               ([\. _-]+(?P<extra_info>.+?)                # Source_Quality_Etc
+               (-(?P<release_group>.+))?)?$                # Group
+               '''),
+              
+              ('standard',
+               # Show.Name.S01E02.Source.Quality.Etc-Group
+               # Show Name - S01E02 - My Ep Name
+               # Show.Name.S01.E03.My.Ep.Name
+               # Show.Name.S01E02E03.Source.Quality.Etc-Group
+               # Show Name - S01E02-03 - My Ep Name
+               # Show.Name.S01.E02.E03
+               '''
+               ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
+               s(?P<season_num>\d+)[\. _-]*                # S01 and optional separator
+               e(?P<ep_num>\d+)                            # E02 and separator
+               ([\. _-]*[e-](?P<extra_ep_num>\d+))*        # additional E03/etc
+               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               (-(?P<release_group>\w+))?)?$               # Group
+               '''),
+
+              ('fov',
+               # Show_Name.1x02.Source_Quality_Etc-Group
+               # Show Name - 1x02 - My Ep Name
+               # Show_Name.1x02x03x04.Source_Quality_Etc-Group
+               # Show Name - 1x02-03-04 - My Ep Name
+               '''
+               ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
+               (?P<season_num>\d+)x                        # 1x
+               (?P<ep_num>\d+)                             # 02 and separator
+               ([\. _-]*[x-](?P<extra_ep_num>\d+))*        # additional x03/etc
+               ([\. _-]+(?P<extra_info>[^-]+?)             # Source_Quality_Etc-
+               (-(?P<release_group>.+))?)?$                # Group
+               '''),
+        
               ('scene_date_format',
                # Show.Name.2010.11.23.Source.Quality.Etc-Group
                # Show Name - 2010-11-23 - Ep Name
@@ -31,78 +87,22 @@ ep_regexes = [
                (-(?P<release_group>.+))?$                  # Group
                '''),
               
-              ('standard_repeat',
-               # Show.Name.S01E02.S01E03.Source.Quality.Etc-Group
-               # Show Name - S01E02 - S01E03 - S01E04 - Ep Name
+              ('stupid',
+               # tpz-abc102
                '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
-               s(?P<season_num>\d+)[\. _-]*                # S01 and optional separator
-               e(?P<ep_num>\d+)                            # E02 and separator
-               ([\. _-]+s(?P=season_num)[\. _-]*           # S01 and optional separator
-               e(?P<extra_ep_num>\d+))+                    # E03/etc and separator
-               [\. _-]+(?P<extra_info>.+?)                 # Source.Quality.Etc
-               (-(?P<release_group>.+))?$                  # Group
+               (?P<release_group>.+?)-\w+?[\. ]?     # tpz-abc
+               (?P<season_num>\d{1,2})                     # 1
+               (?P<ep_num>\d{2})$                          # 02
                '''),
               
-              ('fov_repeat',
-               # Show.Name.1x02.1x03.Source.Quality.Etc-Group
-               # Show Name - 1x02 - 1x03 - 1x04 - Ep Name
-               '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
-               (?P<season_num>\d+)x                        # 1x
-               (?P<ep_num>\d+)                             # 02 and separator
-               ([\. _-]+(?P=season_num)x                   # 1x
-               (?P<extra_ep_num>\d+))+                     # 03/etc and separator
-               [\. _-]+(?P<extra_info>.+?)              # Source_Quality_Etc
-               (-(?P<release_group>.+))?$                  # Group
-               '''),
-              
-              ('standard',
-               # Show.Name.S01E02.Source.Quality.Etc-Group
-               # Show Name - S01E02 - My Ep Name
-               # Show.Name.S01.E03.My.Ep.Name
-               # Show.Name.S01E02E03.Source.Quality.Etc-Group
-               # Show Name - S01E02-03 - My Ep Name
-               # Show.Name.S01.E02.E03
-               '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
-               s(?P<season_num>\d+)[\. _-]*                # S01 and optional separator
-               e(?P<ep_num>\d+)                            # E02 and separator
-               ([\. _-]*[e-](?P<extra_ep_num>\d+))*        # additional E03/etc
-               ([\. _-]+(?P<extra_info>.+?))?              # Source.Quality.Etc
-               (-(?P<release_group>\w+))?$                 # Group
-               '''),
-
-              ('fov',
-               # Show_Name.1x02.Source_Quality_Etc-Group
-               # Show Name - 1x02 - My Ep Name
-               # Show_Name.1x02x03x04.Source_Quality_Etc-Group
-               # Show Name - 1x02-03-04 - My Ep Name
-               '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
-               (?P<season_num>\d+)x                        # 1x
-               (?P<ep_num>\d+)                             # 02 and separator
-               ([\. _-]*[x-](?P<extra_ep_num>\d+))*        # additional E03/etc
-               [\. _-]+(?P<extra_info>[^-]+?)              # Source_Quality_Etc-
-               (-(?P<release_group>.+))?$                  # Group
-               '''),
-        
               ('bare',
                # Show.Name.102.Source.Quality.Etc-Group
                '''
                ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
                (?P<season_num>\d{1,2})                     # 1
-               (?P<ep_num>\d{2})[\. _-]+                   # 02 and separator
-               (?P<extra_info>[^-]+)                       # Source_Quality_Etc-
-               (-(?P<release_group>.+))?$                  # Group
-               '''),
-              
-              ('stupid',
-               # tpz-abc102
-               '''
-               (?P<release_group>.+?)-[A-Za-z]+?[\. ]?     # tpz-abc
-               (?P<season_num>\d{1,2})                     # 1
-               (?P<ep_num>\d{2})$                          # 02
+               (?P<ep_num>\d{2})                           # 02 and separator
+               ([\. _-]+(?P<extra_info>[^-]+)              # Source_Quality_Etc-
+               (-(?P<release_group>.+))?)?$                # Group
                '''),
               
               ('verbose',

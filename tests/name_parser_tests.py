@@ -11,33 +11,41 @@ DEBUG = VERBOSE = False
 simple_test_cases = {
               'standard': {
               'Mr.Show.Name.S01E02.Source.Quality.Etc-Group': parser.ParseResult(None, 'Mr Show Name', 1, [2], 'Source.Quality.Etc', 'Group'),
+              'Show.Name.S01E02': parser.ParseResult(None, 'Show Name', 1, [2]),
               'Show Name - S01E02 - My Ep Name': parser.ParseResult(None, 'Show Name', 1, [2], 'My Ep Name'),
               'Show.1.0.Name.S01.E03.My.Ep.Name-Group': parser.ParseResult(None, 'Show 1.0 Name', 1, [3], 'My.Ep.Name', 'Group'),
               'Show.Name.S01E02E03.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3], 'Source.Quality.Etc', 'Group'),
               'Mr. Show Name - S01E02-03 - My Ep Name': parser.ParseResult(None, 'Mr. Show Name', 1, [2,3], 'My Ep Name'),
               'Show.Name.S01.E02.E03': parser.ParseResult(None, 'Show Name', 1, [2,3]),
               'Show.Name-0.2010.S01E02.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name-0 2010', 1, [2], 'Source.Quality.Etc', 'Group'),
+              'S01E02 Ep Name': parser.ParseResult(None, None, 1, [2], 'Ep Name'),
+              'Show Name - S06E01 - 2009-12-20 - Ep Name': parser.ParseResult(None, 'Show Name', 6, [1], '2009-12-20 - Ep Name'),
               },
               
               'fov': {
               'Show_Name.1x02.Source_Quality_Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2], 'Source_Quality_Etc', 'Group'),
+              'Show Name 1x02': parser.ParseResult(None, 'Show Name', 1, [2]),
               'Show Name - 1x02 - My Ep Name': parser.ParseResult(None, 'Show Name', 1, [2], 'My Ep Name'),
               'Show_Name.1x02x03x04.Source_Quality_Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'Source_Quality_Etc', 'Group'),
               'Show Name - 1x02-03-04 - My Ep Name': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'My Ep Name'),
+              '1x02 Ep Name': parser.ParseResult(None, None, 1, [2], 'Ep Name'),
               },
 
               'standard_repeat': {
               'Show.Name.S01E02.S01E03.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3], 'Source.Quality.Etc', 'Group'),
+              'Show.Name.S01E02.S01E03': parser.ParseResult(None, 'Show Name', 1, [2,3]),
               'Show Name - S01E02 - S01E03 - S01E04 - Ep Name': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'Ep Name'),
               },
               
               'fov_repeat': {
               'Show.Name.1x02.1x03.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3], 'Source.Quality.Etc', 'Group'),
+              'Show.Name.1x02.1x03': parser.ParseResult(None, 'Show Name', 1, [2,3]),
               'Show Name - 1x02 - 1x03 - 1x04 - Ep Name': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'Ep Name'),
               },
 
               'bare': {
               'Show.Name.102.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2], 'Source.Quality.Etc', 'Group'),
+              'Show.Name.102': parser.ParseResult(None, 'Show Name', 1, [2]),
               },
               
               'stupid': {
@@ -84,6 +92,10 @@ combination_test_cases = [
                           ('MythBusters.S08E16.720p.HDTV.x264-aAF\\aaf-mb.s08e16.720p.mkv',
                            parser.ParseResult(None, 'MythBusters', 8, [16], '720p.HDTV.x264', 'aAF'),
                            ['standard']),
+                           
+                           ('/home/drop/storage/TV/Terminator The Sarah Connor Chronicles/Season 2/S02E06 The Tower is Tall, But the Fall is Short.mkv',
+                            parser.ParseResult(None, None, 2, [6], 'The Tower is Tall, But the Fall is Short'),
+                            ['standard']),
                           
                           ]
 

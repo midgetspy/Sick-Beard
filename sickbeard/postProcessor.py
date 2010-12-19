@@ -259,18 +259,23 @@ class PostProcessor(object):
         """
         Look up the NZB name in the history and see if it contains a record for self.nzb_name
         
-        Returns a (tvdb_id, season, [episodes]) tuple. The first two may be None and episodes may be []
-        if none were found.
+        Returns a (tvdb_id, season, []) tuple. The first two may be None if none were found.
         """
         
         to_return = (None, None, [])
         
-        if not self.nzb_name:
+        if not self.nzb_name and not self.folder_name:
             self.in_history = False
             return to_return
-    
-        names = [self.nzb_name, self.nzb_name.rpartition(".")[0]]
-    
+
+        names = []
+        if self.nzb_name:
+            names.append(self.nzb_name)
+            if '.' in self.nzb_name:
+                names.append(self.nzb_name.rpartition(".")[0])
+        if self.folder_name:
+            names.append(self.folder_name)
+
         myDB = db.DBConnection()
     
         for curName in names:
@@ -281,14 +286,11 @@ class PostProcessor(object):
     
             tvdb_id = int(sql_results[0]["showid"])
             season = int(sql_results[0]["season"])
-            episodes = []
-    
-            for cur_result in sql_results:
-                episodes.append(int(cur_result["episode"]))            
 
             self.in_history = True
-            self._log("Found result in history: "+str(tvdb_id)+", "+str(season)+", "+str(set(episodes)), logger.DEBUG)
-            return (tvdb_id, season, list(set(episodes)))
+            to_return = (tvdb_id, season, [])
+            self._log("Found result in history: "+str(to_return), logger.DEBUG)
+            return to_return
         
         self.in_history = False
         return to_return
@@ -300,6 +302,8 @@ class PostProcessor(object):
         Returns a (tvdb_id, season, [episodes]) tuple. The first two may be None and episodes may be []
         if none were found.
         """
+
+        logger.log(u"Analyzing name "+repr(name))
     
         to_return = (None, None, [])
     
@@ -312,18 +316,24 @@ class PostProcessor(object):
         self._log("Parsed "+name+" into "+str(parse_result), logger.DEBUG)
 
         if parse_result.air_by_date:
-            season = -1
+            season = None
             episodes = [parse_result.air_date]
         else:
             season = parse_result.season_number
             episodes = parse_result.episode_numbers 
+
+        to_return = (None, season, episodes)
     
         # do a scene reverse-lookup to get a list of all possible names
         name_list = sceneHelpers.sceneToNormalShowNames(parse_result.series_name)
+
+        if not name_list:
+            return (None, season, episodes)
         
         def _finalize(parse_result):
             self.release_group = parse_result.release_group
-            self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
+            if parse_result.extra_info:
+                self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
         
         # for each possible interpretation of that scene name
         for cur_name in name_list:
@@ -359,6 +369,7 @@ class PostProcessor(object):
             _finalize(parse_result)
             return (int(showObj["id"]), season, episodes)
     
+        _finalize(parse_result)
         return to_return
     
     
@@ -433,12 +444,18 @@ class PostProcessor(object):
     
     def _get_ep_obj(self, tvdb_id, season, episodes):
 
+        show_obj = None
+
         self._log(u"Loading show object for tvdb_id "+str(tvdb_id), logger.DEBUG)
         # find the show in the showlist
         try:
             show_obj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
         except exceptions.MultipleShowObjectsException:
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
+
+        if not show_obj:
+            self._log(u"This show isn't in your list, you need to add it to SB before post-processing an episode", logger.ERROR)
+            raise exceptions.PostProcessingFailed()
 
         root_ep = None
         for cur_episode in episodes:
@@ -491,6 +508,8 @@ class PostProcessor(object):
         if ep_quality != common.Quality.UNKNOWN:
             logger.log(self.file_name+u" looks like it has quality "+common.Quality.qualityStrings[ep_quality]+", using that", logger.DEBUG)
             return ep_quality
+        
+        return ep_quality
     
     def _run_extra_scripts(self, ep_obj):
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
@@ -578,7 +597,10 @@ class PostProcessor(object):
         # if renaming is turned on then rename the episode (and associated files, if necessary)
         if sickbeard.RENAME_EPISODES:
             new_file_name = helpers.sanitizeFileName(ep_obj.prettyName())
-            self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
+            try:
+                self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to rename the files")
 
             # remember the new name of the file
             new_file_path = ek.ek(os.path.join, self.folder_path, new_file_name + '.' + self.file_name.rpartition('.')[-1])
@@ -588,7 +610,10 @@ class PostProcessor(object):
 
         # delete the existing file (and company)
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            self._delete(cur_ep.location, associated_files=True)
+            try:
+                self._delete(cur_ep.location, associated_files=True)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
         dest_path = self._find_ep_destination_folder(ep_obj)
@@ -597,13 +622,19 @@ class PostProcessor(object):
         # if the dir doesn't exist (new season folder) then make it
         if not ek.ek(os.path.isdir, dest_path):
             self._log(u"Season folder didn't exist, creating it", logger.DEBUG)
-            ek.ek(os.mkdir, dest_path)
+            try:
+                ek.ek(os.mkdir, dest_path)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+str(dest_path))
 
-        # move the episode to the show dir
-        if sickbeard.KEEP_PROCESSED_DIR:
-            self._copy(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
-        else:
-            self._move(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
+        try:
+            # move the episode to the show dir
+            if sickbeard.KEEP_PROCESSED_DIR:
+                self._copy(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
+            else:
+                self._move(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
+        except OSError, IOError:
+            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         
         # update the statuses before we rename so the quality goes into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
