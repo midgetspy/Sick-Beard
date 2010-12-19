@@ -86,7 +86,6 @@ if not 'nogit' in oldArgs:
 # figure out what build this is going to be
 latestBuild = findLatestBuild()
 currentBuildNumber = latestBuild+1
-currentBuildNumber = 468
 
 # write the version file before we compile
 versionFile = open("sickbeard/version.py", "w")
@@ -118,11 +117,11 @@ options = dict(
               'sickbeard.notifiers',
               'sickbeard.databases',
               'sickbeard.metadata',
+              'sickbeard.name_parser',
               'lib',
               'lib.tvdb_api',
               'lib.growl',
               'lib.httplib2',
-              'lib.tvnamer',
               'lib.oauth2',
               'lib.pygithub',
               'lib.pythontwitter',
