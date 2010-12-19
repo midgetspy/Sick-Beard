@@ -39,12 +39,32 @@ class PS3Metadata(generic.GenericMetadata):
     show_root/Season 01/show - 1x01 - episode.avi.cover.jpg  (episode thumb)
     """
     
-    def __init__(self):
-        generic.GenericMetadata.__init__(self)
+    def __init__(self,
+                 show_metadata=False,
+                 episode_metadata=False,
+                 poster=False,
+                 fanart=False,
+                 episode_thumbnails=False,
+                 season_thumbnails=False):
 
+        generic.GenericMetadata.__init__(self,
+                                         show_metadata,
+                                         episode_metadata,
+                                         poster,
+                                         fanart,
+                                         episode_thumbnails,
+                                         season_thumbnails)
+        
         self.poster_name = 'cover.jpg'
-        self.name = 'PS3'
+        self.name = 'Sony PS3'
 
+        self.eg_show_metadata = "<i>not supported</i>"
+        self.eg_episode_metadata = "<i>not supported</i>"
+        self.eg_fanart = "fanart.jpg"
+        self.eg_poster = "cover.jpg"
+        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.ext.cover.jpg"
+        self.eg_season_thumbnails = "season##.tbn"
+    
     def get_episode_thumb_path(self, ep_obj):
         """
         Returns the path where the episode thumbnail should be stored. Defaults to
