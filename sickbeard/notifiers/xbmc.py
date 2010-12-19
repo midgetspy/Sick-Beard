@@ -134,7 +134,12 @@ def updateLibrary(host, showName=None):
             return False
 
         encSqlXML = urllib.quote(sqlXML,':\\/<>')
-        et = etree.fromstring(encSqlXML)
+        try:
+            et = etree.fromstring(encSqlXML)
+        except SyntaxError, e:
+            logger.log("Unable to parse XML returned from XBMC: "+str(e), logger.ERROR)
+            return False
+
         paths = et.findall('.//field')
 
         if not paths:
