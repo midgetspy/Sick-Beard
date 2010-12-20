@@ -290,3 +290,17 @@ Son of Suckerfish Dropdowns END
 	padding: 5px;
 	opacity: 0.85;
 }
+
+/* ==================== */
+/* = ProgressBar Text = */
+/* ==================== */
+.progressbarText {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	text-align: center;
+	line-height: 16px;
+	_line-height:14px; /* IE hack to fix spacing*/
+}
