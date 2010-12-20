@@ -3,6 +3,7 @@ import sickbeard
 import xbmc
 import growl
 import tweet
+import prowl
 
 from sickbeard.common import *
 
@@ -22,6 +23,9 @@ def testTwitter2(key):
 def testTwitter():
     return tweet.notifyTwitter("This is a test notification from Sick Beard", force=True)
 
+def testProwl(prowl_api=None):
+    prowl.sendProwl("Sick Beard", "Test", "Testing Prowl notification settings from Sick Beard", prowl_api)
+
 def notify(type, message):
 
     if type == NOTIFY_DOWNLOAD and sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
@@ -31,6 +35,8 @@ def notify(type, message):
             xbmc.notifyXBMC(message, notifyStrings[type])
 
     growl.sendGrowl(notifyStrings[type], message)
+    
+    prowl.sendProwl(message)
 
     if type == NOTIFY_DOWNLOAD:
         tweet.notifyTwitter(message)

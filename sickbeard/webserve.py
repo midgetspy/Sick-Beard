@@ -965,7 +965,7 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None):
+                          use_growl=None, growl_host=None, growl_password=None, use_prowl=None, prowl_api=None, use_twitter=None):
 
         results = []
 
@@ -994,6 +994,11 @@ class ConfigNotifications:
         else:
             use_growl = 0
 
+        if use_prowl == "on":
+            use_prowl = 1
+        else:
+            use_prowl = 0
+
         if use_twitter == "on":
             use_twitter = 1
         else:
@@ -1010,6 +1015,9 @@ class ConfigNotifications:
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
+
+        sickbeard.USE_PROWL = use_prowl
+        sickbeard.PROWL_API = prowl_api
 
         sickbeard.USE_TWITTER = use_twitter
 
@@ -1322,6 +1330,11 @@ class Home:
     def testGrowl(self, host=None, password=None):
         notifiers.testGrowl(host, password)
         return "Tried sending growl to "+host+" with password "+password
+
+    @cherrypy.expose
+    def testProwl(self, prowl_api=None):
+        notifiers.testProwl(prowl_api)
+        return "Tried sending Prowl notification"
 
     @cherrypy.expose
     def twitterStep1(self):

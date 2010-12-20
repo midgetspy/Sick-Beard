@@ -17,6 +17,13 @@
     \$.get("$sbRoot/home/testGrowl", {'host': growl_host, 'password': growl_password});
 
   });
+  
+  \$('#testProwl').click(function(){
+
+    var prowl_api = \$("#prowl_api").val();
+    \$.get("$sbRoot/home/testProwl", {'prowl_api': prowl_api});
+
+  });
 
   \$('#testXBMC').click(function(){
 
@@ -117,6 +124,25 @@ blank, but if the hosts are different Growl <b>requires</b> a password.<br />
 <br />
 
 <input type="button" value="Test Growl" id="testGrowl">
+
+</fieldset>
+</div>
+
+<div class="EntryBlock">
+<fieldset class="EntryFieldSet">
+
+<legend>Prowl</legend>
+
+<label for="use_prowl"><input type="checkbox" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "CHECKED" else ""#> <strong>Enable Prowl Notifications</strong></label><br />
+Should Sick Beard send Prowl notifications?<br />
+<br />
+
+<strong>Prowl api key:</strong><br />
+Get your key at: <a href="https://prowl.weks.net/settings.php" target=_blank>https://prowl.weks.net/settings.php.</a><br />
+<input type="text" name="prowl_api" id="prowl_api" value="$sickbeard.PROWL_API" size="35"><br />
+<br />
+
+<input type="button" value="Test Prowl" id="testProwl">
 
 </fieldset>
 </div>
