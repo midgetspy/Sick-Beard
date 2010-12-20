@@ -922,7 +922,11 @@ class TVEpisode:
             if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_episode_file_path(self)):
                 self.hasnfo = True
             else:
-                self.hasnfo = False
+                (filepath, filename) = os.path.split(os.path.abspath(os.path.dirname(self.location)).lower()+".nfo")
+                if ek.ek(os.path.isfile, os.path.join(os.path.dirname(self.location), filename)):
+                    self.hasnfo = True
+                else:
+                    self.hasnfo = False
 
             if ek.ek(os.path.isfile, sickbeard.metadata_generator.get_episode_thumb_path(self)):
                 self.hastbn = True
