@@ -142,6 +142,17 @@ Get your key at: <a href="https://prowl.weks.net/settings.php" target=_blank>htt
 <input type="text" name="prowl_api" id="prowl_api" value="$sickbeard.PROWL_API" size="35"><br />
 <br />
 
+<strong>Prowl notification priority:</strong><br />
+<select id="prowl_priority" name="prowl_priority">
+<option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then "selected" else ""#>Very Low
+<option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then "selected" else ""#>Moderate
+<option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then "selected" else ""#>Normal
+<option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then "selected" else ""#>High
+<option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then "selected" else ""#>Emergency
+</select><br />
+
+<br />
+
 <input type="button" value="Test Prowl" id="testProwl">
 
 </fieldset>

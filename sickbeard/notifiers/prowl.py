@@ -1,6 +1,6 @@
 import socket
 import sys
-from httplib import HTTPSConnection as Https
+from httplib import HTTPSConnection
 from urllib import urlencode
 
 
@@ -8,7 +8,7 @@ import sickbeard
 
 from sickbeard import logger
     
-def sendProwl(prowl_api, title="Sick Beard", event=None, message=None, priority=0):
+def sendProwl(prowl_api, title="Sick Beard", event=None, message=None):
 	
 	if not sickbeard.USE_PROWL:
 		return False
@@ -21,25 +21,20 @@ def sendProwl(prowl_api, title="Sick Beard", event=None, message=None, priority=
 	logger.log(u"Prowl message: " + message, logger.DEBUG)
 	logger.log(u"Prowl api: " + prowl_api, logger.DEBUG)
 	
-	h = Https("prowl.weks.net")
-        
-    # Set User-Agent
-	headers = {'User-Agent': "SickBeard",'Content-type': "application/x-www-form-urlencoded"}
+	priority = sickbeard.PROWL_PRIORITY
+	http_handler = HTTPSConnection("prowl.weks.net")
                         
-	# Perform the request and get the response headers and content
-	data = {
-		'apikey': prowl_api,
+	data = {'apikey': prowl_api,
 		'application': title,
 		'event': event,
 		'description': message,
-		'priority': priority
-	}
+		'priority': priority }
 
-	h.request(	"POST",
+	http_handler.request(	"POST",
 				"/publicapi/add",
-				headers = headers,
+				headers = {'Content-type': "application/x-www-form-urlencoded"},
 				body = urlencode(data))
-	response = h.getresponse()
+	response = http_handler.getresponse()
 	request_status = response.status
 
 	if request_status == 200:

@@ -965,7 +965,7 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, use_prowl=None, prowl_api=None, use_twitter=None):
+                          use_growl=None, growl_host=None, growl_password=None, use_prowl=None, prowl_api=None, prowl_priority=0, use_twitter=None):
 
         results = []
 
@@ -1018,6 +1018,7 @@ class ConfigNotifications:
 
         sickbeard.USE_PROWL = use_prowl
         sickbeard.PROWL_API = prowl_api
+        sickbeard.PROWL_PRIORITY = prowl_priority
 
         sickbeard.USE_TWITTER = use_twitter
 
