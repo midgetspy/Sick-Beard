@@ -23,8 +23,8 @@ def testTwitter2(key):
 def testTwitter():
     return tweet.notifyTwitter("This is a test notification from Sick Beard", force=True)
 
-def testProwl(prowl_api=None):
-    prowl.sendProwl("Sick Beard", "Test", "Testing Prowl notification settings from Sick Beard", prowl_api)
+def testProwl(prowl_api):
+    prowl.sendProwl(prowl_api, "Sick Beard", "Test", "Testing Prowl notification settings from Sick Beard")
 
 def notify(type, message):
 
