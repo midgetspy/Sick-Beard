@@ -117,8 +117,6 @@ def main():
 	forceUpdate = False
 	forcedPort = None
 
-	fork = False
-	
 	for o, a in opts:
 		# for now we'll just silence the logging
 		if (o in ('-q', '--quiet')):
@@ -137,7 +135,6 @@ def main():
 
 		# Run as a daemon
 		if (o in ('-d', '--daemon')):
-			fork = True
 			consoleLogging = False
 			sickbeard.DAEMON = True
 
@@ -156,7 +153,7 @@ def main():
 	sickbeard.showList = []
 
 	# TK THIS WILL NOT WORK UNDER WIN32. NEED TO HANDLE THIS PROPERLY
-	if fork:
+	if sickbeard.DAEMON:
 		daemonize()
 	
 	# use this pid for everything
