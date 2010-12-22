@@ -119,6 +119,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
     showNames = set(makeSceneShowSearchStrings(show))
 
     toReturn = []
+    term_list = []
 
     # search each show name
     for curShow in showNames:
