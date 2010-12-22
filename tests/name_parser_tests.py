@@ -99,6 +99,27 @@ combination_test_cases = [
                           
                           ]
 
+unicode_test_cases = [
+                      (u'The.Big.Bang.Theory.2x07.The.Panty.Pi\xf1ata.Polarization.720p.HDTV.x264.AC3-SHELDON.mkv',
+                       parser.ParseResult(None, 'The.Big.Bang.Theory', 2, [7], '720p.HDTV.x264.AC3', 'SHELDON')
+                       ),
+                      ('The.Big.Bang.Theory.2x07.The.Panty.Pi\xc3\xb1ata.Polarization.720p.HDTV.x264.AC3-SHELDON.mkv',
+                       parser.ParseResult(None, 'The.Big.Bang.Theory', 2, [7], '720p.HDTV.x264.AC3', 'SHELDON')
+                       ),
+                      ]
+
+class UnicodeTests(unittest.TestCase):
+    
+    def _test_unicode(self, name, result):
+        print repr(name)
+        np = parser.NameParser(True)
+        parse_result = np.parse(name)
+        print repr(str(parse_result))
+    
+    def test_unicode(self):
+        for (name, result) in unicode_test_cases:
+            self._test_unicode(name, result)
+
 class ComboTests(unittest.TestCase):
     
     def _test_combo(self, name, result, which_regexes):
@@ -232,7 +253,10 @@ if __name__ == '__main__':
         suite = unittest.TestLoader().loadTestsFromName('name_parser_tests.BasicTests.test_'+sys.argv[1])
     else:
         suite = unittest.TestLoader().loadTestsFromTestCase(BasicTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    #unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
+    #unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
     unittest.TextTestRunner(verbosity=2).run(suite)
