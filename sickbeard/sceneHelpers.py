@@ -146,8 +146,9 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                 toReturn.append('"'+curShow+'"')
     
     if extraSearchType == "nzbmatrix":     
-       toReturn = ['+('+','.join(toReturn)+')', '+('+','.join(term_list)+')']
-
+        toReturn = ['+('+','.join(toReturn)+')']
+        if term_list:
+            toReturn.append('+('+','.join(term_list)+')')
     return toReturn
 
 
