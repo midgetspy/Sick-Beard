@@ -8,15 +8,15 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <link rel="SHORTCUT ICON" href="$sbRoot/images/favicon.ico"/>
     <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png"/>
-	<link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />	
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css"/>
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/defaultcolors.css"/>
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.7.custom.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />	
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
-	<link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />	
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
     <script type="text/javascript" src="$sbRoot/js/jquery-1.4.4.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.7.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.0.3.min.js"></script>
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.json-2.2.min.js"></script>
     <script type='text/javascript' src='$sbRoot/js/tools.tooltip-1.2.5.min.js'></script>
-	<script type='text/javascript' src='$sbRoot/js/jquery.autocomplete.min.js'></script>
+    <script type='text/javascript' src='$sbRoot/js/jquery.autocomplete.min.js'></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
 
     <style type="text/css">
@@ -33,65 +33,65 @@
     <!--
 
     .tvshowDiv {
-		width: 605px;
-		display: block;
-		clear: both;
-		border-left: 1px solid #CCCCCC;
-		border-right: 1px solid #CCCCCC;		
-		border-bottom: 1px solid #CCCCCC;		
-		margin: auto;
-		padding: 0px;
-		text-align: left;
+        width: 606px;
+        display: block;
+        clear: both;
+        border-left: 1px solid #CCCCCC;
+        border-right: 1px solid #CCCCCC;
+        border-bottom: 1px solid #CCCCCC;
+        margin: auto;
+        padding: 0px;
+        text-align: left;
     }
 
-    .tvshowDiv a, .tvshowDiv a:link, .tvshowDiv a:visited, .tvshowDiv a:hover  {	
-		text-decoration: none;
-		background: none;
-	}
-	
-	.tvshowTitle {
-		float: left; 
-		padding-top: 5px; 
-		padding-left: 8px; 
-		line-height: 18px;
-		font-size: 18px;
-	}
+    .tvshowDiv a, .tvshowDiv a:link, .tvshowDiv a:visited, .tvshowDiv a:hover  {
+        text-decoration: none;
+        background: none;
+    }
 
-	.tvshowTitleIcons	{
-		float: right;
-		padding: 5px 10px 0px 0px;
-	}
-	
+    .tvshowTitle {
+        float: left; 
+        padding-top: 5px; 
+        padding-left: 8px; 
+        line-height: 18px;
+        font-size: 18px;
+    }
+
+    .tvshowTitleIcons {
+        float: right;
+        padding: 5px 10px 0px 0px;
+    }
+
     .tvshowDiv .title { font-weight: 900; color: #333; }
 
     .posterThumb {
-		background-image: url("images/poster.png");
-		height: 200px;
-		width: 136px;
-		border-top: 1px solid #ccc; 
-		border-right: 1px solid #ccc;
+        background-image: url("images/poster.png");
+        height: 200px;
+        width: 136px;
+        border-top: 1px solid #ccc; 
+        border-right: 1px solid #ccc;
     }
     .bannerThumb {
-		background-image: url("images/poster.png");
-		height: 112px;
-		width: 606px;
-		/* margin-bottom: 1px; */
+        background-image: url("images/poster.png");
+        height: 112px;
+        width: 606px;
+        /* margin-bottom: 1px; */
     }
 
     th {
         color: #000;
         letter-spacing: 1px;
         text-align: left;
-		background-color: #333333;		
-/*		
-		background: url("images/hMids.gif") repeat-x scroll 0 0 transparent;	
-		background-position: 0 -196px;		
+        background-color: #333333;
+/*
+        background: url("images/hMids.gif") repeat-x scroll 0 0 transparent;
+        background-position: 0 -196px;
 */
     }
 
     th.nobg {
         background: #efefef;
-		border-top: 1px solid #666;
+        border-top: 1px solid #666;
     }
     td {
         border-top: 1px solid #d2ebe8;
@@ -101,74 +101,75 @@
     }
 
     td.next_episode {
-		border-top: 1px solid #ccc;
+        border-top: 1px solid #ccc;
         background: #F5FAFA;
         color: #000;
     }
-	
-	.ep_listing {
-		width: auto;
-		border: 1px solid #CCCCCC;
-		margin: 10px;
-		overflow: hidden;
-		padding: 10px;
-	}
-	
-	h1.day {
-		background: url("../images/hMids.gif") repeat-x scroll 0 -140px transparent;		
-		font-weight: bold;		
-		padding: 4px;
-		letter-spacing: 1px;
-		background-color: #9CB5CF;
-		color: #000;
-		text-align: center;	
-	}
 
-	h1.later {
-		background: url("../images/hMids.gif") repeat-x scroll 0 -252px transparent;		
-		font-weight: bold;		
-		padding: 4px;
-		letter-spacing: 1px;
-		background-color: #9CB5CF;
-		color: #000;
-		text-align: center;	
-	}
+    .ep_listing {
+        width: auto;
+        border: 1px solid #CCCCCC;
+        margin-bottom: 10px;
+        /* margin: 10px; */
+        overflow: hidden;
+        padding: 10px;
+    }
 
-	h1.missed {
-		background: url("../images/hMids.gif") repeat-x scroll 0 -224px transparent;		
-		font-weight: bold;		
-		padding: 4px;
-		letter-spacing: 1px;
-		background-color: #9CB5CF;
-		color: #000;
-		text-align: center;	
-	}
-	
-	h1.network {
-		background: url("../images/hMids.gif") repeat-x scroll 0 -112px transparent;		
-		font-weight: bold;		
-		padding: 4px;
-		letter-spacing: 1px;
-		background-color: #9CB5CF;
-		color: #000;
-		text-align: center;		
-	}
-	
-	.listing_default{
-		background-color: #e5e5e5;
-	}
+    h1.day {
+        font-weight: bold;
+        padding: 4px;
+        letter-spacing: 1px;
+        background-color: #9CB5CF;
+        color: #000;
+        text-align: center;
+        margin-top: 0px;
+    }
+
+    h1.later {
+        background: url("../images/hMids.gif") repeat-x scroll 0 -252px transparent;
+        font-weight: bold;
+        padding: 4px;
+        letter-spacing: 1px;
+        background-color: #9CB5CF;
+        color: #000;
+        text-align: center;
+    }
+
+    h1.missed {
+        background: url("../images/hMids.gif") repeat-x scroll 0 -224px transparent;
+        font-weight: bold;
+        padding: 4px;
+        letter-spacing: 1px;
+        background-color: #9CB5CF;
+        color: #000;
+        text-align: center;
+    }
+
+    h1.network {
+        background: url("../images/hMids.gif") repeat-x scroll 0 -112px transparent;
+        font-weight: bold;
+        padding: 4px;
+        letter-spacing: 1px;
+        background-color: #9CB5CF;
+        color: #000;
+        text-align: center;
+    }
+
+    .listing_default{
+        background-color: #e5e5e5;
+    }
 
     -->
-    </style>	
+    </style>
 </head>
 
 <body>
 <a name="top">
 #if $sickbeard.VERSION_NOTIFY or $sickbeard.NEWEST_VERSION_STRING:
 <div id="upgrade-notification">
-	<div>
-		<span class="notify-text">$sickbeard.NEWEST_VERSION_STRING</span>
-	</div>
+    <div>
+        <span class="notify-text">$sickbeard.NEWEST_VERSION_STRING</span>
+    </div>
 </div>
 <div id="header-fix"></div>
 #end if
@@ -215,4 +216,3 @@
     $curError[1]
 </div>
 #end for
-

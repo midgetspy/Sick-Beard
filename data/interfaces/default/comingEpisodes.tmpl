@@ -10,19 +10,16 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <div style="margin: 0px auto; text-align: center;">
-<div style="margin: 0px auto; border: 1px solid #E9E9E9; background-color: #F8F8F8; padding: 0px 35px 0px 35px; width: 650px;">
-  <div style="text-align: center; width: 650px;">
+<div style="margin: 0px auto; border: 1px solid #E9E9E9; background-color: #F8F8F8; padding: 0px 35px 0px 35px; width: 629px;">
+  <div style="text-align: center; width: 629px;">
 
-	#set $cur_segment = None
-	#set $too_late_header = False
-	#set $missed_header = False
-	#set $show_div = ""
+    #set $cur_segment = None
+    #set $too_late_header = False
+    #set $missed_header = False
+    #set $show_div = ""
 
-	#for $cur_result in $sql_results:
-	<!-- start $cur_result["show_name"] -->		
-        #if int($cur_result["paused"]):
-            #continue
-        #end if
+    #for $cur_result in $sql_results:
+    <!-- start $cur_result["show_name"] -->
         
         #if $sort == "network":
             #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
@@ -33,11 +30,11 @@
             #set $cur_ep_airdate = int($cur_result["airdate"])
             #if $cur_segment != $cur_ep_airdate:
                 #if $cur_ep_airdate < $today and not $missed_header:
-                    <br /><h1 class="missed">Missed</h1>
+                    <br /><h1 class="day">Missed</h1>
                     #set $missed_header = True
                     #set $show_div = "ep_listing listing_overdue"
                 #elif $cur_ep_airdate >= $next_week and not $too_late_header:
-                    <br /><h1 class="later">Later</h1>
+                    <br /><h1 class="day">Later</h1>
                     #set $show_div = "ep_listing listing_toofar"
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
@@ -55,19 +52,23 @@
 #if $sort != "date":
 <br/>
 #end if
-		
+
     <div class="$show_div" id="listing_${cur_result["showid"]}">
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
           <th>
-			<span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}" style="color: #fff;">$cur_result["show_name"]</a></span>
-			<span class="tvshowTitleIcons"><a href="http://www.thetvdb.com/?tab=series&id=${cur_result["showid"]}" target="_blank" title="http://www.thetvdb.com/?tab=series&id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/info.png" /></a> <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&season=$cur_result["season"]&episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></span>
+            <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}" style="color: #fff;">$cur_result["show_name"]
+            #if int($cur_result["paused"]):
+            <span style="color: red; font-size: 12px;">[paused]</span>
+            #end if            
+            </a></span>
+            <span class="tvshowTitleIcons"><a href="http://www.thetvdb.com/?tab=series&id=${cur_result["showid"]}" target="_blank" title="http://www.thetvdb.com/?tab=series&id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/info.png" /></a> <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&season=$cur_result["season"]&episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></span>
           </th>
-        </tr>			
+        </tr>
         <tr>
           <th class="nobg">
-			<a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" src="$sbRoot/showPoster/?show=${cur_result["showid"]}" class="bannerThumb" /></a>
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="bannerThumb" src="$sbRoot/showPoster/?show=${cur_result["showid"]}" /></a>
           </th>
         </tr>
         <tr>
@@ -77,28 +78,34 @@
         </tr>
         <tr>
           <td>
-            <span>[There is no summary added for this episode]</span><br/><br/>
+            <span>
+            #if $cur_result["description"] == '':
+                [There is no summary added for this episode]
+            #else:
+                $cur_result["description"]
+            #end if
+            </span><br/><br/>
             <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
 #if int($cur_result["quality"]) in $qualityPresets:
 [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]
 #else:
 [<span class="title">Custom</span>]
 #end if
-			<br />
+            <br />
           </td>
         </tr>
       </table>
-      </div>	  
+      </div>
     </div>
-	
-	<!-- end $cur_result["show_name"] -->	
+    
+    <!-- end $cur_result["show_name"] -->
     #end for
-	<br/>
-	
+
+    <br/>
   </div>
 </div>
 </div>
-	
+
 <script type="text/javascript" charset="utf-8">
 setInterval(window.location.reload, 180000); // Refresh every 3 minutes
 </script>
