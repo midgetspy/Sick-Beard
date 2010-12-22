@@ -1769,7 +1769,11 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
 
-        posterFilename = os.path.abspath(sickbeard.metadata_generator.get_poster_path(showObj))
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            if ek.ek(os.path.isfile, cur_provider.get_poster_path(showObj)):
+                posterFilename = os.path.abspath(cur_provider.get_poster_path(showObj))
+                break
+
         if ek.ek(os.path.isfile, posterFilename):
             try:
                 from PIL import Image
