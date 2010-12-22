@@ -312,7 +312,8 @@ class NewzbinProvider(generic.NZBProvider):
         else:
             params['q'] = ''
 
-        params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
+        lang = sickbeard.LANGUAGE_MED
+        params['q'] += 'Attr:Lang~%lang AND NOT Attr:VideoF=DVD' % lang
 
         url = "http://www.newzbin.com/search/?%s" % urllib.urlencode(params)
         logger.log("Newzbin search URL: " + url, logger.DEBUG)

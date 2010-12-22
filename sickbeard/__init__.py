@@ -89,6 +89,7 @@ WEB_HOST = None
 WEB_IPV6 = None
 
 LANGUAGE_SHORT = None
+LANGUAGE_MED = None
 LANGUAGE_LONG = None
 RESULT_FILTERS = None
 
@@ -309,7 +310,7 @@ def initialize(consoleLogging=True):
                 METADATA_TYPE, METADATA_SHOW, METADATA_EPISODE, metadata_generator, \
                 ART_POSTER, ART_FANART, ART_THUMBNAILS, ART_SEASON_THUMBNAILS, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                LANGUAGE_SHORT, LANGUAGE_LONG, RESULT_FILTERS
+                LANGUAGE_SHORT, LANGUAGE_MED, LANGUAGE_LONG, RESULT_FILTERS
 
 
 
@@ -357,6 +358,7 @@ def initialize(consoleLogging=True):
 
         # AW: Language settings
         LANGUAGE_SHORT = check_setting_str(CFG, 'General', 'language_short', 'en')
+        LANGUAGE_MED = check_setting_str(CFG, 'General', 'language_med', 'Eng')
         LANGUAGE_LONG = check_setting_str(CFG, 'General', 'language_long', '')
         
         #AW: Result Filters put into config
