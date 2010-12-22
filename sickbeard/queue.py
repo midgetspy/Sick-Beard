@@ -281,10 +281,6 @@ class QueueItemAdd(QueueItem):
 
         self.finish()
 
-        sickbeard.updateAiringList()
-        sickbeard.updateComingList()
-
-
     def _finishEarly(self):
         if self.show != None:
             self.show.deleteShow()

@@ -82,9 +82,9 @@ ep_regexes = [
                ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
                (?P<air_year>\d{4})[\. _-]+                 # 2010 and separator
                (?P<air_month>\d{2})[\. _-]+                # 11 and separator
-               (?P<air_day>\d{2})[\. _-]+                  # 23 and separator
-               (?P<extra_info>.+?)                         # Source.Quality.Etc
-               (-(?P<release_group>.+))?$                  # Group
+               (?P<air_day>\d{2})                          # 23 and separator
+               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               (-(?P<release_group>.+))?)?$                # Group
                '''),
               
               ('stupid',
