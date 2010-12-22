@@ -142,6 +142,12 @@ class NameParser(object):
         else:
             return b 
 
+    def _unicodify(self, obj, encoding = "utf-8"):
+        if isinstance(obj, basestring):
+            if not isinstance(obj, unicode):
+                obj = unicode(obj, encoding)
+        return obj
+
     def _convert_number(self, number):
         if type(number) == int:
             return number
@@ -166,6 +172,8 @@ class NameParser(object):
         return int(number)
 
     def parse(self, name):
+        
+        name = self._unicodify(name)
         
         # break it into parts if there are any (dirname, file name, extension)
         dir_name, file_name = os.path.split(name)
@@ -225,6 +233,7 @@ class ParseResult(object):
                  release_group=None,
                  air_date=None
                  ):
+
         self.original_name = original_name
         
         self.series_name = series_name
@@ -276,7 +285,7 @@ class ParseResult(object):
         if self.release_group:
             to_return += ' (' + self.release_group + ')'
 
-        return to_return 
+        return to_return.encode('utf-8')
 
     def _is_air_by_date(self):
         if self.season_number == None and len(self.episode_numbers) == 0 and self.air_date:
