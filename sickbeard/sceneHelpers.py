@@ -231,7 +231,7 @@ def allPossibleShowNames(show):
 
     return showNames
 
-def isGoodResult(name, show, log=True):
+def isGoodResult(name, show, doLanguageCheck, log=True):
     """
     Use an automatically-created regex to make sure the result actually is the show it claims to be
     """
@@ -248,8 +248,11 @@ def isGoodResult(name, show, log=True):
         match = re.search(curRegex, name, re.I)
 
         if match:
-            # AW: Check if it has the correct language
-            return filterLanguage(name)
+            if doLanguageCheck:
+                # AW: Check if it has the correct language
+                return filterLanguage(name)
+            else:
+                return True
 
     if log:
         logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")

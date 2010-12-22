@@ -213,7 +213,7 @@ class TVCache():
                 else:
                     logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
                     for curShow in sickbeard.showList:
-                        if sceneHelpers.isGoodResult(name, curShow, False):
+                        if sceneHelpers.isGoodResult(name, curShow, False, False):
                             logger.log(u"Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
                             tvdb_id = curShow.tvdbid
                             break

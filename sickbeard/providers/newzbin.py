@@ -78,7 +78,7 @@ class NewzbinProvider(generic.NZBProvider):
 
     def isEnabled(self):
         return sickbeard.NEWZBIN
-
+    
     def getQuality(self, item):
         attributes = item.find(self._report('attributes'))
         attr_dict = {}
@@ -312,8 +312,7 @@ class NewzbinProvider(generic.NZBProvider):
         else:
             params['q'] = ''
 
-        lang = sickbeard.LANGUAGE_MED
-        params['q'] += 'Attr:Lang~%lang AND NOT Attr:VideoF=DVD' % lang
+        params['q'] += 'Attr:Lang~' + sickbeard.LANGUAGE_MED + ' AND NOT Attr:VideoF=DVD'
 
         url = "http://www.newzbin.com/search/?%s" % urllib.urlencode(params)
         logger.log("Newzbin search URL: " + url, logger.DEBUG)

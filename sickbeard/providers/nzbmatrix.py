@@ -41,6 +41,8 @@ class NZBMatrixProvider(generic.NZBProvider):
         self.cache = NZBMatrixCache(self)
 
         self.url = 'http://www.nzbmatrix.com/'
+        
+        self.needsLanguageCheck = True
 
     def isEnabled(self):
         return sickbeard.NZBMATRIX

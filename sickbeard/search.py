@@ -194,7 +194,7 @@ def findEpisode(episode, manualSearch=False):
 
 	for curProvider in providers.sortedProviderList():
 
-		if not curProvider.isActive():
+		if not curProvider.isActive():			
 			continue
 
 		try:
@@ -210,7 +210,7 @@ def findEpisode(episode, manualSearch=False):
 		didSearch = True
 
 		# skip non-tv crap
-		curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, episode.show), curFoundResults)
+		curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, episode.show, curProvider.needsLanguageCheck), curFoundResults)
 
 		foundResults += curFoundResults
 
@@ -241,7 +241,7 @@ def findSeason(show, season):
 			for curEp in curResults:
 
 				# skip non-tv crap
-				curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), curResults[curEp])
+				curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show, curProvider.needsLanguageCheck), curResults[curEp])
 
 				if curEp in foundResults:
 					foundResults[curEp] += curResults[curEp]
@@ -316,7 +316,7 @@ def findSeason(show, season):
 			# if not, break it apart and add them as the lowest priority results
 			individualResults = nzbSplitter.splitResult(bestSeasonNZB)
 
-			individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), individualResults)
+			individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show, curProvider.needsLanguageCheck), individualResults)
 
 			for curResult in individualResults:
 				if len(curResult.episodes) == 1:

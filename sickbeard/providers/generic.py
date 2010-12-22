@@ -51,6 +51,9 @@ class GenericProvider:
         self.supportsBacklog = False
 
         self.cache = tvcache.TVCache(self)
+        
+        # AW: should the results be checked for correct language or is this already done in the search?
+        self.needsLanguageCheck = False;        
 
     def getID(self):
         return GenericProvider.makeID(self.name)
