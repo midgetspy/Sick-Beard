@@ -536,7 +536,7 @@ class PostProcessor(object):
             return True
         
         # if the user downloaded it manually and it appears to be a PROPER/REPACK then it's priority
-        if self.is_proper and new_ep_quality <= ep_obj.quality:
+        if self.is_proper and new_ep_quality <= ep_obj.show.quality:
             self._log(u"This was manually downloaded but it appears to a proper so I'm marking it as priority", logger.DEBUG)
             return True 
         
