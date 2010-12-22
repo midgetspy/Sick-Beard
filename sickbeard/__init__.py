@@ -53,6 +53,8 @@ MY_FULLNAME = None
 MY_NAME = None
 MY_ARGS = []
 
+DAEMON = None
+
 backlogSearchScheduler = None
 currentSearchScheduler = None
 showUpdateScheduler = None

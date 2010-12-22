@@ -63,10 +63,36 @@ def loadShowsFromDB():
 
 		#TODO: make it update the existing shows if the showlist has something in it
 
-def main():
+def daemonize():
+	# Make a non-session-leader child process
+	try:
+		pid = os.fork()
+		if pid != 0:
+			sys.exit(0)
+	except OSError, e:
+		raise RuntimeError("1st fork failed: %s [%d]" %
+				   (e.strerror, e.errno))
 
-	# use this pid for everything
-	sickbeard.PID = os.getpid()
+	os.chdir(sickbeard.PROG_DIR)
+	os.setsid()
+        # Make sure I can read my own files and shut out others
+	prev = os.umask(0)
+	os.umask(prev and int('077',8))
+
+	# Make the child a session-leader by detaching from the terminal
+	try:
+		pid = os.fork()
+		if pid != 0:
+			sys.exit(0)
+	except OSError, e:
+		raise RuntimeError("2st fork failed: %s [%d]" %
+				   (e.strerror, e.errno))
+		raise Exception, "%s [%d]" % (e.strerror, e.errno)
+
+	dev_null = file('/dev/null', 'r')
+	os.dup2(dev_null.fileno(), sys.stdin.fileno())
+
+def main():
 
 	# do some preliminary stuff
 	sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(sys.argv[0]))
@@ -83,14 +109,16 @@ def main():
 	threading.currentThread().name = "MAIN"
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "qfp:", ['quiet', 'force-update', 'port=', 'tvbinz'])
+		opts, args = getopt.getopt(sys.argv[1:], "qfdp:", ['quiet', 'force-update', 'daemon', 'port=', 'tvbinz'])
 	except getopt.GetoptError:
-		print "Available options: --quiet, --forceupdate, --port"
+		print "Available options: --quiet, --forceupdate, --port, --daemon"
 		sys.exit()
 
 	forceUpdate = False
 	forcedPort = None
 
+	fork = False
+	
 	for o, a in opts:
 		# for now we'll just silence the logging
 		if (o in ('-q', '--quiet')):
@@ -103,9 +131,15 @@ def main():
 		if (o in ('-f', '--forceupdate')):
 			forceUpdate = True
 
-		# should we update right away?
+		# use a different port
 		if (o in ('-p', '--port')):
 			forcedPort = int(a)
+
+		# Run as a daemon
+		if (o in ('-d', '--daemon')):
+			fork = True
+			consoleLogging = False
+			sickbeard.DAEMON = True
 
 	if consoleLogging:
 		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
@@ -120,6 +154,13 @@ def main():
 	sickbeard.initialize(consoleLogging=consoleLogging)
 
 	sickbeard.showList = []
+
+	# TK THIS WILL NOT WORK UNDER WIN32. NEED TO HANDLE THIS PROPERLY
+	if fork:
+		daemonize()
+	
+	# use this pid for everything
+	sickbeard.PID = os.getpid()
 
 	if forcedPort:
 		logger.log(u"Forcing web server to port "+str(forcedPort))
