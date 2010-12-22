@@ -80,11 +80,13 @@ $(document).ready(function(){
 	// -- end of metadata options div toggle code --
     
     $('.metadata_checkbox').click(function(){
-        $(this).refreshMetadataConfig();
+        $(this).refreshMetadataConfig(false);
     });
 
-    $.fn.refreshMetadataConfig = function() {
-        var idArr = $("#provider_order_list").sortable('toArray');
+    $.fn.refreshMetadataConfig = function(first) {
+        
+        var cur_most = 0;
+        var cur_most_provider = '';
         
         $('.metadataDiv').each(function(){
             var generator_name = $(this).attr('id');
@@ -103,6 +105,14 @@ $(document).ready(function(){
             config_arr.push(fanart ? '1':'0');
             config_arr.push(episode_thumbnails ? '1':'0');
             config_arr.push(season_thumbnails ? '1':'0');
+
+            var cur_num = 0;
+            for (var i = 0; i < config_arr.length; i++)
+                cur_num += parseInt(config_arr[i])
+            if (cur_num > cur_most) {
+                cur_most = cur_num
+                cur_most_provider = generator_name
+            }
             
             $("#"+generator_name+"_eg_show_metadata").attr('class', show_metadata ? 'enabled' : 'disabled');
             $("#"+generator_name+"_eg_episode_metadata").attr('class', episode_metadata ? 'enabled' : 'disabled');
@@ -114,8 +124,14 @@ $(document).ready(function(){
             $("#"+generator_name+"_data").val(config_arr.join('|'))
             
         });
+        
+        if (cur_most_provider != '' && first) {
+            $('#metadataType option[value='+cur_most_provider+']').attr('selected', 'selected')
+            $(this).showHideMetadata();
+        }
+        
     }
 	
-    $(this).refreshMetadataConfig();
+    $(this).refreshMetadataConfig(true);
     
 });
