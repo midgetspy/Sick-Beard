@@ -1317,16 +1317,16 @@ class Home:
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
-        notifiers.testGrowl(host, password)
+        notifiers.growl_notifier.test_notify(host, password)
         return "Tried sending growl to "+host+" with password "+password
 
     @cherrypy.expose
     def twitterStep1(self):
-        return notifiers.testTwitter1()
+        return notifiers.twitter_notifier._get_authorization()
 
     @cherrypy.expose
     def twitterStep2(self, key):
-        result = notifiers.testTwitter2(key)
+        result = notifiers.twitter_notifier._get_credentials(key)
         logger.log(u"result: "+str(result))
         if result:
             return "Key verification successful"
@@ -1335,7 +1335,7 @@ class Home:
 
     @cherrypy.expose
     def testTwitter(self):
-        result = notifiers.testTwitter()
+        result = notifiers.twitter_notifier.test_notify()
         if result:
             return "Tweet successful, check your twitter to make sure it worked"
         else:
@@ -1343,7 +1343,7 @@ class Home:
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
-        notifiers.testXBMC(urllib.unquote_plus(host), username, password)
+        notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
         return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
@@ -1634,7 +1634,7 @@ class Home:
     def updateXBMC(self, showName=None):
 
         for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-            if xbmc.updateLibrary(curHost, showName=showName):
+            if notifiers.xbmc_notifier._update_library(curHost, showName=showName):
                 ui.flash.message("Command sent to XBMC host " + curHost + " to update library")
             else:
                 ui.flash.error("Unable to contact XBMC host " + curHost)
@@ -1775,7 +1775,11 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
 
-        posterFilename = os.path.abspath(sickbeard.metadata_generator.get_poster_path(showObj))
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            if ek.ek(os.path.isfile, cur_provider.get_poster_path(showObj)):
+                posterFilename = os.path.abspath(cur_provider.get_poster_path(showObj))
+                break
+
         if ek.ek(os.path.isfile, posterFilename):
             try:
                 from PIL import Image
