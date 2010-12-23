@@ -311,7 +311,7 @@ class PostProcessor(object):
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
         parse_result = np.parse(name)
-        self._log("Parsed "+name+" into "+str(parse_result), logger.DEBUG)
+        self._log("Parsed "+name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
 
         if parse_result.air_by_date:
             season = -1
@@ -534,8 +534,9 @@ class PostProcessor(object):
             return True
         
         # if the user downloaded it manually and it appears to be a PROPER/REPACK then it's priority
-        if self.is_proper and new_ep_quality <= ep_obj.quality:
-            self._log(u"This was manually downloaded but it appears to a proper so I'm marking it as priority", logger.DEBUG)
+        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
+        if self.is_proper and new_ep_quality >= old_ep_quality:
+            self._log(u"This was manually downloaded but it appears to be a proper so I'm marking it as priority", logger.DEBUG)
             return True 
         
         return False

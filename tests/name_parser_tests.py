@@ -75,6 +75,7 @@ simple_test_cases = {
               
               'scene_date_format': {
               'Show.Name.2010.11.23.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [], 'Source.Quality.Etc', 'Group', datetime.date(2010,11,23)),
+              'Show Name - 2010.11.23': parser.ParseResult(None, 'Show Name', air_date = datetime.date(2010,11,23)),
               'Show.Name.2010.23.11.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [], 'Source.Quality.Etc', 'Group', datetime.date(2010,11,23)),
               'Show Name - 2010-11-23 - Ep Name': parser.ParseResult(None, 'Show Name', extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
                }
@@ -98,6 +99,27 @@ combination_test_cases = [
                             ['standard']),
                           
                           ]
+
+unicode_test_cases = [
+                      (u'The.Big.Bang.Theory.2x07.The.Panty.Pi\xf1ata.Polarization.720p.HDTV.x264.AC3-SHELDON.mkv',
+                       parser.ParseResult(None, 'The.Big.Bang.Theory', 2, [7], '720p.HDTV.x264.AC3', 'SHELDON')
+                       ),
+                      ('The.Big.Bang.Theory.2x07.The.Panty.Pi\xc3\xb1ata.Polarization.720p.HDTV.x264.AC3-SHELDON.mkv',
+                       parser.ParseResult(None, 'The.Big.Bang.Theory', 2, [7], '720p.HDTV.x264.AC3', 'SHELDON')
+                       ),
+                      ]
+
+class UnicodeTests(unittest.TestCase):
+    
+    def _test_unicode(self, name, result):
+        np = parser.NameParser(True)
+        parse_result = np.parse(name)
+        # this shouldn't raise an exception
+        a = repr(str(parse_result))
+    
+    def test_unicode(self):
+        for (name, result) in unicode_test_cases:
+            self._test_unicode(name, result)
 
 class ComboTests(unittest.TestCase):
     
@@ -239,4 +261,7 @@ if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
     unittest.TextTestRunner(verbosity=2).run(suite)

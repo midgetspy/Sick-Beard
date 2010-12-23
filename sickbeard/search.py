@@ -155,21 +155,26 @@ def searchForNeededEpisodes():
 	return foundResults.values()
 
 
-def pickBestResult(results):
+def pickBestResult(results, quality_list=None):
 
 	logger.log(u"Picking the best result out of "+str([x.name for x in results]), logger.DEBUG)
 
 	# find the best result for the current episode
 	bestResult = None
-	for curResult in results:
-		logger.log("Quality of "+curResult.name+" is "+str(curResult.quality))
-		if not bestResult or bestResult.quality < curResult.quality and curResult.quality != Quality.UNKNOWN:
-			bestResult = curResult
-		elif bestResult.quality == curResult.quality:
-			if "proper" in curResult.name.lower() or "repack" in curResult.name.lower():
-				bestResult = curResult
-			elif "internal" in bestResult.name.lower() and "internal" not in curResult.name.lower():
-				bestResult = curResult
+	for cur_result in results:
+		logger.log("Quality of "+cur_result.name+" is "+str(cur_result.quality))
+		
+		if quality_list and cur_result.quality not in quality_list:
+			logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
+			continue
+		
+		if not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN:
+			bestResult = cur_result
+		elif bestResult.quality == cur_result.quality:
+			if "proper" in cur_result.name.lower() or "repack" in cur_result.name.lower():
+				bestResult = cur_result
+			elif "internal" in bestResult.name.lower() and "internal" not in cur_result.name.lower():
+				bestResult = cur_result
 
 	if bestResult:
 		logger.log(u"Picked "+bestResult.name+" as the best", logger.DEBUG)
@@ -258,10 +263,12 @@ def findSeason(show, season):
 
 	finalResults = []
 
+	anyQualities, bestQualities = Quality.splitQuality(show.quality)
+
 	# pick the best season NZB
 	bestSeasonNZB = None
 	if SEASON_RESULT in foundResults:
-		bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT])
+		bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities)
 
 	highest_quality_overall = 0
 	for cur_season in foundResults:
