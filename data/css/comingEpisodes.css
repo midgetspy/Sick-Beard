@@ -54,6 +54,8 @@ div#insideContent {
 
 .posterThumb {
     background-image: url("images/poster.png");
+    display:table-cell;
+    vertical-align: top;
     height: 200px;
     width: 136px;
     border-top: 1px solid #ccc; 
@@ -61,6 +63,8 @@ div#insideContent {
 }
 .bannerThumb {
     background-image: url("images/poster.png");
+    display:table-cell;    
+    vertical-align: top;
     height: 112px;
     width: 606px;
     /* margin-bottom: 1px; */
@@ -86,6 +90,7 @@ div#insideContent {
 }
 
 .tvshowDiv td.next_episode {
+    width: 100%;
     border-top: 1px solid #ccc;
     background: #F5FAFA;
     color: #000;

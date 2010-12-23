@@ -57,7 +57,7 @@
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <th colspan="2">
+          <th #if $sickbeard.USE_BANNER then "" else "colspan=\"2\""#>
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
@@ -67,9 +67,13 @@
           </th>
         </tr>
         <tr>
-          <th rowspan="2">
-            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="posterThumb" src="$sbRoot/showPoster/?show=${cur_result["showid"]}" /></a>
+          <th #if $sickbeard.USE_BANNER then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.USE_BANNER then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}" /></a>
           </th>
+#if $sickbeard.USE_BANNER:
+        </tr>
+        <tr>
+#end if          
           <td class="next_episode">
             <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
           </td>
