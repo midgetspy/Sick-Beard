@@ -9,15 +9,19 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<div style="margin: 0px auto; text-align: center;">
-<div style="margin: 0px auto; border: 1px solid #E9E9E9; background-color: #F8F8F8; padding: 0px 35px 0px 35px; width: 629px;">
-  <div style="text-align: center; width: 629px;">
+<div id="outsideWrapper">
+<div id="insideWrapper">
+  <div id="insideContent">
 
     #set $cur_segment = None
     #set $too_late_header = False
     #set $missed_header = False
-    #set $show_div = ""
+    #set $show_div = "ep_listing listing_default"
 
+    #if $sort == "show": 
+        <br/>
+    #end if
+    
     #for $cur_result in $sql_results:
     <!-- start $cur_result["show_name"] -->
         
@@ -49,29 +53,23 @@
             #end if
         #end if
 
-#if $sort != "date":
-<br/>
-#end if
-
     <div class="$show_div" id="listing_${cur_result["showid"]}">
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <th>
-            <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}" style="color: #fff;">$cur_result["show_name"]
+          <th colspan="2">
+            <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
             #if int($cur_result["paused"]):
-            <span style="color: red; font-size: 12px;">[paused]</span>
+            <span class="pause">[paused]</span>
             #end if            
             </a></span>
             <span class="tvshowTitleIcons"><a href="http://www.thetvdb.com/?tab=series&id=${cur_result["showid"]}" target="_blank" title="http://www.thetvdb.com/?tab=series&id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/info.png" /></a> <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&season=$cur_result["season"]&episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></span>
           </th>
         </tr>
         <tr>
-          <th class="nobg">
-            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="bannerThumb" src="$sbRoot/showPoster/?show=${cur_result["showid"]}" /></a>
+          <th rowspan="2">
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="posterThumb" src="$sbRoot/showPoster/?show=${cur_result["showid"]}" /></a>
           </th>
-        </tr>
-        <tr>
           <td class="next_episode">
             <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
           </td>
