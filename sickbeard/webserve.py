@@ -1756,10 +1756,6 @@ class Home:
 
             #TODO: check if the download was successful
 
-            # update our lists to reflect the result if this search
-            sickbeard.updateAiringList()
-            sickbeard.updateComingList()
-
         redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
 
 
@@ -1803,17 +1799,35 @@ class WebInterface:
     @cherrypy.expose
     def comingEpisodes(self, sort="date"):
 
-        epList = sickbeard.comingList
+        myDB = db.DBConnection()
+        
+        today = datetime.date.today().toordinal()
+        next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
+        recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
+
+        done_show_list = []
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        for cur_result in sql_results:
+            done_show_list.append(int(cur_result["showid"]))
+
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results += more_sql_results
+
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results += more_sql_results
+
+        #epList = sickbeard.comingList
 
         # sort by air date
         sorts = {
-            'date': (lambda x, y: cmp(x.airdate.toordinal(), y.airdate.toordinal())),
-            'show': (lambda a, b: cmp(a.name, b.name)),
-            'network': (lambda a, b: cmp(a.show.network, b.show.network)),
+            'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
+            'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
+            'network': (lambda a, b: cmp(a["network"], b["network"])),
         }
         if sort not in sorts:
             sort = 'date'
-        epList.sort(sorts[sort])
+        #epList.sort(sorts[sort])
+        sql_results.sort(sorts[sort])
 
         t = PageTemplate(file="comingEpisodes.tmpl")
         t.submenu = [
@@ -1822,7 +1836,11 @@ class WebInterface:
             { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
         ]
         t.sort = sort
-        t.epList = epList
+        #t.epList = epList
+        
+        t.next_week = next_week
+        t.today = today
+        t.sql_results = sql_results
 
         return _munge(t)
 
