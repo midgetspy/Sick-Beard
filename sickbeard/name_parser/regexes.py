@@ -135,10 +135,10 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
                (e(p(isode)?)?|part|pt)[\. _-]?             # e, ep, episode, or part
-               (?P<ep_num>[\divx]+)                        # first ep num
+               (?P<ep_num>(\d+|[ivx]+))                        # first ep num
                ([\. _-]+((and|&|to)[\. _-]+)?              # and/&/to joiner
                ((e(p(isode)?)?|part|pt)[\. _-]?)?          # e, ep, episode, or part
-               (?P<extra_ep_num>[\divx]+))*                # second ep num
+               (?P<extra_ep_num>(\d+|[ivx]+)))*                # second ep num
                ([\. _-]+(?P<extra_info>.+?))?              # Ep Name/etc
                (-(?P<release_group>.+))?$                  # Group               '''
                ),
