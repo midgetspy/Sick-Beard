@@ -175,9 +175,10 @@ padding-top: 3px;
   margin-top: 20px;
 }
 .sickbeardTable {
-width:80%;
-margin-left: 10%;
-margin-right: 10%;
+    width:80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    border: 1px solid #CCCCCC;
 }
 
 .normalheight, .doubleheight, .tripleheight, .pattern, .result, .heading1, .heading2, .heading3 {float:left; border-left:1px }
