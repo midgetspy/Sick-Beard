@@ -178,7 +178,7 @@ padding-top: 3px;
     width:80%;
     margin-left: 10%;
     margin-right: 10%;
-    border: 1px solid #CCCCCC;
+    border: 1px solid #e9e9e9;
 }
 
 .normalheight, .doubleheight, .tripleheight, .pattern, .result, .heading1, .heading2, .heading3 {float:left; border-left:1px }
