@@ -25,7 +25,7 @@
     var xbmc_password = \$("#xbmc_password").val();
 
     \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
-    
+
   });
 
   \$('#twitterStep1').click(function(){
@@ -58,243 +58,243 @@
 <div id="config-content" class="clearfix">
 
 <form id="form" action="saveNotifications" method="POST">
-			
-			<div id="config-components">
-				
-				<div id="core-component-group1" class="component-group clearfix">
+            
+            <div id="config-components">
+                
+                <div id="core-component-group1" class="component-group clearfix">
 
-					<div class="component-group-desc">
-						<h3>XBMC</h3>
-						<p>A free and open source cross-platform media center and home entertainment system software with a 10-foot user interface designed for the living-room TV.</p>
-					</div>
-					
-					<fieldset class="component-group-list">
-						<div class="field-pair">
-							<input type="checkbox" name="use_xbmc" id="use_xbmc" #if $sickbeard.USE_XBMC then "CHECKED" else ""# />  
-							<label class="clearfix" for="use_xbmc">
-								<span class="component-title">Enable</span>
-								<span class="component-desc">Should Sick Beard send XBMC commands?</span>
-							</label>
-						</div>
-						
-						<div class="field-pair">
-							<input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
-							<label class="clearfix" for="xbmc_notify_onsnatch">
-								<span class="component-title">Notify on Snatch</span>
-								<span class="component-desc">Send notification when we start a download?</span>
-							</label>
-						</div>
+                    <div class="component-group-desc">
+                        <h3>XBMC</h3>
+                        <p>A free and open source cross-platform media center and home entertainment system software with a 10-foot user interface designed for the living-room TV.</p>
+                    </div>
 
-						<div class="field-pair">
-							<input type="checkbox" name="xbmc_notify_ondownload" id="xbmc_notify_ondownload" #if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
-							<label class="clearfix" for="xbmc_notify_ondownload">
-								<span class="component-title">Notify on Download</span>
-								<span class="component-desc">Send notification when we finish a download?</span>
-							</label>
-						</div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_xbmc" id="use_xbmc" #if $sickbeard.USE_XBMC then "CHECKED" else ""# />  
+                            <label class="clearfix" for="use_xbmc">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send XBMC commands?</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<input type="checkbox" name="xbmc_update_library" id="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "CHECKED" else ""# /> 
-							<label class="clearfix" for="xbmc_update_library">
-								<span class="component-title">Update Library</span>
-								<span class="component-desc">Update XBMC library when we finish a download?</span>
-							</label>
-						</div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
+                            <label class="clearfix" for="xbmc_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<input type="checkbox" name="xbmc_update_full" id="xbmc_update_full" #if $sickbeard.XBMC_UPDATE_FULL then "CHECKED" else ""# />
-							<label class="clearfix" for="xbmc_update_full">
-								<span class="component-title">Full Library Update</span>
-								<span class="component-desc">Do a full library update if per-show fails?</span>
-							</label>
-						</div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="xbmc_notify_ondownload" id="xbmc_notify_ondownload" #if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
+                            <label class="clearfix" for="xbmc_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">XBMC IP:Port</span>
-								<input type="text" name="xbmc_host" id="xbmc_host" value="$sickbeard.XBMC_HOST" size="35" />
-							</label>						
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Host running XBMC (eg. 192.168.1.100:8080)</span>
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">(multiple host strings can be separated by commas)</span>
-							</label>
-						</div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="xbmc_update_library" id="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "CHECKED" else ""# /> 
+                            <label class="clearfix" for="xbmc_update_library">
+                                <span class="component-title">Update Library</span>
+                                <span class="component-desc">Update XBMC library when we finish a download?</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">XBMC Username</span>
-								<input type="text" name="xbmc_username" id="xbmc_username" value="$sickbeard.XBMC_USERNAME" size="35" />
-							</label>						
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Username of your XBMC server (blank for none)</span>
-							</label>
-						</div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="xbmc_update_full" id="xbmc_update_full" #if $sickbeard.XBMC_UPDATE_FULL then "CHECKED" else ""# />
+                            <label class="clearfix" for="xbmc_update_full">
+                                <span class="component-title">Full Library Update</span>
+                                <span class="component-desc">Do a full library update if per-show fails?</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">XBMC Password</span>
-								<input type="password" name="xbmc_password" id="xbmc_password" value="$sickbeard.XBMC_PASSWORD" size="35" />
-							</label>						
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Password of your XBMC server (blank for none)</span>
-							</label>
-						</div>
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XBMC IP:Port</span>
+                                <input type="text" name="xbmc_host" id="xbmc_host" value="$sickbeard.XBMC_HOST" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Host running XBMC (eg. 192.168.1.100:8080)</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">(multiple host strings can be separated by commas)</span>
+                            </label>
+                        </div>
 
-					<input type="button" value="Test XBMC" id="testXBMC">
-					<input type="submit" value="Save Changes">	
-						
-					</fieldset>
-				</div><!-- /component-group -->
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XBMC Username</span>
+                                <input type="text" name="xbmc_username" id="xbmc_username" value="$sickbeard.XBMC_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your XBMC server (blank for none)</span>
+                            </label>
+                        </div>
 
-				<div id="core-component-group2" class="component-group clearfix">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XBMC Password</span>
+                                <input type="password" name="xbmc_password" id="xbmc_password" value="$sickbeard.XBMC_PASSWORD" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Password of your XBMC server (blank for none)</span>
+                            </label>
+                        </div>
 
-					<div class="component-group-desc">
-						<h3>Growl</h3>
-						<p>A cross-platform unobtrusive global notification system.</p>
-					</div>
-					
-					<fieldset class="component-group-list">
-						<div class="field-pair">
-							<input type="checkbox" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "CHECKED" else ""# /> 
-							<label class="clearfix" for="use_growl">
-								<span class="component-title">Enable</span>
-								<span class="component-desc">Should Sick Beard send Growl notifications?</span>
-							</label>
-						</div>
+                    <input type="button" value="Test XBMC" id="testXBMC">
+                    <input type="submit" value="Save Changes">
 
-						<div class="field-pair">
-							<input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
-							<label class="clearfix" for="growl_notify_onsnatch">
-								<span class="component-title">Notify on Snatch</span>
-								<span class="component-desc">Send notification when we start a download?</span>
-							</label>
-						</div>
+                    </fieldset>
+                </div><!-- /component-group -->
 
-						<div class="field-pair">
-							<input type="checkbox" name="growl_notify_ondownload" id="growl_notify_ondownload" #if $sickbeard.GROWL_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
-							<label class="clearfix" for="growl_notify_ondownload">
-								<span class="component-title">Notify on Download</span>
-								<span class="component-desc">Send notification when we finish a download?</span>
-							</label>
-						</div>
-						
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">Growl IP:Port</span>
-								<input type="text" name="growl_host" id="growl_host" value="$sickbeard.GROWL_HOST" size="35" />
-							</label>						
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Host running Growl (eg. 192.168.1.100:23053)</span>
-							</label>
-						</div>
+                <div id="core-component-group2" class="component-group clearfix">
 
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">Growl Password</span>
-								<input type="password" name="growl_password" id="growl_password" value="$sickbeard.GROWL_PASSWORD" size="35" />
-							</label>						
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">May leave blank if Sick Beard is on the same host.</span>
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Otherwise Growl <b>requires</b> a password to be used.</span>
-							</label>							
-						</div>
+                    <div class="component-group-desc">
+                        <h3>Growl</h3>
+                        <p>A cross-platform unobtrusive global notification system.</p>
+                    </div>
 
-					<input type="button" value="Test Growl" id="testGrowl">
-					<input type="submit" value="Save Changes">	
-						
-					</fieldset>
-				</div><!-- /component-group -->
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "CHECKED" else ""# /> 
+                            <label class="clearfix" for="use_growl">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Growl notifications?</span>
+                            </label>
+                        </div>
 
-				<div id="core-component-group3" class="component-group clearfix">
-				
-					<div class="component-group-desc">
-						<h3>Twitter</h3>
-						<p>A social networking and microblogging service, enabling its users to send and read other users' messages called tweets.</p>
-					</div>
-					
-					<fieldset class="component-group-list">
-						<div class="field-pair">
-							<input type="checkbox" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "CHECKED" else ""# />
-							<label class="clearfix" for="use_twitter">
-								<span class="component-title">Enable</span>
-								<span class="component-desc">Should Sick Beard post tweets on Twitter?</span>
-							</label>
-							<label class="nocheck clearfix" for="use_twitter">
-								<span class="component-title">&nbsp</span>
-								<span class="component-desc">You may want to use a second account.</span>
-							</label>							
-						</div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
+                            <label class="clearfix" for="growl_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<input type="checkbox" name="twitter_notify_onsnatch" id="twitter_notify_onsnatch" #if $sickbeard.TWITTER_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
-							<label class="clearfix" for="twitter_notify_onsnatch">
-								<span class="component-title">Notify on Snatch</span>
-								<span class="component-desc">Send notification when we start a download?</span>
-							</label>
-						</div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="growl_notify_ondownload" id="growl_notify_ondownload" #if $sickbeard.GROWL_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
+                            <label class="clearfix" for="growl_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<input type="checkbox" name="twitter_notify_ondownload" id="twitter_notify_ondownload" #if $sickbeard.TWITTER_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
-							<label class="clearfix" for="twitter_notify_ondownload">
-								<span class="component-title">Notify on Download</span>
-								<span class="component-desc">Send notification when we finish a download?</span>
-							</label>
-						</div>
-						
-						<div class="field-pair">
-							<label class="clearfix">
-								<span class="component-title">Step One</span>
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-desc">Click the "Request Authorization" button.<br/> This will open a new page containing an auth key.<br/> Note: if nothing happens check your popup blocker.<br/></span>
-								<input type="button" value="Request Authorization" id="twitterStep1">
-							</label>							
-						</div>
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Growl IP:Port</span>
+                                <input type="text" name="growl_host" id="growl_host" value="$sickbeard.GROWL_HOST" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Host running Growl (eg. 192.168.1.100:23053)</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<label class="clearfix">
-								<span class="component-title">Step Two</span>
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-desc">Enter the key Twitter gave you below, and click "Verify Key".<br/></span>
-								<input type="text" id="twitter_key" value="" size="35"><br />
-							</label>							
-							<label class="nocheck clearfix">
-								<input type="button" value="Verify Key" id="twitterStep2">
-							</label>								
-						</div>
-						
-						<div class="field-pair">
-							<label class="clearfix">
-								<span class="component-title">Step Three</span>
-							</label>
-						</div>
-						
-					<input type="button" value="Test Twitter" id="testTwitter">
-					<input type="submit" value="Save Changes">	
-					
-					</fieldset>
-				</div><!-- /component-group -->
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Growl Password</span>
+                                <input type="password" name="growl_password" id="growl_password" value="$sickbeard.GROWL_PASSWORD" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">May leave blank if Sick Beard is on the same host.</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Otherwise Growl <b>requires</b> a password to be used.</span>
+                            </label>
+                        </div>
 
-			<br/><input type="submit" value="Save Changes"><br/>
-				
-			</div><!-- /config-components -->
+                    <input type="button" value="Test Growl" id="testGrowl">
+                    <input type="submit" value="Save Changes">
 
-</form>				
+                    </fieldset>
+                </div><!-- /component-group -->
+
+                <div id="core-component-group3" class="component-group clearfix">
+                
+                    <div class="component-group-desc">
+                        <h3>Twitter</h3>
+                        <p>A social networking and microblogging service, enabling its users to send and read other users' messages called tweets.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "CHECKED" else ""# />
+                            <label class="clearfix" for="use_twitter">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard post tweets on Twitter?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_twitter">
+                                <span class="component-title">&nbsp</span>
+                                <span class="component-desc">You may want to use a second account.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="twitter_notify_onsnatch" id="twitter_notify_onsnatch" #if $sickbeard.TWITTER_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
+                            <label class="clearfix" for="twitter_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="twitter_notify_ondownload" id="twitter_notify_ondownload" #if $sickbeard.TWITTER_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
+                            <label class="clearfix" for="twitter_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Step One</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">Click the "Request Authorization" button.<br/> This will open a new page containing an auth key.<br/> Note: if nothing happens check your popup blocker.<br/></span>
+                                <input type="button" value="Request Authorization" id="twitterStep1">
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Step Two</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">Enter the key Twitter gave you below, and click "Verify Key".<br/></span>
+                                <input type="text" id="twitter_key" value="" size="35"><br />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <input type="button" value="Verify Key" id="twitterStep2">
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Step Three</span>
+                            </label>
+                        </div>
+
+                    <input type="button" value="Test Twitter" id="testTwitter">
+                    <input type="submit" value="Save Changes">
+
+                    </fieldset>
+                </div><!-- /component-group -->
+
+            <br/><input type="submit" value="Save Changes"><br/>
+
+            </div><!-- /config-components -->
+
+</form>
 
 
-</div></div>				
+</div></div>
 <div class="clearfix"></div>
-		
+
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
