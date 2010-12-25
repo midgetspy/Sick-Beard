@@ -25,7 +25,7 @@
     var xbmc_password = \$("#xbmc_password").val();
 
     \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
-    
+
   });
 
   \$('#twitterStep1').click(function(){
@@ -67,7 +67,7 @@
                         <h3>XBMC</h3>
                         <p>A free and open source cross-platform media center and home entertainment system software with a 10-foot user interface designed for the living-room TV.</p>
                     </div>
-                    
+
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <input type="checkbox" name="use_xbmc" id="use_xbmc" #if $sickbeard.USE_XBMC then "CHECKED" else ""# />  
@@ -76,7 +76,7 @@
                                 <span class="component-desc">Should Sick Beard send XBMC commands?</span>
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
                             <label class="clearfix" for="xbmc_notify_onsnatch">
@@ -148,7 +148,7 @@
 
                     <input type="button" value="Test XBMC" id="testXBMC">
                     <input type="submit" value="Save Changes">
-                        
+
                     </fieldset>
                 </div><!-- /component-group -->
 
@@ -158,7 +158,7 @@
                         <h3>Growl</h3>
                         <p>A cross-platform unobtrusive global notification system.</p>
                     </div>
-                    
+
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <input type="checkbox" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "CHECKED" else ""# /> 
@@ -183,7 +183,7 @@
                                 <span class="component-desc">Send notification when we finish a download?</span>
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Growl IP:Port</span>
@@ -212,7 +212,7 @@
 
                     <input type="button" value="Test Growl" id="testGrowl">
                     <input type="submit" value="Save Changes">
-                        
+
                     </fieldset>
                 </div><!-- /component-group -->
 
@@ -222,7 +222,7 @@
                         <h3>Twitter</h3>
                         <p>A social networking and microblogging service, enabling its users to send and read other users' messages called tweets.</p>
                     </div>
-                    
+
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <input type="checkbox" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "CHECKED" else ""# />
@@ -251,7 +251,7 @@
                                 <span class="component-desc">Send notification when we finish a download?</span>
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Step One</span>
@@ -274,21 +274,21 @@
                                 <input type="button" value="Verify Key" id="twitterStep2">
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Step Three</span>
                             </label>
                         </div>
-                        
+
                     <input type="button" value="Test Twitter" id="testTwitter">
                     <input type="submit" value="Save Changes">
-                    
+
                     </fieldset>
                 </div><!-- /component-group -->
 
             <br/><input type="submit" value="Save Changes"><br/>
-                
+
             </div><!-- /config-components -->
 
 </form>
