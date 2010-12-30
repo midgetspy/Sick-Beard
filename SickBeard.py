@@ -166,10 +166,6 @@ def main():
 	logger.log(u"Loading initial show list")
 	loadShowsFromDB()
 
-	# set up the lists
-	sickbeard.updateAiringList()
-	sickbeard.updateComingList()
-
 	# fire up all our threads
 	sickbeard.start()
 

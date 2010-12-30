@@ -4,8 +4,7 @@ import xml.etree.cElementTree as etree
 import xml.etree
 import re
 
-from lib.tvnamer.utils import FileParser
-from lib.tvnamer import tvnamer_exceptions
+from name_parser.parser import NameParser, InvalidNameException
 
 from sickbeard import logger, classes, helpers
 from sickbeard.common import *
@@ -91,14 +90,14 @@ def splitResult(result):
 
     # parse the season ep name
     try:
-        fp = FileParser(result.name)
-        epInfo = fp.parse()
-    except tvnamer_exceptions.InvalidFilename:
+        np = NameParser(False)
+        parse_result = np.parse(result.name)
+    except InvalidNameException:
         logger.log(u"Unable to parse the filename "+result.name+" into a valid episode", logger.WARNING)
         return False
 
     # bust it up
-    season = epInfo.seasonnumber if epInfo.seasonnumber != None else 1
+    season = parse_result.season_number if parse_result.season_number != None else 1
 
     separateNZBs, xmlns = getSeasonNZBs(result.name, urlData, season)
 
@@ -110,24 +109,22 @@ def splitResult(result):
 
         # parse the name
         try:
-            fp = FileParser(newNZB)
-            epInfo = fp.parse()
-        except tvnamer_exceptions.InvalidFilename:
+            np = NameParser(False)
+            parse_result = np.parse(newNZB)
+        except InvalidNameException:
             logger.log(u"Unable to parse the filename "+newNZB+" into a valid episode", logger.WARNING)
             return False
 
         # make sure the result is sane
-        if (epInfo.seasonnumber != None and epInfo.seasonnumber != season) or (epInfo.seasonnumber == None and season != 1):
+        if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
             logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
             continue
-        elif len(epInfo.episodenumbers) == 0:
+        elif len(parse_result.episode_numbers) == 0:
             logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to be a valid episode NZB, ignoring it", logger.WARNING)
             continue
 
         wantEp = True
-        for epNo in epInfo.episodenumbers:
-            if epNo == -1:
-                continue
+        for epNo in parse_result.episode_numbers:
             if not result.extraInfo[0].wantEpisode(season, epNo, result.quality):
                 logger.log(u"Ignoring result "+newNZB+" because we don't want an episode that is "+Quality.qualityStrings[result.quality], logger.DEBUG)
                 wantEp = False
@@ -137,7 +134,7 @@ def splitResult(result):
 
         # get all the associated episode objects
         epObjList = []
-        for curEp in epInfo.episodenumbers:
+        for curEp in parse_result.episode_numbers:
             epObjList.append(result.extraInfo[0].getEpisode(season, curEp))
 
         # make a result

@@ -18,9 +18,10 @@
 
 
 import StringIO, zlib, gzip
-import os.path, os, glob
+import os.path, os
 import urllib, urllib2
 import re
+import shutil
 
 import sickbeard
 
@@ -38,332 +39,360 @@ import xml.etree.cElementTree as etree
 urllib._urlopener = classes.SickBeardURLopener()
 
 def indentXML(elem, level=0):
-	'''
-	Does our pretty printing, makes Matt very happy
-	'''
-	i = "\n" + level*"  "
-	if len(elem):
-		if not elem.text or not elem.text.strip():
-			elem.text = i + "  "
-		if not elem.tail or not elem.tail.strip():
-			elem.tail = i
-		for elem in elem:
-			indentXML(elem, level+1)
-		if not elem.tail or not elem.tail.strip():
-			elem.tail = i
-	else:
-		# Strip out the newlines from text
-		if elem.text:
-			elem.text = elem.text.replace('\n', ' ')
-		if level and (not elem.tail or not elem.tail.strip()):
-			elem.tail = i
+    '''
+    Does our pretty printing, makes Matt very happy
+    '''
+    i = "\n" + level*"  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+        for elem in elem:
+            indentXML(elem, level+1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        # Strip out the newlines from text
+        if elem.text:
+            elem.text = elem.text.replace('\n', ' ')
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
 
 def replaceExtension(file, newExt):
-	'''
-	>>> replaceExtension('foo.avi', 'mkv')
-	'foo.mkv'
-	>>> replaceExtension('.vimrc', 'arglebargle')
-	'.vimrc'
-	>>> replaceExtension('a.b.c', 'd')
-	'a.b.d'
-	>>> replaceExtension('', 'a')
-	''
-	>>> replaceExtension('foo.bar', '')
-	'foo.'
-	'''
-	sepFile = file.rpartition(".")
-	if sepFile[0] == "":
-		return file
-	else:
-		return sepFile[0] + "." + newExt
+    '''
+    >>> replaceExtension('foo.avi', 'mkv')
+    'foo.mkv'
+    >>> replaceExtension('.vimrc', 'arglebargle')
+    '.vimrc'
+    >>> replaceExtension('a.b.c', 'd')
+    'a.b.d'
+    >>> replaceExtension('', 'a')
+    ''
+    >>> replaceExtension('foo.bar', '')
+    'foo.'
+    '''
+    sepFile = file.rpartition(".")
+    if sepFile[0] == "":
+        return file
+    else:
+        return sepFile[0] + "." + newExt
 
 def isMediaFile (file):
-	# ignore samples
-	if re.search('(^|[\W_])sample\d*[\W_]', file):
-		return False
+    # ignore samples
+    if re.search('(^|[\W_])sample\d*[\W_]', file):
+        return False
 
-	sepFile = file.rpartition(".")
-	if sepFile[2].lower() in mediaExtensions:
-		return True
-	else:
-		return False
+    sepFile = file.rpartition(".")
+    if sepFile[2].lower() in mediaExtensions:
+        return True
+    else:
+        return False
 
 def sanitizeFileName (name):
-	'''
-	>>> sanitizeFileName('a/b/c')
-	'a-b-c'
-	>>> sanitizeFileName('abc')
-	'abc'
-	>>> sanitizeFileName('a"b')
-	'ab'
-	'''
-	for x in "\\/*":
-		name = name.replace(x, "-")
-	for x in ":\"<>|?":
-		name = name.replace(x, "")
-	return name
+    '''
+    >>> sanitizeFileName('a/b/c')
+    'a-b-c'
+    >>> sanitizeFileName('abc')
+    'abc'
+    >>> sanitizeFileName('a"b')
+    'ab'
+    '''
+    for x in "\\/*":
+        name = name.replace(x, "-")
+    for x in ":\"<>|?":
+        name = name.replace(x, "")
+    return name
 
 
 def getURL (url, headers=[]):
-	"""
-	Returns a byte-string retrieved from the url provider.
-	"""
+    """
+    Returns a byte-string retrieved from the url provider.
+    """
 
-	opener = urllib2.build_opener()
-	opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
-	for cur_header in headers:
-		opener.addheaders.append(cur_header)
-	usock = opener.open(url)
-	url = usock.geturl()
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
+    for cur_header in headers:
+        opener.addheaders.append(cur_header)
+    usock = opener.open(url)
+    url = usock.geturl()
 
-	encoding = usock.info().get("Content-Encoding")
+    encoding = usock.info().get("Content-Encoding")
 
-	if encoding in ('gzip', 'x-gzip', 'deflate'):
-		content = usock.read()
-		if encoding == 'deflate':
-			data = StringIO.StringIO(zlib.decompress(content))
-		else:
-			data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
-		result = data.read()
+    if encoding in ('gzip', 'x-gzip', 'deflate'):
+        content = usock.read()
+        if encoding == 'deflate':
+            data = StringIO.StringIO(zlib.decompress(content))
+        else:
+            data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
+        result = data.read()
 
-	else:
-		result = usock.read()
-		usock.close()
+    else:
+        result = usock.read()
+        usock.close()
 
-	return result
+    return result
 
 def findCertainShow (showList, tvdbid):
-	results = filter(lambda x: x.tvdbid == tvdbid, showList)
-	if len(results) == 0:
-		return None
-	elif len(results) > 1:
-		raise MultipleShowObjectsException()
-	else:
-		return results[0]
+    results = filter(lambda x: x.tvdbid == tvdbid, showList)
+    if len(results) == 0:
+        return None
+    elif len(results) > 1:
+        raise MultipleShowObjectsException()
+    else:
+        return results[0]
 
 def findCertainTVRageShow (showList, tvrid):
 
-	if tvrid == 0:
-		return None
+    if tvrid == 0:
+        return None
 
-	results = filter(lambda x: x.tvrid == tvrid, showList)
+    results = filter(lambda x: x.tvrid == tvrid, showList)
 
-	if len(results) == 0:
-		return None
-	elif len(results) > 1:
-		raise MultipleShowObjectsException()
-	else:
-		return results[0]
+    if len(results) == 0:
+        return None
+    elif len(results) > 1:
+        raise MultipleShowObjectsException()
+    else:
+        return results[0]
 
 
 def makeDir (dir):
-	if not ek.ek(os.path.isdir, dir):
-		try:
-			ek.ek(os.makedirs, dir)
-		except OSError:
-			return False
-	return True
+    if not ek.ek(os.path.isdir, dir):
+        try:
+            ek.ek(os.makedirs, dir)
+        except OSError:
+            return False
+    return True
 
 def makeShowNFO(showID, showDir):
 
-	logger.log(u"Making NFO for show "+str(showID)+" in dir "+showDir, logger.DEBUG)
+    logger.log(u"Making NFO for show "+str(showID)+" in dir "+showDir, logger.DEBUG)
 
-	if not makeDir(showDir):
-		logger.log(u"Unable to create show dir, can't make NFO", logger.ERROR)
-		return False
+    if not makeDir(showDir):
+        logger.log(u"Unable to create show dir, can't make NFO", logger.ERROR)
+        return False
 
-	t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
+    t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
 
-	try:
-		myShow = t[int(showID)]
-	except tvdb_exceptions.tvdb_shownotfound:
- 		logger.log(u"Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
-		raise
+    try:
+        myShow = t[int(showID)]
+    except tvdb_exceptions.tvdb_shownotfound:
+        logger.log(u"Unable to find show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+        raise
 
-	except tvdb_exceptions.tvdb_error:
- 		logger.log(u"TVDB is down, can't use its data to add this show", logger.ERROR)
- 		raise
+    except tvdb_exceptions.tvdb_error:
+        logger.log(u"TVDB is down, can't use its data to add this show", logger.ERROR)
+        raise
 
-	# check for title and id
-	try:
-		if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
- 			logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+    # check for title and id
+    try:
+        if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
+            logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
-			return False
-	except tvdb_exceptions.tvdb_attributenotfound:
- 		logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
+            return False
+    except tvdb_exceptions.tvdb_attributenotfound:
+        logger.log(u"Incomplete info for show with id " + str(showID) + " on tvdb, skipping it", logger.ERROR)
 
-		return False
+        return False
 
-	tvNode = buildNFOXML(myShow)
-	# Make it purdy
-	indentXML( tvNode )
-	nfo = etree.ElementTree( tvNode )
+    tvNode = buildNFOXML(myShow)
+    # Make it purdy
+    indentXML( tvNode )
+    nfo = etree.ElementTree( tvNode )
 
- 	logger.log(u"Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
-	nfo_filename = os.path.join(showDir, "tvshow.nfo").encode('utf-8')
-	nfo_fh = open(nfo_filename, 'w')
-	nfo.write( nfo_fh, encoding="utf-8" )
+    logger.log(u"Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
+    nfo_filename = os.path.join(showDir, "tvshow.nfo").encode('utf-8')
+    nfo_fh = open(nfo_filename, 'w')
+    nfo.write( nfo_fh, encoding="utf-8" )
 
-	return True
+    return True
 
 def buildNFOXML(myShow):
-	'''
-	Build an etree.Element of the root node of an NFO file with the
-	data from `myShow`, a TVDB show object.
+    '''
+    Build an etree.Element of the root node of an NFO file with the
+    data from `myShow`, a TVDB show object.
 
-	>>> from collections import defaultdict
-	>>> from xml.etree.cElementTree import tostring
-	>>> show = defaultdict(lambda: None, _actors=[])
-	>>> tostring(buildNFOXML(show))
-	'<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title /><rating /><plot /><episodeguide><url /></episodeguide><mpaa /><id /><genre /><premiered /><studio /></tvshow>'
-	>>> show['seriesname'] = 'Peaches'
-	>>> tostring(buildNFOXML(show))
-	'<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa /><id /><genre /><premiered /><studio /></tvshow>'
-	>>> show['contentrating'] = 'PG'
-	>>> tostring(buildNFOXML(show))
-	'<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa>PG</mpaa><id /><genre /><premiered /><studio /></tvshow>'
-	>>> show['genre'] = 'Fruit|Edibles'
-	>>> tostring(buildNFOXML(show))
-	'<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa>PG</mpaa><id /><genre>Fruit / Edibles</genre><premiered /><studio /></tvshow>'
-	'''
-	tvNode = etree.Element( "tvshow" )
-	for ns in XML_NSMAP.keys():
-		tvNode.set(ns, XML_NSMAP[ns])
+    >>> from collections import defaultdict
+    >>> from xml.etree.cElementTree import tostring
+    >>> show = defaultdict(lambda: None, _actors=[])
+    >>> tostring(buildNFOXML(show))
+    '<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title /><rating /><plot /><episodeguide><url /></episodeguide><mpaa /><id /><genre /><premiered /><studio /></tvshow>'
+    >>> show['seriesname'] = 'Peaches'
+    >>> tostring(buildNFOXML(show))
+    '<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa /><id /><genre /><premiered /><studio /></tvshow>'
+    >>> show['contentrating'] = 'PG'
+    >>> tostring(buildNFOXML(show))
+    '<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa>PG</mpaa><id /><genre /><premiered /><studio /></tvshow>'
+    >>> show['genre'] = 'Fruit|Edibles'
+    >>> tostring(buildNFOXML(show))
+    '<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa>PG</mpaa><id /><genre>Fruit / Edibles</genre><premiered /><studio /></tvshow>'
+    '''
+    tvNode = etree.Element( "tvshow" )
+    for ns in XML_NSMAP.keys():
+        tvNode.set(ns, XML_NSMAP[ns])
 
-	title = etree.SubElement( tvNode, "title" )
-	if myShow["seriesname"] != None:
-		title.text = myShow["seriesname"]
+    title = etree.SubElement( tvNode, "title" )
+    if myShow["seriesname"] != None:
+        title.text = myShow["seriesname"]
 
-	rating = etree.SubElement( tvNode, "rating" )
-	if myShow["rating"] != None:
-		rating.text = myShow["rating"]
+    rating = etree.SubElement( tvNode, "rating" )
+    if myShow["rating"] != None:
+        rating.text = myShow["rating"]
 
-	plot = etree.SubElement( tvNode, "plot" )
-	if myShow["overview"] != None:
-		plot.text = myShow["overview"]
+    plot = etree.SubElement( tvNode, "plot" )
+    if myShow["overview"] != None:
+        plot.text = myShow["overview"]
 
-	episodeguide = etree.SubElement( tvNode, "episodeguide" )
-	episodeguideurl = etree.SubElement( episodeguide, "url" )
-	if myShow["id"] != None:
-		showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
-		episodeguideurl.text = showurl
+    episodeguide = etree.SubElement( tvNode, "episodeguide" )
+    episodeguideurl = etree.SubElement( episodeguide, "url" )
+    if myShow["id"] != None:
+        showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
+        episodeguideurl.text = showurl
 
-	mpaa = etree.SubElement( tvNode, "mpaa" )
-	if myShow["contentrating"] != None:
-		mpaa.text = myShow["contentrating"]
+    mpaa = etree.SubElement( tvNode, "mpaa" )
+    if myShow["contentrating"] != None:
+        mpaa.text = myShow["contentrating"]
 
-	tvdbid = etree.SubElement( tvNode, "id" )
-	if myShow["id"] != None:
-		tvdbid.text = myShow["id"]
+    tvdbid = etree.SubElement( tvNode, "id" )
+    if myShow["id"] != None:
+        tvdbid.text = myShow["id"]
 
-	genre = etree.SubElement( tvNode, "genre" )
-	if myShow["genre"] != None:
-		genre.text = " / ".join([x for x in myShow["genre"].split('|') if x != ''])
+    genre = etree.SubElement( tvNode, "genre" )
+    if myShow["genre"] != None:
+        genre.text = " / ".join([x for x in myShow["genre"].split('|') if x != ''])
 
-	premiered = etree.SubElement( tvNode, "premiered" )
-	if myShow["firstaired"] != None:
-		premiered.text = myShow["firstaired"]
+    premiered = etree.SubElement( tvNode, "premiered" )
+    if myShow["firstaired"] != None:
+        premiered.text = myShow["firstaired"]
 
-	studio = etree.SubElement( tvNode, "studio" )
-	if myShow["network"] != None:
-		studio.text = myShow["network"]
+    studio = etree.SubElement( tvNode, "studio" )
+    if myShow["network"] != None:
+        studio.text = myShow["network"]
 
-	for actor in myShow['_actors']:
+    for actor in myShow['_actors']:
 
-		cur_actor = etree.SubElement( tvNode, "actor" )
+        cur_actor = etree.SubElement( tvNode, "actor" )
 
-		cur_actor_name = etree.SubElement( cur_actor, "name" )
-		cur_actor_name.text = actor['name']
-		cur_actor_role = etree.SubElement( cur_actor, "role" )
-		cur_actor_role_text = actor['role']
+        cur_actor_name = etree.SubElement( cur_actor, "name" )
+        cur_actor_name.text = actor['name']
+        cur_actor_role = etree.SubElement( cur_actor, "role" )
+        cur_actor_role_text = actor['role']
 
-		if cur_actor_role_text != None:
-			cur_actor_role.text = cur_actor_role_text
+        if cur_actor_role_text != None:
+            cur_actor_role.text = cur_actor_role_text
 
-		cur_actor_thumb = etree.SubElement( cur_actor, "thumb" )
-		cur_actor_thumb_text = actor['image']
+        cur_actor_thumb = etree.SubElement( cur_actor, "thumb" )
+        cur_actor_thumb_text = actor['image']
 
-		if cur_actor_thumb_text != None:
-			cur_actor_thumb.text = cur_actor_thumb_text
+        if cur_actor_thumb_text != None:
+            cur_actor_thumb.text = cur_actor_thumb_text
 
-	return tvNode
+    return tvNode
 
 
 def searchDBForShow(regShowName):
 
-	showNames = [regShowName.replace(' ','_')]
+    showNames = [regShowName.replace(' ','_')]
 
-	# if tvdb fails then try looking it up in the db
-	myDB = db.DBConnection()
+    myDB = db.DBConnection()
 
-	yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
+    yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
 
-	for showName in showNames:
+    for showName in showNames:
 
-		sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
+        sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
 
-		if len(sqlResults) == 1:
-			return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+        if len(sqlResults) == 1:
+            return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
-		else:
+        else:
 
-			# if we didn't get exactly one result then try again with the year stripped off if possible
-			match = re.match(yearRegex, showName)
-			if match:
-				logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
-				sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
+            # if we didn't get exactly one result then try again with the year stripped off if possible
+            match = re.match(yearRegex, showName)
+            if match:
+                logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
+                sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
 
-			if len(sqlResults) == 0:
-				logger.log(u"Unable to match a record in the DB for "+showName, logger.DEBUG)
-				continue
-			elif len(sqlResults) > 1:
-				logger.log(u"Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
-				continue
-			else:
-				return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+            if len(sqlResults) == 0:
+                logger.log(u"Unable to match a record in the DB for "+showName, logger.DEBUG)
+                continue
+            elif len(sqlResults) > 1:
+                logger.log(u"Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
+                continue
+            else:
+                return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
 
-	return None
+    return None
 
 def sizeof_fmt(num):
-	'''
-	>>> sizeof_fmt(2)
-	'2.0 bytes'
-	>>> sizeof_fmt(1024)
-	'1.0 KB'
-	>>> sizeof_fmt(2048)
-	'2.0 KB'
-	>>> sizeof_fmt(2**20)
-	'1.0 MB'
-	>>> sizeof_fmt(1234567)
-	'1.2 MB'
-	'''
-	for x in ['bytes','KB','MB','GB','TB']:
-		if num < 1024.0:
-			return "%3.1f %s" % (num, x)
-		num /= 1024.0
+    '''
+    >>> sizeof_fmt(2)
+    '2.0 bytes'
+    >>> sizeof_fmt(1024)
+    '1.0 KB'
+    >>> sizeof_fmt(2048)
+    '2.0 KB'
+    >>> sizeof_fmt(2**20)
+    '1.0 MB'
+    >>> sizeof_fmt(1234567)
+    '1.2 MB'
+    '''
+    for x in ['bytes','KB','MB','GB','TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
 
 def listMediaFiles(dir):
 
-	if not dir or not ek.ek(os.path.isdir, dir):
-		return []
+    if not dir or not ek.ek(os.path.isdir, dir):
+        return []
 
-	files = []
-	for curFile in ek.ek(os.listdir, dir):
-		fullCurFile = ek.ek(os.path.join, dir, curFile)
+    files = []
+    for curFile in ek.ek(os.listdir, dir):
+        fullCurFile = ek.ek(os.path.join, dir, curFile)
 
-		# if it's a dir do it recursively
-		if ek.ek(os.path.isdir, fullCurFile) and not curFile.startswith('.') and not curFile == 'Extras':
-			files += listMediaFiles(fullCurFile)
+        # if it's a dir do it recursively
+        if ek.ek(os.path.isdir, fullCurFile) and not curFile.startswith('.') and not curFile == 'Extras':
+            files += listMediaFiles(fullCurFile)
 
-		elif isMediaFile(curFile):
-			files.append(fullCurFile)
+        elif isMediaFile(curFile):
+            files.append(fullCurFile)
 
-	return files
+    return files
+
+def copyFile(srcFile, destFile):
+    ek.ek(shutil.copyfile, srcFile, destFile)
+    try:
+        ek.ek(shutil.copymode, srcFile, destFile)
+    except OSError:
+        pass
+
+def moveFile(srcFile, destFile):
+    try:
+        ek.ek(os.rename, srcFile, destFile)
+    except OSError:
+        copyFile(srcFile, destFile)
+        ek.ek(os.unlink, srcFile)
+
+def rename_file(old_path, new_name):
+
+    old_path_list = ek.ek(os.path.split, old_path)
+    old_file_ext = ek.ek(os.path.splitext, old_path_list[1])[1]
+
+    new_path = ek.ek(os.path.join, old_path_list[0], sanitizeFileName(new_name) + old_file_ext)
+
+    logger.log(u"Renaming from " + old_path + " to " + new_path)
+
+    try:
+        ek.ek(os.rename, old_path, new_path)
+    except (OSError, IOError), e:
+        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + str(e), logger.ERROR)
+        return False
+
+    return new_path
 
 if __name__ == '__main__':
-	import doctest
-	doctest.testmod()
-
-# vim: noet
+    import doctest
+    doctest.testmod()
