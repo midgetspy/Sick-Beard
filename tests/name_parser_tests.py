@@ -95,10 +95,14 @@ combination_test_cases = [
                            parser.ParseResult(None, 'MythBusters', 8, [16], '720p.HDTV.x264', 'aAF'),
                            ['standard']),
                            
-                           ('/home/drop/storage/TV/Terminator The Sarah Connor Chronicles/Season 2/S02E06 The Tower is Tall, But the Fall is Short.mkv',
-                            parser.ParseResult(None, None, 2, [6], 'The Tower is Tall, But the Fall is Short'),
-                            ['standard']),
-                          
+                          ('/home/drop/storage/TV/Terminator The Sarah Connor Chronicles/Season 2/S02E06 The Tower is Tall, But the Fall is Short.mkv',
+                           parser.ParseResult(None, None, 2, [6], 'The Tower is Tall, But the Fall is Short'),
+                           ['standard']),
+                           
+                          (r'Q:\Test\TV\Jimmy Fallon\Season 2\Jimmy Fallon - 2010-12-15 - blah.avi',
+                           parser.ParseResult(None, 'Jimmy Fallon', extra_info = 'blah', air_date = datetime.date(2010,12,15)),
+                           ['scene_date_format']),
+                           
                           ]
 
 unicode_test_cases = [

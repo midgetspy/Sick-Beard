@@ -78,7 +78,7 @@ class NameParser(object):
             result.which_regex = [cur_regex_name]
             
             named_groups = match.groupdict().keys()
-            
+
             if 'series_name' in named_groups:
                 result.series_name = match.group('series_name')
                 if result.series_name:
@@ -174,7 +174,7 @@ class NameParser(object):
     def parse(self, name):
         
         name = self._unicodify(name)
-        
+
         # break it into parts if there are any (dirname, file name, extension)
         dir_name, file_name = os.path.split(name)
         ext_match = re.match('(.*)\.\w{3,4}$', file_name)
@@ -194,11 +194,13 @@ class NameParser(object):
         
         # parse the dirname for extra info if needed
         dir_name_result = self._parse_string(dir_name)
-        
+
         # build the ParseResult object
-        final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
-        final_result.episode_numbers = self._combine_results(file_name_result, dir_name_result, 'episode_numbers')
         final_result.air_date = self._combine_results(file_name_result, dir_name_result, 'air_date')
+
+        if not final_result.air_date:
+            final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
+            final_result.episode_numbers = self._combine_results(file_name_result, dir_name_result, 'episode_numbers')
         
         # if the dirname has a release group/show name I believe it over the filename
         final_result.series_name = self._combine_results(dir_name_result, file_name_result, 'series_name')
@@ -284,6 +286,8 @@ class ParseResult(object):
             to_return += ' - ' + self.extra_info
         if self.release_group:
             to_return += ' (' + self.release_group + ')'
+
+        to_return += ' [ABD: '+str(self.air_by_date)+']'
 
         return to_return.encode('utf-8')
 
