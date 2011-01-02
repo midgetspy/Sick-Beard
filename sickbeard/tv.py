@@ -354,7 +354,8 @@ class TVShow(object):
             logger.log(u"Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 
-        if len(parse_result.episode_numbers) == 0:
+        if len(parse_result.episode_numbers) == 0 and not parse_result.air_by_date:
+            logger.log("parse_result: "+str(parse_result))
             logger.log(u"No episode number found in "+file+", ignoring it", logger.ERROR)
             return None
 
