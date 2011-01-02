@@ -54,7 +54,7 @@ class XBMCNotifier:
                 # do a per-show update first, if possible
                 if not self._update_library(curHost, showName=show_name) and sickbeard.XBMC_UPDATE_FULL:
                     # do a full update if requested
-                    self._log(u"Update of show directory failed on " + curHost + ", trying full update as requested")
+                    logger.log(u"Update of show directory failed on " + curHost + ", trying full update as requested", logger.ERROR)
                     self._update_library(curHost)
 
 
