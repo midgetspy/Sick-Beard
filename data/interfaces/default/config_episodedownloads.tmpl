@@ -37,257 +37,257 @@
 <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.PROG_DIR</span> "</h5>
 <form action="saveEpisodeDownloads" method="POST">
 
-			<div id="config-components">
-				
-				<div id="core-component-group1" class="component-group clearfix">
+            <div id="config-components">
+                
+                <div id="core-component-group1" class="component-group clearfix">
 
-					<div class="component-group-desc">
-						<h3>Episode Search</h3>
-						<p>Settings that dictate how and when episode searching works with <a href="$sbRoot/config/providers">Providers</a>.</p>
-					</div>
+                    <div class="component-group-desc">
+                        <h3>Episode Search</h3>
+                        <p>Settings that dictate how and when episode searching works with <a href="$sbRoot/config/providers">Providers</a>.</p>
+                    </div>
 
-					<fieldset class="component-group-list">	
-						<div class="field-pair">
-							<input type="checkbox" name="download_propers" id="download_propers" #if $sickbeard.DOWNLOAD_PROPERS == True then "CHECKED" else ""# />
-							<label class="clearfix" for="download_propers">
-								<span class="component-title">Download Propers</span>
-								<span class="component-desc">Replace original download with "Proper/Repack" if nuked?</span>	
-							</label>						
-						</div>
-						
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">Search Frequency</span>
-								<input type="text" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="5" />
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Time in minutes between searches (eg. 60)</span>
-							</label>							
-						</div>	
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="download_propers" id="download_propers" #if $sickbeard.DOWNLOAD_PROPERS == True then "CHECKED" else ""# />
+                            <label class="clearfix" for="download_propers">
+                                <span class="component-title">Download Propers</span>
+                                <span class="component-desc">Replace original download with "Proper/Repack" if nuked?</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Search Frequency</span>
+                                <input type="text" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="5" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Time in minutes between searches (eg. 60)</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">Backlog Search Freq.</span>
-								<input type="text" name="backlog_search_frequency" value="$sickbeard.BACKLOG_SEARCH_FREQUENCY" size="5" />
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Time in days between backlog searches (eg. 21)</span>
-							</label>							
-						</div>	
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Backlog Search Freq.</span>
+                                <input type="text" name="backlog_search_frequency" value="$sickbeard.BACKLOG_SEARCH_FREQUENCY" size="5" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Time in days between backlog searches (eg. 21)</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">Usenet Retention</span>
-								<input type="text" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="5" />
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Age limit in days for usenet articles to be used. (eg. 500)</span>
-							</label>							
-						</div>	
-						
-						<div class="clearfix"></div>
-						<input type="submit" value="Save Changes"><br/>						
-						
-					</fieldset>					
-				</div><!-- /component-group1 -->
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Usenet Retention</span>
+                                <input type="text" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="5" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Age limit in days for usenet articles to be used. (eg. 500)</span>
+                            </label>
+                        </div>
 
-				<div id="core-component-group2" class="component-group clearfix">
+                        <div class="clearfix"></div>
+                        <input type="submit" value="Save Changes"><br/>
+                        
+                    </fieldset>
+                </div><!-- /component-group1 -->
 
-					<div class="component-group-desc">
-						<h3>Episode Results</h3>
-						<p>Settings that dictate how Sick Beard handles NZB and Torrents search results.</p>
-					</div>
+                <div id="core-component-group2" class="component-group clearfix">
 
-					<fieldset class="component-group-list">	
-						<div class="field-pair">
-							<label class="clearfix" for="metadataTarget">
-								<span class="component-title jumbo">NZB Method:</span>
-								<span class="component-desc">
-									<select name="nzb_method" id="nzb_method">
-									#set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd"}
-									#for $curAction in ('sabnzbd', 'blackhole'):
-									  #if $sickbeard.NZB_METHOD == $curAction:
-										#set $nzb_method = "SELECTED"
-									  #else
-										#set $nzb_method = ""
-									  #end if
-									<option value="$curAction" $nzb_method>$nzb_method_text[$curAction]
-									#end for
-									</select>
-								</span>		
-							</label>
-						</div>
+                    <div class="component-group-desc">
+                        <h3>Episode Results</h3>
+                        <p>Settings that dictate how Sick Beard handles NZB and Torrents search results.</p>
+                    </div>
 
-						<div class="field-pair">
-							<label class="nocheck clearfix">
-								<span class="component-title">Torrent Black Hole</span>
-								<input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="45" />
-							</label>						
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">The directory where Sick Beard should store your <i>Torrent</i> files.</span>		
-							</label>														
-						</div>	
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <label class="clearfix" for="metadataTarget">
+                                <span class="component-title jumbo">NZB Method:</span>
+                                <span class="component-desc">
+                                    <select name="nzb_method" id="nzb_method">
+                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd"}
+                                    #for $curAction in ('sabnzbd', 'blackhole'):
+                                      #if $sickbeard.NZB_METHOD == $curAction:
+                                        #set $nzb_method = "SELECTED"
+                                      #else
+                                        #set $nzb_method = ""
+                                      #end if
+                                    <option value="$curAction" $nzb_method>$nzb_method_text[$curAction]
+                                    #end for
+                                    </select>
+                                </span>
+                            </label>
+                        </div>
 
-						<div id="blackhole_settings">
-							<div class="field-pair">
-								<label class="nocheck clearfix">
-									<span class="component-title">NZB Black Hole</span>
-									<input type="text" name="nzb_dir" id="nzb_dir" value="$sickbeard.NZB_DIR" size="45" />
-								</label>
-								<label class="nocheck clearfix">
-									<span class="component-title">&nbsp;</span>
-									<span class="component-desc">The directory where Sick Beard should store your <i>NZB</i> files.</span>		
-								</label>							
-							</div>	
-						</div>
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Torrent Black Hole</span>
+                                <input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="45" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">The directory where Sick Beard should store your <i>Torrent</i> files.</span>
+                            </label>
+                        </div>
 
-						<div id="sabnzbd_settings">
-							<div class="field-pair">
-								<label class="nocheck clearfix">
-									<span class="component-title">SABnzbd IP:Port</span>
-									<input type="text" name="sab_host" value="$sickbeard.SAB_HOST" size="35" />
-								</label>						
-								<label class="nocheck clearfix">
-									<span class="component-title">&nbsp;</span>
-									<span class="component-desc">Host running SABnzbd+ (eg. 192.168.1.100:8080)</span>
-								</label>
-							</div>
-							
-							<div class="field-pair">
-								<label class="nocheck clearfix">
-									<span class="component-title">SABnzbd Username</span>
-									<input type="text" name="sab_username" value="$sickbeard.SAB_USERNAME" size="20" />
-								</label>						
-								<label class="nocheck clearfix">
-									<span class="component-title">&nbsp;</span>
-									<span class="component-desc">Username of your SABnzbd+ server (blank for none)</span>
-								</label>
-							</div>
+                        <div id="blackhole_settings">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZB Black Hole</span>
+                                    <input type="text" name="nzb_dir" id="nzb_dir" value="$sickbeard.NZB_DIR" size="45" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The directory where Sick Beard should store your <i>NZB</i> files.</span>
+                                </label>
+                            </div>
+                        </div>
 
-							<div class="field-pair">
-								<label class="nocheck clearfix">
-									<span class="component-title">SABnzbd Password</span>
-									<input type="password" name="sab_password" value="$sickbeard.SAB_PASSWORD" size="20" />
-								</label>						
-								<label class="nocheck clearfix">
-									<span class="component-title">&nbsp;</span>
-									<span class="component-desc">Password of your SABnzbd+ server (blank for none)</span>
-								</label>
-							</div>
+                        <div id="sabnzbd_settings">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SABnzbd IP:Port</span>
+                                    <input type="text" name="sab_host" value="$sickbeard.SAB_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Host running SABnzbd+ (eg. 192.168.1.100:8080)</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SABnzbd Username</span>
+                                    <input type="text" name="sab_username" value="$sickbeard.SAB_USERNAME" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Username of your SABnzbd+ server (blank for none)</span>
+                                </label>
+                            </div>
 
-							<div class="field-pair">
-								<label class="nocheck clearfix">
-									<span class="component-title">SABnzbd API Key</span>
-									<input type="text" name="sab_apikey" value="$sickbeard.SAB_APIKEY" size="45" />
-								</label>
-								<label class="nocheck clearfix">
-									<span class="component-title">&nbsp;</span>
-									<span class="component-desc">SABnzbd+ Config -> General -> API Key.</span>
-								</label>
-							</div>
-							
-							<div class="field-pair">
-								<label class="nocheck clearfix">
-									<span class="component-title">SABnzbd Category</span>
-									<input type="text" name="sab_category" value="$sickbeard.SAB_CATEGORY" size="20" />
-								</label>						
-								<label class="nocheck clearfix">
-									<span class="component-title">&nbsp;</span>
-									<span class="component-desc">Category for downloads to go into (eg. TV)</span>
-								</label>
-							</div>
-						</div>
-						
-						<div class="clearfix"></div>
-						<input type="submit" value="Save Changes"><br/>						
-						
-					</fieldset>					
-				</div><!-- /component-group2 -->		
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SABnzbd Password</span>
+                                    <input type="password" name="sab_password" value="$sickbeard.SAB_PASSWORD" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Password of your SABnzbd+ server (blank for none)</span>
+                                </label>
+                            </div>
 
-				<div id="core-component-group3" class="component-group clearfix">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SABnzbd API Key</span>
+                                    <input type="text" name="sab_apikey" value="$sickbeard.SAB_APIKEY" size="45" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">SABnzbd+ Config -> General -> API Key.</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SABnzbd Category</span>
+                                    <input type="text" name="sab_category" value="$sickbeard.SAB_CATEGORY" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Category for downloads to go into (eg. TV)</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="clearfix"></div>
+                        <input type="submit" value="Save Changes"><br/>
+                        
+                    </fieldset>
+                </div><!-- /component-group2 -->
 
-					<div class="component-group-desc">
-						<h3>Post-Processing</h3>
-						<p>Settings that dictate how Sick Beard should process completed downloads.</p>
-					</div>
+                <div id="core-component-group3" class="component-group clearfix">
 
-					<fieldset class="component-group-list">	
-						<div class="field-pair">
-							<label class="nocheck clearfix" for="tv_download_dir">
-								<span class="component-title">TV Download Dir</span>
-								<input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="45" />
-							</label>						
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">The folder where your download client puts your TV downloads.</span>		
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc"><b>NOTE:</b> Use only if not using SABnzbd+ post processing.</span>	
-							</label>
-							<label class="nocheck clearfix">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc">Or if SABnzbd+ and Sick Beard are on different PCs.</span>	
-							</label>							
-						</div>	
+                    <div class="component-group-desc">
+                        <h3>Post-Processing</h3>
+                        <p>Settings that dictate how Sick Beard should process completed downloads.</p>
+                    </div>
 
-						
-						<div class="field-pair">
-							<input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""# />
-							<label class="clearfix" for="keep_processed_dir">
-								<span class="component-title">Keep Original Files</span>
-								<span class="component-desc">Keep original files after they've been processed?</span>	
-							</label>						
-						</div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="tv_download_dir">
+                                <span class="component-title">TV Download Dir</span>
+                                <input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="45" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">The folder where your download client puts your TV downloads.</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> Use only if not using SABnzbd+ post processing.</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Or if SABnzbd+ and Sick Beard are on different PCs.</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<input type="checkbox" name="move_associated_files" id="move_associated_files" #if $sickbeard.MOVE_ASSOCIATED_FILES == True then "CHECKED" else ""# />
-							<label class="clearfix" for="move_associated_files">
-								<span class="component-title">Move Associated Files</span>
-								<span class="component-desc">Move srr/srt/sfv/etc files with the episode when processed?</span>	
-							</label>
-							<label class="nocheck clearfix" for="move_associated_files">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc"><b>NOTE:</b> <i>.nfo</i> will be renamed to <i>.nfo-orig</i> when moved.</span>	
-							</label>				
-						</div>
+                        
+                        <div class="field-pair">
+                            <input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""# />
+                            <label class="clearfix" for="keep_processed_dir">
+                                <span class="component-title">Keep Original Files</span>
+                                <span class="component-desc">Keep original files after they've been processed?</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "CHECKED" else ""# />
-							<label class="clearfix" for="rename_episodes">
-								<span class="component-title">Rename Episodes</span>
-								<span class="component-desc">Rename episode using the naming settings in <a href="$sbRoot/config/general">General</a>?</span>	
-							</label>						
-						</div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="move_associated_files" id="move_associated_files" #if $sickbeard.MOVE_ASSOCIATED_FILES == True then "CHECKED" else ""# />
+                            <label class="clearfix" for="move_associated_files">
+                                <span class="component-title">Move Associated Files</span>
+                                <span class="component-desc">Move srr/srt/sfv/etc files with the episode when processed?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="move_associated_files">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> <i>.nfo</i> will be renamed to <i>.nfo-orig</i> when moved.</span>
+                            </label>
+                        </div>
 
-						<div class="field-pair">
-							<input type="checkbox" name="process_automatically" id="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "CHECKED" else ""# />
-							<label class="clearfix" for="process_automatically">
-								<span class="component-title">Scan and Process</span>
-								<span class="component-desc">Scan and post-process any files in your <i>TV Download Dir</i>?</span>	
-							</label>
-							<label class="nocheck clearfix" for="process_automatically">
-								<span class="component-title">&nbsp;</span>
-								<span class="component-desc"><b>NOTE:</b> Do not use if you use sabToSickbeard w/ SABnzbd+!</span>	
-							</label>								
-						</div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "CHECKED" else ""# />
+                            <label class="clearfix" for="rename_episodes">
+                                <span class="component-title">Rename Episodes</span>
+                                <span class="component-desc">Rename episode using the naming settings in <a href="$sbRoot/config/general">General</a>?</span>
+                            </label>
+                        </div>
 
-						<div class="clearfix"></div>
-						<input type="submit" value="Save Changes"><br/>						
-						
-					</fieldset>					
-				</div><!-- /component-group3 -->	
-				
-			<br/><input type="submit" value="Save Changes"><br/>
-				
-			</div><!-- /config-components -->
+                        <div class="field-pair">
+                            <input type="checkbox" name="process_automatically" id="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "CHECKED" else ""# />
+                            <label class="clearfix" for="process_automatically">
+                                <span class="component-title">Scan and Process</span>
+                                <span class="component-desc">Scan and post-process any files in your <i>TV Download Dir</i>?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="process_automatically">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> Do not use if you use sabToSickbeard w/ SABnzbd+!</span>
+                            </label>
+                        </div>
+
+                        <div class="clearfix"></div>
+                        <input type="submit" value="Save Changes"><br/>
+
+                    </fieldset>
+                </div><!-- /component-group3 -->
+
+            <br/><input type="submit" value="Save Changes"><br/>
+
+            </div><!-- /config-components -->
 
 </form>
-</div></div>				
+</div></div>
 <div class="clearfix"></div>
 
 <script type="text/javascript" charset="utf-8">
