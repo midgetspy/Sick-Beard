@@ -23,7 +23,6 @@ import sys
 if sys.hexversion >= 0x020600F0:
 	from multiprocessing import Process, freeze_support
 
-
 import os
 import os.path
 import threading
@@ -75,7 +74,8 @@ def daemonize():
 
 	os.chdir(sickbeard.PROG_DIR)
 	os.setsid()
-        # Make sure I can read my own files and shut out others
+
+    # Make sure I can read my own files and shut out others
 	prev = os.umask(0)
 	os.umask(prev and int('077',8))
 
@@ -135,8 +135,11 @@ def main():
 
 		# Run as a daemon
 		if (o in ('-d', '--daemon')):
-			consoleLogging = False
-			sickbeard.DAEMON = True
+			if sys.platform == 'win32':
+				print "Daemonize not supported under Windows, starting normally"
+			else:
+				consoleLogging = False
+				sickbeard.DAEMON = True
 
 	if consoleLogging:
 		print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
@@ -152,7 +155,6 @@ def main():
 
 	sickbeard.showList = []
 
-	# TK THIS WILL NOT WORK UNDER WIN32. NEED TO HANDLE THIS PROPERLY
 	if sickbeard.DAEMON:
 		daemonize()
 	
