@@ -143,6 +143,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
     showNames = set(makeSceneShowSearchStrings(show))
 
     toReturn = []
+    term_list = []
 
     # search each show name
     for curShow in showNames:
@@ -159,7 +160,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         # nzbmatrix is special, we build a search string just for them
         elif extraSearchType == "nzbmatrix":
             if numseasons == 1:
-                toReturn.append('+"'+curShow+'"')
+                toReturn.append('"'+curShow+'"')
             elif numseasons == 0:
                 toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
             else:

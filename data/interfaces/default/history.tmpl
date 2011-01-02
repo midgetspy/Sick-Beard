@@ -30,7 +30,7 @@
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
   <tr class="evenLine">
     <td>$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
-    <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]">$hItem["show_name"] - 
+    <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] -
       #if $hItem["absolute_numbering"]
         <%=str(hItem["absolute_episode"]) %></a></td>
       #else

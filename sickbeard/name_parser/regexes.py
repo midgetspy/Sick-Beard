@@ -82,9 +82,9 @@ ep_regexes = [
                ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
                (?P<air_year>\d{4})[\. _-]+                 # 2010 and separator
                (?P<air_month>\d{2})[\. _-]+                # 11 and separator
-               (?P<air_day>\d{2})[\. _-]+                  # 23 and separator
-               (?P<extra_info>.+?)                         # Source.Quality.Etc
-               (-(?P<release_group>.+))?$                  # Group
+               (?P<air_day>\d{2})                          # 23 and separator
+               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               (-(?P<release_group>.+))?)?$                # Group
                '''),
                
               ('anime_3digit_episode',
@@ -161,10 +161,10 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
                (e(p(isode)?)?|part|pt)[\. _-]?             # e, ep, episode, or part
-               (?P<ep_num>[\divx]+)                        # first ep num
+               (?P<ep_num>(\d+|[ivx]+))                        # first ep num
                ([\. _-]+((and|&|to)[\. _-]+)?              # and/&/to joiner
                ((e(p(isode)?)?|part|pt)[\. _-]?)?          # e, ep, episode, or part
-               (?P<extra_ep_num>[\divx]+))*                # second ep num
+               (?P<extra_ep_num>(\d+|[ivx]+)))*                # second ep num
                ([\. _-]+(?P<extra_info>.+?))?              # Ep Name/etc
                (-(?P<release_group>.+))?$                  # Group               '''
                ),

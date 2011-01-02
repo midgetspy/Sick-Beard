@@ -59,6 +59,7 @@ simple_test_cases = {
               },
 
               'no_season_general': {
+              'Deconstructed.E07.1080i.HDTV.DD5.1.MPEG2-TrollHD': parser.ParseResult(None, 'Deconstructed', None, [7], '1080i.HDTV.DD5.1.MPEG2', 'TrollHD'),
               'Show.Name.E23.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [23], 'Source.Quality.Etc', 'Group'),
               'Show Name - Episode 01 - Ep Name': parser.ParseResult(None, 'Show Name', None, [1], 'Ep Name'),
               'Show.Name.Part.3.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [3], 'Source.Quality.Etc', 'Group'),
@@ -75,6 +76,7 @@ simple_test_cases = {
               
               'scene_date_format': {
               'Show.Name.2010.11.23.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [], 'Source.Quality.Etc', 'Group', datetime.date(2010,11,23)),
+              'Show Name - 2010.11.23': parser.ParseResult(None, 'Show Name', air_date = datetime.date(2010,11,23)),
               'Show.Name.2010.23.11.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [], 'Source.Quality.Etc', 'Group', datetime.date(2010,11,23)),
               'Show Name - 2010-11-23 - Ep Name': parser.ParseResult(None, 'Show Name', extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
                }
@@ -93,11 +95,36 @@ combination_test_cases = [
                            parser.ParseResult(None, 'MythBusters', 8, [16], '720p.HDTV.x264', 'aAF'),
                            ['standard']),
                            
-                           ('/home/drop/storage/TV/Terminator The Sarah Connor Chronicles/Season 2/S02E06 The Tower is Tall, But the Fall is Short.mkv',
-                            parser.ParseResult(None, None, 2, [6], 'The Tower is Tall, But the Fall is Short'),
-                            ['standard']),
-                          
+                          ('/home/drop/storage/TV/Terminator The Sarah Connor Chronicles/Season 2/S02E06 The Tower is Tall, But the Fall is Short.mkv',
+                           parser.ParseResult(None, None, 2, [6], 'The Tower is Tall, But the Fall is Short'),
+                           ['standard']),
+                           
+                          (r'Q:\Test\TV\Jimmy Fallon\Season 2\Jimmy Fallon - 2010-12-15 - blah.avi',
+                           parser.ParseResult(None, 'Jimmy Fallon', extra_info = 'blah', air_date = datetime.date(2010,12,15)),
+                           ['scene_date_format']),
+                           
                           ]
+
+unicode_test_cases = [
+                      (u'The.Big.Bang.Theory.2x07.The.Panty.Pi\xf1ata.Polarization.720p.HDTV.x264.AC3-SHELDON.mkv',
+                       parser.ParseResult(None, 'The.Big.Bang.Theory', 2, [7], '720p.HDTV.x264.AC3', 'SHELDON')
+                       ),
+                      ('The.Big.Bang.Theory.2x07.The.Panty.Pi\xc3\xb1ata.Polarization.720p.HDTV.x264.AC3-SHELDON.mkv',
+                       parser.ParseResult(None, 'The.Big.Bang.Theory', 2, [7], '720p.HDTV.x264.AC3', 'SHELDON')
+                       ),
+                      ]
+
+class UnicodeTests(unittest.TestCase):
+    
+    def _test_unicode(self, name, result):
+        np = parser.NameParser(True)
+        parse_result = np.parse(name)
+        # this shouldn't raise an exception
+        a = repr(str(parse_result))
+    
+    def test_unicode(self):
+        for (name, result) in unicode_test_cases:
+            self._test_unicode(name, result)
 
 class ComboTests(unittest.TestCase):
     
@@ -235,4 +262,7 @@ if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -111,10 +111,8 @@ class TVShow(object):
         for curSeason in self.episodes:
             for curEp in self.episodes[curSeason]:
                 myEp = self.episodes[curSeason][curEp]
-                if myEp not in sickbeard.comingList and \
-                myEp not in sickbeard.airingList:
-                    self.episodes[curSeason][curEp] = None
-                    del myEp
+                self.episodes[curSeason][curEp] = None
+                del myEp
 
 
     def getEpisode(self, season, episode, file=None, noCreate=False):
@@ -379,7 +377,8 @@ class TVShow(object):
             logger.log(u"Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 
-        if len(parse_result.episode_numbers) == 0:
+        if len(parse_result.episode_numbers) == 0 and not parse_result.air_by_date:
+            logger.log("parse_result: "+str(parse_result))
             logger.log(u"No episode number found in "+file+", ignoring it", logger.ERROR)
             return None
 
@@ -436,7 +435,7 @@ class TVShow(object):
 
             else:
                 # if there is a new file associated with this ep then re-check the quality
-                if ek.ek(os.path.normpath, curEp.location) != ek.ek(os.path.normpath, file) and curEp.location != '':
+                if curEp.location and ek.ek(os.path.normpath, curEp.location) != ek.ek(os.path.normpath, file):
                     logger.log(u"The old episode had a different file associated with it, I will re-check the quality based on the new filename "+file, logger.DEBUG)
                     checkQualityAgain = True
 
@@ -1307,14 +1306,6 @@ class TVEpisode:
         if self.show.getEpisode(self.season, self.episode, noCreate=True) == self:
             logger.log(u"Removing myself from my show's list", logger.DEBUG)
             del self.show.episodes[self.season][self.episode]
-
-        # make sure it's not in any ep lists
-        if self in sickbeard.airingList:
-            logger.log(u"Removing myself from the airing list", logger.DEBUG)
-            sickbeard.airingList.remove(self)
-        if self in sickbeard.comingList:
-            logger.log(u"Removing myself from the coming list", logger.DEBUG)
-            sickbeard.comingList.remove(self)
 
         # delete myself from the DB
         logger.log(u"Deleting myself from the database", logger.DEBUG)
