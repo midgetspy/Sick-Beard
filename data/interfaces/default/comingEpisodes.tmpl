@@ -64,7 +64,7 @@
           </h1>
           <p class="next">
             <span class="title">Next Episode:</span> <span class="info ">
-              #if $curEp.show.absolute_numbering
+              #if $cur_result["absolute_numbering"]
                 <%=str(cur_result["absolute_episode"]) %> - $cur_result["name"] airs $datetime.date.fromordinal(int($cur_result["airdate"]))</span>
               #else
                 <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] airs $datetime.date.fromordinal(int($cur_result["airdate"]))</span>
