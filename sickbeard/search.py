@@ -96,7 +96,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
 			curEpObj.saveToDB()
 
 		if curEpObj.status not in Quality.DOWNLOADED:
-			notifiers.notify(NOTIFY_SNATCH, curEpObj.prettyName(True))
+			notifiers.notify_snatch(curEpObj.prettyName(True))
 
 	return True
 
