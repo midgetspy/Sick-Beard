@@ -235,7 +235,7 @@ class GitUpdateManager(UpdateManager):
         Returns: True for success or False for failure
         """
 
-        output, err = self._run_git('rev-parse HEAD')
+        output, err = self._run_git('rev-parse origin/HEAD')
 
         if not output:
             return self._git_error()
