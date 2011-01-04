@@ -464,7 +464,7 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
+                    use_banner=None, xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
 
         results = []
 
@@ -518,6 +518,11 @@ class ConfigGeneral:
         else:
             naming_dates = 0
 
+        if use_banner == "on":
+            use_banner = 1
+        else:
+            use_banner = 0
+            
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
 
@@ -531,10 +536,11 @@ class ConfigGeneral:
 
         sickbeard.LAUNCH_BROWSER = launch_browser
 
+        sickbeard.USE_BANNER = use_banner        
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
-
+        
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = newQuality

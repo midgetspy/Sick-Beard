@@ -90,6 +90,7 @@ WEB_IPV6 = None
 LAUNCH_BROWSER = None
 CACHE_DIR = None
 
+USE_BANNER = None
 METADATA_XBMC = None
 METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
@@ -302,7 +303,7 @@ def initialize(consoleLogging=True):
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
+                USE_BANNER, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES
 
 
@@ -460,6 +461,7 @@ def initialize(consoleLogging=True):
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
+        USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
         METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
 
         metadata_provider_dict = metadata.get_metadata_generator_dict()
@@ -765,7 +767,8 @@ def save_config():
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
-    
+
+    new_config['General']['use_banner'] = int(USE_BANNER)    
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
     new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()

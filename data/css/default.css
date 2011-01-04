@@ -1,28 +1,30 @@
 body {
-	font-family: 'Verdana', 'Helvetica', 'Sans-serif', 'sans';
-	font-size: 12px;
-	line-height: 18px;
-	padding: 0px;
-	margin: 0px;
+    font-family: 'Verdana', 'Helvetica', 'Sans-serif', 'sans';
+    font-size: 12px;
+    line-height: 18px;
+    padding: 0px;
+    margin: 0px;
 }
 
 form {
-  margin: 0px;
-  padding: 0px;
-  border: none;
-  display: inline;
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    display: inline;
 }
 
 legend {
-  font-weight: bold;
+    font-weight: bold;
 }
 div.EntryBlock {
-  display: inline;
+    display: inline;
 }
 div.EntryBlock form {
-  display: inline;
+    display: inline;
 }
-
+img {
+    border: 0;
+}
 fieldset.EntryFieldSet {
   vertical-align: top;
   display: inline;
@@ -30,95 +32,95 @@ fieldset.EntryFieldSet {
   margin: 5px;
 }
 .MainMenu {
-padding-left: 6px;
+    padding-left: 6px;
 }
 .MainMenu a {
-	font-weight: bold;
-	padding: 3px;
+    font-weight: bold;
+    padding: 3px;
     padding-bottom: 7px;
-	text-decoration: none;
-	padding-left: 12px;
+    text-decoration: none;
+    padding-left: 12px;
     padding-right: 12px;
 }
 .SubMenu {
-padding-left: 6px;
-padding-right: 6px;
+    padding-left: 6px;
+    padding-right: 6px;
 }
 .SubMenu a {
-	font-weight: bold;
-	padding: 3px;
+    font-weight: bold;
+    padding: 3px;
     padding-bottom: 7px;
-	text-decoration: none;
-	padding-left: 12px;
+    text-decoration: none;
+    padding-left: 12px;
     padding-right: 12px;
     
 }
 
 a.current {
-	border: none;
-	padding: 3px;
-	padding-bottom: 7px;
-	padding-left: 12px;
+    border: none;
+    padding: 3px;
+    padding-bottom: 7px;
+    padding-left: 12px;
     padding-right: 12px;
 }
 
 a.current {
-	color:white;
+    color:white;
 }
 
 a.current:hover {
-	border: none;
+    border: none;
 }
 
 
 .block {
-	padding: 10px;
+    padding: 10px;
 }
 
 .blockWithBorder {
-	display: block;
-	border-width: thin;
-	border-style: solid;
-	padding: 5px;
+    display: block;
+    border-width: thin;
+    border-style: solid;
+    padding: 5px;
 }
 
 .MainMenu {
-	display: block;
-	padding: 5px;
+    display: block;
+    padding: 5px;
 
 }
 .SubMenu {
-	display: block;
-	padding: 5px;
+    display: block;
+    padding: 5px;
 }
 
 table {
-	font-size: 9pt;
-	margin: 0px;
+    font-size: 9pt;
+    margin: 0px;
 }
 td, td {
   padding: 5px;
 }
 th {
-	font-weight: bold;
+    font-weight: bold;
 }
 
 tr.active {
-	font-weight: bold;
+    font-weight: bold;
 }
 
 tr.finished {
-	font-weight: normal;
+    font-weight: normal;
 }
 
 tr.waiting {
-	font-style: italic;
+    font-style: italic;
 }
 
 td.pre {
-	font-size: 13px;
-	font-family: 'courier new',courier,serif;
-	font-weight: bold;
+    font-size: 13px;
+    font-family: 'courier new',courier,serif;
+    font-weight: bold;
 }
 
 h1 {
@@ -142,29 +144,29 @@ padding-top: 3px;
 }
 
 #tagline {
-	display: block;
-	position: relative;
-	padding-right: 10px;
-	top: 1px;
-	float: right;
-	text-align: right;
-	font-size: 10px;
-	font-weight: normal;
+    display: block;
+    position: relative;
+    padding-right: 10px;
+    top: 1px;
+    float: right;
+    text-align: right;
+    font-size: 10px;
+    font-weight: normal;
 }
 
 #logo {
-	font-size: 33px;
-	font-family: Arial, Helvetica, sans-serif;
-	font-weight: bold ;
-	text-transform: uppercase;
-	padding-left: 20px;
+    font-size: 33px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold ;
+    text-transform: uppercase;
+    padding-left: 20px;
 }
 
 #versiontext {
-	font-size: 20px;
-	font-family: Arial, Helvetica, sans-serif;
-	text-transform: lowercase;
-	color: #57442B;
+    font-size: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    text-transform: lowercase;
+    color: #57442B;
 }
 
 .footer {
@@ -173,9 +175,10 @@ padding-top: 3px;
   margin-top: 20px;
 }
 .sickbeardTable {
-width:80%;
-margin-left: 10%;
-margin-right: 10%;
+    width:80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    border: 1px solid #e9e9e9;
 }
 
 .normalheight, .doubleheight, .tripleheight, .pattern, .result, .heading1, .heading2, .heading3 {float:left; border-left:1px }
@@ -205,32 +208,32 @@ By Patrick Griffiths and Dan Webb.
 http://htmldog.com/articles/suckerfish/dropdowns/
 */
 #nav, #nav ul {
-	padding: 0;
-	margin: 0;
-	list-style: none;
+    padding: 0;
+    margin: 0;
+    list-style: none;
 }
 
 #nav a {
-	display: block;
-	width: 4em;
+    display: block;
+    width: 4em;
     padding-bottom:0;
 }
 
 
 #nav li ul {
-	position: absolute;
-	width: 6em;
-	left: -999em;
+    position: absolute;
+    width: 6em;
+    left: -999em;
     background-color:white;
     
 }
 
 #nav li:hover ul {
-	left: auto;
+    left: auto;
 }
 
 #nav li:hover ul, #nav li.sfhover ul {
-	left: auto;
+    left: auto;
 }
 
 #nav{
@@ -257,25 +260,25 @@ Son of Suckerfish Dropdowns END
 /* ========= */
 
 .message {
-	padding: 4px 0 4px 1em;
-	margin-bottom: 20px;
-	text-align: left;
-	font-size: larger;
+    padding: 4px 0 4px 1em;
+    margin-bottom: 20px;
+    text-align: left;
+    font-size: larger;
 }
 .message p {
-	margin: 0;
+    margin: 0;
 }
 .message p span {
-	float: left;
-	margin-right: .5em;
+    float: left;
+    margin-right: .5em;
 }
 .message ul {
-	margin: 0;
+    margin: 0;
 }
 
 .message a:hover {
-	color: blue;
-	background: none;
+    color: blue;
+    background: none;
 }
 
 /* =========== */
@@ -283,24 +286,24 @@ Son of Suckerfish Dropdowns END
 /* =========== */
 
 #tooltip {
-	display: none;
-	z-index: 3000;
-	border: 1px solid #111;
-	background-color: #eee;
-	padding: 5px;
-	opacity: 0.85;
+    display: none;
+    z-index: 3000;
+    border: 1px solid #111;
+    background-color: #eee;
+    padding: 5px;
+    opacity: 0.85;
 }
 
 /* ==================== */
 /* = ProgressBar Text = */
 /* ==================== */
 .progressbarText {
-	position: absolute;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	overflow: visible;
-	text-align: center;
-	line-height: 16px;
-	_line-height:14px; /* IE hack to fix spacing*/
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    text-align: center;
+    line-height: 16px;
+    _line-height:14px; /* IE hack to fix spacing*/
 }

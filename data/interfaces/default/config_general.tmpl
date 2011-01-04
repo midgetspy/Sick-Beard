@@ -156,8 +156,16 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 #end for
 
                         <div class="clearfix"></div>
+                        
+                        <div class="field-pair clearfix">
+                            <input type="checkbox" name="use_banner" id="use_banner" #if $sickbeard.USE_BANNER then "CHECKED" else ""#>
+                            <label class="clearfix" for="use_banner">
+                                <span class="component-title">Banner Layout</span>
+                                <span class="component-desc">Use banner instead of poster layout for Coming Episodes.</span>
+                            </label>
+                        </div>
 
-                        <br/><input type="submit" value="Save Changes"><br/>
+                        <input type="submit" value="Save Changes"><br/>
 
                     </fieldset>
                 </div><!-- /component-group2 -->
