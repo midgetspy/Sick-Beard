@@ -379,7 +379,7 @@ def moveFile(srcFile, destFile):
 def rename_file(old_path, new_name):
 
     old_path_list = ek.ek(os.path.split, old_path)
-    old_file_ext = ek.ek(os.path.splitext, old_path_list[1])[1]
+    old_file_ext = os.path.splitext(old_path_list[1])[1]
 
     new_path = ek.ek(os.path.join, old_path_list[0], sanitizeFileName(new_name) + old_file_ext)
 
