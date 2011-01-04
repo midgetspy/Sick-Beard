@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "new_config_v2"
+SICKBEARD_VERSION = "master"
