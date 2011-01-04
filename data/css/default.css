@@ -2,7 +2,7 @@ body {
 	font-family: 'Verdana', 'Helvetica', 'Sans-serif', 'sans';
 	font-size: 12px;
 	line-height: 18px;
-	padding: 15px;
+	padding: 0px;
 	margin: 0px;
 }
 
@@ -29,6 +29,9 @@ fieldset.EntryFieldSet {
   padding: 7px;
   margin: 5px;
 }
+.MainMenu {
+padding-left: 6px;
+}
 .MainMenu a {
 	font-weight: bold;
 	padding: 3px;
@@ -37,7 +40,10 @@ fieldset.EntryFieldSet {
 	padding-left: 12px;
     padding-right: 12px;
 }
-
+.SubMenu {
+padding-left: 6px;
+padding-right: 6px;
+}
 .SubMenu a {
 	font-weight: bold;
 	padding: 3px;
@@ -128,7 +134,9 @@ h2 {
   font-size: 18px;
   font-weight: bold;
 }
-
+#header {
+padding-top: 3px;
+}
 #header a:hover {
     background: none;
 }
@@ -136,7 +144,8 @@ h2 {
 #tagline {
 	display: block;
 	position: relative;
-	top: -18px;
+	padding-right: 10px;
+	top: 1px;
 	float: right;
 	text-align: right;
 	font-size: 10px;
@@ -280,4 +289,18 @@ Son of Suckerfish Dropdowns END
 	background-color: #eee;
 	padding: 5px;
 	opacity: 0.85;
+}
+
+/* ==================== */
+/* = ProgressBar Text = */
+/* ==================== */
+.progressbarText {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	text-align: center;
+	line-height: 16px;
+	_line-height:14px; /* IE hack to fix spacing*/
 }

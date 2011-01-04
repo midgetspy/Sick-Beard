@@ -1,0 +1,92 @@
+#config  { padding: 0px 30px 20px 30px; text-align: center; }
+#config * { margin:0; padding:0; font-family: "Trebuchet MS", Verdana, sans-serif; }
+#config ul { list-style-type:none; }
+#config h3 { font-size:1.5em; color:#000; }
+#config h4 { font-size:1em; color:#333; text-transform: uppercase; margin:0 0 .2em; }
+#config h5 { font-size:1em; color:#000; margin:0 0 .2em; }
+#config p, #config li { font-size:1.2em; line-height:1.3; }
+
+#config .path { font-size:1em; color:#333; font-family: Verdana;}
+#config .jumbo {font-size: 16px !important;}
+
+#config-content { display: block; width: 835px; text-align: left; padding:0 0 40px; clear: both; background: #fff; margin: 0px auto;}
+
+#config-components { float: left; width: auto; }
+#config-components-border { float: left; width: auto; border-top: 1px solid #999999; padding: 5px 0;}
+
+#config .component-group { border-bottom: 1px dotted #666; padding: 15px 15px 25px; position: relative; }
+#config .component-group-desc { float: left; width: 235px; }
+#config .component-group-desc h3 { font-size: 1.5em;  }
+#config .component-group-desc p { margin: .8em 0; width: 85%; font-size: 1.2em; color: #666;}
+#config .component-group-desc p.note { margin: .8em 0; width: 90%; font-size: 1.2em; color: #333;}
+#config .component-group-list { float: left; width: 565px; }
+
+#config fieldset {border:0; outline: 0;  }
+
+#config div.field-pair { margin: .9em 0 1.4em;  }
+#config div.field-pair input { float: left; margin-right: 6px; }
+
+#config label.nocheck { padding-left: 20px; }
+#config label span.component-title { font-size: 1.2em; font-weight: bold; float: left; width: 160px; margin-right: 10px;}
+#config label span.component-desc { font-size: 1.1em;  }
+
+#config div.field-pair select { font-size: 1.1em; border: 1px solid #d4d0c8;}
+#config div.field-pair select option { padding: 0 10px; line-height: 1.4; }
+
+
+#config-settings { float: right; width: 200px; background: #fffae5; border-bottom: 1px dotted #666; border-top: 1px solid #999;padding: 20px 0 30px; margin-right: 20px; }
+#config-settings .config-settings-group { margin: 0 15px 15px; border-bottom: 1px dotted #999; padding-bottom: 15px; }
+#config-settings .config-settings-group h2 { margin-bottom: 0; }
+#config-settings .config-settings-group p {font-size: 1.1em; color: #666; margin: .6em 0 1em; }
+#config-settings .config-settings-group div.field-pair { margin: 1.2em 0 .6em; }
+#config-settings .config-settings-group input {float: left;}
+
+.clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+.clearfix { display: inline-block; }
+/* Hides from IE-mac \*/
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+/* End hide from IE-mac */
+
+#provider_order_list { list-style-type: none; margin: 0; padding: 0; width: 250px; }
+#provider_order_list li { margin: 0 5px 5px 5px; padding: 5px; font-size: 1.3em; height: 1.5em; font-family: Verdana; }
+html>body #provider_order_list li { height: 1.5em; line-height: 1.3em; }
+#config div.providerDiv, #config div #customQuality { padding-left: 20px; }
+.providerDiv { display: none; padding-left: 20px; }
+
+#config div.metadataDiv {display: none; }	
+#config div.metadata_options { float: left; font-size: 14px; font-family: Verdana; width: 185px; color: #003366; padding: 7px; background: #F5F1E4; overflow: auto; border-left: 1px solid #404040; border-top: 1px solid #404040; border-bottom: 1px solid #d4d0c8; border-right:1px solid #d4d0c8; }
+#config div.metadata_options label:hover { background-color:#99ff99; }
+#config div.metadata_options label { display: block; color: #003366; line-height: 1.5em; padding-left: 7px;}
+#config div.metadata_example{ float: right; font-size: 14px; font-family: Verdana; width: 265px; color: #003366; padding: 7px; overflow: auto; margin-right: 30px; }
+#config div.metadata_example label { display: block; color: #000000; line-height: 1.5em;}
+
+#config div.metadataDiv .disabled {color: #ccc;}
+#config div #metadataLegend { font-size: 14px; font-family: Verdana; font-weight: 900; display: block; width: auto; text-align: center; padding-bottom: 3px;}
+
+/* header notification related css */
+#upgrade-notification {
+	margin: 0;
+	padding: 0;
+	line-height: 1;
+	color: #57442b;
+	font-size: 130%;
+	font-weight: bold;
+	height: 0;
+	left: 0;
+	text-align: center;
+	top: 0;
+	width: 100%;
+	z-index: 100;
+}
+#upgrade-notification div {
+	background-color: #c6b695;
+	border-bottom: 1px solid #af986b;
+	padding: 7px 0;
+}			
+
+#header-fix {
+	*margin-bottom: -31px; /* IE fix */
+	height: 21px;
+	padding: 0;
+}

@@ -48,13 +48,33 @@ class MediaBrowserMetadata(generic.GenericMetadata):
     show_root/metadata/show - 1x01 - episode.jpg   (episode thumb)
     """
     
-    def __init__(self):
-        generic.GenericMetadata.__init__(self)
+    def __init__(self,
+                 show_metadata=False,
+                 episode_metadata=False,
+                 poster=False,
+                 fanart=False,
+                 episode_thumbnails=False,
+                 season_thumbnails=False):
+
+        generic.GenericMetadata.__init__(self,
+                                         show_metadata,
+                                         episode_metadata,
+                                         poster,
+                                         fanart,
+                                         episode_thumbnails,
+                                         season_thumbnails)
         
         self._show_file_name = 'series.xml'
         self._ep_nfo_extension = 'xml'
 
         self.name = 'MediaBrowser'
+
+        self.eg_show_metadata = "series.xml"
+        self.eg_episode_metadata = "metadata\\<i>filename</i>.xml"
+        self.eg_fanart = "fanart.jpg"
+        self.eg_poster = "folder.jpg"
+        self.eg_episode_thumbnails = "metadata\\<i>filename</i>.jpg"
+        self.eg_season_thumbnails = "Season##\\folder.jpg"
     
     def get_episode_file_path(self, ep_obj):
         """
@@ -66,7 +86,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         if ek.ek(os.path.isfile, ep_obj.location):
             xml_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), self._ep_nfo_extension)
-            metadata_dir_name = ek.ek(os.path.join, ep_obj.show.location, 'metadata')
+            metadata_dir_name = ek.ek(os.path.join, ek.ek(os.path.dirname, ep_obj.location), 'metadata')
             xml_file_path = ek.ek(os.path.join, metadata_dir_name, xml_file_name)
         else:
             logger.log(u"Episode location doesn't exist: "+str(ep_obj.location), logger.DEBUG)
@@ -84,7 +104,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         if ek.ek(os.path.isfile, ep_obj.location):
             tbn_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), 'jpg')
-            metadata_dir_name = ek.ek(os.path.join, ep_obj.show.location, 'metadata')
+            metadata_dir_name = ek.ek(os.path.join, ek.ek(os.path.dirname, ep_obj.location), 'metadata')
             tbn_file_path = ek.ek(os.path.join, metadata_dir_name, tbn_file_name)
         else:
             return None

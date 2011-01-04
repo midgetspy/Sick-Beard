@@ -137,11 +137,14 @@ def change_BACKLOG_SEARCH_FREQUENCY(freq):
     sickbeard.backlogSearchScheduler.action.cycleTime = sickbeard.BACKLOG_SEARCH_FREQUENCY
 
 def change_VERSION_NOTIFY(version_notify):
-
+   
     oldSetting = sickbeard.VERSION_NOTIFY
 
     sickbeard.VERSION_NOTIFY = version_notify
 
+    if version_notify == False:
+        sickbeard.NEWEST_VERSION_STRING = None;
+        
     if oldSetting == False and version_notify == True:
         sickbeard.versionCheckScheduler.action.run()
 

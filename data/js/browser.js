@@ -57,13 +57,13 @@
 			}
 			fileBrowserDialog.dialog('option', 'buttons',
 			{
+				"Cancel": function(){
+					fileBrowserDialog.dialog("close");
+				},			
 				"Ok": function(){
 					options.field.val(currentBrowserPath);
 					if(options.key)
 						$.cookie('fileBrowser-' + options.key, currentBrowserPath);
-					fileBrowserDialog.dialog("close");
-				},
-				"Cancel": function(){
 					fileBrowserDialog.dialog("close");
 				}
 			});
