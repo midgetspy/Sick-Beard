@@ -226,7 +226,7 @@ class NewznabCache(tvcache.TVCache):
 		data = self.provider.getURL(url)
 
 		# hack this in until it's fixed server side
-		if not data.startswith('<?xml'):
+		if data and not data.startswith('<?xml'):
 			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
 		return data
