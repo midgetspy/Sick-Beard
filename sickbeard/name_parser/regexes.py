@@ -99,9 +99,9 @@ ep_regexes = [
                # Show.Name.102.Source.Quality.Etc-Group
                '''
                ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
-               (?P<season_num>\d{1})                       # 1
+               (?P<season_num>\d{1,2})                     # 1
                (?P<ep_num>\d{2})                           # 02 and separator
-               ([\. _-]+(?P<extra_info>[^-]+)              # Source_Quality_Etc-
+               ([\. _-]+(?P<extra_info>(?!\d{3}[\. _-]+)[^-]+) # Source_Quality_Etc-
                (-(?P<release_group>.+))?)?$                # Group
                '''),
               
