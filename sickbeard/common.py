@@ -280,6 +280,7 @@ sceneExceptions = {72546: ['CSI'],
                    70726: ['Babylon 5', 'Babylon5'],
                    83714: ['Genius', 'Genius With Dave Gormand'],
                    212571: ['Come Fly With Me (2010)'],
+                   81563: ['Border Security', 'Border Security Australia\'s Frontline'],
                    }
 
 countryList = {'Australia': 'AU',
