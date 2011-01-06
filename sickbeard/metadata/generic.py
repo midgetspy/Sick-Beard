@@ -165,7 +165,7 @@ class GenericMetadata():
         if season == 0:
             season_thumb_file_path = 'season-specials'
         else:
-            season_thumb_file_path = 'season' + str(season).zfill(2)
+            season_thumb_file_path = sickbeard.SEASON_FOLDERS_FORMAT % (season)
         
         return ek.ek(os.path.join, show_obj.location, season_thumb_file_path+'.tbn')
     
