@@ -45,6 +45,7 @@ simple_test_cases = {
 
               'bare': {
               'Show.Name.102.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2], 'Source.Quality.Etc', 'Group'),
+              'show.name.2010.123.source.quality.etc-group': parser.ParseResult(None, 'show name 2010', 1, [23], 'source.quality.etc', 'group'),
               'Show.Name.102': parser.ParseResult(None, 'Show Name', 1, [2]),
               },
               
