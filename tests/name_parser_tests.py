@@ -104,6 +104,10 @@ combination_test_cases = [
                           (r'Q:\Test\TV\Jimmy Fallon\Season 2\Jimmy Fallon - 2010-12-15 - blah.avi',
                            parser.ParseResult(None, 'Jimmy Fallon', extra_info = 'blah', air_date = datetime.date(2010,12,15)),
                            ['scene_date_format']),
+
+                          (r'x:\30 Rock\Season 4\30 Rock - 4x22 -.avi',
+                           parser.ParseResult(None, '30 Rock', 4, [22]),
+                           ['fov']),
                            
                           ]
 

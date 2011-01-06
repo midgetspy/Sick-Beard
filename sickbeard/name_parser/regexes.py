@@ -57,7 +57,7 @@ ep_regexes = [
                s(?P<season_num>\d+)[\. _-]*                # S01 and optional separator
                e(?P<ep_num>\d+)                            # E02 and separator
                ([\. _-]*[e-](?P<extra_ep_num>\d+))*        # additional E03/etc
-               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               [\. _-]*((?P<extra_info>.+?)                # Source.Quality.Etc
                (-(?P<release_group>\w+))?)?$               # Group
                '''),
 
@@ -71,7 +71,7 @@ ep_regexes = [
                (?P<season_num>\d+)x                        # 1x
                (?P<ep_num>\d+)                             # 02 and separator
                ([\. _-]*[x-](?P<extra_ep_num>\d+))*        # additional x03/etc
-               ([\. _-]+(?P<extra_info>[^-]+?)             # Source_Quality_Etc-
+               [\. _-]*((?P<extra_info>[^-]+?)             # Source_Quality_Etc-
                (-(?P<release_group>.+))?)?$                # Group
                '''),
         
@@ -83,7 +83,7 @@ ep_regexes = [
                (?P<air_year>\d{4})[\. _-]+                 # 2010 and separator
                (?P<air_month>\d{2})[\. _-]+                # 11 and separator
                (?P<air_day>\d{2})                          # 23 and separator
-               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               [\. _-]*((?P<extra_info>.+?)                # Source.Quality.Etc
                (-(?P<release_group>.+))?)?$                # Group
                '''),
               

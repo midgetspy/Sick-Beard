@@ -137,10 +137,10 @@ class NameParser(object):
         
         # if a is good use it
         if a != None or (type(a) == list and len(a)):
-            return a 
+            return a
         # if not use b (if b isn't set it'll just be default)
         else:
-            return b 
+            return b
 
     def _unicodify(self, obj, encoding = "utf-8"):
         if isinstance(obj, basestring):
