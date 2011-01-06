@@ -53,8 +53,8 @@ class XBMCMetadata(generic.GenericMetadata):
         self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
         self.eg_fanart = "fanart.jpg"
         self.eg_poster = "folder.jpg"
-        self.eg_season_thumbnails = (sickbeard.SEASON_FOLDERS_FORMAT + ".tbn") % 0
-        self.eg_episode_thumbnails = (sickbeard.SEASON_FOLDERS_FORMAT + "\\<i>filename</i>.tbn") % 0
+        self.eg_episode_thumbnails = "season##.tbn"
+        self.eg_season_thumbnails = "Season##\\<i>filename</i>.tbn"
     
     def _show_data(self, show_obj):
         """
