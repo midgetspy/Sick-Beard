@@ -117,13 +117,15 @@ class GenericMetadata():
     def _has_episode_thumb(self, ep_obj):
         location = self.get_episode_thumb_path(ep_obj)
         result = location != None and ek.ek(os.path.isfile, location)
-        logger.log("Checking if "+str(location)+" exists: "+str(result), logger.DEBUG)
+        if location:
+            logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
         return result
     
     def _has_season_thumb(self, show_obj, season):
         location = self.get_season_thumb_path(show_obj, season)
         result = location != None and ek.ek(os.path.isfile, location)
-        logger.log("Checking if "+str(location)+" exists: "+str(result), logger.DEBUG)
+        if location:
+            logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
         return result
     
     def get_show_file_path(self, show_obj):
