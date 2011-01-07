@@ -456,6 +456,7 @@ class ConfigGeneral:
         t.submenu = ConfigMenu
         return _munge(t)
 
+    
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
@@ -464,7 +465,7 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    use_banner=None, xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
 
         results = []
 
@@ -518,11 +519,6 @@ class ConfigGeneral:
         else:
             naming_dates = 0
 
-        if use_banner == "on":
-            use_banner = 1
-        else:
-            use_banner = 0
-            
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
 
@@ -536,7 +532,6 @@ class ConfigGeneral:
 
         sickbeard.LAUNCH_BROWSER = launch_browser
 
-        sickbeard.USE_BANNER = use_banner        
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
@@ -1798,6 +1793,15 @@ class WebInterface:
             logger.log(u"No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
+    def toggleBanners(self):
+        
+        # toggle the setting
+        sickbeard.USE_BANNER = not sickbeard.USE_BANNER
+        
+        # forward to the coming eps page
+        redirect("/comingEpisodes")
+
+    @cherrypy.expose
     def comingEpisodes(self, sort="date"):
 
         myDB = db.DBConnection()
@@ -1835,6 +1839,7 @@ class WebInterface:
             { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
             { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
             { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
+            { 'title': 'Toggle Banner View', 'path': 'toggleBanners/' },
         ]
         t.sort = sort
         #t.epList = epList
