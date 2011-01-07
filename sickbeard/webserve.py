@@ -1785,7 +1785,7 @@ class WebInterface:
                 im = Image.open(posterFilename)
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
-                im.thumbnail((100, 147), Image.ANTIALIAS)
+                im.thumbnail((136, 200), Image.ANTIALIAS)
                 buffer = StringIO()
                 im.save(buffer, 'JPEG')
                 return buffer.getvalue()
