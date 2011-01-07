@@ -17,7 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
-from sickbeard import helpers, version
+from sickbeard import helpers, version, ui
 from sickbeard import logger
 
 import os, os.path, platform, shutil, time
@@ -66,6 +66,8 @@ class CheckVersion():
         logger.log(u"Checking if "+self.install_type+" needs an update")
         if not self.updater.need_update():
             logger.log(u"No update needed")
+            if force:
+                ui.flash.message('No update needed')
             return False
 
         self.updater.set_newest_text()
