@@ -456,6 +456,7 @@ class ConfigGeneral:
         t.submenu = ConfigMenu
         return _munge(t)
 
+    
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
@@ -534,7 +535,7 @@ class ConfigGeneral:
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
-
+        
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = newQuality
@@ -1792,6 +1793,15 @@ class WebInterface:
             logger.log(u"No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
+    def toggleBanners(self):
+        
+        # toggle the setting
+        sickbeard.USE_BANNER = not sickbeard.USE_BANNER
+        
+        # forward to the coming eps page
+        redirect("/comingEpisodes")
+
+    @cherrypy.expose
     def comingEpisodes(self, sort="date"):
 
         myDB = db.DBConnection()
@@ -1829,6 +1839,7 @@ class WebInterface:
             { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
             { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
             { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
+            { 'title': 'Toggle Banner View', 'path': 'toggleBanners/' },
         ]
         t.sort = sort
         #t.epList = epList
