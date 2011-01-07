@@ -9,6 +9,16 @@
 <!--#set global $topmenu="manageShows"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<div class="h2footer align-right">
+    <b>Jump to Season:</b>
+    #for $seasonNum in $seasonResults:
+        #if int($seasonNum["season"]) == 0 then "<span class=\"separator\">|</span> " else ""#
+        <a href="#season-$seasonNum["season"]">
+        #if int($seasonNum["season"]) == 0 then "Specials</a>" else str($seasonNum["season"])+"</a> "#
+        #if int($seasonNum["season"]) > 1 then "<span class=\"separator\">|</span> " else ""#
+    #end for
+</div><br/>
+
 <input type="hidden" id="sbRoot" value="$sbRoot">
 
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
@@ -20,21 +30,20 @@
 <option value="$curShow.tvdbid" #if $curShow == $show then "SELECTED" else ""#>$curShow.name
 #end for
 </select><br />
-<br />
-<br />
 
-Airs: $show.airs on $show.network<br />
-Status: $show.status<br />
+<div style="background-color: #efefef; padding: 10px; border: 1px solid #DFDEDE; margin: 10px;">
+<b>Airs:</b> $show.airs on $show.network<br />
+<b>Status:</b> $show.status<br />
 
 #if $showLoc[1]:
-Location: $showLoc[0]
+<b>Location:</b> $showLoc[0]
 #else:
 <span style="color: red;">Location: $showLoc[0]</span> (dir is missing)
 #end if
 <br />
 
 #set $anyQualities, $bestQualities = $Quality.splitQuality(int($show.quality))
-Quality:
+<b>Quality:</b>
 #if $show.quality in $qualityPresets:
 $qualityPresetStrings[$show.quality]
 #else:
@@ -47,17 +56,20 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 #end if
 <br />
 
-Season Folders: <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
+<b>Season Folders:</b> <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
-Active: <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
+<b>Active:</b> <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
 
 #if $show.air_by_date or ($show.genre and "Talk Show" in $show.genre):
 #set $air_by_date = True
 #else
 #set $air_by_date = False
 #end if
-Air by date: <img src="$sbRoot/images/#if int($air_by_date) == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
+<b>Air by date:</b> <img src="$sbRoot/images/#if int($air_by_date) == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"><br />
+</div>
 <br />
+
+<div class="float-left">
 Change selected episodes to 
 <select id="statusSelect">
 #for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
@@ -70,13 +82,15 @@ Change selected episodes to
 <input type="hidden" id="showID" value="$show.tvdbid">
 <input type="button" id="changeStatus" value="Go"><br />
 <br />
-<b>NOTE:</b> Episodes can only be changed to a "Downloaded ..." status if they are already either "Downloaded ..." or "Snatched ..."<br />
-All other statuses will automatically update to the appropriate "Downloaded ..." status on a show refresh.<br />
+<div id="statusNote"><b>NOTE:</b> Episodes can only be changed to a "Downloaded ..." status if they are already either "Downloaded ..." or "Snatched ..."<br />
+All other statuses will automatically update to the appropriate "Downloaded ..." status on a show refresh.
+</div><br />
+</div>
 
 #set $curSeason = -1
 #set $odd = 0
 
-<div align="right" id="checkboxControls">
+<div class="float-right" id="checkboxControls">
 <span class="wanted">Wanted: <b>$epCounts[$Overview.WANTED]</b> <input type="checkbox" id="wanted" CHECKED></span>
 <span class="qual">Low Quality: <b>$epCounts[$Overview.QUAL]</b> <input type="checkbox" id="qual" CHECKED></span>
 <span class="good">Downloaded: <b>$epCounts[$Overview.GOOD]</b> <input type="checkbox" id="good" CHECKED></span>
@@ -84,25 +98,20 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
 <br />
 <span class="selectAll"><a href="#" onClick="return false" class="seriesCheck">Select Filtered Episodes</a> </span> 
 <span class="clearAll"><a href="#" onClick="return false" class="clearAll">Clear All</a></span>
-<br />
 </div>
 
-Jump to Season:
-#for $seasonNum in $seasonResults:
-    <a href="#season-$seasonNum["season"]">
-    #if int($seasonNum["season"]) == 0 then "Specials</a>" else str($seasonNum["season"])+"</a> |"
-#end for
+<div style="clear:both;" class="clearfix"><br /></div>
 
 <table class="sickbeardTable">
     
 #for $epResult in $sqlResults:
-   
+
     #if int($epResult["season"]) != $curSeason:
+  <tr><td colspan="9"></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
-    <td colspan=8>
-	<br />
-	<h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#
-	</h2><font size="-3"><a href="#top">[top]</a></font></td>
+    <td colspan="9">
+        <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
+    </td>
   </tr>
   <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
         #set $curSeason = int($epResult["season"])
@@ -116,16 +125,16 @@ Jump to Season:
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>">
 #end if
     </td>
-  	<td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
-  	<td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+    <td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
+    <td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "yes.gif\" alt=\"Y" else "no.gif\" alt=\"N"#" width="16" height="16"></td>
     <td align="center">$epResult["episode"]</td>
     <td>
         $epResult["name"]
         #if $epResult["description"] != "" and $epResult["description"] != None:
-        <img src="$sbRoot/images/info.png" height="16" class="plotInfo" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
+        <img src="$sbRoot/images/info32.png" height="16" class="plotInfo" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
         #end if
     </td>
-    <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td align="center" NOWRAP>#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 $epLoc[len($show._location)+1:]
@@ -137,13 +146,12 @@ $epLoc
     <td>$statusStrings[int($epResult["status"])]</td>
     <td align="center">
     #if int($epResult["season"]) != 0: 
-    <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]">search</a>
+    <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]"><img src="$sbRoot/images/info.png" height="16" alt="search"/></a>
     #end if
     </td>
    </tr>
-   
-#end for            
+
+#end for
 </table><br /><br />
-            
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
