@@ -45,6 +45,8 @@ simple_test_cases = {
 
               'bare': {
               'Show.Name.102.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2], 'Source.Quality.Etc', 'Group'),
+              'show.name.2010.123.source.quality.etc-group': parser.ParseResult(None, 'show name 2010', 1, [23], 'source.quality.etc', 'group'),
+              'show.name.2010.222.123.source.quality.etc-group': parser.ParseResult(None, 'show name 2010.222', 1, [23], 'source.quality.etc', 'group'),
               'Show.Name.102': parser.ParseResult(None, 'Show Name', 1, [2]),
               },
               
@@ -102,6 +104,10 @@ combination_test_cases = [
                           (r'Q:\Test\TV\Jimmy Fallon\Season 2\Jimmy Fallon - 2010-12-15 - blah.avi',
                            parser.ParseResult(None, 'Jimmy Fallon', extra_info = 'blah', air_date = datetime.date(2010,12,15)),
                            ['scene_date_format']),
+
+                          (r'x:\30 Rock\Season 4\30 Rock - 4x22 -.avi',
+                           parser.ParseResult(None, '30 Rock', 4, [22]),
+                           ['fov']),
                            
                           ]
 
