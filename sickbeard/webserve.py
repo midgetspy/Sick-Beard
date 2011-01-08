@@ -1785,7 +1785,11 @@ class WebInterface:
                 im = Image.open(posterFilename)
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
-                im.thumbnail((136, 200), Image.ANTIALIAS)
+                if sickbeard.USE_BANNER:
+                  size = 600, 112
+                else:
+                  size = 136, 200
+                im.thumbnail(size, Image.ANTIALIAS)
                 buffer = StringIO()
                 im.save(buffer, 'JPEG')
                 return buffer.getvalue()
