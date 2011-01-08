@@ -34,7 +34,7 @@
 { 
     \$("#massUpdateTable").tablesorter({
         sortList: [[3,1],[1,0]],
-		widgets: ['zebra'],
+        widgets: ['zebra'],
         headers: {
             0: { sorter: false},
             1: { sorter: 'showNames'},
@@ -89,7 +89,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\">"
 #end if
 
-  <tr class="evenLine">
+  <tr>
     <td align=center><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid">
     <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td align="center">
@@ -110,7 +110,7 @@ Custom
 #end for
 </tbody>
 <tfoot>
-  <tr class="evenLine">
+  <tr>
     <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit"></td>
     <td colspan="7" align="center"><input type="button" value="Submit" id="submitMassUpdate"></td>
   </tr>
