@@ -63,20 +63,16 @@ class BacklogSearcher:
         else:
             return None
 
-    def wait_paused(self):
-        while self.amPaused:
-            self.amWaiting = True
-            time.sleep(1)
-        self.amWaiting = False
-
     def am_running(self):
         logger.log(u"amWaiting: "+str(self.amWaiting)+", amActive: "+str(self.amActive), logger.DEBUG)
         return (not self.amWaiting) and self.amActive
 
-    def searchBacklog(self):
+    def searchBacklog(self, which_shows=None):
 
-        # support pause
-        self.wait_paused()
+        if which_shows:
+            show_list = which_shows
+        else:
+            show_list = sickbeard.showList
 
         if self.amActive == True:
             logger.log(u"Backlog is still running, not starting it again", logger.DEBUG)
@@ -87,7 +83,7 @@ class BacklogSearcher:
         curDate = datetime.date.today().toordinal()
         fromDate = datetime.date.fromordinal(1)
 
-        if not curDate - self._lastBacklog >= self.cycleTime:
+        if not which_shows and not curDate - self._lastBacklog >= self.cycleTime:
             logger.log(u"Running limited backlog on recently missed episodes only")
             fromDate = datetime.date.today() - datetime.timedelta(days=7)
 
@@ -98,8 +94,8 @@ class BacklogSearcher:
         numSeasonResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes ep, tv_shows show WHERE season != 0 AND ep.showid = show.tvdb_id AND show.paused = 0 AND ep.airdate > ?", [fromDate.toordinal()])
 
         # get separate lists of the season/date shows
-        season_shows = [x for x in sickbeard.showList if not x.is_air_by_date]
-        air_by_date_shows = [x for x in sickbeard.showList if x.is_air_by_date]
+        season_shows = [x for x in show_list if not x.is_air_by_date]
+        air_by_date_shows = [x for x in show_list if x.is_air_by_date]
 
         # figure out how many segments of air by date shows we're going to do
         air_by_date_segments = []
@@ -112,7 +108,7 @@ class BacklogSearcher:
         numSeasonsDone = 0.0
 
         # go through non air-by-date shows and see if they need any episodes
-        for curShow in sickbeard.showList:
+        for curShow in show_list:
 
             if curShow.paused:
                 continue

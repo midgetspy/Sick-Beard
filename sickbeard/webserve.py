@@ -197,6 +197,16 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
+    def backlogShow(self, tvdb_id):
+        
+        show_obj = helpers.findCertainShow(sickbeard.showList, int(tvdb_id))
+        
+        if show_obj:
+            sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj])
+        
+        redirect("/manage/backlogOverview")
+        
+    @cherrypy.expose
     def backlogOverview(self):
 
         t = PageTemplate(file="manage_backlogOverview.tmpl")
