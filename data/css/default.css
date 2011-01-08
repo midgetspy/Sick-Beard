@@ -255,11 +255,6 @@ line-height:16px;
 _line-height:14px;
 }
 
-a:hover {
-background-color:#ccc;
-color:#000;
-}
-
 tr.seasonheader {
 text-align:center;
 background-color:#fff;
@@ -270,6 +265,13 @@ font-size:22px;
 line-height:20px;
 letter-spacing:1px;
 margin:0;
+color:#000;
+}
+tr.seasonheader a {
+text-decoration:none;
+}
+tr.seasonheader a:hover {
+background-color: #fff;
 }
 
 tr.unaired,span.unaired {

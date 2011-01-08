@@ -17,16 +17,13 @@
 #set $totalQual = $totalQual + $showCounts[$curShow.tvdbid][$Overview.QUAL]
 #end for
 
-<h2>Summary</h2>
+<div class="h2footer align-right">
+    <span class="wanted">Wanted: <b>$totalWanted</b></span>
+    <span class="qual">Low Quality: <b>$totalQual</b></span>
+</div><br/>
 
-<span class="wanted">Wanted: <b>$totalWanted</b></span><br />
-<span class="qual">Low Quality: <b>$totalQual</b></span><br />
-<br />
-<br />
+<table class="sickbeardTable">
 
-
-<table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
-    
 #for $curShow in sorted($sickbeard.showList, key=operator.attrgetter('name')):
 
 #if $showCounts[$curShow.tvdbid][$Overview.QUAL]+$showCounts[$curShow.tvdbid][$Overview.WANTED] == 0:
@@ -34,13 +31,12 @@
 #end if
 
   <tr class="seasonheader">
-    <td colspan=4><br />
-    <a href="$sbRoot/home/displayShow?show=$curShow.tvdbid"><h2>$curShow.name</h2></a>
-    <div align="right" id="checkboxControls">
-        <span class="wanted">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
-        <span class="qual">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
-    </div>
-    </td>
+    <td colspan="3">
+        <br/><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid"><h2 style="display: inline;">$curShow.name</h2></a>
+        <div class="float-right" id="checkboxControls">
+            <span class="wanted">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
+            <span class="qual">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
+        </div>
   </tr>
 
   <tr><th>Episode</th><th>Name</th><th>Airdate</th></tr>
