@@ -32,7 +32,7 @@ from sickbeard import providers, metadata
 from providers import ezrss, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
-from sickbeard import helpers, db, exceptions, queue, scheduler
+from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 
 from sickbeard.common import *
@@ -60,6 +60,7 @@ currentSearchScheduler = None
 showUpdateScheduler = None
 versionCheckScheduler = None
 showQueueScheduler = None
+searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
 
@@ -297,7 +298,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, \
+                MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
@@ -546,9 +547,14 @@ def initialize(consoleLogging=True):
                                                      threadName="CHECKVERSION",
                                                      runImmediately=True)
 
-        showQueueScheduler = scheduler.Scheduler(queue.ShowQueue(),
+        showQueueScheduler = scheduler.Scheduler(show_queue.ShowQueue(),
                                                cycleTime=datetime.timedelta(seconds=3),
                                                threadName="SHOWQUEUE",
+                                               silent=True)
+
+        searchQueueScheduler = scheduler.Scheduler(search_queue.SearchQueue(),
+                                               cycleTime=datetime.timedelta(seconds=3),
+                                               threadName="SEARCHQUEUE",
                                                silent=True)
 
         properFinderInstance = properFinder.ProperFinder()
@@ -573,7 +579,7 @@ def start():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
-            properFinderScheduler, autoPostProcesserScheduler
+            properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler
 
     with INIT_LOCK:
 
@@ -594,6 +600,9 @@ def start():
             # start the queue checker
             showQueueScheduler.thread.start()
 
+            # start the search queue checker
+            searchQueueScheduler.thread.start()
+
             # start the queue checker
             properFinderScheduler.thread.start()
 
@@ -603,7 +612,7 @@ def start():
 def halt ():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
-            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler
+            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler
 
     with INIT_LOCK:
 
@@ -645,6 +654,13 @@ def halt ():
             logger.log(u"Waiting for the SHOWQUEUE thread to exit")
             try:
                 showQueueScheduler.thread.join(10)
+            except:
+                pass
+
+            searchQueueScheduler.abort = True
+            logger.log(u"Waiting for the SEARCHQUEUE thread to exit")
+            try:
+                searchQueueScheduler.thread.join(10)
             except:
                 pass
 
