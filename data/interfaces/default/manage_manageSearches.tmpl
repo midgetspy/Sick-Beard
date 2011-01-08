@@ -13,15 +13,13 @@
 
 <b>Backlog Search:</b><br />
 
-#if $backlogPI == None:
+#if not $backlogRunning:
 Not in progress (<a href="$sbRoot/manage/manageSearches/forceBacklog">force</a>)<br />
 #else:
 #if $backlogPaused then "Paused: " else ""#
-#set $aoeu = "%.2f%%" % $backlogPI.percentComplete
-$aoeu complete<br />
-$backlogPI.currentStatus['title']<br />
-<a href="$sbRoot/manage/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#">#if $backlogPaused then "Unpause" else "Pause"#</a><br />
+Currently running<br />
 #end if
+<a href="$sbRoot/manage/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#">#if $backlogPaused then "Unpause" else "Pause"#</a><br />
 <br />
 <b>Daily Episode Search:</b><br />
 #if not $searchStatus:

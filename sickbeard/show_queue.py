@@ -34,6 +34,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
     def __init__(self):
         generic_queue.GenericQueue.__init__(self)
+        self.queue_name = "SHOWQUEUE"
+
 
     def _isInQueue(self, show, actions):
         return show in [x.show for x in self.queue if x.action_id in actions]

@@ -135,8 +135,9 @@ class ManageSearches:
     @cherrypy.expose
     def index(self):
         t = PageTemplate(file="manage_manageSearches.tmpl")
-        t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
-        t.backlogPaused = sickbeard.backlogSearchScheduler.action.amPaused
+        #t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
+        t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused()
+        t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress()
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
         t.submenu = ManageMenu
 
@@ -167,11 +168,9 @@ class ManageSearches:
     @cherrypy.expose
     def pauseBacklog(self, paused=None):
         if paused == "1":
-            setPaused = True
+            sickbeard.searchQueueScheduler.action.pause_backlog()
         else:
-            setPaused = False
-
-        sickbeard.backlogSearchScheduler.action.amPaused = setPaused
+            sickbeard.searchQueueScheduler.action.unpause_backlog()
 
         redirect("/manage/manageSearches")
 
