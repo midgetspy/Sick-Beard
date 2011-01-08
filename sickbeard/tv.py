@@ -313,7 +313,7 @@ class TVShow(object):
         poster_result = fanart_result = season_thumb_result = False
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
-            logger.log("Running season folders for "+cur_provider.name, DEBUG)
+            logger.log("Running season folders for "+cur_provider.name, logger.DEBUG)
             poster_result = cur_provider.create_poster(self) or poster_result
             fanart_result = cur_provider.create_fanart(self) or fanart_result
             season_thumb_result = cur_provider.create_season_thumbs(self) or season_thumb_result
