@@ -277,7 +277,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
 
 def get_backlog_cycle_time():
     cycletime = sickbeard.SEARCH_FREQUENCY*2+7
-    return min([cycletime, 60])
+    return max([cycletime, 720])
 
 
 def initialize(consoleLogging=True):
