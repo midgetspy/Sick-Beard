@@ -333,3 +333,10 @@ margin:0;
 a,.queuelink,td > a,td > a,a.remove {
 color:#000;
 }
+
+div#summary {
+background-color:#efefef;
+padding:10px;
+border:1px solid #DFDEDE;
+margin:10px;
+}

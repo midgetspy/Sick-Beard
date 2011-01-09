@@ -24,14 +24,14 @@
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 
-<b>Change Show:</b>
+<div class="align-left"><b>Change Show:</b>
 <select id="pickShow">
 #for $curShow in $sickbeard.showList:
 <option value="$curShow.tvdbid" #if $curShow == $show then "SELECTED" else ""#>$curShow.name
 #end for
-</select><br />
+</select></div>
 
-<div style="background-color: #efefef; padding: 10px; border: 1px solid #DFDEDE; margin: 10px;">
+<div id="summary" class="align-left">
 <b>Airs:</b> $show.airs on $show.network<br />
 <b>Status:</b> $show.status<br />
 
