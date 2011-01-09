@@ -22,7 +22,7 @@
     <span class="qual">Low Quality: <b>$totalQual</b></span>
 </div><br/>
 
-<table class="sickbeardTable">
+<table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
 
 #for $curShow in sorted($sickbeard.showList, key=operator.attrgetter('name')):
 
@@ -33,7 +33,7 @@
   <tr class="seasonheader">
     <td colspan="3">
         <br/><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid"><h2 style="display: inline;">$curShow.name</h2></a>
-        <div class="float-right" id="checkboxControls">
+        <div class="float-right">
             <span class="wanted">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
             <span class="qual">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
         </div>
@@ -50,7 +50,7 @@
   <tr class="$Overview.overviewStrings[$showCats[$curShow.tvdbid][$whichStr]]">
     <td align="center">$whichStr</td>
     <td>$curResult["name"]</td>
-    <td align="center" NOWRAP>#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
+    <td align="center" nowrap="nowrap">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
   </tr>
 
 #end for

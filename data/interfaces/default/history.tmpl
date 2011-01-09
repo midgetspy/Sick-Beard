@@ -13,7 +13,7 @@
 <!--#set global $topmenu="history"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script>
+<script type="text/javascript">
 \$(document).ready(function() 
 { 
     \$("#historyTable").tablesorter({
@@ -50,7 +50,7 @@
       #if $hItem["provider"] > 0
         #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
         #if $provider != None: 
-        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name">
+        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" />
         #end if
       #end if
     #end if
