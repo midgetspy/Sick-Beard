@@ -104,7 +104,6 @@ h1.day {
     background-color: #9CB5CF;
     color: #000;
     text-align: center;
-    margin-top: 0px;
 }
 
 h1.network {
@@ -114,7 +113,6 @@ h1.network {
     background-color: #8FBFAF;
     color: #000;
     text-align: center;
-    margin-top: 0px;    
 }
 
 .ep_listing {
