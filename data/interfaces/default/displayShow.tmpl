@@ -102,7 +102,7 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
 
 <div style="clear:both;" class="clearfix"><br /></div>
 
-<table class="sickbeardTable">
+<table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
     
 #for $epResult in $sqlResults:
 
@@ -134,7 +134,7 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
         <img src="$sbRoot/images/info32.png" height="16" class="plotInfo" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
         #end if
     </td>
-    <td align="center" NOWRAP>#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td align="center" nowrap="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 $epLoc[len($show._location)+1:]
