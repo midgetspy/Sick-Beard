@@ -1,11 +1,12 @@
 #import sickbeard.version
 #import sickbeard
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
     <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="SHORTCUT ICON" href="$sbRoot/images/favicon.ico"/>
     <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png"/>
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
@@ -31,7 +32,6 @@
 </head>
 
 <body>
-<a name="top"></a>
 #if $sickbeard.NEWEST_VERSION_STRING:
 <div id="upgrade-notification">
     <div>
@@ -41,7 +41,8 @@
 <div id="header-fix"></div>
 #end if
 <div id="header">
-    <span id="logo"><a href="$sbRoot/home/" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard_small.png" width="150"></a></span>
+    <a name="top"></a>
+    <span id="logo"><a href="$sbRoot/home/" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard_small.png" width="150" /></a></span>
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
 </div>
 <span class="MainMenu">
@@ -54,7 +55,7 @@
     #end for
     <br />
 </span>
-    <span id="tagline"><a class="imgLink" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JA8M7VDY89SQ4" target="_new"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0"></a></span>
+    <span id="tagline"><a class="imgLink" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" alt="[donate]"/></a></span>
 #if $varExists('submenu'):
 <span class="SubMenu">
 #for $menuItem in $submenu:

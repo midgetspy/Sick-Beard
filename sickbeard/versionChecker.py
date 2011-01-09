@@ -124,7 +124,7 @@ class WindowsUpdateManager(UpdateManager):
             return True
 
     def set_newest_text(self):
-        new_str = 'There is a <a href="'+self.gc_url+'" target="_new">newer version available</a> (build '+str(self._newest_version)+')'
+        new_str = 'There is a <a href="'+self.gc_url+'" onclick="window.open(this.href); return false;">newer version available</a> (build '+str(self._newest_version)+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
         sickbeard.NEWEST_VERSION_STRING = new_str
 
@@ -185,7 +185,7 @@ class GitUpdateManager(UpdateManager):
         self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
 
     def _git_error(self):
-        error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" target="_new">set git_path in your config.ini</a> to enable updates.'
+        error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
         sickbeard.NEWEST_VERSION_STRING = error_message
         
         return None
@@ -298,7 +298,7 @@ class GitUpdateManager(UpdateManager):
         else:
             url = 'http://github.com/midgetspy/Sick-Beard/commits/'
 
-        new_str = 'There is a <a href="'+url+'" target="_new">newer version available</a> ('+message+')'
+        new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
 
         sickbeard.NEWEST_VERSION_STRING = new_str
