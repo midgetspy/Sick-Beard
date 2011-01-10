@@ -101,9 +101,6 @@ class ShowQueue(generic_queue.GenericQueue):
 
         queueItemObj = QueueItemRefresh(show)
 
-        # refresh gets put at the front cause it's quick
-        self.queue.insert(0, queueItemObj)
-
         return queueItemObj
 
     def renameShowEpisodes(self, show, force=False):
@@ -172,7 +169,7 @@ class QueueItemAdd(ShowQueueItem):
 
         # this will initialize self.show to None
         ShowQueueItem.__init__(self, ShowQueueActions.ADD, self.show)
-
+        
     def _getName(self):
         if self.show == None:
             return self.showDir
@@ -264,6 +261,9 @@ class QueueItemAdd(ShowQueueItem):
 class QueueItemRefresh(ShowQueueItem):
     def __init__(self, show=None):
         ShowQueueItem.__init__(self, ShowQueueActions.REFRESH, show)
+
+        # do refreshes first because they're quick
+        self.priority = generic_queue.QueuePriorities.HIGH
 
     def execute(self):
 
