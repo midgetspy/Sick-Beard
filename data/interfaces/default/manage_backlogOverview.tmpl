@@ -34,6 +34,7 @@
     <td colspan="3">
         <br/><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid"><h2 style="display: inline;">$curShow.name</h2></a>
         <div class="float-right">
+            <a href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid">Force Backlog</a>
             <span class="wanted">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
             <span class="qual">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
         </div>

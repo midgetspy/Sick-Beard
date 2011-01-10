@@ -38,6 +38,7 @@ from sickbeard import history, notifiers, processTV, search, providers
 from sickbeard import tv, versionChecker, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
+from sickbeard import search_queue
 
 from sickbeard.notifiers import xbmc
 from sickbeard.providers import newznab
@@ -134,8 +135,9 @@ class ManageSearches:
     @cherrypy.expose
     def index(self):
         t = PageTemplate(file="manage_manageSearches.tmpl")
-        t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
-        t.backlogPaused = sickbeard.backlogSearchScheduler.action.amPaused
+        #t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
+        t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused()
+        t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress()
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
         t.submenu = ManageMenu
 
@@ -166,11 +168,9 @@ class ManageSearches:
     @cherrypy.expose
     def pauseBacklog(self, paused=None):
         if paused == "1":
-            setPaused = True
+            sickbeard.searchQueueScheduler.action.pause_backlog()
         else:
-            setPaused = False
-
-        sickbeard.backlogSearchScheduler.action.amPaused = setPaused
+            sickbeard.searchQueueScheduler.action.unpause_backlog()
 
         redirect("/manage/manageSearches")
 
@@ -196,6 +196,16 @@ class Manage:
         t.submenu = ManageMenu
         return _munge(t)
 
+    @cherrypy.expose
+    def backlogShow(self, tvdb_id):
+        
+        show_obj = helpers.findCertainShow(sickbeard.showList, int(tvdb_id))
+        
+        if show_obj:
+            sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj])
+        
+        redirect("/manage/backlogOverview")
+        
     @cherrypy.expose
     def backlogOverview(self):
 
@@ -1683,6 +1693,8 @@ class Home:
             else:
                 return _genericMessage("Error", errMsg)
 
+        segment_list = []
+
         if eps != None:
 
             for curEp in eps.split('|'):
@@ -1692,6 +1704,16 @@ class Home:
                 epInfo = curEp.split('x')
 
                 epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+
+                if int(status) == WANTED:
+                    # figure out what segment the episode is in and remember it so we can backlog it
+                    if epObj.show.is_air_by_date:
+                        ep_segment = str(epObj.airdate)[:7]
+                    else:
+                        ep_segment = epObj.season
+    
+                    if ep_segment not in segment_list:
+                        segment_list.append(ep_segment)
 
                 if epObj == None:
                     return _genericMessage("Error", "Episode couldn't be retrieved")
@@ -1708,6 +1730,11 @@ class Home:
 
                     epObj.status = int(status)
                     epObj.saveToDB()
+
+        for cur_segment in segment_list:
+            logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
+            cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
+            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
 
         if direct:
             return json.dumps({'result': 'success'})
