@@ -219,7 +219,7 @@ class NameParser(object):
                 final_result.which_regex += dir_name_result.which_regex
 
         # if there's no useful info in it then raise an exception
-        if final_result.season_number == None and not final_result.episode_numbers and not final_result.series_name:
+        if final_result.season_number == None and not final_result.episode_numbers and final_result.air_date == None and not final_result.series_name:
             raise InvalidNameException("Unable to parse "+name)
 
         # return it
