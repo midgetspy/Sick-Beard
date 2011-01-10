@@ -23,7 +23,6 @@ $(document).ready(function(){
                   $('#multiExampleText').text(data);
         });
 
-
         return
 
     };
@@ -58,36 +57,36 @@ $(document).ready(function(){
         $(this).setExampleText();
     });  
 
-	// -- start of metadata options div toggle code --
+    // -- start of metadata options div toggle code --
     $('#metadataType').change(function(){
         $(this).showHideMetadata();
     });
-	
-	$.fn.showHideMetadata = function() {
+
+    $.fn.showHideMetadata = function() {
         $('.metadataDiv').each(function(){
             var targetName = $(this).attr('id');
             var selectedTarget = $('#metadataType :selected').val();
-            
+
             if (selectedTarget == targetName)
                 $(this).show();
             else
                 $(this).hide();
-            
+
         });
    } 
-	//initalize to show the div
-	$(this).showHideMetadata();	
-	// -- end of metadata options div toggle code --
+    //initalize to show the div
+    $(this).showHideMetadata();	
+    // -- end of metadata options div toggle code --
     
     $('.metadata_checkbox').click(function(){
         $(this).refreshMetadataConfig(false);
     });
 
     $.fn.refreshMetadataConfig = function(first) {
-        
+
         var cur_most = 0;
         var cur_most_provider = '';
-        
+
         $('.metadataDiv').each(function(){
             var generator_name = $(this).attr('id');
 
@@ -113,7 +112,7 @@ $(document).ready(function(){
                 cur_most = cur_num
                 cur_most_provider = generator_name
             }
-            
+
             $("#"+generator_name+"_eg_show_metadata").attr('class', show_metadata ? 'enabled' : 'disabled');
             $("#"+generator_name+"_eg_episode_metadata").attr('class', episode_metadata ? 'enabled' : 'disabled');
             $("#"+generator_name+"_eg_poster").attr('class', poster ? 'enabled' : 'disabled');
@@ -124,14 +123,14 @@ $(document).ready(function(){
             $("#"+generator_name+"_data").val(config_arr.join('|'))
             
         });
-        
+
         if (cur_most_provider != '' && first) {
             $('#metadataType option[value='+cur_most_provider+']').attr('selected', 'selected')
             $(this).showHideMetadata();
         }
         
     }
-	
+
     $(this).refreshMetadataConfig(true);
-    
+
 });

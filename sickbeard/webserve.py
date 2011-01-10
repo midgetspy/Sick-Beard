@@ -65,7 +65,7 @@ class PageTemplate (Template):
         self.sbRoot = sickbeard.WEB_ROOT
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
-        logPageTitle = 'Logs & Errors'
+        logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
             logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
 

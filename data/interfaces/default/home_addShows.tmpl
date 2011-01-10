@@ -7,18 +7,23 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<div>
 <h2>Add Single Show</h2>
 
-<form method="POST" action="addShows" accept-charset="utf-8">
-Single show folder: <input type="text" name="showDirs" id="showDir" size="50"> <input type="submit" value="Add Show">
+<form method="post" action="addShows" accept-charset="utf-8">
+Single show folder: <input type="text" name="showDirs" id="showDir" size="50" /> <input type="submit" value="Add Show" />
 </form>
-<p><font size="-2"><b>Hint:</b> To start tracking a show you don't have yet, enter the path where you would like it stored, i.e. /path/to/New Show</font>
-<br />
-<br />
+<p style="font-size:90%;"><b>Hint:</b> To start tracking a show you don't have yet, enter the path where you would like it stored, i.e. /path/to/New Show</p>
+</div>
+
+<br/>
+
+<div>
 <h2>Add multiple shows from a root directory</h2>
-<form method="POST" action="addRootDir" accept-charset="utf-8">
-Root show folder: <input type="text" name="dir" id="showsDir" size="50"> <input type="submit" value="Add multiple shows">
+<form method="post" action="addRootDir" accept-charset="utf-8">
+Root show folder: <input type="text" name="dir" id="showsDir" size="50" /> <input type="submit" value="Add multiple shows" />
 </form>
+</div>
 
 <script type="text/javascript" charset="utf-8">
     jQuery('#showDir').fileBrowser({ title: 'Select Show Folder', key: 'showPath' });

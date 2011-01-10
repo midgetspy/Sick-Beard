@@ -17,7 +17,7 @@
 #set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
 #set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
 
-<script>
+<script type="text/javascript" charset="utf-8">
 \$.tablesorter.addParser({ 
     id: 'nextAirDate',
     is: function(s) {
@@ -148,7 +148,7 @@
     #continue
   #end if
 
-  <tr class="evenLine">
+  <tr>
     <td align="center">(loading)</td>
     <td>
     #if $curLoadingShow.show == None:
@@ -188,8 +188,8 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $den = 1
 #end if
 
-  <tr class="evenLine">
-    <td align="center">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
+  <tr>
+    <td align="center" nowrap="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
     <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td>$curShow.network</td>
     <td align="center">
@@ -200,7 +200,7 @@ Custom
 #end if
     </td>
     <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid" style="position:relative;"></div></td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
   </tr>
 
