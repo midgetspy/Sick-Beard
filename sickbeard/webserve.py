@@ -66,7 +66,7 @@ class PageTemplate (Template):
         self.sbRoot = sickbeard.WEB_ROOT
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
-        logPageTitle = 'Logs & Errors'
+        logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
             logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
 
@@ -1812,7 +1812,11 @@ class WebInterface:
                 im = Image.open(posterFilename)
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
-                im.thumbnail((100, 147), Image.ANTIALIAS)
+                if sickbeard.USE_BANNER:
+                  size = 600, 112
+                else:
+                  size = 136, 200
+                im.thumbnail(size, Image.ANTIALIAS)
                 buffer = StringIO()
                 im.save(buffer, 'JPEG')
                 return buffer.getvalue()

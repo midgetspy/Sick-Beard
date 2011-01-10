@@ -57,16 +57,16 @@
 });
 </script>
 
-<form id="addShowForm" method="POST" action="$sbRoot/home/addShows/addSingleShow" accept-charset="utf-8">
-<input type="submit" value="Continue" id="addShow"> <input type="button" value="Skip" id="skipShow"><br /><br />
+<form id="addShowForm" method="post" action="$sbRoot/home/addShows/addSingleShow" accept-charset="utf-8">
+<input type="submit" value="Continue" id="addShow" /> <input type="button" value="Skip" id="skipShow" /><br /><br />
 
 <div id="searchResults" width="250"></div>
 <br />
-<input type="hidden" name="skipShow" id="skipShowItem" value="0">
-<input type="hidden" name="showToAdd" value="$showToAdd">
-<input type="text" id="nameToSearch" value="$showNameToAdd"> <input type="button" id="searchName" value="Search"><br />
+<input type="hidden" name="skipShow" id="skipShowItem" value="0" />
+<input type="hidden" name="showToAdd" value="$showToAdd" />
+<input type="text" id="nameToSearch" value="$showNameToAdd" /> <input type="button" id="searchName" value="Search" /><br />
 #for $curShow in $showDirs:
-<input type="hidden" name="showDirs" value="$curShow">
+<input type="hidden" name="showDirs" value="$curShow" />
 #end for 
 </form>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

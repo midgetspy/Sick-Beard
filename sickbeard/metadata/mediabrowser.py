@@ -41,7 +41,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
     
     show_root/series.xml                           (show metadata)
     show_root/folder.jpg                           (poster)
-    show_root/fanart.jpg                           (fanart)
+    show_root/backdrop.jpg                           (fanart)
     show_root/Season 01/folder.jpg                 (season thumb)
     show_root/Season 01/show - 1x01 - episode.avi  (* example of existing ep of course)
     show_root/Season 01/show - 1x01 - episode.xml  (episode metadata)
@@ -71,7 +71,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         self.eg_show_metadata = "series.xml"
         self.eg_episode_metadata = "metadata\\<i>filename</i>.xml"
-        self.eg_fanart = "fanart.jpg"
+        self.eg_fanart = "backdrop.jpg"
         self.eg_poster = "folder.jpg"
         self.eg_episode_thumbnails = "metadata\\<i>filename</i>.jpg"
         self.eg_season_thumbnails = "Season##\\folder.jpg"

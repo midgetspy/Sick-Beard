@@ -18,7 +18,7 @@ class GrowlNotifier:
 
     def notify_download(self, ep_name):
         if sickbeard.GROWL_NOTIFY_ONDOWNLOAD:
-            self._sendGROWL(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
+            self._sendGrowl(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
     def _send_growl(self, options,message=None):
     

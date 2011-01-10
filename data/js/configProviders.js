@@ -5,7 +5,7 @@ $(document).ready(function(){
             var providerName = $(this).attr('id');
             var selectedProvider = $('#editAProvider :selected').val();
             
-            if (selectedProvider == providerName)
+            if (selectedProvider+'Div' == providerName)
                 $(this).show();
             else
                 $(this).hide();

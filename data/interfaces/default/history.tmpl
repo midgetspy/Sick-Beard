@@ -13,12 +13,12 @@
 <!--#set global $topmenu="history"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script>
+<script type="text/javascript">
 \$(document).ready(function() 
 { 
     \$("#historyTable").tablesorter({
-		widgets: ['zebra'],
-    	sortList: [[0,1]]
+        widgets: ['zebra'],
+        sortList: [[0,1]]
     }); 
 });
 </script>
@@ -29,33 +29,33 @@
   <tbody>
 #for $hItem in $historyResults:
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
-  <tr class="evenLine">
+  <tr>
     <td>$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
     <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
     <td align="center">$statusStrings[$curStatus]</td>
     <td align="center">
-	#if $curStatus == DOWNLOADED:
-	  #set $match = $re.search("\-(\w+)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
-	  #if $match
-	  	#if $match.group(1).upper() in ("X264", "720P"):
-	  	  #set $match = $re.search("(\w+)\-.*\-"+$match.group(1)+"\.\w{3}\Z", $os.path.basename($hItem["resource"]), re.IGNORECASE)
-	  	  #if $match
-		  	  $match.group(1).upper()
-		  #end if
-	  	#else:
+    #if $curStatus == DOWNLOADED:
+      #set $match = $re.search("\-(\w+)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
+      #if $match
+          #if $match.group(1).upper() in ("X264", "720P"):
+            #set $match = $re.search("(\w+)\-.*\-"+$match.group(1)+"\.\w{3}\Z", $os.path.basename($hItem["resource"]), re.IGNORECASE)
+            #if $match
+                $match.group(1).upper()
+          #end if
+          #else:
           $match.group(1).upper()
         #end if
-	  #end if
-	#else
+      #end if
+    #else
       #if $hItem["provider"] > 0
         #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
         #if $provider != None: 
-        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name">
+        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" />
         #end if
       #end if
     #end if
-	</td>
-	<td align="center">$Quality.qualityStrings[$curQuality]</td>
+    </td>
+    <td align="center">$Quality.qualityStrings[$curQuality]</td>
   </tr>
 #end for
   </tbody>

@@ -313,7 +313,7 @@ class TVShow(object):
         poster_result = fanart_result = season_thumb_result = False
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
-            logger.log("Running season folders for "+cur_provider.name)
+            logger.log("Running season folders for "+cur_provider.name, logger.DEBUG)
             poster_result = cur_provider.create_poster(self) or poster_result
             fanart_result = cur_provider.create_fanart(self) or fanart_result
             season_thumb_result = cur_provider.create_season_thumbs(self) or season_thumb_result
@@ -897,8 +897,8 @@ class TVEpisode:
         # check for nfo and tbn
         if ek.ek(os.path.isfile, self.location):
             for cur_provider in sickbeard.metadata_provider_dict.values():
-                self.hasnfo = cur_provider.create_episode_metadata(self) or self.hasnfo
-                self.hastbn = cur_provider.create_episode_thumb(self)or self.hastbn
+                self.hasnfo = cur_provider._has_episode_metadata(self) or self.hasnfo
+                self.hastbn = cur_provider._has_episode_thumb(self)or self.hastbn
 
         # if either setting has changed return true, if not return false
         return oldhasnfo != self.hasnfo or oldhastbn != self.hastbn

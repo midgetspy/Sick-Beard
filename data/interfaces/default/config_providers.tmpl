@@ -8,25 +8,21 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript">
-sbRoot = '$sbRoot'; 
-</script>
 <script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
-<script type="text/javascript">
+<script type="text/javascript" charset="utf-8">
+sbRoot = '$sbRoot'; 
 \$(document).ready(function(){
 
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
     \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
 #end for
-
 });
-
 </script>
 
 <div id="config">
-<div id="config-content" class="clearfix">
+<div id="config-content">
 
-<form action="saveProviders" method="POST">
+<form action="saveProviders" method="post">
 
             <div id="config-components">
                 
@@ -38,7 +34,7 @@ sbRoot = '$sbRoot';
                         <p class="note">At least one provider is required but two are recommended.</p>
                         <p>More providers offer redundancy but at the expense of a longer search period.</p>
                         <p class="note"><span style="color: #654B24; font-size: 16px;">*</span> Provider does not support backlog searches at this time.</p>
-                        <p class="note"><span style="color: #654B24; font-size: 16px;">**</span> Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.<p>
+                        <p class="note"><span style="color: #654B24; font-size: 16px;">**</span> Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -54,16 +50,16 @@ sbRoot = '$sbRoot';
                               #set $imgName = $curName + '.gif'
                             #end if
                           <li class="ui-state-default" id="$curName">
-                            <input type="checkbox" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "CHECKED" else ""#>
-                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" width="16" height="16"></a>
+                            <input type="checkbox" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
+                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
                             #if $curProvider.name == "EZRSS" then "**" else ""#
                           </li>
                         #end for
                         </ul>
-                        <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>">
-                        <br/><input type="submit" value="Save Changes"><br/>
+                        <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
+                        <br/><input type="submit" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group1 -->
 
@@ -76,15 +72,15 @@ sbRoot = '$sbRoot';
                     
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <label class="clearfix" for="edit_provider">
+                            <label class="clearfix" for="editAProvider">
                                 <span class="component-title jumbo">Select Provider:</span>
                                 <span class="component-desc">
                                     <select id="editAProvider">
                                         #if $sickbeard.SHOW_TVBINZ then "<option value=\"tvbinz\">TVBinz" else ""#
-                                        <option value="nzbs_org">NZBs.org
-                                        <option value="nzbs_r_us">NZBs'R'US
-                                        <option value="newzbin">Newzbin
-                                        <option value="nzbmatrix">NZBMatrix
+                                        <option value="nzbs_org">NZBs.org</option>
+                                        <option value="nzbs_r_us">NZBs'R'US</option>
+                                        <option value="newzbin">Newzbin</option>
+                                        <option value="nzbmatrix">NZBMatrix</option>
                                     </select>
                                 </span>
                             </label>
@@ -93,90 +89,90 @@ sbRoot = '$sbRoot';
 
 <!-- start div for editing providers -->
 #if $sickbeard.SHOW_TVBINZ:
-<div class="providerDiv" id="tvbinz">
+<div class="providerDiv" id="tvbinzDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">TVBinz Cookie UID</span>
-                                <input class="component-desc" type="text" name="tvbinz_uid" value="$sickbeard.TVBINZ_UID" size="10">
+                                <input class="component-desc" type="text" name="tvbinz_uid" value="$sickbeard.TVBINZ_UID" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">TVBinz Hash</span>
-                                <input class="component-desc" type="text" name="tvbinz_hash" value="$sickbeard.TVBINZ_HASH" size="40">
+                                <input class="component-desc" type="text" name="tvbinz_hash" value="$sickbeard.TVBINZ_HASH" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">TVBinz Auth String</span>
-                                <input class="component-desc" type="text" name="tvbinz_auth" value="$sickbeard.TVBINZ_AUTH" size="40">
+                                <input class="component-desc" type="text" name="tvbinz_auth" value="$sickbeard.TVBINZ_AUTH" size="40" />
                             </label>
                         </div>
 </div>
 #end if
 
-<div class="providerDiv" id="nzbs_org">
+<div class="providerDiv" id="nzbs_orgDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBs.org UID</span>
-                                <input class="component-desc" type="text" name="nzbs_org_uid" value="$sickbeard.NZBS_UID" size="10">
+                                <input class="component-desc" type="text" name="nzbs_org_uid" value="$sickbeard.NZBS_UID" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBs.org Hash</span>
-                                <input class="component-desc" type="text" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="40">
+                                <input class="component-desc" type="text" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="40" />
                             </label>
                         </div>
 </div>
 
-<div class="providerDiv" id="nzbmatrix">
+<div class="providerDiv" id="nzbmatrixDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBMatrix Username</span>
-                                <input class="component-desc" type="text" name="nzbmatrix_username" value="$sickbeard.NZBMATRIX_USERNAME" size="10">
+                                <input class="component-desc" type="text" name="nzbmatrix_username" value="$sickbeard.NZBMATRIX_USERNAME" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBMatrix API Key</span>
-                                <input class="component-desc" type="text" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="40">
+                                <input class="component-desc" type="text" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="40" />
                             </label>
                         </div>
 </div>
 
-<div class="providerDiv" id="newzbin">
+<div class="providerDiv" id="newzbinDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Newzbin Username</span>
-                                <input class="component-desc" type="text" name="newzbin_username" value="$sickbeard.NEWZBIN_USERNAME" size="10">
+                                <input class="component-desc" type="text" name="newzbin_username" value="$sickbeard.NEWZBIN_USERNAME" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Newzbin Password</span>
-                                <input class="component-desc" type="text" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="40">
+                                <input class="component-desc" type="text" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="40" />
                             </label>
                         </div>
 </div>
 
-<div class="providerDiv" id="nzbs_r_us">
+<div class="providerDiv" id="nzbs_r_usDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBs'R'US UID</span>
-                                <input class="component-desc" type="text" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="10">
+                                <input class="component-desc" type="text" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBs'R'US Hash</span>
-                                <input class="component-desc" type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="40">
+                                <input class="component-desc" type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="40" />
                             </label>
                         </div>
 </div>
 <!-- end div for editing providers -->
 
-                    <input type="submit" value="Save Changes"><br/>
+                    <input type="submit" value="Save Changes" /><br/>
             
                     </fieldset>
                 </div><!-- /component-group2 -->
@@ -194,7 +190,7 @@ sbRoot = '$sbRoot';
                             <label class="clearfix">
                                 <span class="component-title jumbo">Select Provider:</span>
                                 <span class="component-desc">
-                                    <input type="hidden" name="newznab_string" id="newznab_string">
+                                    <input type="hidden" name="newznab_string" id="newznab_string" />
                                     <select id="editANewznabProvider">
                                         <option value="addNewznab">-- add new provider --</option>
                                     </select>
@@ -206,19 +202,19 @@ sbRoot = '$sbRoot';
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Provider Name</span>
-                                <input class="component-desc" type="text" id="newznab_name" size="40">
+                                <input class="component-desc" type="text" id="newznab_name" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Site URL</span>
-                                <input class="component-desc" type="text" id="newznab_url" size="40">
+                                <input class="component-desc" type="text" id="newznab_url" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">API Key</span>
-                                <input class="component-desc" type="text" id="newznab_key" size="40">
+                                <input class="component-desc" type="text" id="newznab_key" size="40" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -226,10 +222,10 @@ sbRoot = '$sbRoot';
                             </label>
                         </div>
             <div id="newznab_add_div">
-                <input type="button" class="newznab_save" id="newznab_add" value="Add">
+                <input type="button" class="newznab_save" id="newznab_add" value="Add" />
             </div>
             <div id="newznab_update_div" style="display: none;">
-                <input type="button" class="newznab_delete" id="newznab_delete" value="Delete">
+                <input type="button" class="newznab_delete" id="newznab_delete" value="Delete" />
             </div> 
 </div>
 
@@ -237,7 +233,7 @@ sbRoot = '$sbRoot';
                 </div><!-- /component-group3 -->
 
                     
-            <br/><input type="submit" value="Save Changes"><br/>
+            <br/><input type="submit" value="Save Changes" /><br/>
                 
             </div><!-- /config-components -->
 
