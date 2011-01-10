@@ -939,7 +939,7 @@ class ConfigNotifications:
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
-						  use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
+						  use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_prefix=None):
 
         results = []
 
@@ -1014,6 +1014,7 @@ class ConfigNotifications:
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+        sickbeard.TWITTER_PREFIX = twitter_prefix
 
         sickbeard.save_config()
 
