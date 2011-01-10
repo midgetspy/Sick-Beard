@@ -100,6 +100,8 @@ class ShowQueue(generic_queue.GenericQueue):
             return
 
         queueItemObj = QueueItemRefresh(show)
+        
+        self.queue.append(queueItemObj)
 
         return queueItemObj
 
