@@ -157,7 +157,7 @@ class ShowQueueItem(generic_queue.QueueItem):
     def _isLoading(self):
         return False
 
-    name = property(_getName)
+    show_name = property(_getName)
 
     isLoading = property(_isLoading)
 
@@ -171,14 +171,14 @@ class QueueItemAdd(ShowQueueItem):
         self.show = None
 
         # this will initialize self.show to None
-        ShowQueueItem.__init__(self, ShowQueueActions.ADD)
+        ShowQueueItem.__init__(self, ShowQueueActions.ADD, self.show)
 
     def _getName(self):
         if self.show == None:
             return self.showDir
         return self.show.name
 
-    name = property(_getName)
+    show_name = property(_getName)
 
     def _isLoading(self):
         if self.show == None:
