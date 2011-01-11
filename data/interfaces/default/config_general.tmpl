@@ -17,7 +17,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 </script>
 <script type="text/javascript" src="$sbRoot/js/configGeneral.js"></script>
 #set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
-<script>
+<script type="text/javascript" charset="utf-8">
 \$(document).ready(function(){
 
   if (#if $sickbeard.QUALITY_DEFAULT in $qualityPresets then "1" else "0"#) {
@@ -54,10 +54,10 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 </script>
 
 <div id="config">
-<div id="config-content" class="clearfix">
+<div id="config-content">
 <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.PROG_DIR</span> "</h5>
 
-<form action="saveGeneral" method="POST">
+<form action="saveGeneral" method="post">
 
             <div id="config-components">
                 
@@ -71,7 +71,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="launch_browser" id="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "CHECKED" else ""#>
+                            <input type="checkbox" name="launch_browser" id="launch_browser" #if $sickbeard.LAUNCH_BROWSER then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="launch_browser">
                                 <span class="component-title">Launch Browser</span>
                                 <span class="component-desc">Should Sick Beard open its home page when started?</span>
@@ -79,7 +79,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         </div>
                         
                         <div class="field-pair">
-                            <input type="checkbox" name="version_notify" id="version_notify" #if $sickbeard.VERSION_NOTIFY then "CHECKED" else ""#>
+                            <input type="checkbox" name="version_notify" id="version_notify" #if $sickbeard.VERSION_NOTIFY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="version_notify">
                                 <span class="component-title">Check for Update</span>
                                 <span class="component-desc">Show notification about updates for Sick Beard if available.</span>
@@ -93,12 +93,11 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair">
                             <label class="nocheck clearfix" for="log_dir">
                                 <span class="component-title">Logging Directory</span>
-                                <input type="text" name="log_dir" id="log_dir" value="$sickbeard.LOG_DIR" size="35">
+                                <input type="text" name="log_dir" id="log_dir" value="$sickbeard.LOG_DIR" size="35" />
                             </label>
                         </div>
-                        
-                        <input type="submit" value="Save Changes">
-                        
+
+                        <input type="submit" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group1 -->
 
@@ -117,7 +116,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                     #set $m_dict = $metadata.get_metadata_generator_dict()
                                     <select id="metadataType">
                                     #for ($cur_name, $cur_generator) in $m_dict.items():
-                                    <option value="$GenericMetadata.makeID($cur_name)">$cur_name<br />
+                                    <option value="$GenericMetadata.makeID($cur_name)">$cur_name</option>
                                     #end for
                                     </select>
                                 </span>
@@ -136,12 +135,12 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 #set $cur_id = $GenericMetadata.makeID($cur_name)
 <div class="metadataDiv" id="$cur_id">
     <div class="metadata_options">
-        <label for="${cur_id}_show_metadata"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_show_metadata" #if $cur_metadata_inst.show_metadata then "CHECKED" else ""#/>&nbsp;Show Metadata</label>
-        <label for="${cur_id}_episode_metadata"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_episode_metadata" #if $cur_metadata_inst.episode_metadata then "CHECKED" else ""#/>&nbsp;Episode Metadata</label>
-        <label for="${cur_id}_fanart"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_fanart" #if $cur_metadata_inst.fanart then "CHECKED" else ""#/>&nbsp;Show Fanart Image</label>
-        <label for="${cur_id}_poster"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_poster" #if $cur_metadata_inst.poster then "CHECKED" else ""#/>&nbsp;Show Folder Image</label>
-        <label for="${cur_id}_episode_thumbnails"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_episode_thumbnails" #if $cur_metadata_inst.episode_thumbnails then "CHECKED" else ""#/>&nbsp;Episode Thumbnail</label>
-        <label for="${cur_id}_season_thumbnails"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_season_thumbnails" #if $cur_metadata_inst.season_thumbnails then "CHECKED" else ""#/>&nbsp;Season Thumbnail</label>
+        <label for="${cur_id}_show_metadata"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_show_metadata" #if $cur_metadata_inst.show_metadata then "checked=\"checked\"" else ""#/>&nbsp;Show Metadata</label>
+        <label for="${cur_id}_episode_metadata"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_episode_metadata" #if $cur_metadata_inst.episode_metadata then "checked=\"checked\"" else ""#/>&nbsp;Episode Metadata</label>
+        <label for="${cur_id}_fanart"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_fanart" #if $cur_metadata_inst.fanart then "checked=\"checked\"" else ""#/>&nbsp;Show Fanart Image</label>
+        <label for="${cur_id}_poster"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_poster" #if $cur_metadata_inst.poster then "checked=\"checked\"" else ""#/>&nbsp;Show Folder Image</label>
+        <label for="${cur_id}_episode_thumbnails"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_episode_thumbnails" #if $cur_metadata_inst.episode_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Episode Thumbnail</label>
+        <label for="${cur_id}_season_thumbnails"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_season_thumbnails" #if $cur_metadata_inst.season_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Season Thumbnail</label>
     </div>
     <div class="metadata_example">
         <label for="${cur_id}_show_metadata"><span id="${cur_id}_eg_show_metadata">$cur_metadata_inst.eg_show_metadata</span></label>
@@ -151,14 +150,13 @@ nameTestURL = "$sbRoot/config/general/testNaming";
         <label for="${cur_id}_episode_thumbnails"><span id="${cur_id}_eg_episode_thumbnails">$cur_metadata_inst.eg_episode_thumbnails</span></label>
         <label for="${cur_id}_season_thumbnails"><span id="${cur_id}_eg_season_thumbnails">$cur_metadata_inst.eg_season_thumbnails</span></label>
     </div>
-    <input type="hidden" name="${cur_id}_data" id="${cur_id}_data" value="$cur_metadata_inst.get_config()">
+    <input type="hidden" name="${cur_id}_data" id="${cur_id}_data" value="$cur_metadata_inst.get_config()" />
 </div>
 #end for
 
-                        <div class="clearfix"></div>
-                        
-                        <br /><input type="submit" value="Save Changes"><br/>
+                        <div class="clearfix" style="clear:left;"></div>
 
+                        <br /><input type="submit" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group2 -->
 
@@ -172,7 +170,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="web_ipv6" id="web_ipv6" #if $sickbeard.WEB_IPV6 then "CHECKED" else ""#>
+                            <input type="checkbox" name="web_ipv6" id="web_ipv6" #if $sickbeard.WEB_IPV6 then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="web_ipv6">
                                 <span class="component-title">Listen on IPv6</span>
                                 <span class="component-desc">Allow Sick Beard to bind to any available IPv6 address?</span>
@@ -180,7 +178,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         </div>
                         
                         <div class="field-pair">
-                            <input type="checkbox" name="web_log" id="web_log" #if $sickbeard.WEB_LOG then "CHECKED" else ""#>
+                            <input type="checkbox" name="web_log" id="web_log" #if $sickbeard.WEB_LOG then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="web_log">
                                 <span class="component-title">HTTP Logs</span>
                                 <span class="component-desc">Have Sick Beard's web server (cherrypy) generate logs?</span>
@@ -190,7 +188,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">HTTP Port</span>
-                                <input type="text" name="web_port" value="$sickbeard.WEB_PORT" size="10">
+                                <input type="text" name="web_port" value="$sickbeard.WEB_PORT" size="10" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -201,7 +199,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">HTTP Username</span>
-                                <input type="text" name="web_username" value="$sickbeard.WEB_USERNAME" size="35">
+                                <input type="text" name="web_username" value="$sickbeard.WEB_USERNAME" size="35" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -212,15 +210,15 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">HTTP Password</span>
-                                <input type="password" name="web_password" value="$sickbeard.WEB_PASSWORD" size="35">
+                                <input type="password" name="web_password" value="$sickbeard.WEB_PASSWORD" size="35" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
                                 <span class="component-desc">Password for authentication (blank for none)</span>
                             </label>
                         </div>
-                        
-                        <input type="submit" value="Save Changes">
+
+                        <input type="submit" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group3 -->
 
@@ -234,7 +232,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="season_folders_default" id="season_folders_default" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "CHECKED" else ""#>
+                            <input type="checkbox" name="season_folders_default" id="season_folders_default" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="season_folders_default">
                                 <span class="component-title">Use Season Folders</span>
                                 <span class="component-desc">Whether show should be created with season folders?</span>
@@ -242,30 +240,30 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         </div>
 
                         <div class="field-pair">
-                            <label class="clearfix" for="metadataTarget">
+                            <label class="clearfix" for="qualityPreset">
                                 <span class="component-title jumbo">Initial Quality:</span>
                                 <span class="component-desc">
                                     #set $selected = None
                                     <select id="qualityPreset">
-                                    <option value="0">Custom
+                                    <option value="0">Custom</option>
                                     #for $curPreset in sorted($qualityPresets):
-                                    <option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "SELECTED" else ""#>$qualityPresetStrings[$curPreset]
+                                    <option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
                                     #end for
                                     </select><br />
-                                    
+
 <div id="customQuality">
 <br/><h5>If I don't have the episode then download it in <b>one</b> of the following qualities:</h5>
 #set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
 <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
 #for $curQuality in sorted($anyQualityList):
-<option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$Quality.qualityStrings[$curQuality]
+<option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
 #end for
 </select><br />
 <br/><h5>Then Re-download the episodes in any or all of these qualities as they are available:</h5>
 #set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
 <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
 #for $curQuality in sorted($bestQualityList):
-<option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$Quality.qualityStrings[$curQuality]
+<option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
 #end for
 </select>
 </div>
@@ -273,9 +271,8 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 </span>
                             </label>
                         </div>
-                        
-                        <input type="submit" value="Save Changes">
-                        
+
+                        <input type="submit" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group4 -->
 
@@ -291,7 +288,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                     
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="naming_show_name" id="naming_show_name" #if $sickbeard.NAMING_SHOW_NAME then "CHECKED" else ""#>
+                            <input type="checkbox" name="naming_show_name" id="naming_show_name" #if $sickbeard.NAMING_SHOW_NAME then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_show_name">
                                 <span class="component-title">Show Name</span>
                                 <span class="component-desc">Include the TV show's name when renaming the file?</span>
@@ -299,7 +296,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="naming_ep_name" id="naming_ep_name" #if $sickbeard.NAMING_EP_NAME then "CHECKED" else ""#>
+                            <input type="checkbox" name="naming_ep_name" id="naming_ep_name" #if $sickbeard.NAMING_EP_NAME then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_ep_name">
                                 <span class="component-title">Episode Name</span>
                                 <span class="component-desc">Include the TV show's episode title when renaming the file?</span>
@@ -307,7 +304,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="naming_use_periods" id="naming_use_periods" #if $sickbeard.NAMING_USE_PERIODS then "CHECKED" else ""#>
+                            <input type="checkbox" name="naming_use_periods" id="naming_use_periods" #if $sickbeard.NAMING_USE_PERIODS then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_use_periods">
                                 <span class="component-title">Use Periods</span>
                                 <span class="component-desc">Replace the spaces with periods in the filename instead?</span>
@@ -315,7 +312,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "CHECKED" else ""#>
+                            <input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_quality">
                                 <span class="component-title">Quality</span>
                                 <span class="component-desc">Append the show quality to the end of the filename?</span>
@@ -323,7 +320,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="naming_dates" id="naming_dates" #if $sickbeard.NAMING_DATES then "CHECKED" else ""#>
+                            <input type="checkbox" name="naming_dates" id="naming_dates" #if $sickbeard.NAMING_DATES then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_dates">
                                 <span class="component-title">Air-By-Date Format</span>
                                 <span class="component-desc">Use the date instead of the season/episode format?</span>
@@ -340,7 +337,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_sep_type" id="naming_sep_type">
                                     #for ($i, $ex) in enumerate($config.naming_sep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "SELECTED" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "selected=\"selected\"" else ""#>$ex
                                     #end for
                                     </select>
                                 </span>
@@ -353,7 +350,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_ep_type" id="naming_ep_type">
                                     #for ($i, $ex) in enumerate($config.naming_ep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "SELECTED" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "selected=\"selected\"" else ""#>$ex
                                     #end for
                                     </select>
                                 </span>
@@ -375,7 +372,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_multi_ep_type" id="naming_multi_ep_type">
                                     #for ($i, $ex) in enumerate($config.naming_multi_ep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "SELECTED" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "selected=\"selected\"" else ""#>$ex
                                     #end for
                                     </select>
                                 </span>
@@ -394,7 +391,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Season Folder Format</span>
-                                <input type="text" id="season_folders_format" name="season_folders_format" value="$sickbeard.SEASON_FOLDERS_FORMAT" size="15">
+                                <input type="text" id="season_folders_format" name="season_folders_format" value="$sickbeard.SEASON_FOLDERS_FORMAT" size="15" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -405,14 +402,12 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">(eg. 'Season %0d' or 'season%02d')</span>
                             </label>
                         </div>
-                        
-                        <input type="submit" value="Save Changes">
-                        
+
+                        <input type="submit" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group5 -->
-                
-            <br/><input type="submit" value="Save Changes"><br/>
-                
+
+            <br/><input type="submit" value="Save Changes" /><br/>
             </div><!-- /config-components -->
 
 </form>

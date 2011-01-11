@@ -193,7 +193,7 @@ class GenericMetadata():
     
     def create_episode_metadata(self, ep_obj):
         if self.episode_metadata and ep_obj and not self._has_episode_metadata(ep_obj):
-            logger.log("Metadata provider "+self.name+" creating episode metadata for "+str(ep_obj.prettyName()), logger.DEBUG)
+            logger.log("Metadata provider "+self.name+" creating episode metadata for "+ep_obj.prettyName(), logger.DEBUG)
             return self.write_ep_file(ep_obj)
         return False
     

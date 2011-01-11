@@ -7,7 +7,7 @@
 <!--#set global $topmenu="config"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script>
+<script type="text/javascript" charset="utf-8">
 \$(document).ready(function(){
 
   \$('#testGrowl').click(function(){
@@ -55,12 +55,12 @@
 
 
 <div id="config">
-<div id="config-content" class="clearfix">
+<div id="config-content">
 
-<form id="form" action="saveNotifications" method="POST">
-            
+<form id="form" action="saveNotifications" method="post">
+
             <div id="config-components">
-                
+
                 <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
@@ -70,7 +70,7 @@
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="use_xbmc" id="use_xbmc" #if $sickbeard.USE_XBMC then "CHECKED" else ""# />  
+                            <input type="checkbox" name="use_xbmc" id="use_xbmc" #if $sickbeard.USE_XBMC then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_xbmc">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send XBMC commands?</span>
@@ -78,7 +78,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
+                            <input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="xbmc_notify_onsnatch">
                                 <span class="component-title">Notify on Snatch</span>
                                 <span class="component-desc">Send notification when we start a download?</span>
@@ -86,7 +86,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="xbmc_notify_ondownload" id="xbmc_notify_ondownload" #if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
+                            <input type="checkbox" name="xbmc_notify_ondownload" id="xbmc_notify_ondownload" #if $sickbeard.XBMC_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="xbmc_notify_ondownload">
                                 <span class="component-title">Notify on Download</span>
                                 <span class="component-desc">Send notification when we finish a download?</span>
@@ -94,7 +94,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="xbmc_update_library" id="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "CHECKED" else ""# /> 
+                            <input type="checkbox" name="xbmc_update_library" id="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="xbmc_update_library">
                                 <span class="component-title">Update Library</span>
                                 <span class="component-desc">Update XBMC library when we finish a download?</span>
@@ -102,7 +102,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="xbmc_update_full" id="xbmc_update_full" #if $sickbeard.XBMC_UPDATE_FULL then "CHECKED" else ""# />
+                            <input type="checkbox" name="xbmc_update_full" id="xbmc_update_full" #if $sickbeard.XBMC_UPDATE_FULL then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="xbmc_update_full">
                                 <span class="component-title">Full Library Update</span>
                                 <span class="component-desc">Do a full library update if per-show fails?</span>
@@ -146,8 +146,8 @@
                             </label>
                         </div>
 
-                    <input type="button" value="Test XBMC" id="testXBMC">
-                    <input type="submit" value="Save Changes">
+                    <input type="button" value="Test XBMC" id="testXBMC" />
+                    <input type="submit" value="Save Changes" />
 
                     </fieldset>
                 </div><!-- /component-group -->
@@ -161,7 +161,7 @@
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "CHECKED" else ""# /> 
+                            <input type="checkbox" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="use_growl">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send Growl notifications?</span>
@@ -169,7 +169,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
+                            <input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="growl_notify_onsnatch">
                                 <span class="component-title">Notify on Snatch</span>
                                 <span class="component-desc">Send notification when we start a download?</span>
@@ -177,7 +177,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="growl_notify_ondownload" id="growl_notify_ondownload" #if $sickbeard.GROWL_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
+                            <input type="checkbox" name="growl_notify_ondownload" id="growl_notify_ondownload" #if $sickbeard.GROWL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="growl_notify_ondownload">
                                 <span class="component-title">Notify on Download</span>
                                 <span class="component-desc">Send notification when we finish a download?</span>
@@ -210,8 +210,8 @@
                             </label>
                         </div>
 
-                    <input type="button" value="Test Growl" id="testGrowl">
-                    <input type="submit" value="Save Changes">
+                    <input type="button" value="Test Growl" id="testGrowl" />
+                    <input type="submit" value="Save Changes" />
 
                     </fieldset>
                 </div><!-- /component-group -->
@@ -225,19 +225,19 @@
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "CHECKED" else ""# />
+                            <input type="checkbox" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_twitter">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard post tweets on Twitter?</span>
                             </label>
                             <label class="nocheck clearfix" for="use_twitter">
-                                <span class="component-title">&nbsp</span>
+                                <span class="component-title">&nbsp;</span>
                                 <span class="component-desc">You may want to use a second account.</span>
                             </label>
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="twitter_notify_onsnatch" id="twitter_notify_onsnatch" #if $sickbeard.TWITTER_NOTIFY_ONSNATCH then "CHECKED" else ""# /> 
+                            <input type="checkbox" name="twitter_notify_onsnatch" id="twitter_notify_onsnatch" #if $sickbeard.TWITTER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="twitter_notify_onsnatch">
                                 <span class="component-title">Notify on Snatch</span>
                                 <span class="component-desc">Send notification when we start a download?</span>
@@ -245,7 +245,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="twitter_notify_ondownload" id="twitter_notify_ondownload" #if $sickbeard.TWITTER_NOTIFY_ONDOWNLOAD then "CHECKED" else ""# />
+                            <input type="checkbox" name="twitter_notify_ondownload" id="twitter_notify_ondownload" #if $sickbeard.TWITTER_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="twitter_notify_ondownload">
                                 <span class="component-title">Notify on Download</span>
                                 <span class="component-desc">Send notification when we finish a download?</span>
@@ -258,7 +258,7 @@
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-desc">Click the "Request Authorization" button.<br/> This will open a new page containing an auth key.<br/> Note: if nothing happens check your popup blocker.<br/></span>
-                                <input type="button" value="Request Authorization" id="twitterStep1">
+                                <input type="button" value="Request Authorization" id="twitterStep1" />
                             </label>
                         </div>
 
@@ -268,10 +268,10 @@
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-desc">Enter the key Twitter gave you below, and click "Verify Key".<br/></span>
-                                <input type="text" id="twitter_key" value="" size="35"><br />
+                                <input type="text" id="twitter_key" value="" size="35" /><br />
                             </label>
                             <label class="nocheck clearfix">
-                                <input type="button" value="Verify Key" id="twitterStep2">
+                                <input type="button" value="Verify Key" id="twitterStep2" />
                             </label>
                         </div>
 
@@ -281,13 +281,13 @@
                             </label>
                         </div>
 
-                    <input type="button" value="Test Twitter" id="testTwitter">
-                    <input type="submit" value="Save Changes">
+                    <input type="button" value="Test Twitter" id="testTwitter" />
+                    <input type="submit" value="Save Changes" />
 
                     </fieldset>
                 </div><!-- /component-group -->
 
-            <br/><input type="submit" value="Save Changes"><br/>
+            <br/><input type="submit" value="Save Changes" /><br/>
 
             </div><!-- /config-components -->
 

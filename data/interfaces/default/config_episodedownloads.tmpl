@@ -8,7 +8,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript">
+<script type="text/javascript" charset="utf-8">
 \$(document).ready(function(){
 
     \$.fn.nzb_method_handler = function() {
@@ -26,16 +26,16 @@
     }
 
     \$('#nzb_method').change(\$(this).nzb_method_handler);
-    
+
     \$(this).nzb_method_handler();
 
 });
 </script>
 
 <div id="config">
-<div id="config-content" class="clearfix">
+<div id="config-content">
 <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.PROG_DIR</span> "</h5>
-<form action="saveEpisodeDownloads" method="POST">
+<form action="saveEpisodeDownloads" method="post">
 
             <div id="config-components">
                 
@@ -48,7 +48,7 @@
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="download_propers" id="download_propers" #if $sickbeard.DOWNLOAD_PROPERS == True then "CHECKED" else ""# />
+                            <input type="checkbox" name="download_propers" id="download_propers" #if $sickbeard.DOWNLOAD_PROPERS == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="download_propers">
                                 <span class="component-title">Download Propers</span>
                                 <span class="component-desc">Replace original download with "Proper/Repack" if nuked?</span>
@@ -89,7 +89,7 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes"><br/>
+                        <input type="submit" value="Save Changes" /><br/>
                         
                     </fieldset>
                 </div><!-- /component-group1 -->
@@ -103,18 +103,18 @@
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <label class="clearfix" for="metadataTarget">
+                            <label class="clearfix" for="nzb_method">
                                 <span class="component-title jumbo">NZB Method:</span>
                                 <span class="component-desc">
                                     <select name="nzb_method" id="nzb_method">
                                     #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd"}
                                     #for $curAction in ('sabnzbd', 'blackhole'):
                                       #if $sickbeard.NZB_METHOD == $curAction:
-                                        #set $nzb_method = "SELECTED"
+                                        #set $nzb_method = "selected=\"selected\""
                                       #else
                                         #set $nzb_method = ""
                                       #end if
-                                    <option value="$curAction" $nzb_method>$nzb_method_text[$curAction]
+                                    <option value="$curAction" $nzb_method>$nzb_method_text[$curAction]</option>
                                     #end for
                                     </select>
                                 </span>
@@ -203,7 +203,7 @@
                         </div>
                         
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes"><br/>
+                        <input type="submit" value="Save Changes" /><br/>
                         
                     </fieldset>
                 </div><!-- /component-group2 -->
@@ -237,7 +237,7 @@
 
                         
                         <div class="field-pair">
-                            <input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "CHECKED" else ""# />
+                            <input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="keep_processed_dir">
                                 <span class="component-title">Keep Original Files</span>
                                 <span class="component-desc">Keep original files after they've been processed?</span>
@@ -245,7 +245,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="move_associated_files" id="move_associated_files" #if $sickbeard.MOVE_ASSOCIATED_FILES == True then "CHECKED" else ""# />
+                            <input type="checkbox" name="move_associated_files" id="move_associated_files" #if $sickbeard.MOVE_ASSOCIATED_FILES == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="move_associated_files">
                                 <span class="component-title">Move Associated Files</span>
                                 <span class="component-desc">Move srr/srt/sfv/etc files with the episode when processed?</span>
@@ -257,7 +257,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "CHECKED" else ""# />
+                            <input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="rename_episodes">
                                 <span class="component-title">Rename Episodes</span>
                                 <span class="component-desc">Rename episode using the naming settings in <a href="$sbRoot/config/general">General</a>?</span>
@@ -265,7 +265,7 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="process_automatically" id="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "CHECKED" else ""# />
+                            <input type="checkbox" name="process_automatically" id="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="process_automatically">
                                 <span class="component-title">Scan and Process</span>
                                 <span class="component-desc">Scan and post-process any files in your <i>TV Download Dir</i>?</span>
@@ -277,12 +277,12 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes"><br/>
+                        <input type="submit" value="Save Changes" /><br/>
 
                     </fieldset>
                 </div><!-- /component-group3 -->
 
-            <br/><input type="submit" value="Save Changes"><br/>
+            <br/><input type="submit" value="Save Changes" /><br/>
 
             </div><!-- /config-components -->
 
