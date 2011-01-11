@@ -174,7 +174,7 @@ Custom
     #set $show_div = "ep_listing listing_default"
 
     #if $sort == "show": 
-        <br/>
+        <br/><br/>
     #end if
     
     #for $cur_result in $sql_results:
@@ -183,6 +183,18 @@ Custom
         #if $sort == "network":
             #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
                 <br /><h1 class="network">$cur_result["network"]</h1>
+                #set $cur_ep_airdate = int($cur_result["airdate"])
+                #if $cur_ep_airdate < $today:
+                    #set $show_div = "ep_listing listing_overdue"
+                #elif $cur_ep_airdate >= $next_week:
+                    #set $show_div = "ep_listing listing_toofar"
+                #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
+                    #if $cur_ep_airdate == $today:
+                        #set $show_div = "ep_listing listing_current"
+                    #else:
+                        #set $show_div = "ep_listing listing_default"
+                    #end if
+                #end if
                 #set $cur_segment = $cur_result["network"]
             #end if
         #elif $sort == "date":
