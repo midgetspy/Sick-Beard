@@ -25,10 +25,9 @@ import datetime
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
-                 "dirfix", "samplefix", "nfofix", "dvdextras",
-                 "sample", "extras", "dubbed", "german",
-                "french", "core2hd")
+resultFilters = ("sub(pack|s|bed)", "nlsub(bed)?", "swesub(bed)?",
+                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
+                 "dubbed", "german", "french", "core2hd")
 
 def filterBadReleases(name):
 
