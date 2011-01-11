@@ -1828,6 +1828,15 @@ class WebInterface:
         redirect("/comingEpisodes")
 
     @cherrypy.expose
+    def toggleList(self):
+        
+        # toggle the setting
+        sickbeard.USE_LISTVIEW = not sickbeard.USE_LISTVIEW
+        
+        # forward to the coming eps page
+        redirect("/comingEpisodes")
+
+    @cherrypy.expose
     def comingEpisodes(self, sort="date"):
 
         myDB = db.DBConnection()
@@ -1866,6 +1875,7 @@ class WebInterface:
             { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
             { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
             { 'title': 'Toggle Banner View', 'path': 'toggleBanners/' },
+            { 'title': 'Toggle List View', 'path': 'toggleList/' },
         ]
         t.sort = sort
         #t.epList = epList
