@@ -615,7 +615,11 @@ class PostProcessor(object):
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
-        dest_path = self._find_ep_destination_folder(ep_obj)
+        try:
+            dest_path = self._find_ep_destination_folder(ep_obj)
+        except exceptions.ShowDirNotFoundException:
+            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
+            
         self._log(u"Destination folder for this episode: "+str(dest_path), logger.DEBUG)
         
         # if the dir doesn't exist (new season folder) then make it
