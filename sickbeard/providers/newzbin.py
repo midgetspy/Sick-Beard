@@ -265,7 +265,7 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _doSearch(self, searchStr):
 
-        data = self._getRSSData(searchStr)
+        data = self._getRSSData(searchStr.encode('utf-8'))
         
         item_list = []
 

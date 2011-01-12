@@ -39,8 +39,6 @@ from sickbeard import sceneHelpers
 
 from sickbeard import encodingKludge as ek
 
-from sickbeard.notifiers import xbmc
-
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -617,7 +615,11 @@ class PostProcessor(object):
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
-        dest_path = self._find_ep_destination_folder(ep_obj)
+        try:
+            dest_path = self._find_ep_destination_folder(ep_obj)
+        except exceptions.ShowDirNotFoundException:
+            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
+            
         self._log(u"Destination folder for this episode: "+str(dest_path), logger.DEBUG)
         
         # if the dir doesn't exist (new season folder) then make it
@@ -648,20 +650,14 @@ class PostProcessor(object):
         history.logDownload(ep_obj, self.file_path)
 
         # send notifications
-        notifiers.notify(common.NOTIFY_DOWNLOAD, ep_obj.prettyName(True))
+        notifiers.notify_download(ep_obj.prettyName(True))
 
         # generate nfo/tbn
         ep_obj.createMetaFiles()
         ep_obj.saveToDB()
 
-        # this needs to be factored out into the notifiers
-        if sickbeard.XBMC_UPDATE_LIBRARY:
-            for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-                # do a per-show update first, if possible
-                if not xbmc.updateLibrary(curHost, showName=ep_obj.show.name) and sickbeard.XBMC_UPDATE_FULL:
-                    # do a full update if requested
-                    self._log(u"Update of show directory failed on " + curHost + ", trying full update as requested")
-                    xbmc.updateLibrary(curHost)
+        # do the library update
+        notifiers.xbmc_notifier.update_library(ep_obj.show.name)
 
         # run extra_scripts
         self._run_extra_scripts(ep_obj)

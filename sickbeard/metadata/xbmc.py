@@ -31,10 +31,30 @@ import xml.etree.cElementTree as etree
 
 class XBMCMetadata(generic.GenericMetadata):
     
-    def __init__(self):
-        generic.GenericMetadata.__init__(self)
+    def __init__(self,
+                 show_metadata=False,
+                 episode_metadata=False,
+                 poster=False,
+                 fanart=False,
+                 episode_thumbnails=False,
+                 season_thumbnails=False):
+
+        generic.GenericMetadata.__init__(self,
+                                         show_metadata,
+                                         episode_metadata,
+                                         poster,
+                                         fanart,
+                                         episode_thumbnails,
+                                         season_thumbnails)
         
         self.name = 'XBMC'
+
+        self.eg_show_metadata = "tvshow.nfo"
+        self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
+        self.eg_fanart = "fanart.jpg"
+        self.eg_poster = "folder.jpg"
+        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.tbn"
+        self.eg_season_thumbnails = "season##.tbn"
     
     def _show_data(self, show_obj):
         """

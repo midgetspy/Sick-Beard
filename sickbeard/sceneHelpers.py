@@ -25,10 +25,9 @@ import datetime
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ("subpack", "nlsub", "swesub", "subbed", "subs",
-                 "dirfix", "samplefix", "nfofix", "dvdextras",
-                 "sample", "extras", "dubbed", "german",
-                "french", "core2hd")
+resultFilters = ("sub(pack|s|bed)", "nlsub(bed)?", "swesub(bed)?",
+                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
+                 "dubbed", "german", "french", "core2hd")
 
 def filterBadReleases(name):
 
@@ -55,7 +54,7 @@ def sanitizeSceneName (name):
     for x in ",:()'!":
         name = name.replace(x, "")
 
-    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and")
+    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
     name = re.sub("\.\.*", ".", name)
 
     if name.endswith('.'):

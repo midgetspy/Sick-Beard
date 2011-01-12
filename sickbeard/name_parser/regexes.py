@@ -57,7 +57,7 @@ ep_regexes = [
                s(?P<season_num>\d+)[\. _-]*                # S01 and optional separator
                e(?P<ep_num>\d+)                            # E02 and separator
                ([\. _-]*[e-](?P<extra_ep_num>\d+))*        # additional E03/etc
-               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               [\. _-]*((?P<extra_info>.+?)                # Source.Quality.Etc
                (-(?P<release_group>\w+))?)?$               # Group
                '''),
 
@@ -71,7 +71,7 @@ ep_regexes = [
                (?P<season_num>\d+)x                        # 1x
                (?P<ep_num>\d+)                             # 02 and separator
                ([\. _-]*[x-](?P<extra_ep_num>\d+))*        # additional x03/etc
-               ([\. _-]+(?P<extra_info>[^-]+?)             # Source_Quality_Etc-
+               [\. _-]*((?P<extra_info>[^-]+?)             # Source_Quality_Etc-
                (-(?P<release_group>.+))?)?$                # Group
                '''),
         
@@ -79,18 +79,18 @@ ep_regexes = [
                # Show.Name.2010.11.23.Source.Quality.Etc-Group
                # Show Name - 2010-11-23 - Ep Name
                '''
-               ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
+               ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
                (?P<air_year>\d{4})[\. _-]+                 # 2010 and separator
                (?P<air_month>\d{2})[\. _-]+                # 11 and separator
                (?P<air_day>\d{2})                          # 23 and separator
-               ([\. _-]+(?P<extra_info>.+?)                # Source.Quality.Etc
+               [\. _-]*((?P<extra_info>.+?)                # Source.Quality.Etc
                (-(?P<release_group>.+))?)?$                # Group
                '''),
               
               ('stupid',
                # tpz-abc102
                '''
-               (?P<release_group>.+?)-\w+?[\. ]?     # tpz-abc
+               (?P<release_group>.+?)-\w+?[\. ]?           # tpz-abc
                (?P<season_num>\d{1,2})                     # 1
                (?P<ep_num>\d{2})$                          # 02
                '''),
@@ -101,7 +101,7 @@ ep_regexes = [
                ^(?P<series_name>.+?)[\. _-]+               # Show_Name and separator
                (?P<season_num>\d{1,2})                     # 1
                (?P<ep_num>\d{2})                           # 02 and separator
-               ([\. _-]+(?P<extra_info>[^-]+)              # Source_Quality_Etc-
+               ([\. _-]+(?P<extra_info>(?!\d{3}[\. _-]+)[^-]+) # Source_Quality_Etc-
                (-(?P<release_group>.+))?)?$                # Group
                '''),
               
@@ -135,10 +135,10 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)[\. _-]+)?            # Show_Name and separator
                (e(p(isode)?)?|part|pt)[\. _-]?             # e, ep, episode, or part
-               (?P<ep_num>[\divx]+)                        # first ep num
+               (?P<ep_num>(\d+|[ivx]+))                        # first ep num
                ([\. _-]+((and|&|to)[\. _-]+)?              # and/&/to joiner
                ((e(p(isode)?)?|part|pt)[\. _-]?)?          # e, ep, episode, or part
-               (?P<extra_ep_num>[\divx]+))*                # second ep num
+               (?P<extra_ep_num>(\d+|[ivx]+)))*                # second ep num
                ([\. _-]+(?P<extra_info>.+?))?              # Ep Name/etc
                (-(?P<release_group>.+))?$                  # Group               '''
                ),

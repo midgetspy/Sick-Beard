@@ -1,3 +1,21 @@
+# Author: Nic Wolfe <nic@wolfeden.ca>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import with_statement
 
 import os.path
@@ -9,80 +27,48 @@ from lib.tvdb_api import tvdb_exceptions
 from sickbeard.common import *
 
 from sickbeard.tv import TVShow
-from sickbeard import exceptions
-from sickbeard import helpers
-from sickbeard import logger
-from sickbeard import ui
+from sickbeard import exceptions, helpers, logger, ui
+from sickbeard import generic_queue
 
+class ShowQueue(generic_queue.GenericQueue):
 
-class ShowQueue:
     def __init__(self):
+        generic_queue.GenericQueue.__init__(self)
+        self.queue_name = "SHOWQUEUE"
 
-        self.currentItem = None
-        self.queue = []
-
-        self.thread = None
 
     def _isInQueue(self, show, actions):
-        return show in [x.show for x in self.queue if x.action in actions]
+        return show in [x.show for x in self.queue if x.action_id in actions]
 
     def _isBeingSomethinged(self, show, actions):
         return self.currentItem != None and show == self.currentItem.show and \
-                self.currentItem.action in actions
+                self.currentItem.action_id in actions
 
     def isInUpdateQueue(self, show):
-        return self._isInQueue(show, (QueueActions.UPDATE, QueueActions.FORCEUPDATE))
+        return self._isInQueue(show, (ShowQueueActions.UPDATE, ShowQueueActions.FORCEUPDATE))
 
     def isInRefreshQueue(self, show):
-        return self._isInQueue(show, (QueueActions.REFRESH,))
+        return self._isInQueue(show, (ShowQueueActions.REFRESH,))
 
     def isInRenameQueue(self, show):
-        return self._isInQueue(show, (QueueActions.RENAME,))
+        return self._isInQueue(show, (ShowQueueActions.RENAME,))
 
     def isBeingAdded(self, show):
-        return self._isBeingSomethinged(show, (QueueActions.ADD,))
+        return self._isBeingSomethinged(show, (ShowQueueActions.ADD,))
 
     def isBeingUpdated(self, show):
-        return self._isBeingSomethinged(show, (QueueActions.UPDATE, QueueActions.FORCEUPDATE))
+        return self._isBeingSomethinged(show, (ShowQueueActions.UPDATE, ShowQueueActions.FORCEUPDATE))
 
     def isBeingRefreshed(self, show):
-        return self._isBeingSomethinged(show, (QueueActions.REFRESH,))
+        return self._isBeingSomethinged(show, (ShowQueueActions.REFRESH,))
 
     def isBeingRenamed(self, show):
-        return self._isBeingSomethinged(show, (QueueActions.RENAME,))
+        return self._isBeingSomethinged(show, (ShowQueueActions.RENAME,))
 
     def _getLoadingShowList(self):
         return [x for x in self.queue+[self.currentItem] if x != None and x.isLoading]
 
     loadingShowList = property(_getLoadingShowList)
-
-    def run(self):
-
-        # only start a new task if one isn't already going
-        if self.thread == None or self.thread.isAlive() == False:
-
-            # if the thread is dead then the current item should be finished
-            if self.currentItem != None:
-                self.currentItem.finish()
-                self.currentItem = None
-
-            # if there's something in the queue then run it in a thread and take it out of the queue
-            if len(self.queue) > 0:
-
-                queueItem = self.queue[0]
-
-                logger.log(u"Starting new task: " + QueueActions.TEXT[queueItem.action] + " - " + queueItem.name)
-
-                # launch the queue item in a thread
-                # TODO: improve thread name
-                threadName = "QUEUE-" + QueueActions.TEXT[queueItem.action].replace(" ","").upper()
-                self.thread = threading.Thread(None, queueItem.execute, threadName)
-                self.thread.start()
-
-                self.currentItem = queueItem
-
-                # take it out of the queue
-                del self.queue[0]
 
     def updateShow(self, show, force=False):
 
@@ -114,9 +100,8 @@ class ShowQueue:
             return
 
         queueItemObj = QueueItemRefresh(show)
-
-        # refresh gets put at the front cause it's quick
-        self.queue.insert(0, queueItemObj)
+        
+        self.queue.append(queueItemObj)
 
         return queueItemObj
 
@@ -134,21 +119,21 @@ class ShowQueue:
 
         return queueItemObj
 
-class QueueActions:
+class ShowQueueActions:
     REFRESH=1
     ADD=2
     UPDATE=3
     FORCEUPDATE=4
     RENAME=5
+    
+    names = {REFRESH: 'Refresh',
+                    ADD: 'Add',
+                    UPDATE: 'Update',
+                    FORCEUPDATE: 'Force Update',
+                    RENAME: 'Rename',
+                    }
 
-    TEXT = {REFRESH: 'Refresh',
-            ADD: 'Add',
-            UPDATE: 'Update',
-            FORCEUPDATE: 'Forced Update',
-            RENAME: 'Rename'
-    }
-
-class QueueItem:
+class ShowQueueItem(generic_queue.QueueItem):
     """
     Represents an item in the queue waiting to be executed
 
@@ -158,11 +143,12 @@ class QueueItem:
     - show being updated
     - show being force updated
     """
-    def __init__(self, action, show=None):
-        self.action = action
+    def __init__(self, action_id, show):
+        generic_queue.QueueItem.__init__(self, ShowQueueActions.names[action_id], action_id)
         self.show = show
-
-        self.inProgress = False
+    
+    def isInQueue(self):
+        return self in sickbeard.showQueueScheduler.action.queue+[sickbeard.showQueueScheduler.action.currentItem]
 
     def _getName(self):
         return self.show.name
@@ -170,25 +156,12 @@ class QueueItem:
     def _isLoading(self):
         return False
 
-    name = property(_getName)
+    show_name = property(_getName)
 
     isLoading = property(_isLoading)
 
-    def isInQueue(self):
-        return self in sickbeard.showQueueScheduler.action.queue+[sickbeard.showQueueScheduler.action.currentItem]
 
-    def execute(self):
-        """Should subclass this"""
-
-        logger.log(u"Beginning task")
-        self.inProgress = True
-
-    def finish(self):
-
-        logger.log(u"Finished performing a task")
-        self.inProgress = False
-
-class QueueItemAdd(QueueItem):
+class QueueItemAdd(ShowQueueItem):
     def __init__(self, tvdb_id, showDir):
 
         self.tvdb_id = tvdb_id
@@ -197,14 +170,14 @@ class QueueItemAdd(QueueItem):
         self.show = None
 
         # this will initialize self.show to None
-        QueueItem.__init__(self, QueueActions.ADD)
-
+        ShowQueueItem.__init__(self, ShowQueueActions.ADD, self.show)
+        
     def _getName(self):
         if self.show == None:
             return self.showDir
         return self.show.name
 
-    name = property(_getName)
+    show_name = property(_getName)
 
     def _isLoading(self):
         if self.show == None:
@@ -215,7 +188,7 @@ class QueueItemAdd(QueueItem):
 
     def execute(self):
 
-        QueueItem.execute(self)
+        ShowQueueItem.execute(self)
 
         logger.log(u"Starting to add show "+self.showDir)
 
@@ -242,7 +215,7 @@ class QueueItemAdd(QueueItem):
 
         except exceptions.MultipleShowObjectsException:
             logger.log(u"The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
-            ui.flash.error("The show in " + self.showDir + " is already in your show list, skipping")
+            ui.flash.error('Show skipped', "The show in " + self.showDir + " is already in your show list")
             self._finishEarly()
             return
 
@@ -287,13 +260,16 @@ class QueueItemAdd(QueueItem):
         self.finish()
 
 
-class QueueItemRefresh(QueueItem):
+class QueueItemRefresh(ShowQueueItem):
     def __init__(self, show=None):
-        QueueItem.__init__(self, QueueActions.REFRESH, show)
+        ShowQueueItem.__init__(self, ShowQueueActions.REFRESH, show)
+
+        # do refreshes first because they're quick
+        self.priority = generic_queue.QueuePriorities.HIGH
 
     def execute(self):
 
-        QueueItem.execute(self)
+        ShowQueueItem.execute(self)
 
         logger.log(u"Performing refresh on "+self.show.name)
 
@@ -302,13 +278,13 @@ class QueueItemRefresh(QueueItem):
 
         self.inProgress = False
 
-class QueueItemRename(QueueItem):
+class QueueItemRename(ShowQueueItem):
     def __init__(self, show=None):
-        QueueItem.__init__(self, QueueActions.RENAME, show)
+        ShowQueueItem.__init__(self, ShowQueueActions.RENAME, show)
 
     def execute(self):
 
-        QueueItem.execute(self)
+        ShowQueueItem.execute(self)
 
         logger.log(u"Performing rename on "+self.show.name)
 
@@ -316,14 +292,14 @@ class QueueItemRename(QueueItem):
 
         self.inProgress = False
 
-class QueueItemUpdate(QueueItem):
+class QueueItemUpdate(ShowQueueItem):
     def __init__(self, show=None):
-        QueueItem.__init__(self, QueueActions.UPDATE, show)
+        ShowQueueItem.__init__(self, ShowQueueActions.UPDATE, show)
         self.force = False
 
     def execute(self):
 
-        QueueItem.execute(self)
+        ShowQueueItem.execute(self)
 
         logger.log(u"Beginning update of "+self.show.name)
 
@@ -382,6 +358,6 @@ class QueueItemUpdate(QueueItem):
 
 class QueueItemForceUpdate(QueueItemUpdate):
     def __init__(self, show=None):
-        QueueItem.__init__(self, QueueActions.FORCEUPDATE, show)
+        ShowQueueItem.__init__(self, ShowQueueActions.FORCEUPDATE, show)
         self.force = True
 

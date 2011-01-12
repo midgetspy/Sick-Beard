@@ -1,283 +1,342 @@
+* { outline: 0; }
+img { border: 0; }
+
 body {
-	font-family: 'Verdana', 'Helvetica', 'Sans-serif', 'sans';
-	font-size: 12px;
-	line-height: 18px;
-	padding: 15px;
-	margin: 0px;
+background-color:#fff;
+color:#000;
+font-family:'Verdana', 'Helvetica', 'Sans-serif', 'sans';
+font-size:12px;
+line-height:18px;
+margin:0;
+padding:0;
 }
 
 form {
-  margin: 0px;
-  padding: 0px;
-  border: none;
-  display: inline;
+border:none;
+display:inline;
+margin:0;
+padding:0;
 }
 
-legend {
-  font-weight: bold;
-}
-div.EntryBlock {
-  display: inline;
-}
-div.EntryBlock form {
-  display: inline;
-}
-
+/* only used in config_timezones.tmpl */
 fieldset.EntryFieldSet {
-  vertical-align: top;
-  display: inline;
-  padding: 7px;
-  margin: 5px;
+vertical-align:top;
+display:inline;
+border-color:#3a3a3a;
+margin:5px;
+padding:7px;
 }
-.MainMenu a {
-	font-weight: bold;
-	padding: 3px;
-    padding-bottom: 7px;
-	text-decoration: none;
-	padding-left: 12px;
-    padding-right: 12px;
+legend {
+color:#000;
+font-weight:700;
 }
+/* --------------------------------------------- */
 
-.SubMenu a {
-	font-weight: bold;
-	padding: 3px;
-    padding-bottom: 7px;
-	text-decoration: none;
-	padding-left: 12px;
-    padding-right: 12px;
-    
-}
-
-a.current {
-	border: none;
-	padding: 3px;
-	padding-bottom: 7px;
-	padding-left: 12px;
-    padding-right: 12px;
-}
-
-a.current {
-	color:white;
-}
-
-a.current:hover {
-	border: none;
-}
-
-
-.block {
-	padding: 10px;
-}
-
-.blockWithBorder {
-	display: block;
-	border-width: thin;
-	border-style: solid;
-	padding: 5px;
-}
-
-.MainMenu {
-	display: block;
-	padding: 5px;
-
-}
-.SubMenu {
-	display: block;
-	padding: 5px;
-}
-
-table {
-	font-size: 9pt;
-	margin: 0px;
-}
-td, td {
-  padding: 5px;
-}
-th {
-	font-weight: bold;
-}
-
-tr.active {
-	font-weight: bold;
-}
-
-tr.finished {
-	font-weight: normal;
-}
-
-tr.waiting {
-	font-style: italic;
-}
-
-td.pre {
-	font-size: 13px;
-	font-family: 'courier new',courier,serif;
-	font-weight: bold;
-}
-
-h1 {
-  text-align: left;
-  font-size: 19px;
-  font-weight: normal;
-  padding-bottom: 4px;
-}
-* html h1 {
-  padding-bottom: 2px;
-}
-h2 {
-  font-size: 18px;
-  font-weight: bold;
+/* these are for incl_top.tmpl */
+#header {
+padding-top:3px;
 }
 
 #header a:hover {
-    background: none;
+background:none;
 }
 
 #tagline {
-	display: block;
-	position: relative;
-	top: -18px;
-	float: right;
-	text-align: right;
-	font-size: 10px;
-	font-weight: normal;
+display:block;
+position:relative;
+padding-right:10px;
+top:1px;
+float:right;
+text-align:right;
+font-size:10px;
+font-weight:400;
 }
 
 #logo {
-	font-size: 33px;
-	font-family: Arial, Helvetica, sans-serif;
-	font-weight: bold ;
-	text-transform: uppercase;
-	padding-left: 20px;
+font-size:33px;
+font-family:Arial, Helvetica, sans-serif;
+font-weight:700;
+text-transform:uppercase;
+padding-left:20px;
 }
 
 #versiontext {
-	font-size: 20px;
-	font-family: Arial, Helvetica, sans-serif;
-	text-transform: lowercase;
-	color: #57442B;
+font-size:20px;
+font-family:Arial, Helvetica, sans-serif;
+text-transform:lowercase;
+color:#57442B;
 }
+
+.MainMenu {
+display:block;
+background-color:#F5F1E4;
+padding:5px;
+}
+
+.MainMenu a {
+font-weight:700;
+text-decoration:none;
+color:#4e4e4e;
+padding:3px 12px 7px;
+}
+
+.SubMenu {
+display:block;
+padding:5px;
+}
+
+.SubMenu a {
+font-weight:700;
+text-decoration:none;
+color:#f5f5f5;
+padding:3px 12px 7px;
+}
+/* --------------------------------------------- */
+
+a.current {
+border:none;
+color:#ccc;
+background-color:#000;
+padding:3px 12px 7px;
+}
+
+a.current:hover {
+border:none;
+}
+
+table {
+font-size:9pt;
+margin:0;
+}
+
+td,td {
+padding:5px;
+}
+
+tr.active {
+font-weight:700;
+}
+
+tr.finished {
+font-weight:400;
+}
+
+tr.waiting {
+font-style:italic;
+}
+
+td.pre {
+font-size:13px;
+font-family:'courier new',courier,serif;
+font-weight:700;
+}
+
+h1 {
+text-align:left;
+font-size:19px;
+line-height:20px;
+font-weight:400;
+padding-bottom:4px;
+margin-bottom:12px;
+border-bottom:1px solid #4e4e4e;
+}
+
+h1 a {
+text-decoration:none;
+}
+
+h2 {
+font-size:18px;
+font-weight:700;
+}
+
+.h2footer {
+margin-top:-32px;
+margin-right:5px;
+}
+
+.separator {
+font-size:90%;
+color:#999;
+}
+
+div select {
+font-size:1.1em;
+border:1px solid #d4d0c8;
+}
+
+div select option {
+line-height:1.4;
+padding:0 10px;
+}
+
+/* --------------- alignment ------------------- */
+.float-left {
+float:left;
+}
+
+.float-right {
+float:right;
+}
+
+.align-left {
+text-align:left;
+}
+
+.align-right {
+text-align:right;
+}
+/* --------------------------------------------- */
 
 .footer {
-  text-align: center;
-  padding-bottom: 5px;
-  margin-top: 20px;
+text-align:center;
+padding-bottom:5px;
+margin-top:20px;
+background-color:#F5F1E4;
+border-top:1px solid #000;
+color:#4e4e4e;
 }
+
 .sickbeardTable {
 width:80%;
-margin-left: 10%;
-margin-right: 10%;
+margin-left:auto;
+margin-right:auto;
 }
 
-.normalheight, .doubleheight, .tripleheight, .pattern, .result, .heading1, .heading2, .heading3 {float:left; border-left:1px }
-.normalheight, .doubleheight, .tripleheight, .heading1 {width:125px;}
-.normalheight {}
-.doubleheight {height:30px;}
-.tripleheight {height:60px;}
-.row{clear:left;}
-.pattern, .heading2 {width:70px}
-.result, .heading3  {width:125px}
-#Keytable {text-align:center;}
-.heading1, .heading2, .heading3{font-weight:bold; background-color:black; color:white;}
-
-
-.plotLink {
-  font-size: 9px;
+.sickbeardTable th{
+padding: 2px;
+font-weight:700;
+background-color:#333;
+color:#FFF;
 }
 
-.plotDiv {
-  display: none;
-}
-
-
-/*
-Son of Suckerfish Dropdowns
-By Patrick Griffiths and Dan Webb.
-http://htmldog.com/articles/suckerfish/dropdowns/
-*/
-#nav, #nav ul {
-	padding: 0;
-	margin: 0;
-	list-style: none;
-}
-
-#nav a {
-	display: block;
-	width: 4em;
-    padding-bottom:0;
-}
-
-
-#nav li ul {
-	position: absolute;
-	width: 6em;
-	left: -999em;
-    background-color:white;
-    
-}
-
-#nav li:hover ul {
-	left: auto;
-}
-
-#nav li:hover ul, #nav li.sfhover ul {
-	left: auto;
-}
-
-#nav{
-display: inline;
-display: -moz-inline-box;
-display: inline-block;
-width:100px;
-
+.row {
+clear:left;
 }
 
 .plotInfo {
-   cursor: help;
-   float: right;
+cursor:help;
+float:right;
 }
-/*
-Son of Suckerfish Dropdowns END
-*/
-
-#speedbox{width:36px;}
-
-
-/* ========= */
-/* = Flash = */
-/* ========= */
 
 .message {
-	padding: 4px 0 4px 1em;
-	margin-bottom: 20px;
-	text-align: left;
-	font-size: larger;
+margin-bottom:20px;
+text-align:left;
+font-size:larger;
+padding:4px 0 4px 1em;
 }
-.message p {
-	margin: 0;
-}
+
 .message p span {
-	float: left;
-	margin-right: .5em;
-}
-.message ul {
-	margin: 0;
+float:left;
+margin-right:.5em;
 }
 
 .message a:hover {
-	color: blue;
-	background: none;
+color:blue;
+background:none;
 }
 
-/* =========== */
-/* = Tooltip = */
-/* =========== */
-
 #tooltip {
-	display: none;
-	z-index: 3000;
-	border: 1px solid #111;
-	background-color: #eee;
-	padding: 5px;
-	opacity: 0.85;
+display:none;
+z-index:3000;
+border:1px solid #111;
+background-color:#eee;
+padding:5px;
+}
+
+.progressbarText {
+position:absolute;
+top:0;
+width:100%;
+height:100%;
+overflow:visible;
+text-align:center;
+line-height:16px;
+_line-height:14px;
+}
+
+tr.seasonheader {
+text-align:center;
+background-color:#fff;
+padding:0;
+}
+tr.seasonheader h2 {
+font-size:22px;
+line-height:20px;
+letter-spacing:1px;
+margin:0;
+color:#000;
+}
+tr.seasonheader a {
+text-decoration:none;
+}
+tr.seasonheader a:hover {
+background-color: #fff;
+}
+
+tr.unaired,span.unaired {
+background-color:#F5F1E4;
+padding:2px;
+}
+
+tr.skipped,span.skipped {
+background-color:#BEDEED;
+padding:2px;
+}
+
+tr.good,span.good {
+background-color:#C3E3C8;
+padding:2px;
+}
+
+tr.qual,span.qual {
+background-color:#FFDA8A;
+padding:2px;
+}
+
+tr.wanted,span.wanted {
+background-color:#FFB0B0;
+padding:2px;
+}
+
+#progressBar {
+background-color:#cdf;
+border:1px solid blue;
+}
+
+#percentageBar {
+background-color:#9bf;
+}
+
+.SubMenu,a.current {
+background-color:#57442B;
+color:#FFF;
+}
+
+a.current:hover,a:hover {
+background-color:#000;
+color:#FFF;
+}
+
+a.imgLink:hover {
+background-color:transparent;
+}
+
+div.EntryBlock,div.EntryBlock form {
+display:inline;
+}
+
+.message p,.message ul {
+margin:0;
+}
+
+a,.queuelink,td > a,td > a,a.remove {
+color:#000;
+}
+
+div#summary {
+background-color:#efefef;
+padding:10px;
+border:1px solid #DFDEDE;
+margin:10px;
 }

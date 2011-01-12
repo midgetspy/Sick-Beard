@@ -6,7 +6,7 @@ import xbmc, mediabrowser, ps3
 def available_generators():
     return filter(lambda x: x not in ('generic', 'helpers'), __all__)
 
-def getMetadataModule(name):
+def _getMetadataModule(name):
     name = name.lower()
     prefix = "sickbeard.metadata."
     if name in __all__ and prefix+name in sys.modules:
@@ -14,22 +14,22 @@ def getMetadataModule(name):
     else:
         return None
 
-def getMetadataClass(name):
+def _getMetadataClass(name):
 
-    module = getMetadataModule(name)
+    module = _getMetadataModule(name)
     
     if not module:
         return None
     
     return module.metadata_class()
 
-def getMetadataGeneratorList():
+def get_metadata_generator_dict():
     result = {}
     for cur_generator_id in available_generators():
-        cur_module = getMetadataClass(cur_generator_id)
-        if not cur_module:
+        cur_generator = _getMetadataClass(cur_generator_id)
+        if not cur_generator:
             continue
-        result[cur_generator_id] = cur_module.name
+        result[cur_generator.name] = cur_generator
     
     return result
         

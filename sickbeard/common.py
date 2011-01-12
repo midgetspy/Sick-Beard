@@ -122,9 +122,9 @@ class Quality:
 
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
-        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any):
+        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any) and not checkName(["720p"], all):
             return Quality.SDTV
-        elif checkName(["dvdrip.xvid", "bdrip.xvid", "dvdrip.divx", "dvdrip.ws.xvid"], any):
+        elif checkName(["dvdrip.xvid", "bdrip.xvid", "dvdrip.divx", "dvdrip.ws.xvid"], any) and not checkName(["720p"], all):
             return Quality.SDDVD
         elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
             return Quality.HDTV
@@ -279,6 +279,9 @@ sceneExceptions = {72546: ['CSI'],
                    164451: ['Carlos (2010)'],
                    70726: ['Babylon 5', 'Babylon5'],
                    83714: ['Genius', 'Genius With Dave Gormand'],
+                   212571: ['Come Fly With Me (2010)'],
+                   81563: ['Border Security', 'Border Security Australia\'s Frontline'],
+                   172381: ['Silent Library (US)'],
                    }
 
 countryList = {'Australia': 'AU',

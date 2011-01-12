@@ -9,7 +9,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script>
+<script type="text/javascript" charset="utf-8">
 \$.tablesorter.addParser({ 
     // set a unique id 
     id: 'showNames', 
@@ -34,6 +34,7 @@
 { 
     \$("#massUpdateTable").tablesorter({
         sortList: [[3,1],[1,0]],
+        widgets: ['zebra'],
         headers: {
             0: { sorter: false},
             1: { sorter: 'showNames'},
@@ -46,21 +47,21 @@
 </script>
 <script type="text/javascript" src="$sbRoot/js/massUpdate.js"></script>
 
-<form name="massUpdateForm" method="POST" action="massUpdate">
+<form name="massUpdateForm" method="post" action="massUpdate">
 
-<table id="massUpdateTable" class="sickbeardTable tablesorter">
+<table id="massUpdateTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
 
   <thead>
     <tr>
-      <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck"></th>
+      <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck" /></th>
       <th>Show</th>
       <th>Quality</th>
       <th>Active</th>
       <th>Status</th>
-      <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck"></th>
-      <th width="1%">Re-scan&nbsp;<input type="checkbox" class="bulkCheck" id="refreshCheck"></th>
-      <th width="1%">Rename&nbsp;<input type="checkbox" class="bulkCheck" id="renameCheck"></th>
-<!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck"></th>-->
+      <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck" /></th>
+      <th width="1%">Rescan&nbsp;<input type="checkbox" class="bulkCheck" id="refreshCheck" /></th>
+      <th width="1%">Rename&nbsp;<input type="checkbox" class="bulkCheck" id="renameCheck" /></th>
+<!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>-->
     </tr>
   </thead>
   <tbody>
@@ -73,24 +74,24 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #if $sickbeard.showQueueScheduler.action.isBeingUpdated($curShow) or $sickbeard.showQueueScheduler.action.isInUpdateQueue($curShow):
   #set $curUpdate = ""
 #else:
-  #set $curUpdate = "<input type=\"checkbox\" class=\"updateCheck\" id=\"update-"+str($curShow.tvdbid)+"\">"
+  #set $curUpdate = "<input type=\"checkbox\" class=\"updateCheck\" id=\"update-"+str($curShow.tvdbid)+"\"/>"
 #end if
 
 #if $sickbeard.showQueueScheduler.action.isBeingRefreshed($curShow) or $sickbeard.showQueueScheduler.action.isInRefreshQueue($curShow):
   #set $curRefresh = ""
 #else:
-  #set $curRefresh = "<input type=\"checkbox\" class=\"refreshCheck\" id=\"refresh-"+str($curShow.tvdbid)+"\">"
+  #set $curRefresh = "<input type=\"checkbox\" class=\"refreshCheck\" id=\"refresh-"+str($curShow.tvdbid)+"\"/>"
 #end if
 
 #if $sickbeard.showQueueScheduler.action.isBeingRenamed($curShow) or $sickbeard.showQueueScheduler.action.isInRenameQueue($curShow):
   #set $curRename = ""
 #else:
-  #set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\">"
+  #set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\"/>"
 #end if
 
-  <tr class="evenLine">
-    <td align=center><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid">
-    <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+  <tr>
+    <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
+    <td nowrap="nowrap"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td align="center">
 #if $curShow.quality in $qualityPresets:
 $qualityPresetStrings[$curShow.quality]
@@ -98,25 +99,24 @@ $qualityPresetStrings[$curShow.quality]
 Custom
 #end if 
     </td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16"></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes.gif\" alt=\"Y\"" else "no.gif\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
     <td align="center">$curRename</td>
-<!--    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid"></td>-->
+<!--    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid" /></td>-->
   </tr>
 
 #end for
 </tbody>
 <tfoot>
-  <tr class="evenLine">
-    <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit"></td>
-    <td colspan="7" align="center"><input type="button" value="Submit" id="submitMassUpdate"></td>
+  <tr>
+    <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit" /></td>
+    <td colspan="7" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
 </table>
 
 </form>
-
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

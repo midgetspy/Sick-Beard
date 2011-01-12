@@ -38,6 +38,7 @@ from sickbeard import history, notifiers, processTV, search, providers
 from sickbeard import tv, versionChecker, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
+from sickbeard import search_queue
 
 from sickbeard.notifiers import xbmc
 from sickbeard.providers import newznab
@@ -65,7 +66,7 @@ class PageTemplate (Template):
         self.sbRoot = sickbeard.WEB_ROOT
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
-        logPageTitle = 'Logs & Errors'
+        logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
             logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
 
@@ -134,22 +135,13 @@ class ManageSearches:
     @cherrypy.expose
     def index(self):
         t = PageTemplate(file="manage_manageSearches.tmpl")
-        t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
-        t.backlogPaused = sickbeard.backlogSearchScheduler.action.amPaused
+        #t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
+        t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused()
+        t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress()
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
         t.submenu = ManageMenu
 
         return _munge(t)
-
-    @cherrypy.expose
-    def forceBacklog(self):
-
-        # force it to run the next time it looks
-        sickbeard.backlogSearchScheduler.forceSearch()
-        logger.log(u"Backlog search started in background")
-        ui.flash.message('Backlog search started',
-                      'The backlog search has begun and will run in the background')
-        redirect("/manage/manageSearches")
 
     @cherrypy.expose
     def forceSearch(self):
@@ -159,18 +151,16 @@ class ManageSearches:
         if result:
             logger.log(u"Search forced")
             ui.flash.message('Episode search started',
-                          'Note: RSS feeds may not be updated if they have been retrieved too recently')
+                          'Note: RSS feeds may not be updated if retrieved recently')
 
         redirect("/manage/manageSearches")
 
     @cherrypy.expose
     def pauseBacklog(self, paused=None):
         if paused == "1":
-            setPaused = True
+            sickbeard.searchQueueScheduler.action.pause_backlog()
         else:
-            setPaused = False
-
-        sickbeard.backlogSearchScheduler.action.amPaused = setPaused
+            sickbeard.searchQueueScheduler.action.unpause_backlog()
 
         redirect("/manage/manageSearches")
 
@@ -196,6 +186,16 @@ class Manage:
         t.submenu = ManageMenu
         return _munge(t)
 
+    @cherrypy.expose
+    def backlogShow(self, tvdb_id):
+        
+        show_obj = helpers.findCertainShow(sickbeard.showList, int(tvdb_id))
+        
+        if show_obj:
+            sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj])
+        
+        redirect("/manage/backlogOverview")
+        
     @cherrypy.expose
     def backlogOverview(self):
 
@@ -436,7 +436,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
-        ui.flash.message('Removed all history entries greater than 30 days old')
+        ui.flash.message('Removed history entries greater than 30 days old')
         redirect("/history")
 
 
@@ -456,6 +456,7 @@ class ConfigGeneral:
         t.submenu = ConfigMenu
         return _munge(t)
 
+    
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
@@ -464,8 +465,7 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    metadata_type=None, metadata_show=None, metadata_episode=None,
-                    art_poster=None, art_fanart=None, art_thumbnails=None, art_season_thumbnails=None):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
 
         results = []
 
@@ -483,36 +483,6 @@ class ConfigGeneral:
             launch_browser = 1
         else:
             launch_browser = 0
-
-        if metadata_show == "on":
-            metadata_show = 1
-        else:
-            metadata_show = 0
-
-        if metadata_episode == "on":
-            metadata_episode = 1
-        else:
-            metadata_episode = 0
-
-        if art_poster == "on":
-            art_poster = 1
-        else:
-            art_poster = 0
-
-        if art_fanart == "on":
-            art_fanart = 1
-        else:
-            art_fanart = 0
-
-        if art_thumbnails == "on":
-            art_thumbnails = 1
-        else:
-            art_thumbnails = 0
-
-        if art_season_thumbnails == "on":
-            art_season_thumbnails = 1
-        else:
-            art_season_thumbnails = 0
 
         if season_folders_default == "on":
             season_folders_default = 1
@@ -562,17 +532,10 @@ class ConfigGeneral:
 
         sickbeard.LAUNCH_BROWSER = launch_browser
 
-        sickbeard.METADATA_TYPE = metadata_type
-        sickbeard.METADATA_SHOW = metadata_show
-        sickbeard.METADATA_EPISODE = metadata_episode
-
-        sickbeard.metadata_generator = metadata.getMetadataClass(sickbeard.METADATA_TYPE)
-
-        sickbeard.ART_POSTER = art_poster
-        sickbeard.ART_FANART = art_fanart
-        sickbeard.ART_THUMBNAILS = art_thumbnails
-        sickbeard.ART_SEASON_THUMBNAILS = art_season_thumbnails
-
+        sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
+        sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
+        sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
+        
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
         sickbeard.QUALITY_DEFAULT = newQuality
@@ -602,7 +565,7 @@ class ConfigGeneral:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/general/")
 
@@ -701,7 +664,7 @@ class ConfigEpisodeDownloads:
     def saveEpisodeDownloads(self, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None,
                        torrent_dir=None, nzb_method=None, usenet_retention=None,
-                       search_frequency=None, backlog_search_frequency=None, tv_download_dir=None,
+                       search_frequency=None, tv_download_dir=None,
                        keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                        download_propers=None, move_associated_files=None):
 
@@ -717,8 +680,6 @@ class ConfigEpisodeDownloads:
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
 
         config.change_SEARCH_FREQUENCY(search_frequency)
-
-        config.change_BACKLOG_SEARCH_FREQUENCY(backlog_search_frequency)
 
         if download_propers == "on":
             download_propers = 1
@@ -777,7 +738,7 @@ class ConfigEpisodeDownloads:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/episodedownloads/")
 
@@ -950,7 +911,7 @@ class ConfigProviders:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/providers/")
 
@@ -963,9 +924,10 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
+    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_growl=None, growl_host=None, growl_password=None, use_twitter=None):
+                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
+						  use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
 
         results = []
 
@@ -989,16 +951,40 @@ class ConfigNotifications:
         else:
             xbmc_update_full = 0
 
+        if use_xbmc == "on":
+            use_xbmc = 1
+        else:
+            use_xbmc = 0
+            
+        if growl_notify_onsnatch == "on":
+            growl_notify_onsnatch = 1
+        else:
+            growl_notify_onsnatch = 0
+
+        if growl_notify_ondownload == "on":
+            growl_notify_ondownload = 1
+        else:
+            growl_notify_ondownload = 0
         if use_growl == "on":
             use_growl = 1
         else:
             use_growl = 0
 
+        if twitter_notify_onsnatch == "on":
+            twitter_notify_onsnatch = 1
+        else:
+            twitter_notify_onsnatch = 0
+
+        if twitter_notify_ondownload == "on":
+            twitter_notify_ondownload = 1
+        else:
+            twitter_notify_ondownload = 0
         if use_twitter == "on":
             use_twitter = 1
         else:
             use_twitter = 0
 
+        sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
@@ -1008,10 +994,14 @@ class ConfigNotifications:
         sickbeard.XBMC_PASSWORD = xbmc_password
 
         sickbeard.USE_GROWL = use_growl
+        sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
+        sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
 
         sickbeard.USE_TWITTER = use_twitter
+        sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
+        sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
 
         sickbeard.save_config()
 
@@ -1021,7 +1011,7 @@ class ConfigNotifications:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved')
+            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/notifications/")
 
@@ -1160,7 +1150,7 @@ class NewHomeAddShows:
 
         # if we got a TVDB ID then make a show out of it
         sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd)
-        ui.flash.message('Show added', 'Adding the specified show into '+showToAdd)
+        ui.flash.message('Show added', 'Adding the specified show into '+ showToAdd)
         # no need to display anything now that we added the show, so continue on to the next show
         return self.addShows(showDirs)
 
@@ -1320,16 +1310,16 @@ class Home:
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
-        notifiers.testGrowl(host, password)
+        notifiers.growl_notifier.test_notify(host, password)
         return "Tried sending growl to "+host+" with password "+password
 
     @cherrypy.expose
     def twitterStep1(self):
-        return notifiers.testTwitter1()
+        return notifiers.twitter_notifier._get_authorization()
 
     @cherrypy.expose
     def twitterStep2(self, key):
-        result = notifiers.testTwitter2(key)
+        result = notifiers.twitter_notifier._get_credentials(key)
         logger.log(u"result: "+str(result))
         if result:
             return "Key verification successful"
@@ -1338,7 +1328,7 @@ class Home:
 
     @cherrypy.expose
     def testTwitter(self):
-        result = notifiers.testTwitter()
+        result = notifiers.twitter_notifier.test_notify()
         if result:
             return "Tweet successful, check your twitter to make sure it worked"
         else:
@@ -1346,7 +1336,7 @@ class Home:
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
-        notifiers.testXBMC(urllib.unquote_plus(host), username, password)
+        notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
         return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
@@ -1637,7 +1627,7 @@ class Home:
     def updateXBMC(self, showName=None):
 
         for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-            if xbmc.updateLibrary(curHost, showName=showName):
+            if notifiers.xbmc_notifier._update_library(curHost, showName=showName):
                 ui.flash.message("Command sent to XBMC host " + curHost + " to update library")
             else:
                 ui.flash.error("Unable to contact XBMC host " + curHost)
@@ -1691,6 +1681,8 @@ class Home:
             else:
                 return _genericMessage("Error", errMsg)
 
+        segment_list = []
+
         if eps != None:
 
             for curEp in eps.split('|'):
@@ -1700,6 +1692,16 @@ class Home:
                 epInfo = curEp.split('x')
 
                 epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+
+                if int(status) == WANTED:
+                    # figure out what segment the episode is in and remember it so we can backlog it
+                    if epObj.show.is_air_by_date:
+                        ep_segment = str(epObj.airdate)[:7]
+                    else:
+                        ep_segment = epObj.season
+    
+                    if ep_segment not in segment_list:
+                        segment_list.append(ep_segment)
 
                 if epObj == None:
                     return _genericMessage("Error", "Episode couldn't be retrieved")
@@ -1716,6 +1718,17 @@ class Home:
 
                     epObj.status = int(status)
                     epObj.saveToDB()
+
+        msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
+        for cur_segment in segment_list:
+            msg += "<li>Season "+str(cur_segment)+"</li>"
+            logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
+            cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
+            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
+        msg += "</ul>"
+
+        if segment_list:
+            ui.flash.message("Backlog started", msg)
 
         if direct:
             return json.dumps({'result': 'success'})
@@ -1778,7 +1791,11 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
 
-        posterFilename = os.path.abspath(sickbeard.metadata_generator.get_poster_path(showObj))
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            if ek.ek(os.path.isfile, cur_provider.get_poster_path(showObj)):
+                posterFilename = os.path.abspath(cur_provider.get_poster_path(showObj))
+                break
+
         if ek.ek(os.path.isfile, posterFilename):
             try:
                 from PIL import Image
@@ -1789,12 +1806,25 @@ class WebInterface:
                 im = Image.open(posterFilename)
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
-                im.thumbnail((100, 147), Image.ANTIALIAS)
+                if sickbeard.USE_BANNER:
+                  size = 600, 112
+                else:
+                  size = 136, 200
+                im.thumbnail(size, Image.ANTIALIAS)
                 buffer = StringIO()
                 im.save(buffer, 'JPEG')
                 return buffer.getvalue()
         else:
             logger.log(u"No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
+
+    @cherrypy.expose
+    def toggleBanners(self):
+        
+        # toggle the setting
+        sickbeard.USE_BANNER = not sickbeard.USE_BANNER
+        
+        # forward to the coming eps page
+        redirect("/comingEpisodes")
 
     @cherrypy.expose
     def comingEpisodes(self, sort="date"):
@@ -1834,6 +1864,7 @@ class WebInterface:
             { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
             { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
             { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
+            { 'title': 'Toggle Banner View', 'path': 'toggleBanners/' },
         ]
         t.sort = sort
         #t.epList = epList
