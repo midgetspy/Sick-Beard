@@ -197,7 +197,8 @@ class PostProcessor(object):
             try:
                 helpers.moveFile(cur_file_path, new_file_path)
             except (IOError, OSError), e:
-                logger.log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                raise e
                 
     def _copy(self, file_path, new_path, associated_files=False):
 
@@ -220,6 +221,7 @@ class PostProcessor(object):
                 helpers.copyFile(cur_file_path, new_file_path)
             except (IOError, OSError), e:
                 logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                raise e
 
     def _find_ep_destination_folder(self, ep_obj):
         
