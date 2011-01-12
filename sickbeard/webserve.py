@@ -664,7 +664,7 @@ class ConfigEpisodeDownloads:
     def saveEpisodeDownloads(self, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None,
                        torrent_dir=None, nzb_method=None, usenet_retention=None,
-                       search_frequency=None, backlog_search_frequency=None, tv_download_dir=None,
+                       search_frequency=None, tv_download_dir=None,
                        keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                        download_propers=None, move_associated_files=None):
 
@@ -680,8 +680,6 @@ class ConfigEpisodeDownloads:
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
 
         config.change_SEARCH_FREQUENCY(search_frequency)
-
-        config.change_BACKLOG_SEARCH_FREQUENCY(backlog_search_frequency)
 
         if download_propers == "on":
             download_propers = 1

@@ -120,13 +120,11 @@ USENET_RETENTION = None
 DOWNLOAD_PROPERS = None
 
 SEARCH_FREQUENCY = None
-BACKLOG_SEARCH_FREQUENCY = None
+BACKLOG_SEARCH_FREQUENCY = 21
 
 MIN_SEARCH_FREQUENCY = 10
-MIN_BACKLOG_SEARCH_FREQUENCY = 7
 
 DEFAULT_SEARCH_FREQUENCY = 60
-DEFAULT_BACKLOG_SEARCH_FREQUENCY = 21
 
 EZRSS = False
 TORRENT_DIR = None
@@ -293,12 +291,12 @@ def initialize(consoleLogging=True):
                 loadingShowList, SOCKET_TIMEOUT, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TORRENT_DIR, USENET_RETENTION, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                DEFAULT_BACKLOG_SEARCH_FREQUENCY, QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
+                QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
                 USE_XBMC, GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                MIN_BACKLOG_SEARCH_FREQUENCY, TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, \
+                TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
@@ -387,10 +385,6 @@ def initialize(consoleLogging=True):
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
         if SEARCH_FREQUENCY < MIN_SEARCH_FREQUENCY:
             SEARCH_FREQUENCY = MIN_SEARCH_FREQUENCY
-
-        BACKLOG_SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'backlog_search_frequency', DEFAULT_BACKLOG_SEARCH_FREQUENCY)
-        if BACKLOG_SEARCH_FREQUENCY < MIN_BACKLOG_SEARCH_FREQUENCY:
-            BACKLOG_SEARCH_FREQUENCY = MIN_BACKLOG_SEARCH_FREQUENCY
 
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
@@ -767,7 +761,6 @@ def save_config():
     new_config['General']['nzb_method'] = NZB_METHOD
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
-    new_config['General']['backlog_search_frequency'] = int(BACKLOG_SEARCH_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['season_folders_format'] = SEASON_FOLDERS_FORMAT

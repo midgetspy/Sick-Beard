@@ -1182,7 +1182,7 @@ class TVEpisode:
 
     def createNFO(self, force=False):
 
-        eps_to_write = eps_to_write = [self] + self.relatedEps
+        eps_to_write = [self] + self.relatedEps
 
         shouldSave = False
 
