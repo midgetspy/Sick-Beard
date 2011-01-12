@@ -24,7 +24,6 @@ Sick Beard makes use of the following projects:
 * [Cheetah][cheetah]
 * [simplejson][simplejson]
 * [tvdb_api][tvdb_api]
-* [tvnamer][tvnamer]
 * [ConfigObj][configobj]
 * [SABnzbd+][sabnzbd]
 * [jQuery][jquery]
@@ -42,7 +41,6 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 [cheetah]: http://www.cheetahtemplate.org/
 [simplejson]: http://code.google.com/p/simplejson/ 
 [tvdb_api]: http://github.com/dbr/tvdb_api
-[tvnamer]: http://github.com/dbr/tvnamer
 [configobj]: http://www.voidspace.org.uk/python/configobj.html
 [sabnzbd]: http://www.sabnzbd.org/
 [jquery]: http://jquery.com
