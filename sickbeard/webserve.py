@@ -1727,7 +1727,8 @@ class Home:
             sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
         msg += "</ul>"
 
-        ui.flash.message("Backlog started", msg)
+        if segment_list:
+            ui.flash.message("Backlog started", msg)
 
         if direct:
             return json.dumps({'result': 'success'})
