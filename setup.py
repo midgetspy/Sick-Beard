@@ -97,6 +97,7 @@ data_files = find_data_files('', '', [
     'readme.txt',
     'data/css/*',
     'data/css/pepper-grinder/*',
+    'data/css/pepper-grinder/images/*',
     'data/images/*',
     'data/images/providers/*',
     'data/images/tablesorter/*',
