@@ -206,7 +206,6 @@ class TVShow(object):
             except exceptions.EpisodeDeletedException:
                 logger.log(u"The episode deleted itself when I tried making an object for it", logger.DEBUG)
 
-
             # store the reference in the show
             if curEpisode != None:
                 curEpisode.saveToDB()
@@ -448,7 +447,7 @@ class TVShow(object):
             with rootEp.lock:
                 rootEp.createMetaFiles()
 
-        return None
+        return rootEp
 
 
     def loadFromDB(self, skipNFO=False):
@@ -894,11 +893,26 @@ class TVEpisode:
         oldhasnfo = self.hasnfo
         oldhastbn = self.hastbn
 
+        cur_nfo = False
+        cur_tbn = False
+
         # check for nfo and tbn
         if ek.ek(os.path.isfile, self.location):
             for cur_provider in sickbeard.metadata_provider_dict.values():
-                self.hasnfo = cur_provider._has_episode_metadata(self) or self.hasnfo
-                self.hastbn = cur_provider._has_episode_thumb(self)or self.hastbn
+                if cur_provider.episode_metadata:
+                    new_result = cur_provider._has_episode_metadata(self)
+                else:
+                    new_result = False
+                cur_nfo = new_result or cur_nfo
+                
+                if cur_provider.episode_thumbnails:
+                    new_result = cur_provider._has_episode_thumb(self)
+                else:
+                    new_result = False
+                cur_tbn = new_result or cur_tbn
+
+        self.hasnfo = cur_nfo
+        self.hastbn = cur_tbn
 
         # if either setting has changed return true, if not return false
         return oldhasnfo != self.hasnfo or oldhastbn != self.hastbn
@@ -1159,66 +1173,24 @@ class TVEpisode:
             logger.log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try to create metadata")
             return
 
-        epsToWrite = [self] + self.relatedEps
+        self.createNFO(force)
+        self.createThumbnail(force)
 
-        shouldSave = self.checkForMetaFiles()
-
-        result = self.createNFO(force)
-        if result == None:
-            return False
-        elif result == True:
-            shouldSave = True
-
-        result = self.createThumbnail(epsToWrite, force)
-        if result == None:
-            return False
-        elif result == True:
-            shouldSave = True
-
-        # save our new NFO statuses to the DB
-        if shouldSave:
+        if self.checkForMetaFiles():
             self.saveToDB()
 
 
     def createNFO(self, force=False):
-
-        eps_to_write = [self] + self.relatedEps
-
-        shouldSave = False
-
-        needsNFO = not self.hasnfo
-        if force:
-            needsNFO = True
-
-        # if we're not forcing then we want to make an NFO unless every related ep already has one
-        else:
-            for curEp in eps_to_write:
-                if not curEp.hasnfo:
-                    break
-                needsNFO = False
-
-        if not needsNFO:
-            return False
 
         result = False
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
             result = cur_provider.create_episode_metadata(self) or result
 
-        if not result:
-            return False
-
-        for ep_to_write in eps_to_write:
-            ep_to_write.hasnfo = True
-            shouldSave = True
-
-        return shouldSave
+        return result
 
 
-    def createThumbnail(self, epsToWrite, force=False):
-
-        if self.hastbn and not force:
-            return False
+    def createThumbnail(self, force=False):
 
         result = False
 
