@@ -117,7 +117,7 @@ class XBMCMetadata(generic.GenericMetadata):
         if myShow["contentrating"] != None:
             mpaa.text = myShow["contentrating"]
     
-        tvdbid = etree.SubElement(tv_node, "tvdbid")
+        tvdbid = etree.SubElement(tv_node, "id")
         if myShow["id"] != None:
             tvdbid.text = myShow["id"]
     
