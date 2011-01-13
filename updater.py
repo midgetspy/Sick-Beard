@@ -1,4 +1,4 @@
-import subprocess, os, time, sys, os.path, shutil
+import subprocess, os, time, sys, os.path, shutil, re
 
 try:
     log_file = open('sb-update.log', 'w')
@@ -20,7 +20,11 @@ def isProcRunning(pid):
     out, err = p.communicate()
 
     for line in out.split('\n'):
+        # Win 7
         if 'INFO: No tasks are running which match the specified criteria.' in line:
+            return False
+        # Win XP
+        elif 'INFO: No tasks running with the specified criteria.' in line:
             return False
 
     return True
