@@ -20,7 +20,7 @@
         fileBrowserDialog.dialog('option', 'dialogClass', 'browserDialog busy');
         currentRequest = $.getJSON(endpoint, { path: path }, function(data){
             fileBrowserDialog.empty();
-            $('<h1>').text(path).appendTo(fileBrowserDialog);
+            $('<h1">').text(path).appendTo(fileBrowserDialog);
             list = $('<ul>').appendTo(fileBrowserDialog);
             $.each(data, function(i, entry) {
                 link = $("<a href='javascript:void(0)' />").click(function(){ browse(entry.path, endpoint); }).text(entry.name);
@@ -48,9 +48,10 @@
                 fileBrowserDialog = $('<div id="fileBrowserDialog" style="display:hidden"></div>').appendTo('body').dialog({
                     dialogClass: 'browserDialog',
                     title:       options.title,
-                    position:    ['center', 50],
-                    width:       600,
-                    height:      600,
+                    position:    ['center', 40],
+                    minWidth:    400,
+                    minHeight:   320,
+                    height:      $(document).height()-80,
                     modal:       true,
                     autoOpen:    false
                 });
