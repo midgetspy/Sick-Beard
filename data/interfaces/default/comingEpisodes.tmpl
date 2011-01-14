@@ -44,6 +44,8 @@
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
                     #if datetime.date.fromordinal($cur_ep_airdate).isocalendar()[1] > datetime.date.fromordinal($today).isocalendar()[1]:
                         <br /><h1 class="day">Next $datetime.date.fromordinal($cur_ep_airdate).strftime("%A")</h1>
+                    #elif $cur_ep_airdate == $today:
+                        <br /><h1 class="day">Today</h1>
                     #else:
                         <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A")</h1>
                     #end if
