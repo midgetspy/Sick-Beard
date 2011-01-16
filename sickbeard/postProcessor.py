@@ -324,7 +324,7 @@ class PostProcessor(object):
             episodes = parse_result.episode_numbers
             abs_episodes = parse_result.absolute_numbers
             
-        to_return = (None, season, episodes)
+        to_return = (None, season, episodes, abs_episodes)
     
         # do a scene reverse-lookup to get a list of all possible names
         name_list = sceneHelpers.sceneToNormalShowNames(parse_result.series_name)
