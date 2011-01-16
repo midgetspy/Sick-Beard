@@ -60,10 +60,23 @@ class PS3Metadata(generic.GenericMetadata):
 
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "<i>not supported</i>"
-        self.eg_fanart = "fanart.jpg"
+        self.eg_fanart = "<i>not supported</i>"
         self.eg_poster = "cover.jpg"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.ext.cover.jpg"
-        self.eg_season_thumbnails = "season##.tbn"
+        self.eg_season_thumbnails = "<i>not supported</i>"
+    
+    # all of the following are not supported, so do nothing
+    def create_show_metadata(self, show_obj):
+        pass
+    
+    def create_episode_metadata(self, ep_obj):
+        pass
+    
+    def create_fanart(self, show_obj):
+        pass
+    
+    def create_season_thumbs(self, show_obj):
+        pass
     
     def get_episode_thumb_path(self, ep_obj):
         """
