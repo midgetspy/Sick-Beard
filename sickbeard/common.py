@@ -21,7 +21,9 @@ import os.path
 import operator, platform
 import re
 
-USER_AGENT = 'Sick Beard/alpha2 ('+platform.system()+' '+platform.release()+')'
+from sickbeard import version
+
+USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION+' ('+platform.system()+' '+platform.release()+')'
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
