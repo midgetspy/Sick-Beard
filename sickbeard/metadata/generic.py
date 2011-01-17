@@ -402,10 +402,15 @@ class GenericMetadata():
         # use the default poster name
         poster_path = self.get_poster_path(show_obj)
         
-        poster_data = self._retrieve_show_image('poster', show_obj, which)
+        if sickbeard.USE_BANNER:
+            img_type = 'banner'
+        else:
+            img_type = 'poster'
+        
+        poster_data = self._retrieve_show_image(img_type, show_obj, which)
 
         if not poster_data:
-            logger.log(u"No poster image was retrieved, unable to write poster", logger.DEBUG)
+            logger.log(u"No show folder image was retrieved, unable to write poster", logger.DEBUG)
             return False
 
         return self._write_image(poster_data, poster_path)
