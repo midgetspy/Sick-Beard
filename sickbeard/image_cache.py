@@ -127,7 +127,7 @@ class ImageCache:
                 logger.log(u"Checking if image "+cur_file_name+" (type "+str(cur_file_type)+" needs metadata: "+str(need_images[cur_file_type]), logger.DEBUG)
                 
                 if cur_file_type in need_images and need_images[cur_file_type]:
-                    logger.log(u"Found an image in the show dir that doesn't exist in the cache, caching it: "+str(cur_file_name)+", type "+str(cur_file_type), logger.DEBUG)
+                    logger.log(u"Found an image in the show dir that doesn't exist in the cache, caching it: "+cur_file_name+", type "+str(cur_file_type), logger.DEBUG)
                     self._cache_image_from_file(cur_file_name, cur_file_type, show_obj.tvdbid)
                     need_images[cur_file_type] = False
                     
