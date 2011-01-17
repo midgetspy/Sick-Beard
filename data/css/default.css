@@ -154,6 +154,9 @@ font-weight:700;
 margin-top:-32px;
 margin-right:5px;
 }
+.h2footer span {
+padding:2px;
+} 
 
 .separator {
 font-size:90%;
@@ -242,6 +245,7 @@ z-index:3000;
 border:1px solid #111;
 background-color:#eee;
 padding:5px;
+margin-right:10px;
 }
 
 .progressbarText {
@@ -272,6 +276,7 @@ text-decoration:none;
 }
 tr.seasonheader a:hover {
 background-color: #fff;
+color:#000;
 }
 
 tr.unaired,span.unaired {
