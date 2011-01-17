@@ -273,17 +273,17 @@ background-color:#FFB0B0;
 padding:2px;
 }
 
-a:hover {
+a,a.remove {
+color:#000;
+}
+
+h1 a:hover, h2 a:hover, span a:hover, div.h2footer a:hover {
 background-color:#000;
 color:#FFF;
 }
 
 .message p,.message ul {
 margin:0;
-}
-
-a,td > a,td > a,a.remove {
-color:#000;
 }
 
 div#summary {
