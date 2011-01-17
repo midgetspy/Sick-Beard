@@ -275,6 +275,7 @@ class QueueItemRefresh(ShowQueueItem):
 
         self.show.refreshDir()
         self.show.writeMetadata()
+        self.show.populateCache()
 
         self.inProgress = False
 

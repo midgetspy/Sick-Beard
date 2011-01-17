@@ -39,6 +39,7 @@ from sickbeard import tv, versionChecker, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
+from sickbeard import image_cache
 
 from sickbeard.notifiers import xbmc
 from sickbeard.providers import newznab
@@ -1781,7 +1782,7 @@ class WebInterface:
         redirect("/home")
 
     @cherrypy.expose
-    def showPoster(self, show=None):
+    def showPoster(self, show=None, which=None):
 
         if show == None:
             return "Invalid show" #TODO: make it return a standard image
@@ -1791,31 +1792,36 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
 
-        for cur_provider in sickbeard.metadata_provider_dict.values():
-            if ek.ek(os.path.isfile, cur_provider.get_poster_path(showObj)):
-                posterFilename = os.path.abspath(cur_provider.get_poster_path(showObj))
-                break
+        cache_obj = image_cache.ImageCache()
+        
+        if which == 'poster':
+            image_file_name = cache_obj.poster_path(showObj.tvdbid)
+        # this is for 'banner' but also the default case
+        else:
+            image_file_name = cache_obj.banner_path(showObj.tvdbid)
 
-        if ek.ek(os.path.isfile, posterFilename):
+        if ek.ek(os.path.isfile, image_file_name):
             try:
                 from PIL import Image
                 from cStringIO import StringIO
             except ImportError: # PIL isn't installed
-                return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
+                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
             else:
-                im = Image.open(posterFilename)
+                im = Image.open(image_file_name)
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
-                if sickbeard.USE_BANNER:
-                  size = 600, 112
+                if which == 'banner':
+                    size = 600, 112
+                elif which == 'poster':
+                    size = 136, 200
                 else:
-                  size = 136, 200
+                    return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
                 im.thumbnail(size, Image.ANTIALIAS)
                 buffer = StringIO()
                 im.save(buffer, 'JPEG')
                 return buffer.getvalue()
         else:
-            logger.log(u"No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
+            logger.log(u"No image available for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
     def toggleBanners(self):

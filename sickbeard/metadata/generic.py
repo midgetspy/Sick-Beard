@@ -505,7 +505,7 @@ class GenericMetadata():
             logger.log(u"Unable to look up show on TVDB, not downloading images: "+str(e).decode('utf-8'), logger.ERROR)
             return None
     
-        if image_type not in ('fanart', 'poster'):
+        if image_type not in ('fanart', 'poster', 'banner'):
             logger.log(u"Invalid image type "+str(image_type)+", couldn't find it in the TVDB object", logger.ERROR)
             return None
     
