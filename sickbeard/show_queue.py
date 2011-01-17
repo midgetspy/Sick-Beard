@@ -151,7 +151,7 @@ class ShowQueueItem(generic_queue.QueueItem):
         return self in sickbeard.showQueueScheduler.action.queue+[sickbeard.showQueueScheduler.action.currentItem]
 
     def _getName(self):
-        return self.show.name
+        return str(self.show.tvdbid)
 
     def _isLoading(self):
         return False
