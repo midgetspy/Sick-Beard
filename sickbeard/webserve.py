@@ -69,7 +69,8 @@ class PageTemplate (Template):
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
             logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
-
+        self.logPageTitle = logPageTitle
+        self.sbPID = str(sickbeard.PID)
         self.menu = [
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
@@ -139,7 +140,7 @@ class ManageSearches:
         t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused()
         t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress()
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
-        t.submenu = ManageMenu
+        #t.submenu = ManageMenu
 
         return _munge(t)
 
@@ -183,7 +184,7 @@ class Manage:
     def index(self):
 
         t = PageTemplate(file="manage.tmpl")
-        t.submenu = ManageMenu
+        #t.submenu = ManageMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -200,7 +201,7 @@ class Manage:
     def backlogOverview(self):
 
         t = PageTemplate(file="manage_backlogOverview.tmpl")
-        t.submenu = ManageMenu
+        #t.submenu = ManageMenu
 
         myDB = db.DBConnection()
 
@@ -240,7 +241,7 @@ class Manage:
     def massEdit(self, toEdit=None):
 
         t = PageTemplate(file="manage_massEdit.tmpl")
-        t.submenu = ManageMenu
+        #t.submenu = ManageMenu
 
         if not toEdit:
             redirect("/manage")
@@ -416,7 +417,7 @@ class History:
         t.historyResults = sqlResults
         t.submenu = [
             { 'title': 'Clear History', 'path': 'history/clearHistory' },
-            { 'title': 'Trim History',  'path': 'history/trimHistory'  },
+            #{ 'title': 'Trim History',  'path': 'history/trimHistory'  },
         ]
 
         return _munge(t)
@@ -453,7 +454,7 @@ class ConfigGeneral:
     def index(self):
 
         t = PageTemplate(file="config_general.tmpl")
-        t.submenu = ConfigMenu
+        #t.submenu = ConfigMenu
         return _munge(t)
 
     
@@ -657,7 +658,7 @@ class ConfigEpisodeDownloads:
     def index(self):
 
         t = PageTemplate(file="config_episodedownloads.tmpl")
-        t.submenu = ConfigMenu
+        #t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -749,7 +750,7 @@ class ConfigProviders:
     @cherrypy.expose
     def index(self):
         t = PageTemplate(file="config_providers.tmpl")
-        t.submenu = ConfigMenu
+        #t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -922,14 +923,14 @@ class ConfigNotifications:
     @cherrypy.expose
     def index(self):
         t = PageTemplate(file="config_notifications.tmpl")
-        t.submenu = ConfigMenu
+        #t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
-						  use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
 
         results = []
 
@@ -1024,7 +1025,7 @@ class Config:
     def index(self):
 
         t = PageTemplate(file="config.tmpl")
-        t.submenu = ConfigMenu
+        #t.submenu = ConfigMenu
         return _munge(t)
 
     general = ConfigGeneral()
@@ -1053,7 +1054,7 @@ class HomePostProcess:
     def index(self):
 
         t = PageTemplate(file="home_postprocess.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1076,7 +1077,7 @@ class NewHomeAddShows:
     def index(self):
 
         t = PageTemplate(file="home_addShows.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1170,7 +1171,7 @@ class NewHomeAddShows:
             redirect("/home")
 
         t = PageTemplate(file="home_addShow.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
 
         # make sure everything's unescaped
         showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
@@ -1221,7 +1222,7 @@ class NewHomeAddShows:
 
 ErrorLogsMenu = [
     { 'title': 'Clear Errors', 'path': 'errorlogs/clearerrors' },
-    { 'title': 'View Log',  'path': 'errorlogs/viewlog'  },
+    #{ 'title': 'View Log',  'path': 'errorlogs/viewlog'  },
 ]
 
 
