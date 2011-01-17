@@ -18,7 +18,7 @@
     <span class="listing_unknown">Unknown</span>
 </div><br/>
 
-#if $sickbeard.USE_LISTVIEW:
+#if $sickbeard.COMING_EPS_FORMAT == 'list':
 <!-- start list view -->
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 <script type="text/javascript" charset="utf-8">
@@ -224,7 +224,7 @@ Custom
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <th #if $sickbeard.USE_BANNER then "" else "colspan=\"2\""#>
+          <th #if $sickbeard.COMING_EPS_FORMAT == 'banner' then "" else "colspan=\"2\""#>
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
@@ -234,10 +234,10 @@ Custom
           </th>
         </tr>
         <tr>
-          <th #if $sickbeard.USE_BANNER then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
-            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.USE_BANNER then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}" /></a>
+          <th #if $sickbeard.COMING_EPS_FORMAT == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.COMING_EPS_FORMAT == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$sickbeard.COMING_EPS_FORMAT" /></a>
           </th>
-#if $sickbeard.USE_BANNER:
+#if $sickbeard.COMING_EPS_FORMAT == 'banner':
         </tr>
         <tr>
 #end if          

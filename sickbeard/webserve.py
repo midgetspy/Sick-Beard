@@ -1829,21 +1829,12 @@ class WebInterface:
             logger.log(u"No image available for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
-    def toggleBanners(self):
+    def setComingEpsFormat(self, format):
+        if format not in ('poster', 'banner', 'list'):
+            format = 'banner'
         
-        # toggle the setting
-        sickbeard.USE_BANNER = not sickbeard.USE_BANNER
+        sickbeard.COMING_EPS_FORMAT = format
         
-        # forward to the coming eps page
-        redirect("/comingEpisodes")
-
-    @cherrypy.expose
-    def toggleList(self):
-        
-        # toggle the setting
-        sickbeard.USE_LISTVIEW = not sickbeard.USE_LISTVIEW
-        
-        # forward to the coming eps page
         redirect("/comingEpisodes")
 
     @cherrypy.expose
@@ -1884,8 +1875,9 @@ class WebInterface:
             { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
             { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
             { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
-            { 'title': 'Toggle Banner View', 'path': 'toggleBanners/' },
-            { 'title': 'Toggle List View', 'path': 'toggleList/' },
+            { 'title': 'Use Banner View', 'path': 'setComingEpsFormat/?format=banner' },
+            { 'title': 'Use Poster View', 'path': 'setComingEpsFormat/?format=poster' },
+            { 'title': 'Use List View', 'path': 'setComingEpsFormat/?format=list' },
         ]
         t.sort = sort
         #t.epList = epList
