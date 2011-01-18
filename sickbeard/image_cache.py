@@ -23,7 +23,7 @@ sys.path.append(os.path.abspath('lib'))
 
 import sickbeard
 
-from sickbeard import helpers, logger
+from sickbeard import helpers, logger, exceptions
 from sickbeard import encodingKludge as ek
 from sickbeard.metadata.generic import GenericMetadata
 
@@ -119,17 +119,20 @@ class ImageCache:
             return
         
         # check the show dir for images and use them
-        for cur_provider in sickbeard.metadata_provider_dict.values():
-            if ek.ek(os.path.isfile, cur_provider.get_poster_path(show_obj)):
-                cur_file_name = os.path.abspath(cur_provider.get_poster_path(show_obj))
-                cur_file_type = self.which_type(cur_file_name)
-                
-                logger.log(u"Checking if image "+cur_file_name+" (type "+str(cur_file_type)+" needs metadata: "+str(need_images[cur_file_type]), logger.DEBUG)
-                
-                if cur_file_type in need_images and need_images[cur_file_type]:
-                    logger.log(u"Found an image in the show dir that doesn't exist in the cache, caching it: "+cur_file_name+", type "+str(cur_file_type), logger.DEBUG)
-                    self._cache_image_from_file(cur_file_name, cur_file_type, show_obj.tvdbid)
-                    need_images[cur_file_type] = False
+        try:
+            for cur_provider in sickbeard.metadata_provider_dict.values():
+                if ek.ek(os.path.isfile, cur_provider.get_poster_path(show_obj)):
+                    cur_file_name = os.path.abspath(cur_provider.get_poster_path(show_obj))
+                    cur_file_type = self.which_type(cur_file_name)
+                    
+                    logger.log(u"Checking if image "+cur_file_name+" (type "+str(cur_file_type)+" needs metadata: "+str(need_images[cur_file_type]), logger.DEBUG)
+                    
+                    if cur_file_type in need_images and need_images[cur_file_type]:
+                        logger.log(u"Found an image in the show dir that doesn't exist in the cache, caching it: "+cur_file_name+", type "+str(cur_file_type), logger.DEBUG)
+                        self._cache_image_from_file(cur_file_name, cur_file_type, show_obj.tvdbid)
+                        need_images[cur_file_type] = False
+        except exceptions.ShowDirNotFoundException, e:
+            logger.log(u"Unable to search for images in show dir because it doesn't exist", logger.WARNING)
                     
         # download from TVDB for missing ones
         for cur_image_type in [self.POSTER, self.BANNER]:
