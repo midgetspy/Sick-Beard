@@ -19,12 +19,14 @@
 import os.path
 import sys
 
-sys.path.append(os.path.abspath('lib'))
-
 import sickbeard
 
 from sickbeard import helpers, logger, exceptions
 from sickbeard import encodingKludge as ek
+
+# this is such a hack, I really need to fix this crap
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'lib'))
+
 from sickbeard.metadata.generic import GenericMetadata
 
 from lib.hachoir_parser import createParser
