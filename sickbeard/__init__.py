@@ -190,7 +190,8 @@ TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
 
-COMING_EPS_FORMAT = None
+COMING_EPS_LAYOUT = None
+COMING_EPS_SORT = None
 
 EXTRA_SCRIPTS = []
 
@@ -305,7 +306,8 @@ def initialize(consoleLogging=True):
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, COMING_EPS_FORMAT
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                COMING_EPS_LAYOUT, COMING_EPS_SORT
 
         if __INITIALIZED__:
             return False
@@ -510,7 +512,8 @@ def initialize(consoleLogging=True):
                 tmp_provider.set_config(cur_metadata_config)
                 metadata_provider_dict[tmp_provider.name] = tmp_provider
 
-        COMING_EPS_FORMAT = check_setting_str(CFG, 'GUI', 'coming_eps_format', 'banner')
+        COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
+        COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
@@ -872,7 +875,8 @@ def save_config():
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
 
     new_config['GUI'] = {}
-    new_config['GUI']['coming_eps_format'] = COMING_EPS_FORMAT
+    new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
+    new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
 
     new_config.write()
 

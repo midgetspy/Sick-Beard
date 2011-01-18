@@ -8,6 +8,7 @@
 <!--#set global $topmenu="comingEpisodes"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+#set $sort = $sickbeard.COMING_EPS_SORT
 
 <div class="h2footer align-right">
     <b>Key:</b> 
@@ -18,7 +19,7 @@
     <span class="listing_unknown">Unknown</span>
 </div><br/>
 
-#if $sickbeard.COMING_EPS_FORMAT == 'list':
+#if $sickbeard.COMING_EPS_LAYOUT == 'list':
 <!-- start list view -->
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 <script type="text/javascript" charset="utf-8">
@@ -224,7 +225,7 @@ Custom
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <th #if $sickbeard.COMING_EPS_FORMAT == 'banner' then "" else "colspan=\"2\""#>
+          <th #if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "" else "colspan=\"2\""#>
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
@@ -234,10 +235,10 @@ Custom
           </th>
         </tr>
         <tr>
-          <th #if $sickbeard.COMING_EPS_FORMAT == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
-            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.COMING_EPS_FORMAT == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$sickbeard.COMING_EPS_FORMAT" /></a>
+          <th #if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$sickbeard.COMING_EPS_LAYOUT" /></a>
           </th>
-#if $sickbeard.COMING_EPS_FORMAT == 'banner':
+#if $sickbeard.COMING_EPS_LAYOUT == 'banner':
         </tr>
         <tr>
 #end if          

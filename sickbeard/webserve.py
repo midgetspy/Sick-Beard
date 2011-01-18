@@ -141,7 +141,7 @@ class ManageSearches:
         t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused()
         t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress()
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
-        #t.submenu = ManageMenu
+        t.submenu = ManageMenu
 
         return _munge(t)
 
@@ -185,7 +185,7 @@ class Manage:
     def index(self):
 
         t = PageTemplate(file="manage.tmpl")
-        #t.submenu = ManageMenu
+        t.submenu = ManageMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -202,7 +202,7 @@ class Manage:
     def backlogOverview(self):
 
         t = PageTemplate(file="manage_backlogOverview.tmpl")
-        #t.submenu = ManageMenu
+        t.submenu = ManageMenu
 
         myDB = db.DBConnection()
 
@@ -242,7 +242,7 @@ class Manage:
     def massEdit(self, toEdit=None):
 
         t = PageTemplate(file="manage_massEdit.tmpl")
-        #t.submenu = ManageMenu
+        t.submenu = ManageMenu
 
         if not toEdit:
             redirect("/manage")
@@ -418,7 +418,7 @@ class History:
         t.historyResults = sqlResults
         t.submenu = [
             { 'title': 'Clear History', 'path': 'history/clearHistory' },
-            #{ 'title': 'Trim History',  'path': 'history/trimHistory'  },
+            { 'title': 'Trim History',  'path': 'history/trimHistory'  },
         ]
 
         return _munge(t)
@@ -455,7 +455,7 @@ class ConfigGeneral:
     def index(self):
 
         t = PageTemplate(file="config_general.tmpl")
-        #t.submenu = ConfigMenu
+        t.submenu = ConfigMenu
         return _munge(t)
 
     
@@ -664,7 +664,7 @@ class ConfigEpisodeDownloads:
     def index(self):
 
         t = PageTemplate(file="config_episodedownloads.tmpl")
-        #t.submenu = ConfigMenu
+        t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -754,7 +754,7 @@ class ConfigProviders:
     @cherrypy.expose
     def index(self):
         t = PageTemplate(file="config_providers.tmpl")
-        #t.submenu = ConfigMenu
+        t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -927,7 +927,7 @@ class ConfigNotifications:
     @cherrypy.expose
     def index(self):
         t = PageTemplate(file="config_notifications.tmpl")
-        #t.submenu = ConfigMenu
+        t.submenu = ConfigMenu
         return _munge(t)
 
     @cherrypy.expose
@@ -1029,7 +1029,7 @@ class Config:
     def index(self):
 
         t = PageTemplate(file="config.tmpl")
-        #t.submenu = ConfigMenu
+        t.submenu = ConfigMenu
         return _munge(t)
 
     general = ConfigGeneral()
@@ -1830,16 +1830,25 @@ class WebInterface:
             logger.log(u"No image available for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
-    def setComingEpsFormat(self, format):
-        if format not in ('poster', 'banner', 'list'):
-            format = 'banner'
+    def setComingEpsLayout(self, layout):
+        if layout not in ('poster', 'banner', 'list'):
+            layout = 'banner'
         
-        sickbeard.COMING_EPS_FORMAT = format
+        sickbeard.COMING_EPS_LAYOUT = layout
         
         redirect("/comingEpisodes")
 
     @cherrypy.expose
-    def comingEpisodes(self, sort="date"):
+    def setComingEpsSort(self, sort):
+        if sort not in ('date', 'network', 'show'):
+            sort = 'date'
+        
+        sickbeard.COMING_EPS_SORT = sort
+        
+        redirect("/comingEpisodes")
+
+    @cherrypy.expose
+    def comingEpisodes(self):
 
         myDB = db.DBConnection()
         
@@ -1866,23 +1875,22 @@ class WebInterface:
             'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
             'network': (lambda a, b: cmp(a["network"], b["network"])),
         }
-        if sort not in sorts:
-            sort = 'date'
+
         #epList.sort(sorts[sort])
-        sql_results.sort(sorts[sort])
+        sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
         t = PageTemplate(file="comingEpisodes.tmpl")
         t.submenu = [
-            { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
-            { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
-            { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
-            { 'title': 'Use Banner View', 'path': 'setComingEpsFormat/?format=banner' },
-            { 'title': 'Use Poster View', 'path': 'setComingEpsFormat/?format=poster' },
-            { 'title': 'Use List View', 'path': 'setComingEpsFormat/?format=list' },
+            { 'title': 'Sort by:', 'path': {'Date': 'setComingEpsSort/?sort=date',
+                                            'Show': 'setComingEpsSort/?sort=show',
+                                            'Network': 'setComingEpsSort/?sort=network',
+                                           }},
+            { 'title': 'Layout:', 'path': {'Banner': 'setComingEpsLayout/?layout=banner',
+                                           'Poster': 'setComingEpsLayout/?layout=poster',
+                                           'List': 'setComingEpsLayout/?layout=list',
+                                           }},
         ]
-        t.sort = sort
-        #t.epList = epList
-        
+
         t.next_week = next_week
         t.today = today
         t.sql_results = sql_results
