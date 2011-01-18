@@ -18,8 +18,8 @@
 #end for
 
 <div class="h2footer align-right">
-    <span class="wanted">Wanted: <b>$totalWanted</b></span>
-    <span class="qual">Low Quality: <b>$totalQual</b></span>
+    <span class="wanted" style="white-space:nowrap;">Wanted: <b>$totalWanted</b></span>
+    <span class="qual" style="white-space:nowrap;">Low Quality: <b>$totalQual</b></span>
 </div><br/>
 
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
@@ -32,10 +32,10 @@
 
   <tr class="seasonheader">
     <td colspan="3">
-        <br/><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid"><h2 style="display: inline;">$curShow.name</h2></a>
+        <br/><h2 style="display: inline; position:absolute;"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></h2>
         <div class="float-right">
-            <span class="wanted">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
-            <span class="qual">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
+            <span class="wanted" style="white-space:nowrap;">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
+            <span class="qual" style="white-space:nowrap;">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
             <a href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid"><img alt="[force backlog]" height="20" src="$sbRoot/images/forceBacklog20.png" title="Force Backlog" style="position: relative; top:4px;"/></a>
         </div>
   </tr>
