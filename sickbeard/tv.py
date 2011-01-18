@@ -623,6 +623,12 @@ class TVShow(object):
 
         # remove self from show list
         sickbeard.showList = [x for x in sickbeard.showList if x.tvdbid != self.tvdbid]
+        
+        # clear the cache
+        image_cache_dir = ek.ek(os.path.join, sickbeard.CACHE_DIR, 'images')
+        for cache_file in ek.ek(glob.glob, ek.ek(os.path.join, image_cache_dir, str(self.tvdbid)+'.*')):
+            logger.log(u"Deleting cache file "+cache_file)
+            os.remove(cache_file)
 
     def populateCache(self):
         cache_inst = image_cache.ImageCache()
