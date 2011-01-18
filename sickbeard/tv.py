@@ -21,7 +21,6 @@ from __future__ import with_statement
 import os.path
 import datetime
 import threading
-import urllib
 import re
 import glob
 
@@ -35,9 +34,9 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
-from sickbeard import processTV
 from sickbeard import tvrage
 from sickbeard import config
+from sickbeard import image_cache
 
 from sickbeard import encodingKludge as ek
 
@@ -624,6 +623,18 @@ class TVShow(object):
 
         # remove self from show list
         sickbeard.showList = [x for x in sickbeard.showList if x.tvdbid != self.tvdbid]
+        
+        # clear the cache
+        image_cache_dir = ek.ek(os.path.join, sickbeard.CACHE_DIR, 'images')
+        for cache_file in ek.ek(glob.glob, ek.ek(os.path.join, image_cache_dir, str(self.tvdbid)+'.*')):
+            logger.log(u"Deleting cache file "+cache_file)
+            os.remove(cache_file)
+
+    def populateCache(self):
+        cache_inst = image_cache.ImageCache()
+        
+        logger.log(u"Checking & filling cache for show "+self.name)
+        cache_inst.fill_cache(self)
 
     def refreshDir(self):
 

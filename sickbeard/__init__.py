@@ -92,6 +92,7 @@ LAUNCH_BROWSER = None
 CACHE_DIR = None
 
 USE_BANNER = None
+USE_LISTVIEW = None
 METADATA_XBMC = None
 METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
@@ -188,6 +189,9 @@ TWITTER_NOTIFY_ONDOWNLOAD = False
 TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
+
+COMING_EPS_LAYOUT = None
+COMING_EPS_SORT = None
 
 EXTRA_SCRIPTS = []
 
@@ -287,9 +291,8 @@ def initialize(consoleLogging=True):
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
-                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, \
-                loadingShowList, SOCKET_TIMEOUT, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TORRENT_DIR, USENET_RETENTION, \
+                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
                 USE_XBMC, GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -302,9 +305,9 @@ def initialize(consoleLogging=True):
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                USE_BANNER, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES
-
+                USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                COMING_EPS_LAYOUT, COMING_EPS_SORT
 
         if __INITIALIZED__:
             return False
@@ -457,6 +460,7 @@ def initialize(consoleLogging=True):
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
         USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
+        USE_LISTVIEW = bool(check_setting_int(CFG, 'General', 'use_listview', 0))
         METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
 
         metadata_provider_dict = metadata.get_metadata_generator_dict()
@@ -507,6 +511,9 @@ def initialize(consoleLogging=True):
                 tmp_provider = cur_metadata_class.metadata_class()
                 tmp_provider.set_config(cur_metadata_config)
                 metadata_provider_dict[tmp_provider.name] = tmp_provider
+
+        COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
+        COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
@@ -777,7 +784,8 @@ def save_config():
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
-    new_config['General']['use_banner'] = int(USE_BANNER)    
+    new_config['General']['use_banner'] = int(USE_BANNER)
+    new_config['General']['use_listview'] = int(USE_LISTVIEW)
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
     new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
@@ -865,6 +873,10 @@ def save_config():
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+
+    new_config['GUI'] = {}
+    new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
+    new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
 
     new_config.write()
 

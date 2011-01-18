@@ -39,6 +39,7 @@ from sickbeard import tv, versionChecker, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
+from sickbeard import image_cache
 
 from sickbeard.notifiers import xbmc
 from sickbeard.providers import newznab
@@ -69,7 +70,8 @@ class PageTemplate (Template):
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
             logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
-
+        self.logPageTitle = logPageTitle
+        self.sbPID = str(sickbeard.PID)
         self.menu = [
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
@@ -465,7 +467,7 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, use_banners=None):
 
         results = []
 
@@ -518,6 +520,11 @@ class ConfigGeneral:
             naming_dates = 1
         else:
             naming_dates = 0
+
+        if use_banners == "on":
+            use_banners = 1
+        else:
+            use_banners = 0
 
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
@@ -927,7 +934,7 @@ class ConfigNotifications:
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
-						  use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
 
         results = []
 
@@ -1051,7 +1058,7 @@ class HomePostProcess:
     def index(self):
 
         t = PageTemplate(file="home_postprocess.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1074,7 +1081,7 @@ class NewHomeAddShows:
     def index(self):
 
         t = PageTemplate(file="home_addShows.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1168,7 +1175,7 @@ class NewHomeAddShows:
             redirect("/home")
 
         t = PageTemplate(file="home_addShow.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
 
         # make sure everything's unescaped
         showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
@@ -1219,7 +1226,7 @@ class NewHomeAddShows:
 
 ErrorLogsMenu = [
     { 'title': 'Clear Errors', 'path': 'errorlogs/clearerrors' },
-    { 'title': 'View Log',  'path': 'errorlogs/viewlog'  },
+    #{ 'title': 'View Log',  'path': 'errorlogs/viewlog'  },
 ]
 
 
@@ -1781,7 +1788,7 @@ class WebInterface:
         redirect("/home")
 
     @cherrypy.expose
-    def showPoster(self, show=None):
+    def showPoster(self, show=None, which=None):
 
         if show == None:
             return "Invalid show" #TODO: make it return a standard image
@@ -1791,43 +1798,57 @@ class WebInterface:
         if showObj == None:
             return "Unable to find show" #TODO: make it return a standard image
 
-        for cur_provider in sickbeard.metadata_provider_dict.values():
-            if ek.ek(os.path.isfile, cur_provider.get_poster_path(showObj)):
-                posterFilename = os.path.abspath(cur_provider.get_poster_path(showObj))
-                break
+        cache_obj = image_cache.ImageCache()
+        
+        if which == 'poster':
+            image_file_name = cache_obj.poster_path(showObj.tvdbid)
+        # this is for 'banner' but also the default case
+        else:
+            image_file_name = cache_obj.banner_path(showObj.tvdbid)
 
-        if ek.ek(os.path.isfile, posterFilename):
+        if ek.ek(os.path.isfile, image_file_name):
             try:
                 from PIL import Image
                 from cStringIO import StringIO
             except ImportError: # PIL isn't installed
-                return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
+                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
             else:
-                im = Image.open(posterFilename)
+                im = Image.open(image_file_name)
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
-                if sickbeard.USE_BANNER:
-                  size = 600, 112
+                if which == 'banner':
+                    size = 600, 112
+                elif which == 'poster':
+                    size = 136, 200
                 else:
-                  size = 136, 200
+                    return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
                 im.thumbnail(size, Image.ANTIALIAS)
                 buffer = StringIO()
                 im.save(buffer, 'JPEG')
                 return buffer.getvalue()
         else:
-            logger.log(u"No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
+            logger.log(u"No image available for show "+show.name, logger.WARNING) #TODO: make it return a standard image
 
     @cherrypy.expose
-    def toggleBanners(self):
+    def setComingEpsLayout(self, layout):
+        if layout not in ('poster', 'banner', 'list'):
+            layout = 'banner'
         
-        # toggle the setting
-        sickbeard.USE_BANNER = not sickbeard.USE_BANNER
+        sickbeard.COMING_EPS_LAYOUT = layout
         
-        # forward to the coming eps page
         redirect("/comingEpisodes")
 
     @cherrypy.expose
-    def comingEpisodes(self, sort="date"):
+    def setComingEpsSort(self, sort):
+        if sort not in ('date', 'network', 'show'):
+            sort = 'date'
+        
+        sickbeard.COMING_EPS_SORT = sort
+        
+        redirect("/comingEpisodes")
+
+    @cherrypy.expose
+    def comingEpisodes(self):
 
         myDB = db.DBConnection()
         
@@ -1854,21 +1875,22 @@ class WebInterface:
             'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
             'network': (lambda a, b: cmp(a["network"], b["network"])),
         }
-        if sort not in sorts:
-            sort = 'date'
+
         #epList.sort(sorts[sort])
-        sql_results.sort(sorts[sort])
+        sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
         t = PageTemplate(file="comingEpisodes.tmpl")
         t.submenu = [
-            { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
-            { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
-            { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
-            { 'title': 'Toggle Banner View', 'path': 'toggleBanners/' },
+            { 'title': 'Sort by:', 'path': {'Date': 'setComingEpsSort/?sort=date',
+                                            'Show': 'setComingEpsSort/?sort=show',
+                                            'Network': 'setComingEpsSort/?sort=network',
+                                           }},
+            { 'title': 'Layout:', 'path': {'Banner': 'setComingEpsLayout/?layout=banner',
+                                           'Poster': 'setComingEpsLayout/?layout=poster',
+                                           'List': 'setComingEpsLayout/?layout=list',
+                                           }},
         ]
-        t.sort = sort
-        #t.epList = epList
-        
+
         t.next_week = next_week
         t.today = today
         t.sql_results = sql_results

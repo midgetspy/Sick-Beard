@@ -239,6 +239,8 @@ class QueueItemAdd(ShowQueueItem):
             self.show.setTVRID()
 
             self.show.writeMetadata()
+            self.show.populateCache()
+            
         except Exception, e:
             logger.log(u"Error with TVDB, not creating episode list: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
@@ -275,6 +277,7 @@ class QueueItemRefresh(ShowQueueItem):
 
         self.show.refreshDir()
         self.show.writeMetadata()
+        self.show.populateCache()
 
         self.inProgress = False
 

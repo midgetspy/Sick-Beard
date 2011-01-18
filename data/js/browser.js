@@ -46,9 +46,10 @@
                 fileBrowserDialog = $('<div id="fileBrowserDialog" style="display:hidden"></div>').appendTo('body').dialog({
                     dialogClass: 'browserDialog',
                     title:       options.title,
-                    position:    ['center', 50],
-                    width:       600,
-                    height:      600,
+                    position:    ['center', 40],
+                    minWidth:    Math.min($(document).width()-80, 650),
+                    minHeight:   320,
+                    height:      $(document).height()-80,
                     modal:       true,
                     autoOpen:    false
                 });
