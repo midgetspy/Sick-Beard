@@ -467,7 +467,7 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, use_banners=None):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, use_banner=None):
 
         results = []
 
@@ -521,10 +521,10 @@ class ConfigGeneral:
         else:
             naming_dates = 0
 
-        if use_banners == "on":
-            use_banners = 1
+        if use_banner == "on":
+            use_banner = 1
         else:
-            use_banners = 0
+            use_banner = 0
 
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
@@ -562,7 +562,7 @@ class ConfigGeneral:
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
 
-        sickbeard.USE_BANNER = use_banners
+        sickbeard.USE_BANNER = use_banner
 
         config.change_VERSION_NOTIFY(version_notify)
 
