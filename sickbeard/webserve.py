@@ -127,9 +127,9 @@ def _getEpisode(show, season, episode):
     return epObj
 
 ManageMenu = [
+            { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
            #{ 'title': 'Episode Overview', 'path': 'manage/episodeOverview' },
-           { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             ]
 
 class ManageSearches:
@@ -445,8 +445,8 @@ class History:
 ConfigMenu = [
     { 'title': 'General',           'path': 'config/general/'          },
     { 'title': 'Episode Downloads', 'path': 'config/episodedownloads/' },
-    { 'title': 'Search Providers',  'path': 'config/providers/'        },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
+    { 'title': 'Search Providers',  'path': 'config/providers/'        },
 ]
 
 class ConfigGeneral:

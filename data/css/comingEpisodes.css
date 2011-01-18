@@ -53,7 +53,7 @@ div#insideContent {
 }
 
 .posterThumb {
-    background-image: url("/images/poster.png");
+/*  background-image: url("/images/poster.png"); */
     /* display:table-cell; */
     vertical-align: top;
     height: 200px;
@@ -62,7 +62,7 @@ div#insideContent {
     border-right: 1px solid #ccc;
 }
 .bannerThumb {
-    background-image: url("/images/poster.png");
+/*  background-image: url("/images/poster.png"); */
     background-repeat: repeat-x;
     /* display:table-cell; */
     vertical-align: top;
