@@ -341,7 +341,7 @@ class PostProcessor(object):
             for exceptionID in common.sceneExceptions:
                 # for each exception name
                 for curException in common.sceneExceptions[exceptionID]:
-                    if cur_name.lower() == curException.lower():
+                    if cur_name.lower() in (curException.lower(), sceneHelpers.sanitizeSceneName(curException).lower().replace('.',' ')):
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
                         _finalize(parse_result)
                         return (exceptionID, season, episodes)
