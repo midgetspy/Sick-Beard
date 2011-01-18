@@ -1383,7 +1383,7 @@ class Home:
         if updated:
             # do a hard restart
             threading.Timer(2, sickbeard.restart, [False]).start()
-            return _genericMessage("Restarting","Sick Beard is restarting, refresh in 30 seconds.")
+            return "Sick Beard is restarting, refresh in 30 seconds."
         else:
             return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
 
