@@ -147,11 +147,11 @@
 #for $menuItem in $submenu:
     #if 'requires' not in $menuItem or $menuItem.requires():
         #if type($menuItem.path) == dict:
-            #if $first then "" else "| "#<b>$menuItem.title</b>
+            #if $first then "" else "</span>| <span>"#<b>$menuItem.title</b>
             #set $first = False
             #set $inner_first = True
             #for $cur_link in $menuItem.path:
-                #if $inner_first then "" else "/ "#<a href="$sbRoot/$menuItem.path[$cur_link]">$cur_link</a>
+                #if $inner_first then "" else "&middot; "#<a class="inner" href="$sbRoot/$menuItem.path[$cur_link]">$cur_link</a>
                 #set $inner_first = False
             #end for
         #else
@@ -163,6 +163,8 @@
 </span>
 </div>
 #end if
+
+
 <div id="content">
 
 #for $curMessage in $flash.messages():

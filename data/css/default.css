@@ -307,12 +307,19 @@ color:#333;
 border-bottom: 1px solid #333;
 padding-left:5px;
 }
+#SubMenu span {
+padding:2px 6px 2px 8px;
+}
 #SubMenu span a {
 line-height:24px;
-font-weight:700;
 text-decoration:none;
 color:#333;
-padding:2px 12px 2px;
+font-weight:700;
+padding:2px 6px 2px;
+}
+#SubMenu span a.inner {
+font-weight:400;
+padding:2px;
 }
 #SubMenu span a:hover {
 background-color:#000;
