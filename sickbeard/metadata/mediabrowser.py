@@ -155,8 +155,16 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         show_obj: a TVShow instance to create the NFO for
         """
 
-        t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
-        
+	tvdb_lang = show_obj.lang
+        # There's gotta be a better way of doing this but we don't wanna
+	# change the language value elsewhere
+	ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+	if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+	    ltvdb_api_parms['language'] = tvdb_lang
+
+        t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
+    
         tv_node = etree.Element("Series")
         for ns in XML_NSMAP.keys():
             tv_node.set(ns, XML_NSMAP[ns])
@@ -256,8 +264,18 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         eps_to_write = [ep_obj] + ep_obj.relatedEps
         
         shouldSave = False
+
+	tvdb_lang = ep_obj.show.lang
+    
         try:
-            t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
+	    # There's gotta be a better way of doing this but we don't wanna
+	    # change the language value elsewhere
+	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+		ltvdb_api_parms['language'] = tvdb_lang
+
+            t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             myShow = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(str(e))

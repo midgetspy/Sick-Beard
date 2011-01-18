@@ -244,3 +244,11 @@ class AddAirByDateOption(UpgradeHistoryForGenericProviders):
 	def execute(self):
 		self.connection.action("ALTER TABLE tv_shows ADD air_by_date NUMERIC")
 		self.incDBVersion()
+
+class AddLang (AddAirByDateOption):
+	def test(self):
+		return self.hasColumn("tv_shows", "lang")
+
+	def execute(self):
+		self.addColumn("tv_shows", "lang", "TEXT", "en")
+
