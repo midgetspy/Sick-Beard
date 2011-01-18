@@ -562,6 +562,8 @@ class ConfigGeneral:
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
 
+        sickbeard.USE_BANNER = use_banners
+
         config.change_VERSION_NOTIFY(version_notify)
 
         sickbeard.save_config()
