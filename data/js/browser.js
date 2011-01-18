@@ -1,11 +1,4 @@
 (function(){
-    $.Browser = {
-        defaults: {
-            title:             'Choose Directory',
-            url:               '/browser/',
-            autocompleteURL:   '/browser/complete'
-        }
-    };
 
     var fileBrowserDialog  = null;
     var currentBrowserPath = null;
@@ -20,7 +13,12 @@
         fileBrowserDialog.dialog('option', 'dialogClass', 'browserDialog busy');
         currentRequest = $.getJSON(endpoint, { path: path }, function(data){
             fileBrowserDialog.empty();
-            $('<h1>').text(path).appendTo(fileBrowserDialog);
+            var first_val = data[0];
+            var i = 0;
+            data = jQuery.grep(data, function(value) {
+                return i++ != 0;
+            });
+            $('<h1>').text(first_val.current_path).appendTo(fileBrowserDialog);
             list = $('<ul>').appendTo(fileBrowserDialog);
             $.each(data, function(i, entry) {
                 link = $("<a href='javascript:void(0)' />").click(function(){ browse(entry.path, endpoint); }).text(entry.name);
