@@ -97,16 +97,6 @@ ep_regexes = [
                (?P<ep_num>\d{2})$                          # 02
                '''),
               
-              ('bare',
-               # Show.Name.102.Source.Quality.Etc-Group
-               '''
-               ^(?P<series_name>.+?)[. _-]+                # Show_Name and separator
-               (?P<season_num>\d{1,2})                     # 1
-               (?P<ep_num>\d{2})                           # 02 and separator
-               ([. _-]+(?P<extra_info>(?!\d{3}[. _-]+)[^-]+) # Source_Quality_Etc-
-               (-(?P<release_group>.+))?)?$                # Group
-               '''),
-              
               ('verbose',
                # Show Name Season 1 Episode 2 Ep Name
                '''
@@ -129,24 +119,46 @@ ep_regexes = [
                '''
                ),
 
+              ('no_season_multi_ep',
+               # Show.Name.E02-03
+               # Show.Name.E02.2010
+               '''
+               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
+               (e(p(isode)?)?|part|pt)[. _-]?              # e, ep, episode, or part
+               (?P<ep_num>(\d+|[ivx]+))                    # first ep num
+               ((([. _-]+(and|&|to)[. _-]+)|-)                # and/&/to joiner
+               (?P<extra_ep_num>(?!(1080|720)[pi])(\d+|[ivx]+))[. _-])            # second ep num
+               ([. _-]*(?P<extra_info>.+?)                 # Source_Quality_Etc-
+               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               '''
+               ),
+
               ('no_season_general',
                # Show.Name.E23.Test
                # Show.Name.Part.3.Source.Quality.Etc-Group
                # Show.Name.Part.1.and.Part.2.Blah-Group
-               # Show Name Episode 3 and 4
                '''
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
                (e(p(isode)?)?|part|pt)[. _-]?              # e, ep, episode, or part
                (?P<ep_num>(\d+|[ivx]+))                    # first ep num
                ([. _-]+((and|&|to)[. _-]+)?                # and/&/to joiner
-               ((e(p(isode)?)?|part|pt)[. _-]?)?           # e, ep, episode, or part
-               (?P<extra_ep_num>(?!(1080|720)[pi])(\d+|[ivx]+)))*            # second ep num
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
+               ((e(p(isode)?)?|part|pt)[. _-]?)           # e, ep, episode, or part
+               (?P<extra_ep_num>(?!(1080|720)[pi])(\d+|[ivx]+))[. _-])*            # second ep num
+               ([. _-]*(?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
                '''
                ),
 
-               
+              ('bare',
+               # Show.Name.102.Source.Quality.Etc-Group
+               '''
+               ^(?P<series_name>.+?)[. _-]+                # Show_Name and separator
+               (?P<season_num>\d{1,2})                     # 1
+               (?P<ep_num>\d{2})                           # 02 and separator
+               ([. _-]+(?P<extra_info>(?!\d{3}[. _-]+)[^-]+) # Source_Quality_Etc-
+               (-(?P<release_group>.+))?)?$                # Group
+               '''),
+              
               ('no_season',
                # Show Name - 01 - Ep Name
                # 01 - Ep Name
