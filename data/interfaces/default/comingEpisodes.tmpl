@@ -133,11 +133,12 @@
             #end if
 
     <!-- start $cur_result["show_name"] -->
-      <tr class="$show_div">
-        <td align="left" width="60"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %>
+      <tr class="$show_div"><div>
+        <td align="left"><span class="float-left"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></span>
         #if $cur_result["description"] != "" and $cur_result["description"] != None:
         <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
         #end if
+        </div>
         </td>
         <td>$cur_result["name"]</td>
         <td align="center" nowrap="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
