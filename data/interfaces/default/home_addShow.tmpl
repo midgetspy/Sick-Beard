@@ -13,10 +13,30 @@
 <script type="text/javascript" charset="utf-8">
 \$(document).ready(function() 
 { 
+    \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data){
+	var resultStr = '';
 
-  \$('#searchName').click(function(){
-        \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val()}, function(data){
-            var resultStr = ''
+	if (data.results.length == 0) {
+            resultStr = '<option value="en" selected="selected">en</option>';
+        } else {
+            \$.each(data.results, function(index, obj){
+                if (resultStr == '')
+        		selected = ' selected="selected"';
+                else
+                        selected = '';
+
+		resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
+            });
+        }
+        \$('#tvdbLangSelect').html(resultStr)
+
+        \$('#tvdbLangSelect').change(function() { searchTvdb() });
+    });
+
+
+    function searchTvdb(){
+        \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val(), 'lang': \$('#tvdbLangSelect').val()}, function(data){
+            var resultStr = '';
             
             if (data.results.length == 0) {
                 resultStr = '<b>No results found, try a different search.</b>';
@@ -27,17 +47,23 @@
                         checked = ' checked';
                     else
                         checked = '';
-                    resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '"' + checked + ' /> '
-                    resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" target="_new"><b>' + obj[1] + '</b></a>'
+                    resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '"' + checked + ' /> ';
+		    if(data.langid && data.langid != "")
+                    	resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '&lid=' + data.langid + '" target="_new"><b>' + obj[1] + '</b></a>';
+		    else
+			resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" target="_new"><b>' + obj[1] + '</b></a>';
+
                     if (obj[2] != null)
-                        resultStr += ' (started on ' + obj[2] + ')'
-                    resultStr += '<br />'
+                        resultStr += ' (started on ' + obj[2] + ')';
+                    resultStr += '<br />';
                 });
-                resultStr += '</ul>'
+                resultStr += '</ul>';
             }
             \$('#searchResults').html(resultStr)
         });
-    });  
+    };  
+
+    \$('#searchName').click(function() {searchTvdb()});
 
     \$('#searchName').click()
 
@@ -64,7 +90,9 @@
 <br />
 <input type="hidden" name="skipShow" id="skipShowItem" value="0" />
 <input type="hidden" name="showToAdd" value="$showToAdd" />
-<input type="text" id="nameToSearch" value="$showNameToAdd" /> <input type="button" id="searchName" value="Search" /><br />
+<input type="text" id="nameToSearch" value="$showNameToAdd" />
+<select name="tvdbLang" id="tvdbLangSelect"></select>
+<input type="button" id="searchName" value="Search" /><br />
 #for $curShow in $showDirs:
 <input type="hidden" name="showDirs" value="$curShow" />
 #end for 

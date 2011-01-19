@@ -44,7 +44,7 @@ from common import *
 
 class TVShow(object):
 
-    def __init__ (self, tvdbid):
+    def __init__ (self, tvdbid, lang="en"):
 
         self.tvdbid = tvdbid
 
@@ -63,7 +63,7 @@ class TVShow(object):
         self.startyear = 0
         self.paused = 0
         self.air_by_date = 0
-	self.lang = ""
+	self.lang = lang
 
         self.lock = threading.Lock()
         self._isDirGood = False

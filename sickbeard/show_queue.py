@@ -113,8 +113,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir)
+    def addShow(self, tvdb_id, showDir, lang="en"):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, lang)
         self.queue.append(queueItemObj)
 
         return queueItemObj
@@ -162,10 +162,11 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir):
+    def __init__(self, tvdb_id, showDir, lang="en"):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
+	self.lang = lang
 
         self.show = None
 
@@ -193,7 +194,7 @@ class QueueItemAdd(ShowQueueItem):
         logger.log(u"Starting to add show "+self.showDir)
 
         try:
-            newShow = TVShow(self.tvdb_id)
+            newShow = TVShow(self.tvdb_id, self.lang)
             newShow.loadFromTVDB()
 
             self.show = newShow
