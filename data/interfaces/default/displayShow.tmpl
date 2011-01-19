@@ -56,6 +56,9 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 #end if
 <br />
 
+<b>Language:</b> $show.lang
+<br />
+
 <b>Season Folders:</b> <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes32.png\" alt=\"Y" else "no32.png\" alt=\"N"#" width="16" height="16"><br />
 
 <b>Active:</b> <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes32.png\" alt=\"Y" else "no32.png\" alt=\"N"#" width="16" height="16"><br />
