@@ -35,6 +35,8 @@
 
 
     function searchTvdb(){
+	\$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/searching_anim.gif">searching..</img>');
+
         \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val(), 'lang': \$('#tvdbLangSelect').val()}, function(data){
             var resultStr = '';
             
@@ -59,7 +61,7 @@
                 });
                 resultStr += '</ul>';
             }
-            \$('#searchResults').html(resultStr)
+            \$('#searchResults').html(resultStr);
         });
     };  
 
