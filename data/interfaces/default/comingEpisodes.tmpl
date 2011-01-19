@@ -119,6 +119,10 @@
 
     #for $cur_result in $sql_results:
 
+        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+            #continue
+        #end if
+
         #set $cur_ep_airdate = int($cur_result["airdate"])
             #if $cur_ep_airdate < $today:
                 #set $show_div = "listing_overdue"
@@ -181,6 +185,10 @@ Custom
     #for $cur_result in $sql_results:
     <!-- start $cur_result["show_name"] -->
         
+        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+            #continue
+        #end if
+
         #if $sort == "network":
             #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
                 <br /><h1 class="network">$cur_result["network"]</h1>
