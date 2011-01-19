@@ -18,6 +18,36 @@
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
+<style type="text/css">
+<!--
+.ac_loading { background: white url("$sbRoot/images/indicator.gif") right center no-repeat; }
+.sf-sub-indicator { background: url("$sbRoot/images/arrows.png") no-repeat -10px -100px; }
+.sf-shadow ul { background: url("$sbRoot/images/shadow.png") no-repeat bottom right; }
+table.tablesorter thead tr .header { background-image: url("$sbRoot/tablesorter/images/tablesorter/bg.gif"); }
+table.tablesorter thead tr .headerSortUp { background-image: url("$sbRoot/tablesorter/images/tablesorter/asc.gif"); }
+table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/tablesorter/images/tablesorter/desc.gif"); }
+.browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat; }
+
+.ui-widget-content { border: 1px solid #d9d6c4; background: #eceadf url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat; color: #1f1f1f; }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #cbc7bd; background: #f8f7f6 url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_10_f8f7f6_60x60.png") 50% 50% repeat; font-weight: bold; color: #654b24; }
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #d9d6c4; background: #eceadf url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_15_eceadf_60x60.png") 50% 50% repeat; font-weight: bold; color: #140f06; }
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 1px solid #b2a266; background: #f7f3de url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_15_f7f3de_60x60.png") 50% 50% repeat; color: #3a3427; }
+.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #681818; background: #b83400 url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_68_b83400_60x60.png") 50% 50% repeat; color: #ffffff; }
+
+.ui-icon { width: 16px; height: 16px; background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_222222_256x240.png"); }
+.ui-widget-content .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_222222_256x240.png"); }
+.ui-widget-header .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_b83400_256x240.png"); }
+.ui-state-default .ui-icon { background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_b83400_256x240.png"); }
+.ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_ffffff_256x240.png"); }
+.ui-state-active .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_8c291d_256x240.png"); }
+.ui-state-highlight .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_3572ac_256x240.png"); }
+.ui-state-error .ui-icon, .ui-state-error-text .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_fbdb93_256x240.png"); }
+
+.ui-widget-overlay { background: #6e4f1c url("$sbRoot/css/pepper-grinder/images/ui-bg_diagonal-maze_20_6e4f1c_10x10.png") 50% 50% repeat; opacity: .60;filter:Alpha(Opacity=60); }
+.ui-widget-shadow { margin: 0 0 0 -10px; padding: 5px; background: #000000 url("$sbRoot/css/pepper-grinder/images/ui-bg_diagonal-maze_40_000000_10x10.png") 50% 50% repeat; opacity: .60;filter:Alpha(Opacity=60); -moz-border-radius: 18px; -webkit-border-radius: 18px; border-radius: 18px; }/*
+-->
+</style>
+
     <script type="text/javascript" src="$sbRoot/js/jquery-1.4.4.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.7.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
@@ -102,29 +132,8 @@
                         <li><a href="$sbRoot/home/shutdown/"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
                 </ul>
             </li>
-            <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes">Coming Episodes</a>
-<!--
-                <ul>
-                        <li><a href="$sbRoot/comingEpisodes/?sort=date"><img src="$sbRoot/images/menu/sortdate16.png" alt="" width="16" height="16" />Sort by Date</a></li>
-                        <li><a href="$sbRoot/comingEpisodes/?sort=network"><img src="$sbRoot/images/menu/sortnetwork16.png" alt="" width="16" height="16" />Sort by Network</a></li>
-                        <li><a href="$sbRoot/comingEpisodes/?sort=show"><img src="$sbRoot/images/menu/sortshow16.png" alt="" width="16" height="16" />Sort by Show</a></li>
-                        <li><a href="$sbRoot#">Toggle View</a>
-                            <ul>
-                                <li><a href="$sbRoot/toggleBanners/"><img src="$sbRoot/images/menu/banner16.png" alt="" width="16" height="16" />Toggle Banner View</a></li>
-                                <li><a href="$sbRoot/toggleList/"><img src="$sbRoot/images/menu/list16.png" alt="" width="16" height="16" />Toggle List View</a></li>
-                            </ul>
-                        </li>
-                </ul>
--->
-            </li>
-            <li id="NAVhistory"><a href="$sbRoot/history">History</a>
-<!--
-                <ul>
-                        <li><a href="$sbRoot/history/clearHistory"><img src="$sbRoot/images/menu/clear16.png" alt="" width="16" height="16" />Clear History</a></li>
-                        <li><a href="$sbRoot/history/trimHistory"><img src="$sbRoot/images/menu/trim16.png" alt="" width="16" height="16" />Trim History</a></li>
-                </ul>
--->
-            </li>
+            <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes">Coming Episodes</a></li>
+            <li id="NAVhistory"><a href="$sbRoot/history">History</a></li>
             <li id="NAVmanage"><a href="$sbRoot/manage">Manage</a>
                 <ul>
                         <li><a href="$sbRoot/manage/backlogOverview"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Backlog Overview</a></li>
@@ -141,9 +150,6 @@
             </li>
             <li id="NAVerrorlogs"><a href="$sbRoot/errorlogs">$logPageTitle</a>
                 <ul>
-<!--
-                        <li><a href="$sbRoot/errorlogs/clearerrors"><img src="$sbRoot/images/menu/clear16.png" alt="" width="16" height="16" />Clear Errors</a></li>
--->
                         <li><a href="$sbRoot/errorlogs/viewlog"><img src="$sbRoot/images/menu/viewlog16.png" alt="" width="16" height="16" />View Log</a></li>
                 </ul>
             </li>

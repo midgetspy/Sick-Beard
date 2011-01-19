@@ -33,11 +33,11 @@
 	line-height: 16px;
 	overflow: hidden;
 }
-
+/*
 .ac_loading {
 	background: white url('../images/indicator.gif') right center no-repeat;
 }
-
+*/
 .ac_odd {
 	background-color: #eee;
 }
