@@ -1847,6 +1847,13 @@ class WebInterface:
         redirect("/comingEpisodes")
 
     @cherrypy.expose
+    def toggleComingEpsDisplayPaused(self):
+        
+        sickbeard.COMING_EPS_DISPLAY_PAUSED = not sickbeard.COMING_EPS_DISPLAY_PAUSED
+        
+        redirect("/comingEpisodes")
+
+    @cherrypy.expose
     def setComingEpsSort(self, sort):
         if sort not in ('date', 'network', 'show'):
             sort = 'date'
@@ -1888,15 +1895,19 @@ class WebInterface:
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
         t = PageTemplate(file="comingEpisodes.tmpl")
+        paused_item = { 'title': '', 'path': 'toggleComingEpsDisplayPaused' }
+        paused_item['title'] = 'Hide Paused' if sickbeard.COMING_EPS_DISPLAY_PAUSED else 'Show Paused'
         t.submenu = [
             { 'title': 'Sort by:', 'path': {'Date': 'setComingEpsSort/?sort=date',
                                             'Show': 'setComingEpsSort/?sort=show',
                                             'Network': 'setComingEpsSort/?sort=network',
                                            }},
+                                           
             { 'title': 'Layout:', 'path': {'Banner': 'setComingEpsLayout/?layout=banner',
                                            'Poster': 'setComingEpsLayout/?layout=poster',
                                            'List': 'setComingEpsLayout/?layout=list',
                                            }},
+            paused_item,
         ]
 
         t.next_week = next_week
