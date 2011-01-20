@@ -96,6 +96,7 @@ USE_LISTVIEW = None
 METADATA_XBMC = None
 METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
+METADATA_WDTV = None
 
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_FORMAT = None
@@ -308,7 +309,7 @@ def initialize(consoleLogging=True):
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV
 
         if __INITIALIZED__:
             return False
@@ -502,10 +503,12 @@ def initialize(consoleLogging=True):
             METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
             METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
             METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
+            METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
             
             for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
                                        (METADATA_MEDIABROWSER, metadata.mediabrowser),
                                        (METADATA_PS3, metadata.ps3),
+                                       (METADATA_WDTV, metadata.wdtv),
                                        ]:
 
                 (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
@@ -791,6 +794,7 @@ def save_config():
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
     new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
+    new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
 
     new_config['General']['cache_dir'] = CACHE_DIR if CACHE_DIR else 'cache'
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
