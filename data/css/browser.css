@@ -1,3 +1,7 @@
+#fileBrowserDialog {
+  max-height: 480;
+  overflow-y: auto;
+}
 #fileBrowserDialog ul {
   margin: 0;
   padding: 0;
@@ -19,6 +23,8 @@
   margin: 0 4px;
   float: left;
 }
+/*
 .browserDialog.busy .ui-dialog-buttonpane {
-   background: url(../images/loading.gif) 10px 50% no-repeat;
+  background: url("/images/loading.gif") 10px 50% no-repeat;
 }
+*/

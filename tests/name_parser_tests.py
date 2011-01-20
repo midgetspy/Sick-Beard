@@ -3,6 +3,7 @@ import unittest
 
 import sys, os.path
 sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath('../lib'))
 
 from sickbeard.name_parser import parser
 
@@ -21,6 +22,8 @@ simple_test_cases = {
               'S01E02 Ep Name': parser.ParseResult(None, None, 1, [2], 'Ep Name'),
               'Show Name - S06E01 - 2009-12-20 - Ep Name': parser.ParseResult(None, 'Show Name', 6, [1], '2009-12-20 - Ep Name'),
               'Show Name - S06E01 - -30-': parser.ParseResult(None, 'Show Name', 6, [1], '30-' ),
+              'Show-Name-S06E01-720p': parser.ParseResult(None, 'Show-Name', 6, [1], '720p' ),
+              'Show-Name-S06E01-1080i': parser.ParseResult(None, 'Show-Name', 6, [1], '1080i' ),
               },
               
               'fov': {
@@ -30,6 +33,8 @@ simple_test_cases = {
               'Show_Name.1x02x03x04.Source_Quality_Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'Source_Quality_Etc', 'Group'),
               'Show Name - 1x02-03-04 - My Ep Name': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'My Ep Name'),
               '1x02 Ep Name': parser.ParseResult(None, None, 1, [2], 'Ep Name'),
+              'Show-Name-1x02-720p': parser.ParseResult(None, 'Show-Name', 1, [2], '720p'),
+              'Show-Name-1x02-1080i': parser.ParseResult(None, 'Show-Name', 1, [2], '1080i'),
               },
 
               'standard_repeat': {
@@ -67,8 +72,12 @@ simple_test_cases = {
               'Show Name - Episode 01 - Ep Name': parser.ParseResult(None, 'Show Name', None, [1], 'Ep Name'),
               'Show.Name.Part.3.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [3], 'Source.Quality.Etc', 'Group'),
               'Show.Name.Part.1.and.Part.2.Blah-Group': parser.ParseResult(None, 'Show Name', None, [1,2], 'Blah', 'Group'),
-              'Show Name Episode 3 and 4': parser.ParseResult(None, 'Show Name', None, [3,4]),
               'Show.Name.Part.IV.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [4], 'Source.Quality.Etc', 'Group'),
+              },
+
+              'no_season_multi_ep': {
+              'Show.Name.E23-24.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [23,24], 'Source.Quality.Etc', 'Group'),
+              'Show Name - Episode 01-02 - Ep Name': parser.ParseResult(None, 'Show Name', None, [1,2], 'Ep Name'),
               },
 
               'season_only': {
@@ -215,6 +224,10 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser(False)
         self._test_names(np, 'no_season_general')
 
+    def test_no_season_multi_ep_names(self):
+        np = parser.NameParser(False)
+        self._test_names(np, 'no_season_multi_ep')
+
     def test_season_only_names(self):
         np = parser.NameParser(False)
         self._test_names(np, 'season_only')
@@ -254,6 +267,10 @@ class BasicTests(unittest.TestCase):
     def test_no_season_general_file_names(self):
         np = parser.NameParser()
         self._test_names(np, 'no_season_general', lambda x: x + '.avi')
+
+    def test_no_season_multi_ep_file_names(self):
+        np = parser.NameParser()
+        self._test_names(np, 'no_season_multi_ep', lambda x: x + '.avi')
 
     def test_season_only_file_names(self):
         np = parser.NameParser()

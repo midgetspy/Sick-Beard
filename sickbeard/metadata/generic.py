@@ -402,10 +402,15 @@ class GenericMetadata():
         # use the default poster name
         poster_path = self.get_poster_path(show_obj)
         
-        poster_data = self._retrieve_show_image('poster', show_obj, which)
+        if sickbeard.USE_BANNER:
+            img_type = 'banner'
+        else:
+            img_type = 'poster'
+        
+        poster_data = self._retrieve_show_image(img_type, show_obj, which)
 
         if not poster_data:
-            logger.log(u"No poster image was retrieved, unable to write poster", logger.DEBUG)
+            logger.log(u"No show folder image was retrieved, unable to write poster", logger.DEBUG)
             return False
 
         return self._write_image(poster_data, poster_path)
@@ -505,7 +510,7 @@ class GenericMetadata():
             logger.log(u"Unable to look up show on TVDB, not downloading images: "+str(e).decode('utf-8'), logger.ERROR)
             return None
     
-        if image_type not in ('fanart', 'poster'):
+        if image_type not in ('fanart', 'poster', 'banner'):
             logger.log(u"Invalid image type "+str(image_type)+", couldn't find it in the TVDB object", logger.ERROR)
             return None
     
