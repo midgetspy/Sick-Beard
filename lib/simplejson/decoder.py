@@ -4,9 +4,9 @@ import re
 import sys
 import struct
 
-from lib.simplejson.scanner import make_scanner
+from simplejson.scanner import make_scanner
 try:
-    from lib.simplejson._speedups import scanstring as c_scanstring
+    from simplejson._speedups import scanstring as c_scanstring
 except ImportError:
     c_scanstring = None
 

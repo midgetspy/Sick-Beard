@@ -1,4 +1,4 @@
-from hachoir_metadata.version import VERSION as __version__
+from .hachoir_metadata.version import VERSION as __version__
 from hachoir_metadata.metadata import extractMetadata
 
 # Just import the module,
