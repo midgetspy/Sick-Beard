@@ -170,7 +170,7 @@ color:#4e4e4e;
 }
 
 .sickbeardTable {
-width:80%;
+width:90%;
 margin-left:auto;
 margin-right:auto;
 }
@@ -188,6 +188,7 @@ clear:left;
 
 .plotInfo {
 cursor:help;
+padding-left:5px;
 float:right;
 }
 
