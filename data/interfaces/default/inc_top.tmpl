@@ -52,7 +52,6 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.7.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
     <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery.hoverIntent.min-r5.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.autocomplete.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
@@ -79,7 +78,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
             extraWidth:  1     // extra width can ensure lines don't sometimes turn over 
                                // due to slight rounding differences and font-family 
         }).superfish({
-            pathClass:   'current',
+            delay:         150,
+            disableHI:     true, 
             animation:   {opacity:'show',height:'show'},
             speed:       'fast',
             dropShadows: false
