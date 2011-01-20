@@ -467,7 +467,8 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, use_banner=None):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
+                    wdtv_data=None, use_banner=None):
 
         results = []
 
@@ -542,6 +543,7 @@ class ConfigGeneral:
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
+        sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
