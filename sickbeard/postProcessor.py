@@ -39,8 +39,6 @@ from sickbeard import sceneHelpers
 
 from sickbeard import encodingKludge as ek
 
-from sickbeard.notifiers import xbmc
-
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -199,7 +197,8 @@ class PostProcessor(object):
             try:
                 helpers.moveFile(cur_file_path, new_file_path)
             except (IOError, OSError), e:
-                logger.log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                raise e
                 
     def _copy(self, file_path, new_path, associated_files=False):
 
@@ -222,6 +221,7 @@ class PostProcessor(object):
                 helpers.copyFile(cur_file_path, new_file_path)
             except (IOError, OSError), e:
                 logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                raise e
 
     def _find_ep_destination_folder(self, ep_obj):
         
@@ -313,7 +313,7 @@ class PostProcessor(object):
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
         parse_result = np.parse(name)
-        self._log("Parsed "+name+" into "+str(parse_result), logger.DEBUG)
+        self._log("Parsed "+name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
 
         if parse_result.air_by_date:
             season = -1
@@ -341,7 +341,7 @@ class PostProcessor(object):
             for exceptionID in common.sceneExceptions:
                 # for each exception name
                 for curException in common.sceneExceptions[exceptionID]:
-                    if cur_name.lower() == curException.lower():
+                    if cur_name.lower() in (curException.lower(), sceneHelpers.sanitizeSceneName(curException).lower().replace('.',' ')):
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
                         _finalize(parse_result)
                         return (exceptionID, season, episodes)
@@ -536,8 +536,9 @@ class PostProcessor(object):
             return True
         
         # if the user downloaded it manually and it appears to be a PROPER/REPACK then it's priority
-        if self.is_proper and new_ep_quality <= ep_obj.quality:
-            self._log(u"This was manually downloaded but it appears to a proper so I'm marking it as priority", logger.DEBUG)
+        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
+        if self.is_proper and new_ep_quality >= old_ep_quality:
+            self._log(u"This was manually downloaded but it appears to be a proper so I'm marking it as priority", logger.DEBUG)
             return True 
         
         return False
@@ -616,8 +617,12 @@ class PostProcessor(object):
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
-        dest_path = self._find_ep_destination_folder(ep_obj)
-        self._log(u"Destination folder for this episode: "+str(dest_path), logger.DEBUG)
+        try:
+            dest_path = self._find_ep_destination_folder(ep_obj)
+        except exceptions.ShowDirNotFoundException:
+            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
+            
+        self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
         
         # if the dir doesn't exist (new season folder) then make it
         if not ek.ek(os.path.isdir, dest_path):
@@ -625,7 +630,7 @@ class PostProcessor(object):
             try:
                 ek.ek(os.mkdir, dest_path)
             except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+str(dest_path))
+                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
         try:
             # move the episode to the show dir
@@ -647,20 +652,14 @@ class PostProcessor(object):
         history.logDownload(ep_obj, self.file_path)
 
         # send notifications
-        notifiers.notify(common.NOTIFY_DOWNLOAD, ep_obj.prettyName(True))
+        notifiers.notify_download(ep_obj.prettyName(True))
 
         # generate nfo/tbn
         ep_obj.createMetaFiles()
         ep_obj.saveToDB()
 
-        # this needs to be factored out into the notifiers
-        if sickbeard.XBMC_UPDATE_LIBRARY:
-            for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-                # do a per-show update first, if possible
-                if not xbmc.updateLibrary(curHost, showName=ep_obj.show.name) and sickbeard.XBMC_UPDATE_FULL:
-                    # do a full update if requested
-                    self._log(u"Update of show directory failed on " + curHost + ", trying full update as requested")
-                    xbmc.updateLibrary(curHost)
+        # do the library update
+        notifiers.xbmc_notifier.update_library(ep_obj.show.name)
 
         # run extra_scripts
         self._run_extra_scripts(ep_obj)

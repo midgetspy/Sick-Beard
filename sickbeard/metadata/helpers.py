@@ -56,7 +56,7 @@ def getTVDBIDFromNFO(dir):
         else:
             raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
-    except (exceptions.NoNFOException, SyntaxError), e:
+    except (exceptions.NoNFOException, SyntaxError, ValueError), e:
         logger.log(u"There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
         logger.log(u"Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 

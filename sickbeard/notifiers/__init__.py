@@ -7,21 +7,19 @@ import prowl
 
 from sickbeard.common import *
 
+xbmc_notifier = xbmc.XBMCNotifier()
+growl_notifier = growl.GrowlNotifier()
+twitter_notifier = tweet.TwitterNotifier()
 
-def testGrowl(host, password):
-    growl.sendGrowl("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password)
+def notify_download(ep_name):
+    xbmc_notifier.notify_download(ep_name)
+    growl_notifier.notify_download(ep_name)
+    twitter_notifier.notify_download(ep_name)
 
-def testXBMC(host, username, password):
-    xbmc.notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password)
-
-def testTwitter1():
-    return tweet.get_authorization()
-
-def testTwitter2(key):
-    return tweet.get_credentials(key)
-
-def testTwitter():
-    return tweet.notifyTwitter("This is a test notification from Sick Beard", force=True)
+def notify_snatch(ep_name):
+    xbmc_notifier.notify_snatch(ep_name)
+    growl_notifier.notify_snatch(ep_name)
+    twitter_notifier.notify_snatch(ep_name)
 
 def testProwl(prowl_api):
     prowl.sendProwl(prowl_api, "Sick Beard", "Test", "Testing Prowl notification settings from Sick Beard")

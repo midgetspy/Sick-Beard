@@ -28,7 +28,7 @@ $(document).ready(function(){
       if (this.checked == true) {
         updateArr.push($(this).attr('id').split('-')[1])
       }
-    });  
+    });
 
     $('.refreshCheck').each(function() {
       if (this.checked == true) {
@@ -40,13 +40,13 @@ $(document).ready(function(){
       if (this.checked == true) {
         renameArr.push($(this).attr('id').split('-')[1])
       }
-    });  
+    });
 /*
     $('.metadataCheck').each(function() {
       if (this.checked == true) {
         metadataArr.push($(this).attr('id').split('-')[1])
       }
-    });  
+    });
 */
     if (updateArr.length+refreshArr.length+renameArr.length+metadataArr.length == 0)
       return false

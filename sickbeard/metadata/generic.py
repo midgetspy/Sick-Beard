@@ -20,7 +20,7 @@ import os.path
 
 import xml.etree.cElementTree as etree
 
-import urllib
+import re
 
 import sickbeard
 
@@ -48,7 +48,14 @@ class GenericMetadata():
     - season thumbnails
     """
     
-    def __init__(self):
+    def __init__(self,
+                 show_metadata=False,
+                 episode_metadata=False,
+                 poster=False,
+                 fanart=False,
+                 episode_thumbnails=False,
+                 season_thumbnails=False):
+
         self._show_file_name = "tvshow.nfo"
         self._ep_nfo_extension = "nfo"
         
@@ -59,6 +66,67 @@ class GenericMetadata():
         self.generate_ep_metadata = True
         
         self.name = 'Generic'
+
+        self.show_metadata = show_metadata
+        self.episode_metadata = episode_metadata
+        self.poster = poster
+        self.fanart = fanart
+        self.episode_thumbnails = episode_thumbnails
+        self.season_thumbnails = season_thumbnails
+    
+    def get_config(self):
+        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_thumbnails]
+        return '|'.join([str(int(x)) for x in config_list])
+
+    def get_id(self):
+        return GenericMetadata.makeID(self.name)
+
+    @staticmethod
+    def makeID(name):
+        return re.sub("[^\w\d_]", "_", name).lower()
+
+    def set_config(self, string):
+        config_list = [bool(int(x)) for x in string.split('|')]
+        self.show_metadata = config_list[0]
+        self.episode_metadata = config_list[1]
+        self.poster = config_list[2]
+        self.fanart = config_list[3]
+        self.episode_thumbnails = config_list[4]
+        self.season_thumbnails = config_list[5]
+    
+    def _has_show_metadata(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_show_file_path(show_obj))
+        logger.log("Checking if "+self.get_show_file_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_episode_metadata(self, ep_obj):
+        result = ek.ek(os.path.isfile, self.get_episode_file_path(ep_obj))
+        logger.log("Checking if "+self.get_episode_file_path(ep_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_poster(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_poster_path(show_obj))
+        logger.log("Checking if "+self.get_poster_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_fanart(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_fanart_path(show_obj))
+        logger.log("Checking if "+self.get_fanart_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_episode_thumb(self, ep_obj):
+        location = self.get_episode_thumb_path(ep_obj)
+        result = location != None and ek.ek(os.path.isfile, location)
+        if location:
+            logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_season_thumb(self, show_obj, season):
+        location = self.get_season_thumb_path(show_obj, season)
+        result = location != None and ek.ek(os.path.isfile, location)
+        if location:
+            logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
+        return result
     
     def get_show_file_path(self, show_obj):
         return ek.ek(os.path.join, show_obj.location, self._show_file_name)
@@ -115,6 +183,76 @@ class GenericMetadata():
         This should be overridden by the implementing class. It should
         provide the content of the episode metadata file.
         """
+        return None
+    
+    def create_show_metadata(self, show_obj):
+        if self.show_metadata and show_obj and not self._has_show_metadata(show_obj):
+            logger.log("Metadata provider "+self.name+" creating show metadata for "+show_obj.name, logger.DEBUG)
+            return self.write_show_file(show_obj)
+        return False
+    
+    def create_episode_metadata(self, ep_obj):
+        if self.episode_metadata and ep_obj and not self._has_episode_metadata(ep_obj):
+            logger.log("Metadata provider "+self.name+" creating episode metadata for "+ep_obj.prettyName(), logger.DEBUG)
+            return self.write_ep_file(ep_obj)
+        return False
+    
+    def create_poster(self, show_obj):
+        if self.poster and show_obj and not self._has_poster(show_obj):
+            logger.log("Metadata provider "+self.name+" creating poster for "+show_obj.name, logger.DEBUG)
+            return self.save_poster(show_obj)
+        return False
+    
+    def create_fanart(self, show_obj):
+        if self.fanart and show_obj and not self._has_fanart(show_obj):
+            logger.log("Metadata provider "+self.name+" creating fanart for "+show_obj.name, logger.DEBUG)
+            return self.save_fanart(show_obj)
+        return False
+    
+    def create_episode_thumb(self, ep_obj):
+        if self.episode_thumbnails and ep_obj and not self._has_episode_thumb(ep_obj):
+            logger.log("Metadata provider "+self.name+" creating show metadata for "+ep_obj.prettyName(), logger.DEBUG)
+            return self.save_thumbnail(ep_obj)
+        return  False
+    
+    def create_season_thumbs(self, show_obj):
+        if self.season_thumbnails and show_obj:
+            logger.log("Metadata provider "+self.name+" creating season thumbnails for "+show_obj.name, logger.DEBUG)
+            return self.save_season_thumbs(show_obj)
+        return False
+    
+    def _get_episode_thumb_url(self, ep_obj):
+        """
+        Returns the URL to use for downloading an episode's thumbnail. Uses
+        theTVDB.com data.
+        
+        ep_obj: a TVEpisode object for which to grab the thumb URL
+        """
+        all_eps = [ep_obj] + ep_obj.relatedEps
+    
+        # get a TVDB object
+        try:
+            t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
+            tvdb_show_obj = t[ep_obj.show.tvdbid]
+        except tvdb_exceptions.tvdb_shownotfound, e:
+            raise exceptions.ShowNotFoundException(str(e))
+        except tvdb_exceptions.tvdb_error, e:
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+str(e).decode('utf-8'), logger.ERROR)
+            return None
+    
+        # try all included episodes in case some have thumbs and others don't
+        for cur_ep in all_eps:
+            try:
+                myEp = tvdb_show_obj[cur_ep.season][cur_ep.episode]
+            except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
+                logger.log(u"Unable to find episode " + str(cur_ep.season) + "x" + str(cur_ep.episode) + " on tvdb... has it been removed? Should I delete from db?")
+                continue
+    
+            thumb_url = myEp["filename"]
+            
+            if thumb_url:
+                return thumb_url
+
         return None
     
     def write_show_file(self, show_obj):
@@ -199,40 +337,6 @@ class GenericMetadata():
         
         return True
 
-    def _get_episode_thumb_url(self, ep_obj):
-        """
-        Returns the URL to use for downloading an episode's thumbnail. Uses
-        theTVDB.com data.
-        
-        ep_obj: a TVEpisode object for which to grab the thumb URL
-        """
-        all_eps = [ep_obj] + ep_obj.relatedEps
-    
-        # get a TVDB object
-        try:
-            t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
-            tvdb_show_obj = t[ep_obj.show.tvdbid]
-        except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
-        except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+str(e).decode('utf-8'), logger.ERROR)
-            return None
-    
-        # try all included episodes in case some have thumbs and others don't
-        for cur_ep in all_eps:
-            try:
-                myEp = tvdb_show_obj[cur_ep.season][cur_ep.episode]
-            except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-                logger.log(u"Unable to find episode " + str(cur_ep.season) + "x" + str(cur_ep.episode) + " on tvdb... has it been removed? Should I delete from db?")
-                continue
-    
-            thumb_url = myEp["filename"]
-            
-            if thumb_url:
-                return thumb_url
-
-        return None
-    
     def save_thumbnail(self, ep_obj):
         """
         Retrieves a thumbnail and saves it to the correct spot. This method should not need to
@@ -298,14 +402,61 @@ class GenericMetadata():
         # use the default poster name
         poster_path = self.get_poster_path(show_obj)
         
-        poster_data = self._retrieve_show_image('poster', show_obj, which)
+        if sickbeard.USE_BANNER:
+            img_type = 'banner'
+        else:
+            img_type = 'poster'
+        
+        poster_data = self._retrieve_show_image(img_type, show_obj, which)
 
         if not poster_data:
-            logger.log(u"No poster image was retrieved, unable to write poster", logger.DEBUG)
+            logger.log(u"No show folder image was retrieved, unable to write poster", logger.DEBUG)
             return False
 
         return self._write_image(poster_data, poster_path)
 
+
+    def save_season_thumbs(self, show_obj):
+        """
+        Saves all season thumbnails to disk for the given show.
+        
+        show_obj: a TVShow object for which to save the season thumbs
+        
+        Cycles through all seasons and saves the season thumbs if possible. This
+        method should not need to be overridden by implementing classes, changing
+        _season_thumb_dict and get_season_thumb_path should be good enough.
+        """
+    
+        season_dict = self._season_thumb_dict(show_obj)
+    
+        # Returns a nested dictionary of season art with the season
+        # number as primary key. It's really overkill but gives the option
+        # to present to user via ui to pick down the road.
+        for cur_season in season_dict:
+
+            cur_season_art = season_dict[cur_season]
+            
+            if len(cur_season_art) == 0:
+                continue
+    
+            # Just grab whatever's there for now
+            art_id, season_url = cur_season_art.popitem()
+
+            season_thumb_file_path = self.get_season_thumb_path(show_obj, cur_season)
+            
+            if not season_thumb_file_path:
+                logger.log(u"Path for season "+str(cur_season)+" came back blank, skipping this season", logger.DEBUG)
+                continue
+    
+            seasonData = metadata_helpers.getShowImage(season_url)
+            
+            if not seasonData:
+                logger.log(u"No season thumb data available, skipping this season", logger.DEBUG)
+                continue
+            
+            self._write_image(seasonData, season_thumb_file_path)
+    
+        return True
 
     def _write_image(self, image_data, image_path):
         """
@@ -359,7 +510,7 @@ class GenericMetadata():
             logger.log(u"Unable to look up show on TVDB, not downloading images: "+str(e).decode('utf-8'), logger.ERROR)
             return None
     
-        if image_type not in ('fanart', 'poster'):
+        if image_type not in ('fanart', 'poster', 'banner'):
             logger.log(u"Invalid image type "+str(image_type)+", couldn't find it in the TVDB object", logger.ERROR)
             return None
     
@@ -413,47 +564,3 @@ class GenericMetadata():
                 continue
 
         return result
-    
-    
-    def save_season_thumbs(self, show_obj):
-        """
-        Saves all season thumbnails to disk for the given show.
-        
-        show_obj: a TVShow object for which to save the season thumbs
-        
-        Cycles through all seasons and saves the season thumbs if possible. This
-        method should not need to be overridden by implementing classes, changing
-        _season_thumb_dict and get_season_thumb_path should be good enough.
-        """
-    
-        season_dict = self._season_thumb_dict(show_obj)
-    
-        # Returns a nested dictionary of season art with the season
-        # number as primary key. It's really overkill but gives the option
-        # to present to user via ui to pick down the road.
-        for cur_season in season_dict:
-
-            cur_season_art = season_dict[cur_season]
-            
-            if len(cur_season_art) == 0:
-                continue
-    
-            # Just grab whatever's there for now
-            art_id, season_url = cur_season_art.popitem()
-
-            season_thumb_file_path = self.get_season_thumb_path(show_obj, cur_season)
-            
-            if not season_thumb_file_path:
-                logger.log(u"Path for season "+str(cur_season)+" came back blank, skipping this season", logger.DEBUG)
-                continue
-    
-            seasonData = metadata_helpers.getShowImage(season_url)
-            
-            if not seasonData:
-                logger.log(u"No season thumb data available, skipping this season", logger.DEBUG)
-                continue
-            
-            self._write_image(seasonData, season_thumb_file_path)
-    
-        return True
-

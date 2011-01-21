@@ -5,6 +5,12 @@ sys.path.append(os.path.abspath('..'))
 
 from sickbeard import sceneHelpers, common
 
+class Show:
+    def __init__(self, name, tvdbid, tvrname):
+        self.name = name
+        self.tvdbid = tvdbid
+        self.tvrname = tvrname
+
 class SceneTests(unittest.TestCase):
     
     def _test_sceneToNormalShowNames(self, name, expected):
@@ -17,19 +23,25 @@ class SceneTests(unittest.TestCase):
         
     def _test_allPossibleShowNames(self, name, tvdbid=0, tvrname=None, expected=[]):
         
-        class Show:
-            def __init__(self, name, tvdbid, tvrname):
-                self.name = name
-                self.tvdbid = tvdbid
-                self.tvrname = tvrname
-        
-        
         result = sceneHelpers.allPossibleShowNames(Show(name, tvdbid, tvrname))
         self.assertTrue(len(set(expected).intersection(set(result))) == len(expected))
 
     def _test_filterBadReleases(self, name, expected):
         result = sceneHelpers.filterBadReleases(name)
         self.assertEqual(result, expected)
+
+    def _test_isGoodName(self, name, show):
+        self.assertTrue(sceneHelpers.isGoodResult(name, show))
+
+    def test_isGoodName(self):
+        self._test_isGoodName('Show.Name.S01E02.Test-Test', Show('Show/Name', 0, ''))
+        self._test_isGoodName('Show.Name.S01E02.Test-Test', Show('Show. Name', 0, ''))
+        self._test_isGoodName('Show.Name.S01E02.Test-Test', Show('Show- Name', 0, ''))
+        self._test_isGoodName('Show.Name.Part.IV.Test-Test', Show('Show Name', 0, ''))
+        self._test_isGoodName('Show.Name.1x02.Test-Test', Show('Show Name', 0, ''))
+        self._test_isGoodName('Show.Name.S01.Test-Test', Show('Show Name', 0, ''))
+        self._test_isGoodName('Show.Name.E02.Test-Test', Show('Show: Name', 0, ''))
+        self._test_isGoodName('Show Name Season 2 Test', Show('Show: Name', 0, ''))
 
     def test_sceneToNormalShowNames(self):
         self._test_sceneToNormalShowNames('Show Name 2010', ['Show Name 2010', 'Show Name (2010)'])

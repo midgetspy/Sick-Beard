@@ -7,8 +7,9 @@
 <!--#set global $topmenu="config"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<p>
-<b>Configfile:</b> $os.path.join($sickbeard.PROG_DIR, "config.ini")
-</p>
+<div id="summary" class="align-left">
+<b>SB Configfile:</b> $os.path.join($sickbeard.PROG_DIR, "config.ini")<br />
+<b>Python Version:</b> $sys.version[:120] <br />
+</div>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

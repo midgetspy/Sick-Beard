@@ -17,16 +17,13 @@
 #set $totalQual = $totalQual + $showCounts[$curShow.tvdbid][$Overview.QUAL]
 #end for
 
-<h2>Summary</h2>
+<div class="h2footer align-right">
+    <span class="wanted" style="white-space:nowrap;">Wanted: <b>$totalWanted</b></span>
+    <span class="qual" style="white-space:nowrap;">Low Quality: <b>$totalQual</b></span>
+</div><br/>
 
-<span class="wanted">Wanted: <b>$totalWanted</b></span><br />
-<span class="qual">Low Quality: <b>$totalQual</b></span><br />
-<br />
-<br />
+<table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
 
-
-<table class="sickbeardTable">
-    
 #for $curShow in sorted($sickbeard.showList, key=operator.attrgetter('name')):
 
 #if $showCounts[$curShow.tvdbid][$Overview.QUAL]+$showCounts[$curShow.tvdbid][$Overview.WANTED] == 0:
@@ -34,13 +31,13 @@
 #end if
 
   <tr class="seasonheader">
-    <td colspan=4><br />
-    <a href="$sbRoot/home/displayShow?show=$curShow.tvdbid"><h2>$curShow.name</h2></a>
-    <div align="right" id="checkboxControls">
-        <span class="wanted">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
-        <span class="qual">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
-    </div>
-    </td>
+    <td colspan="3">
+        <br/><h2 style="display: inline; position:absolute;"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></h2>
+        <div class="float-right">
+            <span class="wanted" style="white-space:nowrap;">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
+            <span class="qual" style="white-space:nowrap;">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
+            <a href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid"><img alt="[force backlog]" height="20" src="$sbRoot/images/forceBacklog20.png" title="Force Backlog" style="position: relative; top:4px;"/></a>
+        </div>
   </tr>
 
   <tr><th>Episode</th><th>Name</th><th>Airdate</th></tr>
@@ -54,7 +51,7 @@
   <tr class="$Overview.overviewStrings[$showCats[$curShow.tvdbid][$whichStr]]">
     <td align="center">$whichStr</td>
     <td>$curResult["name"]</td>
-    <td align="center">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
+    <td align="center" nowrap="nowrap">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
   </tr>
 
 #end for

@@ -88,7 +88,7 @@ def sendNZB(nzb):
             f = opener.open(req)
 
     except (EOFError, IOError), e:
-        logger.log(u"Unable to connect to SAB: "+str(e).decode('utf-8'), logger.ERROR)
+        logger.log(u"Unable to connect to SAB: "+str(e), logger.ERROR)
         return False
 
     except httplib.InvalidURL, e:

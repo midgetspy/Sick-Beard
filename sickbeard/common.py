@@ -21,7 +21,9 @@ import os.path
 import operator, platform
 import re
 
-USER_AGENT = 'Sick Beard/alpha2 ('+platform.system()+' '+platform.release()+')'
+from sickbeard import version
+
+USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION+' ('+platform.system()+' '+platform.release()+')'
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -122,9 +124,9 @@ class Quality:
 
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
-        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any):
+        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any) and not checkName(["720p"], all):
             return Quality.SDTV
-        elif checkName(["dvdrip.xvid", "bdrip.xvid", "dvdrip.divx", "dvdrip.ws.xvid"], any):
+        elif checkName(["dvdrip.xvid", "bdrip.xvid", "dvdrip.divx", "dvdrip.ws.xvid"], any) and not checkName(["720p"], all):
             return Quality.SDDVD
         elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
             return Quality.HDTV
@@ -182,13 +184,11 @@ Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in 
 HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
 ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
-BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV], [Quality.SDTV, Quality.HDTV])
 
-qualityPresets = (SD, HD, ANY, BEST)
+qualityPresets = (SD, HD, ANY)
 qualityPresetStrings = {SD: "SD",
                         HD: "HD",
-                        ANY: "Any",
-                        BEST: "Best"}
+                        ANY: "Any"}
 
 class StatusStrings:
     def __init__(self):
@@ -279,6 +279,9 @@ sceneExceptions = {72546: ['CSI'],
                    164451: ['Carlos (2010)'],
                    70726: ['Babylon 5', 'Babylon5'],
                    83714: ['Genius', 'Genius With Dave Gormand'],
+                   212571: ['Come Fly With Me (2010)'],
+                   81563: ['Border Security', 'Border Security Australia\'s Frontline'],
+                   172381: ['Silent Library (US)'],
                    }
 
 countryList = {'Australia': 'AU',
