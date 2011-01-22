@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.7.custom.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.9.custom.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
@@ -49,7 +49,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 </style>
 
     <script type="text/javascript" src="$sbRoot/js/jquery-1.4.4.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.7.custom.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.9.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
     <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.autocomplete.min.js"></script>
@@ -126,13 +126,17 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
 </div>
 <ul id="MainMenu" class="sf-menu">
-            <li class="spacer">&nbsp;</li>
+            <li id="NAVsystem" class="first"><a href="#" class="navIcon"><img src="$sbRoot/images/menu/system16.png" alt="" width="16" height="16" /></a>
+                <ul>
+                        <li><a href="$sbRoot/manage/manageSearches/forceVersionCheck"><img src="$sbRoot/images/menu/update16.png" alt="" width="16" height="16" />Force Version Check</a></li>
+                        <li><a href="$sbRoot/home/restart/?pid=$sbPID"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
+                        <li><a href="$sbRoot/home/shutdown/"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
+                </ul>
+            </li>
             <li id="NAVhome"><a href="$sbRoot/home">Home</a>
                 <ul>
                         <li><a href="$sbRoot/home/addShows/"><img src="$sbRoot/images/menu/addshow16.png" alt="" width="16" height="16" />Add Shows</a></li>
                         <li><a href="$sbRoot/home/postprocess/"><img src="$sbRoot/images/menu/postprocess16.png" alt="" width="16" height="16" />Manual Post-Processing</a></li>
-                        <li><a href="$sbRoot/home/restart/?pid=$sbPID"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
-                        <li><a href="$sbRoot/home/shutdown/"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
                 </ul>
             </li>
             <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes">Coming Episodes</a></li>
