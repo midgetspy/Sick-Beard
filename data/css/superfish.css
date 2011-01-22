@@ -20,6 +20,13 @@ border:	1px solid #57442B;
     background-color:#57442B;
     width:15px;
 }
+.sf-menu .first {
+margin-left:15px;
+border-left:	1px solid #ccc;
+}
+.sf-menu .navIcon {
+padding: 0.50em 2.25em 0.30em 1em;
+}
 .sf-menu li:hover {
     visibility:		inherit; /* fixes IE7 'sticky bug' */
 }
@@ -66,7 +73,7 @@ ul.sf-menu li li li.sfHover ul {
     line-height:	1.0;
 }
 .sf-menu a {
-    border-right:	1px solid #fff;
+    border-right:	1px solid #ccc;
     padding: 		.75em 1em;
     text-decoration:none;
 }
