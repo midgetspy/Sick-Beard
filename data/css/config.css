@@ -1,5 +1,6 @@
 #config{text-align:center;padding:0 30px 20px;}
 #config *{font-family:"Trebuchet MS", Verdana, sans-serif;margin:0;padding:0;}
+#config .imgLink img {vertical-align:sub;}
 #config ul{list-style-type:none;}
 #config h3{font-size:1.5em;color:#000;}
 #config h4{font-size:1em;color:#333;text-transform:uppercase;margin:0 0 .2em;}
