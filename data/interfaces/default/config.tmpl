@@ -8,8 +8,23 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <div id="summary" class="align-left">
-<b>SB Configfile:</b> $os.path.join($sickbeard.PROG_DIR, "config.ini")<br />
-<b>Python Version:</b> $sys.version[:120] <br />
+<table class="infoTable" cellspacing="1" border="0" cellpadding="0">
+    <tr><td class="infoTableHeader">SB Version: </td><td class="infoTableCell">alpha ($sickbeard.version.SICKBEARD_VERSION) &ndash; January 22, 2011</td></tr>
+    <tr><td class="infoTableHeader">SB Configfile: </td><td class="infoTableCell">$sickbeard.CONFIG_FILE</td></tr>
+    <tr><td class="infoTableHeader">SB Arguments: </td><td class="infoTableCell">$sickbeard.MY_ARGS</td></tr>
+    <tr><td class="infoTableHeader">SB Web Root: </td><td class="infoTableCell">$sickbeard.WEB_ROOT</td></tr>
+    <tr><td class="infoTableHeader">Python Version: </td><td class="infoTableCell">$sys.version[:120]</td></tr>
+    <tr style="border-top: 1px dotted #666666;"><td class="infoTableHeader">Homepage </td><td class="infoTableCell"><a href="http://www.sickbeard.com/">http://www.sickbeard.com/</a></td></tr>
+    <tr><td class="infoTableHeader">Forums </td><td class="infoTableCell"><a href="http://sickbeard.com/forums/">http://sickbeard.com/forums/</a></td></tr>
+    <tr><td class="infoTableHeader">Source </td><td class="infoTableCell"><a href="https://github.com/midgetspy/Sick-Beard/">https://github.com/midgetspy/Sick-Beard/</a></td></tr>
+    <tr><td class="infoTableHeader">Bug Tracker &<br/> Windows Builds </td><td class="infoTableCell"><a href="http://code.google.com/p/sickbeard/">http://code.google.com/p/sickbeard/</a></td></tr>
+    <tr><td class="infoTableHeader">Internet Relay Chat </td><td class="infoTableCell"><a href="irc://irc.freenode.net/#sickbeard"><i>#sickbeard</i> on <i>irc.freenode.net</i></a>
+</table>
 </div>
+
+<table class="infoTable" cellspacing="1" border="0" cellpadding="0"><tr>
+    <td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" alt="[donate]" /></td>
+    <td>Sickbeard is free, but you can contribute by giving a <b><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;">donation</a></b>.</td>
+</tr></table>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
