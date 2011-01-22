@@ -1,6 +1,6 @@
 #config{text-align:center;padding:0 30px 20px;}
 #config *{font-family:"Trebuchet MS", Verdana, sans-serif;margin:0;padding:0;}
-#config .imgLink img {vertical-align:sub;}
+#config .imgLink img {padding-bottom:1px;}
 #config ul{list-style-type:none;}
 #config h3{font-size:1.5em;color:#000;}
 #config h4{font-size:1em;color:#333;text-transform:uppercase;margin:0 0 .2em;}
@@ -37,8 +37,8 @@
 * html .clearfix{height:1%;}
 /* End hide from IE-mac */
 #provider_order_list{list-style-type:none;width:250px;margin:0;padding:0;}
-#provider_order_list li{font-size:1.3em;height:1.5em;font-family:Verdana;margin:0 5px 5px;padding:5px;}
-html>body #provider_order_list li{height:1.5em;line-height:1.3em;}
+#provider_order_list li{font-size:1.3em;height:1.3em;font-family:Verdana;margin:0 5px 5px;padding:6px;}
+#provider_order_list input{margin:0px 2px;}
 .providerDiv{display:none;padding-left:20px;}
 #config div.metadataDiv{display:none;}
 #config div.metadata_options{float:left;font-size:14px;font-family:Verdana;width:185px;color:#036;background:#F5F1E4;overflow:auto;border-left:1px solid #404040;border-top:1px solid #404040;border-bottom:1px solid #d4d0c8;border-right:1px solid #d4d0c8;padding:7px;}
