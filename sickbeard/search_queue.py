@@ -119,7 +119,7 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
 class BacklogQueueItem(generic_queue.QueueItem):
     def __init__(self, show, segment):
         generic_queue.QueueItem.__init__(self, 'Backlog', BACKLOG_SEARCH)
-        self.thread_name = 'BACKLOG-'+show.name
+        self.thread_name = 'BACKLOG-'+str(show.tvdbid)
         
         self.show = show
         self.segment = segment

@@ -3,11 +3,11 @@
 import re
 
 try:
-    from simplejson._speedups import encode_basestring_ascii as c_encode_basestring_ascii
+    from _speedups import encode_basestring_ascii as c_encode_basestring_ascii
 except ImportError:
     c_encode_basestring_ascii = None
 try:
-    from simplejson._speedups import make_encoder as c_make_encoder
+    from _speedups import make_encoder as c_make_encoder
 except ImportError:
     c_make_encoder = None
 

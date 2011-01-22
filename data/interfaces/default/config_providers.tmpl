@@ -81,6 +81,7 @@ sbRoot = '$sbRoot';
                                         <option value="nzbs_r_us">NZBs'R'US</option>
                                         <option value="newzbin">Newzbin</option>
                                         <option value="nzbmatrix">NZBMatrix</option>
+                                        <option value="tvtorrents">TvTorrents</option>
                                     </select>
                                 </span>
                             </label>
@@ -170,6 +171,22 @@ sbRoot = '$sbRoot';
                             </label>
                         </div>
 </div>
+
+<div class="providerDiv" id="tvtorrentsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">TvTorrents Digest:</span>
+                                <input class="component-desc" type="text" name="tvtorrents_digest" value="$sickbeard.TVTORRENTS_DIGEST" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">TvTorrents Hash:</span>
+                                <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
+                            </label>
+                        </div>
+</div>
+
 <!-- end div for editing providers -->
 
                     <input type="submit" value="Save Changes" /><br/>

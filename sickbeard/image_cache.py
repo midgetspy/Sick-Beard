@@ -26,8 +26,8 @@ from sickbeard import encodingKludge as ek
 
 from sickbeard.metadata.generic import GenericMetadata
 
-from lib.hachoir_parser import createParser
-from lib.hachoir_metadata import extractMetadata
+from hachoir_parser import createParser
+from hachoir_metadata import extractMetadata
 
 class ImageCache:
     
@@ -60,7 +60,9 @@ class ImageCache:
         img_parser = createParser(path)
         img_metadata = extractMetadata(img_parser)
         img_ratio = float(img_metadata.get('width'))/float(img_metadata.get('height'))
-        
+
+        img_parser.stream._input.close()
+
         if 0.55 < img_ratio < 0.8:
             return self.POSTER
         elif 5 < img_ratio < 6:

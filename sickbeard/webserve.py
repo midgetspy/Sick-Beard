@@ -727,7 +727,6 @@ class ConfigEpisodeDownloads:
 
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
-        sickbeard.SEARCH_FREQUENCY = int(search_frequency)
 
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
@@ -825,6 +824,7 @@ class ConfigProviders:
                       nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       tvbinz_auth=None, provider_order=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+                      tvtorrents_digest=None, tvtorrents_hash=None, 
                       newzbin_username=None, newzbin_password=None):
 
         results = []
@@ -888,6 +888,8 @@ class ConfigProviders:
                 sickbeard.WOMBLE = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
+            elif curProvider == 'tvtorrents':
+                sickbeard.TVTORRENTS = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -899,6 +901,9 @@ class ConfigProviders:
             sickbeard.TVBINZ_HASH = tvbinz_hash.strip()
         if tvbinz_auth:
             sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
+            
+        sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
+        sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.NZBS_UID = nzbs_org_uid.strip()
         sickbeard.NZBS_HASH = nzbs_org_hash.strip()
@@ -938,6 +943,7 @@ class ConfigNotifications:
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
+                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
 
         results = []
@@ -980,6 +986,20 @@ class ConfigNotifications:
             use_growl = 1
         else:
             use_growl = 0
+            
+        if prowl_notify_onsnatch == "on":
+            prowl_notify_onsnatch = 1
+        else:
+            prowl_notify_onsnatch = 0
+
+        if prowl_notify_ondownload == "on":
+            prowl_notify_ondownload = 1
+        else:
+            prowl_notify_ondownload = 0
+        if use_prowl == "on":
+            use_prowl = 1
+        else:
+            use_prowl = 0
 
         if twitter_notify_onsnatch == "on":
             twitter_notify_onsnatch = 1
@@ -1011,6 +1031,8 @@ class ConfigNotifications:
         sickbeard.GROWL_PASSWORD = growl_password
 
         sickbeard.USE_PROWL = use_prowl
+        sickbeard.PROWL_NOTIFY_ONSNATCH = prowl_notify_onsnatch
+        sickbeard.PROWL_NOTIFY_ONDOWNLOAD = prowl_notify_ondownload
         sickbeard.PROWL_API = prowl_api
         sickbeard.PROWL_PRIORITY = prowl_priority
 
@@ -1329,8 +1351,8 @@ class Home:
         return "Tried sending growl to "+host+" with password "+password
 
     @cherrypy.expose
-    def testProwl(self, prowl_api=None):
-        notifiers.testProwl(prowl_api)
+    def testProwl(self, prowl_api=None, prowl_priority=0):
+        notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
         return "Tried sending Prowl notification"
 
     @cherrypy.expose
@@ -1883,14 +1905,14 @@ class WebInterface:
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
 
         done_show_list = []
-        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["showid"]))
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
         #epList = sickbeard.comingList
