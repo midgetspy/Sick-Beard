@@ -85,7 +85,10 @@ class NameParser(object):
                     result.series_name = self.clean_series_name(result.series_name)
             
             if 'season_num' in named_groups:
-                result.season_number = int(match.group('season_num'))
+                tmp_season = int(match.group('season_num'))
+                if cur_regex_name == 'bare' and tmp_season in (19,20):
+                    continue
+                result.season_number = tmp_season
             
             if 'ep_num' in named_groups:
                 ep_num = self._convert_number(match.group('ep_num'))
@@ -115,7 +118,7 @@ class NameParser(object):
             
             if 'release_group' in named_groups:
                 result.release_group = match.group('release_group')
-            
+
             return result
         
         return None

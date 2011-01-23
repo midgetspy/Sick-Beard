@@ -30,11 +30,15 @@ legend {
 color:#000;
 font-weight:700;
 }
+div.EntryBlock,div.EntryBlock form {
+display:inline;
+}
 /* --------------------------------------------- */
 
 /* these are for incl_top.tmpl */
 #header {
 padding-top:3px;
+z-index:2;
 }
 
 #header a:hover {
@@ -67,42 +71,7 @@ text-transform:lowercase;
 color:#57442B;
 }
 
-.MainMenu {
-display:block;
-background-color:#F5F1E4;
-padding:5px;
-}
-
-.MainMenu a {
-font-weight:700;
-text-decoration:none;
-color:#4e4e4e;
-padding:3px 12px 7px;
-}
-
-.SubMenu {
-display:block;
-padding:5px;
-}
-
-.SubMenu a {
-font-weight:700;
-text-decoration:none;
-color:#f5f5f5;
-padding:3px 12px 7px;
-}
 /* --------------------------------------------- */
-
-a.current {
-border:none;
-color:#ccc;
-background-color:#000;
-padding:3px 12px 7px;
-}
-
-a.current:hover {
-border:none;
-}
 
 table {
 font-size:9pt;
@@ -154,6 +123,9 @@ font-weight:700;
 margin-top:-32px;
 margin-right:5px;
 }
+.h2footer span {
+padding:2px;
+} 
 
 .separator {
 font-size:90%;
@@ -198,7 +170,7 @@ color:#4e4e4e;
 }
 
 .sickbeardTable {
-width:80%;
+width:90%;
 margin-left:auto;
 margin-right:auto;
 }
@@ -216,6 +188,7 @@ clear:left;
 
 .plotInfo {
 cursor:help;
+padding-left:5px;
 float:right;
 }
 
@@ -242,6 +215,7 @@ z-index:3000;
 border:1px solid #111;
 background-color:#eee;
 padding:5px;
+margin-right:10px;
 }
 
 .progressbarText {
@@ -272,6 +246,7 @@ text-decoration:none;
 }
 tr.seasonheader a:hover {
 background-color: #fff;
+color:#000;
 }
 
 tr.unaired,span.unaired {
@@ -299,39 +274,17 @@ background-color:#FFB0B0;
 padding:2px;
 }
 
-#progressBar {
-background-color:#cdf;
-border:1px solid blue;
+a,a.remove {
+color:#000;
 }
 
-#percentageBar {
-background-color:#9bf;
-}
-
-.SubMenu,a.current {
-background-color:#57442B;
-color:#FFF;
-}
-
-a.current:hover,a:hover {
+h1 a:hover, h2 a:hover, span a:hover, div.h2footer a:hover {
 background-color:#000;
 color:#FFF;
 }
 
-a.imgLink:hover {
-background-color:transparent;
-}
-
-div.EntryBlock,div.EntryBlock form {
-display:inline;
-}
-
 .message p,.message ul {
 margin:0;
-}
-
-a,.queuelink,td > a,td > a,a.remove {
-color:#000;
 }
 
 div#summary {
@@ -339,4 +292,54 @@ background-color:#efefef;
 padding:10px;
 border:1px solid #DFDEDE;
 margin:10px;
+}
+
+#MainMenu {
+background-color:#57442B;
+color:#F5F5F5;
+line-height:1;
+/*margin-bottom:1em;*/
+width:100%;
+border-bottom: 1px solid #333;
+}
+#SubMenu {
+background-color:#F5F1E4;
+color:#333;
+border-bottom: 1px solid #333;
+padding-left:5px;
+}
+#SubMenu span {
+padding:2px 6px 2px 8px;
+}
+#SubMenu span a {
+line-height:24px;
+text-decoration:none;
+color:#333;
+font-weight:700;
+padding:2px 6px 2px;
+}
+#SubMenu span a.inner {
+font-weight:400;
+padding:2px;
+}
+#SubMenu span a:hover {
+background-color:#000;
+color:#fff;
+}
+#donate {
+line-height:2px;
+background: none;
+float: right;
+}
+#donate a,#donate a:hover {
+background-color:#57442B;
+border:0;
+padding:3px 15px 0px;
+}
+#content {
+padding: 10px 15px 15px;
+_text-align: center;
+min-width:500px;
+z-index:1;
+clear:both;
 }

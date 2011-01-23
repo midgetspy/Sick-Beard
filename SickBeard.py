@@ -32,6 +32,9 @@ import sqlite3
 import traceback
 import getopt
 
+# allow libraries to import each other
+sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), 'lib'))
+
 import sickbeard
 
 from sickbeard import db
@@ -95,7 +98,7 @@ def daemonize():
 def main():
 
     # do some preliminary stuff
-    sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(sys.argv[0]))
+    sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(__file__))
     sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
     sickbeard.MY_ARGS = sys.argv[1:]

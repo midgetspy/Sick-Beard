@@ -21,7 +21,9 @@ import os.path
 import operator, platform
 import re
 
-USER_AGENT = 'Sick Beard/alpha2 ('+platform.system()+' '+platform.release()+')'
+from sickbeard import version
+
+USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION+' ('+platform.system()+' '+platform.release()+')'
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -182,13 +184,11 @@ Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in 
 HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
 ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
-BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV], [Quality.SDTV, Quality.HDTV])
 
-qualityPresets = (SD, HD, ANY, BEST)
+qualityPresets = (SD, HD, ANY)
 qualityPresetStrings = {SD: "SD",
                         HD: "HD",
-                        ANY: "Any",
-                        BEST: "Best"}
+                        ANY: "Any"}
 
 class StatusStrings:
     def __init__(self):
