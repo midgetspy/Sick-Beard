@@ -825,6 +825,7 @@ class ConfigProviders:
                       nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       tvbinz_auth=None, provider_order=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+                      tvtorrents_digest=None, tvtorrents_hash=None, 
                       newzbin_username=None, newzbin_password=None):
 
         results = []
@@ -888,6 +889,8 @@ class ConfigProviders:
                 sickbeard.WOMBLE = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
+            elif curProvider == 'tvtorrents':
+                sickbeard.TVTORRENTS = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -899,6 +902,9 @@ class ConfigProviders:
             sickbeard.TVBINZ_HASH = tvbinz_hash.strip()
         if tvbinz_auth:
             sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
+            
+        sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
+        sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.NZBS_UID = nzbs_org_uid.strip()
         sickbeard.NZBS_HASH = nzbs_org_hash.strip()

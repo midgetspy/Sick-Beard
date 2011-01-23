@@ -29,7 +29,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble, newzbin
+from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, tvbinz, nzbsrus, binreq, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
@@ -129,6 +129,11 @@ MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 60
 
 EZRSS = False
+TVTORRENTS = False
+TVTORRENTS_DIGEST = None
+TVTORRENTS_HASH = None
+
+
 TORRENT_DIR = None
 
 RENAME_EPISODES = False
@@ -300,7 +305,7 @@ def initialize(consoleLogging=True):
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
                 USE_XBMC, GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -410,6 +415,10 @@ def initialize(consoleLogging=True):
         EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         if not EZRSS:
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
+            
+        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
+        TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
+        TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
         TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
         TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
@@ -825,6 +834,11 @@ def save_config():
 
     new_config['EZRSS'] = {}
     new_config['EZRSS']['ezrss'] = int(EZRSS)
+    
+    new_config['TVTORRENTS'] = {}
+    new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
+    new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
+    new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
 
     new_config['TVBinz'] = {}
     new_config['TVBinz']['tvbinz'] = int(TVBINZ)
