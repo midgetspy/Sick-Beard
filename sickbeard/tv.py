@@ -225,10 +225,15 @@ class TVShow(object):
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
+        cachedShow = t[self.tvdbid]
+        cachedSeasons = {}
+
         for curResult in sqlResults:
 
             curSeason = int(curResult["season"])
             curEpisode = int(curResult["episode"])
+            if curSeason not in cachedSeasons:
+                cachedSeasons[curSeason] = cachedShow[curSeason]
 
             if not curSeason in scannedEps:
                 scannedEps[curSeason] = {}
@@ -238,7 +243,7 @@ class TVShow(object):
             try:
                 curEp = self.getEpisode(curSeason, curEpisode)
                 curEp.loadFromDB(curSeason, curEpisode)
-                curEp.loadFromTVDB(tvapi=t)
+                curEp.loadFromTVDB(tvapi=t, cachedSeason=cachedSeasons[curSeason])
                 scannedEps[curSeason][curEpisode] = True
             except exceptions.EpisodeDeletedException:
                 logger.log(u"Tried loading an episode from the DB that should have been deleted, skipping it", logger.DEBUG)
@@ -501,7 +506,7 @@ class TVShow(object):
             if self.tvrid == 0:
                 self.tvrid = int(sqlResults[0]["tvr_id"])
 
-    def loadFromTVDB(self, cache=True, tvapi=None):
+    def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + ": Loading show info from theTVDB")
 
@@ -970,7 +975,7 @@ class TVEpisode:
             return True
 
 
-    def loadFromTVDB(self, season=None, episode=None, cache=True, tvapi=None):
+    def loadFromTVDB(self, season=None, episode=None, cache=True, tvapi=None, cachedSeason=None):
 
         if season == None:
             season = self.season
@@ -980,18 +985,21 @@ class TVEpisode:
         logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
         try:
-            if t is None:
-                # There's gotta be a better way of doing this but we don't wanna
-                # change the cache value elsewhere
-                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+            if cachedSeason is None:
+                if tvapi is None:
+                    # There's gotta be a better way of doing this but we don't wanna
+                    # change the cache value elsewhere
+                    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-                if not cache:
-                    ltvdb_api_parms['cache'] = 'recache'
+                    if not cache:
+                        ltvdb_api_parms['cache'] = 'recache'
 
-                t = tvdb_api.Tvdb(**ltvdb_api_parms)
+                    t = tvdb_api.Tvdb(**ltvdb_api_parms)
+                else:
+                    t = tvapi
+                myEp = t[self.show.tvdbid][season][episode]
             else:
-                t = tvapi
-            myEp = t[self.show.tvdbid][season][episode]
+                myEp = cachedSeason[episode]
         except (tvdb_exceptions.tvdb_error, IOError), e:
             logger.log(u"TVDB threw up an error: "+str(e).decode('utf-8'), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
