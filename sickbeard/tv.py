@@ -294,7 +294,8 @@ class TVShow(object):
                 with ep.lock:
                     logger.log(str(self.tvdbid) + ": Loading info from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
                     ep.loadFromTVDB(season, episode, tvapi=t)
-                    ep.saveToDB()
+                    if ep.dirty:
+                        ep.saveToDB()
 
                 scannedEps[season][episode] = True
 
@@ -874,21 +875,29 @@ class TVShow(object):
             else:
                 return Overview.GOOD
 
+def dirty_setter(attr_name):
+    def wrapper(self, val):
+        if getattr(self, attr_name) != val:
+            setattr(self, attr_name, val)
+            self.dirty = True
+    return wrapper
 
-class TVEpisode:
+class TVEpisode(object):
 
     def __init__(self, show, season, episode, file=""):
 
-        self.name = ""
-        self.season = season
-        self.episode = episode
-        self.description = ""
-        self.airdate = datetime.date.fromordinal(1)
-        self.hasnfo = False
-        self.hastbn = False
-        self.status = UNKNOWN
+        self._name = ""
+        self._season = season
+        self._episode = episode
+        self._description = ""
+        self._airdate = datetime.date.fromordinal(1)
+        self._hasnfo = False
+        self._hastbn = False
+        self._status = UNKNOWN
+        self._tvdbid = 0
 
-        self.tvdbid = 0
+        # setting any of the above sets the dirty flag
+        self.dirty = True
 
         self.show = show
         self.location = file
@@ -900,6 +909,16 @@ class TVEpisode:
         self.relatedEps = []
 
         self.checkForMetaFiles()
+
+    name = property(lambda self: self._name, dirty_setter("_name"))
+    season = property(lambda self: self._season, dirty_setter("_season"))
+    episode = property(lambda self: self._episode, dirty_setter("_episode"))
+    description = property(lambda self: self._description, dirty_setter("_description"))
+    airdate = property(lambda self: self._airdate, dirty_setter("_airdate"))
+    hasnfo = property(lambda self: self._hasnfo, dirty_setter("_hasnfo"))
+    hastbn = property(lambda self: self._hastbn, dirty_setter("_hastbn"))
+    status = property(lambda self: self._status, dirty_setter("_status"))
+    tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
 
     def checkForMetaFiles(self):
 
@@ -937,8 +956,10 @@ class TVEpisode:
             # if we failed TVDB, NFO *and* SQL then fail
             if result == False and not sqlResult:
                 raise exceptions.EpisodeNotFoundException("Couldn't find episode " + str(season) + "x" + str(episode))
-
-        self.saveToDB()
+        
+        # don't update if not needed
+        if self.dirty:
+            self.saveToDB()
 
 
     def loadFromDB(self, season, episode):
@@ -972,6 +993,7 @@ class TVEpisode:
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
 
+            self.dirty = False
             return True
 
 
@@ -1031,9 +1053,11 @@ class TVEpisode:
         self.name = myEp["episodename"]
         self.season = season
         self.episode = episode
-        self.description = myEp["overview"]
-        if self.description == None:
+        tmp_description = myEp["overview"]
+        if tmp_description == None:
             self.description = ""
+        else:
+            self.description = tmp_description
         rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
         try:
             self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
@@ -1043,9 +1067,10 @@ class TVEpisode:
             if self.tvdbid != -1:
                 self.deleteEpisode()
             return False
-
-        self.tvdbid = myEp["id"]
-
+        
+        #early conversion to int so that episode doesn't get marked dirty
+        self.tvdbid = int(myEp["id"])
+        
         if not os.path.isdir(self.show._location):
             logger.log(u"The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
@@ -1161,9 +1186,9 @@ class TVEpisode:
     def __str__ (self):
 
         toReturn = ""
-        toReturn += self.show.name + " - " + str(self.season) + "x" + str(self.episode) + " - " + self.name + "\n"
-        toReturn += "location: " + self.location + "\n"
-        toReturn += "description: " + self.description + "\n"
+        toReturn += str(self.show.name) + " - " + str(self.season) + "x" + str(self.episode) + " - " + str(self.name) + "\n"
+        toReturn += "location: " + str(self.location) + "\n"
+        toReturn += "description: " + str(self.description) + "\n"
         toReturn += "airdate: " + str(self.airdate.toordinal()) + " (" + str(self.airdate) + ")\n"
         toReturn += "hasnfo: " + str(self.hasnfo) + "\n"
         toReturn += "hastbn: " + str(self.hastbn) + "\n"
@@ -1263,6 +1288,9 @@ class TVEpisode:
         raise exceptions.EpisodeDeletedException()
 
     def saveToDB(self):
+        if not self.dirty:
+            logger.log(str(self.show.tvdbid) + ": Not saving episode to db - record is not dirty", logger.DEBUG)
+            return
 
         logger.log(str(self.show.tvdbid) + ": Saving episode details to database", logger.DEBUG)
 
