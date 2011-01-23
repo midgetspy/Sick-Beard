@@ -170,6 +170,18 @@ Custom
 <!-- end list view -->
 #else:
 <!-- start non list view -->
+<script type="text/javascript" charset="utf-8">
+\$(document).ready(function(){ 
+  \$(".ep_summary").hide();
+  \$(".ep_summaryTrigger").click(function() {
+    \$(this).next(".ep_summary").slideToggle('normal', function() {
+        \$(this).prev(".ep_summaryTrigger").attr('src', function(i, src) {
+            return \$(this).next(".ep_summary").is(':visible') ? src.replace('plus','minus') : src.replace('minus','plus');
+        });
+    });
+  });
+});
+</script>
 <div id="outsideWrapper">
 <div id="insideWrapper">
   <div id="insideContent">
@@ -257,13 +269,13 @@ Custom
         </tr>
         <tr>
           <td>
-            <span>
+            <img class="ep_summaryTrigger float-left" src="$sbRoot/images/plus.png" height="16" width="16" alt="" /><div class="ep_summary">
             #if $cur_result["description"] == '':
                 [There is no summary added for this episode]
             #else:
                 $cur_result["description"]
             #end if
-            </span><br/><br/>
+            </div><br/>
             <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
 #if int($cur_result["quality"]) in $qualityPresets:
 [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]
