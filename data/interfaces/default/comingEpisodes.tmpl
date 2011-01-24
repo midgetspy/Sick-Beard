@@ -245,7 +245,7 @@ Custom
         </tr>
         <tr>
           <th #if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
-            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$sickbeard.COMING_EPS_LAYOUT" /></a>
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}" class="#if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "bannerThumb" else "posterThumb"#" ><img alt="" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$sickbeard.COMING_EPS_LAYOUT" /></a>
           </th>
 #if $sickbeard.COMING_EPS_LAYOUT == 'banner':
         </tr>

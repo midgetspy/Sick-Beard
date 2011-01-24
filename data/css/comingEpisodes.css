@@ -52,16 +52,20 @@ div#insideContent {
     color: #333;
 }
 
-.posterThumb {
+.tvshowDiv a.posterThumb {
     /* display:table-cell; */
+    display: block;
+    background: url(../images/poster.png) 50% 50%;
     vertical-align: top;
     height: 200px;
     width: 136px;
     border-top: 1px solid #ccc; 
     border-right: 1px solid #ccc;
 }
-.bannerThumb {
+.tvshowDiv a.bannerThumb {
     /* display:table-cell; */
+    display: block;
+    background: url(../images/banner.png) 50% 50%;
     vertical-align: top;
     height: 112px;
     width: 606px;
