@@ -78,10 +78,6 @@ font-size:9pt;
 margin:0;
 }
 
-td,td {
-padding:5px;
-}
-
 tr.active {
 font-weight:700;
 }
@@ -176,10 +172,13 @@ margin-right:auto;
 }
 
 .sickbeardTable th{
-padding: 2px;
+padding:2px;
 font-weight:700;
 background-color:#333;
 color:#FFF;
+}
+.sickbeardTable td{
+padding:5px;
 }
 
 .row {
@@ -341,4 +340,9 @@ _text-align: center;
 min-width:500px;
 z-index:1;
 clear:both;
+}
+.showLegend{
+font-weight:700;
+padding-right:10px;
+padding-bottom:1px;
 }

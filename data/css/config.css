@@ -53,5 +53,5 @@
 #upgrade-notification div{background-color:#c6b695;border-bottom:1px solid #af986b;padding:7px 0;}
 #header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;}
 .infoTable {border-collapse: collapse;}
-.infoTableHeader, .infoTableCell {margin: 6px;padding: 5px;}
+.infoTableHeader, .infoTableCell {padding: 5px;}
 .infoTableHeader{font-weight:700;}
