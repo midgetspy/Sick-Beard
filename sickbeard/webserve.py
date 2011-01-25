@@ -26,6 +26,10 @@ import re
 import threading
 import datetime
 import operator
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import new as md5
 
 from Cheetah.Template import Template
 import cherrypy
@@ -1807,7 +1811,9 @@ class WebInterface:
         else:
             image_file_name = cache_obj.banner_path(showObj.tvdbid)
 
-        if not ek.ek(os.path.isfile, image_file_name):
+        try:
+            stat = ek.ek(os.stat, image_file_name)
+        except OSError:
             raise cherrypy.HTTPError(404)
 
         try:
@@ -1825,6 +1831,10 @@ class WebInterface:
         else:
             return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
 
+        etag = 'W/"%s"' % md5('%s-%d-%d-%d-%d' % (which, size[0], size[1], stat.st_mtime, stat.st_size)).hexdigest()
+        if cherrypy.request.headers.get('If-None-Match') == etag:
+            raise cherrypy.HTTPRedirect([], 304)
+
         im = Image.open(image_file_name)
         if im.mode == 'P': # Convert GIFs to RGB
             im = im.convert('RGB')
@@ -1832,6 +1842,8 @@ class WebInterface:
         buffer = StringIO()
         im.save(buffer, 'PNG')
         cherrypy.response.headers['Content-Type'] = 'image/png'
+        cherrypy.response.headers['Etag'] = etag
+        cherrypy.response.headers['Cache-Control'] = 'max-age=86400' # one day
         return buffer.getvalue()
 
     @cherrypy.expose
