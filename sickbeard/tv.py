@@ -44,7 +44,7 @@ from common import *
 
 class TVShow(object):
 
-    def __init__ (self, tvdbid, lang="en"):
+    def __init__ (self, tvdbid, lang=""):
 
         self.tvdbid = tvdbid
 
@@ -430,6 +430,7 @@ class TVShow(object):
                 newQuality = Quality.nameQuality(file)
                 if newQuality == Quality.UNKNOWN:
                     newQuality = Quality.assumeQuality(file)
+
                 newStatus = None
 
                 # if it was snatched and now exists then set the status correctly
