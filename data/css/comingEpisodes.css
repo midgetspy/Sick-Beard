@@ -36,10 +36,11 @@ div#insideContent {
 .tvshowTitle a {
     color: #FFFFFF;
     float: left; 
-    padding-top: 4px; 
+    padding-top: 5px; 
     padding-left: 8px; 
     line-height: 17px;
     font-size: 16px;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 
 .tvshowTitleIcons {
