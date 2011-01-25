@@ -176,6 +176,7 @@ padding:2px;
 font-weight:700;
 background-color:#333;
 color:#FFF;
+text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 .sickbeardTable td{
 padding:5px;
