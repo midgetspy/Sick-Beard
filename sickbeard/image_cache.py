@@ -60,7 +60,9 @@ class ImageCache:
         img_parser = createParser(path)
         img_metadata = extractMetadata(img_parser)
         img_ratio = float(img_metadata.get('width'))/float(img_metadata.get('height'))
-        
+
+        img_parser.stream._input.close()
+
         if 0.55 < img_ratio < 0.8:
             return self.POSTER
         elif 5 < img_ratio < 6:
