@@ -595,11 +595,44 @@ class PostProcessor(object):
         else:
             self._log(u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
         
+        # delete the existing file (and company)
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            try:
+                self._delete(cur_ep.location, associated_files=True)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
+
+        # find the destination folder
+        try:
+            dest_path = self._find_ep_destination_folder(ep_obj)
+        except exceptions.ShowDirNotFoundException:
+            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
+
+        self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
+
+        # if the dir doesn't exist (new season folder) then make it
+        if not ek.ek(os.path.isdir, dest_path):
+            self._log(u"Season folder didn't exist, creating it", logger.DEBUG)
+            try:
+                ek.ek(os.mkdir, dest_path)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
+		
+	#move or copy the episode
+        try:
+            # move the episode to the show dir
+            if sickbeard.KEEP_PROCESSED_DIR:
+                self._copy(self.file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
+            else:
+                self._move(self.file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
+        except OSError, IOError:
+            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+
         # if renaming is turned on then rename the episode (and associated files, if necessary)
         if sickbeard.RENAME_EPISODES:
             new_file_name = helpers.sanitizeFileName(ep_obj.prettyName())
             try:
-                self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
+                self._rename(dest_path + self.file_name, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to rename the files")
 
@@ -608,38 +641,7 @@ class PostProcessor(object):
             self._log(u"After renaming the new file path is "+new_file_path, logger.DEBUG)
         else:
             new_file_path = self.file_path
-
-        # delete the existing file (and company)
-        for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            try:
-                self._delete(cur_ep.location, associated_files=True)
-            except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
-        
-        # find the destination folder
-        try:
-            dest_path = self._find_ep_destination_folder(ep_obj)
-        except exceptions.ShowDirNotFoundException:
-            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
-            
-        self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
-        
-        # if the dir doesn't exist (new season folder) then make it
-        if not ek.ek(os.path.isdir, dest_path):
-            self._log(u"Season folder didn't exist, creating it", logger.DEBUG)
-            try:
-                ek.ek(os.mkdir, dest_path)
-            except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
-
-        try:
-            # move the episode to the show dir
-            if sickbeard.KEEP_PROCESSED_DIR:
-                self._copy(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
-            else:
-                self._move(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
-        except OSError, IOError:
-            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+       
         
         # update the statuses before we rename so the quality goes into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
