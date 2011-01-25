@@ -727,7 +727,6 @@ class ConfigEpisodeDownloads:
 
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
-        sickbeard.SEARCH_FREQUENCY = int(search_frequency)
 
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
