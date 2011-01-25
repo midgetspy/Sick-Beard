@@ -77,6 +77,12 @@ ul.sf-menu li li li.sfHover ul {
     padding: 		.75em 1em;
     text-decoration:none;
 }
+.sf-menu li a {
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+}
+.sf-menu li li a, .sf-menu li li li a {
+    text-shadow: none;
+}
 .sf-menu a, .sf-menu a:visited { /* visited pseudo selector so IE6 applies text colour*/
     color:			#F5F5F5;
 }
