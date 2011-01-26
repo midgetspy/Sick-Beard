@@ -191,6 +191,15 @@ TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
 
+QUALITY_NONE = None
+QUALITY_UNKNOWN = None
+QUALITY_SDTV = None
+QUALITY_SDDVD = None
+QUALITY_HDTV = None
+QUALITY_HDWEBDL = None
+QUALITY_HDBLURAY = None
+QUALITY_FULLHDBLURAY = None
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -309,7 +318,9 @@ def initialize(consoleLogging=True):
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, \
+                QUALITY_NONE, QUALITY_UNKNOWN, QUALITY_SDTV, QUALITY_SDDVD, QUALITY_HDTV, QUALITY_HDWEBDL, \
+                QUALITY_HDBLURAY, QUALITY_FULLHDBLURAY
 
         if __INITIALIZED__:
             return False
@@ -324,6 +335,7 @@ def initialize(consoleLogging=True):
         CheckSection('XBMC')
         CheckSection('Growl')
         CheckSection('Twitter')
+        CheckSection('CustomQuality')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -456,6 +468,15 @@ def initialize(consoleLogging=True):
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
+		
+        QUALITY_NONE = check_setting_str(CFG, 'CustomQuality', 'quality_none', 'N/A')
+        QUALITY_UNKNOWN = check_setting_str(CFG, 'CustomQuality', 'quality_unknown', 'Unknown')
+        QUALITY_SDTV = check_setting_str(CFG, 'CustomQuality', 'quality_sdtv', 'SD TV')
+        QUALITY_SDDVD = check_setting_str(CFG, 'CustomQuality', 'quality_sddvd', 'SD DVD')
+        QUALITY_HDTV = check_setting_str(CFG, 'CustomQuality', 'quality_hdtv', 'HD TV')
+        QUALITY_HDWEBDL = check_setting_str(CFG, 'CustomQuality', 'quality_hdwebdl', '720p WEB-DL')
+        QUALITY_HDBLURAY = check_setting_str(CFG, 'CustomQuality', 'quality_hdbluray', '720p BluRay')
+        QUALITY_FULLHDBLURAY = check_setting_str(CFG, 'CustomQuality', 'quality_fullhdbluray', '1080p BluRay')
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -884,6 +905,16 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+    
+    new_config['CustomQuality'] = {}
+    new_config['CustomQuality']['quality_none'] = QUALITY_NONE
+    new_config['CustomQuality']['quality_unknown'] = QUALITY_UNKNOWN
+    new_config['CustomQuality']['quality_sdtv'] = QUALITY_SDTV
+    new_config['CustomQuality']['quality_sddvd'] = QUALITY_SDDVD
+    new_config['CustomQuality']['quality_hdtv'] = QUALITY_HDTV
+    new_config['CustomQuality']['quality_hdwebdl'] = QUALITY_HDWEBDL
+    new_config['CustomQuality']['quality_hdbluray'] = QUALITY_HDBLURAY
+    new_config['CustomQuality']['quality_fullhdbluray'] = QUALITY_FULLHDBLURAY
 
     new_config.write()
 

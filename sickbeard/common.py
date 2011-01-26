@@ -21,6 +21,7 @@ import os.path
 import operator, platform
 import re
 
+from lib.configobj import ConfigObj
 from sickbeard import version
 
 USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION+' ('+platform.system()+' '+platform.release()+')'
@@ -66,14 +67,51 @@ class Quality:
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
     UNKNOWN = 1<<15
 
-    qualityStrings = {NONE: "N/A",
-                      UNKNOWN: "Unknown",
-                      SDTV: "SD TV",
-                      SDDVD: "SD DVD",
-                      HDTV: "HD TV",
-                      HDWEBDL: "720p WEB-DL",
-                      HDBLURAY: "720p BluRay",
-                      FULLHDBLURAY: "1080p BluRay"}
+    # load quality strings from config.ini
+    program_dir = os.path.dirname(os.path.normpath(os.path.abspath(__file__)))
+    configure_file = os.path.join(program_dir, "config.ini")
+    configure_obj = ConfigObj(configure_file)
+    try:
+        quality_none = configure_obj['CustomQuality']['quality_none']
+    except:
+        quality_none = "N/A"
+    try:
+        quality_unknown = configure_obj['CustomQuality']['quality_unknown']
+    except:
+        quality_unknown = "Unknown"
+    try:
+        quality_sdtv = configure_obj['CustomQuality']['quality_sdtv']
+    except:
+        quality_sdtv = "SD TV"
+    try:
+        quality_sddvd = configure_obj['CustomQuality']['quality_sddvd']
+    except:
+        quality_sddvd = "SD DVD"
+    try:
+        quality_hdtv = configure_obj['CustomQuality']['quality_hdtv']
+    except:
+        quality_hdtv = "HD TV"
+    try:
+        quality_hdwebdl = configure_obj['CustomQuality']['quality_hdwebdl']
+    except:
+        quality_hdwebdl = "720p WEB-DL"
+    try:
+        quality_hdbluray = configure_obj['CustomQuality']['quality_hdbluray']
+    except:
+        quality_hdbluray = "720p BluRay"
+    try:
+        quality_fullhdbluray = configure_obj['CustomQuality']['quality_fullhdbluray']
+    except:
+        quality_fullhdbluray = "1080p BluRay"
+    
+    qualityStrings = {NONE: quality_none,
+                      UNKNOWN: quality_unknown,
+                      SDTV: quality_sdtv,
+                      SDDVD: quality_sddvd,
+                      HDTV: quality_hdtv,
+                      HDWEBDL: quality_hdwebdl,
+                      HDBLURAY: quality_hdbluray,
+                      FULLHDBLURAY: quality_fullhdbluray}
 
     statusPrefixes = {DOWNLOADED: "Downloaded",
                       SNATCHED: "Snatched"}
