@@ -54,6 +54,8 @@ simple_test_cases = {
               'show.name.2010.123.source.quality.etc-group': parser.ParseResult(None, 'show name 2010', 1, [23], 'source.quality.etc', 'group'),
               'show.name.2010.222.123.source.quality.etc-group': parser.ParseResult(None, 'show name 2010.222', 1, [23], 'source.quality.etc', 'group'),
               'Show.Name.102': parser.ParseResult(None, 'Show Name', 1, [2]),
+              'the.event.401.hdtv-lol': parser.ParseResult(None, 'the event', 4, [1], 'hdtv', 'lol'),
+              'show.name.2010.special.hdtv-blah': None,
               },
               
               'stupid': {
@@ -183,8 +185,14 @@ class BasicTests(unittest.TestCase):
                 cur_test = cur_test_base
             if VERBOSE or verbose:
                 print 'Testing', cur_test
-            test_result = np.parse(cur_test)
+
             result = simple_test_cases[section][cur_test_base]
+            if not result:
+                self.assertRaises(parser.InvalidNameException, np.parse, cur_test)
+                return
+            else:
+                test_result = np.parse(cur_test)
+            
             if DEBUG or verbose:
                 print 'air_by_date:', test_result.air_by_date, 'air_date:', test_result.air_date
                 print test_result

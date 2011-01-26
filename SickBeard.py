@@ -33,7 +33,7 @@ import traceback
 import getopt
 
 # allow libraries to import each other
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), 'lib'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'lib'))
 
 import sickbeard
 
