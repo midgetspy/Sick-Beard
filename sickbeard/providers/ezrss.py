@@ -124,7 +124,7 @@ class EZRSSProvider(generic.TorrentProvider):
         return (title, url)
 
     def _extract_name_from_url(self, url):
-        name_regex = '.*/(.*)\.\[.*]\.torrent$'
+        name_regex = '.*/(.*)\.(\[.*]|\d+\.TPB)\.torrent$'
         logger.log(u"Comparing "+name_regex+" against "+url, logger.DEBUG)
         match = re.match(name_regex, url, re.I)
         if match:
