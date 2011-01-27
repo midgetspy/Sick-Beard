@@ -937,7 +937,8 @@ class ConfigNotifications:
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
+                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None):
 
         results = []
 
@@ -1012,6 +1013,10 @@ class ConfigNotifications:
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+
+        sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
+        sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
+        sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
 
         sickbeard.save_config()
 
@@ -1348,6 +1353,16 @@ class Home:
     def testXBMC(self, host=None, username=None, password=None):
         notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
         return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
+
+    @cherrypy.expose
+    def testLibnotify(self):
+        try:
+            import pynotify
+        except ImportError:
+            return "Error: pynotify module is not installed"
+        notifiers.libnotify_notifier.test_notify()
+        return "Tried sending desktop notification via libnotify"
+
 
     @cherrypy.expose
     def shutdown(self):
