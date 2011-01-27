@@ -69,7 +69,7 @@ class Quality:
 
     # load quality strings from config.ini
     program_dir = os.path.dirname(os.path.normpath(os.path.abspath(__file__)))
-    configure_file = os.path.join(program_dir, "config.ini")
+    configure_file = os.path.join(program_dir, "..", "config.ini")
     configure_obj = ConfigObj(configure_file)
     try:
         quality_none = configure_obj['CustomQuality']['quality_none']
