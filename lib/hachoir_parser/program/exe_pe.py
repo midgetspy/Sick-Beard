@@ -1,9 +1,9 @@
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_core.field import (FieldSet, ParserError,
     Bit, UInt8, UInt16, UInt32, TimestampUnix32,
     Bytes, String, Enum,
     PaddingBytes, PaddingBits, NullBytes, NullBits)
-from hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
-from hachoir_core.error import HACHOIR_ERRORS
+from lib.hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
+from lib.hachoir_core.error import HACHOIR_ERRORS
 
 class SectionHeader(FieldSet):
     static_size = 40 * 8

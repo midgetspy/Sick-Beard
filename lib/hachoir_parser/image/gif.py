@@ -4,16 +4,16 @@ GIF picture parser.
 Author: Victor Stinner
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     Enum, UInt8, UInt16,
     Bit, Bits, NullBytes,
     String, PascalString8, Character,
     NullBits, RawBytes)
-from hachoir_parser.image.common import PaletteRGB
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.tools import humanDuration
-from hachoir_core.text_handler import textHandler, displayHandler, hexadecimal
+from lib.hachoir_parser.image.common import PaletteRGB
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.tools import humanDuration
+from lib.hachoir_core.text_handler import textHandler, displayHandler, hexadecimal
 
 # Maximum image dimension (in pixel)
 MAX_WIDTH = 6000

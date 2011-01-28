@@ -13,10 +13,10 @@ Creation date: YYYY-mm-DD
 """
 
 # TODO: Just keep what you need
-from hachoir_parser import Parser
-from hachoir_core.field import (ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (ParserError,
     UInt8, UInt16, UInt32, String, RawBytes)
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
 
 class TODOFile(Parser):
     PARSER_TAGS = {

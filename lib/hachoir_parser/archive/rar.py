@@ -5,15 +5,15 @@ Status: can only read higher-level attructures
 Author: Christophe Gisquet
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (StaticFieldSet, FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (StaticFieldSet, FieldSet,
     Bit, Bits, Enum,
     UInt8, UInt16, UInt32, UInt64,
     String, TimeDateMSDOS32,
     NullBytes, NullBits, RawBytes)
-from hachoir_core.text_handler import textHandler, filesizeHandler, hexadecimal
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_parser.common.msdos import MSDOSFileAttr32
+from lib.hachoir_core.text_handler import textHandler, filesizeHandler, hexadecimal
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_parser.common.msdos import MSDOSFileAttr32
 
 MAX_FILESIZE = 1000 * 1024 * 1024
 

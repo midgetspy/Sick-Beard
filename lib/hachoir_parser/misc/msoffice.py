@@ -8,12 +8,12 @@ Author: Robert Xiao, Victor Stinner
 Creation: 2006-04-23
 """
 
-from hachoir_parser import HachoirParser
-from hachoir_core.field import FieldSet, RootSeekableFieldSet, RawBytes
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.stream import StringInputStream
-from hachoir_parser.misc.msoffice_summary import SummaryFieldSet, CompObj
-from hachoir_parser.misc.word_doc import WordDocumentFieldSet
+from lib.hachoir_parser import HachoirParser
+from lib.hachoir_core.field import FieldSet, RootSeekableFieldSet, RawBytes
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.stream import StringInputStream
+from lib.hachoir_parser.misc.msoffice_summary import SummaryFieldSet, CompObj
+from lib.hachoir_parser.misc.word_doc import WordDocumentFieldSet
 
 PROPERTY_NAME = {
     u"\5DocumentSummaryInformation": "doc_summary",

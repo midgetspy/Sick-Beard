@@ -12,14 +12,14 @@ Author: Victor Stinner
 Creation date: 4 november 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet,
     UInt8, UInt24, UInt32, NullBits, NullBytes,
     Bit, Bits, String, RawBytes, Enum)
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_parser.audio.mpeg_audio import Frame
-from hachoir_parser.video.amf import AMFObject
-from hachoir_core.tools import createDict
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_parser.audio.mpeg_audio import Frame
+from lib.hachoir_parser.video.amf import AMFObject
+from lib.hachoir_core.tools import createDict
 
 SAMPLING_RATE = {
     0: ( 5512, "5.5 kHz"),

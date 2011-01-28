@@ -1,6 +1,6 @@
 import os, sys, time
-import hachoir_core.config as config
-from hachoir_core.i18n import _
+import lib.hachoir_core.config as config
+from lib.hachoir_core.i18n import _
 
 class Log:
     LOG_INFO   = 0
@@ -75,7 +75,7 @@ class Log:
            level <= self.LOG_INFO and not config.verbose:
             return
         if config.debug:
-            from hachoir_core.error import getBacktrace
+            from lib.hachoir_core.error import getBacktrace
             backtrace = getBacktrace(None)
             if backtrace:
                 text += "\n\n" + backtrace

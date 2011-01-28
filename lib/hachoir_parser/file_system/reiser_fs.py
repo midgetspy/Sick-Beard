@@ -20,10 +20,10 @@ Kurz.
 """
 
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, Enum,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, Enum,
     UInt16, UInt32, String, RawBytes, NullBytes)
-from hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.endian import LITTLE_ENDIAN
 
 class Journal_params(FieldSet):
     static_size = 32*8

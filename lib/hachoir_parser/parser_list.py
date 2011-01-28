@@ -1,8 +1,8 @@
 import re
 import types
-from hachoir_core.error import error
-from hachoir_core.i18n import _
-from hachoir_parser import Parser, HachoirParser
+from lib.hachoir_core.error import error
+from lib.hachoir_core.i18n import _
+from lib.hachoir_parser import Parser, HachoirParser
 import sys
 
 ### Parser list ################################################################

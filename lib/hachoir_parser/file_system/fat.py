@@ -1,14 +1,14 @@
-from hachoir_core.compatibility import sorted
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, StaticFieldSet,
+from lib.hachoir_core.compatibility import sorted
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, StaticFieldSet,
     RawBytes, PaddingBytes, createPaddingField, Link, Fragment,
     Bit, Bits, UInt8, UInt16, UInt32,
     String, Bytes, NullBytes)
-from hachoir_core.field.integer import GenericInteger
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_core.error import error
-from hachoir_core.tools import humanFilesize, makePrintable
+from lib.hachoir_core.field.integer import GenericInteger
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.error import error
+from lib.hachoir_core.tools import humanFilesize, makePrintable
 import datetime
 import re
 

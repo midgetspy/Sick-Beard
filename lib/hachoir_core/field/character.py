@@ -2,9 +2,9 @@
 Character field class: a 8-bit character
 """
 
-from hachoir_core.field import Bits
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.tools import makePrintable
+from lib.hachoir_core.field import Bits
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.tools import makePrintable
 
 class Character(Bits):
     """

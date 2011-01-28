@@ -1,7 +1,7 @@
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_core.field import (FieldSet,
     Bit, UInt8, UInt16, UInt32, Bytes,
     PaddingBits, PaddingBytes, NullBits, NullBytes)
-from hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
+from lib.hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
 
 class NE_Header(FieldSet):
     static_size = 64*8

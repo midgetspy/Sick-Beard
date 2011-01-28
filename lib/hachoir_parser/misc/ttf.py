@@ -10,14 +10,14 @@ Author: Victor Stinner
 Creation date: 2007-02-08
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt16, UInt32, Bit, Bits,
     PaddingBits, NullBytes,
     String, RawBytes, Bytes, Enum,
     TimestampMac32)
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
 
 MAX_NAME_COUNT = 300
 MIN_NB_TABLE = 3

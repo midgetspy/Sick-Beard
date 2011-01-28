@@ -5,13 +5,13 @@ Author: Alexandre Boeglin
 Creation date: 08 jul 2007
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet,
     UInt8, UInt16, UInt24, UInt32, UInt64, Enum,
     CString, String, PaddingBytes, RawBytes, NullBytes)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.tools import paddingSize, humanFilesize
-from hachoir_parser.common.win32 import GUID
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.tools import paddingSize, humanFilesize
+from lib.hachoir_parser.common.win32 import GUID
 
 EFI_SECTION_COMPRESSION = 0x1
 EFI_SECTION_GUID_DEFINED = 0x2

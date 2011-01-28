@@ -5,10 +5,10 @@ Author: Victor Stinner
 Creation: 18 december 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import FieldSet, UInt8, UInt16, Enum, RawBytes
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_parser.image.common import PaletteRGB
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import FieldSet, UInt8, UInt16, Enum, RawBytes
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_parser.image.common import PaletteRGB
 
 class Line(FieldSet):
     def __init__(self, *args):

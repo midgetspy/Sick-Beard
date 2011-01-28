@@ -1,6 +1,6 @@
-from hachoir_core.field import Bits, Bytes
-from hachoir_core.tools import makePrintable, humanFilesize
-from hachoir_core import config
+from lib.hachoir_core.field import Bits, Bytes
+from lib.hachoir_core.tools import makePrintable, humanFilesize
+from lib.hachoir_core import config
 
 class PaddingBits(Bits):
     """

@@ -1,4 +1,4 @@
-from hachoir_core.iso639 import ISO639_2
+from lib.hachoir_core.iso639 import ISO639_2
 
 class Language:
     def __init__(self, code):

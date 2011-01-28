@@ -2,13 +2,13 @@
 PCX picture filter.
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (
     UInt8, UInt16,
     PaddingBytes, RawBytes,
     Enum)
-from hachoir_parser.image.common import PaletteRGB
-from hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_parser.image.common import PaletteRGB
+from lib.hachoir_core.endian import LITTLE_ENDIAN
 
 class PcxFile(Parser):
     endian = LITTLE_ENDIAN

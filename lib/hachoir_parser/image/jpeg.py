@@ -12,17 +12,17 @@ Information:
 Author: Victor Stinner
 """
 
-from hachoir_core.error import HachoirError
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_core.error import HachoirError
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt8, UInt16, Enum,
     Bit, Bits, NullBits, NullBytes,
     String, RawBytes)
-from hachoir_parser.image.common import PaletteRGB
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_parser.image.exif import Exif
-from hachoir_parser.image.photoshop_metadata import PhotoshopMetadata
+from lib.hachoir_parser.image.common import PaletteRGB
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_parser.image.exif import Exif
+from lib.hachoir_parser.image.photoshop_metadata import PhotoshopMetadata
 
 MAX_FILESIZE = 100 * 1024 * 1024
 
