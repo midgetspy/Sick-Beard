@@ -197,7 +197,8 @@ class PostProcessor(object):
             try:
                 helpers.moveFile(cur_file_path, new_file_path)
             except (IOError, OSError), e:
-                logger.log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                raise e
                 
     def _copy(self, file_path, new_path, associated_files=False):
 
@@ -220,6 +221,7 @@ class PostProcessor(object):
                 helpers.copyFile(cur_file_path, new_file_path)
             except (IOError, OSError), e:
                 logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                raise e
 
     def _find_ep_destination_folder(self, ep_obj):
         
@@ -339,7 +341,7 @@ class PostProcessor(object):
             for exceptionID in common.sceneExceptions:
                 # for each exception name
                 for curException in common.sceneExceptions[exceptionID]:
-                    if cur_name.lower() == curException.lower():
+                    if cur_name.lower() in (curException.lower(), sceneHelpers.sanitizeSceneName(curException).lower().replace('.',' ')):
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
                         _finalize(parse_result)
                         return (exceptionID, season, episodes)
@@ -620,7 +622,7 @@ class PostProcessor(object):
         except exceptions.ShowDirNotFoundException:
             raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
             
-        self._log(u"Destination folder for this episode: "+str(dest_path), logger.DEBUG)
+        self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
         
         # if the dir doesn't exist (new season folder) then make it
         if not ek.ek(os.path.isdir, dest_path):
@@ -628,7 +630,7 @@ class PostProcessor(object):
             try:
                 ek.ek(os.mkdir, dest_path)
             except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+str(dest_path))
+                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
         try:
             # move the episode to the show dir

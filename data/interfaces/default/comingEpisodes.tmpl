@@ -8,7 +8,168 @@
 <!--#set global $topmenu="comingEpisodes"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+#set $sort = $sickbeard.COMING_EPS_SORT
 
+<div class="h2footer align-right">
+    <b>Key:</b> 
+    <span class="listing_overdue">Past</span>
+    <span class="listing_current">Current</span>
+    <span class="listing_default">Future</span>
+    <span class="listing_toofar">Distant</span>
+    <span class="listing_unknown">Unknown</span>
+</div><br/>
+
+#if $sickbeard.COMING_EPS_LAYOUT == 'list':
+<!-- start list view -->
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+<script type="text/javascript" charset="utf-8">
+\$.tablesorter.addParser({ 
+    id: 'nextAirDate',
+    is: function(s) {
+        return false;
+    },
+    format: function(s) {
+        if (s == '')
+            return '9999-99-99';
+        else
+            return s; 
+    },
+    type: 'text'
+});
+
+\$.tablesorter.addParser({
+    id: 'loadingNames',
+    is: function(s) {
+        return false;
+    }, 
+    format: function(s) { 
+        if (s.indexOf('Loading...') == 0)
+            return s.replace('Loading...','!!!');
+        else if (s.indexOf('The ') == 0)
+            return s.replace('The ', '')
+        else if (s.indexOf('A ') == 0)
+            return s.replace('A ', '')
+        else
+            return s;
+    },
+    type: 'text'
+});
+
+\$.tablesorter.addParser({
+    id: 'quality',
+    is: function(s) {
+        return false;
+    },
+    format: function(s) { 
+        return s.toLowerCase().replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4); 
+    },
+    type: 'numeric'
+});
+
+//http://web.archive.org/web/20080801073104/http://www.jdempster.com/category/code/jquery/tablesortercookiewidget/
+\$.tablesorter.addWidget({
+  id: 'cookie',
+  format: function(table) {
+    var sortList = table.config.sortList;
+    var tablesorterCookieJar = \$.cookieJar('tablesorter');
+    if ( sortList.length > 0) {
+      tablesorterCookieJar.set(\$(table).attr('id'), sortList);
+    } else {
+      var sortList = tablesorterCookieJar.get(\$(table).attr('id'));
+      if (sortList && sortList.length > 0) {
+        jQuery(table).trigger('sorton', [sortList]);
+      }
+    }
+  }
+});
+ 
+\$(document).ready(function(){ 
+
+#set $sort_codes = {'date': 2, 'show': 3, 'network': 4}
+#if $sort not in $sort_codes:
+    $sort = 'date'
+#end if
+        sortList = [[$sort_codes[$sort],0]]; 
+
+    \$("#showListTable").tablesorter({
+        sortList: sortList,
+        headers: {
+            0: { sorter: false},
+            1: { sorter: false},
+            2: { sorter: 'nextAirDate' },
+            3: { sorter: 'loadingNames' },
+            4: { sorter: 'loadingNames' },
+            5: { sorter: 'quality' },
+            6: { sorter: 'status' },
+            7: { sorter: false},
+            8: { sorter: false}
+        }
+    });
+
+});
+</script>
+
+    #set $show_div = "listing_default"
+
+<input type="hidden" id="sbRoot" value="$sbRoot" />
+
+    <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
+    <thead><tr><th>Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>Status</th><th>tvDB</th><th>Force</th></tr></thead>
+    <tbody>
+
+    #for $cur_result in $sql_results:
+
+        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+            #continue
+        #end if
+
+        #set $cur_ep_airdate = int($cur_result["airdate"])
+            #if $cur_ep_airdate < $today:
+                #set $show_div = "listing_overdue"
+            #elif $cur_ep_airdate >= $next_week:
+                #set $show_div = "listing_toofar"
+            #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
+                #if $cur_ep_airdate == $today:
+                    #set $show_div = "listing_current"
+                #else:
+                    #set $show_div = "listing_default"
+                #end if
+            #end if
+
+    <!-- start $cur_result["show_name"] -->
+      <tr class="$show_div"><div>
+        <td align="left"><span class="float-left"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></span>
+        #if $cur_result["description"] != "" and $cur_result["description"] != None:
+        <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
+        #end if
+        </div>
+        </td>
+        <td>$cur_result["name"]</td>
+        <td align="center" nowrap="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
+        <td><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
+            #if int($cur_result["paused"]):
+            <span class="pause">[paused]</span>
+            #end if
+        </td>
+        <td align="center">$cur_result["network"]</td>
+        <td align="center">
+#if int($cur_result["quality"]) in $qualityPresets:
+$qualityPresetStrings[int($cur_result["quality"])]
+#else:
+Custom
+#end if
+        </td>
+        <td align="center">$cur_result["show_status"]</td>
+        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/search32.png" /></a></td>
+        <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></td>
+      </tr>
+    <!-- end $cur_result["show_name"] -->
+    #end for
+    </tbody>
+    </table>
+<!-- end list view -->
+#else:
+<!-- start non list view -->
 <div id="outsideWrapper">
 <div id="insideWrapper">
   <div id="insideContent">
@@ -19,15 +180,31 @@
     #set $show_div = "ep_listing listing_default"
 
     #if $sort == "show": 
-        <br/>
+        <br/><br/>
     #end if
     
     #for $cur_result in $sql_results:
     <!-- start $cur_result["show_name"] -->
         
+        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+            #continue
+        #end if
+
         #if $sort == "network":
             #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
                 <br /><h1 class="network">$cur_result["network"]</h1>
+                #set $cur_ep_airdate = int($cur_result["airdate"])
+                #if $cur_ep_airdate < $today:
+                    #set $show_div = "ep_listing listing_overdue"
+                #elif $cur_ep_airdate >= $next_week:
+                    #set $show_div = "ep_listing listing_toofar"
+                #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
+                    #if $cur_ep_airdate == $today:
+                        #set $show_div = "ep_listing listing_current"
+                    #else:
+                        #set $show_div = "ep_listing listing_default"
+                    #end if
+                #end if
                 #set $cur_segment = $cur_result["network"]
             #end if
         #elif $sort == "date":
@@ -57,20 +234,20 @@
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <th #if $sickbeard.USE_BANNER then "" else "colspan=\"2\""#>
+          <th #if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "" else "colspan=\"2\""#>
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if            
             </a></span>
-            <span class="tvshowTitleIcons"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/info.png" /></a> <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></span>
+            <span class="tvshowTitleIcons"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/search32.png" /></a> <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></span>
           </th>
         </tr>
         <tr>
-          <th #if $sickbeard.USE_BANNER then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
-            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.USE_BANNER then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}" /></a>
+          <th #if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$sickbeard.COMING_EPS_LAYOUT" /></a>
           </th>
-#if $sickbeard.USE_BANNER:
+#if $sickbeard.COMING_EPS_LAYOUT == 'banner':
         </tr>
         <tr>
 #end if          
@@ -107,6 +284,9 @@
   </div>
 </div>
 </div>
+<!-- end non list view -->
+#end if
+
 
 <script type="text/javascript" charset="utf-8">
 setInterval(window.location.reload, 180000); // Refresh every 3 minutes

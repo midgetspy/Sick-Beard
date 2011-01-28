@@ -3,6 +3,7 @@ $(function(){
         $('.plotInfo').tooltip(
         {
                 position:     'bottom right',
+                offset:       [0, 5],
                 delay:        100,
                 effect:       'fade',
                 tip:          '#tooltip',

@@ -39,6 +39,7 @@ from sickbeard import tv, versionChecker, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
+from sickbeard import image_cache
 
 from sickbeard.notifiers import xbmc
 from sickbeard.providers import newznab
@@ -69,7 +70,8 @@ class PageTemplate (Template):
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
             logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
-
+        self.logPageTitle = logPageTitle
+        self.sbPID = str(sickbeard.PID)
         self.menu = [
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
@@ -125,9 +127,9 @@ def _getEpisode(show, season, episode):
     return epObj
 
 ManageMenu = [
+            { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
            #{ 'title': 'Episode Overview', 'path': 'manage/episodeOverview' },
-           { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             ]
 
 class ManageSearches:
@@ -443,8 +445,8 @@ class History:
 ConfigMenu = [
     { 'title': 'General',           'path': 'config/general/'          },
     { 'title': 'Episode Downloads', 'path': 'config/episodedownloads/' },
-    { 'title': 'Search Providers',  'path': 'config/providers/'        },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
+    { 'title': 'Search Providers',  'path': 'config/providers/'        },
 ]
 
 class ConfigGeneral:
@@ -465,7 +467,8 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
+                    wdtv_data=None, use_banner=None):
 
         results = []
 
@@ -519,6 +522,11 @@ class ConfigGeneral:
         else:
             naming_dates = 0
 
+        if use_banner == "on":
+            use_banner = 1
+        else:
+            use_banner = 0
+
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
 
@@ -535,6 +543,7 @@ class ConfigGeneral:
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
+        sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
@@ -554,6 +563,8 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        sickbeard.USE_BANNER = use_banner
 
         config.change_VERSION_NOTIFY(version_notify)
 
@@ -716,7 +727,6 @@ class ConfigEpisodeDownloads:
 
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
-        sickbeard.SEARCH_FREQUENCY = int(search_frequency)
 
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
@@ -927,7 +937,7 @@ class ConfigNotifications:
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
-						  use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
 
         results = []
 
@@ -1051,7 +1061,7 @@ class HomePostProcess:
     def index(self):
 
         t = PageTemplate(file="home_postprocess.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1074,7 +1084,7 @@ class NewHomeAddShows:
     def index(self):
 
         t = PageTemplate(file="home_addShows.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1168,7 +1178,7 @@ class NewHomeAddShows:
             redirect("/home")
 
         t = PageTemplate(file="home_addShow.tmpl")
-        t.submenu = HomeMenu()
+        #t.submenu = HomeMenu()
 
         # make sure everything's unescaped
         showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
@@ -1219,7 +1229,7 @@ class NewHomeAddShows:
 
 ErrorLogsMenu = [
     { 'title': 'Clear Errors', 'path': 'errorlogs/clearerrors' },
-    { 'title': 'View Log',  'path': 'errorlogs/viewlog'  },
+    #{ 'title': 'View Log',  'path': 'errorlogs/viewlog'  },
 ]
 
 
@@ -1374,7 +1384,7 @@ class Home:
         if updated:
             # do a hard restart
             threading.Timer(2, sickbeard.restart, [False]).start()
-            return _genericMessage("Restarting","Sick Beard is restarting, refresh in 30 seconds.")
+            return "Sick Beard is restarting, refresh in 30 seconds."
         else:
             return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
 
@@ -1781,53 +1791,80 @@ class WebInterface:
         redirect("/home")
 
     @cherrypy.expose
-    def showPoster(self, show=None):
+    def showPoster(self, show=None, which=None):
 
+        if which == 'poster':
+            default_image_name = 'poster.png'
+        else:
+            default_image_name = 'banner.png'
+
+        default_image_path = ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', default_image_name)
         if show == None:
-            return "Invalid show" #TODO: make it return a standard image
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
         else:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
         if showObj == None:
-            return "Unable to find show" #TODO: make it return a standard image
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
 
-        for cur_provider in sickbeard.metadata_provider_dict.values():
-            if ek.ek(os.path.isfile, cur_provider.get_poster_path(showObj)):
-                posterFilename = os.path.abspath(cur_provider.get_poster_path(showObj))
-                break
+        cache_obj = image_cache.ImageCache()
+        
+        if which == 'poster':
+            image_file_name = cache_obj.poster_path(showObj.tvdbid)
+        # this is for 'banner' but also the default case
+        else:
+            image_file_name = cache_obj.banner_path(showObj.tvdbid)
 
-        if ek.ek(os.path.isfile, posterFilename):
+        if ek.ek(os.path.isfile, image_file_name):
             try:
                 from PIL import Image
                 from cStringIO import StringIO
             except ImportError: # PIL isn't installed
-                return cherrypy.lib.static.serve_file(posterFilename, content_type="image/jpeg")
+                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
             else:
-                im = Image.open(posterFilename)
+                im = Image.open(image_file_name)
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
-                if sickbeard.USE_BANNER:
-                  size = 600, 112
+                if which == 'banner':
+                    size = 600, 112
+                elif which == 'poster':
+                    size = 136, 200
                 else:
-                  size = 136, 200
+                    return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
                 im.thumbnail(size, Image.ANTIALIAS)
                 buffer = StringIO()
                 im.save(buffer, 'JPEG')
                 return buffer.getvalue()
         else:
-            logger.log(u"No poster for show "+show.name, logger.WARNING) #TODO: make it return a standard image
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
 
     @cherrypy.expose
-    def toggleBanners(self):
+    def setComingEpsLayout(self, layout):
+        if layout not in ('poster', 'banner', 'list'):
+            layout = 'banner'
         
-        # toggle the setting
-        sickbeard.USE_BANNER = not sickbeard.USE_BANNER
+        sickbeard.COMING_EPS_LAYOUT = layout
         
-        # forward to the coming eps page
         redirect("/comingEpisodes")
 
     @cherrypy.expose
-    def comingEpisodes(self, sort="date"):
+    def toggleComingEpsDisplayPaused(self):
+        
+        sickbeard.COMING_EPS_DISPLAY_PAUSED = not sickbeard.COMING_EPS_DISPLAY_PAUSED
+        
+        redirect("/comingEpisodes")
+
+    @cherrypy.expose
+    def setComingEpsSort(self, sort):
+        if sort not in ('date', 'network', 'show'):
+            sort = 'date'
+        
+        sickbeard.COMING_EPS_SORT = sort
+        
+        redirect("/comingEpisodes")
+
+    @cherrypy.expose
+    def comingEpisodes(self):
 
         myDB = db.DBConnection()
         
@@ -1836,14 +1873,14 @@ class WebInterface:
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
 
         done_show_list = []
-        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["showid"]))
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
         #epList = sickbeard.comingList
@@ -1854,21 +1891,26 @@ class WebInterface:
             'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
             'network': (lambda a, b: cmp(a["network"], b["network"])),
         }
-        if sort not in sorts:
-            sort = 'date'
+
         #epList.sort(sorts[sort])
-        sql_results.sort(sorts[sort])
+        sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
         t = PageTemplate(file="comingEpisodes.tmpl")
+        paused_item = { 'title': '', 'path': 'toggleComingEpsDisplayPaused' }
+        paused_item['title'] = 'Hide Paused' if sickbeard.COMING_EPS_DISPLAY_PAUSED else 'Show Paused'
         t.submenu = [
-            { 'title': 'Sort by Date', 'path': 'comingEpisodes/?sort=date' },
-            { 'title': 'Sort by Show', 'path': 'comingEpisodes/?sort=show' },
-            { 'title': 'Sort by Network', 'path': 'comingEpisodes/?sort=network' },
-            { 'title': 'Toggle Banner View', 'path': 'toggleBanners/' },
+            { 'title': 'Sort by:', 'path': {'Date': 'setComingEpsSort/?sort=date',
+                                            'Show': 'setComingEpsSort/?sort=show',
+                                            'Network': 'setComingEpsSort/?sort=network',
+                                           }},
+                                           
+            { 'title': 'Layout:', 'path': {'Banner': 'setComingEpsLayout/?layout=banner',
+                                           'Poster': 'setComingEpsLayout/?layout=poster',
+                                           'List': 'setComingEpsLayout/?layout=list',
+                                           }},
+            paused_item,
         ]
-        t.sort = sort
-        #t.epList = epList
-        
+
         t.next_week = next_week
         t.today = today
         t.sql_results = sql_results

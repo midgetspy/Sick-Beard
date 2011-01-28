@@ -53,7 +53,6 @@ div#insideContent {
 }
 
 .posterThumb {
-    background-image: url("/images/poster.png");
     /* display:table-cell; */
     vertical-align: top;
     height: 200px;
@@ -62,8 +61,6 @@ div#insideContent {
     border-right: 1px solid #ccc;
 }
 .bannerThumb {
-    background-image: url("/images/poster.png");
-    background-repeat: repeat-x;
     /* display:table-cell; */
     vertical-align: top;
     height: 112px;
@@ -125,7 +122,7 @@ h1.network {
 }
 
 .listing_default {
-    background-color: #e5e5e5;
+    background-color: #F5F1E4;
 }
 
 .listing_current {

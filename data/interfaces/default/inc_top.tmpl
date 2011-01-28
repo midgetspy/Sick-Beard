@@ -9,26 +9,106 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="SHORTCUT ICON" href="$sbRoot/images/favicon.ico"/>
     <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css"/>
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/superfish.css"/>
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.7.custom.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
+<style type="text/css">
+<!--
+.ac_loading { background: white url("$sbRoot/images/indicator.gif") right center no-repeat; }
+.sf-sub-indicator { background: url("$sbRoot/images/arrows.png") no-repeat -10px -100px; }
+.sf-shadow ul { background: url("$sbRoot/images/shadow.png") no-repeat bottom right; }
+table.tablesorter thead tr .header { background-image: url("$sbRoot/images/tablesorter/bg.gif"); }
+table.tablesorter thead tr .headerSortUp { background-image: url("$sbRoot/images/tablesorter/asc.gif"); }
+table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/images/tablesorter/desc.gif"); }
+.browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat; }
+
+.ui-widget-content { border: 1px solid #d9d6c4; background: #eceadf url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat; color: #1f1f1f; }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #cbc7bd; background: #f8f7f6 url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_10_f8f7f6_60x60.png") 50% 50% repeat; font-weight: bold; color: #654b24; }
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #d9d6c4; background: #eceadf url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_15_eceadf_60x60.png") 50% 50% repeat; font-weight: bold; color: #140f06; }
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 1px solid #b2a266; background: #f7f3de url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_15_f7f3de_60x60.png") 50% 50% repeat; color: #3a3427; }
+.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #681818; background: #b83400 url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_68_b83400_60x60.png") 50% 50% repeat; color: #ffffff; }
+
+.ui-icon { width: 16px; height: 16px; background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_222222_256x240.png"); }
+.ui-widget-content .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_222222_256x240.png"); }
+.ui-widget-header .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_b83400_256x240.png"); }
+.ui-state-default .ui-icon { background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_b83400_256x240.png"); }
+.ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_ffffff_256x240.png"); }
+.ui-state-active .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_8c291d_256x240.png"); }
+.ui-state-highlight .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_3572ac_256x240.png"); }
+.ui-state-error .ui-icon, .ui-state-error-text .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_fbdb93_256x240.png"); }
+
+.ui-widget-overlay { background: #6e4f1c url("$sbRoot/css/pepper-grinder/images/ui-bg_diagonal-maze_20_6e4f1c_10x10.png") 50% 50% repeat; opacity: .60;filter:Alpha(Opacity=60); }
+.ui-widget-shadow { margin: 0 0 0 -10px; padding: 5px; background: #000000 url("$sbRoot/css/pepper-grinder/images/ui-bg_diagonal-maze_40_000000_10x10.png") 50% 50% repeat; opacity: .60;filter:Alpha(Opacity=60); -moz-border-radius: 18px; -webkit-border-radius: 18px; border-radius: 18px; }/*
+-->
+</style>
+
     <script type="text/javascript" src="$sbRoot/js/jquery-1.4.4.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.7.custom.min.js"></script>
-    <script type='text/javascript' src='$sbRoot/js/jquery.autocomplete.min.js'></script>
+    <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.autocomplete.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.json-2.2.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+    top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; //HTML for control, which is auto wrapped in DIV w/ ID="topcontrol"
+    </script>
     <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.selectboxes.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.0.3.min.js"></script>
-    <script type='text/javascript' src='$sbRoot/js/tools.tooltip-1.2.5.min.js'></script>
+    <script type="text/javascript" src="$sbRoot/js/tools.tooltip-1.2.5.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $.Browser = {
+        defaults: {
+            title:             'Choose Directory',
+            url:               '$sbRoot/browser/',
+            autocompleteURL:   '$sbRoot/browser/complete'
+        }
+    };
+    </script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
+<script type="text/javascript"> 
+    \$(document).ready(function(){ 
+        \$("ul.sf-menu").supersubs({ 
+            minWidth:    12,   // minimum width of sub-menus in em units 
+            maxWidth:    27,   // maximum width of sub-menus in em units 
+            extraWidth:  1     // extra width can ensure lines don't sometimes turn over 
+                               // due to slight rounding differences and font-family 
+        }).superfish({
+            delay:         150,
+            disableHI:     true, 
+            animation:   {opacity:'show',height:'show'},
+            speed:       'fast',
+            dropShadows: false
+        });
+        \$("#MainMenu.sf-menu ul li a").mouseover(function(){
+            imgsrc = \$(this).children("img").attr("src");
+            if(imgsrc!=null) {
+                matches = imgsrc.match(/_over/);
+                if (!matches) {
+                    imgsrcON = imgsrc.replace(/.png$/ig,"_over.png");
+                    \$(this).children("img").attr("src", imgsrcON);
+                }
+                \$("#MainMenu.sf-menu ul li a").mouseout(function(){
+                    \$(this).children("img").attr("src", imgsrc);
+                });
+            }
+        });
+        \$("#MainMenu.sf-menu ul li img").each(function() {
+            rollsrc = \$(this).attr("src");
+            rollON = rollsrc.replace(/.png$/ig,"_over.png");
+            \$("<img>").attr("src", rollON);
+        });
 
+        \$("#NAV$topmenu").addClass('current');
+    }); 
+</script>
 </head>
 
 <body>
@@ -45,29 +125,65 @@
     <span id="logo"><a href="$sbRoot/home/" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard_small.png" width="150" /></a></span>
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
 </div>
-<span class="MainMenu">
-    #for $menuItem in $menu:
-        #if $topmenu == $menuItem.key
-            <a class="current" href="$sbRoot/$menuItem.key">$menuItem.title</a> |
-        #else
-            <a href="$sbRoot/$menuItem.key">$menuItem.title</a> |
-        #end if
-    #end for
-    <br />
-</span>
-    <span id="tagline"><a class="imgLink" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" alt="[donate]"/></a></span>
+<ul id="MainMenu" class="sf-menu">
+            <li class="spacer">&nbsp;</li>
+            <li id="NAVhome"><a href="$sbRoot/home">Home</a>
+                <ul>
+                        <li><a href="$sbRoot/home/addShows/"><img src="$sbRoot/images/menu/addshow16.png" alt="" width="16" height="16" />Add Shows</a></li>
+                        <li><a href="$sbRoot/home/postprocess/"><img src="$sbRoot/images/menu/postprocess16.png" alt="" width="16" height="16" />Manual Post-Processing</a></li>
+                        <li><a href="$sbRoot/home/restart/?pid=$sbPID"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
+                        <li><a href="$sbRoot/home/shutdown/"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
+                </ul>
+            </li>
+            <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes">Coming Episodes</a></li>
+            <li id="NAVhistory"><a href="$sbRoot/history">History</a></li>
+            <li id="NAVmanage"><a href="$sbRoot/manage">Manage</a>
+                <ul>
+                        <li><a href="$sbRoot/manage/backlogOverview"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Backlog Overview</a></li>
+                        <li><a href="$sbRoot/manage/manageSearches"><img src="$sbRoot/images/menu/managesearches16.png" alt="" width="16" height="16" />Manage Searches</a></li>
+                </ul>
+            </li>
+            <li id="NAVconfig"><a href="$sbRoot/config">Config</a>
+                <ul>
+                        <li><a href="$sbRoot/config/general/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />General</a></li>
+                        <li><a href="$sbRoot/config/episodedownloads/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Episode Downloads</a></li>
+                        <li><a href="$sbRoot/config/notifications/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Notifications</a></li>
+                        <li><a href="$sbRoot/config/providers/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Search Providers</a></li>
+                </ul>
+            </li>
+            <li id="NAVerrorlogs"><a href="$sbRoot/errorlogs">$logPageTitle</a>
+                <ul>
+                        <li><a href="$sbRoot/errorlogs/viewlog"><img src="$sbRoot/images/menu/viewlog16.png" alt="" width="16" height="16" />View Log</a></li>
+                </ul>
+            </li>
+            <li id="donate"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" alt="[donate]" /></a></li>
+</ul>
 #if $varExists('submenu'):
-<span class="SubMenu">
+<div id="SubMenu">
+<span>
+#set $first = True
 #for $menuItem in $submenu:
     #if 'requires' not in $menuItem or $menuItem.requires():
-    <a href="$sbRoot/$menuItem.path">$menuItem.title</a> |
+        #if type($menuItem.path) == dict:
+            #if $first then "" else "</span>| <span>"#<b>$menuItem.title</b>
+            #set $first = False
+            #set $inner_first = True
+            #for $cur_link in $menuItem.path:
+                #if $inner_first then "" else "&middot; "#<a class="inner" href="$sbRoot/$menuItem.path[$cur_link]">$cur_link</a>
+                #set $inner_first = False
+            #end for
+        #else
+            #if $first then "" else "| "#<a href="$sbRoot/$menuItem.path">$menuItem.title</a>
+            #set $first = False
+        #end if
     #end if
 #end for
 </span>
+</div>
 #end if
 
-<div style="padding: 15px; _text-align: center; min-width: 500px;">
-<h1>#if $varExists('header') then $header else $title#</h1>
+
+<div id="content">
 
 #for $curMessage in $flash.messages():
 <br />
@@ -84,3 +200,5 @@
     $curError[1]
 </div>
 #end for
+
+<h1>#if $varExists('header') then $header else $title#</h1>
