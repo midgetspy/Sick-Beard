@@ -22,20 +22,20 @@ Changes:
     * Creation of the parser
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet,
     CString, String,
     UInt32, UInt16, UInt8,
     Bit, Bits, PaddingBits,
     TimestampWin64, DateTimeMSDOS32,
     NullBytes, PaddingBytes, RawBytes, Enum)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_parser.common.win32 import GUID
-from hachoir_parser.common.msdos import MSDOSFileAttr16, MSDOSFileAttr32
-from hachoir_core.text_handler import filesizeHandler
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_parser.common.win32 import GUID
+from lib.hachoir_parser.common.msdos import MSDOSFileAttr16, MSDOSFileAttr32
+from lib.hachoir_core.text_handler import filesizeHandler
 
-from hachoir_core.tools import paddingSize
+from lib.hachoir_core.tools import paddingSize
 
 class ItemIdList(FieldSet):
     def __init__(self, *args, **kw):

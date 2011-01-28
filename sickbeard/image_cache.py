@@ -26,8 +26,8 @@ from sickbeard import encodingKludge as ek
 
 from sickbeard.metadata.generic import GenericMetadata
 
-from hachoir_parser import createParser
-from hachoir_metadata import extractMetadata
+from lib.hachoir_parser import createParser
+from lib.hachoir_metadata import extractMetadata
 
 class ImageCache:
     

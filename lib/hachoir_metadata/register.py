@@ -1,17 +1,17 @@
-from hachoir_core.i18n import _
-from hachoir_core.tools import (
+from lib.hachoir_core.i18n import _
+from lib.hachoir_core.tools import (
     humanDuration, humanBitRate,
     humanFrequency, humanBitSize, humanFilesize,
     humanDatetime)
-from hachoir_core.language import Language
-from hachoir_metadata.filter import Filter, NumberFilter, DATETIME_FILTER
+from lib.hachoir_core.language import Language
+from lib.hachoir_metadata.filter import Filter, NumberFilter, DATETIME_FILTER
 from datetime import date, datetime, timedelta
-from hachoir_metadata.formatter import (
+from lib.hachoir_metadata.formatter import (
     humanAudioChannel, humanFrameRate, humanComprRate, humanAltitude,
     humanPixelSize, humanDPI)
-from hachoir_metadata.setter import (
+from lib.hachoir_metadata.setter import (
     setDatetime, setTrackNumber, setTrackTotal, setLanguage)
-from hachoir_metadata.metadata_item import Data
+from lib.hachoir_metadata.metadata_item import Data
 
 MIN_SAMPLE_RATE = 1000              # 1 kHz
 MAX_SAMPLE_RATE = 192000            # 192 kHz

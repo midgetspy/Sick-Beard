@@ -2,10 +2,10 @@
 GNU ar archive : archive file (.a) and Debian (.deb) archive.
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     String, RawBytes, UnixLine)
-from hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.endian import BIG_ENDIAN
 
 class ArchiveFileEntry(FieldSet):
     def createFields(self):

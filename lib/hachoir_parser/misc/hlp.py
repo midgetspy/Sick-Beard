@@ -10,12 +10,12 @@ Author: Victor Stinner
 Creation date: 2007-09-03
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet,
     Bits, Int32, UInt16, UInt32,
     NullBytes, RawBytes, PaddingBytes, String)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import (textHandler, hexadecimal,
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import (textHandler, hexadecimal,
     displayHandler, humanFilesize)
 
 class FileEntry(FieldSet):

@@ -11,14 +11,14 @@ Creation: 25 march 2005
 
 DISASSEMBLE = False
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, UInt8,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, UInt8,
     UInt16, Int32, UInt32, Int64, ParserError, Float64, Enum,
     Character, Bytes, RawBytes, PascalString8, TimestampUnix32)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.bits import long2raw
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_core.i18n import ngettext
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.bits import long2raw
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.i18n import ngettext
 if DISASSEMBLE:
     from dis import dis
 

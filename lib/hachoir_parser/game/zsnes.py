@@ -5,11 +5,11 @@ Author: Jason Gorski
 Creation date: 2006-09-15
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, StaticFieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, StaticFieldSet,
     UInt8, UInt16, UInt32,
     String, PaddingBytes, Bytes, RawBytes)
-from hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.endian import LITTLE_ENDIAN
 
 class ZSTHeader(StaticFieldSet):
     format = (

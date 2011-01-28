@@ -1,8 +1,8 @@
-from hachoir_core.field import Field, BasicFieldSet, FakeArray, MissingField, ParserError
-from hachoir_core.tools import makeUnicode
-from hachoir_core.error import HACHOIR_ERRORS
+from lib.hachoir_core.field import Field, BasicFieldSet, FakeArray, MissingField, ParserError
+from lib.hachoir_core.tools import makeUnicode
+from lib.hachoir_core.error import HACHOIR_ERRORS
 from itertools import repeat
-import hachoir_core.config as config
+import lib.hachoir_core.config as config
 
 class RootSeekableFieldSet(BasicFieldSet):
     def __init__(self, parent, name, stream, description, size):

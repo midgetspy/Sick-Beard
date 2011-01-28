@@ -5,15 +5,15 @@ Author: Victor Stinner
 Creation: 27 december 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet,
     UInt16, UInt32, Float80, TimestampMac32,
     RawBytes, NullBytes,
     String, Enum, PascalString32)
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.text_handler import filesizeHandler
-from hachoir_core.tools import alignValue
-from hachoir_parser.audio.id3 import ID3v2
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.text_handler import filesizeHandler
+from lib.hachoir_core.tools import alignValue
+from lib.hachoir_parser.audio.id3 import ID3v2
 
 CODEC_NAME = {
     'ACE2': u"ACE 2-to-1",

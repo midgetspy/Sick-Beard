@@ -4,14 +4,14 @@ EXIF metadata parser (can be found in a JPEG picture for example)
 Author: Victor Stinner
 """
 
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt8, UInt16, UInt32,
     Int32, Enum, String,
     Bytes, SubFile,
     NullBytes, createPaddingField)
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN, NETWORK_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_core.tools import createDict
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN, NETWORK_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.tools import createDict
 
 MAX_COUNT = 1000
 

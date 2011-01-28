@@ -1,8 +1,8 @@
-import hachoir_core.config as config
-from hachoir_core.field import Parser as GenericParser
-from hachoir_core.error import HACHOIR_ERRORS, HachoirError, error
-from hachoir_core.tools import makeUnicode
-from hachoir_core.i18n import _
+import lib.hachoir_core.config as config
+from lib.hachoir_core.field import Parser as GenericParser
+from lib.hachoir_core.error import HACHOIR_ERRORS, HachoirError, error
+from lib.hachoir_core.tools import makeUnicode
+from lib.hachoir_core.i18n import _
 from inspect import getmro
 
 

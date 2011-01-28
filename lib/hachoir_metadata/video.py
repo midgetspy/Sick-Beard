@@ -1,14 +1,14 @@
-from hachoir_core.field import MissingField
-from hachoir_metadata.metadata import (registerExtractor,
+from lib.hachoir_core.field import MissingField
+from lib.hachoir_metadata.metadata import (registerExtractor,
     Metadata, RootMetadata, MultipleMetadata)
-from hachoir_metadata.metadata_item import QUALITY_GOOD
-from hachoir_metadata.safe import fault_tolerant
-from hachoir_parser.video import MovFile, AsfFile, FlvFile
-from hachoir_parser.video.asf import Descriptor as ASF_Descriptor
-from hachoir_parser.container import MkvFile
-from hachoir_parser.container.mkv import dateToDatetime
-from hachoir_core.i18n import _
-from hachoir_core.tools import makeUnicode, makePrintable, timedelta2seconds
+from lib.hachoir_metadata.metadata_item import QUALITY_GOOD
+from lib.hachoir_metadata.safe import fault_tolerant
+from lib.hachoir_parser.video import MovFile, AsfFile, FlvFile
+from lib.hachoir_parser.video.asf import Descriptor as ASF_Descriptor
+from lib.hachoir_parser.container import MkvFile
+from lib.hachoir_parser.container.mkv import dateToDatetime
+from lib.hachoir_core.i18n import _
+from lib.hachoir_core.tools import makeUnicode, makePrintable, timedelta2seconds
 from datetime import timedelta
 
 class MkvMetadata(MultipleMetadata):

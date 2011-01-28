@@ -14,8 +14,8 @@ WARNING: Loading this module indirectly calls initLocale() which sets
          settings.
 """
 
-import hachoir_core.config as config
-import hachoir_core
+import lib.hachoir_core.config as config
+import lib.hachoir_core
 import locale
 from os import path
 import sys
