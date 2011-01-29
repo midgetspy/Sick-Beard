@@ -198,7 +198,7 @@ class HachoirParserList(ParserList):
             return self.parser_list
 
         todo = []
-        module = __import__("hachoir_parser")
+        module = __import__("lib.hachoir_parser")
         for attrname in dir(module):
             attr = getattr(module, attrname)
             if isinstance(attr, types.ModuleType):
