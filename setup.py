@@ -101,6 +101,7 @@ data_files = find_data_files('', '', [
     'data/images/*',
     'data/images/providers/*',
     'data/images/tablesorter/*',
+    'data/images/menu/*',
     'data/js/*',
     'data/interfaces/*',
     'data/interfaces/default/*',
