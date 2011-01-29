@@ -46,10 +46,14 @@ class ImageCache:
         return ek.ek(os.path.join, self._cache_dir(), banner_file_name)
 
     def has_poster(self, tvdb_id):
-        return ek.ek(os.path.isfile, self.poster_path(tvdb_id))
+        poster_path = self.poster_path(tvdb_id)
+        logger.log(u"Checking if file "+str(poster_path)+" exists", logger.DEBUG)
+        return ek.ek(os.path.isfile, poster_path)
 
     def has_banner(self, tvdb_id):
-        return ek.ek(os.path.isfile, self.banner_path(tvdb_id))
+        banner_path = self.banner_path(tvdb_id)
+        logger.log(u"Checking if file "+str(banner_path)+" exists", logger.DEBUG)
+        return ek.ek(os.path.isfile, banner_path)
 
     BANNER = 1
     POSTER = 2
@@ -117,6 +121,7 @@ class ImageCache:
                        }
 
         if not need_images[self.POSTER] and not need_images[self.BANNER]:
+            logger.log(u"No new cache images needed, not retrieving new ones")
             return
         
         # check the show dir for images and use them
