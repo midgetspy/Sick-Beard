@@ -100,7 +100,7 @@ class TVDBWebUI:
         redirect("/home/addShows/addShow?" + showDirList + "seriesList=" + searchList)
 
 def _munge(string):
-    return unicode(string).encode('ascii', 'xmlcharrefreplace')
+    return unicode(string).encode('utf-8', 'xmlcharrefreplace')
 
 def _genericMessage(subject, message):
     t = PageTemplate(file="genericMessage.tmpl")
