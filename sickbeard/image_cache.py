@@ -114,11 +114,17 @@ class ImageCache:
     def fill_cache(self, show_obj):
 
         logger.log(u"Checking if we need any cache images for show "+str(show_obj.tvdbid), logger.DEBUG)
+
+        has_poster = self.has_poster(show_obj.tvdbid)
+        has_banner = self.has_banner(show_obj.tvdbid)
+        logger.log(u"has_poster: "+str(has_poster)+", has_banner: "+str(has_banner), logger.DEBUG)
         
         # check if the images are already cached or not
-        need_images = {self.POSTER: not self.has_poster(show_obj.tvdbid),
-                       self.BANNER: not self.has_banner(show_obj.tvdbid),
+        need_images = {self.POSTER: not has_poster,
+                       self.BANNER: not has_banner,
                        }
+        
+        logger.log(u"need_images: "+str(need_images), logger.DEBUG)
 
         if not need_images[self.POSTER] and not need_images[self.BANNER]:
             logger.log(u"No new cache images needed, not retrieving new ones")
@@ -127,6 +133,7 @@ class ImageCache:
         # check the show dir for images and use them
         try:
             for cur_provider in sickbeard.metadata_provider_dict.values():
+                logger.log(u"Checking if we can use the show image from the "+cur_provider.name+" metadata", logger.DEBUG)
                 if ek.ek(os.path.isfile, cur_provider.get_poster_path(show_obj)):
                     cur_file_name = os.path.abspath(cur_provider.get_poster_path(show_obj))
                     cur_file_type = self.which_type(cur_file_name)
@@ -146,3 +153,5 @@ class ImageCache:
             if cur_image_type in need_images and need_images[cur_image_type]:
                 self._cache_image_from_tvdb(show_obj, cur_image_type)
         
+
+        logger.log(u"Done cache check")
