@@ -1,5 +1,5 @@
 #import sickbeard
-#import datetime
+#import datetime, locale
 #from sickbeard import db
 #from sickbeard.common import *
 </div>
@@ -14,7 +14,7 @@
 <br />
 <b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> |
 <!--<b>Update</b>: <a%a=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%> | -->
-<b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d") <br />
+<b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d").decode(locale.getpreferredencoding()) <br />
 </div>
 </body>
 </html>
