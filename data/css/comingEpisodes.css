@@ -62,7 +62,7 @@ div#insideContent {
     border-top: 1px solid #ccc; 
     border-right: 1px solid #ccc;
 }
-.tvshowDiv a.posterThumb {
+.tvshowDiv a.posterThumb img {
     height: 200px;
     width: 136px;
 }
@@ -75,7 +75,7 @@ div#insideContent {
     width: 606px;
     /* margin-bottom: 1px; */
 }
-.tvshowDiv a.bannerThumb {
+.tvshowDiv a.bannerThumb img {
     height: 112px;
     width: 606px;
 }
