@@ -18,6 +18,7 @@
 
 import os.path
 import sys
+import traceback
 
 import sickbeard
 
@@ -60,9 +61,15 @@ class ImageCache:
     
     def which_type(self, path):
         if not ek.ek(os.path.isfile, path):
+            logger.log(u"Couldn't check the type of "+str(path)+" cause it doesn't exist", logger.WARNING)
             return None
         img_parser = createParser(path)
         img_metadata = extractMetadata(img_parser)
+
+        if not img_metadata:
+            logger.log(u"Unable to get metadata from "+str(path)+", not using your existing image", logger.DEBUG)
+            return None
+        
         img_ratio = float(img_metadata.get('width'))/float(img_metadata.get('height'))
 
         img_parser.stream._input.close()
@@ -115,17 +122,11 @@ class ImageCache:
 
         logger.log(u"Checking if we need any cache images for show "+str(show_obj.tvdbid), logger.DEBUG)
 
-        has_poster = self.has_poster(show_obj.tvdbid)
-        has_banner = self.has_banner(show_obj.tvdbid)
-        logger.log(u"has_poster: "+str(has_poster)+", has_banner: "+str(has_banner), logger.DEBUG)
-        
         # check if the images are already cached or not
-        need_images = {self.POSTER: not has_poster,
-                       self.BANNER: not has_banner,
+        need_images = {self.POSTER: not self.has_poster(show_obj.tvdbid),
+                       self.BANNER: not self.has_banner(show_obj.tvdbid),
                        }
         
-        logger.log(u"need_images: "+str(need_images), logger.DEBUG)
-
         if not need_images[self.POSTER] and not need_images[self.BANNER]:
             logger.log(u"No new cache images needed, not retrieving new ones")
             return
@@ -138,6 +139,10 @@ class ImageCache:
                     cur_file_name = os.path.abspath(cur_provider.get_poster_path(show_obj))
                     cur_file_type = self.which_type(cur_file_name)
                     
+                    if cur_file_type == None:
+                        logger.log(u"Unable to retrieve image type, not using the image from "+str(cur_file_name), logger.WARNING)
+                        continue
+
                     logger.log(u"Checking if image "+cur_file_name+" (type "+str(cur_file_type)+" needs metadata: "+str(need_images[cur_file_type]), logger.DEBUG)
                     
                     if cur_file_type in need_images and need_images[cur_file_type]:
