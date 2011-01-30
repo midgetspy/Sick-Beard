@@ -56,23 +56,24 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.json-2.2.min.js"></script>
-    <script type="text/javascript" charset="utf-8">
-    top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; //HTML for control, which is auto wrapped in DIV w/ ID="topcontrol"
-    </script>
-    <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.selectboxes.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.0.3.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/tools.tooltip-1.2.5.min.js"></script>
     <script type="text/javascript" charset="utf-8">
+        //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
+        top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; 
+        
         $.Browser = {
-        defaults: {
-            title:             'Choose Directory',
-            url:               '$sbRoot/browser/',
-            autocompleteURL:   '$sbRoot/browser/complete'
-        }
-    };
+            defaults: {
+                title:             'Choose Directory',
+                url:               '$sbRoot/browser/',
+                autocompleteURL:   '$sbRoot/browser/complete'
+            }
+        };
     </script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
+    
 <script type="text/javascript"> 
     \$(document).ready(function(){ 
         \$("ul.sf-menu").supersubs({ 
@@ -106,8 +107,30 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
             \$("<img>").attr("src", rollON);
         });
 
-        \$("#NAV$topmenu").addClass('current');
-    }); 
+        \$("#NAV$topmenu").addClass("current");
+
+        \$("a.confirm").bind("click",function() {
+            var target = \$( this ).attr('href');
+            \$("<div> <p><span class=\"ui-icon ui-icon-alert\" style=\"float:left; margin:1px 7px 1px 0;\"></span>Are you sure?</p> </div>").dialog({
+                autoOpen: true,
+                modal: true,
+                resizable: false,
+                minHeight: 165,
+                title: "Confirm Action",
+                buttons: {
+                    "Proceed": function() {
+                        \$( this ).dialog( "close" );
+                        location.href = target;
+                    },
+                    Cancel: function() {
+                        \$( this ).dialog( "close" );
+                    }
+                }
+            });
+        return false;
+        });
+
+    });
 </script>
 </head>
 
@@ -129,8 +152,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
             <li id="NAVsystem" class="first"><a href="#" class="navIcon"><img src="$sbRoot/images/menu/system16.png" alt="" width="16" height="16" /></a>
                 <ul>
                         <li><a href="$sbRoot/manage/manageSearches/forceVersionCheck"><img src="$sbRoot/images/menu/update16.png" alt="" width="16" height="16" />Force Version Check</a></li>
-                        <li><a href="$sbRoot/home/restart/?pid=$sbPID"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
-                        <li><a href="$sbRoot/home/shutdown/"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
+                        <li><a href="$sbRoot/home/restart/?pid=$sbPID" class="confirm"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
+                        <li><a href="$sbRoot/home/shutdown/" class="confirm"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
                 </ul>
             </li>
             <li id="NAVhome"><a href="$sbRoot/home">Home</a>
