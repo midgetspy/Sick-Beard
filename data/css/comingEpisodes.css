@@ -53,7 +53,6 @@ div#insideContent {
 }
 
 .tvshowDiv a.posterThumb {
-    /* display:table-cell; */
     display: block;
     background: url(../images/poster.png) 50% 50%;
     vertical-align: top;
@@ -62,14 +61,20 @@ div#insideContent {
     border-top: 1px solid #ccc; 
     border-right: 1px solid #ccc;
 }
+.tvshowDiv a.posterThumb img {
+	width: 136px;
+	height: 200px;
+}
 .tvshowDiv a.bannerThumb {
-    /* display:table-cell; */
     display: block;
     background: url(../images/banner.png) 50% 50%;
     vertical-align: top;
-    height: 112px;
     width: 606px;
-    /* margin-bottom: 1px; */
+    height: 112px;
+}
+.tvshowDiv a.bannerThumb img {
+	width: 606px;
+	height: 112px;
 }
 
 .tvshowDiv th {
