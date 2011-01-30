@@ -41,7 +41,7 @@ class ProwlNotifier:
         logger.log(u"Prowl api: " + prowl_api, logger.DEBUG)
         logger.log(u"Prowl priority: " + prowl_priority, logger.DEBUG)
         
-        http_handler = HTTPSConnection("prowl.weks.net")
+        http_handler = HTTPSConnection("prowlapp.com")
                                                 
         data = {'apikey': prowl_api,
                 'application': title,
