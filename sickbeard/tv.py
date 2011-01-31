@@ -1270,8 +1270,8 @@ class TVEpisode(object):
 
         raise exceptions.EpisodeDeletedException()
 
-    def saveToDB(self):
-        if not self.dirty:
+    def saveToDB(self, forceSave=False):
+        if not self.dirty and not forceSave:
             logger.log(str(self.show.tvdbid) + ": Not saving episode to db - record is not dirty", logger.DEBUG)
             return
 
