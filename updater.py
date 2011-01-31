@@ -19,15 +19,15 @@ def isProcRunning(pid):
     p = subprocess.Popen(tasklist_cmd, stdout=subprocess.PIPE)
     out, err = p.communicate()
 
-    for line in out.split('\n'):
-        # Win 7
-        if 'INFO: No tasks are running which match the specified criteria.' in line:
-            return False
-        # Win XP
-        elif 'INFO: No tasks running with the specified criteria.' in line:
-            return False
+    results = out.split('\r\n')
+    
+    regex = '".*\\.exe","'+str(pid)+'",("[^"]*",?){3}'
 
-    return True
+    for cur_line in results:
+        if re.match(regex, cur_line, re.I):
+            return True
+    
+    return False
 
 if len(sys.argv) < 3:
     log("Invalid call.")
@@ -85,12 +85,12 @@ try:
         if os.path.isdir(sb_update_dir):
             shutil.rmtree(sb_update_dir)
     
-    if log_file:
-        log_file.close()                        
-    
     # re-launch SB
     p = subprocess.Popen(sb_executable, cwd=os.getcwd())
 
 except Exception, e:
     log("Exception while updating: "+str(e))
     raise
+
+if log_file:
+    log_file.close()                        
