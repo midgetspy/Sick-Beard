@@ -116,7 +116,7 @@ font-weight:700;
 }
 
 .h2footer {
-margin-top:-32px;
+margin-top:-33px;
 margin-right:5px;
 }
 .h2footer span {
@@ -136,6 +136,7 @@ border:1px solid #d4d0c8;
 div select option {
 line-height:1.4;
 padding:0 10px;
+border-bottom: 1px dotted #D7D7D7;
 }
 
 /* --------------- alignment ------------------- */

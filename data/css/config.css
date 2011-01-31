@@ -24,7 +24,7 @@
 #config label span.component-title{font-size:1.2em;font-weight:700;float:left;width:160px;margin-right:10px;}
 #config label span.component-desc{font-size:1.1em;}
 #config div.field-pair select{font-size:1.1em;border:1px solid #d4d0c8;}
-#config div.field-pair select option{line-height:1.4;padding:0 10px;}
+#config div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
 #config-settings{float:right;width:200px;background:#fffae5;border-bottom:1px dotted #666;border-top:1px solid #999;margin-right:20px;padding:20px 0 30px;}
 #config-settings .config-settings-group{border-bottom:1px dotted #999;padding-bottom:15px;margin:0 15px 15px;}
 #config-settings .config-settings-group h2{margin-bottom:0;}
