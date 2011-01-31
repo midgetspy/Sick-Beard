@@ -6,7 +6,6 @@ background-color:#fff;
 color:#000;
 font-family:'Verdana', 'Helvetica', 'Sans-serif', 'sans';
 font-size:12px;
-line-height:18px;
 margin:0;
 padding:0;
 }
@@ -297,7 +296,6 @@ margin:10px;
 #MainMenu {
 background-color:#57442B;
 color:#F5F5F5;
-line-height:1;
 /*margin-bottom:1em;*/
 width:100%;
 border-bottom: 1px solid #333;
