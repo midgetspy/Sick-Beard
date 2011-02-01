@@ -91,7 +91,7 @@
 #end if
         sortList = [[$sort_codes[$sort],0]]; 
 
-    \$("#showListTable").tablesorter({
+    \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: sortList,
         headers: {
             0: { sorter: false},
