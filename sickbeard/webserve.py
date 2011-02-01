@@ -735,10 +735,13 @@ class ConfigEpisodeDownloads:
         sickbeard.SAB_APIKEY = sab_apikey.strip()
         sickbeard.SAB_CATEGORY = sab_category
 
-        if sab_host.startswith('http://'):
-            sickbeard.SAB_HOST = sab_host[7:].rstrip('/')
-        else:
-            sickbeard.SAB_HOST = sab_host
+        if sab_host and not re.match('https?://.*', sab_host):
+            sab_host = 'http://' + sab_host
+
+        if not sab_host.endswith('/'):
+            sab_host = sab_host + '/'
+
+        sickbeard.SAB_HOST = sab_host
 
         sickbeard.save_config()
 
