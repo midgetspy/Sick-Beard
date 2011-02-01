@@ -1048,7 +1048,7 @@ def haveXBMC():
 
 def HomeMenu():
     return [
-    { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
+    { 'title': 'Add Shows',              'path': 'home/addShows/',                          },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
     { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
@@ -1061,7 +1061,7 @@ class HomePostProcess:
     def index(self):
 
         t = PageTemplate(file="home_postprocess.tmpl")
-        #t.submenu = HomeMenu()
+        t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1084,7 +1084,7 @@ class NewHomeAddShows:
     def index(self):
 
         t = PageTemplate(file="home_addShows.tmpl")
-        #t.submenu = HomeMenu()
+        t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1178,7 +1178,7 @@ class NewHomeAddShows:
             redirect("/home")
 
         t = PageTemplate(file="home_addShow.tmpl")
-        #t.submenu = HomeMenu()
+        t.submenu = HomeMenu()
 
         # make sure everything's unescaped
         showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
