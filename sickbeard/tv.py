@@ -221,10 +221,22 @@ class TVShow(object):
 
         scannedEps = {}
 
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+	if self.lang:
+	    ltvdb_api_parms['language'] = self.lang
+
+        t = tvdb_api.Tvdb(**ltvdb_api_parms)
+
+        cachedShow = t[self.tvdbid]
+        cachedSeasons = {}
+
         for curResult in sqlResults:
 
             curSeason = int(curResult["season"])
             curEpisode = int(curResult["episode"])
+            if curSeason not in cachedSeasons:
+                cachedSeasons[curSeason] = cachedShow[curSeason]
 
             if not curSeason in scannedEps:
                 scannedEps[curSeason] = {}
@@ -234,7 +246,7 @@ class TVShow(object):
             try:
                 curEp = self.getEpisode(curSeason, curEpisode)
                 curEp.loadFromDB(curSeason, curEpisode)
-                curEp.loadFromTVDB()
+                curEp.loadFromTVDB(tvapi=t, cachedSeason=cachedSeasons[curSeason])
                 scannedEps[curSeason][curEpisode] = True
             except exceptions.EpisodeDeletedException:
                 logger.log(u"Tried loading an episode from the DB that should have been deleted, skipping it", logger.DEBUG)
@@ -252,7 +264,7 @@ class TVShow(object):
         if not cache:
             ltvdb_api_parms['cache'] = 'recache'
 
-	if not (self.lang == "" or self.lang == "en" or self.lang == None):
+	if self.lang:
 	    ltvdb_api_parms['language'] = self.lang
 
         try:
@@ -280,15 +292,16 @@ class TVShow(object):
                     continue
                 else:
                     try:
-                        ep.loadFromTVDB()
+                        ep.loadFromTVDB(tvapi=t)
                     except exceptions.EpisodeDeletedException:
                         logger.log(u"The episode was deleted, skipping the rest of the load")
                         continue
 
                 with ep.lock:
                     logger.log(str(self.tvdbid) + ": Loading info from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
-                    ep.loadFromTVDB(season, episode)
-                    ep.saveToDB()
+                    ep.loadFromTVDB(season, episode, tvapi=t)
+                    if ep.dirty:
+                        ep.saveToDB()
 
                 scannedEps[season][episode] = True
 
@@ -373,7 +386,7 @@ class TVShow(object):
 		# change the cache value elsewhere
 		ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-		if not (self.lang == "" or self.lang == "en" or self.lang == None):
+		if self.lang:
 		    ltvdb_api_parms['language'] = self.lang
 
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
@@ -512,21 +525,26 @@ class TVShow(object):
 	    if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
-    def loadFromTVDB(self, cache=True):
+
+    def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + ": Loading show info from theTVDB")
 
         # There's gotta be a better way of doing this but we don't wanna
         # change the cache value elsewhere
-        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+        if tvapi is None:
+            ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-        if not cache:
-            ltvdb_api_parms['cache'] = 'recache'
+            if not cache:
+                ltvdb_api_parms['cache'] = 'recache'
+	    
+	    if self.lang:
+		ltvdb_api_parms['language'] = self.lang
 
-	if not (self.lang == "" or self.lang == "en" or self.lang == None):
-	    ltvdb_api_parms['language'] = self.lang
+            t = tvdb_api.Tvdb(**ltvdb_api_parms)
+        else:
+            t = tvapi
 
-        t = tvdb_api.Tvdb(**ltvdb_api_parms)
         myEp = t[self.tvdbid]
 
         self.name = myEp["seriesname"]
@@ -892,21 +910,29 @@ class TVShow(object):
             else:
                 return Overview.GOOD
 
+def dirty_setter(attr_name):
+    def wrapper(self, val):
+        if getattr(self, attr_name) != val:
+            setattr(self, attr_name, val)
+            self.dirty = True
+    return wrapper
 
-class TVEpisode:
+class TVEpisode(object):
 
     def __init__(self, show, season, episode, file=""):
 
-        self.name = ""
-        self.season = season
-        self.episode = episode
-        self.description = ""
-        self.airdate = datetime.date.fromordinal(1)
-        self.hasnfo = False
-        self.hastbn = False
-        self.status = UNKNOWN
+        self._name = ""
+        self._season = season
+        self._episode = episode
+        self._description = ""
+        self._airdate = datetime.date.fromordinal(1)
+        self._hasnfo = False
+        self._hastbn = False
+        self._status = UNKNOWN
+        self._tvdbid = 0
 
-        self.tvdbid = 0
+        # setting any of the above sets the dirty flag
+        self.dirty = True
 
         self.show = show
         self.location = file
@@ -918,6 +944,16 @@ class TVEpisode:
         self.relatedEps = []
 
         self.checkForMetaFiles()
+
+    name = property(lambda self: self._name, dirty_setter("_name"))
+    season = property(lambda self: self._season, dirty_setter("_season"))
+    episode = property(lambda self: self._episode, dirty_setter("_episode"))
+    description = property(lambda self: self._description, dirty_setter("_description"))
+    airdate = property(lambda self: self._airdate, dirty_setter("_airdate"))
+    hasnfo = property(lambda self: self._hasnfo, dirty_setter("_hasnfo"))
+    hastbn = property(lambda self: self._hastbn, dirty_setter("_hastbn"))
+    status = property(lambda self: self._status, dirty_setter("_status"))
+    tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
 
     def checkForMetaFiles(self):
 
@@ -970,8 +1006,10 @@ class TVEpisode:
             # if we failed TVDB, NFO *and* SQL then fail
             if result == False and not sqlResult:
                 raise exceptions.EpisodeNotFoundException("Couldn't find episode " + str(season) + "x" + str(episode))
-
-        self.saveToDB()
+        
+        # don't update if not needed
+        if self.dirty:
+            self.saveToDB()
 
 
     def loadFromDB(self, season, episode):
@@ -1005,10 +1043,11 @@ class TVEpisode:
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
 
+            self.dirty = False
             return True
 
 
-    def loadFromTVDB(self, season=None, episode=None, cache=True):
+    def loadFromTVDB(self, season=None, episode=None, cache=True, tvapi=None, cachedSeason=None):
 
         if season == None:
             season = self.season
@@ -1017,20 +1056,29 @@ class TVEpisode:
 
         logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
-        # There's gotta be a better way of doing this but we don't wanna
-        # change the cache value elsewhere
-        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-
-        if not cache:
-            ltvdb_api_parms['cache'] = 'recache'
-
 	tvdb_lang = self.show.lang
 
-	if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-	    ltvdb_api_parms['language'] = tvdb_lang
+        try:
+            if cachedSeason is None:
+                if tvapi is None:
+                    # There's gotta be a better way of doing this but we don't wanna
+                    # change the cache value elsewhere
+                    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+                    if not cache:
+                        ltvdb_api_parms['cache'] = 'recache'
+
+		    if tvdb_lang:
+		    	ltvdb_api_parms['language'] = tvdb_lang
+
+                    t = tvdb_api.Tvdb(**ltvdb_api_parms)
+                else:
+                    t = tvapi
+                myEp = t[self.show.tvdbid][season][episode]
+            else:
+                myEp = cachedSeason[episode]
 
         try:
-            t = tvdb_api.Tvdb(**ltvdb_api_parms)
             myEp = t[self.show.tvdbid][season][episode]
         except (tvdb_exceptions.tvdb_error, IOError), e:
             logger.log(u"TVDB threw up an error: "+str(e).decode('utf-8'), logger.DEBUG)
@@ -1063,9 +1111,11 @@ class TVEpisode:
         self.name = myEp["episodename"]
         self.season = season
         self.episode = episode
-        self.description = myEp["overview"]
-        if self.description == None:
+        tmp_description = myEp["overview"]
+        if tmp_description == None:
             self.description = ""
+        else:
+            self.description = tmp_description
         rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
         try:
             self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
@@ -1075,9 +1125,10 @@ class TVEpisode:
             if self.tvdbid != -1:
                 self.deleteEpisode()
             return False
-
-        self.tvdbid = myEp["id"]
-
+        
+        #early conversion to int so that episode doesn't get marked dirty
+        self.tvdbid = int(myEp["id"])
+        
         if not os.path.isdir(self.show._location):
             logger.log(u"The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
@@ -1193,9 +1244,9 @@ class TVEpisode:
     def __str__ (self):
 
         toReturn = ""
-        toReturn += self.show.name + " - " + str(self.season) + "x" + str(self.episode) + " - " + self.name + "\n"
-        toReturn += "location: " + self.location + "\n"
-        toReturn += "description: " + self.description + "\n"
+        toReturn += str(self.show.name) + " - " + str(self.season) + "x" + str(self.episode) + " - " + str(self.name) + "\n"
+        toReturn += "location: " + str(self.location) + "\n"
+        toReturn += "description: " + str(self.description) + "\n"
         toReturn += "airdate: " + str(self.airdate.toordinal()) + " (" + str(self.airdate) + ")\n"
         toReturn += "hasnfo: " + str(self.hasnfo) + "\n"
         toReturn += "hastbn: " + str(self.hastbn) + "\n"
@@ -1252,7 +1303,10 @@ class TVEpisode:
 
         raise exceptions.EpisodeDeletedException()
 
-    def saveToDB(self):
+    def saveToDB(self, forceSave=False):
+        if not self.dirty and not forceSave:
+            logger.log(str(self.show.tvdbid) + ": Not saving episode to db - record is not dirty", logger.DEBUG)
+            return
 
         logger.log(str(self.show.tvdbid) + ": Saving episode details to database", logger.DEBUG)
 

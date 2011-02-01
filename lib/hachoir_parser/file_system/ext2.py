@@ -10,14 +10,14 @@ Sources:
   http://www.nondot.org/sabre/os/files/FileSystems/ext2fs/
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     Bit, Bits, UInt8, UInt16, UInt32,
     Enum, String, TimestampUnix32, RawBytes, NullBytes)
-from hachoir_core.tools import (alignValue,
+from lib.hachoir_core.tools import (alignValue,
     humanDuration, humanFilesize)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import textHandler
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import textHandler
 from itertools import izip
 
 class DirectoryEntry(FieldSet):

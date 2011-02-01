@@ -140,10 +140,11 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
                (e(p(isode)?)?|part|pt)[. _-]?              # e, ep, episode, or part
-               (?P<ep_num>(\d+|[ivx]+))                    # first ep num
+               (?P<ep_num>(\d+|([ivx]+(?=[. _-]))))                    # first ep num
                ([. _-]+((and|&|to)[. _-]+)?                # and/&/to joiner
                ((e(p(isode)?)?|part|pt)[. _-]?)           # e, ep, episode, or part
-               (?P<extra_ep_num>(?!(1080|720)[pi])(\d+|[ivx]+))[. _-])*            # second ep num
+               (?P<extra_ep_num>(?!(1080|720)[pi])
+               (\d+|([ivx]+(?=[. _-]))))[. _-])*            # second ep num
                ([. _-]*(?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
                '''
@@ -165,7 +166,7 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
                (?P<ep_num>\d{2})                           # 02
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
+               [. _-]+((?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
                '''
                ),

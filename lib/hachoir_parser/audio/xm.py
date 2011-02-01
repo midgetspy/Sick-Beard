@@ -13,15 +13,15 @@ Author: Christophe GISQUET <christophe.gisquet@free.fr>
 Creation: 8th February 2007
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (StaticFieldSet, FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (StaticFieldSet, FieldSet,
     Bit, RawBits, Bits,
     UInt32, UInt16, UInt8, Int8, Enum,
     RawBytes, String, GenericVector)
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
-from hachoir_core.text_handler import textHandler, filesizeHandler, hexadecimal
-from hachoir_parser.audio.modplug import ParseModplugMetadata
-from hachoir_parser.common.tracker import NOTE_NAME
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, filesizeHandler, hexadecimal
+from lib.hachoir_parser.audio.modplug import ParseModplugMetadata
+from lib.hachoir_parser.common.tracker import NOTE_NAME
 
 def parseSigned(val):
     return "%i" % (val.value-128)

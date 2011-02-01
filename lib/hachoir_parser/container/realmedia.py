@@ -13,12 +13,12 @@ Samples:
 - http://samples.mplayerhq.hu/real/
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet,
     UInt16, UInt32, Bit, RawBits,
     RawBytes, String, PascalString8, PascalString16)
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.endian import BIG_ENDIAN
 
 def parseHeader(self):
     yield UInt32(self, "filever", "File version")

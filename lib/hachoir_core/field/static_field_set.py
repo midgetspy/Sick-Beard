@@ -1,4 +1,4 @@
-from hachoir_core.field import FieldSet, ParserError
+from lib.hachoir_core.field import FieldSet, ParserError
 
 class StaticFieldSet(FieldSet):
     """

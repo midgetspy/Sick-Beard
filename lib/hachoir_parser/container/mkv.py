@@ -4,18 +4,18 @@
 # Created: 8 june 2006
 #
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, Link,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, Link,
     MissingField, ParserError,
     Enum as _Enum, String as _String,
     Float32, Float64,
     NullBits, Bits, Bit, RawBytes, Bytes,
     Int16, GenericInteger)
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.iso639 import ISO639_2
-from hachoir_core.tools import humanDatetime
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_parser.container.ogg import XiphInt
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.iso639 import ISO639_2
+from lib.hachoir_core.tools import humanDatetime
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_parser.container.ogg import XiphInt
 from datetime import datetime, timedelta
 
 class RawInt(GenericInteger):

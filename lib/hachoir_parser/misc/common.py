@@ -1,4 +1,4 @@
-from hachoir_core.field import StaticFieldSet, Float32
+from lib.hachoir_core.field import StaticFieldSet, Float32
 
 class Vertex(StaticFieldSet):
     format = ((Float32, "x"), (Float32, "y"), (Float32, "z"))

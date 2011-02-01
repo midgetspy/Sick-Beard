@@ -5,11 +5,11 @@ Author: Sebastien Ponce
 Creation date: 29 october 2008
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet,
     UInt16, UInt32, TimestampMac32,
     String, RawBytes)
-from hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.endian import BIG_ENDIAN
 
 class PRCHeader(FieldSet):
     static_size = 78*8

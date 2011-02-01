@@ -1,5 +1,5 @@
 #import sickbeard
-#import datetime
+#import datetime, locale
 #from sickbeard.common import *
 #set global $title="Coming Episodes"
 
@@ -137,11 +137,12 @@
             #end if
 
     <!-- start $cur_result["show_name"] -->
-      <tr class="$show_div">
-        <td align="left"><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %>
+      <tr class="$show_div"><div>
+        <td align="left"><span class="float-left"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></span>
         #if $cur_result["description"] != "" and $cur_result["description"] != None:
-        <img alt="" src="$sbRoot/images/info32.png" height="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
+        <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
         #end if
+        </div>
         </td>
         <td>$cur_result["name"]</td>
         <td align="center" nowrap="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
@@ -159,8 +160,8 @@ Custom
 #end if
         </td>
         <td align="center">$cur_result["show_status"]</td>
-        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/search32.png" /></a></td>
-        <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></td>
+        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/search32.png" /></a></td>
+        <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></td>
       </tr>
     <!-- end $cur_result["show_name"] -->
     #end for
@@ -169,6 +170,18 @@ Custom
 <!-- end list view -->
 #else:
 <!-- start non list view -->
+<script type="text/javascript" charset="utf-8">
+\$(document).ready(function(){ 
+  \$(".ep_summary").hide();
+  \$(".ep_summaryTrigger").click(function() {
+    \$(this).next(".ep_summary").slideToggle('normal', function() {
+        \$(this).prev(".ep_summaryTrigger").attr('src', function(i, src) {
+            return \$(this).next(".ep_summary").is(':visible') ? src.replace('plus','minus') : src.replace('minus','plus');
+        });
+    });
+  });
+});
+</script>
 <div id="outsideWrapper">
 <div id="insideWrapper">
   <div id="insideContent">
@@ -218,7 +231,7 @@ Custom
                     #set $show_div = "ep_listing listing_toofar"
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A")</h1>
+                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode(locale.getpreferredencoding())</h1>
                     #if $cur_ep_airdate == $today:
                         #set $show_div = "ep_listing listing_current"
                     #else:
@@ -256,13 +269,13 @@ Custom
         </tr>
         <tr>
           <td>
-            <span>
+            <img class="ep_summaryTrigger float-left" src="$sbRoot/images/plus.png" height="16" width="16" alt="" /><div class="ep_summary">
             #if $cur_result["description"] == '':
                 [There is no summary added for this episode]
             #else:
                 $cur_result["description"]
             #end if
-            </span><br/><br/>
+            </div><br/>
             <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
 #if int($cur_result["quality"]) in $qualityPresets:
 [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]

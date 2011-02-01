@@ -9,13 +9,13 @@ Author: Victor Stinner
 Creation date: 25 december 2006 (christmas ;-))
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (ParserError, GenericVector,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (ParserError, GenericVector,
     UInt32, String,
     Bytes, NullBytes, RawBytes)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.tools import humanFilesize
-from hachoir_core.bits import str2hex
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.tools import humanFilesize
+from lib.hachoir_core.bits import str2hex
 
 PAGE_SIZE = 4096
 

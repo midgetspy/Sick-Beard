@@ -1,4 +1,4 @@
-from hachoir_core.field import Field, FieldSet, ParserError
+from lib.hachoir_core.field import Field, FieldSet, ParserError
 
 class GenericVector(FieldSet):
     def __init__(self, parent, name, nb_items, item_class, item_name="item", description=None):

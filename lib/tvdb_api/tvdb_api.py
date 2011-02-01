@@ -44,7 +44,7 @@ except ImportError:
 try:
     import lib.httplib2 as httplib2
 except ImportError:
-    import httplib2 as httplib2
+    import httplib2
 
 from tvdb_ui import BaseUI, ConsoleUI
 from tvdb_exceptions import (tvdb_error, tvdb_userabort, tvdb_shownotfound,

@@ -3,13 +3,13 @@
 Author: Victor Stinner
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (StaticFieldSet, FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (StaticFieldSet, FieldSet,
     UInt16, UInt32, RawBytes, Enum, CString)
-from hachoir_parser.image.common import RGB
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_parser.misc.common import Vertex, MapUV
+from lib.hachoir_parser.image.common import RGB
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_parser.misc.common import Vertex, MapUV
 
 def readObject(parent):
     yield CString(parent, "name", "Object name")

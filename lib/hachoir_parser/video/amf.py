@@ -10,9 +10,9 @@ Author: Victor Stinner
 Creation date: 4 november 2006
 """
 
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt8, UInt16, UInt32, PascalString16, Float64)
-from hachoir_core.tools import timestampUNIX
+from lib.hachoir_core.tools import timestampUNIX
 
 def parseUTF8(parent):
     yield PascalString16(parent, "value", charset="UTF-8")

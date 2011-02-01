@@ -11,9 +11,9 @@ Sources:
 Author: Victor Stinner
 """
 
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt8, UInt16, String, RawBytes, NullBytes)
-from hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
 
 def IPTC_String(parent, name, desc=None):
     # Charset may be utf-8, ISO-8859-1, or ...

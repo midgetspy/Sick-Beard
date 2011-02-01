@@ -10,20 +10,20 @@ Author: Victor Stinner
 Creation: 5 august 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt16, UInt32, UInt64,
     TimestampWin64, TimedeltaWin64,
     String, PascalString16, Enum,
     Bit, Bits, PaddingBits,
     PaddingBytes, NullBytes, RawBytes)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import (
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import (
     displayHandler, filesizeHandler)
-from hachoir_core.tools import humanBitRate
+from lib.hachoir_core.tools import humanBitRate
 from itertools import izip
-from hachoir_parser.video.fourcc import audio_codec_name, video_fourcc_name
-from hachoir_parser.common.win32 import BitmapInfoHeader, GUID
+from lib.hachoir_parser.video.fourcc import audio_codec_name, video_fourcc_name
+from lib.hachoir_parser.common.win32 import BitmapInfoHeader, GUID
 
 MAX_HEADER_SIZE = 100 * 1024  # bytes
 

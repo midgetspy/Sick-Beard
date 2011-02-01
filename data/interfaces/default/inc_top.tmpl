@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.7.custom.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.9.custom.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
@@ -49,28 +49,31 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 </style>
 
     <script type="text/javascript" src="$sbRoot/js/jquery-1.4.4.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.7.custom.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.9.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
     <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery.hoverIntent.min-r5.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.autocomplete.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.json-2.2.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.selectboxes.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.0.3.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/tools.tooltip-1.2.5.min.js"></script>
     <script type="text/javascript" charset="utf-8">
+        //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
+        top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; 
+        
         $.Browser = {
-        defaults: {
-            title:             'Choose Directory',
-            url:               '$sbRoot/browser/',
-            autocompleteURL:   '$sbRoot/browser/complete'
-        }
-    };
+            defaults: {
+                title:             'Choose Directory',
+                url:               '$sbRoot/browser/',
+                autocompleteURL:   '$sbRoot/browser/complete'
+            }
+        };
     </script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
+    
 <script type="text/javascript"> 
     \$(document).ready(function(){ 
         \$("ul.sf-menu").supersubs({ 
@@ -79,7 +82,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
             extraWidth:  1     // extra width can ensure lines don't sometimes turn over 
                                // due to slight rounding differences and font-family 
         }).superfish({
-            pathClass:   'current',
+            delay:         150,
+            disableHI:     true, 
             animation:   {opacity:'show',height:'show'},
             speed:       'fast',
             dropShadows: false
@@ -103,8 +107,16 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
             \$("<img>").attr("src", rollON);
         });
 
-        \$("#NAV$topmenu").addClass('current');
-    }); 
+        \$("#NAV$topmenu").addClass("current");
+
+        \$("a.confirm").bind("click",function() {
+            var target = \$( this ).attr('href');
+            if (confirm("Are you sure?"))
+                location.href = target;
+            return false;
+        });
+
+    });
 </script>
 </head>
 
@@ -123,13 +135,17 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
 </div>
 <ul id="MainMenu" class="sf-menu">
-            <li class="spacer">&nbsp;</li>
+            <li id="NAVsystem" class="first"><a href="#" class="navIcon"><img src="$sbRoot/images/menu/system16.png" alt="" width="16" height="16" /></a>
+                <ul>
+                        <li><a href="$sbRoot/manage/manageSearches/forceVersionCheck"><img src="$sbRoot/images/menu/update16.png" alt="" width="16" height="16" />Force Version Check</a></li>
+                        <li><a href="$sbRoot/home/restart/?pid=$sbPID" class="confirm"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
+                        <li><a href="$sbRoot/home/shutdown/" class="confirm"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
+                </ul>
+            </li>
             <li id="NAVhome"><a href="$sbRoot/home">Home</a>
                 <ul>
                         <li><a href="$sbRoot/home/addShows/"><img src="$sbRoot/images/menu/addshow16.png" alt="" width="16" height="16" />Add Shows</a></li>
                         <li><a href="$sbRoot/home/postprocess/"><img src="$sbRoot/images/menu/postprocess16.png" alt="" width="16" height="16" />Manual Post-Processing</a></li>
-                        <li><a href="$sbRoot/home/restart/?pid=$sbPID"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
-                        <li><a href="$sbRoot/home/shutdown/"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
                 </ul>
             </li>
             <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes">Coming Episodes</a></li>
@@ -170,7 +186,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
                 #set $inner_first = False
             #end for
         #else
-            #if $first then "" else "| "#<a href="$sbRoot/$menuItem.path">$menuItem.title</a>
+            #if $first then "" else "| "#<a href="$sbRoot/$menuItem.path" #if 'confirm' in $menuItem then "class=\"confirm\"" else "" #>$menuItem.title</a>
             #set $first = False
         #end if
     #end if

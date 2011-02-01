@@ -4,15 +4,15 @@
 # Created: 10 june 2006
 #
 
-from hachoir_parser import Parser
-from hachoir_core.field import (Field, FieldSet, createOrphanField,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (Field, FieldSet, createOrphanField,
     NullBits, Bit, Bits, Enum, Fragment, MissingField, ParserError,
     UInt8, UInt16, UInt24, UInt32, UInt64,
     RawBytes, String, PascalString32, NullBytes)
-from hachoir_core.stream import FragmentedStream, InputStreamError
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
-from hachoir_core.tools import humanDurationNanosec
-from hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.stream import FragmentedStream, InputStreamError
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
+from lib.hachoir_core.tools import humanDurationNanosec
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
 
 MAX_FILESIZE = 1000 * 1024 * 1024
 

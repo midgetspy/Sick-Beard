@@ -11,15 +11,15 @@ Author: Christophe Gisquet <christophe.gisquet@free.fr>
 Creation date: 19 january 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (StaticFieldSet, FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (StaticFieldSet, FieldSet,
     Bit, Bits, NullBits, RawBytes, Enum,
     UInt8, UInt16, UInt32,
     PascalString8, PascalString16, String,
     TimeDateMSDOS32)
-from hachoir_core.text_handler import textHandler, filesizeHandler, hexadecimal
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_parser.common.msdos import MSDOSFileAttr32
+from lib.hachoir_core.text_handler import textHandler, filesizeHandler, hexadecimal
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_parser.common.msdos import MSDOSFileAttr32
 
 MAGIC = "**ACE**"
 

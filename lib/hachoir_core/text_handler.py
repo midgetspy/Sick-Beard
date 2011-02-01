@@ -2,12 +2,12 @@
 Utilities used to convert a field to human classic reprentation of data.
 """
 
-from hachoir_core.tools import (
+from lib.hachoir_core.tools import (
     humanDuration, humanFilesize, alignValue,
     durationWin64 as doDurationWin64,
     deprecated)
 from types import FunctionType, MethodType
-from hachoir_core.field import Field
+from lib.hachoir_core.field import Field
 
 def textHandler(field, handler):
     assert isinstance(handler, (FunctionType, MethodType))

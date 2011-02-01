@@ -7,18 +7,18 @@ Documents
  - Apache POI (HPSF Internals):
    http://poi.apache.org/hpsf/internals.html
 """
-from hachoir_parser import HachoirParser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import HachoirParser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     RootSeekableFieldSet, SeekableFieldSet,
     Bit, Bits, NullBits,
     UInt8, UInt16, UInt32, TimestampWin64, TimedeltaWin64, Enum,
     Bytes, RawBytes, NullBytes, String,
     Int8, Int32, Float32, Float64, PascalString32)
-from hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
-from hachoir_core.tools import createDict
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
-from hachoir_parser.common.win32 import GUID, PascalStringWin32, CODEPAGE_CHARSET
-from hachoir_parser.image.bmp import BmpHeader, parseImageData
+from lib.hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
+from lib.hachoir_core.tools import createDict
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
+from lib.hachoir_parser.common.win32 import GUID, PascalStringWin32, CODEPAGE_CHARSET
+from lib.hachoir_parser.image.bmp import BmpHeader, parseImageData
 
 MAX_SECTION_COUNT = 100
 

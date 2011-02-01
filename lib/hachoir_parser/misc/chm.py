@@ -11,15 +11,15 @@ Author: Victor Stinner
 Creation date: 2007-03-04
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (Field, FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (Field, FieldSet, ParserError,
     Int32, UInt32, UInt64,
     RawBytes, PaddingBytes,
     Enum, String)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_parser.common.win32 import GUID
-from hachoir_parser.common.win32_lang_id import LANGUAGE_ID
-from hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_parser.common.win32 import GUID
+from lib.hachoir_parser.common.win32_lang_id import LANGUAGE_ID
+from lib.hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
 
 class CWord(Field):
     """

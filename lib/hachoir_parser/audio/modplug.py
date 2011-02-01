@@ -8,11 +8,11 @@ Author: Christophe GISQUET <christophe.gisquet@free.fr>
 Creation: 10th February 2007
 """
 
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_core.field import (FieldSet,
     UInt32, UInt16, UInt8, Int8, Float32,
     RawBytes, String, GenericVector, ParserError)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
 
 MAX_ENVPOINTS = 32
 

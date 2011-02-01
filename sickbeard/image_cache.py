@@ -18,14 +18,12 @@
 
 import os.path
 import sys
+import traceback
 
 import sickbeard
 
 from sickbeard import helpers, logger, exceptions
 from sickbeard import encodingKludge as ek
-
-# this is such a hack, I really need to fix this crap
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'lib'))
 
 from sickbeard.metadata.generic import GenericMetadata
 
@@ -49,21 +47,33 @@ class ImageCache:
         return ek.ek(os.path.join, self._cache_dir(), banner_file_name)
 
     def has_poster(self, tvdb_id):
-        return ek.ek(os.path.isfile, self.poster_path(tvdb_id))
+        poster_path = self.poster_path(tvdb_id)
+        logger.log(u"Checking if file "+str(poster_path)+" exists", logger.DEBUG)
+        return ek.ek(os.path.isfile, poster_path)
 
     def has_banner(self, tvdb_id):
-        return ek.ek(os.path.isfile, self.banner_path(tvdb_id))
+        banner_path = self.banner_path(tvdb_id)
+        logger.log(u"Checking if file "+str(banner_path)+" exists", logger.DEBUG)
+        return ek.ek(os.path.isfile, banner_path)
 
     BANNER = 1
     POSTER = 2
     
     def which_type(self, path):
         if not ek.ek(os.path.isfile, path):
+            logger.log(u"Couldn't check the type of "+str(path)+" cause it doesn't exist", logger.WARNING)
             return None
         img_parser = createParser(path)
         img_metadata = extractMetadata(img_parser)
-        img_ratio = float(img_metadata.get('width'))/float(img_metadata.get('height'))
+
+        if not img_metadata:
+            logger.log(u"Unable to get metadata from "+str(path)+", not using your existing image", logger.DEBUG)
+            return None
         
+        img_ratio = float(img_metadata.get('width'))/float(img_metadata.get('height'))
+
+        img_parser.stream._input.close()
+
         if 0.55 < img_ratio < 0.8:
             return self.POSTER
         elif 5 < img_ratio < 6:
@@ -111,22 +121,28 @@ class ImageCache:
     def fill_cache(self, show_obj):
 
         logger.log(u"Checking if we need any cache images for show "+str(show_obj.tvdbid), logger.DEBUG)
-        
+
         # check if the images are already cached or not
         need_images = {self.POSTER: not self.has_poster(show_obj.tvdbid),
                        self.BANNER: not self.has_banner(show_obj.tvdbid),
                        }
-
+        
         if not need_images[self.POSTER] and not need_images[self.BANNER]:
+            logger.log(u"No new cache images needed, not retrieving new ones")
             return
         
         # check the show dir for images and use them
         try:
             for cur_provider in sickbeard.metadata_provider_dict.values():
+                logger.log(u"Checking if we can use the show image from the "+cur_provider.name+" metadata", logger.DEBUG)
                 if ek.ek(os.path.isfile, cur_provider.get_poster_path(show_obj)):
                     cur_file_name = os.path.abspath(cur_provider.get_poster_path(show_obj))
                     cur_file_type = self.which_type(cur_file_name)
                     
+                    if cur_file_type == None:
+                        logger.log(u"Unable to retrieve image type, not using the image from "+str(cur_file_name), logger.WARNING)
+                        continue
+
                     logger.log(u"Checking if image "+cur_file_name+" (type "+str(cur_file_type)+" needs metadata: "+str(need_images[cur_file_type]), logger.DEBUG)
                     
                     if cur_file_type in need_images and need_images[cur_file_type]:
@@ -142,3 +158,5 @@ class ImageCache:
             if cur_image_type in need_images and need_images[cur_image_type]:
                 self._cache_image_from_tvdb(show_obj, cur_image_type)
         
+
+        logger.log(u"Done cache check")

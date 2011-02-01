@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from hachoir_core.compatibility import any, sorted
-from hachoir_core.endian import endian_name
-from hachoir_core.tools import makePrintable, makeUnicode
-from hachoir_core.dict import Dict
-from hachoir_core.error import error, HACHOIR_ERRORS
-from hachoir_core.i18n import _
-from hachoir_core.log import Logger
-from hachoir_metadata.metadata_item import (
+from lib.hachoir_core.compatibility import any, sorted
+from lib.hachoir_core.endian import endian_name
+from lib.hachoir_core.tools import makePrintable, makeUnicode
+from lib.hachoir_core.dict import Dict
+from lib.hachoir_core.error import error, HACHOIR_ERRORS
+from lib.hachoir_core.i18n import _
+from lib.hachoir_core.log import Logger
+from lib.hachoir_metadata.metadata_item import (
     MIN_PRIORITY, MAX_PRIORITY, QUALITY_NORMAL)
-from hachoir_metadata.register import registerAllItems
+from lib.hachoir_metadata.register import registerAllItems
 
 extractors = {}
 

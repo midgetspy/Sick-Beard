@@ -211,10 +211,11 @@ class XBMCMetadata(generic.GenericMetadata):
                 logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
                 return None
 
-            if myEp["firstaired"] == None and ep_obj.season == 0:
+            if not myEp["firstaired"]:
                 myEp["firstaired"] = str(datetime.date.fromordinal(1))
 
-            if myEp["episodename"] == None or myEp["firstaired"] == None:
+            if not myEp["episodename"]:
+                logger.log(u"Not generating nfo because the ep has no title", logger.DEBUG)
                 return None
 
             logger.log(u"Creating metadata for episode "+str(ep_obj.season)+"x"+str(ep_obj.episode), logger.DEBUG)
