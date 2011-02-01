@@ -111,23 +111,9 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
         \$("a.confirm").bind("click",function() {
             var target = \$( this ).attr('href');
-            \$("<div> <p><span class=\"ui-icon ui-icon-alert\" style=\"float:left; margin:1px 7px 1px 0;\"></span>Are you sure?</p> </div>").dialog({
-                autoOpen: true,
-                modal: true,
-                resizable: false,
-                minHeight: 165,
-                title: "Confirm Action",
-                buttons: {
-                    "Proceed": function() {
-                        \$( this ).dialog( "close" );
-                        location.href = target;
-                    },
-                    Cancel: function() {
-                        \$( this ).dialog( "close" );
-                    }
-                }
-            });
-        return false;
+            if (confirm("Are you sure?"))
+                location.href = target;
+            return false;
         });
 
     });
