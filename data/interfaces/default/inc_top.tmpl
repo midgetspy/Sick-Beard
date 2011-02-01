@@ -125,7 +125,6 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     #for $curMessage in $flash.messages():
         \$.pnotify({
             pnotify_hide: true,
-            pnotify_opacity: .8,
             pnotify_title: '$curMessage[0].replace('\\','\\\\').replace('"','\\"')',
             pnotify_text: '$curMessage[1].replace('\\','\\\\').replace('"','\\"')'
         });
@@ -135,7 +134,6 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
         \$.pnotify({
             pnotify_type: 'error',
             pnotify_hide: false,
-            pnotify_opacity: .8,
             pnotify_title: '$curError[0].replace('\\','\\\\').replace('"','\\"')',
             pnotify_text: '$curError[1].replace('\\','\\\\').replace('"','\\"')'
         });
