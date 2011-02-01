@@ -1078,8 +1078,6 @@ class TVEpisode(object):
             else:
                 myEp = cachedSeason[episode]
 
-        try:
-            myEp = t[self.show.tvdbid][season][episode]
         except (tvdb_exceptions.tvdb_error, IOError), e:
             logger.log(u"TVDB threw up an error: "+str(e).decode('utf-8'), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
