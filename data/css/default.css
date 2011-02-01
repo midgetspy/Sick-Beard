@@ -325,14 +325,14 @@ background-color:#000;
 color:#fff;
 }
 #donate {
-line-height:2px;
-background: none;
+line-height:1em;
+background: #57442B;
 float: right;
 }
 #donate a,#donate a:hover {
 background-color:#57442B;
 border:0;
-padding:3px 15px 0px;
+padding:4px 15px 0px;
 }
 #content {
 padding: 10px 15px 15px;
