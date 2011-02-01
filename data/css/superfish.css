@@ -26,7 +26,7 @@ margin-left:15px;
 border-left:	1px solid #ccc;
 }
 .sf-menu .navIcon {
-    padding: 0.7em 1em 0.45em;
+    padding: 0.6em 1em 0.55em;
 }
 .sf-menu li:hover {
     visibility:		inherit; /* fixes IE7 'sticky bug' */
