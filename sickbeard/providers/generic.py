@@ -196,8 +196,6 @@ class GenericProvider:
 
             (title, url) = self._get_title_and_url(item)
 
-            quality = self.getQuality(item)
-
             # parse the file name
             try:
                 myParser = NameParser()
@@ -243,8 +241,7 @@ class GenericProvider:
 
         for item in itemList:
 
-            title = item.findtext('title')
-            url = item.findtext('link')
+            (title, url) = self._get_title_and_url(item)
 
             quality = self.getQuality(item)
 
