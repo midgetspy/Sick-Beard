@@ -229,10 +229,19 @@ class GenericMetadata():
         ep_obj: a TVEpisode object for which to grab the thumb URL
         """
         all_eps = [ep_obj] + ep_obj.relatedEps
+
+	tvdb_lang = ep_obj.show.lang
     
         # get a TVDB object
         try:
-            t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
+	    # There's gotta be a better way of doing this but we don't wanna
+	    # change the language value elsewhere
+	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+		ltvdb_api_parms['language'] = tvdb_lang
+
+            t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             tvdb_show_obj = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(str(e))
@@ -503,8 +512,17 @@ class GenericMetadata():
         Returns: the binary image data if available, or else None
         """
 
+	tvdb_lang = show_obj.lang
+
         try:
-            t = tvdb_api.Tvdb(banners=True, **sickbeard.TVDB_API_PARMS)
+	    # There's gotta be a better way of doing this but we don't wanna
+	    # change the language value elsewhere
+	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+		ltvdb_api_parms['language'] = tvdb_lang
+
+            t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
             tvdb_show_obj = t[show_obj.tvdbid]
         except (tvdb_exceptions.tvdb_error, IOError), e:
             logger.log(u"Unable to look up show on TVDB, not downloading images: "+str(e).decode('utf-8'), logger.ERROR)
@@ -531,8 +549,17 @@ class GenericMetadata():
         # This holds our resulting dictionary of season art
         result = {}
     
+	tvdb_lang = show_obj.lang
+
         try:
-            t = tvdb_api.Tvdb(banners=True, **sickbeard.TVDB_API_PARMS)
+	    # There's gotta be a better way of doing this but we don't wanna
+	    # change the language value elsewhere
+	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+		ltvdb_api_parms['language'] = tvdb_lang
+
+            t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
             tvdb_show_obj = t[show_obj.tvdbid]
         except (tvdb_exceptions.tvdb_error, IOError), e:
             logger.log(u"Unable to look up show on TVDB, not downloading images: "+str(e).decode('utf-8'), logger.ERROR)

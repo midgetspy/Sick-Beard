@@ -79,10 +79,19 @@ class TVRage:
 
         logger.log(u"Checking the first episode of each season to see if the air dates match between TVDB and TVRage")
 
+	tvdb_lang = self.show.lang
+
         try:
 
             try:
-                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+        	# There's gotta be a better way of doing this but we don't wanna
+		# change the language value elsewhere
+		ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+		if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+		    ltvdb_api_parms['language'] = tvdb_lang
+
+                t = tvdb_api.Tvdb(**ltvdb_api_parms)
             except tvdb_exceptions.tvdb_exception, e:
                 logger.log(u"Currently this doesn't work with TVDB down but with some DB magic it can be added", logger.DEBUG)
                 return None
@@ -169,9 +178,17 @@ class TVRage:
 
             airdate = None
 
+	    tvdb_lang = self.show.lang
+            # There's gotta be a better way of doing this but we don't wanna
+	    # change the language value elsewhere
+	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+	        ltvdb_api_parms['language'] = tvdb_lang
+
             # make sure the last TVDB episode matches our last episode
             try:
-                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 ep = t[self.show.tvdbid][self.lastEpInfo['season']][self.lastEpInfo['episode']]
 
                 if ep["firstaired"] == "" or ep["firstaired"] == None:

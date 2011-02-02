@@ -252,3 +252,11 @@ class ChangeSabConfigFromIpToHost(AddAirByDateOption):
 	def execute(self):
 		sickbeard.SAB_HOST = 'http://' + sickbeard.SAB_HOST + '/sabnzbd/'
 		self.incDBVersion()
+
+class AddLang (ChangeSabConfigFromIpToHost):
+	def test(self):
+		return self.hasColumn("tv_shows", "lang")
+
+	def execute(self):
+		self.addColumn("tv_shows", "lang", "TEXT", "en")
+

@@ -173,7 +173,20 @@ def makeShowNFO(showID, showDir):
         logger.log(u"Unable to create show dir, can't make NFO", logger.ERROR)
         return False
 
-    t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
+    showObj = helpers.findCertainShow(sickbeard.showList, showID)
+    if not showObj:
+        logger.log(u"This should never have happened, post a bug about this!", logger.ERROR)
+        raise Exception("BAD STUFF HAPPENED")
+
+    tvdb_lang = showObj.lang
+    # There's gotta be a better way of doing this but we don't wanna
+    # change the language value elsewhere
+    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+	ltvdb_api_parms['language'] = tvdb_lang
+
+    t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
 
     try:
         myShow = t[int(showID)]

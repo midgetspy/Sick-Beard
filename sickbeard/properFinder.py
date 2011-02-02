@@ -146,8 +146,21 @@ class ProperFinder():
 
             # if we have an air-by-date show then get the real season/episode numbers
             if curProper.season == -1 and curProper.tvdbid:
+		showObj = helpers.findCertainShow(sickbeard.showList, curProper.tvdbid)
+		if not showObj:
+		    logger.log(u"This should never have happened, post a bug about this!", logger.ERROR)
+		    raise Exception("BAD STUFF HAPPENED")
+
+		tvdb_lang = showObj.lang
+		# There's gotta be a better way of doing this but we don't wanna
+		# change the language value elsewhere
+		ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+		if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+		    ltvdb_api_parms['language'] = tvdb_lang
+
                 try:
-                    t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                    t = tvdb_api.Tvdb(**ltvdb_api_parms)
                     epObj = t[curProper.tvdbid].airedOn(curProper.episode)[0]
                     season = int(epObj["seasonnumber"])
                     episodes = [int(epObj["episodenumber"])]

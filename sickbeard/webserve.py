@@ -1112,12 +1112,26 @@ class NewHomeAddShows:
         return _munge(t)
 
     @cherrypy.expose
-    def searchTVDBForShowName(self, name):
+    def getTVDBLanguages(self):
+	result = tvdb_api.Tvdb().config['valid_languages']
+
+	# Make sure list is sorted alphabetically but 'en' is in front
+	if 'en' in result:
+	    del result[result.index('en')]
+	result.sort()
+	result.insert(0,'en')
+
+	return json.dumps({'results': result})
+
+    @cherrypy.expose
+    def searchTVDBForShowName(self, name, lang="en"):
+	if(lang == 'null' or lang == None or lang == "" ):
+		lang = "en"
 
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
 
         params = {'seriesname': name.encode('utf-8'),
-                  'language': 'en'}
+                  'language': lang}
 
         finalURL = baseURL + urllib.urlencode(params)
 
@@ -1136,7 +1150,9 @@ class NewHomeAddShows:
         for curSeries in series:
             results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
 
-        return json.dumps({'results': results})
+	lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
+
+        return json.dumps({'results': results, 'langid': lang_id})
 
     @cherrypy.expose
     def addRootDir(self, dir=None):
@@ -1173,7 +1189,7 @@ class NewHomeAddShows:
         redirect(url)
 
     @cherrypy.expose
-    def addSingleShow(self, showToAdd, whichSeries=None, skipShow=False, showDirs=[]):
+    def addSingleShow(self, showToAdd, whichSeries=None, skipShow=False, showDirs=[], tvdbLang="en"):
 
         # we don't need to unquote the rest of the showDirs cause we're going to pass them straight through
         showToAdd = urllib.unquote_plus(showToAdd)
@@ -1183,7 +1199,7 @@ class NewHomeAddShows:
             return self.addShows(showDirs)
 
         # if we got a TVDB ID then make a show out of it
-        sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd)
+        sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd, tvdbLang)
         ui.flash.message('Show added', 'Adding the specified show into '+ showToAdd)
         # no need to display anything now that we added the show, so continue on to the next show
         return self.addShows(showDirs)
@@ -1203,6 +1219,7 @@ class NewHomeAddShows:
 
         t = PageTemplate(file="home_addShow.tmpl")
         t.submenu = HomeMenu()
+
 
         # make sure everything's unescaped
         showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
@@ -1502,7 +1519,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -1544,6 +1561,12 @@ class Home:
         else:
             air_by_date = 0
 
+	
+	if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
+	    tvdb_lang = tvdbLang
+        else:
+	    tvdb_lang = showObj.lang
+
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
 
@@ -1564,6 +1587,7 @@ class Home:
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
+	    showObj.lang = tvdb_lang
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
@@ -1893,7 +1917,7 @@ class WebInterface:
         redirect("/comingEpisodes")
 
     @cherrypy.expose
-    def comingEpisodes(self):
+    def comingEpisodes(self, layout="None"):
 
         myDB = db.DBConnection()
         
@@ -1943,6 +1967,13 @@ class WebInterface:
         t.next_week = next_week
         t.today = today
         t.sql_results = sql_results
+
+	# Allow local overriding of layout parameter
+	if layout and layout in ('poster', 'banner', 'list'):
+	    t.layout = layout
+	else:
+	    t.layout = sickbeard.COMING_EPS_LAYOUT
+		
 
         return _munge(t)
 
