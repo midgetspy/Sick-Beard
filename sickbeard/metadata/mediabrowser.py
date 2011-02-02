@@ -156,13 +156,13 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         show_obj: a TVShow instance to create the NFO for
         """
 
-	tvdb_lang = show_obj.lang
+        tvdb_lang = show_obj.lang
         # There's gotta be a better way of doing this but we don't wanna
-	# change the language value elsewhere
-	ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+        # change the language value elsewhere
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-	if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-	    ltvdb_api_parms['language'] = tvdb_lang
+        if tvdb_lang and not tvdb_lang == 'en':
+            ltvdb_api_parms['language'] = tvdb_lang
 
         t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
     
@@ -266,15 +266,15 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         
         shouldSave = False
 
-	tvdb_lang = ep_obj.show.lang
+        tvdb_lang = ep_obj.show.lang
     
         try:
-	    # There's gotta be a better way of doing this but we don't wanna
-	    # change the language value elsewhere
-	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+            # There's gotta be a better way of doing this but we don't wanna
+            # change the language value elsewhere
+            ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-		ltvdb_api_parms['language'] = tvdb_lang
+            if tvdb_lang and not tvdb_lang == 'en':
+                ltvdb_api_parms['language'] = tvdb_lang
 
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             myShow = t[ep_obj.show.tvdbid]

@@ -1113,20 +1113,20 @@ class NewHomeAddShows:
 
     @cherrypy.expose
     def getTVDBLanguages(self):
-	result = tvdb_api.Tvdb().config['valid_languages']
+        result = tvdb_api.Tvdb().config['valid_languages']
 
-	# Make sure list is sorted alphabetically but 'en' is in front
-	if 'en' in result:
-	    del result[result.index('en')]
-	result.sort()
-	result.insert(0,'en')
+        # Make sure list is sorted alphabetically but 'en' is in front
+        if 'en' in result:
+            del result[result.index('en')]
+        result.sort()
+        result.insert(0,'en')
 
-	return json.dumps({'results': result})
+        return json.dumps({'results': result})
 
     @cherrypy.expose
     def searchTVDBForShowName(self, name, lang="en"):
-	if(lang == 'null' or lang == None or lang == "" ):
-		lang = "en"
+        if not lang or lang == 'null':
+                lang = "en"
 
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
 
@@ -1150,7 +1150,7 @@ class NewHomeAddShows:
         for curSeries in series:
             results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
 
-	lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
+        lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
 
         return json.dumps({'results': results, 'langid': lang_id})
 
@@ -1561,11 +1561,11 @@ class Home:
         else:
             air_by_date = 0
 
-	
-	if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
-	    tvdb_lang = tvdbLang
+        
+        if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
+            tvdb_lang = tvdbLang
         else:
-	    tvdb_lang = showObj.lang
+            tvdb_lang = showObj.lang
 
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
@@ -1587,7 +1587,7 @@ class Home:
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
-	    showObj.lang = tvdb_lang
+            showObj.lang = tvdb_lang
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
@@ -1968,12 +1968,12 @@ class WebInterface:
         t.today = today
         t.sql_results = sql_results
 
-	# Allow local overriding of layout parameter
-	if layout and layout in ('poster', 'banner', 'list'):
-	    t.layout = layout
-	else:
-	    t.layout = sickbeard.COMING_EPS_LAYOUT
-		
+        # Allow local overriding of layout parameter
+        if layout and layout in ('poster', 'banner', 'list'):
+            t.layout = layout
+        else:
+            t.layout = sickbeard.COMING_EPS_LAYOUT
+                
 
         return _munge(t)
 

@@ -63,7 +63,7 @@ class TVShow(object):
         self.startyear = 0
         self.paused = 0
         self.air_by_date = 0
-	self.lang = lang
+        self.lang = lang
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -223,8 +223,8 @@ class TVShow(object):
 
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-	if self.lang:
-	    ltvdb_api_parms['language'] = self.lang
+        if self.lang:
+            ltvdb_api_parms['language'] = self.lang
 
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
@@ -264,8 +264,8 @@ class TVShow(object):
         if not cache:
             ltvdb_api_parms['cache'] = 'recache'
 
-	if self.lang:
-	    ltvdb_api_parms['language'] = self.lang
+        if self.lang:
+            ltvdb_api_parms['language'] = self.lang
 
         try:
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
@@ -382,12 +382,12 @@ class TVShow(object):
         # if we have an air-by-date show then get the real season/episode numbers
         if parse_result.air_by_date:
             try:
-		# There's gotta be a better way of doing this but we don't wanna
-		# change the cache value elsewhere
-		ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+                # There's gotta be a better way of doing this but we don't wanna
+                # change the cache value elsewhere
+                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-		if self.lang:
-		    ltvdb_api_parms['language'] = self.lang
+                if self.lang:
+                    ltvdb_api_parms['language'] = self.lang
 
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
@@ -522,7 +522,7 @@ class TVShow(object):
             if self.tvrid == 0:
                 self.tvrid = int(sqlResults[0]["tvr_id"])
 
-	    if self.lang == "":
+            if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
 
@@ -537,9 +537,9 @@ class TVShow(object):
 
             if not cache:
                 ltvdb_api_parms['cache'] = 'recache'
-	    
-	    if self.lang:
-		ltvdb_api_parms['language'] = self.lang
+            
+            if self.lang:
+                ltvdb_api_parms['language'] = self.lang
 
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
         else:
@@ -806,7 +806,7 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-			"lang": self.lang
+                        "lang": self.lang
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
@@ -1056,7 +1056,7 @@ class TVEpisode(object):
 
         logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
-	tvdb_lang = self.show.lang
+        tvdb_lang = self.show.lang
 
         try:
             if cachedSeason is None:
@@ -1068,8 +1068,8 @@ class TVEpisode(object):
                     if not cache:
                         ltvdb_api_parms['cache'] = 'recache'
 
-		    if tvdb_lang:
-		    	ltvdb_api_parms['language'] = tvdb_lang
+                    if tvdb_lang:
+                            ltvdb_api_parms['language'] = tvdb_lang
 
                     t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 else:
@@ -1423,5 +1423,4 @@ class TVEpisode(object):
             finalName = re.sub("\s+", ".", finalName)
 
         return finalName
-
 

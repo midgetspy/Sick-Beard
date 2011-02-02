@@ -230,16 +230,16 @@ class GenericMetadata():
         """
         all_eps = [ep_obj] + ep_obj.relatedEps
 
-	tvdb_lang = ep_obj.show.lang
+        tvdb_lang = ep_obj.show.lang
     
         # get a TVDB object
         try:
-	    # There's gotta be a better way of doing this but we don't wanna
-	    # change the language value elsewhere
-	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+            # There's gotta be a better way of doing this but we don't wanna
+            # change the language value elsewhere
+            ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-		ltvdb_api_parms['language'] = tvdb_lang
+            if tvdb_lang and not tvdb_lang == 'en':
+                ltvdb_api_parms['language'] = tvdb_lang
 
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             tvdb_show_obj = t[ep_obj.show.tvdbid]
@@ -512,15 +512,15 @@ class GenericMetadata():
         Returns: the binary image data if available, or else None
         """
 
-	tvdb_lang = show_obj.lang
+        tvdb_lang = show_obj.lang
 
         try:
-	    # There's gotta be a better way of doing this but we don't wanna
-	    # change the language value elsewhere
-	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+            # There's gotta be a better way of doing this but we don't wanna
+            # change the language value elsewhere
+            ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-		ltvdb_api_parms['language'] = tvdb_lang
+            if tvdb_lang and not tvdb_lang == 'en':
+                ltvdb_api_parms['language'] = tvdb_lang
 
             t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
             tvdb_show_obj = t[show_obj.tvdbid]
@@ -549,15 +549,15 @@ class GenericMetadata():
         # This holds our resulting dictionary of season art
         result = {}
     
-	tvdb_lang = show_obj.lang
+        tvdb_lang = show_obj.lang
 
         try:
-	    # There's gotta be a better way of doing this but we don't wanna
-	    # change the language value elsewhere
-	    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+            # There's gotta be a better way of doing this but we don't wanna
+            # change the language value elsewhere
+            ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-	    if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-		ltvdb_api_parms['language'] = tvdb_lang
+            if tvdb_lang and not tvdb_lang == 'en':
+                ltvdb_api_parms['language'] = tvdb_lang
 
             t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
             tvdb_show_obj = t[show_obj.tvdbid]

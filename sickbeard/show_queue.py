@@ -166,7 +166,7 @@ class QueueItemAdd(ShowQueueItem):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
-	self.lang = lang
+        self.lang = lang
 
         self.show = None
 
@@ -364,4 +364,3 @@ class QueueItemForceUpdate(QueueItemUpdate):
     def __init__(self, show=None):
         ShowQueueItem.__init__(self, ShowQueueActions.FORCEUPDATE, show)
         self.force = True
-

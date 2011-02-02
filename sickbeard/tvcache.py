@@ -189,7 +189,7 @@ class TVCache():
                 showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
                 if showObj:
                     tvrage_id = showObj.tvrid
-		    tvdb_lang = showObj.lang
+                    tvdb_lang = showObj.lang
                 else:
                     logger.log(u"We were given a TVDB id "+str(tvdb_id)+" but it doesn't match a show we have in our list, so leaving tvrage_id empty", logger.DEBUG)
                     tvrage_id = 0
@@ -199,7 +199,7 @@ class TVCache():
                 showObj = helpers.findCertainTVRageShow(sickbeard.showList, tvrage_id)
                 if showObj:
                     tvdb_id = showObj.tvdbid
-		    tvdb_lang = showObj.lang
+                    tvdb_lang = showObj.lang
                 else:
                     logger.log(u"We were given a TVRage id "+str(tvrage_id)+" but it doesn't match a show we have in our list, so leaving tvdb_id empty", logger.DEBUG)
                     tvdb_id = 0
@@ -218,7 +218,7 @@ class TVCache():
                         if sceneHelpers.isGoodResult(name, curShow, False):
                             logger.log(u"Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
                             tvdb_id = curShow.tvdbid
-			    tvdb_lang = curShow.lang
+                            tvdb_lang = curShow.lang
                             break
 
                 if tvdb_id:
@@ -228,7 +228,7 @@ class TVCache():
                         logger.log(u"This should never have happened, post a bug about this!", logger.ERROR)
                         raise Exception("BAD STUFF HAPPENED")
                     tvrage_id = showObj.tvrid
-		    tvdb_lang = showObj.lang
+                    tvdb_lang = showObj.lang
 
 
         if not season:
@@ -239,12 +239,12 @@ class TVCache():
         # if we have an air-by-date show then get the real season/episode numbers
         if parse_result.air_by_date and tvdb_id:
             try:
-		# There's gotta be a better way of doing this but we don't wanna
-		# change the language value elsewhere
-		ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+                # There's gotta be a better way of doing this but we don't wanna
+                # change the language value elsewhere
+                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-		if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-		    ltvdb_api_parms['language'] = tvdb_lang
+                if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
+                    ltvdb_api_parms['language'] = tvdb_lang
 
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 epObj = t[tvdb_id].airedOn(parse_result.air_date)[0]

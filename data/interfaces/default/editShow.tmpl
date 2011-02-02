@@ -44,24 +44,24 @@
   });
 
   \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data){
-	var resultStr = '';
+        var resultStr = '';
 
-	if (data.results.length == 0) {
+        if (data.results.length == 0) {
             resultStr = '<option value="$show.lang" selected="selected">$show.lang</option>';
         } else {
-	    var current_lang_added = false;
+            var current_lang_added = false;
             \$.each(data.results, function(index, obj){
                 if (obj == "$show.lang") {
-        		selected = ' selected="selected"';
-			current_lang_added = true;
-		}
+                        selected = ' selected="selected"';
+                        current_lang_added = true;
+                }
                 else
                         selected = '';
 
-		resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
+                resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
             });
-	    if (!current_lang_added)
-		resultStr += '<option value="$show.lang" selected="selected">$show.lang</option>';
+            if (!current_lang_added)
+                resultStr += '<option value="$show.lang" selected="selected">$show.lang</option>';
         }
         \$('#tvdbLangSelect').html(resultStr)
 

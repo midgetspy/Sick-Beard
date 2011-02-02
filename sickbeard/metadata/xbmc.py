@@ -66,13 +66,13 @@ class XBMCMetadata(generic.GenericMetadata):
 
         show_ID = show_obj.tvdbid
 
-	tvdb_lang = show_obj.lang
+        tvdb_lang = show_obj.lang
         # There's gotta be a better way of doing this but we don't wanna
-	# change the language value elsewhere
-	ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+        # change the language value elsewhere
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-	if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-	    ltvdb_api_parms['language'] = tvdb_lang
+        if tvdb_lang and not tvdb_lang == 'en':
+            ltvdb_api_parms['language'] = tvdb_lang
 
         t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
     
@@ -176,13 +176,13 @@ class XBMCMetadata(generic.GenericMetadata):
 
         eps_to_write = [ep_obj] + ep_obj.relatedEps
 
-	tvdb_lang = ep_obj.show.lang
+        tvdb_lang = ep_obj.show.lang
         # There's gotta be a better way of doing this but we don't wanna
-	# change the language value elsewhere
-	ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+        # change the language value elsewhere
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-	if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-	    ltvdb_api_parms['language'] = tvdb_lang
+        if tvdb_lang and not tvdb_lang == 'en':
+            ltvdb_api_parms['language'] = tvdb_lang
 
         try:
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
