@@ -2,6 +2,7 @@ import sickbeard
 
 import xbmc
 import growl
+import prowl
 import tweet
 try:
     from sickbeard.notifiers import libnotify
@@ -12,11 +13,13 @@ from sickbeard.common import *
 
 xbmc_notifier = xbmc.XBMCNotifier()
 growl_notifier = growl.GrowlNotifier()
+prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
 
 notifiers = [
     xbmc_notifier,
     growl_notifier,
+    prowl_notifier,
     twitter_notifier,
 ]
 
@@ -43,6 +46,8 @@ def notify(type, message):
             xbmc.notifyXBMC(message, notifyStrings[type])
 
     growl.sendGrowl(notifyStrings[type], message)
+    
+    prowl.sendProwl(message)
 
     if type == NOTIFY_DOWNLOAD:
         tweet.notifyTwitter(message)

@@ -310,7 +310,7 @@ class QueueItemUpdate(ShowQueueItem):
         self.show.loadFromTVDB(cache=not self.force)
 
         # either update or refresh depending on the time
-        if self.show.status == "Ended":
+        if self.show.status == "Ended" and not self.force:
             #TODO: maybe I should still update specials?
             logger.log(u"Not updating episodes for show "+self.show.name+" because it's marked as ended.", logger.DEBUG)
             sickbeard.showQueueScheduler.action.refreshShow(self.show, True)

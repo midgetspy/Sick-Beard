@@ -940,6 +940,7 @@ class ConfigNotifications:
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
+                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None):
 
@@ -983,6 +984,20 @@ class ConfigNotifications:
             use_growl = 1
         else:
             use_growl = 0
+            
+        if prowl_notify_onsnatch == "on":
+            prowl_notify_onsnatch = 1
+        else:
+            prowl_notify_onsnatch = 0
+
+        if prowl_notify_ondownload == "on":
+            prowl_notify_ondownload = 1
+        else:
+            prowl_notify_ondownload = 0
+        if use_prowl == "on":
+            use_prowl = 1
+        else:
+            use_prowl = 0
 
         if twitter_notify_onsnatch == "on":
             twitter_notify_onsnatch = 1
@@ -1012,6 +1027,12 @@ class ConfigNotifications:
         sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
+
+        sickbeard.USE_PROWL = use_prowl
+        sickbeard.PROWL_NOTIFY_ONSNATCH = prowl_notify_onsnatch
+        sickbeard.PROWL_NOTIFY_ONDOWNLOAD = prowl_notify_ondownload
+        sickbeard.PROWL_API = prowl_api
+        sickbeard.PROWL_PRIORITY = prowl_priority
 
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
@@ -1330,6 +1351,11 @@ class Home:
     def testGrowl(self, host=None, password=None):
         notifiers.growl_notifier.test_notify(host, password)
         return "Tried sending growl to "+host+" with password "+password
+
+    @cherrypy.expose
+    def testProwl(self, prowl_api=None, prowl_priority=0):
+        notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
+        return "Tried sending Prowl notification"
 
     @cherrypy.expose
     def twitterStep1(self):

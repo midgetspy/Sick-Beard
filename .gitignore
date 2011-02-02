@@ -7,3 +7,4 @@ sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
 *.bak
 tags
+.DS_Store

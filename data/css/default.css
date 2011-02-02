@@ -6,7 +6,6 @@ background-color:#fff;
 color:#000;
 font-family:'Verdana', 'Helvetica', 'Sans-serif', 'sans';
 font-size:12px;
-line-height:18px;
 margin:0;
 padding:0;
 }
@@ -116,7 +115,7 @@ font-weight:700;
 }
 
 .h2footer {
-margin-top:-32px;
+margin-top:-33px;
 margin-right:5px;
 }
 .h2footer span {
@@ -136,6 +135,7 @@ border:1px solid #d4d0c8;
 div select option {
 line-height:1.4;
 padding:0 10px;
+border-bottom: 1px dotted #D7D7D7;
 }
 
 /* --------------- alignment ------------------- */
@@ -163,6 +163,7 @@ margin-top:20px;
 background-color:#F5F1E4;
 border-top:1px solid #000;
 color:#4e4e4e;
+line-height: 1.4em;
 }
 
 .sickbeardTable {
@@ -296,7 +297,6 @@ margin:10px;
 #MainMenu {
 background-color:#57442B;
 color:#F5F5F5;
-line-height:1;
 /*margin-bottom:1em;*/
 width:100%;
 border-bottom: 1px solid #333;
@@ -326,14 +326,14 @@ background-color:#000;
 color:#fff;
 }
 #donate {
-line-height:2px;
-background: none;
+line-height:1em;
+background: #57442B;
 float: right;
 }
 #donate a,#donate a:hover {
 background-color:#57442B;
 border:0;
-padding:3px 15px 0px;
+padding:4px 15px 0px;
 }
 #content {
 padding: 10px 15px 15px;
