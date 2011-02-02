@@ -1561,11 +1561,16 @@ class Home:
         else:
             air_by_date = 0
 
-        
         if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
             tvdb_lang = tvdbLang
         else:
             tvdb_lang = showObj.lang
+
+        # if we changed the language then kick off an update
+        if tvdb_lang == showObj.lang:
+            do_update = False
+        else:
+            do_update = True
 
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
@@ -1594,7 +1599,8 @@ class Home:
                 if not os.path.isdir(location):
                     errors.append("New location <tt>%s</tt> does not exist" % location)
 
-                else:
+                # don't bother if we're going to update anyway
+                elif not do_update:
                     # change it
                     try:
                         showObj.location = location
@@ -1610,6 +1616,14 @@ class Home:
 
             # save it to the DB
             showObj.saveToDB()
+
+        # force the update
+        if do_update:
+            try:
+                sickbeard.showQueueScheduler.action.updateShow(showObj, True)
+                time.sleep(1)
+            except exceptions.CantUpdateException, e:
+                errors.append("Unable to force an update on the show.")
 
         if directCall:
             return errors
