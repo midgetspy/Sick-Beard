@@ -1,5 +1,5 @@
 #import sickbeard
-#import datetime, locale
+#import datetime
 #from sickbeard.common import *
 #set global $title="Coming Episodes"
 
@@ -231,7 +231,7 @@ Custom
                     #set $show_div = "ep_listing listing_toofar"
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode(locale.getpreferredencoding())</h1>
+                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
                     #if $cur_ep_airdate == $today:
                         #set $show_div = "ep_listing listing_current"
                     #else:
