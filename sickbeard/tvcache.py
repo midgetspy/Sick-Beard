@@ -95,9 +95,8 @@ class TVCache():
 
         # fix up bad feeds
         for cur_line in raw_data.split('\n'):
-            if re.search('>[^<>]*&(?!amp;).*<', cur_line):
-                logger.log(u"Fixing up the feed, putting &amp; in this line: "+cur_line, logger.WARNING)
-                data += re.sub('&(?!amp;)', '&amp;', cur_line)
+            if 'CDATA' not in cur_line:
+                data += re.sub('&(?!\#\d+|\w+;)', '&amp;', cur_line)
             else:
                 data += cur_line
             data += '\n'
