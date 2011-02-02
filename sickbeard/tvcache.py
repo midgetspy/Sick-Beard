@@ -76,10 +76,10 @@ class TVCache():
         if not self.shouldUpdate():
             return
 
-        data = self._getRSSData()
+        raw_data = self._getRSSData()
 
         # as long as the http request worked we count this as an update
-        if data:
+        if raw_data:
             self.setLastUpdate()
         else:
             return []
@@ -88,9 +88,20 @@ class TVCache():
         logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
         self._clearCache()
 
-        if not self._checkAuth(data):
+        if not self._checkAuth(raw_data):
             raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
 
+        data = ''
+
+        # fix up bad feeds
+        for cur_line in raw_data.split('\n'):
+            if re.search('>[^<>]*&(?!amp;).*<', cur_line):
+                logger.log(u"Fixing up the feed, putting &amp; in this line: "+cur_line, logger.WARNING)
+                data += re.sub('&(?!amp;)', '&amp;', cur_line)
+            else:
+                data += cur_line
+            data += '\n'
+        
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
