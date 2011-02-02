@@ -1239,6 +1239,7 @@ class NewHomeAddShows:
             tvdb_id = None
             try:
                 tvdb_id = metadata.helpers.getTVDBIDFromNFO(showToAdd)
+
             except exceptions.NoNFOException, e:
                 # we couldn't get a tvdb id from the file so let them know and just print the search page
                 if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo.old")):
