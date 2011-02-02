@@ -152,5 +152,10 @@ span.pause {
 }
 
 .ep_summaryTrigger {
-    padding-right: 5px;
+    float: left;
+    padding-top: 5px;
+}
+.ep_summary {
+    margin-left: 25px;
+    padding-top: 5px;
 }
