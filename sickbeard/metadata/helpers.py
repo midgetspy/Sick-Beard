@@ -32,6 +32,8 @@ import xml.etree.cElementTree as etree
 
 def getTVDBIDFromNFO(dir):
 
+    show_lang = None
+
     if not ek.ek(os.path.isdir, dir):
         logger.log(u"Show dir doesn't exist, can't load NFO")
         raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
@@ -59,9 +61,9 @@ def getTVDBIDFromNFO(dir):
             raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
         try:
-            t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+            t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)
             s = t[int(tvdb_id)]
-            if not s or name not in s or not s['name']:
+            if not s or 'name' not in s or not s['name']:
                 raise exceptions.NoNFOException("Show has no name on TVDB, probably the wrong language")
         except tvdb_exceptions.tvdb_exception, e:
             raise exceptions.NoNFOException("Unable to look up the show on TVDB, not using the NFO")
