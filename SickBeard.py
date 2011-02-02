@@ -109,7 +109,7 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp:", ['quiet', 'force-update', 'daemon', 'port=', 'tvbinz'])
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp:", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz'])
     except getopt.GetoptError:
         print "Available options: --quiet, --forceupdate, --port, --daemon"
         sys.exit()
