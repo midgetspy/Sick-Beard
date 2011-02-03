@@ -244,3 +244,11 @@ class AddAirByDateOption(UpgradeHistoryForGenericProviders):
 	def execute(self):
 		self.connection.action("ALTER TABLE tv_shows ADD air_by_date NUMERIC")
 		self.incDBVersion()
+
+class ChangeSabConfigFromIpToHost(AddAirByDateOption):
+	def test(self):
+		return self.checkDBVersion() >= 5
+	
+	def execute(self):
+		sickbeard.SAB_HOST = 'http://' + sickbeard.SAB_HOST + '/sabnzbd/'
+		self.incDBVersion()

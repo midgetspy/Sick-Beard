@@ -35,6 +35,7 @@ simple_test_cases = {
               '1x02 Ep Name': parser.ParseResult(None, None, 1, [2], 'Ep Name'),
               'Show-Name-1x02-720p': parser.ParseResult(None, 'Show-Name', 1, [2], '720p'),
               'Show-Name-1x02-1080i': parser.ParseResult(None, 'Show-Name', 1, [2], '1080i'),
+              'Show Name [05x12] Ep Name': parser.ParseResult(None, 'Show Name', 5, [12], 'Ep Name'),
               },
 
               'standard_repeat': {

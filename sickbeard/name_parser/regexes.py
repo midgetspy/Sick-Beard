@@ -68,12 +68,12 @@ ep_regexes = [
                # Show_Name.1x02x03x04.Source_Quality_Etc-Group
                # Show Name - 1x02-03-04 - My Ep Name
                '''
-               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
+               ^((?P<series_name>.+?)[\[. _-]+)?             # Show_Name and separator
                (?P<season_num>\d+)x                        # 1x
                (?P<ep_num>\d+)                             # 02 and separator
                (([. _-]*x|-)                               # linking x/- char
                (?P<extra_ep_num>(?!(1080|720)[pi])\d+))*   # additional x03/etc
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
+               [\]. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
                '''),
         

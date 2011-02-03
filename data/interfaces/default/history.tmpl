@@ -16,7 +16,7 @@
 <script type="text/javascript">
 \$(document).ready(function() 
 { 
-    \$("#historyTable").tablesorter({
+    \$("#historyTable:has(tbody tr)").tablesorter({
         widgets: ['zebra'],
         sortList: [[0,1]]
     }); 
