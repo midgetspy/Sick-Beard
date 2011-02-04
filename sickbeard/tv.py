@@ -910,7 +910,7 @@ class TVEpisode(object):
         self.dirty = True
 
         self.show = show
-        self.location = file
+        self._location = file
 
         self.lock = threading.Lock()
 
@@ -929,6 +929,7 @@ class TVEpisode(object):
     hastbn = property(lambda self: self._hastbn, dirty_setter("_hastbn"))
     status = property(lambda self: self._status, dirty_setter("_status"))
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
+    location = property(lambda self: self._location, dirty_setter("_location"))
 
     def checkForMetaFiles(self):
 
