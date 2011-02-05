@@ -334,20 +334,20 @@
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Get your key at: <a href="https://prowl.weks.net/settings.php" target=_blank>https://prowl.weks.net/settings.php</a></span>
+                                <span class="component-desc">Get your key at: <a href="https://prowl.weks.net/settings.php" onclick="window.open(this.href, '_blank'); return false;">https://prowl.weks.net/settings.php</a></span>
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Prowl priority:</span>
                                <select id="prowl_priority" name="prowl_priority">
-<option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then "selected" else ""#>Very Low
-<option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then "selected" else ""#>Moderate
-<option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then "selected" else ""#>Normal
-<option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then "selected" else ""#>High
-<option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then "selected" else ""#>Emergency
-</select>
+                                    <option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then "selected" else ""#>Very Low
+                                    <option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then "selected" else ""#>Moderate
+                                    <option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then "selected" else ""#>Normal
+                                    <option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then "selected" else ""#>High
+                                    <option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then "selected" else ""#>Emergency
+                                </select>
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
