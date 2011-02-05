@@ -69,6 +69,10 @@ div#insideContent {
     /* margin-bottom: 1px; */
 }
 
+.minimalThumb {
+    float: left;
+}
+
 .tvshowDiv th {
     color: #000;
     letter-spacing: 1px;

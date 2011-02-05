@@ -1884,6 +1884,13 @@ class WebInterface:
         redirect("/comingEpisodes")
 
     @cherrypy.expose
+    def toggleComingEpsMinimal(self):
+
+        sickbeard.COMING_EPS_MINIMAL = not sickbeard.COMING_EPS_MINIMAL
+
+        redirect("/comingEpisodes")
+            
+    @cherrypy.expose
     def setComingEpsSort(self, sort):
         if sort not in ('date', 'network', 'show'):
             sort = 'date'
@@ -1927,6 +1934,8 @@ class WebInterface:
         t = PageTemplate(file="comingEpisodes.tmpl")
         paused_item = { 'title': '', 'path': 'toggleComingEpsDisplayPaused' }
         paused_item['title'] = 'Hide Paused' if sickbeard.COMING_EPS_DISPLAY_PAUSED else 'Show Paused'
+        minimal_item = { 'title': '', 'path': 'toggleComingEpsMinimal' }
+        minimal_item['title'] = 'Full View' if sickbeard.COMING_EPS_MINIMAL else 'Minimal View'
         t.submenu = [
             { 'title': 'Sort by:', 'path': {'Date': 'setComingEpsSort/?sort=date',
                                             'Show': 'setComingEpsSort/?sort=show',
@@ -1937,7 +1946,7 @@ class WebInterface:
                                            'Poster': 'setComingEpsLayout/?layout=poster',
                                            'List': 'setComingEpsLayout/?layout=list',
                                            }},
-            paused_item,
+            paused_item, minimal_item,
         ]
 
         t.next_week = next_week

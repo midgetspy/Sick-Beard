@@ -180,6 +180,11 @@ Custom
         });
     });
   });
+  \$(".minimalThumb").tooltip(
+  {
+    delay:  100,
+    effect: 'fade'
+  });
 });
 </script>
 <div id="outsideWrapper">
@@ -204,17 +209,27 @@ Custom
 
         #if $sort == "network":
             #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
+                #if $sickbeard.COMING_EPS_MINIMAL and $cur_segment != None then "</div>" else ""#
                 <br /><h1 class="network">$cur_result["network"]</h1>
                 #set $cur_ep_airdate = int($cur_result["airdate"])
                 #if $cur_ep_airdate < $today:
                     #set $show_div = "ep_listing listing_overdue"
+                    #if $sickbeard.COMING_EPS_MINIMAL:
+                    <div class="$show_div">
+                    #end if
                 #elif $cur_ep_airdate >= $next_week:
                     #set $show_div = "ep_listing listing_toofar"
+                    #if $sickbeard.COMING_EPS_MINIMAL:
+                    <div class="$show_div">
+                    #end if
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
                     #if $cur_ep_airdate == $today:
                         #set $show_div = "ep_listing listing_current"
                     #else:
                         #set $show_div = "ep_listing listing_default"
+                    #end if
+                    #if $sickbeard.COMING_EPS_MINIMAL:
+                    <div class="$show_div">
                     #end if
                 #end if
                 #set $cur_segment = $cur_result["network"]
@@ -223,25 +238,41 @@ Custom
             #set $cur_ep_airdate = int($cur_result["airdate"])
             #if $cur_segment != $cur_ep_airdate:
                 #if $cur_ep_airdate < $today and not $missed_header:
+                    #if $sickbeard.COMING_EPS_MINIMAL and $cur_segment != None then "</div>" else ""#
                     <br /><h1 class="day">Missed</h1>
                     #set $missed_header = True
                     #set $show_div = "ep_listing listing_overdue"
+                    #if $sickbeard.COMING_EPS_MINIMAL:
+                    <div class="$show_div">
+                    #end if
                 #elif $cur_ep_airdate >= $next_week and not $too_late_header:
+                    #if $sickbeard.COMING_EPS_MINIMAL and $cur_segment != None then "</div>" else ""#
                     <br /><h1 class="day">Later</h1>
                     #set $show_div = "ep_listing listing_toofar"
                     #set $too_late_header = True
+                    #if $sickbeard.COMING_EPS_MINIMAL:
+                    <div class="$show_div">
+                    #end if
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
+                    #if $sickbeard.COMING_EPS_MINIMAL and $cur_segment != None then "</div>" else ""#
                     <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
                     #if $cur_ep_airdate == $today:
                         #set $show_div = "ep_listing listing_current"
                     #else:
                         #set $show_div = "ep_listing listing_default"
                     #end if
+                    #if $sickbeard.COMING_EPS_MINIMAL:
+                    <div class="$show_div">
+                    #end if
                 #end if
                 #set $cur_segment = $cur_ep_airdate
             #end if
         #end if
 
+    #if $sickbeard.COMING_EPS_MINIMAL:
+    <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "bannerThumb" else "posterThumb"# minimalThumb" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$sickbeard.COMING_EPS_LAYOUT" /></a>
+    <div id="tooltip">$cur_result["show_name"]#if int($cur_result["paused"]) then " [paused]" else ""#<br/>Next Episode: <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</div>
+    #else:
     <div class="$show_div" id="listing_${cur_result["showid"]}">
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -288,9 +319,14 @@ Custom
       </table>
       </div>
     </div>
+    #end if
     
     <!-- end $cur_result["show_name"] -->
     #end for
+    
+    #if $sickbeard.COMING_EPS_MINIMAL
+    </div>
+    #end if
 
     <br/>
   </div>
