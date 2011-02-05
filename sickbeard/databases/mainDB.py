@@ -252,3 +252,13 @@ class ChangeSabConfigFromIpToHost(AddAirByDateOption):
 	def execute(self):
 		sickbeard.SAB_HOST = 'http://' + sickbeard.SAB_HOST + '/sabnzbd/'
 		self.incDBVersion()
+
+class FixSabHostURL(ChangeSabConfigFromIpToHost):
+	def test(self):
+		return self.checkDBVersion() >= 6
+	
+	def execute(self):
+		if sickbeard.SAB_HOST.endswith('/sabnzbd/'):
+			sickbeard.SAB_HOST = sickbeard.SAB_HOST.replace('/sabnzbd/','/')
+		sickbeard.save_config()
+		self.incDBVersion()
