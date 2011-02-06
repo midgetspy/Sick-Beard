@@ -55,3 +55,5 @@
 .infoTable {border-collapse: collapse;}
 .infoTableHeader, .infoTableCell {padding: 5px;}
 .infoTableHeader{font-weight:700;}
+
+#config div.testNotification {border: 1px dotted #CCCCCC; padding: 5px; margin-bottom: 10px; line-height:20px;}

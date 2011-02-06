@@ -1344,13 +1344,19 @@ class Home:
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
-        notifiers.growl_notifier.test_notify(host, password)
-        return "Tried sending growl to "+host+" with password "+password
+        result = notifiers.growl_notifier.test_notify(host, password)
+        if result:
+            return "Test growl sent successfully to "+urllib.unquote_plus(host)+" with password "+password
+        else:
+            return "Test growl failed to "+urllib.unquote_plus(host)+" with password "+password
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):
-        notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
-        return "Tried sending Prowl notification"
+        result = notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
+        if result:
+            return "Test prowl notice sent successfully"
+        else:
+            return "Test prowl notice failed"
 
     @cherrypy.expose
     def twitterStep1(self):
@@ -1375,8 +1381,11 @@ class Home:
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
-        notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
-        return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
+        result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
+        if result:
+            return "Test notice sent successfully to "+urllib.unquote_plus(host)
+        else:
+            return "Test notice failed to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
     def shutdown(self):

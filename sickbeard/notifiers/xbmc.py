@@ -46,7 +46,7 @@ class XBMCNotifier:
             self._notifyXBMC(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
 
     def test_notify(self, host, username, password):
-        self._notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password, force=True)
+        return self._notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password, force=True)
 
     def update_library(self, show_name):
         if sickbeard.XBMC_UPDATE_LIBRARY:
@@ -122,7 +122,7 @@ class XBMCNotifier:
         for curHost in [x.strip() for x in host.split(",")]:
             command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' +fileString + ')' }
             logger.log(u"Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
-            request = self._sendToXBMC(command, curHost, username, password)
+            return self._sendToXBMC(command, curHost, username, password)
 
     def _update_library(self, host, showName=None):
     
