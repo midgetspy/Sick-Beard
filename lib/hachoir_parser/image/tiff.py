@@ -5,12 +5,12 @@ Authors: Victor Stinner and Sebastien Ponce
 Creation date: 30 september 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, SeekableFieldSet, ParserError, RootSeekableFieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, SeekableFieldSet, ParserError, RootSeekableFieldSet,
     UInt16, UInt32, Bytes, String)
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
-from hachoir_parser.image.exif import BasicIFDEntry
-from hachoir_core.tools import createDict
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
+from lib.hachoir_parser.image.exif import BasicIFDEntry
+from lib.hachoir_core.tools import createDict
 
 MAX_COUNT = 250
 

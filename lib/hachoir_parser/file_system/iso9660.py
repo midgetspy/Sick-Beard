@@ -9,11 +9,11 @@ Author: Victor Stinner
 Creation: 11 july 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt8, UInt32, UInt64, Enum,
     NullBytes, RawBytes, String)
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
 
 class PrimaryVolumeDescriptor(FieldSet):
     static_size = 2041*8

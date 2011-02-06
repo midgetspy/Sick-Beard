@@ -1,6 +1,6 @@
-from hachoir_metadata.metadata import RootMetadata, registerExtractor
-from hachoir_metadata.safe import fault_tolerant
-from hachoir_parser.file_system import ISO9660
+from lib.hachoir_metadata.metadata import RootMetadata, registerExtractor
+from lib.hachoir_metadata.safe import fault_tolerant
+from lib.hachoir_parser.file_system import ISO9660
 from datetime import datetime
 
 class ISO9660_Metadata(RootMetadata):

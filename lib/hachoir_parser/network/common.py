@@ -1,7 +1,7 @@
-from hachoir_core.field import FieldSet, Field, Bits
-from hachoir_core.bits import str2hex
-from hachoir_parser.network.ouid import REGISTERED_OUID
-from hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.field import FieldSet, Field, Bits
+from lib.hachoir_core.bits import str2hex
+from lib.hachoir_parser.network.ouid import REGISTERED_OUID
+from lib.hachoir_core.endian import BIG_ENDIAN
 from socket import gethostbyaddr, herror as socket_host_error
 
 def ip2name(addr):

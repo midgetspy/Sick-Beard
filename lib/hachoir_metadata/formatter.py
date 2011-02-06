@@ -1,4 +1,4 @@
-from hachoir_core.i18n import _, ngettext
+from lib.hachoir_core.i18n import _, ngettext
 
 NB_CHANNEL_NAME = {1: _("mono"), 2: _("stereo")}
 

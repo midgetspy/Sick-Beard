@@ -5,12 +5,12 @@ Author: Victor Stinner
 Creation date: 08 may 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt8, UInt16, UInt32, Enum,
     String, Bytes)
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
 
 class ElfHeader(FieldSet):
     static_size = 52*8

@@ -1,10 +1,10 @@
 from datetime import date, datetime
 import re
-from hachoir_core.language import Language
+from lib.hachoir_core.language import Language
 from locale import setlocale, LC_ALL
 from time import strptime
-from hachoir_metadata.timezone import createTimezone
-from hachoir_metadata import config
+from lib.hachoir_metadata.timezone import createTimezone
+from lib.hachoir_metadata import config
 
 NORMALIZE_REGEX = re.compile("[-/.: ]+")
 YEAR_REGEX1 = re.compile("^([0-9]{4})$")

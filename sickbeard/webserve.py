@@ -100,7 +100,7 @@ class TVDBWebUI:
         redirect("/home/addShows/addShow?" + showDirList + "seriesList=" + searchList)
 
 def _munge(string):
-    return unicode(string).encode('ascii', 'xmlcharrefreplace')
+    return unicode(string).encode('utf-8', 'xmlcharrefreplace')
 
 def _genericMessage(subject, message):
     t = PageTemplate(file="genericMessage.tmpl")
@@ -467,7 +467,8 @@ class ConfigGeneral:
                     naming_multi_ep_type=None, naming_ep_name=None,
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, use_banner=None):
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
+                    wdtv_data=None, use_banner=None):
 
         results = []
 
@@ -542,6 +543,7 @@ class ConfigGeneral:
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
+        sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
         sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
@@ -725,7 +727,6 @@ class ConfigEpisodeDownloads:
 
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
-        sickbeard.SEARCH_FREQUENCY = int(search_frequency)
 
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
@@ -734,10 +735,13 @@ class ConfigEpisodeDownloads:
         sickbeard.SAB_APIKEY = sab_apikey.strip()
         sickbeard.SAB_CATEGORY = sab_category
 
-        if sab_host.startswith('http://'):
-            sickbeard.SAB_HOST = sab_host[7:].rstrip('/')
-        else:
-            sickbeard.SAB_HOST = sab_host
+        if sab_host and not re.match('https?://.*', sab_host):
+            sab_host = 'http://' + sab_host
+
+        if not sab_host.endswith('/'):
+            sab_host = sab_host + '/'
+
+        sickbeard.SAB_HOST = sab_host
 
         sickbeard.save_config()
 
@@ -936,6 +940,7 @@ class ConfigNotifications:
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
+                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
 
         results = []
@@ -978,6 +983,20 @@ class ConfigNotifications:
             use_growl = 1
         else:
             use_growl = 0
+            
+        if prowl_notify_onsnatch == "on":
+            prowl_notify_onsnatch = 1
+        else:
+            prowl_notify_onsnatch = 0
+
+        if prowl_notify_ondownload == "on":
+            prowl_notify_ondownload = 1
+        else:
+            prowl_notify_ondownload = 0
+        if use_prowl == "on":
+            use_prowl = 1
+        else:
+            use_prowl = 0
 
         if twitter_notify_onsnatch == "on":
             twitter_notify_onsnatch = 1
@@ -1007,6 +1026,12 @@ class ConfigNotifications:
         sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
+
+        sickbeard.USE_PROWL = use_prowl
+        sickbeard.PROWL_NOTIFY_ONSNATCH = prowl_notify_onsnatch
+        sickbeard.PROWL_NOTIFY_ONDOWNLOAD = prowl_notify_ondownload
+        sickbeard.PROWL_API = prowl_api
+        sickbeard.PROWL_PRIORITY = prowl_priority
 
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
@@ -1047,7 +1072,7 @@ def haveXBMC():
 
 def HomeMenu():
     return [
-    { 'title': 'Add Shows',              'path': 'home/addShows/'                           },
+    { 'title': 'Add Shows',              'path': 'home/addShows/',                          },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
     { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
@@ -1060,7 +1085,7 @@ class HomePostProcess:
     def index(self):
 
         t = PageTemplate(file="home_postprocess.tmpl")
-        #t.submenu = HomeMenu()
+        t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1083,7 +1108,7 @@ class NewHomeAddShows:
     def index(self):
 
         t = PageTemplate(file="home_addShows.tmpl")
-        #t.submenu = HomeMenu()
+        t.submenu = HomeMenu()
         return _munge(t)
 
     @cherrypy.expose
@@ -1177,7 +1202,7 @@ class NewHomeAddShows:
             redirect("/home")
 
         t = PageTemplate(file="home_addShow.tmpl")
-        #t.submenu = HomeMenu()
+        t.submenu = HomeMenu()
 
         # make sure everything's unescaped
         showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
@@ -1323,6 +1348,11 @@ class Home:
         return "Tried sending growl to "+host+" with password "+password
 
     @cherrypy.expose
+    def testProwl(self, prowl_api=None, prowl_priority=0):
+        notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
+        return "Tried sending Prowl notification"
+
+    @cherrypy.expose
     def twitterStep1(self):
         return notifiers.twitter_notifier._get_authorization()
 
@@ -1436,11 +1466,11 @@ class Home:
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
-                t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid         })
-                t.submenu.append({ 'title': 'Re-scan files',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid         })
+                t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
+                t.submenu.append({ 'title': 'Re-scan files',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
-            t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid        })
+            t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
 
         t.show = showObj
         t.sqlResults = sqlResults
@@ -1877,14 +1907,14 @@ class WebInterface:
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
 
         done_show_list = []
-        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["showid"]))
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
         #epList = sickbeard.comingList

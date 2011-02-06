@@ -9,15 +9,15 @@ Author: Victor Stinner
 Creation date: 2007-01-19
 """
 
-from hachoir_core.field import (FieldSet, ParserError, Enum,
+from lib.hachoir_core.field import (FieldSet, ParserError, Enum,
     Bit, Bits, SeekableFieldSet,
     UInt16, UInt32, TimestampUnix32,
     RawBytes, PaddingBytes, NullBytes, NullBits,
     CString, String)
-from hachoir_core.text_handler import textHandler, filesizeHandler, hexadecimal
-from hachoir_core.tools import createDict, paddingSize, alignValue, makePrintable
-from hachoir_core.error import HACHOIR_ERRORS
-from hachoir_parser.common.win32 import BitmapInfoHeader
+from lib.hachoir_core.text_handler import textHandler, filesizeHandler, hexadecimal
+from lib.hachoir_core.tools import createDict, paddingSize, alignValue, makePrintable
+from lib.hachoir_core.error import HACHOIR_ERRORS
+from lib.hachoir_parser.common.win32 import BitmapInfoHeader
 
 MAX_DEPTH = 5
 MAX_INDEX_PER_HEADER = 300

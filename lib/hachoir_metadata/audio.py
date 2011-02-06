@@ -1,12 +1,12 @@
-from hachoir_metadata.metadata import (registerExtractor,
+from lib.hachoir_metadata.metadata import (registerExtractor,
     Metadata, RootMetadata, MultipleMetadata)
-from hachoir_parser.audio import AuFile, MpegAudioFile, RealAudioFile, AiffFile, FlacParser
-from hachoir_parser.container import OggFile, RealMediaFile
-from hachoir_core.i18n import _
-from hachoir_core.tools import makePrintable, timedelta2seconds, humanBitRate
+from lib.hachoir_parser.audio import AuFile, MpegAudioFile, RealAudioFile, AiffFile, FlacParser
+from lib.hachoir_parser.container import OggFile, RealMediaFile
+from lib.hachoir_core.i18n import _
+from lib.hachoir_core.tools import makePrintable, timedelta2seconds, humanBitRate
 from datetime import timedelta
-from hachoir_metadata.metadata_item import QUALITY_FAST, QUALITY_NORMAL, QUALITY_BEST
-from hachoir_metadata.safe import fault_tolerant, getValue
+from lib.hachoir_metadata.metadata_item import QUALITY_FAST, QUALITY_NORMAL, QUALITY_BEST
+from lib.hachoir_metadata.safe import fault_tolerant, getValue
 
 def computeComprRate(meta, size):
     if not meta.has("duration") \

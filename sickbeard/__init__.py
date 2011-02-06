@@ -97,6 +97,7 @@ USE_LISTVIEW = None
 METADATA_XBMC = None
 METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
+METADATA_WDTV = None
 
 QUALITY_DEFAULT = None
 SEASON_FOLDERS_FORMAT = None
@@ -183,6 +184,12 @@ GROWL_NOTIFY_ONSNATCH = False
 GROWL_NOTIFY_ONDOWNLOAD = False
 GROWL_HOST = None
 GROWL_PASSWORD = None
+
+USE_PROWL = False
+PROWL_NOTIFY_ONSNATCH = False
+PROWL_NOTIFY_ONDOWNLOAD = False
+PROWL_API = None
+PROWL_PRIORITY = 0
 
 USE_TWITTER = False
 TWITTER_NOTIFY_ONSNATCH = False
@@ -298,7 +305,7 @@ def initialize(consoleLogging=True):
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
                 USE_XBMC, GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
+                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, \
@@ -309,7 +316,7 @@ def initialize(consoleLogging=True):
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV
 
         if __INITIALIZED__:
             return False
@@ -323,6 +330,7 @@ def initialize(consoleLogging=True):
         CheckSection('SABnzbd')
         CheckSection('XBMC')
         CheckSection('Growl')
+        CheckSection('Prowl')
         CheckSection('Twitter')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
@@ -459,6 +467,12 @@ def initialize(consoleLogging=True):
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
 
+        USE_PROWL = bool(check_setting_int(CFG, 'Prowl', 'use_prowl', 0))
+        PROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_onsnatch', 0))
+        PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
+        PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
+        PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
+
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
         TWITTER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_ondownload', 0))        
@@ -512,10 +526,12 @@ def initialize(consoleLogging=True):
             METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
             METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
             METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
+            METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
             
             for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
                                        (METADATA_MEDIABROWSER, metadata.mediabrowser),
                                        (METADATA_PS3, metadata.ps3),
+                                       (METADATA_WDTV, metadata.wdtv),
                                        ]:
 
                 (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
@@ -801,6 +817,7 @@ def save_config():
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
     new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
+    new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
 
     new_config['General']['cache_dir'] = CACHE_DIR if CACHE_DIR else 'cache'
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
@@ -874,6 +891,13 @@ def save_config():
     new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD) 
     new_config['Growl']['growl_host'] = GROWL_HOST
     new_config['Growl']['growl_password'] = GROWL_PASSWORD
+    
+    new_config['Prowl'] = {}
+    new_config['Prowl']['use_prowl'] = int(USE_PROWL)
+    new_config['Prowl']['prowl_notify_onsnatch'] = int(PROWL_NOTIFY_ONSNATCH)
+    new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD) 
+    new_config['Prowl']['prowl_api'] = PROWL_API
+    new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)

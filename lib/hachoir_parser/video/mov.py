@@ -15,13 +15,13 @@ Author: Victor Stinner
 Creation: 2 august 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (ParserError, FieldSet, MissingField,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (ParserError, FieldSet, MissingField,
     UInt8, Int16, UInt16, UInt32, TimestampMac32,
     String, PascalString8, CString,
     RawBytes, PaddingBytes)
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
 
 class QTFloat32(FieldSet):
     static_size = 32

@@ -184,6 +184,7 @@ Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in 
 HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
 ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
+BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
 
 qualityPresets = (SD, HD, ANY)
 qualityPresetStrings = {SD: "SD",
@@ -282,6 +283,7 @@ sceneExceptions = {72546: ['CSI'],
                    212571: ['Come Fly With Me (2010)'],
                    81563: ['Border Security', 'Border Security Australia\'s Frontline'],
                    172381: ['Silent Library (US)'],
+                   131791: ['Sci-Fi Science'],
                    }
 
 countryList = {'Australia': 'AU',

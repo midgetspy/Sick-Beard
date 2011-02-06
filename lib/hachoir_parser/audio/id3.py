@@ -6,13 +6,13 @@ Informations: http://www.id3.org/
 Author: Victor Stinner
 """
 
-from hachoir_core.field import (FieldSet, MatchError, ParserError,
+from lib.hachoir_core.field import (FieldSet, MatchError, ParserError,
     Enum, UInt8, UInt24, UInt32,
     CString, String, RawBytes,
     Bit, Bits, NullBytes, NullBits)
-from hachoir_core.text_handler import textHandler
-from hachoir_core.tools import humanDuration
-from hachoir_core.endian import NETWORK_ENDIAN
+from lib.hachoir_core.text_handler import textHandler
+from lib.hachoir_core.tools import humanDuration
+from lib.hachoir_core.endian import NETWORK_ENDIAN
 
 class ID3v1(FieldSet):
     static_size = 128 * 8

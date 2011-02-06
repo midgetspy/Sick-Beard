@@ -8,13 +8,13 @@ Author: Victor Stinner
 Creation: 27 december 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, Bits, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, Bits, ParserError,
     String, UInt32, UInt24, UInt16, UInt8, Enum, RawBytes)
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_core.tools import createDict, humanDurationNanosec
-from hachoir_parser.common.tracker import NOTE_NAME
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.tools import createDict, humanDurationNanosec
+from lib.hachoir_parser.common.tracker import NOTE_NAME
 
 MAX_FILESIZE = 10 * 1024 * 1024
 

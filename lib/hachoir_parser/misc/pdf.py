@@ -4,16 +4,16 @@ Adobe Portable Document Format (PDF) parser.
 Author: Christophe Gisquet <christophe.gisquet@free.fr>
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (
     Field, FieldSet,
     ParserError,
     GenericVector,
     UInt8, UInt16, UInt32,
     String,
     RawBytes)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
 
 MAGIC = "%PDF-"
 ENDMAGIC = "%%EOF"

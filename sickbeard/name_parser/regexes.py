@@ -68,12 +68,12 @@ ep_regexes = [
                # Show_Name.1x02x03x04.Source_Quality_Etc-Group
                # Show Name - 1x02-03-04 - My Ep Name
                '''
-               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
+               ^((?P<series_name>.+?)[\[. _-]+)?             # Show_Name and separator
                (?P<season_num>\d+)x                        # 1x
                (?P<ep_num>\d+)                             # 02 and separator
                (([. _-]*x|-)                               # linking x/- char
                (?P<extra_ep_num>(?!(1080|720)[pi])\d+))*   # additional x03/etc
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
+               [\]. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
                '''),
         
@@ -166,10 +166,11 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
                (e(p(isode)?)?|part|pt)[. _-]?              # e, ep, episode, or part
-               (?P<ep_num>(\d+|[ivx]+))                    # first ep num
+               (?P<ep_num>(\d+|([ivx]+(?=[. _-]))))                    # first ep num
                ([. _-]+((and|&|to)[. _-]+)?                # and/&/to joiner
                ((e(p(isode)?)?|part|pt)[. _-]?)           # e, ep, episode, or part
-               (?P<extra_ep_num>(?!(1080|720)[pi])(\d+|[ivx]+))[. _-])*            # second ep num
+               (?P<extra_ep_num>(?!(1080|720)[pi])
+               (\d+|([ivx]+(?=[. _-]))))[. _-])*            # second ep num
                ([. _-]*(?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
                '''
@@ -191,7 +192,7 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
                (?P<ep_num>\d{2})                           # 02
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
+               [. _-]+((?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
                '''
                ),

@@ -130,7 +130,8 @@ class BacklogSearcher:
                     sickbeard.searchQueueScheduler.action.add_item(backlog_queue_item)
 
         # don't consider this an actual backlog search if we only did recent eps
-        if fromDate == datetime.date.fromordinal(1):
+        # or if we only did certain shows
+        if fromDate == datetime.date.fromordinal(1) or not which_shows:
             self._set_lastBacklog(curDate)
 
         self.amActive = False

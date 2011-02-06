@@ -5,11 +5,11 @@ Author: Victor Stinner
 Creation: 12 july 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import UInt32, Enum, String, RawBytes
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.text_handler import displayHandler, filesizeHandler
-from hachoir_core.tools import createDict, humanFrequency
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import UInt32, Enum, String, RawBytes
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.text_handler import displayHandler, filesizeHandler
+from lib.hachoir_core.tools import createDict, humanFrequency
 
 class AuFile(Parser):
     PARSER_TAGS = {

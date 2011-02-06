@@ -2,8 +2,8 @@
 Dictionnary classes which store values order.
 """
 
-from hachoir_core.error import HachoirError
-from hachoir_core.i18n import _
+from lib.hachoir_core.error import HachoirError
+from lib.hachoir_core.i18n import _
 
 class UniqKeyError(HachoirError):
     """

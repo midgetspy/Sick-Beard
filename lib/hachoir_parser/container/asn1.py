@@ -39,15 +39,15 @@ Author: Victor Stinner
 Creation date: 24 september 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet,
     FieldError, ParserError,
     Bit, Bits, Bytes, UInt8, GenericInteger, String,
     Field, Enum, RawBytes)
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.tools import createDict, humanDatetime
-from hachoir_core.stream import InputStreamError
-from hachoir_core.text_handler import textHandler
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.tools import createDict, humanDatetime
+from lib.hachoir_core.stream import InputStreamError
+from lib.hachoir_core.text_handler import textHandler
 
 # --- Field parser ---
 

@@ -16,14 +16,14 @@ Creation date: 26 december 2006
 
 MAX_FILESIZE = 50 * 1024 * 1024
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, StaticFieldSet, Enum,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, StaticFieldSet, Enum,
     MissingField, ParserError,
     UInt32, Int32, UInt16, Int16, UInt8, NullBytes, RawBytes, String)
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_core.tools import createDict
-from hachoir_parser.image.common import RGBA
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.tools import createDict
+from lib.hachoir_parser.image.common import RGBA
 
 POLYFILL_MODE = {1: "Alternate", 2: "Winding"}
 

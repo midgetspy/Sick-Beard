@@ -13,17 +13,17 @@ Author: Victor Stinner
 Creation date: 15 september 2006
 """
 
-from hachoir_parser import Parser
-from hachoir_parser.audio.mpeg_audio import MpegAudioFile
-from hachoir_core.field import (FieldSet,
+from lib.hachoir_parser import Parser
+from lib.hachoir_parser.audio.mpeg_audio import MpegAudioFile
+from lib.hachoir_core.field import (FieldSet,
     FieldError, ParserError,
     Bit, Bits, Bytes, RawBits, PaddingBits, NullBits,
     UInt8, UInt16,
     RawBytes, PaddingBytes,
     Enum)
-from hachoir_core.endian import BIG_ENDIAN
-from hachoir_core.stream import StringInputStream
-from hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.endian import BIG_ENDIAN
+from lib.hachoir_core.stream import StringInputStream
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
 
 class FragmentGroup:
     def __init__(self, parser):

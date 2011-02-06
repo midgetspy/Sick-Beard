@@ -17,6 +17,14 @@
     \$.get("$sbRoot/home/testGrowl", {'host': growl_host, 'password': growl_password});
 
   });
+  
+  \$('#testProwl').click(function(){
+
+    var prowl_api = \$("#prowl_api").val();
+    var prowl_priority = \$("#prowl_priority").val();
+    \$.get("$sbRoot/home/testProwl", {'prowl_api': prowl_api, 'prowl_priority': prowl_priority});
+
+  });
 
   \$('#testXBMC').click(function(){
 
@@ -282,6 +290,72 @@
                         </div>
 
                     <input type="button" value="Test Twitter" id="testTwitter" />
+                    <input type="submit" value="Save Changes" />
+
+                    </fieldset>
+                </div><!-- /component-group -->
+                
+            <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Prowl</h3>
+                        <p>A Growl client for iOS.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_prowl">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Prowl notifications?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="prowl_notify_onsnatch" id="prowl_notify_onsnatch" #if $sickbeard.PROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="prowl_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="prowl_notify_ondownload" id="prowl_notify_ondownload" #if $sickbeard.PROWL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="prowl_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Prowl API key:</span>
+                                <input type="text" name="prowl_api" id="prowl_api" value="$sickbeard.PROWL_API" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Get your key at: <a href="https://prowl.weks.net/settings.php" target=_blank>https://prowl.weks.net/settings.php</a></span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Prowl priority:</span>
+                               <select id="prowl_priority" name="prowl_priority">
+<option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then "selected" else ""#>Very Low
+<option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then "selected" else ""#>Moderate
+<option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then "selected" else ""#>Normal
+<option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then "selected" else ""#>High
+<option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then "selected" else ""#>Emergency
+</select>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Priority of Prowl messages from Sick-Beard.</span>
+                            </label>
+                        </div>
+
+                    <input type="button" value="Test Prowl" id="testProwl" />
                     <input type="submit" value="Save Changes" />
 
                     </fieldset>

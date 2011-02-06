@@ -29,17 +29,17 @@ Thanks to:
      format information
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt8, UInt16, UInt32, Enum,
     Bit, NullBits, NullBytes,
     RawBytes, String, PaddingBytes,
     SubFile)
-from hachoir_core.tools import alignValue, humanDuration
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.text_handler import filesizeHandler, textHandler
-from hachoir_parser.video.fourcc import audio_codec_name, video_fourcc_name
-from hachoir_parser.image.ico import IcoFile
+from lib.hachoir_core.tools import alignValue, humanDuration
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.text_handler import filesizeHandler, textHandler
+from lib.hachoir_parser.video.fourcc import audio_codec_name, video_fourcc_name
+from lib.hachoir_parser.image.ico import IcoFile
 from datetime import timedelta
 
 def parseText(self):

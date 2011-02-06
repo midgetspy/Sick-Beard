@@ -9,11 +9,11 @@ CVS online:
 Author: Victor Stinner
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (StaticFieldSet, FieldSet, ParserError,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (StaticFieldSet, FieldSet, ParserError,
     UInt8, UInt32, Enum, Float32, String, PascalString32, RawBytes)
-from hachoir_parser.image.common import RGBA
-from hachoir_core.endian import NETWORK_ENDIAN
+from lib.hachoir_parser.image.common import RGBA
+from lib.hachoir_core.endian import NETWORK_ENDIAN
 
 class XcfCompression(FieldSet):
     static_size = 8

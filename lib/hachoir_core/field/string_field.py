@@ -15,11 +15,11 @@ Note: For PascalStringXX, prefixed value is the number of bytes and not
       of characters!
 """
 
-from hachoir_core.field import FieldError, Bytes
-from hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
-from hachoir_core.tools import alignValue, makePrintable
-from hachoir_core.i18n import guessBytesCharset, _
-from hachoir_core import config
+from lib.hachoir_core.field import FieldError, Bytes
+from lib.hachoir_core.endian import LITTLE_ENDIAN, BIG_ENDIAN
+from lib.hachoir_core.tools import alignValue, makePrintable
+from lib.hachoir_core.i18n import guessBytesCharset, _
+from lib.hachoir_core import config
 from codecs import BOM_UTF16_LE, BOM_UTF16_BE, BOM_UTF32_LE, BOM_UTF32_BE
 
 # Default charset used to convert byte string to Unicode

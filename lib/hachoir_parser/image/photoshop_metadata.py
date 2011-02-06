@@ -1,11 +1,11 @@
-from hachoir_core.field import (FieldSet, ParserError,
+from lib.hachoir_core.field import (FieldSet, ParserError,
     UInt8, UInt16, UInt32,
     String, CString, PascalString8,
     NullBytes, RawBytes)
-from hachoir_core.text_handler import textHandler, hexadecimal
-from hachoir_core.tools import alignValue, createDict
-from hachoir_parser.image.iptc import IPTC
-from hachoir_parser.common.win32 import PascalStringWin32
+from lib.hachoir_core.text_handler import textHandler, hexadecimal
+from lib.hachoir_core.tools import alignValue, createDict
+from lib.hachoir_parser.image.iptc import IPTC
+from lib.hachoir_parser.common.win32 import PascalStringWin32
 
 class Version(FieldSet):
     def createFields(self):

@@ -3,8 +3,8 @@ Utilities to convert integers and binary strings to binary (number), binary
 string, number, hexadecimal, etc.
 """
 
-from hachoir_core.endian import BIG_ENDIAN, LITTLE_ENDIAN
-from hachoir_core.compatibility import reversed
+from lib.hachoir_core.endian import BIG_ENDIAN, LITTLE_ENDIAN
+from lib.hachoir_core.compatibility import reversed
 from itertools import chain, repeat
 from struct import calcsize, unpack, error as struct_error
 

@@ -39,12 +39,20 @@ try:
 except ImportError:
     gzip = None
 
-import httplib2
-    
+# Use local version for sickbeard, system version elsewhere
 try:
-    import socks
+    import lib.httplib2 as httplib2
 except ImportError:
-    socks = None
+    import httplib2
+    
+# Try using local version, followed by system, and none if neither are found
+try:
+    import lib.socks as socks
+except ImportError:
+    try:
+        import socks as socks
+    except ImportError:
+        socks = None
 
 from tvdb_ui import BaseUI, ConsoleUI
 from tvdb_exceptions import (tvdb_error, tvdb_userabort, tvdb_shownotfound,

@@ -89,10 +89,21 @@ class EZRSSProvider(generic.TorrentProvider):
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
-        data = self.getURL(searchURL)
+        raw_data = self.getURL(searchURL)
 
-        if data == None:
+        if raw_data == None:
             return []
+        
+        data = ''
+        
+        # fix up bad feeds
+        for cur_line in raw_data.split('\n'):
+            if re.search('>[^<>]*&(?!amp;).*<', cur_line):
+                logger.log(u"Fixing up the feed, putting &amp; in this line: "+cur_line, logger.WARNING)
+                data += re.sub('&(?!amp;)', '&amp;', cur_line)
+            else:
+                data += cur_line
+            data += '\n'
         
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
@@ -128,7 +139,7 @@ class EZRSSProvider(generic.TorrentProvider):
         return (title, url)
 
     def _extract_name_from_url(self, url):
-        name_regex = '.*/(.*)\.\[.*]\.torrent$'
+        name_regex = '.*/(.*)\.(\[.*]|\d+\.TPB)\.torrent$'
         logger.log(u"Comparing "+name_regex+" against "+url, logger.DEBUG)
         match = re.match(name_regex, url, re.I)
         if match:

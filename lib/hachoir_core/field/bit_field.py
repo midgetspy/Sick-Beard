@@ -5,9 +5,9 @@ Bit sized classes:
 - RawBits: unknown content with a size in bits.
 """
 
-from hachoir_core.field import Field
-from hachoir_core.i18n import _
-from hachoir_core import config
+from lib.hachoir_core.field import Field
+from lib.hachoir_core.i18n import _
+from lib.hachoir_core import config
 
 class RawBits(Field):
     """

@@ -5,14 +5,14 @@ Author: Victor Stinner
 Creation date: 31 january 2007
 """
 
-from hachoir_parser import Parser
-from hachoir_core.field import (FieldSet, Enum,
+from lib.hachoir_parser import Parser
+from lib.hachoir_core.field import (FieldSet, Enum,
     CString, String,
     UInt16, UInt32, Bit, Bits, PaddingBits, NullBits,
     DateTimeMSDOS32, RawBytes)
-from hachoir_parser.common.msdos import MSDOSFileAttr16
-from hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
-from hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_parser.common.msdos import MSDOSFileAttr16
+from lib.hachoir_core.text_handler import textHandler, hexadecimal, filesizeHandler
+from lib.hachoir_core.endian import LITTLE_ENDIAN
 
 MAX_NB_FOLDER = 30
 

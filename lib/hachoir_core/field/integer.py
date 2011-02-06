@@ -4,7 +4,7 @@ Integer field classes:
 - Int8, Int16, Int24, Int32, Int64: signed integer of 8, 16, 32, 64 bits.
 """
 
-from hachoir_core.field import Bits, FieldError
+from lib.hachoir_core.field import Bits, FieldError
 
 class GenericInteger(Bits):
     """

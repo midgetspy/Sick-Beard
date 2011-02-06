@@ -3,6 +3,7 @@
     margin:			0;
     padding:		0;
     list-style:		none;
+    font-size:  13px;
 }
 .sf-menu ul {
 border:	1px solid #57442B;
@@ -19,6 +20,13 @@ border:	1px solid #57442B;
 .sf-menu li.spacer,.sf-menu li.spacer:hover {
     background-color:#57442B;
     width:15px;
+}
+.sf-menu .first {
+margin-left:15px;
+border-left:	1px solid #ccc;
+}
+.sf-menu .navIcon {
+    padding: 0.6em 1em 0.55em;
 }
 .sf-menu li:hover {
     visibility:		inherit; /* fixes IE7 'sticky bug' */
@@ -63,12 +71,18 @@ ul.sf-menu li li li.sfHover ul {
 .sf-menu {
     float:			left;
     /*margin-bottom:	1em;*/
-    line-height:	1.0;
+    line-height:	1em;
 }
 .sf-menu a {
-    border-right:	1px solid #fff;
+    border-right:	1px solid #ccc;
     padding: 		.75em 1em;
     text-decoration:none;
+}
+.sf-menu li a {
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+}
+.sf-menu li li a, .sf-menu li li li a {
+    text-shadow: none;
 }
 .sf-menu a, .sf-menu a:visited { /* visited pseudo selector so IE6 applies text colour*/
     color:			#F5F5F5;

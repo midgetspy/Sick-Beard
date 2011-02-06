@@ -4,7 +4,7 @@
 Various utilities.
 """
 
-from hachoir_core.i18n import _, ngettext
+from lib.hachoir_core.i18n import _, ngettext
 import re
 import stat
 from datetime import datetime, timedelta, MAXYEAR

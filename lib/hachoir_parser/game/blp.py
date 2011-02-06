@@ -12,11 +12,11 @@ Creation date: July 10 2007
   http://en.wikipedia.org/wiki/S3_Texture_Compression
 """
 
-from hachoir_core.endian import LITTLE_ENDIAN
-from hachoir_core.field import String, UInt32, UInt8, Enum, FieldSet, RawBytes, GenericVector, Bit, Bits
-from hachoir_parser.parser import Parser
-from hachoir_parser.image.common import PaletteRGBA
-from hachoir_core.tools import alignValue
+from lib.hachoir_core.endian import LITTLE_ENDIAN
+from lib.hachoir_core.field import String, UInt32, UInt8, Enum, FieldSet, RawBytes, GenericVector, Bit, Bits
+from lib.hachoir_parser.parser import Parser
+from lib.hachoir_parser.image.common import PaletteRGBA
+from lib.hachoir_core.tools import alignValue
 
 class PaletteIndex(UInt8):
     def createDescription(self):

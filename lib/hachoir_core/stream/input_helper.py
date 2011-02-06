@@ -1,5 +1,5 @@
-from hachoir_core.i18n import getTerminalCharset, guessBytesCharset, _
-from hachoir_core.stream import InputIOStream, InputSubStream, InputStreamError
+from lib.hachoir_core.i18n import getTerminalCharset, guessBytesCharset, _
+from lib.hachoir_core.stream import InputIOStream, InputSubStream, InputStreamError
 
 def FileInputStream(filename, real_filename=None, **args):
     """

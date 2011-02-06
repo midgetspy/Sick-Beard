@@ -1,7 +1,7 @@
-from hachoir_core.endian import BIG_ENDIAN, LITTLE_ENDIAN
-from hachoir_core.field import GenericFieldSet
-from hachoir_core.log import Logger
-import hachoir_core.config as config
+from lib.hachoir_core.endian import BIG_ENDIAN, LITTLE_ENDIAN
+from lib.hachoir_core.field import GenericFieldSet
+from lib.hachoir_core.log import Logger
+import lib.hachoir_core.config as config
 
 class Parser(GenericFieldSet):
     """

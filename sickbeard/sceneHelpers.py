@@ -25,7 +25,7 @@ import datetime
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ("sub(pack|s|bed)", "nlsub(bed)?", "swesub(bed)?",
+resultFilters = ("sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
                  "dubbed", "german", "french", "core2hd")
 
@@ -225,6 +225,8 @@ def allPossibleShowNames(show):
     # any countries defined in common.countryList
     # (and vice versa)
     for curName in set(showNames):
+        if not curName:
+            continue
         for curCountry in country_list:
             if curName.endswith(' '+curCountry):
                 newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
