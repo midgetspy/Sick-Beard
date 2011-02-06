@@ -1346,9 +1346,9 @@ class Home:
     def testGrowl(self, host=None, password=None):
         result = notifiers.growl_notifier.test_notify(host, password)
         if result:
-            return "Test growl sent successfully to "+urllib.unquote_plus(host)+" with password "+password
+            return "Test growl sent successfully to "+urllib.unquote_plus(host)+" with password '"+password+"'"
         else:
-            return "Test growl failed to "+urllib.unquote_plus(host)+" with password "+password
+            return "Test growl failed to "+urllib.unquote_plus(host)+" with password '"+password+"'"
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):

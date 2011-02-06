@@ -10,7 +10,7 @@ from lib.growl import gntp
 class GrowlNotifier:
 
     def test_notify(self, host, password):
-        self._sendGrowl("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True)
+        return self._sendGrowl("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True)
 
     def notify_snatch(self, ep_name):
         if sickbeard.GROWL_NOTIFY_ONSNATCH:
@@ -111,7 +111,10 @@ class GrowlNotifier:
             opts['port'] = pc[1]
             logger.log(u"Sending growl to "+opts['host']+":"+str(opts['port'])+": "+message)
             try:
-                self._send_growl(opts, message)
+                request = self._send_growl(opts, message)
+                if not request:
+                    return False
+                return True
             except socket.error, e:
                 logger.log(u"Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+str(e).decode('utf-8'))
 
