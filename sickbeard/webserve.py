@@ -675,7 +675,7 @@ class ConfigEpisodeDownloads:
     def saveEpisodeDownloads(self, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None,
                        torrent_dir=None, nzb_method=None, usenet_retention=None,
-                       search_frequency=None, tv_download_dir=None,
+                       search_frequency=None, tv_download_dir=None, missed_episodes_age=None,
                        keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                        download_propers=None, move_associated_files=None):
 
@@ -720,6 +720,9 @@ class ConfigEpisodeDownloads:
         if usenet_retention == None:
             usenet_retention = 200
 
+        if missed_episodes_age is None:
+            missed_episodes_age = 7
+
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
@@ -727,6 +730,7 @@ class ConfigEpisodeDownloads:
 
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
+        sickbeard.MISSED_EPISODES_AGE = int(missed_episodes_age)
 
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
@@ -1957,3 +1961,4 @@ class WebInterface:
     browser = browser.WebFileBrowser()
 
     errorlogs = ErrorLogs()
+
