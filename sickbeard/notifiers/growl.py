@@ -53,9 +53,11 @@ class GrowlNotifier:
     
         if message:
             notice.add_header('Notification-Text',message)
-    
-        return self._send(options['host'],options['port'],notice.encode(),options['debug'])
-    
+
+        response = self._send(options['host'],options['port'],notice.encode(),options['debug'])
+        if isinstance(response,gntp.GNTPOK): return True
+        return False
+
     def _send(self, host,port,data,debug=False):
         if debug: print '<Sending>\n',data,'\n</Sending>'
         
@@ -67,8 +69,9 @@ class GrowlNotifier:
         s.close()
     
         if debug: print '<Recieved>\n',response,'\n</Recieved>'
+
         return response
-    
+
     def _sendGrowl(self, title="Sick Beard Notification", message=None, name=None, host=None, password=None, force=False):
     
         if not sickbeard.USE_GROWL and not force:
@@ -113,11 +116,9 @@ class GrowlNotifier:
             opts['port'] = pc[1]
             logger.log(u"Sending growl to "+opts['host']+":"+str(opts['port'])+": "+message)
             try:
-                request = self._send_growl(opts, message)
-                if not request:
-                    return False
-                return True
+                return self._send_growl(opts, message)
             except socket.error, e:
                 logger.log(u"Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+str(e).decode('utf-8'))
+                return False
 
 notifier = GrowlNotifier
