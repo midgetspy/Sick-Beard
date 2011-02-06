@@ -54,11 +54,12 @@ class GrowlNotifier:
         if message:
             notice.add_header('Notification-Text',message)
     
-        self._send(options['host'],options['port'],notice.encode(),options['debug'])
+        return self._send(options['host'],options['port'],notice.encode(),options['debug'])
     
     def _send(self, host,port,data,debug=False):
         if debug: print '<Sending>\n',data,'\n</Sending>'
-    
+        
+        response = ''
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host,port))
         s.send(data)
@@ -66,6 +67,7 @@ class GrowlNotifier:
         s.close()
     
         if debug: print '<Recieved>\n',response,'\n</Recieved>'
+        return response
     
     def _sendGrowl(self, title="Sick Beard Notification", message=None, name=None, host=None, password=None, force=False):
     
