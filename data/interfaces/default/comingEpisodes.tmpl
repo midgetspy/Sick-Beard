@@ -276,13 +276,12 @@ Custom
 [<span class="title">Custom</span>]
 #end if
             <br />
-            <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">
             #if $cur_result["description"] == '':
-                [There is no summary added for this episode]
+                <div class="ep_summary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
             #else:
-                $cur_result["description"]
+                <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">$cur_result["description"]</div>
             #end if
-            </div><br/>
+            <br/>
           </td>
         </tr>
       </table>
