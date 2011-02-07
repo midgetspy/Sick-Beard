@@ -24,6 +24,7 @@ import sqlite3
 import datetime
 import socket
 import os, sys, subprocess
+import urllib
 
 from threading import Lock
 
@@ -359,12 +360,21 @@ def initialize(consoleLogging=True):
         if not helpers.makeDir(CACHE_DIR):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
+            
+        proxies = urllib.getproxies()
+        proxy_url = None
+        if 'http' in proxies:
+            proxy_url = proxies['http']
+        elif 'ftp' in proxies:
+            proxy_url = proxies['ftp']
 
         # Set our common tvdb_api options here
         TVDB_API_PARMS = {'cache': True,
                           'apikey': TVDB_API_KEY,
                           'language': 'en',
-                          'cache_dir': False}
+                          'cache_dir': False,
+                          'http_proxy': proxy_url}
+        
         if CACHE_DIR:
             TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
 
