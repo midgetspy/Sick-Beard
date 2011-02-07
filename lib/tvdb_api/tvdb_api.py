@@ -501,12 +501,12 @@ class Tvdb:
 	    h_cache = self.config['cache_location']
 	else:
 	    h_cache = False
-    
-    if self.config['http_proxy'] != '' and self.config['http_proxy'] != None and socks != None:
-        parsedURI = socks.parseproxyuri(self.config['http_proxy'])
-        h = httplib2.Http(cache=h_cache,proxy_info=httplib2.ProxyInfo(socks.PROXY_TYPE_HTTP, parsedURI[1], int(parsedURI[2])))
-    else:
-        h = httplib2.Http(cache=h_cache)
+
+        if self.config['http_proxy'] != '' and self.config['http_proxy'] != None and socks != None:
+            parsedURI = socks.parseproxyuri(self.config['http_proxy'])
+            h = httplib2.Http(cache=h_cache,proxy_info=httplib2.ProxyInfo(socks.PROXY_TYPE_HTTP, parsedURI[1], int(parsedURI[2])))
+        else:
+            h = httplib2.Http(cache=h_cache)
 
 	# Handle a recache request, this will get fresh content and cache again
 	# if enabled
