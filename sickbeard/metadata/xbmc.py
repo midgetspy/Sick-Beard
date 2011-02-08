@@ -66,7 +66,15 @@ class XBMCMetadata(generic.GenericMetadata):
 
         show_ID = show_obj.tvdbid
 
-        t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
+        tvdb_lang = show_obj.lang
+        # There's gotta be a better way of doing this but we don't wanna
+        # change the language value elsewhere
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+        if tvdb_lang and not tvdb_lang == 'en':
+            ltvdb_api_parms['language'] = tvdb_lang
+
+        t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
     
         tv_node = etree.Element("tvshow")
         for ns in XML_NSMAP.keys():
@@ -168,8 +176,16 @@ class XBMCMetadata(generic.GenericMetadata):
 
         eps_to_write = [ep_obj] + ep_obj.relatedEps
 
+        tvdb_lang = ep_obj.show.lang
+        # There's gotta be a better way of doing this but we don't wanna
+        # change the language value elsewhere
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+        if tvdb_lang and not tvdb_lang == 'en':
+            ltvdb_api_parms['language'] = tvdb_lang
+
         try:
-            t = tvdb_api.Tvdb(actors=True, **sickbeard.TVDB_API_PARMS)
+            t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             myShow = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(str(e))

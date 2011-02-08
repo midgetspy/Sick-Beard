@@ -44,7 +44,7 @@ from common import *
 
 class TVShow(object):
 
-    def __init__ (self, tvdbid):
+    def __init__ (self, tvdbid, lang=""):
 
         self.tvdbid = tvdbid
 
@@ -63,6 +63,7 @@ class TVShow(object):
         self.startyear = 0
         self.paused = 0
         self.air_by_date = 0
+        self.lang = lang
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -221,6 +222,10 @@ class TVShow(object):
         scannedEps = {}
 
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+        if self.lang:
+            ltvdb_api_parms['language'] = self.lang
+
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
         cachedShow = t[self.tvdbid]
@@ -258,6 +263,9 @@ class TVShow(object):
 
         if not cache:
             ltvdb_api_parms['cache'] = 'recache'
+
+        if self.lang:
+            ltvdb_api_parms['language'] = self.lang
 
         try:
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
@@ -374,7 +382,15 @@ class TVShow(object):
         # if we have an air-by-date show then get the real season/episode numbers
         if parse_result.air_by_date:
             try:
-                t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                # There's gotta be a better way of doing this but we don't wanna
+                # change the cache value elsewhere
+                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+                if self.lang:
+                    ltvdb_api_parms['language'] = self.lang
+
+                t = tvdb_api.Tvdb(**ltvdb_api_parms)
+
                 epObj = t[self.tvdbid].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
@@ -427,6 +443,7 @@ class TVShow(object):
                 newQuality = Quality.nameQuality(file)
                 if newQuality == Quality.UNKNOWN:
                     newQuality = Quality.assumeQuality(file)
+
                 newStatus = None
 
                 # if it was snatched and now exists then set the status correctly
@@ -505,6 +522,10 @@ class TVShow(object):
             if self.tvrid == 0:
                 self.tvrid = int(sqlResults[0]["tvr_id"])
 
+            if self.lang == "":
+                self.lang = sqlResults[0]["lang"]
+
+
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + ": Loading show info from theTVDB")
@@ -516,6 +537,9 @@ class TVShow(object):
 
             if not cache:
                 ltvdb_api_parms['cache'] = 'recache'
+            
+            if self.lang:
+                ltvdb_api_parms['language'] = self.lang
 
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
         else:
@@ -781,7 +805,8 @@ class TVShow(object):
                         "paused": self.paused,
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
-                        "tvr_name": self.tvrname
+                        "tvr_name": self.tvrname,
+                        "lang": self.lang
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
@@ -1032,6 +1057,8 @@ class TVEpisode(object):
 
         logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
+        tvdb_lang = self.show.lang
+
         try:
             if cachedSeason is None:
                 if tvapi is None:
@@ -1042,12 +1069,16 @@ class TVEpisode(object):
                     if not cache:
                         ltvdb_api_parms['cache'] = 'recache'
 
+                    if tvdb_lang:
+                            ltvdb_api_parms['language'] = tvdb_lang
+
                     t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 else:
                     t = tvapi
                 myEp = t[self.show.tvdbid][season][episode]
             else:
                 myEp = cachedSeason[episode]
+
         except (tvdb_exceptions.tvdb_error, IOError), e:
             logger.log(u"TVDB threw up an error: "+str(e).decode('utf-8'), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
@@ -1393,5 +1424,4 @@ class TVEpisode(object):
             finalName = re.sub("\s+", ".", finalName)
 
         return finalName
-
 
