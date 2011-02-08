@@ -642,18 +642,18 @@ class ConfigGeneral:
         class TVEpisode(tv.TVEpisode):
             def __init__(self, season, episode, name):
                 self.relatedEps = []
-                self.name = name
-                self.season = season
-                self.episode = episode
+                self._name = name
+                self._season = season
+                self._episode = episode
                 self.show = TVShow()
 
 
         # make a fake episode object
         ep = TVEpisode(1,2,"Ep Name")
-        ep.status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
+        ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
 
         if whichTest == "multi":
-            ep.name = "Ep Name (1)"
+            ep._name = "Ep Name (1)"
             secondEp = TVEpisode(1,3,"Ep Name (2)")
             ep.relatedEps.append(secondEp)
 
