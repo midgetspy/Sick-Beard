@@ -171,7 +171,6 @@ width:90%;
 margin-left:auto;
 margin-right:auto;
 }
-
 .sickbeardTable th{
 padding:2px;
 font-weight:700;
@@ -181,6 +180,10 @@ text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 .sickbeardTable td{
 padding:5px;
+}
+.sickbeardTable tfoot a {
+color:#FFF;
+text-decoration: none;
 }
 
 .row {
