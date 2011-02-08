@@ -1,5 +1,5 @@
 #import sickbeard
-#import datetime, locale
+#import datetime
 #from sickbeard.common import *
 #set global $title="Coming Episodes"
 
@@ -231,7 +231,7 @@ Custom
                     #set $show_div = "ep_listing listing_toofar"
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode(locale.getpreferredencoding())</h1>
+                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
                     #if $cur_ep_airdate == $today:
                         #set $show_div = "ep_listing listing_current"
                     #else:
@@ -276,13 +276,12 @@ Custom
 [<span class="title">Custom</span>]
 #end if
             <br />
-            <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">
             #if $cur_result["description"] == '':
-                [There is no summary added for this episode]
+                <div class="ep_summary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
             #else:
-                $cur_result["description"]
+                <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">$cur_result["description"]</div>
             #end if
-            </div><br/>
+            <br/>
           </td>
         </tr>
       </table>

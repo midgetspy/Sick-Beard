@@ -30,8 +30,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 .browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat; }
 
 .ui-dialog, .ui-dialog-buttonpane { background: #eceadf url("$sbRoot/css/smooth-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat !important; }
-.ui-widget-content { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_ffffff_40x100.png") 50% 50% repeat; color: #222222; }
-.ui-widget-header { border: 1px solid #aaaaaa; background: #dcdcdc url("$sbRoot/css/smooth-grinder/images/ui-bg_highlight-soft_75_dcdcdc_1x100.png") 50% 50% repeat-x; color: #222222; font-weight: bold; }
+.ui-widget-content { border: 1px solid #aaaaaa; background: #dcdcdc url("$sbRoot/css/smooth-grinder/images/ui-bg_highlight-soft_75_dcdcdc_1x100.png") 50% 50% repeat-x; color: #222222; }
+.ui-widget-header { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_ffffff_40x100.png") 50% 50% repeat; color: #222222; font-weight: bold; }
 
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #aaaaaa; background: #e6e6e6 url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50% repeat-x; font-weight: bold; color: #654b24; }
 .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #999999; background: #dadada url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_75_dadada_1x400.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
@@ -118,14 +118,14 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
         \$("a.confirm").bind("click",function() {
             var target = \$( this ).attr('href');
-            if (confirm("Are you sure?"))
+            if ( confirm("Are you sure you want to " + \$(this).attr('text') + "?") )
                 location.href = target;
             return false;
         });
 
     \$.pnotify.defaults.pnotify_width = "325px";
     \$.pnotify.defaults.pnotify_history = false;
-    \$.pnotify.defaults.pnotify_delay = 1500;
+    \$.pnotify.defaults.pnotify_delay = 4000;
 
     #for $curMessage in $flash.messages():
         \$.pnotify({

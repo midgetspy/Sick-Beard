@@ -20,6 +20,8 @@ class EZRSSProvider(generic.TorrentProvider):
         self.cache = EZRSSCache(self)
 
         self.url = 'http://www.ezrss.it/'
+        
+        self.ezrss_ns = 'http://xmlns.ezrss.it/0.1/'
 
     def isEnabled(self):
         return sickbeard.EZRSS
@@ -28,8 +30,9 @@ class EZRSSProvider(generic.TorrentProvider):
         return 'ezrss.gif'
       
     def getQuality(self, item):
-        link = item.findtext('link')
-        quality = Quality.nameQuality(link)
+        
+        filename = item.findtext('{%s}torrent/{%s}fileName' %(self.ezrss_ns,self.ezrss_ns))
+        quality = Quality.nameQuality(filename)
         return quality
 
     def findSeasonResults(self, show, season):
@@ -85,10 +88,20 @@ class EZRSSProvider(generic.TorrentProvider):
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
-        data = self.getURL(searchURL)
+        raw_data = self.getURL(searchURL)
 
-        if data == None:
+        if raw_data == None:
             return []
+        
+        data = ''
+        
+        # fix up bad feeds
+        for cur_line in raw_data.split('\n'):
+            if 'CDATA' not in cur_line:
+                data += re.sub('&(?!\#\d+|\w+;)', '&amp;', cur_line)
+            else:
+                data += cur_line
+            data += '\n'
         
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
@@ -115,18 +128,19 @@ class EZRSSProvider(generic.TorrentProvider):
     def _get_title_and_url(self, item):
         title = item.findtext('title')
         url = item.findtext('link').replace('&amp;','&')
+        filename = item.findtext('{%s}torrent/{%s}fileName' %(self.ezrss_ns,self.ezrss_ns))
         
-        new_title = self._extract_name_from_url(url)
+        new_title = self._extract_name_from_filename(filename)
         if new_title:
             title = new_title
             logger.log(u"Extracted the name "+title+" from the torrent link", logger.DEBUG)
 
         return (title, url)
 
-    def _extract_name_from_url(self, url):
-        name_regex = '.*/(.*)\.(\[.*]|\d+\.TPB)\.torrent$'
-        logger.log(u"Comparing "+name_regex+" against "+url, logger.DEBUG)
-        match = re.match(name_regex, url, re.I)
+    def _extract_name_from_filename(self, filename):
+        name_regex = '(.*)\.?(\[.*]|\d+\.TPB)\.torrent$'
+        logger.log(u"Comparing "+name_regex+" against "+filename, logger.DEBUG)
+        match = re.match(name_regex, filename, re.I)
         if match:
             return match.group(1)
         return None
@@ -155,8 +169,9 @@ class EZRSSCache(tvcache.TVCache):
 
         title = item.findtext('title')
         url = item.findtext('link')
+        filename = item.findtext('{%s}torrent/{%s}fileName' %(self.provider.ezrss_ns,self.provider.ezrss_ns))
 
-        new_title = self.provider._extract_name_from_url(url)
+        new_title = self.provider._extract_name_from_filename(filename)
         if new_title:
             title = new_title
             logger.log(u"Extracted the name "+title+" from the torrent link", logger.DEBUG)

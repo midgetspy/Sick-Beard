@@ -642,18 +642,18 @@ class ConfigGeneral:
         class TVEpisode(tv.TVEpisode):
             def __init__(self, season, episode, name):
                 self.relatedEps = []
-                self.name = name
-                self.season = season
-                self.episode = episode
+                self._name = name
+                self._season = season
+                self._episode = episode
                 self.show = TVShow()
 
 
         # make a fake episode object
         ep = TVEpisode(1,2,"Ep Name")
-        ep.status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
+        ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
 
         if whichTest == "multi":
-            ep.name = "Ep Name (1)"
+            ep._name = "Ep Name (1)"
             secondEp = TVEpisode(1,3,"Ep Name (2)")
             ep.relatedEps.append(secondEp)
 
@@ -1362,13 +1362,24 @@ class Home:
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
-        notifiers.growl_notifier.test_notify(host, password)
-        return "Tried sending growl to "+host+" with password "+password
+        result = notifiers.growl_notifier.test_notify(host, password)
+        if password==None or password=='':
+            pw_append = ''
+        else:
+            pw_append = " with password: " + password
+
+        if result:
+            return "Test growl sent successfully to "+urllib.unquote_plus(host)+pw_append
+        else:
+            return "Test growl failed to "+urllib.unquote_plus(host)+pw_append
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):
-        notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
-        return "Tried sending Prowl notification"
+        result = notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
+        if result:
+            return "Test prowl notice sent successfully"
+        else:
+            return "Test prowl notice failed"
 
     @cherrypy.expose
     def twitterStep1(self):
@@ -1393,8 +1404,11 @@ class Home:
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
-        notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
-        return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
+        result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
+        if result:
+            return "Test notice sent successfully to "+urllib.unquote_plus(host)
+        else:
+            return "Test notice failed to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
     def shutdown(self):
