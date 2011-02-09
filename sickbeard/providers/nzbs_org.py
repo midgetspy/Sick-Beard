@@ -43,7 +43,7 @@ class NZBsProvider(generic.NZBProvider):
 
 		self.cache = NZBsCache(self)
 
-		self.url = 'http://www.nzbs.org/'
+		self.url = 'https://secure.nzbs.org/'
 
 	def isEnabled(self):
 		return sickbeard.NZBS

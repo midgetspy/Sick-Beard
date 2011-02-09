@@ -19,7 +19,7 @@ class EZRSSProvider(generic.TorrentProvider):
 
         self.cache = EZRSSCache(self)
 
-        self.url = 'http://www.ezrss.it/'
+        self.url = 'https://www.ezrss.it/'
         
         self.ezrss_ns = 'http://xmlns.ezrss.it/0.1/'
 
@@ -147,7 +147,7 @@ class EZRSSCache(tvcache.TVCache):
 
 
     def _getRSSData(self):
-        url = 'http://www.ezrss.it/feed/'
+        url = self.provider.url + 'feed/'
 
         logger.log(u"EZRSS cache update URL: "+ url, logger.DEBUG)
 

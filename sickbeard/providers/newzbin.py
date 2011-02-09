@@ -69,7 +69,7 @@ class NewzbinProvider(generic.NZBProvider):
 
         self.cache = NewzbinCache(self)
 
-        self.url = 'http://www.newzbin.com/'
+        self.url = 'https://www.newzbin.com/'
 
         self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
 
@@ -314,7 +314,7 @@ class NewzbinProvider(generic.NZBProvider):
 
         params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
 
-        url = "http://www.newzbin.com/search/?%s" % urllib.urlencode(params)
+        url = self.url + "search/?%s" % urllib.urlencode(params)
         logger.log("Newzbin search URL: " + url, logger.DEBUG)
 
         data = self.getURL(url)
