@@ -1,4 +1,5 @@
 import urllib
+import re
 
 import xml.etree.cElementTree as etree
 
@@ -67,7 +68,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = ep_obj.show.name
+        params['show_name'] = re.sub('[()]', '', ep_obj.show.name)
         
         if ep_obj.show.is_air_by_date:
             params['date'] = str(ep_obj.airdate)
