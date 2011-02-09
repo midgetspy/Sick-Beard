@@ -1961,7 +1961,7 @@ class WebInterface:
         redirect("/comingEpisodes")
 
     @cherrypy.expose
-    def comingEpisodes(self, layout="None"):
+    def comingEpisodes(self, layout=None):
 
         myDB = db.DBConnection()
         
@@ -1992,6 +1992,14 @@ class WebInterface:
         #epList.sort(sorts[sort])
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
+        cache_obj = image_cache.ImageCache()
+        coming_episodes = []
+        for row in sql_results:
+            ep = dict(row)
+            ep['poster_exists'] = ek.ek(os.path.exists, cache_obj.poster_path(row['showid']))
+            ep['banner_exists'] = ek.ek(os.path.exists, cache_obj.banner_path(row['showid']))
+            coming_episodes.append(ep)
+
         t = PageTemplate(file="comingEpisodes.tmpl")
         paused_item = { 'title': '', 'path': 'toggleComingEpsDisplayPaused' }
         paused_item['title'] = 'Hide Paused' if sickbeard.COMING_EPS_DISPLAY_PAUSED else 'Show Paused'
@@ -2010,7 +2018,7 @@ class WebInterface:
 
         t.next_week = next_week
         t.today = today
-        t.sql_results = sql_results
+        t.sql_results = coming_episodes
 
         # Allow local overriding of layout parameter
         if layout and layout in ('poster', 'banner', 'list'):
