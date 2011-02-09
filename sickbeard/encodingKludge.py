@@ -1,5 +1,6 @@
 import os
 import os.path
+import locale
 
 from sickbeard import logger
 
@@ -10,9 +11,9 @@ from sickbeard import logger
 def fixStupidEncodings(x):
     if type(x) == str:
         try:
-            return x.decode('utf-8')
+            return x.decode(locale.getpreferredencoding())
         except UnicodeDecodeError:
-            logger.log(u"Unable to decode value: "+str(repr(x)), logger.ERROR)
+            logger.log(u"Unable to decode value: "+repr(x), logger.ERROR)
             return None
     elif type(x) == unicode:
         return x
@@ -35,7 +36,7 @@ def ek(func, *args):
     if os.name == 'nt':
         result = func(*args)
     else:
-        result = func(*[x.encode('UTF-8') for x in args])
+        result = func(*[x.encode(locale.getpreferredencoding()) for x in args])
 
     if type(result) == list:
         return fixListEncodings(result)
