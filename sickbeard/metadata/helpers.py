@@ -26,9 +26,13 @@ from sickbeard.common import *
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
 
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
+
 import xml.etree.cElementTree as etree
 
 def getTVDBIDFromNFO(dir):
+
+    show_lang = None
 
     if not ek.ek(os.path.isdir, dir):
         logger.log(u"Show dir doesn't exist, can't load NFO")
@@ -55,6 +59,14 @@ def getTVDBIDFromNFO(dir):
             tvdb_id = int(showXML.findtext('id'))
         else:
             raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
+
+        try:
+            t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)
+            s = t[int(tvdb_id)]
+            if not s or 'name' not in s or not s['name']:
+                raise exceptions.NoNFOException("Show has no name on TVDB, probably the wrong language")
+        except tvdb_exceptions.tvdb_exception, e:
+            raise exceptions.NoNFOException("Unable to look up the show on TVDB, not using the NFO")
 
     except (exceptions.NoNFOException, SyntaxError, ValueError), e:
         logger.log(u"There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)

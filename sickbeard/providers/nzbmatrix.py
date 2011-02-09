@@ -70,7 +70,8 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
                   "subcat": "6,41",
-                  "english": 1}
+                  "english": 1,
+                  "ssl": 1}
 
         searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 

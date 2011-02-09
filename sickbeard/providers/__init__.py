@@ -73,7 +73,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'NZB.su|http://www.nzb.su/||0'
+    return 'NZB.su|https://www.nzb.su/||0'
 
 
 def getProviderModule(name):

@@ -43,6 +43,31 @@
         \$(this).setFromPresets(\$('#qualityPreset :selected').val());
   });
 
+  \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data){
+        var resultStr = '';
+
+        if (data.results.length == 0) {
+            resultStr = '<option value="$show.lang" selected="selected">$show.lang</option>';
+        } else {
+            var current_lang_added = false;
+            \$.each(data.results, function(index, obj){
+                if (obj == "$show.lang") {
+                        selected = ' selected="selected"';
+                        current_lang_added = true;
+                }
+                else
+                        selected = '';
+
+                resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
+            });
+            if (!current_lang_added)
+                resultStr += '<option value="$show.lang" selected="selected">$show.lang</option>';
+        }
+        \$('#tvdbLangSelect').html(resultStr)
+
+        \$('#tvdbLangSelect').change(function() { searchTvdb() });
+  });
+
 });
 </script>
 
@@ -79,6 +104,9 @@ Then Re-download the episodes in any or all of these qualities as they are avail
 <br />
 <br />
 </div>
+Language: <select name="tvdbLang" id="tvdbLangSelect"></select>
+<br />
+<br />
 Use Season Folders: <input type="checkbox" name="seasonfolders" #if $show.seasonfolders == 1 then "CHECKED" else ""#><br /><br />
 Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "CHECKED" else ""#><br /><br />
 
