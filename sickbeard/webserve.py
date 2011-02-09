@@ -642,18 +642,18 @@ class ConfigGeneral:
         class TVEpisode(tv.TVEpisode):
             def __init__(self, season, episode, name):
                 self.relatedEps = []
-                self.name = name
-                self.season = season
-                self.episode = episode
+                self._name = name
+                self._season = season
+                self._episode = episode
                 self.show = TVShow()
 
 
         # make a fake episode object
         ep = TVEpisode(1,2,"Ep Name")
-        ep.status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
+        ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
 
         if whichTest == "multi":
-            ep.name = "Ep Name (1)"
+            ep._name = "Ep Name (1)"
             secondEp = TVEpisode(1,3,"Ep Name (2)")
             ep.relatedEps.append(secondEp)
 
@@ -1117,12 +1117,26 @@ class NewHomeAddShows:
         return _munge(t)
 
     @cherrypy.expose
-    def searchTVDBForShowName(self, name):
+    def getTVDBLanguages(self):
+        result = tvdb_api.Tvdb().config['valid_languages']
+
+        # Make sure list is sorted alphabetically but 'en' is in front
+        if 'en' in result:
+            del result[result.index('en')]
+        result.sort()
+        result.insert(0,'en')
+
+        return json.dumps({'results': result})
+
+    @cherrypy.expose
+    def searchTVDBForShowName(self, name, lang="en"):
+        if not lang or lang == 'null':
+                lang = "en"
 
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
 
         params = {'seriesname': name.encode('utf-8'),
-                  'language': 'en'}
+                  'language': lang}
 
         finalURL = baseURL + urllib.urlencode(params)
 
@@ -1141,7 +1155,9 @@ class NewHomeAddShows:
         for curSeries in series:
             results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
 
-        return json.dumps({'results': results})
+        lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
+
+        return json.dumps({'results': results, 'langid': lang_id})
 
     @cherrypy.expose
     def addRootDir(self, dir=None):
@@ -1178,7 +1194,7 @@ class NewHomeAddShows:
         redirect(url)
 
     @cherrypy.expose
-    def addSingleShow(self, showToAdd, whichSeries=None, skipShow=False, showDirs=[]):
+    def addSingleShow(self, showToAdd, whichSeries=None, skipShow=False, showDirs=[], tvdbLang="en"):
 
         # we don't need to unquote the rest of the showDirs cause we're going to pass them straight through
         showToAdd = urllib.unquote_plus(showToAdd)
@@ -1188,7 +1204,7 @@ class NewHomeAddShows:
             return self.addShows(showDirs)
 
         # if we got a TVDB ID then make a show out of it
-        sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd)
+        sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd, tvdbLang)
         ui.flash.message('Show added', 'Adding the specified show into '+ showToAdd)
         # no need to display anything now that we added the show, so continue on to the next show
         return self.addShows(showDirs)
@@ -1209,6 +1225,7 @@ class NewHomeAddShows:
         t = PageTemplate(file="home_addShow.tmpl")
         t.submenu = HomeMenu()
 
+
         # make sure everything's unescaped
         showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
 
@@ -1227,6 +1244,7 @@ class NewHomeAddShows:
             tvdb_id = None
             try:
                 tvdb_id = metadata.helpers.getTVDBIDFromNFO(showToAdd)
+
             except exceptions.NoNFOException, e:
                 # we couldn't get a tvdb id from the file so let them know and just print the search page
                 if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo.old")):
@@ -1349,13 +1367,24 @@ class Home:
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
-        notifiers.growl_notifier.test_notify(host, password)
-        return "Tried sending growl to "+host+" with password "+password
+        result = notifiers.growl_notifier.test_notify(host, password)
+        if password==None or password=='':
+            pw_append = ''
+        else:
+            pw_append = " with password: " + password
+
+        if result:
+            return "Test growl sent successfully to "+urllib.unquote_plus(host)+pw_append
+        else:
+            return "Test growl failed to "+urllib.unquote_plus(host)+pw_append
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):
-        notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
-        return "Tried sending Prowl notification"
+        result = notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
+        if result:
+            return "Test prowl notice sent successfully"
+        else:
+            return "Test prowl notice failed"
 
     @cherrypy.expose
     def twitterStep1(self):
@@ -1380,8 +1409,11 @@ class Home:
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
-        notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
-        return "Tried sending XBMC notification to "+urllib.unquote_plus(host)
+        result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
+        if result:
+            return "Test notice sent successfully to "+urllib.unquote_plus(host)
+        else:
+            return "Test notice failed to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
     def testLibnotify(self):
@@ -1505,6 +1537,13 @@ class Home:
             epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
             epCounts[curEpCat] += 1
 
+        def titler(x):
+            if x.lower().startswith('a '):
+                    x = x[2:]
+            elif x.lower().startswith('the '):
+                    x = x[4:]
+            return x
+        t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
 
         t.epCounts = epCounts
         t.epCats = epCats
@@ -1517,7 +1556,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -1559,6 +1598,17 @@ class Home:
         else:
             air_by_date = 0
 
+        if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
+            tvdb_lang = tvdbLang
+        else:
+            tvdb_lang = showObj.lang
+
+        # if we changed the language then kick off an update
+        if tvdb_lang == showObj.lang:
+            do_update = False
+        else:
+            do_update = True
+
         if type(anyQualities) != list:
             anyQualities = [anyQualities]
 
@@ -1579,13 +1629,15 @@ class Home:
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
+            showObj.lang = tvdb_lang
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
                 if not os.path.isdir(location):
                     errors.append("New location <tt>%s</tt> does not exist" % location)
 
-                else:
+                # don't bother if we're going to update anyway
+                elif not do_update:
                     # change it
                     try:
                         showObj.location = location
@@ -1601,6 +1653,14 @@ class Home:
 
             # save it to the DB
             showObj.saveToDB()
+
+        # force the update
+        if do_update:
+            try:
+                sickbeard.showQueueScheduler.action.updateShow(showObj, True)
+                time.sleep(1)
+            except exceptions.CantUpdateException, e:
+                errors.append("Unable to force an update on the show.")
 
         if directCall:
             return errors
@@ -1908,7 +1968,7 @@ class WebInterface:
         redirect("/comingEpisodes")
 
     @cherrypy.expose
-    def comingEpisodes(self):
+    def comingEpisodes(self, layout="None"):
 
         myDB = db.DBConnection()
         
@@ -1958,6 +2018,13 @@ class WebInterface:
         t.next_week = next_week
         t.today = today
         t.sql_results = sql_results
+
+        # Allow local overriding of layout parameter
+        if layout and layout in ('poster', 'banner', 'list'):
+            t.layout = layout
+        else:
+            t.layout = sickbeard.COMING_EPS_LAYOUT
+                
 
         return _munge(t)
 

@@ -305,7 +305,11 @@ class GitUpdateManager(UpdateManager):
 
     def need_update(self):
         self._find_installed_version()
-        self._check_github_for_update()
+        try:
+            self._check_github_for_update()
+        except Exception, e:
+            logger.log(u"Unable to contact github, can't check for update", logger.ERROR)
+            return False
 
         logger.log(u"After checking, cur_commit = "+str(self._cur_commit_hash)+", newest_commit = "+str(self._newest_commit_hash)+", num_commits_behind = "+str(self._num_commits_behind), logger.DEBUG)
 

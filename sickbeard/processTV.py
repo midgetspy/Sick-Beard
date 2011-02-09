@@ -102,8 +102,6 @@ def processDir (dirName, nzbName=None, recurse=False):
         # as long as the postprocessing was successful delete the old folder unless the config wants us not to
         if process_result:
 
-            returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
-            
             if len(videoFiles) == 1 and not sickbeard.KEEP_PROCESSED_DIR and \
                 ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR) and \
                 len(remainingFolders) == 0:
@@ -115,7 +113,8 @@ def processDir (dirName, nzbName=None, recurse=False):
                 except (OSError, IOError), e:
                     returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + str(e).decode('utf-8'), logger.ERROR)
 
-
+            returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
+            
         else:
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path)
 

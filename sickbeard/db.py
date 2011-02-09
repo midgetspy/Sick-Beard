@@ -106,6 +106,16 @@ class DBConnection:
 			columns[column['name']] = { 'type': column['type'] }
 		return columns
 
+def sanityCheckDatabase(connection, sanity_check):
+	sanity_check(connection).check()
+
+class DBSanityCheck(object):
+	def __init__(self, connection):
+		self.connection = connection
+
+	def check(self):
+		pass
+
 # ===============
 # = Upgrade API =
 # ===============
