@@ -11,7 +11,7 @@ from sickbeard import logger, common
 class ProwlNotifier:
 
     def test_notify(self, prowl_api, prowl_priority):
-        self._sendProwl(prowl_api, prowl_priority, event="Test", message="Testing Prowl settings from Sick Beard", force=True)
+        return self._sendProwl(prowl_api, prowl_priority, event="Test", message="Testing Prowl settings from Sick Beard", force=True)
 
     def notify_snatch(self, ep_name):
         if sickbeard.PROWL_NOTIFY_ONSNATCH:
@@ -41,7 +41,7 @@ class ProwlNotifier:
         logger.log(u"Prowl api: " + prowl_api, logger.DEBUG)
         logger.log(u"Prowl priority: " + prowl_priority, logger.DEBUG)
         
-        http_handler = HTTPSConnection("prowl.weks.net")
+        http_handler = HTTPSConnection("api.prowlapp.com")
                                                 
         data = {'apikey': prowl_api,
                 'application': title,
@@ -58,9 +58,12 @@ class ProwlNotifier:
 
         if request_status == 200:
                 logger.log(u"Prowl notifications sent.", logger.DEBUG)
+                return True
         elif request_status == 401: 
                 logger.log(u"Prowl auth failed: %s" % response.reason, logger.ERROR)
+                return False
         else:
                 logger.log(u"Prowl notification failed.", logger.ERROR)
+                return False
                 
 notifier = ProwlNotifier
