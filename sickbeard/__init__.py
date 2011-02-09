@@ -542,6 +542,9 @@ def initialize(consoleLogging=True):
 
         # initialize the main SB database
         db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
+        
+        # fix up any db problems
+        db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
