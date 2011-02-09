@@ -93,10 +93,12 @@
 <input type="hidden" name="skipShow" id="skipShowItem" value="0" />
 <input type="hidden" name="showToAdd" value="$showToAdd" />
 <input type="text" id="nameToSearch" value="$showNameToAdd" />
-<select name="tvdbLang" id="tvdbLangSelect"></select>
+<select name="tvdbLang" id="tvdbLangSelect"></select>*
 <input type="button" id="searchName" value="Search" /><br />
 #for $curShow in $showDirs:
 <input type="hidden" name="showDirs" value="$curShow" />
 #end for 
 </form>
+<br />
+* Note: This will only affect the language of the TVDB data which affects metadata file contents and episode filenames. This DOES NOT allow Sick Beard to download non-english files!
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
