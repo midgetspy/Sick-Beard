@@ -300,7 +300,7 @@ class NewzbinProvider(generic.NZBProvider):
                 'ps_rb_source': 3008,
                 'ps_rb_video_format': 3082257,
                 'ps_rb_language': 4096,
-                'sort': 'ps_edit_date',
+                'sort': 'date',
                 'order': 'desc',
                 'u_post_results_amt': 50,
                 'feed': 'rss',
