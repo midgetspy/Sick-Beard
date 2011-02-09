@@ -2018,7 +2018,7 @@ class WebInterface:
 
         t.next_week = next_week
         t.today = today
-        t.sql_results = coming_episodes
+        t.coming_episodes = coming_episodes
 
         # Allow local overriding of layout parameter
         if layout and layout in ('poster', 'banner', 'list'):
