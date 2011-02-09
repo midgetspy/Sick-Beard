@@ -189,7 +189,7 @@ class NewzbinProvider(generic.NZBProvider):
 
 
     def getIDFromURL(self, url):
-        id_regex = 'http://www\.newzbin\.com/browse/post/(\d+)/'
+        id_regex = 'https?://www\.newzbin\.com/browse/post/(\d+)/'
         id_match = re.match(id_regex, url)
         if not id_match:
             return None
