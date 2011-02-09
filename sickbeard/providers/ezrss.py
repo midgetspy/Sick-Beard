@@ -88,20 +88,10 @@ class EZRSSProvider(generic.TorrentProvider):
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
-        raw_data = self.getURL(searchURL)
+        data = self.getURL(searchURL)
 
-        if raw_data == None:
+        if not data:
             return []
-        
-        data = ''
-        
-        # fix up bad feeds
-        for cur_line in raw_data.split('\n'):
-            if 'CDATA' not in cur_line:
-                data += re.sub('&(?!\#\d+|\w+;)', '&amp;', cur_line)
-            else:
-                data += cur_line
-            data += '\n'
         
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
