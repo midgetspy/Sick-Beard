@@ -3,6 +3,7 @@ import os.path
 import locale
 
 from sickbeard import logger
+import sickbeard
 
 # This module tries to deal with the apparently random behavior of python when dealing with unicode <-> utf-8
 # encodings. It tries to just use unicode, but if that fails then it tries forcing it to utf-8. Any functions
@@ -11,7 +12,7 @@ from sickbeard import logger
 def fixStupidEncodings(x):
     if type(x) == str:
         try:
-            return x.decode(locale.getpreferredencoding())
+            return x.decode(sickbeard.SYS_ENCODING)
         except UnicodeDecodeError:
             logger.log(u"Unable to decode value: "+repr(x), logger.ERROR)
             return None
@@ -36,7 +37,7 @@ def ek(func, *args):
     if os.name == 'nt':
         result = func(*args)
     else:
-        result = func(*[x.encode(locale.getpreferredencoding()) for x in args])
+        result = func(*[x.encode(sickbeard.SYS_ENCODING) for x in args])
 
     if type(result) == list:
         return fixListEncodings(result)
