@@ -941,7 +941,8 @@ class ConfigNotifications:
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
+			  use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None):
 
         results = []
 
@@ -1036,6 +1037,10 @@ class ConfigNotifications:
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+
+	sickbeard.USE_NOTIFO = use_notifo
+	sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
+	sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
 
         sickbeard.save_config()
 
@@ -1380,6 +1385,24 @@ class Home:
             return "Test prowl notice sent successfully"
         else:
             return "Test prowl notice failed"
+
+    @cherrypy.expose
+    def testNotifo(self):
+        result = notifiers.notifo_notifier.test_notify()
+        if result:
+            return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
+	else:
+	    return "Error sending Notifo notification"
+
+    @cherrypy.expose
+    def notifoStep1(self, key):
+        result = notifiers.notifo_notifier._get_credentials(key)
+        logger.log(u"result: "+str(result))
+        if result:
+            return "Key verification successful"
+        else:
+            return "Unable to verify key"
+
 
     @cherrypy.expose
     def twitterStep1(self):

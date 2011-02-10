@@ -363,6 +363,66 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
                     </fieldset>
                 </div><!-- /component-group -->
 
+ 		<div id="core-component-group5" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Notifo</h3>
+                        <p>A generic notifications platform allowing (almost) real-time notifications from any number of services, with both desktop and mobile clients</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_notifo" id="use_notifo" #if $sickbeard.USE_NOTIFO then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_notifo">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Notifo?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="notifo_notify_onsnatch" id="notifo_notify_onsnatch" #if $sickbeard.NOTIFO_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="notifo_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="notifo_notify_ondownload" id="notifo_notify_ondownload" #if $sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="notifo_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Step One</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">Enter the Notifo API key, and click "Verify Key".<br/></span>
+                                <input type="text" id="notifo_key" value="" size="64" /><br />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <input type="button" value="Verify Key" id="notifoStep1" />
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Step Two</span>
+                            </label>
+                        </div>
+
+                    <div class="testNotification" id="testNotifo-result">Click below to test.</div>
+                    <input type="button" value="Test Notifo" id="testNotifo" />
+                    <input type="submit" value="Save Changes" />
+
+                    </fieldset>
+
+                </div>
+
+
             <br/><input type="submit" value="Save Changes" /><br/>
 
             </div><!-- /config-components -->

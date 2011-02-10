@@ -4,6 +4,7 @@ import xbmc
 import growl
 import tweet
 import prowl
+import notifo
 
 from sickbeard.common import *
 
@@ -11,18 +12,21 @@ xbmc_notifier = xbmc.XBMCNotifier()
 growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
+notifo_notifier = notifo.NotifoNotifier()
 
 def notify_download(ep_name):
     xbmc_notifier.notify_download(ep_name)
     growl_notifier.notify_download(ep_name)
     prowl_notifier.notify_download(ep_name)
     twitter_notifier.notify_download(ep_name)
+    notifo_notifier.notify_download(ep_name)
 
 def notify_snatch(ep_name):
     xbmc_notifier.notify_snatch(ep_name)
     growl_notifier.notify_snatch(ep_name)
     prowl_notifier.notify_snatch(ep_name)
     twitter_notifier.notify_snatch(ep_name)
+    notifo_notifier.notify_snatch(ep_name)
 
 def notify(type, message):
 
@@ -35,6 +39,8 @@ def notify(type, message):
     growl.sendGrowl(notifyStrings[type], message)
     
     prowl.sendProwl(message)
+
+    notifo.notifyNotifo(message)
 
     if type == NOTIFY_DOWNLOAD:
         tweet.notifyTwitter(message)
