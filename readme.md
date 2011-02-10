@@ -28,6 +28,7 @@ Sick Beard makes use of the following projects:
 * [SABnzbd+][sabnzbd]
 * [jQuery][jquery]
 * [Python GNTP][pythongntp]
+* [SocksiPy][socks]
 
 ## Dependencies
 
@@ -45,6 +46,7 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 [sabnzbd]: http://www.sabnzbd.org/
 [jquery]: http://jquery.com
 [pythongntp]: http://github.com/kfdm/gntp
+[socks]: http://code.google.com/p/socksipy-branch/
 [googledownloads]: http://code.google.com/p/sickbeard/downloads/list
 [googleissues]: http://code.google.com/p/sickbeard/issues/list
 [googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
