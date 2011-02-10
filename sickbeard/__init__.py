@@ -52,6 +52,7 @@ PROG_DIR = None
 MY_FULLNAME = None
 MY_NAME = None
 MY_ARGS = []
+SYS_ENCODING = ''
 
 DAEMON = None
 
