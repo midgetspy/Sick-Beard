@@ -674,6 +674,7 @@ class ConfigEpisodeDownloads:
     @cherrypy.expose
     def saveEpisodeDownloads(self, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None,
+                       sab_limit_q=None, sab_qlimit=None,
                        torrent_dir=None, nzb_method=None, usenet_retention=None,
                        search_frequency=None, tv_download_dir=None,
                        keep_processed_dir=None, process_automatically=None, rename_episodes=None,
@@ -734,6 +735,14 @@ class ConfigEpisodeDownloads:
         sickbeard.SAB_PASSWORD = sab_password
         sickbeard.SAB_APIKEY = sab_apikey.strip()
         sickbeard.SAB_CATEGORY = sab_category
+        sickbeard.SAB_QLIMIT = sab_qlimit
+
+        if sab_limit_q == "on":
+            sab_limit_q = 1
+        else:
+            sab_limit_q = 0
+
+        sickbeard.SAB_LIMIT_Q = sab_limit_q
 
         if sab_host and not re.match('https?://.*', sab_host):
             sab_host = 'http://' + sab_host

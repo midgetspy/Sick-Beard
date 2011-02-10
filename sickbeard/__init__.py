@@ -170,6 +170,8 @@ SAB_PASSWORD = None
 SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = None
+SAB_QLIMIT = None
+SAB_LIMIT_Q = False
 
 USE_XBMC = False
 XBMC_NOTIFY_ONSNATCH = False
@@ -297,8 +299,8 @@ def initialize(consoleLogging=True):
     with INIT_LOCK:
 
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, \
-                NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
-                SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
+                NZB_METHOD,NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
+                SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, SAB_QLIMIT, SAB_LIMIT_Q, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
@@ -452,6 +454,8 @@ def initialize(consoleLogging=True):
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', 'tv')
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
+        SAB_QLIMIT = check_setting_str(CFG, 'SABnzbd', 'sab_qlimit', '10000')
+        SAB_LIMIT_Q = bool(check_setting_int(CFG, 'SABnzbd', 'sab_limit_q', 0))
 
         USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0)) 
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
@@ -878,6 +882,8 @@ def save_config():
     new_config['SABnzbd']['sab_apikey'] = SAB_APIKEY
     new_config['SABnzbd']['sab_category'] = SAB_CATEGORY
     new_config['SABnzbd']['sab_host'] = SAB_HOST
+    new_config['SABnzbd']['sab_qlimit'] = SAB_QLIMIT
+    new_config['SABnzbd']['sab_limit_q'] = int(SAB_LIMIT_Q)
 
     new_config['XBMC'] = {}
     new_config['XBMC']['use_xbmc'] = int(USE_XBMC)    

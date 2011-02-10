@@ -193,6 +193,17 @@
                                     <span class="component-desc">Category for downloads to go into (eg. TV)</span>
                                 </label>
                             </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="sab_limit_q" id="sab_limit_q" #if $sickbeard.SAB_LIMIT_Q == True then "checked=\"checked\"" else ""# onclick="document.getElementById('sab_qlimit').disabled=document.getElementById('sab_limit_q').checked?false:true" />
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Limit queue size?</span>
+                                    <input type="text" name="sab_qlimit" id="sab_qlimit" value="$sickbeard.SAB_QLIMIT" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Only send downloads to SABnzbd+ when the queue is less than <i>x</i> MB</span>
+                                </label>
+                            </div>
                         </div>
                         
                         <div class="clearfix"></div>

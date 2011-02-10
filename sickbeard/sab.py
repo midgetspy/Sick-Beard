@@ -29,6 +29,8 @@ import urllib2, cookielib
 from sickbeard.common import *
 from sickbeard import logger, classes
 
+import xml.etree.cElementTree as etree
+
 def sendNZB(nzb):
 
     params = {}
@@ -122,3 +124,56 @@ def sendNZB(nzb):
     else:
         logger.log(u"Unknown failure sending NZB to sab. Return text is: " + sabText, logger.ERROR)
         return False
+
+
+
+def checkNZBQ():
+
+    params = {}
+
+    if sickbeard.SAB_USERNAME != None:
+        params['ma_username'] = sickbeard.SAB_USERNAME
+    if sickbeard.SAB_PASSWORD != None:
+        params['ma_password'] = sickbeard.SAB_PASSWORD
+    if sickbeard.SAB_APIKEY != None:
+        params['apikey'] = sickbeard.SAB_APIKEY
+    if sickbeard.SAB_CATEGORY != None:
+        params['cat'] = sickbeard.SAB_CATEGORY
+
+    params['mode'] = 'qstatus'
+    params['output'] = 'xml'
+
+    url = sickbeard.SAB_HOST + "api?" + urllib.urlencode(params)
+
+    try:
+        f = urllib.urlopen(url)
+
+    except (EOFError, IOError), e:
+        logger.log(u"Unable to connect to SAB: "+str(e), logger.ERROR)
+        return 0
+
+    except httplib.InvalidURL, e:
+        logger.log(u"Invalid SAB host, check your config: "+str(e).decode('utf-8'), logger.ERROR)
+        return 0
+
+    if f == None:
+        logger.log(u"No data returned from SABnzbd. QLen check failed, aborting download", logger.ERROR)
+        return 0
+
+    try:
+        xmlresp = etree.parse(f)
+        nzbQlen = int(float(xmlresp.find('mb').text))
+        logger.log("NZB Q length: " + str(nzbQlen), logger.DEBUG)
+        return nzbQlen
+
+    except Exception, e:
+        logger.log(u"Error trying to get result from SAB. QLen check failed, abording download: " + str(e), logger.ERROR)
+        return 0
+"""
+    if nzbQlen > maxlen:
+        logger.log("Q longer than maximum (" + str(nzbQlen) + ">" + str(maxlen) + "). Aborting.", logger.DEBUG)
+        return False
+    else:
+        logger.log("Q less than maximum (" + str(nzbQlen) + "<" + str(maxlen) + "). Continuing.", logger.DEBUG)
+	return True
+"""
