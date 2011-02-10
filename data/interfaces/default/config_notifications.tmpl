@@ -56,9 +56,9 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
   });
 
   \$('#testLibnotify').click(function(){
-
-    \$.get("$sbRoot/home/testLibnotify", function(data){alert(data)});
-
+    \$('#testLibnotify-result').html(loading);
+    \$.get("$sbRoot/home/testLibnotify",
+	function(message){ \$('#testLibnotify-result').html(message); });
   });
 
 });  
@@ -372,7 +372,7 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
                 <div id="core-component-group5" class="component-group clearfix">
                     <div class="component-group-desc">
                         <h3>Libnotify</h3>
-                        <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).  Sick Beard must be restarted after installing pynotify.</p>
+                        <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -400,6 +400,7 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
                             </label>
                         </div>
 
+                    <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
                     <input type="button" value="Test Libnotify" id="testLibnotify" />
                     <input type="submit" value="Save Changes" />
 

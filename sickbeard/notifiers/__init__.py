@@ -4,10 +4,7 @@ import xbmc
 import growl
 import prowl
 import tweet
-try:
-    from sickbeard.notifiers import libnotify
-except ImportError: # No pynotify installed
-    libnotify = None
+from . import libnotify
 
 from sickbeard.common import *
 
@@ -15,19 +12,17 @@ xbmc_notifier = xbmc.XBMCNotifier()
 growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
+libnotify_notifier = libnotify.LibnotifyNotifier()
 
 notifiers = [
+    # Libnotify notifier goes first because it doesn't involve blocking on
+    # network activity.
+    libnotify_notifier,
     xbmc_notifier,
     growl_notifier,
     prowl_notifier,
     twitter_notifier,
 ]
-
-if libnotify is not None:
-    # Insert libnotify first because it shouldn't be delayed by notifications
-    # going out over the network.
-    libnotify_notifier = libnotify.LibnotifyNotifier()
-    notifiers.insert(0, libnotify_notifier)
 
 def notify_download(ep_name):
     for n in notifiers:

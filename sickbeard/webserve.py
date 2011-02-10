@@ -1417,12 +1417,10 @@ class Home:
 
     @cherrypy.expose
     def testLibnotify(self):
-        try:
-            import pynotify
-        except ImportError:
-            return "Error: pynotify module is not installed"
-        notifiers.libnotify_notifier.test_notify()
-        return "Tried sending desktop notification via libnotify"
+        if notifiers.libnotify_notifier.test_notify():
+            return "Tried sending desktop notification via libnotify"
+        else:
+            return notifiers.libnotify.diagnose()
 
 
     @cherrypy.expose
