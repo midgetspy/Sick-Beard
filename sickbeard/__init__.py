@@ -53,6 +53,7 @@ PROG_DIR = None
 MY_FULLNAME = None
 MY_NAME = None
 MY_ARGS = []
+SYS_ENCODING = ''
 
 DAEMON = None
 
@@ -360,7 +361,7 @@ def initialize(consoleLogging=True):
         if not helpers.makeDir(CACHE_DIR):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
-
+            
         proxies = urllib.getproxies()
         proxy_url = None
         if 'http' in proxies:
@@ -374,7 +375,7 @@ def initialize(consoleLogging=True):
                           'language': 'en',
                           'cache_dir': False,
                           'http_proxy': proxy_url}
-    
+
         if CACHE_DIR:
             TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
         
@@ -552,6 +553,9 @@ def initialize(consoleLogging=True):
 
         # initialize the main SB database
         db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
+        
+        # fix up any db problems
+        db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),

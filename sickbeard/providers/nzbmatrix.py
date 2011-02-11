@@ -55,31 +55,32 @@ class NZBMatrixProvider(generic.NZBProvider):
 
         sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(ep_obj))
 
-	# search for all show names and episode numbers like (%2b"show-a"%2b"episode-a")+(%2b"show-b"%2b"episode-b") in a single search
-	nzbMatrixSearchStrings = []
-	for searchString in sceneSearchStrings:
-		searchWords = searchString.split('.')
-		nzbMatrixSearchStrings.append('(+"' + '"+"'.join(searchWords) + '")')
-		
-	return ['.'.join(nzbMatrixSearchStrings)]
+        # search for all show names and episode numbers like (%2b"show-a"%2b"episode-a")+(%2b"show-b"%2b"episode-b") in a single search
+        nzbMatrixSearchStrings = []
+        for searchString in sceneSearchStrings:
+            searchWords = searchString.split('.')
+            nzbMatrixSearchStrings.append('(+"' + '"+"'.join(searchWords) + '")')
+
+        return ['.'.join(nzbMatrixSearchStrings)]
 
     def _doSearch(self, curString, quotes=False, english=True):
 
         term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
         if quotes:
             term = "\""+term+"\""
-
-	params = {"term": term,
-			  "age": sickbeard.USENET_RETENTION,
-			  "page": "download",
-			  "username": sickbeard.NZBMATRIX_USERNAME,
-			  "apikey": sickbeard.NZBMATRIX_APIKEY,
-			  "subcat": "6,41,28"}
-	
-	if english:
-		params["english"] = 1
-	
-	searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
+    
+        params = {"term": term,
+    			  "age": sickbeard.USENET_RETENTION,
+    			  "page": "download",
+    			  "username": sickbeard.NZBMATRIX_USERNAME,
+    			  "apikey": sickbeard.NZBMATRIX_APIKEY,
+    			  "subcat": "6,41,28",
+                  "ssl": 1}
+    
+        if english:
+            params["english"] = 1
+    
+        searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
