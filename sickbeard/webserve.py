@@ -942,7 +942,7 @@ class ConfigNotifications:
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
-			  use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None):
+			  use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None):
 
         results = []
 
@@ -1013,6 +1013,20 @@ class ConfigNotifications:
         else:
             use_twitter = 0
 
+        if notifo_notify_onsnatch == "on":
+            notifo_notify_onsnatch = 1
+        else:
+            notifo_notify_onsnatch = 0
+
+        if notifo_notify_ondownload == "on":
+            notifo_notify_ondownload = 1
+        else:
+            notifo_notify_ondownload = 0
+        if use_notifo == "on":
+            use_notifo = 1
+        else:
+            use_notifo = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1041,6 +1055,8 @@ class ConfigNotifications:
 	sickbeard.USE_NOTIFO = use_notifo
 	sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
 	sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
+        sickbeard.NOTIFO_USERNAME = notifo_username
+        sickbeard.NOTIFO_APISECRET = notifo_apisecret
 
         sickbeard.save_config()
 
@@ -1387,22 +1403,12 @@ class Home:
             return "Test prowl notice failed"
 
     @cherrypy.expose
-    def testNotifo(self):
-        result = notifiers.notifo_notifier.test_notify()
+    def testNotifo(self, username=None, apisecret=None):
+        result = notifiers.notifo_notifier.test_notify(username, apisecret)
         if result:
             return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
 	else:
 	    return "Error sending Notifo notification"
-
-    @cherrypy.expose
-    def notifoStep1(self, key):
-        result = notifiers.notifo_notifier._get_credentials(key)
-        logger.log(u"result: "+str(result))
-        if result:
-            return "Key verification successful"
-        else:
-            return "Unable to verify key"
-
 
     @cherrypy.expose
     def twitterStep1(self):

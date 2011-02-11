@@ -37,6 +37,14 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
     function (data){ document.getElementById('testXBMC-result').innerHTML = data;});
   });
 
+  \$('#testNotifo').click(function(){
+    document.getElementById('testNotifo-result').innerHTML = loading;
+    var notifo_username = \$("#notifo_username").val();
+    var notifo_apisecret = \$("#notifo_apisecret").val();
+    \$.get("$sbRoot/home/testNotifo", {'username': notifo_username, 'apisecret': notifo_apisecret},
+    function (data){ document.getElementById('testNotifo-result').innerHTML = data; });
+  });
+
   \$('#twitterStep1').click(function(){
     document.getElementById('testTwitter-result').innerHTML = loading;
     var twitter1_result = \$.get("$sbRoot/home/twitterStep1", function (data){window.open(data)})
@@ -367,7 +375,7 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
 
                     <div class="component-group-desc">
                         <h3>Notifo</h3>
-                        <p>A notifications platform for push-notifications from any number of services to either mobile or desktop clients</p>
+                        <p>A platform for push-notifications to either mobile or desktop clients</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -396,21 +404,24 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
                         </div>
 
                         <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Step One</span>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Notifo Username</span>
+                                <input type="text" name="notifo_username" id="notifo_username" value="$sickbeard.NOTIFO_USERNAME" size="35" />
                             </label>
                             <label class="nocheck clearfix">
-                                <span class="component-desc">Enter the Notifo API key, and click "Verify Key".<br/></span>
-                                <input type="text" id="notifo_key" value="" size="64" /><br />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <input type="button" value="Verify Key" id="notifoStep1" />
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your Notifo account</span>
                             </label>
                         </div>
 
                         <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Step Two</span>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Notifo API secret</span>
+                                <input type="password" name="notifo_apisecret" id="notifo_apisecret" value="$sickbeard.NOTIFO_APISECRET" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">API secret of Notifo account</span>
                             </label>
                         </div>
 
