@@ -36,10 +36,10 @@
 
 
     function searchTvdb(){
-        \$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/searching_anim.gif">searching..</img>');
+        \$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/loading_forceUpdate.gif" height="32" width="32" /> searching...');
 
         \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val(), 'lang': \$('#tvdbLangSelect').val()}, function(data){
-            var resultStr = '';
+            var resultStr = '<fieldset>\n<legend>Search Results:</legend>\n';
             
             if (data.results.length == 0) {
                 resultStr = '<b>No results found, try a different search.</b>';
@@ -52,9 +52,9 @@
                         checked = '';
                     resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '|' + obj[1] + '"' + checked + ' /> ';
                     if(data.langid && data.langid != "")
-                            resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '&lid=' + data.langid + '" target="_new"><b>' + obj[1] + '</b></a>';
+                            resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '&lid=' + data.langid + '" onclick=\"window.open(this.href, \'_blank\'); return false;\" ><b>' + obj[1] + '</b></a>';
                     else
-                        resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" target="_new"><b>' + obj[1] + '</b></a>';
+                        resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" onclick=\"window.open(this.href, \'_blank\'); return false;\" ><b>' + obj[1] + '</b></a>';
 
                     if (obj[2] != null)
                         resultStr += ' (started on ' + obj[2] + ')';
@@ -62,6 +62,7 @@
                 });
                 resultStr += '</ul>';
             }
+            resultStr += '</fieldset>';
             \$('#searchResults').html(resultStr);
         });
     };  
@@ -122,32 +123,22 @@
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
 
 <div id="newShowAccordion" style="width: 80%">
-
-<h3>1) Find your show on TVDB</h3>
-
-<div style="height: 400px; overflow:auto">
-<br /> 
+<h3><a href="#">1) Find your show on TVDB</a></h3>
+<div style="height: 400px; overflow:auto; padding: 15px;">
 <input type="text" id="nameToSearch" value="" />
 <select name="tvdbLang" id="tvdbLangSelect"></select>*
 <input type="button" id="searchName" value="Search" /><br />
-* Note: This will only affect the language of the TVDB data which affects metadata file contents<br />
-and episode filenames. This DOES NOT allow Sick Beard to download non-english files!<br />
+<p>* <b>Note:</b> This will only affect the language of the TVDB data used for metadata file contents and episode filenames. This DOES NOT allow Sick Beard to download non-english files!</p>
 <br />
 <div id="searchResults" width="250"></div>
 <br />
 <input type="hidden" id="cancelShowItem" value="0" />
 <input type="button" id="continue_1" value="Continue"><br /><br />
-
-<br />
-<br />
 </div>
 
-<h3>2) Pick the parent folder</h3>
-
-<div>
-<br />
-<span id="sampleRootDir"></span><br />
-<br />
+<h3><a href="#">2) Pick the parent folder</a></h3>
+<div style="padding: 15px;">
+<span id="sampleRootDir"></span>
 #if $sickbeard.ROOT_DIRS:
 #set $backend_pieces = $sickbeard.ROOT_DIRS.split('|')
 #set $backend_default = 'rd-'+$backend_pieces[0]
@@ -171,14 +162,11 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 <br />
 <input type="hidden" id="rootDirText">
 <input type="button" id="back_2" value="Back"> <input type="button" id="continue_2" value="Continue">
-<br />
-<br />
 </div>
 
-<h3>3) Customize options</h3>
+<h3><a href="#">3) Customize options</a></h3>
 
-<div style="overflow:auto">
-<br />
+<div style="overflow:auto; padding: 15px;">
 Status for episodes that you don't already have:
 <select name="defaultStatus" id="statusSelect">
 #for $curStatus in [$SKIPPED, $WANTED, $ARCHIVED, $IGNORED]:
@@ -215,12 +203,9 @@ Show Quality:
 Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#><br />
 <br />
 <input type="button" id="back_3" value="Back"><br />
-<br />
 
 </div>
 </div>
-<br />
-<br />
 <br />
 <input type="submit" id="addShowButton" value="Add Show"> <input type="button" id="skipShowButton" value="Skip Show">
 
