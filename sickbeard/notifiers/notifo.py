@@ -1,4 +1,7 @@
 import urllib
+import sickbeard
+
+from sickbeard import logger, common
 
 try:
     import simplejson as json
@@ -15,7 +18,7 @@ class NotifoNotifier:
 
     def _sendNotifo(self, msg, username, apisecret):
         msg = msg.strip()
-        apiurl = API_URL % self.get_credentials(username, apisecret)
+        apiurl = API_URL % {"username": username, "secret": apisecret}
         data = urllib.urlencode({
             "msg": msg,
         })
@@ -36,17 +39,26 @@ class NotifoNotifier:
 
 
     def notify_snatch(self, ep_name):
-        return true
+        if sickbeard.NOTIFO_NOTIFY_ONSNATCH:
+            self._notifyNotifo(common.notifyStrings[common.NOTIFY_SNATCH]+': '+ep_name)
 
     def notify_downloade(self, ep_name):
-        return true
+        if sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD:
+            self._notifyNotifo(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)       
 
-    def _notifyNotifo(self, message):
-        return true
+    def _notifyNotifo(self, message=None, username=None, apisecret=None):
+        if not sickbeard.USE_NOTIFO and not force:
+            logger.log("Notification for Notifo not enabled, skipping this notification", logger.DEBUG)
+            return False
 
-    def get_credentials(self, username = None, secret = None):
-        if username is not None and secret is not None:
-            return {"username": username, "secret": secret}
-        return {"username": "jeroen94704", "secret": ""}
-    
+        if not username:
+            username = sickbeard.NOTIFO_USERNAME
+        if not apisecret:
+            apisecret = sickbeard.NOTIFO_APISECRET
+
+        logger.log(u"Sending notification for " + message, logger.DEBUG)
+
+        self._sendNotifo(message, username, apisecret)
+        return True
+
 notifier = NotifoNotifier
