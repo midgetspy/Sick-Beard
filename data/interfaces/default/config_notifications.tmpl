@@ -37,6 +37,14 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
     function (data){ document.getElementById('testXBMC-result').innerHTML = data;});
   });
 
+  \$('#testNotifo').click(function(){
+    document.getElementById('testNotifo-result').innerHTML = loading;
+    var notifo_username = \$("#notifo_username").val();
+    var notifo_apisecret = \$("#notifo_apisecret").val();
+    \$.get("$sbRoot/home/testNotifo", {'username': notifo_username, 'apisecret': notifo_apisecret},
+    function (data){ document.getElementById('testNotifo-result').innerHTML = data; });
+  });
+
   \$('#twitterStep1').click(function(){
     document.getElementById('testTwitter-result').innerHTML = loading;
     var twitter1_result = \$.get("$sbRoot/home/twitterStep1", function (data){window.open(data)})
@@ -362,6 +370,69 @@ var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"1
 
                     </fieldset>
                 </div><!-- /component-group -->
+
+ 		<div id="core-component-group5" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Notifo</h3>
+                        <p>A platform for push-notifications to either mobile or desktop clients</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_notifo" id="use_notifo" #if $sickbeard.USE_NOTIFO then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_notifo">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Notifo?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="notifo_notify_onsnatch" id="notifo_notify_onsnatch" #if $sickbeard.NOTIFO_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="notifo_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="notifo_notify_ondownload" id="notifo_notify_ondownload" #if $sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="notifo_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Notifo Username</span>
+                                <input type="text" name="notifo_username" id="notifo_username" value="$sickbeard.NOTIFO_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your Notifo account</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Notifo API secret</span>
+                                <input type="password" name="notifo_apisecret" id="notifo_apisecret" value="$sickbeard.NOTIFO_APISECRET" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Get your API key at:  <a href="http://notifo.com/user/settings" onclick="window.open(this.href, '_blank'); return false;">http://notifo.com/user/settings</a></span>
+                            </label>
+                        </div>
+
+                    <div class="testNotification" id="testNotifo-result">Click below to test.</div>
+                    <input type="button" value="Test Notifo" id="testNotifo" />
+                    <input type="submit" value="Save Changes" />
+
+                    </fieldset>
+
+                </div>
+
 
             <br/><input type="submit" value="Save Changes" /><br/>
 
