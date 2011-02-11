@@ -35,10 +35,10 @@
 
 
     function searchTvdb(){
-        \$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/searching_anim.gif">searching..</img>');
+        \$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/loading_forceUpdate.gif" height="32" width="32" /> searching...');
 
         \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val(), 'lang': \$('#tvdbLangSelect').val()}, function(data){
-            var resultStr = '';
+            var resultStr = '<fieldset>\n<legend>Search Results:</legend>\n';
             
             if (data.results.length == 0) {
                 resultStr = '<b>No results found, try a different search.</b>';
@@ -51,9 +51,9 @@
                         checked = '';
                     resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '"' + checked + ' /> ';
                     if(data.langid && data.langid != "")
-                            resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '&lid=' + data.langid + '" target="_new"><b>' + obj[1] + '</b></a>';
+                            resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '&lid=' + data.langid + '" onclick=\"window.open(this.href, \'_blank\'); return false;\" ><b>' + obj[1] + '</b></a>';
                     else
-                        resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" target="_new"><b>' + obj[1] + '</b></a>';
+                        resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" onclick=\"window.open(this.href, \'_blank\'); return false;\" ><b>' + obj[1] + '</b></a>';
 
                     if (obj[2] != null)
                         resultStr += ' (started on ' + obj[2] + ')';
@@ -61,6 +61,7 @@
                 });
                 resultStr += '</ul>';
             }
+            resultStr += '</fieldset>';
             \$('#searchResults').html(resultStr);
         });
     };  
@@ -86,10 +87,7 @@
 </script>
 
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addSingleShow" accept-charset="utf-8">
-<input type="submit" value="Continue" id="addShow" /> <input type="button" value="Skip" id="skipShow" /><br /><br />
-
-<div id="searchResults" width="250"></div>
-<br />
+<p>
 <input type="hidden" name="skipShow" id="skipShowItem" value="0" />
 <input type="hidden" name="showToAdd" value="$showToAdd" />
 <input type="text" id="nameToSearch" value="$showNameToAdd" />
@@ -98,7 +96,14 @@
 #for $curShow in $showDirs:
 <input type="hidden" name="showDirs" value="$curShow" />
 #end for 
+</p>
+<p>* <b>Note:</b> This will only affect the language of the TVDB data used for metadata file contents and episode filenames. This DOES NOT allow Sick Beard to download non-english files!</p>
+
+<input type="submit" value="Continue" id="addShow" /> <input type="button" value="Skip" id="skipShow" /><br /><br />
+
+<div id="searchResults"></div>
+
 </form>
 <br />
-* Note: This will only affect the language of the TVDB data which affects metadata file contents and episode filenames. This DOES NOT allow Sick Beard to download non-english files!
+
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
