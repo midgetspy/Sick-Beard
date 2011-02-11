@@ -1,0 +1,229 @@
+#import os.path
+#import urllib
+#import sickbeard
+#from sickbeard.common import *
+#set global $title="New Show"
+
+#set global $sbPath="../.."
+
+<!--#set global $statpath="../.."#-->
+<!--#set global $topmenu="home"#-->
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" charset="utf-8">
+\$(document).ready(function() 
+{ 
+    \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data){
+        var resultStr = '';
+
+        if (data.results.length == 0) {
+            resultStr = '<option value="en" selected="selected">en</option>';
+        } else {
+            \$.each(data.results, function(index, obj){
+                if (resultStr == '')
+                        selected = ' selected="selected"';
+                else
+                        selected = '';
+
+                resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
+            });
+        }
+        \$('#tvdbLangSelect').html(resultStr)
+
+        \$('#tvdbLangSelect').change(function() { searchTvdb() });
+    });
+
+
+    function searchTvdb(){
+        \$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/searching_anim.gif">searching..</img>');
+
+        \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val(), 'lang': \$('#tvdbLangSelect').val()}, function(data){
+            var resultStr = '';
+            
+            if (data.results.length == 0) {
+                resultStr = '<b>No results found, try a different search.</b>';
+            } else {
+            
+                \$.each(data.results, function(index, obj){
+                    if (resultStr == '')
+                        checked = ' checked';
+                    else
+                        checked = '';
+                    resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '|' + obj[1] + '"' + checked + ' /> ';
+                    if(data.langid && data.langid != "")
+                            resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '&lid=' + data.langid + '" target="_new"><b>' + obj[1] + '</b></a>';
+                    else
+                        resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" target="_new"><b>' + obj[1] + '</b></a>';
+
+                    if (obj[2] != null)
+                        resultStr += ' (started on ' + obj[2] + ')';
+                    resultStr += '<br />';
+                });
+                resultStr += '</ul>';
+            }
+            \$('#searchResults').html(resultStr);
+        });
+    };  
+
+    \$('#searchName').click(function() {searchTvdb()});
+
+    //\$('#searchName').click()
+
+    \$('#cancelShow').click(function(){
+        \$('#cancelShowItem').val(1);
+        \$('#addShowForm').submit();
+    });
+    
+});
+</script>
+
+#set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
+<script type="text/javascript" charset="utf-8">
+\$(document).ready(function(){
+
+  if (#if $sickbeard.QUALITY_DEFAULT in $qualityPresets then "1" else "0"#) {
+      \$('#customQuality').hide();
+  }
+
+  \$.fn.setFromPresets = function(preset) {
+      if (preset == 0) {
+        \$('#customQuality').show();
+        return
+      } else
+        \$('#customQuality').hide();
+  
+      \$('#anyQualities option').each(function(i) {
+          var result = preset & \$(this).val()
+          if (result > 0) \$(this).attr('selected', 'selected');
+          else \$(this).attr('selected', false);
+      });
+
+      \$('#bestQualities option').each(function(i) {
+          var result = preset & (\$(this).val() << 16)
+          if (result > 0) \$(this).attr('selected', 'selected');
+          else \$(this).attr('selected', false);
+      });
+
+      return
+  }
+  
+  \$('#qualityPreset').change(function(){
+        \$(this).setFromPresets(\$('#qualityPreset :selected').val());
+  });
+
+});
+
+</script>
+
+<script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
+
+
+<form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
+
+<div id="newShowAccordion" style="width: 80%">
+
+<h3>1) Find your show on TVDB</h3>
+
+<div style="height: 400px; overflow:auto">
+<br /> 
+<input type="text" id="nameToSearch" value="" />
+<select name="tvdbLang" id="tvdbLangSelect"></select>*
+<input type="button" id="searchName" value="Search" /><br />
+* Note: This will only affect the language of the TVDB data which affects metadata file contents<br />
+and episode filenames. This DOES NOT allow Sick Beard to download non-english files!<br />
+<br />
+<div id="searchResults" width="250"></div>
+<br />
+<input type="hidden" id="cancelShowItem" value="0" />
+<input type="button" id="continue_1" value="Continue"><br /><br />
+
+<br />
+<br />
+</div>
+
+<h3>2) Pick the parent folder</h3>
+
+<div>
+<br />
+<span id="sampleRootDir"></span><br />
+<br />
+#if $sickbeard.ROOT_DIRS:
+#set $backend_pieces = $sickbeard.ROOT_DIRS.split('|')
+#set $backend_default = 'rd-'+$backend_pieces[0]
+#set $backend_dirs = $backend_pieces[1:]
+#else:
+#set $backend_default = ''
+#set $backend_dirs = []
+#end if
+<input type="hidden" id="whichDefaultRootDir" value="$backend_default">
+<select name="rootDir" id="rootDirs" size="8" style="min-width: 300px;">
+#for $cur_dir in $backend_dirs:
+<option value="$cur_dir">$cur_dir</option>
+#end for
+</select><br />
+<br />
+<input type="button" id="addRootDir" value="New" />
+<input type="button" id="editRootDir" value="Edit" />
+<input type="button" id="deleteRootDir" value="Delete" />
+<input type="button" id="defaultRootDir" value="Set as Default" />
+<br />
+<br />
+<input type="hidden" id="rootDirText">
+<input type="button" id="back_2" value="Back"> <input type="button" id="continue_2" value="Continue">
+<br />
+<br />
+</div>
+
+<h3>3) Customize options</h3>
+
+<div style="overflow:auto">
+<br />
+Status for episodes that you don't already have:
+<select name="defaultStatus" id="statusSelect">
+#for $curStatus in [$SKIPPED, $WANTED, $ARCHIVED, $IGNORED]:
+<option value="$curStatus">$statusStrings[$curStatus]
+#end for
+</select><br />
+<br />
+Show Quality:
+#set $selected = None
+<select id="qualityPreset">
+<option value="0">Custom</option>
+#for $curPreset in sorted($qualityPresets):
+<option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
+#end for
+</select><br />
+
+<div id="customQuality">
+<br/><h5>If I don't have the episode then download it in <b>one</b> of the following qualities:</h5>
+#set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
+<select id="anyQualities" name="anyQualities" multiple="multiple" size="$len($anyQualityList)">
+#for $curQuality in sorted($anyQualityList):
+<option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
+#end for
+</select><br />
+<br/><h5>Then Re-download the episodes in any or all of these qualities as they are available:</h5>
+#set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
+<select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
+#for $curQuality in sorted($bestQualityList):
+<option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
+#end for
+</select>
+</div>
+<br />
+Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#><br />
+<br />
+<input type="button" id="back_3" value="Back"><br />
+<br />
+
+</div>
+</div>
+<br />
+<br />
+<br />
+<input type="submit" id="addShowButton" value="Add Show"> <input type="button" id="skipShowButton" value="Skip Show">
+
+</form>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
