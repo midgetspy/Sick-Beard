@@ -91,7 +91,10 @@ class PS3Metadata(generic.GenericMetadata):
             return None
         
         return tbn_filename
-    
+
+    def retrieveShowMetadata(self, dir):
+        return (None, None)
+
 # present a standard "interface"
 metadata_class = PS3Metadata
 

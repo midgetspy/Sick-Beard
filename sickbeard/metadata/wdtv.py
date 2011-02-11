@@ -124,6 +124,9 @@ class WDTVMetadata(generic.GenericMetadata):
 
         return ek.ek(os.path.join, show_obj.location, season_dir, 'folder.jpg')
 
+    def retrieveShowMetadata(self, dir):
+        return (None, None)
+
 # present a standard "interface"
 metadata_class = WDTVMetadata
 
