@@ -263,6 +263,7 @@ class QueueItemAdd(ShowQueueItem):
 
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
+            logger.log(u"Launching backlog for this show since its episodes are WANTED")
             sickbeard.backlogSearchScheduler.action.searchBacklog([self.show])
 
         self.show.flushEpisodes()

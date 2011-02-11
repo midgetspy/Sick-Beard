@@ -1233,7 +1233,7 @@ class NewHomeAddShows:
         
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir):
-            ui.flash.error("Unable to add show", "Folder exists already")
+            ui.flash.error("Unable to add show", "Folder "+str(show_dir)+" exists already")
             redirect('/home')
         
         # create the dir and make sure it worked
@@ -1260,7 +1260,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, defaultStatus, newQuality, seasonFolders, tvdbLang)
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang)
         ui.flash.message('Show added', 'Adding the specified show into '+rootDir)
 
         redirect('/home')
