@@ -42,7 +42,7 @@ class NotifoNotifier:
         if sickbeard.NOTIFO_NOTIFY_ONSNATCH:
             self._notifyNotifo(common.notifyStrings[common.NOTIFY_SNATCH]+': '+ep_name)
 
-    def notify_downloade(self, ep_name):
+    def notify_download(self, ep_name):
         if sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD:
             self._notifyNotifo(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)       
 
