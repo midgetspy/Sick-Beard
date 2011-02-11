@@ -32,7 +32,12 @@ class ShowUpdater():
 
             try:
 
-                curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)
+                if curShow.status != "Ended":
+                    curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)
+                else:
+                    #TODO: maybe I should still update specials?
+                    logger.log(u"Not updating episodes for show "+self.show.name+" because it's marked as ended.", logger.DEBUG)
+                    curQueueItem = sickbeard.showQueueScheduler.action.refreshShow(curShow, True)
 
                 piList.append(curQueueItem)
 
