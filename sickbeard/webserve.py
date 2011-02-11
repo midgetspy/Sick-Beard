@@ -458,6 +458,9 @@ class ConfigGeneral:
         t.submenu = ConfigMenu
         return _munge(t)
 
+    @cherrypy.expose
+    def saveRootDirs(self, rootDirString=None):
+        sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
@@ -1199,10 +1202,113 @@ class NewHomeAddShows:
             return self.addShows(showDirs)
 
         # if we got a TVDB ID then make a show out of it
-        sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd, tvdbLang)
+        sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd, lang=tvdbLang)
         ui.flash.message('Show added', 'Adding the specified show into '+ showToAdd)
         # no need to display anything now that we added the show, so continue on to the next show
         return self.addShows(showDirs)
+
+    @cherrypy.expose
+    def newShow(self):
+        t = PageTemplate(file="home_newShow.tmpl")
+        t.submenu = HomeMenu()
+        
+        return _munge(t)
+
+    @cherrypy.expose
+    def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
+                   anyQualities=None, bestQualities=None, seasonFolders=None):
+        
+        # sanity check on our inputs
+        if not rootDir or not whichSeries:
+            return "Missing params, no tvdb id or folder:"+repr(whichSeries)+" and "+repr(rootDir)
+        
+        # figure out what show we're adding and where
+        series_pieces = whichSeries.partition('|')
+        if len(series_pieces) < 3:
+            return "Error with show selection."
+        
+        tvdb_id = int(series_pieces[0])
+        show_name = series_pieces[2]
+        show_dir = ek.ek(os.path.join, rootDir, helpers.sanitizeFileName(show_name))
+        
+        # blanket policy - if the dir exists you should have used "add existing show" numbnuts
+        if ek.ek(os.path.isdir, show_dir):
+            ui.flash.error("Unable to add show", "Folder exists already")
+            redirect('/home')
+        
+        # create the dir and make sure it worked
+        dir_exists = helpers.makeDir(show_dir)
+        if not dir_exists:
+            logger.log(u"Unable to create the folder "+str(show_dir)+", can't add the show", logger.ERROR)
+            ui.flash.error("Unable to add show", "Unable to create the folder "+str(show_dir)+", can't add the show")
+            redirect("/home")
+
+        # prepare the inputs for passing along
+        if seasonFolders == "on":
+            seasonFolders = 1
+        else:
+            seasonFolders = 0
+        
+        if not anyQualities:
+            anyQualities = []
+        if not bestQualities:
+            bestQualities = []
+        if type(anyQualities) != list:
+            anyQualities = [anyQualities]
+        if type(bestQualities) != list:
+            bestQualities = [bestQualities]
+        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+        
+        # add the show
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, defaultStatus, newQuality, seasonFolders, tvdbLang)
+        ui.flash.message('Show added', 'Adding the specified show into '+rootDir)
+
+        redirect('/home')
+
+    @cherrypy.expose
+    def existingShow(self, root_dir=None):
+        t = PageTemplate(file="home_addExistingShow.tmpl")
+        t.submenu = HomeMenu()
+        
+        myDB = db.DBConnection()
+        
+        if not ek.ek(os.path.isdir, root_dir):
+            return "Invalid path"
+        
+        dir_list = []
+        
+        for cur_file in ek.ek(os.listdir, root_dir):
+            
+            cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
+            if not ek.ek(os.path.isdir, cur_path):
+                continue
+            
+            cur_dir = {'dir': cur_path,
+                       'display_dir': ek.ek(os.path.basename, cur_path),
+                       }
+            
+            # see if the folder is in XBMC already
+            dirResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [cur_path])
+            
+            if dirResults:
+                cur_dir['added_already'] = True
+            else:
+                cur_dir['added_already'] = False
+            
+            dir_list.append(cur_dir)
+            
+            tvdb_id = ''
+            show_name = ''
+            for cur_provider in sickbeard.metadata_provider_dict.values():
+                (tvdb_id, show_name) = cur_provider.retrieveShowMetadata(cur_path)
+                if tvdb_id and show_name:
+                    break
+            
+            cur_dir['existing_info'] = (tvdb_id, show_name) 
+
+        t.dirList = dir_list
+        
+        return _munge(t)
 
     @cherrypy.expose
     def addShows(self, showDirs=[]):

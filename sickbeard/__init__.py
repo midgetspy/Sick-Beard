@@ -92,6 +92,7 @@ WEB_IPV6 = None
 
 LAUNCH_BROWSER = None
 CACHE_DIR = None
+ROOT_DIRS = None
 
 USE_BANNER = None
 USE_LISTVIEW = None
@@ -309,7 +310,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, \
+                TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
@@ -361,7 +362,9 @@ def initialize(consoleLogging=True):
         if not helpers.makeDir(CACHE_DIR):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
-            
+        
+        ROOT_DIRS = check_setting_str(CFG, 'General', 'root_dirs', '')
+        
         proxies = urllib.getproxies()
         proxy_url = None
         if 'http' in proxies:
@@ -824,6 +827,7 @@ def save_config():
     new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
 
     new_config['General']['cache_dir'] = CACHE_DIR if CACHE_DIR else 'cache'
+    new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)

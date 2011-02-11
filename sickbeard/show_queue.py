@@ -27,7 +27,7 @@ from lib.tvdb_api import tvdb_exceptions
 from sickbeard.common import *
 
 from sickbeard.tv import TVShow
-from sickbeard import exceptions, helpers, logger, ui
+from sickbeard import exceptions, helpers, logger, ui, db
 from sickbeard import generic_queue
 
 class ShowQueue(generic_queue.GenericQueue):
@@ -113,8 +113,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir, lang="en"):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, lang)
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, season_folders=None, lang="en"):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, season_folders, lang)
         self.queue.append(queueItemObj)
 
         return queueItemObj
@@ -162,10 +162,13 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, lang="en"):
+    def __init__(self, tvdb_id, showDir, default_status, quality, season_folders, lang):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
+        self.default_status = default_status
+        self.quality = quality
+        self.season_folders = season_folders
         self.lang = lang
 
         self.show = None
@@ -201,8 +204,8 @@ class QueueItemAdd(ShowQueueItem):
 
             # set up initial values
             self.show.location = self.showDir
-            self.show.quality = sickbeard.QUALITY_DEFAULT
-            self.show.seasonfolders = sickbeard.SEASON_FOLDERS_DEFAULT
+            self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
+            self.show.seasonfolders = self.season_folders if self.season_folders != None else sickbeard.SEASON_FOLDERS_DEFAULT
             self.show.paused = False
 
         except tvdb_exceptions.tvdb_exception, e:
@@ -251,6 +254,16 @@ class QueueItemAdd(ShowQueueItem):
         except Exception, e:
             logger.log(u"Error saving the episode to the database: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
+
+        # if they gave a custom status then change all the eps to it
+        if self.default_status != SKIPPED:
+            logger.log(u"Setting all episodes to the specified default status: "+str(self.default_status))
+            myDB = db.DBConnection();
+            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ?", [self.default_status, SKIPPED, self.show.tvdbid])
+
+        # if they started with WANTED eps then run the backlog
+        if self.default_status == WANTED:
+            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show])
 
         self.show.flushEpisodes()
 
