@@ -128,6 +128,7 @@ options = dict(
               'lib.pygithub',
               'lib.pythontwitter',
               'lib.simplejson',
+              'lib.socks',
               'lib.hachoir_core',
               'lib.hachoir_core.field',
               'lib.hachoir_core.stream',
