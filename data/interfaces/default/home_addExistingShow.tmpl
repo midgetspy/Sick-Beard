@@ -11,38 +11,16 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-AAA: $sickbeard.ROOT_DIRS<br />
-<script type="text/javascript" src="$sbRoot/js/addExistingShow.js"></script>
-
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/addExistingShow.js"></script>
 
 <h2>Select Shows To Add</h2>
 
-<table id="addRootDirTable" class="sickbeardTable tablesorter">
-  <thead><tr><th width="1%"><input type="checkbox" id="checkAll" CHECKED></th><th>Dir Name</th><th width="1%">Metadata</td></tr></thead>
-  <tbody>
-#for $curDir in $dirList:
-#if $curDir['added_already']:
-#continue
-#end if
+<div id="tableDiv"></div>
 
-#set $show_id = $curDir['dir']
-#if $curDir['existing_info'][0]:
-#set $show_id = $show_id + ':' + $str($curDir['existing_info'][0])
-#end if
-  <tr>
-    <td><input type="checkbox" id="$show_id" class="dirCheck" CHECKED></td>
-    <td><label for="$show_id">$curDir['display_dir']</label></td>
-    <td align="center">#if $curDir['existing_info'][0] and $curDir['existing_info'][1] then '<a href="http://thetvdb.com/?tab=series&id='+$str($curDir['existing_info'][0])+'">'+$curDir['existing_info'][1]+'</a>' else "?"#</td>
-  </tr>
-#end for
-  </tbody>
-  <tfoot>
-  <tr>
-    <td colspan="3"><input type="button" value="Continue" id="submitShowDirs" /></td>
-  </tr>
-  </tfoot>
-</tbody>
-</table>
+<input type="button" value="Submit" id="submitShowDirs">
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

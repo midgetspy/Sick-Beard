@@ -146,6 +146,7 @@ $(document).ready(function(){
         console.log(log_str)
         
         $('#rootDirText').val(dir_text);
+        $('#rootDirText').change();
         console.log('rootDirText: '+$('#rootDirText').val())
     }
     

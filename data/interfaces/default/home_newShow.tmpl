@@ -68,7 +68,8 @@
 
     \$('#searchName').click(function() {searchTvdb()});
 
-    //\$('#searchName').click()
+    if (\$('#nameToSearch').val().length)
+        \$('#searchName').click()
 
     \$('#cancelShow').click(function(){
         \$('#cancelShowItem').val(1);
@@ -127,7 +128,7 @@
 
 <div style="height: 400px; overflow:auto">
 <br /> 
-<input type="text" id="nameToSearch" value="" />
+<input type="text" id="nameToSearch" value="$default_show_name" />
 <select name="tvdbLang" id="tvdbLangSelect"></select>*
 <input type="button" id="searchName" value="Search" /><br />
 * Note: This will only affect the language of the TVDB data which affects metadata file contents<br />
@@ -146,7 +147,13 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 
 <div>
 <br />
+#if $provided_show_dir:
+<b>$provided_show_dir</b> <br />
+<input type="hidden" name="fullShowPath" value="$provided_show_dir">
+<br />
+#else
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
+#end if
 <input type="button" id="back_2" value="Back"> <input type="button" id="continue_2" value="Continue">
 <br />
 <br />
@@ -180,7 +187,8 @@ Show Quality:
 <option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
 #end for
 </select><br />
-<br/><h5>Then Re-download the episodes in any or all of these qualities as they are available:</h5>
+<br/>
+<h5>Then re-download the episodes in any or all of these qualities as they are available:</h5>
 #set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
 <select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
 #for $curQuality in sorted($bestQualityList):
@@ -199,6 +207,10 @@ Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASO
 <br />
 <br />
 <br />
+#for $curNextDir in $other_dirs:
+<input type="hidden" name="other_dirs" value="$curNextDir">
+#end for
+
 <input type="submit" id="addShowButton" value="Add Show"> <input type="button" id="skipShowButton" value="Skip Show">
 
 </form>
