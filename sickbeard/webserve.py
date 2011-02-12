@@ -1233,12 +1233,35 @@ class NewHomeAddShows:
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
                    anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
-                   other_dirs=None):
+                   other_dirs=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
         """
         
+        # grab our list of other dirs if given
+        if not other_dirs:
+            other_dirs = []
+        elif type(other_dirs) != list:
+            other_dirs = [other_dirs]
+            
+        def finishAddShow(): 
+            # if there are no extra shows then go home
+            if not other_dirs:
+                redirect('/home')
+            
+            # peel off the next one
+            next_show_dir = other_dirs[0]
+            rest_of_show_dirs = other_dirs[1:]
+            
+            # go to add the next show
+            return self.newShow(next_show_dir, rest_of_show_dirs)
+        
+        # if we're skipping then behave accordingly
+        if skipShow:
+            return finishAddShow()
+        else:
+            logger.log(u"skipShow: "+repr(skipShow))
         
         # sanity check on our inputs
         if (not rootDir and not fullShowPath) or not whichSeries:
@@ -1290,22 +1313,7 @@ class NewHomeAddShows:
         sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang)
         ui.flash.message('Show added', 'Adding the specified show into '+show_dir)
 
-        # grab our list of other dirs if given
-        if not other_dirs:
-            other_dirs = []
-        elif type(other_dirs) != list:
-            other_dirs = [other_dirs]
-        
-        # if there are no extra shows then go home
-        if not other_dirs:
-            redirect('/home')
-        
-        # peel off the next one
-        next_show_dir = other_dirs[0]
-        rest_of_show_dirs = other_dirs[1:]
-        
-        # go to add the next show
-        return self.newShow(next_show_dir, rest_of_show_dirs)
+        return finishAddShow()
         
 
     @cherrypy.expose

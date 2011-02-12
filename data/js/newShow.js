@@ -75,6 +75,11 @@ $(document).ready(function(){
 
     });
     
+    $('#skipShowButton').click(function(){
+        $('#skipShow').val('1');
+        $('#addShowForm').submit();
+    });
+    
     /***********************************************
     * jQuery Form to Form Wizard- (c) Dynamic Drive (www.dynamicdrive.com)
     * This notice MUST stay intact for legal use
@@ -84,7 +89,7 @@ $(document).ready(function(){
     var myform=new formtowizard({
         formid: 'addShowForm',
         revealfx: ['slide', 500]
-    })
+    });
 
     $('#nameToSearch').focus();
 
