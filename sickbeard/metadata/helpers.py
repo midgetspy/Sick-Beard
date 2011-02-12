@@ -63,7 +63,7 @@ def getTVDBIDFromNFO(dir):
         try:
             t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)
             s = t[int(tvdb_id)]
-            if not s or 'name' not in s or not s['name']:
+            if not s  or not s['seriesname']:
                 raise exceptions.NoNFOException("Show has no name on TVDB, probably the wrong language")
         except tvdb_exceptions.tvdb_exception, e:
             raise exceptions.NoNFOException("Unable to look up the show on TVDB, not using the NFO")
