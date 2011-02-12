@@ -1,0 +1,31 @@
+#import sickbeard
+#from sickbeard.common import Quality, qualityPresets, qualityPresetStrings
+
+#set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
+
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
+#set $selected = None
+<select id="qualityPreset">
+<option value="0">Custom</option>
+#for $curPreset in sorted($qualityPresets):
+<option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
+#end for
+</select><br />
+
+<div id="customQuality">
+<br/><h5>If I don't have the episode then download it in <b>one</b> of the following qualities:</h5>
+#set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
+<select id="anyQualities" name="anyQualities" multiple="multiple" size="$len($anyQualityList)">
+#for $curQuality in sorted($anyQualityList):
+<option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
+#end for
+</select><br />
+<br/>
+<h5>Then re-download the episodes in any or all of these qualities as they are available:</h5>
+#set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
+<select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
+#for $curQuality in sorted($bestQualityList):
+<option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
+#end for
+</select>
+</div>

@@ -14,44 +14,6 @@
 <link rel="stylesheet" type="text/css" href="$sbRoot/css/formwizard.css" />
 <script src="$sbRoot/js/formwizard.js" type="text/javascript"></script>
 
-#set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
-<script type="text/javascript" charset="utf-8">
-\$(document).ready(function(){
-
-  if (#if $sickbeard.QUALITY_DEFAULT in $qualityPresets then "1" else "0"#) {
-      \$('#customQuality').hide();
-  }
-
-  \$.fn.setFromPresets = function(preset) {
-      if (preset == 0) {
-        \$('#customQuality').show();
-        return
-      } else
-        \$('#customQuality').hide();
-  
-      \$('#anyQualities option').each(function(i) {
-          var result = preset & \$(this).val()
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      \$('#bestQualities option').each(function(i) {
-          var result = preset & (\$(this).val() << 16)
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      return
-  }
-  
-  \$('#qualityPreset').change(function(){
-        \$(this).setFromPresets(\$('#qualityPreset :selected').val());
-  });
-
-});
-
-</script>
-
 <script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
 
 
@@ -101,31 +63,8 @@ Status for episodes that you don't already have:
 </select><br />
 <br />
 Show Quality:
-#set $selected = None
-<select id="qualityPreset">
-<option value="0">Custom</option>
-#for $curPreset in sorted($qualityPresets):
-<option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
-#end for
-</select><br />
-
-<div id="customQuality">
-<br/><h5>If I don't have the episode then download it in <b>one</b> of the following qualities:</h5>
-#set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
-<select id="anyQualities" name="anyQualities" multiple="multiple" size="$len($anyQualityList)">
-#for $curQuality in sorted($anyQualityList):
-<option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
-#end for
-</select><br />
-<br/>
-<h5>Then re-download the episodes in any or all of these qualities as they are available:</h5>
-#set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
-<select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
-#for $curQuality in sorted($bestQualityList):
-<option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
-#end for
-</select>
-</div>
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
+<br />
 <br />
 Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#><br />
 </div>
