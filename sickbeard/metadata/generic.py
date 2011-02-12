@@ -599,10 +599,10 @@ class GenericMetadata():
         metadata_path = ek.ek(os.path.join, dir, self._show_file_name)
     
         if not ek.ek(os.path.isdir, dir) or not ek.ek(os.path.isfile, metadata_path):
-            logger.log(u"The file doesn't exist, can't load the metadata file")
+            logger.log(u"Can't load the metadata file from "+repr(metadata_path)+", it doesn't exist", logger.DEBUG)
             return empty_return
 
-        logger.log(u"Loading show info from metadata file")
+        logger.log(u"Loading show info from metadata file in "+dir, logger.DEBUG)
     
         try:
             xmlFileObj = ek.ek(open, metadata_path, 'r')
