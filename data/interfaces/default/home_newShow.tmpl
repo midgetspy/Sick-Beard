@@ -11,6 +11,9 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<link rel="stylesheet" type="text/css" href="$sbRoot/css/formwizard.css" />
+<script src="$sbRoot/js/formwizard.js" type="text/javascript"></script>
+
 <script type="text/javascript" charset="utf-8">
 \$(document).ready(function() 
 { 
@@ -122,11 +125,10 @@
 
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
 
-<div id="newShowAccordion" style="width: 80%">
+<fieldset class="sectionwrap">
+<legend>Find your show on TVDB</legend>
 
-<h3>1) Find your show on TVDB</h3>
-
-<div style="height: 400px; overflow:auto">
+<div style="overflow:auto">
 <br /> 
 <input type="text" id="nameToSearch" value="$default_show_name" />
 <select name="tvdbLang" id="tvdbLangSelect"></select>*
@@ -135,18 +137,14 @@
 and episode filenames. This DOES NOT allow Sick Beard to download non-english files!<br />
 <br />
 <div id="searchResults" width="250"></div>
-<br />
 <input type="hidden" id="cancelShowItem" value="0" />
-<input type="button" id="continue_1" value="Continue"><br /><br />
-
-<br />
-<br />
 </div>
+</fieldset>
 
-<h3>2) Pick the parent folder</h3>
+<fieldset class="sectionwrap">
+<legend>Pick the parent folder</legend>
 
-<div>
-<br />
+<div style="overflow:auto">
 #if $provided_show_dir:
 <b>$provided_show_dir</b> <br />
 <input type="hidden" name="fullShowPath" value="$provided_show_dir">
@@ -154,15 +152,13 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 #else
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
 #end if
-<input type="button" id="back_2" value="Back"> <input type="button" id="continue_2" value="Continue">
-<br />
-<br />
 </div>
+</fieldset>
 
-<h3>3) Customize options</h3>
+<fieldset class="sectionwrap">
+<legend>Customize options</legend>
 
 <div style="overflow:auto">
-<br />
 Status for episodes that you don't already have:
 <select name="defaultStatus" id="statusSelect">
 #for $curStatus in [$SKIPPED, $WANTED, $ARCHIVED, $IGNORED]:
@@ -198,21 +194,17 @@ Show Quality:
 </div>
 <br />
 Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#><br />
-<br />
-<input type="button" id="back_3" value="Back"><br />
-<br />
+</div>
+</fieldset>
 
-</div>
-</div>
-<br />
-<br />
-<br />
+
 #for $curNextDir in $other_dirs:
 <input type="hidden" name="other_dirs" value="$curNextDir">
 #end for
-
-<input type="submit" id="addShowButton" value="Add Show"> <input type="button" id="skipShowButton" value="Skip Show">
-
 </form>
+<br />
+<br />
+<input type="button" id="addShowButton" value="Add Show"> <input type="button" id="skipShowButton" value="Skip Show">
+
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
