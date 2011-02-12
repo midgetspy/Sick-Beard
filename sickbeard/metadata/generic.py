@@ -628,16 +628,6 @@ class GenericMetadata():
                 logger.log(u"Invalid tvdb id ("+str(tvdb_id)+"), not using metadata file", logger.WARNING)
                 return empty_return
     
-            try:
-                t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)
-                s = t[int(tvdb_id)]
-                if not s or not s['seriesname']:
-                    logger.log(u"Show has no name on TVDB, probably the wrong language: "+str(s['seriesname']), logger.WARNING)
-                    return empty_return
-            except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Unable to look up the show on TVDB, not using the NFO", logger.WARNING)
-                return empty_return
-    
         except (exceptions.NoNFOException, SyntaxError, ValueError), e:
             logger.log(u"There was an error parsing your existing metadata file: " + str(e), logger.WARNING)
             return empty_return
