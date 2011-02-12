@@ -54,7 +54,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = show.name       
+        params['show_name'] = re.sub('[()]', '', show.name)       
           
         if season != None:
             params['season'] = season
