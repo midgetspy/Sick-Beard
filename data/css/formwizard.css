@@ -1,5 +1,4 @@
 fieldset.sectionwrap{ /*fieldset that wraps around each form "page" */
-height: 350px;
 overflow: auto;
 width: 800px;
 border-width:0;
