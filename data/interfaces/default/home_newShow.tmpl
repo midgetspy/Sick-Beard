@@ -60,13 +60,12 @@ Status for episodes that you don't already have:
 <option value="$curStatus" #if $sickbeard.STATUS_DEFAULT == $curStatus then 'selected="selected"' else ''#>$statusStrings[$curStatus]
 #end for
 </select>
-<br />
-<br />
+<br /><br />
+Season Folders: <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#>
+<br /><br />
 Show Quality:
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 <br />
-<br />
-Season Folders: <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#><br />
 </div>
 </fieldset>
 

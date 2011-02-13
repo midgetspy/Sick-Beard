@@ -12,6 +12,7 @@
 #end for
 </select><br />
 
+<div style="height: 225px; overflow: auto;">
 <div id="customQuality">
 <br/><h5>If I don't have the episode then download it in <b>one</b> of the following qualities:</h5>
 #set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
@@ -28,4 +29,5 @@
 <option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
 #end for
 </select>
+</div>
 </div>
