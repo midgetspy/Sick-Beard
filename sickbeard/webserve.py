@@ -463,13 +463,28 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
+    def saveDefaultStatus(self, defaultStatus):
+        sickbeard.STATUS_DEFAULT = int(defaultStatus)
+    
+    @cherrypy.expose
+    def saveDefaultQuality(self, defaultQuality):
+        sickbeard.QUALITY_DEFAULT = int(defaultQuality)
+    
+    @cherrypy.expose
+    def saveDefaultSeasonFolders(self, defaultSeasonFolders):
+        if defaultSeasonFolders == "on":
+            defaultSeasonFolders = 1
+        else:
+            defaultSeasonFolders = 0
+        sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+    
+    @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
-                    web_password=None, season_folders_format=None, season_folders_default=None,
+                    web_password=None, season_folders_format=None, 
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None,
-                    naming_use_periods=None, naming_sep_type=None, naming_quality=None,
-                    anyQualities = [], bestQualities = [], naming_dates=None,
+                    naming_use_periods=None, naming_sep_type=None, naming_quality=None, naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
                     wdtv_data=None, use_banner=None):
 
@@ -489,11 +504,6 @@ class ConfigGeneral:
             launch_browser = 1
         else:
             launch_browser = 0
-
-        if season_folders_default == "on":
-            season_folders_default = 1
-        else:
-            season_folders_default = 0
 
         if version_notify == "on":
             version_notify = 1
@@ -530,14 +540,6 @@ class ConfigGeneral:
         else:
             use_banner = 0
 
-        if type(anyQualities) != list:
-            anyQualities = [anyQualities]
-
-        if type(bestQualities) != list:
-            bestQualities = [bestQualities]
-
-        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
-
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
@@ -549,8 +551,6 @@ class ConfigGeneral:
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
-        sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
-        sickbeard.QUALITY_DEFAULT = newQuality
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
         sickbeard.NAMING_EP_NAME = naming_ep_name
