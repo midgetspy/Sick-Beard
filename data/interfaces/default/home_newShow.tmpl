@@ -14,112 +14,6 @@
 <link rel="stylesheet" type="text/css" href="$sbRoot/css/formwizard.css" />
 <script src="$sbRoot/js/formwizard.js" type="text/javascript"></script>
 
-<script type="text/javascript" charset="utf-8">
-\$(document).ready(function() 
-{ 
-    \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data){
-        var resultStr = '';
-
-        if (data.results.length == 0) {
-            resultStr = '<option value="en" selected="selected">en</option>';
-        } else {
-            \$.each(data.results, function(index, obj){
-                if (resultStr == '')
-                        selected = ' selected="selected"';
-                else
-                        selected = '';
-
-                resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
-            });
-        }
-        \$('#tvdbLangSelect').html(resultStr)
-
-        \$('#tvdbLangSelect').change(function() { searchTvdb() });
-    });
-
-
-    function searchTvdb(){
-        \$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/searching_anim.gif">searching..</img>');
-
-        \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val(), 'lang': \$('#tvdbLangSelect').val()}, function(data){
-            var resultStr = '';
-            
-            if (data.results.length == 0) {
-                resultStr = '<b>No results found, try a different search.</b>';
-            } else {
-            
-                \$.each(data.results, function(index, obj){
-                    if (resultStr == '')
-                        checked = ' checked';
-                    else
-                        checked = '';
-                    resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '|' + obj[1] + '"' + checked + ' /> ';
-                    if(data.langid && data.langid != "")
-                            resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '&lid=' + data.langid + '" target="_new"><b>' + obj[1] + '</b></a>';
-                    else
-                        resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" target="_new"><b>' + obj[1] + '</b></a>';
-
-                    if (obj[2] != null)
-                        resultStr += ' (started on ' + obj[2] + ')';
-                    resultStr += '<br />';
-                });
-                resultStr += '</ul>';
-            }
-            \$('#searchResults').html(resultStr);
-        });
-    };  
-
-    \$('#searchName').click(function() {searchTvdb()});
-
-    if (\$('#nameToSearch').val().length)
-        \$('#searchName').click()
-
-    \$('#cancelShow').click(function(){
-        \$('#cancelShowItem').val(1);
-        \$('#addShowForm').submit();
-    });
-    
-});
-</script>
-
-#set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
-<script type="text/javascript" charset="utf-8">
-\$(document).ready(function(){
-
-  if (#if $sickbeard.QUALITY_DEFAULT in $qualityPresets then "1" else "0"#) {
-      \$('#customQuality').hide();
-  }
-
-  \$.fn.setFromPresets = function(preset) {
-      if (preset == 0) {
-        \$('#customQuality').show();
-        return
-      } else
-        \$('#customQuality').hide();
-  
-      \$('#anyQualities option').each(function(i) {
-          var result = preset & \$(this).val()
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      \$('#bestQualities option').each(function(i) {
-          var result = preset & (\$(this).val() << 16)
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      return
-  }
-  
-  \$('#qualityPreset').change(function(){
-        \$(this).setFromPresets(\$('#qualityPreset :selected').val());
-  });
-
-});
-
-</script>
-
 <script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
 
 
@@ -131,7 +25,9 @@
 <div style="overflow:auto">
 <br /> 
 <input type="text" id="nameToSearch" value="$default_show_name" />
-<select name="tvdbLang" id="tvdbLangSelect"></select>*
+<select name="tvdbLang" id="tvdbLangSelect">
+<option value="en" selected="selected">en</option>
+</select>*
 <input type="button" id="searchName" value="Search" /><br />
 * Note: This will only affect the language of the TVDB data which affects metadata file contents<br />
 and episode filenames. This DOES NOT allow Sick Beard to download non-english files!<br />
@@ -167,31 +63,8 @@ Status for episodes that you don't already have:
 </select><br />
 <br />
 Show Quality:
-#set $selected = None
-<select id="qualityPreset">
-<option value="0">Custom</option>
-#for $curPreset in sorted($qualityPresets):
-<option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
-#end for
-</select><br />
-
-<div id="customQuality">
-<br/><h5>If I don't have the episode then download it in <b>one</b> of the following qualities:</h5>
-#set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
-<select id="anyQualities" name="anyQualities" multiple="multiple" size="$len($anyQualityList)">
-#for $curQuality in sorted($anyQualityList):
-<option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
-#end for
-</select><br />
-<br/>
-<h5>Then re-download the episodes in any or all of these qualities as they are available:</h5>
-#set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
-<select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
-#for $curQuality in sorted($bestQualityList):
-<option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
-#end for
-</select>
-</div>
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
+<br />
 <br />
 Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#><br />
 </div>
@@ -201,10 +74,13 @@ Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASO
 #for $curNextDir in $other_dirs:
 <input type="hidden" name="other_dirs" value="$curNextDir">
 #end for
+<input type="hidden" name="skipShow" id="skipShow" value="">
 </form>
 <br />
 <br />
-<input type="button" id="addShowButton" value="Add Show"> <input type="button" id="skipShowButton" value="Skip Show">
-
+<input type="button" id="addShowButton" value="Add Show">
+#if $other_dirs:
+<input type="button" id="skipShowButton" value="Skip Show">
+#end if
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

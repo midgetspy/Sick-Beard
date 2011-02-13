@@ -1,5 +1,5 @@
 <table id="addRootDirTable" class="sickbeardTable tablesorter">
-  <thead><tr><th width="1%"><input type="checkbox" id="checkAll" CHECKED></th><th>Dir Name</th><th width="1%">Metadata</td></tr></thead>
+  <thead><tr><th width="1%"><input type="checkbox" id="checkAll" CHECKED></th><th>Dir Name</th><th width="20%">Contains show</td></tr></thead>
   <tbody>
 #for $curDir in $dirList:
 #if $curDir['added_already']:
@@ -12,7 +12,7 @@
 #end if
   <tr>
     <td><input type="checkbox" id="$show_id" class="dirCheck" CHECKED></td>
-    <td><label for="$show_id">$curDir['display_dir']</label></td>
+    <td><label for="$show_id">$curDir['dir']</label></td>
     <td align="center">#if $curDir['existing_info'][0] and $curDir['existing_info'][1] then '<a href="http://thetvdb.com/?tab=series&id='+$str($curDir['existing_info'][0])+'">'+$curDir['existing_info'][1]+'</a>' else "?"#</td>
   </tr>
 #end for

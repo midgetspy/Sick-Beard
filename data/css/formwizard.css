@@ -8,7 +8,7 @@ padding:5px;
 
 legend{ /*title shown at top of each form page */
 font:bold 16px Arial;
-color: darkred;
+color: #57442B;
 }
 
 div.stepsguide{ /*div that contains all the "steps" text located at top of form */ 
@@ -46,7 +46,7 @@ border-radius:5px;
 -webkit-border-radius:5px;
 -moz-border-radius:5px;
 padding:2px 5px;
-background:darkred;
+background:#57442B;
 color:white;
 cursor:hand;
 cursor:pointer;

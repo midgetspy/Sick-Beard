@@ -81,7 +81,8 @@ $(document).ready(function(){
         console.log('setting default to '+which)
 
         // put an asterisk on the text
-        $('#'+which).text('*'+$('#'+which).text());
+        if ($('#'+which).text().charAt(0) != '*')
+            $('#'+which).text('*'+$('#'+which).text());
         
         // if there's an existing one then take the asterisk off
         if ($('#whichDefaultRootDir').val() && force != true) {

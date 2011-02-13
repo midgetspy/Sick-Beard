@@ -1159,45 +1159,52 @@ class NewHomeAddShows:
         return json.dumps({'results': results, 'langid': lang_id})
 
     @cherrypy.expose
-    def massAddTable(self, root_dir=None):
+    def massAddTable(self):
         t = PageTemplate(file="home_massAddTable.tmpl")
         t.submenu = HomeMenu()
         
         myDB = db.DBConnection()
+
+        if sickbeard.ROOT_DIRS:
+            root_dirs = sickbeard.ROOT_DIRS.split('|')[1:]
+        else:
+            return "No root dirs defined." 
         
-        if not ek.ek(os.path.isdir, root_dir):
-            return "Invalid path"
+        tmp = root_dirs[int(sickbeard.ROOT_DIRS.split('|')[0])]
+        root_dirs.remove(tmp)
+        root_dirs = [tmp]+root_dirs
         
         dir_list = []
         
-        for cur_file in ek.ek(os.listdir, root_dir):
-            
-            cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
-            if not ek.ek(os.path.isdir, cur_path):
-                continue
-            
-            cur_dir = {'dir': cur_path,
-                       'display_dir': ek.ek(os.path.basename, cur_path),
-                       }
-            
-            # see if the folder is in XBMC already
-            dirResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [cur_path])
-            
-            if dirResults:
-                cur_dir['added_already'] = True
-            else:
-                cur_dir['added_already'] = False
-            
-            dir_list.append(cur_dir)
-            
-            tvdb_id = ''
-            show_name = ''
-            for cur_provider in sickbeard.metadata_provider_dict.values():
-                (tvdb_id, show_name) = cur_provider.retrieveShowMetadata(cur_path)
-                if tvdb_id and show_name:
-                    break
-            
-            cur_dir['existing_info'] = (tvdb_id, show_name) 
+        for root_dir in root_dirs:
+            for cur_file in ek.ek(os.listdir, root_dir):
+                
+                cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
+                if not ek.ek(os.path.isdir, cur_path):
+                    continue
+                
+                cur_dir = {'dir': cur_path,
+                           'display_dir': ek.ek(os.path.basename, cur_path),
+                           }
+                
+                # see if the folder is in XBMC already
+                dirResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [cur_path])
+                
+                if dirResults:
+                    cur_dir['added_already'] = True
+                else:
+                    cur_dir['added_already'] = False
+                
+                dir_list.append(cur_dir)
+                
+                tvdb_id = ''
+                show_name = ''
+                for cur_provider in sickbeard.metadata_provider_dict.values():
+                    (tvdb_id, show_name) = cur_provider.retrieveShowMetadata(cur_path)
+                    if tvdb_id and show_name:
+                        break
+                
+                cur_dir['existing_info'] = (tvdb_id, show_name) 
 
         t.dirList = dir_list
         
@@ -1233,12 +1240,33 @@ class NewHomeAddShows:
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
                    anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
-                   other_dirs=None):
+                   other_dirs=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
         """
         
+        # grab our list of other dirs if given
+        if not other_dirs:
+            other_dirs = []
+        elif type(other_dirs) != list:
+            other_dirs = [other_dirs]
+            
+        def finishAddShow(): 
+            # if there are no extra shows then go home
+            if not other_dirs:
+                redirect('/home')
+            
+            # peel off the next one
+            next_show_dir = other_dirs[0]
+            rest_of_show_dirs = other_dirs[1:]
+            
+            # go to add the next show
+            return self.newShow(next_show_dir, rest_of_show_dirs)
+        
+        # if we're skipping then behave accordingly
+        if skipShow:
+            return finishAddShow()
         
         # sanity check on our inputs
         if (not rootDir and not fullShowPath) or not whichSeries:
@@ -1290,22 +1318,7 @@ class NewHomeAddShows:
         sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang)
         ui.flash.message('Show added', 'Adding the specified show into '+show_dir)
 
-        # grab our list of other dirs if given
-        if not other_dirs:
-            other_dirs = []
-        elif type(other_dirs) != list:
-            other_dirs = [other_dirs]
-        
-        # if there are no extra shows then go home
-        if not other_dirs:
-            redirect('/home')
-        
-        # peel off the next one
-        next_show_dir = other_dirs[0]
-        rest_of_show_dirs = other_dirs[1:]
-        
-        # go to add the next show
-        return self.newShow(next_show_dir, rest_of_show_dirs)
+        return finishAddShow()
         
 
     @cherrypy.expose
