@@ -101,8 +101,9 @@ def main():
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
     sickbeard.MY_ARGS = sys.argv[1:]
 
+    locale.setlocale(locale.LC_ALL, '')
     sickbeard.SYS_ENCODING = locale.getpreferredencoding()
-    if not sickbeard.SYS_ENCODING:
+    if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII'):
         sickbeard.SYS_ENCODING = 'UTF-8'
 
     sickbeard.CONFIG_FILE = os.path.join(sickbeard.PROG_DIR, "config.ini")
