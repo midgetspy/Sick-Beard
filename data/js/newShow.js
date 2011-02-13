@@ -141,4 +141,9 @@ $(document).ready(function(){
     $('#rootDirText').change(updateSampleText);
     $('#whichSeries').live('change', updateSampleText);
 
+    $('#nameToSearch').keyup(function(event){
+        if(event.keyCode == 13)
+            $('#searchName').click();
+    });
+
 });
