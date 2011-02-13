@@ -101,8 +101,13 @@ def main():
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
     sickbeard.MY_ARGS = sys.argv[1:]
 
-    locale.setlocale(locale.LC_ALL, '')
+    try:
+        locale.setlocale(locale.LC_ALL, "")
+    except (locale.Error, IOError):
+        pass
     sickbeard.SYS_ENCODING = locale.getpreferredencoding()
+    
+    # for OSes that are poorly configured I'll just force UTF-8
     if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII'):
         sickbeard.SYS_ENCODING = 'UTF-8'
 
