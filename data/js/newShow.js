@@ -93,6 +93,23 @@ $(document).ready(function(){
 
     $('#nameToSearch').focus();
 
+    $('#makeStatusDefault').live('click', function() {
+        $.get(sbRoot+'/config/general/saveDefaultStatus', {defaultStatus: $('#statusSelect').val()} );
+        return false;
+    });
 
+    $('#makeQualityDefault').live('click', function() {
+        $.get(sbRoot+'/config/general/saveDefaultQuality', {defaultQuality: $('#qualityPreset').val()} );
+        return false;
+    });
+
+    $('#makeSeasonFoldersDefault').live('click', function() {
+        $.get(sbRoot+'/config/general/saveDefaultSeasonFolders', {defaultSeasonFolders: $('#seasonFolders').val()} );
+        return false;
+    });
+
+    $('#statusSelect').after('(<a href="#" id="makeStatusDefault">make default</a>)');
+    $('#qualityPreset').after('(<a href="#" id="makeQualityDefault">make default</a>)');
+    $('#seasonFolders').after('(<a href="#" id="makeSeasonFoldersDefault">make default</a>)');
 
 });

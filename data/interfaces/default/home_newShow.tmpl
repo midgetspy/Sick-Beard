@@ -58,15 +58,16 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 Status for episodes that you don't already have:
 <select name="defaultStatus" id="statusSelect">
 #for $curStatus in [$SKIPPED, $WANTED, $ARCHIVED, $IGNORED]:
-<option value="$curStatus">$statusStrings[$curStatus]
+<option value="$curStatus" #if $sickbeard.STATUS_DEFAULT == $curStatus then 'selected="selected"' else ''#>$statusStrings[$curStatus]
 #end for
-</select><br />
+</select>
+<br />
 <br />
 Show Quality:
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 <br />
 <br />
-Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#><br />
+Season Folders: <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#><br />
 </div>
 </fieldset>
 
@@ -82,5 +83,6 @@ Season Folders: <input type="checkbox" name="seasonFolders" #if $sickbeard.SEASO
 #if $other_dirs:
 <input type="button" id="skipShowButton" value="Skip Show">
 #end if
+<script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
