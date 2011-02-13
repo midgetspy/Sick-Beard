@@ -78,6 +78,9 @@ $(document).ready(function(){
         if (!which.length)
             return
 
+        if ($('#whichDefaultRootDir').val() == which)
+            return
+
         console.log('setting default to '+which)
 
         // put an asterisk on the text
