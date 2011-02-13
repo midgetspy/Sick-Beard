@@ -36,7 +36,7 @@ $(document).ready(function(){
                         checked = ' checked';
                     else
                         checked = '';
-                    resultStr += '<input type="radio" name="whichSeries" value="' + obj[0] + '|' + obj[1] + '"' + checked + ' /> ';
+                    resultStr += '<input type="radio" id="whichSeries" name="whichSeries" value="' + obj[0] + '|' + obj[1] + '"' + checked + ' /> ';
                     if(data.langid && data.langid != "")
                             resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '&lid=' + data.langid + '" target="_new"><b>' + obj[1] + '</b></a>';
                     else
@@ -49,6 +49,7 @@ $(document).ready(function(){
                 resultStr += '</ul>';
             }
             $('#searchResults').html(resultStr);
+            updateSampleText();
         });
     };  
 
@@ -111,5 +112,33 @@ $(document).ready(function(){
     $('#statusSelect').after('(<a href="#" id="makeStatusDefault">make default</a>)');
     $('#qualityPreset').after('(<a href="#" id="makeQualityDefault">make default</a>)');
     $('#seasonFolders').after('(<a href="#" id="makeSeasonFoldersDefault">make default</a>)');
+
+    function updateSampleText() {
+        // if something's selected then we have some behavior to figure out
+        if ($("#rootDirs option:selected").length) {
+            sample_text = $('#rootDirs option:selected').val();
+            if (sample_text.indexOf('/') >= 0)
+                sep_char = '/';
+            else if (sample_text.indexOf('\\') >= 0)
+                sep_char = '\\';
+
+            sample_text = 'Eg. <b>' + sample_text;
+            if (sample_text.substr(sample_text.length-1) != sep_char)
+                sample_text += sep_char;
+            sample_text += '</b><i>||</i>' + sep_char;
+
+            if ($('input:radio[name=whichSeries]:checked').length) {
+                var selected_name = $('input:radio[name=whichSeries]:checked').val().split('|')[1];
+                $.get(sbRoot+'/home/addShows/sanitizeFileName', {name: selected_name}, function(data){
+                     $('#sampleRootDir').html(sample_text.replace('||', data));
+                });
+            } else {
+                $('#sampleRootDir').html(sample_text.replace('||', 'Show Name'));
+            }
+        }
+    }
+    
+    $('#rootDirText').change(updateSampleText);
+    $('#whichSeries').live('change', updateSampleText);
 
 });
