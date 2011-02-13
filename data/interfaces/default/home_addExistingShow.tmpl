@@ -13,16 +13,18 @@
 
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
 
-Showing all folders in:<br />
+Searching for all shows in:<br />
+<ul id="rootDirStaticList">
 #if $sickbeard.ROOT_DIRS:
 #for $cur_dir in $sickbeard.ROOT_DIRS.split('|')[1:]
-- $cur_dir<br />
+<li>$cur_dir</li>
 #end for
 #end if
+</ul>
 <br />
-<a href="#">Click to manage root TV folders</a> (doesn't do anything atm)<br />
+<a href="#">Click to manage root TV folders</a> (should toggle rootDirDisplay div, doesn't do anything atm)<br />
 <br />
-<div style="display: none">
+<div id="rootDirDisplay" #if $sickbeard.ROOT_DIRS then 'style="display: none"' else ''#>
 <script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
 </div>

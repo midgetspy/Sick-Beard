@@ -35,7 +35,7 @@ $(document).ready(function()
         $.get('/home/addShows/massAddTable', function(data) {
             $('#tableDiv').html(data);
             $("#addRootDirTable").tablesorter({
-                sortList: [[1,0]],
+                //sortList: [[1,0]],
                 widgets: ['zebra'],
                 headers: {
                     0: { sorter: false }
@@ -45,12 +45,6 @@ $(document).ready(function()
 
     }
 
-    $('#rootDirText').change(function(){
-        if ($("#rootDirs option:selected").length)
-            loadContent();
-    });
-
-    if ($("#rootDirs option:selected").length)
-        loadContent();
+    loadContent();
     
 });
