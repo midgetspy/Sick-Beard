@@ -285,6 +285,7 @@ sceneExceptions = {72546: ['CSI'],
                    172381: ['Silent Library (US)'],
                    131791: ['Sci-Fi Science'],
                    80646: ['Frontline (US)', 'Frontline'],
+                   189931: ['RBT (AU)'],
                    }
 
 countryList = {'Australia': 'AU',
