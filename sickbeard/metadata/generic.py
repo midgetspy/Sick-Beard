@@ -599,10 +599,10 @@ class GenericMetadata():
         metadata_path = ek.ek(os.path.join, dir, self._show_file_name)
     
         if not ek.ek(os.path.isdir, dir) or not ek.ek(os.path.isfile, metadata_path):
-            logger.log(u"The file doesn't exist, can't load the metadata file")
+            logger.log(u"Can't load the metadata file from "+repr(metadata_path)+", it doesn't exist", logger.DEBUG)
             return empty_return
 
-        logger.log(u"Loading show info from metadata file")
+        logger.log(u"Loading show info from metadata file in "+dir, logger.DEBUG)
     
         try:
             xmlFileObj = ek.ek(open, metadata_path, 'r')
@@ -626,16 +626,6 @@ class GenericMetadata():
     
             if not tvdb_id:
                 logger.log(u"Invalid tvdb id ("+str(tvdb_id)+"), not using metadata file", logger.WARNING)
-                return empty_return
-    
-            try:
-                t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)
-                s = t[int(tvdb_id)]
-                if not s or not s['seriesname']:
-                    logger.log(u"Show has no name on TVDB, probably the wrong language: "+str(s['seriesname']), logger.WARNING)
-                    return empty_return
-            except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Unable to look up the show on TVDB, not using the NFO", logger.WARNING)
                 return empty_return
     
         except (exceptions.NoNFOException, SyntaxError, ValueError), e:

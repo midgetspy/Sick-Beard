@@ -1,0 +1,53 @@
+fieldset.sectionwrap{ /*fieldset that wraps around each form "page" */
+height: 350px;
+overflow: auto;
+width: 800px;
+border-width:0;
+padding:5px;
+}
+
+legend{ /*title shown at top of each form page */
+font:bold 16px Arial;
+color: darkred;
+}
+
+div.stepsguide{ /*div that contains all the "steps" text located at top of form */ 
+width: 800px; /*width of "steps" container*/
+overflow:hidden;
+margin-bottom:15px;
+cursor:pointer;
+}
+
+div.stepsguide .step{ /*div that wraps around each "steps" text */
+width:260px; /*width of each "steps" text*/
+font: bold 24px Arial;
+float:left;
+}
+
+div.stepsguide .disabledstep{ /*div that wraps around each "steps" text */
+color:#C4C4C4;
+}
+
+div.stepsguide .step .smalltext{ /*small footer text inside "steps" text */
+font-size: 13px;
+font-weight: normal;
+}
+
+div.formpaginate{ /* CSS for pagination DIV container */
+width: 750px;
+overflow:auto;
+font-weight:bold;
+text-align:center;
+margin-top:1em;
+}
+
+div.formpaginate .prev, div.formpaginate .next{ /*CSS for "prev" and "next" SPAN elements within paginate container */
+border-radius:5px;
+-webkit-border-radius:5px;
+-moz-border-radius:5px;
+padding:2px 5px;
+background:darkred;
+color:white;
+cursor:hand;
+cursor:pointer;
+}
