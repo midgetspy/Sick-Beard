@@ -1128,6 +1128,10 @@ class NewHomeAddShows:
         return json.dumps({'results': result})
 
     @cherrypy.expose
+    def sanitizeFileName(self, name):
+        return helpers.sanitizeFileName(name)
+
+    @cherrypy.expose
     def searchTVDBForShowName(self, name, lang="en"):
         if not lang or lang == 'null':
                 lang = "en"

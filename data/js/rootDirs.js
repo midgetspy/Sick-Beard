@@ -108,10 +108,9 @@ $(document).ready(function(){
 
         if (!$("#rootDirs").length)
             return
-        var do_disable = 'true';
-        var sample_text = '';
-        var sep_char = '';
         
+        var do_disable = 'true';
+
         // re-sync option ids
         syncOptionIDs();
 
@@ -122,20 +121,9 @@ $(document).ready(function(){
         // if something's selected then we have some behavior to figure out
         if ($("#rootDirs option:selected").length) {
             do_disable = '';
-            sample_text = $('#rootDirs option:selected').val();
-            if (sample_text.indexOf('/') >= 0)
-                sep_char = '/';
-            else if (sample_text.indexOf('\\') >= 0)
-                sep_char = '\\';
-
-            sample_text = 'Eg. <b>' + sample_text;
-            if (sample_text.substr(sample_text.length-1) != sep_char)
-                sample_text += sep_char;
-             sample_text += '</b><i>Sample Show</i>' + sep_char;
         }
         
         // update the elements
-        $('#sampleRootDir').html(sample_text)
         $('#deleteRootDir').attr('disabled', do_disable);
         $('#defaultRootDir').attr('disabled', do_disable);
         $('#editRootDir').attr('disabled', do_disable);
