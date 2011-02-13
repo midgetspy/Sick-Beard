@@ -38,13 +38,14 @@ div#insideContent {
     float: left; 
     padding-top: 5px; 
     padding-left: 8px; 
-    line-height: 18px;
-    font-size: 18px;
+    line-height: 17px;
+    font-size: 16px;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 
 .tvshowTitleIcons {
     float: right;
-    padding: 5px 10px 0px 0px;
+    padding: 3px 5px;
 }
 
 .tvshowDiv .title { 
@@ -148,4 +149,13 @@ h1.network {
 span.pause {
     color: #FF0000;
     font-size: 12px;
+}
+
+.ep_summaryTrigger {
+    float: left;
+    padding-top: 5px;
+}
+.ep_summary {
+    margin-left: 25px;
+    padding-top: 5px;
 }

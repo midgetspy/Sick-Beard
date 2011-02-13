@@ -199,6 +199,8 @@ def allPossibleShowNames(show):
     # any countries defined in common.countryList
     # (and vice versa)
     for curName in set(showNames):
+        if not curName:
+            continue
         for curCountry in country_list:
             if curName.endswith(' '+curCountry):
                 newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
@@ -218,7 +220,7 @@ def isGoodResult(name, show, log=True):
     showNames = map(sanitizeSceneName, all_show_names) + all_show_names
 
     for curName in set(showNames):
-        escaped_name = re.sub('\\\\[.-]', '\W+', re.escape(curName))
+        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
         curRegex = '^' + escaped_name + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:
             logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
@@ -226,6 +228,7 @@ def isGoodResult(name, show, log=True):
         match = re.search(curRegex, name, re.I)
 
         if match:
+            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
             return True
 
     if log:

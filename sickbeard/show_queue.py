@@ -113,8 +113,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir)
+    def addShow(self, tvdb_id, showDir, lang="en"):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, lang)
         self.queue.append(queueItemObj)
 
         return queueItemObj
@@ -162,10 +162,11 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir):
+    def __init__(self, tvdb_id, showDir, lang="en"):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
+        self.lang = lang
 
         self.show = None
 
@@ -193,7 +194,7 @@ class QueueItemAdd(ShowQueueItem):
         logger.log(u"Starting to add show "+self.showDir)
 
         try:
-            newShow = TVShow(self.tvdb_id)
+            newShow = TVShow(self.tvdb_id, self.lang)
             newShow.loadFromTVDB()
 
             self.show = newShow
@@ -309,13 +310,6 @@ class QueueItemUpdate(ShowQueueItem):
         logger.log(u"Retrieving show info from TVDB", logger.DEBUG)
         self.show.loadFromTVDB(cache=not self.force)
 
-        # either update or refresh depending on the time
-        if self.show.status == "Ended":
-            #TODO: maybe I should still update specials?
-            logger.log(u"Not updating episodes for show "+self.show.name+" because it's marked as ended.", logger.DEBUG)
-            sickbeard.showQueueScheduler.action.refreshShow(self.show, True)
-            return
-
         # get episode list from DB
         logger.log(u"Loading all episodes from the database", logger.DEBUG)
         DBEpList = self.show.loadEpisodesFromDB()
@@ -363,4 +357,3 @@ class QueueItemForceUpdate(QueueItemUpdate):
     def __init__(self, show=None):
         ShowQueueItem.__init__(self, ShowQueueActions.FORCEUPDATE, show)
         self.force = True
-

@@ -51,7 +51,7 @@ sbRoot = '$sbRoot';
                             #end if
                           <li class="ui-state-default" id="$curName">
                             <input type="checkbox" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
-                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" width="16" height="16" /></a>
+                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
                             #if $curProvider.name == "EZRSS" then "**" else ""#

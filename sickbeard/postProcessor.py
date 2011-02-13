@@ -362,7 +362,23 @@ class PostProcessor(object):
     
                 self._log(u"Looking up name "+cur_name+u" on TVDB", logger.DEBUG)
                 showObj = t[cur_name]
-            except (tvdb_exceptions.tvdb_exception, IOError), e:
+            except (tvdb_exceptions.tvdb_exception), e:
+                # if none found, search on all languages
+                try:
+                    # There's gotta be a better way of doing this but we don't wanna
+                    # change the language value elsewhere
+                    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+                    ltvdb_api_parms['search_all_languages'] = True
+                    t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **ltvdb_api_parms)
+
+                    self._log(u"Looking up name "+cur_name+u" in all languages on TVDB", logger.DEBUG)
+                    showObj = t[cur_name]
+                except (tvdb_exceptions.tvdb_exception, IOError), e:
+                    pass
+
+                continue
+            except (IOError), e:
                 continue
             
             self._log(u"Lookup successful, using tvdb id "+str(showObj["id"]), logger.DEBUG)
@@ -419,8 +435,25 @@ class PostProcessor(object):
             # for air-by-date shows we need to look up the season/episode from tvdb
             if season == -1 and tvdb_id:
                 self._log(u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
+                
+                # try to get language set for this show
+                tvdb_lang = None
                 try:
-                    t = tvdb_api.Tvdb(**sickbeard.TVDB_API_PARMS)
+                    showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                    if(showObj != None):
+                        tvdb_lang = showObj.lang
+                except exceptions.MultipleShowObjectsException:
+                    raise #TODO: later I'll just log this, for now I want to know about it ASAP
+
+                try:
+                    # There's gotta be a better way of doing this but we don't wanna
+                    # change the language value elsewhere
+                    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+                    if tvdb_lang and not tvdb_lang == 'en':
+                        ltvdb_api_parms['language'] = tvdb_lang
+
+                    t = tvdb_api.Tvdb(**ltvdb_api_parms)
                     epObj = t[cur_tvdb_id].airedOn(episodes[0])[0]
                     season = int(epObj["seasonnumber"])
                     episodes = [int(epObj["episodenumber"])]
@@ -485,8 +518,9 @@ class PostProcessor(object):
         # make sure the quality is set right before we continue
         if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
             oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
-            self._log(u"The old status had a quality in it, using that: "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
-            return ep_quality
+            if ep_quality != common.Quality.UNKNOWN:
+                self._log(u"The old status had a quality in it, using that: "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
+                return ep_quality
 
         name_list = [self.nzb_name, self.folder_name, self.file_name]
     

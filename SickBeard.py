@@ -23,6 +23,7 @@ import sys
 if sys.hexversion >= 0x020600F0:
     from multiprocessing import Process, freeze_support
 
+import locale
 import os
 import os.path
 import threading
@@ -100,6 +101,16 @@ def main():
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
     sickbeard.MY_ARGS = sys.argv[1:]
 
+    try:
+        locale.setlocale(locale.LC_ALL, "")
+    except (locale.Error, IOError):
+        pass
+    sickbeard.SYS_ENCODING = locale.getpreferredencoding()
+    
+    # for OSes that are poorly configured I'll just force UTF-8
+    if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII'):
+        sickbeard.SYS_ENCODING = 'UTF-8'
+
     sickbeard.CONFIG_FILE = os.path.join(sickbeard.PROG_DIR, "config.ini")
 
     # need console logging for SickBeard.py and SickBeard-console.exe
@@ -109,7 +120,7 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp:", ['quiet', 'force-update', 'daemon', 'port=', 'tvbinz'])
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp:", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz'])
     except getopt.GetoptError:
         print "Available options: --quiet, --forceupdate, --port, --daemon"
         sys.exit()

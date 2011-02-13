@@ -1,5 +1,6 @@
 #config{text-align:center;padding:0 30px 20px;}
 #config *{font-family:"Trebuchet MS", Verdana, sans-serif;margin:0;padding:0;}
+#config .imgLink img {padding-bottom:1px;}
 #config ul{list-style-type:none;}
 #config h3{font-size:1.5em;color:#000;}
 #config h4{font-size:1em;color:#333;text-transform:uppercase;margin:0 0 .2em;}
@@ -23,7 +24,7 @@
 #config label span.component-title{font-size:1.2em;font-weight:700;float:left;width:160px;margin-right:10px;}
 #config label span.component-desc{font-size:1.1em;}
 #config div.field-pair select{font-size:1.1em;border:1px solid #d4d0c8;}
-#config div.field-pair select option{line-height:1.4;padding:0 10px;}
+#config div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
 #config-settings{float:right;width:200px;background:#fffae5;border-bottom:1px dotted #666;border-top:1px solid #999;margin-right:20px;padding:20px 0 30px;}
 #config-settings .config-settings-group{border-bottom:1px dotted #999;padding-bottom:15px;margin:0 15px 15px;}
 #config-settings .config-settings-group h2{margin-bottom:0;}
@@ -36,8 +37,8 @@
 * html .clearfix{height:1%;}
 /* End hide from IE-mac */
 #provider_order_list{list-style-type:none;width:250px;margin:0;padding:0;}
-#provider_order_list li{font-size:1.3em;height:1.5em;font-family:Verdana;margin:0 5px 5px;padding:5px;}
-html>body #provider_order_list li{height:1.5em;line-height:1.3em;}
+#provider_order_list li{font-size:1.3em;height:1.3em;font-family:Verdana;margin:0 5px 5px;padding:6px;}
+#provider_order_list input{margin:0px 2px;}
 .providerDiv{display:none;padding-left:20px;}
 #config div.metadataDiv{display:none;}
 #config div.metadata_options{float:left;font-size:14px;font-family:Verdana;width:185px;color:#036;background:#F5F1E4;overflow:auto;border-left:1px solid #404040;border-top:1px solid #404040;border-bottom:1px solid #d4d0c8;border-right:1px solid #d4d0c8;padding:7px;}
@@ -51,3 +52,8 @@ html>body #provider_order_list li{height:1.5em;line-height:1.3em;}
 #upgrade-notification{line-height:1;color:#57442b;font-size:130%;font-weight:700;height:0;left:0;text-align:center;top:0;width:100%;z-index:100;margin:0;padding:0;}
 #upgrade-notification div{background-color:#c6b695;border-bottom:1px solid #af986b;padding:7px 0;}
 #header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;}
+.infoTable {border-collapse: collapse;}
+.infoTableHeader, .infoTableCell {padding: 5px;}
+.infoTableHeader{font-weight:700;}
+
+#config div.testNotification {border: 1px dotted #CCCCCC; padding: 5px; margin-bottom: 10px; line-height:20px;}

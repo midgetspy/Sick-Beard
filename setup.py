@@ -286,7 +286,7 @@ if "noup" not in oldArgs:
     print "Uploading zip to google code"
     googlecode_upload.upload(os.path.abspath(zipFilename+".zip"), "sickbeard", gc_username, gc_password, "Win32 alpha build "+str(currentBuildNumber)+" (unstable/development release)", ["Featured","Type-Executable","OpSys-Windows"])
  
-if not 'nogit' in oldArgs:
+if not 'nogit' in oldArgs or not 'somegit' in oldArgs:
     # tag commit as a new build and push changes to github
     print 'Tagging commit and pushing'
     p = subprocess.Popen('git tag -a "build-'+str(currentBuildNumber)+'" -m "Windows build '+zipFilename+'"', shell=True, cwd=compile_dir)

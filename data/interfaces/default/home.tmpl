@@ -67,11 +67,11 @@
         return false; 
     },
     format: function(s) {
-        match = s.match(/^\<\!\-\-(.*)\-\-\>\<div.*$/)
-        
+        match = s.match(/^\<\!\-\-(.*)\-\-\>/)
+
         if (match == null || match[1] == "?")
             return -10;
-        
+
         var nums = match[1].split(" / ");
 
         var finalNum = parseInt((nums[0]/nums[1])*1000)*100;
@@ -140,6 +140,12 @@
 <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
 
   <thead><tr><th>Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+  <tfoot>
+    <tr>
+      <th rowspan="1" colspan="1"><a href="$sbRoot/home/addShows/">Add Show</a></th>
+      <th rowspan="1" colspan="6"></th>
+    </tr>
+  </tfoot>
   <tbody>
 
 #for $curLoadingShow in $sickbeard.showQueueScheduler.action.loadingShowList:
@@ -192,15 +198,13 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td align="center" nowrap="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
     <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td>$curShow.network</td>
-    <td align="center">
 #if $curShow.quality in $qualityPresets:
-$qualityPresetStrings[$curShow.quality]
+    <td align="center">$qualityPresetStrings[$curShow.quality]</td>
 #else:
-Custom
+    <td align="center">Custom</td>
 #end if
-    </td>
     <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid" style="position:relative;"></div></td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes32.png\" alt=\"Y\"" else "no32.png\" alt=\"N\""# width="16" height="16" /></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
   </tr>
 

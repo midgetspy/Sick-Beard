@@ -1,12 +1,11 @@
 * { outline: 0; }
-img { border: 0; }
+img { border: 0; vertical-align: middle;}
 
 body {
 background-color:#fff;
 color:#000;
 font-family:'Verdana', 'Helvetica', 'Sans-serif', 'sans';
 font-size:12px;
-line-height:18px;
 margin:0;
 padding:0;
 }
@@ -78,10 +77,6 @@ font-size:9pt;
 margin:0;
 }
 
-td,td {
-padding:5px;
-}
-
 tr.active {
 font-weight:700;
 }
@@ -120,7 +115,7 @@ font-weight:700;
 }
 
 .h2footer {
-margin-top:-32px;
+margin-top:-33px;
 margin-right:5px;
 }
 .h2footer span {
@@ -140,6 +135,7 @@ border:1px solid #d4d0c8;
 div select option {
 line-height:1.4;
 padding:0 10px;
+border-bottom: 1px dotted #D7D7D7;
 }
 
 /* --------------- alignment ------------------- */
@@ -167,6 +163,7 @@ margin-top:20px;
 background-color:#F5F1E4;
 border-top:1px solid #000;
 color:#4e4e4e;
+line-height: 1.4em;
 }
 
 .sickbeardTable {
@@ -174,12 +171,19 @@ width:90%;
 margin-left:auto;
 margin-right:auto;
 }
-
 .sickbeardTable th{
-padding: 2px;
+padding:2px;
 font-weight:700;
 background-color:#333;
 color:#FFF;
+text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+}
+.sickbeardTable td{
+padding:5px;
+}
+.sickbeardTable tfoot a {
+color:#FFF;
+text-decoration: none;
 }
 
 .row {
@@ -225,8 +229,7 @@ width:100%;
 height:100%;
 overflow:visible;
 text-align:center;
-line-height:16px;
-_line-height:14px;
+vertical-align: middle;
 }
 
 tr.seasonheader {
@@ -297,7 +300,6 @@ margin:10px;
 #MainMenu {
 background-color:#57442B;
 color:#F5F5F5;
-line-height:1;
 /*margin-bottom:1em;*/
 width:100%;
 border-bottom: 1px solid #333;
@@ -327,14 +329,14 @@ background-color:#000;
 color:#fff;
 }
 #donate {
-line-height:2px;
-background: none;
+line-height:1em;
+background: #57442B;
 float: right;
 }
 #donate a,#donate a:hover {
 background-color:#57442B;
 border:0;
-padding:3px 15px 0px;
+padding:4px 15px 0px;
 }
 #content {
 padding: 10px 15px 15px;
@@ -342,4 +344,9 @@ _text-align: center;
 min-width:500px;
 z-index:1;
 clear:both;
+}
+.showLegend{
+font-weight:700;
+padding-right:10px;
+padding-bottom:1px;
 }

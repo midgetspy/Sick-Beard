@@ -24,6 +24,7 @@ import sqlite3
 import datetime
 import socket
 import os, sys, subprocess
+import urllib
 
 from threading import Lock
 
@@ -52,6 +53,7 @@ PROG_DIR = None
 MY_FULLNAME = None
 MY_NAME = None
 MY_ARGS = []
+SYS_ENCODING = ''
 
 DAEMON = None
 
@@ -184,6 +186,12 @@ GROWL_NOTIFY_ONDOWNLOAD = False
 GROWL_HOST = None
 GROWL_PASSWORD = None
 
+USE_PROWL = False
+PROWL_NOTIFY_ONSNATCH = False
+PROWL_NOTIFY_ONDOWNLOAD = False
+PROWL_API = None
+PROWL_PRIORITY = 0
+
 USE_TWITTER = False
 TWITTER_NOTIFY_ONSNATCH = False
 TWITTER_NOTIFY_ONDOWNLOAD = False
@@ -298,7 +306,7 @@ def initialize(consoleLogging=True):
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, \
                 USE_XBMC, GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
+                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, \
@@ -323,6 +331,7 @@ def initialize(consoleLogging=True):
         CheckSection('SABnzbd')
         CheckSection('XBMC')
         CheckSection('Growl')
+        CheckSection('Prowl')
         CheckSection('Twitter')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
@@ -352,12 +361,21 @@ def initialize(consoleLogging=True):
         if not helpers.makeDir(CACHE_DIR):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
+            
+        proxies = urllib.getproxies()
+        proxy_url = None
+        if 'http' in proxies:
+            proxy_url = proxies['http']
+        elif 'ftp' in proxies:
+            proxy_url = proxies['ftp']
 
         # Set our common tvdb_api options here
         TVDB_API_PARMS = {'cache': True,
                           'apikey': TVDB_API_KEY,
                           'language': 'en',
-                          'cache_dir': False}
+                          'cache_dir': False,
+                          'http_proxy': proxy_url}
+        
         if CACHE_DIR:
             TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
 
@@ -450,6 +468,12 @@ def initialize(consoleLogging=True):
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
 
+        USE_PROWL = bool(check_setting_int(CFG, 'Prowl', 'use_prowl', 0))
+        PROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_onsnatch', 0))
+        PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
+        PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
+        PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
+
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
         TWITTER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_ondownload', 0))        
@@ -529,6 +553,9 @@ def initialize(consoleLogging=True):
 
         # initialize the main SB database
         db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
+        
+        # fix up any db problems
+        db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
@@ -868,6 +895,13 @@ def save_config():
     new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD) 
     new_config['Growl']['growl_host'] = GROWL_HOST
     new_config['Growl']['growl_password'] = GROWL_PASSWORD
+    
+    new_config['Prowl'] = {}
+    new_config['Prowl']['use_prowl'] = int(USE_PROWL)
+    new_config['Prowl']['prowl_notify_onsnatch'] = int(PROWL_NOTIFY_ONSNATCH)
+    new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD) 
+    new_config['Prowl']['prowl_api'] = PROWL_API
+    new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)

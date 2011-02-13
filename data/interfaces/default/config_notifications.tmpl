@@ -9,44 +9,50 @@
 
 <script type="text/javascript" charset="utf-8">
 \$(document).ready(function(){
+var loading = '<img src=\"$sbRoot/images/indicator.gif\" height=\"16\" width=\"16\" />';
 
   \$('#testGrowl').click(function(){
-
+    document.getElementById('testGrowl-result').innerHTML = loading;
     var growl_host = \$("#growl_host").val();
     var growl_password = \$("#growl_password").val();
-    \$.get("$sbRoot/home/testGrowl", {'host': growl_host, 'password': growl_password});
+    var growl_result = \$.get("$sbRoot/home/testGrowl", {'host': growl_host, 'password': growl_password}, 
+    function (data){ document.getElementById('testGrowl-result').innerHTML = data;});
+  });
 
+  \$('#testProwl').click(function(){
+    document.getElementById('testProwl-result').innerHTML = loading;
+    var prowl_api = \$("#prowl_api").val();
+    var prowl_priority = \$("#prowl_priority").val();
+    var prowl_result = \$.get("$sbRoot/home/testProwl", {'prowl_api': prowl_api, 'prowl_priority': prowl_priority}, 
+    function (data){ document.getElementById('testProwl-result').innerHTML = data;});
   });
 
   \$('#testXBMC').click(function(){
-
+    document.getElementById('testXBMC-result').innerHTML = loading;
     var xbmc_host = \$("#xbmc_host").val();
     var xbmc_username = \$("#xbmc_username").val();
     var xbmc_password = \$("#xbmc_password").val();
 
-    \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password});
-
+    \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password}, 
+    function (data){ document.getElementById('testXBMC-result').innerHTML = data;});
   });
 
   \$('#twitterStep1').click(function(){
-
-    \$.get("$sbRoot/home/twitterStep1", function (data){window.open(data)});
-    return false;
-    
+    document.getElementById('testTwitter-result').innerHTML = loading;
+    var twitter1_result = \$.get("$sbRoot/home/twitterStep1", function (data){window.open(data)})
+    .complete(function() { document.getElementById('testTwitter-result').innerHTML = '<b>Step1:</b> Confirm Authorization'; });
   });
 
   \$('#twitterStep2').click(function(){
-
+    document.getElementById('testTwitter-result').innerHTML = loading;
     var twitter_key = \$("#twitter_key").val();
-    \$.get("$sbRoot/home/twitterStep2", {'key': twitter_key}, function (data){alert(data)});
-    return false;
-
+    \$.get("$sbRoot/home/twitterStep2", {'key': twitter_key}, 
+    function (data){ document.getElementById('testTwitter-result').innerHTML = data; });
   });
 
   \$('#testTwitter').click(function(){
-
-    \$.get("$sbRoot/home/testTwitter", function (data){alert(data)});
-
+    \$.get("$sbRoot/home/testTwitter", 
+    function (data){ document.getElementById('testTwitter-result').innerHTML = data;});
   });
 
 });  
@@ -146,6 +152,7 @@
                             </label>
                         </div>
 
+                    <div class="testNotification" id="testXBMC-result">Click below to test.</div>
                     <input type="button" value="Test XBMC" id="testXBMC" />
                     <input type="submit" value="Save Changes" />
 
@@ -210,6 +217,7 @@
                             </label>
                         </div>
 
+                    <div class="testNotification" id="testGrowl-result">Click below to test.</div>
                     <input type="button" value="Test Growl" id="testGrowl" />
                     <input type="submit" value="Save Changes" />
 
@@ -281,7 +289,75 @@
                             </label>
                         </div>
 
+                    <div class="testNotification" id="testTwitter-result">Click below to test.</div>
                     <input type="button" value="Test Twitter" id="testTwitter" />
+                    <input type="submit" value="Save Changes" />
+
+                    </fieldset>
+                </div><!-- /component-group -->
+                
+            <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Prowl</h3>
+                        <p>A Growl client for iOS.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_prowl">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Prowl notifications?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="prowl_notify_onsnatch" id="prowl_notify_onsnatch" #if $sickbeard.PROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="prowl_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="prowl_notify_ondownload" id="prowl_notify_ondownload" #if $sickbeard.PROWL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="prowl_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Prowl API key:</span>
+                                <input type="text" name="prowl_api" id="prowl_api" value="$sickbeard.PROWL_API" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Get your key at: <a href="https://www.prowlapp.com/api_settings.php" onclick="window.open(this.href, '_blank'); return false;">https://www.prowlapp.com/api_settings.php</a></span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Prowl priority:</span>
+                               <select id="prowl_priority" name="prowl_priority">
+                                    <option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then "selected" else ""#>Very Low
+                                    <option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then "selected" else ""#>Moderate
+                                    <option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then "selected" else ""#>Normal
+                                    <option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then "selected" else ""#>High
+                                    <option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then "selected" else ""#>Emergency
+                                </select>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Priority of Prowl messages from Sick-Beard.</span>
+                            </label>
+                        </div>
+
+                    <div class="testNotification" id="testProwl-result">Click below to test.</div>
+                    <input type="button" value="Test Prowl" id="testProwl" />
                     <input type="submit" value="Save Changes" />
 
                     </fieldset>

@@ -135,12 +135,12 @@ class NewznabProvider(generic.NZBProvider):
 
 		data = self.getURL(searchURL)
 		
+		if not data:
+			return []
+
 		# hack this in until it's fixed server side
 		if not data.startswith('<?xml'):
 			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
-
-		if data == None:
-			return []
 
 		try:
 			responseSoup = etree.ElementTree(etree.XML(data))

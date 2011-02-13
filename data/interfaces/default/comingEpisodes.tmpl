@@ -1,5 +1,5 @@
 #import sickbeard
-#import datetime, locale
+#import datetime
 #from sickbeard.common import *
 #set global $title="Coming Episodes"
 
@@ -19,7 +19,7 @@
     <span class="listing_unknown">Unknown</span>
 </div><br/>
 
-#if $sickbeard.COMING_EPS_LAYOUT == 'list':
+#if $layout == 'list':
 <!-- start list view -->
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 <script type="text/javascript" charset="utf-8">
@@ -91,7 +91,7 @@
 #end if
         sortList = [[$sort_codes[$sort],0]]; 
 
-    \$("#showListTable").tablesorter({
+    \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: sortList,
         headers: {
             0: { sorter: false},
@@ -170,6 +170,18 @@ Custom
 <!-- end list view -->
 #else:
 <!-- start non list view -->
+<script type="text/javascript" charset="utf-8">
+\$(document).ready(function(){ 
+  \$(".ep_summary").hide();
+  \$(".ep_summaryTrigger").click(function() {
+    \$(this).next(".ep_summary").slideToggle('normal', function() {
+        \$(this).prev(".ep_summaryTrigger").attr('src', function(i, src) {
+            return \$(this).next(".ep_summary").is(':visible') ? src.replace('plus','minus') : src.replace('minus','plus');
+        });
+    });
+  });
+});
+</script>
 <div id="outsideWrapper">
 <div id="insideWrapper">
   <div id="insideContent">
@@ -219,7 +231,7 @@ Custom
                     #set $show_div = "ep_listing listing_toofar"
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode(locale.getpreferredencoding())</h1>
+                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
                     #if $cur_ep_airdate == $today:
                         #set $show_div = "ep_listing listing_current"
                     #else:
@@ -234,7 +246,7 @@ Custom
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <th #if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "" else "colspan=\"2\""#>
+          <th #if $layout == 'banner' then "" else "colspan=\"2\""#>
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
@@ -244,10 +256,10 @@ Custom
           </th>
         </tr>
         <tr>
-          <th #if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
-            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $sickbeard.COMING_EPS_LAYOUT == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$sickbeard.COMING_EPS_LAYOUT" /></a>
+          <th #if $layout == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$layout" /></a>
           </th>
-#if $sickbeard.COMING_EPS_LAYOUT == 'banner':
+#if $layout == 'banner':
         </tr>
         <tr>
 #end if          
@@ -256,14 +268,7 @@ Custom
           </td>
         </tr>
         <tr>
-          <td>
-            <span>
-            #if $cur_result["description"] == '':
-                [There is no summary added for this episode]
-            #else:
-                $cur_result["description"]
-            #end if
-            </span><br/><br/>
+          <td style="vertical-align: top;">
             <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
 #if int($cur_result["quality"]) in $qualityPresets:
 [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]
@@ -271,6 +276,12 @@ Custom
 [<span class="title">Custom</span>]
 #end if
             <br />
+            #if $cur_result["description"] == '':
+                <div class="ep_summary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
+            #else:
+                <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">$cur_result["description"]</div>
+            #end if
+            <br/>
           </td>
         </tr>
       </table>

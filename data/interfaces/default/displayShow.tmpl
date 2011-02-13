@@ -9,13 +9,13 @@
 <!--#set global $topmenu="manageShows"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<div class="h2footer align-right">
+<div class="h2footer align-right" style="margin-left:250px; line-height: 20px;">
     <b>Jump to Season:</b>
     #for $seasonNum in $seasonResults:
         #if int($seasonNum["season"]) == 0 then "<span class=\"separator\">|</span> " else ""#
         <a href="#season-$seasonNum["season"]">
         #if int($seasonNum["season"]) == 0 then "Specials</a>" else str($seasonNum["season"])+"</a> "#
-        #if int($seasonNum["season"]) > 1 then "<span class=\"separator\">|</span> " else ""#
+        #if int($seasonNum["season"]) >1 then "<span class=\"separator\">|</span> " else ""#
     #end for
 </div><br/>
 
@@ -26,48 +26,44 @@
 
 <div class="align-left"><b>Change Show:</b>
 <select id="pickShow">
-#for $curShow in $sickbeard.showList:
+#for $curShow in $sortedShowList:
 <option value="$curShow.tvdbid" #if $curShow == $show then "SELECTED" else ""#>$curShow.name
 #end for
 </select></div>
 
 <div id="summary" class="align-left">
-<b>Airs:</b> $show.airs on $show.network<br />
-<b>Status:</b> $show.status<br />
-
+<table class="infoTable" cellspacing="1" border="0" cellpadding="0">
+    <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
+    <tr><td class="showLegend">Status: </td><td>$show.status</td></tr>
 #if $showLoc[1]:
-<b>Location:</b> $showLoc[0]
+    <tr><td class="showLegend">Location: </td><td>$showLoc[0]</td></tr>
 #else:
-<span style="color: red;"><b>Location:</b> $showLoc[0]</span> (dir is missing)
+    <tr><td class="showLegend"><span style="color: red;">Location: </span></td><td><span style="color: red;">$showLoc[0]</span> (dir is missing)</td></tr>
 #end if
-<br />
-
 #set $anyQualities, $bestQualities = $Quality.splitQuality(int($show.quality))
-<b>Quality:</b>
+    <tr><td class="showLegend">Quality: </td><td>
 #if $show.quality in $qualityPresets:
 $qualityPresetStrings[$show.quality]
 #else:
 #if $anyQualities:
-initially download <b><%=", ".join([Quality.qualityStrings[x] for x in anyQualities])%></b> #if $bestQualities then " + " else ""#
+initially download: <b><%=", ".join([Quality.qualityStrings[x] for x in anyQualities])%></b> #if $bestQualities then " + " else ""#
 #end if
 #if $bestQualities:
 replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
 #end if 
 #end if
-<br />
-
-<b>Season Folders:</b> <img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes32.png\" alt=\"Y" else "no32.png\" alt=\"N"#" width="16" height="16"><br />
-
-<b>Active:</b> <img src="$sbRoot/images/#if int($show.paused) == 0 then "yes32.png\" alt=\"Y" else "no32.png\" alt=\"N"#" width="16" height="16"><br />
-
+    </td></tr>
+    <tr><td class="showLegend">Language:</td><td>$show.lang</td></tr>
+    <tr><td class="showLegend">Season Folders: </td><td><img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 #if $show.air_by_date or ($show.genre and "Talk Show" in $show.genre):
 #set $air_by_date = True
 #else
 #set $air_by_date = False
 #end if
-<b>Air-by-Date:</b> <img src="$sbRoot/images/#if int($air_by_date) == 1 then "yes32.png\" alt=\"Y" else "no32.png\" alt=\"N"#" width="16" height="16"><br />
+    <tr><td class="showLegend">Active: </td><td><img src="$sbRoot/images/#if int($show.paused) == 0 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+</table>
 </div>
-<br />
 
 <div class="float-left">
 Change selected episodes to 

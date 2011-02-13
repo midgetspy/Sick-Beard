@@ -7,17 +7,18 @@
 <head>
     <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="SHORTCUT ICON" href="$sbRoot/images/favicon.ico"/>
-    <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/superfish.css"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/pepper-grinder/jquery-ui-1.8.7.custom.css" />
+    <link rel="shortcut icon" href="$sbRoot/images/favicon.ico" />
+    <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
-    <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.pnotify.default.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/smooth-grinder/jquery-ui-1.8.9.custom.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/superfish.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
+    <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
 <style type="text/css">
 <!--
 .ac_loading { background: white url("$sbRoot/images/indicator.gif") right center no-repeat; }
@@ -28,51 +29,58 @@ table.tablesorter thead tr .headerSortUp { background-image: url("$sbRoot/images
 table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/images/tablesorter/desc.gif"); }
 .browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat; }
 
-.ui-widget-content { border: 1px solid #d9d6c4; background: #eceadf url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat; color: #1f1f1f; }
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #cbc7bd; background: #f8f7f6 url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_10_f8f7f6_60x60.png") 50% 50% repeat; font-weight: bold; color: #654b24; }
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #d9d6c4; background: #eceadf url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_15_eceadf_60x60.png") 50% 50% repeat; font-weight: bold; color: #140f06; }
-.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 1px solid #b2a266; background: #f7f3de url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_15_f7f3de_60x60.png") 50% 50% repeat; color: #3a3427; }
-.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #681818; background: #b83400 url("$sbRoot/css/pepper-grinder/images/ui-bg_fine-grain_68_b83400_60x60.png") 50% 50% repeat; color: #ffffff; }
+.ui-dialog, .ui-dialog-buttonpane { background: #eceadf url("$sbRoot/css/smooth-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat !important; }
+.ui-widget-content { border: 1px solid #aaaaaa; background: #dcdcdc url("$sbRoot/css/smooth-grinder/images/ui-bg_highlight-soft_75_dcdcdc_1x100.png") 50% 50% repeat-x; color: #222222; }
+.ui-widget-header { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_ffffff_40x100.png") 50% 50% repeat; color: #222222; font-weight: bold; }
 
-.ui-icon { width: 16px; height: 16px; background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_222222_256x240.png"); }
-.ui-widget-content .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_222222_256x240.png"); }
-.ui-widget-header .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_b83400_256x240.png"); }
-.ui-state-default .ui-icon { background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_b83400_256x240.png"); }
-.ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_ffffff_256x240.png"); }
-.ui-state-active .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_8c291d_256x240.png"); }
-.ui-state-highlight .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_3572ac_256x240.png"); }
-.ui-state-error .ui-icon, .ui-state-error-text .ui-icon {background-image: url("$sbRoot/css/pepper-grinder/images/ui-icons_fbdb93_256x240.png"); }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #aaaaaa; background: #e6e6e6 url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50% repeat-x; font-weight: bold; color: #654b24; }
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #999999; background: #dadada url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_75_dadada_1x400.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_65_ffffff_1x400.png") 50% 50% repeat-x; font-weight: bold; color: #140f06; }
 
-.ui-widget-overlay { background: #6e4f1c url("$sbRoot/css/pepper-grinder/images/ui-bg_diagonal-maze_20_6e4f1c_10x10.png") 50% 50% repeat; opacity: .60;filter:Alpha(Opacity=60); }
-.ui-widget-shadow { margin: 0 0 0 -10px; padding: 5px; background: #000000 url("$sbRoot/css/pepper-grinder/images/ui-bg_diagonal-maze_40_000000_10x10.png") 50% 50% repeat; opacity: .60;filter:Alpha(Opacity=60); -moz-border-radius: 18px; -webkit-border-radius: 18px; border-radius: 18px; }/*
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 1px solid #aaaaaa; background: #fbf9ee url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_55_fbf9ee_1x400.png") 50% 50% repeat-x; color: #363636; }
+.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #aaaaaa; background: #fef1ec url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_95_fef1ec_1x400.png") 50% 50% repeat-x; color: #8c291d; }
+
+.ui-icon { width: 16px; height: 16px; background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_222222_256x240.png"); }
+.ui-widget-content .ui-icon {background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_222222_256x240.png"); }
+.ui-widget-header .ui-icon {background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_222222_256x240.png"); }
+.ui-state-default .ui-icon { background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_8c291d_256x240.png"); }
+.ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_222222_256x240.png"); }
+.ui-state-active .ui-icon {background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_8c291d_256x240.png"); }
+.ui-state-highlight .ui-icon {background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_2e83ff_256x240.png"); }
+.ui-state-error .ui-icon, .ui-state-error-text .ui-icon {background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_cd0a0a_256x240.png"); }
+
+.ui-widget-overlay { background: #aaaaaa url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat; opacity: .35;filter:Alpha(Opacity=35); }
+.ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
 -->
 </style>
 
-    <script type="text/javascript" src="$sbRoot/js/jquery-1.4.4.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.7.custom.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-1.5.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.9.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
     <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.autocomplete.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.json-2.2.min.js"></script>
-    <script type="text/javascript" charset="utf-8">
-    top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; //HTML for control, which is auto wrapped in DIV w/ ID="topcontrol"
-    </script>
-    <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.selectboxes.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.0.3.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/tools.tooltip-1.2.5.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.pnotify-1.0.1.min.js"></script>
     <script type="text/javascript" charset="utf-8">
+        //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
+        top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; 
+        
         $.Browser = {
-        defaults: {
-            title:             'Choose Directory',
-            url:               '$sbRoot/browser/',
-            autocompleteURL:   '$sbRoot/browser/complete'
-        }
-    };
+            defaults: {
+                title:             'Choose Directory',
+                url:               '$sbRoot/browser/',
+                autocompleteURL:   '$sbRoot/browser/complete'
+            }
+        };
     </script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
+    
 <script type="text/javascript"> 
     \$(document).ready(function(){ 
         \$("ul.sf-menu").supersubs({ 
@@ -106,8 +114,36 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
             \$("<img>").attr("src", rollON);
         });
 
-        \$("#NAV$topmenu").addClass('current');
-    }); 
+        \$("#NAV$topmenu").addClass("current");
+
+        \$("a.confirm").bind("click",function() {
+            var target = \$( this ).attr('href');
+            if ( confirm("Are you sure you want to " + \$(this).attr('text') + "?") )
+                location.href = target;
+            return false;
+        });
+
+    \$.pnotify.defaults.pnotify_width = "325px";
+    \$.pnotify.defaults.pnotify_history = false;
+    \$.pnotify.defaults.pnotify_delay = 4000;
+
+    #for $curMessage in $flash.messages():
+        \$.pnotify({
+            pnotify_title: '$curMessage[0].replace('\\','\\\\').replace('"','\\"')',
+            pnotify_text: '$curMessage[1].replace('\\','\\\\').replace('"','\\"')'
+        });
+    #end for
+
+    #for $curError in $flash.errors():
+        \$.pnotify({
+            pnotify_type: 'error',
+            pnotify_hide: false,
+            pnotify_title: '$curError[0].replace('\\','\\\\').replace('"','\\"')',
+            pnotify_text: '$curError[1].replace('\\','\\\\').replace('"','\\"')'
+        });
+    #end for
+
+    });
 </script>
 </head>
 
@@ -126,13 +162,17 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
 </div>
 <ul id="MainMenu" class="sf-menu">
-            <li class="spacer">&nbsp;</li>
+            <li id="NAVsystem" class="first"><a href="#" class="navIcon"><img src="$sbRoot/images/menu/system18.png" alt="" width="18" height="18" /></a>
+                <ul>
+                        <li><a href="$sbRoot/manage/manageSearches/forceVersionCheck"><img src="$sbRoot/images/menu/update16.png" alt="" width="16" height="16" />Force Version Check</a></li>
+                        <li><a href="$sbRoot/home/restart/?pid=$sbPID" class="confirm"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
+                        <li><a href="$sbRoot/home/shutdown/" class="confirm"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
+                </ul>
+            </li>
             <li id="NAVhome"><a href="$sbRoot/home">Home</a>
                 <ul>
                         <li><a href="$sbRoot/home/addShows/"><img src="$sbRoot/images/menu/addshow16.png" alt="" width="16" height="16" />Add Shows</a></li>
                         <li><a href="$sbRoot/home/postprocess/"><img src="$sbRoot/images/menu/postprocess16.png" alt="" width="16" height="16" />Manual Post-Processing</a></li>
-                        <li><a href="$sbRoot/home/restart/?pid=$sbPID"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
-                        <li><a href="$sbRoot/home/shutdown/"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
                 </ul>
             </li>
             <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes">Coming Episodes</a></li>
@@ -173,7 +213,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
                 #set $inner_first = False
             #end for
         #else
-            #if $first then "" else "| "#<a href="$sbRoot/$menuItem.path">$menuItem.title</a>
+            #if $first then "" else "| "#<a href="$sbRoot/$menuItem.path" #if 'confirm' in $menuItem then "class=\"confirm\"" else "" #>$menuItem.title</a>
             #set $first = False
         #end if
     #end if
@@ -181,7 +221,6 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 </span>
 </div>
 #end if
-
 
 <div id="content">
 
