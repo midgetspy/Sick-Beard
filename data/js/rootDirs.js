@@ -75,13 +75,13 @@ $(document).ready(function(){
 
     function setDefault(which, force){
 
-        if (!which.length)
-            return
-
-        if ($('#whichDefaultRootDir').val() == which)
-            return
-
         console.log('setting default to '+which)
+
+        if (which != undefined && !which.length)
+            return
+
+        if ($('#whichDefaultRootDir').val() == which && force != true)
+            return
 
         // put an asterisk on the text
         if ($('#'+which).text().charAt(0) != '*')
@@ -105,6 +105,9 @@ $(document).ready(function(){
     }
 
     function refreshRootDirs() {
+
+        if (!$("#rootDirs").length)
+            return
         var do_disable = 'true';
         var sample_text = '';
         var sep_char = '';
