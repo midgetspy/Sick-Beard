@@ -13,7 +13,18 @@
 
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
 
+Showing all folders in:<br />
+#if $sickbeard.ROOT_DIRS:
+#for $cur_dir in $sickbeard.ROOT_DIRS.split('|')[1:]
+- $cur_dir<br />
+#end for
+#end if
+<br />
+<a href="#">Click to manage root TV folders</a> (doesn't work)<br />
+<br />
+<div style="display: none">
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
+</div>
 
 <script type="text/javascript" src="$sbRoot/js/addExistingShow.js"></script>
 

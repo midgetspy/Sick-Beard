@@ -1159,45 +1159,52 @@ class NewHomeAddShows:
         return json.dumps({'results': results, 'langid': lang_id})
 
     @cherrypy.expose
-    def massAddTable(self, root_dir=None):
+    def massAddTable(self):
         t = PageTemplate(file="home_massAddTable.tmpl")
         t.submenu = HomeMenu()
         
         myDB = db.DBConnection()
+
+        if sickbeard.ROOT_DIRS:
+            root_dirs = sickbeard.ROOT_DIRS.split('|')[1:]
+        else:
+            return "No root dirs defined." 
         
-        if not ek.ek(os.path.isdir, root_dir):
-            return "Invalid path"
+        tmp = root_dirs[int(sickbeard.ROOT_DIRS.split('|')[0])]
+        root_dirs.remove(tmp)
+        root_dirs = [tmp]+root_dirs
         
         dir_list = []
         
-        for cur_file in ek.ek(os.listdir, root_dir):
-            
-            cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
-            if not ek.ek(os.path.isdir, cur_path):
-                continue
-            
-            cur_dir = {'dir': cur_path,
-                       'display_dir': ek.ek(os.path.basename, cur_path),
-                       }
-            
-            # see if the folder is in XBMC already
-            dirResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [cur_path])
-            
-            if dirResults:
-                cur_dir['added_already'] = True
-            else:
-                cur_dir['added_already'] = False
-            
-            dir_list.append(cur_dir)
-            
-            tvdb_id = ''
-            show_name = ''
-            for cur_provider in sickbeard.metadata_provider_dict.values():
-                (tvdb_id, show_name) = cur_provider.retrieveShowMetadata(cur_path)
-                if tvdb_id and show_name:
-                    break
-            
-            cur_dir['existing_info'] = (tvdb_id, show_name) 
+        for root_dir in root_dirs:
+            for cur_file in ek.ek(os.listdir, root_dir):
+                
+                cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
+                if not ek.ek(os.path.isdir, cur_path):
+                    continue
+                
+                cur_dir = {'dir': cur_path,
+                           'display_dir': ek.ek(os.path.basename, cur_path),
+                           }
+                
+                # see if the folder is in XBMC already
+                dirResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [cur_path])
+                
+                if dirResults:
+                    cur_dir['added_already'] = True
+                else:
+                    cur_dir['added_already'] = False
+                
+                dir_list.append(cur_dir)
+                
+                tvdb_id = ''
+                show_name = ''
+                for cur_provider in sickbeard.metadata_provider_dict.values():
+                    (tvdb_id, show_name) = cur_provider.retrieveShowMetadata(cur_path)
+                    if tvdb_id and show_name:
+                        break
+                
+                cur_dir['existing_info'] = (tvdb_id, show_name) 
 
         t.dirList = dir_list
         
@@ -1260,8 +1267,6 @@ class NewHomeAddShows:
         # if we're skipping then behave accordingly
         if skipShow:
             return finishAddShow()
-        else:
-            logger.log(u"skipShow: "+repr(skipShow))
         
         # sanity check on our inputs
         if (not rootDir and not fullShowPath) or not whichSeries:

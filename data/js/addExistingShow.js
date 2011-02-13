@@ -31,31 +31,26 @@ $(document).ready(function()
   });
 
 
-    var showing_dir = '';
+    function loadContent() {
+        $.get('/home/addShows/massAddTable', function(data) {
+            $('#tableDiv').html(data);
+        });
 
-    function loadContent(which_dir) {
-        if (which_dir != showing_dir) {
-            $.get('/home/addShows/massAddTable', {root_dir: which_dir}, function(data) {
-                $('#tableDiv').html(data);
-            });
-            showing_dir = which_dir;
-
-            $("#addRootDirTable").tablesorter({
-                sortList: [[1,0]],
-                widgets: ['zebra'],
-                headers: {
-                    0: { sorter: false }
-                }
-            });
-        }
+        $("#addRootDirTable").tablesorter({
+            sortList: [[1,0]],
+            widgets: ['zebra'],
+            headers: {
+                0: { sorter: false }
+            }
+        });
     }
 
     $('#rootDirText').change(function(){
         if ($("#rootDirs option:selected").length)
-            loadContent($("#rootDirs option:selected").val());
+            loadContent();
     });
 
     if ($("#rootDirs option:selected").length)
-        loadContent($("#rootDirs option:selected").val());
+        loadContent();
     
 });
