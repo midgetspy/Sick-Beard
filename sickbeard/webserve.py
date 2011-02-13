@@ -1178,11 +1178,18 @@ class NewHomeAddShows:
         root_dirs.remove(tmp)
         root_dirs = [tmp]+root_dirs
         
+        logger.log(u"def: "+tmp+", list: "+repr(root_dirs))
+        
         dir_list = []
         
         for root_dir in root_dirs:
-            for cur_file in ek.ek(os.listdir, root_dir):
-                
+            try:
+                file_list = ek.ek(os.listdir, root_dir)
+            except:
+                continue
+
+            for cur_file in file_list:
+
                 cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
                 if not ek.ek(os.path.isdir, cur_path):
                     continue
