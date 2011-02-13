@@ -34,15 +34,15 @@ $(document).ready(function()
     function loadContent() {
         $.get('/home/addShows/massAddTable', function(data) {
             $('#tableDiv').html(data);
+            $("#addRootDirTable").tablesorter({
+                sortList: [[1,0]],
+                widgets: ['zebra'],
+                headers: {
+                    0: { sorter: false }
+                }
+            });
         });
 
-        $("#addRootDirTable").tablesorter({
-            sortList: [[1,0]],
-            widgets: ['zebra'],
-            headers: {
-                0: { sorter: false }
-            }
-        });
     }
 
     $('#rootDirText').change(function(){
