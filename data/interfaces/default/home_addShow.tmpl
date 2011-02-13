@@ -35,7 +35,7 @@
 
 
     function searchTvdb(){
-        \$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/loading_forceUpdate.gif" height="32" width="32" /> searching...');
+        \$('#searchResults').html('<img id="searchingAnim" src="$sbRoot/images/loading32.gif" height="32" width="32" /> searching...');
 
         \$.getJSON('$sbRoot/home/addShows/searchTVDBForShowName', {'name': \$('#nameToSearch').val(), 'lang': \$('#tvdbLangSelect').val()}, function(data){
             var resultStr = '<fieldset>\n<legend>Search Results:</legend>\n';
