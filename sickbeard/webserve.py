@@ -1178,8 +1178,6 @@ class NewHomeAddShows:
         root_dirs.remove(tmp)
         root_dirs = [tmp]+root_dirs
         
-        logger.log(u"def: "+tmp+", list: "+repr(root_dirs))
-        
         dir_list = []
         
         for root_dir in root_dirs:

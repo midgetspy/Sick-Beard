@@ -1,5 +1,10 @@
 $(document).ready(function(){
 
+    function logMsg(msg) {
+        if (window.console && window.logMsg)
+            logMsg(msg)
+    }
+
     function addRootDir(path){
         // check if it's the first one
         var is_default = false;
@@ -51,7 +56,7 @@ $(document).ready(function(){
 
             if (newDefault) {
 
-                console.log('new default when deleting')
+                logMsg('new default when deleting')
                 
                 // we deleted the default so this isn't valid anymore
                 $("#whichDefaultRootDir").val('');
@@ -80,7 +85,7 @@ $(document).ready(function(){
 
     function setDefault(which, force){
 
-        console.log('setting default to '+which)
+        logMsg('setting default to '+which)
 
         if (which != undefined && !which.length)
             return
@@ -143,11 +148,11 @@ $(document).ready(function(){
                 dir_text += '|' + $(this).val()
         });
         log_str += 'def: '+ $('#whichDefaultRootDir').val();
-        console.log(log_str)
+        logMsg(log_str)
         
         $('#rootDirText').val(dir_text);
         $('#rootDirText').change();
-        console.log('rootDirText: '+$('#rootDirText').val())
+        logMsg('rootDirText: '+$('#rootDirText').val())
     }
     
     $('#rootDirs').click(refreshRootDirs);
