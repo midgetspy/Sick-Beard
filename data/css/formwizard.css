@@ -51,12 +51,20 @@ cursor:hand;
 cursor:pointer;
 }
 
+.stepDiv {padding: 15px;}
 
+/* step 3 related */
+
+.alt { background-color: #efefef; }
 div.field-pair{padding:.9em 0 1.4em;}
-div.field-pair input{float:left;margin-right:6px;}
-label.nocheck,div.providerDiv,div #customQuality{padding-left:20px;}
-label span.component-title{font-size:1.2em;font-weight:700;float:left;width:160px;margin-right:10px;}
-label span.component-desc{font-size:1.1em;}
+div.field-pair input{float:left;}
+label.nocheck,div.providerDiv,div #customQuality{padding-left:23px;}
+label span.component-title{font-size:1.2em;font-weight:700;float:left;width:165px; padding-left: 6px; margin-right:10px;}
+label span.component-desc{font-size:1.1em; float:left;}
 div.field-pair select{font-size:1.1em;border:1px solid #d4d0c8;}
 div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
-.alt { background-color: #efefef; }
+
+#customQualityWrapper { height: 175px; overflow: auto; }
+#customQualityWrapper div.component-group-desc{float:left;width:165px;}
+#customQualityWrapper div.component-group-desc p{width:85%;font-size:1.2em;color:#666;margin:.8em 0;}
+#customQualityWrapper div.component-group-desc p.note{width:90%;font-size:1.2em;color:#333;margin:.8em 0;}
