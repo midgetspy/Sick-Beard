@@ -159,7 +159,7 @@ formtowizard.prototype={
 			//$stepsguide.insertBefore($sectionswrapper) //add Steps Container before sectionswrapper container
 			var $thesteps=$stepsguide.find('div.step')
 			//create pagination DIV and add it to end of form:
-			var $paginatediv=$('<div class="formpaginate" style="overflow:hidden;"><span class="prev" style="float:left">Back</span> <span class="status">Step 1 of </span> <span class="next" style="float:right">Next</span></div>')
+			var $paginatediv=$('<div class="formpaginate" style="overflow:hidden;"><span class="prev" style="float:left">Prev</span> <span class="status">Step 1 of </span> <span class="next" style="float:right">Next</span></div>')
 			$theform.append($paginatediv)
 			thiswizard.$theform=$theform
 			if (setting.revealfx[0]=="slide"){

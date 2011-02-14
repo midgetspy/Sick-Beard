@@ -21,7 +21,7 @@
 <fieldset class="sectionwrap">
 <legend class="legendStep">Find a show on the TVDB</legend>
 
-<div style="padding: 15px;">
+<div class="stepDiv">
 <p>
 <input type="text" id="nameToSearch" value="$default_show_name" />
 <select name="tvdbLang" id="tvdbLangSelect">
@@ -40,7 +40,7 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 <fieldset class="sectionwrap">
 <legend class="legendStep">Pick the parent folder</legend>
 
-<div style="padding: 15px;">
+<div class="stepDiv">
 #if $provided_show_dir:
 <b>$provided_show_dir</b> <br />
 <input type="hidden" name="fullShowPath" value="$provided_show_dir">
@@ -54,7 +54,7 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 <fieldset class="sectionwrap">
 <legend class="legendStep">Customize options</legend>
 
-<div style="padding: 15px;">
+<div class="stepDiv">
 
 <div class="field-pair">
     <label for="statusSelect" class="nocheck clearfix">
@@ -77,19 +77,12 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
     </label>
 </div>
 
-<div class="field-pair">
-    <label for="qualityPreset" class="nocheck clearfix">
-        <span class="component-title">
-        #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
-        </span>
-        <span class="component-desc">Preferred quality to download</span>
-    </label>
-</div>
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 
 <div class="field-pair alt">
     <input type="checkbox">
     <label for="makeDefault" class="clearfix">
-        <span class="component-title">Make Default</span>
+        <span class="component-title">Save Defaults</span>
         <span class="component-desc">Use current values as the defaults</span>
     </label>
 </div>
@@ -97,18 +90,26 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 </div>
 </fieldset>
 
-
 #for $curNextDir in $other_dirs:
 <input type="hidden" name="other_dirs" value="$curNextDir">
 #end for
 <input type="hidden" name="skipShow" id="skipShow" value="">
 </form>
+
 <br />
+<<<<<<< HEAD
 <br />
 <input type="button" id="addShowButton" value="Add Show" disabled>
+=======
+
+<div style="width: 800px; text-align: center;">
+<input type="button" id="addShowButton" value="Add Show">
+>>>>>>> 773cd6e... Twaked new show even further.
 #if $other_dirs:
 <input type="button" id="skipShowButton" value="Skip Show">
 #end if
+</div>
+
 <script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
 
 </div>
