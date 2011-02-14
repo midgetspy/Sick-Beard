@@ -313,6 +313,7 @@ class PopulateRootDirs (AddLang):
         
         if not dir_counts:
             self.incDBVersion()
+            return
         
         default_root_dir = dir_counts.values().index(max(dir_counts.values()))
         
