@@ -311,6 +311,9 @@ class PopulateRootDirs (AddLang):
         
         logger.log(u"Dir counts: "+str(dir_counts), logger.DEBUG)
         
+        if not dir_counts:
+            self.incDBVersion()
+        
         default_root_dir = dir_counts.values().index(max(dir_counts.values()))
         
         new_root_dirs = str(default_root_dir)+'|'+'|'.join(dir_counts.keys())
