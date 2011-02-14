@@ -44,6 +44,7 @@ $(document).ready(function(){
             var toDelete = $("#rootDirs option:selected");
 
             var newDefault = (toDelete.attr('id') == $("#whichDefaultRootDir").val());
+            var deleted_num = $("#rootDirs option:selected").attr('id').substr(3);
 
             toDelete.remove();
             syncOptionIDs();
@@ -53,12 +54,16 @@ $(document).ready(function(){
                 console.log('new default when deleting')
                 
                 // we deleted the default so this isn't valid anymore
-                $("#whichDefaultRootDir").val('')
+                $("#whichDefaultRootDir").val('');
 
                 // if we're deleting the default and there are options left then pick a new default
                 if ($("#rootDirs option").length)
                     setDefault($('#rootDirs option').attr('id'));
             
+            } else if ($("#whichDefaultRootDir").val().length) {
+                var old_default_num = $("#whichDefaultRootDir").val().substr(3);
+                if (old_default_num > deleted_num)
+                    $("#whichDefaultRootDir").val('rd-'+(old_default_num-1))
             }
 
         }
