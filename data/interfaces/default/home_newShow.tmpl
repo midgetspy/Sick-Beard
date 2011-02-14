@@ -15,8 +15,7 @@
 <script src="$sbRoot/js/formwizard.js" type="text/javascript"></script>
 
 <script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
-
-
+   
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
 
 <fieldset class="sectionwrap">
@@ -56,18 +55,45 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 <legend class="legendStep">Customize options</legend>
 
 <div style="padding: 15px;">
-Status for episodes that you don't already have:
+
+<div class="field-pair">
+    <label for="statusSelect" class="nocheck clearfix">
+        <span class="component-title">
 <select name="defaultStatus" id="statusSelect">
 #for $curStatus in [$SKIPPED, $WANTED, $ARCHIVED, $IGNORED]:
 <option value="$curStatus" #if $sickbeard.STATUS_DEFAULT == $curStatus then 'selected="selected"' else ''#>$statusStrings[$curStatus]
 #end for
 </select>
-<br /><br />
-Season Folders: <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#>
-<br /><br />
-Show Quality:
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
-<br />
+        </span>
+        <span class="component-desc">Set initial status of missing episodes</span>
+    </label>
+</div>
+
+<div class="field-pair alt">
+    <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#>
+    <label for="seasonFolders" class="clearfix">
+        <span class="component-title">Season Folders</span>
+        <span class="component-desc">Store episodes in season folders?</span>
+    </label>
+</div>
+
+<div class="field-pair">
+    <label for="qualityPreset" class="nocheck clearfix">
+        <span class="component-title">
+        #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
+        </span>
+        <span class="component-desc">Preferred quality to download</span>
+    </label>
+</div>
+
+<div class="field-pair alt">
+    <input type="checkbox">
+    <label for="makeDefault" class="clearfix">
+        <span class="component-title">Make Default</span>
+        <span class="component-desc">Use current values as the defaults</span>
+    </label>
+</div>
+
 </div>
 </fieldset>
 
@@ -84,5 +110,7 @@ Show Quality:
 <input type="button" id="skipShowButton" value="Skip Show">
 #end if
 <script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
+
+</div>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
