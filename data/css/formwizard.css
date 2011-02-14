@@ -5,7 +5,7 @@ border-width:0;
 padding:5px;
 }
 
-legend{ /*title shown at top of each form page */
+legend.legendStep{ /*title shown at top of each form page */
 font:bold 16px Arial;
 color: #57442B;
 }
@@ -33,7 +33,7 @@ font-weight: normal;
 }
 
 div.formpaginate{ /* CSS for pagination DIV container */
-width: 750px;
+width: 800px;
 overflow:auto;
 font-weight:bold;
 text-align:center;
@@ -41,10 +41,10 @@ margin-top:1em;
 }
 
 div.formpaginate .prev, div.formpaginate .next{ /*CSS for "prev" and "next" SPAN elements within paginate container */
-border-radius:5px;
--webkit-border-radius:5px;
--moz-border-radius:5px;
-padding:2px 5px;
+border-radius:6px;
+-webkit-border-radius:6px;
+-moz-border-radius:6px;
+padding:3px 6px;
 background:#57442B;
 color:white;
 cursor:hand;

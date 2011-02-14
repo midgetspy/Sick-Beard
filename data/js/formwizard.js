@@ -23,7 +23,7 @@ formtowizard.prototype={
 		for (var i=0; i<arr.length; i++){ //loop thru "break" elements
 			var $fieldsetelements=$startelement.nextUntil('#'+arr[i].breakafter+', *[name='+arr[i].breakafter+']').andSelf() //reference all elements from start element to break element (nextUntil() is jQuery 1.4 function)
 			$fieldsetelements.add($fieldsetelements.next()).wrapAll('<fieldset class="sectionwrap" />') //wrap these elements with fieldset element
-			$startelement=$theform.find('fieldset.sectionwrap').eq(i).prepend('<legend>'+arr[i].legend+'</legend>').next() //increment startelement to begin at the end of the just inserted fieldset element
+			$startelement=$theform.find('fieldset.sectionwrap').eq(i).prepend('<legend class="legendStep">'+arr[i].legend+'</legend>').next() //increment startelement to begin at the end of the just inserted fieldset element
 		}
 	},
 

@@ -20,14 +20,16 @@
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
 
 <fieldset class="sectionwrap">
-<legend>Find a show on the TVDB</legend>
+<legend class="legendStep">Find a show on the TVDB</legend>
 
 <div style="padding: 15px;">
+<p>
 <input type="text" id="nameToSearch" value="$default_show_name" />
 <select name="tvdbLang" id="tvdbLangSelect">
 <option value="en" selected="selected">en</option>
 </select>*
-<input type="button" id="searchName" value="Search" /><br />
+<input type="button" id="searchName" value="Search" />
+</p>
 * <b>Note:</b> This will only affect the language of the TVDB data which affects metadata file contents<br />
 and episode filenames. This DOES NOT allow Sick Beard to download non-english files!<br />
 <br />
@@ -37,9 +39,9 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 </fieldset>
 
 <fieldset class="sectionwrap">
-<legend>Pick the parent folder</legend>
+<legend class="legendStep">Pick the parent folder</legend>
 
-<div>
+<div style="padding: 15px;">
 #if $provided_show_dir:
 <b>$provided_show_dir</b> <br />
 <input type="hidden" name="fullShowPath" value="$provided_show_dir">
@@ -51,9 +53,9 @@ and episode filenames. This DOES NOT allow Sick Beard to download non-english fi
 </fieldset>
 
 <fieldset class="sectionwrap">
-<legend>Customize options</legend>
+<legend class="legendStep">Customize options</legend>
 
-<div>
+<div style="padding: 15px;">
 Status for episodes that you don't already have:
 <select name="defaultStatus" id="statusSelect">
 #for $curStatus in [$SKIPPED, $WANTED, $ARCHIVED, $IGNORED]:

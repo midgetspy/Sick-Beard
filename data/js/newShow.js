@@ -25,10 +25,10 @@ $(document).ready(function(){
         $('#searchResults').html('<img id="searchingAnim" src="'+sbRoot+'/images/loading32.gif" height="32" width="32" /> searching...');
 
         $.getJSON(sbRoot+'/home/addShows/searchTVDBForShowName', {'name': $('#nameToSearch').val(), 'lang': $('#tvdbLangSelect').val()}, function(data){
-            var resultStr = '';
+            var resultStr = '<fieldset>\n<legend>Search Results:</legend>\n';
             
             if (data.results.length == 0) {
-                resultStr = '<b>No results found, try a different search.</b>';
+                resultStr += '<b>No results found, try a different search.</b>';
             } else {
             
                 $.each(data.results, function(index, obj){
@@ -48,6 +48,7 @@ $(document).ready(function(){
                 });
                 resultStr += '</ul>';
             }
+            resultStr += '</fieldset>';
             $('#searchResults').html(resultStr);
             updateSampleText();
         });

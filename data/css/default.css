@@ -26,8 +26,8 @@ margin:5px;
 padding:7px;
 }
 legend {
-color:#000;
-font-weight:700;
+font:bold 16px Arial;
+color: #57442B;
 }
 div.EntryBlock,div.EntryBlock form {
 display:inline;
