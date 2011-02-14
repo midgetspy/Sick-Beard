@@ -11,7 +11,7 @@
 <h2>Add Single Show</h2>
 
 <form method="post" action="addShows" accept-charset="utf-8">
-Single show folder: <input type="text" name="showDirs" id="showDir" size="50" /> <input type="submit" value="Add Show" />
+Single show folder: <input type="text" name="showDirs" id="showDir" size="50" value="$sickbeard.DEFAULT_SHOW_DIR" /> <input type="submit" value="Add Show" />
 </form>
 <p style="font-size:90%;"><b>Hint:</b> To start tracking a show you don't have yet, enter the path where you would like it stored, i.e. /path/to/New Show</p>
 </div>
@@ -21,7 +21,7 @@ Single show folder: <input type="text" name="showDirs" id="showDir" size="50" />
 <div>
 <h2>Add multiple shows from a root directory</h2>
 <form method="post" action="addRootDir" accept-charset="utf-8">
-Root show folder: <input type="text" name="dir" id="showsDir" size="50" /> <input type="submit" value="Add multiple shows" />
+Root show folder: <input type="text" name="dir" id="showsDir" size="50" value="$sickbeard.DEFAULT_SHOW_DIR" /> <input type="submit" value="Add multiple shows" />
 </form>
 </div>
 

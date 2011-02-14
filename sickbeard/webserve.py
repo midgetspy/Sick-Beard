@@ -468,7 +468,7 @@ class ConfigGeneral:
                     naming_use_periods=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
-                    wdtv_data=None, use_banner=None):
+                    wdtv_data=None, use_banner=None, default_show_dir=None):
 
         results = []
 
@@ -567,6 +567,8 @@ class ConfigGeneral:
         sickbeard.USE_BANNER = use_banner
 
         config.change_VERSION_NOTIFY(version_notify)
+
+        sickbeard.DEFAULT_SHOW_DIR = default_show_dir;
 
         sickbeard.save_config()
 

@@ -97,6 +97,13 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                             </label>
                         </div>
 
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="default_show_dir">
+                                <span class="component-title">Default Show Directory</span>
+                                <input type="text" name="default_show_dir" id="default_show_dir" value="$sickbeard.DEFAULT_SHOW_DIR" size="35" />
+                            </label>
+                        </div>
+
                         <input type="submit" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group1 -->
@@ -425,6 +432,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
 <script type="text/javascript" charset="utf-8">
     jQuery('#log_dir').fileBrowser({ title: 'Select Log Directory' });
+    jQuery('#default_show_dir').fileBrowser({ title: 'Select Default Show Directory' });
 </script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

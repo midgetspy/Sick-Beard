@@ -81,6 +81,7 @@ INIT_LOCK = Lock()
 __INITIALIZED__ = False
 
 LOG_DIR = None
+DEFAULT_SHOW_DIR = None
 
 WEB_PORT = None
 WEB_LOG = None
@@ -337,6 +338,11 @@ def initialize(consoleLogging=True):
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
             logger.log(u"!!! No log folder, logging to screen only!", logger.ERROR)
+
+        DEFAULT_SHOW_DIR = check_setting_str(CFG, 'General', 'default_show_dir', '')
+        if not helpers.makeDir(DEFAULT_SHOW_DIR):
+            logger.log(u"!!! Default show folder does not exist. Not using default directory!", logger.ERROR)
+            DEFAULT_SHOW_DIR = None
 
         try:
             WEB_PORT = check_setting_int(CFG, 'General', 'web_port', 8081)
@@ -790,6 +796,7 @@ def save_config():
 
     new_config['General'] = {}
     new_config['General']['log_dir'] = LOG_DIR
+    new_config['General']['default_show_dir'] = DEFAULT_SHOW_DIR
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
     new_config['General']['web_ipv6'] = WEB_IPV6
