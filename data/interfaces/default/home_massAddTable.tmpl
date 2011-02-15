@@ -1,8 +1,8 @@
 <table id="addRootDirTable" class="sickbeardTable tablesorter">
-  <thead><tr><th width="1%"><input type="checkbox" id="checkAll" checked=checked></th><th>Directory</th><th width="20%">Contains Show (nfo)</td></tr></thead>
+  <thead><tr><th width="1%"><input type="checkbox" id="checkAll" checked=checked></th><th>Directory</th><th width="20%">Show name based on NFO</td></tr></thead>
   <tfoot>
     <tr>
-      <th rowspan="1" colspan="3" align="left"><a href="#" style="padding-left: 10px;">Manage Directories</a></th>
+      <th rowspan="1" colspan="3" align="left"><a href="#" style="padding-left: 10px;" class="showManage">Manage Directories</a></th>
     </tr>
   </tfoot>
   <tbody>
@@ -17,7 +17,7 @@
 #end if
   <tr>
     <td><input type="checkbox" id="$show_id" class="dirCheck" checked=checked></td>
-    <td><label for="$show_id">$curDir['dir']</label></td>
+    <td><label for="$show_id">$curDir['display_dir']</label></td>
     <td>#if $curDir['existing_info'][0] and $curDir['existing_info'][1] then '<a href="http://thetvdb.com/?tab=series&id='+$str($curDir['existing_info'][0])+'">'+$curDir['existing_info'][1]+'</a>' else "?"#</td>
   </tr>
 #end for

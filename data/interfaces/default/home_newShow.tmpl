@@ -25,10 +25,11 @@
         <input type="text" id="nameToSearch" value="$default_show_name" />
         <select name="tvdbLang" id="tvdbLangSelect">
             <option value="en" selected="selected">en</option>
-        </select>*
+        </select><b>*</b>
         <input type="button" id="searchName" value="Search" /><br /><br />
 
-        * <b>Note:</b> This will only affect the language of the TVDB data which affects metadata file contents and episode filenames. This DOES NOT allow Sick Beard to download non-english files!<br />
+        <b>*</b> This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
+        This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
         <br />
         <div id="searchResults" style="height: 225px; overflow: auto;"></div>
         <input type="hidden" id="cancelShowItem" value="0" />
@@ -62,7 +63,7 @@
                     #end for
                     </select>
                 </span>
-                <span class="component-desc">Set initial status of missing episodes</span>
+                <span class="component-desc">Set the initial status of missing episodes</span>
             </label>
         </div>
 

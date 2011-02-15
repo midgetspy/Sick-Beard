@@ -1,25 +1,29 @@
 $(document).ready(function(){
 
-    $.getJSON(sbRoot+'/home/addShows/getTVDBLanguages', {}, function(data){
-        var resultStr = '';
-
-        if (data.results.length == 0) {
-            resultStr = '<option value="en" selected="selected">en</option>';
-        } else {
-            $.each(data.results, function(index, obj){
-                if (resultStr == '')
-                        selected = ' selected="selected"';
-                else
-                        selected = '';
-
-                resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
+    function populateSelect() {
+        if ($('#tvdbLangSelect option').length <= 1) {
+            $.getJSON(sbRoot+'/home/addShows/getTVDBLanguages', {}, function(data){
+                var resultStr = '';
+        
+                if (data.results.length == 0) {
+                    resultStr = '<option value="en" selected="selected">en</option>';
+                } else {
+                    $.each(data.results, function(index, obj){
+                        if (resultStr == '')
+                                selected = ' selected="selected"';
+                        else
+                                selected = '';
+        
+                        resultStr += '<option value="' + obj + '"' + selected + '>' + obj + '</option>';
+                    });
+                }
+        
+                $('#tvdbLangSelect').html(resultStr);
+        
+                $('#tvdbLangSelect').change(function() { searchTvdb() });
             });
         }
-        $('#tvdbLangSelect').html(resultStr)
-
-        $('#tvdbLangSelect').change(function() { searchTvdb() });
-    });
-
+    }
 
     function searchTvdb(){
         $('#searchResults').html('<img id="searchingAnim" src="'+sbRoot+'/images/loading32.gif" height="32" width="32" /> searching...');
@@ -92,7 +96,8 @@ $(document).ready(function(){
 
     var myform=new formtowizard({
         formid: 'addShowForm',
-        revealfx: ['slide', 500]
+        revealfx: ['slide', 500],
+        oninit: function () { populateSelect(); }
     });
 
     $('#nameToSearch').focus();

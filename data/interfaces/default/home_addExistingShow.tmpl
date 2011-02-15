@@ -15,7 +15,37 @@
 
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
 
-Searching for shows within:<br />
+<script type="text/javascript" src="$sbRoot/js/addExistingShow.js"></script>
+
+<script>
+\$(document).ready(function(){ 
+    \$( "#tabs" ).tabs({
+        collapsible: true,
+        selected: #if $sickbeard.ROOT_DIRS then '-1' else '0'#
+    });
+    
+    \$('.showManage').click(function() {
+      \$( "#tabs" ).tabs( 'select', 0 );
+      return false;
+    });
+});
+</script>
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Manage Directories</a></li>
+        <li><a href="#tabs-2">Customize Options</a></li>
+    </ul>
+    <div id="tabs-1">
+        #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
+    </div>
+    <div id="tabs-2">
+        <p><strong>Click this tab again to close the content pane.</strong></p>
+        <p>need to import the options stuff here.</p>
+    </div>
+</div>
+
+<h3>Displaying shows not in Sick Beard within these directories:</h3>
 <ul id="rootDirStaticList">
 #if $sickbeard.ROOT_DIRS:
 #for $cur_dir in $sickbeard.ROOT_DIRS.split('|')[1:]
@@ -23,18 +53,8 @@ Searching for shows within:<br />
 #end for
 #end if
 </ul>
+
 <br />
-<a href="#">Manage Directories</a><br />
-<br />
-
-<div id="rootDirDisplay" #if $sickbeard.ROOT_DIRS then 'style="display: none"' else ''#>
-    #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
-</div>
-
-<script type="text/javascript" src="$sbRoot/js/addExistingShow.js"></script>
-
-<h2>Select Shows To Add</h2>
-
 <div id="tableDiv"></div>
 
 <input type="button" value="Submit" id="submitShowDirs">

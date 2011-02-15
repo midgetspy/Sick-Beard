@@ -1,5 +1,5 @@
 #import sickbeard
-<span id="sampleRootDir"></span><br /><br />
+<span id="sampleRootDir"></span>
 
 #if $sickbeard.ROOT_DIRS:
 #set $backend_pieces = $sickbeard.ROOT_DIRS.split('|')
@@ -11,8 +11,8 @@
 #end if
 
 <input type="hidden" id="whichDefaultRootDir" value="$backend_default">
-<div style="padding-bottom: 5px;">
-    <select name="rootDir" id="rootDirs" size="8" style="min-width: 400px;">
+<div style="padding-bottom: 5px; padding-top: 10px;">
+    <select name="rootDir" id="rootDirs" size="6" style="min-width: 400px;">
     #for $cur_dir in $backend_dirs:
         <option value="$cur_dir">$cur_dir</option>
     #end for
