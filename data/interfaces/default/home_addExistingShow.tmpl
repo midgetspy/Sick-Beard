@@ -11,9 +11,11 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
+
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
 
-Searching for all shows in:<br />
+Searching for shows within:<br />
 <ul id="rootDirStaticList">
 #if $sickbeard.ROOT_DIRS:
 #for $cur_dir in $sickbeard.ROOT_DIRS.split('|')[1:]
@@ -22,11 +24,11 @@ Searching for all shows in:<br />
 #end if
 </ul>
 <br />
-<a href="#">Click to manage root TV folders</a> (should toggle rootDirDisplay div, doesn't do anything atm)<br />
+<a href="#">Manage Directories</a><br />
 <br />
+
 <div id="rootDirDisplay" #if $sickbeard.ROOT_DIRS then 'style="display: none"' else ''#>
-<script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
+    #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
 </div>
 
 <script type="text/javascript" src="$sbRoot/js/addExistingShow.js"></script>
