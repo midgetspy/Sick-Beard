@@ -1192,8 +1192,9 @@ class NewHomeAddShows:
                 if not ek.ek(os.path.isdir, cur_path):
                     continue
                 
-                cur_dir = {'dir': cur_path,
-                           'display_dir': ek.ek(os.path.basename, cur_path),
+                cur_dir = {
+                           'dir': cur_path,
+                           'display_dir': '<b>'+ek.ek(os.path.dirname, cur_path)+os.sep+'</b>'+ek.ek(os.path.basename, cur_path),
                            }
                 
                 # see if the folder is in XBMC already
