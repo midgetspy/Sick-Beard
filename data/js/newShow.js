@@ -112,9 +112,11 @@ $(document).ready(function(){
         return false;
     });
 
+    /*
     $('#statusSelect').after('(<a href="#" id="makeStatusDefault">make default</a>)');
     $('#qualityPreset').after('(<a href="#" id="makeQualityDefault">make default</a>)');
     $('#seasonFolders').after('(<a href="#" id="makeSeasonFoldersDefault">make default</a>)');
+    */
 
     function updateSampleText() {
         // if something's selected then we have some behavior to figure out
