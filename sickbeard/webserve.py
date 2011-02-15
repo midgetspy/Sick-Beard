@@ -1157,17 +1157,19 @@ class NewHomeAddShows:
         return json.dumps({'results': results, 'langid': lang_id})
 
     @cherrypy.expose
-    def massAddTable(self):
+    def massAddTable(self, rootDir=None):
         t = PageTemplate(file="home_massAddTable.tmpl")
         t.submenu = HomeMenu()
         
         myDB = db.DBConnection()
 
-        if sickbeard.ROOT_DIRS:
-            root_dirs = sickbeard.ROOT_DIRS.split('|')[1:]
+        if not rootDir:
+            return "No folders selected." 
+        elif type(rootDir) != list:
+            root_dirs = [rootDir]
         else:
-            return "No root dirs defined." 
-        
+            root_dirs = rootDir
+
         tmp = root_dirs[int(sickbeard.ROOT_DIRS.split('|')[0])]
         root_dirs.remove(tmp)
         root_dirs = [tmp]+root_dirs

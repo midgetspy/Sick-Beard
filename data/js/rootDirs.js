@@ -2,7 +2,7 @@ $(document).ready(function(){
 
     function logMsg(msg) {
         if (window.console && window.logMsg)
-            logMsg(msg)
+            console.log(msg)
     }
 
     function addRootDir(path){

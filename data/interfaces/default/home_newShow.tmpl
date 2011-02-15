@@ -42,8 +42,8 @@
 
     <div class="stepDiv">
         #if $provided_show_dir:
-            <b>$provided_show_dir</b> <br />
-            <input type="hidden" name="fullShowPath" value="$provided_show_dir"><br />
+            Pre-chosen Destination Folder: <b>$provided_show_dir</b> <br />
+            <input type="hidden" id="fullShowPath" name="fullShowPath" value="$provided_show_dir"><br />
         #else
             #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
         #end if

@@ -32,7 +32,17 @@ $(document).ready(function()
 
 
     function loadContent() {
-        $.get('/home/addShows/massAddTable', function(data) {
+        var url = '';
+        $('.dir_check').each(function(i,w){
+            if ($(w).is(':checked')) {
+                if (url.length)
+                    url += '&'
+                url += 'rootDir=' + $(w).attr('id')
+            }
+        });
+
+        $('#tableDiv').html('<img id="searchingAnim" src="'+sbRoot+'/images/loading32.gif" height="32" width="32" /> loading folders...');
+        $.get('/home/addShows/massAddTable', url, function(data) {
             $('#tableDiv').html(data);
             $("#addRootDirTable").tablesorter({
                 //sortList: [[1,0]],
@@ -45,6 +55,20 @@ $(document).ready(function()
 
     }
 
-    loadContent();
+    var last_txt = '';
+    $('#rootDirText').change(function() {
+        if (last_txt == $('#rootDirText').val())
+            return false;
+        else
+            last_txt = $('#rootDirText').val();
+        $('#rootDirStaticList').html('');           
+        $('#rootDirs option').each(function(i, w) {
+            $('#rootDirStaticList').append('<li><input type="checkbox" class="dir_check" id="'+$(w).val()+'" checked> '+$(w).val()+'</li>')
+        });
+        loadContent();
+    });
+    
+    $('.dir_check').live('click', loadContent);
+
     
 });

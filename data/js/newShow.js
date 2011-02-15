@@ -89,10 +89,10 @@ $(document).ready(function(){
     });
     
     /***********************************************
-* jQuery Form to Form Wizard- (c) Dynamic Drive (www.dynamicdrive.com)
-* This notice MUST stay intact for legal use
-* Visit http://www.dynamicdrive.com/ for this script and 100s more.
-***********************************************/
+    * jQuery Form to Form Wizard- (c) Dynamic Drive (www.dynamicdrive.com)
+    * This notice MUST stay intact for legal use
+    * Visit http://www.dynamicdrive.com/ for this script and 100s more.
+    ***********************************************/
 
     var myform=new formtowizard({
         formid: 'addShowForm',
