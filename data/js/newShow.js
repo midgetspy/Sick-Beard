@@ -25,6 +25,7 @@ $(document).ready(function(){
         $('#searchResults').html('<img id="searchingAnim" src="'+sbRoot+'/images/loading32.gif" height="32" width="32" /> searching...');
 
         $.getJSON(sbRoot+'/home/addShows/searchTVDBForShowName', {'name': $('#nameToSearch').val(), 'lang': $('#tvdbLangSelect').val()}, function(data){
+            var firstResult = true;
             var resultStr = '<fieldset>\n<legend>Search Results:</legend>\n';
             
             if (data.results.length == 0) {
@@ -32,9 +33,10 @@ $(document).ready(function(){
             } else {
             
                 $.each(data.results, function(index, obj){
-                    if (resultStr == '')
+                    if (firstResult) {
                         checked = ' checked';
-                    else
+                        firstResult = false;
+                    } else
                         checked = '';
                     resultStr += '<input type="radio" id="whichSeries" name="whichSeries" value="' + obj[0] + '|' + obj[1] + '"' + checked + ' /> ';
                     if(data.langid && data.langid != "")
