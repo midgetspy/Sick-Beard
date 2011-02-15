@@ -9,11 +9,12 @@
 <!--#set global $statpath="../.."#-->
 <!--#set global $topmenu="home"#-->
 #import os.path
+
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <link rel="stylesheet" type="text/css" href="$sbRoot/css/formwizard.css" />
-<script src="$sbRoot/js/formwizard.js" type="text/javascript"></script>
-
+<script type="text/javascript" src="$sbRoot/js/formwizard.js"></script>
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
 <script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
    
 <form id="addShowForm" method="post" action="$sbRoot/home/addShows/addNewShow" accept-charset="utf-8">
@@ -78,10 +79,9 @@
         #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 
         <div class="field-pair alt">
-            <input type="checkbox">
-            <label for="makeDefault" class="clearfix">
-                <span class="component-title">Save Defaults</span>
-                <span class="component-desc">Use current values as the defaults</span>
+            <label for="makeDefault" class="nocheck clearfix">
+                <span class="component-title"><input type="button" id="saveDefaultsButton" value="Save Defaults" disabled></span>
+                <span class="component-desc">Persist current values as the defaults</span>
             </label>
         </div>
 

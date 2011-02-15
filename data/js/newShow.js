@@ -102,26 +102,16 @@ $(document).ready(function(){
 
     $('#nameToSearch').focus();
 
-    $('#makeStatusDefault').live('click', function() {
-        $.get(sbRoot+'/config/general/saveDefaultStatus', {defaultStatus: $('#statusSelect').val()} );
-        return false;
+    $('#saveDefaultsButton').click(function() {
+        $.get(sbRoot+'/config/general/saveAddShowDefaults', {defaultStatus: $('#statusSelect').val(),
+                                                             defaultQuality: $('#qualityPreset').val(),
+                                                             defaultSeasonFolders: $('#seasonFolders').val()} );
+        $(this).attr('disabled', true);
     });
 
-    $('#makeQualityDefault').live('click', function() {
-        $.get(sbRoot+'/config/general/saveDefaultQuality', {defaultQuality: $('#qualityPreset').val()} );
-        return false;
+    $('#statusSelect, #qualityPreset, #seasonFolders, #anyQualities, #bestQualities').change(function(){
+        $('#saveDefaultsButton').attr('disabled', false);
     });
-
-    $('#makeSeasonFoldersDefault').live('click', function() {
-        $.get(sbRoot+'/config/general/saveDefaultSeasonFolders', {defaultSeasonFolders: $('#seasonFolders').val()} );
-        return false;
-    });
-
-    /*
-    $('#statusSelect').after('(<a href="#" id="makeStatusDefault">make default</a>)');
-    $('#qualityPreset').after('(<a href="#" id="makeQualityDefault">make default</a>)');
-    $('#seasonFolders').after('(<a href="#" id="makeSeasonFoldersDefault">make default</a>)');
-    */
 
     function updateSampleText() {
         // if something's selected then we have some behavior to figure out
@@ -149,7 +139,7 @@ $(document).ready(function(){
             $('#sampleRootDir').html('No root dir selected.');
         }
         
-        if ($("#rootDirs option:selected").length && $('input:radio[name=whichSeries]:checked').length)
+        if (($("#rootDirs option:selected").length || ($('#fullShowPath').length && $('#fullShowPath').val().length)) && $('input:radio[name=whichSeries]:checked').length)
             $('#addShowButton').attr('disabled', false);
         else
             $('#addShowButton').attr('disabled', true);
