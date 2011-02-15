@@ -7,58 +7,7 @@
 <!--#set global $topmenu="config"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" charset="utf-8">
-\$(document).ready(function(){
-var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"16\" />';
-
-  \$('#testGrowl').click(function(){
-    document.getElementById('testGrowl-result').innerHTML = loading;
-    var growl_host = \$("#growl_host").val();
-    var growl_password = \$("#growl_password").val();
-    var growl_result = \$.get("$sbRoot/home/testGrowl", {'host': growl_host, 'password': growl_password}, 
-    function (data){ document.getElementById('testGrowl-result').innerHTML = data;});
-  });
-
-  \$('#testProwl').click(function(){
-    document.getElementById('testProwl-result').innerHTML = loading;
-    var prowl_api = \$("#prowl_api").val();
-    var prowl_priority = \$("#prowl_priority").val();
-    var prowl_result = \$.get("$sbRoot/home/testProwl", {'prowl_api': prowl_api, 'prowl_priority': prowl_priority}, 
-    function (data){ document.getElementById('testProwl-result').innerHTML = data;});
-  });
-
-  \$('#testXBMC').click(function(){
-    document.getElementById('testXBMC-result').innerHTML = loading;
-    var xbmc_host = \$("#xbmc_host").val();
-    var xbmc_username = \$("#xbmc_username").val();
-    var xbmc_password = \$("#xbmc_password").val();
-
-    \$.get("$sbRoot/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password}, 
-    function (data){ document.getElementById('testXBMC-result').innerHTML = data;});
-  });
-
-  \$('#twitterStep1').click(function(){
-    document.getElementById('testTwitter-result').innerHTML = loading;
-    var twitter1_result = \$.get("$sbRoot/home/twitterStep1", function (data){window.open(data)})
-    .complete(function() { document.getElementById('testTwitter-result').innerHTML = '<b>Step1:</b> Confirm Authorization'; });
-  });
-
-  \$('#twitterStep2').click(function(){
-    document.getElementById('testTwitter-result').innerHTML = loading;
-    var twitter_key = \$("#twitter_key").val();
-    \$.get("$sbRoot/home/twitterStep2", {'key': twitter_key}, 
-    function (data){ document.getElementById('testTwitter-result').innerHTML = data; });
-  });
-
-  \$('#testTwitter').click(function(){
-    \$.get("$sbRoot/home/testTwitter", 
-    function (data){ document.getElementById('testTwitter-result').innerHTML = data;});
-  });
-
-});  
-      
-</script>
-
+<script type="text/javascript" src="$sbRoot/js/configNotifications.js"></script>
 
 <div id="config">
 <div id="config-content">
@@ -76,13 +25,14 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="use_xbmc" id="use_xbmc" #if $sickbeard.USE_XBMC then "checked=\"checked\"" else ""# />
+                            <input type="checkbox" class="enabler" name="use_xbmc" id="use_xbmc" #if $sickbeard.USE_XBMC then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_xbmc">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send XBMC commands?</span>
                             </label>
                         </div>
 
+                        <div id="content_use_xbmc">
                         <div class="field-pair">
                             <input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="xbmc_notify_onsnatch">
@@ -152,9 +102,11 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
                             </label>
                         </div>
 
-                    <div class="testNotification" id="testXBMC-result">Click below to test.</div>
-                    <input type="button" value="Test XBMC" id="testXBMC" />
-                    <input type="submit" value="Save Changes" />
+                        <div class="testNotification" id="testXBMC-result">Click below to test.</div>
+                        <input type="button" value="Test XBMC" id="testXBMC" />
+                        <input type="submit" value="Save Changes" />
+
+                        </div><!-- /enabler_xbmc -->
 
                     </fieldset>
                 </div><!-- /component-group -->
@@ -168,13 +120,14 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" class="enabler" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="use_growl">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send Growl notifications?</span>
                             </label>
                         </div>
 
+                        <div id="content_use_growl">
                         <div class="field-pair">
                             <input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="growl_notify_onsnatch">
@@ -217,9 +170,11 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
                             </label>
                         </div>
 
-                    <div class="testNotification" id="testGrowl-result">Click below to test.</div>
-                    <input type="button" value="Test Growl" id="testGrowl" />
-                    <input type="submit" value="Save Changes" />
+                        <div class="testNotification" id="testGrowl-result">Click below to test.</div>
+                        <input type="button" value="Test Growl" id="testGrowl" />
+                        <input type="submit" value="Save Changes" />
+                        
+                        </div><!-- /content_use_growl -->
 
                     </fieldset>
                 </div><!-- /component-group -->
@@ -233,7 +188,7 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "checked=\"checked\"" else ""# />
+                            <input type="checkbox" class="enabler" name="use_twitter" id="use_twitter" #if $sickbeard.USE_TWITTER then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_twitter">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard post tweets on Twitter?</span>
@@ -244,6 +199,7 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
                             </label>
                         </div>
 
+                        <div id="content_use_twitter">
                         <div class="field-pair">
                             <input type="checkbox" name="twitter_notify_onsnatch" id="twitter_notify_onsnatch" #if $sickbeard.TWITTER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="twitter_notify_onsnatch">
@@ -289,9 +245,11 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
                             </label>
                         </div>
 
-                    <div class="testNotification" id="testTwitter-result">Click below to test.</div>
-                    <input type="button" value="Test Twitter" id="testTwitter" />
-                    <input type="submit" value="Save Changes" />
+                        <div class="testNotification" id="testTwitter-result">Click below to test.</div>
+                        <input type="button" value="Test Twitter" id="testTwitter" />
+                        <input type="submit" value="Save Changes" />
+                        
+                        </div><!-- /content_use_twitter -->
 
                     </fieldset>
                 </div><!-- /component-group -->
@@ -305,13 +263,14 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" class="enabler" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="use_prowl">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send Prowl notifications?</span>
                             </label>
                         </div>
 
+                        <div id="content_use_prowl">
                         <div class="field-pair">
                             <input type="checkbox" name="prowl_notify_onsnatch" id="prowl_notify_onsnatch" #if $sickbeard.PROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="prowl_notify_onsnatch">
@@ -356,9 +315,11 @@ var loading = '<img src=\"$sbRoot/images/loading16.gif\" height=\"16\" width=\"1
                             </label>
                         </div>
 
-                    <div class="testNotification" id="testProwl-result">Click below to test.</div>
-                    <input type="button" value="Test Prowl" id="testProwl" />
-                    <input type="submit" value="Save Changes" />
+                        <div class="testNotification" id="testProwl-result">Click below to test.</div>
+                        <input type="button" value="Test Prowl" id="testProwl" />
+                        <input type="submit" value="Save Changes" />
+                        
+                        </div><!-- /content_use_prowl -->
 
                     </fieldset>
                 </div><!-- /component-group -->

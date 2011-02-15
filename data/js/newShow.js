@@ -25,6 +25,7 @@ $(document).ready(function(){
         $('#searchResults').html('<img id="searchingAnim" src="'+sbRoot+'/images/loading32.gif" height="32" width="32" /> searching...');
 
         $.getJSON(sbRoot+'/home/addShows/searchTVDBForShowName', {'name': $('#nameToSearch').val(), 'lang': $('#tvdbLangSelect').val()}, function(data){
+            var firstResult = true;
             var resultStr = '<fieldset>\n<legend>Search Results:</legend>\n';
             
             if (data.results.length == 0) {
@@ -32,9 +33,10 @@ $(document).ready(function(){
             } else {
             
                 $.each(data.results, function(index, obj){
-                    if (resultStr == '')
+                    if (firstResult) {
                         checked = ' checked';
-                    else
+                        firstResult = false;
+                    } else
                         checked = '';
                     resultStr += '<input type="radio" id="whichSeries" name="whichSeries" value="' + obj[0] + '|' + obj[1] + '"' + checked + ' /> ';
                     if(data.langid && data.langid != "")
@@ -52,7 +54,7 @@ $(document).ready(function(){
             $('#searchResults').html(resultStr);
             updateSampleText();
         });
-    };  
+    };
 
     $('#searchName').click(function() {searchTvdb()});
 
@@ -83,10 +85,10 @@ $(document).ready(function(){
     });
     
     /***********************************************
-    * jQuery Form to Form Wizard- (c) Dynamic Drive (www.dynamicdrive.com)
-    * This notice MUST stay intact for legal use
-    * Visit http://www.dynamicdrive.com/ for this script and 100s more.
-    ***********************************************/
+* jQuery Form to Form Wizard- (c) Dynamic Drive (www.dynamicdrive.com)
+* This notice MUST stay intact for legal use
+* Visit http://www.dynamicdrive.com/ for this script and 100s more.
+***********************************************/
 
     var myform=new formtowizard({
         formid: 'addShowForm',
@@ -110,11 +112,9 @@ $(document).ready(function(){
         return false;
     });
 
-    /*
     $('#statusSelect').after('(<a href="#" id="makeStatusDefault">make default</a>)');
     $('#qualityPreset').after('(<a href="#" id="makeQualityDefault">make default</a>)');
     $('#seasonFolders').after('(<a href="#" id="makeSeasonFoldersDefault">make default</a>)');
-    */
 
     function updateSampleText() {
         // if something's selected then we have some behavior to figure out
@@ -141,6 +141,11 @@ $(document).ready(function(){
         } else {
             $('#sampleRootDir').html('No root dir selected.');
         }
+        
+        if ($("#rootDirs option:selected").length && $('input:radio[name=whichSeries]:checked').length)
+            $('#addShowButton').attr('disabled', false);
+        else
+            $('#addShowButton').attr('disabled', true);
     }
     
     $('#rootDirText').change(updateSampleText);
