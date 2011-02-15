@@ -5,30 +5,31 @@ $(document).ready(function()
         var seasCheck = this;
 
         $('.dirCheck').each(function(){
-           this.checked = seasCheck.checked 
+           this.checked = seasCheck.checked;
         });
     });
 
     $('#submitShowDirs').click(function(){
   
-        var dirArr = new Array()
+        var dirArr = new Array();
 
         $('.dirCheck').each(function() {
       
         if (this.checked == true) {
-           dirArr.push($(this).attr('id'))
+           dirArr.push($(this).attr('id'));
         }
       
         });  
 
         if (dirArr.length == 0)
-            return false
+            return false;
 
-        url = 'addExistingShows?showDirs='+dirArr.join('&showDirs=')
+        url = 'addExistingShows?promptForSettings='+ ($('#promptForSettings').attr('checked') ? 'on' : 'off');
 
-        window.location.href = url
+        url += '&shows_to_add='+dirArr.join('&shows_to_add=');
 
-  });
+        window.location.href = url;
+    });
 
 
     function loadContent() {

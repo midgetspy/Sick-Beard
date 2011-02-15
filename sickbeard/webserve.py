@@ -1217,7 +1217,7 @@ class NewHomeAddShows:
         return _munge(t)
 
     @cherrypy.expose
-    def newShow(self, show_dir=None, other_dirs=None):
+    def newShow(self, show_to_add=None, other_shows=None):
         """
         Display the new show page which collects a tvdb id, folder, and extra options and
         posts them to addNewShow
@@ -1225,47 +1225,62 @@ class NewHomeAddShows:
         t = PageTemplate(file="home_newShow.tmpl")
         t.submenu = HomeMenu()
         
+        show_dir, tvdb_id, show_name = self.split_extra_show(show_to_add)
+        
+        if tvdb_id and show_name:
+            use_provided_info = True
+        else:
+            use_provided_info = False
+        
+        # tell the template whether we're giving it show name & TVDB ID
+        t.use_provided_info = use_provided_info
+        
         # use the given show_dir for the tvdb search if available 
         if not show_dir:
-            default_name = ''
+            t.default_show_name = ''
+        elif not show_name:
+            t.default_show_name = ek.ek(os.path.basename, ek.ek(os.path.normpath, show_dir))
         else:
-            default_name = ek.ek(os.path.basename, ek.ek(os.path.normpath, show_dir))
+            t.default_show_name = show_name
         
         # carry a list of other dirs if given
-        if not other_dirs:
-            other_dirs = []
-        elif type(other_dirs) != list:
-            other_dirs = [other_dirs]
+        if not other_shows:
+            other_shows = []
+        elif type(other_shows) != list:
+            other_shows = [other_shows]
         
-        t.default_show_name = default_name
+        if use_provided_info:
+            t.provided_tvdb_id = tvdb_id
+            t.provided_tvdb_name = show_name
+            
         t.provided_show_dir = show_dir
-        t.other_dirs = other_dirs
+        t.other_shows = other_shows
         
         return _munge(t)
 
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
                    anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
-                   other_dirs=None, skipShow=None):
+                   other_shows=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
         """
         
         # grab our list of other dirs if given
-        if not other_dirs:
-            other_dirs = []
-        elif type(other_dirs) != list:
-            other_dirs = [other_dirs]
+        if not other_shows:
+            other_shows = []
+        elif type(other_shows) != list:
+            other_shows = [other_shows]
             
         def finishAddShow(): 
             # if there are no extra shows then go home
-            if not other_dirs:
+            if not other_shows:
                 redirect('/home')
             
             # peel off the next one
-            next_show_dir = other_dirs[0]
-            rest_of_show_dirs = other_dirs[1:]
+            next_show_dir = other_shows[0]
+            rest_of_show_dirs = other_shows[1:]
             
             # go to add the next show
             return self.newShow(next_show_dir, rest_of_show_dirs)
@@ -1328,7 +1343,7 @@ class NewHomeAddShows:
         
 
     @cherrypy.expose
-    def existingShows(self, root_dir=None):
+    def existingShows(self):
         """
         Prints out the page to add existing shows from a root dir 
         """
@@ -1337,32 +1352,57 @@ class NewHomeAddShows:
         
         return _munge(t)
 
+    def split_extra_show(self, extra_show):
+        if not extra_show:
+            return (None, None, None)
+        split_vals = extra_show.split('|')
+        if len(split_vals) < 3:
+            return (extra_show, None, None)
+        show_dir = split_vals[0]
+        tvdb_id = split_vals[1]
+        show_name = '|'.join(split_vals[2:])
+        
+        return (show_dir, tvdb_id, show_name)
+
     @cherrypy.expose
-    def addExistingShows(self, showDirs=None):
+    def addExistingShows(self, shows_to_add=None, promptForSettings=None):
         """
         Receives a dir list and add them. Adds the ones with given TVDB IDs first, then forwards
         along to the newShow page.
         """
 
-        # grab a list of other dirs if given
-        if not showDirs:
-            showDirs = []
-        elif type(showDirs) != list:
-            showDirs = [showDirs]
+        # grab a list of other shows to add, if provided
+        if not shows_to_add:
+            shows_to_add = []
+        elif type(shows_to_add) != list:
+            shows_to_add = [shows_to_add]
+        
+        if promptForSettings == "on":
+            promptForSettings = 1
+        else:
+            promptForSettings = 0
         
         tvdb_id_given = []
         dirs_only = []
         # separate all the ones with TVDB IDs
-        for cur_dir in showDirs:
+        for cur_dir in shows_to_add:
             if not '|' in cur_dir:
                 dirs_only.append(cur_dir)
             else:
-                show_dir, tvdb_id = cur_dir.split('|')
-                tvdb_id_given.append((show_dir, int(tvdb_id)))
+                show_dir, tvdb_id, show_name = self.split_extra_show(cur_dir)
+                if not show_dir or not tvdb_id or not show_name:
+                    continue
+                tvdb_id_given.append((show_dir, int(tvdb_id), show_name))
+
+
+        # if they want me to prompt for settings then I will just carry on to the newShow page
+        if promptForSettings and shows_to_add:
+            return self.newShow(shows_to_add[0], shows_to_add[1:])
         
+        # if they don't want me to prompt for settings then I can just add all the nfo shows now
         num_added = 0
         for cur_show in tvdb_id_given:
-            show_dir, tvdb_id = cur_show
+            show_dir, tvdb_id, show_name = cur_show
             # make sure the
             try:
                 t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)

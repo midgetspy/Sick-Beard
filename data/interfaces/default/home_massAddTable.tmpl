@@ -13,7 +13,7 @@
 
 #set $show_id = $curDir['dir']
 #if $curDir['existing_info'][0]:
-#set $show_id = $show_id + '|' + $str($curDir['existing_info'][0])
+#set $show_id = $show_id + '|' + $str($curDir['existing_info'][0]) + '|' + $curDir['existing_info'][1] 
 #end if
   <tr>
     <td><input type="checkbox" id="$show_id" class="dirCheck" checked=checked></td>

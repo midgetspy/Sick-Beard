@@ -40,17 +40,19 @@
     </div>
     <div id="tabs-2">
         <p><strong>Click this tab again to close the content pane.</strong></p>
-        <p>need to import the options stuff here.</p>
+        #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_addShowOptions.tmpl")
     </div>
 </div>
+<br />
+<br />
+Sick Beard can add shows from NFO/xml files with no user interaction using the default show options.<br />
+If you would rather have it prompt you to customize these shows please check the box below.<br />
+<br />
+<input type="checkbox" name="promptForSettings" id="promptForSettings"> Prompt me to select settings for each show<br />
+<br /> 
 
 <h3>Displaying shows not in Sick Beard within these directories:</h3>
 <ul id="rootDirStaticList">
-#if $sickbeard.ROOT_DIRS:
-#for $cur_dir in $sickbeard.ROOT_DIRS.split('|')[1:]
-
-#end for
-#end if
 </ul>
 
 <br />
