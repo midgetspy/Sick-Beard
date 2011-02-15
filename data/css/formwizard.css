@@ -1,11 +1,11 @@
-fieldset.sectionwrap{ /*fieldset that wraps around each form "page" */
+fieldset.sectionwrap{
 overflow: auto;
 width: 800px;
 border-width:0;
 padding:5px;
 }
 
-legend.legendStep{ /*title shown at top of each form page */
+legend.legendStep{
 font:bold 16px Arial;
 color: #57442B;
 }
@@ -17,22 +17,28 @@ margin-bottom:15px;
 cursor:pointer;
 }
 
-div.stepsguide .step{ /*div that wraps around each "steps" text */
+div.stepsguide .step{
 width:260px; /*width of each "steps" text*/
 font: bold 24px Arial;
 float:left;
 }
-
-div.stepsguide .disabledstep{ /*div that wraps around each "steps" text */
-color:#C4C4C4;
+div.stepsguide .step p {
+border-bottom: 4px solid #57442B;
 }
 
-div.stepsguide .step .smalltext{ /*small footer text inside "steps" text */
+div.stepsguide .disabledstep{
+color:#C4C4C4;
+}
+div.stepsguide .disabledstep p {
+border-bottom: 4px solid #8A775E;
+}
+
+div.stepsguide .step .smalltext{
 font-size: 13px;
 font-weight: normal;
 }
 
-div.formpaginate{ /* CSS for pagination DIV container */
+div.formpaginate{
 width: 800px;
 overflow:auto;
 font-weight:bold;
@@ -40,7 +46,7 @@ text-align:center;
 margin-top:1em;
 }
 
-div.formpaginate .prev, div.formpaginate .next{ /*CSS for "prev" and "next" SPAN elements within paginate container */
+div.formpaginate .prev, div.formpaginate .next{
 border-radius:6px;
 -webkit-border-radius:6px;
 -moz-border-radius:6px;
