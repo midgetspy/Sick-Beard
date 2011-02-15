@@ -9,17 +9,20 @@
 #set $backend_default = ''
 #set $backend_dirs = []
 #end if
+
 <input type="hidden" id="whichDefaultRootDir" value="$backend_default">
-<div style="padding: 5px 0;">
-<select name="rootDir" id="rootDirs" size="8" style="min-width: 300px;">
-#for $cur_dir in $backend_dirs:
-<option value="$cur_dir">$cur_dir</option>
-#end for
-</select>
+<div style="padding-bottom: 5px;">
+    <select name="rootDir" id="rootDirs" size="8" style="min-width: 400px;">
+    #for $cur_dir in $backend_dirs:
+        <option value="$cur_dir">$cur_dir</option>
+    #end for
+    </select>
 </div>
-<input type="button" id="addRootDir" value="New" />
-<input type="button" id="editRootDir" value="Edit" />
-<input type="button" id="deleteRootDir" value="Delete" />
-<input type="button" id="defaultRootDir" value="Set as Default *" />
-<br />
+<div style="text-align: center; width: 400px; ">
+    <input type="button" id="addRootDir" value="New" />
+    <input type="button" id="editRootDir" value="Edit" />
+    <input type="button" id="deleteRootDir" value="Delete" />
+    <input type="button" id="defaultRootDir" value="Set as Default *" />
+</div>
 <input type="text" style="display: none" id="rootDirText">
+<br />
