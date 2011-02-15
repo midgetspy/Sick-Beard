@@ -125,7 +125,7 @@ $(document).ready(function(){
             else if (sample_text.indexOf('\\') >= 0)
                 sep_char = '\\';
 
-            sample_text = 'Eg. <b>' + sample_text;
+            sample_text = 'Destination: <b>' + sample_text;
             if (sample_text.substr(sample_text.length-1) != sep_char)
                 sample_text += sep_char;
             sample_text += '</b><i>||</i>' + sep_char;
@@ -138,6 +138,8 @@ $(document).ready(function(){
             } else {
                 $('#sampleRootDir').html(sample_text.replace('||', 'Show Name'));
             }
+        } else {
+            $('#sampleRootDir').html('No root dir selected.');
         }
     }
     
