@@ -141,6 +141,11 @@ $(document).ready(function(){
         } else {
             $('#sampleRootDir').html('No root dir selected.');
         }
+        
+        if ($("#rootDirs option:selected").length && $('input:radio[name=whichSeries]:checked').length)
+            $('#addShowButton').attr('disabled', false);
+        else
+            $('#addShowButton').attr('disabled', true);
     }
     
     $('#rootDirText').change(updateSampleText);
