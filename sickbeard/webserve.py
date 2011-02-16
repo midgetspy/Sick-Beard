@@ -1523,6 +1523,8 @@ class Home:
             epCounts[curEpCat] += 1
 
         def titler(x):
+            if not x:
+                return x
             if x.lower().startswith('a '):
                     x = x[2:]
             elif x.lower().startswith('the '):
