@@ -1,0 +1,24 @@
+#import os.path
+#import urllib
+#import sickbeard
+#set global $title="New Show"
+
+#set global $sbPath="../.."
+
+<!--#set global $statpath="../.."#-->
+<!--#set global $topmenu="home"#-->
+#import os.path
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<a href="$sbRoot/home/addShows/newShow">Add A New Show</a><br />
+<br />
+If you are adding a new show.<br />
+<br />
+<a href="$sbRoot/home/addShows/existingShows">Add Existing Show</a><br />
+<br />
+If you are adding a show from a folder that already exists (if you have episodes downloaded already).<br />
+<br />
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
+ 

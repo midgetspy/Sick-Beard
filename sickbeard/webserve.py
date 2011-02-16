@@ -1069,8 +1069,7 @@ def haveXBMC():
 
 def HomeMenu():
     return [
-    { 'title': 'New Show',               'path': 'home/addShows/newShow',                   },
-    { 'title': 'Add Existing Shows',     'path': 'home/addShows/existingShows',             },
+    { 'title': 'Add Shows',               'path': 'home/addShows/',                         },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
     { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
