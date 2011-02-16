@@ -54,10 +54,14 @@ import hmac
 from gettext import gettext as _
 import socket
 
+# Try using local version, followed by system, and none if neither are found
 try:
-    import socks
+    import lib.socks as socks
 except ImportError:
-    socks = None
+    try:
+        import socks as socks
+    except ImportError:
+        socks = None
 
 # Build the appropriate socket wrapper for ssl
 try:

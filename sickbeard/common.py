@@ -285,7 +285,8 @@ sceneExceptions = {72546: ['CSI'],
                    172381: ['Silent Library (US)'],
                    131791: ['Sci-Fi Science'],
                    80646: ['Frontline (US)', 'Frontline'],
-                   164541: ['Hawaii Five-0', 'Hawaii Five-0 (2010)'],
+                   189931: ['RBT (AU)'],
+                   73255: ['House', 'House M D'],
                    }
 
 countryList = {'Australia': 'AU',
