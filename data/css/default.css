@@ -361,8 +361,8 @@ label span.component-desc{font-size:.9em; float:left;}
 div.field-pair select{font-size:1em;border:1px solid #d4d0c8;}
 div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
 
-ul#rootDirStaticList { width: 90%; margin-left: auto; margin-right: auto; padding-left: 0; }
-ul#rootDirStaticList li{ list-style: none outside none; margin: 2px; padding: 4px 5px 4px 5px; position: relative; cursor: pointer; }
+ul#rootDirStaticList { width: 90%; text-align: left; margin-left: auto; margin-right: auto; padding-left: 0; }
+ul#rootDirStaticList li{ list-style: none outside none; margin: 2px; padding: 4px 5px 4px 5px; cursor: pointer; }
 
 #displayText {
 background-color:#efefef;
@@ -377,6 +377,8 @@ margin-left: auto;
 margin-right: auto;
 width: 600px;
 }
-div#addShowPortal  button{ padding-top: 10px; padding-bottom: 10px; width: 425px; }
-div#addShowPortal  button div.button{ margin: 25px 25px 25px 10px; }
+div#addShowPortal  button { padding: 10px; width: 450px; }
+div#addShowPortal  button div.button img{ float: left; margin: 25px 25px 25px 10px; vertical-align: middle;}
+div#addShowPortal  button .buttontext { float: right; text-align: left; width: 350px; }
 
+#rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }

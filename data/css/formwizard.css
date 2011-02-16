@@ -1,4 +1,5 @@
 fieldset.sectionwrap{
+text-align: left;
 overflow: auto;
 width: 800px;
 border-width:0;
@@ -11,6 +12,7 @@ color: #57442B;
 }
 
 div.stepsguide{ /*div that contains all the "steps" text located at top of form */ 
+text-align: left;
 width: 800px; /*width of "steps" container*/
 overflow:hidden;
 margin-bottom:15px;
