@@ -38,7 +38,7 @@ $(document).ready(function() {
             if ($(w).is(':checked')) {
                 if (url.length)
                     url += '&'
-                url += 'rootDir=' + $(w).attr('id')
+                url += 'rootDir=' + encodeURIComponent($(w).attr('id'));
             }
         });
 
