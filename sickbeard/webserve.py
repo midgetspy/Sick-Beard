@@ -1214,7 +1214,10 @@ class NewHomeAddShows:
                     if tvdb_id and show_name:
                         break
                 
-                cur_dir['existing_info'] = (tvdb_id, show_name) 
+                cur_dir['existing_info'] = (tvdb_id, show_name)
+                
+                if tvdb_id and helpers.findCertainShow(sickbeard.showList, tvdb_id):
+                    cur_dir['added_already'] = True 
 
         t.dirList = dir_list
         
