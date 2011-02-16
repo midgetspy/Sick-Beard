@@ -321,6 +321,14 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="naming_use_lowercase" id="naming_use_lowercase" #if $sickbeard.NAMING_USE_LOWERCASE then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="naming_use_lowercase">
+                                <span class="component-title">Use Lowercase</span>
+                                <span class="component-desc">Replace the uppercase characters with lowercase in the filename instead?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_quality">
                                 <span class="component-title">Quality</span>

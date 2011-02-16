@@ -465,7 +465,7 @@ class ConfigGeneral:
                     web_password=None, season_folders_format=None, season_folders_default=None,
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None,
-                    naming_use_periods=None, naming_sep_type=None, naming_quality=None,
+                    naming_use_periods=None, naming_use_lowercase=None, naming_sep_type=None, naming_quality=None,
                     anyQualities = [], bestQualities = [], naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
                     wdtv_data=None, use_banner=None):
@@ -583,7 +583,7 @@ class ConfigGeneral:
 
     @cherrypy.expose
     def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
-                   sep_type=None, use_periods=None, quality=None, whichTest="single"):
+                   sep_type=None, use_periods=None, quality=None, use_lowercase=None, whichTest="single"):
 
         if show_name == None:
             show_name = sickbeard.NAMING_SHOW_NAME
@@ -608,6 +608,14 @@ class ConfigGeneral:
                 use_periods = False
             else:
                 use_periods = True
+
+        if use_lowercase == None:
+            use_lowercase = sickbeard.NAMING_USE_LOWERCASE
+        else:
+            if use_lowercase == "0":
+                use_lowercase = False
+            else:
+                use_lowercase = True
 
         if quality == None:
             quality = sickbeard.NAMING_QUALITY
@@ -658,7 +666,7 @@ class ConfigGeneral:
             ep.relatedEps.append(secondEp)
 
         # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality)
+        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality, use_lowercase)
 
         return name
 

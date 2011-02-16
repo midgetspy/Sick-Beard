@@ -113,6 +113,7 @@ NAMING_SEP_TYPE = None
 NAMING_USE_PERIODS = None
 NAMING_QUALITY = None
 NAMING_DATES = None
+NAMING_USE_LOWERCASE = None
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
@@ -312,7 +313,7 @@ def initialize(consoleLogging=True):
                 TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
+                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, NAMING_USE_LOWERCASE, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, BINREQ, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
@@ -392,6 +393,7 @@ def initialize(consoleLogging=True):
         NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
         NAMING_SEP_TYPE = check_setting_int(CFG, 'General', 'naming_sep_type', 0)
         NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
+        NAMING_USE_LOWERCASE = bool(check_setting_int(CFG, 'General', 'naming_use_lowercase', 1))
         NAMING_QUALITY = bool(check_setting_int(CFG, 'General', 'naming_quality', 0))
         NAMING_DATES = bool(check_setting_int(CFG, 'General', 'naming_dates', 1))
 
@@ -812,6 +814,7 @@ def save_config():
     new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
     new_config['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
     new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
+    new_config['General']['naming_use_lowercase'] = int(NAMING_USE_LOWERCASE)
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
