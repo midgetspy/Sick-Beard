@@ -62,9 +62,9 @@
 
 <fieldset class="sectionwrap">
     <legend class="legendStep">Customize options</legend>
-
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_addShowOptions.tmpl")
-
+        <div class="stepDiv">
+            #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_addShowOptions.tmpl")
+        </div>
 </fieldset>
 
 #for $curNextDir in $other_shows:

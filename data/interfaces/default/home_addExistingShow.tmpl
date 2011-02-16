@@ -22,11 +22,6 @@
         collapsible: true,
         selected: #if $sickbeard.ROOT_DIRS then '-1' else '0'#
     });
-    
-    \$('.showManage').click(function() {
-      \$( "#tabs" ).tabs( 'select', 0 );
-      return false;
-    });
 });
 </script>
 
@@ -39,7 +34,6 @@
         #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
     </div>
     <div id="tabs-2">
-        <p><strong>Click this tab again to close the content pane.</strong></p>
         #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_addShowOptions.tmpl")
     </div>
 </div>
@@ -52,8 +46,7 @@ If you would rather have it prompt you to customize these shows please check the
 <br /> 
 
 <h3>Displaying shows not in Sick Beard within these directories:</h3>
-<ul id="rootDirStaticList">
-</ul>
+<ul id="rootDirStaticList"></ul>
 
 <br />
 <div id="tableDiv"></div>

@@ -1,5 +1,5 @@
-$(document).ready(function() 
-{ 
+$(document).ready(function() { 
+
     $('#checkAll').live('click', function(){
     
         var seasCheck = this;
@@ -10,7 +10,7 @@ $(document).ready(function()
     });
 
     $('#submitShowDirs').click(function(){
-  
+
         var dirArr = new Array();
 
         $('.dirCheck').each(function() {
@@ -18,7 +18,7 @@ $(document).ready(function()
         if (this.checked == true) {
            dirArr.push($(this).attr('id'));
         }
-      
+
         });  
 
         if (dirArr.length == 0)
@@ -64,12 +64,15 @@ $(document).ready(function()
             last_txt = $('#rootDirText').val();
         $('#rootDirStaticList').html('');           
         $('#rootDirs option').each(function(i, w) {
-            $('#rootDirStaticList').append('<li><input type="checkbox" class="dir_check" id="'+$(w).val()+'" checked> '+$(w).val()+'</li>')
+            $('#rootDirStaticList').append('<li class="ui-state-default ui-corner-all"><input type="checkbox" class="dir_check" id="'+$(w).val()+'" checked=checked> <label for="'+$(w).val()+'"><span class="ui-icon ui-icon-folder-open float-right"></span>'+$(w).val()+'</label></li>')
         });
         loadContent();
     });
     
     $('.dir_check').live('click', loadContent);
-
+   
+    $('.showManage').live('click', function() {
+      $( "#tabs" ).tabs( 'select', 0 );
+    });
     
 });
