@@ -2,7 +2,7 @@
 #import urllib
 #import sickbeard
 #from sickbeard.common import *
-#set global $title="New Show"
+#set global $title="Existing Show"
 
 #set global $sbPath="../.."
 
@@ -39,11 +39,12 @@
 </div>
 <br />
 <br />
-Sick Beard can add shows from NFO/xml files with no user interaction using the default show options.<br />
-If you would rather have it prompt you to customize these shows please check the box below.<br />
-<br />
-<input type="checkbox" name="promptForSettings" id="promptForSettings"> Prompt me to select settings for each show<br />
-<br /> 
+
+Sick Beard can add existing shows, using the current options, by using locally stored NFO/XML metadata to eliminate user interaction.<br />
+If you would rather have Sick Beard prompt you to customize each show, then use the checkbox below.<br />
+<p><input type="checkbox" name="promptForSettings" id="promptForSettings"> <label for="promptForSettings">Prompt me to set settings for each show</label></p>
+
+<hr>
 
 <h3>Displaying shows not in Sick Beard within these directories:</h3>
 <ul id="rootDirStaticList"></ul>

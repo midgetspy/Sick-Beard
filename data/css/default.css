@@ -363,3 +363,11 @@ div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px 
 
 ul#rootDirStaticList { width: 90%; margin-left: auto; margin-right: auto; padding-left: 0; }
 ul#rootDirStaticList li{ list-style: none outside none; margin: 2px; padding: 4px 5px 4px 5px; position: relative; cursor: pointer; }
+
+#displayText {
+background-color:#efefef;
+padding:8px;
+border:1px solid #DFDEDE;
+font-size:1.1em;
+overflow: hidden;
+}
