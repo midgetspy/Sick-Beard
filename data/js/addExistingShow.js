@@ -16,7 +16,7 @@ $(document).ready(function() {
         $('.dirCheck').each(function() {
       
         if (this.checked == true) {
-           dirArr.push($(this).attr('id'));
+           dirArr.push(encodeURIComponent($(this).attr('id')));
         }
 
         });  

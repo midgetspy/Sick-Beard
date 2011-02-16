@@ -1377,6 +1377,8 @@ class NewHomeAddShows:
         elif type(shows_to_add) != list:
             shows_to_add = [shows_to_add]
         
+        shows_to_add = [urllib.unquote_plus(x) for x in shows_to_add]
+        
         if promptForSettings == "on":
             promptForSettings = 1
         else:
