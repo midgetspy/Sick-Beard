@@ -22,7 +22,7 @@ import os.path
 import threading
 import traceback
 
-from lib.tvdb_api import tvdb_exceptions
+from lib.tvdb_api import tvdb_exceptions, tvdb_api
 
 from sickbeard.common import *
 
@@ -197,6 +197,19 @@ class QueueItemAdd(ShowQueueItem):
         logger.log(u"Starting to add show "+self.showDir)
 
         try:
+            # make sure the tvdb ids are valid
+            try:
+                t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)
+                s = t[self.tvdb_id]
+                if not s or not s['seriesname']:
+                    ui.flash.error("Unable to add show", "Show in "+str(self.showDir)+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
+                    self._finishEarly()
+                    return
+            except tvdb_exceptions.tvdb_exception, e:
+                ui.flash.error("Unable to add show", "Unable to look up the show in "+str(self.showDir)+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
+                self._finishEarly()
+                return
+
             newShow = TVShow(self.tvdb_id, self.lang)
             newShow.loadFromTVDB()
 

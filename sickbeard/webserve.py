@@ -1409,16 +1409,6 @@ class NewHomeAddShows:
         num_added = 0
         for cur_show in tvdb_id_given:
             show_dir, tvdb_id, show_name = cur_show
-            # make sure the
-            try:
-                t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)
-                s = t[tvdb_id]
-                if not s or not s['seriesname']:
-                    ui.flash.error("Unable to add show", "Show in "+str(show_dir)+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
-                    continue
-            except tvdb_exceptions.tvdb_exception, e:
-                ui.flash.error("Unable to add show", "Unable to look up the show in "+str(show_dir)+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
-                continue
 
             # add the show
             sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT)
