@@ -1,7 +1,7 @@
 #import os.path
 #import urllib
 #import sickbeard
-#set global $title="New Show"
+#set global $title="Add Show"
 
 #set global $sbPath="../.."
 
@@ -11,14 +11,40 @@
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<a href="$sbRoot/home/addShows/newShow">Add A New Show</a><br />
-<br />
-If you are adding a new show.<br />
-<br />
-<a href="$sbRoot/home/addShows/existingShows">Add Existing Show</a><br />
-<br />
-If you are adding a show from a folder that already exists (if you have episodes downloaded already).<br />
-<br />
+<script>
+\$(document).ready(function(){  
+
+    \$('#btnNewShow').click(function() {
+      window.location = '$sbRoot/home/addShows/newShow';
+    });
+    \$('#btnExistingShow').click(function() {
+      window.location = '$sbRoot/home/addShows/existingShows';
+    });
+
+});
+</script>
+
+<div id="addShowPortal">
+
+<button id="btnNewShow">
+<div class="button float-left"><img src="$sbRoot/images/add-new32.png" /></div>
+<div class="align-left">
+    <h2>Add New</h2>
+    <p>If you are adding a new show.</p>
+</div>
+</button>
+
+<br/><br/>
+
+<button id="btnExistingShow">
+<div class="button float-left"><img src="$sbRoot/images/add-existing32.png" /></div>
+<div class="align-left">
+    <h2>Add Existing</h2>
+    <p>If you are adding a show from a folder that already exists (if you have episodes downloaded already).</p>
+</div>
+</button>
+
+</div>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
- 
+

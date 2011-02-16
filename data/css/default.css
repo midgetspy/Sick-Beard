@@ -371,3 +371,12 @@ border:1px solid #DFDEDE;
 font-size:1.1em;
 overflow: hidden;
 }
+
+div#addShowPortal {
+margin-left: auto; 
+margin-right: auto; 
+width: 600px;
+}
+div#addShowPortal  button{ width: 425px; }
+div#addShowPortal  button div.button{ margin: 25px 25px 25px 10px; }
+
