@@ -1,5 +1,6 @@
 #import sickbeard.version
 #import sickbeard
+#import urllib
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -136,8 +137,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
     #for $curMessage in $flash.messages():
         \$.pnotify({
-            pnotify_title: '$curMessage[0].replace('\\','\\\\').replace('"','\\"')',
-            pnotify_text: '$curMessage[1].replace('\\','\\\\').replace('"','\\"')'
+            pnotify_title: decodeURIComponent('$urllib.quote($curMessage[0])'),
+            pnotify_text: decodeURIComponent('$urllib.quote($curMessage[1])')
         });
     #end for
 
@@ -145,8 +146,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
         \$.pnotify({
             pnotify_type: 'error',
             pnotify_hide: false,
-            pnotify_title: '$curError[0].replace('\\','\\\\').replace('"','\\"')',
-            pnotify_text: '$curError[1].replace('\\','\\\\').replace('"','\\"')'
+            pnotify_title: decodeURIComponent('$urllib.quote($curError[0])'),
+            pnotify_text: decodeURIComponent('$urllib.quote($curError[1])')
         });
     #end for
 
