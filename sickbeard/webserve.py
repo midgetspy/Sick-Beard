@@ -255,45 +255,64 @@ class Manage:
             if showObj:
                 showList.append(showObj)
 
-        useSeasonfolders = True
-        lastSeasonfolders = None
+        use_season_folders = True
+        last_season_folders = None
 
-        usePaused = True
-        lastPaused = None
+        use_paused = True
+        last_paused = None
 
-        useQuality = True
-        lastQuality = None
+        use_quality = True
+        last_quality = None
+
+        root_dir_list = []
 
         for curShow in showList:
-            if usePaused:
-                if lastPaused == None:
-                    lastPaused = curShow.paused
-                elif lastPaused != curShow.paused:
-                    usePaused = True
+            
+            cur_root_dir = ek.ek(os.path.dirname, curShow._location)
+            if cur_root_dir not in root_dir_list:
+                root_dir_list.append(cur_root_dir) 
+            
+            if use_paused:
+                if last_paused == None:
+                    last_paused = curShow.paused
+                elif last_paused != curShow.paused:
+                    use_paused = True
 
-            if useSeasonfolders:
-                if lastSeasonfolders == None:
-                    lastSeasonfolders = curShow.seasonfolders
-                elif lastSeasonfolders != curShow.seasonfolders:
-                    useSeasonfolders = True
+            if use_season_folders:
+                if last_season_folders == None:
+                    last_season_folders = curShow.seasonfolders
+                elif last_season_folders != curShow.seasonfolders:
+                    use_season_folders = True
 
-            if useQuality:
-                if lastQuality == None:
-                    lastQuality = curShow.quality
-                elif lastQuality != curShow.quality:
-                    useQuality = True
+            if use_quality:
+                if last_quality == None:
+                    last_quality = curShow.quality
+                elif last_quality != curShow.quality:
+                    use_quality = True
 
         t.showList = toEdit
-        t.pausedValue = lastPaused if usePaused else False
-        t.seasonfoldersValue = lastSeasonfolders if useSeasonfolders else False
-        t.qualityValue = lastQuality if useQuality else SD
-        t.commonPath = os.path.dirname(os.path.commonprefix([x._location for x in showList]))
+        t.paused_value = last_paused if use_paused else False
+        t.season_folders_value = last_season_folders if use_season_folders else False
+        t.quality_value = last_quality if use_quality else SD
+        t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, paused=None, seasonfolders=None, anyQualities=[], bestQualities=[],
-                       oldCommonPath=None, newCommonPath=None, toEdit=None):
+    def massEditSubmit(self, edit_paused=False, paused=None, edit_season_folders=False, season_folders=None,
+                       edit_quality=False, anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
+
+        edit_paused = True if edit_paused == 'on' else False
+        edit_season_folders = True if edit_season_folders == 'on' else False
+        edit_quality = True if edit_quality == 'on' else False
+
+        dir_map = {}
+        for cur_arg in kwargs:
+            if not cur_arg.startswith('orig_root_dir_'):
+                continue
+            which_index = cur_arg.replace('orig_root_dir_', '')
+            end_dir = kwargs['new_root_dir_'+which_index]
+            dir_map[kwargs[cur_arg]] = end_dir
 
         showIDs = toEdit.split("|")
         errors = []
@@ -302,12 +321,23 @@ class Manage:
             showObj = helpers.findCertainShow(sickbeard.showList, int(curShow))
             if not showObj:
                 continue
-            if oldCommonPath:
-                newLocation = showObj._location.replace(oldCommonPath, newCommonPath)
-            else:
-                newLocation = ek.ek(os.path.join, newCommonPath, showObj._location)
 
-            curErrors += Home().editShow(curShow, newLocation, anyQualities, bestQualities, seasonfolders, paused, True)
+            cur_root_dir = ek.ek(os.path.dirname, showObj._location)
+            cur_show_dir = ek.ek(os.path.basename, showObj._location)
+            if cur_root_dir in dir_map and cur_root_dir != dir_map[cur_root_dir]:
+                new_show_dir = ek.ek(os.path.join, dir_map[cur_root_dir], cur_show_dir)
+                logger.log(u"For show "+showObj.name+" changing dir from "+showObj._location+" to "+new_show_dir)
+            else:
+                new_show_dir = showObj._location
+            
+            if not edit_paused:
+                paused = showObj.paused
+            if not edit_season_folders:
+                season_folders = showObj.seasonfolders
+            if not edit_quality:
+                anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
+            
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, season_folders, paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors))
@@ -1768,7 +1798,8 @@ class Home:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
 
-            if showObj.seasonfolders != seasonfolders:
+            if bool(showObj.seasonfolders) != bool(seasonfolders):
+                logger.log(str(showObj.seasonfolders)+" != "+str(seasonfolders))
                 showObj.seasonfolders = seasonfolders
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)
@@ -1781,7 +1812,8 @@ class Home:
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
-                if not os.path.isdir(location):
+                logger.log(os.path.normpath(showObj._location)+" != "+os.path.normpath(location))
+                if not ek.ek(os.path.isdir, location):
                     errors.append("New location <tt>%s</tt> does not exist" % location)
 
                 # don't bother if we're going to update anyway
