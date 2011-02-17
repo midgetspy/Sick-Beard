@@ -1,0 +1,49 @@
+#import sickbeard
+#import datetime
+#from sickbeard import common
+#set global $title="Episode Overview"
+
+#set global $sbPath=".."
+
+<!--#set global $topmenu="manage"#-->
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+#if not $whichStatus:
+
+<form action="$sbRoot/manage/episodeStatuses" method="GET">
+Manage all episodes with status <select name="whichStatus">
+#for $curStatus in [$common.SKIPPED, $common.SNATCHED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]:
+<option value="$curStatus">$common.statusStrings[$curStatus]</option>
+#end for
+</select>
+<input type="submit" value="Manage"> 
+</form>
+
+#else
+
+<form action="$sbRoot/manage/changeEpisodeStatuses" method="POST">
+<h2>Shows containing $common.statusStrings[$int($whichStatus)] episodes</h2>
+<br/ >
+
+Set checked shows/episodes to <select name="whichStatus">
+#set $statusList = [$common.SKIPPED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]
+#$statusList.remove($int($whichStatus))
+#for $curStatus in $statusList:
+<option value="$curStatus">$common.statusStrings[$curStatus]</option>
+#end for
+</select>
+<input type="submit" value="Go">
+<br />
+<br />
+<br />
+
+#for $cur_tvdb_id in $ep_counts:
+$show_names[$cur_tvdb_id] ($ep_counts[$cur_tvdb_id]) <input type="checkbox" id="$cur_tvdb_id" name="$cur_tvdb_id-all" checked><br />
+<br />
+#end for
+</form>
+
+#end if
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

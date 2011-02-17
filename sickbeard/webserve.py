@@ -189,6 +189,55 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
+    def episodeStatuses(self, whichStatus=None):
+
+        if whichStatus:
+            whichStatus = int(whichStatus)
+
+        t = PageTemplate(file="manage_episodeStatuses.tmpl")
+        t.submenu = ManageMenu
+        t.whichStatus = whichStatus
+
+        # if we have no status then this is as far as we need to go
+        if not whichStatus:
+            return _munge(t)
+        
+        myDB = db.DBConnection();
+        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN (?) AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", [whichStatus])
+
+        ep_counts = {}
+        show_names = {}
+        for cur_status_result in status_results:
+            cur_tvdb_id = int(cur_status_result["tvdb_id"])
+            if cur_tvdb_id not in ep_counts:
+                ep_counts[cur_tvdb_id] = 1
+            else:
+                ep_counts[cur_tvdb_id] += 1
+        
+            show_names[cur_tvdb_id] = cur_status_result["show_name"]
+        
+        t.show_names = show_names
+        t.ep_counts = ep_counts
+        return _munge(t)
+
+    @cherrypy.expose
+    def changeEpisodeStatuses(self, whichStatus, *args, **kwargs):
+        
+        for arg in kwargs:
+            tvdb_id, what = arg.split('-')
+            
+            val = 1 if arg == 'on' else 0
+            
+            if what == 'all' and val:
+                logger.log(u"Setting all episodes for show "+str(tvdb_id)+" to status "+str(whichStatus))
+            elif val:
+                season, episode = what.split('x')
+                logger.log(u"Setting episode "+str(what)+" for show "+str(tvdb_id)+" to status "+str(whichStatus)) 
+                
+        
+        redirect('/manage/episodeStatuses')
+
+    @cherrypy.expose
     def backlogShow(self, tvdb_id):
         
         show_obj = helpers.findCertainShow(sickbeard.showList, int(tvdb_id))
