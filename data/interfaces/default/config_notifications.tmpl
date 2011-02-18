@@ -324,7 +324,7 @@
                     </fieldset>
                 </div><!-- /component-group -->
 
- 		<div id="core-component-group5" class="component-group clearfix">
+                 <div id="core-component-group5" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Notifo</h3>
@@ -389,6 +389,47 @@
 
                 </div>
 
+
+                <div id="core-component-group6" class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3>Libnotify</h3>
+                        <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_libnotify" id="use_libnotify" #if $sickbeard.USE_LIBNOTIFY then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_libnotify">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send libnotify notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_libnotify">
+                        <div class="field-pair">
+                            <input type="checkbox" name="libnotify_notify_onsnatch" id="libnotify_notify_onsnatch" #if $sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="libnotify_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="libnotify_notify_ondownload" id="libnotify_notify_ondownload" #if $sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="libnotify_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
+                        <input type="button" value="Test Libnotify" id="testLibnotify" />
+                        <input type="submit" value="Save Changes" />
+
+                        </div><!-- /content_use_libnotify -->
+
+                    </fieldset>
+                </div><!-- /component-group -->
 
             <br/><input type="submit" value="Save Changes" /><br/>
 

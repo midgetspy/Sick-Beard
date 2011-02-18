@@ -939,7 +939,8 @@ class ConfigNotifications:
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
-			  use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None):
+                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
+                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None):
 
         results = []
 
@@ -1049,11 +1050,15 @@ class ConfigNotifications:
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
 
-	sickbeard.USE_NOTIFO = use_notifo
-	sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
-	sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
+        sickbeard.USE_NOTIFO = use_notifo
+        sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
+        sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
         sickbeard.NOTIFO_USERNAME = notifo_username
         sickbeard.NOTIFO_APISECRET = notifo_apisecret
+
+        sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
+        sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
+        sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
 
         sickbeard.save_config()
 
@@ -1568,8 +1573,8 @@ class Home:
         result = notifiers.notifo_notifier.test_notify(username, apisecret)
         if result:
             return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
-	else:
-	    return "Error sending Notifo notification"
+        else:
+            return "Error sending Notifo notification"
 
     @cherrypy.expose
     def twitterStep1(self):
@@ -1599,6 +1604,14 @@ class Home:
             return "Test notice sent successfully to "+urllib.unquote_plus(host)
         else:
             return "Test notice failed to "+urllib.unquote_plus(host)
+
+    @cherrypy.expose
+    def testLibnotify(self):
+        if notifiers.libnotify_notifier.test_notify():
+            return "Tried sending desktop notification via libnotify"
+        else:
+            return notifiers.libnotify.diagnose()
+
 
     @cherrypy.expose
     def shutdown(self):

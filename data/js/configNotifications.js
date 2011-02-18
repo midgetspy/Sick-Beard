@@ -34,7 +34,13 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testNotifo", {'username': notifo_username, 'apisecret': notifo_apisecret},
         function (data){ document.getElementById('testNotifo-result').innerHTML = data; });
     });
-    
+
+    $('#testLibnotify').click(function(){
+        $('#testLibnotify-result').html(loading);
+        $.get("$sbRoot/home/testLibnotify",
+        function(message){ document.getElementById('testLibnotify-result').innerHTML = message; });
+    });
+  
     $('#twitterStep1').click(function(){
         document.getElementById('testTwitter-result').innerHTML = loading;
         var twitter1_result = $.get(sbRoot+"/home/twitterStep1", function (data){window.open(data)})
