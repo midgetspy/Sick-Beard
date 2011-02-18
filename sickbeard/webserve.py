@@ -1841,7 +1841,6 @@ class Home:
             showObj.quality = newQuality
 
             if bool(showObj.seasonfolders) != bool(seasonfolders):
-                logger.log(str(showObj.seasonfolders)+" != "+str(seasonfolders))
                 showObj.seasonfolders = seasonfolders
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)

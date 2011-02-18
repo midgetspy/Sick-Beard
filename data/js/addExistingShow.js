@@ -24,7 +24,7 @@ $(document).ready(function() {
         if (dirArr.length == 0)
             return false;
 
-        url = 'addExistingShows?promptForSettings='+ ($('#promptForSettings').attr('checked') ? 'on' : 'off');
+        url = sbRoot+'/home/addShows/addExistingShows?promptForSettings='+ ($('#promptForSettings').attr('checked') ? 'on' : 'off');
 
         url += '&shows_to_add='+dirArr.join('&shows_to_add=');
 
@@ -43,7 +43,7 @@ $(document).ready(function() {
         });
 
         $('#tableDiv').html('<img id="searchingAnim" src="'+sbRoot+'/images/loading32.gif" height="32" width="32" /> loading folders...');
-        $.get('/home/addShows/massAddTable', url, function(data) {
+        $.get(sbRoot+'/home/addShows/massAddTable', url, function(data) {
             $('#tableDiv').html(data);
             $("#addRootDirTable").tablesorter({
                 //sortList: [[1,0]],
