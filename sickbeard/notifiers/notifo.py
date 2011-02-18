@@ -4,7 +4,7 @@ import sickbeard
 from sickbeard import logger, common
 
 try:
-    import simplejson as json
+    import lib.simplejson as json
 except:
     import json
 
@@ -46,7 +46,7 @@ class NotifoNotifier:
         if sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD:
             self._notifyNotifo(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)       
 
-    def _notifyNotifo(self, message=None, username=None, apisecret=None):
+    def _notifyNotifo(self, message=None, username=None, apisecret=None, force=False):
         if not sickbeard.USE_NOTIFO and not force:
             logger.log("Notification for Notifo not enabled, skipping this notification", logger.DEBUG)
             return False
