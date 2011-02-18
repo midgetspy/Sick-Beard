@@ -9,7 +9,7 @@ $(document).ready(function(){
         $('#bestQualities').attr('disabled', !checked);
     });
 
-    $('#edit_seasonFolders').change(function(){
+    $('#edit_season_folders').change(function(){
         var checked = $(this).attr('checked');
 
         $('#season_folders').attr('disabled', !checked);

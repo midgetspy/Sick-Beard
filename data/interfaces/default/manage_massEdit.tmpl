@@ -28,9 +28,9 @@ $cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
 #end for
 <br />
 <br />
-<input type="checkbox" id="edit_quality" name="edit_quality" checked> Quality:
+<input type="checkbox" id="edit_quality" name="edit_quality"> Quality:
 #set $selected = None
-<select id="qualityPreset">
+<select id="qualityPreset" disabled>
 <option value="0">Custom
 #for $curPreset in sorted($common.qualityPresets):
 <option value="$curPreset" #if $curPreset == $quality_value then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
@@ -40,7 +40,7 @@ $cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
 <div id="customQuality">
 If I don't have the episode then download it in <b>one</b> of the following qualities:<br />
 #set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
-<select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
+<select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)" disabled>
 #for $curQuality in sorted($anyQualityList):
 <option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
 #end for
@@ -48,7 +48,7 @@ If I don't have the episode then download it in <b>one</b> of the following qual
 <br />
 Then Re-download the episodes in any or all of these qualities as they are available:<br />
 #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
-<select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
+<select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)" disabled>
 #for $curQuality in sorted($bestQualityList):
 <option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
 #end for
@@ -57,9 +57,9 @@ Then Re-download the episodes in any or all of these qualities as they are avail
 <br />
 </div>
 
-<input type="checkbox" id="edit_season_folders" name="edit_season_folders" checked> Use Season Folders: <input type="checkbox" id="season_folders" name="season_folders" #if $season_folders_value == 1 then "CHECKED" else ""#><br />
+<input type="checkbox" id="edit_season_folders" name="edit_season_folders"> Use Season Folders: <input type="checkbox" id="season_folders" name="season_folders" #if $season_folders_value == 1 then "CHECKED" else ""# disabled><br />
 <br />
-<input type="checkbox" id="edit_paused" name="edit_paused" checked> Paused: <input type="checkbox" id="paused" name="paused" #if $paused_value then "CHECKED" else ""#><br />
+<input type="checkbox" id="edit_paused" name="edit_paused"> Paused: <input type="checkbox" id="paused" name="paused" #if $paused_value then "CHECKED" else ""# disabled><br />
 <br />
 <input type="submit" value="Submit">
 </form>
