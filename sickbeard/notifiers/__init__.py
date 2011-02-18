@@ -4,7 +4,7 @@ import xbmc
 import growl
 import prowl
 import tweet
-from * import libnotify
+from . import libnotify
 import notifo
 
 from sickbeard.common import *
