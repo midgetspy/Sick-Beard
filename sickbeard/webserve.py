@@ -938,7 +938,8 @@ class ConfigNotifications:
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
+			  use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None):
 
         results = []
 
@@ -1009,6 +1010,20 @@ class ConfigNotifications:
         else:
             use_twitter = 0
 
+        if notifo_notify_onsnatch == "on":
+            notifo_notify_onsnatch = 1
+        else:
+            notifo_notify_onsnatch = 0
+
+        if notifo_notify_ondownload == "on":
+            notifo_notify_ondownload = 1
+        else:
+            notifo_notify_ondownload = 0
+        if use_notifo == "on":
+            use_notifo = 1
+        else:
+            use_notifo = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1033,6 +1048,12 @@ class ConfigNotifications:
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+
+	sickbeard.USE_NOTIFO = use_notifo
+	sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
+	sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
+        sickbeard.NOTIFO_USERNAME = notifo_username
+        sickbeard.NOTIFO_APISECRET = notifo_apisecret
 
         sickbeard.save_config()
 
@@ -1541,6 +1562,14 @@ class Home:
             return "Test prowl notice sent successfully"
         else:
             return "Test prowl notice failed"
+
+    @cherrypy.expose
+    def testNotifo(self, username=None, apisecret=None):
+        result = notifiers.notifo_notifier.test_notify(username, apisecret)
+        if result:
+            return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
+	else:
+	    return "Error sending Notifo notification"
 
     @cherrypy.expose
     def twitterStep1(self):
