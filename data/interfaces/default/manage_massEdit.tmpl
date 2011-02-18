@@ -9,55 +9,31 @@
 <!--#set global $topmenu="home"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($qualityValue))
-<script>
-\$(document).ready(function(){
-
-  if (#if $qualityValue in $common.qualityPresets then "1" else "0"#) {
-      \$('#customQuality').hide();
-  }
-
-  \$.fn.setFromPresets = function(preset) {
-      if (preset == 0) {
-        \$('#customQuality').show();
-        return
-      } else
-        \$('#customQuality').hide();
-  
-      \$('#anyQualities option').each(function(i) {
-          var result = preset & \$(this).val()
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      \$('#bestQualities option').each(function(i) {
-          var result = preset & (\$(this).val() << 16)
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      return
-  }
-  
-  \$('#qualityPreset').change(function(){
-        \$(this).setFromPresets(\$('#qualityPreset :selected').val());
-  });
-
-});
-</script>
-
+#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($quality_value))
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
+<script type="text/javascript" src="$sbRoot/js/massEdit.js"></script>
 
 <form action="massEditSubmit" method="post">
-<input type="hidden" name="toEdit" value="$showList">
-<input type="hidden" name="oldCommonPath" value="$commonPath">
-Common path prefix: <input type="text" name="newCommonPath" id="newCommonPath" value="$commonPath" size="50">*<br />
+<input type="hidden" name="toEdit" value="$showList" />
+
+<h3>Root show directories:</h3>
 <br />
-Quality:
+#for $cur_dir in $root_dir_list:
+#set $cur_index = $root_dir_list.index($cur_dir)
+$cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
+<input type="hidden" name="orig_root_dir_$cur_index" value="$cur_dir">
+<input type="text" style="display: none" name="new_root_dir_$cur_index" id="new_root_dir_$cur_index" class="new_root_dir" value="$cur_dir">
+<input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit">
+<br />
+#end for
+<br />
+<br />
+<input type="checkbox" id="edit_quality" name="edit_quality" checked> Quality:
 #set $selected = None
 <select id="qualityPreset">
 <option value="0">Custom
 #for $curPreset in sorted($common.qualityPresets):
-<option value="$curPreset" #if $curPreset == $qualityValue then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
+<option value="$curPreset" #if $curPreset == $quality_value then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
 #end for
 </select><br />
 <br />
@@ -80,8 +56,11 @@ Then Re-download the episodes in any or all of these qualities as they are avail
 <br />
 <br />
 </div>
-Use Season Folders: <input type="checkbox" name="seasonfolders" #if $seasonfoldersValue == 1 then "CHECKED" else ""#>*<br /><br />
-Paused: <input type="checkbox" name="paused" #if $pausedValue then "CHECKED" else ""#><br /><br />
+
+<input type="checkbox" id="edit_season_folders" name="edit_season_folders" checked> Use Season Folders: <input type="checkbox" id="season_folders" name="season_folders" #if $season_folders_value == 1 then "CHECKED" else ""#><br />
+<br />
+<input type="checkbox" id="edit_paused" name="edit_paused" checked> Paused: <input type="checkbox" id="paused" name="paused" #if $paused_value then "CHECKED" else ""#><br />
+<br />
 <input type="submit" value="Submit">
 </form>
 <br />

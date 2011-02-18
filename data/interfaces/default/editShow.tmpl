@@ -46,6 +46,7 @@
 Location: <input type="text" name="location" id="location" value="$show._location" size="50"><br />
 <br />
 Quality:
+#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($show.quality))
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 <br />
 <br />
