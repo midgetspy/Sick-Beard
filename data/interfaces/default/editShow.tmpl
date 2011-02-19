@@ -9,39 +9,8 @@
 <!--#set global $topmenu="home"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-#set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($show.quality))
 <script>
 \$(document).ready(function(){
-
-  if (#if $show.quality in $common.qualityPresets then "1" else "0"#) {
-      \$('#customQuality').hide();
-  }
-
-  \$.fn.setFromPresets = function(preset) {
-      if (preset == 0) {
-        \$('#customQuality').show();
-        return
-      } else
-        \$('#customQuality').hide();
-  
-      \$('#anyQualities option').each(function(i) {
-          var result = preset & \$(this).val()
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      \$('#bestQualities option').each(function(i) {
-          var result = preset & (\$(this).val() << 16)
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      return
-  }
-  
-  \$('#qualityPreset').change(function(){
-        \$(this).setFromPresets(\$('#qualityPreset :selected').val());
-  });
 
   \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data){
         var resultStr = '';
@@ -77,33 +46,12 @@
 Location: <input type="text" name="location" id="location" value="$show._location" size="50"><br />
 <br />
 Quality:
-#set $selected = None
-<select id="qualityPreset">
-<option value="0">Custom
-#for $curPreset in sorted($common.qualityPresets):
-<option value="$curPreset" #if $curPreset == $show.quality then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
-#end for
-</select><br />
-<br />
-<div id="customQuality">
-If I don't have the episode then download it in <b>one</b> of the following qualities:<br />
-#set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
-<select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
-#for $curQuality in sorted($anyQualityList):
-<option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
-#end for
-</select><br />
-<br />
-Then Re-download the episodes in any or all of these qualities as they are available:<br />
-#set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
-<select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
-#for $curQuality in sorted($bestQualityList):
-<option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
-#end for
-</select>
+#set $qualities = $common.Quality.splitQuality(int($show.quality))
+#set global $anyQualities = $qualities[0]
+#set global $bestQualities = $qualities[1]
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 <br />
 <br />
-</div>
 Language: <select name="tvdbLang" id="tvdbLangSelect"></select>
 <br />
 <br />
