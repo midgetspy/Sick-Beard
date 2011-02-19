@@ -15,11 +15,10 @@
 
 <style type="text/css">
 <!--
-.optionWrapper { width: 425px; margin-left: auto; margin-right: auto; padding: 5px; }
-.optionWrapper span.selectTitle { font-weight: 700; font-size: 14px; float: left; text-align: left; width: 175px; }
+.optionWrapper { width: 450px; margin-left: auto; margin-right: auto; padding: 6px 12px; }
+.optionWrapper span.selectTitle { float: left; font-weight: 700; font-size: 1.2em; text-align: left; width: 225px; }
 .optionWrapper div.selectChoices { float: left; width: 175px; margin-left: 25px; }
 .optionWrapper br { clear: both; }
-#customQuality h3 { margin-bottom: 5px; }
 -->
 </style>
 
@@ -27,10 +26,10 @@
 <input type="hidden" name="toEdit" value="$showList" />
 
 <div class="optionWrapper">
-    <h3>Root Directories <span class="separator">*</span></h3>
+<span class="selectTitle">Root Directories <span class="separator">*</span></span><br />
         #for $cur_dir in $root_dir_list:
         #set $cur_index = $root_dir_list.index($cur_dir)
-        <div style="padding-left: 25px; padding-bottom: 6px;">
+        <div style="padding: 6px 0 3px 25px;">
             <input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit">
             $cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
         </div>
@@ -57,7 +56,7 @@
         <div style="width: 50%; text-align: center;" class="float-left">
         <h3>Inital</h3>
             #set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
-            <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)" disabled>
+            <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
             #for $curQuality in sorted($anyQualityList):
             <option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
             #end for
@@ -66,7 +65,7 @@
         <div style="width: 50%; text-align: center;" class="float-left">
         <h3>Archive</h3>
             #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
-            <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)" disabled>
+            <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
             #for $curQuality in sorted($bestQualityList):
             <option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
             #end for
@@ -109,7 +108,7 @@
 </div>
 
 <div class="optionWrapper">
-    <br /><span class="separator" style="font-size: 1.2em;">*</span>
+    <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
 </div>
 
