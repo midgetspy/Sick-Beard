@@ -13,127 +13,114 @@
 <script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
 <script type="text/javascript" src="$sbRoot/js/massEdit.js"></script>
 
+<style type="text/css">
+<!--
+.optionWrapper { width: 425px; margin-left: auto; margin-right: auto; padding: 5px; }
+.optionWrapper span.selectTitle { font-weight: 700; font-size: 14px; float: left; text-align: left; width: 175px; }
+.optionWrapper div.selectChoices { float: left; width: 175px; margin-left: 25px; }
+.optionWrapper br { clear: both; }
+#customQuality h3 { margin-bottom: 5px; }
+-->
+</style>
 
 <form action="massEditSubmit" method="post">
 <input type="hidden" name="toEdit" value="$showList" />
 
-<h3>Root show directories:</h3>
-#for $cur_dir in $root_dir_list:
-#set $cur_index = $root_dir_list.index($cur_dir)
-<input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit">
-$cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
-<input type="hidden" name="orig_root_dir_$cur_index" value="$cur_dir">
-<input type="text" style="display: none" name="new_root_dir_$cur_index" id="new_root_dir_$cur_index" class="new_root_dir" value="$cur_dir">
-<br />
-#end for
-<br />
-<br />
-<input type="checkbox" id="edit_quality" name="edit_quality"> Quality:
-#set $selected = None
-<select id="qualityPreset" disabled>
-<option value="0">Custom
-#for $curPreset in sorted($common.qualityPresets):
-<option value="$curPreset" #if $curPreset == $quality_value then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
-#end for
-</select><br />
-<br />
-<div id="customQuality">
-If I don't have the episode then download it in <b>one</b> of the following qualities:<br />
-#set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
-<select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)" disabled>
-#for $curQuality in sorted($anyQualityList):
-<option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
-#end for
-</select><br />
-<br />
-Then Re-download the episodes in any or all of these qualities as they are available:<br />
-#set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
-<select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)" disabled>
-#for $curQuality in sorted($bestQualityList):
-<option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
-#end for
-</select>
-<br />
-<br />
+<div class="optionWrapper">
+    <h3>Root Directories <span class="separator">*</span></h3>
+        #for $cur_dir in $root_dir_list:
+        #set $cur_index = $root_dir_list.index($cur_dir)
+        <div style="padding-left: 25px; padding-bottom: 6px;">
+            <input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit">
+            $cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
+        </div>
+        <input type="hidden" name="orig_root_dir_$cur_index" value="$cur_dir">
+        <input type="text" style="display: none" name="new_root_dir_$cur_index" id="new_root_dir_$cur_index" class="new_root_dir" value="$cur_dir">
+        #end for
+
 </div>
 
-<input type="checkbox" id="edit_season_folders" name="edit_season_folders"> Use Season Folders: <input type="checkbox" id="season_folders" name="season_folders" #if $season_folders_value == 1 then "CHECKED" else ""# disabled><br />
-<br />
-<input type="checkbox" id="edit_paused" name="edit_paused"> Paused: <input type="checkbox" id="paused" name="paused" #if $paused_value then "CHECKED" else ""# disabled><br />
-<br />
-<input type="submit" value="Submit">
-</form>
-<br />
-<br />
-* Note: Changing the show paths or season folders value will cause all selected shows to be refreshed.<br />
-
-<br /><br /><br /><br /><br /><br />
-
-<table id="masseditTable" class="sickbeardTable" style="width: 400px;" cellspacing="1" border="0" cellpadding="0">
-  <thead><tr><th colspan="2">Mass Edit - Temp Design</th></tr></thead>
-  <tbody>
-
-  <tr>
-    <td nowrap="nowrap"><span style="font-weight: 700; font-size: 13px;">Quality: </span></td>
-    <td>
-        <select id="edit_quality2">
+<div class="optionWrapper alt">
+<span class="selectTitle">Quality</span>
+    <div class="selectChoices">
+        <select id="qualityPreset">
             <option value="keep">&lt; keep &gt;</option>
             #set $selected = None
             <option value="0">Custom
             #for $curPreset in sorted($common.qualityPresets):
-            <option value="$curPreset" #if $curPreset == $quality_value then "SELECTED" else ""#>$common.qualityPresetStrings[$curPreset]
+            <option value="$curPreset">$common.qualityPresetStrings[$curPreset]
             #end for
         </select>
-    </td>
-  </tr>
-<tr class="alt">
-    <td align="center" valign="top">
-        <b>Initial:</b><br/>
-        #set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
-        <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)" disabled>
-        #for $curQuality in sorted($anyQualityList):
-        <option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
-        #end for
-        </select>
-    </td>
-    <td align="center" valign="top">
-        <b>Archive:</b><br/>
-        #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
-        <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)" disabled>
-        #for $curQuality in sorted($bestQualityList):
-        <option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
-        #end for
-        </select>
-    </td>
-</tr>
+    </div><br />
 
-  <tr>
-    <td nowrap="nowrap"><span style="font-weight: 700; font-size: 13px;">Season Folders: </span></td>
-    <td>
+    <div id="customQuality">
+        <div style="width: 50%; text-align: center;" class="float-left">
+        <h3>Inital</h3>
+            #set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
+            <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)" disabled>
+            #for $curQuality in sorted($anyQualityList):
+            <option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
+            #end for
+            </select>
+        </div>
+        <div style="width: 50%; text-align: center;" class="float-left">
+        <h3>Archive</h3>
+            #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
+            <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)" disabled>
+            #for $curQuality in sorted($bestQualityList):
+            <option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
+            #end for
+            </select>
+        </div>
+    <br />
+    </div>
+</div>
+
+<div class="optionWrapper">
+<span class="selectTitle">Season Folders <span class="separator">*</span></span>
+    <div class="selectChoices">
         <select id="edit_season_folders2">
             <option value="keep">&lt; keep &gt;</option>
             <option value="enable">enable</option>
             <option value="disable">disable</option>
         </select>
-    </td>
-  </tr>
+    </div><br />
+</div>
 
-  <tr>
-    <td nowrap="nowrap"><span style="font-weight: 700; font-size: 13px;">Paused: </span></td>
-    <td>
+<div class="optionWrapper alt">
+    <span class="selectTitle">Metadata Language</span>
+    <div class="selectChoices">
+        <select id="edit_lang2">
+            <option value="keep">&lt; keep &gt;</option>
+            <option value="en">en</option>
+        </select>
+    </div><br />
+</div>
+
+<div class="optionWrapper">
+    <span class="selectTitle">Paused</span>
+    <div class="selectChoices">
         <select id="edit_paused2">
             <option value="keep">&lt; keep &gt;</option>
             <option value="enable">enable</option>
             <option value="disable">disable</option>
         </select>
-    </td>
-  </tr>
-  
-  </tbody>
-</table>
+    </div><br />
+</div>
 
+<div class="optionWrapper">
+    <br /><span class="separator" style="font-size: 1.2em;">*</span>
+    Changing these settings will cause the selected shows to be refreshed.
+</div>
 
-<br /><br /><br /><br /><br /><br />
+<div class="optionWrapper" style="text-align: center;">
+    <input type="reset" value="Reset">
+    <input type="submit" value="Submit"><br />
+</div>
+
+</form>
+<br />
+
 <script type="text/javascript" charset="utf-8">
     jQuery('#location').fileBrowser({ title: 'Select Show Location' });
 </script>
