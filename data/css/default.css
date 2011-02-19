@@ -73,7 +73,6 @@ color:#57442B;
 /* --------------------------------------------- */
 
 table {
-font-size:9pt;
 margin:0;
 }
 
@@ -295,6 +294,9 @@ background-color:#efefef;
 padding:10px;
 border:1px solid #DFDEDE;
 margin:10px;
+}
+div#summary tr {
+line-height: 17px;
 }
 
 #MainMenu {
