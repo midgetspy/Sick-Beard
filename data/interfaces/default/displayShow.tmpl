@@ -26,28 +26,14 @@
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 
-<script>
-\$(document).ready(function(){
-    \$("#prevShow").click(function(){
-      \$('#pickShow option:selected').prev('option').attr('selected', 'selected');
-      \$("#pickShow").change();
-    });
-
-    \$("#nextShow").click(function(){
-      \$('#pickShow option:selected').next('option').attr('selected', 'selected');
-      \$("#pickShow").change();
-    });
-});
-</script>
-
 <div class="align-left"><b>Change Show:</b>
-<div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" /></div>
+<div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
 <select id="pickShow">
 #for $curShow in $sortedShowList:
 <option value="$curShow.tvdbid" #if $curShow == $show then "SELECTED" else ""#>$curShow.name
 #end for
 </select>
-<div class="navShow"><img id="nextShow" width="16" height="18" src="$sbRoot/images/next.gif" alt="&gt;&gt;" /></div>
+<div class="navShow"><img id="nextShow" width="16" height="18" src="$sbRoot/images/next.gif" alt="&gt;&gt;" title="Next Show" /></div>
 </div>
 
 <div id="summary" class="align-left">

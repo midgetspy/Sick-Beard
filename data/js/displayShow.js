@@ -8,6 +8,16 @@ $(document).ready(function(){
                }
    });
 
+    $("#prevShow").click(function(){
+        $('#pickShow option:selected').prev('option').attr('selected', 'selected');
+        $("#pickShow").change();
+    });
+
+    $("#nextShow").click(function(){
+        $('#pickShow option:selected').next('option').attr('selected', 'selected');
+        $("#pickShow").change();
+    });
+
     $('#changeStatus').click(function(){
   
         var sbRoot = $('#sbRoot').val()
