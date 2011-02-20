@@ -63,7 +63,8 @@ $(document).ready(function(){
     var whichBulkCheck = $(bulkCheck).attr('id');
 
     $('.'+whichBulkCheck).each(function(){
-      this.checked = !this.checked 
+        if (!this.disabled)
+            this.checked = !this.checked 
     });
   });
   

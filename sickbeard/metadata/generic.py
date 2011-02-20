@@ -591,3 +591,45 @@ class GenericMetadata():
                 continue
 
         return result
+
+    def retrieveShowMetadata(self, dir):
+    
+        empty_return = (None, None)
+    
+        metadata_path = ek.ek(os.path.join, dir, self._show_file_name)
+    
+        if not ek.ek(os.path.isdir, dir) or not ek.ek(os.path.isfile, metadata_path):
+            logger.log(u"Can't load the metadata file from "+repr(metadata_path)+", it doesn't exist", logger.DEBUG)
+            return empty_return
+
+        logger.log(u"Loading show info from metadata file in "+dir, logger.DEBUG)
+    
+        try:
+            xmlFileObj = ek.ek(open, metadata_path, 'r')
+            showXML = etree.ElementTree(file = xmlFileObj)
+    
+            if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
+                logger.log(u"Invalid info in tvshow.nfo (missing name or id):" \
+                    + str(showXML.findtext('title')) + " " \
+                    + str(showXML.findtext('tvdbid')) + " " \
+                    + str(showXML.findtext('id')))
+                return empty_return
+    
+            name = showXML.findtext('title')
+            if showXML.findtext('tvdbid') != None:
+                tvdb_id = int(showXML.findtext('tvdbid'))
+            elif showXML.findtext('id'):
+                tvdb_id = int(showXML.findtext('id'))
+            else:
+                logger.log(u"Empty <id> or <tvdbid> field in NFO, unable to find an ID", logger.WARNING)
+                return empty_return
+    
+            if not tvdb_id:
+                logger.log(u"Invalid tvdb id ("+str(tvdb_id)+"), not using metadata file", logger.WARNING)
+                return empty_return
+    
+        except (exceptions.NoNFOException, SyntaxError, ValueError), e:
+            logger.log(u"There was an error parsing your existing metadata file: " + str(e), logger.WARNING)
+            return empty_return
+    
+        return (tvdb_id, name)

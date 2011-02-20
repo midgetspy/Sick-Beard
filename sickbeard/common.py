@@ -183,7 +183,7 @@ Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in 
 
 HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
-ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
+ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY, Quality.UNKNOWN], [])
 BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
 
 qualityPresets = (SD, HD, ANY)
@@ -255,7 +255,6 @@ sceneExceptions = {72546: ['CSI'],
                    75692: ['Law & Order: SVU'],
                    71489: ['Law & Order: Criminal Intent', 'Law & Order: CI'],
                    79590: ['Dancing With The Stars (US)'],
-                   71256: ['The Daily Show'],
                    73387: ['Craig Ferguson'],
                    85355: ['Jimmy Fallon'],
                    75088: ['David Letterman'],
@@ -284,6 +283,9 @@ sceneExceptions = {72546: ['CSI'],
                    81563: ['Border Security', 'Border Security Australia\'s Frontline'],
                    172381: ['Silent Library (US)'],
                    131791: ['Sci-Fi Science'],
+                   80646: ['Frontline (US)', 'Frontline'],
+                   189931: ['RBT (AU)'],
+                   73255: ['House', 'House M D'],
                    }
 
 countryList = {'Australia': 'AU',

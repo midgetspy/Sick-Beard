@@ -37,7 +37,7 @@ class NZBsRUSProvider(generic.NZBProvider):
 
 		self.cache = NZBsRUSCache(self)
 
-		self.url = 'http://www.nzbsrus.com/'
+		self.url = 'https://www.nzbsrus.com/'
 
 	def isEnabled(self):
 		return sickbeard.NZBSRUS

@@ -181,12 +181,13 @@ $(document).ready(function(){
 
     $(this).showHideProviders();
 
-        $("#provider_order_list").sortable({
-            placeholder: 'ui-state-highlight',
-            update: function (event, ui) {
-                $(this).refreshProviderList();
-            }
-        });
-        $("#provider_order_list").disableSelection();
+    $("#provider_order_list").sortable({
+        placeholder: 'ui-state-highlight',
+        update: function (event, ui) {
+            $(this).refreshProviderList();
+        }
+    });
+    
+    $("#provider_order_list").disableSelection();
 
 });

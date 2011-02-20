@@ -69,7 +69,7 @@ class NewzbinProvider(generic.NZBProvider):
 
         self.cache = NewzbinCache(self)
 
-        self.url = 'http://www.newzbin.com/'
+        self.url = 'https://www.newzbin.com/'
 
         self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
 
@@ -189,7 +189,7 @@ class NewzbinProvider(generic.NZBProvider):
 
 
     def getIDFromURL(self, url):
-        id_regex = 'http://www\.newzbin\.com/browse/post/(\d+)/'
+        id_regex = re.escape(self.url) + 'browse/post/(\d+)/'
         id_match = re.match(id_regex, url)
         if not id_match:
             return None
@@ -212,7 +212,7 @@ class NewzbinProvider(generic.NZBProvider):
 
         params = urllib.urlencode({"username": sickbeard.NEWZBIN_USERNAME, "password": sickbeard.NEWZBIN_PASSWORD, "reportid": id})
         try:
-            urllib.urlretrieve("http://www.newzbin.com/api/dnzb/", fileName, data=params)
+            urllib.urlretrieve(self.url+"api/dnzb/", fileName, data=params)
         except exceptions.NewzbinAPIThrottled:
             logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
             self.downloadResult(nzb)
@@ -300,7 +300,7 @@ class NewzbinProvider(generic.NZBProvider):
                 'ps_rb_source': 3008,
                 'ps_rb_video_format': 3082257,
                 'ps_rb_language': 4096,
-                'sort': 'ps_edit_date',
+                'sort': 'date',
                 'order': 'desc',
                 'u_post_results_amt': 50,
                 'feed': 'rss',
@@ -314,7 +314,7 @@ class NewzbinProvider(generic.NZBProvider):
 
         params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
 
-        url = "http://www.newzbin.com/search/?%s" % urllib.urlencode(params)
+        url = self.url + "search/?%s" % urllib.urlencode(params)
         logger.log("Newzbin search URL: " + url, logger.DEBUG)
 
         data = self.getURL(url)

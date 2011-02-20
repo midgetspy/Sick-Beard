@@ -26,8 +26,8 @@ margin:5px;
 padding:7px;
 }
 legend {
-color:#000;
-font-weight:700;
+font:bold 16px Arial;
+color: #57442B;
 }
 div.EntryBlock,div.EntryBlock form {
 display:inline;
@@ -350,3 +350,35 @@ font-weight:700;
 padding-right:10px;
 padding-bottom:1px;
 }
+
+/* for the add new/existing show */
+.alt { background-color: #efefef; }
+div.field-pair{padding:0.75em 0;}
+div.field-pair input{float:left;}
+label.nocheck,div.providerDiv,div #customQuality{padding-left:23px;}
+label span.component-title{font-size:1.1em;font-weight:700;float:left;width:165px; padding-left: 6px; margin-right:10px;}
+label span.component-desc{font-size:.9em; float:left;}
+div.field-pair select{font-size:1em;border:1px solid #d4d0c8;}
+div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
+
+ul#rootDirStaticList { width: 90%; text-align: left; margin-left: auto; margin-right: auto; padding-left: 0; }
+ul#rootDirStaticList li{ list-style: none outside none; margin: 2px; padding: 4px 5px 4px 5px; cursor: pointer; }
+
+#displayText {
+background-color:#efefef;
+padding:8px;
+border:1px solid #DFDEDE;
+font-size:1.1em;
+overflow: hidden;
+}
+
+div#addShowPortal {
+margin-left: auto; 
+margin-right: auto;
+width: 600px;
+}
+div#addShowPortal  button { padding: 10px; width: 450px; }
+div#addShowPortal  button div.button img{ float: left; margin: 25px 25px 25px 10px; vertical-align: middle;}
+div#addShowPortal  button .buttontext { float: right; text-align: left; width: 350px; }
+
+#rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
