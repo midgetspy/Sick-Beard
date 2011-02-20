@@ -2165,8 +2165,8 @@ class WebInterface:
             im = im.convert('RGB')
         im = im.resize(size, Image.ANTIALIAS)
         buffer = StringIO()
-        im.save(buffer, 'PNG')
-        cherrypy.response.headers['Content-Type'] = 'image/png'
+        im.save(buffer, 'JPEG', quality=98, optimize=True)
+        cherrypy.response.headers['Content-Type'] = 'image/jpeg'
         cherrypy.response.headers['Etag'] = etag
         cherrypy.response.headers['Cache-Control'] = 'max-age=86400' # one day
         return buffer.getvalue()
