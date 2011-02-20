@@ -251,6 +251,7 @@ background-color: #fff;
 color:#000;
 }
 
+#checkboxControls label { white-space:nowrap; }
 tr.unaired,span.unaired {
 background-color:#F5F1E4;
 padding:2px;
@@ -384,3 +385,5 @@ div#addShowPortal  button div.button img{ float: left; margin: 25px 25px 25px 10
 div#addShowPortal  button .buttontext { float: right; text-align: left; width: 350px; }
 
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
+
+.hover { background-color: #cfcfcf !important; cursor: pointer; }
