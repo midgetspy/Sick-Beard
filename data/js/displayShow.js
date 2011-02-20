@@ -1,5 +1,13 @@
 $(document).ready(function(){
 
+   $("table.sickbeardTable tr").click( function(event) {
+               if (event.target.type !== "checkbox") {
+                  $(this).find("input:checkbox.epCheck").each(function(){
+                     $(this).attr("checked", !$(this).attr("checked"));
+                  });
+               }
+   });
+
     $('#changeStatus').click(function(){
   
         var sbRoot = $('#sbRoot').val()

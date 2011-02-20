@@ -109,7 +109,7 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
-  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Action</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -142,7 +142,7 @@ $epLoc
     <td>$statusStrings[int($epResult["status"])]</td>
     <td align="center">
     #if int($epResult["season"]) != 0: 
-    <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Search" /></a>
+    <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
     #end if
     </td>
    </tr>
