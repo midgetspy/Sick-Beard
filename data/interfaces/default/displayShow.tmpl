@@ -9,8 +9,10 @@
 <!--#set global $topmenu="manageShows"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
+
 <div class="h2footer align-right" style="margin-left:250px; line-height: 20px;">
-    <b>Jump to Season:</b>
+    <b>Season:</b>
     #for $seasonNum in $seasonResults:
         #if int($seasonNum["season"]) == 0 then "<span class=\"separator\">|</span> " else ""#
         <a href="#season-$seasonNum["season"]">
@@ -105,6 +107,7 @@ All other statuses will automatically update to the appropriate "Downloaded ..."
     #if int($epResult["season"]) != $curSeason:
   <tr><td colspan="9"></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
+    <a name="season-$epResult["season"]"></a>
     <td colspan="9">
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
