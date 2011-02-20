@@ -387,3 +387,5 @@ div#addShowPortal  button .buttontext { float: right; text-align: left; width: 3
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
 
 .hover { background-color: #cfcfcf !important; cursor: pointer; }
+
+.navShow { display: inline; cursor: pointer; vertical-align: top; }
