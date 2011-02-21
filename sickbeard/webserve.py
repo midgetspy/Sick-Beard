@@ -493,9 +493,22 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, defaultQuality):
+    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
+
+        if anyQualities:
+            anyQualities = anyQualities.split(',')
+        else:
+            anyQualities = []
+
+        if bestQualities:
+            bestQualities = bestQualities.split(',')
+        else:
+            bestQualities = []
+
+        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+        
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
-        sickbeard.QUALITY_DEFAULT = int(defaultQuality)
+        sickbeard.QUALITY_DEFAULT = int(newQuality)
         if defaultSeasonFolders == "on":
             defaultSeasonFolders = 1
         else:
