@@ -30,6 +30,24 @@ from sickbeard import logger
 
 db_lock = threading.Lock()
 
+
+class DBResult(list):
+	'''
+	Sub-class of list which stores some SQL-query metadata along with the query
+	results.  The column_names attribute contains string versions of the column
+	names of the result table which can be used to perform dictionary lookup on
+	the sqlite3.Row objects the DBResult contains.
+	'''
+	def __init__(self, L, description):
+		super(DBResult, self).__init__(L)
+		self.column_names = list(col[0] for col in description)
+
+	def __iadd__(self, other):
+		if self.column_names != other.column_names:
+			raise ValueError("Incompatible columns")
+		return super(DBResult, self).__iadd__(self, other)
+
+
 class DBConnection:
 	def __init__(self, dbFileName="sickbeard.db"):
 
@@ -37,28 +55,28 @@ class DBConnection:
 
 		self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, self.dbFileName), 20)
 		self.connection.row_factory = sqlite3.Row
+		self.cursor = self.connection.cursor()
 
  	def action(self, query, args=None):
 
  		with db_lock:
 
-			if query == None:
-				return
+			if query is None:
+				return None
 	
-			sqlResult = None
 			attempt = 0
 	
 			while attempt < 5:
 				try:
 					if args == None:
 						logger.log(self.dbFileName+": "+query, logger.DEBUG)
-						sqlResult = self.connection.execute(query)
+						sqlResult = self.cursor.execute(query)
 					else:
 						logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
-						sqlResult = self.connection.execute(query, args)
+						sqlResult = self.cursor.execute(query, args)
 					self.connection.commit()
 					# get out of the connection attempt loop since we were successful
-					break
+					return sqlResult
 				except sqlite3.OperationalError, e:
 					if "unable to open database file" in str(e) or "database is locked" in str(e):
 						logger.log(u"DB error: "+str(e).decode('utf-8'), logger.WARNING)
@@ -71,17 +89,17 @@ class DBConnection:
 					logger.log(u"Fatal error executing query: " + str(e), logger.ERROR)
 					raise
 	
-			return sqlResult
+			return None
 
 
 	def select(self, query, args=None):
 
 		sqlResults = self.action(query, args).fetchall()
 
-		if sqlResults == None:
-			return []
+		if sqlResults is None:
+			sqlResults = []
 
-		return sqlResults
+		return DBResult(sqlResults, self.cursor.description)
 
 	def upsert(self, tableName, valueDict, keyDict):
 
@@ -170,3 +188,5 @@ class SchemaUpgrade (object):
 		curVersion = self.checkDBVersion()
 		self.connection.action("UPDATE db_version SET db_version = ?", [curVersion+1])
 		return curVersion+1
+
+# vim: ft=python noexpandtab

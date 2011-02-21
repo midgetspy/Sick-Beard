@@ -2231,7 +2231,7 @@ class WebInterface:
         cache_obj = image_cache.ImageCache()
         coming_episodes = []
         for row in sql_results:
-            ep = dict(row)
+            ep = dict((k, row[k]) for k in sql_results.column_names)
             ep['poster_exists'] = ek.ek(os.path.exists, cache_obj.poster_path(row['showid']))
             ep['banner_exists'] = ek.ek(os.path.exists, cache_obj.banner_path(row['showid']))
             coming_episodes.append(ep)
