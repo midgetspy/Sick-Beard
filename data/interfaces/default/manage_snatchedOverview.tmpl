@@ -1,0 +1,67 @@
+#import sickbeard
+#import datetime
+#from sickbeard.common import *
+#set global $title="Snatched Overview"
+
+#set global $sbPath=".."
+
+<!--#set global $topmenu="manage"#-->
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<input type="hidden" id="sbRoot" value="$sbRoot">
+
+<script type="text/javascript" src="$sbRoot/js/snatchedOverview.js"></script>
+
+<div id='dialog'></div>
+
+#set $totalSnatched = 0
+
+#for $curShow in $sickbeard.showList:
+#set $totalSnatched = $totalSnatched + $showCounts[$curShow.tvdbid]
+#end for
+
+<div class="h2footer align-right">
+    <span style="margin-right: 1em;" id="changeStatus">Mark selected as wanted</span>
+    <span style="margin-right: 1em;" id="globalCheck">Select all episodes</span>
+    <span style="margin-right: 1em;" id="clearAll">Clear selection</span>
+    <span class="good" style="white-space:nowrap;">Snatched: <b>$totalSnatched</b></span>
+</div><br/>
+
+<table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
+
+#for $curShow in sorted($sickbeard.showList, key=operator.attrgetter('name')):
+
+#if $showCounts[$curShow.tvdbid] == 0:
+#continue
+#end if
+
+  <tr class="seasonheader">
+    <td colspan="3">
+        <br/><h2 style="display: inline; position:absolute;"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></h2>
+        <div class="float-right">
+            <span class="good" style="white-space:nowrap;">Snatched: <b>$showCounts[$curShow.tvdbid]</b></span>
+        </div>
+  </tr>
+
+  <tr><th width="1%"><input type="checkbox" class="showCheck" id="$curShow.tvdbid"></th><th>Episode</th><th>Name</th><th>Airdate</th></tr>
+
+#for $curResult in $showSQLResults[$curShow.tvdbid]:
+#set $whichStr = $str($curResult["season"]) + "x" + $str($curResult["episode"])
+#if $whichStr not in $showCats[$curShow.tvdbid]:
+#continue
+#end if
+#set $overview = $showCats[$curShow.tvdbid][$whichStr]
+  <tr class="good">
+    <td><input type="checkbox" class="epCheck" id="$curShow.tvdbid/$whichStr"></td>
+    <td align="center">$whichStr</td>
+    <td>$curResult["name"]</td>
+    <td align="center" nowrap="nowrap">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
+  </tr>
+
+#end for
+
+#end for  
+
+
+</table><br /><br />

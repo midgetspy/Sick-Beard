@@ -128,6 +128,7 @@ def _getEpisode(show, season, episode):
 
 ManageMenu = [
             { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
+            { 'title': 'Snatched Overview', 'path': 'manage/snatchedOverview' },
             { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
            #{ 'title': 'Episode Overview', 'path': 'manage/episodeOverview' },
             ]
@@ -227,6 +228,44 @@ class Manage:
                 curEpCat = curShow.getOverview(int(curResult["status"]))
                 epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
                 epCounts[curEpCat] += 1
+
+            showCounts[curShow.tvdbid] = epCounts
+            showCats[curShow.tvdbid] = epCats
+            showSQLResults[curShow.tvdbid] = sqlResults
+
+        t.showCounts = showCounts
+        t.showCats = showCats
+        t.showSQLResults = showSQLResults
+
+        return _munge(t)
+
+    @cherrypy.expose
+    def snatchedOverview(self):
+
+        t = PageTemplate(file="manage_snatchedOverview.tmpl")
+        t.submenu = ManageMenu
+
+        myDB = db.DBConnection()
+
+        showCounts = {}
+        showCats = {}
+        showSQLResults = {}
+
+        for curShow in sickbeard.showList:
+
+            epCounts = 0
+            epCats = {}
+
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC", [curShow.tvdbid])
+
+            for curResult in sqlResults:
+
+                if int(curResult["status"]) not in Quality.SNATCHED + Quality.SNATCHED_PROPER:
+                  continue
+
+                curEpCat = curShow.getOverview(int(curResult["status"]))
+                epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
+                epCounts += 1
 
             showCounts[curShow.tvdbid] = epCounts
             showCats[curShow.tvdbid] = epCats
