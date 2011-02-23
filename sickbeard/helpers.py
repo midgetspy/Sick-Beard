@@ -98,10 +98,8 @@ def sanitizeFileName (name):
     >>> sanitizeFileName('a"b')
     'ab'
     '''
-    for x in "\\/*":
-        name = name.replace(x, "-")
-    for x in ":\"<>|?":
-        name = name.replace(x, "")
+    name = re.sub(r"[\\/*]", "-", name)
+    name = re.sub(r'[:"<>|?]', "", name)
     return name
 
 
