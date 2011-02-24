@@ -356,13 +356,13 @@ padding-bottom:1px;
 
 /* for the add new/existing show */
 .alt { background-color: #efefef; }
-div.field-pair{padding:0.75em 0;}
-div.field-pair input{float:left;}
-label.nocheck,div.providerDiv,div #customQuality{padding-left:23px;}
-label span.component-title{font-size:1.1em;font-weight:700;float:left;width:165px; padding-left: 6px; margin-right:10px;}
-label span.component-desc{font-size:.9em; float:left;}
-div.field-pair select{font-size:1em;border:1px solid #d4d0c8;}
-div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
+#tabs div.field-pair, .stepDiv div.field-pair{padding:0.75em 0;}
+#tabs div.field-pair input, .stepDiv div.field-pair input{float:left;}
+#tabs label.nocheck,   #tabs div.providerDiv,  #tabs  div #customQuality, .stepDiv label.nocheck,.stepDiv div.providerDiv,.stepDiv div #customQuality{padding-left:23px;}
+#tabs  label span.component-title, .stepDiv label span.component-title{font-size:1.1em;font-weight:700;float:left;width:165px; padding-left: 6px; margin-right:10px;}
+#tabs label span.component-desc, .stepDiv label span.component-desc{font-size:.9em; float:left;}
+#tabs div.field-pair select, .stepDiv div.field-pair select{font-size:1em;border:1px solid #d4d0c8;}
+#tabs div.field-pair select option, .stepDiv div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
 
 ul#rootDirStaticList { width: 90%; text-align: left; margin-left: auto; margin-right: auto; padding-left: 0; }
 ul#rootDirStaticList li{ list-style: none outside none; margin: 2px; padding: 4px 5px 4px 5px; cursor: pointer; }
