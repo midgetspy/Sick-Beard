@@ -153,7 +153,7 @@ class NZBMatrixCache(tvcache.TVCache):
                    'english': 1,
                    'ssl': 1,
                    'scenename': 1,
-                   'subcat': '6,41'}
+                   'subcat': '6,41,9,53'}
 
         url += urllib.urlencode(urlArgs)
 
