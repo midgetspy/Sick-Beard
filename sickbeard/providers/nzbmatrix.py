@@ -69,7 +69,7 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "page": "download",
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
-                  "subcat": "6,41",
+                  "subcat": "6,41,9,53",
                   "english": 1,
                   "ssl": 1}
 
@@ -153,7 +153,7 @@ class NZBMatrixCache(tvcache.TVCache):
                    'english': 1,
                    'ssl': 1,
                    'scenename': 1,
-                   'subcat': '6,41,9,53'}
+                   'subcat': '6,41'}
 
         url += urllib.urlencode(urlArgs)
 
