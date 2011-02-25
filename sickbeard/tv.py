@@ -1342,6 +1342,7 @@ class TVEpisode(object):
 
         regex = "(.*) \(\d\)"
 
+        goodEpString = ''
 
         if len(self.relatedEps) == 0:
             goodName = self.name
@@ -1395,8 +1396,13 @@ class TVEpisode(object):
             naming_quality = sickbeard.NAMING_QUALITY
 
         if ((self.show.genre and "Talk Show" in self.show.genre) or self.show.air_by_date) and sickbeard.NAMING_DATES:
-            goodEpString = self.airdate.strftime("%Y.%m.%d")
-        else:
+            try:
+                goodEpString = self.airdate.strftime("%Y.%m.%d")
+            except ValueError:
+                pass
+
+        # if we didn't set it to the air-by-date value use the season/ep
+        if not goodEpString:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
 
         for relEp in self.relatedEps:
