@@ -1385,14 +1385,14 @@ class NewHomeAddShows:
         
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
-            ui.flash.error("Unable to add show", "Folder "+str(show_dir)+" exists already")
+            ui.flash.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home')
         
         # create the dir and make sure it worked
         dir_exists = helpers.makeDir(show_dir)
         if not dir_exists:
-            logger.log(u"Unable to create the folder "+str(show_dir)+", can't add the show", logger.ERROR)
-            ui.flash.error("Unable to add show", "Unable to create the folder "+str(show_dir)+", can't add the show")
+            logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
+            ui.flash.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
 
         # prepare the inputs for passing along
