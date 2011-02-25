@@ -137,8 +137,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
     #for $curMessage in $flash.messages():
         \$.pnotify({
-            pnotify_title: decodeURIComponent('$urllib.quote($curMessage[0])'),
-            pnotify_text: decodeURIComponent('$urllib.quote($curMessage[1])')
+            pnotify_title: decodeURIComponent('$urllib.quote($curMessage[0].encode('UTF-8'))'),
+            pnotify_text: decodeURIComponent('$urllib.quote($curMessage[1].encode('UTF-8'))')
         });
     #end for
 
@@ -146,8 +146,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
         \$.pnotify({
             pnotify_type: 'error',
             pnotify_hide: false,
-            pnotify_title: decodeURIComponent('$urllib.quote($curError[0])'),
-            pnotify_text: decodeURIComponent('$urllib.quote($curError[1])')
+            pnotify_title: decodeURIComponent('$urllib.quote($curError[0].encode('UTF-8'))'),
+            pnotify_text: decodeURIComponent('$urllib.quote($curError[1].encode('UTF-8'))')
         });
     #end for
 
