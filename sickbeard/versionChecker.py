@@ -201,7 +201,7 @@ class GitUpdateManager(UpdateManager):
         if platform.system().lower() == 'darwin':
             git_locations.append('/usr/local/git/bin/git')
 
-        output = None
+        output = err = None
 
         for cur_git in git_locations:
 
