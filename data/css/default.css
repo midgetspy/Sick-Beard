@@ -36,7 +36,7 @@ display:inline;
 
 /* these are for incl_top.tmpl */
 #header {
-padding-top:3px;
+padding:5px 0;
 z-index:2;
 }
 
@@ -60,7 +60,7 @@ font-size:33px;
 font-family:Arial, Helvetica, sans-serif;
 font-weight:700;
 text-transform:uppercase;
-padding-left:20px;
+padding-left:15px;
 }
 
 #versiontext {
