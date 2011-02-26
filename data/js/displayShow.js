@@ -117,16 +117,4 @@ $(document).ready(function(){
          });
     }
 
-    $.fn.showHideNote = function() {
-            var selectedValue = $("#statusSelect :selected").val();
-            if (selectedValue > 50)
-                $('#statusNote').show();
-            else
-                $('#statusNote').hide();
-    };
-    $('#statusSelect').change(function(){
-        $(this).showHideNote();
-    });
-   $(this).showHideNote();
-
 });

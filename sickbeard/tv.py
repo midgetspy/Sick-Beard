@@ -676,7 +676,7 @@ class TVShow(object):
     def refreshDir(self):
 
         # make sure the show dir is where we think it is
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             return False
 
         # load from dir
@@ -702,11 +702,12 @@ class TVShow(object):
             # if the path doesn't exist or if it's not in our show dir
             if not ek.ek(os.path.isfile, curLoc) or not os.path.normpath(curLoc).startswith(os.path.normpath(self.location)):
 
-                logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
                 with curEp.lock:
+                    # if it used to have a file associated with it and it doesn't anymore then set it to IGNORED
+                    if curEp.location and curEp.status in Quality.DOWNLOADED:
+                        logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to IGNORED", logger.DEBUG)
+                        curEp.status = IGNORED
                     curEp.location = ''
-                    if curEp.status in Quality.DOWNLOADED:
-                        curEp.status = SKIPPED
                     curEp.hasnfo = False
                     curEp.hastbn = False
                     curEp.saveToDB()
