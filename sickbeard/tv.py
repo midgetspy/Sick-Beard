@@ -1128,7 +1128,7 @@ class TVEpisode(object):
         #early conversion to int so that episode doesn't get marked dirty
         self.tvdbid = int(myEp["id"])
         
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(u"The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
 
