@@ -8,7 +8,7 @@ import generic
 
 from sickbeard.common import *
 from sickbeard import logger
-from sickbeard import tvcache
+from sickbeard import tvcache, sceneHelpers
 
 class EZRSSProvider(generic.TorrentProvider):
 
@@ -54,7 +54,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = re.sub('[()]', '', show.name)       
+        params['show_name'] = sceneHelpers.sanitizeSceneName(show.name).replace('.',' ')       
           
         if season != None:
             params['season'] = season
@@ -68,7 +68,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = re.sub('[()]', '', ep_obj.show.name)
+        params['show_name'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name).replace('.',' ')
         
         if ep_obj.show.is_air_by_date:
             params['date'] = str(ep_obj.airdate)
