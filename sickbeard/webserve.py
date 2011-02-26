@@ -1152,11 +1152,15 @@ class Config:
 def haveXBMC():
     return sickbeard.XBMC_HOST != None and len(sickbeard.XBMC_HOST) > 0
 
+def havePLEX():
+    return sickbeard.PLEX_HOST != None and len(sickbeard.PLEX_HOST) > 0
+
 def HomeMenu():
     return [
     { 'title': 'Add Shows',               'path': 'home/addShows/',                         },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
+    { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX   },
     { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
     ]
@@ -2003,6 +2007,18 @@ class Home:
                 ui.flash.message("Command sent to XBMC host " + curHost + " to update library")
             else:
                 ui.flash.error("Unable to contact XBMC host " + curHost)
+        redirect('/home')
+
+
+    @cherrypy.expose
+    def updatePLEX(self):
+
+        if notifiers.plex_notifier._update_library():
+            ui.flash.message("Command sent to Plex Media Server host " + sickbeard.PLEX_HOST + " to update library")
+            logger.log(u"Plex library update initiated for host " + sickbeard.PLEX_HOST, logger.DEBUG)
+        else:
+            ui.flash.error("Unable to contact Plex Media Server host " + sickbeard.PLEX_HOST)
+            logger.log(u"Plex library update failed for host " + sickbeard.PLEX_HOST, logger.ERROR)
         redirect('/home')
 
 
