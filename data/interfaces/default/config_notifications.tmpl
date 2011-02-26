@@ -114,6 +114,51 @@
                 <div id="core-component-group2" class="component-group clearfix">
 
                     <div class="component-group-desc">
+                        <h3>Plex Media Server</h3>
+                        <p>Lorem ipsum.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_plex" id="use_plex" #if $sickbeard.USE_PLEX then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_plex">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Plex Media Server commands?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_plex">
+                        <div class="field-pair">
+                            <input type="checkbox" name="plex_update_library" id="plex_update_library" #if $sickbeard.PLEX_UPDATE_LIBRARY then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="plex_update_library">
+                                <span class="component-title">Update Library</span>
+                                <span class="component-desc">Update Plex Media Server library when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Plex Media Server IP:Port</span>
+                                <input type="text" name="plex_host" id="plex_host" value="$sickbeard.PLEX_HOST" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Host running Plex Media Server (eg. 192.168.1.100:32400)</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testPLEX-result">Click below to test.</div>
+                        <input type="button" value="Test Plex Media Server" id="testPLEX" />
+                        <input type="submit" value="Save Changes" />
+
+                        </div><!-- /enabler_plex -->
+
+                    </fieldset>
+                </div><!-- /component-group -->
+
+                <div id="core-component-group3" class="component-group clearfix">
+
+                    <div class="component-group-desc">
                         <h3>Growl</h3>
                         <p>A cross-platform unobtrusive global notification system.</p>
                     </div>
@@ -179,7 +224,7 @@
                     </fieldset>
                 </div><!-- /component-group -->
 
-                <div id="core-component-group3" class="component-group clearfix">
+                <div id="core-component-group4" class="component-group clearfix">
                 
                     <div class="component-group-desc">
                         <h3>Twitter</h3>
@@ -254,7 +299,7 @@
                     </fieldset>
                 </div><!-- /component-group -->
                 
-            <div id="core-component-group4" class="component-group clearfix">
+            <div id="core-component-group5" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Prowl</h3>
@@ -324,7 +369,7 @@
                     </fieldset>
                 </div><!-- /component-group -->
 
-                 <div id="core-component-group5" class="component-group clearfix">
+                 <div id="core-component-group6" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Notifo</h3>
@@ -390,7 +435,7 @@
                 </div>
 
 
-                <div id="core-component-group6" class="component-group clearfix">
+                <div id="core-component-group7" class="component-group clearfix">
                     <div class="component-group-desc">
                         <h3>Libnotify</h3>
                         <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
