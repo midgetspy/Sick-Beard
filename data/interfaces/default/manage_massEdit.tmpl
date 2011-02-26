@@ -6,7 +6,7 @@
 
 #set global $sbPath=".."
 
-<!--#set global $topmenu="home"#-->
+<!--#set global $topmenu="manage"#-->
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $anyQualities, $bestQualities = $common.Quality.splitQuality(int($quality_value))
@@ -103,7 +103,6 @@
 </div>
 
 <div class="optionWrapper" style="text-align: center;">
-    <input type="reset" value="Reset">
     <input type="submit" value="Submit"><br />
 </div>
 
