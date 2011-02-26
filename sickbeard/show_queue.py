@@ -199,7 +199,11 @@ class QueueItemAdd(ShowQueueItem):
         try:
             # make sure the tvdb ids are valid
             try:
-                t = tvdb_api.Tvdb(search_all_languages=True, **sickbeard.TVDB_API_PARMS)
+                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+                if self.lang:
+                    ltvdb_api_parms['language'] = self.lang
+        
+                t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 s = t[self.tvdb_id]
                 if not s or not s['seriesname']:
                     ui.flash.error("Unable to add show", "Show in "+str(self.showDir)+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
