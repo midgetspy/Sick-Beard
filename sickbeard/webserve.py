@@ -299,12 +299,8 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, edit_paused=False, paused=None, edit_season_folders=False, season_folders=None,
-                       edit_quality=False, anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
-
-        edit_paused = True if edit_paused == 'on' else False
-        edit_season_folders = True if edit_season_folders == 'on' else False
-        edit_quality = True if edit_quality == 'on' else False
+    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False,
+                       anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
 
         dir_map = {}
         for cur_arg in kwargs:
@@ -330,14 +326,21 @@ class Manage:
             else:
                 new_show_dir = showObj._location
             
-            if not edit_paused:
-                paused = showObj.paused
-            if not edit_season_folders:
-                season_folders = showObj.seasonfolders
-            if not edit_quality:
+            if paused == 'keep':
+                new_paused = showObj.paused
+            else:
+                new_paused = 'on' if paused == 'enable' else 'off'
+            logger.log(str(paused)+" so "+str(new_paused))
+
+            if season_folders == 'keep':
+                new_season_folders = showObj.seasonfolders
+            else:
+                new_season_folders = 'on' if season_folders == 'enable' else 'off'
+
+            if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, season_folders, paused, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors))

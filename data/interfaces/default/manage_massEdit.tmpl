@@ -42,7 +42,7 @@
 <div class="optionWrapper alt">
 <span class="selectTitle">Quality</span>
     <div class="selectChoices">
-        <select id="qualityPreset">
+        <select id="qualityPreset" name="quality_preset">
             <option value="keep">&lt; keep &gt;</option>
             #set $selected = None
             <option value="0">Custom
@@ -78,7 +78,7 @@
 <div class="optionWrapper">
 <span class="selectTitle">Season Folders <span class="separator">*</span></span>
     <div class="selectChoices">
-        <select id="edit_season_folders2">
+        <select id="edit_season_folders" name="season_folders">
             <option value="keep">&lt; keep &gt;</option>
             <option value="enable">enable</option>
             <option value="disable">disable</option>
@@ -87,19 +87,9 @@
 </div>
 
 <div class="optionWrapper alt">
-    <span class="selectTitle">Metadata Language</span>
-    <div class="selectChoices">
-        <select id="edit_lang2">
-            <option value="keep">&lt; keep &gt;</option>
-            <option value="en">en</option>
-        </select>
-    </div><br />
-</div>
-
-<div class="optionWrapper">
     <span class="selectTitle">Paused</span>
     <div class="selectChoices">
-        <select id="edit_paused2">
+        <select id="edit_paused" name="paused">
             <option value="keep">&lt; keep &gt;</option>
             <option value="enable">enable</option>
             <option value="disable">disable</option>
