@@ -1,6 +1,7 @@
 import sickbeard
 
 import xbmc
+import plex
 import growl
 import prowl
 import tweet
@@ -10,6 +11,7 @@ import notifo
 from sickbeard.common import *
 
 xbmc_notifier = xbmc.XBMCNotifier()
+plex_notifier = plex.PLEXNotifier()
 growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
@@ -21,6 +23,7 @@ notifiers = [
     # network activity.
     libnotify_notifier,
     xbmc_notifier,
+    plex_notifier,
     growl_notifier,
     prowl_notifier,
     twitter_notifier,

@@ -182,6 +182,10 @@ XBMC_HOST = None
 XBMC_USERNAME = None
 XBMC_PASSWORD = None
 
+USE_PLEX = False
+PLEX_UPDATE_LIBRARY = False
+PLEX_HOST = None
+
 USE_GROWL = False
 GROWL_NOTIFY_ONSNATCH = False
 GROWL_NOTIFY_ONDOWNLOAD = False
@@ -314,7 +318,8 @@ def initialize(consoleLogging=True):
                 NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
-                XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
+                XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
+                USE_PLEX, PLEX_UPDATE_LIBRARY, PLEX_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -346,6 +351,7 @@ def initialize(consoleLogging=True):
         CheckSection('TVBinz')
         CheckSection('SABnzbd')
         CheckSection('XBMC')
+        CheckSection('PLEX')
         CheckSection('Growl')
         CheckSection('Prowl')
         CheckSection('Twitter')
@@ -480,6 +486,10 @@ def initialize(consoleLogging=True):
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
+
+        USE_PLEX = bool(check_setting_int(CFG, 'PLEX', 'use_plex', 0))
+        PLEX_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'PLEX', 'plex_update_library', 0))
+        PLEX_HOST = check_setting_str(CFG, 'PLEX', 'plex_host', '')
 
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onsnatch', 0))
@@ -919,6 +929,11 @@ def save_config():
     new_config['XBMC']['xbmc_host'] = XBMC_HOST
     new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
+
+    new_config['PLEX'] = {}
+    new_config['PLEX']['use_plex'] = int(USE_PLEX)
+    new_config['PLEX']['plex_update_library'] = int(PLEX_UPDATE_LIBRARY)
+    new_config['PLEX']['plex_host'] = PLEX_HOST
 
     new_config['Growl'] = {}
     new_config['Growl']['use_growl'] = int(USE_GROWL)

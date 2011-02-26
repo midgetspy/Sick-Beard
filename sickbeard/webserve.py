@@ -42,6 +42,7 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 
 from sickbeard.notifiers import xbmc
+from sickbeard.notifiers import plex
 from sickbeard.providers import newznab
 from sickbeard.common import *
 
@@ -979,6 +980,7 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+                          use_plex=None, plex_update_library=None, plex_host=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
@@ -1011,7 +1013,17 @@ class ConfigNotifications:
             use_xbmc = 1
         else:
             use_xbmc = 0
-            
+
+        if plex_update_library == "on":
+            plex_update_library = 1
+        else:
+            plex_update_library = 0
+
+        if use_plex == "on":
+            use_plex = 1
+        else:
+            use_plex = 0
+
         if growl_notify_onsnatch == "on":
             growl_notify_onsnatch = 1
         else:
@@ -1076,6 +1088,10 @@ class ConfigNotifications:
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
+
+        sickbeard.USE_PLEX = use_plex
+        sickbeard.PLEX_UPDATE_LIBRARY = plex_update_library
+        sickbeard.PLEX_HOST = plex_host
 
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
@@ -1647,6 +1663,14 @@ class Home:
             return "Test notice sent successfully to "+urllib.unquote_plus(host)
         else:
             return "Test notice failed to "+urllib.unquote_plus(host)
+
+    @cherrypy.expose
+    def testPLEX(self, host=None):
+        result = notifiers.plex_notifier.test_notify(urllib.unquote_plus(host))
+        if result:
+            return "Test was successfull"
+        else:
+            return "Test failed"
 
     @cherrypy.expose
     def testLibnotify(self):
