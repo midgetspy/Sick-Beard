@@ -512,11 +512,14 @@ class ConfigGeneral:
         
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
-        if defaultSeasonFolders == "on":
+
+        if defaultSeasonFolders == "true":
             defaultSeasonFolders = 1
         else:
             defaultSeasonFolders = 0
+
         sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+
     
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
