@@ -16,10 +16,11 @@
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.pnotify.default.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/smooth-grinder/jquery-ui-1.8.9.custom.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/smooth-grinder/jquery-ui-1.8.10.custom.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/superfish.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
+
 <style type="text/css">
 <!--
 .ac_loading { background: white url("$sbRoot/images/loading16.gif") right center no-repeat; }
@@ -57,8 +58,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 --> 
 </style>
 
-    <script type="text/javascript" src="$sbRoot/js/jquery-1.5.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.10.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
     <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.autocomplete.min.js"></script>
@@ -72,9 +73,22 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <script type="text/javascript" src="$sbRoot/js/jquery.divgrow-1.3.1.min.js"></script>
 
     <script type="text/javascript" charset="utf-8">
-        sbRoot = "$sbRoot";
+\$(document).ready(function(){ 
+
+   \$("table.sickbeardTable td").hover( 
+       function() { \$(this).find("a").parent().addClass("hover"); }, 
+       function() { \$(this).find("a").parent().removeClass("hover");
+   } );
+   
+   \$("table.sickbeardTable td").click( function() {
+        var href = \$(this).find("a").attr("href");
+        if(href) { window.location = href; }
+   });
+   
+});
     </script>
     <script type="text/javascript" charset="utf-8">
+        sbRoot = "$sbRoot";
         //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
         top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; 
         

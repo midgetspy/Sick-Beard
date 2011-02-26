@@ -1,5 +1,23 @@
 $(document).ready(function(){
 
+   $("table.sickbeardTable tr").click( function(event) {
+               if (event.target.type !== "checkbox") {
+                  $(this).find("input:checkbox.epCheck").each(function(){
+                     $(this).attr("checked", !$(this).attr("checked"));
+                  });
+               }
+   });
+
+    $("#prevShow").click(function(){
+        $('#pickShow option:selected').prev('option').attr('selected', 'selected');
+        $("#pickShow").change();
+    });
+
+    $("#nextShow").click(function(){
+        $('#pickShow option:selected').next('option').attr('selected', 'selected');
+        $("#pickShow").change();
+    });
+
     $('#changeStatus').click(function(){
   
         var sbRoot = $('#sbRoot').val()

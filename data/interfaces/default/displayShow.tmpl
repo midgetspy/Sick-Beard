@@ -9,8 +9,10 @@
 <!--#set global $topmenu="manageShows"#-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
+
 <div class="h2footer align-right" style="margin-left:250px; line-height: 20px;">
-    <b>Jump to Season:</b>
+    <b>Season:</b>
     #for $seasonNum in $seasonResults:
         #if int($seasonNum["season"]) == 0 then "<span class=\"separator\">|</span> " else ""#
         <a href="#season-$seasonNum["season"]">
@@ -25,11 +27,14 @@
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 
 <div class="align-left"><b>Change Show:</b>
+<div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
 <select id="pickShow">
 #for $curShow in $sortedShowList:
 <option value="$curShow.tvdbid" #if $curShow == $show then "SELECTED" else ""#>$curShow.name
 #end for
-</select></div>
+</select>
+<div class="navShow"><img id="nextShow" width="16" height="18" src="$sbRoot/images/next.gif" alt="&gt;&gt;" title="Next Show" /></div>
+</div>
 
 <div id="summary" class="align-left">
 <table class="infoTable" cellspacing="1" border="0" cellpadding="0">
@@ -85,10 +90,10 @@ Change selected episodes to
 #set $odd = 0
 
 <div class="float-right" id="checkboxControls">
-<span class="wanted" style="white-space:nowrap;">Wanted: <b>$epCounts[$Overview.WANTED]</b> <input type="checkbox" id="wanted" CHECKED></span>
-<span class="qual" style="white-space:nowrap;">Low Quality: <b>$epCounts[$Overview.QUAL]</b> <input type="checkbox" id="qual" CHECKED></span>
-<span class="good" style="white-space:nowrap;">Downloaded: <b>$epCounts[$Overview.GOOD]</b> <input type="checkbox" id="good" CHECKED></span>
-<span class="skipped" style="white-space:nowrap;">Skipped: <b>$epCounts[$Overview.SKIPPED]</b> <input type="checkbox" id="skipped" CHECKED></span>
+<label for="wanted"><span class="wanted">Wanted: <b>$epCounts[$Overview.WANTED]</b> <input type="checkbox" id="wanted" checked=checked></span>
+<label for="qual"><span class="qual">Low Quality: <b>$epCounts[$Overview.QUAL]</b> <input type="checkbox" id="qual" checked=checked></span>
+<label for"good"><span class="good">Downloaded: <b>$epCounts[$Overview.GOOD]</b> <input type="checkbox" id="good" checked=checked></span>
+<label for="skipped"><span class="skipped">Skipped: <b>$epCounts[$Overview.SKIPPED]</b> <input type="checkbox" id="skipped" checked=checked></label>
 <br />
 <span class="selectAll"><a href="#" onClick="return false" class="seriesCheck">Select Filtered Episodes</a> </span> 
 <span class="clearAll"><a href="#" onClick="return false" class="clearAll">Clear All</a></span>
@@ -103,11 +108,12 @@ Change selected episodes to
     #if int($epResult["season"]) != $curSeason:
   <tr><td colspan="9"></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
+    <a name="season-$epResult["season"]"></a>
     <td colspan="9">
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
-  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Actions</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]"></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Action</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -119,7 +125,7 @@ Change selected episodes to
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>">
 #end if
     </td>
-    <td align="center"><a name="<%=str(epResult["season"])+"x"+str(epResult["episode"])%>"></a><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "nfo.gif\" alt=\"Y" else "nfo-no.gif\" alt=\"N"#" width="23" height="11"></td>
+    <td align="center"><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "nfo.gif\" alt=\"Y" else "nfo-no.gif\" alt=\"N"#" width="23" height="11"></td>
     <td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "tbn.gif\" alt=\"Y" else "tbn-no.gif\" alt=\"N"#" width="23" height="11"></td>
     <td align="center">$epResult["episode"]</td>
     <td>
@@ -140,7 +146,7 @@ $epLoc
     <td>$statusStrings[int($epResult["status"])]</td>
     <td align="center">
     #if int($epResult["season"]) != 0: 
-    <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search"/></a>
+    <a href="searchEpisode?show=$show.tvdbid&season=$epResult["season"]&episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
     #end if
     </td>
    </tr>
