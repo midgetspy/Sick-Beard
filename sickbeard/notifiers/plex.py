@@ -9,6 +9,12 @@ class PLEXNotifier:
     def test_notify(self, host=None):
         return self._test_notify(host, force=True)
 
+    def notify_snatch(self, ep_name):
+        pass
+
+    def notify_download(self, ep_name):
+        pass
+
     def update_library(self):
         if sickbeard.PLEX_UPDATE_LIBRARY:
             self._update_library()
