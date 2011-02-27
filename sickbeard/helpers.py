@@ -406,6 +406,13 @@ def rename_file(old_path, new_name):
 
     return new_path
 
+def chmodFile(file, permissions):
+    try:
+        os.chmod(file, permissions)
+        logger.log(u"Changed permissions of %s to %s" % ( file, permissions ))
+    except OSError:
+        logger.log(u"Couldn't change the permissions to %s on %s" % ( permissions, file ), logger.ERROR)
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
