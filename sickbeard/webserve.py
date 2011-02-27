@@ -723,7 +723,7 @@ class ConfigEpisodeDownloads:
                        torrent_dir=None, nzb_method=None, usenet_retention=None,
                        search_frequency=None, tv_download_dir=None,
                        keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                       download_propers=None, move_associated_files=None, permissions=None):
+                       download_propers=None, move_associated_files=None):
 
         results = []
 
@@ -780,14 +780,6 @@ class ConfigEpisodeDownloads:
         sickbeard.SAB_PASSWORD = sab_password
         sickbeard.SAB_APIKEY = sab_apikey.strip()
         sickbeard.SAB_CATEGORY = sab_category
-        
-        if str(permissions).length < 4:
-            if str(permissions).length == 3:
-                sickbeard.SEASON_FOLDER_PERMISSIONS = int("0" + permissions)
-            else:
-                sickbeard.SEASON_FOLDER_PERMISSIONS = 0777
-        else:
-            sickbeard.SEASON_FOLDER_PERMISSIONS = int(permissions);
 
         if sab_host and not re.match('https?://.*', sab_host):
             sab_host = 'http://' + sab_host
