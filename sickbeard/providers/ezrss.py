@@ -1,4 +1,5 @@
 import urllib
+import re
 
 import xml.etree.cElementTree as etree
 
@@ -7,7 +8,7 @@ import generic
 
 from sickbeard.common import *
 from sickbeard import logger
-from sickbeard import tvcache
+from sickbeard import tvcache, sceneHelpers
 
 class EZRSSProvider(generic.TorrentProvider):
 
@@ -19,7 +20,7 @@ class EZRSSProvider(generic.TorrentProvider):
 
         self.cache = EZRSSCache(self)
 
-        self.url = 'http://www.ezrss.it/'
+        self.url = 'https://www.ezrss.it/'
         
         self.ezrss_ns = 'http://xmlns.ezrss.it/0.1/'
 
@@ -53,7 +54,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = show.name       
+        params['show_name'] = sceneHelpers.sanitizeSceneName(show.name).replace('.',' ')       
           
         if season != None:
             params['season'] = season
@@ -67,7 +68,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = ep_obj.show.name
+        params['show_name'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name).replace('.',' ')
         
         if ep_obj.show.is_air_by_date:
             params['date'] = str(ep_obj.airdate)
@@ -88,20 +89,10 @@ class EZRSSProvider(generic.TorrentProvider):
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
-        raw_data = self.getURL(searchURL)
+        data = self.getURL(searchURL)
 
-        if raw_data == None:
+        if not data:
             return []
-        
-        data = ''
-        
-        # fix up bad feeds
-        for cur_line in raw_data.split('\n'):
-            if 'CDATA' not in cur_line:
-                data += re.sub('&(?!\#\d+|\w+;)', '&amp;', cur_line)
-            else:
-                data += cur_line
-            data += '\n'
         
         try:
             responseSoup = etree.ElementTree(etree.XML(data))
@@ -138,7 +129,7 @@ class EZRSSProvider(generic.TorrentProvider):
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
-        name_regex = '(.*)\.?(\[.*]|\d+\.TPB)\.torrent$'
+        name_regex = '(.*?)\.?(\[.*]|\d+\.TPB)\.torrent$'
         logger.log(u"Comparing "+name_regex+" against "+filename, logger.DEBUG)
         match = re.match(name_regex, filename, re.I)
         if match:
@@ -157,7 +148,7 @@ class EZRSSCache(tvcache.TVCache):
 
 
     def _getRSSData(self):
-        url = 'http://www.ezrss.it/feed/'
+        url = self.provider.url + 'feed/'
 
         logger.log(u"EZRSS cache update URL: "+ url, logger.DEBUG)
 

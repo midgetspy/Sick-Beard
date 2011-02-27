@@ -70,7 +70,8 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
                   "subcat": "6,41",
-                  "english": 1}
+                  "english": 1,
+                  "ssl": 1}
 
         searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
@@ -150,6 +151,7 @@ class NZBMatrixCache(tvcache.TVCache):
                    'username': sickbeard.NZBMATRIX_USERNAME,
                    'apikey': sickbeard.NZBMATRIX_APIKEY,
                    'english': 1,
+                   'ssl': 1,
                    'scenename': 1,
                    'subcat': '6,41'}
 

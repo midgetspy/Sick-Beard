@@ -365,7 +365,7 @@ class PostProcessor(object):
             for exceptionID in common.sceneExceptions:
                 # for each exception name
                 for curException in common.sceneExceptions[exceptionID]:
-                    if cur_name.lower() == curException.lower():
+                    if cur_name.lower() in (curException.lower(), sceneHelpers.sanitizeSceneName(curException).lower().replace('.',' ')):
                         self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
                         _finalize(parse_result)
                         return (exceptionID, season, episodes)
@@ -542,8 +542,9 @@ class PostProcessor(object):
         # make sure the quality is set right before we continue
         if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
             oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
-            self._log(u"The old status had a quality in it, using that: "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
-            return ep_quality
+            if ep_quality != common.Quality.UNKNOWN:
+                self._log(u"The old status had a quality in it, using that: "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
+                return ep_quality
 
         name_list = [self.nzb_name, self.folder_name, self.file_name]
     

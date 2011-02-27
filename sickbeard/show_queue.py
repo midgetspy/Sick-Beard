@@ -22,12 +22,12 @@ import os.path
 import threading
 import traceback
 
-from lib.tvdb_api import tvdb_exceptions
+from lib.tvdb_api import tvdb_exceptions, tvdb_api
 
 from sickbeard.common import *
 
 from sickbeard.tv import TVShow
-from sickbeard import exceptions, helpers, logger, ui
+from sickbeard import exceptions, helpers, logger, ui, db
 from sickbeard import generic_queue
 
 class ShowQueue(generic_queue.GenericQueue):
@@ -113,8 +113,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir, lang="en"):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, lang)
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, season_folders=None, lang="en"):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, season_folders, lang)
         self.queue.append(queueItemObj)
 
         return queueItemObj
@@ -162,10 +162,13 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, lang="en"):
+    def __init__(self, tvdb_id, showDir, default_status, quality, season_folders, lang):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
+        self.default_status = default_status
+        self.quality = quality
+        self.season_folders = season_folders
         self.lang = lang
 
         self.show = None
@@ -194,6 +197,23 @@ class QueueItemAdd(ShowQueueItem):
         logger.log(u"Starting to add show "+self.showDir)
 
         try:
+            # make sure the tvdb ids are valid
+            try:
+                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+                if self.lang:
+                    ltvdb_api_parms['language'] = self.lang
+        
+                t = tvdb_api.Tvdb(**ltvdb_api_parms)
+                s = t[self.tvdb_id]
+                if not s or not s['seriesname']:
+                    ui.flash.error("Unable to add show", "Show in "+str(self.showDir)+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
+                    self._finishEarly()
+                    return
+            except tvdb_exceptions.tvdb_exception, e:
+                ui.flash.error("Unable to add show", "Unable to look up the show in "+str(self.showDir)+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
+                self._finishEarly()
+                return
+
             newShow = TVShow(self.tvdb_id, self.lang)
             newShow.loadFromTVDB()
 
@@ -201,8 +221,8 @@ class QueueItemAdd(ShowQueueItem):
 
             # set up initial values
             self.show.location = self.showDir
-            self.show.quality = sickbeard.QUALITY_DEFAULT
-            self.show.seasonfolders = sickbeard.SEASON_FOLDERS_DEFAULT
+            self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
+            self.show.seasonfolders = self.season_folders if self.season_folders != None else sickbeard.SEASON_FOLDERS_DEFAULT
             self.show.paused = False
 
         except tvdb_exceptions.tvdb_exception, e:
@@ -251,6 +271,17 @@ class QueueItemAdd(ShowQueueItem):
         except Exception, e:
             logger.log(u"Error saving the episode to the database: " + str(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
+
+        # if they gave a custom status then change all the eps to it
+        if self.default_status != SKIPPED:
+            logger.log(u"Setting all episodes to the specified default status: "+str(self.default_status))
+            myDB = db.DBConnection();
+            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ?", [self.default_status, SKIPPED, self.show.tvdbid])
+
+        # if they started with WANTED eps then run the backlog
+        if self.default_status == WANTED:
+            logger.log(u"Launching backlog for this show since its episodes are WANTED")
+            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show])
 
         self.show.flushEpisodes()
 
@@ -309,13 +340,6 @@ class QueueItemUpdate(ShowQueueItem):
 
         logger.log(u"Retrieving show info from TVDB", logger.DEBUG)
         self.show.loadFromTVDB(cache=not self.force)
-
-        # either update or refresh depending on the time
-        if self.show.status == "Ended" and not self.force:
-            #TODO: maybe I should still update specials?
-            logger.log(u"Not updating episodes for show "+self.show.name+" because it's marked as ended.", logger.DEBUG)
-            sickbeard.showQueueScheduler.action.refreshShow(self.show, True)
-            return
 
         # get episode list from DB
         logger.log(u"Loading all episodes from the database", logger.DEBUG)

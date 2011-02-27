@@ -401,5 +401,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         return data
     
+    def retrieveShowMetadata(self, dir):
+        return (None, None)
+
 # present a standard "interface"
 metadata_class = MediaBrowserMetadata

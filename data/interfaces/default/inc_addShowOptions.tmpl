@@ -1,0 +1,34 @@
+#import sickbeard
+#from sickbeard.common import *
+        <div class="field-pair">
+            <label for="statusSelect" class="nocheck clearfix">
+                <span class="component-title">
+                    <select name="defaultStatus" id="statusSelect">
+                    #for $curStatus in [$SKIPPED, $WANTED, $ARCHIVED, $IGNORED]:
+                        <option value="$curStatus" #if $sickbeard.STATUS_DEFAULT == $curStatus then 'selected="selected"' else ''#>$statusStrings[$curStatus]
+                    #end for
+                    </select>
+                </span>
+                <span class="component-desc">Set the initial status of missing episodes</span>
+            </label>
+        </div>
+
+        <div class="field-pair alt">
+            <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#>
+            <label for="seasonFolders" class="clearfix">
+                <span class="component-title">Season Folders</span>
+                <span class="component-desc">Store episodes in season folders?</span>
+            </label>
+        </div>
+
+        #set $qualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
+        #set global $anyQualities = $qualities[0]
+        #set global $bestQualities = $qualities[1]
+        #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
+
+        <div class="field-pair alt">
+            <label for="makeDefault" class="nocheck clearfix">
+                <span class="component-title"><input type="button" id="saveDefaultsButton" value="Save Defaults" disabled></span>
+                <span class="component-desc">Persist current values as the defaults</span>
+            </label>
+        </div>

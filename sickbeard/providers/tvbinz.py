@@ -39,7 +39,7 @@ class TVBinzProvider(generic.NZBProvider):
 
 		self.cache = TVBinzCache(self)
 
-		self.url = 'http://www.tvbinz.net/'
+		self.url = 'https://www.tvbinz.net/'
 
 	def isEnabled(self):
 		return sickbeard.TVBINZ

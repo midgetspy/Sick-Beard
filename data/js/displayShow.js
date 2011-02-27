@@ -1,5 +1,23 @@
 $(document).ready(function(){
 
+   $("table.sickbeardTable tr").click( function(event) {
+               if (event.target.type !== "checkbox") {
+                  $(this).find("input:checkbox.epCheck").each(function(){
+                     $(this).attr("checked", !$(this).attr("checked"));
+                  });
+               }
+   });
+
+    $("#prevShow").click(function(){
+        $('#pickShow option:selected').prev('option').attr('selected', 'selected');
+        $("#pickShow").change();
+    });
+
+    $("#nextShow").click(function(){
+        $('#pickShow option:selected').next('option').attr('selected', 'selected');
+        $("#pickShow").change();
+    });
+
     $('#changeStatus').click(function(){
   
         var sbRoot = $('#sbRoot').val()
@@ -116,17 +134,5 @@ $(document).ready(function(){
 
          });
     }
-
-    $.fn.showHideNote = function() {
-            var selectedValue = $("#statusSelect :selected").val();
-            if (selectedValue > 50)
-                $('#statusNote').show();
-            else
-                $('#statusNote').hide();
-    };
-    $('#statusSelect').change(function(){
-        $(this).showHideNote();
-    });
-   $(this).showHideNote();
 
 });

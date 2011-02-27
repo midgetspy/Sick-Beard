@@ -255,45 +255,60 @@ class Manage:
             if showObj:
                 showList.append(showObj)
 
-        useSeasonfolders = True
-        lastSeasonfolders = None
+        use_season_folders = True
+        last_season_folders = None
 
-        usePaused = True
-        lastPaused = None
+        use_paused = True
+        last_paused = None
 
-        useQuality = True
-        lastQuality = None
+        use_quality = True
+        last_quality = None
+
+        root_dir_list = []
 
         for curShow in showList:
-            if usePaused:
-                if lastPaused == None:
-                    lastPaused = curShow.paused
-                elif lastPaused != curShow.paused:
-                    usePaused = True
+            
+            cur_root_dir = ek.ek(os.path.dirname, curShow._location)
+            if cur_root_dir not in root_dir_list:
+                root_dir_list.append(cur_root_dir) 
+            
+            if use_paused:
+                if last_paused == None:
+                    last_paused = curShow.paused
+                elif last_paused != curShow.paused:
+                    use_paused = True
 
-            if useSeasonfolders:
-                if lastSeasonfolders == None:
-                    lastSeasonfolders = curShow.seasonfolders
-                elif lastSeasonfolders != curShow.seasonfolders:
-                    useSeasonfolders = True
+            if use_season_folders:
+                if last_season_folders == None:
+                    last_season_folders = curShow.seasonfolders
+                elif last_season_folders != curShow.seasonfolders:
+                    use_season_folders = True
 
-            if useQuality:
-                if lastQuality == None:
-                    lastQuality = curShow.quality
-                elif lastQuality != curShow.quality:
-                    useQuality = True
+            if use_quality:
+                if last_quality == None:
+                    last_quality = curShow.quality
+                elif last_quality != curShow.quality:
+                    use_quality = True
 
         t.showList = toEdit
-        t.pausedValue = lastPaused if usePaused else False
-        t.seasonfoldersValue = lastSeasonfolders if useSeasonfolders else False
-        t.qualityValue = lastQuality if useQuality else SD
-        t.commonPath = os.path.dirname(os.path.commonprefix([x._location for x in showList]))
+        t.paused_value = last_paused if use_paused else False
+        t.season_folders_value = last_season_folders if use_season_folders else False
+        t.quality_value = last_quality if use_quality else SD
+        t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, paused=None, seasonfolders=None, anyQualities=[], bestQualities=[],
-                       oldCommonPath=None, newCommonPath=None, toEdit=None):
+    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False,
+                       anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
+
+        dir_map = {}
+        for cur_arg in kwargs:
+            if not cur_arg.startswith('orig_root_dir_'):
+                continue
+            which_index = cur_arg.replace('orig_root_dir_', '')
+            end_dir = kwargs['new_root_dir_'+which_index]
+            dir_map[kwargs[cur_arg]] = end_dir
 
         showIDs = toEdit.split("|")
         errors = []
@@ -302,12 +317,30 @@ class Manage:
             showObj = helpers.findCertainShow(sickbeard.showList, int(curShow))
             if not showObj:
                 continue
-            if oldCommonPath:
-                newLocation = showObj._location.replace(oldCommonPath, newCommonPath)
-            else:
-                newLocation = ek.ek(os.path.join, newCommonPath, showObj._location)
 
-            curErrors += Home().editShow(curShow, newLocation, anyQualities, bestQualities, seasonfolders, paused, True)
+            cur_root_dir = ek.ek(os.path.dirname, showObj._location)
+            cur_show_dir = ek.ek(os.path.basename, showObj._location)
+            if cur_root_dir in dir_map and cur_root_dir != dir_map[cur_root_dir]:
+                new_show_dir = ek.ek(os.path.join, dir_map[cur_root_dir], cur_show_dir)
+                logger.log(u"For show "+showObj.name+" changing dir from "+showObj._location+" to "+new_show_dir)
+            else:
+                new_show_dir = showObj._location
+            
+            if paused == 'keep':
+                new_paused = showObj.paused
+            else:
+                new_paused = 'on' if paused == 'enable' else 'off'
+            logger.log(str(paused)+" so "+str(new_paused))
+
+            if season_folders == 'keep':
+                new_season_folders = showObj.seasonfolders
+            else:
+                new_season_folders = 'on' if season_folders == 'enable' else 'off'
+
+            if quality_preset == 'keep':
+                anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
+            
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors))
@@ -458,15 +491,43 @@ class ConfigGeneral:
         t.submenu = ConfigMenu
         return _munge(t)
 
+    @cherrypy.expose
+    def saveRootDirs(self, rootDirString=None):
+        sickbeard.ROOT_DIRS = rootDirString
+    
+    @cherrypy.expose
+    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
+
+        if anyQualities:
+            anyQualities = anyQualities.split(',')
+        else:
+            anyQualities = []
+
+        if bestQualities:
+            bestQualities = bestQualities.split(',')
+        else:
+            bestQualities = []
+
+        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+        
+        sickbeard.STATUS_DEFAULT = int(defaultStatus)
+        sickbeard.QUALITY_DEFAULT = int(newQuality)
+
+        if defaultSeasonFolders == "true":
+            defaultSeasonFolders = 1
+        else:
+            defaultSeasonFolders = 0
+
+        sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+
     
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
-                    web_password=None, season_folders_format=None, season_folders_default=None,
+                    web_password=None, season_folders_format=None, 
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None,
-                    naming_use_periods=None, naming_sep_type=None, naming_quality=None,
-                    anyQualities = [], bestQualities = [], naming_dates=None,
+                    naming_use_periods=None, naming_sep_type=None, naming_quality=None, naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
                     wdtv_data=None, use_banner=None):
 
@@ -486,11 +547,6 @@ class ConfigGeneral:
             launch_browser = 1
         else:
             launch_browser = 0
-
-        if season_folders_default == "on":
-            season_folders_default = 1
-        else:
-            season_folders_default = 0
 
         if version_notify == "on":
             version_notify = 1
@@ -527,14 +583,6 @@ class ConfigGeneral:
         else:
             use_banner = 0
 
-        if type(anyQualities) != list:
-            anyQualities = [anyQualities]
-
-        if type(bestQualities) != list:
-            bestQualities = [bestQualities]
-
-        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
-
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
@@ -546,8 +594,6 @@ class ConfigGeneral:
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
-        sickbeard.SEASON_FOLDERS_DEFAULT = int(season_folders_default)
-        sickbeard.QUALITY_DEFAULT = newQuality
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
         sickbeard.NAMING_EP_NAME = naming_ep_name
@@ -941,7 +987,9 @@ class ConfigNotifications:
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None):
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
+                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
+                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None):
 
         results = []
 
@@ -1012,6 +1060,20 @@ class ConfigNotifications:
         else:
             use_twitter = 0
 
+        if notifo_notify_onsnatch == "on":
+            notifo_notify_onsnatch = 1
+        else:
+            notifo_notify_onsnatch = 0
+
+        if notifo_notify_ondownload == "on":
+            notifo_notify_ondownload = 1
+        else:
+            notifo_notify_ondownload = 0
+        if use_notifo == "on":
+            use_notifo = 1
+        else:
+            use_notifo = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1036,6 +1098,16 @@ class ConfigNotifications:
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+
+        sickbeard.USE_NOTIFO = use_notifo
+        sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
+        sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
+        sickbeard.NOTIFO_USERNAME = notifo_username
+        sickbeard.NOTIFO_APISECRET = notifo_apisecret
+
+        sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
+        sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
+        sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
 
         sickbeard.save_config()
 
@@ -1072,7 +1144,7 @@ def haveXBMC():
 
 def HomeMenu():
     return [
-    { 'title': 'Add Shows',              'path': 'home/addShows/',                          },
+    { 'title': 'Add Shows',               'path': 'home/addShows/',                         },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
     { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
@@ -1124,6 +1196,10 @@ class NewHomeAddShows:
         return json.dumps({'results': result})
 
     @cherrypy.expose
+    def sanitizeFileName(self, name):
+        return helpers.sanitizeFileName(name)
+
+    @cherrypy.expose
     def searchTVDBForShowName(self, name, lang="en"):
         if not lang or lang == 'null':
                 lang = "en"
@@ -1155,117 +1231,277 @@ class NewHomeAddShows:
         return json.dumps({'results': results, 'langid': lang_id})
 
     @cherrypy.expose
-    def addRootDir(self, dir=None):
-        if dir == None:
-            redirect("/home/addShows")
+    def massAddTable(self, rootDir=None):
+        t = PageTemplate(file="home_massAddTable.tmpl")
+        t.submenu = HomeMenu()
+        
+        myDB = db.DBConnection()
 
-        if not os.path.isdir(dir):
-            logger.log(u"The provided directory "+dir+" doesn't exist", logger.ERROR)
-            ui.flash.error("Unable to find the directory <tt>%s</tt>" % dir)
-            redirect("/home/addShows")
+        if not rootDir:
+            return "No folders selected." 
+        elif type(rootDir) != list:
+            root_dirs = [rootDir]
+        else:
+            root_dirs = rootDir
+        
+        root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
 
-        showDirs = []
+        default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
+        if len(root_dirs) > default_index:
+            tmp = root_dirs[default_index]
+            if tmp in root_dirs:
+                root_dirs.remove(tmp)
+                root_dirs = [tmp]+root_dirs
+        
+        dir_list = []
+        
+        for root_dir in root_dirs:
+            try:
+                file_list = ek.ek(os.listdir, root_dir)
+            except:
+                continue
 
-        for curDir in os.listdir(unicode(dir)):
-            curPath = os.path.join(dir, curDir)
-            if os.path.isdir(curPath):
-                logger.log(u"Adding "+curPath+" to the showDir list", logger.DEBUG)
-                showDirs.append(curPath)
+            for cur_file in file_list:
 
-        if len(showDirs) == 0:
-            logger.log(u"The provided directory "+dir+" has no shows in it", logger.ERROR)
-            ui.flash.error("The provided root folder <tt>%s</tt> has no shows in it." % dir)
-            redirect("/home/addShows")
+                cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
+                if not ek.ek(os.path.isdir, cur_path):
+                    continue
+                
+                cur_dir = {
+                           'dir': cur_path,
+                           'display_dir': '<b>'+ek.ek(os.path.dirname, cur_path)+os.sep+'</b>'+ek.ek(os.path.basename, cur_path),
+                           }
+                
+                # see if the folder is in XBMC already
+                dirResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [cur_path])
+                
+                if dirResults:
+                    cur_dir['added_already'] = True
+                else:
+                    cur_dir['added_already'] = False
+                
+                dir_list.append(cur_dir)
+                
+                tvdb_id = ''
+                show_name = ''
+                for cur_provider in sickbeard.metadata_provider_dict.values():
+                    (tvdb_id, show_name) = cur_provider.retrieveShowMetadata(cur_path)
+                    if tvdb_id and show_name:
+                        break
+                
+                cur_dir['existing_info'] = (tvdb_id, show_name)
+                
+                if tvdb_id and helpers.findCertainShow(sickbeard.showList, tvdb_id):
+                    cur_dir['added_already'] = True 
 
-        #result = ui.addShowsFromRootDir(dir)
-
-        myTemplate = PageTemplate(file="home_addRootDir.tmpl")
-        myTemplate.showDirs = [urllib.quote_plus(x.encode('utf-8')) for x in showDirs]
-        myTemplate.submenu = HomeMenu()
-        return _munge(myTemplate)
-
-        url = "/home/addShows/addShow?"+"&".join(["showDir="+urllib.quote_plus(x.encode('utf-8')) for x in showDirs])
-        logger.log(u"Redirecting to URL "+url, logger.DEBUG)
-        redirect(url)
+        t.dirList = dir_list
+        
+        return _munge(t)
 
     @cherrypy.expose
-    def addSingleShow(self, showToAdd, whichSeries=None, skipShow=False, showDirs=[], tvdbLang="en"):
-
-        # we don't need to unquote the rest of the showDirs cause we're going to pass them straight through
-        showToAdd = urllib.unquote_plus(showToAdd)
-
-        # if they intentionally skipped the show then oblige them
-        if skipShow == "1":
-            return self.addShows(showDirs)
-
-        # if we got a TVDB ID then make a show out of it
-        sickbeard.showQueueScheduler.action.addShow(int(whichSeries), showToAdd, tvdbLang)
-        ui.flash.message('Show added', 'Adding the specified show into '+ showToAdd)
-        # no need to display anything now that we added the show, so continue on to the next show
-        return self.addShows(showDirs)
+    def newShow(self, show_to_add=None, other_shows=None):
+        """
+        Display the new show page which collects a tvdb id, folder, and extra options and
+        posts them to addNewShow
+        """
+        t = PageTemplate(file="home_newShow.tmpl")
+        t.submenu = HomeMenu()
+        
+        show_dir, tvdb_id, show_name = self.split_extra_show(show_to_add)
+        
+        if tvdb_id and show_name:
+            use_provided_info = True
+        else:
+            use_provided_info = False
+        
+        # tell the template whether we're giving it show name & TVDB ID
+        t.use_provided_info = use_provided_info
+        
+        # use the given show_dir for the tvdb search if available 
+        if not show_dir:
+            t.default_show_name = ''
+        elif not show_name:
+            t.default_show_name = ek.ek(os.path.basename, ek.ek(os.path.normpath, show_dir)).replace('.',' ')
+        else:
+            t.default_show_name = show_name
+        
+        # carry a list of other dirs if given
+        if not other_shows:
+            other_shows = []
+        elif type(other_shows) != list:
+            other_shows = [other_shows]
+        
+        if use_provided_info:
+            t.provided_tvdb_id = tvdb_id
+            t.provided_tvdb_name = show_name
+            
+        t.provided_show_dir = show_dir
+        t.other_shows = other_shows
+        
+        return _munge(t)
 
     @cherrypy.expose
-    def addShows(self, showDirs=[]):
-
-        if showDirs and type(showDirs) != list:
-            showDirs = [showDirs]
-
-        # don't allow blank shows
-        showDirs = [x for x in showDirs if x]
-
-        # if there's nothing left to add, go home
-        if len(showDirs) == 0:
+    def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
+                   anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
+                   other_shows=None, skipShow=None):
+        """
+        Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
+        provided then it forwards back to newShow, if not it goes to /home.
+        """
+        
+        # grab our list of other dirs if given
+        if not other_shows:
+            other_shows = []
+        elif type(other_shows) != list:
+            other_shows = [other_shows]
+            
+        def finishAddShow(): 
+            # if there are no extra shows then go home
+            if not other_shows:
+                redirect('/home')
+            
+            # peel off the next one
+            next_show_dir = other_shows[0]
+            rest_of_show_dirs = other_shows[1:]
+            
+            # go to add the next show
+            return self.newShow(next_show_dir, rest_of_show_dirs)
+        
+        # if we're skipping then behave accordingly
+        if skipShow:
+            return finishAddShow()
+        
+        # sanity check on our inputs
+        if (not rootDir and not fullShowPath) or not whichSeries:
+            return "Missing params, no tvdb id or folder:"+repr(whichSeries)+" and "+repr(rootDir)+"/"+repr(fullShowPath)
+        
+        # figure out what show we're adding and where
+        series_pieces = whichSeries.partition('|')
+        if len(series_pieces) < 3:
+            return "Error with show selection."
+        
+        tvdb_id = int(series_pieces[0])
+        show_name = series_pieces[2]
+        
+        # use the whole path if it's given, or else append the show name to the root dir to get the full show path
+        if fullShowPath:
+            show_dir = ek.ek(os.path.normpath, fullShowPath)
+        else:
+            show_dir = ek.ek(os.path.join, rootDir, helpers.sanitizeFileName(show_name))
+        
+        # blanket policy - if the dir exists you should have used "add existing show" numbnuts
+        if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
+            ui.flash.error("Unable to add show", "Folder "+show_dir+" exists already")
+            redirect('/home')
+        
+        # create the dir and make sure it worked
+        dir_exists = helpers.makeDir(show_dir)
+        if not dir_exists:
+            logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
+            ui.flash.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
 
-        t = PageTemplate(file="home_addShow.tmpl")
+        # prepare the inputs for passing along
+        if seasonFolders == "on":
+            seasonFolders = 1
+        else:
+            seasonFolders = 0
+        
+        if not anyQualities:
+            anyQualities = []
+        if not bestQualities:
+            bestQualities = []
+        if type(anyQualities) != list:
+            anyQualities = [anyQualities]
+        if type(bestQualities) != list:
+            bestQualities = [bestQualities]
+        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+        
+        # add the show
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang)
+        ui.flash.message('Show added', 'Adding the specified show into '+show_dir)
+
+        return finishAddShow()
+        
+
+    @cherrypy.expose
+    def existingShows(self):
+        """
+        Prints out the page to add existing shows from a root dir 
+        """
+        t = PageTemplate(file="home_addExistingShow.tmpl")
         t.submenu = HomeMenu()
-
-
-        # make sure everything's unescaped
-        showDirs = [os.path.normpath(urllib.unquote_plus(x)) for x in showDirs]
-
-        # peel off a single show that we'll be working on, leave the rest in a list
-        showToAdd = showDirs[0]
-        restOfShowDirs = showDirs[1:]
-
-        # if the dir we're given doesn't exist and we can't create it then skip it
-        if not helpers.makeDir(showToAdd):
-            ui.flash.error("Warning", "Unable to create dir "+showToAdd+", skipping")
-            # recursively continue on our way, encoding the input as though we came from the web form
-            return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
-
-        # if there's a tvshow.nfo then try to get a TVDB ID out of it
-        if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo")):
-            tvdb_id = None
-            try:
-                tvdb_id = metadata.helpers.getTVDBIDFromNFO(showToAdd)
-
-            except exceptions.NoNFOException, e:
-                # we couldn't get a tvdb id from the file so let them know and just print the search page
-                if ek.ek(os.path.isfile, ek.ek(os.path.join, showToAdd, "tvshow.nfo.old")):
-                    ui.flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo, renamed it to tvshow.nfo.old and ignoring it')
-
-                # no tvshow.nfo.old means we couldn't rename it and we can't continue adding this show
-                # encode the input as though we came from the web form
-                else:
-                    ui.flash.error('Warning', 'Unable to retrieve TVDB ID from tvshow.nfo and unable to rename it - you will need to remove it manually')
-                    return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
-
-            # if we got a TVDB ID then make a show out of it
-            if tvdb_id:
-                sickbeard.showQueueScheduler.action.addShow(tvdb_id, showToAdd)
-                ui.flash.message('Show added', 'Auto-added show from tvshow.nfo in '+showToAdd)
-                # no need to display anything now that we added the show, so continue on to the next show
-                return self.addShows([urllib.quote_plus(x.encode('utf-8')) for x in restOfShowDirs])
-
-        # encode any info we send to the web page
-        t.showToAdd = showToAdd
-        t.showNameToAdd = os.path.split(showToAdd)[1]
-
-        # get the rest so we can pass them along
-        t.showDirs = [x for x in restOfShowDirs]
-
+        
         return _munge(t)
+
+    def split_extra_show(self, extra_show):
+        if not extra_show:
+            return (None, None, None)
+        split_vals = extra_show.split('|')
+        if len(split_vals) < 3:
+            return (extra_show, None, None)
+        show_dir = split_vals[0]
+        tvdb_id = split_vals[1]
+        show_name = '|'.join(split_vals[2:])
+        
+        return (show_dir, tvdb_id, show_name)
+
+    @cherrypy.expose
+    def addExistingShows(self, shows_to_add=None, promptForSettings=None):
+        """
+        Receives a dir list and add them. Adds the ones with given TVDB IDs first, then forwards
+        along to the newShow page.
+        """
+
+        # grab a list of other shows to add, if provided
+        if not shows_to_add:
+            shows_to_add = []
+        elif type(shows_to_add) != list:
+            shows_to_add = [shows_to_add]
+        
+        shows_to_add = [urllib.unquote_plus(x) for x in shows_to_add]
+        
+        if promptForSettings == "on":
+            promptForSettings = 1
+        else:
+            promptForSettings = 0
+        
+        tvdb_id_given = []
+        dirs_only = []
+        # separate all the ones with TVDB IDs
+        for cur_dir in shows_to_add:
+            if not '|' in cur_dir:
+                dirs_only.append(cur_dir)
+            else:
+                show_dir, tvdb_id, show_name = self.split_extra_show(cur_dir)
+                if not show_dir or not tvdb_id or not show_name:
+                    continue
+                tvdb_id_given.append((show_dir, int(tvdb_id), show_name))
+
+
+        # if they want me to prompt for settings then I will just carry on to the newShow page
+        if promptForSettings and shows_to_add:
+            return self.newShow(shows_to_add[0], shows_to_add[1:])
+        
+        # if they don't want me to prompt for settings then I can just add all the nfo shows now
+        num_added = 0
+        for cur_show in tvdb_id_given:
+            show_dir, tvdb_id, show_name = cur_show
+
+            # add the show
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT)
+            num_added += 1
+         
+        if num_added:
+            ui.flash.message("Shows Added", "Automatically added "+str(num_added)+" from their existing metadata files")
+
+        # if we're done then go home
+        if not dirs_only:
+            redirect('/home')
+
+        # for the remaining shows we need to prompt for each one, so forward this on to the newShow page
+        return self.newShow(dirs_only[0], dirs_only[1:])
+
 
 
 
@@ -1382,6 +1618,14 @@ class Home:
             return "Test prowl notice failed"
 
     @cherrypy.expose
+    def testNotifo(self, username=None, apisecret=None):
+        result = notifiers.notifo_notifier.test_notify(username, apisecret)
+        if result:
+            return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
+        else:
+            return "Error sending Notifo notification"
+
+    @cherrypy.expose
     def twitterStep1(self):
         return notifiers.twitter_notifier._get_authorization()
 
@@ -1409,6 +1653,14 @@ class Home:
             return "Test notice sent successfully to "+urllib.unquote_plus(host)
         else:
             return "Test notice failed to "+urllib.unquote_plus(host)
+
+    @cherrypy.expose
+    def testLibnotify(self):
+        if notifiers.libnotify_notifier.test_notify():
+            return "Tried sending desktop notification via libnotify"
+        else:
+            return notifiers.libnotify.diagnose()
+
 
     @cherrypy.expose
     def shutdown(self):
@@ -1522,6 +1774,15 @@ class Home:
             epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
             epCounts[curEpCat] += 1
 
+        def titler(x):
+            if not x:
+                return x
+            if x.lower().startswith('a '):
+                    x = x[2:]
+            elif x.lower().startswith('the '):
+                    x = x[4:]
+            return x
+        t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
 
         t.epCounts = epCounts
         t.epCats = epCats
@@ -1598,7 +1859,7 @@ class Home:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
 
-            if showObj.seasonfolders != seasonfolders:
+            if bool(showObj.seasonfolders) != bool(seasonfolders):
                 showObj.seasonfolders = seasonfolders
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)
@@ -1611,7 +1872,8 @@ class Home:
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
-                if not os.path.isdir(location):
+                logger.log(os.path.normpath(showObj._location)+" != "+os.path.normpath(location))
+                if not ek.ek(os.path.isdir, location):
                     errors.append("New location <tt>%s</tt> does not exist" % location)
 
                 # don't bother if we're going to update anyway
@@ -1804,7 +2066,7 @@ class Home:
                         logger.log(u"Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
 
-                    if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
+                    if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
                         logger.log(u"Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
                         continue
 

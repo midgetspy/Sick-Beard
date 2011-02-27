@@ -45,6 +45,15 @@ try:
     import lib.httplib2 as httplib2
 except ImportError:
     import httplib2
+    
+# Try using local version, followed by system, and none if neither are found
+try:
+    import lib.socks as socks
+except ImportError:
+    try:
+        import socks as socks
+    except ImportError:
+        socks = None
 
 from tvdb_ui import BaseUI, ConsoleUI
 from tvdb_exceptions import (tvdb_error, tvdb_userabort, tvdb_shownotfound,
@@ -307,7 +316,8 @@ class Tvdb:
                 language = None,
                 search_all_languages = False,
                 apikey = None,
-                forceConnect=False):
+                forceConnect = False,
+                http_proxy = None):
         """interactive (True/False):
             When True, uses built-in console UI is used to select the correct show.
             When False, the first search result is used.
@@ -374,6 +384,10 @@ class Tvdb:
             recently timed out. By default it will wait one minute before
             trying again, and any requests within that one minute window will
             return an exception immediately. 
+            
+        http_proxy (str/unicode):
+            URL for an optional HTTP Proxy that may be used to retrieve the data
+            from thetvdb.com
         """
         
         global lastTimeout
@@ -419,6 +433,8 @@ class Tvdb:
 
         self.config['banners_enabled'] = banners
         self.config['actors_enabled'] = actors
+        
+        self.config['http_proxy'] = http_proxy
 
         if self.config['debug_enabled']:
             warnings.warn("The debug argument to tvdb_api.__init__ will be removed in the next version. "
@@ -486,7 +502,11 @@ class Tvdb:
 	else:
 	    h_cache = False
 
-	h = httplib2.Http(cache=h_cache)
+        if self.config['http_proxy'] != '' and self.config['http_proxy'] != None and socks != None:
+            parsedURI = socks.parseproxyuri(self.config['http_proxy'])
+            h = httplib2.Http(cache=h_cache,proxy_info=httplib2.ProxyInfo(socks.PROXY_TYPE_HTTP, parsedURI[1], int(parsedURI[2])))
+        else:
+            h = httplib2.Http(cache=h_cache)
 
 	# Handle a recache request, this will get fresh content and cache again
 	# if enabled
