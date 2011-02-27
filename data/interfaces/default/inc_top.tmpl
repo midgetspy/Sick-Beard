@@ -88,9 +88,10 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 });
     </script>
     <script type="text/javascript" charset="utf-8">
+    <!--
         sbRoot = "$sbRoot";
         //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
-        top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; 
+        top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px alt="Jump to top" />'; 
         
         $.Browser = {
             defaults: {
@@ -99,11 +100,13 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
                 autocompleteURL:   '$sbRoot/browser/complete'
             }
         };
+    //-->
     </script>
     <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
     
-<script type="text/javascript"> 
+<script type="text/javascript">
+<!--
     \$(document).ready(function(){ 
         \$("ul.sf-menu").supersubs({ 
             minWidth:    12,   // minimum width of sub-menus in em units 
@@ -166,6 +169,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     #end for
 
     });
+//-->
 </script>
 </head>
 

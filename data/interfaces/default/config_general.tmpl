@@ -18,6 +18,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 <script type="text/javascript" src="$sbRoot/js/configGeneral.js"></script>
 #set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
 <script type="text/javascript" charset="utf-8">
+<!--
 \$(document).ready(function(){
 
   if (#if $sickbeard.QUALITY_DEFAULT in $qualityPresets then "1" else "0"#) {
@@ -51,6 +52,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
   });
 
 });
+//-->
 </script>
 
 <div id="config">
@@ -157,14 +159,14 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="clearfix" style="clear:left;"></div>
 
                         <div class="field-pair clearfix">
-                            <input type="checkbox" name="use_banner" id="use_banner" #if $sickbeard.USE_BANNER then "CHECKED" else ""#>
+                            <input type="checkbox" name="use_banner" id="use_banner" #if $sickbeard.USE_BANNER then "checked=checked" else ""#/>
                             <label class="clearfix" for="use_banner">
                                 <span class="component-title">Use Banners</span>
                                 <span class="component-desc">Use banners instead of posters for your Show Folder Images</span>
                             </label>
                         </div>
 
-                        <input type="submit" value="Save Changes"><br/>
+                        <input type="submit" value="Save Changes" /><br/>
 
                     </fieldset>
                 </div><!-- /component-group2 -->
@@ -292,7 +294,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_sep_type" id="naming_sep_type">
                                     #for ($i, $ex) in enumerate($config.naming_sep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "selected=\"selected\"" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
                                     </select>
                                 </span>
@@ -305,7 +307,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_ep_type" id="naming_ep_type">
                                     #for ($i, $ex) in enumerate($config.naming_ep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "selected=\"selected\"" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
                                     </select>
                                 </span>
@@ -315,9 +317,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair" style="padding:10px; background: #efefef;">
                             <label class="clearfix" for="naming_ep_type">
                                 <span class="component-title jumbo">Single-Ep Example:</span>
-                                <span class="component-desc jumbo">
-                                    <div id="normalExampleText"></div>
-                                </span>
+                                <span class="component-desc jumbo" id="normalExampleText"></span>
                             </label>
                         </div>
 
@@ -327,7 +327,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_multi_ep_type" id="naming_multi_ep_type">
                                     #for ($i, $ex) in enumerate($config.naming_multi_ep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "selected=\"selected\"" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
                                     </select>
                                 </span>
@@ -337,9 +337,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair" style="padding:10px; background: #efefef;">
                             <label class="clearfix" for="naming_multi_ep_type">
                                 <span class="component-title jumbo">Multi-Ep Example:</span>
-                                <span class="component-desc jumbo">
-                                    <div id="multiExampleText"></div>
-                                </span>
+                                <span class="component-desc jumbo" id="multiExampleText"></span>
                             </label>
                         </div>
                         

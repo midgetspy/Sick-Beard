@@ -302,11 +302,11 @@
                             <label class="nocheck clearfix">
                                 <span class="component-title">Prowl priority:</span>
                                <select id="prowl_priority" name="prowl_priority">
-                                    <option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then "selected" else ""#>Very Low
-                                    <option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then "selected" else ""#>Moderate
-                                    <option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then "selected" else ""#>Normal
-                                    <option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then "selected" else ""#>High
-                                    <option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then "selected" else ""#>Emergency
+                                    <option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then 'selected="selected"' else ""#>Very Low</option>
+                                    <option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then 'selected="selected"' else ""#>Moderate</option>
+                                    <option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then 'selected="selected"' else ""#>Normal</option>
+                                    <option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then 'selected="selected"' else ""#>High</option>
+                                    <option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then 'selected="selected"' else ""#>Emergency</option>
                                 </select>
                             </label>
                             <label class="nocheck clearfix">

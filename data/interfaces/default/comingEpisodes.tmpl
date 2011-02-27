@@ -161,7 +161,7 @@ Custom
         </td>
         <td align="center">$cur_result["show_status"]</td>
         <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/search32.png" /></a></td>
-        <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></td>
+        <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></td>
       </tr>
     <!-- end $cur_result["show_name"] -->
     #end for
@@ -252,12 +252,12 @@ Custom
             <span class="pause">[paused]</span>
             #end if            
             </a></span>
-            <span class="tvshowTitleIcons"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/search32.png" /></a> <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate|${cur_result["showid"]}|$cur_result["show_name"]" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage|${cur_result["showid"]}" /></a></span>
+            <span class="tvshowTitleIcons"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/search32.png" /></a> <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
           </th>
         </tr>
         <tr>
           <th #if $layout == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
-            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&which=$layout" /></a>
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&amp;which=$layout" /></a>
           </th>
 #if $layout == 'banner':
         </tr>
