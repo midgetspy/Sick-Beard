@@ -191,8 +191,9 @@ clear:left;
 
 .plotInfo {
 cursor:help;
-padding-left:5px;
-float:right;
+margin-left: 8px;
+float: right;
+clear: right;
 }
 
 .message {
@@ -389,3 +390,9 @@ div#addShowPortal  button .buttontext { float: right; text-align: left; width: 3
 .hover { background-color: #cfcfcf !important; cursor: pointer; }
 
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
+
+/* for manage_massEdit */
+.optionWrapper { width: 450px; margin-left: auto; margin-right: auto; padding: 6px 12px; }
+.optionWrapper span.selectTitle { float: left; font-weight: 700; font-size: 1.2em; text-align: left; width: 225px; }
+.optionWrapper div.selectChoices { float: left; width: 175px; margin-left: 25px; }
+.optionWrapper br { clear: both; }

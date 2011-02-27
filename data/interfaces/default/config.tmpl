@@ -4,12 +4,12 @@
 
 #set global $sbPath=".."
 
-<!--#set global $topmenu="config"#-->
+#set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <div id="summary" class="align-left">
 <table class="infoTable" cellspacing="1" border="0" cellpadding="0">
-    <tr><td class="infoTableHeader">SB Version: </td><td class="infoTableCell">alpha ($sickbeard.version.SICKBEARD_VERSION) <!-- &ndash; build.date --></td></tr>
+    <tr><td class="infoTableHeader">SB Version: </td><td class="infoTableCell">alpha ($sickbeard.version.SICKBEARD_VERSION) <!-- &ndash; build.date //--></td></tr>
     <tr><td class="infoTableHeader">SB Config file: </td><td class="infoTableCell">$sickbeard.CONFIG_FILE</td></tr>
     <tr><td class="infoTableHeader">SB Cache Dir: </td><td class="infoTableCell">$sickbeard.CACHE_DIR</td></tr>
     <tr><td class="infoTableHeader">SB Arguments: </td><td class="infoTableCell">$sickbeard.MY_ARGS</td></tr>

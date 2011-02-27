@@ -6,10 +6,11 @@
 
 #set global $sbPath=".."
 
-<!--#set global $topmenu="home"#-->
+#set global $topmenu="home"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 <script>
+<!--
 \$(document).ready(function(){
 
   \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data){
@@ -38,6 +39,7 @@
   });
 
 });
+//-->
 </script>
 
 
