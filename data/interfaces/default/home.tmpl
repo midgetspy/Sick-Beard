@@ -18,6 +18,7 @@
 #set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
 
 <script type="text/javascript" charset="utf-8">
+<!--
 \$.tablesorter.addParser({ 
     id: 'nextAirDate',
     is: function(s) {
@@ -135,6 +136,7 @@
     });
 
 });
+//-->
 </script>
 
 <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
@@ -209,12 +211,14 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   </tr>
 
 <script type="text/javascript">
+<!--
    \$(function() {
        \$("\#progressbar$curShow.tvdbid").progressbar({
            value: parseInt($nom) * 100 / parseInt($den)
        });
-       \$("\#progressbar$curShow.tvdbid").append( "<!--$dlStat--><div class='progressbarText'>$dlStat</div>" )
+       \$("\#progressbar$curShow.tvdbid").append( "<div class='progressbarText'>$dlStat</div>" )
    });
+//-->
 </script>
 
 #end for

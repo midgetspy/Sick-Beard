@@ -64,6 +64,12 @@
 <!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>-->
     </tr>
   </thead>
+<tfoot>
+  <tr>
+    <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit" /></td>
+    <td colspan="7" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
+  </tr>
+</tfoot>
   <tbody>
 
 #set $myShowList = $sickbeard.showList
@@ -110,12 +116,6 @@ Custom
 
 #end for
 </tbody>
-<tfoot>
-  <tr>
-    <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit" /></td>
-    <td colspan="7" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
-  </tr>
-</tfoot>
 </table>
 
 </form>
