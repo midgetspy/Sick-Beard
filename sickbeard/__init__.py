@@ -403,7 +403,7 @@ def initialize(consoleLogging=True):
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         SEASON_FOLDERS_FORMAT = check_setting_str(CFG, 'General', 'season_folders_format', 'Season %02d')
         SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
-        SEASON_FOLDER_PERMISSIONS = check_setting_int(CFG, 'Genernal', 'permissions', 0777)
+        SEASON_FOLDER_PERMISSIONS = check_setting_int(CFG, 'General', 'permissions', 0777)
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
