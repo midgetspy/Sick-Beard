@@ -4,12 +4,13 @@
 
 #set global $sbPath="../.."
 
-<!--#set global $topmenu="config"#-->
+#set global $topmenu="config"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
 <script type="text/javascript" charset="utf-8">
+<!--
 sbRoot = '$sbRoot'; 
 \$(document).ready(function(){
 
@@ -17,6 +18,7 @@ sbRoot = '$sbRoot';
     \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
 #end for
 });
+//-->
 </script>
 
 <div id="config">
@@ -61,7 +63,7 @@ sbRoot = '$sbRoot';
                         <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
                         <br/><input type="submit" value="Save Changes" /><br/>
                     </fieldset>
-                </div><!-- /component-group1 -->
+                </div><!-- /component-group1 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
 
@@ -87,7 +89,7 @@ sbRoot = '$sbRoot';
                         </div>
 
 
-<!-- start div for editing providers -->
+<!-- start div for editing providers //-->
 #if $sickbeard.SHOW_TVBINZ:
 <div class="providerDiv" id="tvbinzDiv">
                         <div class="field-pair">
@@ -170,12 +172,12 @@ sbRoot = '$sbRoot';
                             </label>
                         </div>
 </div>
-<!-- end div for editing providers -->
+<!-- end div for editing providers //-->
 
                     <input type="submit" value="Save Changes" /><br/>
             
                     </fieldset>
-                </div><!-- /component-group2 -->
+                </div><!-- /component-group2 //-->
 
                 <div id="core-component-group3" class="component-group clearfix">
 
@@ -230,12 +232,12 @@ sbRoot = '$sbRoot';
 </div>
 
                     </fieldset>
-                </div><!-- /component-group3 -->
+                </div><!-- /component-group3 //-->
 
                     
             <br/><input type="submit" value="Save Changes" /><br/>
                 
-            </div><!-- /config-components -->
+            </div><!-- /config-components //-->
 
 </form>
 </div></div>

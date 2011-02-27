@@ -9,11 +9,13 @@
 
 #set global $sbPath="../.."
 
-<!--#set global $topmenu="config"#-->
+#set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript">
+<!--
 nameTestURL = "$sbRoot/config/general/testNaming";
+//-->
 </script>
 <script type="text/javascript" src="$sbRoot/js/configGeneral.js"></script>
 #set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
@@ -101,7 +103,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                         <input type="submit" value="Save Changes" />
                     </fieldset>
-                </div><!-- /component-group1 -->
+                </div><!-- /component-group1 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
 
@@ -169,7 +171,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <input type="submit" value="Save Changes" /><br/>
 
                     </fieldset>
-                </div><!-- /component-group2 -->
+                </div><!-- /component-group2 //-->
 
                 <div id="core-component-group3" class="component-group clearfix">
 
@@ -231,9 +233,9 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                         <input type="submit" value="Save Changes" />
                     </fieldset>
-                </div><!-- /component-group3 -->
+                </div><!-- /component-group3 //-->
 
-                <div id="core-component-group5" class="component-group clearfix">
+                <div id="core-component-group4" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Episode Naming</h3>
@@ -358,7 +360,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                         <input type="submit" value="Save Changes" />
                     </fieldset>
-                </div><!-- /component-group5 -->
+                </div><!-- /component-group4 //-->
 
             <br/><input type="submit" value="Save Changes" /><br/>
             </div><!-- /config-components -->
@@ -368,7 +370,9 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 <div class="clearfix"></div>
 
 <script type="text/javascript" charset="utf-8">
+<!--
     jQuery('#log_dir').fileBrowser({ title: 'Select Log Directory' });
+//-->
 </script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
