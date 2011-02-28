@@ -235,20 +235,4 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
 <div id="content">
 
-#for $curMessage in $flash.messages():
-<br />
-<div class="message ui-state-highlight ui-corner-all">
-    <p><span class="ui-icon ui-icon-info"></span>$curMessage[0]</p>
-    $curMessage[1]
-</div>
-#end for
-
-#for $curError in $flash.errors():
-<br />
-<div class="message ui-state-error ui-corner-all">
-    <p><span class="ui-icon ui-icon-alert"></span>$curError[0]</p>
-    $curError[1]
-</div>
-#end for
-
 <h1>#if $varExists('header') then $header else $title#</h1>
