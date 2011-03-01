@@ -153,14 +153,14 @@ margin-left:auto;
 margin-right:auto;
 }
 .sickbeardTable th{
-padding:2px;
+padding:3px;
 font-weight:700;
 background-color:#333;
 color:#FFF;
 text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 .sickbeardTable td{
-padding:5px;
+padding:4px;
 }
 .sickbeardTable tfoot a {
 color:#FFF;
@@ -188,6 +188,7 @@ margin-right:10px;
 }
 
 .progressbarText {
+text-shadow: 0 0 0.1em #fff;
 position:absolute;
 top:0;
 width:100%;

@@ -8,7 +8,8 @@ table.tablesorter thead tr .header {
 }
 table.tablesorter thead tr th, table.tablesorter tfoot tr th {
     border: 1px solid #241109;
-    padding: 2px;
+    padding: 3px;
+    font-weight:700;
 }
 /*
 table.tablesorter thead tr .headerSortUp {
