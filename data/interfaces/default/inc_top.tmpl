@@ -1,5 +1,6 @@
 #import sickbeard.version
 #import sickbeard
+#import urllib
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -15,13 +16,14 @@
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.pnotify.default.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/smooth-grinder/jquery-ui-1.8.9.custom.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/smooth-grinder/jquery-ui-1.8.10.custom.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/superfish.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
+
 <style type="text/css">
 <!--
-.ac_loading { background: white url("$sbRoot/images/indicator.gif") right center no-repeat; }
+.ac_loading { background: white url("$sbRoot/images/loading16.gif") right center no-repeat; }
 .sf-sub-indicator { background: url("$sbRoot/images/arrows.png") no-repeat -10px -100px; }
 .sf-shadow ul { background: url("$sbRoot/images/shadow.png") no-repeat bottom right; }
 table.tablesorter thead tr .header { background-image: url("$sbRoot/images/tablesorter/bg.gif"); }
@@ -30,14 +32,16 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 .browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat; }
 
 .ui-dialog, .ui-dialog-buttonpane { background: #eceadf url("$sbRoot/css/smooth-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat !important; }
-.ui-widget-content { border: 1px solid #aaaaaa; background: #dcdcdc url("$sbRoot/css/smooth-grinder/images/ui-bg_highlight-soft_75_dcdcdc_1x100.png") 50% 50% repeat-x; color: #222222; }
-.ui-widget-header { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_ffffff_40x100.png") 50% 50% repeat; color: #222222; font-weight: bold; }
+.ui-accordion-content, .ui-tabs-panel { background: #ededed !important; background-image: none !important; }
 
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #aaaaaa; background: #e6e6e6 url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50% repeat-x; font-weight: bold; color: #654b24; }
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #999999; background: #dadada url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_75_dadada_1x400.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_65_ffffff_1x400.png") 50% 50% repeat-x; font-weight: bold; color: #140f06; }
+.ui-widget-content { border: 1px solid #aaaaaa; background: #dcdcdc url("$sbRoot/css/smooth-grinder/images/ui-bg_highlight-soft_75_dcdcdc_1x100.png") 50% top repeat-x; color: #222222; }
+.ui-widget-header { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_ffffff_40x100.png") 50% 50% repeat-x; color: #222222; font-weight: bold; }
 
-.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight  {border: 1px solid #aaaaaa; background: #fbf9ee url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_55_fbf9ee_1x400.png") 50% 50% repeat-x; color: #363636; }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #aaaaaa; background: #efefef url("$sbRoot/css/smooth-grinder/images/ui-bg_highlight-soft_75_efefef_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #999999; background: #dddddd url("$sbRoot/css/smooth-grinder/images/ui-bg_highlight-soft_75_dddddd_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #aaaaaa; background: #dfdfdf url("$sbRoot/css/smooth-grinder/images/ui-bg_inset-soft_75_dfdfdf_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #140f06; }
+
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {border: 1px solid #aaaaaa; background: #fbf9ee url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_55_fbf9ee_1x400.png") 50% 50% repeat-x; color: #363636; }
 .ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #aaaaaa; background: #fef1ec url("$sbRoot/css/smooth-grinder/images/ui-bg_glass_95_fef1ec_1x400.png") 50% 50% repeat-x; color: #8c291d; }
 
 .ui-icon { width: 16px; height: 16px; background-image: url("$sbRoot/css/smooth-grinder/images/ui-icons_222222_256x240.png"); }
@@ -51,11 +55,11 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
 .ui-widget-overlay { background: #aaaaaa url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat; opacity: .35;filter:Alpha(Opacity=35); }
 .ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
--->
+--> 
 </style>
 
-    <script type="text/javascript" src="$sbRoot/js/jquery-1.5.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.10.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
     <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.autocomplete.min.js"></script>
@@ -66,7 +70,25 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.0.3.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/tools.tooltip-1.2.5.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.pnotify-1.0.1.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.divgrow-1.3.1.min.js"></script>
+
     <script type="text/javascript" charset="utf-8">
+\$(document).ready(function(){ 
+
+   \$("table.sickbeardTable td").hover( 
+       function() { \$(this).find("a").parent().addClass("hover"); }, 
+       function() { \$(this).find("a").parent().removeClass("hover");
+   } );
+   
+   \$("table.sickbeardTable td").click( function() {
+        var href = \$(this).find("a").attr("href");
+        if(href) { window.location = href; }
+   });
+   
+});
+    </script>
+    <script type="text/javascript" charset="utf-8">
+        sbRoot = "$sbRoot";
         //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
         top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; 
         
@@ -129,8 +151,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
     #for $curMessage in $flash.messages():
         \$.pnotify({
-            pnotify_title: '$curMessage[0].replace('\\','\\\\').replace('"','\\"')',
-            pnotify_text: '$curMessage[1].replace('\\','\\\\').replace('"','\\"')'
+            pnotify_title: decodeURIComponent('$urllib.quote($curMessage[0].encode('UTF-8'))'),
+            pnotify_text: decodeURIComponent('$urllib.quote($curMessage[1].encode('UTF-8'))')
         });
     #end for
 
@@ -138,8 +160,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
         \$.pnotify({
             pnotify_type: 'error',
             pnotify_hide: false,
-            pnotify_title: '$curError[0].replace('\\','\\\\').replace('"','\\"')',
-            pnotify_text: '$curError[1].replace('\\','\\\\').replace('"','\\"')'
+            pnotify_title: decodeURIComponent('$urllib.quote($curError[0].encode('UTF-8'))'),
+            pnotify_text: decodeURIComponent('$urllib.quote($curError[1].encode('UTF-8'))')
         });
     #end for
 

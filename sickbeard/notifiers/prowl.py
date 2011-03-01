@@ -46,7 +46,7 @@ class ProwlNotifier:
         data = {'apikey': prowl_api,
                 'application': title,
                 'event': event,
-                'description': message,
+                'description': message.encode('utf-8'),
                 'priority': prowl_priority }
 
         http_handler.request("POST",

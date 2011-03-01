@@ -171,7 +171,7 @@
   </tr>
 #end for
 
-#set $myShowList = $sickbeard.showList
+#set $myShowList = $list($sickbeard.showList)
 $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #for $curShow in $myShowList:
 #set $curEp = $curShow.nextEpisode()

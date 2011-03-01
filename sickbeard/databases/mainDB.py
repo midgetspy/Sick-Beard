@@ -293,3 +293,37 @@ class AddLang (FixSabHostURL):
 
     def execute(self):
         self.addColumn("tv_shows", "lang", "TEXT", "en")
+
+class PopulateRootDirs (AddLang):
+    def test(self):
+        return self.checkDBVersion() >= 7
+    
+    def execute(self):
+        dir_results = self.connection.select("SELECT location FROM tv_shows")
+        
+        dir_counts = {}
+        for cur_dir in dir_results:
+            cur_root_dir = ek.ek(os.path.dirname, ek.ek(os.path.normpath, cur_dir["location"]))
+            if cur_root_dir not in dir_counts:
+                dir_counts[cur_root_dir] = 1
+            else:
+                dir_counts[cur_root_dir] += 1
+        
+        logger.log(u"Dir counts: "+str(dir_counts), logger.DEBUG)
+        
+        if not dir_counts:
+            self.incDBVersion()
+            return
+        
+        default_root_dir = dir_counts.values().index(max(dir_counts.values()))
+        
+        new_root_dirs = str(default_root_dir)+'|'+'|'.join(dir_counts.keys())
+        logger.log(u"Setting ROOT_DIRS to: "+new_root_dirs, logger.DEBUG)
+        
+        sickbeard.ROOT_DIRS = new_root_dirs
+        
+        self.incDBVersion()
+        
+        
+        
+        
