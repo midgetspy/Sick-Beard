@@ -55,6 +55,7 @@ div#insideContent {
 
 .posterThumb {
     /* display:table-cell; */
+    -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
     height: 200px;
     width: 136px;
@@ -63,6 +64,7 @@ div#insideContent {
 }
 .bannerThumb {
     /* display:table-cell; */
+    -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
     height: 112px;
     width: 606px;
