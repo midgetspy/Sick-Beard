@@ -1,13 +1,11 @@
 #import sickbeard
+#import os.path
 #from sickbeard import common
 #from sickbeard import exceptions
 #set global $title="Edit "+$show.name
 #set global $header=$show.name
-
 #set global $sbPath=".."
-
-<!--#set global $topmenu="home"#-->
-#import os.path
+#set global $topmenu="home"
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 <script>
 \$(document).ready(function(){

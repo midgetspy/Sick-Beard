@@ -1,14 +1,12 @@
 #import sickbeard
+#import os.path
 #from sickbeard.common import *
 #import pytz
 #from pytz import common_timezones
 #set global $title="Config - Timezones"
 #set global $header="Timezone Options"
-
 #set global $sbPath="../.."
-
-<!--#set global $topmenu="config"#-->
-#import os.path
+#set global $topmenu="config"
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <form action="saveTimezones" method="POST">

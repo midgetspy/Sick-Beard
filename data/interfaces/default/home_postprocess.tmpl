@@ -1,11 +1,8 @@
 #import sickbeard
-#set global $title="Post Processing"
-
-#set global $sbPath="../.."
-
-
-<!--#set global $topmenu="home"#-->
 #import os.path
+#set global $title="Post Processing"
+#set global $sbPath="../.."
+#set global $topmenu="home"
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <form name="processForm" method="post" action="processEpisode">

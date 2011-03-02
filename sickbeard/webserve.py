@@ -783,11 +783,11 @@ class ConfigEpisodeDownloads:
         
         if str(permissions).length < 4:
             if str(permissions).length == 3:
-                sickbeard.SEASON_FOLDER_PERMISSIONS = int("0" + permissions)
+                sickbeard.PERMISSIONS = int("0" + permissions)
             else:
-                sickbeard.SEASON_FOLDER_PERMISSIONS = 0777
+                sickbeard.PERMISSIONS = 0777
         else:
-            sickbeard.SEASON_FOLDER_PERMISSIONS = int(permissions);
+            sickbeard.PERMISSIONS = int(permissions);
 
         if sab_host and not re.match('https?://.*', sab_host):
             sab_host = 'http://' + sab_host
@@ -1409,7 +1409,7 @@ class NewHomeAddShows:
             ui.flash.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
         else:
-            helpers.chmodFile(show_dir, sickbeard.SEASON_FOLDER_PERMISSIONS)
+            helpers.chmodFile(show_dir, sickbeard.PERMISSIONS)
             
         # prepare the inputs for passing along
         if seasonFolders == "on":

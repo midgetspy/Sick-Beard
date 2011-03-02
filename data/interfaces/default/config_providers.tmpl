@@ -1,11 +1,9 @@
 #import sickbeard
+#import os.path
 #set global $title="Config - Providers"
 #set global $header="Search Providers"
-
 #set global $sbPath="../.."
-
-<!--#set global $topmenu="config"#-->
-#import os.path
+#set global $topmenu="config"
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>

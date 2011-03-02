@@ -1,16 +1,13 @@
 #import sickbeard
 #import datetime
+#import os.path
 #from sickbeard.common import *
 #from sickbeard import db
 
 #set global $title="Home"
 #set global $header="Show List"
-
 #set global $sbPath = ".."
-
-#set global $topmenu="home"#
-
-#import os.path
+#set global $topmenu="home"
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 #set $myDB = $db.DBConnection()

@@ -5,6 +5,7 @@
 #set global $sbPath="../.."
 
 #set global $topmenu="config"
+#set $perstr = '%o' % $sickbeard.PERMISSIONS
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
@@ -272,7 +273,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix" for="folder_permissions">
                                 <span class="component-title">Permission for New Folder</span>
-                                <input type="text" name="permissions" id="permissions" value="$sickbeard.SEASON_FOLDER_PERMISSIONS" size="10" />
+                                <input type="text" name="permissions" id="permissions" value="$perstr" size="10" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
