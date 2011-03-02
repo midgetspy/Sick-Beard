@@ -235,10 +235,11 @@ Custom
                     #set $show_div = "ep_listing listing_toofar"
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
                     #if $cur_ep_airdate == $today:
+                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h1>
                         #set $show_div = "ep_listing listing_current"
                     #else:
+                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
                         #set $show_div = "ep_listing listing_default"
                     #end if
                 #end if
