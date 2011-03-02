@@ -23,7 +23,7 @@ import re
 
 from sickbeard import version
 
-USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION+' ('+platform.system()+' '+platform.release()+')'
+USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION.replace(' ','-')+' ('+platform.system()+' '+platform.release()+')'
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -286,6 +286,7 @@ sceneExceptions = {72546: ['CSI'],
                    80646: ['Frontline (US)', 'Frontline'],
                    189931: ['RBT (AU)'],
                    73255: ['House', 'House M D'],
+                   73244: ['The Office (US)', 'The Office'],
                    }
 
 countryList = {'Australia': 'AU',

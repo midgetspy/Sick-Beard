@@ -303,12 +303,8 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, edit_paused=False, paused=None, edit_season_folders=False, season_folders=None,
-                       edit_quality=False, anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
-
-        edit_paused = True if edit_paused == 'on' else False
-        edit_season_folders = True if edit_season_folders == 'on' else False
-        edit_quality = True if edit_quality == 'on' else False
+    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False,
+                       anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
 
         dir_map = {}
         for cur_arg in kwargs:
@@ -334,14 +330,21 @@ class Manage:
             else:
                 new_show_dir = showObj._location
             
-            if not edit_paused:
-                paused = showObj.paused
-            if not edit_season_folders:
-                season_folders = showObj.seasonfolders
-            if not edit_quality:
+            if paused == 'keep':
+                new_paused = showObj.paused
+            else:
+                new_paused = 'on' if paused == 'enable' else 'off'
+            logger.log(str(paused)+" so "+str(new_paused))
+
+            if season_folders == 'keep':
+                new_season_folders = showObj.seasonfolders
+            else:
+                new_season_folders = 'on' if season_folders == 'enable' else 'off'
+
+            if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, season_folders, paused, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors))
@@ -497,14 +500,30 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, defaultQuality):
+    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
+
+        if anyQualities:
+            anyQualities = anyQualities.split(',')
+        else:
+            anyQualities = []
+
+        if bestQualities:
+            bestQualities = bestQualities.split(',')
+        else:
+            bestQualities = []
+
+        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+        
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
-        sickbeard.QUALITY_DEFAULT = int(defaultQuality)
-        if defaultSeasonFolders == "on":
+        sickbeard.QUALITY_DEFAULT = int(newQuality)
+
+        if defaultSeasonFolders == "true":
             defaultSeasonFolders = 1
         else:
             defaultSeasonFolders = 0
+
         sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+
     
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
@@ -1306,7 +1325,7 @@ class NewHomeAddShows:
         if not show_dir:
             t.default_show_name = ''
         elif not show_name:
-            t.default_show_name = ek.ek(os.path.basename, ek.ek(os.path.normpath, show_dir))
+            t.default_show_name = ek.ek(os.path.basename, ek.ek(os.path.normpath, show_dir)).replace('.',' ')
         else:
             t.default_show_name = show_name
         
@@ -1376,14 +1395,14 @@ class NewHomeAddShows:
         
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
-            ui.flash.error("Unable to add show", "Folder "+str(show_dir)+" exists already")
+            ui.flash.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home')
         
         # create the dir and make sure it worked
         dir_exists = helpers.makeDir(show_dir)
         if not dir_exists:
-            logger.log(u"Unable to create the folder "+str(show_dir)+", can't add the show", logger.ERROR)
-            ui.flash.error("Unable to add show", "Unable to create the folder "+str(show_dir)+", can't add the show")
+            logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
+            ui.flash.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
 
         # prepare the inputs for passing along
@@ -2051,7 +2070,7 @@ class Home:
                         logger.log(u"Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
 
-                    if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
+                    if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
                         logger.log(u"Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
                         continue
 

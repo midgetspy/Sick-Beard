@@ -1,26 +1,5 @@
 $(document).ready(function(){
 
-
-    $('#edit_quality').change(function(){
-        var checked = $(this).attr('checked');
-
-        $('#qualityPreset').attr('disabled', !checked);
-        $('#anyQualities').attr('disabled', !checked);
-        $('#bestQualities').attr('disabled', !checked);
-    });
-
-    $('#edit_season_folders').change(function(){
-        var checked = $(this).attr('checked');
-
-        $('#season_folders').attr('disabled', !checked);
-    });
-
-    $('#edit_paused').change(function(){
-        var checked = $(this).attr('checked');
-
-        $('#paused').attr('disabled', !checked);
-    });
-
     function find_dir_index(which){
         var dir_parts = which.split('_');
         return dir_parts[dir_parts.length-1];
@@ -33,7 +12,7 @@ $(document).ready(function(){
 
     $('.new_root_dir').change(function(){
         var cur_index = find_dir_index($(this).attr('id'));
-        $('#display_new_root_dir_'+cur_index).html($(this).val());
+        $('#display_new_root_dir_'+cur_index).html('<b>'+$(this).val()+'</b>');
     });
 
     $('.edit_root_dir').click(function(){

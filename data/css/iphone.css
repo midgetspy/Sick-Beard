@@ -1,5 +1,4 @@
-body 
-{
+body {
 width: 100%;
 padding: 0;
 margin: 0;
@@ -8,6 +7,7 @@ line-height:10px;
 }
 
 .MainMenu a, .SubMenu a { padding: 2px; font-weight: normal;  }
+#btnExistingShow, #btnNewShow { min-height: 150px; }
 
 .sickbeardTable {
 margin-left:1%;

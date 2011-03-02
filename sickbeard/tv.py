@@ -676,7 +676,7 @@ class TVShow(object):
     def refreshDir(self):
 
         # make sure the show dir is where we think it is
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             return False
 
         # load from dir
@@ -702,11 +702,12 @@ class TVShow(object):
             # if the path doesn't exist or if it's not in our show dir
             if not ek.ek(os.path.isfile, curLoc) or not os.path.normpath(curLoc).startswith(os.path.normpath(self.location)):
 
-                logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to SKIPPED", logger.DEBUG)
                 with curEp.lock:
+                    # if it used to have a file associated with it and it doesn't anymore then set it to IGNORED
+                    if curEp.location and curEp.status in Quality.DOWNLOADED:
+                        logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to IGNORED", logger.DEBUG)
+                        curEp.status = IGNORED
                     curEp.location = ''
-                    if curEp.status in Quality.DOWNLOADED:
-                        curEp.status = SKIPPED
                     curEp.hasnfo = False
                     curEp.hastbn = False
                     curEp.saveToDB()
@@ -1128,7 +1129,7 @@ class TVEpisode(object):
         #early conversion to int so that episode doesn't get marked dirty
         self.tvdbid = int(myEp["id"])
         
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(u"The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
 
@@ -1342,6 +1343,7 @@ class TVEpisode(object):
 
         regex = "(.*) \(\d\)"
 
+        goodEpString = ''
 
         if len(self.relatedEps) == 0:
             goodName = self.name
@@ -1395,8 +1397,13 @@ class TVEpisode(object):
             naming_quality = sickbeard.NAMING_QUALITY
 
         if ((self.show.genre and "Talk Show" in self.show.genre) or self.show.air_by_date) and sickbeard.NAMING_DATES:
-            goodEpString = self.airdate.strftime("%Y.%m.%d")
-        else:
+            try:
+                goodEpString = self.airdate.strftime("%Y.%m.%d")
+            except ValueError:
+                pass
+
+        # if we didn't set it to the air-by-date value use the season/ep
+        if not goodEpString:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
 
         for relEp in self.relatedEps:

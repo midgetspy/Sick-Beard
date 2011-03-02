@@ -1,9 +1,15 @@
 $(document).ready(function(){
 
     $('#saveDefaultsButton').click(function() {
+        var anyQualArray = new Array();
+        var bestQualArray = new Array();
+        $('#anyQualities option:selected').each(function(i,d){anyQualArray.push($(d).val())});
+        $('#bestQualities option:selected').each(function(i,d){bestQualArray.push($(d).val())});
+
         $.get(sbRoot+'/config/general/saveAddShowDefaults', {defaultStatus: $('#statusSelect').val(),
-                                                             defaultQuality: $('#qualityPreset').val(),
-                                                             defaultSeasonFolders: $('#seasonFolders').val()} );
+                                                             anyQualities: anyQualArray.join(','),
+                                                             bestQualities: bestQualArray.join(','),
+                                                             defaultSeasonFolders: $('#seasonFolders').attr('checked')} );
         $(this).attr('disabled', true);
         $.pnotify({
             pnotify_title: 'Saved Defaults',
