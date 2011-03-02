@@ -407,12 +407,12 @@ def rename_file(old_path, new_name):
     return new_path
 
 def chmodAsParent(chmodPath):
+    if os.name == 'nt' or os.name == 'ce':
+        return
     parentPath = os.path.dirname(chmodPath)
     try:
         shutil.copymode(parentPath, chmodPath)
-        logger.log(u"Inherited permissions from %s to %s" % (parentPath, chmodPath))
-    except WindowsError:
-        pass
+        logger.log(u"%s inherited permissions from %s" % (chmodPath, parentPath), Logger.DEBUG)
     except OSError:
         logger.log(u"Couldn't inherit permissions from %s to %s" % (parentPath, chmodPath), logger.ERROR)
 
