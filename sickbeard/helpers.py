@@ -412,7 +412,7 @@ def chmodAsParent(chmodPath):
     parentPath = os.path.dirname(chmodPath)
     try:
         shutil.copymode(parentPath, chmodPath)
-        logger.log(u"%s inherited permissions from %s" % (chmodPath, parentPath), Logger.DEBUG)
+        logger.log(u"%s inherited permissions from %s" % (chmodPath, parentPath), logger.DEBUG)
     except OSError:
         logger.log(u"Couldn't inherit permissions from %s to %s" % (parentPath, chmodPath), logger.ERROR)
 
