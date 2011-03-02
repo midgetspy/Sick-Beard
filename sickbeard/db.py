@@ -39,21 +39,56 @@ class DBResult(list):
 	the sqlite3.Row objects the DBResult contains.
 	'''
 	def __init__(self, L, description):
+		'''
+		>>> r = DBResult([], (('a',), ('b',), ('c',)))
+		>>> r.column_names
+		('a', 'b', 'c')
+		'''
 		super(DBResult, self).__init__(L)
-		self.column_names = list(col[0] for col in description)
+		self.column_names = tuple(col[0] for col in description)
 
 	def __iadd__(self, other):
+		'''
+		>>> a = DBResult('12345', (('a',), ('b',), ('c',)))
+		>>> b = DBResult('67890', (('a',), ('b',), ('c',)))
+		>>> ''.join(a + b)
+		'1234567890'
+		'''
 		if self.column_names != other.column_names:
 			raise ValueError("Incompatible columns")
-		return super(DBResult, self).__iadd__(self, other)
+		return super(DBResult, self).__iadd__(other)
 
 
 class DBConnection:
+	'''
+	Convenience wrapper around an sqlite3 database that provides locking
+	for concurrent access.
+
+	>>> db = DBConnection(dbFileName=":memory:")
+	>>> db.action(None) is None
+	True
+	>>> r = db.action('CREATE TABLE foo ( col1 varchar(10), col2 int )')
+	>>> r = db.action('INSERT INTO foo VALUES ("bar", 1)')
+	>>> r = db.action('INSERT INTO foo VALUES ("biz", 2)')
+	>>> r = db.select('SELECT * FROM foo')
+	>>> r[0]['col1']
+	u'bar'
+	>>> r[1]['col2']
+	2
+	>>> r.column_names
+	('col1', 'col2')
+	'''
 	def __init__(self, dbFileName="sickbeard.db"):
 
 		self.dbFileName = dbFileName
 
-		self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, self.dbFileName), 20)
+		# Use an in-memory database for testing
+		if dbFileName == ":memory:":
+			dbPath = ":memory:"
+		else:
+			dbPath = os.path.join(sickbeard.PROG_DIR, self.dbFileName)
+
+		self.connection = sqlite3.connect(dbPath, 20)
 		self.connection.row_factory = sqlite3.Row
 		self.cursor = self.connection.cursor()
 
@@ -188,5 +223,9 @@ class SchemaUpgrade (object):
 		curVersion = self.checkDBVersion()
 		self.connection.action("UPDATE db_version SET db_version = ?", [curVersion+1])
 		return curVersion+1
+
+if __name__ == '__main__':
+	import doctest
+	doctest.testmod()
 
 # vim: ft=python noexpandtab
