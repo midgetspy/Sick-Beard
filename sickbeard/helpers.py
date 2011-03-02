@@ -19,6 +19,7 @@
 
 import StringIO, zlib, gzip
 import os.path, os
+import stat
 import urllib, urllib2
 import re
 import shutil
@@ -410,11 +411,26 @@ def chmodAsParent(chmodPath):
     if os.name == 'nt' or os.name == 'ce':
         return
     parentPath = os.path.dirname(chmodPath)
-    try:
-        shutil.copymode(parentPath, chmodPath)
-        logger.log(u"%s inherited permissions from %s" % (chmodPath, parentPath), logger.DEBUG)
-    except OSError:
-        logger.log(u"Couldn't inherit permissions from %s to %s" % (parentPath, chmodPath), logger.ERROR)
+    if os.path.isdir(chmodPath):
+        try:
+            shutil.copymode(parentPath, chmodPath)
+            logger.log(u"Directory %s inherited permissions from %s" % (chmodPath, parentPath), logger.DEBUG)
+        except OSError:
+            logger.log(u"Directory %s couldn't inherit permissions from %s " % (chmodPath, parentPath), logger.ERROR)
+    else:
+        parentMode = os.stat(parentPath)[stat.ST_MODE]
+        fileMode = 0
+
+        for bit in [stat.S_IRUSR, stat.S_IWUSR, stat.S_IRGRP, stat.S_IWGRP, stat.S_IROTH, stat.S_IWOTH]:
+            if parentMode & bit:
+                fileMode = fileMode + bit
+
+        try:
+            os.chmod(chmodPath, fileMode)
+            logger.log(u"File %s inherited permissions from %s without execute flags" % (chmodPath, parentPath), logger.DEBUG)
+        except OSError:
+            logger.log(u"File %s couldn't inherit permissions from %s without execute flags" % (chmodPath, parentPath), logger.ERROR)
+
 
 if __name__ == '__main__':
     import doctest
