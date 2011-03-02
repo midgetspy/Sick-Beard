@@ -406,6 +406,16 @@ def rename_file(old_path, new_name):
 
     return new_path
 
+def chmodAsParent(chmodPath):
+    parentPath = os.path.dirname(chmodPath)
+    try:
+        shutil.copymode(parentPath, chmodPath)
+        logger.log(u"Inherited permissions from %s to %s" % (parentPath, chmodPath))
+    except WindowsError:
+        pass
+    except OSError:
+        logger.log(u"Couldn't inherit permissions from %s to %s" % (parentPath, chmodPath), logger.ERROR)
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
