@@ -10,7 +10,33 @@
 # Description:       starts instance of Sick Beard using start-stop-daemon
 ### END INIT INFO
 
-############### EDIT ME ##################
+### DON'T EDIT ME
+## place your customizations to these variables in
+## the appropriate location for your distribution and
+## symlink this file to the appropriate location for
+## your distribution
+###
+
+###
+## debian/ubuntu usage example:
+##  one install:
+##   _symlink_ this script to /etc/init.d/sickbeard
+##   _copy_ initscript_config to /etc/defaults/sickbeard
+##
+##  multiple installs:
+##   copied config file name must match the name 
+##   you use for the symlink
+##   in /etc/init.d.
+##   e.g.:
+##   initscript symlinked to /etc/init.d/mygreatsickbeard1
+##   config _copied_ /etc/default/mygreatsickbeard1
+##   and
+##   initscript symlinked to /etc/init.d/mygreatsickbeard2
+##   config _copied_ to /etc/default/mygreatsickbeard2
+##
+## 
+###
+
 # path to app
 APP_PATH=PATH_TO_SICKBEARD_DIRECTORY
 
@@ -31,7 +57,13 @@ RUN_AS=SICKBEARD_USER
 
 PID_FILE=/var/run/sickbeard.pid
 
-############### END EDIT ME ##################
+# initscript name
+INITSCRIPT="$(basename "$0")"
+
+# debian, ubuntu place initscript customizations here
+if [ -r /etc/default/${INITSCRIPT} ]; then
+	. /etc/default/${INITSCRIPT}
+fi
 
 test -x $DAEMON || exit 0
 
