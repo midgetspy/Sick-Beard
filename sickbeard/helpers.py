@@ -407,29 +407,32 @@ def rename_file(old_path, new_name):
 
     return new_path
 
-def chmodAsParent(chmodPath):
+def chmodAsParent(childPath):
     if os.name == 'nt' or os.name == 'ce':
         return
-    parentPath = os.path.dirname(chmodPath)
-    if os.path.isdir(chmodPath):
-        try:
-            shutil.copymode(parentPath, chmodPath)
-            logger.log(u"Directory %s inherited permissions from %s" % (chmodPath, parentPath), logger.DEBUG)
-        except OSError:
-            logger.log(u"Directory %s couldn't inherit permissions from %s " % (chmodPath, parentPath), logger.ERROR)
+
+    parentPath = os.path.dirname(childPath)
+    parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
+
+    if os.path.isfile(childPath):
+        childMode = readwriteBits(parentMode)
     else:
-        parentMode = os.stat(parentPath)[stat.ST_MODE]
-        fileMode = 0
+        childMode = parentMode
 
-        for bit in [stat.S_IRUSR, stat.S_IWUSR, stat.S_IRGRP, stat.S_IWGRP, stat.S_IROTH, stat.S_IWOTH]:
-            if parentMode & bit:
-                fileMode = fileMode + bit
+    try:
+        os.chmod(childPath, childMode)
+        logger.log(u"Setting permissions for %s to %o as parent directory has %o" % (childPath, childMode, parentMode), logger.DEBUG)
+    except OSError:
+        logger.log(u"Failed to set permission for %s to %o" % (childPath, childMode), logger.ERROR)
 
-        try:
-            os.chmod(chmodPath, fileMode)
-            logger.log(u"File %s inherited permissions from %s without execute flags" % (chmodPath, parentPath), logger.DEBUG)
-        except OSError:
-            logger.log(u"File %s couldn't inherit permissions from %s without execute flags" % (chmodPath, parentPath), logger.ERROR)
+def readwriteBits(currentMode):
+    newMode = 0
+
+    for bit in [stat.S_IRUSR, stat.S_IWUSR, stat.S_IRGRP, stat.S_IWGRP, stat.S_IROTH, stat.S_IWOTH]:
+        if currentMode & bit:
+            newMode += bit
+
+    return newMode
 
 
 if __name__ == '__main__':
