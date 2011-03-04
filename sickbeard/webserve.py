@@ -329,13 +329,14 @@ class Manage:
             if paused == 'keep':
                 new_paused = showObj.paused
             else:
-                new_paused = 'on' if paused == 'enable' else 'off'
-            logger.log(str(paused)+" so "+str(new_paused))
+                new_paused = True if paused == 'enable' else False
+            new_paused = 'on' if new_paused else 'off'
 
             if season_folders == 'keep':
                 new_season_folders = showObj.seasonfolders
             else:
-                new_season_folders = 'on' if season_folders == 'enable' else 'off'
+                new_season_folders = True if season_folders == 'enable' else False
+            new_season_folders = 'on' if new_season_folders else 'off'
 
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
@@ -343,7 +344,7 @@ class Manage:
             curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
 
             if curErrors:
-                logger.log(u"Errors: "+str(curErrors))
+                logger.log(u"Errors: "+str(curErrors), logger.ERROR)
                 errors.append('<b>%s:</b><br />\n<ul>' % showObj.name + '\n'.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
 
         if len(errors) > 0:
