@@ -276,7 +276,7 @@ class QueueItemAdd(ShowQueueItem):
         if self.default_status != SKIPPED:
             logger.log(u"Setting all episodes to the specified default status: "+str(self.default_status))
             myDB = db.DBConnection();
-            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ?", [self.default_status, SKIPPED, self.show.tvdbid])
+            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
 
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
