@@ -7,6 +7,7 @@
     margin: auto;
     padding: 0px;
     text-align: left;
+    width: 606px;
 }
 
 .tvshowDiv a, .tvshowDiv a:link, .tvshowDiv a:visited, .tvshowDiv a:hover  {
@@ -100,7 +101,7 @@ h1.network {
     border: 1px solid #CCCCCC;
     margin-bottom: 10px;
     /* margin: 10px; */
-    overflow: hidden;
+    /* overflow: hidden; */
     padding: 10px;
 }
 
