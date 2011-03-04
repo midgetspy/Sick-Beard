@@ -35,7 +35,6 @@
 }
 
 .posterThumb {
-    display:table-cell;
     -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
     height: 200px;
@@ -44,7 +43,6 @@
     border-right: 1px solid #ccc;
 }
 .bannerThumb {
-    display:table-cell;
     -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
     height: 112px;
