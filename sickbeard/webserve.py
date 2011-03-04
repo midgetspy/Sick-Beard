@@ -255,13 +255,13 @@ class Manage:
             if showObj:
                 showList.append(showObj)
 
-        use_season_folders = True
+        season_folders_all_same = True
         last_season_folders = None
 
-        use_paused = True
+        paused_all_same = True
         last_paused = None
 
-        use_quality = True
+        quality_all_same = True
         last_quality = None
 
         root_dir_list = []
@@ -272,28 +272,30 @@ class Manage:
             if cur_root_dir not in root_dir_list:
                 root_dir_list.append(cur_root_dir) 
             
-            if use_paused:
-                if last_paused == None:
+            # if we know they're not all the same then no point even bothering
+            if paused_all_same:
+                # if we had a value already and this value is different then they're not all the same
+                if last_paused not in (curShow.paused, None):
+                    paused_all_same = False
+                else:
                     last_paused = curShow.paused
-                elif last_paused != curShow.paused:
-                    use_paused = True
 
-            if use_season_folders:
-                if last_season_folders == None:
+            if season_folders_all_same:
+                if last_season_folders not in (None, curShow.seasonfolders):
+                    season_folders_all_same = False
+                else:
                     last_season_folders = curShow.seasonfolders
-                elif last_season_folders != curShow.seasonfolders:
-                    use_season_folders = True
 
-            if use_quality:
-                if last_quality == None:
+            if quality_all_same:
+                if last_quality not in (None, curShow.quality):
+                    quality_all_same = False
+                else:
                     last_quality = curShow.quality
-                elif last_quality != curShow.quality:
-                    use_quality = True
 
         t.showList = toEdit
-        t.paused_value = last_paused if use_paused else False
-        t.season_folders_value = last_season_folders if use_season_folders else False
-        t.quality_value = last_quality if use_quality else SD
+        t.paused_value = last_paused if paused_all_same else None
+        t.season_folders_value = last_season_folders if season_folders_all_same else None
+        t.quality_value = last_quality if quality_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
