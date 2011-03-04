@@ -17,7 +17,7 @@
     <span class="listing_default">Future</span>
     <span class="listing_toofar">Distant</span>
     <span class="listing_unknown">Unknown</span>
-</div><br/>
+</div>
 
 #if $layout == 'list':
 <!-- start list view //-->
@@ -115,6 +115,7 @@
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
+<br/>
     <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
     <thead><tr><th>Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>Status</th><th>tvDB</th><th>Force</th></tr></thead>
     <tbody>
@@ -186,9 +187,6 @@ Custom
 });
 //-->
 </script>
-<div id="outsideWrapper">
-<div id="insideWrapper">
-  <div id="insideContent">
 
     #set $cur_segment = None
     #set $too_late_header = False
@@ -297,9 +295,7 @@ Custom
     #end for
 
     <br/>
-  </div>
-</div>
-</div>
+
 <!-- end non list view //-->
 #end if
 

@@ -140,7 +140,6 @@ text-align:right;
 .footer {
 text-align:center;
 padding-bottom:5px;
-margin-top:20px;
 background-color:#F5F1E4;
 border-top:1px solid #000;
 color:#4e4e4e;
@@ -148,7 +147,7 @@ line-height: 1.4em;
 }
 
 .sickbeardTable {
-width:90%;
+width:100%;
 margin-left:auto;
 margin-right:auto;
 }
@@ -305,11 +304,17 @@ border:0;
 padding:4px 15px 0px;
 }
 #content {
-padding: 10px 15px 15px;
-_text-align: center;
-min-width:500px;
-z-index:1;
-clear:both;
+    min-height: 100px;
+    background: #fff;
+    margin-left: auto;
+    margin-right: auto;
+    border-left: thin solid #B3B3B3;
+    border-right: thin solid #B3B3B3;
+    width: 88%;
+    min-width:500px;
+    z-index:1;
+    clear:both;
+    padding: 10px 15px 15px;
 }
 .showLegend{
 font-weight:700;
