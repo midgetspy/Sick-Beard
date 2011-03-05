@@ -26,11 +26,11 @@
         #for $cur_dir in $root_dir_list:
         #set $cur_index = $root_dir_list.index($cur_dir)
         <div style="padding: 6px 0 3px 25px;">
-            <input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit">
+            <input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit" />
             $cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
         </div>
-        <input type="hidden" name="orig_root_dir_$cur_index" value="$cur_dir">
-        <input type="text" style="display: none" name="new_root_dir_$cur_index" id="new_root_dir_$cur_index" class="new_root_dir" value="$cur_dir">
+        <input type="hidden" name="orig_root_dir_$cur_index" value="$cur_dir" />
+        <input type="text" style="display: none" name="new_root_dir_$cur_index" id="new_root_dir_$cur_index" class="new_root_dir" value="$cur_dir" />
         #end for
 
 </div>
@@ -41,9 +41,9 @@
         <select id="qualityPreset" name="quality_preset">
             <option value="keep">&lt; keep &gt;</option>
             #set $selected = None
-            <option value="0"  #if $quality_value != None and $quality_value not in $common.qualityPresets then "selected" else ""#>Custom
+            <option value="0"  #if $quality_value != None and $quality_value not in $common.qualityPresets then "selected=\"selected\"" else ""#>Custom</option>
             #for $curPreset in sorted($common.qualityPresets):
-            <option value="$curPreset" #if $quality_value == $curPreset then "selected" else ""#>$common.qualityPresetStrings[$curPreset]
+            <option value="$curPreset" #if $quality_value == $curPreset then "selected=\"selected\"" else ""#>$common.qualityPresetStrings[$curPreset]</option>
             #end for
         </select>
     </div><br />
@@ -54,7 +54,7 @@
             #set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
             <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
             #for $curQuality in sorted($anyQualityList):
-            <option value="$curQuality" #if $curQuality in $anyQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
+            <option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$common.Quality.qualityStrings[$curQuality]</option>
             #end for
             </select>
         </div>
@@ -63,7 +63,7 @@
             #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
             <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
             #for $curQuality in sorted($bestQualityList):
-            <option value="$curQuality" #if $curQuality in $bestQualities then "SELECTED" else ""#>$common.Quality.qualityStrings[$curQuality]
+            <option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$common.Quality.qualityStrings[$curQuality]</option>
             #end for
             </select>
         </div>
@@ -76,8 +76,8 @@
     <div class="selectChoices">
         <select id="edit_season_folders" name="season_folders">
             <option value="keep">&lt; keep &gt;</option>
-            <option value="enable" #if $season_folders_value then "selected" else ""#>enable</option>
-            <option value="disable" #if $season_folders_value == False then "selected" else ""#>disable</option>
+            <option value="enable" #if $season_folders_value then "selected=\"selected\"" else ""#>enable</option>
+            <option value="disable" #if $season_folders_value == False then "selected=\"selected\"" else ""#>disable</option>
         </select>
     </div><br />
 </div>
@@ -87,8 +87,8 @@
     <div class="selectChoices">
         <select id="edit_paused" name="paused">
             <option value="keep">&lt; keep &gt;</option>
-            <option value="enable" #if $paused_value then "selected" else ""#>enable</option>
-            <option value="disable" #if $paused_value == False then "selected" else ""#>disable</option>
+            <option value="enable" #if $paused_value then "selected=\"selected\"" else ""#>enable</option>
+            <option value="disable" #if $paused_value == False then "selected=\"selected\"" else ""#>disable</option>
         </select>
     </div><br />
 </div>
@@ -99,7 +99,7 @@
 </div>
 
 <div class="optionWrapper" style="text-align: center;">
-    <input type="submit" value="Submit"><br />
+    <input type="submit" value="Submit" /><br />
 </div>
 
 </form>
