@@ -28,25 +28,24 @@
 
 <div id="addShowPortal">
 
-<button id="btnNewShow">
-<div class="button"><img src="$sbRoot/images/add-new32.png" alt="Add New Show"/></div>
-<div class="buttontext">
-    <h2>Add New Show</h2>
-    <p>For shows that you haven't downloaded yet, this option finds a show on TVDB.com, creates a directory for its episodes, and adds it to Sick Beard.</p>
-</div>
-</button>
+    <button id="btnNewShow" class="ui-button">
+        <div class="button"><img src="$sbRoot/images/add-new32.png" alt="Add New Show"/></div>
+        <div class="buttontext">
+            <h2>Add New Show</h2>
+            <p>For shows that you haven't downloaded yet, this option finds a show on TVDB.com, creates a directory for its episodes, and adds it to Sick Beard.</p>
+        </div>
+    </button>
 
-<br/><br/>
+    <br/><br/>
 
-<button id="btnExistingShow">
-<div class="button"><img src="$sbRoot/images/add-existing32.png" alt="Add Existing Shows"/></div>
-<div class="buttontext">
-    <h2>Add Existing Shows</h2>
-    <p>Use this option to add shows that already have a folder created on your hard drive. Sick Beard will scan your existing metadata/episodes and add the show accordingly.</p>
-</div>
-</button>
+    <button id="btnExistingShow" class="ui-button">
+        <div class="button"><img src="$sbRoot/images/add-existing32.png" alt="Add Existing Shows"/></div>
+        <div class="buttontext">
+            <h2>Add Existing Shows</h2>
+            <p>Use this option to add shows that already have a folder created on your hard drive. Sick Beard will scan your existing metadata/episodes and add the show accordingly.</p>
+        </div>
+    </button>
 
 </div>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
-

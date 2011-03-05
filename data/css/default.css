@@ -346,11 +346,11 @@ overflow: hidden;
 div#addShowPortal {
 margin-left: auto; 
 margin-right: auto;
-width: 600px;
+width: 480px;
 }
-div#addShowPortal  button { padding: 10px; width: 450px; }
-div#addShowPortal  button div.button img{ float: left; margin: 25px 25px 25px 10px; vertical-align: middle;}
-div#addShowPortal  button .buttontext { float: right; text-align: left; width: 350px; }
+div#addShowPortal  button { padding: 10px; width: 100%; }
+div#addShowPortal  button div.button img{ position: absolute; display: block; overflow: hidden; top: 35%; padding-left: 0.4em; text-align: center;}
+div#addShowPortal  button .buttontext { position: relative; display: block; padding: 0.1em 0.4em 0.1em 4.4em; text-align: left; }
 
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
 
