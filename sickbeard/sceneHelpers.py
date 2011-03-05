@@ -27,7 +27,7 @@ from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ("sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
-                 "dubbed", "german", "french", "core2hd")
+                 "dub(bed)?", "german", "french", "core2hd")
 
 def filterBadReleases(name,absolute_numbering=False):
 
@@ -51,7 +51,7 @@ def filterBadReleases(name,absolute_numbering=False):
     return True
 
 def sanitizeSceneName (name):
-    for x in ",:()'!":
+    for x in ",:()'!?":
         name = name.replace(x, "")
 
     name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
@@ -246,7 +246,7 @@ def isGoodResult(name, show, log=True):
     showNames = map(sanitizeSceneName, all_show_names) + all_show_names
 
     for curName in set(showNames):
-        escaped_name = re.sub('\\\\[.-]', '\W+', re.escape(curName))
+        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
         curRegex = '^(\[.+?\][ ])?' + escaped_name + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d\d?\d?\s)|(?:\d\d?\d?$)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:
             logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
@@ -254,6 +254,7 @@ def isGoodResult(name, show, log=True):
         match = re.search(curRegex, name, re.I)
 
         if match:
+            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
             return True
 
     if log:

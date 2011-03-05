@@ -167,7 +167,9 @@ class GenericProvider:
     
     def _get_title_and_url(self, item):
         title = item.findtext('title')
-        url = item.findtext('link').replace('&amp;','&')
+        url = item.findtext('link')
+        if url:
+            url = url.replace('&amp;','&')
         
         return (title, url)
     

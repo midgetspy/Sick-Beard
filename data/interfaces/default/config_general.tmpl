@@ -231,60 +231,6 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                     </fieldset>
                 </div><!-- /component-group3 -->
 
-                <div id="core-component-group4" class="component-group clearfix">
-
-                    <div class="component-group-desc">
-                        <h3>Defaults</h3>
-                        <p>Pre-populate these settings as default when adding a <b>NEW</b> TV show.</p>
-                        <p><b>Modifying the settings will NOT change any existing shows!</b></p>
-                    </div>
-
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" name="season_folders_default" id="season_folders_default" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="season_folders_default">
-                                <span class="component-title">Use Season Folders</span>
-                                <span class="component-desc">Whether show should be created with season folders?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="clearfix" for="qualityPreset">
-                                <span class="component-title jumbo">Initial Quality:</span>
-                                <span class="component-desc">
-                                    #set $selected = None
-                                    <select id="qualityPreset">
-                                    <option value="0">Custom</option>
-                                    #for $curPreset in sorted($qualityPresets):
-                                    <option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
-                                    #end for
-                                    </select><br />
-
-<div id="customQuality">
-<br/><h5>If I don't have the episode then download it in <b>one</b> of the following qualities:</h5>
-#set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
-<select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
-#for $curQuality in sorted($anyQualityList):
-<option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
-#end for
-</select><br />
-<br/><h5>Then Re-download the episodes in any or all of these qualities as they are available:</h5>
-#set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
-<select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
-#for $curQuality in sorted($bestQualityList):
-<option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
-#end for
-</select>
-</div>
-
-                                </span>
-                            </label>
-                        </div>
-
-                        <input type="submit" value="Save Changes" />
-                    </fieldset>
-                </div><!-- /component-group4 -->
-
                 <div id="core-component-group5" class="component-group clearfix">
 
                     <div class="component-group-desc">
