@@ -16,7 +16,7 @@
     <span class="listing_current">Current</span>
     <span class="listing_default">Future</span>
     <span class="listing_toofar">Distant</span>
-    <span class="listing_unknown">Unknown</span>
+    <!-- <span class="listing_unknown">Unknown</span> //-->
 </div>
 
 #if $layout == 'list':
@@ -101,9 +101,8 @@
             3: { sorter: 'loadingNames' },
             4: { sorter: 'loadingNames' },
             5: { sorter: 'quality' },
-            6: { sorter: 'status' },
-            7: { sorter: false},
-            8: { sorter: false}
+            6: { sorter: false},
+            7: { sorter: false}
         }
     });
 
@@ -117,7 +116,7 @@
 
 <br/>
     <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th>Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>Status</th><th>tvDB</th><th>Force</th></tr></thead>
+    <thead><tr><th>Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Force</th></tr></thead>
     <tbody>
 
     #for $cur_result in $sql_results:
@@ -162,7 +161,6 @@ $qualityPresetStrings[int($cur_result["quality"])]
 Custom
 #end if
         </td>
-        <td align="center">$cur_result["show_status"]</td>
         <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/search32.png" /></a></td>
         <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></td>
       </tr>
