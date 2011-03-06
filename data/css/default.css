@@ -44,17 +44,6 @@ z-index:2;
 background:none;
 }
 
-#tagline {
-display:block;
-position:relative;
-padding-right:10px;
-top:1px;
-float:right;
-text-align:right;
-font-size:10px;
-font-weight:400;
-}
-
 #logo {
 font-size:33px;
 font-family:Arial, Helvetica, sans-serif;
@@ -120,28 +109,17 @@ border-bottom: 1px dotted #D7D7D7;
 }
 
 /* --------------- alignment ------------------- */
-.float-left {
-float:left;
-}
-
-.float-right {
-float:right;
-}
-
-.align-left {
-text-align:left;
-}
-
-.align-right {
-text-align:right;
-}
+.float-left { float:left; }
+.float-right { float:right; }
+.align-left { text-align:left; }
+.align-right { text-align:right; }
 /* --------------------------------------------- */
 
 .footer {
 text-align:center;
 padding-bottom:5px;
 background-color:#F5F1E4;
-border-top:1px solid #000;
+border-top:1px solid #b3b3b3;
 color:#4e4e4e;
 line-height: 1.4em;
 }
@@ -265,14 +243,14 @@ line-height: 17px;
 #MainMenu {
 background-color:#57442B;
 color:#F5F5F5;
-/*margin-bottom:1em;*/
 width:100%;
-border-bottom: 1px solid #333;
 }
 #SubMenu {
+clear:both;
 background-color:#F5F1E4;
 color:#333;
-border-bottom: 1px solid #333;
+border-top: 1px solid #333;
+border-bottom: 1px solid #b3b3b3;
 padding-left:5px;
 }
 #SubMenu span {
