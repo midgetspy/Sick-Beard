@@ -1798,7 +1798,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, absolute_number=None ,directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -1834,6 +1834,11 @@ class Home:
             paused = 1
         else:
             paused = 0
+            
+        if absolute_number == "on":
+            absolute_number = 1
+        else:
+            absolute_number = 0
 
         if air_by_date == "on":
             air_by_date = 1
@@ -1871,6 +1876,7 @@ class Home:
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
+            showObj.absolute_number = absolute_number
             showObj.lang = tvdb_lang
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
