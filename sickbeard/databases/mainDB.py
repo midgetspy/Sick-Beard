@@ -323,7 +323,18 @@ class PopulateRootDirs (AddLang):
         sickbeard.ROOT_DIRS = new_root_dirs
         
         self.incDBVersion()
+     
+
+class AddAbsoluteEpisodeTVShow(PopulateRootDirs):
+    def test(self):
+        return self.hasColumn("tv_shows", "absolute_number")
+
+    def execute(self):
+        self.addColumn("tv_shows", "absolute_number", "NUMERIC", "0")
         
-        
-        
-        
+class AddAbsoluteEpisodeTVEpisode(AddAbsoluteEpisodeTVShow):
+    def test(self):
+        return self.hasColumn("tv_episodes", "absolute_number")
+
+    def execute(self):
+        self.addColumn("tv_episodes", "absolute_number", "NUMERIC", "NULL")

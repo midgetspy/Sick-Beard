@@ -64,6 +64,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.absolute_number = 0
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -80,6 +81,12 @@ class TVShow(object):
 
     def _is_air_by_date(self):
         return self.air_by_date or (self.genre and "Talk Show" in self.genre)
+    
+    def _is_absolute_number(self):
+        if(self.absolute_number > 0):
+            return False
+        else:
+            return True
     
     is_air_by_date = property(_is_air_by_date)
     
@@ -524,6 +531,12 @@ class TVShow(object):
 
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
+            
+            try:
+                self.absolute_number = int(sqlResults[0]["absolute_number"])
+            except Exception, e:
+                self.absolute_number = 0
+          
 
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
@@ -807,7 +820,8 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "absolute_number": self.absolute_number
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
@@ -925,6 +939,7 @@ class TVEpisode(object):
         self._name = ""
         self._season = season
         self._episode = episode
+        self._absolute_number = 0
         self._description = ""
         self._airdate = datetime.date.fromordinal(1)
         self._hasnfo = False
@@ -949,6 +964,7 @@ class TVEpisode(object):
     name = property(lambda self: self._name, dirty_setter("_name"))
     season = property(lambda self: self._season, dirty_setter("_season"))
     episode = property(lambda self: self._episode, dirty_setter("_episode"))
+    absolute_number = property(lambda self: self._absolute_number, dirty_setter("_absolute_number"))
     description = property(lambda self: self._description, dirty_setter("_description"))
     airdate = property(lambda self: self._airdate, dirty_setter("_airdate"))
     hasnfo = property(lambda self: self._hasnfo, dirty_setter("_hasnfo"))
@@ -1032,6 +1048,7 @@ class TVEpisode(object):
                 self.name = sqlResults[0]["name"]
             self.season = season
             self.episode = episode
+            self.absolute_number = sqlResults[0]["absolute_number"]
             self.description = sqlResults[0]["description"]
             if self.description == None:
                 self.description = ""
@@ -1056,12 +1073,13 @@ class TVEpisode(object):
         if episode == None:
             episode = self.episode
 
-        logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
+        logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.MESSAGE) # TODO: change back to DEBUG
 
         tvdb_lang = self.show.lang
 
         try:
             if cachedSeason is None:
+                logger.log(u"No chache for this episode", logger.MESSAGE) # TODO: change back to DEBUG
                 if tvapi is None:
                     # There's gotta be a better way of doing this but we don't wanna
                     # change the cache value elsewhere
@@ -1078,6 +1096,7 @@ class TVEpisode(object):
                     t = tvapi
                 myEp = t[self.show.tvdbid][season][episode]
             else:
+                logger.log(u"Chached for this episode", logger.MESSAGE) # TODO: change back to DEBUG
                 myEp = cachedSeason[episode]
 
         except (tvdb_exceptions.tvdb_error, IOError), e:
@@ -1096,7 +1115,6 @@ class TVEpisode(object):
                 self.deleteEpisode()
             return
 
-
         if not myEp["firstaired"]:
             myEp["firstaired"] = str(datetime.date.fromordinal(1))
 
@@ -1106,11 +1124,18 @@ class TVEpisode(object):
             if self.tvdbid != -1:
                 self.deleteEpisode()
             return False
+        
+        if myEp["absolute_number"] == None or myEp["absolute_number"] == "":
+            logger.log(u"This episode ("+self.show.name+" - "+str(season)+"x"+str(episode)+") has no absolute_number on TVDB", logger.MESSAGE) # TODO: change back to DEBUG
+        else: 
+            logger.log(str(self.show.tvdbid) + ": The absolute_number for" + str(season) + "x" + str(episode)+" is :"+myEp["absolute_number"], logger.MESSAGE) # TODO: change back to DEBUG
+            self.absolute_number = myEp["absolute_number"]
 
         #NAMEIT logger.log(u"BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
         self.name = myEp["episodename"]
         self.season = season
         self.episode = episode
+        
         tmp_description = myEp["overview"]
         if tmp_description == None:
             self.description = ""
@@ -1320,7 +1345,8 @@ class TVEpisode(object):
                         "hasnfo": self.hasnfo,
                         "hastbn": self.hastbn,
                         "status": self.status,
-                        "location": self.location}
+                        "location": self.location,
+                        "absolute_number": self.absolute_number}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}
