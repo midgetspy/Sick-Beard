@@ -89,6 +89,7 @@ class TVShow(object):
             return True
     
     is_air_by_date = property(_is_air_by_date)
+    is_absolute_number = property(_is_absolute_number)
     
     def _getLocation(self):
         if ek.ek(os.path.isdir, self._location):
