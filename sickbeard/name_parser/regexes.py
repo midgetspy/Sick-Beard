@@ -171,4 +171,34 @@ ep_regexes = [
                '''
                ),
               ]
-
+abs_ep_regexes = [
+               ('abs_3digit_episode',
+               # [Group Name] Show Name.103-104
+               # [Group Name] Show Name - 103-104
+               # Show Name 103-104
+               # [Group Name] Show Name.103
+               # [Group Name] Show Name - 103
+               # Show Name 103
+               '''
+               ^(\[(?P<release_group>.+)\][ \._-]*)?       # Release Group and separator
+               (?P<series_name>.+?)[ \._-]+                # Show_Name and separator
+               (?P<ep_num>\d{3})                           # E01 and separator
+               (-(?P<extra_ep_num>\d{3}))?                 # E02
+               ($|[ \._-]+)                                # Separator and EOL
+               '''),
+               
+               ('abs_2digit_episode',
+               # [Group Name] Show Name.13-14
+               # [Group Name] Show Name - 13-14
+               # Show Name 13-14
+               # [Group Name] Show Name.13
+               # [Group Name] Show Name - 13
+               # Show Name 13
+               '''
+               ^(\[(?P<release_group>.+)\][ \._\-]*)?      # Release Group and separator
+               (?P<series_name>.+?)[ \._\-]+               # Show_Name and separator
+               (?P<ep_num>\d{2})                           # E01 and separator
+               (-(?P<extra_ep_num>\d{2}))?                 # E02
+               ($|[ \._\-]+)                               # Separator and EOL
+               '''),
+               ]
