@@ -9,15 +9,18 @@
 
 #set global $sbPath="../.."
 
-<!--#set global $topmenu="config"#-->
+#set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript">
+<!--
 nameTestURL = "$sbRoot/config/general/testNaming";
+//-->
 </script>
 <script type="text/javascript" src="$sbRoot/js/configGeneral.js"></script>
 #set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
 <script type="text/javascript" charset="utf-8">
+<!--
 \$(document).ready(function(){
 
   if (#if $sickbeard.QUALITY_DEFAULT in $qualityPresets then "1" else "0"#) {
@@ -51,6 +54,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
   });
 
 });
+//-->
 </script>
 
 <div id="config">
@@ -99,7 +103,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                         <input type="submit" value="Save Changes" />
                     </fieldset>
-                </div><!-- /component-group1 -->
+                </div><!-- /component-group1 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
 
@@ -157,17 +161,17 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="clearfix" style="clear:left;"></div>
 
                         <div class="field-pair clearfix">
-                            <input type="checkbox" name="use_banner" id="use_banner" #if $sickbeard.USE_BANNER then "CHECKED" else ""#>
+                            <input type="checkbox" name="use_banner" id="use_banner" #if $sickbeard.USE_BANNER then "checked=checked" else ""#/>
                             <label class="clearfix" for="use_banner">
                                 <span class="component-title">Use Banners</span>
                                 <span class="component-desc">Use banners instead of posters for your Show Folder Images</span>
                             </label>
                         </div>
 
-                        <input type="submit" value="Save Changes"><br/>
+                        <input type="submit" value="Save Changes" /><br/>
 
                     </fieldset>
-                </div><!-- /component-group2 -->
+                </div><!-- /component-group2 //-->
 
                 <div id="core-component-group3" class="component-group clearfix">
 
@@ -229,9 +233,9 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                         <input type="submit" value="Save Changes" />
                     </fieldset>
-                </div><!-- /component-group3 -->
+                </div><!-- /component-group3 //-->
 
-                <div id="core-component-group5" class="component-group clearfix">
+                <div id="core-component-group4" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Episode Naming</h3>
@@ -292,7 +296,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_sep_type" id="naming_sep_type">
                                     #for ($i, $ex) in enumerate($config.naming_sep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "selected=\"selected\"" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
                                     </select>
                                 </span>
@@ -305,7 +309,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_ep_type" id="naming_ep_type">
                                     #for ($i, $ex) in enumerate($config.naming_ep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "selected=\"selected\"" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
                                     </select>
                                 </span>
@@ -315,9 +319,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair" style="padding:10px; background: #efefef;">
                             <label class="clearfix" for="naming_ep_type">
                                 <span class="component-title jumbo">Single-Ep Example:</span>
-                                <span class="component-desc jumbo">
-                                    <div id="normalExampleText"></div>
-                                </span>
+                                <span class="component-desc jumbo" id="normalExampleText"></span>
                             </label>
                         </div>
 
@@ -327,7 +329,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                                 <span class="component-desc">
                                     <select name="naming_multi_ep_type" id="naming_multi_ep_type">
                                     #for ($i, $ex) in enumerate($config.naming_multi_ep_type_text):
-                                    <option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "selected=\"selected\"" else ""#>$ex
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
                                     </select>
                                 </span>
@@ -337,9 +339,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
                         <div class="field-pair" style="padding:10px; background: #efefef;">
                             <label class="clearfix" for="naming_multi_ep_type">
                                 <span class="component-title jumbo">Multi-Ep Example:</span>
-                                <span class="component-desc jumbo">
-                                    <div id="multiExampleText"></div>
-                                </span>
+                                <span class="component-desc jumbo" id="multiExampleText"></span>
                             </label>
                         </div>
                         
@@ -360,7 +360,7 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 
                         <input type="submit" value="Save Changes" />
                     </fieldset>
-                </div><!-- /component-group5 -->
+                </div><!-- /component-group4 //-->
 
             <br/><input type="submit" value="Save Changes" /><br/>
             </div><!-- /config-components -->
@@ -370,7 +370,9 @@ nameTestURL = "$sbRoot/config/general/testNaming";
 <div class="clearfix"></div>
 
 <script type="text/javascript" charset="utf-8">
+<!--
     jQuery('#log_dir').fileBrowser({ title: 'Select Log Directory' });
+//-->
 </script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

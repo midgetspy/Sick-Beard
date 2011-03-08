@@ -6,7 +6,7 @@
 
 #set global $sbPath=".."
 
-<!--#set global $topmenu="manage"#-->
+#set global $topmenu="manage"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #if $quality_value != None:
@@ -17,15 +17,6 @@
 #set $anyQualities, $bestQualities = $common.Quality.splitQuality($initial_quality)
 <script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
 <script type="text/javascript" src="$sbRoot/js/massEdit.js"></script>
-
-<style type="text/css">
-<!--
-.optionWrapper { width: 450px; margin-left: auto; margin-right: auto; padding: 6px 12px; }
-.optionWrapper span.selectTitle { float: left; font-weight: 700; font-size: 1.2em; text-align: left; width: 225px; }
-.optionWrapper div.selectChoices { float: left; width: 175px; margin-left: 25px; }
-.optionWrapper br { clear: both; }
--->
-</style>
 
 <form action="massEditSubmit" method="post">
 <input type="hidden" name="toEdit" value="$showList" />
@@ -115,7 +106,9 @@
 <br />
 
 <script type="text/javascript" charset="utf-8">
+<!--
     jQuery('#location').fileBrowser({ title: 'Select Show Location' });
+//-->
 </script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

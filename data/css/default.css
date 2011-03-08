@@ -36,7 +36,7 @@ display:inline;
 
 /* these are for incl_top.tmpl */
 #header {
-padding-top:3px;
+padding: 5px 0;
 z-index:2;
 }
 
@@ -60,7 +60,7 @@ font-size:33px;
 font-family:Arial, Helvetica, sans-serif;
 font-weight:700;
 text-transform:uppercase;
-padding-left:20px;
+padding: 0px 5px 0px 15px;
 }
 
 #versiontext {
@@ -74,24 +74,6 @@ color:#57442B;
 
 table {
 margin:0;
-}
-
-tr.active {
-font-weight:700;
-}
-
-tr.finished {
-font-weight:400;
-}
-
-tr.waiting {
-font-style:italic;
-}
-
-td.pre {
-font-size:13px;
-font-family:'courier new',courier,serif;
-font-weight:700;
 }
 
 h1 {
@@ -171,14 +153,14 @@ margin-left:auto;
 margin-right:auto;
 }
 .sickbeardTable th{
-padding:2px;
+padding:3px;
 font-weight:700;
 background-color:#333;
 color:#FFF;
 text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 .sickbeardTable td{
-padding:5px;
+padding:4px;
 }
 .sickbeardTable tfoot a {
 color:#FFF;
@@ -191,25 +173,9 @@ clear:left;
 
 .plotInfo {
 cursor:help;
-padding-left:5px;
-float:right;
-}
-
-.message {
-margin-bottom:20px;
-text-align:left;
-font-size:larger;
-padding:4px 0 4px 1em;
-}
-
-.message p span {
-float:left;
-margin-right:.5em;
-}
-
-.message a:hover {
-color:blue;
-background:none;
+margin-left: 8px;
+float: right;
+clear: right;
 }
 
 #tooltip {
@@ -222,6 +188,7 @@ margin-right:10px;
 }
 
 .progressbarText {
+text-shadow: 0 0 0.1em #fff;
 position:absolute;
 top:0;
 width:100%;
@@ -284,10 +251,6 @@ color:#000;
 h1 a:hover, h2 a:hover, span a:hover, div.h2footer a:hover {
 background-color:#000;
 color:#FFF;
-}
-
-.message p,.message ul {
-margin:0;
 }
 
 div#summary {
@@ -387,5 +350,10 @@ div#addShowPortal  button .buttontext { float: right; text-align: left; width: 3
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
 
 .hover { background-color: #cfcfcf !important; cursor: pointer; }
-
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
+
+/* for manage_massEdit */
+.optionWrapper { width: 450px; margin-left: auto; margin-right: auto; padding: 6px 12px; }
+.optionWrapper span.selectTitle { float: left; font-weight: 700; font-size: 1.2em; text-align: left; width: 225px; }
+.optionWrapper div.selectChoices { float: left; width: 175px; margin-left: 25px; }
+.optionWrapper br { clear: both; }
