@@ -611,27 +611,12 @@ class PostProcessor(object):
         else:
             self._log(u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
         
-        #AW: Now handling rename in move/copy command
-        ## if renaming is turned on then rename the episode (and associated files, if necessary)
-        #if sickbeard.RENAME_EPISODES:
-        #    new_file_name = helpers.sanitizeFileName(ep_obj.prettyName())
-        #    try:
-        #        self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
-        #    except OSError, IOError:
-        #        raise exceptions.PostProcessingFailed("Unable to rename the files")
-        #
-        #    # remember the new name of the file
-        #    new_file_path = ek.ek(os.path.join, self.folder_path, new_file_name + '.' + self.file_name.rpartition('.')[-1])
-        #    self._log(u"After renaming the new file path is "+new_file_path, logger.DEBUG)
-        #else:
-        #    new_file_path = self.file_path
-
-        ## delete the existing file (and company)
-        #for cur_ep in [ep_obj] + ep_obj.relatedEps:
-        #    try:
-        #        self._delete(cur_ep.location, associated_files=True)
-        #    except OSError, IOError:
-        #        raise exceptions.PostProcessingFailed("Unable to delete the existing files")
+        # delete the existing file (and company)
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            try:
+                self._delete(cur_ep.location, associated_files=True)
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
         try:
