@@ -76,19 +76,18 @@ class TVShow(object):
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
 
         self.loadFromDB()
-
+        
         self.saveToDB()
 
     def _is_air_by_date(self):
         return self.air_by_date or (self.genre and "Talk Show" in self.genre)
+    is_air_by_date = property(_is_air_by_date)
     
     def _is_absolute_number(self):
         if(self.absolute_number > 0):
             return True
         else:
             return False
-    
-    is_air_by_date = property(_is_air_by_date)
     is_absolute_number = property(_is_absolute_number)
     
     def _getLocation(self):
@@ -485,7 +484,7 @@ class TVShow(object):
 
     def loadFromDB(self, skipNFO=False):
 
-        logger.log(str(self.tvdbid) + ": Loading show info from database")
+        logger.log(str(self.tvdbid) + ": Loading show info from database",logger.DEBUG)
 
         myDB = db.DBConnection()
 
@@ -533,11 +532,9 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
             
-            try:
-                self.absolute_number = int(sqlResults[0]["absolute_number"])
-            except Exception, e:
+            self.absolute_number = sqlResults[0]["absolute_number"]
+            if self.absolute_number == None:
                 self.absolute_number = 0
-          
 
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
