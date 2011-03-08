@@ -116,8 +116,11 @@ border-bottom: 1px dotted #D7D7D7;
 /* --------------------------------------------- */
 
 .footer {
+clear:both;
+width: 100%;
 text-align:center;
-padding-bottom:5px;
+padding-top: 5px;
+padding-bottom: 5px;
 background-color:#F5F1E4;
 border-top:1px solid #b3b3b3;
 color:#4e4e4e;
