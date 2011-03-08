@@ -143,37 +143,11 @@ class PostProcessor(object):
             if ek.ek(os.path.isfile, cur_file):
                 ek.ek(os.remove, cur_file)
                 
-    #AW: Not used any more, moved functionality to _move and _copy
-    def _rename(self, file_path, new_base_name, associated_files=False):
-        
-        if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
+    def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
 
-        if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not renaming anything", logger.DEBUG)
+        if not action:
+            self._log(u"Must provide an action for the combined file operation", logger.ERROR)
             return
-        
-        for cur_file_path in file_list:
-
-            # get the extension
-            cur_extension = cur_file_path.rpartition('.')[-1]
-            
-            # replace .nfo with .nfo-orig to avoid conflicts
-            if cur_extension == 'nfo':
-                cur_extension = 'nfo-orig'
-            
-            new_path = ek.ek(os.path.join, ek.ek(os.path.dirname, cur_file_path), new_base_name+'.'+cur_extension)
-            
-            if ek.ek(os.path.abspath, cur_file_path) == ek.ek(os.path.abspath, new_path):
-                self._log(u"File "+cur_file_path+" is already named properly, no rename needed", logger.DEBUG)
-                continue
-            
-            self._log(u"Renaming file "+cur_file_path+" to "+new_path, logger.DEBUG)
-            ek.ek(os.rename, cur_file_path, new_path)
-
-    def _move(self, file_path, new_path, new_base_name, associated_files=False):
 
         if associated_files:
             file_list = self._list_associated_files(file_path)
@@ -203,6 +177,12 @@ class PostProcessor(object):
             
             new_file_path = ek.ek(os.path.join, new_path, new_file_name)
 
+            action(cur_file_path, new_file_path)
+                
+    def _move(self, file_path, new_path, new_base_name, associated_files=False):
+
+        def _int_move(cur_file_path, new_file_path):
+
             self._log(u"Moving file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
                 helpers.moveFile(cur_file_path, new_file_path)
@@ -210,35 +190,11 @@ class PostProcessor(object):
                 self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
                 raise e
                 
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
+                
     def _copy(self, file_path, new_path, new_base_name, associated_files=False):
 
-        if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
-
-        if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not copying anything", logger.DEBUG)
-            return
-        
-        for cur_file_path in file_list:
-
-            cur_file_name = ek.ek(os.path.basename, cur_file_path)
-            
-            #AW: If new base name then convert name
-            if new_base_name:
-                # get the extension
-                cur_extension = cur_file_path.rpartition('.')[-1]
-            
-                # replace .nfo with .nfo-orig to avoid conflicts
-                if cur_extension == 'nfo':
-                    cur_extension = 'nfo-orig'
-                    
-                new_file_name = new_base_name +'.' + cur_extension
-            else:
-                new_file_name = cur_file_name
-                
-            new_file_path = ek.ek(os.path.join, new_path, new_file_name)
+        def _int_copy (cur_file_path, new_file_path):
 
             self._log(u"Copying file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
@@ -246,6 +202,8 @@ class PostProcessor(object):
             except (IOError, OSError), e:
                 logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
                 raise e
+
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
 
     def _find_ep_destination_folder(self, ep_obj):
         
