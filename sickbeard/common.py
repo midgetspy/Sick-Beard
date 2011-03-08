@@ -287,6 +287,10 @@ sceneExceptions = {72546: ['CSI'],
                    189931: ['RBT (AU)'],
                    73255: ['House', 'House M D'],
                    73244: ['The Office (US)', 'The Office'],
+                   81386: ['Being Human', 'Being Human (UK)'],
+                   89991: ['Out of the Wild: The Alaskan Experiment', 'Out of the Wild: Venezuela'],
+                   222551: ['Only in America With Larry the Cable Guy', 'Only in America'],
+                   77733: ['Degrassi: The Next Generation', 'Degrassi TNG'],
                    }
 
 countryList = {'Australia': 'AU',
