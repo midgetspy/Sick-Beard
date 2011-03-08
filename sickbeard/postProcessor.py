@@ -120,10 +120,6 @@ class PostProcessor(object):
         
         return file_path_list
 
-    def _destination_file_name(self, new_base_name):
-        existing_extension = self.file_name.rpartition('.')[-1]
-        return new_base_name + '.' + existing_extension
-
     def _delete(self, file_path, associated_files=False):
         
         if not file_path:
@@ -634,13 +630,20 @@ class PostProcessor(object):
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
+        # update the statuses before we rename so the quality goes into the name properly
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            with cur_ep.lock:
+                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
+                cur_ep.saveToDB()
+
+        # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             new_base_name = helpers.sanitizeFileName(ep_obj.prettyName())
         else:
             new_base_name = self.file_name
             
         try:
-            # move the episode to the show dir
+            # move the episode and associated files to the show dir
             if sickbeard.KEEP_PROCESSED_DIR:
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
             else:
@@ -648,11 +651,10 @@ class PostProcessor(object):
         except OSError, IOError:
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         
-        # update the statuses before we rename so the quality goes into the name properly
+        # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
                 cur_ep.location = ek.ek(os.path.join, dest_path, self._destination_file_name(new_base_name))
-                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
                 cur_ep.saveToDB()
         
         # log it to history
