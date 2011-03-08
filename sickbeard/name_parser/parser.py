@@ -73,13 +73,16 @@ class NameParser(object):
             match = cur_regex.match(name)
 
             if not match:
+                logger.log(u"No match found for '"+cur_regex_name+"' in '"+name+"'",logger.DEBUG)
                 continue
+            
             
             result = ParseResult(name)
             result.which_regex = [cur_regex_name]
             
             named_groups = match.groupdict().keys()
-
+            logger.log(u"Matched: named_groups: '"+str(named_groups)+"' in '"+name+"'",logger.DEBUG)
+            
             if 'series_name' in named_groups:
                 result.series_name = match.group('series_name')
                 if result.series_name:
