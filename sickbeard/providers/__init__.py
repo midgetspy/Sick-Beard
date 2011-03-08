@@ -6,6 +6,8 @@ __all__ = ['ezrss',
            'binreq',
            'womble',
            'newzbin',
+           'fanzub',
+           
            ]
 
 import sickbeard

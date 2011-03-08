@@ -84,9 +84,9 @@ class TVShow(object):
     
     def _is_absolute_number(self):
         if(self.absolute_number > 0):
-            return False
-        else:
             return True
+        else:
+            return False
     
     is_air_by_date = property(_is_air_by_date)
     is_absolute_number = property(_is_absolute_number)
