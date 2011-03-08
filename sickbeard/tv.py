@@ -1425,8 +1425,11 @@ class TVEpisode(object):
                 goodEpString = self.airdate.strftime("%Y.%m.%d")
             except ValueError:
                 pass
-
-        # if we didn't set it to the air-by-date value use the season/ep
+        # we want a absolute (number) pretty name 
+        if self.show.is_absolute_number:
+            goodEpString = str(self.absolute_number)
+            
+        # if we didn't set it to the air-by-date value or absolute_numbering use the season/ep
         if not goodEpString:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
 

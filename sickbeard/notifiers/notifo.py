@@ -2,6 +2,7 @@ import urllib
 import sickbeard
 
 from sickbeard import logger, common
+from sickbeard.encodingKludge import fixStupidEncodings
 
 try:
     import lib.simplejson as json
@@ -19,8 +20,10 @@ class NotifoNotifier:
     def _sendNotifo(self, msg, username, apisecret):
         msg = msg.strip()
         apiurl = API_URL % {"username": username, "secret": apisecret}
+        # got the hint of encoding to utf-8 from http://stackoverflow.com/questions/787935/python-interface-to-paypal-urllib-urlencode-non-ascii-characters-failing/788055#788055
+        # seams like urlencode likes utf-8 better then unicode
         data = urllib.urlencode({
-            "msg": msg,
+            "msg": msg.encode('utf-8'),
         })
 
         data = urllib.urlopen(apiurl, data)
@@ -40,15 +43,17 @@ class NotifoNotifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.NOTIFO_NOTIFY_ONSNATCH:
-            self._notifyNotifo(common.notifyStrings[common.NOTIFY_SNATCH]+': '+ep_name)
+            logger.log(u"Preparing snatch notification for " + ep_name, logger.DEBUG)
+            self._notifyNotifo(u""+common.notifyStrings[common.NOTIFY_SNATCH]+': '+ep_name)
 
     def notify_download(self, ep_name):
         if sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD:
-            self._notifyNotifo(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)       
+            logger.log(u"Preparing download notification for " + ep_name, logger.DEBUG)
+            self._notifyNotifo(u""+common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)       
 
     def _notifyNotifo(self, message=None, username=None, apisecret=None, force=False):
         if not sickbeard.USE_NOTIFO and not force:
-            logger.log("Notification for Notifo not enabled, skipping this notification", logger.DEBUG)
+            logger.log(u"Notification for Notifo not enabled, skipping this notification", logger.DEBUG)
             return False
 
         if not username:
