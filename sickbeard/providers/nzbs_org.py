@@ -58,7 +58,7 @@ class NZBsProvider(generic.NZBProvider):
 	def _get_episode_search_strings(self, ep_obj):
 		return ['^'+x for x in sceneHelpers.makeSceneSearchString(ep_obj)]
 
-	def _doSearch(self, curString):
+	def _doSearch(self, curString, show=None):
 
 		curString = curString.replace('.', ' ').replace('-', '.')
 
