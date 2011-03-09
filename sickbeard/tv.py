@@ -1030,12 +1030,21 @@ class TVEpisode(object):
 
     def loadFromDB(self, season, episode):
 
-        logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
-
         myDB = db.DBConnection()
+    
+        logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
         sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, season, episode])
-
-        if len(sqlResults) > 1:
+    
+        # only search for absolute numbering if we havent allready found something and the show is flaged as such
+        useInfoFromDB = False
+        if self.show.is_absolute_number and len(sqlResults) == 0 :
+            logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for absolute number " + str(episode), logger.DEBUG)
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season != 0 AND absolute_number = ?", [self.show.tvdbid, episode])
+            useInfoFromDB = True
+            
+        logger.log(str(self.show.tvdbid) + ": sqlResult lenght " +str( len(sqlResults) ) +" and its contens "+ str(sqlResults), logger.DEBUG)
+            
+        if sqlResults == None or len(sqlResults) > 1:
             raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
         elif len(sqlResults) == 0:
             logger.log(str(self.show.tvdbid) + ": Episode " + str(self.season) + "x" + str(self.episode) + " not found in the database", logger.DEBUG)
@@ -1044,8 +1053,14 @@ class TVEpisode(object):
             #NAMEIT logger.log(u"AAAAA from" + str(self.season)+"x"+str(self.episode) + " -" + self.name + " to " + str(sqlResults[0]["name"]))
             if sqlResults[0]["name"] != None:
                 self.name = sqlResults[0]["name"]
-            self.season = season
-            self.episode = episode
+            # if 
+            if not useInfoFromDB:
+                self.season = season
+                self.episode = season
+            else:
+                self.season = sqlResults[0]["season"]
+                self.episode = sqlResults[0]["episode"]
+            
             self.absolute_number = sqlResults[0]["absolute_number"]
             self.description = sqlResults[0]["description"]
             if self.description == None:
