@@ -299,7 +299,7 @@ class ParseResult(object):
             to_return += ' (' + self.release_group + ')'
 
         to_return += ' [ABD: '+str(self.air_by_date)+']'
-        to_return += ' [AN: '+str(self.is_absolute_number)+']'
+        #to_return += ' [AN: '+str(self.is_absolute_number)+']' #TODO: i cant check if its like that yet 
 
         return to_return.encode('utf-8')
 

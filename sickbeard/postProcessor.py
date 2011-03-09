@@ -281,6 +281,7 @@ class PostProcessor(object):
         for curName in names:
             sql_results = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", curName)])
     
+            self._log("Found NO result in history for '"+str(curName)+"'", logger.DEBUG)
             if len(sql_results) == 0:
                 continue
     
@@ -293,7 +294,6 @@ class PostProcessor(object):
             return to_return
         
         self.in_history = False
-        self._log("Found NO result in history for '"+str(self.nzb_name)+"'", logger.DEBUG)
         return to_return
     
     def _analyze_name(self, name, file=True):
