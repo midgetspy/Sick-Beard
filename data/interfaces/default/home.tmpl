@@ -8,7 +8,7 @@
 
 #set global $sbPath = ".."
 
-<!--#set global $topmenu="home"#-->
+#set global $topmenu="home"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
@@ -18,6 +18,7 @@
 #set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
 
 <script type="text/javascript" charset="utf-8">
+<!--
 \$.tablesorter.addParser({ 
     id: 'nextAirDate',
     is: function(s) {
@@ -135,6 +136,7 @@
     });
 
 });
+//-->
 </script>
 
 <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
@@ -203,22 +205,26 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #else:
     <td align="center">Custom</td>
 #end if
-    <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid" style="position:relative;"></div></td>
+    <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
+        <script type="text/javascript">
+        <!--
+            \$(function() {
+               \$("\#progressbar$curShow.tvdbid").progressbar({
+                   value: parseInt($nom) * 100 / parseInt($den)
+               });
+               \$("\#progressbar$curShow.tvdbid").append( "<div class='progressbarText'>$dlStat</div>" )
+            });
+        //-->
+        </script>
+    </td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
   </tr>
 
-<script type="text/javascript">
-   \$(function() {
-       \$("\#progressbar$curShow.tvdbid").progressbar({
-           value: parseInt($nom) * 100 / parseInt($den)
-       });
-       \$("\#progressbar$curShow.tvdbid").append( "<!--$dlStat--><div class='progressbarText'>$dlStat</div>" )
-   });
-</script>
 
 #end for
 </tbody>
 </table>
 
+<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

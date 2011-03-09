@@ -36,7 +36,7 @@ display:inline;
 
 /* these are for incl_top.tmpl */
 #header {
-padding-top:3px;
+padding: 5px 0;
 z-index:2;
 }
 
@@ -44,23 +44,12 @@ z-index:2;
 background:none;
 }
 
-#tagline {
-display:block;
-position:relative;
-padding-right:10px;
-top:1px;
-float:right;
-text-align:right;
-font-size:10px;
-font-weight:400;
-}
-
 #logo {
 font-size:33px;
 font-family:Arial, Helvetica, sans-serif;
 font-weight:700;
 text-transform:uppercase;
-padding-left:20px;
+padding: 0px 5px 0px 15px;
 }
 
 #versiontext {
@@ -74,24 +63,6 @@ color:#57442B;
 
 table {
 margin:0;
-}
-
-tr.active {
-font-weight:700;
-}
-
-tr.finished {
-font-weight:400;
-}
-
-tr.waiting {
-font-style:italic;
-}
-
-td.pre {
-font-size:13px;
-font-family:'courier new',courier,serif;
-font-weight:700;
 }
 
 h1 {
@@ -138,47 +109,38 @@ border-bottom: 1px dotted #D7D7D7;
 }
 
 /* --------------- alignment ------------------- */
-.float-left {
-float:left;
-}
-
-.float-right {
-float:right;
-}
-
-.align-left {
-text-align:left;
-}
-
-.align-right {
-text-align:right;
-}
+.float-left { float:left; }
+.float-right { float:right; }
+.align-left { text-align:left; }
+.align-right { text-align:right; }
 /* --------------------------------------------- */
 
 .footer {
+clear:both;
+width: 100%;
 text-align:center;
-padding-bottom:5px;
-margin-top:20px;
+padding-top: 5px;
+padding-bottom: 5px;
 background-color:#F5F1E4;
-border-top:1px solid #000;
+border-top:1px solid #b3b3b3;
 color:#4e4e4e;
 line-height: 1.4em;
 }
 
 .sickbeardTable {
-width:90%;
+width:100%;
 margin-left:auto;
 margin-right:auto;
 }
 .sickbeardTable th{
-padding:2px;
+padding:3px;
 font-weight:700;
 background-color:#333;
 color:#FFF;
 text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 .sickbeardTable td{
-padding:5px;
+padding:4px;
 }
 .sickbeardTable tfoot a {
 color:#FFF;
@@ -191,25 +153,9 @@ clear:left;
 
 .plotInfo {
 cursor:help;
-padding-left:5px;
-float:right;
-}
-
-.message {
-margin-bottom:20px;
-text-align:left;
-font-size:larger;
-padding:4px 0 4px 1em;
-}
-
-.message p span {
-float:left;
-margin-right:.5em;
-}
-
-.message a:hover {
-color:blue;
-background:none;
+margin-left: 8px;
+float: right;
+clear: right;
 }
 
 #tooltip {
@@ -222,6 +168,7 @@ margin-right:10px;
 }
 
 .progressbarText {
+text-shadow: 0 0 0.1em #fff;
 position:absolute;
 top:0;
 width:100%;
@@ -286,10 +233,6 @@ background-color:#000;
 color:#FFF;
 }
 
-.message p,.message ul {
-margin:0;
-}
-
 div#summary {
 background-color:#efefef;
 padding:10px;
@@ -303,14 +246,14 @@ line-height: 17px;
 #MainMenu {
 background-color:#57442B;
 color:#F5F5F5;
-/*margin-bottom:1em;*/
 width:100%;
-border-bottom: 1px solid #333;
 }
 #SubMenu {
+clear:both;
 background-color:#F5F1E4;
 color:#333;
-border-bottom: 1px solid #333;
+border-top: 1px solid #333;
+border-bottom: 1px solid #b3b3b3;
 padding-left:5px;
 }
 #SubMenu span {
@@ -342,11 +285,17 @@ border:0;
 padding:4px 15px 0px;
 }
 #content {
-padding: 10px 15px 15px;
-_text-align: center;
-min-width:500px;
-z-index:1;
-clear:both;
+    min-height: 100px;
+    background: #fff;
+    margin-left: auto;
+    margin-right: auto;
+    border-left: thin solid #B3B3B3;
+    border-right: thin solid #B3B3B3;
+    width: 88%;
+    min-width:650px;
+    z-index:1;
+    clear:both;
+    padding: 10px 15px 15px;
 }
 .showLegend{
 font-weight:700;
@@ -378,14 +327,19 @@ overflow: hidden;
 div#addShowPortal {
 margin-left: auto; 
 margin-right: auto;
-width: 600px;
+width: 480px;
 }
-div#addShowPortal  button { padding: 10px; width: 450px; }
-div#addShowPortal  button div.button img{ float: left; margin: 25px 25px 25px 10px; vertical-align: middle;}
-div#addShowPortal  button .buttontext { float: right; text-align: left; width: 350px; }
+div#addShowPortal  button { padding: 10px; width: 100%; }
+div#addShowPortal  button div.button img{ position: absolute; display: block; overflow: hidden; top: 35%; padding-left: 0.4em; text-align: center;}
+div#addShowPortal  button .buttontext { position: relative; display: block; padding: 0.1em 0.4em 0.1em 4.4em; text-align: left; }
 
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
 
 .hover { background-color: #cfcfcf !important; cursor: pointer; }
-
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
+
+/* for manage_massEdit */
+.optionWrapper { width: 450px; margin-left: auto; margin-right: auto; padding: 6px 12px; }
+.optionWrapper span.selectTitle { float: left; font-weight: 700; font-size: 1.2em; text-align: left; width: 225px; }
+.optionWrapper div.selectChoices { float: left; width: 175px; margin-left: 25px; }
+.optionWrapper br { clear: both; }

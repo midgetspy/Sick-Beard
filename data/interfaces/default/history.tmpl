@@ -10,10 +10,11 @@
 
 #set global $sbPath=".."
 
-<!--#set global $topmenu="history"#-->
+#set global $topmenu="history"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript">
+<!--
 \$(document).ready(function() 
 { 
     \$("#historyTable:has(tbody tr)").tablesorter({
@@ -21,6 +22,7 @@
         sortList: [[0,1]]
     }); 
 });
+//-->
 </script>
 
 

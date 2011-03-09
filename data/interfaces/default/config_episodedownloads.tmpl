@@ -4,11 +4,12 @@
 
 #set global $sbPath="../.."
 
-<!--#set global $topmenu="config"#-->
+#set global $topmenu="config"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" charset="utf-8">
+<!--
 \$(document).ready(function(){
 
     \$.fn.nzb_method_handler = function() {
@@ -30,6 +31,7 @@
     \$(this).nzb_method_handler();
 
 });
+//-->
 </script>
 
 <div id="config">
@@ -81,7 +83,7 @@
                         <input type="submit" value="Save Changes" /><br/>
                         
                     </fieldset>
-                </div><!-- /component-group1 -->
+                </div><!-- /component-group1 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
 
@@ -199,7 +201,7 @@
                         <input type="submit" value="Save Changes" /><br/>
                         
                     </fieldset>
-                </div><!-- /component-group2 -->
+                </div><!-- /component-group2 //-->
 
                 <div id="core-component-group3" class="component-group clearfix">
 
@@ -273,20 +275,22 @@
                         <input type="submit" value="Save Changes" /><br/>
 
                     </fieldset>
-                </div><!-- /component-group3 -->
+                </div><!-- /component-group3 //-->
 
             <br/><input type="submit" value="Save Changes" /><br/>
 
-            </div><!-- /config-components -->
+            </div><!-- /config-components //-->
 
 </form>
 </div></div>
 <div class="clearfix"></div>
 
 <script type="text/javascript" charset="utf-8">
+<!--
     jQuery('#nzb_dir').fileBrowser({ title: 'Select NZB Black Hole/Watch Directory' });
     jQuery('#torrent_dir').fileBrowser({ title: 'Select Torrent Black Hole/Watch Directory' });
     jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
+//-->
 </script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

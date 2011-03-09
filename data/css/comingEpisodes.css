@@ -1,23 +1,4 @@
-div#outsideWrapper { 
-    margin: 0px auto; 
-    text-align: center;
-}
-
-div#insideWrapper { 
-    margin: 0px auto;
-    border: 1px solid #E9E9E9;
-    background-color: #F8F8F8;
-    padding: 0px 35px 0px 35px;
-    width: 629px;
-}
-
-div#insideContent {
-    text-align: center;
-    width: 629px;
-}
-
 .tvshowDiv {
-    width: 606px;
     display: block;
     clear: both;
     border-left: 1px solid #CCCCCC;
@@ -26,6 +7,7 @@ div#insideContent {
     margin: auto;
     padding: 0px;
     text-align: left;
+    width: 606px;
 }
 
 .tvshowDiv a, .tvshowDiv a:link, .tvshowDiv a:visited, .tvshowDiv a:hover  {
@@ -54,7 +36,7 @@ div#insideContent {
 }
 
 .posterThumb {
-    /* display:table-cell; */
+    -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
     height: 200px;
     width: 136px;
@@ -62,7 +44,7 @@ div#insideContent {
     border-right: 1px solid #ccc;
 }
 .bannerThumb {
-    /* display:table-cell; */
+    -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
     height: 112px;
     width: 606px;
@@ -79,6 +61,7 @@ div#insideContent {
 .tvshowDiv th.nobg {
     background: #efefef;
     border-top: 1px solid #666;
+    text-align: center;
 }
 
 .tvshowDiv td {
@@ -118,7 +101,7 @@ h1.network {
     border: 1px solid #CCCCCC;
     margin-bottom: 10px;
     /* margin: 10px; */
-    overflow: hidden;
+    /* overflow: hidden; */
     padding: 10px;
 }
 

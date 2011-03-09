@@ -4,12 +4,12 @@
 
 #set global $sbPath="../.."
 
-
-<!--#set global $topmenu="manage"#-->
+#set global $topmenu="manage"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" charset="utf-8">
+<!--
 \$.tablesorter.addParser({ 
     // set a unique id 
     id: 'showNames', 
@@ -44,6 +44,7 @@
         }
     }); 
 });
+//-->
 </script>
 <script type="text/javascript" src="$sbRoot/js/massUpdate.js"></script>
 
@@ -61,9 +62,15 @@
       <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck" /></th>
       <th width="1%">Rescan&nbsp;<input type="checkbox" class="bulkCheck" id="refreshCheck" /></th>
       <th width="1%">Rename&nbsp;<input type="checkbox" class="bulkCheck" id="renameCheck" /></th>
-<!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>-->
+<!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>//-->
     </tr>
   </thead>
+<tfoot>
+  <tr>
+    <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit" /></td>
+    <td colspan="7" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
+  </tr>
+</tfoot>
   <tbody>
 
 #set $myShowList = $sickbeard.showList
@@ -105,19 +112,14 @@ Custom
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
     <td align="center">$curRename</td>
-<!--    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid" /></td>-->
+<!--    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid" /></td>//-->
   </tr>
 
 #end for
 </tbody>
-<tfoot>
-  <tr>
-    <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit" /></td>
-    <td colspan="7" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
-  </tr>
-</tfoot>
 </table>
 
 </form>
 
+<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

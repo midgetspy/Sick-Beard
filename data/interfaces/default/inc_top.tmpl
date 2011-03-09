@@ -23,6 +23,8 @@
 
 <style type="text/css">
 <!--
+#contentWrapper { background: url("$sbRoot/images/bg.gif") repeat scroll 0 0 transparent; }
+
 .ac_loading { background: white url("$sbRoot/images/loading16.gif") right center no-repeat; }
 .sf-sub-indicator { background: url("$sbRoot/images/arrows.png") no-repeat -10px -100px; }
 .sf-shadow ul { background: url("$sbRoot/images/shadow.png") no-repeat bottom right; }
@@ -55,7 +57,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
 .ui-widget-overlay { background: #aaaaaa url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat; opacity: .35;filter:Alpha(Opacity=35); }
 .ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
---> 
+//--> 
 </style>
 
     <script type="text/javascript" src="$sbRoot/js/jquery-1.5.1.min.js"></script>
@@ -70,27 +72,13 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.0.3.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/tools.tooltip-1.2.5.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.pnotify-1.0.1.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery.divgrow-1.3.1.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.expand-1.3.8.js"></script>
 
     <script type="text/javascript" charset="utf-8">
-\$(document).ready(function(){ 
-
-   \$("table.sickbeardTable td").hover( 
-       function() { \$(this).find("a").parent().addClass("hover"); }, 
-       function() { \$(this).find("a").parent().removeClass("hover");
-   } );
-   
-   \$("table.sickbeardTable td").click( function() {
-        var href = \$(this).find("a").attr("href");
-        if(href) { window.location = href; }
-   });
-   
-});
-    </script>
-    <script type="text/javascript" charset="utf-8">
+    <!--
         sbRoot = "$sbRoot";
         //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
-        top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" />'; 
+        top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" alt="Jump to top" />'; 
         
         $.Browser = {
             defaults: {
@@ -99,11 +87,13 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
                 autocompleteURL:   '$sbRoot/browser/complete'
             }
         };
+    //-->
     </script>
     <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
     
-<script type="text/javascript"> 
+<script type="text/javascript">
+<!--
     \$(document).ready(function(){ 
         \$("ul.sf-menu").supersubs({ 
             minWidth:    12,   // minimum width of sub-menus in em units 
@@ -166,6 +156,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     #end for
 
     });
+//-->
 </script>
 </head>
 
@@ -244,22 +235,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 </div>
 #end if
 
-<div id="content">
-
-#for $curMessage in $flash.messages():
-<br />
-<div class="message ui-state-highlight ui-corner-all">
-    <p><span class="ui-icon ui-icon-info"></span>$curMessage[0]</p>
-    $curMessage[1]
-</div>
-#end for
-
-#for $curError in $flash.errors():
-<br />
-<div class="message ui-state-error ui-corner-all">
-    <p><span class="ui-icon ui-icon-alert"></span>$curError[0]</p>
-    $curError[1]
-</div>
-#end for
+<div id="contentWrapper">
+    <div id="content">
 
 <h1>#if $varExists('header') then $header else $title#</h1>
