@@ -240,7 +240,8 @@ class ParseResult(object):
                  episode_numbers=None,
                  extra_info=None,
                  release_group=None,
-                 air_date=None
+                 air_date=None,
+                 absolute_number=None
                  ):
 
         self.original_name = original_name
@@ -256,6 +257,7 @@ class ParseResult(object):
         self.release_group = release_group
         
         self.air_date = air_date
+        self.absolute_number = absolute_number
         
         self.which_regex = None
         
@@ -274,6 +276,8 @@ class ParseResult(object):
         if self.release_group != other.release_group:
             return False
         if self.air_date != other.air_date:
+            return False
+        if self.absolute_number != other.absolute_number:
             return False
         
         return True
@@ -295,6 +299,7 @@ class ParseResult(object):
             to_return += ' (' + self.release_group + ')'
 
         to_return += ' [ABD: '+str(self.air_by_date)+']'
+        to_return += ' [AN: '+str(self.is_absolute_number)+']'
 
         return to_return.encode('utf-8')
 

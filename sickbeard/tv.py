@@ -1419,23 +1419,25 @@ class TVEpisode(object):
 
         if naming_quality == None:
             naming_quality = sickbeard.NAMING_QUALITY
-
+        #episode string begin
         if ((self.show.genre and "Talk Show" in self.show.genre) or self.show.air_by_date) and sickbeard.NAMING_DATES:
             try:
                 goodEpString = self.airdate.strftime("%Y.%m.%d")
             except ValueError:
                 pass
-        # we want a absolute (number) pretty name 
-        if self.show.is_absolute_number:
-            goodEpString = str(self.absolute_number)
-            
+           
         # if we didn't set it to the air-by-date value or absolute_numbering use the season/ep
         if not goodEpString:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
 
         for relEp in self.relatedEps:
             goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
-
+        
+        # if we want a absolute (number) pretty name 
+        if self.show.is_absolute_number:
+            goodEpString = str(self.absolute_number)+config.naming_sep_type[naming_sep_type]+goodEpString 
+        #episode string end
+        
         if goodName != '':
             goodName = config.naming_sep_type[naming_sep_type] + goodName
 

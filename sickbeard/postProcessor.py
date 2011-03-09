@@ -293,6 +293,7 @@ class PostProcessor(object):
             return to_return
         
         self.in_history = False
+        self._log("Found NO result in history for '"+str(self.nzb_name)+"'", logger.DEBUG)
         return to_return
     
     def _analyze_name(self, name, file=True):
@@ -351,7 +352,7 @@ class PostProcessor(object):
             self._log(u"Looking up "+cur_name+u" in the DB", logger.DEBUG)
             db_result = helpers.searchDBForShow(cur_name)
             if db_result:
-                self._log(u"Lookup successful, using tvdb id "+str(db_result[0]), logger.DEBUG)
+                self._log(u"Lookup successful, using tvdb id "+str(db_result[0])+" season: "+str(season)+" episode: "+str(episodes), logger.DEBUG)
                 _finalize(parse_result)
                 return (int(db_result[0]), season, episodes)
         
@@ -461,7 +462,22 @@ class PostProcessor(object):
                 except tvdb_exceptions.tvdb_episodenotfound, e:
                     self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(cur_tvdb_id)+u", skipping", logger.DEBUG)
                     continue
-
+            
+            #first lest check if this show is set to absolute numbering
+            elif season == None and tvdb_id and len(episodes) > 0:
+                myDB = db.DBConnection()
+                isAbsoluteNumberSQlResult = myDB.select("SELECT absolute_number,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
+                if int(isAbsoluteNumberSQlResult[0][0]) > 0:
+                    self._log(u"This show is flaged to use absolute numbering", logger.DEBUG)
+                    self._log(u"Getting the season for absolute episode "+str(episodes)+" from the show "+str(isAbsoluteNumberSQlResult[0][1]), logger.DEBUG)
+                    if len(episodes) == 1:
+                        getSeasonAndEpisodeSQlResult = myDB.select("SELECT season,episode FROM tv_episodes WHERE showid = ? and absolute_number = ?", [tvdb_id,episodes[0]])
+                        if getSeasonAndEpisodeSQlResult[0][0] != None and getSeasonAndEpisodeSQlResult[0][1] != None:
+                            season = int(getSeasonAndEpisodeSQlResult[0][0])
+                            episodes = [int(getSeasonAndEpisodeSQlResult[0][1])]
+                    else:
+                        self._log(u"We cant handle multi episodes yet for absolute numbering", logger.ERROR)
+                        
             # if there's no season then we can hopefully just use 1 automatically
             elif season == None and tvdb_id:
                 myDB = db.DBConnection()
@@ -648,12 +664,13 @@ class PostProcessor(object):
             try:
                 self._delete(cur_ep.location, associated_files=True)
             except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
+                raise exceptions.PostProcessingFailed(u"Unable to delete the existing files")
         
         # find the destination folder
         try:
             dest_path = self._find_ep_destination_folder(ep_obj)
         except exceptions.ShowDirNotFoundException:
+            self._log(u"Unable to post-process an episode if the show dir doesn't exist, quitting",logger.ERROR) # this log would have saved me half an hour
             raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
             
         self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
