@@ -112,7 +112,7 @@ Change selected episodes to
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
-  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th>Airdate</th><th>Filename</th><th>Status</th><th>Action</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Status</th><th>Action</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -133,7 +133,7 @@ Change selected episodes to
         <img src="$sbRoot/images/info32.png" height="16" class="plotInfo" alt="" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
         #end if
     </td>
-    <td align="center" nowrap="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 $epLoc[len($show._location)+1:]

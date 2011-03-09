@@ -113,6 +113,7 @@ border-bottom: 1px dotted #D7D7D7;
 .float-right { float:right; }
 .align-left { text-align:left; }
 .align-right { text-align:right; }
+.nowrap { white-space: nowrap; }
 /* --------------------------------------------- */
 
 .footer {
@@ -154,8 +155,8 @@ clear:left;
 .plotInfo {
 cursor:help;
 margin-left: 8px;
+position: relative;
 float: right;
-clear: right;
 }
 
 #tooltip {

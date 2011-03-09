@@ -116,7 +116,7 @@
 
 <br/>
     <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th>Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Force</th></tr></thead>
+    <thead><tr><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Force</th></tr></thead>
     <tbody>
 
     #for $cur_result in $sql_results:
@@ -140,14 +140,14 @@
 
     <!-- start $cur_result["show_name"] //-->
       <tr class="$show_div">
-        <td nowrap="nowrap">
+        <td class="nowrap">
         #if $cur_result["description"] != "" and $cur_result["description"] != None:
             <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
         #end if
             <span><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></span>
         </td>
         <td>$cur_result["name"]</td>
-        <td align="center" nowrap="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
+        <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
         <td><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
