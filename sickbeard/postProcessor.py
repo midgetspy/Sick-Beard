@@ -654,7 +654,7 @@ class PostProcessor(object):
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_ep.location = ek.ek(os.path.join, dest_path, self._destination_file_name(new_base_name))
+                cur_ep.location = ek.ek(os.path.join, dest_path, new_base_name)
                 cur_ep.saveToDB()
         
         # log it to history
