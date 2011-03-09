@@ -457,12 +457,12 @@ class PostProcessor(object):
                         ltvdb_api_parms['language'] = tvdb_lang
 
                     t = tvdb_api.Tvdb(**ltvdb_api_parms)
-                    epObj = t[cur_tvdb_id].airedOn(episodes[0])[0]
+                    epObj = t[tvdb_id].airedOn(episodes[0])[0]
                     season = int(epObj["seasonnumber"])
                     episodes = [int(epObj["episodenumber"])]
                     self._log(u"Got season "+str(season)+" episodes "+str(episodes), logger.DEBUG)
                 except tvdb_exceptions.tvdb_episodenotfound, e:
-                    self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(cur_tvdb_id)+u", skipping", logger.DEBUG)
+                    self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(tvdb_id)+u", skipping", logger.DEBUG)
                     continue
 
             # if there's no season then we can hopefully just use 1 automatically
