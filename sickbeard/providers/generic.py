@@ -151,9 +151,9 @@ class GenericProvider:
         self.cache.updateCache()
         return self.cache.findNeededEpisodes()
 
-    def getQuality(self, item):
+    def getQuality(self, item, anime=False):
         title = item.findtext('title')
-        quality = Quality.nameQuality(title)
+        quality = Quality.nameQuality(title, anime)
         return quality
 
     def _doSearch(self):
@@ -218,7 +218,7 @@ class GenericProvider:
                 logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
                 continue
 
-            quality = self.getQuality(item)
+            quality = self.getQuality(item,episode.show.is_absolute_number)
 
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)

@@ -61,7 +61,8 @@ class Fanzub(generic.NZBProvider):
 
 		curString = curString.replace('.', ' ').replace('-', '.')
 
-		params = {"q": curString.encode('utf-8')
+		params = {"q": curString.encode('utf-8'),
+					"cat": "anime".encode('utf-8')
 				  }
 
 		searchURL = self.url + "rss?" + urllib.urlencode(params)
@@ -129,7 +130,9 @@ class FanzubCache(tvcache.TVCache):
 
 	def _getRSSData(self):
 		url = self.provider.url + 'rss?'
-		urlArgs = {}
+		urlArgs = {"cat": "anime".encode('utf-8')
+					}
+		
 
 		url += urllib.urlencode(urlArgs)
 
