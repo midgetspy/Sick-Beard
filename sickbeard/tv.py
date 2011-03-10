@@ -1044,7 +1044,7 @@ class TVEpisode(object):
             
         logger.log(str(self.show.tvdbid) + ": sqlResult lenght " +str( len(sqlResults) ) +" and its contens "+ str(sqlResults), logger.DEBUG)
             
-        if sqlResults == None or len(sqlResults) > 1:
+        if len(sqlResults) > 1:
             raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
         elif len(sqlResults) == 0:
             logger.log(str(self.show.tvdbid) + ": Episode " + str(self.season) + "x" + str(self.episode) + " not found in the database", logger.DEBUG)

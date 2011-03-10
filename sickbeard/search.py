@@ -111,6 +111,7 @@ def searchForNeededEpisodes():
     # ask all providers for any episodes it finds
     for curProvider in providers.sortedProviderList():
 
+        # is curProvider active 
         if not curProvider.isActive():
             continue
 
