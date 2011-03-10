@@ -38,9 +38,9 @@
         headers: {
             0: { sorter: false},
             1: { sorter: 'showNames'},
-            5: { sorter: false},
             6: { sorter: false},
-            7: { sorter: false}
+            7: { sorter: false},
+            8: { sorter: false}
         }
     }); 
 });
@@ -57,7 +57,8 @@
       <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck" /></th>
       <th class="nowrap">Show Name</th>
       <th>Quality</th>
-      <th>Active</th>
+      <th>Season<br/>Folders</th>
+      <th>Paused</th>
       <th>Status</th>
       <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck" /></th>
       <th width="1%">Rescan&nbsp;<input type="checkbox" class="bulkCheck" id="refreshCheck" /></th>
@@ -68,7 +69,7 @@
 <tfoot>
   <tr>
     <td align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit" /></td>
-    <td colspan="7" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
+    <td colspan="8" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>
@@ -83,31 +84,30 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #set $curRename_disabled = ""
 
 #if $sickbeard.showQueueScheduler.action.isBeingUpdated($curShow) or $sickbeard.showQueueScheduler.action.isInUpdateQueue($curShow):
-  #set $curUpdate_disabled = "disabled "
+  #set $curUpdate_disabled = "disabled=\"disabled\" "
 #end if
 #set $curUpdate = "<input type=\"checkbox\" class=\"updateCheck\" id=\"update-"+str($curShow.tvdbid)+"\" "+$curUpdate_disabled+"/>"
 
 #if $sickbeard.showQueueScheduler.action.isBeingRefreshed($curShow) or $sickbeard.showQueueScheduler.action.isInRefreshQueue($curShow):
-  #set $curRefresh_disabled = "disabled "
+  #set $curRefresh_disabled = "disabled=\"disabled\" "
 #end if
 #set $curRefresh = "<input type=\"checkbox\" class=\"refreshCheck\" id=\"refresh-"+str($curShow.tvdbid)+"\" "+$curRefresh_disabled+"/>"
 
 #if $sickbeard.showQueueScheduler.action.isBeingRenamed($curShow) or $sickbeard.showQueueScheduler.action.isInRenameQueue($curShow):
-  #set $curRename = "disabled "
+  #set $curRename = "disabled=\"disabled\" "
 #end if
 #set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\" "+$curRename_disabled+"/>"
 
   <tr>
     <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
     <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-    <td align="center">
 #if $curShow.quality in $qualityPresets:
-$qualityPresetStrings[$curShow.quality]
+    <td align="center">$qualityPresetStrings[$curShow.quality]</td>
 #else:
-Custom
+    <td align="center">Custom</td>
 #end if 
-    </td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.seasonfolders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
