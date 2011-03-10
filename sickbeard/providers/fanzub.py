@@ -39,7 +39,8 @@ class Fanzub(generic.NZBProvider):
 
 		generic.NZBProvider.__init__(self, "Fanzub")
 
-		self.supportsBacklog = False # i dont know if they do because i dont know what Backlog means oO
+		self.supportsBacklog = False
+		self.description = u"Only useful for anime.<br>No backlog support."
 
 		self.cache = FanzubCache(self)
 
@@ -52,13 +53,13 @@ class Fanzub(generic.NZBProvider):
 		return True
 
 	def _get_season_search_strings(self, show, season):
-		return ['^'+x for x in sceneHelpers.makeSceneSeasonSearchString(show, season)]
+		return []
 
 	def _get_episode_search_strings(self, ep_obj):
 		return [ep_obj.show.name+" "+str(ep_obj.absolute_number)]
 
 	def _doSearch(self, curString):
-
+		
 		curString = curString.replace('.', ' ').replace('-', '.')
 
 		params = {"q": curString.encode('utf-8'),
