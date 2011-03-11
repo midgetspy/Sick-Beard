@@ -25,11 +25,11 @@ import regexes
 from sickbeard import logger
 
 class NameParser(object):
-    def __init__(self, file_name=True):
+    def __init__(self, file_name=True, anime=False):
 
         self.file_name = file_name
         self.compiled_regexes = []
-        self._compile_regexes()
+        self._compile_regexes(anime)
 
     def clean_series_name(self, series_name):
         """Cleans up series name by removing any . and _
@@ -54,8 +54,14 @@ class NameParser(object):
         series_name = re.sub("-$", "", series_name)
         return series_name.strip()
 
-    def _compile_regexes(self):
-        uncompiled_regex = regexes.abs_ep_regexes + regexes.ep_regexes #FIXME: maybe we should always add the regex for absolute numbering
+    def _compile_regexes(self,anime=False):
+        if not anime:
+            logger.log(u"Using normal regex's" , logger.DEBUG)
+            uncompiled_regex = regexes.ep_regexes
+        else:
+            logger.log(u"Using anime AND normal regex's" , logger.DEBUG)
+            uncompiled_regex = regexes.anime_ep_regexes+regexes.ep_regexes
+            
         for (cur_pattern_name, cur_pattern) in uncompiled_regex:
             try:
                 cur_regex = re.compile(cur_pattern, re.VERBOSE | re.IGNORECASE)
@@ -73,7 +79,7 @@ class NameParser(object):
             match = cur_regex.match(name)
 
             if not match:
-                logger.log(u"No match found for '"+cur_regex_name+"' in '"+name+"'",logger.DEBUG)
+                #logger.log(u"No match found for '"+cur_regex_name+"' in '"+name+"'",logger.DEBUG)
                 continue
             
             
@@ -81,7 +87,7 @@ class NameParser(object):
             result.which_regex = [cur_regex_name]
             
             named_groups = match.groupdict().keys()
-            logger.log(u"Matched: named_groups: '"+str(named_groups)+"' in '"+name+"'",logger.DEBUG)
+            logger.log(u"Matched: named_groups: "+str(named_groups)+" using '"+str(cur_regex_name)+"' in '"+name+"'",logger.DEBUG)
             
             if 'series_name' in named_groups:
                 result.series_name = match.group('series_name')

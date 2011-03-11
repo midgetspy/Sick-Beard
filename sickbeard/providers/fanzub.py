@@ -58,7 +58,9 @@ class Fanzub(generic.NZBProvider):
 	def _get_episode_search_strings(self, ep_obj):
 		return [ep_obj.show.name+" "+str(ep_obj.absolute_number)]
 
-	def _doSearch(self, curString):
+	def _doSearch(self, curString, anime=False):
+		if not anime:
+			return [];
 		
 		curString = curString.replace('.', ' ').replace('-', '.')
 

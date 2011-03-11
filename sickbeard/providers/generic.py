@@ -156,7 +156,7 @@ class GenericProvider:
         quality = Quality.nameQuality(title, anime)
         return quality
 
-    def _doSearch(self):
+    def _doSearch(self, anime=False):
         return []
 
     def _get_season_search_strings(self, show, season, episode=None):
@@ -192,7 +192,11 @@ class GenericProvider:
         itemList = []
 
         for cur_search_string in self._get_episode_search_strings(episode):
-            itemList += self._doSearch(cur_search_string)
+            try:
+                itemList += self._doSearch(cur_search_string, anime=episode.show.is_absolute_number)
+            except Exception:
+                itemList += self._doSearch(cur_search_string)
+                
 
         for item in itemList:
 
@@ -200,7 +204,7 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = NameParser()
+                myParser = NameParser(anime=episode.show.is_absolute_number)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)

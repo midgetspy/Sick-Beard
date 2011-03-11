@@ -370,7 +370,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
         try:
-            myParser = NameParser()
+            myParser = NameParser(anime=self.is_absolute_number)
             parse_result = myParser.parse(file)
         except InvalidNameException:
             logger.log(u"Unable to parse the filename "+file+" into a valid episode", logger.ERROR)

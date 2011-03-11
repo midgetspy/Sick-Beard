@@ -95,6 +95,12 @@ simple_test_cases = {
               'Show.Name.2010.23.11.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [], 'Source.Quality.Etc', 'Group', datetime.date(2010,11,23)),
               'Show Name - 2010-11-23 - Ep Name': parser.ParseResult(None, 'Show Name', extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
               '2010-11-23 - Ep Name': parser.ParseResult(None, extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
+               },
+               
+              'anime_episode': {
+              '[Tsuki] Bleach - 301 [1280x720][61D1D4EE]': parser.ParseResult(None, 'Bleach', None, [301], '1280x720', 'Tsuki'),
+              '[BSS-Anon] Tengen Toppa Gurren Lagann - 22-23 [1280x720][h264][6039D9AF]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [22,23], '1280x720', 'BSS-Anon'),
+              '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [2], '480p', 'SJSUBS')
                }
               }
 
@@ -244,6 +250,10 @@ class BasicTests(unittest.TestCase):
     def test_scene_date_format_names(self):
         np = parser.NameParser(False)
         self._test_names(np, 'scene_date_format')
+        
+    def test_anime_names(self):
+        np = parser.NameParser(False,anime=True)
+        self._test_names(np, 'anime_episode',verbose=True)
 
     def test_standard_file_names(self):
         np = parser.NameParser()
