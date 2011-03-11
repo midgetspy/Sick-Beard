@@ -356,7 +356,7 @@ class Manage:
         redirect("/manage")
 
     @cherrypy.expose
-    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toMetadata=None):
+    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None):
 
         if toUpdate != None:
             toUpdate = toUpdate.split('|')
@@ -373,6 +373,11 @@ class Manage:
         else:
             toRename = []
 
+        if toDelete != None:
+            toDelete = toDelete.split('|')
+        else:
+            toDelete = []
+
         if toMetadata != None:
             toMetadata = toMetadata.split('|')
         else:
@@ -383,7 +388,7 @@ class Manage:
         updates = []
         renames = []
 
-        for curShowID in set(toUpdate+toRefresh+toRename+toMetadata):
+        for curShowID in set(toUpdate+toRefresh+toRename+toDelete+toMetadata):
 
             if curShowID == '':
                 continue
@@ -393,24 +398,26 @@ class Manage:
             if showObj == None:
                 continue
 
-            if curShowID in toUpdate:
+            if curShowID in toUpdate and curShowID not in toDelete:
                 try:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True)
                     updates.append(showObj.name)
                 except exceptions.CantUpdateException, e:
                     errors.append("Unable to update show "+showObj.name+": "+str(e).decode('utf-8'))
 
-            if curShowID in toRefresh and curShowID not in toUpdate:
+            if curShowID in toRefresh and curShowID not in toUpdate and curShowID not in toDelete:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)
                     refreshes.append(showObj.name)
                 except exceptions.CantRefreshException, e:
                     errors.append("Unable to refresh show "+showObj.name+": "+str(e).decode('utf-8'))
 
-            if curShowID in toRename:
+            if curShowID in toRename and curShowID not in toDelete:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
                 renames.append(showObj.name)
 
+            if curShowID in toDelete:
+                showObj.deleteShow() 
 
         if len(errors) > 0:
             ui.flash.error("Errors encountered",
@@ -419,22 +426,22 @@ class Manage:
         messageDetail = ""
 
         if len(updates) > 0:
-            messageDetail += "<b>Updates</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(updates)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Updates</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(updates)
+            messageDetail += "</li></ul>"
 
         if len(refreshes) > 0:
-            messageDetail += "<b>Refreshes</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(refreshes)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Refreshes</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(refreshes)
+            messageDetail += "</li></ul>"
 
         if len(renames) > 0:
-            messageDetail += "<b>Renames</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(renames)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Renames</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(renames)
+            messageDetail += "</li></ul>"
 
         if len(updates+refreshes+renames) > 0:
-            ui.flash.message("The following actions were queued:<br /><br />",
+            ui.flash.message("The following actions were queued:",
                           messageDetail)
 
         redirect("/manage")
