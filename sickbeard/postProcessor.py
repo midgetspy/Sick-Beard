@@ -185,6 +185,7 @@ class PostProcessor(object):
             self._log(u"Moving file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
                 helpers.moveFile(cur_file_path, new_file_path)
+                helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
                 self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
                 raise e
@@ -198,6 +199,7 @@ class PostProcessor(object):
             self._log(u"Copying file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
                 helpers.copyFile(cur_file_path, new_file_path)
+                helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
                 logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
                 raise e
@@ -630,6 +632,7 @@ class PostProcessor(object):
             self._log(u"Season folder didn't exist, creating it", logger.DEBUG)
             try:
                 ek.ek(os.mkdir, dest_path)
+                helpers.chmodAsParent(dest_path)
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 

@@ -1413,6 +1413,8 @@ class NewHomeAddShows:
             logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
             ui.flash.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
+        else:
+            helpers.chmodAsParent(show_dir)
 
         # prepare the inputs for passing along
         if seasonFolders == "on":
