@@ -123,15 +123,6 @@ class PostProcessor(object):
         
         return file_path_list
 
-    def _destination_file_name(self, new_name):
-        existing_extension = self.file_name.rpartition('.')[-1]
-        new_name = helpers.sanitizeFileName(new_name)
-        
-        if sickbeard.RENAME_EPISODES:
-            return new_name + '.' + existing_extension
-        else:
-            return self.file_name 
-
     def _delete(self, file_path, associated_files=False):
         
         if not file_path:
@@ -150,37 +141,12 @@ class PostProcessor(object):
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 ek.ek(os.remove, cur_file)
+                
+    def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
 
-    def _rename(self, file_path, new_base_name, associated_files=False):
-        
-        if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
-
-        if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not renaming anything", logger.DEBUG)
+        if not action:
+            self._log(u"Must provide an action for the combined file operation", logger.ERROR)
             return
-        
-        for cur_file_path in file_list:
-
-            # get the extension
-            cur_extension = cur_file_path.rpartition('.')[-1]
-            
-            # replace .nfo with .nfo-orig to avoid conflicts
-            if cur_extension == 'nfo':
-                cur_extension = 'nfo-orig'
-            
-            new_path = ek.ek(os.path.join, ek.ek(os.path.dirname, cur_file_path), new_base_name+'.'+cur_extension)
-            
-            if ek.ek(os.path.abspath, cur_file_path) == ek.ek(os.path.abspath, new_path):
-                self._log(u"File "+cur_file_path+" is already named properly, no rename needed", logger.DEBUG)
-                continue
-            
-            self._log(u"Renaming file "+cur_file_path+" to "+new_path, logger.DEBUG)
-            ek.ek(os.rename, cur_file_path, new_path)
-
-    def _move(self, file_path, new_path, associated_files=False):
 
         if associated_files:
             file_list = self._list_associated_files(file_path)
@@ -194,7 +160,27 @@ class PostProcessor(object):
         for cur_file_path in file_list:
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
-            new_file_path = ek.ek(os.path.join, new_path, cur_file_name)
+            
+            #AW: If new base name then convert name
+            if new_base_name:
+                # get the extension
+                cur_extension = cur_file_path.rpartition('.')[-1]
+            
+                # replace .nfo with .nfo-orig to avoid conflicts
+                if cur_extension == 'nfo':
+                    cur_extension = 'nfo-orig'
+                    
+                new_file_name = new_base_name +'.' + cur_extension
+            else:
+                new_file_name = cur_file_name
+            
+            new_file_path = ek.ek(os.path.join, new_path, new_file_name)
+
+            action(cur_file_path, new_file_path)
+                
+    def _move(self, file_path, new_path, new_base_name, associated_files=False):
+
+        def _int_move(cur_file_path, new_file_path):
 
             self._log(u"Moving file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
@@ -203,21 +189,11 @@ class PostProcessor(object):
                 self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
                 raise e
                 
-    def _copy(self, file_path, new_path, associated_files=False):
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
+                
+    def _copy(self, file_path, new_path, new_base_name, associated_files=False):
 
-        if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
-
-        if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not copying anything", logger.DEBUG)
-            return
-        
-        for cur_file_path in file_list:
-
-            cur_file_name = ek.ek(os.path.basename, cur_file_path)
-            new_file_path = ek.ek(os.path.join, new_path, cur_file_name)
+        def _int_copy (cur_file_path, new_file_path):
 
             self._log(u"Copying file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
@@ -225,6 +201,8 @@ class PostProcessor(object):
             except (IOError, OSError), e:
                 logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
                 raise e
+
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
 
     def _find_ep_destination_folder(self, ep_obj):
         
@@ -632,20 +610,6 @@ class PostProcessor(object):
         else:
             self._log(u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
         
-        # if renaming is turned on then rename the episode (and associated files, if necessary)
-        if sickbeard.RENAME_EPISODES:
-            new_file_name = helpers.sanitizeFileName(ep_obj.prettyName())
-            try:
-                self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
-            except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to rename the files")
-
-            # remember the new name of the file
-            new_file_path = ek.ek(os.path.join, self.folder_path, new_file_name + '.' + self.file_name.rpartition('.')[-1])
-            self._log(u"After renaming the new file path is "+new_file_path, logger.DEBUG)
-        else:
-            new_file_path = self.file_path
-
         # delete the existing file (and company)
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             try:
@@ -669,20 +633,31 @@ class PostProcessor(object):
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
-        try:
-            # move the episode to the show dir
-            if sickbeard.KEEP_PROCESSED_DIR:
-                self._copy(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
-            else:
-                self._move(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
-        except OSError, IOError:
-            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
-        
         # update the statuses before we rename so the quality goes into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_ep.location = ek.ek(os.path.join, dest_path, self._destination_file_name(ep_obj.prettyName()))
                 cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
+                cur_ep.saveToDB()
+
+        # figure out the base name of the resulting episode file
+        if sickbeard.RENAME_EPISODES:
+            new_base_name = helpers.sanitizeFileName(ep_obj.prettyName())
+        else:
+            new_base_name = self.file_name
+            
+        try:
+            # move the episode and associated files to the show dir
+            if sickbeard.KEEP_PROCESSED_DIR:
+                self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+            else:
+                self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+        except OSError, IOError:
+            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+        
+        # put the new location in the database
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            with cur_ep.lock:
+                cur_ep.location = ek.ek(os.path.join, dest_path, new_base_name)
                 cur_ep.saveToDB()
         
         # log it to history
