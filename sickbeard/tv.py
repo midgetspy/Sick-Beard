@@ -1035,14 +1035,14 @@ class TVEpisode(object):
         logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
         sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, season, episode])
     
-        # only search for absolute numbering if we havent allready found something and the show is flaged as such
+        # only search for absolute numbering if we havent already found something and the show is flagged as such
         useInfoFromDB = False
         if self.show.is_absolute_number and len(sqlResults) == 0 :
             logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for absolute number " + str(episode), logger.DEBUG)
             sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season != 0 AND absolute_number = ?", [self.show.tvdbid, episode])
             useInfoFromDB = True
             
-        logger.log(str(self.show.tvdbid) + ": sqlResult lenght " +str( len(sqlResults) ) +" and its contens "+ str(sqlResults), logger.DEBUG)
+        logger.log(str(self.show.tvdbid) + ": sqlResult length " +str( len(sqlResults) ) +" and its contents "+ str(sqlResults), logger.DEBUG)
             
         if len(sqlResults) > 1:
             raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
@@ -1061,7 +1061,7 @@ class TVEpisode(object):
                 self.season = sqlResults[0]["season"]
                 self.episode = sqlResults[0]["episode"]
             
-            self.absolute_number = sqlResults[0]["absolute_number"]
+            self.absolute_number = sqlResults[0]["absolute_number"]    
             self.description = sqlResults[0]["description"]
             if self.description == None:
                 self.description = ""
@@ -1142,7 +1142,7 @@ class TVEpisode(object):
             logger.log(u"This episode ("+self.show.name+" - "+str(season)+"x"+str(episode)+") has no absolute_number on TVDB", logger.MESSAGE) # TODO: change back to DEBUG
         else: 
             logger.log(str(self.show.tvdbid) + ": The absolute_number for" + str(season) + "x" + str(episode)+" is :"+myEp["absolute_number"], logger.MESSAGE) # TODO: change back to DEBUG
-            self.absolute_number = myEp["absolute_number"]
+            self.absolute_number = int(myEp["absolute_number"])
 
         #NAMEIT logger.log(u"BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
         self.name = myEp["episodename"]

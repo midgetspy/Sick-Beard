@@ -297,7 +297,9 @@ class ParseResult(object):
                 to_return += 'E'+str(e)
 
         if self.air_by_date:
-            to_return += str(self.air_date)
+            to_return += 'abd: '+str(self.air_date)
+        if self.absolute_number:
+            to_return += 'absolute_number: '+str(self.absolute_number)
 
         if self.extra_info:
             to_return += ' - ' + self.extra_info
