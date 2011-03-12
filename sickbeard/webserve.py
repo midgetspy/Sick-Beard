@@ -398,26 +398,29 @@ class Manage:
             if showObj == None:
                 continue
 
-            if curShowID in toUpdate and curShowID not in toDelete:
+            if curShowID in toDelete:
+                showObj.deleteShow()
+                # don't do anything else if it's being deleted
+                continue
+
+            if curShowID in toUpdate:
                 try:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True)
                     updates.append(showObj.name)
                 except exceptions.CantUpdateException, e:
                     errors.append("Unable to update show "+showObj.name+": "+str(e).decode('utf-8'))
 
-            if curShowID in toRefresh and curShowID not in toUpdate and curShowID not in toDelete:
+            # don't bother refreshing shows that were updated anyway
+            if curShowID in toRefresh and curShowID not in toUpdate:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)
                     refreshes.append(showObj.name)
                 except exceptions.CantRefreshException, e:
                     errors.append("Unable to refresh show "+showObj.name+": "+str(e).decode('utf-8'))
 
-            if curShowID in toRename and curShowID not in toDelete:
+            if curShowID in toRename:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
                 renames.append(showObj.name)
-
-            if curShowID in toDelete:
-                showObj.deleteShow() 
 
         if len(errors) > 0:
             ui.flash.error("Errors encountered",
