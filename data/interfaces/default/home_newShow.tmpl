@@ -5,8 +5,8 @@
 
 #set global $sbPath="../.."
 
-<!--#set global $statpath="../.."#-->
-<!--#set global $topmenu="home"#-->
+#set global $statpath="../.."#
+#set global $topmenu="home"#
 #import os.path
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
@@ -28,9 +28,9 @@
     <div class="stepDiv">
         #if $use_provided_info:
             Show retrieved from existing metadata: <a href="http://thetvdb.com/?tab=series&id=$provided_tvdb_id">$provided_tvdb_name</a>
-            <input type="hidden" name="tvdbLang" value="en">
-            <input type="hidden" name="whichSeries" value="$provided_tvdb_id">
-            <input type="hidden" id="providedName" value="$provided_tvdb_name">
+            <input type="hidden" name="tvdbLang" value="en" />
+            <input type="hidden" name="whichSeries" value="$provided_tvdb_id" />
+            <input type="hidden" id="providedName" value="$provided_tvdb_name" />
         #else:
             <input type="text" id="nameToSearch" value="$default_show_name" />
             <select name="tvdbLang" id="tvdbLangSelect">
@@ -53,7 +53,7 @@
     <div class="stepDiv">
         #if $provided_show_dir:
             Pre-chosen Destination Folder: <b>$provided_show_dir</b> <br />
-            <input type="hidden" id="fullShowPath" name="fullShowPath" value="$provided_show_dir"><br />
+            <input type="hidden" id="fullShowPath" name="fullShowPath" value="$provided_show_dir" /><br />
         #else
             #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_rootDirs.tmpl")
         #end if
@@ -68,22 +68,20 @@
 </fieldset>
 
 #for $curNextDir in $other_shows:
-<input type="hidden" name="other_shows" value="$curNextDir">
+<input type="hidden" name="other_shows" value="$curNextDir" />
 #end for
-<input type="hidden" name="skipShow" id="skipShow" value="">
+<input type="hidden" name="skipShow" id="skipShow" value="" />
 </form>
 
 <br />
 
 <div style="width: 800px; text-align: center;">
-<input type="button" id="addShowButton" value="Add Show" disabled>
+<input type="button" id="addShowButton" value="Add Show" disabled="disabled" />
 #if $provided_show_dir:
-<input type="button" id="skipShowButton" value="Skip Show">
+<input type="button" id="skipShowButton" value="Skip Show" />
 #end if
 </div>
 
 <script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
-
-</div>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

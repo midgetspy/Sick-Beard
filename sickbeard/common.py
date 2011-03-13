@@ -28,7 +28,7 @@ USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION.replace(' ','-')+' (
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
                    'm2ts', 'm4v', 'ts', 'flv', 'f4v',
-                   'mov', 'rmvb']
+                   'mov', 'rmvb', 'vob']
 
 ### Other constants
 MULTI_EP_RESULT = -1

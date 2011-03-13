@@ -192,11 +192,7 @@ class GenericProvider:
         itemList = []
 
         for cur_search_string in self._get_episode_search_strings(episode):
-            try:
-                itemList += self._doSearch(cur_search_string, anime=episode.show.is_absolute_number)
-            except Exception:
-                itemList += self._doSearch(cur_search_string)
-                
+            itemList += self._doSearch(cur_search_string, show=episode.show)
 
         for item in itemList:
 

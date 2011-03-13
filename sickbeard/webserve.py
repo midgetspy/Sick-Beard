@@ -356,7 +356,7 @@ class Manage:
         redirect("/manage")
 
     @cherrypy.expose
-    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toMetadata=None):
+    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None):
 
         if toUpdate != None:
             toUpdate = toUpdate.split('|')
@@ -373,6 +373,11 @@ class Manage:
         else:
             toRename = []
 
+        if toDelete != None:
+            toDelete = toDelete.split('|')
+        else:
+            toDelete = []
+
         if toMetadata != None:
             toMetadata = toMetadata.split('|')
         else:
@@ -383,7 +388,7 @@ class Manage:
         updates = []
         renames = []
 
-        for curShowID in set(toUpdate+toRefresh+toRename+toMetadata):
+        for curShowID in set(toUpdate+toRefresh+toRename+toDelete+toMetadata):
 
             if curShowID == '':
                 continue
@@ -393,6 +398,11 @@ class Manage:
             if showObj == None:
                 continue
 
+            if curShowID in toDelete:
+                showObj.deleteShow()
+                # don't do anything else if it's being deleted
+                continue
+
             if curShowID in toUpdate:
                 try:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True)
@@ -400,6 +410,7 @@ class Manage:
                 except exceptions.CantUpdateException, e:
                     errors.append("Unable to update show "+showObj.name+": "+str(e).decode('utf-8'))
 
+            # don't bother refreshing shows that were updated anyway
             if curShowID in toRefresh and curShowID not in toUpdate:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)
@@ -411,7 +422,6 @@ class Manage:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
                 renames.append(showObj.name)
 
-
         if len(errors) > 0:
             ui.flash.error("Errors encountered",
                         '<br >\n'.join(errors))
@@ -419,22 +429,22 @@ class Manage:
         messageDetail = ""
 
         if len(updates) > 0:
-            messageDetail += "<b>Updates</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(updates)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Updates</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(updates)
+            messageDetail += "</li></ul>"
 
         if len(refreshes) > 0:
-            messageDetail += "<b>Refreshes</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(refreshes)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Refreshes</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(refreshes)
+            messageDetail += "</li></ul>"
 
         if len(renames) > 0:
-            messageDetail += "<b>Renames</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(renames)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Renames</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(renames)
+            messageDetail += "</li></ul>"
 
         if len(updates+refreshes+renames) > 0:
-            ui.flash.message("The following actions were queued:<br /><br />",
+            ui.flash.message("The following actions were queued:",
                           messageDetail)
 
         redirect("/manage")
@@ -1405,6 +1415,8 @@ class NewHomeAddShows:
             logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
             ui.flash.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
+        else:
+            helpers.chmodAsParent(show_dir)
 
         # prepare the inputs for passing along
         if seasonFolders == "on":
@@ -1757,7 +1769,7 @@ class Home:
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
                 t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
                 t.submenu.append({ 'title': 'Re-scan files',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
-                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
             t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
 
