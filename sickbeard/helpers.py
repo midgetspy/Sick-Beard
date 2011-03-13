@@ -411,10 +411,10 @@ def chmodAsParent(childPath):
     if os.name == 'nt' or os.name == 'ce':
         return
 
-    parentPath = os.path.dirname(childPath)
+    parentPath = ek.ek(os.path.dirname, childPath)
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
 
-    if os.path.isfile(childPath):
+    if ek.ek(os.path.isfile, childPath):
         childMode = readwriteBits(parentMode)
     else:
         childMode = parentMode
