@@ -420,7 +420,7 @@ def chmodAsParent(childPath):
         childMode = parentMode
 
     try:
-        ek.ek(os.chmod, childPath, childMode)
+        os.chmod(childPath, childMode)
         logger.log(u"Setting permissions for %s to %o as parent directory has %o" % (childPath, childMode, parentMode), logger.DEBUG)
     except OSError:
         logger.log(u"Failed to set permission for %s to %o" % (childPath, childMode), logger.ERROR)
