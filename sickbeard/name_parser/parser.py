@@ -191,6 +191,7 @@ class NameParser(object):
         # break it into parts if there are any (dirname, file name, extension)
         dir_name, file_name = os.path.split(name)
         ext_match = re.match('(.*)\.\w{3,4}$', file_name)
+        
         if ext_match and self.file_name:
             base_file_name = ext_match.group(1)
         else:

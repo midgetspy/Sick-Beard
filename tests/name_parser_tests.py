@@ -97,11 +97,25 @@ simple_test_cases = {
               '2010-11-23 - Ep Name': parser.ParseResult(None, extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
                },
                
-              'anime_episode': {
+              'anime_standard': {
               '[Tsuki] Bleach - 301 [1280x720][61D1D4EE]': parser.ParseResult(None, 'Bleach', None, [301], '1280x720', 'Tsuki'),
+              '[SGKK] Bleach 312 [720p MKV]': parser.ParseResult(None, 'Bleach', None, [312], '720p', 'SGKK'),
               '[BSS-Anon] Tengen Toppa Gurren Lagann - 22-23 [1280x720][h264][6039D9AF]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [22,23], '1280x720', 'BSS-Anon'),
-              '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [2], '480p', 'SJSUBS')
-               }
+              '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [2], '480p', 'SJSUBS'),
+              #'[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '480p', 'SGKK')
+               },
+               
+              'anime_standard_round': {
+              '[SGKK] Bleach - 312 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [312], '1280x720', 'SGKK'),
+              '[HorribleSubs] D Gray-Man - 312 (480p) [F501C9BE]': parser.ParseResult(None, 'D Gray-Man', None, [312], '480p', 'HorribleSubs'),
+              '[SGKK] Tengen Toppa Gurren Lagann - 45-46 (720p h264) [F501C9BE]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [45,46], '720p', 'SGKK'),
+               },
+               
+              'anime_slash': {
+              '[SGKK] Bleach 312 [720p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '720p', 'SGKK'),
+              '[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '480p', 'SGKK')
+               },
+              
               }
 
 combination_test_cases = [
@@ -251,9 +265,17 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser(False)
         self._test_names(np, 'scene_date_format')
         
-    def test_anime_names(self):
+    def test_anime_standard(self):
         np = parser.NameParser(False,anime=True)
-        self._test_names(np, 'anime_episode',verbose=True)
+        self._test_names(np, 'anime_standard')
+        
+    def test_anime_standard_round(self):
+        np = parser.NameParser(False,anime=True)
+        self._test_names(np, 'anime_standard_round',verbose=True)
+        
+    def test_anime_slash(self):
+        np = parser.NameParser(False,anime=True)
+        self._test_names(np, 'anime_slash')
 
     def test_standard_file_names(self):
         np = parser.NameParser()

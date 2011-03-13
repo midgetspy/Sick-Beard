@@ -172,7 +172,7 @@ ep_regexes = [
                ),
               ]
 anime_ep_regexes = [
-               ('anime_episode',
+               ('anime_standard',
                # [Group Name] Show Name.13-14
                # [Group Name] Show Name - 13-14
                # Show Name 13-14
@@ -181,10 +181,31 @@ anime_ep_regexes = [
                # Show Name 13
                '''
                ^(\[(?P<release_group>.+)\][ ._-]*)?      # Release Group and separator
-               (?P<series_name>.+?)[ ._-]+               # Show_Name and separator
+               (?P<series_name>.+?)[ ._-]*               # Show_Name and separator
                (?P<ep_num>\d{1,3})                           # E01
                (-(?P<extra_ep_num>\d{2,3}))?                 # E02
-               [ ._-]+\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]*\w*\] # Source_Quality_Etc-
+               [ ._-]+\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
                .*                               # Separator and EOL
+               '''),
+               ('anime_standard_round',
+               # TODO examples
+               '''
+               ^(\[(?P<release_group>.+)\][ ._-]*)?      # Release Group and separator
+               (?P<series_name>.+?)[ ._-]*               # Show_Name and separator
+               (?P<ep_num>\d{1,3})                           # E01
+               (-(?P<extra_ep_num>\d{2,3}))?                 # E02
+               [ ._-]+\((?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\) # Source_Quality_Etc-
+               .*                               # Separator and EOL
+               '''),
+               
+               ('anime_slash',
+               # TODO examples
+               '''
+               ^(\[(?P<release_group>.+)\][ ._-]*)?      # Release Group and separator
+               (?P<series_name>.+?)[ ._-]*               # Show_Name and separator
+               (?P<ep_num>\d{1,3})                           # E01
+               (-(?P<extra_ep_num>\d{2,3}))?                 # E02
+               [ ._-]+\[(?P<extra_info>\d{3,4}p)$ # Source_Quality_Etc-
+                                              # Separator and EOL
                ''')
                ]
