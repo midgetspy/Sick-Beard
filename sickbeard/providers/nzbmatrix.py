@@ -71,7 +71,8 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
                   "subcat": "6,41",
                   "english": 1,
-                  "ssl": 1}
+                  "ssl": 1,
+                  "scenename": 1}
 
         # if the show is a documentary use those cats on nzbmatrix
         if show and show.genre and 'documentary' in show.genre.lower():
