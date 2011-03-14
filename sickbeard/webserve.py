@@ -2252,7 +2252,6 @@ class WebInterface:
             event.add('dtstart').value = parser.parse(str(datetime.datetime.fromordinal(rows['airdate'])) + rows['airs'], fuzzy=True) 
             event.add('duration').value = datetime.timedelta(minutes=int(rows['runtime']))
 
-                        
         return cal.serialize()
 
     
