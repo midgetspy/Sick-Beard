@@ -23,7 +23,7 @@ import webbrowser
 import sqlite3
 import datetime
 import socket
-import os, sys, subprocess
+import os, sys, subprocess, re
 import urllib
 
 from threading import Lock
