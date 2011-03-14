@@ -2248,7 +2248,8 @@ class WebInterface:
         
         for rows in sql_results:
             event = cal.add('vevent')
-            event.add('summary').value = rows['show_name'] + '(s' + str(rows['season']) + 'e' + str(rows['episode']) +') - ' + rows['name']
+            event.add('uid').value = str(rows['tvdb_id']) + ('%02d' % rows['season']) + ('%02d' % rows['episode'])
+            event.add('summary').value = rows['show_name'] + '(s' + '%02d' % rows['season'] + 'e' + '%02d' % rows['episode'] +') - ' + rows['name']
             event.add('dtstart').value = parser.parse(str(datetime.datetime.fromordinal(rows['airdate'])) + rows['airs'], fuzzy=True) 
             event.add('duration').value = datetime.timedelta(minutes=int(rows['runtime']))
 
