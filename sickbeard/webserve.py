@@ -540,7 +540,7 @@ class ConfigGeneral:
                     web_password=None, season_folders_format=None, 
                     version_notify=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None,
-                    naming_use_periods=None, naming_sep_type=None, naming_quality=None, naming_dates=None,
+                    naming_use_periods=None, naming_sep_type=None, naming_quality=None, naming_dates=None, naming_anime=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
                     wdtv_data=None, use_banner=None):
 
@@ -590,6 +590,11 @@ class ConfigGeneral:
             naming_dates = 1
         else:
             naming_dates = 0
+            
+        if naming_anime == "on":
+            naming_anime = 1
+        else:
+            naming_anime = 0
 
         if use_banner == "on":
             use_banner = 1
@@ -613,6 +618,7 @@ class ConfigGeneral:
         sickbeard.NAMING_USE_PERIODS = naming_use_periods
         sickbeard.NAMING_QUALITY = naming_quality
         sickbeard.NAMING_DATES = naming_dates
+        sickbeard.NAMING_ANIME = naming_anime
         sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
         sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
         sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
@@ -696,6 +702,7 @@ class ConfigGeneral:
                 self.name = "Show Name"
                 self.genre = "Comedy"
                 self.air_by_date = 0
+                self.absolute_number = 0
 
         # fake a TVShow (hack since new TVShow is coming anyway)
         class TVEpisode(tv.TVEpisode):

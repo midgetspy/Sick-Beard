@@ -1441,15 +1441,15 @@ class TVEpisode(object):
             except ValueError:
                 pass
            
-        # if we didn't set it to the air-by-date value or absolute_numbering use the season/ep
+        # if we didn't set it to the air-by-date value use the season/ep
         if not goodEpString:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
 
         for relEp in self.relatedEps:
             goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
         
-        # if we want a absolute (number) pretty name 
-        if self.show.is_absolute_number:
+        # if we want a absolute (number) pretty name
+        if self.show.absolute_number and sickbeard.NAMING_ANIME:
             goodEpString = str(self.absolute_number)+config.naming_sep_type[naming_sep_type]+goodEpString 
         #episode string end
         

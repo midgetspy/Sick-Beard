@@ -115,6 +115,7 @@ NAMING_SEP_TYPE = None
 NAMING_USE_PERIODS = None
 NAMING_QUALITY = None
 NAMING_DATES = None
+NAMING_ANIME = None
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
@@ -328,7 +329,7 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                NAMING_DATES,NAMING_ANIME, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
@@ -415,6 +416,7 @@ def initialize(consoleLogging=True):
         NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
         NAMING_QUALITY = bool(check_setting_int(CFG, 'General', 'naming_quality', 0))
         NAMING_DATES = bool(check_setting_int(CFG, 'General', 'naming_dates', 1))
+        NAMING_ANIME = bool(check_setting_int(CFG, 'General', 'naming_anime', 1))
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
@@ -846,6 +848,7 @@ def save_config():
     new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
+    new_config['General']['naming_anime'] = int(NAMING_ANIME)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
     new_config['General']['use_banner'] = int(USE_BANNER)
