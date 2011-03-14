@@ -557,6 +557,9 @@ class TVShow(object):
 
         if myEp["firstaired"] != None and myEp["firstaired"]:
             self.startyear = int(myEp["firstaired"].split('-')[0])
+            
+        if myEp["runtime"] != None:
+            self.runtime = int(myEp["runtime"])
 
         if self.airs == None:
             self.airs = ""
