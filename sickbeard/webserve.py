@@ -129,7 +129,7 @@ def _getEpisode(show, season, episode):
 ManageMenu = [
             { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
-           #{ 'title': 'Episode Overview', 'path': 'manage/episodeOverview' },
+            { 'title': 'Episode Overview', 'path': 'manage/episodeStatuses' },
             ]
 
 class ManageSearches:
@@ -189,6 +189,23 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
+    def showEpisodeStatuses(self, tvdb_id, whichStatus):
+        myDB = db.DBConnection()
+        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? and status = ?", [int(tvdb_id), int(whichStatus)])
+        
+        result = {}
+        for cur_result in cur_show_results:
+            cur_season = int(cur_result["season"])
+            cur_episode = int(cur_result["episode"])
+            
+            if cur_season not in result:
+                result[cur_season] = {}
+            
+            result[cur_season][cur_episode] = cur_result["name"]
+        
+        return json.dumps(result)
+
+    @cherrypy.expose
     def episodeStatuses(self, whichStatus=None):
 
         if whichStatus:
@@ -202,7 +219,7 @@ class Manage:
         if not whichStatus:
             return _munge(t)
         
-        myDB = db.DBConnection();
+        myDB = db.DBConnection()
         status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN (?) AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", [whichStatus])
 
         ep_counts = {}
@@ -221,20 +238,35 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def changeEpisodeStatuses(self, whichStatus, *args, **kwargs):
+    def changeEpisodeStatuses(self, oldStatus, newStatus, *args, **kwargs):
         
+        to_change = {}
+        
+        # make a list of all shows and their associated args
         for arg in kwargs:
             tvdb_id, what = arg.split('-')
             
-            val = 1 if arg == 'on' else 0
+            # we don't care about unchecked checkboxes
+            if kwargs[arg] != 'on':
+                continue
             
-            if what == 'all' and val:
-                logger.log(u"Setting all episodes for show "+str(tvdb_id)+" to status "+str(whichStatus))
-            elif val:
-                season, episode = what.split('x')
-                logger.log(u"Setting episode "+str(what)+" for show "+str(tvdb_id)+" to status "+str(whichStatus)) 
-                
+            if tvdb_id not in to_change:
+                to_change[tvdb_id] = []
+            
+            to_change[tvdb_id].append(what)
         
+        myDB = db.DBConnection()
+
+        for cur_tvdb_id in to_change:
+
+            # get a list of all the eps we want to change if they just said "all"
+            if 'all' in to_change[cur_tvdb_id]:
+                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status = ? AND showid = ?", [oldStatus, cur_tvdb_id])
+                all_eps = [str(x["season"])+'x'+str(x["episode"]) for x in all_eps_results]
+                to_change[cur_tvdb_id] = all_eps
+
+            result = Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
+            
         redirect('/manage/episodeStatuses')
 
     @cherrypy.expose

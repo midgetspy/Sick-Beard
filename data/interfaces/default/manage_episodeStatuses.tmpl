@@ -22,13 +22,25 @@ Manage all episodes with status <select name="whichStatus">
 
 #else
 
+<script type="text/javascript" src="$sbRoot/js/manageEpisodeStatuses.js"></script>
+
 <form action="$sbRoot/manage/changeEpisodeStatuses" method="POST">
+<input type="hidden" id="oldStatus" name="oldStatus" value="$whichStatus">
 <h2>Shows containing $common.statusStrings[$int($whichStatus)] episodes</h2>
 <br/ >
 
-Set checked shows/episodes to <select name="whichStatus">
+#if $whichStatus in ($common.ARCHIVED, $common.IGNORED, $common.SNATCHED):
+#set $row_class = "good"
+#else
+#set $row_class = $common.Overview.overviewStrings[$whichStatus]
+#end if
+<input type="hidden" id="row_class" value="$row_class">
+
+Set checked shows/episodes to <select name="newStatus">
 #set $statusList = [$common.SKIPPED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]
+#if $int($whichStatus) in $statusList
 #$statusList.remove($int($whichStatus))
+#end if
 #for $curStatus in $statusList:
 <option value="$curStatus">$common.statusStrings[$curStatus]</option>
 #end for
@@ -38,10 +50,14 @@ Set checked shows/episodes to <select name="whichStatus">
 <br />
 <br />
 
+<table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
 #for $cur_tvdb_id in $ep_counts:
-$show_names[$cur_tvdb_id] ($ep_counts[$cur_tvdb_id]) <input type="checkbox" id="$cur_tvdb_id" name="$cur_tvdb_id-all" checked><br />
-<br />
+ <tr id="$cur_tvdb_id">
+  <th><input type="checkbox" class="allCheck" id="allCheck-$cur_tvdb_id" name="$cur_tvdb_id-all" checked></th>
+  <th colspan="2" style="width: 100%; text-align: left;">$show_names[$cur_tvdb_id] ($ep_counts[$cur_tvdb_id]) <input type="button" class="get_more_eps" id="$cur_tvdb_id" value="Expand"></th>
+ </tr>
 #end for
+</table>
 </form>
 
 #end if
