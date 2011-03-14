@@ -219,11 +219,11 @@ class StatusStrings:
 statusStrings = StatusStrings()
 
 class Overview:
-    SKIPPED = 1
-    WANTED = 2
-    QUAL = 3
+    UNAIRED = UNAIRED # 1
+    QUAL = 2
+    WANTED = WANTED # 3
     GOOD = 4
-    UNAIRED = 5
+    SKIPPED = SKIPPED # 5
 
     overviewStrings = {SKIPPED: "skipped",
                        WANTED: "wanted",
