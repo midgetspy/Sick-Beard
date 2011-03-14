@@ -2247,14 +2247,12 @@ class WebInterface:
         cal = vobject.iCalendar()
         
         for rows in sql_results:
-            firstaired = datetime.date.fromordinal(rows['airdate'])
-            summary = rows['show_name'] + '(s' + str(rows['season']) + 'e' + str(rows['episode']) +') - ' + rows['name']
-            duration = datetime.timedelta(minutes=int(rows['runtime']))
             event = cal.add('vevent')
-            event.add('summary').value = summary
-            event.add('dtstart').value = firstaired
-            event.add('duration').value = duration
-            
+            event.add('summary').value = rows['show_name'] + '(s' + str(rows['season']) + 'e' + str(rows['episode']) +') - ' + rows['name']
+            event.add('dtstart').value = parser.parse(str(datetime.datetime.fromordinal(rows['airdate'])) + rows['airs'], fuzzy=True) 
+            event.add('duration').value = datetime.timedelta(minutes=int(rows['runtime']))
+
+                        
         return cal.serialize()
 
     
