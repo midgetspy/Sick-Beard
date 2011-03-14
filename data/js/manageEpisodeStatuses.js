@@ -8,7 +8,8 @@ $(document).ready(function() {
         
         var row_class = $('#row_class').val();
         
-        var row = ' <tr class="'+row_class+'">';
+        var row = '';
+        row += ' <tr class="'+row_class+'">';
         row += '  <td><input type="checkbox" class="'+tvdb_id+'-epcheck" name="'+tvdb_id+'-'+season+'x'+episode+'"'+checked+'></td>';
         row += '  <td>'+season+'x'+episode+'</td>';
         row += '  <td style="width: 100%">'+name+'</td>';
@@ -40,7 +41,7 @@ $(document).ready(function() {
                           });
                       });
                   });
-        $(this).attr('disabled','disabled');
+        $(this).hide();
     });
 
 });
