@@ -115,6 +115,10 @@ simple_test_cases = {
               '[SGKK] Bleach 312 [720p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '720p', 'SGKK'),
               '[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '480p', 'SGKK')
                },
+               
+               'anime_standard_codec' :{
+               '[Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]': parser.ParseResult(None, 'Infinite Stratos', None, [7], '720p', 'Ayako')
+                }
               
               }
 
@@ -276,6 +280,10 @@ class BasicTests(unittest.TestCase):
     def test_anime_slash(self):
         np = parser.NameParser(False,anime=True)
         self._test_names(np, 'anime_slash')
+        
+    def test_anime_codec(self):
+        np = parser.NameParser(False,anime=True)
+        self._test_names(np, 'anime_standard_codec',verbose=True)
 
     def test_standard_file_names(self):
         np = parser.NameParser()

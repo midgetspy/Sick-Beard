@@ -207,5 +207,22 @@ anime_ep_regexes = [
                (-(?P<extra_ep_num>\d{2,3}))?                 # E02
                [ ._-]+\[(?P<extra_info>\d{3,4}p)$ # Source_Quality_Etc-
                                               # Separator and EOL
+               '''),
+               ('anime_standard_codec',
+               # [Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]
+               # [Group Name] Show Name - 13-14
+               # Show Name 13-14
+               # [Group Name] Show Name.13
+               # [Group Name] Show Name - 13
+               # Show Name 13
+               '''
+               ^(\[(?P<release_group>.+)\][ ._-]*)?      # Release Group and separator
+               (?P<series_name>.+?)[ ._-]*             # Show_Name and separator
+               (\w+[ ._-]*)?                                #funny stuff
+               (?P<ep_num>\d{1,3})                           # E01
+               (-(?P<extra_ep_num>\d{2,3}))?                # E02
+               ([ ._-]\[H264\])?                           #codec
+               [ ._-]*\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
+               .*                               # Separator and EOL
                ''')
                ]

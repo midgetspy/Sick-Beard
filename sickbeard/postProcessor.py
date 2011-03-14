@@ -344,7 +344,6 @@ class PostProcessor(object):
         for cur_name in name_list:
             try:
                 t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
-    
                 self._log(u"Looking up name "+cur_name+u" on TVDB", logger.DEBUG)
                 showObj = t[cur_name]
             except (tvdb_exceptions.tvdb_exception), e:
@@ -412,7 +411,7 @@ class PostProcessor(object):
             
             if cur_tvdb_id:
                 tvdb_id = cur_tvdb_id
-            if cur_season != None:
+            if cur_season:
                 season = cur_season
             if cur_episodes:
                 episodes = cur_episodes
