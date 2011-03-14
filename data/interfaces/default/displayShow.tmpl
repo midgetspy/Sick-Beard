@@ -108,7 +108,7 @@ Change selected episodes to
     #if int($epResult["season"]) != $curSeason:
   <tr><td colspan="9"><a name="season-$epResult["season"]"></a></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
-    <td colspan="9">
+    <td colspan="#if $show.is_absolute_number then '10' else '9'#">
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
