@@ -414,26 +414,11 @@ def chmodAsParent(childPath):
     parentPath = ek.ek(os.path.dirname, childPath)
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
 
-    if ek.ek(os.path.isfile, childPath):
-        childMode = readwriteBits(parentMode)
-    else:
-        childMode = parentMode
-
     try:
-        os.chmod(childPath, childMode)
-        logger.log(u"Setting permissions for %s to %o as parent directory has %o" % (childPath, childMode, parentMode), logger.DEBUG)
+        os.chmod(childPath, parentMode)
+        logger.log(u"Setting permissions for %s to %o as parent directory has %o" % (childPath, parentMode, parentMode), logger.DEBUG)
     except OSError:
-        logger.log(u"Failed to set permission for %s to %o" % (childPath, childMode), logger.ERROR)
-
-def readwriteBits(currentMode):
-    newMode = 0
-
-    for bit in [stat.S_IRUSR, stat.S_IWUSR, stat.S_IRGRP, stat.S_IWGRP, stat.S_IROTH, stat.S_IWOTH]:
-        if currentMode & bit:
-            newMode += bit
-
-    return newMode
-
+        logger.log(u"Failed to set permission for %s to %o" % (childPath, parentMode), logger.ERROR)
 
 if __name__ == '__main__':
     import doctest
