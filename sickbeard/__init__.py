@@ -377,6 +377,8 @@ def initialize(consoleLogging=True):
             CACHE_DIR = None
         
         ROOT_DIRS = check_setting_str(CFG, 'General', 'root_dirs', '')
+        if not re.match(r'\d+\|[^|]+(?:\|[^|]+)*', ROOT_DIRS):
+            ROOT_DIRS = ''
         
         proxies = urllib.getproxies()
         proxy_url = None
