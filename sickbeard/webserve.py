@@ -48,6 +48,9 @@ from sickbeard.common import *
 from lib.tvdb_api import tvdb_exceptions
 from lib.tvdb_api import tvdb_api
 
+from lib import vobject
+from lib.dateutil import parser
+
 try:
     import json
 except ImportError:
@@ -2223,6 +2226,39 @@ class WebInterface:
         redirect("/comingEpisodes")
 
     @cherrypy.expose
+    def comingEpisodesIcal(self):
+        myDB = db.DBConnection()
+        
+        today = datetime.date.today().toordinal()
+        next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
+        recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
+
+        done_show_list = []
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        for cur_result in sql_results:
+            done_show_list.append(int(cur_result["showid"]))
+
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results += more_sql_results
+
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results += more_sql_results
+
+        cal = vobject.iCalendar()
+        
+        for rows in sql_results:
+            firstaired = datetime.date.fromordinal(rows['airdate'])
+            summary = rows['show_name'] + '(s' + str(rows['season']) + 'e' + str(rows['episode']) +') - ' + rows['name']
+            duration = datetime.timedelta(minutes=int(rows['runtime']))
+            event = cal.add('vevent')
+            event.add('summary').value = summary
+            event.add('dtstart').value = firstaired
+            event.add('duration').value = duration
+            
+        return cal.serialize()
+
+    
+    @cherrypy.expose
     def comingEpisodes(self, layout="None"):
 
         myDB = db.DBConnection()
@@ -2280,7 +2316,6 @@ class WebInterface:
         else:
             t.layout = sickbeard.COMING_EPS_LAYOUT
                 
-
         return _munge(t)
 
     manage = Manage()
