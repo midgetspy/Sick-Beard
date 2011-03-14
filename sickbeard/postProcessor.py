@@ -161,7 +161,7 @@ class PostProcessor(object):
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
-            #AW: If new base name then convert name
+            # If new base name then convert name
             if new_base_name:
                 # get the extension
                 cur_extension = cur_file_path.rpartition('.')[-1]
@@ -645,7 +645,8 @@ class PostProcessor(object):
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
-            new_base_name = helpers.sanitizeFileName(ep_obj.prettyName()) + '.' + orig_extension
+            new_base_name = helpers.sanitizeFileName(ep_obj.prettyName())
+            new_file_name = new_base_name + '.' + orig_extension
 
         else:
             new_base_name = self.file_name
@@ -662,7 +663,7 @@ class PostProcessor(object):
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_ep.location = ek.ek(os.path.join, dest_path, new_base_name)
+                cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
                 cur_ep.saveToDB()
         
         # log it to history
