@@ -295,7 +295,8 @@ class PostProcessor(object):
             return to_return
     
         # parse the name to break it into show name, season, and episode
-        np = NameParser(file)
+        # FIXME:this shouldnt always consider anime !
+        np = NameParser(file, anime=True)
         parse_result = np.parse(name)
         self._log("Parsed "+name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
 

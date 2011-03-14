@@ -1450,7 +1450,7 @@ class TVEpisode(object):
         
         # if we want a absolute (number) pretty name
         if self.show.absolute_number and sickbeard.NAMING_ANIME:
-            goodEpString = str(self.absolute_number)+config.naming_sep_type[naming_sep_type]+goodEpString 
+            goodEpString = goodEpString+config.naming_sep_type[naming_sep_type]+str(self.absolute_number) 
         #episode string end
         
         if goodName != '':
