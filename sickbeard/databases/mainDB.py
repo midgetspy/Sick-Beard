@@ -327,10 +327,10 @@ class PopulateRootDirs (AddLang):
 
 class AddAbsoluteEpisodeTVShow(PopulateRootDirs):
     def test(self):
-        return self.hasColumn("tv_shows", "absolute_number")
+        return self.hasColumn("tv_shows", "anime")
 
     def execute(self):
-        self.addColumn("tv_shows", "absolute_number", "NUMERIC", "0")
+        self.addColumn("tv_shows", "anime", "NUMERIC", "0")
         
 class AddAbsoluteEpisodeTVEpisode(AddAbsoluteEpisodeTVShow):
     def test(self):
@@ -338,3 +338,4 @@ class AddAbsoluteEpisodeTVEpisode(AddAbsoluteEpisodeTVShow):
 
     def execute(self):
         self.addColumn("tv_episodes", "absolute_number", "NUMERIC", "NULL")
+        

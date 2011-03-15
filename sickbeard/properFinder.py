@@ -93,7 +93,8 @@ class ProperFinder():
 
             # parse the file name
             try:
-                myParser = NameParser(False)
+                #FIXME: dont always add anime
+                myParser = NameParser(anime=True)
                 parse_result = myParser.parse(curProper.name)
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+curProper.name+" into a valid episode", logger.DEBUG)

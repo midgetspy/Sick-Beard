@@ -41,6 +41,7 @@ class Fanzub(generic.NZBProvider):
 
 		self.supportsBacklog = False
 		self.description = u"Only useful for anime.<br>No backlog support."
+		self.supportsAbsoluteNumbering = True
 
 		self.cache = FanzubCache(self)
 
@@ -59,7 +60,7 @@ class Fanzub(generic.NZBProvider):
 		return [ep_obj.show.name+" "+str(ep_obj.absolute_number)]
 
 	def _doSearch(self, curString, show=None):
-		if show and not show.is_absolute_number:
+		if show and not show.is_anime:
 			logger.log(u""+str(show.name)+" is not an anime skiping "+str(self.name))
 			return [];
 		
@@ -134,10 +135,10 @@ class FanzubCache(tvcache.TVCache):
 
 	def _getRSSData(self):
 		url = self.provider.url + 'rss?'
-		urlArgs = {"cat": "anime".encode('utf-8')
+		urlArgs = {"cat": "anime".encode('utf-8'),
+					"max": "500".encode('utf-8')
 					}
 		
-
 		url += urllib.urlencode(urlArgs)
 
 		logger.log(u"FANZUB cache update URL: "+ url, logger.DEBUG)

@@ -49,6 +49,7 @@ class GenericProvider:
         self.url = ''
 
         self.supportsBacklog = False
+        self.supportsAbsoluteNumbering = False
 
         self.cache = tvcache.TVCache(self)
 
@@ -155,7 +156,7 @@ class GenericProvider:
         title = item.findtext('title')
         quality = Quality.nameQuality(title, anime)
         return quality
-
+    
     def _doSearch(self, anime=False):
         return []
 
@@ -200,7 +201,7 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = NameParser(anime=episode.show.is_absolute_number)
+                myParser = NameParser(anime=episode.show.is_anime)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
@@ -211,16 +212,15 @@ class GenericProvider:
                 if parse_result.air_date != episode.airdate:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
                     continue
-            elif episode.show.is_absolute_number:
-                logger.log("episode.absolute_number type:"+str(episode.absolute_number.__class__), logger.DEBUG)
-                if episode.absolute_number not in parse_result.episode_numbers:
-                    logger.log("Episode "+title+" isn't "+str(episode.absolute_number)+", skipping it. episode numbers:"+ str(parse_result.episode_numbers), logger.DEBUG)
+            elif episode.show.is_anime:
+                if episode.absolute_number not in parse_result.ab_episode_numbers:
+                    logger.log("Episode "+title+" isn't "+str(episode.absolute_number)+", skipping it. episode numbers:"+ str(parse_result.ab_episode_numbers), logger.DEBUG)
                     continue
             elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
                 logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
                 continue
 
-            quality = self.getQuality(item,episode.show.is_absolute_number)
+            quality = self.getQuality(item,episode.show.is_anime)
 
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)

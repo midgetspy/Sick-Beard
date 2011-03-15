@@ -702,7 +702,7 @@ class ConfigGeneral:
                 self.name = "Show Name"
                 self.genre = "Comedy"
                 self.air_by_date = 0
-                self.absolute_number = 0
+                self.anime = 0
 
         # fake a TVShow (hack since new TVShow is coming anyway)
         class TVEpisode(tv.TVEpisode):
@@ -1819,7 +1819,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, absolute_number=None ,directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, anime=None ,directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -1856,10 +1856,10 @@ class Home:
         else:
             paused = 0
             
-        if absolute_number == "on":
-            absolute_number = 1
+        if anime == "on":
+            anime = 1
         else:
-            absolute_number = 0
+            anime = 0
 
         if air_by_date == "on":
             air_by_date = 1
@@ -1897,7 +1897,7 @@ class Home:
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
-            showObj.absolute_number = absolute_number
+            showObj.anime = anime
             showObj.lang = tvdb_lang
 
             # if we change location clear the db of episodes, change it, write to db, and rescan

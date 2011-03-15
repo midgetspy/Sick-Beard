@@ -26,6 +26,7 @@ from sickbeard import logger
 
 class NameParser(object):
     def __init__(self, file_name=True, anime=False):
+        
 
         self.file_name = file_name
         self.compiled_regexes = []
@@ -87,7 +88,7 @@ class NameParser(object):
             result.which_regex = [cur_regex_name]
             
             named_groups = match.groupdict().keys()
-            logger.log(u"Matched: named_groups: "+str(named_groups)+" using '"+str(cur_regex_name)+"' in '"+name+"'",logger.DEBUG)
+            #logger.log(u"Matched: named_groups: "+str(named_groups)+" using '"+str(cur_regex_name)+"' in '"+name+"'",logger.DEBUG)
             
             if 'series_name' in named_groups:
                 result.series_name = match.group('series_name')
@@ -106,6 +107,13 @@ class NameParser(object):
                     result.episode_numbers = range(ep_num, self._convert_number(match.group('extra_ep_num'))+1)
                 else:
                     result.episode_numbers = [ep_num]
+                    
+            if 'ep_ab_num' in named_groups:
+                ep_ab_num = self._convert_number(match.group('ep_ab_num'))
+                if 'extra_ab_ep_num' in named_groups and match.group('extra_ab_ep_num'):
+                    result.ab_episode_numbers = range(ep_ab_num, self._convert_number(match.group('extra_ab_ep_num'))+1)
+                else:
+                    result.ab_episode_numbers = [ep_ab_num]
 
             if 'air_year' in named_groups and 'air_month' in named_groups and 'air_day' in named_groups:
                 year = int(match.group('air_year'))
@@ -211,8 +219,9 @@ class NameParser(object):
 
         # build the ParseResult object
         final_result.air_date = self._combine_results(file_name_result, dir_name_result, 'air_date')
+        final_result.ab_episode_numbers = self._combine_results(file_name_result, dir_name_result, 'ab_episode_numbers')
 
-        if not final_result.air_date:
+        if not final_result.air_date and not final_result.is_anime:
             final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
             final_result.episode_numbers = self._combine_results(file_name_result, dir_name_result, 'episode_numbers')
         
@@ -248,7 +257,7 @@ class ParseResult(object):
                  extra_info=None,
                  release_group=None,
                  air_date=None,
-                 absolute_number=None
+                 ab_episode_numbers=None
                  ):
 
         self.original_name = original_name
@@ -260,11 +269,15 @@ class ParseResult(object):
         else:
             self.episode_numbers = episode_numbers
 
+        if not ab_episode_numbers:
+            self.ab_episode_numbers = []
+        else:
+            self.ab_episode_numbers = ab_episode_numbers
+
         self.extra_info = extra_info
         self.release_group = release_group
         
         self.air_date = air_date
-        self.absolute_number = absolute_number
         
         self.which_regex = None
         
@@ -284,7 +297,7 @@ class ParseResult(object):
             return False
         if self.air_date != other.air_date:
             return False
-        if self.absolute_number != other.absolute_number:
+        if self.ab_episode_numbers != other.ab_episode_numbers:
             return False
         
         return True
@@ -299,8 +312,8 @@ class ParseResult(object):
 
         if self.air_by_date:
             to_return += 'abd: '+str(self.air_date)
-        if self.absolute_number:
-            to_return += 'absolute_number: '+str(self.absolute_number)
+        if self.ab_episode_numbers:
+            to_return += 'ab_episode_numbers: '+str(self.ab_episode_numbers)
 
         if self.extra_info:
             to_return += ' - ' + self.extra_info
@@ -308,7 +321,7 @@ class ParseResult(object):
             to_return += ' (' + self.release_group + ')'
 
         to_return += ' [ABD: '+str(self.air_by_date)+']'
-        #to_return += ' [AN: '+str(self.is_absolute_number)+']' #TODO: i cant check if its like that yet 
+        to_return += ' [ANIME: '+str(self.is_anime)+']' 
 
         return to_return.encode('utf-8')
 
@@ -317,6 +330,12 @@ class ParseResult(object):
             return True
         return False
     air_by_date = property(_is_air_by_date)
+    
+    def _is_anime(self):
+        if self.season_number == None and len(self.episode_numbers) == 0 and self.ab_episode_numbers:
+            return True
+        return False
+    is_anime = property(_is_anime)
 
 class InvalidNameException(Exception):
     "The given name is not valid"

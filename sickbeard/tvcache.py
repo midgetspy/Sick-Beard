@@ -110,13 +110,18 @@ class TVCache():
     def _translateLinkURL(self, url):
         return url.replace('&amp;','&')
 
-    def _parseItem(self, item):
 
+    def _parseItem(self, item):
+        """Return None
+        parse a single rss feed item and add its info to the chache
+        will check for needed infos
+        """
         title = item.findtext('title')
         url = item.findtext('link')
 
         self._checkItemAuth(title, url)
 
+        # we at least need a title and url, if one is missing stop
         if not title or not url:
             logger.log(u"The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
             return
@@ -159,15 +164,20 @@ class TVCache():
         return True
 
     def _addCacheEntry(self, name, url, season=None, episodes=None, tvdb_id=0, tvrage_id=0, quality=None, extraNames=[]):
-
+        """Return False|None
+        Parse the name and try to get as much info out of it as we can
+        Will use anime regex's if this is called from fanzub
+        On a succesfull parse it will add the parsed infos into the cache.db
+        This dosen't mean the parsed result is usefull
+        """
         myDB = self._getDB()
 
         parse_result = None
-
+        
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
             try:
-                myParser = NameParser()
+                myParser = NameParser(anime=self.provider.supportsAbsoluteNumbering)
                 parse_result = myParser.parse(curName)
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
@@ -182,6 +192,7 @@ class TVCache():
             return False
 
         # if we need tvdb_id or tvrage_id then search the DB for them
+        # if this is called from the a generic provider none of this will be present
         if not tvdb_id or not tvrage_id:
 
             # if we have only the tvdb_id, use the database
@@ -206,11 +217,11 @@ class TVCache():
 
             # if they're both empty then fill out as much info as possible by searching the show name
             else:
-
+                
                 showResult = helpers.searchDBForShow(parse_result.series_name)
                 if showResult:
                     logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
-                    tvdb_id = showResult[0]
+                    tvdb_id = int(showResult[0])
 
                 else:
                     logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
@@ -230,7 +241,7 @@ class TVCache():
                     tvrage_id = showObj.tvrid
                     tvdb_lang = showObj.lang
 
-
+        # this can be overwriten later if we found that the result is an anime or abd
         if not season:
             season = parse_result.season_number if parse_result.season_number != None else 1
         if not episodes:
@@ -253,6 +264,17 @@ class TVCache():
             except tvdb_exceptions.tvdb_episodenotfound, e:
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                 return False
+
+        # TODO: look for every absolute number        
+        if parse_result.is_anime and len(parse_result.ab_episode_numbers) == 1 and tvdb_id:
+            # look it up
+            anime = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+            if anime.is_anime:    
+                episodeObj = anime.getEpisode(None,None,absolute_number=parse_result.ab_episode_numbers[0])
+                season = episodeObj.season
+                episodes = [episodeObj.episode]
+            else:
+                logger.log(u""+str(name)+" was matched to the show "+str(anime.name)+" as an anime but the show is not marked as an anime", logger.WARNING)
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
 

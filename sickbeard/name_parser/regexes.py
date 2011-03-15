@@ -182,8 +182,8 @@ anime_ep_regexes = [
                '''
                ^(\[(?P<release_group>.+)\][ ._-]*)?      # Release Group and separator
                (?P<series_name>.+?)[ ._-]*               # Show_Name and separator
-               (?P<ep_num>\d{1,3})                           # E01
-               (-(?P<extra_ep_num>\d{2,3}))?                 # E02
+               (?P<ep_ab_num>\d{1,3})                           # E01
+               (-(?P<extra_ab_ep_num>\d{2,3}))?                 # E02
                [ ._-]+\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
                .*                               # Separator and EOL
                '''),
@@ -192,8 +192,8 @@ anime_ep_regexes = [
                '''
                ^(\[(?P<release_group>.+)\][ ._-]*)?      # Release Group and separator
                (?P<series_name>.+?)[ ._-]*               # Show_Name and separator
-               (?P<ep_num>\d{1,3})                           # E01
-               (-(?P<extra_ep_num>\d{2,3}))?                 # E02
+               (?P<ep_ab_num>\d{1,3})                           # E01
+               (-(?P<extra_ab_ep_num>\d{2,3}))?                 # E02
                [ ._-]+\((?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\) # Source_Quality_Etc-
                .*                               # Separator and EOL
                '''),
@@ -203,8 +203,8 @@ anime_ep_regexes = [
                '''
                ^(\[(?P<release_group>.+)\][ ._-]*)?      # Release Group and separator
                (?P<series_name>.+?)[ ._-]*               # Show_Name and separator
-               (?P<ep_num>\d{1,3})                           # E01
-               (-(?P<extra_ep_num>\d{2,3}))?                 # E02
+               (?P<ep_ab_num>\d{1,3})                           # E01
+               (-(?P<extra_ab_ep_num>\d{2,3}))?                 # E02
                [ ._-]+\[(?P<extra_info>\d{3,4}p)$ # Source_Quality_Etc-
                                               # Separator and EOL
                '''),
@@ -219,8 +219,8 @@ anime_ep_regexes = [
                ^(\[(?P<release_group>.+)\][ ._-]*)?      # Release Group and separator
                (?P<series_name>.+?)[ ._-]*             # Show_Name and separator
                (\w+[ ._-]*)?                                #funny stuff
-               (?P<ep_num>\d{1,3})                           # E01
-               (-(?P<extra_ep_num>\d{2,3}))?                # E02
+               (?P<ep_ab_num>\d{1,3})                           # E01
+               (-(?P<extra_ab_ep_num>\d{2,3}))?                # E02
                ([ ._-]\[H264\])?                           #codec
                [ ._-]*\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
                .*                               # Separator and EOL
