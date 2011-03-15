@@ -129,7 +129,7 @@ def _getEpisode(show, season, episode):
 ManageMenu = [
             { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
-            { 'title': 'Episode Overview', 'path': 'manage/episodeStatuses' },
+            { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
             ]
 
 class ManageSearches:
