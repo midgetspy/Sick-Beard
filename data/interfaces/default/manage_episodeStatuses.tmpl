@@ -61,7 +61,7 @@ Set checked shows/episodes to <select name="newStatus">
 #for $cur_tvdb_id in $sorted_show_ids:
  <tr id="$cur_tvdb_id">
   <th><input type="checkbox" class="allCheck" id="allCheck-$cur_tvdb_id" name="$cur_tvdb_id-all" checked></th>
-  <th colspan="2" style="width: 100%; text-align: left;">$show_names[$cur_tvdb_id] ($ep_counts[$cur_tvdb_id]) <input type="button" class="get_more_eps" id="$cur_tvdb_id" value="Expand"></th>
+  <th colspan="2" style="width: 100%; text-align: left;"><a class="whitelink" href="$sbRoot/home/displayShow?show=$cur_tvdb_id">$show_names[$cur_tvdb_id]</a> ($ep_counts[$cur_tvdb_id]) <input type="button" class="get_more_eps" id="$cur_tvdb_id" value="Expand"></th>
  </tr>
 #end for
 </table>
