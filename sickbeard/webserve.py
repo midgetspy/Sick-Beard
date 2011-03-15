@@ -196,7 +196,7 @@ class Manage:
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
         
-        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? and status IN ("+','.join(['?']*len(status_list))+")", [int(tvdb_id)] + status_list)
+        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season != 0 AND status IN ("+','.join(['?']*len(status_list))+")", [int(tvdb_id)] + status_list)
         
         result = {}
         for cur_result in cur_show_results:
@@ -230,7 +230,7 @@ class Manage:
             return _munge(t)
         
         myDB = db.DBConnection()
-        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN ("+','.join(['?']*len(status_list))+") AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
+        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
 
         ep_counts = {}
         show_names = {}
@@ -279,7 +279,7 @@ class Manage:
 
             # get a list of all the eps we want to change if they just said "all"
             if 'all' in to_change[cur_tvdb_id]:
-                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN ("+','.join(['?']*len(status_list))+") AND showid = ?", status_list + [cur_tvdb_id])
+                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND showid = ?", status_list + [cur_tvdb_id])
                 all_eps = [str(x["season"])+'x'+str(x["episode"]) for x in all_eps_results]
                 to_change[cur_tvdb_id] = all_eps
 

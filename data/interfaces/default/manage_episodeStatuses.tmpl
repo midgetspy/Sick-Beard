@@ -17,7 +17,7 @@
 #end if
 
 <form action="$sbRoot/manage/episodeStatuses" method="GET">
-View all episodes with status <select name="whichStatus">
+Manage episodes with status <select name="whichStatus">
 #for $curStatus in [$common.SKIPPED, $common.SNATCHED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]:
 <option value="$curStatus">$common.statusStrings[$curStatus]</option>
 #end for
