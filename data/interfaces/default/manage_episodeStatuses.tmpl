@@ -58,7 +58,7 @@ Set checked shows/episodes to <select name="newStatus">
 <br />
 
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
-#for $cur_tvdb_id in $ep_counts:
+#for $cur_tvdb_id in $sorted_show_ids:
  <tr id="$cur_tvdb_id">
   <th><input type="checkbox" class="allCheck" id="allCheck-$cur_tvdb_id" name="$cur_tvdb_id-all" checked></th>
   <th colspan="2" style="width: 100%; text-align: left;">$show_names[$cur_tvdb_id] ($ep_counts[$cur_tvdb_id]) <input type="button" class="get_more_eps" id="$cur_tvdb_id" value="Expand"></th>
