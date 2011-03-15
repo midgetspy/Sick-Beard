@@ -1,5 +1,6 @@
 #import sickbeard
 #import datetime
+#import urllib
 #from sickbeard.common import *
 #set global $title="Coming Episodes"
 
@@ -9,11 +10,6 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
-
-<style type="text/css">
-
-
-</style>
 
 <div class="h2footer align-right">
     <b>Key:</b> 
@@ -228,22 +224,23 @@ getthedate()
 </script>
 
     #set $showTotal = 0
-    #set $sectionTotal = -1
+    #set $showTotal = len($sql_results)
+
+    #set $sectionTotal = 0
+
     #set $cur_segment = None
     #set $too_late_header = False
     #set $missed_header = False
     #set $show_div = "listing_default"
     
   <div class="metadataView">
-  <h3>$datetime.date.fromordinal($today).strftime("%A, %B %d %Y") <span id="clock"></span></h3>
+  <h3>$datetime.date.fromordinal($today).strftime("%A, %B %d %Y") <span id="clock"></span> - $showTotal Shows</h3>
 
     #if $sort == "show": 
-        <br/><br/>
+        <br/>
     #end if
     
-    #set $showTotal = len($sql_results)
     #for $cur_result in $sql_results:
-            #set $sectionTotal = $sectionTotal + 1
 
         #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
             #continue
@@ -278,28 +275,19 @@ getthedate()
             #set $cur_ep_airdate = int($cur_result["airdate"])
             #if $cur_segment != $cur_ep_airdate:
                 #if $cur_ep_airdate < $today and not $missed_header:
-                    #if $cur_segment != None:
-                        </div> $sectionTotal
-                        #set $sectionTotal = 0
-                    #end if
-                    <br /><h3 class="expand listing_overdue">Missed</h3><div class="collapse">
+                    #if $cur_segment != None then "</div>" else ""#
+                    <br /><h3 class="expand listing_overdue">Missed ($sectionTotal)</h3><div class="collapse">
                     #set $missed_header = True
                 #elif $cur_ep_airdate >= $next_week and not $too_late_header:
-                    #if $cur_segment != None:
-                        </div> $sectionTotal
-                        #set $sectionTotal = 0
-                    #end if
-                    <br /><h3 class="expand listing_toofar">Later</h3><div class="collapse">
+                    #if $cur_segment != None then "</div>" else ""#
+                    <br /><h3 class="expand listing_toofar">Later ($sectionTotal)</h3><div class="collapse">
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                    #if $cur_segment != None:
-                        </div> $sectionTotal
-                        #set $sectionTotal = 0
-                    #end if
+                    #if $cur_segment != None then "</div>" else ""#
                     #if $cur_ep_airdate == $today:
-                    <br /><h3 class="expand listing_current">$datetime.date.fromordinal($cur_ep_airdate).strftime("%Y-%m-%d &mdash; Today").decode($sickbeard.SYS_ENCODING)</h3><div class="collapse">
+                    <br /><h3 class="expand listing_current">$datetime.date.fromordinal($cur_ep_airdate).strftime("%Y-%m-%d &mdash; Today").decode($sickbeard.SYS_ENCODING) ($sectionTotal)</h3><div class="collapse">
                     #else:
-                    <br /><h3 class="expand listing_default">$datetime.date.fromordinal($cur_ep_airdate).strftime("%Y-%m-%d &mdash; %A").decode($sickbeard.SYS_ENCODING)</h3><div class="collapse">
+                    <br /><h3 class="expand listing_default">$datetime.date.fromordinal($cur_ep_airdate).strftime("%Y-%m-%d &mdash; %A").decode($sickbeard.SYS_ENCODING) ($sectionTotal)</h3><div class="collapse">
                     #end if
                 #end if
                 #set $cur_segment = $cur_ep_airdate
@@ -307,14 +295,14 @@ getthedate()
         #end if
 
     <!-- start $cur_result["show_name"] //-->
-    <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"##if $sort == 'show' then " showPad" else ""##if $sort == 'network' then " showBG "+$show_div else ""#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&amp;which=$layout" /></a>
-    <div id="tooltip_${cur_result["showid"]}" class="showTT" style="display: none;">$cur_result["show_name"]#if int($cur_result["paused"]) then " [paused]" else ""#<br/>Next Episode: <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</div>
+    <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img title="$cur_result["show_name"]" alt="" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"##if $sort == 'show' then " showPad" else ""##if $sort == 'network' then " showBG "+$show_div else ""#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&amp;which=$layout" /></a>
+    <div id="tt_${cur_result["showid"]}-${int(cur_result["airdate"])}-${int(cur_result["episode"])}" class="showTT" style="display: none;">$cur_result["show_name"]#if int($cur_result["paused"]) then " [paused]" else ""#<br/>Next Episode: <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</div>
     <!-- end $cur_result["show_name"] //-->
 
     #end for
+    #if $cur_segment != None and $sort != "show"  then "</div>" else ""#
 
-    </div> $sectionTotal
-<br/> total shows: $showTotal
+    </div>
 <!-- end non list view //-->
 #end if
 
