@@ -291,6 +291,7 @@ class GenericMetadata():
             if not ek.ek(os.path.isdir, nfo_file_dir):
                 logger.log("Metadata dir didn't exist, creating it at "+nfo_file_dir, logger.DEBUG)
                 ek.ek(os.makedirs, nfo_file_dir)
+                helpers.chmodAsParent(nfo_file_dir)
     
             logger.log(u"Writing show nfo file to "+nfo_file_path)
             
@@ -298,6 +299,7 @@ class GenericMetadata():
     
             data.write(nfo_file, encoding="utf-8")
             nfo_file.close()
+            helpers.chmodAsParent(nfo_file_path)
         except IOError, e:
             logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
             return False
@@ -333,6 +335,7 @@ class GenericMetadata():
             if not ek.ek(os.path.isdir, nfo_file_dir):
                 logger.log("Metadata dir didn't exist, creating it at "+nfo_file_dir, logger.DEBUG)
                 ek.ek(os.makedirs, nfo_file_dir)
+                helpers.chmodAsParent(nfo_file_dir)
             
             logger.log(u"Writing episode nfo file to "+nfo_file_path)
             
@@ -340,6 +343,7 @@ class GenericMetadata():
     
             data.write(nfo_file, encoding="utf-8")
             nfo_file.close()
+            helpers.chmodAsParent(nfo_file_path)
         except IOError, e:
             logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
             return False
@@ -491,10 +495,12 @@ class GenericMetadata():
             if not ek.ek(os.path.isdir, image_dir):
                 logger.log("Metadata dir didn't exist, creating it at "+image_dir, logger.DEBUG)
                 ek.ek(os.makedirs, image_dir)
+                helpers.chmodAsParent(image_dir)
 
             outFile = ek.ek(open, image_path, 'wb')
             outFile.write(image_data)
             outFile.close()
+            helpers.chmodAsParent(image_path)
         except IOError, e:
             logger.log(u"Unable to write image to "+image_path+" - are you sure the show folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
             return False

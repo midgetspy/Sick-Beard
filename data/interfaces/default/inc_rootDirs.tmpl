@@ -10,7 +10,7 @@
 #set $backend_dirs = []
 #end if
 
-<input type="hidden" id="whichDefaultRootDir" value="$backend_default">
+<input type="hidden" id="whichDefaultRootDir" value="$backend_default" />
 <div style="padding-bottom: 5px; padding-top: 10px;">
     <select name="rootDir" id="rootDirs" size="6" style="min-width: 400px;">
     #for $cur_dir in $backend_dirs:
@@ -24,5 +24,5 @@
     <input type="button" id="deleteRootDir" value="Delete" />
     <input type="button" id="defaultRootDir" value="Set as Default *" />
 </div>
-<input type="text" style="display: none" id="rootDirText">
+<input type="text" style="display: none" id="rootDirText" />
 <br />
