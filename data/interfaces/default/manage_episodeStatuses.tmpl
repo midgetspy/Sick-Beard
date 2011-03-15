@@ -9,10 +9,15 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-#if not $whichStatus:
+#if not $whichStatus or ($whichStatus and not $ep_counts):
+
+#if $whichStatus:
+<h2>None of your episodes have status $common.statusStrings[$int($whichStatus)]</h2>
+<br />
+#end if
 
 <form action="$sbRoot/manage/episodeStatuses" method="GET">
-Manage all episodes with status <select name="whichStatus">
+View all episodes with status <select name="whichStatus">
 #for $curStatus in [$common.SKIPPED, $common.SNATCHED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]:
 <option value="$curStatus">$common.statusStrings[$curStatus]</option>
 #end for
@@ -26,7 +31,9 @@ Manage all episodes with status <select name="whichStatus">
 
 <form action="$sbRoot/manage/changeEpisodeStatuses" method="POST">
 <input type="hidden" id="oldStatus" name="oldStatus" value="$whichStatus">
+
 <h2>Shows containing $common.statusStrings[$int($whichStatus)] episodes</h2>
+
 <br/ >
 
 #if $whichStatus in ($common.ARCHIVED, $common.IGNORED, $common.SNATCHED):
