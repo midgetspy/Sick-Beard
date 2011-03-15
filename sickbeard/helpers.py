@@ -306,7 +306,9 @@ def buildNFOXML(myShow):
 
 
 def searchDBForShow(regShowName):
-
+    """Return False|(tvdb_id,show_name)
+    Sanitize given show name into multiple versions and see if we have arecord of that show name in the DB
+    """
     showNames = [regShowName.replace(' ','_')]
 
     myDB = db.DBConnection()
@@ -317,11 +319,11 @@ def searchDBForShow(regShowName):
 
         sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
 
+        # if we find exactly one show return its name and tvdb_id
         if len(sqlResults) == 1:
             return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
         else:
-
             # if we didn't get exactly one result then try again with the year stripped off if possible
             match = re.match(yearRegex, showName)
             if match:
