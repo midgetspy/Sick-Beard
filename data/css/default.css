@@ -344,3 +344,5 @@ div#addShowPortal  button .buttontext { position: relative; display: block; padd
 .optionWrapper span.selectTitle { float: left; font-weight: 700; font-size: 1.2em; text-align: left; width: 225px; }
 .optionWrapper div.selectChoices { float: left; width: 175px; margin-left: 25px; }
 .optionWrapper br { clear: both; }
+
+a.whitelink { color: white; }
