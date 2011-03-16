@@ -45,4 +45,3 @@ def ek(func, *args):
         return fixStupidEncodings(result)
     else:
         return result
-'a
