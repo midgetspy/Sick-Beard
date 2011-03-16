@@ -1779,7 +1779,10 @@ class Home:
     @cherrypy.expose
     def shutdown(self):
 
-        threading.Timer(2, sickbeard.saveAndShutdown).start()
+        def invoke_shutdown():
+            sickbeard.invoke_shutdown = True
+
+        threading.Timer(2, invoke_shutdown).start()
 
         title = "Shutting down"
         message = "Sick Beard is shutting down..."

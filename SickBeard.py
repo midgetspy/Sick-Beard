@@ -231,6 +231,10 @@ def main():
     # stay alive while my threads do the work
     while (True):
 
+        if sickbeard.invoke_shutdown:
+            sickbeard.invoke_shutdown = False
+            sickbeard.saveAndShutdown()
+
         time.sleep(1)
 
     return
