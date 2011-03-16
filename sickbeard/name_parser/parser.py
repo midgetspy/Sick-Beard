@@ -313,7 +313,7 @@ class ParseResult(object):
         if self.air_by_date:
             to_return += 'abd: '+str(self.air_date)
         if self.ab_episode_numbers:
-            to_return += 'ab_episode_numbers: '+str(self.ab_episode_numbers)
+            to_return += 'absolute_numbers: '+str(self.ab_episode_numbers)
 
         if self.extra_info:
             to_return += ' - ' + self.extra_info

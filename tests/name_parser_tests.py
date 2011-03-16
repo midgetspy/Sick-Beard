@@ -98,27 +98,29 @@ simple_test_cases = {
                },
                
               'anime_standard': {
-              '[Tsuki] Bleach - 301 [1280x720][61D1D4EE]': parser.ParseResult(None, 'Bleach', None, [301], '1280x720', 'Tsuki'),
-              '[SGKK] Bleach 312 [720p MKV]': parser.ParseResult(None, 'Bleach', None, [312], '720p', 'SGKK'),
-              '[BSS-Anon] Tengen Toppa Gurren Lagann - 22-23 [1280x720][h264][6039D9AF]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [22,23], '1280x720', 'BSS-Anon'),
-              '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [2], '480p', 'SJSUBS'),
+              '[Tsuki] Bleach - 301 [1280x720][61D1D4EE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'Tsuki', None, [301]),
+              '[SGKK] Bleach 312 [720p MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p', 'SGKK', None, [312]),
+              '[BSS-Anon] Tengen Toppa Gurren Lagann - 22-23 [1280x720][h264][6039D9AF]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '1280x720', 'BSS-Anon', None, [22,23]),
+              '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [], '480p', 'SJSUBS', None, [2]),
               #'[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '480p', 'SGKK')
                },
                
               'anime_standard_round': {
-              '[SGKK] Bleach - 312 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [312], '1280x720', 'SGKK'),
-              '[HorribleSubs] D Gray-Man - 312 (480p) [F501C9BE]': parser.ParseResult(None, 'D Gray-Man', None, [312], '480p', 'HorribleSubs'),
-              '[SGKK] Tengen Toppa Gurren Lagann - 45-46 (720p h264) [F501C9BE]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [45,46], '720p', 'SGKK'),
+              '[SGKK] Bleach - 312 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'SGKK', None, [312]),
+              '[HorribleSubs] D Gray-Man - 312 (480p) [F501C9BE]': parser.ParseResult(None, 'D Gray-Man', None, [], '480p', 'HorribleSubs', None, [312]),
+              '[SGKK] Tengen Toppa Gurren Lagann - 45-46 (720p h264) [F501C9BE]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '720p', 'SGKK', None, [45,46]),
                },
                
               'anime_slash': {
-              '[SGKK] Bleach 312 [720p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '720p', 'SGKK'),
-              '[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '480p', 'SGKK')
+              '[SGKK] Bleach 312 [720p/MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p', 'SGKK', None, [312]),
+              '[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [], '480p', 'SGKK', None, [312])
                },
                
                'anime_standard_codec' :{
-               '[Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]': parser.ParseResult(None, 'Infinite Stratos', None, [7], '720p', 'Ayako')
+               '[Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
+               '[Ayako-Shikkaku] Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne - 10 [LQ][h264][720p] [8853B21C]': parser.ParseResult(None, 'Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne', None, [], '720p', 'Ayako-Shikkaku',None, [10])
                 }
+               
               
               }
 
@@ -219,7 +221,9 @@ class BasicTests(unittest.TestCase):
                 test_result = np.parse(cur_test)
             
             if DEBUG or verbose:
+                print 'using: ', test_result.which_regex
                 print 'air_by_date:', test_result.air_by_date, 'air_date:', test_result.air_date
+                print 'anime:', test_result.is_anime, 'absolute number:', test_result.ab_episode_numbers
                 print test_result
                 print result
             self.assertEqual(test_result.which_regex, [section])
