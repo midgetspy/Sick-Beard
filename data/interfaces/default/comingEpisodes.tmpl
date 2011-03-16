@@ -170,7 +170,6 @@
 <!-- end list view //-->
 #else:
 <!-- start non list view //-->
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 
 <!--[if lte IE 6]>
 <script type="text/javascript">
@@ -184,7 +183,46 @@
     \$("div.metadataView h3.expand").toggler({initShow: "div.collapse:eq(0)"});
     \$("div.metadataView").expandAll({trigger: "h3.expand", ref: "h3.expand"});  
 
-    \$(".showTT").tooltip( { delay: '100', effect: 'fade' } );
+// Select all elements that are to share the same tooltip
+var elems = \$('div.collapse > a > img[title]')
+.each(function(i) {
+    \$.data(this, 'oldtitle', $.attr(this, 'title'));
+})
+.removeAttr('title');
+
+\$('<div />').qtip({
+    content: {
+        text: 'Loading...',
+        title: {
+            text: 'Loading...',
+        }
+    }, 
+    show: {
+        target: elems
+    },
+    hide: {
+        target: elems
+    },
+    events: {
+        show: function(event, api) {
+        var target = \$(event.originalEvent.target);
+        var target2 = \$(event.originalEvent.target).next();
+        api.set('content.title.text', target.attr('title'));
+        api.set('content.text', target2.text() );
+        }
+    },
+    position: {
+        target: 'mouse',
+        adjust: {
+            x: 10,
+            y: -15
+        }
+    },
+    style: {
+        classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-plain'
+    }
+}); 
+
 });
 //-->
 </script>
