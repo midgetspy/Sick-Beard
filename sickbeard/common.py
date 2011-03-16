@@ -135,7 +135,7 @@ class Quality:
             return Quality.SDTV
         elif checkName(["dvdrip.xvid", "bdrip.xvid", "dvdrip.divx", "dvdrip.ws.xvid"], any) and not checkName(["720p"], all):
             return Quality.SDDVD
-        elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any) or checkName(["\[720p\]","1280x720"], any):
+        elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
             return Quality.HDTV
         elif checkName(["720p", "web.dl"], all) or checkName(["720p", "itunes", "h.?264"], all):
             return Quality.HDWEBDL
