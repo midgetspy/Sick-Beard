@@ -143,6 +143,13 @@ class PostProcessor(object):
                 ek.ek(os.remove, cur_file)
                 
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
+        """
+        file_path: The full path of the media file to copy
+        new_path: Destination path where we want to copy the file to 
+        new_base_name: The base filename (no extension) to use during the copy. Use None to keep the same name.
+        associated_files: Boolean, whether we should copy similarly-named files too
+        action: function that takes an old path and new path and does an operation with them (move/copy)
+        """
 
         if not action:
             self._log(u"Must provide an action for the combined file operation", logger.ERROR)
@@ -179,6 +186,12 @@ class PostProcessor(object):
             action(cur_file_path, new_file_path)
                 
     def _move(self, file_path, new_path, new_base_name, associated_files=False):
+        """
+        file_path: The full path of the media file to move
+        new_path: Destination path where we want to move the file to 
+        new_base_name: The base filename (no extension) to use during the move. Use None to keep the same name.
+        associated_files: Boolean, whether we should move similarly-named files too
+        """
 
         def _int_move(cur_file_path, new_file_path):
 
@@ -193,6 +206,12 @@ class PostProcessor(object):
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
                 
     def _copy(self, file_path, new_path, new_base_name, associated_files=False):
+        """
+        file_path: The full path of the media file to copy
+        new_path: Destination path where we want to copy the file to 
+        new_base_name: The base filename (no extension) to use during the copy. Use None to keep the same name.
+        associated_files: Boolean, whether we should copy similarly-named files too
+        """
 
         def _int_copy (cur_file_path, new_file_path):
 
@@ -447,6 +466,10 @@ class PostProcessor(object):
                     self._log(u"Got season "+str(season)+" episodes "+str(episodes), logger.DEBUG)
                 except tvdb_exceptions.tvdb_episodenotfound, e:
                     self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(tvdb_id)+u", skipping", logger.DEBUG)
+
+                    # we don't want to leave dates in the episode list if we couldn't convert them to real episode numbers
+                    episodes = []
+
                     continue
             
             #first lest check if this show is set to absolute numbering
@@ -669,8 +692,10 @@ class PostProcessor(object):
             new_file_name = new_base_name + '.' + orig_extension
 
         else:
-            new_base_name = self.file_name
-            
+            # if we're not renaming then there's no new base name, we'll just use the existing name
+            new_base_name = None
+            new_file_name = self.file_name 
+                       
         try:
             # move the episode and associated files to the show dir
             if sickbeard.KEEP_PROCESSED_DIR:

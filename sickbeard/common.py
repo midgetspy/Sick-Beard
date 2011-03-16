@@ -139,7 +139,7 @@ class Quality:
             return Quality.HDTV
         elif checkName(["720p", "web.dl"], all) or checkName(["720p", "itunes", "h.?264"], all):
             return Quality.HDWEBDL
-        elif checkName(["720p", "bluray", "x264"], all):
+        elif checkName(["720p", "bluray", "x264"], all) or checkName(["720p", "hddvd", "x264"], all):
             return Quality.HDBLURAY
         elif checkName(["1080p", "bluray", "x264"], all) or checkName(["1080p", "hddvd", "x264"], all):
             return Quality.FULLHDBLURAY
@@ -245,11 +245,11 @@ class StatusStrings:
 statusStrings = StatusStrings()
 
 class Overview:
-    SKIPPED = 1
-    WANTED = 2
-    QUAL = 3
+    UNAIRED = UNAIRED # 1
+    QUAL = 2
+    WANTED = WANTED # 3
     GOOD = 4
-    UNAIRED = 5
+    SKIPPED = SKIPPED # 5
 
     overviewStrings = {SKIPPED: "skipped",
                        WANTED: "wanted",
