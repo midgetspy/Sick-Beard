@@ -303,6 +303,9 @@ class PostProcessor(object):
         if parse_result.air_by_date:
             season = -1
             episodes = [parse_result.air_date]
+        elif parse_result.is_anime:
+            season = None
+            episodes = parse_result.ab_episode_numbers
         else:
             season = parse_result.season_number
             episodes = parse_result.episode_numbers 
@@ -449,7 +452,7 @@ class PostProcessor(object):
             #first lest check if this show is set to absolute numbering
             elif season == None and tvdb_id and len(episodes) > 0:
                 myDB = db.DBConnection()
-                isAbsoluteNumberSQlResult = myDB.select("SELECT absolute_number,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
+                isAbsoluteNumberSQlResult = myDB.select("SELECT anime,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
                 if int(isAbsoluteNumberSQlResult[0][0]) > 0:
                     self._log(u"This show is flaged to use absolute numbering", logger.DEBUG)
                     self._log(u"Getting the season for absolute episode "+str(episodes)+" from the show "+str(isAbsoluteNumberSQlResult[0][1]), logger.DEBUG)
