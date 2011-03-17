@@ -1101,13 +1101,13 @@ class TVEpisode(object):
         if episode == None:
             episode = self.episode
 
-        logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.MESSAGE) # TODO: change back to DEBUG
+        logger.log(str(self.show.tvdbid) + ": Loading episode details from theTVDB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
 
         tvdb_lang = self.show.lang
 
         try:
             if cachedSeason is None:
-                logger.log(u"No chache for this episode", logger.MESSAGE) # TODO: change back to DEBUG
+                logger.log(u"No chache for this episode", logger.DEBUG)
                 if tvapi is None:
                     # There's gotta be a better way of doing this but we don't wanna
                     # change the cache value elsewhere
