@@ -11,6 +11,12 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
 
+<style type="text/css">
+<!--
+.ui-tooltip-comingep .ui-tooltip-titlebar { color: #222222; }
+//--> 
+</style>
+
 <div class="h2footer align-right">
     <b>Key:</b> 
     <span class="listing_overdue">Past</span>
@@ -183,45 +189,33 @@
     \$("div.metadataView h3.expand").toggler({initShow: "div.collapse:eq(0)"});
     \$("div.metadataView").expandAll({trigger: "h3.expand", ref: "h3.expand"});  
 
-// Select all elements that are to share the same tooltip
-var elems = \$('div.collapse > a > img[title]')
-.each(function(i) {
-    \$.data(this, 'oldtitle', $.attr(this, 'title'));
-})
-.removeAttr('title');
-
-\$('<div />').qtip({
-    content: {
-        text: 'Loading...',
-        title: {
-            text: 'Loading...',
-        }
-    }, 
-    show: {
-        target: elems
-    },
-    hide: {
-        target: elems
-    },
-    events: {
-        show: function(event, api) {
-        var target = \$(event.originalEvent.target);
-        var target2 = \$(event.originalEvent.target).next();
-        api.set('content.title.text', target.attr('title'));
-        api.set('content.text', target2.text() );
-        }
-    },
-    position: {
-        target: 'mouse',
-        adjust: {
-            x: 10,
-            y: -15
-        }
-    },
-    style: {
-        classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-plain'
-    }
-}); 
+    \$('div.collapse img[rel]').each(function()
+    {
+        \$(this).qtip(
+        {
+            content: {
+                text: function(api) {
+                    return \$( 'div.details_'+\$(this).attr('rel') ).html();
+                },
+                title: {
+                    text: \$(this).attr('title'),
+                    button: true
+                }
+            },
+            position: {
+                at: 'center',
+                my: 'center',
+                viewport: \$(window),
+                adjust: { screen: true }
+            },
+            show: { event: 'click', solo: true },
+            hide: 'unfocus',
+            style: { classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-comingep' }
+        })
+        
+        // Make sure it doesn't follow the link when we click it
+        .click(function() { return false; });
+    });
 
 });
 //-->
@@ -333,8 +327,8 @@ getthedate()
         #end if
 
     <!-- start $cur_result["show_name"] //-->
-    <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img title="$cur_result["show_name"]" alt="" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"##if $sort == 'show' then " showPad" else ""##if $sort == 'network' then " showBG "+$show_div else ""#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&amp;which=$layout" /></a>
-    <div id="tt_${cur_result["showid"]}-${int(cur_result["airdate"])}-${int(cur_result["episode"])}" class="showTT" style="display: none;">$cur_result["show_name"]#if int($cur_result["paused"]) then " [paused]" else ""#<br/>Next Episode: <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</div>
+    <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img title="$cur_result["show_name"]#if int($cur_result["paused"]) then " [paused]" else ""#" alt="" rel="${cur_result["showid"]}-${int(cur_result["episode"])}" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"##if $sort == 'show' then " showPad" else ""##if $sort == 'network' then " showBG "+$show_div else ""#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&amp;which=$layout" /></a>
+    <div class="details_${cur_result["showid"]}-${int(cur_result["episode"])}" style="display: none;"><b>Next:</b> <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])) on $cur_result["network"])<br/><p>#if $cur_result["description"] == '' then "[There is no summary added for this episode]" else $cur_result["description"]#</p></div>
     <!-- end $cur_result["show_name"] //-->
 
     #end for
