@@ -361,4 +361,4 @@ a.whitelink { color: white; }
     text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
     font-size: 1em;
 }
-div.ui-pnotify { min-width: 340px; max-width: 550px; width: auto !important;}
+div.ui-pnotify { min-width: 340px; max-width: 550px; width: auto !important;}/* override for qtip2 titlebar */.ui-tooltip-sb .ui-tooltip-titlebar a { color: #222222; text-decoration: none; }

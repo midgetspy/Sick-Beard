@@ -93,3 +93,6 @@ span.pause {
     padding: 5px !important;
     margin: 2px 0;
 }
+
+p.showActions { text-align: right; margin: 0; } 
+p.showActions img { padding: 0 2px; }

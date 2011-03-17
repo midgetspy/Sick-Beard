@@ -13,9 +13,7 @@
 
 <style type="text/css">
 <!--
-.ui-tooltip-comingep .ui-tooltip-titlebar a { color: #222222; text-decoration: none; }
-p.showActions { text-align: right; margin: 0; } 
-p.showActions img { padding: 0 2px; }
+
 //--> 
 </style>
 
@@ -114,45 +112,10 @@ p.showActions img { padding: 0 2px; }
         }
     });
 
-\$('.plotInfo').each(function() {
-    match = \$(this).attr("id").match(/^plot_info_(\d+)_(\d+)_(\d+)$/);
-    \$(this).qtip({
-       content: {
-          text: 'Loading...',
-          ajax: {
-             url: \$("#sbRoot").val()+'/home/plotDetails',
-             type: 'GET', // POST or GET
-             data: { show: match[1], episode: match[3], season: match[2] }, // Data to pass along with your request
-             success: function(data, status) {
-                this.set('content.text', data);
-             }
-          }
-       },
-       show: {
-          solo: true
-       },
-       position: {
-          viewport: \$(window),
-          my: 'left center',
-          adjust: {
-             y: -6,
-             x: 3
-          }
-       },
-       style: {
-          tip: {
-             corner: true,
-             method: 'polygon'
-          },
-          classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-comingep'
-       }
-    });
-
-});
-
 });
 //-->
 </script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 
     #set $show_div = "listing_default"
 
@@ -203,7 +166,7 @@ p.showActions img { padding: 0 2px; }
 #else:
         <td align="center">Custom</td>
 #end if
-        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvDB]" height="16" width="16" src="$sbRoot/images/search32.png" /></a></td>
+        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvDB]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
         <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Search" id="forceUpdate-${cur_result["showid"]}"><img alt="[search]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></td>
       </tr>
     <!-- end $cur_result["show_name"] //-->
@@ -216,7 +179,9 @@ p.showActions img { padding: 0 2px; }
 
 <!--[if lte IE 6]>
 <script type="text/javascript">
+<!--
    try { document.execCommand( "BackgroundImageCache", false, true); } catch(e) {};
+//-->
 </script>
 <![endif]-->
 
@@ -225,72 +190,42 @@ p.showActions img { padding: 0 2px; }
 \$(document).ready(function(){ 
     \$("div.metadataView h3.expand").toggler({initShow: "div.collapse:eq(0)"});
     \$("div.metadataView").expandAll({trigger: "h3.expand", ref: "h3.expand"});  
-
-    \$('img[rel]').each(function()
-    {
-        \$(this).qtip(
-        {
-            content: {
-                text: function(api) {
-                    return \$( 'div.details_'+\$(this).attr('rel') ).html();
-                },
-                title: {
-                    text: function(api) {
-                        return \$( 'div.title_'+\$(this).attr('rel') ).html();
-                    },
-                    button: true
-                }
-            },
-            position: {
-                at: 'center',
-                my: 'center',
-                viewport: \$(window),
-                adjust: { screen: true }
-            },
-            show: { event: 'click', solo: true },
-            hide: 'unfocus',
-            style: { classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-comingep' }
-        })
-        
-        // Make sure it doesn't follow the link when we click it
-        .click(function() { return false; });
-    });
-
 });
 //-->
 </script>
+<script type="text/javascript" src="$sbRoot/js/epTooltip.js"></script>
 
 <script type="text/javascript" charset="utf-8">
 <!--
-
 function getthedate(){
-var mydate=new Date()
-var hours=mydate.getHours()
-var minutes=mydate.getMinutes()
-var dn="AM"
-if (hours>=12)
-dn="PM"
-if (hours>12){ hours=hours-12 }
-if (hours==0)
-hours=12
-if (minutes<=9)
-minutes="0"+minutes
+    var mydate=new Date()
+    var hours=mydate.getHours()
+    var minutes=mydate.getMinutes()
+    var dn="AM"
+    
+    if (hours>=12)
+        dn="PM"
+    if (hours>12)
+        hours=hours-12
+    if (hours==0)
+        hours=12
+    if (minutes<=9)
+        minutes="0"+minutes
 
-var cdate=" &mdash; "+hours+":"+minutes+" "+dn
-if (document.all)
-document.all.clock.innerHTML=cdate
-else if (document.getElementById)
-document.getElementById("clock").innerHTML=cdate
-else
-document.write(cdate)
+    var cdate=" &mdash; "+hours+":"+minutes+" "+dn
+    if (document.all)
+        document.all.clock.innerHTML=cdate
+    else if (document.getElementById)
+        document.getElementById("clock").innerHTML=cdate
+    else
+        document.write(cdate)
 }
-if (!document.all&&!document.getElementById)
-getthedate()
+    if (!document.all&&!document.getElementById)
+        getthedate()
 
 \$(document).ready(function(){ 
     getthedate()
 });
-
 //-->
 </script>
 
@@ -374,7 +309,7 @@ getthedate()
         <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])) on <b>$cur_result["network"]</b> in <b>#if int($cur_result["quality"]) in $qualityPresets then $qualityPresetStrings[int($cur_result["quality"])] else "Custom"#</b>)<br/>
         <p>#if $cur_result["description"] == '' then "[There is no summary added for this episode]" else $cur_result["description"]#</p>
         <p class="showActions">
-            <a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="View Show at TVDB"><img alt="[tvDB]" height="16" width="16" src="$sbRoot/images/search32.png" /></a>
+            <a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="View Show at TVDB"><img alt="[tvDB]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
             <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Search"><img alt="[search]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" /></a>
         </p>
     </div>
