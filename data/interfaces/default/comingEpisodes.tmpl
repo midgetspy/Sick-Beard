@@ -13,7 +13,9 @@
 
 <style type="text/css">
 <!--
-.ui-tooltip-comingep .ui-tooltip-titlebar { color: #222222; }
+.ui-tooltip-comingep .ui-tooltip-titlebar a { color: #222222; text-decoration: none; }
+p.showActions { text-align: right; margin: 0; } 
+p.showActions img { padding: 0 2px; }
 //--> 
 </style>
 
@@ -156,9 +158,9 @@
         <td>$cur_result["name"]</td>
         <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
         <td><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
-            #if int($cur_result["paused"]):
+#if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
-            #end if
+#end if
         </td>
         <td align="center">$cur_result["network"]</td>
 #if int($cur_result["quality"]) in $qualityPresets:
@@ -166,8 +168,8 @@
 #else:
         <td align="center">Custom</td>
 #end if
-        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/search32.png" /></a></td>
-        <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></td>
+        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvDB]" height="16" width="16" src="$sbRoot/images/search32.png" /></a></td>
+        <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Search" id="forceUpdate-${cur_result["showid"]}"><img alt="[search]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></td>
       </tr>
     <!-- end $cur_result["show_name"] //-->
     #end for
@@ -189,7 +191,7 @@
     \$("div.metadataView h3.expand").toggler({initShow: "div.collapse:eq(0)"});
     \$("div.metadataView").expandAll({trigger: "h3.expand", ref: "h3.expand"});  
 
-    \$('div.collapse img[rel]').each(function()
+    \$('img[rel]').each(function()
     {
         \$(this).qtip(
         {
@@ -198,7 +200,9 @@
                     return \$( 'div.details_'+\$(this).attr('rel') ).html();
                 },
                 title: {
-                    text: \$(this).attr('title'),
+                    text: function(api) {
+                        return \$( 'div.title_'+\$(this).attr('rel') ).html();
+                    },
                     button: true
                 }
             },
@@ -328,7 +332,17 @@ getthedate()
 
     <!-- start $cur_result["show_name"] //-->
     <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img title="$cur_result["show_name"]#if int($cur_result["paused"]) then " [paused]" else ""#" alt="" rel="${cur_result["showid"]}-${int(cur_result["episode"])}" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"##if $sort == 'show' then " showPad" else ""##if $sort == 'network' then " showBG "+$show_div else ""#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&amp;which=$layout" /></a>
-    <div class="details_${cur_result["showid"]}-${int(cur_result["episode"])}" style="display: none;"><b>Next:</b> <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])) on $cur_result["network"])<br/><p>#if $cur_result["description"] == '' then "[There is no summary added for this episode]" else $cur_result["description"]#</p></div>
+    <div class="title_${cur_result["showid"]}-${int(cur_result["episode"])}" style="display: none;">
+        <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}" title="Display Show">$cur_result["show_name"]</a>#if int($cur_result["paused"]) then " <span class=\"pause\">[paused]</span>" else ""#
+    </div>
+    <div class="details_${cur_result["showid"]}-${int(cur_result["episode"])}" style="display: none;">
+        <%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])) on <b>$cur_result["network"]</b> in <b>#if int($cur_result["quality"]) in $qualityPresets then $qualityPresetStrings[int($cur_result["quality"])] else "Custom"#</b>)<br/>
+        <p>#if $cur_result["description"] == '' then "[There is no summary added for this episode]" else $cur_result["description"]#</p>
+        <p class="showActions">
+            <a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="View Show at TVDB"><img alt="[tvDB]" height="16" width="16" src="$sbRoot/images/search32.png" /></a>
+            <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Search"><img alt="[search]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" /></a>
+        </p>
+    </div>
     <!-- end $cur_result["show_name"] //-->
 
     #end for
