@@ -136,7 +136,7 @@ class FanzubCache(tvcache.TVCache):
 	def _getRSSData(self):
 		url = self.provider.url + 'rss?'
 		urlArgs = {"cat": "anime".encode('utf-8'),
-					"max": "500".encode('utf-8')
+					"max": "100".encode('utf-8')
 					}
 		
 		url += urllib.urlencode(urlArgs)
