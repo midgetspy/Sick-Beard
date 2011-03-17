@@ -30,7 +30,6 @@ p.showActions img { padding: 0 2px; }
 
 #if $layout == 'list':
 <!-- start list view //-->
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
 \$.tablesorter.addParser({ 
@@ -114,6 +113,42 @@ p.showActions img { padding: 0 2px; }
             7: { sorter: false}
         }
     });
+
+\$('.plotInfo').each(function() {
+    match = \$(this).attr("id").match(/^plot_info_(\d+)_(\d+)_(\d+)$/);
+    \$(this).qtip({
+       content: {
+          text: 'Loading...',
+          ajax: {
+             url: \$("#sbRoot").val()+'/home/plotDetails',
+             type: 'GET', // POST or GET
+             data: { show: match[1], episode: match[3], season: match[2] }, // Data to pass along with your request
+             success: function(data, status) {
+                this.set('content.text', data);
+             }
+          }
+       },
+       show: {
+          solo: true
+       },
+       position: {
+          viewport: \$(window),
+          my: 'left center',
+          adjust: {
+             y: -6,
+             x: 3
+          }
+       },
+       style: {
+          tip: {
+             corner: true,
+             method: 'polygon'
+          },
+          classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-comingep'
+       }
+    });
+
+});
 
 });
 //-->
