@@ -17,23 +17,6 @@ margin:0;
 padding:0;
 }
 
-/* only used in config_timezones.tmpl */
-fieldset.EntryFieldSet {
-vertical-align:top;
-display:inline;
-border-color:#3a3a3a;
-margin:5px;
-padding:7px;
-}
-legend {
-font:bold 16px Arial;
-color: #57442B;
-}
-div.EntryBlock,div.EntryBlock form {
-display:inline;
-}
-/* --------------------------------------------- */
-
 /* these are for incl_top.tmpl */
 #header {
 background-color:#fff;
