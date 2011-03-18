@@ -37,7 +37,7 @@ def ek(func, *args):
     if os.name == 'nt':
         result = func(*args)
     else:
-        result = func(*[x.encode(sickbeard.SYS_ENCODING) for x in args])
+        result = func(*[x.encode(sickbeard.SYS_ENCODING) if type(x) in (str, unicode) else x for x in args])
 
     if type(result) == list:
         return fixListEncodings(result)

@@ -3,7 +3,6 @@ __all__ = ['ezrss',
            'nzbs_org',
            'tvbinz',
            'nzbsrus',
-           'binreq',
            'womble',
            'newzbin',
            ]

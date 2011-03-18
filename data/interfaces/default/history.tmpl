@@ -10,10 +10,11 @@
 
 #set global $sbPath=".."
 
-<!--#set global $topmenu="history"#-->
+#set global $topmenu="history"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript">
+<!--
 \$(document).ready(function() 
 { 
     \$("#historyTable:has(tbody tr)").tablesorter({
@@ -21,16 +22,17 @@
         sortList: [[0,1]]
     }); 
 });
+//-->
 </script>
 
 
 <table id="historyTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-  <thead><tr><th>Time</th><th>Episode</th><th>Action</th><th>Provider</th><th>Quality</th></tr></thead>
+  <thead><tr><th class="nowrap">Time</th><th>Episode</th><th>Action</th><th>Provider</th><th>Quality</th></tr></thead>
   <tbody>
 #for $hItem in $historyResults:
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
   <tr>
-    <td nowrap="nowrap">$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
+    <td>$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
     <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
     <td align="center">$statusStrings[$curStatus]</td>
     <td align="center">

@@ -140,6 +140,8 @@ $(document).ready(function(){
                 sep_char = '/';
             else if (root_dir_text.indexOf('\\') >= 0)
                 sep_char = '\\';
+            else
+                sep_char = '';
 
             if (root_dir_text.substr(sample_text.length-1) != sep_char)
                 root_dir_text += sep_char;
