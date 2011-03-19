@@ -1,7 +1,7 @@
 import re
 import urllib, ConfigParser
 from distutils.core import setup
-import py2exe, sys, os, glob, shutil, datetime, zipfile, subprocess
+import py2exe, sys, os, shutil, datetime, zipfile, subprocess, fnmatch
 import googlecode_upload
 from lib.pygithub import github
 
@@ -28,28 +28,41 @@ def findLatestBuild():
 
     return None
 
-def find_data_files(source, target, patterns):
-    """Locates the specified data-files and returns the matches
-    in a data_files compatible format.
+def recursive_find_data_files(root_dir, allowed_extensions=('*')):
+    
+    to_return = {}
+    for (dirpath, dirnames, filenames) in os.walk(root_dir):
+        if not filenames:
+            continue
+        
+        for cur_filename in filenames:
+            
+            matches_pattern = False
+            for cur_pattern in allowed_extensions:
+                if fnmatch.fnmatch(cur_filename, '*.'+cur_pattern):
+                    matches_pattern = True
+            if not matches_pattern:
+                continue
+            
+            cur_filepath = os.path.join(dirpath, cur_filename)
+            to_return.setdefault(dirpath, []).append(cur_filepath)
+            
+    return sorted(to_return.items())
 
-    source is the root of the source data tree.
-        Use '' or '.' for current directory.
-    target is the root of the target data tree.
-        Use '' or '.' for the distribution directory.
-    patterns is a sequence of glob-patterns for the
-        files you want to copy.
-    """
-    if glob.has_magic(source) or glob.has_magic(target):
-        raise ValueError("Magic not allowed in src, target")
-    ret = {}
-    for pattern in patterns:
-        pattern = os.path.join(source, pattern)
-        for filename in glob.glob(pattern):
-            if os.path.isfile(filename):
-                targetpath = os.path.join(target, os.path.relpath(filename, source))
-                path = os.path.dirname(targetpath)
-                ret.setdefault(path, []).append(filename)
-    return sorted(ret.items())
+
+def find_all_libraries(root_dirs):
+    
+    libs = []
+    
+    for cur_root_dir in root_dirs:
+        for (dirpath, dirnames, filenames) in os.walk(cur_root_dir):
+            if '__init__.py' not in filenames:
+                continue
+            
+            libs.append(dirpath.replace(os.sep, '.')) 
+    
+    return libs
+
 
 def allFiles(dir):
     files = []
@@ -77,7 +90,7 @@ if os.path.isdir('dist'):
 # root source dir
 compile_dir = os.path.dirname(os.path.normpath(os.path.abspath(sys.argv[0])))
 
-if not 'nogit' in oldArgs:
+if not 'nopull' in oldArgs:
     # pull new source from git
     print 'Updating source from git'
     p = subprocess.Popen('git pull origin master', shell=True, cwd=compile_dir)
@@ -85,7 +98,10 @@ if not 'nogit' in oldArgs:
 
 # figure out what build this is going to be
 latestBuild = findLatestBuild()
-currentBuildNumber = latestBuild+1
+if 'test' in oldArgs:
+    currentBuildNumber = str(latestBuild)+'a'
+else:
+    currentBuildNumber = latestBuild+1
 
 # write the version file before we compile
 versionFile = open("sickbeard/version.py", "w")
@@ -93,19 +109,7 @@ versionFile.write("SICKBEARD_VERSION = \"build "+str(currentBuildNumber)+"\"")
 versionFile.close()
 
 # set up the compilation options
-data_files = find_data_files('', '', [
-    'readme.txt',
-    'data/css/*',
-    'data/css/pepper-grinder/*',
-    'data/css/pepper-grinder/images/*',
-    'data/images/*',
-    'data/images/providers/*',
-    'data/images/tablesorter/*',
-    'data/images/menu/*',
-    'data/js/*',
-    'data/interfaces/*',
-    'data/interfaces/default/*',
-    ])
+data_files = recursive_find_data_files('data', ['gif', 'png', 'jpg', 'ico', 'js', 'css', 'tmpl'])
 
 options = dict(
     name=name,
@@ -114,38 +118,7 @@ options = dict(
     author_email='nic@wolfeden.ca',
     description=name + ' ' + release,
     scripts=['SickBeard.py'],
-    packages=['sickbeard',
-              'sickbeard.providers',
-              'sickbeard.notifiers',
-              'sickbeard.databases',
-              'sickbeard.metadata',
-              'sickbeard.name_parser',
-              'lib',
-              'lib.tvdb_api',
-              'lib.growl',
-              'lib.httplib2',
-              'lib.oauth2',
-              'lib.pygithub',
-              'lib.pythontwitter',
-              'lib.simplejson',
-              'lib.socks',
-              'lib.hachoir_core',
-              'lib.hachoir_core.field',
-              'lib.hachoir_core.stream',
-              'lib.hachoir_parser',
-              'lib.hachoir_parser.archive',
-              'lib.hachoir_parser.audio',
-              'lib.hachoir_parser.common',
-              'lib.hachoir_parser.container',
-              'lib.hachoir_parser.file_system',
-              'lib.hachoir_parser.game',
-              'lib.hachoir_parser.image',
-              'lib.hachoir_parser.misc',
-              'lib.hachoir_parser.network',
-              'lib.hachoir_parser.program',
-              'lib.hachoir_parser.video',
-              'lib.hachoir_metadata',
-              ],
+    packages=find_all_libraries(['sickbeard', 'lib']),
 )
 
 # set up py2exe to generate the console app
@@ -209,39 +182,44 @@ setup(
       console = ['updater.py'],
 )
 
-# start building the CHANGELOG.txt
-print 'Creating changelog'
-gh = github.GitHub()
-
-# read the old changelog and find the last commit from that build
-lastCommit = ""
-try:
-    cl = open("CHANGELOG.txt", "r")
-    lastCommit = cl.readlines()[0].strip()
-    cl.close()
-except:
-    print "I guess there's no changelog"
-
-newestCommit = ""
-changeString = ""
-
-# cycle through all the git commits and save their commit messages
-for curCommit in gh.commits.forBranch('midgetspy', 'Sick-Beard'):
-    if curCommit.id == lastCommit:
-        break
-
-    if newestCommit == "":
-        newestCommit = curCommit.id
+if 'test' in oldArgs:
+    print "Ignoring changelog for test build"
+else:
+    # start building the CHANGELOG.txt
+    print 'Creating changelog'
+    gh = github.GitHub()
     
-    changeString += curCommit.message + "\n\n"
+    # read the old changelog and find the last commit from that build
+    lastCommit = ""
+    try:
+        cl = open("CHANGELOG.txt", "r")
+        lastCommit = cl.readlines()[0].strip()
+        cl.close()
+    except:
+        print "I guess there's no changelog"
+    
+    newestCommit = ""
+    changeString = ""
 
-# if we didn't find any changes don't make a changelog file
-if newestCommit != "":
-    newChangelog = open("CHANGELOG.txt", "w")
-    newChangelog.write(newestCommit+"\n\n")
-    newChangelog.write("Changelog for build "+str(currentBuildNumber)+"\n\n")
-    newChangelog.write(changeString)
-    newChangelog.close()
+    # cycle through all the git commits and save their commit messages
+    for curCommit in gh.commits.forBranch('midgetspy', 'Sick-Beard'):
+        if curCommit.id == lastCommit:
+            break
+    
+        if newestCommit == "":
+            newestCommit = curCommit.id
+        
+        changeString += curCommit.message + "\n\n"
+    
+    # if we didn't find any changes don't make a changelog file
+    if newestCommit != "":
+        newChangelog = open("CHANGELOG.txt", "w")
+        newChangelog.write(newestCommit+"\n\n")
+        newChangelog.write("Changelog for build "+str(currentBuildNumber)+"\n\n")
+        newChangelog.write(changeString)
+        newChangelog.close()
+    else:
+        print "No changes found, keeping old changelog"
 
 # put the changelog in the compile dir
 if os.path.exists("CHANGELOG.txt"):
@@ -282,11 +260,11 @@ gc_username = config.get("GC", "username")
 gc_password = config.get("GC", "password")
 
 # upload to google code unless I tell it not to
-if "noup" not in oldArgs:
+if "noup" not in oldArgs and "test" not in oldArgs:
     print "Uploading zip to google code"
     googlecode_upload.upload(os.path.abspath(zipFilename+".zip"), "sickbeard", gc_username, gc_password, "Win32 alpha build "+str(currentBuildNumber)+" (unstable/development release)", ["Featured","Type-Executable","OpSys-Windows"])
  
-if not 'nogit' in oldArgs or not 'somegit' in oldArgs:
+if 'nopush' not in oldArgs and 'test' not in oldArgs:
     # tag commit as a new build and push changes to github
     print 'Tagging commit and pushing'
     p = subprocess.Popen('git tag -a "build-'+str(currentBuildNumber)+'" -m "Windows build '+zipFilename+'"', shell=True, cwd=compile_dir)
