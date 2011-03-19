@@ -1779,7 +1779,7 @@ class Home:
     @cherrypy.expose
     def shutdown(self):
 
-        threading.Timer(2, sickbeard.saveAndShutdown).start()
+        threading.Timer(2, sickbeard.invoke_shutdown).start()
 
         title = "Shutting down"
         message = "Sick Beard is shutting down..."
@@ -1793,7 +1793,7 @@ class Home:
             redirect("/home")
 
         # do a soft restart
-        threading.Timer(2, sickbeard.restart, [False]).start()
+        threading.Timer(2, sickbeard.invoke_restart, [False]).start()
 
         title = "Restarting"
         message = "Sick Beard is restarting, refresh in 30 seconds."
@@ -1810,7 +1810,7 @@ class Home:
 
         if updated:
             # do a hard restart
-            threading.Timer(2, sickbeard.restart, [False]).start()
+            threading.Timer(2, sickbeard.invoke_restart, [False]).start()
             return "Sick Beard is restarting, refresh in 30 seconds."
         else:
             return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
