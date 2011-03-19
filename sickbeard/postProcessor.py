@@ -110,6 +110,9 @@ class PostProcessor(object):
         file_path_list = []
     
         base_name = file_path.rpartition('.')[0]+'.'
+        
+        # don't confuse glob with chars we didn't mean to use
+        base_name = re.sub(r'[\[\]\*\?]', r'\\\g<0>', base_name)
     
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
             # only list it if the only non-shared part is the extension
@@ -119,15 +122,6 @@ class PostProcessor(object):
             file_path_list.append(associated_file_path)
         
         return file_path_list
-
-    def _destination_file_name(self, new_name):
-        existing_extension = self.file_name.rpartition('.')[-1]
-        new_name = helpers.sanitizeFileName(new_name)
-        
-        if sickbeard.RENAME_EPISODES:
-            return new_name + '.' + existing_extension
-        else:
-            return self.file_name 
 
     def _delete(self, file_path, associated_files=False):
         
@@ -147,37 +141,19 @@ class PostProcessor(object):
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 ek.ek(os.remove, cur_file)
+                
+    def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
+        """
+        file_path: The full path of the media file to copy
+        new_path: Destination path where we want to copy the file to 
+        new_base_name: The base filename (no extension) to use during the copy. Use None to keep the same name.
+        associated_files: Boolean, whether we should copy similarly-named files too
+        action: function that takes an old path and new path and does an operation with them (move/copy)
+        """
 
-    def _rename(self, file_path, new_base_name, associated_files=False):
-        
-        if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
-
-        if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not renaming anything", logger.DEBUG)
+        if not action:
+            self._log(u"Must provide an action for the combined file operation", logger.ERROR)
             return
-        
-        for cur_file_path in file_list:
-
-            # get the extension
-            cur_extension = cur_file_path.rpartition('.')[-1]
-            
-            # replace .nfo with .nfo-orig to avoid conflicts
-            if cur_extension == 'nfo':
-                cur_extension = 'nfo-orig'
-            
-            new_path = ek.ek(os.path.join, ek.ek(os.path.dirname, cur_file_path), new_base_name+'.'+cur_extension)
-            
-            if ek.ek(os.path.abspath, cur_file_path) == ek.ek(os.path.abspath, new_path):
-                self._log(u"File "+cur_file_path+" is already named properly, no rename needed", logger.DEBUG)
-                continue
-            
-            self._log(u"Renaming file "+cur_file_path+" to "+new_path, logger.DEBUG)
-            ek.ek(os.rename, cur_file_path, new_path)
-
-    def _move(self, file_path, new_path, associated_files=False):
 
         if associated_files:
             file_list = self._list_associated_files(file_path)
@@ -191,37 +167,63 @@ class PostProcessor(object):
         for cur_file_path in file_list:
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
-            new_file_path = ek.ek(os.path.join, new_path, cur_file_name)
+            
+            # If new base name then convert name
+            if new_base_name:
+                # get the extension
+                cur_extension = cur_file_path.rpartition('.')[-1]
+            
+                # replace .nfo with .nfo-orig to avoid conflicts
+                if cur_extension == 'nfo':
+                    cur_extension = 'nfo-orig'
+                    
+                new_file_name = new_base_name +'.' + cur_extension
+            else:
+                new_file_name = cur_file_name
+            
+            new_file_path = ek.ek(os.path.join, new_path, new_file_name)
+
+            action(cur_file_path, new_file_path)
+                
+    def _move(self, file_path, new_path, new_base_name, associated_files=False):
+        """
+        file_path: The full path of the media file to move
+        new_path: Destination path where we want to move the file to 
+        new_base_name: The base filename (no extension) to use during the move. Use None to keep the same name.
+        associated_files: Boolean, whether we should move similarly-named files too
+        """
+
+        def _int_move(cur_file_path, new_file_path):
 
             self._log(u"Moving file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
                 helpers.moveFile(cur_file_path, new_file_path)
+                helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
                 self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
                 raise e
                 
-    def _copy(self, file_path, new_path, associated_files=False):
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
+                
+    def _copy(self, file_path, new_path, new_base_name, associated_files=False):
+        """
+        file_path: The full path of the media file to copy
+        new_path: Destination path where we want to copy the file to 
+        new_base_name: The base filename (no extension) to use during the copy. Use None to keep the same name.
+        associated_files: Boolean, whether we should copy similarly-named files too
+        """
 
-        if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
-
-        if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not copying anything", logger.DEBUG)
-            return
-        
-        for cur_file_path in file_list:
-
-            cur_file_name = ek.ek(os.path.basename, cur_file_path)
-            new_file_path = ek.ek(os.path.join, new_path, cur_file_name)
+        def _int_copy (cur_file_path, new_file_path):
 
             self._log(u"Copying file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
                 helpers.copyFile(cur_file_path, new_file_path)
+                helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
                 logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
                 raise e
+
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
 
     def _find_ep_destination_folder(self, ep_obj):
         
@@ -454,12 +456,16 @@ class PostProcessor(object):
                         ltvdb_api_parms['language'] = tvdb_lang
 
                     t = tvdb_api.Tvdb(**ltvdb_api_parms)
-                    epObj = t[cur_tvdb_id].airedOn(episodes[0])[0]
+                    epObj = t[tvdb_id].airedOn(episodes[0])[0]
                     season = int(epObj["seasonnumber"])
                     episodes = [int(epObj["episodenumber"])]
                     self._log(u"Got season "+str(season)+" episodes "+str(episodes), logger.DEBUG)
                 except tvdb_exceptions.tvdb_episodenotfound, e:
-                    self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(cur_tvdb_id)+u", skipping", logger.DEBUG)
+                    self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(tvdb_id)+u", skipping", logger.DEBUG)
+
+                    # we don't want to leave dates in the episode list if we couldn't convert them to real episode numbers
+                    episodes = []
+
                     continue
 
             # if there's no season then we can hopefully just use 1 automatically
@@ -629,20 +635,6 @@ class PostProcessor(object):
         else:
             self._log(u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
         
-        # if renaming is turned on then rename the episode (and associated files, if necessary)
-        if sickbeard.RENAME_EPISODES:
-            new_file_name = helpers.sanitizeFileName(ep_obj.prettyName())
-            try:
-                self._rename(self.file_path, new_file_name, sickbeard.MOVE_ASSOCIATED_FILES)
-            except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to rename the files")
-
-            # remember the new name of the file
-            new_file_path = ek.ek(os.path.join, self.folder_path, new_file_name + '.' + self.file_name.rpartition('.')[-1])
-            self._log(u"After renaming the new file path is "+new_file_path, logger.DEBUG)
-        else:
-            new_file_path = self.file_path
-
         # delete the existing file (and company)
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             try:
@@ -663,23 +655,40 @@ class PostProcessor(object):
             self._log(u"Season folder didn't exist, creating it", logger.DEBUG)
             try:
                 ek.ek(os.mkdir, dest_path)
+                helpers.chmodAsParent(dest_path)
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
-        try:
-            # move the episode to the show dir
-            if sickbeard.KEEP_PROCESSED_DIR:
-                self._copy(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
-            else:
-                self._move(new_file_path, dest_path, sickbeard.MOVE_ASSOCIATED_FILES)
-        except OSError, IOError:
-            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
-        
         # update the statuses before we rename so the quality goes into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_ep.location = ek.ek(os.path.join, dest_path, self._destination_file_name(ep_obj.prettyName()))
                 cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
+                cur_ep.saveToDB()
+
+        # figure out the base name of the resulting episode file
+        if sickbeard.RENAME_EPISODES:
+            orig_extension = self.file_name.rpartition('.')[-1]
+            new_base_name = helpers.sanitizeFileName(ep_obj.prettyName())
+            new_file_name = new_base_name + '.' + orig_extension
+
+        else:
+            # if we're not renaming then there's no new base name, we'll just use the existing name
+            new_base_name = None
+            new_file_name = self.file_name 
+                       
+        try:
+            # move the episode and associated files to the show dir
+            if sickbeard.KEEP_PROCESSED_DIR:
+                self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+            else:
+                self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+        except OSError, IOError:
+            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+        
+        # put the new location in the database
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            with cur_ep.lock:
+                cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
                 cur_ep.saveToDB()
         
         # log it to history

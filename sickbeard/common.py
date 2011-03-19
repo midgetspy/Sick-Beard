@@ -28,7 +28,7 @@ USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION.replace(' ','-')+' (
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
                    'm2ts', 'm4v', 'ts', 'flv', 'f4v',
-                   'mov', 'rmvb']
+                   'mov', 'rmvb', 'vob']
 
 ### Other constants
 MULTI_EP_RESULT = -1
@@ -132,9 +132,9 @@ class Quality:
             return Quality.HDTV
         elif checkName(["720p", "web.dl"], all) or checkName(["720p", "itunes", "h.?264"], all):
             return Quality.HDWEBDL
-        elif checkName(["720p", "bluray", "x264"], all):
+        elif checkName(["720p", "bluray", "x264"], all) or checkName(["720p", "hddvd", "x264"], all):
             return Quality.HDBLURAY
-        elif checkName(["1080p", "bluray", "x264"], all):
+        elif checkName(["1080p", "bluray", "x264"], all) or checkName(["1080p", "hddvd", "x264"], all):
             return Quality.FULLHDBLURAY
         else:
             return Quality.UNKNOWN
@@ -142,9 +142,9 @@ class Quality:
     @staticmethod
     def assumeQuality(name):
 
-        if name.endswith(".avi"):
+        if name.lower().endswith(".avi"):
             return Quality.SDTV
-        elif name.endswith(".mkv"):
+        elif name.lower().endswith(".mkv"):
             return Quality.HDTV
         else:
             return Quality.UNKNOWN
@@ -219,11 +219,11 @@ class StatusStrings:
 statusStrings = StatusStrings()
 
 class Overview:
-    SKIPPED = 1
-    WANTED = 2
-    QUAL = 3
+    UNAIRED = UNAIRED # 1
+    QUAL = 2
+    WANTED = WANTED # 3
     GOOD = 4
-    UNAIRED = 5
+    SKIPPED = SKIPPED # 5
 
     overviewStrings = {SKIPPED: "skipped",
                        WANTED: "wanted",
@@ -287,6 +287,10 @@ sceneExceptions = {72546: ['CSI'],
                    189931: ['RBT (AU)'],
                    73255: ['House', 'House M D'],
                    73244: ['The Office (US)', 'The Office'],
+                   81386: ['Being Human', 'Being Human (UK)'],
+                   89991: ['Out of the Wild: The Alaskan Experiment', 'Out of the Wild: Venezuela'],
+                   222551: ['Only in America With Larry the Cable Guy', 'Only in America'],
+                   77733: ['Degrassi: The Next Generation', 'Degrassi TNG'],
                    }
 
 countryList = {'Australia': 'AU',

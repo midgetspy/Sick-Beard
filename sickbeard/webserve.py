@@ -129,7 +129,7 @@ def _getEpisode(show, season, episode):
 ManageMenu = [
             { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
-           #{ 'title': 'Episode Overview', 'path': 'manage/episodeOverview' },
+            { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
             ]
 
 class ManageSearches:
@@ -187,6 +187,105 @@ class Manage:
         t = PageTemplate(file="manage.tmpl")
         t.submenu = ManageMenu
         return _munge(t)
+
+    @cherrypy.expose
+    def showEpisodeStatuses(self, tvdb_id, whichStatus):
+        myDB = db.DBConnection()
+
+        status_list = [int(whichStatus)]
+        if status_list[0] == SNATCHED:
+            status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
+        
+        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season != 0 AND status IN ("+','.join(['?']*len(status_list))+")", [int(tvdb_id)] + status_list)
+        
+        result = {}
+        for cur_result in cur_show_results:
+            cur_season = int(cur_result["season"])
+            cur_episode = int(cur_result["episode"])
+            
+            if cur_season not in result:
+                result[cur_season] = {}
+            
+            result[cur_season][cur_episode] = cur_result["name"]
+        
+        return json.dumps(result)
+
+    @cherrypy.expose
+    def episodeStatuses(self, whichStatus=None):
+
+        if whichStatus:
+            whichStatus = int(whichStatus)
+            status_list = [whichStatus]
+            if status_list[0] == SNATCHED:
+                status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
+        else:
+            status_list = []
+        
+        t = PageTemplate(file="manage_episodeStatuses.tmpl")
+        t.submenu = ManageMenu
+        t.whichStatus = whichStatus
+
+        # if we have no status then this is as far as we need to go
+        if not status_list:
+            return _munge(t)
+        
+        myDB = db.DBConnection()
+        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
+
+        ep_counts = {}
+        show_names = {}
+        sorted_show_ids = []
+        for cur_status_result in status_results:
+            cur_tvdb_id = int(cur_status_result["tvdb_id"])
+            if cur_tvdb_id not in ep_counts:
+                ep_counts[cur_tvdb_id] = 1
+            else:
+                ep_counts[cur_tvdb_id] += 1
+        
+            show_names[cur_tvdb_id] = cur_status_result["show_name"]
+            if cur_tvdb_id not in sorted_show_ids:
+                sorted_show_ids.append(cur_tvdb_id)
+        
+        t.show_names = show_names
+        t.ep_counts = ep_counts
+        t.sorted_show_ids = sorted_show_ids
+        return _munge(t)
+
+    @cherrypy.expose
+    def changeEpisodeStatuses(self, oldStatus, newStatus, *args, **kwargs):
+        
+        status_list = [int(oldStatus)]
+        if status_list[0] == SNATCHED:
+            status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
+
+        to_change = {}
+        
+        # make a list of all shows and their associated args
+        for arg in kwargs:
+            tvdb_id, what = arg.split('-')
+            
+            # we don't care about unchecked checkboxes
+            if kwargs[arg] != 'on':
+                continue
+            
+            if tvdb_id not in to_change:
+                to_change[tvdb_id] = []
+            
+            to_change[tvdb_id].append(what)
+        
+        myDB = db.DBConnection()
+
+        for cur_tvdb_id in to_change:
+
+            # get a list of all the eps we want to change if they just said "all"
+            if 'all' in to_change[cur_tvdb_id]:
+                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND showid = ?", status_list + [cur_tvdb_id])
+                all_eps = [str(x["season"])+'x'+str(x["episode"]) for x in all_eps_results]
+                to_change[cur_tvdb_id] = all_eps
+
+            result = Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
+            
+        redirect('/manage/episodeStatuses')
 
     @cherrypy.expose
     def backlogShow(self, tvdb_id):
@@ -255,13 +354,13 @@ class Manage:
             if showObj:
                 showList.append(showObj)
 
-        use_season_folders = True
+        season_folders_all_same = True
         last_season_folders = None
 
-        use_paused = True
+        paused_all_same = True
         last_paused = None
 
-        use_quality = True
+        quality_all_same = True
         last_quality = None
 
         root_dir_list = []
@@ -272,28 +371,30 @@ class Manage:
             if cur_root_dir not in root_dir_list:
                 root_dir_list.append(cur_root_dir) 
             
-            if use_paused:
-                if last_paused == None:
+            # if we know they're not all the same then no point even bothering
+            if paused_all_same:
+                # if we had a value already and this value is different then they're not all the same
+                if last_paused not in (curShow.paused, None):
+                    paused_all_same = False
+                else:
                     last_paused = curShow.paused
-                elif last_paused != curShow.paused:
-                    use_paused = True
 
-            if use_season_folders:
-                if last_season_folders == None:
+            if season_folders_all_same:
+                if last_season_folders not in (None, curShow.seasonfolders):
+                    season_folders_all_same = False
+                else:
                     last_season_folders = curShow.seasonfolders
-                elif last_season_folders != curShow.seasonfolders:
-                    use_season_folders = True
 
-            if use_quality:
-                if last_quality == None:
+            if quality_all_same:
+                if last_quality not in (None, curShow.quality):
+                    quality_all_same = False
+                else:
                     last_quality = curShow.quality
-                elif last_quality != curShow.quality:
-                    use_quality = True
 
         t.showList = toEdit
-        t.paused_value = last_paused if use_paused else False
-        t.season_folders_value = last_season_folders if use_season_folders else False
-        t.quality_value = last_quality if use_quality else SD
+        t.paused_value = last_paused if paused_all_same else None
+        t.season_folders_value = last_season_folders if season_folders_all_same else None
+        t.quality_value = last_quality if quality_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
@@ -329,13 +430,14 @@ class Manage:
             if paused == 'keep':
                 new_paused = showObj.paused
             else:
-                new_paused = 'on' if paused == 'enable' else 'off'
-            logger.log(str(paused)+" so "+str(new_paused))
+                new_paused = True if paused == 'enable' else False
+            new_paused = 'on' if new_paused else 'off'
 
             if season_folders == 'keep':
                 new_season_folders = showObj.seasonfolders
             else:
-                new_season_folders = 'on' if season_folders == 'enable' else 'off'
+                new_season_folders = True if season_folders == 'enable' else False
+            new_season_folders = 'on' if new_season_folders else 'off'
 
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
@@ -343,7 +445,7 @@ class Manage:
             curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
 
             if curErrors:
-                logger.log(u"Errors: "+str(curErrors))
+                logger.log(u"Errors: "+str(curErrors), logger.ERROR)
                 errors.append('<b>%s:</b><br />\n<ul>' % showObj.name + '\n'.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
 
         if len(errors) > 0:
@@ -353,7 +455,7 @@ class Manage:
         redirect("/manage")
 
     @cherrypy.expose
-    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toMetadata=None):
+    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None):
 
         if toUpdate != None:
             toUpdate = toUpdate.split('|')
@@ -370,6 +472,11 @@ class Manage:
         else:
             toRename = []
 
+        if toDelete != None:
+            toDelete = toDelete.split('|')
+        else:
+            toDelete = []
+
         if toMetadata != None:
             toMetadata = toMetadata.split('|')
         else:
@@ -380,7 +487,7 @@ class Manage:
         updates = []
         renames = []
 
-        for curShowID in set(toUpdate+toRefresh+toRename+toMetadata):
+        for curShowID in set(toUpdate+toRefresh+toRename+toDelete+toMetadata):
 
             if curShowID == '':
                 continue
@@ -390,6 +497,11 @@ class Manage:
             if showObj == None:
                 continue
 
+            if curShowID in toDelete:
+                showObj.deleteShow()
+                # don't do anything else if it's being deleted
+                continue
+
             if curShowID in toUpdate:
                 try:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True)
@@ -397,6 +509,7 @@ class Manage:
                 except exceptions.CantUpdateException, e:
                     errors.append("Unable to update show "+showObj.name+": "+str(e).decode('utf-8'))
 
+            # don't bother refreshing shows that were updated anyway
             if curShowID in toRefresh and curShowID not in toUpdate:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj)
@@ -408,7 +521,6 @@ class Manage:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
                 renames.append(showObj.name)
 
-
         if len(errors) > 0:
             ui.flash.error("Errors encountered",
                         '<br >\n'.join(errors))
@@ -416,22 +528,22 @@ class Manage:
         messageDetail = ""
 
         if len(updates) > 0:
-            messageDetail += "<b>Updates</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(updates)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Updates</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(updates)
+            messageDetail += "</li></ul>"
 
         if len(refreshes) > 0:
-            messageDetail += "<b>Refreshes</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(refreshes)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Refreshes</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(refreshes)
+            messageDetail += "</li></ul>"
 
         if len(renames) > 0:
-            messageDetail += "<b>Renames</b><br />\n<ul>\n<li>"
-            messageDetail += "</li>\n<li>".join(renames)
-            messageDetail += "</li>\n</ul>\n<br />"
+            messageDetail += "<br /><b>Renames</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(renames)
+            messageDetail += "</li></ul>"
 
         if len(updates+refreshes+renames) > 0:
-            ui.flash.message("The following actions were queued:<br /><br />",
+            ui.flash.message("The following actions were queued:",
                           messageDetail)
 
         redirect("/manage")
@@ -1400,6 +1512,8 @@ class NewHomeAddShows:
             logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
             ui.flash.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
+        else:
+            helpers.chmodAsParent(show_dir)
 
         # prepare the inputs for passing along
         if seasonFolders == "on":
@@ -1665,7 +1779,7 @@ class Home:
     @cherrypy.expose
     def shutdown(self):
 
-        threading.Timer(2, sickbeard.saveAndShutdown).start()
+        threading.Timer(2, sickbeard.invoke_shutdown).start()
 
         title = "Shutting down"
         message = "Sick Beard is shutting down..."
@@ -1679,7 +1793,7 @@ class Home:
             redirect("/home")
 
         # do a soft restart
-        threading.Timer(2, sickbeard.restart, [False]).start()
+        threading.Timer(2, sickbeard.invoke_restart, [False]).start()
 
         title = "Restarting"
         message = "Sick Beard is restarting, refresh in 30 seconds."
@@ -1696,7 +1810,7 @@ class Home:
 
         if updated:
             # do a hard restart
-            threading.Timer(2, sickbeard.restart, [False]).start()
+            threading.Timer(2, sickbeard.invoke_restart, [False]).start()
             return "Sick Beard is restarting, refresh in 30 seconds."
         else:
             return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
@@ -1752,7 +1866,7 @@ class Home:
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
                 t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
                 t.submenu.append({ 'title': 'Re-scan files',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
-                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&force=1'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
             t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
 
@@ -2217,14 +2331,15 @@ class WebInterface:
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
 
         done_show_list = []
-        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["showid"]))
 
         more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", [today, recently, WANTED] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
         #epList = sickbeard.comingList

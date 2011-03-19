@@ -54,7 +54,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = sceneHelpers.sanitizeSceneName(show.name).replace('.',' ')       
+        params['show_name'] = sceneHelpers.sanitizeSceneName(show.name).replace('.',' ').encode('utf-8')
           
         if season != None:
             params['season'] = season
@@ -68,7 +68,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name).replace('.',' ')
+        params['show_name'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name).replace('.',' ').encode('utf-8')
         
         if ep_obj.show.is_air_by_date:
             params['date'] = str(ep_obj.airdate)
@@ -78,7 +78,7 @@ class EZRSSProvider(generic.TorrentProvider):
     
         return [params]
 
-    def _doSearch(self, search_params):
+    def _doSearch(self, search_params, show=None):
     
         params = {"mode": "rss"}
     

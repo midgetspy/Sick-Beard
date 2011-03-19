@@ -58,7 +58,7 @@ class NZBMatrixProvider(generic.NZBProvider):
         # search for all show names and episode numbers like ("a","b","c") in a single search
         return ['("' + '","'.join(sceneSearchStrings) + '")']
 
-    def _doSearch(self, curString, quotes=False):
+    def _doSearch(self, curString, quotes=False, show=None):
 
         term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
         if quotes:
@@ -71,7 +71,12 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
                   "subcat": "6,41",
                   "english": 1,
-                  "ssl": 1}
+                  "ssl": 1,
+                  "scenename": 1}
+
+        # if the show is a documentary use those cats on nzbmatrix
+        if show and show.genre and 'documentary' in show.genre.lower():
+            params['subcat'] = params['subcat'] + ',53,9' 
 
         searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 

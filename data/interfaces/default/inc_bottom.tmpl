@@ -2,6 +2,7 @@
 #import datetime
 #from sickbeard import db
 #from sickbeard.common import *
+    </div>
 </div>
 <div class="footer">
 #set $myDB = $db.DBConnection()
@@ -13,7 +14,7 @@
 <b>$numShows shows</b> ($numGoodShows active) | <b>$numDLEpisodes/$numEpisodes</b> episodes downloaded 
 <br />
 <b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> |
-<!--<b>Update</b>: <a%a=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%> | -->
+<!--<b>Update</b>: <a%a=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%> | //-->
 <b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d").decode($sickbeard.SYS_ENCODING) <br />
 </div>
 </body>
