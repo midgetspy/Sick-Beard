@@ -231,9 +231,10 @@ def main():
     # stay alive while my threads do the work
     while (True):
 
-        if sickbeard.invoke_shutdown:
-            sickbeard.invoke_shutdown = False
-            sickbeard.saveAndShutdown()
+        if sickbeard.invoked_command:
+            logger.log(u"Executing invoked command: "+repr(sickbeard.invoked_command))
+            sickbeard.invoked_command()
+            sickbeard.invoked_command = None
 
         time.sleep(1)
 

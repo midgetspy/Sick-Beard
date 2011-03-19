@@ -42,7 +42,7 @@ from sickbeard.databases import mainDB
 
 from lib.configobj import ConfigObj
 
-invoke_shutdown = False
+invoked_command = None
 
 SOCKET_TIMEOUT = 30
 
@@ -794,6 +794,19 @@ def saveAndShutdown(restart=False):
             subprocess.Popen(popen_list, cwd=os.getcwd())
 
     os._exit(0)
+
+
+def invoke_command(to_call, *args, **kwargs):
+    def delegate():
+        to_call(*args, **kwargs)
+    sickbeard.invoked_command = delegate
+    logger.log(u"Placed invoked command: "+repr(sickbeard.invoked_command)+" for "+repr(to_call)+" with "+repr(args)+" and "+repr(kwargs), logger.DEBUG)
+
+def invoke_restart(soft=True):
+    invoke_command(sickbeard.restart, soft=soft)
+
+def invoke_shutdown():
+    invoke_command(sickbeard.saveAndShutdown)
 
 
 def restart(soft=True):
