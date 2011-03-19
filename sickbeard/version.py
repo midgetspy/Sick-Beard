@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "build 479"
+SICKBEARD_VERSION = "master"
