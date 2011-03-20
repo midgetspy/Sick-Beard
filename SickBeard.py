@@ -164,10 +164,12 @@ def main():
             if sickbeard.DAEMON:
                 sickbeard.CREATEPID = True
                 sickbeard.PIDFILE = str(a)
+            else:
+                logger.log(u"Not running in daemon mode. PID file creation disabled.")
 
-                # if the pidfile already exists, sickbeard may still be running, so exit
-                if (os.path.exists(sickbeard.PIDFILE)):
-                    sys.exit("PID file " + sickbeard.PIDFILE + " already exists. Exiting.")
+            # if the pidfile already exists, sickbeard may still be running, so exit
+            if (os.path.exists(sickbeard.PIDFILE)):
+                sys.exit("PID file " + sickbeard.PIDFILE + " already exists. Exiting.")
 
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
