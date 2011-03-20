@@ -307,7 +307,7 @@ def buildNFOXML(myShow):
 
 def searchDBForShow(regShowName):
 
-    showNames = [regShowName.replace(' ','_')]
+    showNames = [re.sub('[. -]', ' ', regShowName)]
 
     myDB = db.DBConnection()
 
