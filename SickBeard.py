@@ -105,6 +105,7 @@ def main():
     sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
     sickbeard.MY_ARGS = sys.argv[1:]
+    sickbeard.CREATEPID = False
 
     try:
         locale.setlocale(locale.LC_ALL, "")
