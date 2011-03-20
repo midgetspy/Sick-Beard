@@ -1,6 +1,6 @@
 #import sickbeard
 #set global $title="Config - Episode Search"
-#set global $header="Episode Download Options"
+#set global $header="Search Options"
 
 #set global $sbPath="../.."
 
@@ -37,7 +37,7 @@
 <div id="config">
 <div id="config-content">
 <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.PROG_DIR</span> "</h5>
-<form action="saveEpisodeDownloads" method="post">
+<form action="saveSearch" method="post">
 
             <div id="config-components">
                 
@@ -202,80 +202,6 @@
                         
                     </fieldset>
                 </div><!-- /component-group2 //-->
-
-                <div id="core-component-group3" class="component-group clearfix">
-
-                    <div class="component-group-desc">
-                        <h3>Post-Processing</h3>
-                        <p>Settings that dictate how Sick Beard should process completed downloads.</p>
-                    </div>
-
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <label class="nocheck clearfix" for="tv_download_dir">
-                                <span class="component-title">TV Download Dir</span>
-                                <input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="45" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">The folder where your download client puts your TV downloads.</span>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> Use only if not using SABnzbd+ post processing.</span>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Or if SABnzbd+ and Sick Beard are on different PCs.</span>
-                            </label>
-                        </div>
-
-                        
-                        <div class="field-pair">
-                            <input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="keep_processed_dir">
-                                <span class="component-title">Keep Original Files</span>
-                                <span class="component-desc">Keep original files after they've been processed?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <input type="checkbox" name="move_associated_files" id="move_associated_files" #if $sickbeard.MOVE_ASSOCIATED_FILES == True then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="move_associated_files">
-                                <span class="component-title">Move Associated Files</span>
-                                <span class="component-desc">Move srr/srt/sfv/etc files with the episode when processed?</span>
-                            </label>
-                            <label class="nocheck clearfix" for="move_associated_files">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> <i>.nfo</i> will be renamed to <i>.nfo-orig</i> when moved.</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="rename_episodes">
-                                <span class="component-title">Rename Episodes</span>
-                                <span class="component-desc">Rename episode using the naming settings in <a href="$sbRoot/config/general">General</a>?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <input type="checkbox" name="process_automatically" id="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="process_automatically">
-                                <span class="component-title">Scan and Process</span>
-                                <span class="component-desc">Scan and post-process any files in your <i>TV Download Dir</i>?</span>
-                            </label>
-                            <label class="nocheck clearfix" for="process_automatically">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> Do not use if you use sabToSickbeard w/ SABnzbd+!</span>
-                            </label>
-                        </div>
-
-                        <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
-
-                    </fieldset>
-                </div><!-- /component-group3 //-->
 
             <br/><input type="submit" value="Save Changes" /><br/>
 
