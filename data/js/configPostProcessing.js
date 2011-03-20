@@ -18,7 +18,7 @@ $(document).ready(function(){
         });
 
         params['whichTest'] = 'multi'
-        $.get(nameTestURL, params,
+        $.get(sbRoot+"/config/postProcessing/testNaming", params,
               function(data){
                   $('#multiExampleText').text(data);
         });

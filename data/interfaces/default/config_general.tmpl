@@ -12,51 +12,6 @@
 #set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript">
-<!--
-nameTestURL = "$sbRoot/config/general/testNaming";
-//-->
-</script>
-<script type="text/javascript" src="$sbRoot/js/configGeneral.js"></script>
-#set $anyQualities, $bestQualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
-<script type="text/javascript" charset="utf-8">
-<!--
-\$(document).ready(function(){
-
-  if (#if $sickbeard.QUALITY_DEFAULT in $qualityPresets then "1" else "0"#) {
-      \$('#customQuality').hide();
-  }
-
-  \$.fn.setFromPresets = function(preset) {
-      if (preset == 0) {
-        \$('#customQuality').show();
-        return
-      } else
-        \$('#customQuality').hide();
-  
-      \$('#anyQualities option').each(function(i) {
-          var result = preset & \$(this).val()
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      \$('#bestQualities option').each(function(i) {
-          var result = preset & (\$(this).val() << 16)
-          if (result > 0) \$(this).attr('selected', 'selected');
-          else \$(this).attr('selected', false);
-      });
-
-      return
-  }
-  
-  \$('#qualityPreset').change(function(){
-        \$(this).setFromPresets(\$('#qualityPreset :selected').val());
-  });
-
-});
-//-->
-</script>
-
 <div id="config">
 <div id="config-content">
 <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.PROG_DIR</span> "</h5>
