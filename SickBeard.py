@@ -160,16 +160,17 @@ def main():
 
         # write a pidfile if requested
         if (o in ('--pidfile')):
-            # a pidfile is only useful in daemon mode
-            if sickbeard.DAEMON:
-                sickbeard.CREATEPID = True
-                sickbeard.PIDFILE = str(a)
-            else:
-                logger.log(u"Not running in daemon mode. PID file creation disabled.")
+            sickbeard.PIDFILE = str(a)
 
             # if the pidfile already exists, sickbeard may still be running, so exit
             if (os.path.exists(sickbeard.PIDFILE)):
                 sys.exit("PID file " + sickbeard.PIDFILE + " already exists. Exiting.")
+
+            # a pidfile is only useful in daemon mode
+            if sickbeard.DAEMON:
+                sickbeard.CREATEPID = True    
+            else:
+                logger.log(u"Not running in daemon mode. PID file creation disabled.")
 
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
