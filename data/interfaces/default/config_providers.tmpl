@@ -1,4 +1,5 @@
 #import sickbeard
+#from sickbeard.providers.generic import GenericProvider
 #set global $title="Config - Providers"
 #set global $header="Search Providers"
 
@@ -14,9 +15,11 @@
 sbRoot = '$sbRoot'; 
 \$(document).ready(function(){
 
+#if $sickbeard.USE_NZBS:
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
     \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
 #end for
+#end if
 });
 //-->
 </script>
@@ -34,7 +37,7 @@ sbRoot = '$sbRoot';
                         <h3>Provider Priorities</h3>
                         <p>Check off and drag the providers into the order you want them to be used.</p>
                         <p class="note">At least one provider is required but two are recommended.</p>
-                        <p>More providers offer redundancy but at the expense of a longer search period.</p>
+                        <p>NZB/Torrent providers can be toggled in <a href="$sbRoot/config/search">Search Settings</a></p>
                         <p class="note"><span style="color: #654B24; font-size: 16px;">*</span> Provider does not support backlog searches at this time.</p>
                         <p class="note"><span style="color: #654B24; font-size: 16px;">**</span> Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
                     </div>
@@ -43,6 +46,11 @@ sbRoot = '$sbRoot';
                         <ul id="provider_order_list">
                         #for $curProvider in $sickbeard.providers.sortedProviderList():
                             #if $curProvider.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
+                                #continue
+                            #end if
+                            #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
+                                #continue
+                            #elif $curProvider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
                                 #continue
                             #end if
                             #set $curName = $curProvider.getID()

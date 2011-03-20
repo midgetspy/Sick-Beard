@@ -697,9 +697,8 @@ class ConfigSearch:
         return _munge(t)
 
     @cherrypy.expose
-    def saveSearch(self, nzb_dir=None, sab_username=None, sab_password=None,
-                       sab_apikey=None, sab_category=None, sab_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None,
+    def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
+                       sab_apikey=None, sab_category=None, sab_host=None, torrent_dir=None, nzb_method=None, usenet_retention=None,
                        search_frequency=None, download_propers=None):
 
         results = []
@@ -717,8 +716,21 @@ class ConfigSearch:
         else:
             download_propers = 0
 
+        if use_nzbs == "on":
+            use_nzbs = 1
+        else:
+            use_nzbs = 0
+
+        if use_torrents == "on":
+            use_torrents = 1
+        else:
+            use_torrents = 0
+
         if usenet_retention == None:
             usenet_retention = 200
+
+        sickbeard.USE_NZBS = use_nzbs
+        sickbeard.USE_TORRENTS = use_torrents
 
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
@@ -748,7 +760,7 @@ class ConfigSearch:
         else:
             ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
 
-        redirect("/config/episodedownloads/")
+        redirect("/config/search/")
 
 class ConfigPostProcessing:
 

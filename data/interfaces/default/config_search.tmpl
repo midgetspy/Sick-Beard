@@ -9,9 +9,7 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/configSearch.js"></script>
-<!--
-//-->
-</script>
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
 
 <div id="config">
 <div id="config-content">
@@ -67,11 +65,21 @@
                 <div id="core-component-group2" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3>Episode Results</h3>
-                        <p>Settings that dictate how Sick Beard handles NZB and Torrents search results.</p>
+                        <h3>NZB Search</h3>
+                        <p>Settings that dictate how Sick Beard handles NZB search results.</p>
                     </div>
 
                     <fieldset class="component-group-list">
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_nzbs" class="enabler" id="use_nzbs" #if $sickbeard.USE_NZBS then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_nzbs">
+                                <span class="component-title">Search NZBs</span>
+                                <span class="component-desc">Should Sick Beard search for NZB files?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_nzbs">
                         <div class="field-pair">
                             <label class="clearfix" for="nzb_method">
                                 <span class="component-title jumbo">NZB Method:</span>
@@ -88,17 +96,6 @@
                                     #end for
                                     </select>
                                 </span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Torrent Black Hole</span>
-                                <input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="45" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">The directory where Sick Beard should store your <i>Torrent</i> files.</span>
                             </label>
                         </div>
 
@@ -178,6 +175,44 @@
                         
                         <div class="clearfix"></div>
                         <input type="submit" value="Save Changes" /><br/>
+                        
+                        </div><!-- /content_use_nzbs //-->
+                        
+                    </fieldset>
+                </div><!-- /component-group2 //-->
+
+                <div id="core-component-group2" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Torrent Search</h3>
+                        <p>Settings that dictate how Sick Beard handles Torrent search results.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_torrents" class="enabler" id="use_torrents" #if $sickbeard.USE_TORRENTS == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_torrents">
+                                <span class="component-title">Search Torrents</span>
+                                <span class="component-desc">Should Sick Beard search for torrent files?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_torrents">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Torrent Black Hole</span>
+                                <input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="45" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">The directory where Sick Beard should store your <i>Torrent</i> files.</span>
+                            </label>
+                        </div>
+                        
+                        <div class="clearfix"></div>
+                        <input type="submit" value="Save Changes" /><br/>
+                        </div><!-- /content_use_torrents //-->
                         
                     </fieldset>
                 </div><!-- /component-group2 //-->
