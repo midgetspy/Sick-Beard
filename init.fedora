@@ -31,7 +31,10 @@ SB_PIDPATH=`dirname $SB_PIDFILE`
 SB_OPTIONS=" --daemon --pidfile=${SB_PIDFILE}"
 
 # create PID directory if not exist and ensure the SickBeard user can write to it
-[ -d $SB_PIDPATH ] || mkdir -p $SB_PIDPATH && chown $SB_USER $SB_PIDPATH
+if [ ! -d $SB_PIDPATH ]; then
+	mkdir -p $SB_PIDPATH
+	chown $SB_USER $SB_PIDPATH
+fi
 
 start() {
         # Start daemon.
