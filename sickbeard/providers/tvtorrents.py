@@ -39,19 +39,19 @@ class TvTorrentsCache(tvcache.TVCache):
 
     def _getRSSData(self):
         # These will be ignored on the serverside.
-        RegEx = "all.month|month.of|season[\s\d]*complete"
+        ignore_regex = "all.month|month.of|season[\s\d]*complete"
     
-        url = 'http://www.tvtorrents.com/RssServlet?digest='+ sickbeard.TVTORRENTS_DIGEST +'&hash='+ sickbeard.TVTORRENTS_HASH +'&fname=true&exclude=(' + RegEx + ')'
+        url = 'http://www.tvtorrents.com/RssServlet?digest='+ sickbeard.TVTORRENTS_DIGEST +'&hash='+ sickbeard.TVTORRENTS_HASH +'&fname=true&exclude=(' + ignore_regex + ')'
         logger.log(u"TvTorrents cache update URL: "+ url, logger.DEBUG)
 
         data = self.provider.getURL(url)
         
         xml_content = etree.fromstring(data)
         description = xml_content.findtext('channel/description')
-		
+
         if "User can't be found" in description:
             logger.log(u"TvTorrents invalid digest, check your config", logger.ERROR)
-			
+
         if "Invalid Hash" in description:
             logger.log(u"TvTorrents invalid hash, check your config", logger.ERROR)
 
