@@ -26,20 +26,19 @@ homedir=${SB_HOME-/usr/share/sickbeard}
 pidfile=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
 ##
 
-
-SB_PIDPATH=`dirname ${pidfile}`
-SB_OPTIONS=" --daemon --pidfile=${pidfile}"
+pidpath=`dirname ${pidfile}`
+options=" --daemon --pidfile=${pidfile}"
 
 # create PID directory if not exist and ensure the SickBeard user can write to it
-if [ ! -d $SB_PIDPATH ]; then
-	mkdir -p $SB_PIDPATH
-	chown $SB_USER $SB_PIDPATH
+if [ ! -d $pidpath ]; then
+	mkdir -p $pidpath
+	chown $username $pidpath
 fi
 
 start() {
         # Start daemon.
         echo -n $"Starting $prog: "
-        daemon --user=${username} --pidfile=${pidfile} $homedir/SickBeard.py $SB_OPTIONS
+        daemon --user=${username} --pidfile=${pidfile} $homedir/SickBeard.py $options
         RETVAL=$?
         echo
         [ $RETVAL -eq 0 ] && touch $lockfile
