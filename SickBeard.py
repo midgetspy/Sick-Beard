@@ -96,7 +96,11 @@ def daemonize():
     if sickbeard.CREATEPID:
         pid = str(os.getpid())
         logger.log(u"Writing PID " + pid + " to " + str(sickbeard.PIDFILE))
-        file(sickbeard.PIDFILE, 'w+').write("%s\n" % pid)
+        try:
+             file(sickbeard.PIDFILE, 'w+').write("%s\n" % pid)
+        except IOError, e:
+             raise RuntimeError("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
+             raise Exception, "%s [%d]" % (e.strerror, e.errno)
 
 def main():
 
