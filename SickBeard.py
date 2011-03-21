@@ -96,11 +96,7 @@ def daemonize():
     if sickbeard.CREATEPID:
         pid = str(os.getpid())
         logger.log(u"Writing PID " + pid + " to " + str(sickbeard.PIDFILE))
-        try:
-             file(sickbeard.PIDFILE, 'w+').write("%s\n" % pid)
-        except IOError, e:
-             raise RuntimeError("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
-             raise Exception, "%s [%d]" % (e.strerror, e.errno)
+        file(sickbeard.PIDFILE, 'w').write("%s\n" % pid)
 
 def main():
 
@@ -171,8 +167,13 @@ def main():
                 sys.exit("PID file " + sickbeard.PIDFILE + " already exists. Exiting.")
 
             # a pidfile is only useful in daemon mode
+            # also, test to make sure we can write the file properly
             if sickbeard.DAEMON:
-                sickbeard.CREATEPID = True    
+                sickbeard.CREATEPID = True
+                try:
+                    file(sickbeard.PIDFILE, 'w').write("pid\n")
+                except IOError, e:
+                    raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
             else:
                 logger.log(u"Not running in daemon mode. PID file creation disabled.")
 
