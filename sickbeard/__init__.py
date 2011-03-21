@@ -181,6 +181,10 @@ SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = None
 
+NZBGET_PASSWORD = None
+NZBGET_CATEGORY = None
+NZBGET_HOST = None
+
 USE_XBMC = False
 XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
@@ -321,6 +325,7 @@ def initialize(consoleLogging=True):
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
+                NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
@@ -353,6 +358,7 @@ def initialize(consoleLogging=True):
         CheckSection('Newzbin')
         CheckSection('TVBinz')
         CheckSection('SABnzbd')
+        CheckSection('NZBget')
         CheckSection('XBMC')
         CheckSection('Growl')
         CheckSection('Prowl')
@@ -430,7 +436,7 @@ def initialize(consoleLogging=True):
         USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
-        if NZB_METHOD not in ('blackhole', 'sabnzbd'):
+        if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
             NZB_METHOD = 'blackhole'
 
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
@@ -486,6 +492,10 @@ def initialize(consoleLogging=True):
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', 'tv')
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
+
+        NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
+        NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
+        NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 
         USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0)) 
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
@@ -940,6 +950,11 @@ def save_config():
     new_config['SABnzbd']['sab_apikey'] = SAB_APIKEY
     new_config['SABnzbd']['sab_category'] = SAB_CATEGORY
     new_config['SABnzbd']['sab_host'] = SAB_HOST
+
+    new_config['NZBget'] = {}
+    new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
+    new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
+    new_config['NZBget']['nzbget_host'] = NZBGET_HOST
 
     new_config['XBMC'] = {}
     new_config['XBMC']['use_xbmc'] = int(USE_XBMC)    
