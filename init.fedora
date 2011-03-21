@@ -22,7 +22,7 @@ lockfile=/var/lock/subsys/$prog
 ## Edit user configuation in /etc/sysconfig/sickbeard to change
 ## the defaults
 username=${SB_USER-sickbeard}
-homedir=${SB_HOME-/usr/share/sickbeard}
+homedir=${SB_HOME-/opt/sickbeard}
 pidfile=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
 ##
 
