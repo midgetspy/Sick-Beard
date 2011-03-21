@@ -1144,7 +1144,8 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
-                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None):
+                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
+                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None):
 
         results = []
 
@@ -1229,6 +1230,11 @@ class ConfigNotifications:
         else:
             use_notifo = 0
 
+        if use_nmj == "on":
+            use_nmj = 1
+        else:
+            use_nmj = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1263,6 +1269,11 @@ class ConfigNotifications:
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
+
+        sickbeard.USE_NMJ = use_nmj
+        sickbeard.NMJ_HOST = nmj_host
+        sickbeard.NMJ_DATABASE = nmj_database
+        sickbeard.NMJ_MOUNT = nmj_mount
 
         sickbeard.save_config()
 
@@ -1819,6 +1830,22 @@ class Home:
             return "Tried sending desktop notification via libnotify"
         else:
             return notifiers.libnotify.diagnose()
+
+    @cherrypy.expose
+    def testNMJ(self, host=None, database=None, mount=None):
+        result = notifiers.nmj_notifier.test_notify(urllib.unquote_plus(host), database, mount)
+        if result:
+            return "Successfull started the scan update"
+        else:
+            return "Test failed to start the scan update"
+
+    @cherrypy.expose
+    def settingsNMJ(self, host=None):
+        result = notifiers.nmj_notifier.notify_settings(urllib.unquote_plus(host))
+        if result:
+            return '{"message": "Got settings from %(host)s", "database": "%(database)s", "mount": "%(mount)s"}' % {"host": host, "database": sickbeard.NMJ_DATABASE, "mount": sickbeard.NMJ_MOUNT}
+        else:
+            return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
 
 
     @cherrypy.expose
