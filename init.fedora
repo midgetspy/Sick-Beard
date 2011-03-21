@@ -47,7 +47,7 @@ start() {
 
 stop() {
         echo -n $"Shutting down $prog: "
-        killproc -p ${SB_PIDFILE} python
+        killproc -p ${pidfile} python
         RETVAL=$?
         echo
         [ $RETVAL -eq 0 ] && rm -f $lockfile
