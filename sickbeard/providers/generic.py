@@ -66,9 +66,9 @@ class GenericProvider:
         return
 
     def isActive(self):
-        if self.providerType == GenericProvider.NZB:
+        if self.providerType == GenericProvider.NZB and sickbeard.USE_NZBS:
             return self.isEnabled()
-        elif self.providerType == GenericProvider.TORRENT:
+        elif self.providerType == GenericProvider.TORRENT and sickbeard.USE_TORRENTS:
             return self.isEnabled()
         else:
             return False
