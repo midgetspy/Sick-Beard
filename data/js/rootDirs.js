@@ -20,7 +20,7 @@ $(document).ready(function(){
 
         refreshRootDirs();
     
-        $.get('/config/general/saveRootDirs', { rootDirString: $('#rootDirText').val() });
+        $.get(sbRoot+'/config/general/saveRootDirs', { rootDirString: $('#rootDirText').val() });
     
     }
 
@@ -37,7 +37,7 @@ $(document).ready(function(){
         }
 
         refreshRootDirs();
-        $.get('/config/general/saveRootDirs', {rootDirString: $('#rootDirText').val()});
+        $.get(sbRoot+'/config/general/saveRootDirs', {rootDirString: $('#rootDirText').val()});
     }
     
     $('#addRootDir').click(function(){$(this).nFileBrowser(addRootDir)});
@@ -73,14 +73,14 @@ $(document).ready(function(){
 
         }
         refreshRootDirs();
-        $.get('/config/general/saveRootDirs', {rootDirString: $('#rootDirText').val()});
+        $.get(sbRoot+'/config/general/saveRootDirs', {rootDirString: $('#rootDirText').val()});
     });
 
     $('#defaultRootDir').click(function(){
         if ($("#rootDirs option:selected").length)
             setDefault($("#rootDirs option:selected").attr('id'));
         refreshRootDirs();
-        $.get('/config/general/saveRootDirs', 'rootDirString='+$('#rootDirText').val());
+        $.get(sbRoot+'/config/general/saveRootDirs', 'rootDirString='+$('#rootDirText').val());
     });
 
     function setDefault(which, force){
