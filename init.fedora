@@ -24,6 +24,7 @@ lockfile=/var/lock/subsys/$prog
 username=${SB_USER-sickbeard}
 homedir=${SB_HOME-/opt/sickbeard}
 pidfile=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
+nice=${SB_NICE-}
 ##
 
 pidpath=`dirname ${pidfile}`
@@ -38,7 +39,7 @@ fi
 start() {
         # Start daemon.
         echo -n $"Starting $prog: "
-        daemon --user=${username} --pidfile=${pidfile} python $homedir/SickBeard.py $options
+        daemon --user=${username} --pidfile=${pidfile} ${nice} python ${homedir}/SickBeard.py ${options}
         RETVAL=$?
         echo
         [ $RETVAL -eq 0 ] && touch $lockfile
