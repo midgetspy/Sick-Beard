@@ -52,14 +52,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 #continue
                             #end if
                             #set $curName = $curProvider.getID()
-                            #if $curProvider in $sickbeard.newznabProviderList:
-                              #set $imgName = 'newznab.gif'
-                            #else:
-                              #set $imgName = $curName + '.gif'
-                            #end if
                           <li class="ui-state-default" id="$curName">
                             <input type="checkbox" id="enable_$curName" class="provider_enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
-                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
+                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
                             #if $curProvider.name == "EZRSS" then "**" else ""#
