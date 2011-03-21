@@ -358,7 +358,7 @@ def initialize(consoleLogging=True):
         CheckSection('Prowl')
         CheckSection('Twitter')
 
-        LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', str(sickbeard.PROG_DIR) + '/Logs')
+        LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
             logger.log(u"!!! No log folder, logging to screen only!", logger.ERROR)
 
