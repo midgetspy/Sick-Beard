@@ -12,7 +12,7 @@ $(document).ready(function(){
                   'whichTest': 'single'
                   }
         
-        $.get(nameTestURL, params,
+        $.get(sbRoot+"/config/postProcessing/testNaming", params,
               function(data){
                   $('#normalExampleText').text(data);
         });

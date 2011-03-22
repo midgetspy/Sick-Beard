@@ -345,8 +345,12 @@ class SetNzbTorrentSettings(PopulateRootDirs):
             if cur_provider.isEnabled():
                 if cur_provider.providerType == GenericProvider.NZB:
                     use_nzbs = True
+                    logger.log(u"Provider "+cur_provider.name+" is enabled, enabling NZBs in the upgrade")
+                    break
                 elif cur_provider.providerType == GenericProvider.TORRENT:
                     use_torrents = True
+                    logger.log(u"Provider "+cur_provider.name+" is enabled, enabling Torrents in the upgrade")
+                    break
 
         sickbeard.USE_TORRENTS = use_torrents
         sickbeard.USE_NZBS = use_nzbs
