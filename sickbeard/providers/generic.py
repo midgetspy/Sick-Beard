@@ -66,9 +66,9 @@ class GenericProvider:
         return
 
     def isActive(self):
-        if self.providerType == GenericProvider.NZB:
+        if self.providerType == GenericProvider.NZB and sickbeard.USE_NZBS:
             return self.isEnabled()
-        elif self.providerType == GenericProvider.TORRENT:
+        elif self.providerType == GenericProvider.TORRENT and sickbeard.USE_TORRENTS:
             return self.isEnabled()
         else:
             return False
@@ -192,7 +192,7 @@ class GenericProvider:
         itemList = []
 
         for cur_search_string in self._get_episode_search_strings(episode):
-            itemList += self._doSearch(cur_search_string,False,(not episode.show.absolute_numbering))
+            itemList += self._doSearch(cur_search_string, show=episode.show,(not episode.show.absolute_numbering))
 
         for item in itemList:
 
@@ -243,7 +243,7 @@ class GenericProvider:
         results = {}
 
         for curString in self._get_season_search_strings(show, season):
-            itemList += self._doSearch(curString,False,(not show.absolute_numbering))
+            itemList += self._doSearch(curString,False,show,(not show.absolute_numbering))
 
         for item in itemList:
 

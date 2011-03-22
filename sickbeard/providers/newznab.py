@@ -116,7 +116,7 @@ class NewznabProvider(generic.NZBProvider):
 		return self._doSearch({'q': search_string})
 
 	#def _doSearch(self, show, season=None, episode=None, search=None):
-	def _doSearch(self, search_params, quotes=False, english=True):
+	def _doSearch(self, search_params, quotes=False, show=None, english=True):
 
 		params = {"t": "tvsearch",
 				  "maxage": sickbeard.USENET_RETENTION,

@@ -1,5 +1,5 @@
 #fileBrowserDialog {
-  max-height: 480;
+  max-height: 480px;
   overflow-y: auto;
 }
 #fileBrowserDialog ul {

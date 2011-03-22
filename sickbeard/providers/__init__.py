@@ -1,9 +1,9 @@
 __all__ = ['ezrss',
+           'tvtorrents',
            'nzbmatrix',
            'nzbs_org',
            'tvbinz',
            'nzbsrus',
-           'binreq',
            'womble',
            'newzbin',
            ]

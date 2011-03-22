@@ -5,7 +5,7 @@
                 <span class="component-title">
                     <select name="defaultStatus" id="statusSelect">
                     #for $curStatus in [$SKIPPED, $WANTED, $ARCHIVED, $IGNORED]:
-                        <option value="$curStatus" #if $sickbeard.STATUS_DEFAULT == $curStatus then 'selected="selected"' else ''#>$statusStrings[$curStatus]
+                        <option value="$curStatus" #if $sickbeard.STATUS_DEFAULT == $curStatus then 'selected="selected"' else ''#>$statusStrings[$curStatus]</option>
                     #end for
                     </select>
                 </span>
@@ -14,7 +14,7 @@
         </div>
 
         <div class="field-pair alt">
-            <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""#>
+            <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""# />
             <label for="seasonFolders" class="clearfix">
                 <span class="component-title">Season Folders</span>
                 <span class="component-desc">Store episodes in season folders?</span>
@@ -27,8 +27,8 @@
         #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 
         <div class="field-pair alt">
-            <label for="makeDefault" class="nocheck clearfix">
-                <span class="component-title"><input type="button" id="saveDefaultsButton" value="Save Defaults" disabled></span>
+            <label for="saveDefaultsButton" class="nocheck clearfix">
+                <span class="component-title"><input type="button" id="saveDefaultsButton" value="Save Defaults" disabled="disabled" /></span>
                 <span class="component-desc">Persist current values as the defaults</span>
             </label>
         </div>

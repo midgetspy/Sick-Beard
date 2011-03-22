@@ -63,23 +63,28 @@ class NZBMatrixProvider(generic.NZBProvider):
 
         return ['.'.join(nzbMatrixSearchStrings)]
 
-    def _doSearch(self, curString, quotes=False, english=True):
+    def _doSearch(self, curString, quotes=False, show=None, english=True):
 
         term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
         if quotes:
             term = "\""+term+"\""
     
         params = {"term": term,
-    			  "age": sickbeard.USENET_RETENTION,
-    			  "page": "download",
-    			  "username": sickbeard.NZBMATRIX_USERNAME,
-    			  "apikey": sickbeard.NZBMATRIX_APIKEY,
-    			  "subcat": "6,41,28",
-                  "ssl": 1}
-    
+                  "age": sickbeard.USENET_RETENTION,
+                  "page": "download",
+                  "username": sickbeard.NZBMATRIX_USERNAME,
+                  "apikey": sickbeard.NZBMATRIX_APIKEY,
+                  "subcat": "6,41",
+                  "ssl": 1,
+                  "scenename": 1}
+                  
         if english:
             params["english"] = 1
-    
+
+        # if the show is a documentary use those cats on nzbmatrix
+        if show and show.genre and 'documentary' in show.genre.lower():
+            params['subcat'] = params['subcat'] + ',53,9' 
+
         searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
