@@ -161,17 +161,17 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
             if numseasons == 1:
                 toReturn.append('"'+curShow+'"')
             elif numseasons == 0:
-                toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
-            else:
                 if show.absolute_numbering:
                     term_list = ['(+"'+curShow+'"+"'+x+'")' for x in seasonStrings]
                     toReturn.append('.'.join(term_list))
                 else:
-                    term_list = [x+'*' for x in seasonStrings]
-                    if show.is_air_by_date:
-                        term_list = ['"'+x+'"' for x in term_list]
+                    toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
+            else:
+                term_list = [x+'*' for x in seasonStrings]
+                if show.is_air_by_date:
+                    term_list = ['"'+x+'"' for x in term_list]
 
-                    toReturn.append('+"'+curShow+'" +('+','.join(term_list)+')')
+                toReturn.append('+"'+curShow+'" +('+','.join(term_list)+')')
 
     return toReturn
 
