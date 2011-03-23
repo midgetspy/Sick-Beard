@@ -206,7 +206,9 @@ class GenericProvider:
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
-            logger.log("parse_result"+str(parse_result), logger.DEBUG)
+            # FIXME: in some ocassions this creates an "can not convert to ascii" error why ?
+            # hotfix dont log it
+            # logger.log(u"parse_result: "+str(parse_result), logger.DEBUG)
                     
             if episode.show.is_air_by_date:
                 if parse_result.air_date != episode.airdate:
