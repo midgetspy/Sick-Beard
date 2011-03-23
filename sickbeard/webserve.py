@@ -774,7 +774,7 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
-                    naming_sep_type=None, naming_quality=None, naming_dates=None,
+                    naming_sep_type=None, naming_quality=None, naming_dates=None, naming_anime=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, use_banner=None,
                     keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None):
@@ -808,7 +808,7 @@ class ConfigPostProcessing:
             naming_dates = 1
         else:
             naming_dates = 0
-            
+                    
         if naming_anime == "on":
             naming_anime = 1
         else:

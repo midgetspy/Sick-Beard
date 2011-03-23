@@ -218,7 +218,19 @@
                                 <span class="component-desc">Only applies to air-by-date shows. (eg. 2010-02-15 vs S12E23)</span>
                             </label>
                         </div>
-
+                        
+						<div class="field-pair">
+                            <input type="checkbox" name="naming_anime" id="naming_anime" #if $sickbeard.NAMING_ANIME then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="naming_anime">
+                                <span class="component-title">Anime-Absolute-Number</span>
+                                <span class="component-desc">Add the absolute number to the season/episode format?</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Only applies to animes. (eg. S15E45 - 310 vs S15E45)</span>
+                            </label>
+                        </div>
+                        
                         <div class="field-pair">
                             <label class="nocheck clearfix" for="naming_sep_type">
                                 <span class="component-title">Separator Style</span>
