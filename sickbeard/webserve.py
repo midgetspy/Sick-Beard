@@ -589,7 +589,8 @@ class History:
 
 ConfigMenu = [
     { 'title': 'General',           'path': 'config/general/'          },
-    { 'title': 'Episode Downloads', 'path': 'config/episodedownloads/' },
+    { 'title': 'Search Settings',   'path': 'config/search/'           },
+    { 'title': 'Post Processing',   'path': 'config/postProcessing/'   },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
     { 'title': 'Search Providers',  'path': 'config/providers/'        },
 ]
@@ -636,12 +637,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
-                    web_password=None, season_folders_format=None, 
-                    version_notify=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None, naming_ep_name=None,
-                    naming_use_periods=None, naming_sep_type=None, naming_quality=None, naming_dates=None, naming_anime=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None,
-                    wdtv_data=None, use_banner=None):
+                    web_password=None, version_notify=None):
 
         results = []
 
@@ -664,6 +660,129 @@ class ConfigGeneral:
             version_notify = 1
         else:
             version_notify = 0
+
+        if not config.change_LOG_DIR(log_dir):
+            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
+
+        sickbeard.LAUNCH_BROWSER = launch_browser
+
+        sickbeard.WEB_PORT = int(web_port)
+        sickbeard.WEB_IPV6 = web_ipv6
+        sickbeard.WEB_LOG = web_log
+        sickbeard.WEB_USERNAME = web_username
+        sickbeard.WEB_PASSWORD = web_password
+
+        config.change_VERSION_NOTIFY(version_notify)
+
+        sickbeard.save_config()
+
+        if len(results) > 0:
+            for x in results:
+                logger.log(x, logger.ERROR)
+            ui.flash.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
+        else:
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+
+        redirect("/config/general/")
+
+
+class ConfigSearch:
+
+    @cherrypy.expose
+    def index(self):
+
+        t = PageTemplate(file="config_search.tmpl")
+        t.submenu = ConfigMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
+                       sab_apikey=None, sab_category=None, sab_host=None, torrent_dir=None, nzb_method=None, usenet_retention=None,
+                       search_frequency=None, download_propers=None):
+
+        results = []
+
+        if not config.change_NZB_DIR(nzb_dir):
+            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
+
+        if not config.change_TORRENT_DIR(torrent_dir):
+            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
+
+        config.change_SEARCH_FREQUENCY(search_frequency)
+
+        if download_propers == "on":
+            download_propers = 1
+        else:
+            download_propers = 0
+
+        if use_nzbs == "on":
+            use_nzbs = 1
+        else:
+            use_nzbs = 0
+
+        if use_torrents == "on":
+            use_torrents = 1
+        else:
+            use_torrents = 0
+
+        if usenet_retention == None:
+            usenet_retention = 200
+
+        sickbeard.USE_NZBS = use_nzbs
+        sickbeard.USE_TORRENTS = use_torrents
+
+        sickbeard.NZB_METHOD = nzb_method
+        sickbeard.USENET_RETENTION = int(usenet_retention)
+
+        sickbeard.DOWNLOAD_PROPERS = download_propers
+
+        sickbeard.SAB_USERNAME = sab_username
+        sickbeard.SAB_PASSWORD = sab_password
+        sickbeard.SAB_APIKEY = sab_apikey.strip()
+        sickbeard.SAB_CATEGORY = sab_category
+
+        if sab_host and not re.match('https?://.*', sab_host):
+            sab_host = 'http://' + sab_host
+
+        if not sab_host.endswith('/'):
+            sab_host = sab_host + '/'
+
+        sickbeard.SAB_HOST = sab_host
+
+        sickbeard.save_config()
+
+        if len(results) > 0:
+            for x in results:
+                logger.log(x, logger.ERROR)
+            ui.flash.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
+        else:
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+
+        redirect("/config/search/")
+
+class ConfigPostProcessing:
+
+    @cherrypy.expose
+    def index(self):
+
+        t = PageTemplate(file="config_postProcessing.tmpl")
+        t.submenu = ConfigMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
+                    naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
+                    naming_sep_type=None, naming_quality=None, naming_dates=None,
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, use_banner=None,
+                    keep_processed_dir=None, process_automatically=None, rename_episodes=None,
+                    move_associated_files=None, tv_download_dir=None):
+
+        results = []
+
+        if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
+            results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
 
         if naming_show_name == "on":
             naming_show_name = 1
@@ -700,10 +819,30 @@ class ConfigGeneral:
         else:
             use_banner = 0
 
-        if not config.change_LOG_DIR(log_dir):
-            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
+        if process_automatically == "on":
+            process_automatically = 1
+        else:
+            process_automatically = 0
 
-        sickbeard.LAUNCH_BROWSER = launch_browser
+        if rename_episodes == "on":
+            rename_episodes = 1
+        else:
+            rename_episodes = 0
+
+        if keep_processed_dir == "on":
+            keep_processed_dir = 1
+        else:
+            keep_processed_dir = 0
+
+        if move_associated_files == "on":
+            move_associated_files = 1
+        else:
+            move_associated_files = 0
+
+        sickbeard.PROCESS_AUTOMATICALLY = process_automatically
+        sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
+        sickbeard.RENAME_EPISODES = rename_episodes
+        sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
@@ -722,15 +861,7 @@ class ConfigGeneral:
         sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
         sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
 
-        sickbeard.WEB_PORT = int(web_port)
-        sickbeard.WEB_IPV6 = web_ipv6
-        sickbeard.WEB_LOG = web_log
-        sickbeard.WEB_USERNAME = web_username
-        sickbeard.WEB_PASSWORD = web_password
-
         sickbeard.USE_BANNER = use_banner
-
-        config.change_VERSION_NOTIFY(version_notify)
 
         sickbeard.save_config()
 
@@ -740,10 +871,9 @@ class ConfigGeneral:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
 
-        redirect("/config/general/")
-
+        redirect("/config/postProcessing/")
 
     @cherrypy.expose
     def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
@@ -827,99 +957,6 @@ class ConfigGeneral:
 
         return name
 
-class ConfigEpisodeDownloads:
-
-    @cherrypy.expose
-    def index(self):
-
-        t = PageTemplate(file="config_episodedownloads.tmpl")
-        t.submenu = ConfigMenu
-        return _munge(t)
-
-    @cherrypy.expose
-    def saveEpisodeDownloads(self, nzb_dir=None, sab_username=None, sab_password=None,
-                       sab_apikey=None, sab_category=None, sab_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None,
-                       search_frequency=None, tv_download_dir=None,
-                       keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                       download_propers=None, move_associated_files=None):
-
-        results = []
-
-        if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
-            results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
-
-        if not config.change_NZB_DIR(nzb_dir):
-            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
-
-        if not config.change_TORRENT_DIR(torrent_dir):
-            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
-
-        config.change_SEARCH_FREQUENCY(search_frequency)
-
-        if download_propers == "on":
-            download_propers = 1
-        else:
-            download_propers = 0
-
-        if process_automatically == "on":
-            process_automatically = 1
-        else:
-            process_automatically = 0
-
-        if rename_episodes == "on":
-            rename_episodes = 1
-        else:
-            rename_episodes = 0
-
-        if keep_processed_dir == "on":
-            keep_processed_dir = 1
-        else:
-            keep_processed_dir = 0
-
-        if move_associated_files == "on":
-            move_associated_files = 1
-        else:
-            move_associated_files = 0
-
-        if usenet_retention == None:
-            usenet_retention = 200
-
-        sickbeard.PROCESS_AUTOMATICALLY = process_automatically
-        sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
-        sickbeard.RENAME_EPISODES = rename_episodes
-        sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
-
-        sickbeard.NZB_METHOD = nzb_method
-        sickbeard.USENET_RETENTION = int(usenet_retention)
-
-        sickbeard.DOWNLOAD_PROPERS = download_propers
-
-        sickbeard.SAB_USERNAME = sab_username
-        sickbeard.SAB_PASSWORD = sab_password
-        sickbeard.SAB_APIKEY = sab_apikey.strip()
-        sickbeard.SAB_CATEGORY = sab_category
-
-        if sab_host and not re.match('https?://.*', sab_host):
-            sab_host = 'http://' + sab_host
-
-        if not sab_host.endswith('/'):
-            sab_host = sab_host + '/'
-
-        sickbeard.SAB_HOST = sab_host
-
-        sickbeard.save_config()
-
-        if len(results) > 0:
-            for x in results:
-                logger.log(x, logger.ERROR)
-            ui.flash.error('Error(s) Saving Configuration',
-                        '<br />\n'.join(results))
-        else:
-            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
-
-        redirect("/config/episodedownloads/")
-
 class ConfigProviders:
 
     @cherrypy.expose
@@ -992,6 +1029,7 @@ class ConfigProviders:
                       nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       tvbinz_auth=None, provider_order=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+                      tvtorrents_digest=None, tvtorrents_hash=None, 
                       newzbin_username=None, newzbin_password=None):
 
         results = []
@@ -1055,6 +1093,8 @@ class ConfigProviders:
                 sickbeard.WOMBLE = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
+            elif curProvider == 'tvtorrents':
+                sickbeard.TVTORRENTS = curEnabled
             elif curProvider == 'fanzub':
                 sickbeard.FANZUB = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1068,6 +1108,9 @@ class ConfigProviders:
             sickbeard.TVBINZ_HASH = tvbinz_hash.strip()
         if tvbinz_auth:
             sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
+            
+        sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
+        sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.NZBS_UID = nzbs_org_uid.strip()
         sickbeard.NZBS_HASH = nzbs_org_hash.strip()
@@ -1091,7 +1134,7 @@ class ConfigProviders:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/providers/")
 
@@ -1238,7 +1281,7 @@ class ConfigNotifications:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', os.path.join(sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
 
         redirect("/config/notifications/")
 
@@ -1254,7 +1297,9 @@ class Config:
 
     general = ConfigGeneral()
 
-    episodedownloads = ConfigEpisodeDownloads()
+    search = ConfigSearch()
+    
+    postProcessing = ConfigPostProcessing()
 
     providers = ConfigProviders()
 
@@ -1788,7 +1833,7 @@ class Home:
     @cherrypy.expose
     def shutdown(self):
 
-        threading.Timer(2, sickbeard.saveAndShutdown).start()
+        threading.Timer(2, sickbeard.invoke_shutdown).start()
 
         title = "Shutting down"
         message = "Sick Beard is shutting down..."
@@ -1802,7 +1847,7 @@ class Home:
             redirect("/home")
 
         # do a soft restart
-        threading.Timer(2, sickbeard.restart, [False]).start()
+        threading.Timer(2, sickbeard.invoke_restart, [False]).start()
 
         title = "Restarting"
         message = "Sick Beard is restarting, refresh in 30 seconds."
@@ -1819,7 +1864,7 @@ class Home:
 
         if updated:
             # do a hard restart
-            threading.Timer(2, sickbeard.restart, [False]).start()
+            threading.Timer(2, sickbeard.invoke_restart, [False]).start()
             return "Sick Beard is restarting, refresh in 30 seconds."
         else:
             return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")

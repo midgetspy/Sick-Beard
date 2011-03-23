@@ -309,7 +309,7 @@ def searchDBForShow(regShowName):
     """Return False|(tvdb_id,show_name)
     Sanitize given show name into multiple versions and see if we have arecord of that show name in the DB
     """
-    showNames = [regShowName.replace(' ','_')]
+    showNames = [re.sub('[. -]', ' ', regShowName)]
 
     myDB = db.DBConnection()
 

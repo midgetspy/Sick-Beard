@@ -1,10 +1,14 @@
 import sickbeard
+import shutil, time, os.path, sys
+
 from sickbeard import db
 from sickbeard import common
 from sickbeard import logger
+from sickbeard.providers.generic import GenericProvider
 
 from sickbeard import encodingKludge as ek
-import shutil, time, os.path, sys
+
+
 
 class MainSanityCheck(db.DBSanityCheck):
 
@@ -322,10 +326,40 @@ class PopulateRootDirs (AddLang):
         
         sickbeard.ROOT_DIRS = new_root_dirs
         
+        sickbeard.save_config()
+        
         self.incDBVersion()
-     
+        
 
-class AddAbsoluteEpisodeTVShow(PopulateRootDirs):
+class SetNzbTorrentSettings(PopulateRootDirs):
+
+    def test(self):
+        return self.checkDBVersion() >= 8
+    
+    def execute(self):
+
+        use_torrents = False
+        use_nzbs = False
+
+        for cur_provider in sickbeard.providers.sortedProviderList():
+            if cur_provider.isEnabled():
+                if cur_provider.providerType == GenericProvider.NZB:
+                    use_nzbs = True
+                    logger.log(u"Provider "+cur_provider.name+" is enabled, enabling NZBs in the upgrade")
+                    break
+                elif cur_provider.providerType == GenericProvider.TORRENT:
+                    use_torrents = True
+                    logger.log(u"Provider "+cur_provider.name+" is enabled, enabling Torrents in the upgrade")
+                    break
+
+        sickbeard.USE_TORRENTS = use_torrents
+        sickbeard.USE_NZBS = use_nzbs
+        
+        sickbeard.save_config()
+        
+        self.incDBVersion()
+        
+class AddAbsoluteEpisodeTVShow(SetNzbTorrentSettings):
     def test(self):
         return self.hasColumn("tv_shows", "anime")
 
@@ -338,4 +372,3 @@ class AddAbsoluteEpisodeTVEpisode(AddAbsoluteEpisodeTVShow):
 
     def execute(self):
         self.addColumn("tv_episodes", "absolute_number", "NUMERIC", "NULL")
-        
