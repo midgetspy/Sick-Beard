@@ -99,6 +99,7 @@ simple_test_cases = {
                
               'anime_standard': {
               '[Tsuki] Bleach - 301 [1280x720][61D1D4EE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'Tsuki', None, [301]),
+              '[Tsuki] Fairy Tail - 70 [1280x720][C4807111]': parser.ParseResult(None, 'Fairy Tail', None, [], '1280x720', 'Tsuki', None, [70]),
               '[SGKK] Bleach 312v2 [720p MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p', 'SGKK', None, [312]),
               '[BSS-Anon] Tengen Toppa Gurren Lagann - 22-23 [1280x720][h264][6039D9AF]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '1280x720', 'BSS-Anon', None, [22,23]),
               '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [], '480p', 'SJSUBS', None, [2]),
