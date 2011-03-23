@@ -192,7 +192,7 @@ class GenericProvider:
         itemList = []
 
         for cur_search_string in self._get_episode_search_strings(episode):
-            itemList += self._doSearch(cur_search_string,episode.show,(not episode.show.absolute_numbering))
+            itemList += self._doSearch(cur_search_string,False,episode.show,(not episode.show.absolute_numbering))
 
         for item in itemList:
 

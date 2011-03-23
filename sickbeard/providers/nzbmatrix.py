@@ -74,7 +74,7 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "page": "download",
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
-                  "subcat": "6,41",
+                  "subcat": "6,41,28",
                   "ssl": 1,
                   "scenename": 1}
                   
