@@ -355,7 +355,28 @@ class PopulateRootDirs (AddLang):
         
         self.incDBVersion()
         
+class AddSizeAndSceneNameFields(SetNzbTorrentSettings):
 
+    def test(self):
+        return self.checkDBVersion() >= 9
+    
+    def execute(self):
+
+        if not self.hasColumn("tv_episodes", "file_size"):
+            self.addColumn("tv_episodes", "file_size")
+
+        if not self.hasColumn("tv_episodes", "original_name"):
+            self.addColumn("tv_episodes", "original_name", "TEXT", "")
+
+        ep_results = self.connection.select("SELECT episode_id, location FROM tv_episodes")
+        
+        for cur_ep in ep_results:
+            if ek.ek(os.path.isfile, cur_ep["location"]):
+                cur_size = ek.ek(os.path.getsize, cur_ep["location"])
+                self.connection.action("UPDATE tv_episodes SET file_size = ? WHERE episode_id = ?", [cur_size, int(cur_ep["episode_id"])])
+
+        self.incDBVersion()
+        
 class SetNzbTorrentSettings(PopulateRootDirs):
 
     def test(self):

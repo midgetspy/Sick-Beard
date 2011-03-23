@@ -417,6 +417,7 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), logger.DEBUG)
 
             checkQualityAgain = False
+            same_file = False
             curEp = self.getEpisode(season, episode)
 
             if curEp == None:
@@ -433,23 +434,36 @@ class TVShow(object):
                     checkQualityAgain = True
 
                 with curEp.lock:
+                    old_size = curEp.file_size
                     curEp.location = file
+                    # if the sizes are the same then it's probably the same file
+                    if old_size and curEp.file_size == old_size:
+                        same_file = True
+                    else:
+                        same_file = False
+
                     curEp.checkForMetaFiles()
+                
 
             if rootEp == None:
                 rootEp = curEp
             else:
                 rootEp.relatedEps.append(curEp)
 
-            # if they replace a file on me I'll make some attempt at re-checking the quality
-            if checkQualityAgain:
+            # if it's a new file then 
+            if not same_file:
+                curEp.original_name = ''
+
+            # if they replace a file on me I'll make some attempt at re-checking the quality unless I know it's the same file
+            if checkQualityAgain and not same_file:
                 newQuality = Quality.nameQuality(file)
                 logger.log(u"Since this file has been renamed, I checked "+file+" and found quality "+Quality.qualityStrings[newQuality], logger.DEBUG)
                 if newQuality != Quality.UNKNOWN:
                     curEp.status = Quality.compositeStatus(DOWNLOADED, newQuality)
 
 
-            elif sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.DOWNLOADED + [ARCHIVED, IGNORED]:
+            # check for status/quality changes as long as it's a new file
+            elif not same_file and sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.DOWNLOADED + [ARCHIVED, IGNORED]:
 
                 oldStatus, oldQuality = Quality.splitCompositeStatus(curEp.status)
                 newQuality = Quality.nameQuality(file)
@@ -944,6 +958,8 @@ class TVEpisode(object):
         self._hastbn = False
         self._status = UNKNOWN
         self._tvdbid = 0
+        self._file_size = 0
+        self._original_name = 0
 
         # setting any of the above sets the dirty flag
         self.dirty = True
@@ -968,7 +984,22 @@ class TVEpisode(object):
     hastbn = property(lambda self: self._hastbn, dirty_setter("_hastbn"))
     status = property(lambda self: self._status, dirty_setter("_status"))
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
-    location = property(lambda self: self._location, dirty_setter("_location"))
+    #location = property(lambda self: self._location, dirty_setter("_location"))
+    file_size = property(lambda self: self._size, dirty_setter("_file_size"))
+    original_name = property(lambda self: self._size, dirty_setter("_original_name"))
+
+    def _set_location(self, new_location):
+        logger.log(u"Setter sets location to " + new_location, logger.DEBUG)
+        
+        #self._location = newLocation
+        dirty_setter("_location")(new_location)
+
+        if new_location and ek.ek(os.path.isfile, new_location):
+            self.size = ek.ek(os.path.getsize, new_location)
+        else:
+            self.size = 0
+
+    location = property(lambda self: self._location, _set_location)
 
     def checkForMetaFiles(self):
 
@@ -1055,6 +1086,7 @@ class TVEpisode(object):
             # don't overwrite my location
             if sqlResults[0]["location"] != "" and sqlResults[0]["location"] != None:
                 self.location = os.path.normpath(sqlResults[0]["location"])
+            self.size = int(sqlResults[0]["size"])
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
 
@@ -1333,7 +1365,8 @@ class TVEpisode(object):
                         "hasnfo": self.hasnfo,
                         "hastbn": self.hastbn,
                         "status": self.status,
-                        "location": self.location}
+                        "location": self.location,
+                        "size": self.size}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}
