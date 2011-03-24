@@ -30,10 +30,19 @@ from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
 
+from sickbeard import encodingKludge as ek
+
 from sickbeard.providers import *
 from sickbeard import providers
 
 def _downloadResult(result):
+    """
+    Downloads a result to the appropriate black hole folder.
+    
+    Returns a bool representing success.
+    
+    result: SearchResult instance to download.
+    """
 
     resProvider = result.provider
 
@@ -43,15 +52,21 @@ def _downloadResult(result):
         logger.log(u"Invalid provider name - this is a coding error, report it please", logger.ERROR)
         return False
 
+    # nzbs with an URL can just be downloaded from the provider
     if result.resultType == "nzb":
         newResult = resProvider.downloadResult(result)
+
+    # if it's an nzb data result 
     elif result.resultType == "nzbdata":
-        fileName = os.path.join(sickbeard.NZB_DIR, result.name + ".nzb")
+        
+        # get the final file path to the nzb
+        fileName = ek.ek(os.path.join, sickbeard.NZB_DIR, result.name + ".nzb")
 
         logger.log(u"Saving NZB to " + fileName)
 
         newResult = True
 
+        # save the data to disk
         try:
             fileOut = open(fileName, "w")
             fileOut.write(result.extraInfo[0])
@@ -62,6 +77,7 @@ def _downloadResult(result):
 
     elif resProvider.providerType == "torrent":
         newResult = resProvider.downloadResult(result)
+
     else:
         logger.log(u"Invalid provider type - this is a coding error, report it please", logger.ERROR)
         return False
@@ -69,7 +85,17 @@ def _downloadResult(result):
     return newResult
 
 def snatchEpisode(result, endStatus=SNATCHED):
+    """
+    Contains the internal logic necessary to actually "snatch" a result that
+    has been found.
+    
+    Returns a bool representing success.
+    
+    result: SearchResult instance to be snatched.
+    endStatus: the episode status that should be used for the episode object once it's snatched.
+    """
 
+    # NZBs can be sent straight to SAB or saved to disk
     if result.resultType in ("nzb", "nzbdata"):
         if sickbeard.NZB_METHOD == "blackhole":
             dlResult = _downloadResult(result)
@@ -78,6 +104,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
         else:
             logger.log(u"Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
             dlResult = False
+
+    # torrents are always saved to disk
     elif result.resultType == "torrent":
         dlResult = _downloadResult(result)
     else:
