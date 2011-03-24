@@ -85,8 +85,8 @@
                                 <span class="component-title jumbo">NZB Method:</span>
                                 <span class="component-desc">
                                     <select name="nzb_method" id="nzb_method">
-                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd"}
-                                    #for $curAction in ('sabnzbd', 'blackhole'):
+                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
+                                    #for $curAction in ('sabnzbd', 'blackhole', 'nzbget'):
                                       #if $sickbeard.NZB_METHOD == $curAction:
                                         #set $nzb_method = "selected=\"selected\""
                                       #else
@@ -165,6 +165,45 @@
                                 <label class="nocheck clearfix">
                                     <span class="component-title">SABnzbd Category</span>
                                     <input type="text" name="sab_category" value="$sickbeard.SAB_CATEGORY" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Category for downloads to go into (eg. TV)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="nzbget_settings">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZBget HOST:PORT</span>
+                                    <input type="text" name="nzbget_host" value="$sickbeard.NZBGET_HOST" size="45" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Hostname and portnumber of the NZBget RPC (not NZBgetweb!)</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(eg. localhost:6789)</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZBget Password</span>
+                                    <input type="password" name="nzbget_password" value="$sickbeard.NZBGET_PASSWORD" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Password found in nzbget.conf (by default tegbzn6789)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZBget Category</span>
+                                    <input type="text" name="nzbget_category" value="$sickbeard.NZBGET_CATEGORY" size="20" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>

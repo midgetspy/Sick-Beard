@@ -26,6 +26,7 @@ from common import *
 
 from sickbeard import logger, db, sceneHelpers, exceptions, helpers
 from sickbeard import sab
+from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
@@ -101,6 +102,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = _downloadResult(result)
         elif sickbeard.NZB_METHOD == "sabnzbd":
             dlResult = sab.sendNZB(result)
+        elif sickbeard.NZB_METHOD == "nzbget":
+            dlResult = nzbget.sendNZB(result)
         else:
             logger.log(u"Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
             dlResult = False
