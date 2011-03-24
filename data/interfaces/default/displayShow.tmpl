@@ -11,14 +11,30 @@
 
 <script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
 
-<div class="h2footer align-right" style="margin-left:250px; line-height: 20px;">
+<div class="h2footer align-right">
+#if (len($seasonResults) > 14):
+<form>
+    <select id="seasonJump">
+        <option value="jump">Jump to Season</option>
+    #for $seasonNum in $seasonResults:
+        <option value="#season-$seasonNum["season"]">#if int($seasonNum["season"]) == 0 then "Specials" else "Season " + str($seasonNum["season"])#</option>
+    #end for
+    </select>
+</form>
+#else:
+<div class="h2footer align-right">
     <b>Season:</b>
     #for $seasonNum in $seasonResults:
-        #if int($seasonNum["season"]) == 0 then "<span class=\"separator\">|</span> " else ""#
-        <a href="#season-$seasonNum["season"]">
-        #if int($seasonNum["season"]) == 0 then "Specials</a>" else str($seasonNum["season"])+"</a> "#
-        #if int($seasonNum["season"]) >1 then "<span class=\"separator\">|</span> " else ""#
+        #if int($seasonNum["season"]) == 0:
+            <a href="#season-$seasonNum["season"]">Specials</a>
+        #else:
+            <a href="#season-$seasonNum["season"]">${str($seasonNum["season"])}</a>
+        #end if
+        #if $seasonNum != $seasonResults[-1]:
+            <span class="separator">|</span>
+        #end if
     #end for
+#end if
 </div><br/>
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
@@ -151,6 +167,6 @@ $epLoc
    </tr>
 
 #end for
-</table><br /><br />
+</table><br />
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
