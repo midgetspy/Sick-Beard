@@ -38,7 +38,7 @@ from sickbeard import logger
 
 from sickbeard.common import *
 
-from sickbeard.databases import mainDB
+from sickbeard.databases import mainDB, cache_db
 
 from lib.configobj import ConfigObj
 
@@ -51,7 +51,7 @@ PID = None
 CFG = None
 CONFIG_FILE = None
 
-PROG_DIR = None
+PROG_DIR = '.'
 MY_FULLNAME = None
 MY_NAME = None
 MY_ARGS = []
@@ -607,6 +607,9 @@ def initialize(consoleLogging=True):
 
         # initialize the main SB database
         db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
+        
+        # initialize the cache database
+        db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
         
         # fix up any db problems
         db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)

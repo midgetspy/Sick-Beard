@@ -5,6 +5,10 @@ sys.path.append(os.path.abspath('..'))
 
 from sickbeard import sceneHelpers, common
 
+import sickbeard
+from sickbeard import db
+from sickbeard.databases import cache_db
+
 class Show:
     def __init__(self, name, tvdbid, tvrname):
         self.name = name
@@ -58,7 +62,9 @@ class SceneTests(unittest.TestCase):
         self._test_sceneToNormalShowNames('Show Name YA', ['Show Name YA'])
 
     def test_allPossibleShowNames(self):
-        common.sceneExceptions[-1] = ['Exception Test']
+        #common.sceneExceptions[-1] = ['Exception Test']
+        myDB = db.DBConnection("cache.db")
+        myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [-1, 'Exception Test'])
         common.countryList['Full Country Name'] = 'FCN'
         
         self._test_allPossibleShowNames('Show Name', expected=['Show Name'])
@@ -77,9 +83,36 @@ class SceneTests(unittest.TestCase):
         self._test_filterBadReleases('German.Show.S02.Some.Stuff-Grp', True)
         self._test_filterBadReleases('Show.S02.This.Is.German', False)
 
+
+
+
+print 'Loading exceptions...',
+db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
+sceneHelpers.retrieve_exceptions()
+print 'done.'
+
+class SceneExceptionTestCase(unittest.TestCase):
+
+    def test_sceneExceptionsEmpty(self):
+        self.assertEqual(sceneHelpers.get_scene_exceptions(0), [])
+
+    def test_sceneExceptionsBabylon5(self):
+        self.assertEqual(sorted(sceneHelpers.get_scene_exceptions(70726)), ['Babylon 5', 'Babylon5'])
+
+    def test_sceneExceptionByName(self):
+        self.assertEqual(sceneHelpers.get_scene_exception_by_name('Babylon5'), 70726)
+        
+    def test_sceneExceptionByNameEmpty(self):
+        self.assertEqual(sceneHelpers.get_scene_exception_by_name('nothing useful'), None)
+
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         suite = unittest.TestLoader().loadTestsFromName('scene_helpers_tests.SceneTests.test_'+sys.argv[1])
+        unittest.TextTestRunner(verbosity=2).run(suite)
     else:
         suite = unittest.TestLoader().loadTestsFromTestCase(SceneTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        unittest.TextTestRunner(verbosity=2).run(suite)
+        suite = unittest.TestLoader().loadTestsFromTestCase(SceneExceptionTestCase)
+        unittest.TextTestRunner(verbosity=2).run(suite)

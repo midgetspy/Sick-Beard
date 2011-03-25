@@ -376,4 +376,3 @@ class SetNzbTorrentSettings(PopulateRootDirs):
         sickbeard.save_config()
         
         self.incDBVersion()
-        
