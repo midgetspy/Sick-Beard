@@ -132,6 +132,22 @@
 
                         <div id="content_use_plex">
                         <div class="field-pair">
+                            <input type="checkbox" name="plex_notify_onsnatch" id="plex_notify_onsnatch" #if $sickbeard.PLEX_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="plex_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="plex_notify_ondownload" id="plex_notify_ondownload" #if $sickbeard.PLEX_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="plex_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <input type="checkbox" name="plex_update_library" id="plex_update_library" #if $sickbeard.PLEX_UPDATE_LIBRARY then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="plex_update_library">
                                 <span class="component-title">Update Library</span>
@@ -142,11 +158,44 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Plex Media Server IP:Port</span>
-                                <input type="text" name="plex_host" id="plex_host" value="$sickbeard.PLEX_HOST" size="35" />
+                                <input type="text" name="plex_server_host" id="plex_server_host" value="$sickbeard.PLEX_SERVER_HOST" size="35" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
                                 <span class="component-desc">Host running Plex Media Server (eg. 192.168.1.100:32400)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Plex Client IP:Port</span>
+                                <input type="text" name="plex_host" id="plex_host" value="$sickbeard.PLEX_HOST" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Host running Plex Client (eg. 192.168.1.100:8080)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Plex Client Username</span>
+                                <input type="text" name="plex_username" id="plex_username" value="$sickbeard.PLEX_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your Plex client API (blank for none)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Plex Client Password</span>
+                                <input type="password" name="plex_password" id="plex_password" value="$sickbeard.PLEX_PASSWORD" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Password of your Plex client API (blank for none)</span>
                             </label>
                         </div>
 
