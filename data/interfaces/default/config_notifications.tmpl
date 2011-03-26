@@ -126,7 +126,11 @@
                             <input type="checkbox" class="enabler" name="use_plex" id="use_plex" #if $sickbeard.USE_PLEX then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_plex">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send Plex Media Server commands?</span>
+                                <span class="component-desc">Should Sick Beard send Notifications to Plex and/or</span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_plex">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">library updates to Plex Media Server?</span>
                             </label>
                         </div>
 
