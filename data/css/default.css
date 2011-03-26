@@ -88,7 +88,8 @@ font-weight:700;
 margin: -33px 5px 6px 0px;
 }
 .h2footer select {
-margin-top: -36px;
+margin-top: -6px;
+margin-bottom: -6px;
 }
 
 .h2footer span {
