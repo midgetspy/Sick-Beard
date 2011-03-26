@@ -27,6 +27,14 @@ $(document).ready(function(){
         function (data){ document.getElementById('testXBMC-result').innerHTML = data;});
     });
 
+    $('#testPLEX').click(function(){
+        document.getElementById('testPLEX-result').innerHTML = loading;
+        var plex_host = $("#plex_host").val();
+        
+        $.get(sbRoot+"/home/testPLEX", {'host': plex_host}, 
+        function (data){ document.getElementById('testPLEX-result').innerHTML = data;});
+    });
+
     $('#testNotifo').click(function(){
         document.getElementById('testNotifo-result').innerHTML = loading;
         var notifo_username = $("#notifo_username").val();

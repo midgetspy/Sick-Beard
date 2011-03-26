@@ -42,6 +42,7 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 
 from sickbeard.notifiers import xbmc
+from sickbeard.notifiers import plex
 from sickbeard.providers import newznab
 from sickbeard.common import *
 
@@ -1145,6 +1146,7 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+                          use_plex=None, plex_update_library=None, plex_host=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
@@ -1177,7 +1179,17 @@ class ConfigNotifications:
             use_xbmc = 1
         else:
             use_xbmc = 0
-            
+
+        if plex_update_library == "on":
+            plex_update_library = 1
+        else:
+            plex_update_library = 0
+
+        if use_plex == "on":
+            use_plex = 1
+        else:
+            use_plex = 0
+
         if growl_notify_onsnatch == "on":
             growl_notify_onsnatch = 1
         else:
@@ -1243,6 +1255,10 @@ class ConfigNotifications:
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
 
+        sickbeard.USE_PLEX = use_plex
+        sickbeard.PLEX_UPDATE_LIBRARY = plex_update_library
+        sickbeard.PLEX_HOST = plex_host
+
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
         sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
@@ -1304,11 +1320,15 @@ class Config:
 def haveXBMC():
     return sickbeard.XBMC_HOST != None and len(sickbeard.XBMC_HOST) > 0
 
+def havePLEX():
+    return sickbeard.PLEX_HOST != None and len(sickbeard.PLEX_HOST) > 0
+
 def HomeMenu():
     return [
     { 'title': 'Add Shows',               'path': 'home/addShows/',                         },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
+    { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX   },
     { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
     ]
@@ -1819,6 +1839,14 @@ class Home:
             return "Test notice failed to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
+    def testPLEX(self, host=None):
+        result = notifiers.plex_notifier.test_notify(urllib.unquote_plus(host))
+        if result:
+            return "Test was successfull"
+        else:
+            return "Test failed"
+
+    @cherrypy.expose
     def testLibnotify(self):
         if notifiers.libnotify_notifier.test_notify():
             return "Tried sending desktop notification via libnotify"
@@ -2149,6 +2177,18 @@ class Home:
                 ui.flash.message("Command sent to XBMC host " + curHost + " to update library")
             else:
                 ui.flash.error("Unable to contact XBMC host " + curHost)
+        redirect('/home')
+
+
+    @cherrypy.expose
+    def updatePLEX(self):
+
+        if notifiers.plex_notifier._update_library():
+            ui.flash.message("Command sent to Plex Media Server host " + sickbeard.PLEX_HOST + " to update library")
+            logger.log(u"Plex library update initiated for host " + sickbeard.PLEX_HOST, logger.DEBUG)
+        else:
+            ui.flash.error("Unable to contact Plex Media Server host " + sickbeard.PLEX_HOST)
+            logger.log(u"Plex library update failed for host " + sickbeard.PLEX_HOST, logger.ERROR)
         redirect('/home')
 
 

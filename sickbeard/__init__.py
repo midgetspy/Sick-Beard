@@ -181,6 +181,7 @@ SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = None
 
+<<<<<<< HEAD
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
@@ -193,6 +194,20 @@ XBMC_UPDATE_FULL = False
 XBMC_HOST = None
 XBMC_USERNAME = None
 XBMC_PASSWORD = None
+=======
+USE_XBMC = False
+XBMC_NOTIFY_ONSNATCH = False
+XBMC_NOTIFY_ONDOWNLOAD = False
+XBMC_UPDATE_LIBRARY = False
+XBMC_UPDATE_FULL = False
+XBMC_HOST = None
+XBMC_USERNAME = None
+XBMC_PASSWORD = None
+
+USE_PLEX = False
+PLEX_UPDATE_LIBRARY = False
+PLEX_HOST = None
+>>>>>>> b6950b8896b45dcdaf29dbc85d84fda7d8280f4e
 
 USE_GROWL = False
 GROWL_NOTIFY_ONSNATCH = False
@@ -327,7 +342,8 @@ def initialize(consoleLogging=True):
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, \
                 XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
-                XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
+                XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
+                USE_PLEX, PLEX_UPDATE_LIBRARY, PLEX_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -358,8 +374,13 @@ def initialize(consoleLogging=True):
         CheckSection('Newzbin')
         CheckSection('TVBinz')
         CheckSection('SABnzbd')
+<<<<<<< HEAD
         CheckSection('NZBget')
         CheckSection('XBMC')
+=======
+        CheckSection('XBMC')
+        CheckSection('PLEX')
+>>>>>>> b6950b8896b45dcdaf29dbc85d84fda7d8280f4e
         CheckSection('Growl')
         CheckSection('Prowl')
         CheckSection('Twitter')
@@ -493,6 +514,7 @@ def initialize(consoleLogging=True):
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', 'tv')
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
 
+<<<<<<< HEAD
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
@@ -505,6 +527,20 @@ def initialize(consoleLogging=True):
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
+=======
+        USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0)) 
+        XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
+        XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
+        XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
+        XBMC_UPDATE_FULL = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_full', 0))
+        XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
+        XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
+        XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
+
+        USE_PLEX = bool(check_setting_int(CFG, 'PLEX', 'use_plex', 0))
+        PLEX_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'PLEX', 'plex_update_library', 0))
+        PLEX_HOST = check_setting_str(CFG, 'PLEX', 'plex_host', '')
+>>>>>>> b6950b8896b45dcdaf29dbc85d84fda7d8280f4e
 
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onsnatch', 0))
@@ -955,6 +991,7 @@ def save_config():
     new_config['SABnzbd']['sab_category'] = SAB_CATEGORY
     new_config['SABnzbd']['sab_host'] = SAB_HOST
 
+<<<<<<< HEAD
     new_config['NZBget'] = {}
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
@@ -969,6 +1006,22 @@ def save_config():
     new_config['XBMC']['xbmc_host'] = XBMC_HOST
     new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
+=======
+    new_config['XBMC'] = {}
+    new_config['XBMC']['use_xbmc'] = int(USE_XBMC)    
+    new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
+    new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
+    new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
+    new_config['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
+    new_config['XBMC']['xbmc_host'] = XBMC_HOST
+    new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
+    new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
+
+    new_config['PLEX'] = {}
+    new_config['PLEX']['use_plex'] = int(USE_PLEX)
+    new_config['PLEX']['plex_update_library'] = int(PLEX_UPDATE_LIBRARY)
+    new_config['PLEX']['plex_host'] = PLEX_HOST
+>>>>>>> b6950b8896b45dcdaf29dbc85d84fda7d8280f4e
 
     new_config['Growl'] = {}
     new_config['Growl']['use_growl'] = int(USE_GROWL)
