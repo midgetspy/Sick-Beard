@@ -34,6 +34,8 @@ from sickbeard.common import *
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 
+from lib.hachoir_parser import createParser
+
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 class GenericProvider:
@@ -116,6 +118,9 @@ class GenericProvider:
         return result
 
     def downloadResult(self, result):
+        """
+        Save the result to disk.
+        """
 
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
 
@@ -124,6 +129,7 @@ class GenericProvider:
         if data == None:
             return False
 
+        # use the appropriate watch folder
         if self.providerType == GenericProvider.NZB:
             saveDir = sickbeard.NZB_DIR
             writeMode = 'w'
@@ -133,6 +139,7 @@ class GenericProvider:
         else:
             return False
 
+        # use the result name as the filename
         fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
 
         logger.log(u"Saving to " + fileName, logger.DEBUG)
@@ -142,8 +149,23 @@ class GenericProvider:
             fileOut.write(data)
             fileOut.close()
         except IOError, e:
-            logger.log("Unable to save the NZB: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log("Unable to save the file: "+str(e).decode('utf-8'), logger.ERROR)
             return False
+
+        # as long as it's a valid download then consider it a successful snatch
+        return self._verify_download()
+
+    def _verify_download(self, file_name=None):
+        """
+        Checks the saved file to see if it was actually valid, if not then consider the download a failure.
+        """
+
+        # primitive verification of torrents, just make sure we didn't get a text file or something
+        if self.providerType == GenericProvider.TORRENT:
+            parser = createParser(file_name)
+            if not parser or parser._getMimeType() != 'application/x-bittorrent':
+                logger.log(u"Result is not a valid torrent file", logger.WARNING)
+                return False
 
         return True
 
