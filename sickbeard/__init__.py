@@ -798,6 +798,10 @@ def saveAndShutdown(restart=False):
 
     saveAll()
 
+    if sickbeard.CREATEPID:
+        logger.log(u"Removing pidfile " + str(sickbeard.PIDFILE))
+        os.remove(sickbeard.PIDFILE)
+
     if restart:
         install_type = sickbeard.versionCheckScheduler.action.install_type
 

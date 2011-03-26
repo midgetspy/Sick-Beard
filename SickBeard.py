@@ -93,6 +93,11 @@ def daemonize():
     dev_null = file('/dev/null', 'r')
     os.dup2(dev_null.fileno(), sys.stdin.fileno())
 
+    if sickbeard.CREATEPID:
+        pid = str(os.getpid())
+        logger.log(u"Writing PID " + pid + " to " + str(sickbeard.PIDFILE))
+        file(sickbeard.PIDFILE, 'w').write("%s\n" % pid)
+
 def main():
 
     # do some preliminary stuff
@@ -100,6 +105,7 @@ def main():
     sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
     sickbeard.MY_ARGS = sys.argv[1:]
+    sickbeard.CREATEPID = False
 
     try:
         locale.setlocale(locale.LC_ALL, "")
@@ -120,9 +126,9 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp:", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz'])
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile='])
     except getopt.GetoptError:
-        print "Available options: --quiet, --forceupdate, --port, --daemon"
+        print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile"
         sys.exit()
 
     forceUpdate = False
@@ -151,6 +157,25 @@ def main():
             else:
                 consoleLogging = False
                 sickbeard.DAEMON = True
+
+        # write a pidfile if requested
+        if (o in ('--pidfile')):
+            sickbeard.PIDFILE = str(a)
+
+            # if the pidfile already exists, sickbeard may still be running, so exit
+            if (os.path.exists(sickbeard.PIDFILE)):
+                sys.exit("PID file " + sickbeard.PIDFILE + " already exists. Exiting.")
+
+            # a pidfile is only useful in daemon mode
+            # also, test to make sure we can write the file properly
+            if sickbeard.DAEMON:
+                sickbeard.CREATEPID = True
+                try:
+                    file(sickbeard.PIDFILE, 'w').write("pid\n")
+                except IOError, e:
+                    raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
+            else:
+                logger.log(u"Not running in daemon mode. PID file creation disabled.")
 
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
