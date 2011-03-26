@@ -101,6 +101,8 @@ class SceneExceptionTestCase(unittest.TestCase):
 
     def test_sceneExceptionByName(self):
         self.assertEqual(sceneHelpers.get_scene_exception_by_name('Babylon5'), 70726)
+        self.assertEqual(sceneHelpers.get_scene_exception_by_name('babylon 5'), 70726)
+        self.assertEqual(sceneHelpers.get_scene_exception_by_name('Carlos 2010'), 164451)
         
     def test_sceneExceptionByNameEmpty(self):
         self.assertEqual(sceneHelpers.get_scene_exception_by_name('nothing useful'), None)
@@ -109,7 +111,7 @@ class SceneExceptionTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        suite = unittest.TestLoader().loadTestsFromName('scene_helpers_tests.SceneTests.test_'+sys.argv[1])
+        suite = unittest.TestLoader().loadTestsFromName('scene_helpers_tests.SceneExceptionTestCase.test_'+sys.argv[1])
         unittest.TextTestRunner(verbosity=2).run(suite)
     else:
         suite = unittest.TestLoader().loadTestsFromTestCase(SceneTests)
