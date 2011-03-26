@@ -386,6 +386,7 @@ def copyFile(srcFile, destFile):
 def moveFile(srcFile, destFile):
     try:
         ek.ek(os.rename, srcFile, destFile)
+        fixSetGroupID(destFile)
     except OSError:
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
@@ -415,7 +416,7 @@ def chmodAsParent(childPath):
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
 
     if ek.ek(os.path.isfile, childPath):
-        childMode = readwriteBits(parentMode)
+        childMode = fileBitFilter(parentMode)
     else:
         childMode = parentMode
 
@@ -425,14 +426,33 @@ def chmodAsParent(childPath):
     except OSError:
         logger.log(u"Failed to set permission for %s to %o" % (childPath, childMode), logger.ERROR)
 
-def readwriteBits(currentMode):
-    newMode = 0
+def fileBitFilter(mode):
+    for bit in [stat.S_IXUSR, stat.S_IXGRP, stat.S_IXOTH, stat.S_ISUID, stat.S_ISGID]:
+        if mode & bit:
+            mode -= bit
 
-    for bit in [stat.S_IRUSR, stat.S_IWUSR, stat.S_IRGRP, stat.S_IWGRP, stat.S_IROTH, stat.S_IWOTH]:
-        if currentMode & bit:
-            newMode += bit
+    return mode
 
-    return newMode
+def fixSetGroupID(childPath):
+    if os.name == 'nt' or os.name == 'ce':
+        return
+
+    parentPath = ek.ek(os.path.dirname, childPath)
+    parentStat = os.stat(parentPath)
+    parentMode = stat.S_IMODE(parentStat[stat.ST_MODE])
+
+    if parentMode & stat.S_ISGID:
+        parentGID = parentStat[stat.ST_GID]
+        childGID = os.stat(childPath)[stat.ST_GID]
+
+        if childGID == parentGID:
+            return
+
+        try:
+            ek.ek(os.chown, childPath, -1, parentGID)
+            logger.log(u"Respecting the set-group-ID bit on the parent directory for %s" % (childPath), logger.DEBUG)
+        except OSError:
+            logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)
 
 
 if __name__ == '__main__':

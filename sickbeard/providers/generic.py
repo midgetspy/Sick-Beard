@@ -148,6 +148,7 @@ class GenericProvider:
             fileOut = open(fileName, writeMode)
             fileOut.write(data)
             fileOut.close()
+            helpers.chmodAsParent(fileName)
         except IOError, e:
             logger.log("Unable to save the file: "+str(e).decode('utf-8'), logger.ERROR)
             return False
