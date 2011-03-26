@@ -36,22 +36,45 @@ class ImageCache:
         pass
     
     def _cache_dir(self):
+        """
+        Builds up the full path to the image cache directory
+        """
         return ek.ek(os.path.abspath, ek.ek(os.path.join, sickbeard.CACHE_DIR, 'images'))
 
     def poster_path(self, tvdb_id):
+        """
+        Builds up the path to a poster cache for a given tvdb id
+
+        returns: a full path to the cached poster file for the given tvdb id 
+        
+        tvdb_id: ID of the show to use in the file name
+        """
         poster_file_name = str(tvdb_id) + '.poster.jpg'
         return ek.ek(os.path.join, self._cache_dir(), poster_file_name)
     
     def banner_path(self, tvdb_id):
+        """
+        Builds up the path to a banner cache for a given tvdb id
+
+        returns: a full path to the cached banner file for the given tvdb id 
+        
+        tvdb_id: ID of the show to use in the file name
+        """
         banner_file_name = str(tvdb_id) + '.banner.jpg'
         return ek.ek(os.path.join, self._cache_dir(), banner_file_name)
 
     def has_poster(self, tvdb_id):
+        """
+        Returns true if a cached poster exists for the given tvdb id
+        """
         poster_path = self.poster_path(tvdb_id)
         logger.log(u"Checking if file "+str(poster_path)+" exists", logger.DEBUG)
         return ek.ek(os.path.isfile, poster_path)
 
     def has_banner(self, tvdb_id):
+        """
+        Returns true if a cached banner exists for the given tvdb id
+        """
         banner_path = self.banner_path(tvdb_id)
         logger.log(u"Checking if file "+str(banner_path)+" exists", logger.DEBUG)
         return ek.ek(os.path.isfile, banner_path)
@@ -60,9 +83,19 @@ class ImageCache:
     POSTER = 2
     
     def which_type(self, path):
+        """
+        Analyzes the image provided and attempts to determine whether it is a poster or banner.
+        
+        returns: BANNER, POSTER if it concluded one or the other, or None if the image was neither (or didn't exist)
+        
+        path: full path to the image
+        """
+
         if not ek.ek(os.path.isfile, path):
             logger.log(u"Couldn't check the type of "+str(path)+" cause it doesn't exist", logger.WARNING)
             return None
+
+        # use hachoir to parse the image for us
         img_parser = createParser(path)
         img_metadata = extractMetadata(img_parser)
 
@@ -74,8 +107,11 @@ class ImageCache:
 
         img_parser.stream._input.close()
 
+        # most posters are around 0.68 width/height ratio (eg. 680/1000)
         if 0.55 < img_ratio < 0.8:
             return self.POSTER
+        
+        # most banners are around 5.4 width/height ratio (eg. 758/140)
         elif 5 < img_ratio < 6:
             return self.BANNER
         else:
@@ -83,6 +119,17 @@ class ImageCache:
             return None
     
     def _cache_image_from_file(self, image_path, img_type, tvdb_id):
+        """
+        Takes the image provided and copies it to the cache folder
+        
+        returns: bool representing success
+        
+        image_path: path to the image we're caching
+        img_type: BANNER or POSTER
+        tvdb_id: id of the show this image belongs to
+        """
+
+        # generate the path based on the type & tvdb_id
         if img_type == self.POSTER:
             dest_path = self.poster_path(tvdb_id)
         elif img_type == self.BANNER:
@@ -91,6 +138,7 @@ class ImageCache:
             logger.log(u"Invalid cache image type: "+str(img_type), logger.ERROR)
             return False
 
+        # make sure the cache folder exists before we try copying to it
         if not ek.ek(os.path.isdir, self._cache_dir()):
             logger.log(u"Image cache dir didn't exist, creating it at "+str(self._cache_dir()))
             ek.ek(os.makedirs, self._cache_dir())
@@ -101,6 +149,16 @@ class ImageCache:
         return True
 
     def _cache_image_from_tvdb(self, show_obj, img_type):
+        """
+        Retrieves an image of the type specified from TVDB and saves it to the cache folder
+        
+        returns: bool representing success
+        
+        show_obj: TVShow object that we want to cache an image for
+        img_type: BANNER or POSTER
+        """
+
+        # generate the path based on the type & tvdb_id
         if img_type == self.POSTER:
             img_type_name = 'poster'
             dest_path = self.poster_path(show_obj.tvdbid)
@@ -111,6 +169,7 @@ class ImageCache:
             logger.log(u"Invalid cache image type: "+str(img_type), logger.ERROR)
             return False
 
+        # retrieve the image from TVDB using the generic metadata class
         #TODO: refactor
         metadata_generator = GenericMetadata()
         img_data = metadata_generator._retrieve_show_image(img_type_name, show_obj)
@@ -119,6 +178,12 @@ class ImageCache:
         return result
     
     def fill_cache(self, show_obj):
+        """
+        Caches all images for the given show. Copies them from the show dir if possible, or
+        downloads them from TVDB if they aren't in the show dir.
+        
+        show_obj: TVShow object to cache images for
+        """
 
         logger.log(u"Checking if we need any cache images for show "+str(show_obj.tvdbid), logger.DEBUG)
 

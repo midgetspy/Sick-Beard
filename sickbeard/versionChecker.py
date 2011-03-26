@@ -29,6 +29,9 @@ from urllib2 import URLError
 from lib.pygithub import github
 
 class CheckVersion():
+    """
+    Version check class meant to run as a thread object with the SB scheduler.
+    """
 
     def __init__(self):
         self.install_type = self.find_install_type()
@@ -46,6 +49,14 @@ class CheckVersion():
         self.check_for_new_version()
 
     def find_install_type(self):
+        """
+        Determines how this copy of SB was installed.
+        
+        returns: type of installation. Possible values are:
+            'win': any compiled windows build
+            'git': running from source using git
+            'source': running from source without git
+        """
 
         # check if we're a windows build
         if version.SICKBEARD_VERSION.startswith('build '):
@@ -58,6 +69,13 @@ class CheckVersion():
         return install_type
 
     def check_for_new_version(self, force=False):
+        """
+        Checks the internet for a newer version.
+        
+        returns: bool, True for new version or False for no new version.
+        
+        force: if true the VERSION_NOTIFY setting will be ignored and a check will be forced
+        """
 
         if not sickbeard.VERSION_NOTIFY and not force:
             logger.log(u"Version checking is disabled, not checking for the newest version")
@@ -74,7 +92,6 @@ class CheckVersion():
         return True
 
     def update(self):
-
         if self.updater.need_update():
             return self.updater.update()
 

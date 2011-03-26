@@ -17,8 +17,12 @@ APP_PATH=PATH_TO_SICKBEARD_DIRECTORY
 # path to python bin
 DAEMON=/usr/bin/python
 
+# Path to store PID file
+PID_FILE=/var/run/sickbeard/sickbeard.pid
+PID_PATH=`dirname $PID_FILE`
+
 # startup args
-DAEMON_OPTS=" SickBeard.py -q"
+DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE}"
 
 # script name
 NAME=sickbeard
@@ -29,18 +33,21 @@ DESC=SickBeard
 # user
 RUN_AS=SICKBEARD_USER
 
-PID_FILE=/var/run/sickbeard.pid
-
 ############### END EDIT ME ##################
 
 test -x $DAEMON || exit 0
 
 set -e
 
+if [ ! -d $PID_PATH ]; then
+        mkdir -p $PID_PATH
+        chown $RUN_AS $PID_PATH
+fi
+
 case "$1" in
   start)
         echo "Starting $DESC"
-        start-stop-daemon -d $APP_PATH -c $RUN_AS --start --background --pidfile $PID_FILE  --make-pidfile --exec $DAEMON -- $DAEMON_OPTS
+        start-stop-daemon -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
   stop)
         echo "Stopping $DESC"
@@ -51,7 +58,7 @@ case "$1" in
         echo "Restarting $DESC"
         start-stop-daemon --stop --pidfile $PID_FILE
         sleep 15
-        start-stop-daemon -d $APP_PATH -c $RUN_AS --start --background --pidfile $PID_FILE  --make-pidfile --exec $DAEMON -- $DAEMON_OPTS
+        start-stop-daemon -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
   *)
         N=/etc/init.d/$NAME

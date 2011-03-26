@@ -50,8 +50,13 @@ def filterBadReleases(name):
 
     return True
 
-def sanitizeSceneName (name):
-    for x in ",:()'!?":
+def sanitizeSceneName (name, ezrss=False):
+    if not ezrss:
+        bad_chars = ",:()'!?"
+    else:
+        bad_chars = ",()'?"
+
+    for x in bad_chars:
         name = name.replace(x, "")
 
     name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
