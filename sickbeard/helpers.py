@@ -84,6 +84,10 @@ def isMediaFile (file):
     if re.search('(^|[\W_])sample\d*[\W_]', file):
         return False
 
+    # ignore MAC OS's retarded "resource fork" files
+    if file.startswith('._'):
+        return False
+
     sepFile = file.rpartition(".")
     if sepFile[2].lower() in mediaExtensions:
         return True
