@@ -136,22 +136,22 @@ def main():
 
     for o, a in opts:
         # for now we'll just silence the logging
-        if (o in ('-q', '--quiet')):
+        if o in ('-q', '--quiet'):
             consoleLogging = False
         # for now we'll just silence the logging
-        if (o in ('--tvbinz')):
+        if o in ('--tvbinz'):
             sickbeard.SHOW_TVBINZ = True
 
         # should we update right away?
-        if (o in ('-f', '--forceupdate')):
+        if o in ('-f', '--forceupdate'):
             forceUpdate = True
 
         # use a different port
-        if (o in ('-p', '--port')):
+        if o in ('-p', '--port'):
             forcedPort = int(a)
 
         # Run as a daemon
-        if (o in ('-d', '--daemon')):
+        if o in ('-d', '--daemon'):
             if sys.platform == 'win32':
                 print "Daemonize not supported under Windows, starting normally"
             else:
@@ -159,11 +159,11 @@ def main():
                 sickbeard.DAEMON = True
 
         # write a pidfile if requested
-        if (o in ('--pidfile')):
+        if o in ('--pidfile'):
             sickbeard.PIDFILE = str(a)
 
             # if the pidfile already exists, sickbeard may still be running, so exit
-            if (os.path.exists(sickbeard.PIDFILE)):
+            if os.path.exists(sickbeard.PIDFILE):
                 sys.exit("PID file " + sickbeard.PIDFILE + " already exists. Exiting.")
 
             # a pidfile is only useful in daemon mode
