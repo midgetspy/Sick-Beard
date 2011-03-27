@@ -26,6 +26,7 @@ from sickbeard.providers.generic import GenericProvider
 
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
+from sickbeard.name_parser.parser import NameParser, InvalidNameException 
 
 class MainSanityCheck(db.DBSanityCheck):
 
@@ -385,6 +386,13 @@ class AddSizeAndSceneNameFields(SetNzbTorrentSettings):
             if not snatch_results:
                 continue
 
+            nzb_name = snatch_results[0]["resource"]
+            file_name = ek.ek(os.path.basename, cur_result["resource"])
+            
+            # take the extension off the filename, it's not needed
+            if '.' in file_name:
+                file_name = file_name.rpartition('.')[0]
+
             # find the associated episode on disk
             ep_results = self.connection.select("SELECT episode_id, status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?",
                                                 [cur_result["showid"], cur_result["season"], cur_result["episode"]])
@@ -399,11 +407,21 @@ class AddSizeAndSceneNameFields(SetNzbTorrentSettings):
             if ep_quality != int(snatch_results[0]["quality"]):
                 continue 
 
-            # if all is well by here we'll just put the release name into the database
-            self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?", [snatch_results[0]["resource"], ep_results[0]["episode_id"]])
-            
+            # make sure this is actually a real release name and not a season pack or something
+            for cur_name in (nzb_name, file_name):
+                logger.log(u"Checking if "+cur_name+" is actually a good release name", logger.DEBUG)
+                try:
+                    np = NameParser(False)
+                    parse_result = np.parse(cur_name)
+                except InvalidNameException:
+                    continue
 
-        #self.incDBVersion()
+                if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
+                    # if all is well by this point we'll just put the release name into the database
+                    self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?", [cur_name, ep_results[0]["episode_id"]])
+                    break
+
+        self.incDBVersion()
         class SetNzbTorrentSettings(PopulateRootDirs):
 
     def test(self):

@@ -51,6 +51,10 @@ class PostProcessor(object):
     EXISTS_SMALLER = 3
     DOESNT_EXIST = 4
 
+    NZB_NAME = 1
+    FOLDER_NAME = 2
+    FILE_NAME = 3
+
     def __init__(self, file_path, nzb_name = None):
         # absolute path to the folder that is being processed
         self.folder_path = ek.ek(os.path.dirname, ek.ek(os.path.abspath, file_path))
@@ -70,7 +74,10 @@ class PostProcessor(object):
         self.in_history = False
         self.release_group = None
         self.is_proper = False
-        self.good_folder = False
+
+        self.good_results = {self.NZB_NAME: False,
+                             self.FOLDER_NAME: False,
+                             self.FILE_NAME: False}
     
         self.log = ''
     
@@ -345,10 +352,14 @@ class PostProcessor(object):
             if parse_result.extra_info:
                 self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
             
-            # if we are doing the folder name and the folder is good then remember that for later
-            if name == self.folder_name:
-                if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
-                    self.good_folder = True
+            # if the result is complete then remember that for later
+            if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
+                if name == self.nzb_name:
+                    self.good_results[self.NZB_NAME] = True
+                elif name == self.folder_name:
+                    self.good_results[self.FOLDER_NAME] = True
+                elif name == self.file_name:
+                    self.good_results[self.FILE_NAME] = True
         
         # for each possible interpretation of that scene name
         for cur_name in name_list:
@@ -704,11 +715,11 @@ class PostProcessor(object):
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
                 # use the best possible representation of the release name
-                if self.nzb_name:
+                if self.good_results[self.NZB_NAME]:
                     cur_ep.release_name = self.nzb_name
-                elif self.good_folder:
+                elif self.good_results[self.FOLDER_NAME]:
                     cur_ep.release_name = self.folder_name
-                else:
+                elif self.good_results[self.FILE_NAME]:
                     cur_ep.release_name = self.file_name
                 cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
                 cur_ep.saveToDB()
