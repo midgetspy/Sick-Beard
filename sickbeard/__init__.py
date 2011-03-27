@@ -194,6 +194,15 @@ XBMC_HOST = None
 XBMC_USERNAME = None
 XBMC_PASSWORD = None
 
+USE_PLEX = False
+PLEX_NOTIFY_ONSNATCH = False
+PLEX_NOTIFY_ONDOWNLOAD = False
+PLEX_UPDATE_LIBRARY = False
+PLEX_SERVER_HOST = None
+PLEX_HOST = None
+PLEX_USERNAME = None
+PLEX_PASSWORD = None
+
 USE_GROWL = False
 GROWL_NOTIFY_ONSNATCH = False
 GROWL_NOTIFY_ONDOWNLOAD = False
@@ -223,6 +232,11 @@ NOTIFO_PREFIX = None
 USE_LIBNOTIFY = False
 LIBNOTIFY_NOTIFY_ONSNATCH = False
 LIBNOTIFY_NOTIFY_ONDOWNLOAD = False
+
+USE_NMJ = False
+NMJ_HOST = None
+NMJ_DATABASE = None
+NMJ_MOUNT = None
 
 
 COMING_EPS_LAYOUT = None
@@ -325,14 +339,16 @@ def initialize(consoleLogging=True):
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
-                NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, \
-                XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
-                XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, currentSearchScheduler, backlogSearchScheduler, \
+                NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
+                USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
+                XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
+                USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
+                PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
-                USE_XBMC, GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
+                GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
@@ -343,7 +359,7 @@ def initialize(consoleLogging=True):
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, \
+                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV
@@ -360,9 +376,11 @@ def initialize(consoleLogging=True):
         CheckSection('SABnzbd')
         CheckSection('NZBget')
         CheckSection('XBMC')
+        CheckSection('PLEX')
         CheckSection('Growl')
         CheckSection('Prowl')
         CheckSection('Twitter')
+        CheckSection('NMJ')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -506,6 +524,15 @@ def initialize(consoleLogging=True):
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
 
+        USE_PLEX = bool(check_setting_int(CFG, 'Plex', 'use_plex', 0))
+        PLEX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Plex', 'plex_notify_onsnatch', 0))
+        PLEX_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Plex', 'plex_notify_ondownload', 0))
+        PLEX_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'Plex', 'plex_update_library', 0))
+        PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
+        PLEX_HOST = check_setting_str(CFG, 'Plex', 'plex_host', '')
+        PLEX_USERNAME = check_setting_str(CFG, 'Plex', 'plex_username', '')
+        PLEX_PASSWORD = check_setting_str(CFG, 'Plex', 'plex_password', '')
+
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onsnatch', 0))
         GROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Growl', 'growl_notify_ondownload', 0))
@@ -534,6 +561,12 @@ def initialize(consoleLogging=True):
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
         LIBNOTIFY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onsnatch', 0))
         LIBNOTIFY_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_ondownload', 0))
+
+        USE_NMJ = bool(check_setting_int(CFG, 'NMJ', 'use_nmj', 0))
+        NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
+        NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
+        NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
+
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -961,7 +994,7 @@ def save_config():
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
 
     new_config['XBMC'] = {}
-    new_config['XBMC']['use_xbmc'] = int(USE_XBMC)    
+    new_config['XBMC']['use_xbmc'] = int(USE_XBMC)
     new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
     new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
     new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
@@ -969,6 +1002,16 @@ def save_config():
     new_config['XBMC']['xbmc_host'] = XBMC_HOST
     new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
+
+    new_config['Plex'] = {}
+    new_config['Plex']['use_plex'] = int(USE_PLEX)
+    new_config['Plex']['plex_notify_onsnatch'] = int(PLEX_NOTIFY_ONSNATCH)
+    new_config['Plex']['plex_notify_ondownload'] = int(PLEX_NOTIFY_ONDOWNLOAD)
+    new_config['Plex']['plex_update_library'] = int(PLEX_UPDATE_LIBRARY)
+    new_config['Plex']['plex_server_host'] = PLEX_SERVER_HOST
+    new_config['Plex']['plex_host'] = PLEX_HOST
+    new_config['Plex']['plex_username'] = PLEX_USERNAME
+    new_config['Plex']['plex_password'] = PLEX_PASSWORD
 
     new_config['Growl'] = {}
     new_config['Growl']['use_growl'] = int(USE_GROWL)
@@ -1003,6 +1046,12 @@ def save_config():
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
     new_config['Libnotify']['libnotify_notify_onsnatch'] = int(LIBNOTIFY_NOTIFY_ONSNATCH)
     new_config['Libnotify']['libnotify_notify_ondownload'] = int(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
+
+    new_config['NMJ'] = {}
+    new_config['NMJ']['use_nmj'] = int(USE_NMJ)
+    new_config['NMJ']['nmj_host'] = NMJ_HOST
+    new_config['NMJ']['nmj_database'] = NMJ_DATABASE
+    new_config['NMJ']['nmj_mount'] = NMJ_MOUNT
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
