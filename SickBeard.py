@@ -73,7 +73,6 @@ def daemonize():
         raise RuntimeError("1st fork failed: %s [%d]" %
                    (e.strerror, e.errno))
 
-    os.chdir(sickbeard.DATA_DIR)
     os.setsid()
 
     # Make sure I can read my own files and shut out others
@@ -194,12 +193,17 @@ def main():
         except os.error, e:
             raise SystemExit("Unable to create datadir '" + sickbeard.DATA_DIR + "'")
 
+    if not os.access(sickbeard.DATA_DIR, os.W_OK):
+        raise SystemExit("datadir must be writeable '" + sickbeard.DATA_DIR + "'")
+        
+    os.chdir(sickbeard.DATA_DIR)
+    
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
 
     # load the config and publish it to the sickbeard package
     if not os.path.isfile(sickbeard.CONFIG_FILE):
-        logger.log(u"Unable to find config.ini, all settings will be default", logger.ERROR)
+        logger.log(u"Unable to find " + sickbeard.CONFIG_FILE + " , all settings will be default", logger.ERROR)
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
