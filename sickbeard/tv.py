@@ -452,7 +452,7 @@ class TVShow(object):
 
             # if it's a new file then 
             if not same_file:
-                curEp.original_name = ''
+                curEp.release_name = ''
 
             # if they replace a file on me I'll make some attempt at re-checking the quality unless I know it's the same file
             if checkQualityAgain and not same_file:
@@ -959,7 +959,7 @@ class TVEpisode(object):
         self._status = UNKNOWN
         self._tvdbid = 0
         self._file_size = 0
-        self._original_name = 0
+        self._release_name = ''
 
         # setting any of the above sets the dirty flag
         self.dirty = True
@@ -985,19 +985,19 @@ class TVEpisode(object):
     status = property(lambda self: self._status, dirty_setter("_status"))
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
     #location = property(lambda self: self._location, dirty_setter("_location"))
-    file_size = property(lambda self: self._size, dirty_setter("_file_size"))
-    original_name = property(lambda self: self._size, dirty_setter("_original_name"))
+    file_size = property(lambda self: self._file_size, dirty_setter("_file_size"))
+    release_name = property(lambda self: self._release_name, dirty_setter("_release_name"))
 
     def _set_location(self, new_location):
         logger.log(u"Setter sets location to " + new_location, logger.DEBUG)
         
         #self._location = newLocation
-        dirty_setter("_location")(new_location)
+        dirty_setter("_location")(self, new_location)
 
         if new_location and ek.ek(os.path.isfile, new_location):
-            self.size = ek.ek(os.path.getsize, new_location)
+            self.file_size = ek.ek(os.path.getsize, new_location)
         else:
-            self.size = 0
+            self.file_size = 0
 
     location = property(lambda self: self._location, _set_location)
 
@@ -1086,7 +1086,7 @@ class TVEpisode(object):
             # don't overwrite my location
             if sqlResults[0]["location"] != "" and sqlResults[0]["location"] != None:
                 self.location = os.path.normpath(sqlResults[0]["location"])
-            self.size = int(sqlResults[0]["size"])
+            self.file_size = int(sqlResults[0]["file_size"])
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
 
@@ -1366,7 +1366,7 @@ class TVEpisode(object):
                         "hastbn": self.hastbn,
                         "status": self.status,
                         "location": self.location,
-                        "size": self.size}
+                        "file_size": self.file_size}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}

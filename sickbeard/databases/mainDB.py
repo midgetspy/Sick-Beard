@@ -365,19 +365,46 @@ class AddSizeAndSceneNameFields(SetNzbTorrentSettings):
         if not self.hasColumn("tv_episodes", "file_size"):
             self.addColumn("tv_episodes", "file_size")
 
-        if not self.hasColumn("tv_episodes", "original_name"):
-            self.addColumn("tv_episodes", "original_name", "TEXT", "")
+        if not self.hasColumn("tv_episodes", "release_name"):
+            self.addColumn("tv_episodes", "release_name", "TEXT", "")
 
-        ep_results = self.connection.select("SELECT episode_id, location FROM tv_episodes")
+        ep_results = self.connection.select("SELECT episode_id, location, file_size FROM tv_episodes")
         
         for cur_ep in ep_results:
-            if ek.ek(os.path.isfile, cur_ep["location"]):
+            # if there is no size yet then populate it for us
+            if not int(cur_ep["file_size"]) and ek.ek(os.path.isfile, cur_ep["location"]):
                 cur_size = ek.ek(os.path.getsize, cur_ep["location"])
                 self.connection.action("UPDATE tv_episodes SET file_size = ? WHERE episode_id = ?", [cur_size, int(cur_ep["episode_id"])])
 
-        self.incDBVersion()
+        history_results = self.connection.select("SELECT * FROM history WHERE provider = -1")
         
-class SetNzbTorrentSettings(PopulateRootDirs):
+        for cur_result in history_results:
+            # find the associated snatch
+            snatch_results = self.connection.select("SELECT resource, quality FROM history WHERE provider != -1 AND showid = ? AND season = ? AND episode = ? AND date < ?",
+                                                    [cur_result["showid"], cur_result["season"], cur_result["episode"], cur_result["date"]])
+            if not snatch_results:
+                continue
+
+            # find the associated episode on disk
+            ep_results = self.connection.select("SELECT episode_id, status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?",
+                                                [cur_result["showid"], cur_result["season"], cur_result["episode"]])
+            if not ep_results:
+                continue
+
+            # get the status/quality of the existing ep and make sure it's what we expect 
+            ep_status, ep_quality = common.Quality.splitCompositeStatus(int(ep_results[0]["status"]))
+            if ep_status != common.DOWNLOADED:
+                continue
+            
+            if ep_quality != int(snatch_results[0]["quality"]):
+                continue 
+
+            # if all is well by here we'll just put the release name into the database
+            self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?", [snatch_results[0]["resource"], ep_results[0]["episode_id"]])
+            
+
+        #self.incDBVersion()
+        class SetNzbTorrentSettings(PopulateRootDirs):
 
     def test(self):
         return self.checkDBVersion() >= 8

@@ -70,6 +70,7 @@ class PostProcessor(object):
         self.in_history = False
         self.release_group = None
         self.is_proper = False
+        self.good_folder = False
     
         self.log = ''
     
@@ -339,8 +340,15 @@ class PostProcessor(object):
         
         def _finalize(parse_result):
             self.release_group = parse_result.release_group
+            
+            # remember whether it's a proper
             if parse_result.extra_info:
                 self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
+            
+            # if we are doing the folder name and the folder is good then remember that for later
+            if name == self.folder_name:
+                if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
+                    self.good_folder = True
         
         # for each possible interpretation of that scene name
         for cur_name in name_list:
@@ -695,7 +703,13 @@ class PostProcessor(object):
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_ep.original_name = ek.ek(os.path.join, self.folder_name, self.file_name)
+                # use the best possible representation of the release name
+                if self.nzb_name:
+                    cur_ep.release_name = self.nzb_name
+                elif self.good_folder:
+                    cur_ep.release_name = self.folder_name
+                else:
+                    cur_ep.release_name = self.file_name
                 cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
                 cur_ep.saveToDB()
         
