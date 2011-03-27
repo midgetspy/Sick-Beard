@@ -13,16 +13,13 @@
 
 <div class="h2footer align-right">
 #if (len($seasonResults) > 14):
-<form>
     <select id="seasonJump">
         <option value="jump">Jump to Season</option>
     #for $seasonNum in $seasonResults:
         <option value="#season-$seasonNum["season"]">#if int($seasonNum["season"]) == 0 then "Specials" else "Season " + str($seasonNum["season"])#</option>
     #end for
     </select>
-</form>
 #else:
-<div class="h2footer align-right">
     <b>Season:</b>
     #for $seasonNum in $seasonResults:
         #if int($seasonNum["season"]) == 0:
