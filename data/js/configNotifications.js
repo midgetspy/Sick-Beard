@@ -6,7 +6,7 @@ $(document).ready(function(){
         var growl_host = $("#growl_host").val();
         var growl_password = $("#growl_password").val();
         var growl_result = $.get(sbRoot+"/home/testGrowl", {'host': growl_host, 'password': growl_password}, 
-        function (data){ $('#testGrowl-result').html(data);});
+        function (data){ $('#testGrowl-result').html(data); });
     });
 
     $('#testProwl').click(function(){
@@ -14,7 +14,7 @@ $(document).ready(function(){
         var prowl_api = $("#prowl_api").val();
         var prowl_priority = $("#prowl_priority").val();
         var prowl_result = $.get(sbRoot+"/home/testProwl", {'prowl_api': prowl_api, 'prowl_priority': prowl_priority}, 
-        function (data){ $('#testProwl-result').html(data);});
+        function (data){ $('#testProwl-result').html(data); });
     });
 
     $('#testXBMC').click(function(){
@@ -24,7 +24,7 @@ $(document).ready(function(){
         var xbmc_password = $("#xbmc_password").val();
         
         $.get(sbRoot+"/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password}, 
-        function (data){ $('#testXBMC-result').html(data);});
+        function (data){ $('#testXBMC-result').html(data); });
     });
 
     $('#testPLEX').click(function(){
@@ -66,7 +66,48 @@ $(document).ready(function(){
 
     $('#testTwitter').click(function(){
         $.get(sbRoot+"/home/testTwitter", 
-        function (data){ $('#testTwitter-result').html(data);});
+        function (data){ $('#testTwitter-result').html(data); });
     });
 
+    $('#settingsNMJ').click(function(){
+        if (!$('#nmj_host').val()) {
+            alert('Please fill in the Popcorn IP address');
+            $('#nmj_host').focus();
+            return;
+        }
+        $('#testNMJ-result').html(loading);
+        var nmj_host = $('#nmj_host').val();
+        
+        $.get(sbRoot+"/home/settingsNMJ", {'host': nmj_host}, 
+        function (data){
+            if (data == null) {
+                $('#nmj_database').removeAttr('readonly');
+                $('#nmj_mount').removeAttr('readonly');
+            }
+            var JSONData = $.parseJSON(data);
+            $('#testNMJ-result').html(JSONData.message);
+            $('#nmj_database').val(JSONData.database);
+            $('#nmj_mount').val(JSONData.mount);
+            
+            if (JSONData.database)
+                $('#nmj_database').attr('readonly', true);
+            else
+                $('#nmj_database').removeAttr('readonly');
+            
+            if (JSONData.mount)
+                $('#nmj_mount').attr('readonly', true);
+            else
+                $('#nmj_mount').removeAttr('readonly');
+        });
+    });
+
+    $('#testNMJ').click(function(){
+        $('#testNMJ-result').html(loading);
+        var nmj_host = $("#nmj_host").val();
+        var nmj_database = $("#nmj_database").val();
+        var nmj_mount = $("#nmj_mount").val();
+        
+        $.get(sbRoot+"/home/testNMJ", {'host': nmj_host, 'database': nmj_database, 'mount': nmj_mount}, 
+        function (data){ $('#testNMJ-result').html(data); });
+    });
 });

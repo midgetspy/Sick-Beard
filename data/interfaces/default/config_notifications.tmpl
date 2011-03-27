@@ -537,6 +537,82 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
+                <div id="core-component-group7" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>NMJ</h3>
+                        <p>The Networked Media Jukebox, or NMJ, is the official media jukebox interface made available for the Popcorn Hour 200-series.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_nmj" id="use_nmj" #if $sickbeard.USE_NMJ then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_nmj">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send an update command to NMJ?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_nmj">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Popcorn IP address</span>
+                                <input type="text" name="nmj_host" id="nmj_host" value="$sickbeard.NMJ_HOST" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">IP of Popcorn 200-series (eg. 192.168.1.100)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Get settings</span>
+                                <input type="button" value="Get Settings" id="settingsNMJ" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">The Popcorn Hour must be powered on, with NMJ running.</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">NMJ Database and NMJ Mount URL will automatically filled in.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">NMJ Database</span>
+                                <input type="text" name="nmj_database" id="nmj_database" value="$sickbeard.NMJ_DATABASE" size="35" #if $sickbeard.NMJ_DATABASE then "readonly=\"readonly\"" else ""# />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Automatically filled in when clicking Get Settings. </span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">NMJ Mount URL</span>
+                                <input type="text" name="nmj_mount" id="nmj_mount" value="$sickbeard.NMJ_MOUNT" size="35" #if $sickbeard.NMJ_MOUNT then "readonly=\"readonly\"" else ""# />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Automatically filled in when clicking Get Settings,</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">and the database is in on a network share.</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testNMJ-result">Click below to test.</div>
+                        <input type="button" value="Test NMJ" id="testNMJ" />
+                        <input type="submit" value="Save Changes" />
+                        </div><!-- /content_use_nmj //-->
+                    </fieldset>
+                </div><!-- /component-group //-->
+
             <br/><input type="submit" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->

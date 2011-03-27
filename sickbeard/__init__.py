@@ -233,6 +233,11 @@ USE_LIBNOTIFY = False
 LIBNOTIFY_NOTIFY_ONSNATCH = False
 LIBNOTIFY_NOTIFY_ONDOWNLOAD = False
 
+USE_NMJ = False
+NMJ_HOST = None
+NMJ_DATABASE = None
+NMJ_MOUNT = None
+
 
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
@@ -354,7 +359,7 @@ def initialize(consoleLogging=True):
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, \
+                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV
@@ -375,6 +380,7 @@ def initialize(consoleLogging=True):
         CheckSection('Growl')
         CheckSection('Prowl')
         CheckSection('Twitter')
+        CheckSection('NMJ')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -555,6 +561,12 @@ def initialize(consoleLogging=True):
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
         LIBNOTIFY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onsnatch', 0))
         LIBNOTIFY_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_ondownload', 0))
+
+        USE_NMJ = bool(check_setting_int(CFG, 'NMJ', 'use_nmj', 0))
+        NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
+        NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
+        NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
+
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -1034,6 +1046,12 @@ def save_config():
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
     new_config['Libnotify']['libnotify_notify_onsnatch'] = int(LIBNOTIFY_NOTIFY_ONSNATCH)
     new_config['Libnotify']['libnotify_notify_ondownload'] = int(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
+
+    new_config['NMJ'] = {}
+    new_config['NMJ']['use_nmj'] = int(USE_NMJ)
+    new_config['NMJ']['nmj_host'] = NMJ_HOST
+    new_config['NMJ']['nmj_database'] = NMJ_DATABASE
+    new_config['NMJ']['nmj_mount'] = NMJ_MOUNT
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
