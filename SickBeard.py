@@ -195,6 +195,9 @@ def main():
 
     if not os.access(sickbeard.DATA_DIR, os.W_OK):
         raise SystemExit("datadir must be writeable '" + sickbeard.DATA_DIR + "'")
+    
+    if not os.access(sickbeard.CONFIG_FILE, os.W_OK):
+        raise SystemExit("config file must be writeable '" + sickbeard.CONFIG_FILE + "'")
         
     os.chdir(sickbeard.DATA_DIR)
     
