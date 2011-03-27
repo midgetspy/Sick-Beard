@@ -700,7 +700,7 @@ class PostProcessor(object):
                 cur_ep.saveToDB()
         
         # log it to history
-        history.logDownload(ep_obj, self.file_path)
+        history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
 
         # send notifications
         notifiers.notify_download(ep_obj.prettyName(True))
