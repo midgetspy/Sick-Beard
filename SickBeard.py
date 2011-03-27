@@ -73,7 +73,7 @@ def daemonize():
         raise RuntimeError("1st fork failed: %s [%d]" %
                    (e.strerror, e.errno))
 
-    os.chdir(sickbeard.PROG_DIR)
+    os.chdir(sickbeard.DATA_DIR)
     os.setsid()
 
     # Make sure I can read my own files and shut out others
@@ -104,6 +104,7 @@ def main():
     sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(__file__))
     sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
+    sickbeard.DATA_DIR = sickbeard.PROG_DIR
     sickbeard.MY_ARGS = sys.argv[1:]
     sickbeard.CREATEPID = False
 
@@ -117,7 +118,6 @@ def main():
     if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII'):
         sickbeard.SYS_ENCODING = 'UTF-8'
 
-    sickbeard.CONFIG_FILE = os.path.join(sickbeard.PROG_DIR, "config.ini")
 
     # need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
@@ -126,9 +126,9 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile='])
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'config=', 'datadir='])
     except getopt.GetoptError:
-        print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile"
+        print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile --config --datadir"
         sys.exit()
 
     forceUpdate = False
@@ -158,6 +158,14 @@ def main():
                 consoleLogging = False
                 sickbeard.DAEMON = True
 
+        # config file
+        if (o in ('--config')):
+            sickbeard.CONFIG_FILE = os.path.abspath(a)
+
+        # datadir
+        if (o in ('--datadir')):
+            sickbeard.DATA_DIR = os.path.abspath(a)
+
         # write a pidfile if requested
         if o in ('--pidfile'):
             sickbeard.PIDFILE = str(a)
@@ -176,6 +184,15 @@ def main():
                     raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
             else:
                 logger.log(u"Not running in daemon mode. PID file creation disabled.")
+    
+    if not sickbeard.CONFIG_FILE:
+        sickbeard.CONFIG_FILE = os.path.join(sickbeard.DATA_DIR, "config.ini")
+
+    if not os.access(sickbeard.DATA_DIR, os.F_OK):
+        try:
+            os.makedirs(sickbeard.DATA_DIR, 0744)
+        except os.error, e:
+            raise SystemExit("Unable to create datadir '" + sickbeard.DATA_DIR + "'")
 
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE

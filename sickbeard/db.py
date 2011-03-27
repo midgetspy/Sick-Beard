@@ -35,7 +35,7 @@ class DBConnection:
 
 		self.dbFileName = dbFileName
 
-		self.connection = sqlite3.connect(os.path.join(sickbeard.PROG_DIR, self.dbFileName), 20)
+		self.connection = sqlite3.connect(os.path.join(sickbeard.DATA_DIR, self.dbFileName), 20)
 		self.connection.row_factory = sqlite3.Row
 
  	def action(self, query, args=None):
