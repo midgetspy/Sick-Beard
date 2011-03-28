@@ -20,8 +20,7 @@
                 <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3><a href="http://xbmc.org/" class="imgLink" target="_new"><img src="$sbRoot/images/notifiers/xbmc.gif" alt="XBMC" title="XBMC" width="16" height="16" /></a>
-                        XBMC</h3>
+                        <h3><a href="http://xbmc.org/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/xbmc.gif" alt="XBMC" title="XBMC" width="16" height="16" /> XBMC</a></h3>
                         <p>A free and open source cross-platform media center and home entertainment system software with a 10-foot user interface designed for the living-room TV.</p>
                     </div>
 
@@ -116,8 +115,7 @@
                 <div id="core-component-group2" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3><a href="http://www.plexapp.com/" class="imgLink" target="_new"><img src="$sbRoot/images/notifiers/plex.gif" alt="Plex Media Server" title="Plex Media Server" width="16" height="16" /></a>
-                        Plex Media Server</h3>
+                        <h3><a href="http://www.plexapp.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/plex.gif" alt="Plex Media Server" title="Plex Media Server" width="16" height="16" /> Plex Media Server</a></h3>
                         <p>Experience your media on a visually stunning, easy to use interface on your Mac connected to your TV. Your media library has never looked this good!</p>
                     </div>
 
@@ -126,11 +124,7 @@
                             <input type="checkbox" class="enabler" name="use_plex" id="use_plex" #if $sickbeard.USE_PLEX then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_plex">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send Notifications to Plex and/or</span>
-                            </label>
-                            <label class="nocheck clearfix" for="use_plex">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">library updates to Plex Media Server?</span>
+                                <span class="component-desc">Should Sick Beard send Plex commands?</span>
                             </label>
                         </div>
 
@@ -161,7 +155,7 @@
 
                         <div class="field-pair">
                             <label class="nocheck clearfix">
-                                <span class="component-title">Plex Media Server IP:Port</span>
+                                <span class="component-title">Plex Server IP:Port</span>
                                 <input type="text" name="plex_server_host" id="plex_server_host" value="$sickbeard.PLEX_SERVER_HOST" size="35" />
                             </label>
                             <label class="nocheck clearfix">
@@ -215,8 +209,7 @@
                 <div id="core-component-group3" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3><a href="http://growl.info/" class="imgLink" target="_new"><img src="$sbRoot/images/notifiers/growl.gif" alt="Growl" title="Growl" width="16" height="16" /></a>
-                        Growl</h3>
+                        <h3><a href="http://growl.info/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/growl.gif" alt="Growl" title="Growl" width="16" height="16" /> Growl</a></h3>
                         <p>A cross-platform unobtrusive global notification system.</p>
                     </div>
 
@@ -284,8 +277,7 @@
                 <div id="core-component-group4" class="component-group clearfix">
                 
                     <div class="component-group-desc">
-                        <h3><a href="http://www.twitter.com/" class="imgLink" target="_new"><img src="$sbRoot/images/notifiers/twitter.gif" alt="Twitter" title="Twitter" width="16" height="16" /></a>
-                        Twitter</h3>
+                        <h3><a href="http://www.twitter.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/twitter.gif" alt="Twitter" title="Twitter" width="16" height="16" /> Twitter</a></h3>
                         <p>A social networking and microblogging service, enabling its users to send and read other users' messages called tweets.</p>
                     </div>
 
@@ -360,8 +352,7 @@
             <div id="core-component-group5" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3><a href="http://www.prowlapp.com/" class="imgLink" target="_new"><img src="$sbRoot/images/notifiers/prowl.gif" alt="Prowl" title="Prowl" width="16" height="16" /></a>
-                        Prowl</h3>
+                        <h3><a href="http://www.prowlapp.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/prowl.gif" alt="Prowl" title="Prowl" width="16" height="16" /> Prowl</a></h3>
                         <p>A Growl client for iOS.</p>
                     </div>
 
@@ -431,8 +422,7 @@
                  <div id="core-component-group6" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3><a href="http://notifo.com/" class="imgLink" target="_new"><img src="$sbRoot/images/notifiers/notifo.gif" alt="Notifo" title="Notifo" width="16" height="16" /></a>
-                        Notifo</h3>
+                        <h3><a href="http://notifo.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/notifo.gif" alt="Notifo" title="Notifo" width="16" height="16" /> Notifo</a></h3>
                         <p>A platform for push-notifications to either mobile or desktop clients</p>
                     </div>
 
@@ -497,8 +487,7 @@
 
                 <div id="core-component-group7" class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://library.gnome.org/devel/libnotify/" class="imgLink" target="_new"><img src="$sbRoot/images/notifiers/libnotify.gif" alt="Libnotify" title="Libnotify" width="16" height="16" /></a>
-                        Libnotify</h3>
+                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/libnotify.gif" alt="Libnotify" title="Libnotify" width="16" height="16" /> Libnotify</a></h3>
                         <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
                     </div>
 
@@ -507,7 +496,7 @@
                             <input type="checkbox" class="enabler" name="use_libnotify" id="use_libnotify" #if $sickbeard.USE_LIBNOTIFY then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="use_libnotify">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send libnotify notifications?</span>
+                                <span class="component-desc">Should Sick Beard send Libnotify notifications?</span>
                             </label>
                         </div>
 
@@ -537,11 +526,10 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
-                <div id="core-component-group7" class="component-group clearfix">
+                <div id="core-component-group8" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3><a href="http://www.popcornhour.com/" class="imgLink" target="_new"><img src="$sbRoot/images/notifiers/popcorn_hour.gif" alt="Networked Media Jukebox" title="Networked Media Jukebox" width="16" height="16" /></a>
-                        NMJ</h3>
+                        <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nmj.gif" alt="Networked Media Jukebox" title="Networked Media Jukebox" width="16" height="16" /> NMJ</a></h3>
                         <p>The Networked Media Jukebox, or NMJ, is the official media jukebox interface made available for the Popcorn Hour 200-series.</p>
                     </div>
 
@@ -550,7 +538,7 @@
                             <input type="checkbox" class="enabler" name="use_nmj" id="use_nmj" #if $sickbeard.USE_NMJ then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_nmj">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send an update command to NMJ?</span>
+                                <span class="component-desc">Should Sick Beard send update commands to NMJ?</span>
                             </label>
                         </div>
 
@@ -568,16 +556,12 @@
 
                         <div class="field-pair">
                             <label class="nocheck clearfix">
-                                <span class="component-title">Get settings</span>
+                                <span class="component-title">Get Settings</span>
                                 <input type="button" value="Get Settings" id="settingsNMJ" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">The Popcorn Hour must be powered on, with NMJ running.</span>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">NMJ Database and NMJ Mount URL will automatically filled in.</span>
+                                <span class="component-desc">The Popcorn Hour device must be powered on and NMJ running.</span>
                             </label>
                         </div>
 
@@ -588,7 +572,7 @@
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Automatically filled in when clicking Get Settings. </span>
+                                <span class="component-desc">Automatically filled via the 'Get Settings' button.</span>
                             </label>
                         </div>
 
@@ -599,11 +583,7 @@
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Automatically filled in when clicking Get Settings,</span>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">and the database is in on a network share.</span>
+                                <span class="component-desc">Automatically filled via the 'Get Settings' button.</span>
                             </label>
                         </div>
 

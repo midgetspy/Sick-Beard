@@ -591,9 +591,9 @@ class History:
 ConfigMenu = [
     { 'title': 'General',           'path': 'config/general/'          },
     { 'title': 'Search Settings',   'path': 'config/search/'           },
+    { 'title': 'Search Providers',  'path': 'config/providers/'        },
     { 'title': 'Post Processing',   'path': 'config/postProcessing/'   },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
-    { 'title': 'Search Providers',  'path': 'config/providers/'        },
 ]
 
 class ConfigGeneral:
