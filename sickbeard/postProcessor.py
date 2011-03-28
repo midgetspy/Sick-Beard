@@ -340,13 +340,11 @@ class PostProcessor(object):
         # for each possible interpretation of that scene name
         for cur_name in name_list:
             self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
-            for exceptionID in common.sceneExceptions:
-                # for each exception name
-                for curException in common.sceneExceptions[exceptionID]:
-                    if cur_name.lower() in (curException.lower(), sceneHelpers.sanitizeSceneName(curException).lower().replace('.',' ')):
-                        self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
-                        _finalize(parse_result)
-                        return (exceptionID, season, episodes)
+            scene_id = sceneHelpers.get_scene_exception_by_name(cur_name)
+            if scene_id:
+                self._log(u"Scene exception lookup got tvdb id "+str(scene_id)+u", using that", logger.DEBUG)
+                _finalize(parse_result)
+                return (scene_id, season, episodes)
 
         # see if we can find the name directly in the DB, if so use it
         for cur_name in name_list:

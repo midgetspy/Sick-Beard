@@ -16,12 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from sickbeard import common
+from sickbeard.common import countryList
 from sickbeard import logger
 from sickbeard import db
 
 import re
 import datetime
+import urllib
 
 from name_parser.parser import NameParser, InvalidNameException
 
@@ -86,7 +87,7 @@ def sceneToNormalShowNames(name):
         results.append(re.sub('(\D)(\d{4})$', '\\1(\\2)', cur_name))
     
         # add brackets around the country
-        country_match_str = '|'.join(common.countryList.values())
+        country_match_str = '|'.join(countryList.values())
         results.append(re.sub('(?i)([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
 
     results += name_list
@@ -187,9 +188,7 @@ def makeSceneSearchString (episode):
 def allPossibleShowNames(show):
 
     showNames = [show.name]
-
-    if int(show.tvdbid) in common.sceneExceptions:
-        showNames += common.sceneExceptions[int(show.tvdbid)]
+    showNames += [name for name in get_scene_exceptions(show.tvdbid)]
 
     # if we have a tvrage name then use it
     if show.tvrname != "" and show.tvrname != None:
@@ -197,8 +196,8 @@ def allPossibleShowNames(show):
 
     newShowNames = []
 
-    country_list = common.countryList
-    country_list.update(dict(zip(common.countryList.values(), common.countryList.keys())))
+    country_list = countryList
+    country_list.update(dict(zip(countryList.values(), countryList.keys())))
 
     # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
     # any countries defined in common.countryList
@@ -239,3 +238,66 @@ def isGoodResult(name, show, log=True):
     if log:
         logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
     return False
+
+def get_scene_exceptions(tvdb_id):
+    """
+    Given a tvdb_id, return a list of all the scene exceptions.
+    """
+
+    myDB = db.DBConnection("cache.db")
+    exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+    return [cur_exception["show_name"] for cur_exception in exceptions]
+
+def get_scene_exception_by_name(show_name):
+    """
+    Given a show name, return the tvdbid of the exception, None if no exception
+    is present.
+    """
+
+    myDB = db.DBConnection("cache.db")
+    
+    # try the obvious case first
+    exception_result = myDB.select("SELECT tvdb_id FROM scene_exceptions WHERE LOWER(show_name) = ?", [show_name.lower()])
+    if exception_result:
+        return int(exception_result[0]["tvdb_id"])
+
+    all_exception_results = myDB.select("SELECT show_name, tvdb_id FROM scene_exceptions")
+    for cur_exception in all_exception_results:
+
+        cur_exception_name = cur_exception["show_name"]
+        cur_tvdb_id = int(cur_exception["tvdb_id"])
+
+        if show_name.lower() in (cur_exception_name.lower(), sanitizeSceneName(cur_exception_name).lower().replace('.',' ')):
+            logger.log(u"Scene exception lookup got tvdb id "+str(cur_tvdb_id)+u", using that", logger.DEBUG)
+            return cur_tvdb_id
+
+    return None
+
+def retrieve_exceptions():
+
+    exception_dict = {}
+
+    url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
+    open_url = urllib.urlopen(url)
+    
+    # each exception is on one line with the format tvdb_id: 'show name 1', 'show name 2', etc
+    for cur_line in open_url.readlines():
+        tvdb_id, sep, aliases = cur_line.partition(':')
+        
+        if not aliases:
+            continue
+    
+        tvdb_id = int(tvdb_id)
+        
+        # regex out the list of shows, taking \' into account
+        alias_list = re.findall(r"'(.*?)(?<!\\)',?", aliases)
+        
+        exception_dict[tvdb_id] = alias_list
+
+    myDB = db.DBConnection("cache.db")
+    myDB.action("DELETE FROM scene_exceptions WHERE 1=1")
+    
+    for cur_tvdb_id in exception_dict:
+        for cur_exception in exception_dict[cur_tvdb_id]:
+            myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
+
