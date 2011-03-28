@@ -1156,7 +1156,7 @@ class TVEpisode(object):
         if myEp["absolute_number"] == None or myEp["absolute_number"] == "":
             logger.log(u"This episode ("+self.show.name+" - "+str(season)+"x"+str(episode)+") has no anime on TVDB", logger.DEBUG)
         else: 
-            logger.log(str(self.show.tvdbid) + ": The anime for" + str(season) + "x" + str(episode)+" is :"+myEp["absolute_number"], logger.DEBUG)
+            logger.log(str(self.show.tvdbid) + ": The absolute_number for " + str(season) + "x" + str(episode)+" is : "+myEp["absolute_number"], logger.DEBUG)
             self.absolute_number = int(myEp["absolute_number"])
 
         #NAMEIT logger.log(u"BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
