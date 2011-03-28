@@ -371,30 +371,33 @@ class AddSizeAndSceneNameFields(SetNzbTorrentSettings):
 
         ep_results = self.connection.select("SELECT episode_id, location, file_size FROM tv_episodes")
         
+        logger.log(u"Adding file size to all episodes in DB, please be patient")
         for cur_ep in ep_results:
             # if there is no size yet then populate it for us
             if not int(cur_ep["file_size"]) and ek.ek(os.path.isfile, cur_ep["location"]):
                 cur_size = ek.ek(os.path.getsize, cur_ep["location"])
                 self.connection.action("UPDATE tv_episodes SET file_size = ? WHERE episode_id = ?", [cur_size, int(cur_ep["episode_id"])])
 
-        history_results = self.connection.select("SELECT * FROM history WHERE provider = -1")
+        # check each snatch to see if we can use it to get a release name from
+        history_results = self.connection.select("SELECT * FROM history WHERE provider != -1 ORDER BY date ASC")
         
+        logger.log(u"Adding release name to all episodes still in history")
         for cur_result in history_results:
-            # find the associated snatch
-            snatch_results = self.connection.select("SELECT resource, quality FROM history WHERE provider != -1 AND showid = ? AND season = ? AND episode = ? AND date < ?",
+            # find the associated download, if there isn't one then ignore it
+            download_results = self.connection.select("SELECT resource FROM history WHERE provider = -1 AND showid = ? AND season = ? AND episode = ? AND date > ?",
                                                     [cur_result["showid"], cur_result["season"], cur_result["episode"], cur_result["date"]])
-            if not snatch_results:
+            if not download_results:
                 continue
 
-            nzb_name = snatch_results[0]["resource"]
-            file_name = ek.ek(os.path.basename, cur_result["resource"])
+            nzb_name = cur_result["resource"]
+            file_name = ek.ek(os.path.basename, download_results[0]["resource"])
             
             # take the extension off the filename, it's not needed
             if '.' in file_name:
                 file_name = file_name.rpartition('.')[0]
 
             # find the associated episode on disk
-            ep_results = self.connection.select("SELECT episode_id, status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?",
+            ep_results = self.connection.select("SELECT episode_id, status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND location != ''",
                                                 [cur_result["showid"], cur_result["season"], cur_result["episode"]])
             if not ep_results:
                 continue
@@ -404,7 +407,7 @@ class AddSizeAndSceneNameFields(SetNzbTorrentSettings):
             if ep_status != common.DOWNLOADED:
                 continue
             
-            if ep_quality != int(snatch_results[0]["quality"]):
+            if ep_quality != int(cur_result["quality"]):
                 continue 
 
             # make sure this is actually a real release name and not a season pack or something
