@@ -16,4 +16,4 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ["mainDB"]
+__all__ = ["mainDB", "cache"]

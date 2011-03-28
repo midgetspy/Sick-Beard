@@ -178,7 +178,11 @@ class NewQualitySettings (NumericProviders):
 
         ### Update episode statuses
         toUpdate = self.connection.select("SELECT episode_id, location, status FROM tv_episodes WHERE status IN (?, ?, ?, ?, ?, ?, ?)", [common.DOWNLOADED, common.SNATCHED, PREDOWNLOADED, MISSED, BACKLOG, DISCBACKLOG, SNATCHED_BACKLOG])
+        didUpdate = False
         for curUpdate in toUpdate:
+
+            # remember that we changed something
+            didUpdate = True
 
             newStatus = None
             oldStatus = int(curUpdate["status"])
@@ -205,6 +209,10 @@ class NewQualitySettings (NumericProviders):
                 newQuality = common.Quality.assumeQuality(curUpdate["location"])
 
             self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [common.Quality.compositeStatus(common.DOWNLOADED, newQuality), curUpdate["episode_id"]])
+
+        # if no updates were done then the backup is useless
+        if didUpdate:
+            os.remove(ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0'))
 
 
         ### Update show qualities

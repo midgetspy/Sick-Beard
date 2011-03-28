@@ -19,29 +19,35 @@
 import sickbeard
 
 import xbmc
+import plex
 import growl
 import prowl
 import tweet
 from . import libnotify
 import notifo
+import nmj
 
 from sickbeard.common import *
 
 xbmc_notifier = xbmc.XBMCNotifier()
+plex_notifier = plex.PLEXNotifier()
 growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
 notifo_notifier = notifo.NotifoNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
+nmj_notifier = nmj.NMJNotifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
     # network activity.
     libnotify_notifier,
     xbmc_notifier,
+    plex_notifier,
     growl_notifier,
     prowl_notifier,
     twitter_notifier,
+    nmj_notifier,
 ]
 
 def notify_download(ep_name):
