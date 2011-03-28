@@ -479,9 +479,11 @@ class PostProcessor(object):
                     self._log(u"Getting the season for absolute episode "+str(episodes)+" from the show "+str(isAbsoluteNumberSQlResult[0][1]), logger.DEBUG)
                     if len(episodes) == 1:
                         getSeasonAndEpisodeSQlResult = myDB.select("SELECT season,episode FROM tv_episodes WHERE showid = ? and absolute_number = ?", [tvdb_id,episodes[0]])
-                        if getSeasonAndEpisodeSQlResult[0][0] != None and getSeasonAndEpisodeSQlResult[0][1] != None:
+                        if len(getSeasonAndEpisodeSQlResult) > 0 and getSeasonAndEpisodeSQlResult[0][0] != None and getSeasonAndEpisodeSQlResult[0][1] != None:
                             season = int(getSeasonAndEpisodeSQlResult[0][0])
                             episodes = [int(getSeasonAndEpisodeSQlResult[0][1])]
+                        else:
+                            self._log(u"There was no episode with absolute number: "+str(episodes[0])+" for tvdb_id: "+tvdb_id+" in our db", logger.WARNING)
                     else:
                         self._log(u"We cant handle multi episodes yet for absolute numbering", logger.ERROR)
                         
