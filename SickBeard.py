@@ -125,9 +125,9 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'config=', 'datadir='])
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'config=', 'datadir=', 'logdir='])
     except getopt.GetoptError:
-        print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile --config --datadir"
+        print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile --config --datadir --logdir"
         sys.exit()
 
     forceUpdate = False
@@ -164,6 +164,10 @@ def main():
         # datadir
         if (o in ('--datadir')):
             sickbeard.DATA_DIR = os.path.abspath(a)
+        
+        # logdir
+        if (o in ('--logdir')):
+            sickbeard.LOG_DIR = os.path.abspath(a)
 
         # write a pidfile if requested
         if o in ('--pidfile'):
