@@ -290,7 +290,7 @@ def retrieve_exceptions():
         tvdb_id = int(tvdb_id)
         
         # regex out the list of shows, taking \' into account
-        alias_list = re.findall(r"'(.*?)(?<!\\)',?", aliases)
+        alias_list = [re.sub(r'\\(.)', r'\1', x) for x in re.findall(r"'(.*?)(?<!\\)',?", aliases)]
         
         exception_dict[tvdb_id] = alias_list
 
