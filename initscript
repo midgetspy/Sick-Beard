@@ -32,6 +32,10 @@ RUN_AS=SICKBEARD_USER
 PID_FILE=/var/run/sickbeard.pid
 
 ############### END EDIT ME ##################
+if [ -r /etc/default/$NAME ]; then
+	. /etc/default/$NAME
+fi
+
 
 test -x $DAEMON || exit 0
 
