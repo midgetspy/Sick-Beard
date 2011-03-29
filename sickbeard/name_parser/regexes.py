@@ -226,5 +226,15 @@ anime_ep_regexes = [
                ([ ._-](\[\w{1,2}\])*\[[\w.]{3,5}\])?                        #codec
                [ ._-]*\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
                .*?                                                          # Separator and EOL
+               '''),
+               ('anime_bare',
+               
+               # One Piece 102
+               '''
+               ^(?P<series_name>.+?)[ ._]*                                   # Show_Name and separator
+               (?P<ep_ab_num>\d{1,3})                                       # E01
+               (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
+               (v(?P<version>[0-9]))?                                       # version
+               .*?                                                          # Separator and EOL
                ''')
                ]

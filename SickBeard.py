@@ -241,7 +241,6 @@ def main():
     # build from the DB to start with
     logger.log(u"Loading initial show list")
     loadShowsFromDB()
-
     # fire up all our threads
     sickbeard.start()
 

@@ -195,10 +195,15 @@ class TVCache():
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
             try:
-                myParser = NameParser(anime=self.provider.supportsAbsoluteNumbering)
+                if self.provider.supportsAbsoluteNumbering:                
+                    logger.log(u""+str(self.provider.getID)+" supports anime", logger.DEBUG)
+                    myParser = NameParser(regexMode=NameParser.ALL_REGEX)
+                else:
+                    logger.log(u""+str(self.provider.getID)+" onyl supports normal shows", logger.DEBUG)
+                    myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
                 parse_result = myParser.parse(curName)
             except InvalidNameException:
-                logger.log(u"Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
+                logger.log(u"tvcache: Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
                 continue
 
         if not parse_result:

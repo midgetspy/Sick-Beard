@@ -257,7 +257,7 @@ class PostProcessor(object):
         
         return dest_folder
 
-    def _history_lookup(self):
+    def _history_lookup(self, regexMode=NameParser.NORMAL_REGEX):
         """
         Look up the NZB name in the history and see if it contains a record for self.nzb_name
         
@@ -298,14 +298,13 @@ class PostProcessor(object):
         self.in_history = False
         return to_return
     
-    def _analyze_name(self, name, file=True):
+    def _analyze_name(self, name, file=True, regexMode=NameParser.ALL_REGEX): # FIXME:this shouldnt always consider anime !
         """
         Takes a name and tries to figure out a show, season, and episode from it.
         
         Returns a (tvdb_id, season, [episodes]) tuple. The first two may be None and episodes may be []
         if none were found.
         """
-
         logger.log(u"Analyzing name "+repr(name))
     
         to_return = (None, None, [])
@@ -314,8 +313,7 @@ class PostProcessor(object):
             return to_return
     
         # parse the name to break it into show name, season, and episode
-        # FIXME:this shouldnt always consider anime !
-        np = NameParser(file, anime=True)
+        np = NameParser(file, regexMode)
         parse_result = np.parse(name)
         self._log("Parsed "+name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
 
@@ -353,7 +351,7 @@ class PostProcessor(object):
 
         # see if we can find the name directly in the DB, if so use it
         for cur_name in name_list:
-            self._log(u"Looking up "+cur_name+u" in the DB", logger.DEBUG)
+            self._log(u"Looking up "+cur_name+" in the DB", logger.DEBUG)
             db_result = helpers.searchDBForShow(cur_name)
             if db_result:
                 self._log(u"Lookup successful, using tvdb id "+str(db_result[0])+" season: "+str(season)+" episode: "+str(episodes), logger.DEBUG)
@@ -392,6 +390,27 @@ class PostProcessor(object):
         _finalize(parse_result)
         return to_return
     
+    # TODO: implement
+    def _pre_attempt_anime_check(self):
+        return True
+    
+    def _make_attempt_list(self):
+                        # try to look up the nzb in history
+        attempt_list = [self._history_lookup,
+    
+                        # try to analyze the file name
+                        lambda regexMode: self._analyze_name(self.file_name, regexMode=regexMode),
+
+                        # try to analyze the dir name
+                        lambda regexMode: self._analyze_name(self.folder_name, regexMode=regexMode),
+
+                         # try to analyze the file path
+                        lambda regexMode: self._analyze_name(self.file_path, regexMode=regexMode),
+
+                        # try to analyze the nzb name
+                        lambda regexMode: self._analyze_name(self.nzb_name, regexMode=regexMode)
+                        ]
+        return attempt_list
     
     def _find_info(self):
         """
@@ -401,30 +420,19 @@ class PostProcessor(object):
         tvdb_id = season = None
         episodes = []
         
-                        # try to look up the nzb in history
-        attempt_list = [self._history_lookup,
-    
-                        # try to analyze the episode name
-                        lambda: self._analyze_name(self.file_path),
+        attempt_list = self._make_attempt_list()
 
-                        # try to analyze the file name
-                        lambda: self._analyze_name(self.file_name),
-
-                        # try to analyze the dir name
-                        lambda: self._analyze_name(self.folder_name),
-
-                        # try to analyze the file+dir names together
-                        lambda: self._analyze_name(self.file_path),
-
-                        # try to analyze the nzb name
-                        lambda: self._analyze_name(self.nzb_name),
-                        ]
-    
         # attempt every possible method to get our info
         for cur_attempt in attempt_list:
+            try:                
+                (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt(regexMode=NameParser.ALL_REGEX)
+                if cur_tvdb_id and self._check_for_anime(cur_tvdb_id):
+                    logger.log(u"tvdb_id: "+str(cur_tvdb_id)+u" is an anime", logger.DEBUG)
+                    (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt(regexMode=NameParser.ANIME_REGEX)
+                else:
+                    (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt(regexMode=NameParser.NORMAL_REGEX)
+                    logger.log(u"tvdb_id: "+str(cur_tvdb_id)+u" is a normal show", logger.DEBUG)
             
-            try:
-                (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
             except InvalidNameException, e:
                 logger.log(u"Unable to parse, skipping: "+str(e), logger.DEBUG)
                 continue
@@ -436,6 +444,7 @@ class PostProcessor(object):
             if cur_episodes:
                 episodes = cur_episodes
             
+
             # for air-by-date shows we need to look up the season/episode from tvdb
             if season == -1 and tvdb_id:
                 self._log(u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
@@ -471,21 +480,18 @@ class PostProcessor(object):
                     continue
             
             #first lest check if this show is set to absolute numbering
-            elif season == None and tvdb_id and len(episodes) > 0:
-                myDB = db.DBConnection()
-                isAbsoluteNumberSQlResult = myDB.select("SELECT anime,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
-                if int(isAbsoluteNumberSQlResult[0][0]) > 0:
-                    self._log(u"This show is flaged to use absolute numbering", logger.DEBUG)
-                    self._log(u"Getting the season for absolute episode "+str(episodes)+" from the show "+str(isAbsoluteNumberSQlResult[0][1]), logger.DEBUG)
-                    if len(episodes) == 1:
-                        getSeasonAndEpisodeSQlResult = myDB.select("SELECT season,episode FROM tv_episodes WHERE showid = ? and absolute_number = ?", [tvdb_id,episodes[0]])
-                        if len(getSeasonAndEpisodeSQlResult) > 0 and getSeasonAndEpisodeSQlResult[0][0] != None and getSeasonAndEpisodeSQlResult[0][1] != None:
-                            season = int(getSeasonAndEpisodeSQlResult[0][0])
-                            episodes = [int(getSeasonAndEpisodeSQlResult[0][1])]
-                        else:
-                            self._log(u"There was no episode with absolute number: "+str(episodes[0])+" for tvdb_id: "+tvdb_id+" in our db", logger.WARNING)
+            elif self._check_for_anime(tvdb_id):
+                self._log(u"This show is flaged to use absolute numbering", logger.DEBUG)
+                if len(episodes) == 1:
+                    myDB = db.DBConnection()
+                    getSeasonAndEpisodeSQlResult = myDB.select("SELECT season,episode FROM tv_episodes WHERE showid = ? and absolute_number = ?", [tvdb_id,episodes[0]])
+                    if len(getSeasonAndEpisodeSQlResult) > 0 and getSeasonAndEpisodeSQlResult[0][0] != None and getSeasonAndEpisodeSQlResult[0][1] != None:
+                        season = int(getSeasonAndEpisodeSQlResult[0][0])
+                        episodes = [int(getSeasonAndEpisodeSQlResult[0][1])]
                     else:
-                        self._log(u"We cant handle multi episodes yet for absolute numbering", logger.ERROR)
+                        self._log(u"There was no episode with absolute number: "+str(episodes[0])+" for tvdb_id: "+tvdb_id+" in our db", logger.WARNING)
+                else:
+                    self._log(u"We cant handle multi episodes yet for absolute numbering", logger.ERROR)
                         
             # if there's no season then we can hopefully just use 1 automatically
             elif season == None and tvdb_id:
@@ -500,6 +506,19 @@ class PostProcessor(object):
     
         return (tvdb_id, season, episodes)
     
+    def _check_for_anime(self, tvdb_id):
+        """
+        Check if the show is a anime
+        """
+        if tvdb_id:
+            myDB = db.DBConnection()
+            isAbsoluteNumberSQlResult = myDB.select("SELECT anime,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
+            if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
+                self._log(u"This show (tvdbid:"+str(tvdb_id)+") is flaged as an anime", logger.DEBUG)
+                return True
+        return False
+        
+        
     def _get_ep_obj(self, tvdb_id, season, episodes):
 
         show_obj = None

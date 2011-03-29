@@ -25,12 +25,16 @@ import regexes
 from sickbeard import logger
 
 class NameParser(object):
-    def __init__(self, file_name=True, anime=False):
+    
+    ALL_REGEX = -1   # all available regexs
+    NORMAL_REGEX = 0 # normal regexs only
+    ANIME_REGEX = 1  # anime only
+    
+    def __init__(self, file_name=True, regexMode=0):
         
-
         self.file_name = file_name
         self.compiled_regexes = []
-        self._compile_regexes(anime)
+        self._compile_regexes(regexMode)
 
     def clean_series_name(self, series_name):
         """Cleans up series name by removing any . and _
@@ -55,13 +59,25 @@ class NameParser(object):
         series_name = re.sub("-$", "", series_name)
         return series_name.strip()
 
-    def _compile_regexes(self,anime=False):
-        if not anime:
-            logger.log(u"Using normal regex's" , logger.DEBUG)
-            uncompiled_regex = regexes.ep_regexes
-        else:
-            logger.log(u"Using anime AND normal regex's" , logger.DEBUG)
+    def _compile_regexes(self,regexMode):
+        
+        
+        if regexMode <= self.ALL_REGEX:
+            logger.log(u"Using ALL regexs (anime and normal)" , logger.DEBUG)
             uncompiled_regex = regexes.anime_ep_regexes+regexes.ep_regexes
+        
+        elif regexMode == self.NORMAL_REGEX:
+            logger.log(u"Using NORMAL regexs" , logger.DEBUG)
+            uncompiled_regex = regexes.ep_regexes
+            
+        elif regexMode == self.ANIME_REGEX:
+            logger.log(u"Using ANIME regexs" , logger.DEBUG)
+            uncompiled_regex = regexes.anime_ep_regexes
+        
+        else:
+            logger.log(u"This is a programing ERROR. Fallback Using NORMAL regexs" , logger.ERROR)
+            uncompiled_regex = regexes.ep_regexes
+            
             
         for (cur_pattern_name, cur_pattern) in uncompiled_regex:
             try:

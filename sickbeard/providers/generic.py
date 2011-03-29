@@ -221,13 +221,16 @@ class GenericProvider:
         for item in itemList:
 
             (title, url) = self._get_title_and_url(item)
-
+            
+            cur_regexMode = NameParser.ALL_REGEX
+            if episode.show.is_anime:
+                cur_regexMode = NameParser.ANIME_REGEX
             # parse the file name
             try:
-                myParser = NameParser(anime=episode.show.is_anime)
+                myParser = NameParser(regexMode=cur_regexMode)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
-                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                logger.log(u"generic1: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
             # FIXME: in some ocassions this creates an "can not convert to ascii" error why ?
             # hotfix dont log it
@@ -280,10 +283,10 @@ class GenericProvider:
 
             # parse the file name
             try:
-                myParser = NameParser(False)
+                myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
-                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
             if not show.is_air_by_date:

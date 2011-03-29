@@ -460,6 +460,14 @@ def fixSetGroupID(childPath):
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)
 
+def is_anime_in_show_list():
+    for show in sickbeard.showList:
+        if show.is_anime:
+            return True
+    return False
+
+def update_anime_support():
+    sickbeard.ANIMESUPPORT = is_anime_in_show_list()
 
 if __name__ == '__main__':
     import doctest

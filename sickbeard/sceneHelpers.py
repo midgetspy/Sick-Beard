@@ -33,7 +33,7 @@ resultFilters = ("sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
 def filterBadReleases(name):
 
     try:
-        fp = NameParser()
+        fp = NameParser(regexMode=NameParser.ALL_REGEX)
         parse_result = fp.parse(name)
     except InvalidNameException:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)

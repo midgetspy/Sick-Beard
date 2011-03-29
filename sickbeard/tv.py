@@ -385,10 +385,13 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
         try:
-            myParser = NameParser(anime=self.is_anime)
+            if self.is_anime:                
+                myParser = NameParser(regexMode=NameParser.ANIME_REGEX)
+            else:
+                myParser = NameParser(regexMode=NameParser.ALL_REGEX)
             parse_result = myParser.parse(file)
         except InvalidNameException:
-            logger.log(u"Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
+            logger.log(u"tv: Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 
         if len(parse_result.episode_numbers) == 0 and not parse_result.air_by_date:
@@ -838,6 +841,7 @@ class TVShow(object):
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
+        helpers.update_anime_support()
 
 
     def __str__(self):

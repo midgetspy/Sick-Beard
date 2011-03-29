@@ -104,7 +104,7 @@ simple_test_cases = {
               '[BSS-Anon] Tengen Toppa Gurren Lagann - 22-23 [1280x720][h264][6039D9AF]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '1280x720', 'BSS-Anon', None, [22,23]),
               '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [], '480p', 'SJSUBS', None, [2]),
               #'[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '480p', 'SGKK')
-               },
+              },
                
               'anime_standard_round': {
               '[SGKK] Bleach - 312v2 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'SGKK', None, [312]),
@@ -115,13 +115,20 @@ simple_test_cases = {
               'anime_slash': {
               '[SGKK] Bleach 312v1 [720p/MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p', 'SGKK', None, [312]),
               '[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [], '480p', 'SGKK', None, [312])
-               },
+              },
                
-               'anime_standard_codec' :{
-               '[Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
-               '[Ayako] Infinite Stratos - IS - 07v2 [H264][720p][44419534]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
-               '[Ayako-Shikkaku] Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne - 10 [LQ][h264][720p] [8853B21C]': parser.ParseResult(None, 'Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne', None, [], '720p', 'Ayako-Shikkaku',None, [10])
-                }
+              'anime_standard_codec' : {
+              '[Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
+              '[Ayako] Infinite Stratos - IS - 07v2 [H264][720p][44419534]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
+              '[Ayako-Shikkaku] Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne - 10 [LQ][h264][720p] [8853B21C]': parser.ParseResult(None, 'Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne', None, [], '720p', 'Ayako-Shikkaku',None, [10])
+              },
+               
+              'anime_bare' :{
+              'One Piece 102': parser.ParseResult(None, 'One Piece', None, [], None, None, None, [102]),
+              'bleach 10': parser.ParseResult(None, 'bleach', None, [], None, None, None, [10]),
+              'Naruto Shippuden 314v2': parser.ParseResult(None, 'Naruto Shippuden', None, [], None, None, None, [314]),
+              'Naruto Shippuden 104-105': parser.ParseResult(None, 'Naruto Shippuden', None, [], None, None, None, [104,105]),
+              }
                
               
               }
@@ -276,20 +283,24 @@ class BasicTests(unittest.TestCase):
         self._test_names(np, 'scene_date_format')
         
     def test_anime_standard(self):
-        np = parser.NameParser(False,anime=True)
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_standard')
         
     def test_anime_standard_round(self):
-        np = parser.NameParser(False,anime=True)
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_standard_round',verbose=True)
         
     def test_anime_slash(self):
-        np = parser.NameParser(False,anime=True)
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_slash')
         
     def test_anime_codec(self):
-        np = parser.NameParser(False,anime=True)
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_standard_codec',verbose=True)
+                
+    def test_anime_bare(self):
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
+        self._test_names(np, 'anime_bare',verbose=True)
 
     def test_standard_file_names(self):
         np = parser.NameParser()
