@@ -222,12 +222,12 @@ class GenericProvider:
 
             (title, url) = self._get_title_and_url(item)
             
-            cur_regexMode = NameParser.ALL_REGEX
-            if episode.show.is_anime:
-                cur_regexMode = NameParser.ANIME_REGEX
             # parse the file name
             try:
-                myParser = NameParser(regexMode=cur_regexMode)
+                if episode.show.is_anime:                
+                    myParser = NameParser(regexMode=NameParser.ANIME_REGEX)
+                else:
+                    myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
                 logger.log(u"generic1: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
