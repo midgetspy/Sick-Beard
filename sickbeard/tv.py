@@ -388,7 +388,7 @@ class TVShow(object):
             if self.is_anime:                
                 myParser = NameParser(regexMode=NameParser.ANIME_REGEX)
             else:
-                myParser = NameParser(regexMode=NameParser.ALL_REGEX)
+                myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
             parse_result = myParser.parse(file)
         except InvalidNameException:
             logger.log(u"tv: Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
