@@ -18,6 +18,7 @@
 
 import urllib
 import re
+import urllib2
 
 import xml.etree.cElementTree as etree
 
@@ -26,7 +27,7 @@ import generic
 
 from sickbeard.common import *
 from sickbeard import logger
-from sickbeard import tvcache, sceneHelpers, torrentParser
+from sickbeard import tvcache, sceneHelpers, torrentParser, helpers
 
 class EZRSSProvider(generic.TorrentProvider):
 
@@ -175,9 +176,22 @@ class EZRSSCache(tvcache.TVCache):
         # only poll EZRSS every 15 minutes max
         self.minTime = 15
 
-    def getQuality(name, season, episodeText, tvrid, tvdbid):
-        logger.log(u"Looking for {0} with tvdbid {1}".format(name, tvdbid))
-        return Quality.nameQuality(name)
+    def getQuality(self, name, season, episodeText, tvrid, tvdbid, url):
+        quality = Quality.nameQuality(name)
+        if (tvdbid != 0 or tvrid != 0) and quality == Quality.UNKNOWN:
+            logger.log(u"Checking quality properly for " + name, logger.MESSAGE)
+            filename = self._extract_name_from_torrent(url)
+            quality = Quality.nameQuality(filename)
+        return quality
+
+    def _extract_name_from_torrent(self, url):
+        try:
+            contents = helpers.getURL(url, [])
+        except (urllib2.HTTPError, IOError), e:
+            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
+            return None
+        decoded = torrentParser.bdecode(contents)
+        return decoded['info']['name']
 
     def _getRSSData(self):
         url = self.provider.url + 'feed/'
