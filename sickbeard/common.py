@@ -150,13 +150,13 @@ class Quality:
     def nameQualityAnime(name):
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
         
-        if checkName(["480p","AVI"], any) and not checkName(["720p"], all):
+        if checkName(["360p"], any):
             return Quality.SDTV
-        elif checkName(["dvd"], any) and False: # this is not done by anime groups
+        elif checkName(["dvd","480p"], any):
             return Quality.SDDVD
         elif checkName(["720p","1280x720","MKV"], any):
             return Quality.HDTV
-        elif checkName(["720p"], all) and False: # this is not done by anime groups
+        elif checkName(["720p"], all):
             return Quality.HDWEBDL
         elif checkName(["720p", "bluray", "x264"], all):
             return Quality.HDBLURAY
