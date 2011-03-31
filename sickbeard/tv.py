@@ -386,7 +386,7 @@ class TVShow(object):
 
         try:
             if self.is_anime:                
-                myParser = NameParser(regexMode=NameParser.ANIME_REGEX)
+                myParser = NameParser(regexMode=NameParser.ALL_REGEX) #using all because some strange ppl name animes the "normal" way
             else:
                 myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
             parse_result = myParser.parse(file)
@@ -394,7 +394,7 @@ class TVShow(object):
             logger.log(u"tv: Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 
-        if len(parse_result.episode_numbers) == 0 and not parse_result.air_by_date:
+        if len(parse_result.episode_numbers) == 0 and not parse_result.air_by_date and not parse_result.is_anime:
             logger.log("parse_result: "+str(parse_result))
             logger.log(u"No episode number found in "+file+", ignoring it", logger.ERROR)
             return None
@@ -422,6 +422,10 @@ class TVShow(object):
             except tvdb_exceptions.tvdb_episodenotfound, e:
                 logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
                 return None
+        # lets see if we dont need this at all
+        # if its an anime get the real ep number and season     
+        #if self.is_anime and parse_result.is_anime and len(parse_result.ab_episode_numbers) > 0:
+        #    self.tvdbid
 
         for curEpNum in episodes:
 
