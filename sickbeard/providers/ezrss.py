@@ -52,6 +52,12 @@ class EZRSSProvider(generic.TorrentProvider):
         
         filename = item.findtext('{%s}torrent/{%s}fileName' %(self.ezrss_ns,self.ezrss_ns))
         quality = Quality.nameQuality(filename)
+        if quality == Quality.UNKNOWN:
+            # Use the filename in the torrent instead
+            logger.log(u"Quality could not be found from the torrent name, checking actual filename", logger.MESSAGE)
+            url = item.findtext('link').replace('&amp;','&')
+            filename = self._extract_name_from_torrent(url)
+            quality = Quality.nameQuality(filename)
         return quality
 
     def findSeasonResults(self, show, season):
@@ -153,6 +159,11 @@ class EZRSSProvider(generic.TorrentProvider):
         if match:
             return match.group(1)
         return None
+
+    def _extract_name_from_torrent(self, url):
+        contents = self.getURL(url)
+        decoded = sceneHelpers.bdecode(contents)
+        return decoded['info']['name']
 
 
 class EZRSSCache(tvcache.TVCache):
