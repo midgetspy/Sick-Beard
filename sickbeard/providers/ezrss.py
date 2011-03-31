@@ -26,7 +26,7 @@ import generic
 
 from sickbeard.common import *
 from sickbeard import logger
-from sickbeard import tvcache, sceneHelpers
+from sickbeard import tvcache, sceneHelpers, torrentParser
 
 class EZRSSProvider(generic.TorrentProvider):
 
@@ -162,7 +162,7 @@ class EZRSSProvider(generic.TorrentProvider):
 
     def _extract_name_from_torrent(self, url):
         contents = self.getURL(url)
-        decoded = sceneHelpers.bdecode(contents)
+        decoded = torrentParser.bdecode(contents)
         return decoded['info']['name']
 
 
