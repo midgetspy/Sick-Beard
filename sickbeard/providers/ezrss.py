@@ -175,6 +175,9 @@ class EZRSSCache(tvcache.TVCache):
         # only poll EZRSS every 15 minutes max
         self.minTime = 15
 
+    def getQuality(name, season, episodeText, tvrid, tvdbid):
+        logger.log(u"Looking for {0} with tvdbid {1}".format(name, tvdbid))
+        return Quality.nameQuality(name)
 
     def _getRSSData(self):
         url = self.provider.url + 'feed/'
