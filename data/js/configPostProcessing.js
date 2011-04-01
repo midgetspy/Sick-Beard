@@ -1,21 +1,24 @@
 $(document).ready(function(){
 
+	
     $.fn.setExampleText = function() { 
 
         params = {'show_name': $('#naming_show_name').attr('checked')?"1":"0",
                   'ep_type': $('#naming_ep_type :selected').val(),
                   'multi_ep_type': $('#naming_multi_ep_type :selected').val(),
                   'ep_name': $('#naming_ep_name').attr('checked')?"1":"0",
+                  'anime': $('input[name="naming_anime"]:checked').val(),
                   'use_periods': $('#naming_use_periods').attr('checked')?"1":"0",
                   'quality': $('#naming_quality').attr('checked')?"1":"0",
                   'sep_type': $('#naming_sep_type :selected').val(),
-                  'whichTest': 'single'
+                  'whichTest': 'single',
+                  'whichTestAnime': 0
                   }
         
         $.get(sbRoot+"/config/postProcessing/testNaming", params,
-              function(data){
-                  $('#normalExampleText').text(data);
-        });
+                function(data){
+                    $('#normalExampleText').text(data);
+          });
 
         params['whichTest'] = 'multi'
         $.get(sbRoot+"/config/postProcessing/testNaming", params,
@@ -23,6 +26,20 @@ $(document).ready(function(){
                   $('#multiExampleText').text(data);
         });
 
+        params['whichTest'] = 'single'
+        params['whichTestAnime'] = 1
+        $.get(sbRoot+"/config/postProcessing/testNaming", params,
+                  function(data){
+              			$('#normalAnimeExampleText').text(data);
+        });
+
+        params['whichTest'] = 'multi'
+        params['whichTestAnime'] = 1
+        $.get(sbRoot+"/config/postProcessing/testNaming", params,
+                  function(data){
+              			$('#multiAnimeExampleText').text(data);
+        });
+        
         return
 
     };
@@ -55,7 +72,11 @@ $(document).ready(function(){
 
   $('#naming_sep_type').change(function(){
         $(this).setExampleText();
-    });  
+    }); 
+
+  $('input[name="naming_anime"]').click(function(){
+      $(this).setExampleText();
+  }); 
 
     // -- start of metadata options div toggle code --
     $('#metadataType').change(function(){

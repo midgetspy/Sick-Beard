@@ -815,10 +815,7 @@ class ConfigPostProcessing:
         else:
             naming_dates = 0
                     
-        if naming_anime == "on":
-            naming_anime = 1
-        else:
-            naming_anime = 0
+        naming_anime = int(naming_anime)
 
         if use_banner == "on":
             use_banner = 1
@@ -882,8 +879,16 @@ class ConfigPostProcessing:
         redirect("/config/postProcessing/")
 
     @cherrypy.expose
-    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
-                   sep_type=None, use_periods=None, quality=None, whichTest="single"):
+    def testNaming(self, show_name=None,
+                        ep_type=None,
+                        multi_ep_type=None,
+                        ep_name=None,
+                        anime=None,
+                        sep_type=None,
+                        use_periods=None,
+                        quality=None,
+                        whichTest="single",
+                        whichTestAnime=0):
 
         if show_name == None:
             show_name = sickbeard.NAMING_SHOW_NAME
@@ -900,6 +905,11 @@ class ConfigPostProcessing:
                 ep_name = False
             else:
                 ep_name = True
+        
+        if anime == None:
+            anime = sickbeard.NAMING_ANIME
+        else:
+            anime = int(anime)
 
         if use_periods == None:
             use_periods = sickbeard.NAMING_USE_PERIODS
@@ -932,35 +942,46 @@ class ConfigPostProcessing:
         else:
             sep_type = int(sep_type)
 
+        whichTestAnime = int(whichTestAnime)
+        
         class TVShow():
-            def __init__(self):
+            def __init__(self, is_anime):
                 self.name = "Show Name"
                 self.genre = "Comedy"
                 self.air_by_date = 0
-                self.anime = 0
+                self.anime = is_anime
 
         # fake a TVShow (hack since new TVShow is coming anyway)
         class TVEpisode(tv.TVEpisode):
-            def __init__(self, season, episode, name):
+            def __init__(self, season, episode,absolute_number,is_anime, name):
                 self.relatedEps = []
                 self._name = name
                 self._season = season
                 self._episode = episode
-                self.show = TVShow()
+                self._absolute_number = absolute_number
+                self.show = TVShow(is_anime)
 
 
         # make a fake episode object
-        ep = TVEpisode(1,2,"Ep Name")
+        ep = TVEpisode(1,2,2,whichTestAnime,"Ep Name")
+         
         ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
 
         if whichTest == "multi":
             ep._name = "Ep Name (1)"
-            secondEp = TVEpisode(1,3,"Ep Name (2)")
+            secondEp = TVEpisode(1,3,3,whichTestAnime,"Ep Name (2)")
             ep.relatedEps.append(secondEp)
 
         # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality)
-
+        name = ep.prettyName(naming_show_name=show_name,
+                             naming_ep_type=ep_type,
+                             naming_multi_ep_type=multi_ep_type,
+                             naming_ep_name=ep_name,
+                             naming_anime=anime,
+                             naming_sep_type=sep_type,
+                             naming_use_periods=use_periods,
+                             naming_quality=quality)
+        
         return name
 
 class ConfigProviders:

@@ -1400,8 +1400,14 @@ class TVEpisode(object):
     def getOverview(self):
         return self.show.getOverview(self.status)
 
-    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
-                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):
+    def prettyName (self, naming_show_name=None,
+                        naming_ep_type=None,
+                        naming_multi_ep_type=None,
+                        naming_ep_name=None,
+                        naming_anime=None,
+                        naming_sep_type=None,
+                        naming_use_periods=None,
+                        naming_quality=None):
 
         regex = "(.*) \(\d\)"
 
@@ -1445,6 +1451,9 @@ class TVEpisode(object):
 
         if naming_ep_type == None:
             naming_ep_type = sickbeard.NAMING_EP_TYPE
+            
+        if naming_anime == None:
+            naming_anime = sickbeard.NAMING_ANIME
 
         if naming_multi_ep_type == None:
             naming_multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
@@ -1463,17 +1472,25 @@ class TVEpisode(object):
                 goodEpString = self.airdate.strftime("%Y.%m.%d")
             except ValueError:
                 pass
-           
+             
         # if we didn't set it to the air-by-date value use the season/ep
         if not goodEpString:
             goodEpString = config.naming_ep_type[naming_ep_type] % {'seasonnumber': self.season, 'episodenumber': self.episode}
-
+            
+            
         for relEp in self.relatedEps:
             goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
+
+        # anime ?
+        if self.show.anime:
+            if naming_anime == 1: # this crazy person wants both !
+                goodEpString += config.naming_sep_type[naming_sep_type]+"%(#)03d" % {"#":self.absolute_number}
+            elif naming_anime == 2: # total anime freak only need the absolute number !
+                goodEpString = "%(#)03d" % {"#":self.absolute_number}
+            for relEp in self.relatedEps:
+                goodEpString += "-"+"%(#)03d" % {"#":relEp.absolute_number}
         
-        # if we want a absolute (number) pretty name
-        if self.show.anime and sickbeard.NAMING_ANIME:
-            goodEpString = goodEpString+config.naming_sep_type[naming_sep_type]+str(self.absolute_number) 
+            
         #episode string end
         
         if goodName != '':
