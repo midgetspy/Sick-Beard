@@ -154,7 +154,7 @@ class Quality:
             return Quality.SDTV
         elif checkName(["dvd","480p"], any):
             return Quality.SDDVD
-        elif checkName(["720p","1280x720","MKV"], any):
+        elif checkName(["720p","1280x720"], any):
             return Quality.HDTV
         elif checkName(["720p"], all):
             return Quality.HDWEBDL
