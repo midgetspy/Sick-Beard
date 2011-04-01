@@ -180,7 +180,7 @@ class GenericProvider:
         quality = Quality.nameQuality(title, anime)
         return quality
     
-    def _doSearch(self, anime=False):
+    def _doSearch(self, show=None):
         return []
 
     def _get_season_search_strings(self, show, season, episode=None):
@@ -270,17 +270,20 @@ class GenericProvider:
         results = {}
 
         for curString in self._get_season_search_strings(show, season):
-            itemList += self._doSearch(curString)
+            itemList += self._doSearch(curString, show=show)
 
         for item in itemList:
 
             (title, url) = self._get_title_and_url(item)
 
-            quality = self.getQuality(item)
+            quality = self.getQuality(item, show.is_anime)
 
             # parse the file name
             try:
-                myParser = NameParser(False,regexMode=NameParser.NORMAL_REGEX)
+                if show.is_anime:                
+                    myParser = NameParser(regexMode=NameParser.ANIME_REGEX)
+                else:
+                    myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
                 logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
@@ -310,7 +313,18 @@ class GenericProvider:
                 
                 actual_season = int(sql_results[0]["season"])
                 actual_episodes = [int(sql_results[0]["episode"])]
-
+            
+            if show.is_anime and len(parse_result.ab_episode_numbers):
+                try:
+                    #ep = TVEpisode(self, season, episode)
+                    ep = show.getEpisode(None,None,absolute_number=parse_result.ab_episode_numbers[0])
+                    actual_season = ep.season
+                    actual_episodes = [ep.episode]
+                except exceptions.EpisodeNotFoundException:
+                    logger.log(str(self.tvdbid) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, skipping this episode")
+                    continue
+                
+            
             # make sure we want the episode
             wantEp = True
             for epNo in actual_episodes:

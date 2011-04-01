@@ -39,8 +39,8 @@ class Fanzub(generic.NZBProvider):
 
 		generic.NZBProvider.__init__(self, "Fanzub")
 
-		self.supportsBacklog = False
-		self.description = u"Only useful for anime.<br>No backlog support."
+		self.supportsBacklog = True
+		self.description = u"Only useful for anime.<br>Pseudo backlog support."
 		self.supportsAbsoluteNumbering = True
 
 		self.cache = FanzubCache(self)
@@ -54,22 +54,31 @@ class Fanzub(generic.NZBProvider):
 		return True
 
 	def _get_season_search_strings(self, show, season):
-		return []
+		params = {
+				"q": show.name.encode('utf-8'),
+				"max": "1000".encode('utf-8')
+				  }
+		return [params]
 
 	def _get_episode_search_strings(self, ep_obj):
-		return [ep_obj.show.name+" "+str(ep_obj.absolute_number)]
+		params = {
+				"q":ep_obj.show.name+" "+str(ep_obj.absolute_number).encode('utf-8'),
+				  }
+		return [params]
 
-	def _doSearch(self, curString, show=None):
+	def _doSearch(self, search_params, show=None):
 		if show and not show.is_anime:
 			logger.log(u""+str(show.name)+" is not an anime skiping "+str(self.name))
 			return [];
 		
-		curString = curString.replace('.', ' ').replace('-', '.')
+		#curString = curString.replace('.', ' ').replace('-', '.')
 
-		params = {"q": curString.encode('utf-8'),
+		params = {
 					"cat": "anime".encode('utf-8')
 				  }
-
+		if search_params:
+			params.update(search_params)
+			
 		searchURL = self.url + "rss?" + urllib.urlencode(params)
 
 		logger.log(u"Search string: " + searchURL, logger.DEBUG)
