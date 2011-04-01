@@ -120,7 +120,12 @@ simple_test_cases = {
               'anime_standard_codec' : {
               '[Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
               '[Ayako] Infinite Stratos - IS - 07v2 [H264][720p][44419534]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
-              '[Ayako-Shikkaku] Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne - 10 [LQ][h264][720p] [8853B21C]': parser.ParseResult(None, 'Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne', None, [], '720p', 'Ayako-Shikkaku',None, [10])
+              '[Ayako-Shikkaku] Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne - 10 [LQ][h264][720p] [8853B21C]': parser.ParseResult(None, 'Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne', None, [], '720p', 'Ayako-Shikkaku',None, [10]),
+              },
+              
+              'anime_standard_codec2': {
+              '[UTW]_Fractale_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractale', None, [], '720p', 'UTW', None, [1])
+                                       
               },
                
               'anime_bare' :{
@@ -288,15 +293,19 @@ class BasicTests(unittest.TestCase):
         
     def test_anime_standard_round(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_round',verbose=True)
+        self._test_names(np, 'anime_standard_round')
         
     def test_anime_slash(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_slash')
         
     def test_anime_codec(self):
-        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_codec',verbose=True)
+        np = parser.NameParser(False,parser.NameParser.ALL_REGEX)
+        self._test_names(np, 'anime_standard_codec')
+        
+    def test_anime_codec2(self):
+        np = parser.NameParser(False,parser.NameParser.ALL_REGEX)
+        self._test_names(np, 'anime_standard_codec2',verbose=True)
                 
     def test_anime_bare(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)

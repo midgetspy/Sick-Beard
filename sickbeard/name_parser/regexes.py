@@ -227,6 +227,19 @@ anime_ep_regexes = [
                [ ._-]*\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
                .*?                                                          # Separator and EOL
                '''),
+               
+               ('anime_standard_codec2',
+               # [UTW]_Fractale_-_01_[h264-720p][96D3F1BF]
+               '''
+               ^(\[(?P<release_group>.+)\][ ._-]*)?                         # Release Group and separator
+               (?P<series_name>.+?)[ ._]*                                   # Show_Name and separator
+               ([ ._-]+-[ ._-]+[A-Z]+[ ._-]+)?[ ._-]*                       # funny stuff, this is sooo nuts ! this will kick me in the butt one day
+               (?P<ep_ab_num>\d{1,3})                                       # E01
+               (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
+               (v(?P<version>[0-9]))?                                       # version
+               [ ._-]*\[h264-(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
+               .*?                                                          # Separator and EOL
+               '''),
                ('anime_bare',
                
                # One Piece 102
