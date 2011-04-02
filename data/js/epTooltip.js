@@ -19,7 +19,7 @@ $(function(){
                 viewport: $(window),
                 adjust: { screen: true }
             },
-            show: { event: 'click mouseenter', solo: true },
+            show: { event: 'click', solo: true },
             hide: 'click unfocus',
             style: { classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-sb' }
         })
