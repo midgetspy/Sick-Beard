@@ -47,7 +47,7 @@ class NotifoNotifier:
         except IOError:
             return False
         
-	data.close()
+        data.close()
 
         if result["status"] != "success" or result["response_message"] != "OK":
             return False
