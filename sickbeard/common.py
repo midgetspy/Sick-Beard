@@ -108,7 +108,7 @@ class Quality:
         return (anyQualities, bestQualities)
 
     @staticmethod
-    def nameQuality(name, anime=False): #TODO: add ,anime=False
+    def nameQuality(name, anime=False):
 
         name = os.path.basename(name)
 
@@ -156,7 +156,7 @@ class Quality:
             return Quality.SDDVD
         elif checkName(["720p","1280x720"], any):
             return Quality.HDTV
-        elif checkName(["720p"], all):
+        elif checkName(["720p"], any):
             return Quality.HDWEBDL
         elif checkName(["720p", "bluray", "x264"], all):
             return Quality.HDBLURAY
