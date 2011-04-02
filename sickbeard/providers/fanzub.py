@@ -62,7 +62,7 @@ class Fanzub(generic.NZBProvider):
 
 	def _get_episode_search_strings(self, ep_obj):
 		params = {
-				"q":ep_obj.show.name+" "+str(ep_obj.absolute_number).encode('utf-8'),
+				"q":ep_obj.show.name+" "+str(ep_obj.absolute_number).encode('utf-8')
 				  }
 		return [params]
 
@@ -71,11 +71,10 @@ class Fanzub(generic.NZBProvider):
 			logger.log(u""+str(show.name)+" is not an anime skiping "+str(self.name))
 			return [];
 		
-		#curString = curString.replace('.', ' ').replace('-', '.')
-
 		params = {
 					"cat": "anime".encode('utf-8')
 				  }
+		
 		if search_params:
 			params.update(search_params)
 			
@@ -117,10 +116,13 @@ class Fanzub(generic.NZBProvider):
 	def findPropers(self, date=None):
 
 		results = []
+		
+		for i in [2,3]: # we will look for a version 2 or 3
+			params = {
+				"q":"v"+str(i).encode('utf-8')
+				  } 
 
-		for curString in (".PROPER.", ".REPACK."):
-
-			for curResult in self._doSearch(curString):
+			for curResult in self._doSearch(params):
 
 				match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
 				if not match:
