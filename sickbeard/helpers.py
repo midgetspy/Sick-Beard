@@ -315,7 +315,7 @@ def searchDBForShow(regShowName):
 
     myDB = db.DBConnection()
 
-    yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
+    yearRegex = "([^()]+?)\s*(\()?(\d{4})(?(2)\))$"
 
     for showName in showNames:
 
@@ -328,7 +328,7 @@ def searchDBForShow(regShowName):
 
             # if we didn't get exactly one result then try again with the year stripped off if possible
             match = re.match(yearRegex, showName)
-            if match:
+            if match and match.group(1):
                 logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
                 sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
 
