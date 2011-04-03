@@ -28,7 +28,8 @@ from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ("sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
-                 "dub(bed)?", "german", "french", "core2hd")
+                 "dub(bed)?", "german", "french", "core2hd",
+                 "dutch", "swedish")
 
 def filterBadReleases(name):
 
