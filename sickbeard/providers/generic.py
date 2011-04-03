@@ -298,7 +298,7 @@ class GenericProvider:
                 try:
                     (actual_season, actual_episodes) = helpers.get_all_episodes_from_absolute_number(show, None, parse_result.ab_episode_numbers)
                 except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                    logger.log(str(show.tvdbid) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, skipping this episode")
+                    logger.log(str(show.tvdb_id) + ": DB objekt with absolute number " + str(parse_result.ab_episode_numbers) + " was not found, TheTvDB lacking behind?")
                     continue    
                 
             elif show.is_air_by_date:
