@@ -196,10 +196,8 @@ class TVCache():
         for curName in [name] + extraNames:
             try:
                 if self.provider.supportsAbsoluteNumbering:                
-                    logger.log(u""+str(self.provider.getID)+" supports anime", logger.DEBUG)
                     myParser = NameParser(regexMode=NameParser.ALL_REGEX)
                 else:
-                    logger.log(u""+str(self.provider.getID)+" onyl supports normal shows", logger.DEBUG)
                     myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
                 parse_result = myParser.parse(curName)
             except InvalidNameException:
@@ -288,20 +286,21 @@ class TVCache():
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                 return False
 
-        # TODO: look for every absolute number not just the first one
-        if parse_result.is_anime and len(parse_result.ab_episode_numbers) == 1 and tvdb_id:
+        # TODO: refactor this into a general "global" function
+        if parse_result.is_anime and len(parse_result.ab_episode_numbers) >= 1 and tvdb_id:
             # look it up
-            anime = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-            if anime.is_anime:    
-                episodeObj = anime.getEpisode(None,None,absolute_number=parse_result.ab_episode_numbers[0])
-                if episodeObj:
-                    season = episodeObj.season
-                    episodes = [episodeObj.episode]
+            curShow = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+            if curShow.is_anime:
+                if curShow.is_anime:
+                    episodes = []
+                    for ab_episode_number in parse_result.ab_episode_numbers:
+                        ep = curShow.getEpisode(None, None,absolute_number=ab_episode_number)
+                        episodes.append(ep.episode)
                 else:
                     logger.log(u"Unable to find episode, in our db, with absolute number "+str(parse_result.ab_episode_numbers[0])+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                     return False 
             else:
-                logger.log(u""+str(name)+" was matched to the show "+str(anime.name)+" as an anime but the show is not marked as an anime", logger.WARNING)
+                logger.log(u""+str(name)+" was matched to the show "+str(curShow.name)+" as an anime but the show is not marked as an anime", logger.WARNING)
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
 

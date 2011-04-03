@@ -176,7 +176,12 @@ class GenericProvider:
         return self.cache.findNeededEpisodes()
 
     def getQuality(self, item, anime=False):
-        title = item.findtext('title')
+        title = item.findtext('title').replace("/"," ")
+        """we are here in the search provider it is ok to delete the /.
+        i am doing this because some show get posted with a / in the name
+        and during qulaity check it is reduced to the base name
+        """
+        logger.log(u"geting quality for:" + title+ " anime: "+str(anime),logger.DEBUG)
         quality = Quality.nameQuality(title, anime)
         return quality
     
@@ -289,7 +294,14 @@ class GenericProvider:
                 logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-            if not show.is_air_by_date:
+            if show.is_anime and len(parse_result.ab_episode_numbers) >= 1:
+                try:
+                    (actual_season, actual_episodes) = helpers.get_all_episodes_from_absolute_number(show, None, parse_result.ab_episode_numbers)
+                except exceptions.EpisodeNotFoundByAbsoluteNumerException:
+                    logger.log(str(show.tvdbid) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, skipping this episode")
+                    continue    
+                
+            elif show.is_air_by_date:
                 # this check is meaningless for non-season searches
                 if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
@@ -314,15 +326,7 @@ class GenericProvider:
                 actual_season = int(sql_results[0]["season"])
                 actual_episodes = [int(sql_results[0]["episode"])]
             
-            if show.is_anime and len(parse_result.ab_episode_numbers):
-                try:
-                    #ep = TVEpisode(self, season, episode)
-                    ep = show.getEpisode(None,None,absolute_number=parse_result.ab_episode_numbers[0])
-                    actual_season = ep.season
-                    actual_episodes = [ep.episode]
-                except exceptions.EpisodeNotFoundException:
-                    logger.log(str(self.tvdbid) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, skipping this episode")
-                    continue
+            
                 
             
             # make sure we want the episode

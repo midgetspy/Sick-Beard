@@ -469,6 +469,27 @@ def is_anime_in_show_list():
 def update_anime_support():
     sickbeard.ANIMESUPPORT = is_anime_in_show_list()
 
+def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
+
+    episodes = []
+    season = None
+    
+    if not show and not tvdb_id:
+        return (season, episodes)
+    
+    if not show and tvdb_id:
+        show = findCertainShow(sickbeard.showList, tvdb_id)
+
+    for absolute_number in absolute_numbers:
+        ep = show.getEpisode(None, None,absolute_number=absolute_number)
+        if ep:
+            episodes.append(ep.episode)
+        else:
+            raise EpisodeNotFoundByAbsoluteNumerException()
+    season = ep.season # this will always take the last found seson so eps that cross the season border are not handeled well
+    
+    return (season, episodes)
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
