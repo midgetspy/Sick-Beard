@@ -191,13 +191,14 @@ anime_ep_regexes = [
                ('anime_standard_round',
                # TODO examples
                # [Stratos-Subs]_Infinite_Stratos_-_12_(1280x720_H.264_AAC)_[379759DB]
+               # [ShinBunBu-Subs] Bleach - 02-03 (CX 1280x720 x264 AAC)
                '''
                ^(\[(?P<release_group>.+)\][ ._-]*)?                         # Release Group and separator
                (?P<series_name>.+?)[ ._-]*                                  # Show_Name and separator
                (?P<ep_ab_num>\d{1,3})                                       # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
                (v(?P<version>[0-9]))?                                       # version
-               [ ._-]+\((?P<extra_info>\d{3,4}[xp]?\d{0,3})([ ._-]?[\w\s])*\) # Source_Quality_Etc-
+               [ ._-]+\((CX[ ._-]?)*(?P<extra_info>\d{3,4}[xp]?\d{0,3})([ ._-]?[\w\s])*\) # Source_Quality_Etc-
                .*?                                                          # Separator and EOL
                '''),
                

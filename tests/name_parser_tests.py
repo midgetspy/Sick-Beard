@@ -110,6 +110,8 @@ simple_test_cases = {
               '[SGKK] Bleach - 312v2 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'SGKK', None, [312]),
               '[HorribleSubs] D Gray-Man - 312 (480p) [F501C9BE]': parser.ParseResult(None, 'D Gray-Man', None, [], '480p', 'HorribleSubs', None, [312]),
               '[SGKK] Tengen Toppa Gurren Lagann - 45-46 (720p h264) [F501C9BE]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '720p', 'SGKK', None, [45,46]),
+              '[Stratos-Subs]_Infinite_Stratos_-_12_(1280x720_H.264_AAC)_[379759DB]': parser.ParseResult(None, 'Infinite Stratos', None, [], '1280x720', 'Stratos-Subs', None, [12]),
+              '[ShinBunBu-Subs] Bleach - 02-03 (CX 1280x720 x264 AAC)': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'ShinBunBu-Subs', None, [02,03]),
                },
                
               'anime_slash': {
@@ -125,7 +127,7 @@ simple_test_cases = {
               
               'anime_standard_codec2': {
               '[UTW]_Fractale_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractale', None, [], '720p', 'UTW', None, [1])
-                                       
+                                    
               },
                
               'anime_bare' :{
@@ -293,23 +295,23 @@ class BasicTests(unittest.TestCase):
         
     def test_anime_standard_round(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_round')
+        self._test_names(np, 'anime_standard_round',verbose=True)
         
     def test_anime_slash(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_slash')
         
     def test_anime_codec(self):
-        np = parser.NameParser(False,parser.NameParser.ALL_REGEX)
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_standard_codec')
         
     def test_anime_codec2(self):
-        np = parser.NameParser(False,parser.NameParser.ALL_REGEX)
-        self._test_names(np, 'anime_standard_codec2',verbose=True)
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
+        self._test_names(np, 'anime_standard_codec2')
                 
     def test_anime_bare(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_bare',verbose=True)
+        self._test_names(np, 'anime_bare')
 
     def test_standard_file_names(self):
         np = parser.NameParser()
