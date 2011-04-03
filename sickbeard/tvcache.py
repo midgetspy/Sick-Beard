@@ -289,7 +289,7 @@ class TVCache():
         if parse_result.is_anime and len(parse_result.ab_episode_numbers) >= 1 and tvdb_id:
             # look it up
             curShow = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-            if curShow.is_anime:
+            if curShow.is_anime  and len(parse_result.ab_episode_numbers) > 0:
                 try:
                     (season, episodes) = helpers.get_all_episodes_from_absolute_number(curShow, None, parse_result.ab_episode_numbers)
                 except exceptions.EpisodeNotFoundByAbsoluteNumerException:

@@ -470,6 +470,8 @@ def update_anime_support():
     sickbeard.ANIMESUPPORT = is_anime_in_show_list()
 
 def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
+    if len(absolute_numbers) == 0:
+        raise EpisodeNotFoundByAbsoluteNumerException()
 
     episodes = []
     season = None
@@ -486,7 +488,7 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
             episodes.append(ep.episode)
         else:
             raise EpisodeNotFoundByAbsoluteNumerException()
-    season = ep.season # this will always take the last found seson so eps that cross the season border are not handeled well
+        season = ep.season # this will always take the last found seson so eps that cross the season border are not handeled well
     
     return (season, episodes)
 

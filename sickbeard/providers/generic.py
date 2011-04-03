@@ -294,7 +294,7 @@ class GenericProvider:
                 logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-            if show.is_anime and len(parse_result.ab_episode_numbers) >= 1:
+            if show.is_anime and len(parse_result.ab_episode_numbers) > 0:
                 try:
                     (actual_season, actual_episodes) = helpers.get_all_episodes_from_absolute_number(show, None, parse_result.ab_episode_numbers)
                 except exceptions.EpisodeNotFoundByAbsoluteNumerException:
