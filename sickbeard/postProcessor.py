@@ -36,6 +36,7 @@ from sickbeard import history
 from sickbeard import logger
 from sickbeard import notifiers
 from sickbeard import show_name_helpers
+from sickbeard import scene_exceptions
 
 from sickbeard import encodingKludge as ek
 
@@ -340,7 +341,7 @@ class PostProcessor(object):
         # for each possible interpretation of that scene name
         for cur_name in name_list:
             self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
-            scene_id = show_name_helpers.get_scene_exception_by_name(cur_name)
+            scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
             if scene_id:
                 self._log(u"Scene exception lookup got tvdb id "+str(scene_id)+u", using that", logger.DEBUG)
                 _finalize(parse_result)
