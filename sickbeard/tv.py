@@ -1065,8 +1065,6 @@ class TVEpisode(object):
             sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season != 0 AND absolute_number = ?", [self.show.tvdbid, episode])
             useInfoFromDB = True
             
-        logger.log(str(self.show.tvdbid) + ": sqlResult length " +str( len(sqlResults) ) +" and its contents "+ str(sqlResults), logger.DEBUG)
-            
         if len(sqlResults) > 1:
             raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
         elif len(sqlResults) == 0:
