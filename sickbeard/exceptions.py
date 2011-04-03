@@ -77,3 +77,6 @@ class CantUpdateException(SickBeardException):
 
 class PostProcessingFailed(SickBeardException):
 	"Post-processing the episode failed"
+		
+class EpisodeNotFoundByAbsoluteNumerException(SickBeardException):
+	"The show wasn't found in the DB while looking at Absolute Numbers"
