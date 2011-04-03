@@ -17,6 +17,8 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 from sickbeard.common import countryList
+from sickbeard.helpers import sanitizeSceneName
+from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
 from sickbeard import db
 
@@ -51,23 +53,6 @@ def filterBadReleases(name):
             return False
 
     return True
-
-def sanitizeSceneName (name, ezrss=False):
-    if not ezrss:
-        bad_chars = ",:()'!?"
-    else:
-        bad_chars = ",()'?"
-
-    for x in bad_chars:
-        name = name.replace(x, "")
-
-    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
-    name = re.sub("\.\.*", ".", name)
-
-    if name.endswith('.'):
-        name = name[:-1]
-
-    return name
 
 def sceneToNormalShowNames(name):
 
@@ -186,6 +171,30 @@ def makeSceneSearchString (episode):
 
     return toReturn
 
+def isGoodResult(name, show, log=True):
+    """
+    Use an automatically-created regex to make sure the result actually is the show it claims to be
+    """
+
+    all_show_names = allPossibleShowNames(show)
+    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
+
+    for curName in set(showNames):
+        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
+        curRegex = '^' + escaped_name + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
+        if log:
+            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
+
+        match = re.search(curRegex, name, re.I)
+
+        if match:
+            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
+            return True
+
+    if log:
+        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+    return False
+
 def allPossibleShowNames(show):
 
     showNames = [show.name]
@@ -215,90 +224,4 @@ def allPossibleShowNames(show):
     showNames += newShowNames
 
     return showNames
-
-def isGoodResult(name, show, log=True):
-    """
-    Use an automatically-created regex to make sure the result actually is the show it claims to be
-    """
-
-    all_show_names = allPossibleShowNames(show)
-    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
-
-    for curName in set(showNames):
-        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
-        curRegex = '^' + escaped_name + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
-        if log:
-            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
-
-        match = re.search(curRegex, name, re.I)
-
-        if match:
-            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
-            return True
-
-    if log:
-        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
-    return False
-
-def get_scene_exceptions(tvdb_id):
-    """
-    Given a tvdb_id, return a list of all the scene exceptions.
-    """
-
-    myDB = db.DBConnection("cache.db")
-    exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
-    return [cur_exception["show_name"] for cur_exception in exceptions]
-
-def get_scene_exception_by_name(show_name):
-    """
-    Given a show name, return the tvdbid of the exception, None if no exception
-    is present.
-    """
-
-    myDB = db.DBConnection("cache.db")
-    
-    # try the obvious case first
-    exception_result = myDB.select("SELECT tvdb_id FROM scene_exceptions WHERE LOWER(show_name) = ?", [show_name.lower()])
-    if exception_result:
-        return int(exception_result[0]["tvdb_id"])
-
-    all_exception_results = myDB.select("SELECT show_name, tvdb_id FROM scene_exceptions")
-    for cur_exception in all_exception_results:
-
-        cur_exception_name = cur_exception["show_name"]
-        cur_tvdb_id = int(cur_exception["tvdb_id"])
-
-        if show_name.lower() in (cur_exception_name.lower(), sanitizeSceneName(cur_exception_name).lower().replace('.',' ')):
-            logger.log(u"Scene exception lookup got tvdb id "+str(cur_tvdb_id)+u", using that", logger.DEBUG)
-            return cur_tvdb_id
-
-    return None
-
-def retrieve_exceptions():
-
-    exception_dict = {}
-
-    url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
-    open_url = urllib.urlopen(url)
-    
-    # each exception is on one line with the format tvdb_id: 'show name 1', 'show name 2', etc
-    for cur_line in open_url.readlines():
-        tvdb_id, sep, aliases = cur_line.partition(':')
-        
-        if not aliases:
-            continue
-    
-        tvdb_id = int(tvdb_id)
-        
-        # regex out the list of shows, taking \' into account
-        alias_list = [re.sub(r'\\(.)', r'\1', x) for x in re.findall(r"'(.*?)(?<!\\)',?", aliases)]
-        
-        exception_dict[tvdb_id] = alias_list
-
-    myDB = db.DBConnection("cache.db")
-    myDB.action("DELETE FROM scene_exceptions WHERE 1=1")
-    
-    for cur_tvdb_id in exception_dict:
-        for cur_exception in exception_dict[cur_tvdb_id]:
-            myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
 

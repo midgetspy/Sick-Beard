@@ -29,6 +29,7 @@ from sickbeard.common import *
 from sickbeard.tv import TVShow
 from sickbeard import exceptions, helpers, logger, ui, db
 from sickbeard import generic_queue
+from sickbeard import name_cache
 
 class ShowQueue(generic_queue.GenericQueue):
 
@@ -177,6 +178,10 @@ class QueueItemAdd(ShowQueueItem):
         ShowQueueItem.__init__(self, ShowQueueActions.ADD, self.show)
         
     def _getName(self):
+        """
+        Returns the show name if there is a show object created, if not returns
+        the dir that the show is being added to.
+        """
         if self.show == None:
             return self.showDir
         return self.show.name
@@ -184,6 +189,10 @@ class QueueItemAdd(ShowQueueItem):
     show_name = property(_getName)
 
     def _isLoading(self):
+        """
+        Returns True if we've gotten far enough to have a show object, or False
+        if we still only know the folder name.
+        """
         if self.show == None:
             return True
         return False
@@ -205,6 +214,9 @@ class QueueItemAdd(ShowQueueItem):
         
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 s = t[self.tvdb_id]
+
+                # this usually only happens if they have an NFO in their show dir which gave us a TVDB ID that has no
+                # proper english version of the show
                 if not s or not s['seriesname']:
                     ui.flash.error("Unable to add show", "Show in "+str(self.showDir)+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
                     self._finishEarly()
@@ -213,6 +225,9 @@ class QueueItemAdd(ShowQueueItem):
                 ui.flash.error("Unable to add show", "Unable to look up the show in "+str(self.showDir)+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
                 self._finishEarly()
                 return
+
+            # clear the name cache
+            name_cache.clearCache()
 
             newShow = TVShow(self.tvdb_id, self.lang)
             newShow.loadFromTVDB()

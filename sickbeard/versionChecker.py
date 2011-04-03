@@ -19,7 +19,7 @@
 import sickbeard
 from sickbeard import helpers, version, ui
 from sickbeard import logger
-from sickbeard import sceneHelpers
+from sickbeard import scene_exceptions
 
 import os, os.path, platform, shutil, time
 import subprocess, re
@@ -50,7 +50,7 @@ class CheckVersion():
         self.check_for_new_version()
         
         # refresh scene exceptions too
-        sceneHelpers.retrieve_exceptions()
+        scene_exceptions.retrieve_exceptions()
 
     def find_install_type(self):
         """

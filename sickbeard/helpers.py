@@ -458,6 +458,34 @@ def fixSetGroupID(childPath):
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)
 
+def sanitizeSceneName (name, ezrss=False):
+    """
+    Takes a show name and returns the "scenified" version of it.
+    
+    ezrss: If true the scenified version will follow EZRSS's cracksmoker rules as best as possible
+    
+    Returns: A string containing the scene version of the show name given.
+    """
+
+    if not ezrss:
+        bad_chars = ",:()'!?"
+    # ezrss leaves : and ! in their show names as far as I can tell
+    else:
+        bad_chars = ",()'?"
+
+    # strip out any bad chars
+    for x in bad_chars:
+        name = name.replace(x, "")
+
+    # tidy up stuff that doesn't belong in scene names
+    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
+    name = re.sub("\.\.*", ".", name)
+
+    if name.endswith('.'):
+        name = name[:-1]
+
+    return name
+
 
 if __name__ == '__main__':
     import doctest

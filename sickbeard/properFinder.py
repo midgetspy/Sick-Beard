@@ -22,7 +22,7 @@ import operator
 import sickbeard
 
 from sickbeard import db
-from sickbeard import classes, common, helpers, logger, sceneHelpers
+from sickbeard import classes, common, helpers, logger, show_name_helpers
 from sickbeard import providers
 from sickbeard import search
 from sickbeard import history
@@ -118,7 +118,7 @@ class ProperFinder():
                 genericName = self._genericName(parse_result.series_name)
 
                 # get the scene name masks
-                sceneNames = set(sceneHelpers.makeSceneShowSearchStrings(curShow))
+                sceneNames = set(show_name_helpers.makeSceneShowSearchStrings(curShow))
 
                 # for each scene name mask
                 for curSceneName in sceneNames:
@@ -140,7 +140,7 @@ class ProperFinder():
             if curProper.tvdbid == -1:
                 continue
             
-            if not sceneHelpers.filterBadReleases(curProper.name):
+            if not show_name_helpers.filterBadReleases(curProper.name):
                 logger.log(u"Proper "+curProper.name+" isn't a valid scene release that we want, igoring it", logger.DEBUG)
                 continue
 

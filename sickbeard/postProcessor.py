@@ -35,7 +35,7 @@ from sickbeard import helpers
 from sickbeard import history
 from sickbeard import logger
 from sickbeard import notifiers
-from sickbeard import sceneHelpers
+from sickbeard import show_name_helpers
 
 from sickbeard import encodingKludge as ek
 
@@ -327,7 +327,7 @@ class PostProcessor(object):
         to_return = (None, season, episodes)
     
         # do a scene reverse-lookup to get a list of all possible names
-        name_list = sceneHelpers.sceneToNormalShowNames(parse_result.series_name)
+        name_list = show_name_helpers.sceneToNormalShowNames(parse_result.series_name)
 
         if not name_list:
             return (None, season, episodes)
@@ -340,7 +340,7 @@ class PostProcessor(object):
         # for each possible interpretation of that scene name
         for cur_name in name_list:
             self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
-            scene_id = sceneHelpers.get_scene_exception_by_name(cur_name)
+            scene_id = show_name_helpers.get_scene_exception_by_name(cur_name)
             if scene_id:
                 self._log(u"Scene exception lookup got tvdb id "+str(scene_id)+u", using that", logger.DEBUG)
                 _finalize(parse_result)
