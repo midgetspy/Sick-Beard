@@ -286,18 +286,14 @@ class TVCache():
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                 return False
 
-        # TODO: refactor this into a general "global" function
         if parse_result.is_anime and len(parse_result.ab_episode_numbers) >= 1 and tvdb_id:
             # look it up
             curShow = helpers.findCertainShow(sickbeard.showList, tvdb_id)
             if curShow.is_anime:
-                if curShow.is_anime:
-                    episodes = []
-                    for ab_episode_number in parse_result.ab_episode_numbers:
-                        ep = curShow.getEpisode(None, None,absolute_number=ab_episode_number)
-                        episodes.append(ep.episode)
-                else:
-                    logger.log(u"Unable to find episode, in our db, with absolute number "+str(parse_result.ab_episode_numbers[0])+" for show "+parse_result.series_name+", skipping", logger.WARNING)
+                try:
+                    (season, episodes) = helpers.get_all_episodes_from_absolute_number(curShow, None, parse_result.ab_episode_numbers)
+                except exceptions.EpisodeNotFoundByAbsoluteNumerException:
+                    logger.log(str(tvdb_id) + ": DB objekt with absolute number " + str(parse_result.ab_episode_numbers) + " was not found, TheTvDB lacking behind?")
                     return False 
             else:
                 logger.log(u""+str(name)+" was matched to the show "+str(curShow.name)+" as an anime but the show is not marked as an anime", logger.WARNING)
