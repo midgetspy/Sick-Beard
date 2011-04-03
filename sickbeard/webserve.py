@@ -1798,6 +1798,13 @@ class ErrorLogs:
 class Home:
 
     @cherrypy.expose
+    def is_alive(self):
+        if sickbeard.started:
+            return "yep"
+        else:
+            return "nope"
+
+    @cherrypy.expose
     def index(self):
 
         t = PageTemplate(file="home.tmpl")
@@ -1914,13 +1921,13 @@ class Home:
         if str(pid) != str(sickbeard.PID):
             redirect("/home")
 
+        t = PageTemplate(file="restart.tmpl")
+        t.submenu = HomeMenu()
+
         # do a soft restart
         threading.Timer(2, sickbeard.invoke_restart, [False]).start()
 
-        title = "Restarting"
-        message = "Sick Beard is restarting, refresh in 30 seconds."
-
-        return _genericMessage(title, message)
+        return _munge(t)
 
     @cherrypy.expose
     def update(self, pid=None):
@@ -1933,7 +1940,8 @@ class Home:
         if updated:
             # do a hard restart
             threading.Timer(2, sickbeard.invoke_restart, [False]).start()
-            return "Sick Beard is restarting, refresh in 30 seconds."
+            t = PageTemplate(file="restart_bare.tmpl")
+            return _munge(t)
         else:
             return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
 

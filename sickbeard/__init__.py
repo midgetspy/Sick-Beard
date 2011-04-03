@@ -81,6 +81,7 @@ VERSION_NOTIFY = None
 
 INIT_LOCK = Lock()
 __INITIALIZED__ = False
+started = False
 
 LOG_DIR = None
 
@@ -702,7 +703,8 @@ def start():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
-            properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler
+            properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            started
 
     with INIT_LOCK:
 
@@ -731,11 +733,14 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
+            
+            started = True
 
 def halt ():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
-            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler
+            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            started
 
     with INIT_LOCK:
 
@@ -803,6 +808,7 @@ def halt ():
 
 
             __INITIALIZED__ = False
+            started = False
 
 
 def sig_handler(signum=None, frame=None):
