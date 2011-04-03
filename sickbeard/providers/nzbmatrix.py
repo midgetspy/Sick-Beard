@@ -55,7 +55,11 @@ class NZBMatrixProvider(generic.NZBProvider):
 
         sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(ep_obj))
 
-        # search for all show names and episode numbers like ("a","b","c") in a single search
+        # search for all show names and episode numbers like (%2b"show-a"%2b"episode-a")+(%2b"show-b"%2b"episode-b") in a single search
+        nzbMatrixSearchStrings = []
+        for searchString in sceneSearchStrings:
+            searchWords = searchString.split('.')
+            nzbMatrixSearchStrings.append('(+"' + '"+"'.join(searchWords) + '")')
         return ['("' + '","'.join(sceneSearchStrings) + '")']
 
     def _doSearch(self, curString, quotes=False, show=None):
@@ -70,9 +74,13 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
                   "subcat": "6,41",
-                  "english": 1,
                   "ssl": 1,
                   "scenename": 1}
+        if show.is_anime:
+            params["subcat"] = "6,41,28"
+        else:
+            params["english"] = 1
+            
 
         # if the show is a documentary use those cats on nzbmatrix
         if show and show.genre and 'documentary' in show.genre.lower():
