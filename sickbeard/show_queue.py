@@ -239,6 +239,10 @@ class QueueItemAdd(ShowQueueItem):
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.seasonfolders = self.season_folders if self.season_folders != None else sickbeard.SEASON_FOLDERS_DEFAULT
             self.show.paused = False
+            
+            # be smartish about this
+            if self.show.genre and "talk show" in self.show.genre.lower():
+                self.show.air_by_date = 1
 
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to add show due to an error with TVDB: "+str(e).decode('utf-8'), logger.ERROR)

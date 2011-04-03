@@ -384,3 +384,18 @@ class SetNzbTorrentSettings(PopulateRootDirs):
         sickbeard.save_config()
         
         self.incDBVersion()
+
+class FixAirByDateSetting(SetNzbTorrentSettings):
+    
+    def test(self):
+        return self.checkDBVersion() >= 9
+
+    def execute(self):
+        
+        shows = self.connection.select("SELECT * FROM tv_shows")
+        
+        for cur_show in shows:
+            if cur_show["genre"] and "talk show" in cur_show["genre"].lower():
+                self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
+        
+        self.incDBVersion()

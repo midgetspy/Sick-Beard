@@ -248,7 +248,7 @@ class PostProcessor(object):
             # if we couldn't find the right one then just use the season folder defaut format
             if season_folder == '':
                 # for air-by-date shows use the year as the season folder
-                if ep_obj.show.is_air_by_date:
+                if ep_obj.show.air_by_date:
                     season_folder = str(ep_obj.airdate.year)
                 else:
                     season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)

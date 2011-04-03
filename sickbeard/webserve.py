@@ -2297,7 +2297,7 @@ class Home:
 
                 if int(status) == WANTED:
                     # figure out what segment the episode is in and remember it so we can backlog it
-                    if epObj.show.is_air_by_date:
+                    if epObj.show.air_by_date:
                         ep_segment = str(epObj.airdate)[:7]
                     else:
                         ep_segment = epObj.season

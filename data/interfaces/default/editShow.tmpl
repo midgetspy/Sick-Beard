@@ -61,12 +61,8 @@ Use Season Folders: <input type="checkbox" name="seasonfolders" #if $show.season
 Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "checked=\"checked\"" else ""# /><br /><br />
 
 Air by date:
-#if ($show.genre and "Talk Show" not in $show.genre) or not $show.genre:
 <input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "checked=\"checked\"" else ""# /><br />
 (check this if the show is released as Show.03.02.2010 rather than Show.S02E03)
-#else
-<input type="checkbox" disabled=\"disabled\" checked=\"checked\" />
-#end if
 <br /><br />
 <input type="submit" value="Submit" />
 </form>

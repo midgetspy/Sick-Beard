@@ -78,11 +78,6 @@ class TVShow(object):
 
         self.saveToDB()
 
-    def _is_air_by_date(self):
-        return self.air_by_date or (self.genre and "Talk Show" in self.genre)
-    
-    is_air_by_date = property(_is_air_by_date)
-    
     def _getLocation(self):
         if ek.ek(os.path.isdir, self._location):
             return self._location
@@ -1396,7 +1391,7 @@ class TVEpisode(object):
         if naming_quality == None:
             naming_quality = sickbeard.NAMING_QUALITY
 
-        if ((self.show.genre and "Talk Show" in self.show.genre) or self.show.air_by_date) and sickbeard.NAMING_DATES:
+        if self.show.air_by_date and sickbeard.NAMING_DATES:
             try:
                 goodEpString = self.airdate.strftime("%Y.%m.%d")
             except ValueError:

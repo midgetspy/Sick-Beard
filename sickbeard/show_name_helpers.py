@@ -34,6 +34,14 @@ resultFilters = ("sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "dutch", "swedish")
 
 def filterBadReleases(name):
+    """
+    Filters out non-english and just all-around stupid releases by comparing them
+    to the resultFilters contents.
+    
+    name: the release name to check
+    
+    Returns: True if the release name is OK, False if it's bad.
+    """
 
     try:
         fp = NameParser()
@@ -55,6 +63,13 @@ def filterBadReleases(name):
     return True
 
 def sceneToNormalShowNames(name):
+    """
+    Takes a show name from a scene dirname and converts it to a more "human-readable" format.
+    
+    name: The show name to convert
+    
+    Returns: a list of all the possible "normal" names
+    """
 
     if not name:
         return []
@@ -92,7 +107,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
 
     myDB = db.DBConnection()
 
-    if show.is_air_by_date:
+    if show.air_by_date:
         numseasons = 0
         
         # the search string for air by date shows is just 
@@ -132,7 +147,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                 toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
             else:
                 term_list = [x+'*' for x in seasonStrings]
-                if show.is_air_by_date:
+                if show.air_by_date:
                     term_list = ['"'+x+'"' for x in term_list]
 
                 toReturn.append('"'+curShow+'"')
@@ -151,7 +166,7 @@ def makeSceneSearchString (episode):
     numseasons = int(numseasonsSQlResult[0][0])
 
     # see if we should use dates instead of episodes
-    if episode.show.is_air_by_date and episode.airdate != datetime.date.fromordinal(1):
+    if episode.show.air_by_date and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate)]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
@@ -196,6 +211,14 @@ def isGoodResult(name, show, log=True):
     return False
 
 def allPossibleShowNames(show):
+    """
+    Figures out every possible variation of the name for a particular show. Includes TVDB name, TVRage name,
+    country codes on the end, eg. "Show Name (AU)", and any scene exception names.
+    
+    show: a TVShow object that we should get the names of
+    
+    Returns: a list of all the possible show names
+    """
 
     showNames = [show.name]
     showNames += [name for name in get_scene_exceptions(show.tvdbid)]

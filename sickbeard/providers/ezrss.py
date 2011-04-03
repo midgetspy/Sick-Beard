@@ -59,7 +59,7 @@ class EZRSSProvider(generic.TorrentProvider):
         
         results = {}
         
-        if show.is_air_by_date:
+        if show.air_by_date:
             logger.log(u"EZRSS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
             return results
         
@@ -89,7 +89,7 @@ class EZRSSProvider(generic.TorrentProvider):
                    
         params['show_name'] = sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
         
-        if ep_obj.show.is_air_by_date:
+        if ep_obj.show.air_by_date:
             params['date'] = str(ep_obj.airdate)
         else:
             params['season'] = ep_obj.season
