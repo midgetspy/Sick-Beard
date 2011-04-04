@@ -1,5 +1,14 @@
 #import sickbeard
 #from sickbeard.common import *
+        
+        <div class="field-pair alt">
+            <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""# />
+            <label for="seasonFolders" class="clearfix">
+                <span class="component-title">Season Folders</span>
+                <span class="component-desc">Store episodes in season folders?</span>
+            </label>
+        </div>
+		
         <div class="field-pair">
             <label for="statusSelect" class="nocheck clearfix">
                 <span class="component-title">
@@ -12,12 +21,12 @@
                 <span class="component-desc">Set the initial status of missing episodes</span>
             </label>
         </div>
-
-        <div class="field-pair alt">
-            <input type="checkbox" name="seasonFolders" id="seasonFolders" #if $sickbeard.SEASON_FOLDERS_DEFAULT then "checked=\"checked\"" else ""# />
-            <label for="seasonFolders" class="clearfix">
-                <span class="component-title">Season Folders</span>
-                <span class="component-desc">Store episodes in season folders?</span>
+		
+		<div class="field-pair alt">
+            <input type="checkbox" name="anime" id="anime" #if $sickbeard.ANIME_DEFAULT then "checked=\"checked\"" else ""# />
+            <label for="anime" class="clearfix">
+                <span class="component-title">Anime</span>
+                <span class="component-desc">Is this show an Anime?</span>
             </label>
         </div>
 

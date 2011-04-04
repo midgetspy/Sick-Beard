@@ -610,7 +610,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities, anime):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -631,8 +631,15 @@ class ConfigGeneral:
             defaultSeasonFolders = 1
         else:
             defaultSeasonFolders = 0
-
+            
         sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+        
+        if anime == "true":
+            anime = 1
+        else:
+            anime = 0
+
+        sickbeard.ANIME_DEFAULT = int(anime)
 
     
     @cherrypy.expose
@@ -1583,7 +1590,7 @@ class NewHomeAddShows:
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
                    anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
-                   other_shows=None, skipShow=None):
+                   other_shows=None, skipShow=None, anime=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
@@ -1648,6 +1655,11 @@ class NewHomeAddShows:
             seasonFolders = 1
         else:
             seasonFolders = 0
+            
+        if anime == "on":
+            anime = 1
+        else:
+            anime = 0
         
         if not anyQualities:
             anyQualities = []
@@ -1660,7 +1672,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang)
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang, anime)
         ui.flash.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()

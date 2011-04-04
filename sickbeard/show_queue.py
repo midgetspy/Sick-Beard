@@ -114,8 +114,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, season_folders=None, lang="en"):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, season_folders, lang)
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, season_folders=None, lang="en", anime=0):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, season_folders, lang, anime)
         self.queue.append(queueItemObj)
 
         return queueItemObj
@@ -163,7 +163,7 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, default_status, quality, season_folders, lang):
+    def __init__(self, tvdb_id, showDir, default_status, quality, season_folders, lang, anime):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
@@ -171,6 +171,7 @@ class QueueItemAdd(ShowQueueItem):
         self.quality = quality
         self.season_folders = season_folders
         self.lang = lang
+        self.anime = anime
 
         self.show = None
 
@@ -238,6 +239,7 @@ class QueueItemAdd(ShowQueueItem):
             self.show.location = self.showDir
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.seasonfolders = self.season_folders if self.season_folders != None else sickbeard.SEASON_FOLDERS_DEFAULT
+            self.show.anime = self.anime if self.anime != None else sickbeard.ANIME_DEFAULT
             self.show.paused = False
             
             # be smartish about this
