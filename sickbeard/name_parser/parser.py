@@ -237,7 +237,7 @@ class NameParser(object):
         final_result.air_date = self._combine_results(file_name_result, dir_name_result, 'air_date')
         final_result.ab_episode_numbers = self._combine_results(file_name_result, dir_name_result, 'ab_episode_numbers')
 
-        if not final_result.air_date and not final_result.is_anime:
+        if not final_result.air_date:
             final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
             final_result.episode_numbers = self._combine_results(file_name_result, dir_name_result, 'episode_numbers')
         
@@ -329,7 +329,7 @@ class ParseResult(object):
         if self.air_by_date:
             to_return += 'abd: '+str(self.air_date)
         if self.ab_episode_numbers:
-            to_return += 'absolute_numbers: '+str(self.ab_episode_numbers)
+            to_return += ' absolute_numbers: '+str(self.ab_episode_numbers)
 
         if self.extra_info:
             to_return += ' - ' + self.extra_info
@@ -348,7 +348,7 @@ class ParseResult(object):
     air_by_date = property(_is_air_by_date)
     
     def _is_anime(self):
-        if self.season_number == None and len(self.episode_numbers) == 0 and self.ab_episode_numbers:
+        if self.ab_episode_numbers:
             return True
         return False
     is_anime = property(_is_anime)
