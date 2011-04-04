@@ -185,7 +185,7 @@ anime_ep_regexes = [
                (?P<ep_ab_num>\d{1,3})                                       # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
                (v(?P<version>[0-9]))?                                       # version
-               [ ._-]+\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
+               [ ._-]+\[(?P<extra_info>(\d{3,4}[xp]?\d{0,3})|XviD)[ ._-]?[\w\s]*\] # Source_Quality_Etc-
                .*?                                                          # Separator and EOL
                '''),
                ('anime_standard_round',
@@ -242,14 +242,65 @@ anime_ep_regexes = [
                [ ._-]*\[h264-(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
                .*?                                                          # Separator and EOL
                '''),
-               ('anime_bare',
                
-               # One Piece 102
+               ('anime_and_normal',
+               # Bleach - s16e03-04 - 313-314
+               # Bleach.s16e03-04.313-314
+               # Bleach s16e03e04 313-314
                '''
-               ^(?P<series_name>.+?)[ ._]*                                   # Show_Name and separator
-               (?P<ep_ab_num>\d{1,3})                                       # E01
-               (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
-               (v(?P<version>[0-9]))?                                       # version
-               .*?                                                          # Separator and EOL
+               ^(?P<series_name>.+?)[ ._-]+                 # start of string and series name and non optinal separator
+               [sS](?P<season_num>\d+)[. _-]*               # S01 and optional separator
+               [eE](?P<ep_num>\d+)                          # epipisode E02
+               (([. _-]*e|-)                                # linking e/- char
+               (?P<extra_ep_num>\d+))*                      # additional E03/etc
+               ([ ._-]{2,}|[ ._]+)                          # if "-" is used to separate at least something else has to be there(->{2,}) "s16e03-04-313-314" would make sens any way
+               (?P<ep_ab_num>\d{1,3})                       # absolute number
+               (-(?P<extra_ab_ep_num>\d{1,3}))?             # "-" as separator and anditional absolute number, all optinal
+               (v(?P<version>[0-9]))?                       # the version e.g. "v2"
+               .*?
+               '''
+
+               ),
+               
+               ('anime_and_normal_reverse',
+               # Bleach - 313-314 - s16e03-04
+               '''
+               ^(?P<series_name>.+?)[ ._-]+                 # start of string and series name and non optinal separator
+               (?P<ep_ab_num>\d{1,3})                       # absolute number
+               (-(?P<extra_ab_ep_num>\d{1,3}))?             # "-" as separator and anditional absolute number, all optinal
+               (v(?P<version>[0-9]))?                       # the version e.g. "v2"
+               ([ ._-]{2,}|[ ._]+)                          # if "-" is used to separate at least something else has to be there(->{2,}) "s16e03-04-313-314" would make sens any way
+               [sS](?P<season_num>\d+)[. _-]*               # S01 and optional separator
+               [eE](?P<ep_num>\d+)                          # epipisode E02
+               (([. _-]*e|-)                                # linking e/- char
+               (?P<extra_ep_num>\d+))*                      # additional E03/etc
+               .*?
+               '''
+
+               ),
+               
+               ('anime_and_normal_front',
+               # 165.Naruto Shippuuden.s08e014
+               '''
+               ^(?P<ep_ab_num>\d{1,3})                       # start of string and absolute number
+               (-(?P<extra_ab_ep_num>\d{1,3}))?              # "-" as separator and anditional absolute number, all optinal
+               (v(?P<version>[0-9]))?[ ._-]+                 # the version e.g. "v2"
+               (?P<series_name>.+?)[ ._-]+
+               [sS](?P<season_num>\d+)[. _-]*                 # S01 and optional separator
+               [eE](?P<ep_num>\d+) 
+               (([. _-]*e|-)                               # linking e/- char
+               (?P<extra_ep_num>\d+))*                      # additional E03/etc
+               .*?
+               '''
+               ),
+               
+               ('anime_bare',
+               # One Piece - 102
+               '''
+               ^(?P<series_name>.+?)[ ._-]+                         # Show_Name and separator
+               (?P<ep_ab_num>\d{3})                                      # E01
+               (-(?P<extra_ab_ep_num>\d{3}))?                            # E02
+               (v(?P<version>[0-9]))?                                     # v2
+               .*?                                                         # Separator and EOL
                ''')
                ]

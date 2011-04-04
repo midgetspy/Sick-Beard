@@ -23,7 +23,7 @@ simple_test_cases = {
               'Show Name - S06E01 - 2009-12-20 - Ep Name': parser.ParseResult(None, 'Show Name', 6, [1], '2009-12-20 - Ep Name'),
               'Show Name - S06E01 - -30-': parser.ParseResult(None, 'Show Name', 6, [1], '30-' ),
               'Show-Name-S06E01-720p': parser.ParseResult(None, 'Show-Name', 6, [1], '720p' ),
-              'Show-Name-S06E01-1080i': parser.ParseResult(None, 'Show-Name', 6, [1], '1080i' ),
+              'Show-Name-S06E01-1080i': parser.ParseResult(None, 'Show-Name', 6, [1], '1080i' )
               },
               
               'fov': {
@@ -100,10 +100,10 @@ simple_test_cases = {
               'anime_standard': {
               '[Tsuki] Bleach - 301 [1280x720][61D1D4EE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'Tsuki', None, [301]),
               '[Tsuki] Fairy Tail - 70 [1280x720][C4807111]': parser.ParseResult(None, 'Fairy Tail', None, [], '1280x720', 'Tsuki', None, [70]),
+              '[Tsuki] Fairy Tail - 72 [XviD][C4807111]': parser.ParseResult(None, 'Fairy Tail', None, [], 'XviD', 'Tsuki', None, [72]),
               '[SGKK] Bleach 312v2 [720p MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p', 'SGKK', None, [312]),
               '[BSS-Anon] Tengen Toppa Gurren Lagann - 22-23 [1280x720][h264][6039D9AF]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '1280x720', 'BSS-Anon', None, [22,23]),
               '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [], '480p', 'SJSUBS', None, [2]),
-              #'[SGKK] Bleach 312 [480p/MKV]': parser.ParseResult(None, 'Bleach', None, [312], '480p', 'SGKK')
               },
                
               'anime_standard_round': {
@@ -129,14 +129,35 @@ simple_test_cases = {
               '[UTW]_Fractale_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractale', None, [], '720p', 'UTW', None, [1])
                                     
               },
-               
+              'anime_and_normal':{
+              'Bleach - s02e03 - 012 - Name & Name': parser.ParseResult(None, 'Bleach', 2, [3], None, None, None, [12]),
+              'Bleach - s02e03e04 - 012-013 - Name & Name': parser.ParseResult(None, 'Bleach', 2, [3,4], None, None, None, [12,13]),
+              'Bleach - s16e03-04 - 313-314': parser.ParseResult(None, 'Bleach', 16, [3,4], None, None, None, [313,314]),
+              'Blue Submarine No. 6 s16e03e04 313-314': parser.ParseResult(None, 'Blue Submarine No. 6', 16, [3,4], None, None, None, [313,314]),
+              'Bleach.s16e03-04.313-314': parser.ParseResult(None, 'Bleach', 16, [3,4], None, None, None, [313,314]),
+              },
+              
+              'anime_and_normal_reverse':{
+              'Bleach - 012 - s02e03 - Name & Name': parser.ParseResult(None, 'Bleach', 2, [3], None, None, None, [12]),
+              'Blue Submarine No. 6 - 012-013 - s02e03e04 - Name & Name': parser.ParseResult(None, 'Blue Submarine No. 6', 2, [3,4], None, None, None, [12,13]),
+              '07-GHOST - 012-013 - s02e03e04 - Name & Name': parser.ParseResult(None, '07-GHOST', 2, [3,4], None, None, None, [12,13]),
+              '3x3 Eyes - 012-013 - s02e03-04 - Name & Name': parser.ParseResult(None, '3x3 Eyes', 2, [3,4], None, None, None, [12,13]),
+              },
+              
+              'anime_and_normal_front':{
+              '165.Naruto Shippuuden.s08e014': parser.ParseResult(None, 'Naruto Shippuuden', 8, [14], None, None, None, [165]),
+              '165-166.Naruto Shippuuden.s08e014e015': parser.ParseResult(None, 'Naruto Shippuuden', 8, [14,15], None, None, None, [165,166]),
+              '165-166.07-GHOST.s08e014-015': parser.ParseResult(None, '07-GHOST', 8, [14,15], None, None, None, [165,166]),
+              '165-166.3x3 Eyes.S08E014E015': parser.ParseResult(None, '3x3 Eyes', 8, [14,15], None, None, None, [165,166]),
+              },
+                 
               'anime_bare' :{
               'One Piece 102': parser.ParseResult(None, 'One Piece', None, [], None, None, None, [102]),
-              'bleach 10': parser.ParseResult(None, 'bleach', None, [], None, None, None, [10]),
-              'Naruto Shippuden 314v2': parser.ParseResult(None, 'Naruto Shippuden', None, [], None, None, None, [314]),
-              'Naruto Shippuden 104-105': parser.ParseResult(None, 'Naruto Shippuden', None, [], None, None, None, [104,105]),
+              'bleach - 010': parser.ParseResult(None, 'bleach', None, [], None, None, None, [10]),
+              'Naruto Shippuden - 314v2': parser.ParseResult(None, 'Naruto Shippuden', None, [], None, None, None, [314]),
+              'Blue Submarine No. 6 104-105': parser.ParseResult(None, 'Blue Submarine No. 6', None, [], None, None, None, [104,105]),
+              'Samurai X: Trust & Betrayal (OVA) 001-002': parser.ParseResult(None, 'Samurai X: Trust & Betrayal (OVA)', None, [], None, None, None, [1,2]),
               }
-               
               
               }
 
@@ -238,10 +259,11 @@ class BasicTests(unittest.TestCase):
             
             if DEBUG or verbose:
                 print 'using: ', test_result.which_regex
-                print 'air_by_date:', test_result.air_by_date, 'air_date:', test_result.air_date
-                print 'anime:', test_result.is_anime, 'absolute number:', test_result.ab_episode_numbers
+                #print 'air_by_date:', test_result.air_by_date, 'air_date:', test_result.air_date
+                #print 'anime:', test_result.is_anime, 'absolute number:', test_result.ab_episode_numbers
                 print test_result
                 print result
+                print "----"
             self.assertEqual(test_result.which_regex, [section])
             self.assertEqual(test_result, result)
 
@@ -295,7 +317,7 @@ class BasicTests(unittest.TestCase):
         
     def test_anime_standard_round(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_round',verbose=True)
+        self._test_names(np, 'anime_standard_round')
         
     def test_anime_slash(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
@@ -309,9 +331,21 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_standard_codec2')
                 
+    def test_anime_and_normal(self):
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
+        self._test_names(np, 'anime_and_normal')
+                
+    def test_anime_and_normal_reverse(self):
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
+        self._test_names(np, 'anime_and_normal_reverse')
+                
+    def test_anime_and_normal_front(self):
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
+        self._test_names(np, 'anime_and_normal_front')
+
     def test_anime_bare(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_bare')
+        self._test_names(np, 'anime_bare',verbose=True)
 
     def test_standard_file_names(self):
         np = parser.NameParser()
