@@ -27,7 +27,7 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard import classes, sceneHelpers
+from sickbeard import classes
 
 from sickbeard import exceptions, logger, db
 from sickbeard.common import *
