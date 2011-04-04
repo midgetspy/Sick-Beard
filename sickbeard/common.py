@@ -150,7 +150,7 @@ class Quality:
     def nameQualityAnime(name):
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
         
-        if checkName(["360p"], any):
+        if checkName(["360p","XviD"], any):
             return Quality.SDTV
         elif checkName(["dvd","480p"], any):
             return Quality.SDDVD
