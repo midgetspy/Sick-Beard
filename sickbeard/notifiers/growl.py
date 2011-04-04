@@ -28,15 +28,18 @@ from lib.growl import gntp
 class GrowlNotifier:
 
     def test_notify(self, host, password):
-        return self._sendGrowl("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True)
+        sticky = sickbeard.GROWL_STICKY
+        return self._sendGrowl("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True,sticky=sticky)
 
     def notify_snatch(self, ep_name):
+        sticky = sickbeard.GROWL_STICKY
         if sickbeard.GROWL_NOTIFY_ONSNATCH:
-            self._sendGrowl(common.notifyStrings[common.NOTIFY_SNATCH], ep_name)
+            self._sendGrowl(common.notifyStrings[common.NOTIFY_SNATCH], ep_name, sticky=sticky)
 
     def notify_download(self, ep_name):
+        sticky = sickbeard.GROWL_STICKY
         if sickbeard.GROWL_NOTIFY_ONDOWNLOAD:
-            self._sendGrowl(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
+            self._sendGrowl(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name,sticky=sticky)
 
     def _send_growl(self, options,message=None):
     
@@ -62,6 +65,7 @@ class GrowlNotifier:
             notice.set_password(options['password'])
     
         #Optional
+        # determined by config option GROWL_STICKY
         if options['sticky']:
             notice.add_header('Notification-Sticky',options['sticky'])
         if options['priority']:
@@ -90,7 +94,7 @@ class GrowlNotifier:
 
         return response
 
-    def _sendGrowl(self, title="Sick Beard Notification", message=None, name=None, host=None, password=None, force=False):
+    def _sendGrowl(self, title="Sick Beard Notification", message=None, name=None, host=None, password=None, force=False, sticky=None):
     
         if not sickbeard.USE_GROWL and not force:
             return False
@@ -117,7 +121,7 @@ class GrowlNotifier:
         opts['title'] = title
         opts['app'] = 'SickBeard'
     
-        opts['sticky'] = None
+        opts['sticky'] = sticky
         opts['priority'] = None
         opts['debug'] = False
     
@@ -132,11 +136,11 @@ class GrowlNotifier:
         for pc in growlHosts:
             opts['host'] = pc[0]
             opts['port'] = pc[1]
-            logger.log(u"Sending growl to "+opts['host']+":"+str(opts['port'])+": "+message)
+            logger.log(u"Sending growl (sticky: "+str(opts['sticky'])+ ") to "+opts['host']+":"+str(opts['port'])+": "+message)
             try:
                 return self._send_growl(opts, message)
             except socket.error, e:
-                logger.log(u"Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+str(e).decode('utf-8'))
+                logger.log(u"Unable to send growl (sticky: "+str(opts['sticky'])+ ") to "+opts['host']+":"+str(opts['port'])+": "+str(e).decode('utf-8'))
                 return False
 
-notifier = GrowlNotifier
+notifier = GrowlNotifier 

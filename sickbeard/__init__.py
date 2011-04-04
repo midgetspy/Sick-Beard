@@ -207,6 +207,7 @@ PLEX_PASSWORD = None
 USE_GROWL = False
 GROWL_NOTIFY_ONSNATCH = False
 GROWL_NOTIFY_ONDOWNLOAD = False
+GROWL_STICKY = False
 GROWL_HOST = None
 GROWL_PASSWORD = None
 
@@ -349,8 +350,8 @@ def initialize(consoleLogging=True):
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
-                GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
+                TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
+                USE_GROWL, GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, GROWL_STICKY, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
@@ -537,6 +538,7 @@ def initialize(consoleLogging=True):
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onsnatch', 0))
         GROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Growl', 'growl_notify_ondownload', 0))
+        GROWL_STICKY = bool(check_setting_int(CFG, 'Growl', 'growl_sticky', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
 
@@ -1026,6 +1028,7 @@ def save_config():
     new_config['Growl']['use_growl'] = int(USE_GROWL)
     new_config['Growl']['growl_notify_onsnatch'] = int(GROWL_NOTIFY_ONSNATCH)
     new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD) 
+    new_config['Growl']['growl_sticky'] = int(GROWL_STICKY) 
     new_config['Growl']['growl_host'] = GROWL_HOST
     new_config['Growl']['growl_password'] = GROWL_PASSWORD
     

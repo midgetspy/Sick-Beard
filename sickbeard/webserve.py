@@ -1817,11 +1817,12 @@ class Home:
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
+        sticky = sickbeard.GROWL_STICKY
         result = notifiers.growl_notifier.test_notify(host, password)
-        if password==None or password=='':
-            pw_append = ''
+        if password==None or password=='': 
+            pw_append = " with sticky: "+str(sticky) 
         else:
-            pw_append = " with password: " + password
+            pw_append = " with sticky: "+str(sticky)+" and with password: " + password 
 
         if result:
             return "Test growl sent successfully to "+urllib.unquote_plus(host)+pw_append
