@@ -42,3 +42,10 @@ class AddSceneExceptions(InitialSchema):
 
     def execute(self):
         self.connection.action("CREATE TABLE scene_exceptions (exception_id INTEGER PRIMARY KEY, tvdb_id INTEGER KEY, show_name TEXT)")
+
+class AddSceneNameCache(AddSceneExceptions):
+    def test(self):
+        return self.hasTable("scene_names")
+
+    def execute(self):
+        self.connection.action("CREATE TABLE scene_names (tvdb_id INTEGER, name TEXT)")

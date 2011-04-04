@@ -44,14 +44,13 @@ class NotifoNotifier:
             "msg": msg.encode('utf-8'),
         })
 
-        data = urllib.urlopen(apiurl, data)
         try:
-            try:
-                result = json.load(data)
-            except IOError:
-                return False
-        finally:
-            data.close()
+	    data = urllib.urlopen(apiurl, data)	
+            result = json.load(data)
+        except IOError:
+            return False
+        
+        data.close()
 
         if result["status"] != "success" or result["response_message"] != "OK":
             return False

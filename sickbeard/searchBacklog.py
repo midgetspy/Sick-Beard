@@ -94,8 +94,8 @@ class BacklogSearcher:
         numSeasonResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes ep, tv_shows show WHERE season != 0 AND ep.showid = show.tvdb_id AND show.paused = 0 AND ep.airdate > ?", [fromDate.toordinal()])
 
         # get separate lists of the season/date shows
-        season_shows = [x for x in show_list if not x.is_air_by_date]
-        air_by_date_shows = [x for x in show_list if x.is_air_by_date]
+        season_shows = [x for x in show_list if not x.air_by_date]
+        air_by_date_shows = [x for x in show_list if x.air_by_date]
 
         # figure out how many segments of air by date shows we're going to do
         air_by_date_segments = []
@@ -113,7 +113,7 @@ class BacklogSearcher:
             if curShow.paused:
                 continue
 
-            if curShow.is_air_by_date:
+            if curShow.air_by_date:
                 segments = [x[1] for x in self._get_air_by_date_segments(curShow.tvdbid, fromDate)]
             else:
                 segments = self._get_season_segments(curShow.tvdbid, fromDate)

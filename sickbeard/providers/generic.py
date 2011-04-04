@@ -238,7 +238,7 @@ class GenericProvider:
                 logger.log(u"generic1: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
                     
-            if episode.show.is_air_by_date:
+            if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
                     continue

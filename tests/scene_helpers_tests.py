@@ -3,7 +3,7 @@ import unittest
 import sys, os.path
 sys.path.append(os.path.abspath('..'))
 
-from sickbeard import sceneHelpers, common
+from sickbeard import show_name_helpers, scene_exceptions, common
 
 import sickbeard
 from sickbeard import db
@@ -18,24 +18,24 @@ class Show:
 class SceneTests(unittest.TestCase):
     
     def _test_sceneToNormalShowNames(self, name, expected):
-        result = sceneHelpers.sceneToNormalShowNames(name)
+        result = show_name_helpers.sceneToNormalShowNames(name)
         self.assertTrue(len(set(expected).intersection(set(result))) == len(expected))
 
-        dot_result = sceneHelpers.sceneToNormalShowNames(name.replace(' ','.'))
+        dot_result = show_name_helpers.sceneToNormalShowNames(name.replace(' ','.'))
         dot_expected = [x.replace(' ','.') for x in expected]
         self.assertTrue(len(set(dot_expected).intersection(set(dot_result))) == len(dot_expected))
         
     def _test_allPossibleShowNames(self, name, tvdbid=0, tvrname=None, expected=[]):
         
-        result = sceneHelpers.allPossibleShowNames(Show(name, tvdbid, tvrname))
+        result = show_name_helpers.allPossibleShowNames(Show(name, tvdbid, tvrname))
         self.assertTrue(len(set(expected).intersection(set(result))) == len(expected))
 
     def _test_filterBadReleases(self, name, expected):
-        result = sceneHelpers.filterBadReleases(name)
+        result = show_name_helpers.filterBadReleases(name)
         self.assertEqual(result, expected)
 
     def _test_isGoodName(self, name, show):
-        self.assertTrue(sceneHelpers.isGoodResult(name, show))
+        self.assertTrue(show_name_helpers.isGoodResult(name, show))
 
     def test_isGoodName(self):
         self._test_isGoodName('Show.Name.S01E02.Test-Test', Show('Show/Name', 0, ''))
@@ -88,24 +88,24 @@ class SceneTests(unittest.TestCase):
 
 print 'Loading exceptions...',
 db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
-sceneHelpers.retrieve_exceptions()
+scene_exceptions.retrieve_exceptions()
 print 'done.'
 
 class SceneExceptionTestCase(unittest.TestCase):
 
     def test_sceneExceptionsEmpty(self):
-        self.assertEqual(sceneHelpers.get_scene_exceptions(0), [])
+        self.assertEqual(scene_exceptions.get_scene_exceptions(0), [])
 
     def test_sceneExceptionsBabylon5(self):
-        self.assertEqual(sorted(sceneHelpers.get_scene_exceptions(70726)), ['Babylon 5', 'Babylon5'])
+        self.assertEqual(sorted(scene_exceptions.get_scene_exceptions(70726)), ['Babylon 5', 'Babylon5'])
 
     def test_sceneExceptionByName(self):
-        self.assertEqual(sceneHelpers.get_scene_exception_by_name('Babylon5'), 70726)
-        self.assertEqual(sceneHelpers.get_scene_exception_by_name('babylon 5'), 70726)
-        self.assertEqual(sceneHelpers.get_scene_exception_by_name('Carlos 2010'), 164451)
+        self.assertEqual(scene_exceptions.get_scene_exception_by_name('Babylon5'), 70726)
+        self.assertEqual(scene_exceptions.get_scene_exception_by_name('babylon 5'), 70726)
+        self.assertEqual(scene_exceptions.get_scene_exception_by_name('Carlos 2010'), 164451)
         
     def test_sceneExceptionByNameEmpty(self):
-        self.assertEqual(sceneHelpers.get_scene_exception_by_name('nothing useful'), None)
+        self.assertEqual(scene_exceptions.get_scene_exception_by_name('nothing useful'), None)
 
 
 

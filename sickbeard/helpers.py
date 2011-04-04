@@ -317,7 +317,7 @@ def searchDBForShow(regShowName):
 
     myDB = db.DBConnection()
 
-    yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
+    yearRegex = "([^()]+?)\s*(\()?(\d{4})(?(2)\))$"
 
     for showName in showNames:
 
@@ -330,7 +330,7 @@ def searchDBForShow(regShowName):
         else:
             # if we didn't get exactly one result then try again with the year stripped off if possible
             match = re.match(yearRegex, showName)
-            if match:
+            if match and match.group(1):
                 logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
                 sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
 
@@ -491,6 +491,35 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
         season = ep.season # this will always take the last found seson so eps that cross the season border are not handeled well
     
     return (season, episodes)
+
+def sanitizeSceneName (name, ezrss=False):
+    """
+    Takes a show name and returns the "scenified" version of it.
+    
+    ezrss: If true the scenified version will follow EZRSS's cracksmoker rules as best as possible
+    
+    Returns: A string containing the scene version of the show name given.
+    """
+
+    if not ezrss:
+        bad_chars = ",:()'!?"
+    # ezrss leaves : and ! in their show names as far as I can tell
+    else:
+        bad_chars = ",()'?"
+
+    # strip out any bad chars
+    for x in bad_chars:
+        name = name.replace(x, "")
+
+    # tidy up stuff that doesn't belong in scene names
+    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
+    name = re.sub("\.\.*", ".", name)
+
+    if name.endswith('.'):
+        name = name[:-1]
+
+    return name
+
 
 if __name__ == '__main__':
     import doctest
