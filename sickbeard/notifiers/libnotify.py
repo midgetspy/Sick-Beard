@@ -67,6 +67,13 @@ class LibnotifyNotifier:
         except ImportError:
             logger.log(u"Unable to import pynotify. libnotify notifications won't work.")
             return False
+
+	try:
+            import gobject
+        except ImportError:
+            logger.log(u"Unable to import gobject. We can't catch an GError in display.")
+            return False
+
         if not pynotify.init('Sick Beard'):
             logger.log(u"Initialization of pynotify failed. libnotify notifications won't work.")
             return False
@@ -98,14 +105,7 @@ class LibnotifyNotifier:
         # If the session bus can't be acquired here a bunch of warning messages
         # will be printed but the call to show() will still return True.
         # pynotify doesn't seem too keen on error handling.
-        n = self.pynotify.Notification(title, message, icon_uri)
-
-        try:
-            import gobject
-        except ImportError:
-            logger.log(u"Unable to import gobject. We might not be able to catch an GError in display.")
-            pass
-        
+      
         try:
             return n.show()
         except gobject.GError:
