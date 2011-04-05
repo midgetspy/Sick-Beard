@@ -33,10 +33,9 @@ class TIVOMetadata(generic.GenericMetadata):
     Metadata generation class for TIVO
 
     The following file structure is used:
-    
-    show_root/folder.jpg                                     (poster)
-    show_root/Season 01/folder.jpg                           (episode thumb)
-    show_root/Season 01/show - 1x01 - episode.jpg            (existing video)
+
+    show_root/Season 01/show - 1x01 - episode.avi.txt       (* existing episode)
+    show_root/Season 01/.meta/show - 1x01 - episode.avi.txt (episode metadata)
     """
     
     def __init__(self,
@@ -58,11 +57,11 @@ class TIVOMetadata(generic.GenericMetadata):
         self.name = 'TIVO'
 
         self.eg_show_metadata = "<i>not supported</i>"
-        self.eg_episode_metadata = "<i>not supported</i>"
+        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.txt"
         self.eg_fanart = "<i>not supported</i>"
-        self.eg_poster = "folder.jpg"
-        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.jpg"
-        self.eg_season_thumbnails = "Season##\\folder.jpg"
+        self.eg_poster = "<i>not supported</i>"
+        self.eg_episode_thumbnails = "<i>not supported</i>"
+        self.eg_season_thumbnails = "<i>not supported</i>"
     
     # all of the following are not supported, so do nothing
     def create_show_metadata(self, show_obj):
@@ -75,54 +74,10 @@ class TIVOMetadata(generic.GenericMetadata):
         pass
     
     def get_episode_thumb_path(self, ep_obj):
-        """
-        Returns the path where the episode thumbnail should be stored. Defaults to
-        the same path as the episode file but with a .cover.jpg extension.
-        
-        ep_obj: a TVEpisode instance for which to create the thumbnail
-        """
-        if ek.ek(os.path.isfile, ep_obj.location):
-            tbn_filename = helpers.replaceExtension(ep_obj.location, 'jpg')
-        else:
-            return None
-
-        return tbn_filename
+        pass
     
     def get_season_thumb_path(self, show_obj, season):
-        """
-        Season thumbs for MediaBrowser go in Show Dir/Season X/folder.jpg
-        
-        If no season folder exists, None is returned
-        """
-        
-        dir_list = [x for x in ek.ek(os.listdir, show_obj.location) if ek.ek(os.path.isdir, ek.ek(os.path.join, show_obj.location, x))]
-        
-        season_dir_regex = '^Season\s+(\d+)$'
-        
-        season_dir = None
-        
-        for cur_dir in dir_list:
-            if season == 0 and cur_dir == 'Specials':
-                season_dir = cur_dir
-                break
-            
-            match = re.match(season_dir_regex, cur_dir, re.I)
-            if not match:
-                continue
-        
-            cur_season = int(match.group(1))
-            
-            if cur_season == season:
-                season_dir = cur_dir
-                break
-
-        if not season_dir:
-            logger.log(u"Unable to find a season dir for season "+str(season), logger.DEBUG)
-            return None
-
-        logger.log(u"Using "+str(season_dir)+"/folder.jpg as season dir for season "+str(season), logger.DEBUG)
-
-        return ek.ek(os.path.join, show_obj.location, season_dir, 'folder.jpg')
+        pass
 
     def retrieveShowMetadata(self, dir):
         return (None, None)
