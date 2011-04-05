@@ -58,6 +58,7 @@ def diagnose():
 class LibnotifyNotifier:
     def __init__(self):
         self.pynotify = None
+        self.gobject = None
 
     def init_pynotify(self):
         if self.pynotify is not None:
@@ -76,6 +77,7 @@ class LibnotifyNotifier:
             logger.log(u"Initialization of pynotify failed. libnotify notifications won't work.")
             return False
         self.pynotify = pynotify
+        self.gobject = gobject
         return True
 
     def notify_snatch(self, ep_name):
@@ -106,7 +108,7 @@ class LibnotifyNotifier:
         n = self.pynotify.Notification(title, message, icon_uri)
         try:
             return n.show()
-        except gobject.GError:
+        except self.gobject.GError:
             return False
 
 notifier = LibnotifyNotifier
