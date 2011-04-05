@@ -54,7 +54,9 @@ Quality:
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 <br />
 <br />
-Language: <select name="tvdbLang" id="tvdbLangSelect"></select>
+Language: <select name="tvdbLang" id="tvdbLangSelect"></select><br />
+Note: This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
+This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
 <br />
 <br />
 Use Season Folders: <input type="checkbox" name="seasonfolders" #if $show.seasonfolders == 1 then "checked=\"checked\"" else ""# /><br /><br />
