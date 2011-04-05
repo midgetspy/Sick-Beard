@@ -99,7 +99,16 @@ class LibnotifyNotifier:
         # will be printed but the call to show() will still return True.
         # pynotify doesn't seem too keen on error handling.
         n = self.pynotify.Notification(title, message, icon_uri)
-        return n.show()
 
+        try:
+            import gobject
+        except ImportError:
+            logger.log(u"Unable to import gobject. We might not be able to catch an GError in display.")
+            pass
+        
+        try:
+            return n.show()
+        except gobject.GError:
+            return False
 
 notifier = LibnotifyNotifier
