@@ -1,14 +1,23 @@
 var is_alive_url = sbRoot+'/home/is_alive';
 var timeout_id;
+var current_pid = '';
 var num_restart_waits = 0;
 
 function is_alive() {
     timeout_id = 0;
     $.get(is_alive_url, function(data) {
-        if (data == 'yep') {
+                                        
+        // if it's still initalizing then just wait and try again
+        if (data == 'nope') {
+            $('#shut_down_loading').hide();
+            $('#shut_down_success').show();
+            $('#restart_message').show();
+            setTimeout('is_alive()', 1000);
+        } else {
             // if this is before we've even shut down then just try again later
-            if (num_restart_waits == 0) {
-                setTimeout(is_alive, 5000)
+            if (current_pid == '' || data == current_pid) {
+                current_pid = data;
+                setTimeout(is_alive, 1000);
 
             // if we're ready to go then refresh the page which'll forward to /home
             } else {
@@ -17,16 +26,7 @@ function is_alive() {
                 $('#refresh_message').show();
                 location.reload();
             }
-            
-        // if it's still initalizing then just wait and try again
-        } else if (data == 'nope') {
-            $('#restart_loading').hide();
-            $('#restart_success').show();
-            $('#refresh_message').show();
-            setTimeout('is_alive()', 1000);
         }
-        else
-            alert(data);
     });
 }
 
@@ -45,7 +45,7 @@ $(document).ready(function()
         $('#restart_message').show();
 
         // if it is taking forever just give up
-        if (num_restart_waits > 250) {
+        if (num_restart_waits > 30) {
             $('#restart_loading').hide();
             $('#restart_failure').show();
             $('#restart_fail_message').show();

@@ -1802,7 +1802,7 @@ class Home:
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         if sickbeard.started:
-            return "yep"
+            return str(sickbeard.PID)
         else:
             return "nope"
 

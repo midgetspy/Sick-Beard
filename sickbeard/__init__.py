@@ -808,7 +808,6 @@ def halt ():
 
 
             __INITIALIZED__ = False
-            started = False
 
 
 def sig_handler(signum=None, frame=None):
@@ -833,12 +832,12 @@ def saveAll():
 
 def saveAndShutdown(restart=False):
 
-    logger.log(u"Killing cherrypy")
-    cherrypy.engine.exit()
-
     halt()
 
     saveAll()
+
+    logger.log(u"Killing cherrypy")
+    cherrypy.engine.exit()
 
     if sickbeard.CREATEPID:
         logger.log(u"Removing pidfile " + str(sickbeard.PIDFILE))
