@@ -212,17 +212,20 @@ class QueueItemAdd(ShowQueueItem):
                 if self.lang:
                     ltvdb_api_parms['language'] = self.lang
         
+                logger.log(u"TVDB: "+repr(ltvdb_api_parms))
+        
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 s = t[self.tvdb_id]
 
                 # this usually only happens if they have an NFO in their show dir which gave us a TVDB ID that has no
                 # proper english version of the show
                 if not s or not s['seriesname']:
-                    ui.flash.error("Unable to add show", "Show in "+str(self.showDir)+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
+                    ui.flash.error("Unable to add show", "Show in "+self.showDir+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
                     self._finishEarly()
                     return
             except tvdb_exceptions.tvdb_exception, e:
-                ui.flash.error("Unable to add show", "Unable to look up the show in "+str(self.showDir)+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
+                logger.log(u"Error contacting TVDB: "+str(e), logger.ERROR)
+                ui.flash.error("Unable to add show", "Unable to look up the show in "+self.showDir+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
                 self._finishEarly()
                 return
 
