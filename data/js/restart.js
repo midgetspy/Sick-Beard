@@ -45,7 +45,7 @@ $(document).ready(function()
         $('#restart_message').show();
 
         // if it is taking forever just give up
-        if (num_restart_waits > 30) {
+        if (num_restart_waits > 90) {
             $('#restart_loading').hide();
             $('#restart_failure').show();
             $('#restart_fail_message').show();
