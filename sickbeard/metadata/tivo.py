@@ -54,6 +54,10 @@ class TIVOMetadata(generic.GenericMetadata):
                                          episode_thumbnails,
                                          season_thumbnails)
         
+        self._ep_nfo_extension = "txt"
+        
+        self.generate_ep_metadata = True
+        
         self.name = 'TIVO'
 
         self.eg_show_metadata = "<i>not supported</i>"
@@ -63,11 +67,8 @@ class TIVOMetadata(generic.GenericMetadata):
         self.eg_episode_thumbnails = "<i>not supported</i>"
         self.eg_season_thumbnails = "<i>not supported</i>"
     
-    # all of the following are not supported, so do nothing
+    # Override with empty methods for unsupported features.
     def create_show_metadata(self, show_obj):
-        pass
-    
-    def create_episode_metadata(self, ep_obj):
         pass
     
     def create_fanart(self, show_obj):
@@ -81,6 +82,38 @@ class TIVOMetadata(generic.GenericMetadata):
 
     def retrieveShowMetadata(self, dir):
         return (None, None)
+        
+    # Override and implement features for Tivo.
+    def get_episode_file_path(self, ep_obj):
+        """
+        TODO: implement
+        """
+        return helpers.replaceExtension(ep_obj.location, self._ep_nfo_extension)
+
+    def _ep_data(self, ep_obj):
+        """
+        TODO: implement
+        Creates a key value structure for a Tivo episode metadata file and
+        returns the resulting data object.
+        
+        show_obj: a TVEpisode instance to create the metadata file for
+        """
+        return None
+
+    def write_ep_file(self, ep_obj):
+        """
+        TODO: implement
+        Generates and writes ep_obj's metadata under the given path with the
+        given filename root. Uses the episode's name with the extension in
+        _ep_nfo_extension.
+        
+        ep_obj: TVEpisode object for which to create the metadata
+        
+        file_name_path: The file name to use for this metadata. Note that the extension
+                will be automatically added based on _ep_nfo_extension. This should
+                include an absolute path.
+        """
+        return None
 
 # present a standard "interface"
 metadata_class = TIVOMetadata
