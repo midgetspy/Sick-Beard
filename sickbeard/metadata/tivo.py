@@ -93,16 +93,21 @@ class TIVOMetadata(generic.GenericMetadata):
     def _ep_data(self, ep_obj):
         """
         TODO: implement
+        
         Creates a key value structure for a Tivo episode metadata file and
         returns the resulting data object.
         
         show_obj: a TVEpisode instance to create the metadata file for
         """
-        return None
+        
+        data = "Tivo test data"
+        
+        return data
 
     def write_ep_file(self, ep_obj):
         """
         TODO: implement
+        
         Generates and writes ep_obj's metadata under the given path with the
         given filename root. Uses the episode's name with the extension in
         _ep_nfo_extension.
@@ -113,6 +118,17 @@ class TIVOMetadata(generic.GenericMetadata):
                 will be automatically added based on _ep_nfo_extension. This should
                 include an absolute path.
         """
+                
+        data = self._ep_data(ep_obj)
+        
+        if not data:
+            return False
+        
+        nfo_file_path = self.get_episode_file_path(ep_obj)
+        nfo_file_dir = ek.ek(os.path.dirname, nfo_file_path)
+        
+        
+        
         return None
 
 # present a standard "interface"
