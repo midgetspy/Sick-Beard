@@ -869,7 +869,9 @@ the same interface as FileCache."""
                 conn.close()
                 raise ServerNotFoundError("Unable to find the server at %s" % conn.host)
             except socket.error, e:
-                if e.errno == errno.ECONNREFUSED: # Connection refused
+                if not hasattr(e, 'errno'): # I don't know what this is so lets raise it if it happens
+                    raise
+                elif e.errno == errno.ECONNREFUSED: # Connection refused
                     raise
                 # Just because the server closed the connection doesn't apparently mean
                 # that the server didn't send a response.
