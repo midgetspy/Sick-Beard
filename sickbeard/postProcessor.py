@@ -105,7 +105,7 @@ class PostProcessor(object):
 
     def _list_associated_files(self, file_path):
     
-        if not file_path or not ek.ek(os.path.isfile, file_path):
+        if not file_path:
             return []
 
         file_path_list = []

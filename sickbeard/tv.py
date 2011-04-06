@@ -37,6 +37,7 @@ from sickbeard import helpers, exceptions, logger
 from sickbeard import tvrage
 from sickbeard import config
 from sickbeard import image_cache
+from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek
 
@@ -765,7 +766,9 @@ class TVShow(object):
                     for relEp in rootEp.relatedEps:
                         relEp.location = result
 
-            fileList = ek.ek(glob.glob, ek.ek(os.path.join, curEpDir, actualName[0] + "*").replace("[","*").replace("]","*"))
+            #fileList = ek.ek(glob.glob, ek.ek(os.path.join, curEpDir, actualName[0] + "*").replace("[","*").replace("]","*"))
+            fileList = postProcessor.PostProcessor(curLocation)._list_associated_files(curLocation)
+            logger.log(u"Files associated to "+curLocation+": "+str(fileList), logger.DEBUG)
 
             for file in fileList:
                 result = helpers.rename_file(file, rootEp.prettyName())
