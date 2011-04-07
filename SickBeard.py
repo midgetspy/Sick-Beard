@@ -230,6 +230,9 @@ def main():
                 'log_dir':   log_dir,
                 'username':  sickbeard.WEB_USERNAME,
                 'password':  sickbeard.WEB_PASSWORD,
+                'web_ssl' : sickbeard.WEB_SSL,
+                'server_certificate': sickbeard.SSL_CERT_FILE,
+                'server_key' : sickbeard.SSL_KEY_FILE,
         })
     except IOError:
         logger.log(u"Unable to start web server, is something else running on port %d?" % startPort, logger.ERROR)

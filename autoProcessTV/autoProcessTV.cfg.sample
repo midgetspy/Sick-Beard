@@ -1,4 +1,5 @@
 [SickBeard]
+ssl=0
 host=localhost
 port=8081
 username=

@@ -92,6 +92,10 @@ WEB_USERNAME = None
 WEB_PASSWORD = None
 WEB_HOST = None
 WEB_IPV6 = None
+WEB_SSL = None
+
+SSL_CERT_FILE = None
+SSL_KEY_FILE  = None
 
 LAUNCH_BROWSER = None
 CACHE_DIR = None
@@ -337,7 +341,7 @@ def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, \
+        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, WEB_SSL, SSL_CERT_FILE, SSL_KEY_FILE, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
@@ -401,6 +405,10 @@ def initialize(consoleLogging=True):
         WEB_LOG = bool(check_setting_int(CFG, 'General', 'web_log', 0))
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
+        WEB_SSL = bool(check_setting_int(CFG, 'General', 'web_ssl', 0))
+        
+        SSL_CERT_FILE = check_setting_str(CFG, 'General', 'ssl_cert_file', '')
+        SSL_KEY_FILE = check_setting_str(CFG, 'General', 'ssl_key_file', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
 
         CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
@@ -908,6 +916,11 @@ def save_config():
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME
     new_config['General']['web_password'] = WEB_PASSWORD
+    new_config['General']['web_ssl'] = WEB_SSL
+    new_config['General']['ssl_key_file'] = SSL_KEY_FILE
+    new_config['General']['ssl_cert_file'] = SSL_CERT_FILE
+    new_config['General']['web_username'] = WEB_USERNAME
+    new_config['General']['web_password'] = WEB_PASSWORD
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
@@ -1075,7 +1088,10 @@ def save_config():
 def launchBrowser(startPort=None):
     if not startPort:
         startPort = WEB_PORT
-    browserURL = 'http://localhost:%d%s' % (startPort, WEB_ROOT)
+    if WEB_SSL:
+        browserURL = 'https://localhost:%d%s' % (startPort, WEB_ROOT)
+    else:
+        browserURL = 'http://localhost:%d%s' % (startPort, WEB_ROOT)
     try:
         webbrowser.open(browserURL, 2, 1)
     except:

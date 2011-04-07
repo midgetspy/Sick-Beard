@@ -77,6 +77,13 @@
                                 <span class="component-desc">Allow Sick Beard to bind to any available IPv6 address?</span>
                             </label>
                         </div>
+						<div class="field-pair">
+                            <input type="checkbox" name="web_ssl" id="web_ipv6" #if $sickbeard.WEB_SSL then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="web_ssl">
+                                <span class="component-title">Enable SSL</span>
+                                <span class="component-desc">Enable SSL support for SickBeard (https)</span>
+                            </label>
+                        </div>
                         
                         <div class="field-pair">
                             <input type="checkbox" name="web_log" id="web_log" #if $sickbeard.WEB_LOG then "checked=\"checked\"" else ""#/>
@@ -116,6 +123,29 @@
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
                                 <span class="component-desc">Password for authentication (blank for none)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">SSL Certificate</span>
+                                <input type="text" name="ssl_cert_file" value="$sickbeard.SSL_CERT_FILE" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Absolute location for certificate file (blank for none)</span>
+                            </label>
+                        </div>
+                        
+                                                
+                         <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">SSL Key</span>
+                                <input type="text" name="ssl_key_file" value="$sickbeard.SSL_KEY_FILE" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Absolute location for certificate key file (blank for none)</span>
                             </label>
                         </div>
 

@@ -638,7 +638,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
-                    web_password=None, version_notify=None):
+                    web_password=None, version_notify=None, web_ssl=None, ssl_cert_file=None, ssl_key_file=None):
 
         results = []
 
@@ -661,6 +661,10 @@ class ConfigGeneral:
             version_notify = 1
         else:
             version_notify = 0
+        if web_ssl == "on":
+            web_ssl = 1
+        else:
+            web_ssl = 0
 
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
@@ -672,7 +676,10 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
-
+        sickbeard.WEB_SSL = web_ssl
+        sickbeard.SSL_CERT_FILE = ssl_cert_file
+        sickbeard.SSL_KEY_FILE = ssl_key_file
+        
         config.change_VERSION_NOTIFY(version_notify)
 
         sickbeard.save_config()
