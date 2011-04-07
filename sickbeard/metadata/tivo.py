@@ -86,9 +86,25 @@ class TIVOMetadata(generic.GenericMetadata):
     # Override and implement features for Tivo.
     def get_episode_file_path(self, ep_obj):
         """
-        TODO: implement
+        Returns a full show dir/.meta/episode.txt path for Tivo
+        episode metadata files
+        
+        ep_obj: a TVEpisode object to get the path for
         """
-        return helpers.replaceExtension(ep_obj.location, self._ep_nfo_extension)
+        logger.log("TIVO get_episode_file_path called");
+        
+        if ek.ek(os.path.isfile, ep_obj.location):
+            metadata_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), self._ep_nfo_extension)
+            metadata_dir_name = ek.ek(os.path.join, ek.ek(os.path.dirname, ep_obj.location), '.meta')
+            metadata_file_path = ek.ek(os.path.join, metadata_dir_name, metadata_file_name)
+        else:
+            logger.log(u"Episode location doesn't exist: "+str(ep_obj.location), logger.DEBUG)
+            return ''
+            
+
+        logger.log("TIVO metadata_file_path '" + metadata_file_path + "'");
+        
+        return metadata_file_path
 
     def _ep_data(self, ep_obj):
         """
@@ -99,6 +115,7 @@ class TIVOMetadata(generic.GenericMetadata):
         
         show_obj: a TVEpisode instance to create the metadata file for
         """
+        logger.log("TIVO _ep_data called");
         
         data = "Tivo test data"
         
@@ -118,7 +135,8 @@ class TIVOMetadata(generic.GenericMetadata):
                 will be automatically added based on _ep_nfo_extension. This should
                 include an absolute path.
         """
-                
+        logger.log("TIVO write_ep_file called");
+        
         data = self._ep_data(ep_obj)
         
         if not data:
@@ -127,7 +145,9 @@ class TIVOMetadata(generic.GenericMetadata):
         nfo_file_path = self.get_episode_file_path(ep_obj)
         nfo_file_dir = ek.ek(os.path.dirname, nfo_file_path)
         
-        
+        logger.log("TIVO nfo_file_path: '" + nfo_file_path +"'");
+        logger.log("TIVO nfo_file_dir:  '" + nfo_file_dir +"'");
+        logger.log("TIVO With data: " + data);
         
         return None
 
