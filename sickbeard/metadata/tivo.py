@@ -142,11 +142,29 @@ class TIVOMetadata(generic.GenericMetadata):
         nfo_file_path = self.get_episode_file_path(ep_obj)
         nfo_file_dir = ek.ek(os.path.dirname, nfo_file_path)
         
-        logger.log("TIVO nfo_file_path: '" + nfo_file_path +"'");
-        logger.log("TIVO nfo_file_dir:  '" + nfo_file_dir +"'");
-        logger.log("TIVO With data: " + data);
+        logger.log(">> TIVO nfo_file_path: '" + nfo_file_path +"'");
+        logger.log(">> TIVO nfo_file_dir:  '" + nfo_file_dir +"'");
+        logger.log(">> TIVO With data: " + data);
         
-        return None
+        try:
+            if not ek.ek(os.path.isdir, nfo_file_dir):
+                logger.log("Metadata dir didn't exist, creating it at "+nfo_file_dir, logger.DEBUG)
+                ek.ek(os.makedirs, nfo_file_dir)
+                helpers.chmodAsParent(nfo_file_dir)
+            
+            logger.log(u"Writing episode nfo file to "+nfo_file_path)
+            
+            nfo_file = ek.ek(open, nfo_file_path, 'w')
+    
+            nfo_file.write(data)
+            
+            nfo_file.close()
+            helpers.chmodAsParent(nfo_file_path)
+        except IOError, e:
+            logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
+            return False
+        
+        return True
 
 # present a standard "interface"
 metadata_class = TIVOMetadata
