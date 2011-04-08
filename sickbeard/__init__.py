@@ -916,7 +916,7 @@ def save_config():
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME
     new_config['General']['web_password'] = WEB_PASSWORD
-    new_config['General']['web_ssl'] = WEB_SSL
+    new_config['General']['web_ssl'] =int(WEB_SSL)
     new_config['General']['ssl_key_file'] = SSL_KEY_FILE
     new_config['General']['ssl_cert_file'] = SSL_CERT_FILE
     new_config['General']['web_username'] = WEB_USERNAME

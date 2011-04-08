@@ -48,11 +48,43 @@ from lib.configobj import ConfigObj
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
+
+def create_https_certificates(ssl_cert, ssl_key):
+    try:
+        from OpenSSL import crypto
+        from sickbeard.utils.certgen import createKeyPair, createCertRequest, createCertificate,\
+             TYPE_RSA, serial
+    except:
+        logger.log(u"Error initializing pyopenssl")
+        logger.log(traceback.format_exc(), logger.DEBUG)
+        return False
+
+    # Create the CA Certificate
+    cakey = createKeyPair(TYPE_RSA, 1024)
+    careq = createCertRequest(cakey, CN='Certificate Authority')
+    cacert = createCertificate(careq, (careq, cakey), serial, (0, 60*60*24*365*10)) # ten years
+
+    fname = 'server'
+    cname = 'SickBeard'
+    pkey = createKeyPair(TYPE_RSA, 1024)
+    req = createCertRequest(pkey, CN=cname)
+    cert = createCertificate(req, (cacert, cakey), serial, (0, 60*60*24*365*10)) # ten years
+
+    # Save the key and certificate to disk
+    try:
+        open(ssl_key, 'w').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
+        open(ssl_cert, 'w').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+    except:
+        logger.log(u"Error writing ssl files")
+        logger.log(traceback.format_exc(), logger.DEBUG)
+        return False
+    return True
+
 def loadShowsFromDB():
 
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
-
+    
     for sqlShow in sqlResults:
         try:
             curShow = TVShow(int(sqlShow["tvdb_id"]))
@@ -203,7 +235,7 @@ def main():
     else:
         startPort = sickbeard.WEB_PORT
 
-    logger.log(u"Starting Sick Beard on http://localhost:"+str(startPort))
+    logger.log(u"Starting Sick Beard on http(s)://localhost:"+str(startPort))
 
     if sickbeard.WEB_LOG:
         log_dir = sickbeard.LOG_DIR
@@ -221,6 +253,18 @@ def main():
         else:
             webhost = '0.0.0.0'
 
+    # SSL Certificate config and generation
+
+    if sickbeard.WEB_SSL:
+        # Check if configured key and certificate exist, disable SSL if not.
+        if sickbeard.SSL_CERT_FILE == "" or sickbeard.SSL_KEY_FILE == "":
+            logger.log(u"Generating SSL certificate and key.")
+            create_https_certificates('server.crt', 'server.key')
+            sickbeard.SSL_CERT_FILE = os.path.join(os.getcwd(),'server.crt')
+            sickbeard.SSL_KEY_FILE =  os.path.join(os.getcwd(),'server.key')
+        if not(sickbeard.SSL_CERT_FILE != "" and os.path.exists(sickbeard.SSL_CERT_FILE)) or not (sickbeard.SSL_KEY_FILE != "" and os.path.exists(sickbeard.SSL_KEY_FILE)) :
+            logger.log(u"Unable to start webserver with SSL. Configured certificate or key does not exist.")
+            sickbeard.WEB_SSL = 0
     try:
         initWebServer({
                 'port':      startPort,
@@ -232,7 +276,7 @@ def main():
                 'password':  sickbeard.WEB_PASSWORD,
                 'web_ssl' : sickbeard.WEB_SSL,
                 'server_certificate': sickbeard.SSL_CERT_FILE,
-                'server_key' : sickbeard.SSL_KEY_FILE,
+                'server_key' :  sickbeard.SSL_KEY_FILE,
         })
     except IOError:
         logger.log(u"Unable to start web server, is something else running on port %d?" % startPort, logger.ERROR)
@@ -272,3 +316,5 @@ if __name__ == "__main__":
     if sys.hexversion >= 0x020600F0:
         freeze_support()
     main()
+    
+    
