@@ -653,12 +653,6 @@ def initialize(consoleLogging=True):
                                                      threadName="SEARCH",
                                                      runImmediately=True)
 
-        backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
-                                                                      cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
-                                                                      threadName="BACKLOG",
-                                                                      runImmediately=False)
-        backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
-
         # the interval for this is stored inside the ShowUpdater class
         showUpdaterInstance = showUpdater.ShowUpdater()
         showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
@@ -691,6 +685,13 @@ def initialize(consoleLogging=True):
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="POSTPROCESSER",
                                                      runImmediately=True)
+
+        backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
+                                                                      cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
+                                                                      threadName="BACKLOG",
+                                                                      runImmediately=True)
+        backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
+
 
 
         showList = []
