@@ -34,6 +34,8 @@ from sickbeard.common import *
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 
+from lib.hachoir_parser import createParser
+
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 class GenericProvider:
@@ -66,9 +68,9 @@ class GenericProvider:
         return
 
     def isActive(self):
-        if self.providerType == GenericProvider.NZB:
+        if self.providerType == GenericProvider.NZB and sickbeard.USE_NZBS:
             return self.isEnabled()
-        elif self.providerType == GenericProvider.TORRENT:
+        elif self.providerType == GenericProvider.TORRENT and sickbeard.USE_TORRENTS:
             return self.isEnabled()
         else:
             return False
@@ -116,6 +118,9 @@ class GenericProvider:
         return result
 
     def downloadResult(self, result):
+        """
+        Save the result to disk.
+        """
 
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
 
@@ -124,6 +129,7 @@ class GenericProvider:
         if data == None:
             return False
 
+        # use the appropriate watch folder
         if self.providerType == GenericProvider.NZB:
             saveDir = sickbeard.NZB_DIR
             writeMode = 'w'
@@ -133,6 +139,7 @@ class GenericProvider:
         else:
             return False
 
+        # use the result name as the filename
         fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
 
         logger.log(u"Saving to " + fileName, logger.DEBUG)
@@ -141,9 +148,25 @@ class GenericProvider:
             fileOut = open(fileName, writeMode)
             fileOut.write(data)
             fileOut.close()
+            helpers.chmodAsParent(fileName)
         except IOError, e:
-            logger.log("Unable to save the NZB: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log("Unable to save the file: "+str(e).decode('utf-8'), logger.ERROR)
             return False
+
+        # as long as it's a valid download then consider it a successful snatch
+        return self._verify_download(fileName)
+
+    def _verify_download(self, file_name=None):
+        """
+        Checks the saved file to see if it was actually valid, if not then consider the download a failure.
+        """
+
+        # primitive verification of torrents, just make sure we didn't get a text file or something
+        if self.providerType == GenericProvider.TORRENT:
+            parser = createParser(file_name)
+            if not parser or parser._getMimeType() != 'application/x-bittorrent':
+                logger.log(u"Result is not a valid torrent file", logger.WARNING)
+                return False
 
         return True
 
@@ -206,7 +229,7 @@ class GenericProvider:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-            if episode.show.is_air_by_date:
+            if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
                     continue
@@ -255,7 +278,7 @@ class GenericProvider:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-            if not show.is_air_by_date:
+            if not show.air_by_date:
                 # this check is meaningless for non-season searches
                 if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")

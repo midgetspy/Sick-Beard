@@ -1,3 +1,21 @@
+# Author: Nic Wolfe <nic@wolfeden.ca>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
 import time
 import datetime
 import sqlite3
@@ -8,8 +26,9 @@ from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import *
 
-from sickbeard import helpers, classes, exceptions, sceneHelpers
+from sickbeard import helpers, classes, exceptions, show_name_helpers
 from sickbeard import providers
+from sickbeard import name_cache
 
 import xml.etree.cElementTree as etree
 
@@ -207,30 +226,52 @@ class TVCache():
             # if they're both empty then fill out as much info as possible by searching the show name
             else:
 
-                showResult = helpers.searchDBForShow(parse_result.series_name)
-                if showResult:
-                    logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
-                    tvdb_id = showResult[0]
-
+                # check the name cache and see if we already know what show this is
+                logger.log(u"Checking the cache to see if we already know the tvdb id of "+parse_result.series_name, logger.DEBUG)
+                tvdb_id = name_cache.retrieveNameFromCache(parse_result.series_name)
+                
+                # remember if the cache lookup worked or not so we know whether we should bother updating it later
+                if tvdb_id == None:
+                    logger.log(u"No cache results returned, continuing on with the search", logger.DEBUG)
+                    from_cache = False
                 else:
+                    logger.log(u"Cache lookup found "+repr(tvdb_id)+", using that", logger.DEBUG)
+                    from_cache = True
+                
+                # if the cache failed, try looking up the show name in the database
+                if tvdb_id == None:
+                    logger.log(u"Trying to look the show up in the show database", logger.DEBUG)
+                    showResult = helpers.searchDBForShow(parse_result.series_name)
+                    if showResult:
+                        logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
+                        tvdb_id = showResult[0]
+
+                # if the DB lookup fails then do a comprehensive regex search
+                if tvdb_id == None:
                     logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
                     for curShow in sickbeard.showList:
-                        if sceneHelpers.isGoodResult(name, curShow, False):
+                        if show_name_helpers.isGoodResult(name, curShow, False):
                             logger.log(u"Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
                             tvdb_id = curShow.tvdbid
                             tvdb_lang = curShow.lang
                             break
 
+                # if tvdb_id was anything but None (0 or a number) then 
+                if not from_cache:
+                    name_cache.addNameToCache(parse_result.series_name, tvdb_id)
+
+                # if we came out with tvdb_id = None it means we couldn't figure it out at all, just use 0 for that
+                if tvdb_id == None:
+                    tvdb_id = 0
+
+                # if we found the show then retrieve the show object
                 if tvdb_id:
-
                     showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                    if not showObj:
-                        logger.log(u"This should never have happened, post a bug about this!", logger.ERROR)
-                        raise Exception("BAD STUFF HAPPENED")
-                    tvrage_id = showObj.tvrid
-                    tvdb_lang = showObj.lang
+                    if showObj:
+                        tvrage_id = showObj.tvrid
+                        tvdb_lang = showObj.lang
 
-
+        # if we weren't provided with season/episode information then get it from the name that we parsed
         if not season:
             season = parse_result.season_number if parse_result.season_number != None else 1
         if not episodes:
@@ -255,7 +296,6 @@ class TVCache():
                 return False
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
-
 
         # get the current timestamp
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
@@ -300,7 +340,7 @@ class TVCache():
         for curResult in sqlResults:
 
             # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
-            if self.providerID != 'newzbin' and not sceneHelpers.filterBadReleases(curResult["name"]):
+            if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult["name"]):
                 continue
 
             # get the show object, or if it's not one of our shows then ignore it

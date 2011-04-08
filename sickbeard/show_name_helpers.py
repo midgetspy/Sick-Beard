@@ -16,20 +16,32 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from sickbeard import common
+from sickbeard.common import countryList
+from sickbeard.helpers import sanitizeSceneName
+from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
 from sickbeard import db
 
 import re
 import datetime
+import urllib
 
 from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ("sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
-                 "dub(bed)?", "german", "french", "core2hd")
+                 "dub(bed)?", "german", "french", "core2hd",
+                 "dutch", "swedish")
 
 def filterBadReleases(name):
+    """
+    Filters out non-english and just all-around stupid releases by comparing them
+    to the resultFilters contents.
+    
+    name: the release name to check
+    
+    Returns: True if the release name is OK, False if it's bad.
+    """
 
     try:
         fp = NameParser()
@@ -50,19 +62,14 @@ def filterBadReleases(name):
 
     return True
 
-def sanitizeSceneName (name):
-    for x in ",:()'!?":
-        name = name.replace(x, "")
-
-    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
-    name = re.sub("\.\.*", ".", name)
-
-    if name.endswith('.'):
-        name = name[:-1]
-
-    return name
-
 def sceneToNormalShowNames(name):
+    """
+    Takes a show name from a scene dirname and converts it to a more "human-readable" format.
+    
+    name: The show name to convert
+    
+    Returns: a list of all the possible "normal" names
+    """
 
     if not name:
         return []
@@ -81,7 +88,7 @@ def sceneToNormalShowNames(name):
         results.append(re.sub('(\D)(\d{4})$', '\\1(\\2)', cur_name))
     
         # add brackets around the country
-        country_match_str = '|'.join(common.countryList.values())
+        country_match_str = '|'.join(countryList.values())
         results.append(re.sub('(?i)([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
 
     results += name_list
@@ -100,7 +107,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
 
     myDB = db.DBConnection()
 
-    if show.is_air_by_date:
+    if show.air_by_date:
         numseasons = 0
         
         # the search string for air by date shows is just 
@@ -140,7 +147,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                 toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
             else:
                 term_list = [x+'*' for x in seasonStrings]
-                if show.is_air_by_date:
+                if show.air_by_date:
                     term_list = ['"'+x+'"' for x in term_list]
 
                 toReturn.append('"'+curShow+'"')
@@ -159,7 +166,7 @@ def makeSceneSearchString (episode):
     numseasons = int(numseasonsSQlResult[0][0])
 
     # see if we should use dates instead of episodes
-    if episode.show.is_air_by_date and episode.airdate != datetime.date.fromordinal(1):
+    if episode.show.air_by_date and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate)]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
@@ -179,12 +186,42 @@ def makeSceneSearchString (episode):
 
     return toReturn
 
+def isGoodResult(name, show, log=True):
+    """
+    Use an automatically-created regex to make sure the result actually is the show it claims to be
+    """
+
+    all_show_names = allPossibleShowNames(show)
+    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
+
+    for curName in set(showNames):
+        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
+        curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
+        if log:
+            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
+
+        match = re.search(curRegex, name, re.I)
+
+        if match:
+            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
+            return True
+
+    if log:
+        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+    return False
+
 def allPossibleShowNames(show):
+    """
+    Figures out every possible variation of the name for a particular show. Includes TVDB name, TVRage name,
+    country codes on the end, eg. "Show Name (AU)", and any scene exception names.
+    
+    show: a TVShow object that we should get the names of
+    
+    Returns: a list of all the possible show names
+    """
 
     showNames = [show.name]
-
-    if int(show.tvdbid) in common.sceneExceptions:
-        showNames += common.sceneExceptions[int(show.tvdbid)]
+    showNames += [name for name in get_scene_exceptions(show.tvdbid)]
 
     # if we have a tvrage name then use it
     if show.tvrname != "" and show.tvrname != None:
@@ -192,8 +229,8 @@ def allPossibleShowNames(show):
 
     newShowNames = []
 
-    country_list = common.countryList
-    country_list.update(dict(zip(common.countryList.values(), common.countryList.keys())))
+    country_list = countryList
+    country_list.update(dict(zip(countryList.values(), countryList.keys())))
 
     # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
     # any countries defined in common.countryList
@@ -211,26 +248,3 @@ def allPossibleShowNames(show):
 
     return showNames
 
-def isGoodResult(name, show, log=True):
-    """
-    Use an automatically-created regex to make sure the result actually is the show it claims to be
-    """
-
-    all_show_names = allPossibleShowNames(show)
-    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
-
-    for curName in set(showNames):
-        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
-        curRegex = '^' + escaped_name + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
-        if log:
-            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
-
-        match = re.search(curRegex, name, re.I)
-
-        if match:
-            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
-            return True
-
-    if log:
-        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
-    return False

@@ -24,16 +24,26 @@ import sickbeard
 
 from common import *
 
-from sickbeard import logger, db, sceneHelpers, exceptions, helpers
+from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
+from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
+
+from sickbeard import encodingKludge as ek
 
 from sickbeard.providers import *
 from sickbeard import providers
 
 def _downloadResult(result):
+    """
+    Downloads a result to the appropriate black hole folder.
+    
+    Returns a bool representing success.
+    
+    result: SearchResult instance to download.
+    """
 
     resProvider = result.provider
 
@@ -43,25 +53,33 @@ def _downloadResult(result):
         logger.log(u"Invalid provider name - this is a coding error, report it please", logger.ERROR)
         return False
 
+    # nzbs with an URL can just be downloaded from the provider
     if result.resultType == "nzb":
         newResult = resProvider.downloadResult(result)
+
+    # if it's an nzb data result 
     elif result.resultType == "nzbdata":
-        fileName = os.path.join(sickbeard.NZB_DIR, result.name + ".nzb")
+        
+        # get the final file path to the nzb
+        fileName = ek.ek(os.path.join, sickbeard.NZB_DIR, result.name + ".nzb")
 
         logger.log(u"Saving NZB to " + fileName)
 
         newResult = True
 
+        # save the data to disk
         try:
             fileOut = open(fileName, "w")
             fileOut.write(result.extraInfo[0])
             fileOut.close()
+            helpers.chmodAsParent(fileName)
         except IOError, e:
             logger.log(u"Error trying to save NZB to black hole: "+str(e).decode('utf-8'), logger.ERROR)
             newResult = False
 
     elif resProvider.providerType == "torrent":
         newResult = resProvider.downloadResult(result)
+
     else:
         logger.log(u"Invalid provider type - this is a coding error, report it please", logger.ERROR)
         return False
@@ -69,15 +87,29 @@ def _downloadResult(result):
     return newResult
 
 def snatchEpisode(result, endStatus=SNATCHED):
+    """
+    Contains the internal logic necessary to actually "snatch" a result that
+    has been found.
+    
+    Returns a bool representing success.
+    
+    result: SearchResult instance to be snatched.
+    endStatus: the episode status that should be used for the episode object once it's snatched.
+    """
 
+    # NZBs can be sent straight to SAB or saved to disk
     if result.resultType in ("nzb", "nzbdata"):
         if sickbeard.NZB_METHOD == "blackhole":
             dlResult = _downloadResult(result)
         elif sickbeard.NZB_METHOD == "sabnzbd":
             dlResult = sab.sendNZB(result)
+        elif sickbeard.NZB_METHOD == "nzbget":
+            dlResult = nzbget.sendNZB(result)
         else:
             logger.log(u"Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
             dlResult = False
+
+    # torrents are always saved to disk
     elif result.resultType == "torrent":
         dlResult = _downloadResult(result)
     else:
@@ -162,7 +194,7 @@ def pickBestResult(results, quality_list=None):
     # find the best result for the current episode
     bestResult = None
     for cur_result in results:
-        logger.log("Quality of "+cur_result.name+" is "+str(cur_result.quality))
+        logger.log("Quality of "+cur_result.name+" is "+Quality.qualityStrings[cur_result.quality])
         
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
@@ -210,7 +242,7 @@ def findEpisode(episode, manualSearch=False):
         didSearch = True
 
         # skip non-tv crap
-        curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, episode.show), curFoundResults)
+        curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
 
         foundResults += curFoundResults
 
@@ -241,7 +273,7 @@ def findSeason(show, season):
             for curEp in curResults:
 
                 # skip non-tv crap
-                curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), curResults[curEp])
+                curResults[curEp] = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), curResults[curEp])
 
                 if curEp in foundResults:
                     foundResults[curEp] += curResults[curEp]
@@ -316,7 +348,7 @@ def findSeason(show, season):
             # if not, break it apart and add them as the lowest priority results
             individualResults = nzbSplitter.splitResult(bestSeasonNZB)
 
-            individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), individualResults)
+            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
 
             for curResult in individualResults:
                 if len(curResult.episodes) == 1:

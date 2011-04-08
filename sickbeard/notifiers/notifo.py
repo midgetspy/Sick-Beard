@@ -1,3 +1,21 @@
+# Author: Nic Wolfe <nic@wolfeden.ca>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
 import urllib
 import sickbeard
 
@@ -23,14 +41,13 @@ class NotifoNotifier:
             "msg": msg,
         })
 
-        data = urllib.urlopen(apiurl, data)
         try:
-            try:
-                result = json.load(data)
-            except IOError:
-                return False
-        finally:
-            data.close()
+	    data = urllib.urlopen(apiurl, data)	
+            result = json.load(data)
+        except IOError:
+            return False
+        
+        data.close()
 
         if result["status"] != "success" or result["response_message"] != "OK":
             return False

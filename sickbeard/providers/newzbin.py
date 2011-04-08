@@ -27,7 +27,7 @@ import sickbeard
 import generic
 
 import sickbeard.encodingKludge as ek
-from sickbeard import classes, logger, helpers, exceptions, sceneHelpers, db
+from sickbeard import classes, logger, helpers, exceptions, db, show_name_helpers
 from sickbeard import tvcache
 from sickbeard.common import *
 
@@ -238,9 +238,9 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _get_season_search_strings(self, show, season):
 
-        nameList = set(sceneHelpers.allPossibleShowNames(show))
+        nameList = set(show_name_helpers.allPossibleShowNames(show))
 
-        if show.is_air_by_date:
+        if show.air_by_date:
             suffix = ''
         else:
             suffix = 'x'
@@ -256,8 +256,8 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _get_episode_search_strings(self, ep_obj):
 
-        nameList = set(sceneHelpers.allPossibleShowNames(ep_obj.show))
-        if not ep_obj.show.is_air_by_date:
+        nameList = set(show_name_helpers.allPossibleShowNames(ep_obj.show))
+        if not ep_obj.show.air_by_date:
             searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(ep_obj.season, ep_obj.episode) for x in nameList])
         else:
             searchStr = " OR ".join(['^"'+x+' - '+str(ep_obj.airdate)+'"' for x in nameList])

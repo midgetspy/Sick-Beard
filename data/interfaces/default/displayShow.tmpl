@@ -11,14 +11,27 @@
 
 <script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
 
-<div class="h2footer align-right" style="margin-left:250px; line-height: 20px;">
+<div class="h2footer align-right">
+#if (len($seasonResults) > 14):
+    <select id="seasonJump">
+        <option value="jump">Jump to Season</option>
+    #for $seasonNum in $seasonResults:
+        <option value="#season-$seasonNum["season"]">#if int($seasonNum["season"]) == 0 then "Specials" else "Season " + str($seasonNum["season"])#</option>
+    #end for
+    </select>
+#else:
     <b>Season:</b>
     #for $seasonNum in $seasonResults:
-        #if int($seasonNum["season"]) == 0 then "<span class=\"separator\">|</span> " else ""#
-        <a href="#season-$seasonNum["season"]">
-        #if int($seasonNum["season"]) == 0 then "Specials</a>" else str($seasonNum["season"])+"</a> "#
-        #if int($seasonNum["season"]) >1 then "<span class=\"separator\">|</span> " else ""#
+        #if int($seasonNum["season"]) == 0:
+            <a href="#season-$seasonNum["season"]">Specials</a>
+        #else:
+            <a href="#season-$seasonNum["season"]">${str($seasonNum["season"])}</a>
+        #end if
+        #if $seasonNum != $seasonResults[-1]:
+            <span class="separator">|</span>
+        #end if
     #end for
+#end if
 </div><br/>
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
@@ -60,13 +73,8 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
     </td></tr>
     <tr><td class="showLegend">Language:</td><td>$show.lang</td></tr>
     <tr><td class="showLegend">Season Folders: </td><td><img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-#if $show.air_by_date or ($show.genre and "Talk Show" in $show.genre):
-#set $air_by_date = True
-#else
-#set $air_by_date = False
-#end if
     <tr><td class="showLegend">Active: </td><td><img src="$sbRoot/images/#if int($show.paused) == 0 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 </table>
 </div>
 
@@ -151,6 +159,6 @@ $epLoc
    </tr>
 
 #end for
-</table><br /><br />
+</table><br />
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

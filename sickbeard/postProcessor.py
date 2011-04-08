@@ -35,7 +35,8 @@ from sickbeard import helpers
 from sickbeard import history
 from sickbeard import logger
 from sickbeard import notifiers
-from sickbeard import sceneHelpers
+from sickbeard import show_name_helpers
+from sickbeard import scene_exceptions
 
 from sickbeard import encodingKludge as ek
 
@@ -104,7 +105,7 @@ class PostProcessor(object):
 
     def _list_associated_files(self, file_path):
     
-        if not file_path or not ek.ek(os.path.isfile, file_path):
+        if not file_path:
             return []
 
         file_path_list = []
@@ -248,7 +249,7 @@ class PostProcessor(object):
             # if we couldn't find the right one then just use the season folder defaut format
             if season_folder == '':
                 # for air-by-date shows use the year as the season folder
-                if ep_obj.show.is_air_by_date:
+                if ep_obj.show.air_by_date:
                     season_folder = str(ep_obj.airdate.year)
                 else:
                     season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
@@ -327,7 +328,7 @@ class PostProcessor(object):
         to_return = (None, season, episodes)
     
         # do a scene reverse-lookup to get a list of all possible names
-        name_list = sceneHelpers.sceneToNormalShowNames(parse_result.series_name)
+        name_list = show_name_helpers.sceneToNormalShowNames(parse_result.series_name)
 
         if not name_list:
             return (None, season, episodes)
@@ -340,13 +341,11 @@ class PostProcessor(object):
         # for each possible interpretation of that scene name
         for cur_name in name_list:
             self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
-            for exceptionID in common.sceneExceptions:
-                # for each exception name
-                for curException in common.sceneExceptions[exceptionID]:
-                    if cur_name.lower() in (curException.lower(), sceneHelpers.sanitizeSceneName(curException).lower().replace('.',' ')):
-                        self._log(u"Scene exception lookup got tvdb id "+str(exceptionID)+u", using that", logger.DEBUG)
-                        _finalize(parse_result)
-                        return (exceptionID, season, episodes)
+            scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
+            if scene_id:
+                self._log(u"Scene exception lookup got tvdb id "+str(scene_id)+u", using that", logger.DEBUG)
+                _finalize(parse_result)
+                return (scene_id, season, episodes)
 
         # see if we can find the name directly in the DB, if so use it
         for cur_name in name_list:
@@ -703,6 +702,9 @@ class PostProcessor(object):
 
         # do the library update
         notifiers.xbmc_notifier.update_library(ep_obj.show.name)
+
+        # do the library update for Plex Media Server
+        notifiers.plex_notifier.update_library()
 
         # run extra_scripts
         self._run_extra_scripts(ep_obj)

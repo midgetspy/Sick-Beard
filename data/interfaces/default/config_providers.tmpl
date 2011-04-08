@@ -1,4 +1,5 @@
 #import sickbeard
+#from sickbeard.providers.generic import GenericProvider
 #set global $title="Config - Providers"
 #set global $header="Search Providers"
 
@@ -11,11 +12,11 @@
 <script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
-sbRoot = '$sbRoot'; 
 \$(document).ready(function(){
 
+var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
+\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
 #end for
 });
 //-->
@@ -34,7 +35,7 @@ sbRoot = '$sbRoot';
                         <h3>Provider Priorities</h3>
                         <p>Check off and drag the providers into the order you want them to be used.</p>
                         <p class="note">At least one provider is required but two are recommended.</p>
-                        <p>More providers offer redundancy but at the expense of a longer search period.</p>
+                        <p>NZB/Torrent providers can be toggled in <a href="$sbRoot/config/search">Search Settings</a></p>
                         <p class="note"><span style="color: #654B24; font-size: 16px;">*</span> Provider does not support backlog searches at this time.</p>
                         <p class="note"><span style="color: #654B24; font-size: 16px;">**</span> Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
                     </div>
@@ -45,15 +46,15 @@ sbRoot = '$sbRoot';
                             #if $curProvider.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
                                 #continue
                             #end if
-                            #set $curName = $curProvider.getID()
-                            #if $curProvider in $sickbeard.newznabProviderList:
-                              #set $imgName = 'newznab.gif'
-                            #else:
-                              #set $imgName = $curName + '.gif'
+                            #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
+                                #continue
+                            #elif $curProvider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
+                                #continue
                             #end if
+                            #set $curName = $curProvider.getID()
                           <li class="ui-state-default" id="$curName">
-                            <input type="checkbox" id="enable_$curName" class="enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
-                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$imgName" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
+                            <input type="checkbox" id="enable_$curName" class="provider_enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
+                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
                             #if $curProvider.name == "EZRSS" then "**" else ""#
@@ -75,15 +76,31 @@ sbRoot = '$sbRoot';
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <label class="clearfix" for="editAProvider">
-                                <span class="component-title jumbo">Select Provider:</span>
+                                <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
+                                    #set $provider_config_list = []
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvbinz", "tvtorrents"):
+                                        #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
+                                        #if $cur_provider_obj.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
+                                            #continue
+                                        #end if
+                                        #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
+                                            #continue
+                                        #elif $cur_provider_obj.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
+                                            #continue
+                                        #end if
+                                        $provider_config_list.append($cur_provider_obj)
+                                    #end for
+
+                                    #if $provider_config_list:                                        
                                     <select id="editAProvider">
-                                        #if $sickbeard.SHOW_TVBINZ then "<option value=\"tvbinz\">TVBinz" else ""#
-                                        <option value="nzbs_org">NZBs.org</option>
-                                        <option value="nzbs_r_us">NZBs'R'US</option>
-                                        <option value="newzbin">Newzbin</option>
-                                        <option value="nzbmatrix">NZBMatrix</option>
+                                        #for $cur_provider in $provider_config_list:
+                                            <option value="$cur_provider.getID()">$cur_provider.name</option>
+                                        #end for
                                     </select>
+                                    #else:
+                                    No providers available to configure.
+                                    #end if
                                 </span>
                             </label>
                         </div>
@@ -172,7 +189,23 @@ sbRoot = '$sbRoot';
                             </label>
                         </div>
 </div>
-<!-- end div for editing providers //-->
+
+<div class="providerDiv" id="tvtorrentsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">TvTorrents Digest:</span>
+                                <input class="component-desc" type="text" name="tvtorrents_digest" value="$sickbeard.TVTORRENTS_DIGEST" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">TvTorrents Hash:</span>
+                                <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
+                            </label>
+                        </div>
+</div>
+
+<!-- end div for editing providers -->
 
                     <input type="submit" value="Save Changes" /><br/>
             
