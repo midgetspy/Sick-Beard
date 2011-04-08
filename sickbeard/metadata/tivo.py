@@ -100,10 +100,7 @@ class TIVOMetadata(generic.GenericMetadata):
         else:
             logger.log(u"Episode location doesn't exist: "+str(ep_obj.location), logger.DEBUG)
             return ''
-            
-
         logger.log("TIVO metadata_file_path '" + metadata_file_path + "'");
-        
         return metadata_file_path
 
     def _ep_data(self, ep_obj):
