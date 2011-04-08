@@ -434,7 +434,7 @@ class PostProcessor(object):
                 episodes = cur_episodes
             
             # for air-by-date shows we need to look up the season/episode from tvdb
-            if season == -1 and tvdb_id:
+            if season == -1 and tvdb_id and episodes:
                 self._log(u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
                 
                 # try to get language set for this show
