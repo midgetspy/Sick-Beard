@@ -116,14 +116,8 @@ class PostProcessor(object):
         
         # FIME: the escaping dosent work at all
         # don't confuse glob with chars we didn't mean to use
-        # base_name = re.sub(r'[\[\]\*\?]', r'\\\g<0>', base_name) # this doesn't work for files with eg "["
-        # HOTFIX: replace every special char [,],*,? with a "?"
-        base_name = re.sub(r'[\[\]\*\?]', r'?', base_name) # so i will just replace it with a "?" it will just look for any char at that position
-        # yes it will associate "show name [xy]" with "show name (xy)"
-        
-        self._log(u"Looking for associated files that match: "+str(base_name), logger.DEBUG)
-        
-            
+        base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
+    
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
             # only list it if the only non-shared part is the extension
             if '.' in associated_file_path[len(base_name):]:
