@@ -123,19 +123,6 @@ class PostProcessor(object):
                 continue
 
             file_path_list.append(associated_file_path)
-        # if we didnt find any find anything (we should at least find the main file !!)
-        # try a diffrent aproche
-        # this is done because the escaping done in line 118 dosent work
-        # try to pp a file with in [ or ] in it it wont work
-        # it does escaped correctly but dosent work
-        if len(file_path_list) == 0:
-            path = os.path.dirname(base_name) # get the path
-            for file in os.listdir(path):
-                tmpfilePath = str(path)+"/"+str(file) # yeah i dont know it that will work on windows 
-                tmpfilePath = os.path.normpath(tmpfilePath) # maybe this will help
-                
-                self._log(u"i will add file '"+str(tmpfilePath)+"' to the associated files", logger.DEBUG)
-                file_path_list.append(tmpfilePath)
             
         return file_path_list
 
