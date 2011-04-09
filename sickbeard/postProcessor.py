@@ -113,7 +113,7 @@ class PostProcessor(object):
         base_name = file_path.rpartition('.')[0]+'.'
         
         # don't confuse glob with chars we didn't mean to use
-        base_name = re.sub(r'[\[\]\*\?]', r'\\\g<0>', base_name)
+        base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
     
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
             # only list it if the only non-shared part is the extension
