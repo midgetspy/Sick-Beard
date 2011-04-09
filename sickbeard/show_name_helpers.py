@@ -136,7 +136,11 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         
             # if we need a better one then add it to the list of episodes to fetch
             if (curStatus in (common.DOWNLOADED, common.SNATCHED) and curQuality < highestBestQuality) or curStatus == common.WANTED:
-                seasonStrings.append("%d" % episodeNumberResult["absolute_number"])
+                try:
+                    if int(episodeNumberResult["absolute_number"]) > 0:
+                        seasonStrings.append("%d" % int(episodeNumberResult["absolute_number"]))
+                except:
+                    pass
     else:
         numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
         numseasons = int(numseasonsSQlResult[0][0])
