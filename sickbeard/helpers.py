@@ -417,6 +417,11 @@ def chmodAsParent(childPath):
         return
 
     parentPath = ek.ek(os.path.dirname, childPath)
+    
+    if not parentPath:
+        logger.log(u"No parent path provided in "+childPath+", unable to get permissions from it", logger.DEBUG)
+        return
+    
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
 
     if ek.ek(os.path.isfile, childPath):
