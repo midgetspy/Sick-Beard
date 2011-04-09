@@ -291,7 +291,7 @@ class GenericProvider:
                     myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
-                logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.DEBUG)
                 continue
 
             if show.is_anime and len(parse_result.ab_episode_numbers) > 0:
