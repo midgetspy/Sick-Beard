@@ -323,7 +323,7 @@ class PostProcessor(object):
             episodes = [parse_result.air_date]
         elif parse_result.is_anime:
             try:
-                episodes = parse_result.season_number # better then nothing or ?
+                season = parse_result.season_number # better then nothing or ?
                 episodes = parse_result.episode_numbers # better then nothing or ?
             except:
                 season = None
