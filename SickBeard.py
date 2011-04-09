@@ -126,13 +126,14 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile='])
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'nolaunch'])
     except getopt.GetoptError:
         print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile"
         sys.exit()
 
     forceUpdate = False
     forcedPort = None
+    noLaunch = False
 
     for o, a in opts:
         # for now we'll just silence the logging
@@ -145,6 +146,10 @@ def main():
         # should we update right away?
         if o in ('-f', '--forceupdate'):
             forceUpdate = True
+
+        # should we update right away?
+        if o in ('--nolaunch'):
+            noLaunch = True
 
         # use a different port
         if o in ('-p', '--port'):
@@ -246,7 +251,7 @@ def main():
     sickbeard.start()
 
     # launch browser if we're supposed to
-    if sickbeard.LAUNCH_BROWSER:
+    if sickbeard.LAUNCH_BROWSER and not noLaunch:
         sickbeard.launchBrowser(startPort)
 
     # start an update if we're supposed to
