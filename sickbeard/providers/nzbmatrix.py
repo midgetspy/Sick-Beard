@@ -76,8 +76,8 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "subcat": "6,41",
                   "ssl": 1,
                   "scenename": 1}
-        if show.is_anime:
-            params["subcat"] = "6,41,28"
+        if show and show.is_anime:
+            params["subcat"] = "28"
         else:
             params["english"] = 1
             

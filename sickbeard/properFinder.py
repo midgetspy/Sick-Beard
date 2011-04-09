@@ -100,7 +100,7 @@ class ProperFinder():
                 logger.log(u"Unable to parse the filename "+curProper.name+" into a valid episode", logger.DEBUG)
                 continue
 
-            if not parse_result.episode_numbers:
+            if not parse_result.episode_numbers and not parse_result.is_anime:
                 logger.log(u"Ignoring "+curProper.name+" because it's for a full season rather than specific episode", logger.DEBUG)
                 continue
 
@@ -111,6 +111,7 @@ class ProperFinder():
             else:
                 curProper.season = parse_result.season_number if parse_result.season_number != None else 1
                 curProper.episode = parse_result.episode_numbers[0]
+            
             curProper.quality = Quality.nameQuality(curProper.name,parse_result.is_anime)
 
             # for each show in our list
