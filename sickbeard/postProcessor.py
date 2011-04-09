@@ -322,8 +322,12 @@ class PostProcessor(object):
             season = -1
             episodes = [parse_result.air_date]
         elif parse_result.is_anime:
-            season = None
-            episodes = parse_result.ab_episode_numbers # better then nothing or ?
+            try:
+                episodes = parse_result.season_number # better then nothing or ?
+                episodes = parse_result.episode_numbers # better then nothing or ?
+            except:
+                season = None
+                episodes = []
         else:
             season = parse_result.season_number
             episodes = parse_result.episode_numbers 
@@ -399,10 +403,6 @@ class PostProcessor(object):
     
         _finalize(parse_result)
         return to_return
-    
-    # TODO: implement
-    def _pre_attempt_anime_check(self):
-        return True
     
     def _make_attempt_list(self):
                         # try to look up the nzb in history
