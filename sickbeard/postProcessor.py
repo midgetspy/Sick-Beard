@@ -105,7 +105,7 @@ class PostProcessor(object):
 
     def _list_associated_files(self, file_path):
     
-        if not file_path or not ek.ek(os.path.isfile, file_path):
+        if not file_path:
             return []
 
         file_path_list = []
@@ -457,7 +457,7 @@ class PostProcessor(object):
             # at this point we should allready have the corret episodes and numbering even for anime
             # only abd shows dont since it is not saved in the db
             # for air-by-date shows we need to look up the season/episode from tvdb
-            if season == -1 and tvdb_id:
+            if season == -1 and tvdb_id and episodes:
                 self._log(u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
                 
                 # try to get language set for this show

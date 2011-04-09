@@ -1841,8 +1841,10 @@ class Home:
 
     @cherrypy.expose
     def is_alive(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         if sickbeard.started:
-            return "yep"
+            return str(sickbeard.PID)
         else:
             return "nope"
 
@@ -1859,6 +1861,8 @@ class Home:
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.growl_notifier.test_notify(host, password)
         if password==None or password=='':
             pw_append = ''
@@ -1872,6 +1876,8 @@ class Home:
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
         if result:
             return "Test prowl notice sent successfully"
@@ -1880,6 +1886,8 @@ class Home:
 
     @cherrypy.expose
     def testNotifo(self, username=None, apisecret=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.notifo_notifier.test_notify(username, apisecret)
         if result:
             return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
@@ -1888,10 +1896,14 @@ class Home:
 
     @cherrypy.expose
     def twitterStep1(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         return notifiers.twitter_notifier._get_authorization()
 
     @cherrypy.expose
     def twitterStep2(self, key):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.twitter_notifier._get_credentials(key)
         logger.log(u"result: "+str(result))
         if result:
@@ -1901,6 +1913,8 @@ class Home:
 
     @cherrypy.expose
     def testTwitter(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.twitter_notifier.test_notify()
         if result:
             return "Tweet successful, check your twitter to make sure it worked"
@@ -1909,6 +1923,8 @@ class Home:
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
         if result:
             return "Test notice sent successfully to "+urllib.unquote_plus(host)
@@ -1917,6 +1933,8 @@ class Home:
 
     @cherrypy.expose
     def testPLEX(self, host=None, username=None, password=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.plex_notifier.test_notify(urllib.unquote_plus(host), username, password)
         if result:
             return "Test notice sent successfully to "+urllib.unquote_plus(host)
@@ -1925,6 +1943,8 @@ class Home:
 
     @cherrypy.expose
     def testLibnotify(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         if notifiers.libnotify_notifier.test_notify():
             return "Tried sending desktop notification via libnotify"
         else:
@@ -1932,6 +1952,8 @@ class Home:
 
     @cherrypy.expose
     def testNMJ(self, host=None, database=None, mount=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.nmj_notifier.test_notify(urllib.unquote_plus(host), database, mount)
         if result:
             return "Successfull started the scan update"
@@ -1940,6 +1962,8 @@ class Home:
 
     @cherrypy.expose
     def settingsNMJ(self, host=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.nmj_notifier.notify_settings(urllib.unquote_plus(host))
         if result:
             return '{"message": "Got settings from %(host)s", "database": "%(database)s", "mount": "%(mount)s"}' % {"host": host, "database": sickbeard.NMJ_DATABASE, "mount": sickbeard.NMJ_MOUNT}

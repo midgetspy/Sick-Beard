@@ -177,7 +177,7 @@ class WindowsUpdateManager(UpdateManager):
             # find update dir name
             update_dir_contents = os.listdir(sb_update_dir)
             if len(update_dir_contents) != 1:
-                logger.log("Invalid update data, update failed.", logger.ERROR)
+                logger.log("Invalid update data, update failed. Maybe try deleting your sb-update folder?", logger.ERROR)
                 return False
 
             content_dir = os.path.join(sb_update_dir, update_dir_contents[0])
