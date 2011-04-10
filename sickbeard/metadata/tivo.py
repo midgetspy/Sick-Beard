@@ -217,7 +217,7 @@ class TIVOMetadata(generic.GenericMetadata):
             # NOTE: Hard coded the time to T00:00:00Z.
             #
             if curEpToWrite.airdate != datetime.date.fromordinal(1):
-                data += ("callsign : " + str(curEpToWrite.airdate) + "T00:00:00Z\n")
+                data += ("originalAirDate : " + str(curEpToWrite.airdate) + "T00:00:00Z\n")
                
             
             # This shows up at the beginning of the description on the Program screen and on the Details screen.
