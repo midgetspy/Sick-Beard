@@ -189,32 +189,36 @@ def main():
             else:
                 logger.log(u"Not running in daemon mode. PID file creation disabled.")
     
+    # if they don't specify a config file then put it in the data dir
     if not sickbeard.CONFIG_FILE:
         sickbeard.CONFIG_FILE = os.path.join(sickbeard.DATA_DIR, "config.ini")
 
+    # make sure that we can create the data dir
     if not os.access(sickbeard.DATA_DIR, os.F_OK):
         try:
             os.makedirs(sickbeard.DATA_DIR, 0744)
         except os.error, e:
             raise SystemExit("Unable to create datadir '" + sickbeard.DATA_DIR + "'")
 
+    # make sure we can write to the data dir
     if not os.access(sickbeard.DATA_DIR, os.W_OK):
-        raise SystemExit("datadir must be writeable '" + sickbeard.DATA_DIR + "'")
+        raise SystemExit("Data dir must be writeable '" + sickbeard.DATA_DIR + "'")
     
+    # make sure we can write to the config file
     if not os.access(sickbeard.CONFIG_FILE, os.W_OK):
         if os.path.isfile(sickbeard.CONFIG_FILE):
-            raise SystemExit("config file must be writeable '" + sickbeard.CONFIG_FILE + "'")
-        elif os.access(os.path.basename(sickbeard.CONFIG_FILE), os.W_OK):
-            raise SystemExit("config file must be writeable '" + sickbeard.CONFIG_FILE + "'") 
+            raise SystemExit("Config file '" + sickbeard.CONFIG_FILE + "' must be writeable")
+        elif not os.access(os.path.dirname(sickbeard.CONFIG_FILE), os.W_OK):
+            raise SystemExit("Config file root dir '" + os.path.dirname(sickbeard.CONFIG_FILE) + "' must be writeable") 
         
-    os.chdir(sickbeard.DATA_DIR)
+    os.chdir(sickbeard.PROG_DIR)
     
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
 
     # load the config and publish it to the sickbeard package
     if not os.path.isfile(sickbeard.CONFIG_FILE):
-        logger.log(u"Unable to find " + sickbeard.CONFIG_FILE + " , all settings will be default", logger.ERROR)
+        logger.log(u"Unable to find " + sickbeard.CONFIG_FILE + " , all settings will be default", logger.WARNING)
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
