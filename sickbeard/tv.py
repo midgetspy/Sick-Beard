@@ -42,6 +42,7 @@ from sickbeard import postProcessor
 from sickbeard import encodingKludge as ek
 
 from common import *
+from sickbeard.helpers import parseResultWrapper
 
 class TVShow(object):
 
@@ -381,13 +382,8 @@ class TVShow(object):
 
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
-        try:
-            if self.is_anime:                
-                myParser = NameParser(regexMode=NameParser.ANIME_REGEX) #using all because some strange ppl name animes the "normal" way
-            else:
-                myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
-            parse_result = myParser.parse(file)
-        except InvalidNameException:
+        parse_result = parseResultWrapper(self,file)
+        if not parse_result:
             logger.log(u"tv: Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 

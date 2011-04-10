@@ -36,6 +36,7 @@ from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 urllib._urlopener = classes.SickBeardURLopener()
 
@@ -496,6 +497,25 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
         season = ep.season # this will always take the last found seson so eps that cross the season border are not handeled well
     
     return (season, episodes)
+
+def parseResultWrapper(show,toParse):
+    
+    if show and show.is_anime:
+        modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
+    else:
+        modeList = [NameParser.NORMAL_REGEX]
+    for mode in modeList:
+        try:
+            myParser = NameParser(regexMode=mode)                
+            parse_result = myParser.parse(toParse)
+        except InvalidNameException:
+            pass
+        else:
+            break
+    else:
+        return None
+    return parse_result
+    
 
 def sanitizeSceneName (name, ezrss=False):
     """

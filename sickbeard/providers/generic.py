@@ -37,6 +37,7 @@ from sickbeard import encodingKludge as ek
 from lib.hachoir_parser import createParser
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
+from sickbeard.helpers import parseResultWrapper
 
 class GenericProvider:
 
@@ -228,13 +229,8 @@ class GenericProvider:
             (title, url) = self._get_title_and_url(item)
             
             # parse the file name
-            try:
-                if episode.show.is_anime:                
-                    myParser = NameParser(regexMode=NameParser.ANIME_REGEX)
-                else:
-                    myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
-                parse_result = myParser.parse(title)
-            except InvalidNameException:
+            parse_result = parseResultWrapper(episode.show,file)
+            if not parse_result:
                 logger.log(u"generic1: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
                     
@@ -284,13 +280,8 @@ class GenericProvider:
             quality = self.getQuality(item, show.is_anime)
 
             # parse the file name
-            try:
-                if show.is_anime:                
-                    myParser = NameParser(regexMode=NameParser.ANIME_REGEX)
-                else:
-                    myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
-                parse_result = myParser.parse(title)
-            except InvalidNameException:
+            parse_result = parseResultWrapper(show,file)
+            if not parse_result:
                 logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.DEBUG)
                 continue
 
