@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import os.path
 import datetime
 import sickbeard
@@ -28,6 +26,53 @@ from sickbeard import logger
 from sickbeard import classes
 
 from lib.tvdb_api import tvdb_exceptions
+
+MESSAGE = 'notice'
+ERROR = 'error'
+
+class Notifications(object):
+
+    def __init__(self):
+        self._messages = []
+        self._errors = []
+        
+    def message(self, title, detail=''):
+        self._messages.append(Notification(title, detail, MESSAGE))
+
+    def error(self, title, detail=''):
+        self._errors.append(Notification(title, detail, ERROR))
+
+    def get_notifications(self):
+        to_return = [x for x in self._errors + self._messages if x.is_valid()]
+        
+        # clear out the lists
+        self._errors = []
+        self._messages = []
+        
+        return to_return
+
+notifications = Notifications()
+
+    
+class Notification(object):
+    def __init__(self, title, message='', type=None, timeout=None):
+        self.title = title
+        self.message = message
+        
+        self._when = datetime.datetime.now()
+
+        if type:
+            self.type = type
+        else:
+            self.type = MESSAGE
+        
+        if timeout:
+            self._timeout = timeout
+        else:
+            self._timeout = datetime.timedelta(minutes=1)
+
+    def is_valid(self):
+        return datetime.datetime.now() - self._when <= self._timeout
 
 class ProgressIndicator():
 

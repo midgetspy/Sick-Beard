@@ -89,7 +89,7 @@ class CheckVersion():
         if not self.updater.need_update():
             logger.log(u"No update needed")
             if force:
-                ui.flash.message('No update needed')
+                ui.notifications.message('No update needed')
             return False
 
         self.updater.set_newest_text()

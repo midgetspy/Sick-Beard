@@ -70,7 +70,7 @@ class TVShow(object):
         self._isDirGood = False
 
         self.episodes = {}
-
+        
         otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdbid)
         if otherShow != None:
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
