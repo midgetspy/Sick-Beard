@@ -2002,7 +2002,7 @@ class Home:
 
         show_message = ''
 
-        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or True:
+        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
             show_message = 'This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.'
 
         elif sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
