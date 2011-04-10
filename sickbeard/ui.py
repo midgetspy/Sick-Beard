@@ -18,6 +18,7 @@
 
 import os.path
 import datetime
+import cherrypy
 import sickbeard
 
 from sickbeard import exceptions
@@ -43,13 +44,12 @@ class Notifications(object):
         self._errors.append(Notification(title, detail, ERROR))
 
     def get_notifications(self):
-        to_return = [x for x in self._errors + self._messages if x.is_valid()]
+        # filter out expired notifications 
+        self._errors = [x for x in self._errors if not x.is_expired()]
+        self._messages = [x for x in self._messages if not x.is_expired()]
         
-        # clear out the lists
-        self._errors = []
-        self._messages = []
-        
-        return to_return
+        # return any notifications that haven't been shown to the client already
+        return [x.see() for x in self._errors + self._messages if x.is_new()]
 
 notifications = Notifications()
 
@@ -60,6 +60,7 @@ class Notification(object):
         self.message = message
         
         self._when = datetime.datetime.now()
+        self._seen = []
 
         if type:
             self.type = type
@@ -71,8 +72,25 @@ class Notification(object):
         else:
             self._timeout = datetime.timedelta(minutes=1)
 
-    def is_valid(self):
-        return datetime.datetime.now() - self._when <= self._timeout
+    def is_new(self):
+        """
+        Returns True if the notification hasn't been displayed to the current client (aka IP address).
+        """
+        return cherrypy.request.remote.ip not in self._seen
+    
+    def is_expired(self):
+        """
+        Returns True if the notification is older than the specified timeout value.
+        """
+        return datetime.datetime.now() - self._when > self._timeout
+
+    
+    def see(self):
+        """
+        Returns this notification object and marks it as seen by the client ip
+        """
+        self._seen.append(cherrypy.request.remote.ip)
+        return self
 
 class ProgressIndicator():
 

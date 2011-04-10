@@ -12,7 +12,7 @@ function check_notifications() {
         });
     });
     
-    //setTimeout(check_notifications, 3000)
+    setTimeout(check_notifications, 3000)
 }
 
 $(document).ready(function(){
