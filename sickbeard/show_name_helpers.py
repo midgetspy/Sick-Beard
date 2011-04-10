@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import sickbeard
+
 from sickbeard.common import countryList
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard.scene_exceptions import get_scene_exceptions
@@ -28,10 +30,9 @@ import urllib
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ("sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
+resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
-                 "dub(bed)?", "german", "french", "core2hd",
-                 "dutch", "swedish")
+                 "dub(bed)?"]
 
 def filterBadReleases(name):
     """
@@ -55,7 +56,7 @@ def filterBadReleases(name):
         return True
 
     # if any of the bad strings are in the name then say no
-    for x in resultFilters:
+    for x in resultFilters + sickbeard.IGNORE_WORDS.split(','):
         if re.search('(^|[\W_])'+x+'($|[\W_])', parse_result.extra_info, re.I):
             logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False

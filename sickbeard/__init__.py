@@ -239,7 +239,6 @@ NMJ_HOST = None
 NMJ_DATABASE = None
 NMJ_MOUNT = None
 
-
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -247,6 +246,8 @@ COMING_EPS_SORT = None
 EXTRA_SCRIPTS = []
 
 GIT_PATH = None
+
+IGNORE_WORDS = "german,french,core2hd,dutch,swedish"
 
 __INITIALIZED__ = False
 
@@ -363,7 +364,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, IGNORE_WORDS
 
         if __INITIALIZED__:
             return False
@@ -570,6 +571,8 @@ def initialize(consoleLogging=True):
 
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
+
+        IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
 
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
@@ -948,6 +951,7 @@ def save_config():
     
     new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
     new_config['General']['git_path'] = GIT_PATH
+    new_config['General']['ignore_words'] = IGNORE_WORDS
 
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
