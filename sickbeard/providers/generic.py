@@ -229,7 +229,7 @@ class GenericProvider:
             (title, url) = self._get_title_and_url(item)
             
             # parse the file name
-            parse_result = parseResultWrapper(episode.show,file)
+            parse_result = parseResultWrapper(episode.show,title)
             if not parse_result:
                 logger.log(u"generic1: Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
@@ -280,7 +280,7 @@ class GenericProvider:
             quality = self.getQuality(item, show.is_anime)
 
             # parse the file name
-            parse_result = parseResultWrapper(show,file)
+            parse_result = parseResultWrapper(show,title)
             if not parse_result:
                 logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.DEBUG)
                 continue
