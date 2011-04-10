@@ -185,6 +185,7 @@ class TIVOMetadata(generic.GenericMetadata):
             #
             # NOTE: May not be correct format, missing season, but based on description from wiki leaving as is.
             #
+            #str(curEpToWrite.season)
             data += ("episodeNumber : " + str(curEpToWrite.episode) + "\n")
             
             
@@ -208,6 +209,15 @@ class TIVOMetadata(generic.GenericMetadata):
             # This is the call sign of the channel the episode was recorded from.
             if myShow["network"] != None:
                data += ("callsign : " + myShow["network"] + "\n")
+            
+            
+            # This must be entered as yyyy-mm-ddThh:mm:ssZ (the t is capitalized and never changes, the Z is also 
+            # capitalized and never changes). This is the original air date of the episode. 
+            #
+            # NOTE: Hard coded the time to T00:00:00Z.
+            #
+            if curEpToWrite.airdate != datetime.date.fromordinal(1):
+                data += ("callsign : " + str(curEpToWrite.airdate) + "T00:00:00Z\n")
                
             
             # This shows up at the beginning of the description on the Program screen and on the Details screen.
@@ -216,15 +226,6 @@ class TIVOMetadata(generic.GenericMetadata):
             #
             #if myShow["actors"] != None:
             #   data += ("vActor : " + myShow["actors"] + "\n")
-            
-            
-            # This must be entered as yyyy-mm-ddThh:mm:ssZ (the t is capitalized and never changes, the Z is also 
-            # capitalized and never changes). This is the original air date of the episode. 
-            #
-            # FIXME: Parse the date to the expected format.
-            #
-            #if myShow["firstaired"] != None:
-            #   data += ("originalAirDate : " + myShow["firstaired"] + "\n")
                
                
             # This is shown on both the Program screen and the Details screen.
