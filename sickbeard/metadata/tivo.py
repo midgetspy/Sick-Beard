@@ -156,39 +156,34 @@ class TIVOMetadata(generic.GenericMetadata):
             
             if myEp["episodename"] == None or myEp["firstaired"] == None:
                 return None
-            
-            
-        
-        
-            # Example content
-            # title : Eastbound & Down
+                
             if myShow["seriesname"] != None: 
-                data += ("title : " + myShow["seriesname"] + "\n")
             
-            # Example content
-            # episodeTitle : Chapter 1
+                # Title of the series (The Simpsons, Seinfeld, etc.) or title of the movie (The Mummy, Spiderman, etc).
+                data += ("title : " + myShow["seriesname"] + "\n")
+                
+                # Name of series (The Simpsons, Seinfeld, etc.). This should be included if the show is episodic. 
+                # For movies, you may repeat the name of the movie (The Mummy, Spiderman, etc), leave blank, or omit. 
+                data += ("seriesTitle : " + myShow["seriesname"] + "\n")
+            
+            # Title of the episode (Pilot, Homer's Night Out, Episode 02, etc.) Should be included for episodic shows. 
+            # Leave blank or omit for movies.
             data += ("episodeTitle : " + curEpToWrite.name + "\n")
             
-            # Example content
-            # seriesTitle : Chapter 1
-            data += ("seriesTitle : " + curEpToWrite.name + "\n")
-            
-            # Example content
-            # episodeNumber : 1
+            # This should be entered for episodic shows and omitted for movies. The standard tivo format is to enter 
+            # the season number followed by the episode number for that season. 
+            # For example, enter 201 for season 2 episode 01. 
             data += ("episodeNumber : " + str(curEpToWrite.episode) + "\n")
             
-            # FIXME: Hardcode to true for now
-            
-            # Example content
-            # isEpisode : true
+            # Must be entered as true or false. If true, the year from originalAirDate will be shown in parentheses 
+            # after the episode’s title and before the description on the Program screen.
+            # FIXME: Hardcode isEpisode to true for now
             data += ("episodeNumber : true\n")
             
-            # Example content
-            # description : Kenny Powers, a former star baseball player, returns to his hometown but immediately finds...
+            # Write the synopsis of the video here. 
             data += ("description : " + curEpToWrite.description + "\n")
             
-            # Example content
-            # seriesId : SH99999
+            # Usually starts with "SH" and followed by 6-8 digits.
             data += ("seriesId : SH" + str(curEpToWrite.tvdbid) + "\n")        
         
         
