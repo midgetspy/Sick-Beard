@@ -683,7 +683,7 @@ class ConfigGeneral:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/general/")
 
@@ -764,7 +764,7 @@ class ConfigSearch:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/search/")
 
@@ -871,7 +871,7 @@ class ConfigPostProcessing:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/postProcessing/")
 
@@ -1131,7 +1131,7 @@ class ConfigProviders:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/providers/")
 
@@ -1321,7 +1321,7 @@ class ConfigNotifications:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/notifications/")
 

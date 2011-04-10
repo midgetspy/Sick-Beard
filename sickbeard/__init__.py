@@ -384,7 +384,9 @@ def initialize(consoleLogging=True):
         CheckSection('Twitter')
         CheckSection('NMJ')
 
-        LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
+        if LOG_DIR is None:
+            LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
+        
         if not helpers.makeDir(LOG_DIR):
             logger.log(u"!!! No log folder, logging to screen only!", logger.ERROR)
 
