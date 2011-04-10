@@ -88,12 +88,16 @@ class TIVOMetadata(generic.GenericMetadata):
     def get_episode_file_path(self, ep_obj):
         """
         Returns a full show dir/.meta/episode.txt path for Tivo
-        episode metadata files
+        episode metadata files.
+        
+        Note, that pyTivo requires the metadata filename to include the original extention.
+        
+        ie If the episode name is foo.avi, the metadata name is foo.avi.txt
         
         ep_obj: a TVEpisode object to get the path for
         """
         if ek.ek(os.path.isfile, ep_obj.location):
-            metadata_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), self._ep_nfo_extension)
+            metadata_file_name = ek.ek(os.path.basename, ep_obj.location) + "." + self._ep_nfo_extension
             metadata_dir_name = ek.ek(os.path.join, ek.ek(os.path.dirname, ep_obj.location), '.meta')
             metadata_file_path = ek.ek(os.path.join, metadata_dir_name, metadata_file_name)
         else:
@@ -185,7 +189,7 @@ class TIVOMetadata(generic.GenericMetadata):
             
             # Example content
             # seriesId : SH99999
-            data += ("seriesId : " + str(curEpToWrite.tvdbid) + "\n")        
+            data += ("seriesId : SH" + str(curEpToWrite.tvdbid) + "\n")        
         
         
         
