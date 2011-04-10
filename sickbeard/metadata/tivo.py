@@ -37,6 +37,8 @@ class TIVOMetadata(generic.GenericMetadata):
 
     show_root/Season 01/show - 1x01 - episode.avi.txt       (* existing episode)
     show_root/Season 01/.meta/show - 1x01 - episode.avi.txt (episode metadata)
+    
+    This class only generates episode specific metadata files, it does NOT generated a default.txt file.
     """
     
     def __init__(self,
@@ -162,33 +164,105 @@ class TIVOMetadata(generic.GenericMetadata):
                 # Title of the series (The Simpsons, Seinfeld, etc.) or title of the movie (The Mummy, Spiderman, etc).
                 data += ("title : " + myShow["seriesname"] + "\n")
                 
+                
                 # Name of series (The Simpsons, Seinfeld, etc.). This should be included if the show is episodic. 
                 # For movies, you may repeat the name of the movie (The Mummy, Spiderman, etc), leave blank, or omit. 
                 data += ("seriesTitle : " + myShow["seriesname"] + "\n")
+                
             
             # Title of the episode (Pilot, Homer's Night Out, Episode 02, etc.) Should be included for episodic shows. 
             # Leave blank or omit for movies.
             data += ("episodeTitle : " + curEpToWrite.name + "\n")
             
+            
             # This should be entered for episodic shows and omitted for movies. The standard tivo format is to enter 
-            # the season number followed by the episode number for that season. 
-            # For example, enter 201 for season 2 episode 01. 
+            # the season number followed by the episode number for that season. For example, enter 201 for season 2 
+            # episode 01. 
+            # 
+            # This only shows up if you go into the Details from the Program screen. 
+            #
+            # This seems to disappear once the video is transferred to TiVo.
+            #
+            # NOTE: May not be correct format, missing season, but based on description from wiki leaving as is.
+            #
             data += ("episodeNumber : " + str(curEpToWrite.episode) + "\n")
             
+            
             # Must be entered as true or false. If true, the year from originalAirDate will be shown in parentheses 
-            # after the episode’s title and before the description on the Program screen.
-            # FIXME: Hardcode isEpisode to true for now
-            data += ("episodeNumber : true\n")
+            # after the episode's title and before the description on the Program screen.
+            #
+            # FIXME: Hardcode isEpisode to true for now, not sure how to handle movies
+            #
+            data += ("isEpisode : true\n")
+            
             
             # Write the synopsis of the video here. 
             data += ("description : " + curEpToWrite.description + "\n")
             
+            
             # Usually starts with "SH" and followed by 6-8 digits.
-            data += ("seriesId : SH" + str(curEpToWrite.tvdbid) + "\n")        
-        
-        
-        
-        
+            data += ("seriesId : SH" + str(curEpToWrite.tvdbid) + "\n")
+            
+
+            # This is the call sign of the channel the episode was recorded from.
+            if myShow["network"] != None:
+               data += ("callsign : " + myShow["network"] + "\n")
+               
+            
+            # This shows up at the beginning of the description on the Program screen and on the Details screen.
+            #
+            # FIXME: Parse actor list correctly
+            #
+            #if myShow["actors"] != None:
+            #   data += ("vActor : " + myShow["actors"] + "\n")
+            
+            
+            # This must be entered as yyyy-mm-ddThh:mm:ssZ (the t is capitalized and never changes, the Z is also 
+            # capitalized and never changes). This is the original air date of the episode. 
+            #
+            # FIXME: Parse the date to the expected format.
+            #
+            #if myShow["firstaired"] != None:
+            #   data += ("originalAirDate : " + myShow["firstaired"] + "\n")
+               
+               
+            # This is shown on both the Program screen and the Details screen.
+            #
+            # This is shown on both the Program screen and the Details screen. It uses a single digit to determine the 
+            # number of stars: 1 for 1 star, 7 for 4 stars
+            # 
+            # FIXME: Convert from 10 point rating to 4 point rating.
+            # 
+            #if myShow["rating"] != None:
+            #   data += ("starRating : " + myShow["rating"] + "\n")
+
+            
+            # This must be entered as yyyy. This is the original air date of the movie. 
+            # TODO: movieYear, not sure if this is available
+            
+            
+            # This is shown on both the Program screen and the Details screen.
+            # It uses the standard TV rating system of: TV-Y7, TV-Y, TV-G, TV-PG, TV-14, TV-MA and TV-NR.
+            # TODO: tvRating, not sure if this is available
+
+            
+            # This is shown on both the Program screen and the Details screen.
+            # TODO: mpaaRating, not sure if this is available
+            
+            # This field can be repeated as many times as necessary or omitted completely.
+            # TODO: vProgramGenre, not sure if this is available
+            
+
+            # NOTE: The following are metadata keywords are not used
+            # displayMajorNumber
+            # showingBits
+            # displayMinorNumber
+            # colorCode
+            # vSeriesGenre
+            # vGuestStar, vDirector, vExecProducer, vProducer, vWriter, vHost, vChoreographer
+            # partCount
+            # partIndex
+            
         
         return data
 
