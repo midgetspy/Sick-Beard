@@ -292,7 +292,7 @@ class GenericProvider:
                     logger.log(str(show.tvdbid) + ": DB objekt with absolute number " + str(parse_result.ab_episode_numbers) + " was not found, TheTvDB lacking behind?")
                     continue    
                 
-            elif not show.is_air_by_date:
+            elif not show.air_by_date:
                 # this check is meaningless for non-season searches
                 if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
