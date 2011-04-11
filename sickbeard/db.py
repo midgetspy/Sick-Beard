@@ -86,7 +86,7 @@ class DBConnection:
 		if dbFileName == ":memory:":
 			dbPath = ":memory:"
 		else:
-			dbPath = os.path.join(sickbeard.PROG_DIR, self.dbFileName)
+			dbPath = os.path.join(sickbeard.DATA_DIR, self.dbFileName)
 
 		self.connection = sqlite3.connect(dbPath, 20)
 		self.connection.row_factory = sqlite3.Row

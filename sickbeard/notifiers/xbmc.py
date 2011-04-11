@@ -57,6 +57,17 @@ class XBMCNotifier:
                     logger.log(u"Update of show directory failed on " + curHost + ", trying full update as requested", logger.ERROR)
                     self._update_library(curHost)
 
+    def _username(self):
+        return sickbeard.XBMC_USERNAME
+
+    def _password(self):
+        return sickbeard.XBMC_PASSWORD
+
+    def _use_me(self):
+        return sickbeard.USE_XBMC
+
+    def _hostname(self):
+        return sickbeard.XBMC_HOST
 
     def _sendToXBMC(self, command, host, username=None, password=None):
         '''
@@ -69,9 +80,9 @@ class XBMCNotifier:
         '''
     
         if not username:
-            username = sickbeard.XBMC_USERNAME
+            username = self._username()
         if not password:
-            password = sickbeard.XBMC_PASSWORD
+            password = self._password()
     
         for key in command:
             if type(command[key]) == unicode:
@@ -104,25 +115,31 @@ class XBMCNotifier:
 
     def _notifyXBMC(self, input, title="Sick Beard", host=None, username=None, password=None, force=False):
     
-        if not sickbeard.USE_XBMC and not force:
+        if not self._use_me() and not force:
             logger.log("Notification for XBMC not enabled, skipping this notification", logger.DEBUG)
             return False
     
         if not host:
-            host = sickbeard.XBMC_HOST
+            host = self._hostname()
         if not username:
-            username = sickbeard.XBMC_USERNAME
+            username = self._username()
         if not password:
-            password = sickbeard.XBMC_PASSWORD
+            password = self._password()
     
         logger.log(u"Sending notification for " + input, logger.DEBUG)
     
         fileString = title + "," + input
     
+        result = ''
+    
         for curHost in [x.strip() for x in host.split(",")]:
             command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' +fileString + ')' }
             logger.log(u"Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
-            return self._sendToXBMC(command, curHost, username, password)
+            if result:
+                result += ', '
+            result += curHost + ':' + self._sendToXBMC(command, curHost, username, password)
+
+        return result
 
     def _update_library(self, host, showName=None):
     

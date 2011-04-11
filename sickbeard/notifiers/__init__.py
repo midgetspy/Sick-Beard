@@ -1,29 +1,53 @@
+# Author: Nic Wolfe <nic@wolfeden.ca>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
 import sickbeard
 
 import xbmc
+import plex
 import growl
 import prowl
 import tweet
 from . import libnotify
 import notifo
+import nmj
 
 from sickbeard.common import *
 
 xbmc_notifier = xbmc.XBMCNotifier()
+plex_notifier = plex.PLEXNotifier()
 growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
 notifo_notifier = notifo.NotifoNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
+nmj_notifier = nmj.NMJNotifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
     # network activity.
     libnotify_notifier,
     xbmc_notifier,
+    plex_notifier,
     growl_notifier,
     prowl_notifier,
     twitter_notifier,
+    nmj_notifier,
 ]
 
 def notify_download(ep_name):
@@ -35,20 +59,3 @@ def notify_snatch(ep_name):
     for n in notifiers:
         n.notify_snatch(ep_name)
     notifo_notifier.notify_snatch(ep_name)
-
-def notify(type, message):
-
-    if type == NOTIFY_DOWNLOAD and sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
-            xbmc.notifyXBMC(message, notifyStrings[type])
-
-    if type == NOTIFY_SNATCH and sickbeard.XBMC_NOTIFY_ONSNATCH:
-            xbmc.notifyXBMC(message, notifyStrings[type])
-
-    growl.sendGrowl(notifyStrings[type], message)
-    
-    prowl.sendProwl(message)
-
-    notifo.notifyNotifo(message)
-
-    if type == NOTIFY_DOWNLOAD:
-        tweet.notifyTwitter(message)

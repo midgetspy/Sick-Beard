@@ -1,12 +1,13 @@
 $(document).ready(function(){
 
-   $("table.sickbeardTable tr").click( function(event) {
-               if (event.target.type !== "checkbox") {
-                  $(this).find("input:checkbox.epCheck").each(function(){
-                     $(this).attr("checked", !$(this).attr("checked"));
-                  });
-               }
-   });
+    $('#seasonJump').change(function() {
+    var id = $(this).val();
+    if (id && id != 'jump') {
+        $('html,body').animate({scrollTop: $(id).offset().top},'slow');
+        location.hash = id;
+    }
+    $(this).val('jump');
+    });
 
     $("#prevShow").click(function(){
         $('#pickShow option:selected').prev('option').attr('selected', 'selected');

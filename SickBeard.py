@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -73,7 +73,6 @@ def daemonize():
         raise RuntimeError("1st fork failed: %s [%d]" %
                    (e.strerror, e.errno))
 
-    os.chdir(sickbeard.PROG_DIR)
     os.setsid()
 
     # Make sure I can read my own files and shut out others
@@ -93,13 +92,20 @@ def daemonize():
     dev_null = file('/dev/null', 'r')
     os.dup2(dev_null.fileno(), sys.stdin.fileno())
 
+    if sickbeard.CREATEPID:
+        pid = str(os.getpid())
+        logger.log(u"Writing PID " + pid + " to " + str(sickbeard.PIDFILE))
+        file(sickbeard.PIDFILE, 'w').write("%s\n" % pid)
+
 def main():
 
     # do some preliminary stuff
     sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(__file__))
     sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
+    sickbeard.DATA_DIR = sickbeard.PROG_DIR
     sickbeard.MY_ARGS = sys.argv[1:]
+    sickbeard.CREATEPID = False
 
     try:
         locale.setlocale(locale.LC_ALL, "")
@@ -111,7 +117,6 @@ def main():
     if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII'):
         sickbeard.SYS_ENCODING = 'UTF-8'
 
-    sickbeard.CONFIG_FILE = os.path.join(sickbeard.PROG_DIR, "config.ini")
 
     # need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
@@ -120,44 +125,100 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp:", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz'])
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'nolaunch', 'config=', 'datadir='])
     except getopt.GetoptError:
-        print "Available options: --quiet, --forceupdate, --port, --daemon"
+        print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile --config --datadir"
         sys.exit()
 
     forceUpdate = False
     forcedPort = None
+    noLaunch = False
 
     for o, a in opts:
         # for now we'll just silence the logging
-        if (o in ('-q', '--quiet')):
+        if o in ('-q', '--quiet'):
             consoleLogging = False
         # for now we'll just silence the logging
-        if (o in ('--tvbinz')):
+        if o in ('--tvbinz'):
             sickbeard.SHOW_TVBINZ = True
 
         # should we update right away?
-        if (o in ('-f', '--forceupdate')):
+        if o in ('-f', '--forceupdate'):
             forceUpdate = True
 
+        # should we update right away?
+        if o in ('--nolaunch'):
+            noLaunch = True
+
         # use a different port
-        if (o in ('-p', '--port')):
+        if o in ('-p', '--port'):
             forcedPort = int(a)
 
         # Run as a daemon
-        if (o in ('-d', '--daemon')):
+        if o in ('-d', '--daemon'):
             if sys.platform == 'win32':
                 print "Daemonize not supported under Windows, starting normally"
             else:
                 consoleLogging = False
                 sickbeard.DAEMON = True
 
+        # config file
+        if (o in ('--config')):
+            sickbeard.CONFIG_FILE = os.path.abspath(a)
+
+        # datadir
+        if (o in ('--datadir')):
+            sickbeard.DATA_DIR = os.path.abspath(a)
+
+        # write a pidfile if requested
+        if o in ('--pidfile'):
+            sickbeard.PIDFILE = str(a)
+
+            # if the pidfile already exists, sickbeard may still be running, so exit
+            if os.path.exists(sickbeard.PIDFILE):
+                sys.exit("PID file " + sickbeard.PIDFILE + " already exists. Exiting.")
+
+            # a pidfile is only useful in daemon mode
+            # also, test to make sure we can write the file properly
+            if sickbeard.DAEMON:
+                sickbeard.CREATEPID = True
+                try:
+                    file(sickbeard.PIDFILE, 'w').write("pid\n")
+                except IOError, e:
+                    raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
+            else:
+                logger.log(u"Not running in daemon mode. PID file creation disabled.")
+    
+    # if they don't specify a config file then put it in the data dir
+    if not sickbeard.CONFIG_FILE:
+        sickbeard.CONFIG_FILE = os.path.join(sickbeard.DATA_DIR, "config.ini")
+
+    # make sure that we can create the data dir
+    if not os.access(sickbeard.DATA_DIR, os.F_OK):
+        try:
+            os.makedirs(sickbeard.DATA_DIR, 0744)
+        except os.error, e:
+            raise SystemExit("Unable to create datadir '" + sickbeard.DATA_DIR + "'")
+
+    # make sure we can write to the data dir
+    if not os.access(sickbeard.DATA_DIR, os.W_OK):
+        raise SystemExit("Data dir must be writeable '" + sickbeard.DATA_DIR + "'")
+    
+    # make sure we can write to the config file
+    if not os.access(sickbeard.CONFIG_FILE, os.W_OK):
+        if os.path.isfile(sickbeard.CONFIG_FILE):
+            raise SystemExit("Config file '" + sickbeard.CONFIG_FILE + "' must be writeable")
+        elif not os.access(os.path.dirname(sickbeard.CONFIG_FILE), os.W_OK):
+            raise SystemExit("Config file root dir '" + os.path.dirname(sickbeard.CONFIG_FILE) + "' must be writeable") 
+        
+    os.chdir(sickbeard.PROG_DIR)
+    
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
 
     # load the config and publish it to the sickbeard package
     if not os.path.isfile(sickbeard.CONFIG_FILE):
-        logger.log(u"Unable to find config.ini, all settings will be default", logger.ERROR)
+        logger.log(u"Unable to find " + sickbeard.CONFIG_FILE + " , all settings will be default", logger.WARNING)
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
@@ -221,7 +282,7 @@ def main():
     sickbeard.start()
 
     # launch browser if we're supposed to
-    if sickbeard.LAUNCH_BROWSER:
+    if sickbeard.LAUNCH_BROWSER and not noLaunch:
         sickbeard.launchBrowser(startPort)
 
     # start an update if we're supposed to

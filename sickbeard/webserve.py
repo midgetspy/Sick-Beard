@@ -46,6 +46,7 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 
 from sickbeard.notifiers import xbmc
+from sickbeard.notifiers import plex
 from sickbeard.providers import newznab
 from sickbeard.common import *
 
@@ -594,9 +595,9 @@ class History:
 ConfigMenu = [
     { 'title': 'General',           'path': 'config/general/'          },
     { 'title': 'Search Settings',   'path': 'config/search/'           },
+    { 'title': 'Search Providers',  'path': 'config/providers/'        },
     { 'title': 'Post Processing',   'path': 'config/postProcessing/'   },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
-    { 'title': 'Search Providers',  'path': 'config/providers/'        },
 ]
 
 class ConfigGeneral:
@@ -686,7 +687,7 @@ class ConfigGeneral:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/general/")
 
@@ -702,8 +703,8 @@ class ConfigSearch:
 
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
-                       sab_apikey=None, sab_category=None, sab_host=None, torrent_dir=None, nzb_method=None, usenet_retention=None,
-                       search_frequency=None, download_propers=None):
+                       sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
+                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
 
         results = []
 
@@ -754,6 +755,11 @@ class ConfigSearch:
 
         sickbeard.SAB_HOST = sab_host
 
+        sickbeard.NZBGET_PASSWORD = nzbget_password
+        sickbeard.NZBGET_CATEGORY = nzbget_category
+        sickbeard.NZBGET_HOST = nzbget_host
+
+
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -762,7 +768,7 @@ class ConfigSearch:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/search/")
 
@@ -869,7 +875,7 @@ class ConfigPostProcessing:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/postProcessing/")
 
@@ -1129,7 +1135,7 @@ class ConfigProviders:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/providers/")
 
@@ -1144,11 +1150,14 @@ class ConfigNotifications:
     @cherrypy.expose
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+                          use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
+                          plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
-                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None):
+                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
+                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None):
 
         results = []
 
@@ -1176,7 +1185,27 @@ class ConfigNotifications:
             use_xbmc = 1
         else:
             use_xbmc = 0
-            
+
+        if plex_update_library == "on":
+            plex_update_library = 1
+        else:
+            plex_update_library = 0
+
+        if plex_notify_onsnatch == "on":
+            plex_notify_onsnatch = 1
+        else:
+            plex_notify_onsnatch = 0
+
+        if plex_notify_ondownload == "on":
+            plex_notify_ondownload = 1
+        else:
+            plex_notify_ondownload = 0
+
+        if use_plex == "on":
+            use_plex = 1
+        else:
+            use_plex = 0
+
         if growl_notify_onsnatch == "on":
             growl_notify_onsnatch = 1
         else:
@@ -1186,6 +1215,7 @@ class ConfigNotifications:
             growl_notify_ondownload = 1
         else:
             growl_notify_ondownload = 0
+
         if use_growl == "on":
             use_growl = 1
         else:
@@ -1233,6 +1263,11 @@ class ConfigNotifications:
         else:
             use_notifo = 0
 
+        if use_nmj == "on":
+            use_nmj = 1
+        else:
+            use_nmj = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1241,6 +1276,15 @@ class ConfigNotifications:
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
+
+        sickbeard.USE_PLEX = use_plex
+        sickbeard.PLEX_NOTIFY_ONSNATCH = plex_notify_onsnatch
+        sickbeard.PLEX_NOTIFY_ONDOWNLOAD = plex_notify_ondownload
+        sickbeard.PLEX_UPDATE_LIBRARY = plex_update_library
+        sickbeard.PLEX_HOST = plex_host
+        sickbeard.PLEX_SERVER_HOST = plex_server_host
+        sickbeard.PLEX_USERNAME = plex_username
+        sickbeard.PLEX_PASSWORD = plex_password
 
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
@@ -1268,6 +1312,11 @@ class ConfigNotifications:
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
 
+        sickbeard.USE_NMJ = use_nmj
+        sickbeard.NMJ_HOST = nmj_host
+        sickbeard.NMJ_DATABASE = nmj_database
+        sickbeard.NMJ_MOUNT = nmj_mount
+
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -1276,7 +1325,7 @@ class ConfigNotifications:
             ui.flash.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.PROG_DIR, 'config.ini') )
+            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/notifications/")
 
@@ -1301,13 +1350,17 @@ class Config:
     notifications = ConfigNotifications()
 
 def haveXBMC():
-    return sickbeard.XBMC_HOST != None and len(sickbeard.XBMC_HOST) > 0
+    return sickbeard.XBMC_HOST
+
+def havePLEX():
+    return sickbeard.PLEX_SERVER_HOST
 
 def HomeMenu():
     return [
     { 'title': 'Add Shows',               'path': 'home/addShows/',                         },
     { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
     { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
+    { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX   },
     { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
     { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
     ]
@@ -1749,6 +1802,15 @@ class ErrorLogs:
 class Home:
 
     @cherrypy.expose
+    def is_alive(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        if sickbeard.started:
+            return str(sickbeard.PID)
+        else:
+            return "nope"
+
+    @cherrypy.expose
     def index(self):
 
         t = PageTemplate(file="home.tmpl")
@@ -1761,6 +1823,8 @@ class Home:
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.growl_notifier.test_notify(host, password)
         if password==None or password=='':
             pw_append = ''
@@ -1774,6 +1838,8 @@ class Home:
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
         if result:
             return "Test prowl notice sent successfully"
@@ -1782,6 +1848,8 @@ class Home:
 
     @cherrypy.expose
     def testNotifo(self, username=None, apisecret=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.notifo_notifier.test_notify(username, apisecret)
         if result:
             return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
@@ -1790,10 +1858,14 @@ class Home:
 
     @cherrypy.expose
     def twitterStep1(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         return notifiers.twitter_notifier._get_authorization()
 
     @cherrypy.expose
     def twitterStep2(self, key):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.twitter_notifier._get_credentials(key)
         logger.log(u"result: "+str(result))
         if result:
@@ -1803,6 +1875,8 @@ class Home:
 
     @cherrypy.expose
     def testTwitter(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.twitter_notifier.test_notify()
         if result:
             return "Tweet successful, check your twitter to make sure it worked"
@@ -1811,6 +1885,8 @@ class Home:
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
         if result:
             return "Test notice sent successfully to "+urllib.unquote_plus(host)
@@ -1818,11 +1894,43 @@ class Home:
             return "Test notice failed to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
+    def testPLEX(self, host=None, username=None, password=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.plex_notifier.test_notify(urllib.unquote_plus(host), username, password)
+        if result:
+            return "Test notice sent successfully to "+urllib.unquote_plus(host)
+        else:
+            return "Test notice failed to "+urllib.unquote_plus(host)
+
+    @cherrypy.expose
     def testLibnotify(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
         if notifiers.libnotify_notifier.test_notify():
             return "Tried sending desktop notification via libnotify"
         else:
             return notifiers.libnotify.diagnose()
+
+    @cherrypy.expose
+    def testNMJ(self, host=None, database=None, mount=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.nmj_notifier.test_notify(urllib.unquote_plus(host), database, mount)
+        if result:
+            return "Successfull started the scan update"
+        else:
+            return "Test failed to start the scan update"
+
+    @cherrypy.expose
+    def settingsNMJ(self, host=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.nmj_notifier.notify_settings(urllib.unquote_plus(host))
+        if result:
+            return '{"message": "Got settings from %(host)s", "database": "%(database)s", "mount": "%(mount)s"}' % {"host": host, "database": sickbeard.NMJ_DATABASE, "mount": sickbeard.NMJ_MOUNT}
+        else:
+            return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
 
 
     @cherrypy.expose
@@ -1841,13 +1949,13 @@ class Home:
         if str(pid) != str(sickbeard.PID):
             redirect("/home")
 
+        t = PageTemplate(file="restart.tmpl")
+        t.submenu = HomeMenu()
+
         # do a soft restart
         threading.Timer(2, sickbeard.invoke_restart, [False]).start()
 
-        title = "Restarting"
-        message = "Sick Beard is restarting, refresh in 30 seconds."
-
-        return _genericMessage(title, message)
+        return _munge(t)
 
     @cherrypy.expose
     def update(self, pid=None):
@@ -1860,7 +1968,8 @@ class Home:
         if updated:
             # do a hard restart
             threading.Timer(2, sickbeard.invoke_restart, [False]).start()
-            return "Sick Beard is restarting, refresh in 30 seconds."
+            t = PageTemplate(file="restart_bare.tmpl")
+            return _munge(t)
         else:
             return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
 
@@ -2152,6 +2261,18 @@ class Home:
 
 
     @cherrypy.expose
+    def updatePLEX(self):
+
+        if notifiers.plex_notifier._update_library():
+            ui.flash.message("Command sent to Plex Media Server host " + sickbeard.PLEX_HOST + " to update library")
+            logger.log(u"Plex library update initiated for host " + sickbeard.PLEX_HOST, logger.DEBUG)
+        else:
+            ui.flash.error("Unable to contact Plex Media Server host " + sickbeard.PLEX_HOST)
+            logger.log(u"Plex library update failed for host " + sickbeard.PLEX_HOST, logger.ERROR)
+        redirect('/home')
+
+
+    @cherrypy.expose
     def fixEpisodeNames(self, show=None):
 
         if show == None:
@@ -2212,7 +2333,7 @@ class Home:
 
                 if int(status) == WANTED:
                     # figure out what segment the episode is in and remember it so we can backlog it
-                    if epObj.show.is_air_by_date:
+                    if epObj.show.air_by_date:
                         ep_segment = str(epObj.airdate)[:7]
                     else:
                         ep_segment = epObj.season

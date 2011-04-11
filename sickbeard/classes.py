@@ -31,32 +31,64 @@ class SickBeardURLopener(urllib.FancyURLopener):
     version = USER_AGENT
 
 class AuthURLOpener(SickBeardURLopener):
+    """
+    URLOpener class that supports http auth without needing interactive password entry.
+    If the provided username/password don't work it simply fails.
+    
+    user: username to use for HTTP auth
+    pw: password to use for HTTP auth
+    """
     def __init__(self, user, pw):
         self.username = user
         self.password = pw
+
+        # remember if we've tried the username/password before
         self.numTries = 0
+        
+        # call the base class
         urllib.FancyURLopener.__init__(self)
 
     def prompt_user_passwd(self, host, realm):
+        """
+        Override this function and instead of prompting just give the
+        username/password that were provided when the class was instantiated.
+        """
+
+        # if this is the first try then provide a username/password
         if self.numTries == 0:
             self.numTries = 1
             return (self.username, self.password)
+        
+        # if we've tried before then return blank which cancels the request
         else:
             return ('', '')
 
+    # this is pretty much just a hack for convenience
     def openit(self, url):
         self.numTries = 0
         return SickBeardURLopener.open(self, url)
 
 class SearchResult:
+    """
+    Represents a search result from an indexer.
+    """
 
     def __init__(self, episodes):
         self.provider = -1
+
+        # URL to the NZB/torrent file
         self.url = ""
+
+        # used by some providers to store extra info associated with the result
         self.extraInfo = []
+
+        # list of TVEpisode objects that this result is associated with
         self.episodes = episodes
-        self.predownloaded = False
+
+        # quality of the release
         self.quality = -1
+
+        # release name
         self.name = ""
 
     def __str__(self):
@@ -74,16 +106,30 @@ class SearchResult:
         return self.episodes[0].prettyName(True) + "." + self.resultType
 
 class NZBSearchResult(SearchResult):
+    """
+    Regular NZB result with an URL to the NZB
+    """
     resultType = "nzb"
 
 class NZBDataSearchResult(SearchResult):
+    """
+    NZB result where the actual NZB XML data is stored in the extraInfo
+    """
     resultType = "nzbdata"
 
 class TorrentSearchResult(SearchResult):
+    """
+    Torrent result with an URL to the torrent
+    """
     resultType = "torrent"
 
 
 class ShowListUI:
+    """
+    This class is for tvdb-api. Instead of prompting with a UI to pick the
+    desired result out of a list of shows it tries to be smart about it
+    based on what shows are in SB. 
+    """
     def __init__(self, config, log=None):
         self.config = config
         self.log = log
@@ -116,6 +162,10 @@ class Proper:
 
 
 class ErrorViewer():
+    """
+    Keeps a static list of UIErrors to be displayed on the UI and allows
+    the list to be cleared.
+    """
 
     errors = []
 
@@ -131,6 +181,9 @@ class ErrorViewer():
         ErrorViewer.errors = []
 
 class UIError():
+    """
+    Represents an error to be displayed in the web UI.
+    """
     def __init__(self, message):
         self.message = message
         self.time = datetime.datetime.now()
