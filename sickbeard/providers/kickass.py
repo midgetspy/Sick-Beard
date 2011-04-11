@@ -26,7 +26,8 @@ import generic
 
 from sickbeard.common import *
 from sickbeard import logger
-from sickbeard import tvcache, sceneHelpers
+from sickbeard import tvcache
+from sickbeard.helpers import sanitizeSceneName
 
 class KICKASSProvider(generic.TorrentProvider):
 
@@ -50,8 +51,8 @@ class KICKASSProvider(generic.TorrentProvider):
         
         results = {}
         
-#        if show.is_air_by_date:
-#            logger.log(u"EZRSS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
+#        if show.air_by_date:
+#            logger.log(u"KICKASS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
 #            return results
         
         results = generic.TorrentProvider.findSeasonResults(self, show, season)
@@ -65,7 +66,7 @@ class KICKASSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = sceneHelpers.sanitizeSceneName(show.name).replace('.',' ').encode('utf-8')
+        params['show_name'] = sanitizeSceneName(show.name, ezrss=True).replace('.',' ').encode('utf-8')
           
         if season != None:
             params['season'] = season
@@ -79,9 +80,9 @@ class KICKASSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name).replace('.',' ').encode('utf-8')
+        params['show_name'] = sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
         
-        if ep_obj.show.is_air_by_date:
+        if ep_obj.show.air_by_date:
             params['date'] = str(ep_obj.airdate)
         else:
             params['season'] = ep_obj.season
@@ -96,10 +97,12 @@ class KICKASSProvider(generic.TorrentProvider):
         if search_params:
             params.update(search_params)
         
-        #Formatting the episode number S01E01   
-        ep_number = sickbeard.config.naming_ep_type[2] % {'seasonnumber': params['season'], 'episodenumber': params['episode']}
-        
-        searchURL = self.url +'search/'+params['show_name']+ '-' + ep_number + '/?rss=1'
+        if show.air_by_date:
+            searchURL = self.url +'search/'+params['show_name']+'-'+params['date']+ '/?rss=1'
+        else:
+            #Formatting the episode number S01E01   
+            ep_number = sickbeard.config.naming_ep_type[2] % {'seasonnumber': params['season'], 'episodenumber': params['episode']}
+            searchURL = self.url +'search/'+params['show_name']+ '-' + ep_number + '/?rss=1'
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
@@ -112,7 +115,7 @@ class KICKASSProvider(generic.TorrentProvider):
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load EZRSS RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load KICKASS RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
             logger.log(u"RSS data: "+data, logger.DEBUG)
             return []
         
@@ -123,7 +126,7 @@ class KICKASSProvider(generic.TorrentProvider):
             (title, url) = self._get_title_and_url(curItem)
             
             if not title or not url:
-                logger.log(u"The XML returned from the EZRSS RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+                logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
                 continue
     
             results.append(curItem)
@@ -156,25 +159,22 @@ class KICKASSCache(tvcache.TVCache):
 
         tvcache.TVCache.__init__(self, provider)
 
-        # only poll TvTorrents every 15 minutes max
+        # only poll KICKASS every 15 minutes max
         self.minTime = 15
 
 
     def _getRSSData(self):
     
         url = 'http://www.kickasstorrents.com/new/?rss=1'
-        logger.log(u"TvTorrents cache update URL: "+ url, logger.DEBUG)
+        logger.log(u"KICKASS cache update URL: "+ url, logger.DEBUG)
 
         data = self.provider.getURL(url)
         
         xml_content = etree.fromstring(data)
         description = xml_content.findtext('channel/description')
 
-        if "User can't be found" in description:
-            logger.log(u"TvTorrents invalid digest, check your config", logger.ERROR)
-
         if "Invalid Hash" in description:
-            logger.log(u"TvTorrents invalid hash, check your config", logger.ERROR)
+            logger.log(u"KICKASS invalid hash, check your config", logger.ERROR)
 
         return data
 
@@ -184,7 +184,7 @@ class KICKASSCache(tvcache.TVCache):
         url = item.findtext('torrentLink')
 
         if not title or not url:
-            logger.log(u"The XML returned from the TvTorrents RSS feed is incomplete, this result is unusable", logger.ERROR)
+            logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable", logger.ERROR)
             return
 
         logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
