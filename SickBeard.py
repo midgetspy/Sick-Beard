@@ -49,6 +49,9 @@ signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
 def loadShowsFromDB():
+    '''
+    Populates the showList with shows from the database
+    '''
 
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
@@ -64,6 +67,10 @@ def loadShowsFromDB():
         #TODO: make it update the existing shows if the showlist has something in it
 
 def daemonize():
+    '''
+    Fork off as a daemon
+    '''
+
     # Make a non-session-leader child process
     try:
         pid = os.fork()
@@ -77,7 +84,7 @@ def daemonize():
 
     # Make sure I can read my own files and shut out others
     prev = os.umask(0)
-    os.umask(prev and int('077',8))
+    os.umask(prev and int('077', 8))
 
     # Make the child a session-leader by detaching from the terminal
     try:
@@ -87,7 +94,6 @@ def daemonize():
     except OSError, e:
         raise RuntimeError("2st fork failed: %s [%d]" %
                    (e.strerror, e.errno))
-        raise Exception, "%s [%d]" % (e.strerror, e.errno)
 
     dev_null = file('/dev/null', 'r')
     os.dup2(dev_null.fileno(), sys.stdin.fileno())
@@ -98,6 +104,9 @@ def daemonize():
         file(sickbeard.PIDFILE, 'w').write("%s\n" % pid)
 
 def main():
+    '''
+    TV for me
+    '''
 
     # do some preliminary stuff
     sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(__file__))
@@ -203,16 +212,16 @@ def main():
     # make sure we can write to the data dir
     if not os.access(sickbeard.DATA_DIR, os.W_OK):
         raise SystemExit("Data dir must be writeable '" + sickbeard.DATA_DIR + "'")
-    
+
     # make sure we can write to the config file
     if not os.access(sickbeard.CONFIG_FILE, os.W_OK):
         if os.path.isfile(sickbeard.CONFIG_FILE):
             raise SystemExit("Config file '" + sickbeard.CONFIG_FILE + "' must be writeable")
         elif not os.access(os.path.dirname(sickbeard.CONFIG_FILE), os.W_OK):
             raise SystemExit("Config file root dir '" + os.path.dirname(sickbeard.CONFIG_FILE) + "' must be writeable") 
-        
+
     os.chdir(sickbeard.PROG_DIR)
-    
+
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
 
