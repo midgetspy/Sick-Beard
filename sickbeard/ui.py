@@ -32,18 +32,39 @@ MESSAGE = 'notice'
 ERROR = 'error'
 
 class Notifications(object):
-
+    """
+    A queue of Notification objects.
+    """
     def __init__(self):
         self._messages = []
         self._errors = []
         
-    def message(self, title, detail=''):
-        self._messages.append(Notification(title, detail, MESSAGE))
+    def message(self, title, message=''):
+        """
+        Add a regular notification to the queue
+        
+        title: The title of the notification
+        message: The message portion of the notification  
+        """
+        self._messages.append(Notification(title, message, MESSAGE))
 
-    def error(self, title, detail=''):
-        self._errors.append(Notification(title, detail, ERROR))
+    def error(self, title, message=''):
+        """
+        Add an error notification to the queue
+
+        title: The title of the notification
+        message: The message portion of the notification  
+        """
+        self._errors.append(Notification(title, message, ERROR))
 
     def get_notifications(self):
+        """
+        Return all the available notifications in a list. Marks them all as seen
+        as it returns them. Also removes timed out Notifications from the queue.
+        
+        Returns: A list of Notification objects
+        """
+        
         # filter out expired notifications 
         self._errors = [x for x in self._errors if not x.is_expired()]
         self._messages = [x for x in self._messages if not x.is_expired()]
@@ -51,10 +72,15 @@ class Notifications(object):
         # return any notifications that haven't been shown to the client already
         return [x.see() for x in self._errors + self._messages if x.is_new()]
 
+# static notification queue object
 notifications = Notifications()
 
     
 class Notification(object):
+    """
+    Represents a single notification. Tracks its own timeout and a list of which clients have
+    seen it before.
+    """
     def __init__(self, title, message='', type=None, timeout=None):
         self.title = title
         self.message = message
