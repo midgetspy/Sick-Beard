@@ -47,7 +47,7 @@ try:
     import lib.httplib2 as httplib2
 except ImportError:
     import httplib2
-    
+
 # Try using local version, followed by system, and none if neither are found
 try:
     import lib.socks as socks
@@ -150,9 +150,9 @@ class Show(dict):
         Search terms are converted to lower case (unicode) strings.
 
         # Examples
-        
+
         These examples assume t is an instance of Tvdb():
-        
+
         >>> t = Tvdb()
         >>>
 
@@ -248,7 +248,7 @@ class Episode(dict):
         """Search episode data for term, if it matches, return the Episode (self).
         The key parameter can be used to limit the search to a specific element,
         for example, episodename.
-        
+
         This primarily for use use by Show.search and Season.search. See
         Show.search for further information on search
 
@@ -319,7 +319,8 @@ class Tvdb:
                 search_all_languages = False,
                 apikey = None,
                 forceConnect = False,
-                http_proxy = None):
+                http_proxy = None,
+                base_url = None):
         """interactive (True/False):
             When True, uses built-in console UI is used to select the correct show.
             When False, the first search result is used.
@@ -373,7 +374,7 @@ class Tvdb:
             By default, Tvdb will only search in the language specified using
             the language option. When this is True, it will search for the
             show in and language
-        
+
         apikey (str/unicode):
             Override the default thetvdb.com API key. By default it will use
             tvdb_api's own key (fine for small scripts), but you can use your
@@ -385,19 +386,19 @@ class Tvdb:
             If true it will always try to connect to theTVDB.com even if we
             recently timed out. By default it will wait one minute before
             trying again, and any requests within that one minute window will
-            return an exception immediately. 
-            
+            return an exception immediately.
+
         http_proxy (str/unicode):
             URL for an optional HTTP Proxy that may be used to retrieve the data
             from thetvdb.com
         """
-        
+
         global lastTimeout
-        
+
         # if we're given a lastTimeout that is less than 1 min just give up
         if not forceConnect and lastTimeout != None and datetime.datetime.now() - lastTimeout < datetime.timedelta(minutes=1):
             raise tvdb_error("We recently timed out, so giving up early this time")
-        
+
         self.shows = ShowContainer() # Holds all Show classes
         self.corrections = {} # Holds show-name to show_id mapping
 
@@ -435,7 +436,7 @@ class Tvdb:
 
         self.config['banners_enabled'] = banners
         self.config['actors_enabled'] = actors
-        
+
         self.config['http_proxy'] = http_proxy
 
         if self.config['debug_enabled']:
@@ -474,7 +475,10 @@ class Tvdb:
 
         # The following url_ configs are based of the
         # http://thetvdb.com/wiki/index.php/Programmers_API
-        self.config['base_url'] = "http://www.thetvdb.com"
+        if base_url is not None:
+            self.config['base_url'] = base_url
+        else:
+            self.config['base_url'] = "http://www.thetvdb.com"
 
         if self.config['search_all_languages']:
             self.config['url_getSeries'] = "%(base_url)s/api/GetSeries.php?seriesname=%%s&language=all" % self.config
@@ -529,7 +533,7 @@ class Tvdb:
             good error.  Failed hitting %s, error message: %s" % (url,
                 str(errormsg)))
         #end try
-        
+
         return str(resp)
 
     def _getetsrc(self, url):
@@ -823,7 +827,7 @@ class Tvdb:
             if key not in self.shows:
                 self._getShowData(key, self.config['language'])
             return self.shows[key]
-        
+
         key = key.lower() # make key lower case
         sid = self._nameToSid(key)
         log().debug('Got series id %s' % (sid))
