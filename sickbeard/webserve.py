@@ -1748,8 +1748,8 @@ class ErrorLogs:
         minLevel = int(minLevel)
 
         data = []
-        if os.path.isfile(logger.logFile):
-            f = ek.ek(open, logger.logFile)
+        if os.path.isfile(logger.sb_log_instance.log_file):
+            f = ek.ek(open, logger.sb_log_instance.log_file)
             data = f.readlines()
             f.close()
 
