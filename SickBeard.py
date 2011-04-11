@@ -208,7 +208,7 @@ def main():
         elif not os.access(os.path.dirname(sickbeard.CONFIG_FILE), os.W_OK):
             raise SystemExit("Config file root dir '" + os.path.dirname(sickbeard.CONFIG_FILE) + "' must be writeable") 
         
-    os.chdir(sickbeard.PROG_DIR)
+    os.chdir(sickbeard.DATA_DIR)
     
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
