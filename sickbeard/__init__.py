@@ -122,7 +122,7 @@ NAMING_DATES = None
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
-TVDB_API_BASE_URL = None
+TVDB_API_BASE_URL = 'http://www.thetvdb.com'
 TVDB_API_PARMS = {}
 
 USE_NZBS = None
@@ -433,7 +433,7 @@ def initialize(consoleLogging=True):
             proxy_url = proxies['ftp']
 
         # Set our common tvdb_api options here
-        TVDB_API_BASE_URL = check_setting_str(CFG, 'General', 'tvdb_api_base_url', '')
+        TVDB_API_BASE_URL = check_setting_str(CFG, 'General', 'tvdb_api_base_url', 'http://www.thetvdb.com')
         TVDB_API_PARMS = {'cache': True,
                           'apikey': TVDB_API_KEY,
                           'language': 'en',
