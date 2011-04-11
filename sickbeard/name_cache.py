@@ -19,8 +19,6 @@
 from sickbeard import db
 from sickbeard.helpers import sanitizeSceneName
 
-from sickbeard import logger
-
 def addNameToCache(name, tvdb_id):
     """
     Adds the show & tvdb id to the scene_names table in cache.db.

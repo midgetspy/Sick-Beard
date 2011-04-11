@@ -18,7 +18,7 @@
 
 
 import StringIO, zlib, gzip
-import os.path, os
+import os
 import stat
 import urllib, urllib2
 import re
@@ -26,9 +26,9 @@ import shutil
 
 import sickbeard
 
-from sickbeard.exceptions import *
+from sickbeard.exceptions import MultipleShowObjectsException
 from sickbeard import logger, classes
-from sickbeard.common import *
+from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
@@ -458,7 +458,7 @@ def fixSetGroupID(childPath):
             return
 
         try:
-            ek.ek(os.chown, childPath, -1, parentGID)
+            ek.ek(os.chown, childPath, -1, parentGID)  #@UndefinedVariable - only available on UNIX
             logger.log(u"Respecting the set-group-ID bit on the parent directory for %s" % (childPath), logger.DEBUG)
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)

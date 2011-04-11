@@ -18,11 +18,12 @@
 
 from __future__ import with_statement
 
+import os
 import traceback
 
 import sickbeard
 
-from common import *
+from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
@@ -33,7 +34,7 @@ from sickbeard import nzbSplitter
 
 from sickbeard import encodingKludge as ek
 
-from sickbeard.providers import *
+#from sickbeard.providers import *
 from sickbeard import providers
 
 def _downloadResult(result):

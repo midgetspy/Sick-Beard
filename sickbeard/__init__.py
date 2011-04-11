@@ -56,6 +56,9 @@ MY_FULLNAME = None
 MY_NAME = None
 MY_ARGS = []
 SYS_ENCODING = ''
+DATA_DIR = ''
+CREATEPID = False
+PIDFILE = ''
 
 DAEMON = None
 
@@ -181,7 +184,7 @@ SAB_USERNAME = None
 SAB_PASSWORD = None
 SAB_APIKEY = None
 SAB_CATEGORY = None
-SAB_HOST = None
+SAB_HOST = ''
 
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
@@ -192,7 +195,7 @@ XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
 XBMC_UPDATE_LIBRARY = False
 XBMC_UPDATE_FULL = False
-XBMC_HOST = None
+XBMC_HOST = ''
 XBMC_USERNAME = None
 XBMC_PASSWORD = None
 
@@ -208,7 +211,7 @@ PLEX_PASSWORD = None
 USE_GROWL = False
 GROWL_NOTIFY_ONSNATCH = False
 GROWL_NOTIFY_ONDOWNLOAD = False
-GROWL_HOST = None
+GROWL_HOST = ''
 GROWL_PASSWORD = None
 
 USE_PROWL = False
@@ -331,7 +334,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
 
 
 def get_backlog_cycle_time():
-    cycletime = sickbeard.SEARCH_FREQUENCY*2+7
+    cycletime = SEARCH_FREQUENCY*2+7
     return max([cycletime, 720])
 
 
@@ -412,7 +415,7 @@ def initialize(consoleLogging=True):
         
         # unless they specify, put the cache dir inside the data dir
         if not os.path.isabs(ACTUAL_CACHE_DIR):
-            CACHE_DIR = os.path.join(sickbeard.DATA_DIR, ACTUAL_CACHE_DIR)
+            CACHE_DIR = os.path.join(DATA_DIR, ACTUAL_CACHE_DIR)
         else:
             CACHE_DIR = ACTUAL_CACHE_DIR
         
@@ -851,27 +854,27 @@ def saveAndShutdown(restart=False):
     logger.log(u"Killing cherrypy")
     cherrypy.engine.exit()
 
-    if sickbeard.CREATEPID:
-        logger.log(u"Removing pidfile " + str(sickbeard.PIDFILE))
-        os.remove(sickbeard.PIDFILE)
+    if CREATEPID:
+        logger.log(u"Removing pidfile " + str(PIDFILE))
+        os.remove(PIDFILE)
 
     if restart:
-        install_type = sickbeard.versionCheckScheduler.action.install_type
+        install_type = versionCheckScheduler.action.install_type
 
         popen_list = []
 
         if install_type in ('git', 'source'):
-            popen_list = [sys.executable, sickbeard.MY_FULLNAME]
+            popen_list = [sys.executable, MY_FULLNAME]
         elif install_type == 'win':
             if hasattr(sys, 'frozen'):
                 # c:\dir\to\updater.exe 12345 c:\dir\to\sickbeard.exe
-                popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(sickbeard.PID), sys.executable]
+                popen_list = [os.path.join(PROG_DIR, 'updater.exe'), str(PID), sys.executable]
             else:
                 logger.log(u"Unknown SB launch method, please file a bug report about this", logger.ERROR)
-                popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(sickbeard.PID), sys.executable, sickbeard.MY_FULLNAME ]
+                popen_list = [sys.executable, os.path.join(PROG_DIR, 'updater.py'), str(PID), sys.executable, MY_FULLNAME ]
 
         if popen_list:
-            popen_list += sickbeard.MY_ARGS + ['--nolaunch']
+            popen_list += MY_ARGS + ['--nolaunch']
             logger.log(u"Restarting Sick Beard with " + str(popen_list))
             subprocess.Popen(popen_list, cwd=os.getcwd())
 
@@ -881,14 +884,14 @@ def saveAndShutdown(restart=False):
 def invoke_command(to_call, *args, **kwargs):
     def delegate():
         to_call(*args, **kwargs)
-    sickbeard.invoked_command = delegate
-    logger.log(u"Placed invoked command: "+repr(sickbeard.invoked_command)+" for "+repr(to_call)+" with "+repr(args)+" and "+repr(kwargs), logger.DEBUG)
+    invoked_command = delegate
+    logger.log(u"Placed invoked command: "+repr(invoked_command)+" for "+repr(to_call)+" with "+repr(args)+" and "+repr(kwargs), logger.DEBUG)
 
 def invoke_restart(soft=True):
-    invoke_command(sickbeard.restart, soft=soft)
+    invoke_command(restart, soft=soft)
 
 def invoke_shutdown():
-    invoke_command(sickbeard.saveAndShutdown)
+    invoke_command(saveAndShutdown)
 
 
 def restart(soft=True):
@@ -909,7 +912,7 @@ def restart(soft=True):
 def save_config():
 
     new_config = ConfigObj()
-    new_config.filename = sickbeard.CONFIG_FILE
+    new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
     new_config['General']['log_dir'] = LOG_DIR
@@ -1102,7 +1105,7 @@ def getEpList(epIDs, showid=None):
     if epIDs == None or len(epIDs) == 0:
         return []
 
-    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(["?" for x in epIDs]),)
+    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(['?']*len(epIDs)),)
     params = epIDs
 
     if showid != None:
@@ -1115,7 +1118,7 @@ def getEpList(epIDs, showid=None):
     epList = []
 
     for curEp in sqlResults:
-        curShowObj = helpers.findCertainShow(sickbeard.showList, int(curEp["showid"]))
+        curShowObj = helpers.findCertainShow(showList, int(curEp["showid"]))
         curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]))
         epList.append(curEpObj)
 

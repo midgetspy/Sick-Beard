@@ -18,9 +18,10 @@
 
 
 
-import urllib
 import datetime
+import re
 import time
+import urllib
 
 import xml.etree.cElementTree as etree
 
@@ -29,8 +30,7 @@ import generic
 
 from sickbeard import classes, show_name_helpers
 
-from sickbeard import exceptions, logger, db
-from sickbeard.common import *
+from sickbeard import exceptions, logger
 from sickbeard import tvcache
 
 class NZBsProvider(generic.NZBProvider):

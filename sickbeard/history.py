@@ -17,12 +17,9 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import db
-import sqlite3
 import datetime
 
-from sickbeard import logger
-from sickbeard.common import *
-from sickbeard import providers
+from sickbeard.common import SNATCHED, Quality
 
 dateFormat = "%Y%m%d%H%M%S"
 

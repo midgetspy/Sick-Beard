@@ -22,9 +22,8 @@ import sickbeard
 
 import generic
 
-from sickbeard.common import *
+from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
-from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree

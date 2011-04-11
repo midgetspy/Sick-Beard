@@ -18,16 +18,7 @@
 
 
 
-import os.path
-import datetime
 import sickbeard
-
-from sickbeard import exceptions
-from sickbeard.tv import TVShow
-from sickbeard import logger
-from sickbeard import classes
-
-from lib.tvdb_api import tvdb_exceptions
 
 class ProgressIndicator():
 
@@ -76,7 +67,7 @@ class QueueProgressIndicator():
         return len([x for x in self.queueItemList if x.isInQueue()])
 
     def nextName(self):
-        for curItem in [sickbeard.showQueueScheduler.action.currentItem]+sickbeard.showQueueScheduler.action.queue:
+        for curItem in [sickbeard.showQueueScheduler.action.currentItem]+sickbeard.showQueueScheduler.action.queue: #@UndefinedVariable
             if curItem in self.queueItemList:
                 return curItem.name
 
@@ -95,38 +86,6 @@ class LoadingTVShow():
     def __init__(self, dir):
         self.dir = dir
         self.show = None
-
-def addShowsFromRootDir(dir):
-
-    returnStr = ""
-
-    if not os.path.isdir(dir):
-        return "Couldn't find directory " + dir
-
-    for curDir in os.listdir(unicode(dir)):
-        showDir = os.path.join(dir, curDir)
-        logStr = "Attempting to load show in " + showDir
-        logger.log(logStr, logger.DEBUG)
-        returnStr += logStr + "<br />\n"
-
-        sickbeard.loadingShowList[showDir] = LoadingTVShow(showDir)
-
-        try:
-            #myAdder = ShowAdder(showDir)
-            #myAdder.start()
-            sickbeard.showAddScheduler.action.addShowToQueue(showDir)
-        except exceptions.NoNFOException:
-            logStr = "Unable to automatically add the show in " + showDir
-            logger.log(logStr, logger.ERROR)
-            returnStr += logStr + "<br />\n"
-            del sickbeard.loadingShowList[showDir]
-        except exceptions.MultipleShowObjectsException:
-            logStr = "Show in "+showDir+" already exists, skipping..."
-            logger.log(logStr, logger.ERROR)
-            returnStr += logStr + "<br />\n"
-            del sickbeard.loadingShowList[showDir]
-
-    return returnStr
 
 class Flash:
     _messages = []

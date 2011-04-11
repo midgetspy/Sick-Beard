@@ -25,28 +25,24 @@ import urllib
 import re
 import threading
 import datetime
-import operator
 
 from Cheetah.Template import Template
-import cherrypy
 import cherrypy.lib
 
-import metadata.helpers
+import sickbeard
 
 from sickbeard import config
-from sickbeard import history, notifiers, processTV, search, providers
-from sickbeard import tv, versionChecker, ui
+from sickbeard import history, notifiers, processTV, search
+from sickbeard import tv, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 
-from sickbeard.notifiers import xbmc
-from sickbeard.notifiers import plex
 from sickbeard.providers import newznab
-from sickbeard.common import *
+from sickbeard.common import Quality, Overview, statusStrings
+from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 
-from lib.tvdb_api import tvdb_exceptions
 from lib.tvdb_api import tvdb_api
 
 try:
@@ -55,8 +51,6 @@ except ImportError:
     from lib import simplejson as json
 
 import xml.etree.cElementTree as etree
-
-import sickbeard
 
 from sickbeard import browser
 
@@ -139,9 +133,9 @@ class ManageSearches:
     def index(self):
         t = PageTemplate(file="manage_manageSearches.tmpl")
         #t.backlogPI = sickbeard.backlogSearchScheduler.action.getProgressIndicator()
-        t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused()
-        t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress()
-        t.searchStatus = sickbeard.currentSearchScheduler.action.amActive
+        t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused() #@UndefinedVariable
+        t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
+        t.searchStatus = sickbeard.currentSearchScheduler.action.amActive #@UndefinedVariable
         t.submenu = ManageMenu
 
         return _munge(t)
@@ -161,9 +155,9 @@ class ManageSearches:
     @cherrypy.expose
     def pauseBacklog(self, paused=None):
         if paused == "1":
-            sickbeard.searchQueueScheduler.action.pause_backlog()
+            sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
         else:
-            sickbeard.searchQueueScheduler.action.unpause_backlog()
+            sickbeard.searchQueueScheduler.action.unpause_backlog() #@UndefinedVariable
 
         redirect("/manage/manageSearches")
 
@@ -171,7 +165,7 @@ class ManageSearches:
     def forceVersionCheck(self):
 
         # force a check to see if there is a new version
-        result = sickbeard.versionCheckScheduler.action.check_for_new_version(force=True)
+        result = sickbeard.versionCheckScheduler.action.check_for_new_version(force=True) #@UndefinedVariable
         if result:
             logger.log(u"Forcing version check")
 
@@ -284,7 +278,7 @@ class Manage:
                 all_eps = [str(x["season"])+'x'+str(x["episode"]) for x in all_eps_results]
                 to_change[cur_tvdb_id] = all_eps
 
-            result = Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
+            Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
             
         redirect('/manage/episodeStatuses')
 
@@ -294,7 +288,7 @@ class Manage:
         show_obj = helpers.findCertainShow(sickbeard.showList, int(tvdb_id))
         
         if show_obj:
-            sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj])
+            sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj]) #@UndefinedVariable
         
         redirect("/manage/backlogOverview")
         
@@ -505,7 +499,7 @@ class Manage:
 
             if curShowID in toUpdate:
                 try:
-                    sickbeard.showQueueScheduler.action.updateShow(showObj, True)
+                    sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
                     updates.append(showObj.name)
                 except exceptions.CantUpdateException, e:
                     errors.append("Unable to update show "+showObj.name+": "+str(e).decode('utf-8'))
@@ -513,13 +507,13 @@ class Manage:
             # don't bother refreshing shows that were updated anyway
             if curShowID in toRefresh and curShowID not in toUpdate:
                 try:
-                    sickbeard.showQueueScheduler.action.refreshShow(showObj)
+                    sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                     refreshes.append(showObj.name)
                 except exceptions.CantRefreshException, e:
                     errors.append("Unable to refresh show "+showObj.name+": "+str(e).decode('utf-8'))
 
             if curShowID in toRename:
-                sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj)
+                sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj) #@UndefinedVariable
                 renames.append(showObj.name)
 
         if len(errors) > 0:
@@ -1630,7 +1624,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang)
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang) #@UndefinedVariable
         ui.flash.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -1701,7 +1695,7 @@ class NewHomeAddShows:
             show_dir, tvdb_id, show_name = cur_show
 
             # add the show
-            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT)
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT) #@UndefinedVariable
             num_added += 1
          
         if num_added:
@@ -1959,7 +1953,7 @@ class Home:
         if str(pid) != str(sickbeard.PID):
             redirect("/home")
 
-        updated = sickbeard.versionCheckScheduler.action.update()
+        updated = sickbeard.versionCheckScheduler.action.update() #@UndefinedVariable
 
         if updated:
             # do a hard restart
@@ -2001,23 +1995,23 @@ class Home:
         except sickbeard.exceptions.ShowDirNotFoundException:
             t.showLoc = (showObj._location, False)
 
-        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
+        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
             ui.flash.message('This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.')
 
-        elif sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
+        elif sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
             ui.flash.message('The information below is in the process of being updated.')
 
-        elif sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj):
+        elif sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj): #@UndefinedVariable
             ui.flash.message('The episodes below are currently being refreshed from disk')
 
-        elif sickbeard.showQueueScheduler.action.isInRefreshQueue(showObj):
+        elif sickbeard.showQueueScheduler.action.isInRefreshQueue(showObj): #@UndefinedVariable
             ui.flash.message('This show is queued to be refreshed.')
 
-        elif sickbeard.showQueueScheduler.action.isInUpdateQueue(showObj):
+        elif sickbeard.showQueueScheduler.action.isInUpdateQueue(showObj): #@UndefinedVariable
             ui.flash.message('This show is queued and awaiting an update.')
 
-        if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
-            if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
+        if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
+            if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
                 t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
                 t.submenu.append({ 'title': 'Re-scan files',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
@@ -2130,7 +2124,7 @@ class Home:
             if bool(showObj.seasonfolders) != bool(seasonfolders):
                 showObj.seasonfolders = seasonfolders
                 try:
-                    sickbeard.showQueueScheduler.action.refreshShow(showObj)
+                    sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                 except exceptions.CantRefreshException, e:
                     errors.append("Unable to refresh this show: "+str(e).decode('utf-8'))
 
@@ -2150,7 +2144,7 @@ class Home:
                     try:
                         showObj.location = location
                         try:
-                            sickbeard.showQueueScheduler.action.refreshShow(showObj)
+                            sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                         except exceptions.CantRefreshException, e:
                             errors.append("Unable to refresh this show:"+str(e).decode('utf-8'))
                         # grab updated info from TVDB
@@ -2165,7 +2159,7 @@ class Home:
         # force the update
         if do_update:
             try:
-                sickbeard.showQueueScheduler.action.updateShow(showObj, True)
+                sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
                 time.sleep(1)
             except exceptions.CantUpdateException, e:
                 errors.append("Unable to force an update on the show.")
@@ -2190,8 +2184,7 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
 
-        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or \
-        sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):
+        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
             return _genericMessage("Error", "Shows can't be deleted while they're being added or updated.")
 
         showObj.deleteShow()
@@ -2212,7 +2205,7 @@ class Home:
 
         # force the update from the DB
         try:
-            sickbeard.showQueueScheduler.action.refreshShow(showObj)
+            sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
         except exceptions.CantRefreshException, e:
             ui.flash.error("Unable to refresh this show.",
                         str(e))
@@ -2234,7 +2227,7 @@ class Home:
 
         # force the update
         try:
-            sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force))
+            sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force)) #@UndefinedVariable
         except exceptions.CantUpdateException, e:
             ui.flash.error("Unable to update this show.",
                         str(e))
@@ -2279,7 +2272,7 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
 
-        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj):
+        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
             return _genericMessage("Error", "Show is still being added, wait until it is finished before you rename files")
 
         showObj.fixEpisodeNames()
@@ -2358,7 +2351,7 @@ class Home:
             msg += "<li>Season "+str(cur_segment)+"</li>"
             logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
             cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
-            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
+            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
         msg += "</ul>"
 
         if segment_list:

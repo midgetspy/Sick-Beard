@@ -26,7 +26,6 @@ from sickbeard import db
 
 import re
 import datetime
-import urllib
 
 from name_parser.parser import NameParser, InvalidNameException
 

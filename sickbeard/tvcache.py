@@ -24,10 +24,9 @@ import sickbeard
 
 from sickbeard import db
 from sickbeard import logger
-from sickbeard.common import *
+from sickbeard.common import Quality
 
-from sickbeard import helpers, classes, exceptions, show_name_helpers
-from sickbeard import providers
+from sickbeard import helpers, exceptions, show_name_helpers
 from sickbeard import name_cache
 
 import xml.etree.cElementTree as etree
@@ -291,7 +290,7 @@ class TVCache():
                 epObj = t[tvdb_id].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
-            except tvdb_exceptions.tvdb_episodenotfound, e:
+            except tvdb_exceptions.tvdb_episodenotfound:
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                 return False
 

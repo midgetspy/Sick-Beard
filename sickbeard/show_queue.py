@@ -18,16 +18,16 @@
 
 from __future__ import with_statement
 
-import os.path
-import threading
 import traceback
+
+import sickbeard
 
 from lib.tvdb_api import tvdb_exceptions, tvdb_api
 
-from sickbeard.common import *
+from sickbeard.common import SKIPPED, WANTED
 
 from sickbeard.tv import TVShow
-from sickbeard import exceptions, helpers, logger, ui, db
+from sickbeard import exceptions, logger, ui, db
 from sickbeard import generic_queue
 from sickbeard import name_cache
 
@@ -149,7 +149,7 @@ class ShowQueueItem(generic_queue.QueueItem):
         self.show = show
     
     def isInQueue(self):
-        return self in sickbeard.showQueueScheduler.action.queue+[sickbeard.showQueueScheduler.action.currentItem]
+        return self in sickbeard.showQueueScheduler.action.queue+[sickbeard.showQueueScheduler.action.currentItem] #@UndefinedVariable
 
     def _getName(self):
         return str(self.show.tvdbid)
@@ -303,7 +303,7 @@ class QueueItemAdd(ShowQueueItem):
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
             logger.log(u"Launching backlog for this show since its episodes are WANTED")
-            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show])
+            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show]) #@UndefinedVariable
 
         self.show.flushEpisodes()
 
@@ -404,7 +404,7 @@ class QueueItemUpdate(ShowQueueItem):
             if self.show.tvrid == 0:
                 self.show.setTVRID()
 
-        sickbeard.showQueueScheduler.action.refreshShow(self.show, True)
+        sickbeard.showQueueScheduler.action.refreshShow(self.show, True) #@UndefinedVariable
 
 class QueueItemForceUpdate(QueueItemUpdate):
     def __init__(self, show=None):

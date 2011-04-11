@@ -20,7 +20,6 @@ from __future__ import with_statement
 
 import glob
 import os
-import os.path
 import re
 import shlex
 import subprocess
@@ -363,7 +362,7 @@ class PostProcessor(object):
     
                 self._log(u"Looking up name "+cur_name+u" on TVDB", logger.DEBUG)
                 showObj = t[cur_name]
-            except (tvdb_exceptions.tvdb_exception), e:
+            except (tvdb_exceptions.tvdb_exception):
                 # if none found, search on all languages
                 try:
                     # There's gotta be a better way of doing this but we don't wanna
@@ -375,11 +374,11 @@ class PostProcessor(object):
 
                     self._log(u"Looking up name "+cur_name+u" in all languages on TVDB", logger.DEBUG)
                     showObj = t[cur_name]
-                except (tvdb_exceptions.tvdb_exception, IOError), e:
+                except (tvdb_exceptions.tvdb_exception, IOError):
                     pass
 
                 continue
-            except (IOError), e:
+            except (IOError):
                 continue
             
             self._log(u"Lookup successful, using tvdb id "+str(showObj["id"]), logger.DEBUG)
@@ -519,10 +518,10 @@ class PostProcessor(object):
     def _get_quality(self, ep_obj):
         
         ep_quality = common.Quality.UNKNOWN
-        oldStatus = None
+
         # make sure the quality is set right before we continue
         if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
-            oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
+            oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
             if ep_quality != common.Quality.UNKNOWN:
                 self._log(u"The old status had a quality in it, using that: "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
                 return ep_quality
@@ -557,7 +556,7 @@ class PostProcessor(object):
             self._log(u"Absolute path to script: "+ek.ek(os.path.abspath, script_cmd[0]), logger.DEBUG)
             try:
                 p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
-                out, err = p.communicate()
+                out, err = p.communicate() #@UnusedVariable
                 self._log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
                 self._log(u"Unable to run extra_script: "+str(e).decode('utf-8'))
@@ -575,7 +574,7 @@ class PostProcessor(object):
             return True
         
         # if the user downloaded it manually and it appears to be a PROPER/REPACK then it's priority
-        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
+        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
         if self.is_proper and new_ep_quality >= old_ep_quality:
             self._log(u"This was manually downloaded but it appears to be a proper so I'm marking it as priority", logger.DEBUG)
             return True 
