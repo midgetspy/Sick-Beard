@@ -49,9 +49,9 @@ signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
 def loadShowsFromDB():
-    '''
+    """
     Populates the showList with shows from the database
-    '''
+    """
 
     myDB = db.DBConnection()
     sqlResults = myDB.select("SELECT * FROM tv_shows")
@@ -67,9 +67,9 @@ def loadShowsFromDB():
         #TODO: make it update the existing shows if the showlist has something in it
 
 def daemonize():
-    '''
+    """
     Fork off as a daemon
-    '''
+    """
 
     # Make a non-session-leader child process
     try:
@@ -104,9 +104,9 @@ def daemonize():
         file(sickbeard.PIDFILE, 'w').write("%s\n" % pid)
 
 def main():
-    '''
+    """
     TV for me
-    '''
+    """
 
     # do some preliminary stuff
     sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(__file__))
