@@ -394,6 +394,9 @@ class TVShow(object):
             except tvdb_exceptions.tvdb_episodenotfound:
                 logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
                 return None
+            except tvdb_exceptions.tvdb_error, e:
+                logger.log(u"Unable to contact TVDB: "+str(e), logger.WARNING)
+                return None
 
         for curEpNum in episodes:
 
@@ -539,6 +542,7 @@ class TVShow(object):
                 ltvdb_api_parms['language'] = self.lang
 
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
+
         else:
             t = tvapi
 

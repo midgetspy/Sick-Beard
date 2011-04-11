@@ -361,7 +361,11 @@ class QueueItemUpdate(ShowQueueItem):
         logger.log(u"Beginning update of "+self.show.name)
 
         logger.log(u"Retrieving show info from TVDB", logger.DEBUG)
-        self.show.loadFromTVDB(cache=not self.force)
+        try:
+            self.show.loadFromTVDB(cache=not self.force)
+        except tvdb_exceptions.tvdb_error, e:
+            logger.log(u"Unable to contact TVDB, aborting: "+str(e), logger.WARNING)
+            return
 
         # get episode list from DB
         logger.log(u"Loading all episodes from the database", logger.DEBUG)
