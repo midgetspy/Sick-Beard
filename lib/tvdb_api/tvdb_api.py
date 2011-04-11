@@ -29,6 +29,7 @@ import logging
 import datetime
 import time
 import traceback
+import socket
 
 try:
     import xml.etree.cElementTree as ElementTree
@@ -519,7 +520,7 @@ class Tvdb:
         try:
             log().debug("Retrieving URL %s" % url)
             header, resp = h.request(url, headers=h_header)
-        except (IOError, httplib2.HttpLib2Error), errormsg:
+        except (socket.error, IOError, httplib2.HttpLib2Error), errormsg:
             if not str(errormsg).startswith('HTTP Error'):
                 lastTimeout = datetime.datetime.now()
             raise tvdb_error("Could not connect to server %s: %s" % (url, errormsg))
