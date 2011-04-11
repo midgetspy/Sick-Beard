@@ -202,9 +202,9 @@ class TIVOMetadata(generic.GenericMetadata):
             
             
             # Usually starts with "SH" and followed by 6-8 digits.
-            if myShow["id"] != None:
-                data += ("seriesId : SH" + myShow["id"] + "\n")
-            
+            if myShow["zap2it_id"] != None:
+                data += ("seriesId : " + myShow["zap2it_id"] + "\n")
+                
 
             # This is the call sign of the channel the episode was recorded from.
             if myShow["network"] != None:
