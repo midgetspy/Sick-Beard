@@ -19,13 +19,9 @@
 from __future__ import with_statement 
 
 import os
-import os.path
 import threading
 
 import logging
-import logging.handlers
-
-from exceptions import *
 
 import sickbeard
 
@@ -111,7 +107,7 @@ class SBRotatingLogHandler(object):
             cur_log += 1
         return cur_log - 1
     
-    def rotate_logs(self):
+    def _rotate_logs(self):
         
         sb_logger = logging.getLogger('sickbeard')
         
@@ -167,7 +163,7 @@ class SBRotatingLogHandler(object):
                     classes.ErrorViewer.add(classes.UIError(message))
                 else:
                     sb_logger.log(logLevel, out_line)
-            except ValueError, e:
+            except ValueError:
                 pass
 
 sb_log_instance = SBRotatingLogHandler('sickbeard.log', NUM_LOGS, LOG_SIZE)
