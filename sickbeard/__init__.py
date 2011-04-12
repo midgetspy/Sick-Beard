@@ -874,7 +874,9 @@ def saveAndShutdown(restart=False):
                 popen_list = [sys.executable, os.path.join(PROG_DIR, 'updater.py'), str(PID), sys.executable, MY_FULLNAME ]
 
         if popen_list:
-            popen_list += MY_ARGS + ['--nolaunch']
+            popen_list += MY_ARGS
+            if '--nolaunch' not in popen_list:
+                popen_list += ['--nolaunch']
             logger.log(u"Restarting Sick Beard with " + str(popen_list))
             subprocess.Popen(popen_list, cwd=os.getcwd())
 
