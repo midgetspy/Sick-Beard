@@ -104,16 +104,17 @@ def main():
     sickbeard.MY_ARGS = sys.argv[1:]
     sickbeard.CREATEPID = False
 
+    sickbeard.SYS_ENCODING = None
+
     try:
         locale.setlocale(locale.LC_ALL, "")
+        sickbeard.SYS_ENCODING = locale.getpreferredencoding()
     except (locale.Error, IOError):
         pass
-    sickbeard.SYS_ENCODING = locale.getpreferredencoding()
-    
-    # for OSes that are poorly configured I'll just force UTF-8
-    if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII'):
-        sickbeard.SYS_ENCODING = 'UTF-8'
 
+    # for OSes that are poorly configured I'll just force UTF-8
+    if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
+        sickbeard.SYS_ENCODING = 'UTF-8'
 
     # need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
