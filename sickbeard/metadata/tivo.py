@@ -117,8 +117,6 @@ class TIVOMetadata(generic.GenericMetadata):
         The key values for the metadata file are from:
         http://pytivo.sourceforge.net/wiki/index.php/Metadata
         """
-        logger.log("TIVO _ep_data called");
-        
         
         data = "";
                 
@@ -288,10 +286,6 @@ class TIVOMetadata(generic.GenericMetadata):
         nfo_file_path = self.get_episode_file_path(ep_obj)
         nfo_file_dir = ek.ek(os.path.dirname, nfo_file_path)
         
-        logger.log(">> TIVO nfo_file_path: '" + nfo_file_path +"'");
-        logger.log(">> TIVO nfo_file_dir:  '" + nfo_file_dir +"'");
-        logger.log(">> TIVO With data: " + data);
-        
         try:
             if not ek.ek(os.path.isdir, nfo_file_dir):
                 logger.log("Metadata dir didn't exist, creating it at "+nfo_file_dir, logger.DEBUG)
@@ -299,10 +293,10 @@ class TIVOMetadata(generic.GenericMetadata):
                 helpers.chmodAsParent(nfo_file_dir)
             
             logger.log(u"Writing episode nfo file to "+nfo_file_path)
-            
             nfo_file = ek.ek(open, nfo_file_path, 'w')
-    
-            nfo_file.write(data)
+            
+            # Calling encode directly, b/c often descriptions have wonky characters.
+            nfo_file.write( data.encode( "utf-8" ) )
             
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
