@@ -26,8 +26,7 @@ import generic
 
 from sickbeard.common import *
 from sickbeard import logger
-from sickbeard import tvcache
-from sickbeard.helpers import sanitizeSceneName
+from sickbeard import tvcache, sceneHelpers
 
 class KICKASSProvider(generic.TorrentProvider):
 
@@ -66,7 +65,7 @@ class KICKASSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = sanitizeSceneName(show.name, ezrss=True).replace('.',' ').encode('utf-8')
+        params['show_name'] = sceneHelpers.sanitizeSceneName(show.name, ezrss=True).replace('.',' ').encode('utf-8')
           
         if season != None:
             params['season'] = season
@@ -80,7 +79,7 @@ class KICKASSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
+        params['show_name'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
         
         if ep_obj.show.air_by_date:
             params['date'] = str(ep_obj.airdate)
