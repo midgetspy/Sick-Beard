@@ -882,6 +882,7 @@ def saveAndShutdown(restart=False):
 
 
 def invoke_command(to_call, *args, **kwargs):
+    global invoked_command
     def delegate():
         to_call(*args, **kwargs)
     invoked_command = delegate
