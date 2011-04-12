@@ -648,7 +648,7 @@ def initialize(consoleLogging=True):
 
         providerList = providers.makeProviderList()
         
-        logger.initLogging(consoleLogging=consoleLogging)
+        logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
         db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
