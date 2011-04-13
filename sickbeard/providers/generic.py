@@ -26,7 +26,7 @@ import urllib2
 
 import sickbeard
 
-from sickbeard import helpers, classes, logger, db
+from sickbeard import helpers, classes, logger, db, exceptions
 
 from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
 from sickbeard import tvcache
