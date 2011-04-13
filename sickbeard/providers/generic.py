@@ -18,19 +18,17 @@
 
 
 
-import urllib2
-import os.path
-import sys
 import datetime
-import time
-
-import xml.etree.cElementTree as etree
+import os
+import sys
+import re
+import urllib2
 
 import sickbeard
 
-from sickbeard import helpers, classes, exceptions, logger, db
+from sickbeard import helpers, classes, logger, db
 
-from sickbeard.common import *
+from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 

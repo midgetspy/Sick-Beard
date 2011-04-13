@@ -25,7 +25,7 @@ import traceback
 import sickbeard
 
 from sickbeard import logger
-from sickbeard.common import *
+from sickbeard.common import UNAIRED
 
 from sickbeard import db
 from sickbeard import exceptions, helpers
@@ -296,10 +296,10 @@ class TVRage:
 
         try:
             date = datetime.datetime.strptime(epInfo[2], "%b/%d/%Y").date()
-        except ValueError, e:
+        except ValueError:
             try:
                 date = datetime.datetime.strptime(epInfo[2], "%d/%b/%Y").date()
-            except ValueError, e:
+            except ValueError:
                 logger.log(u"Unable to figure out the time from the TVRage data "+epInfo[2])
                 return None
 

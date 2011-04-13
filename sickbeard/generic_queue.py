@@ -19,7 +19,6 @@
 import operator
 import threading
 
-import sickbeard
 from sickbeard import logger
 
 class QueuePriorities:

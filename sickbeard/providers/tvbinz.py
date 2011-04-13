@@ -19,17 +19,15 @@
 from __future__ import with_statement
 
 import urllib
-import urllib2
-import sys
 
 
 import sickbeard
 import generic
 
-from sickbeard import helpers, classes, exceptions, logger
+from sickbeard import exceptions, logger
 from sickbeard import tvcache
 
-from sickbeard.common import *
+from sickbeard.common import Quality
 
 class TVBinzProvider(generic.NZBProvider):
 

@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import socket
-import sys
 
 import sickbeard
 
@@ -79,7 +78,6 @@ class GrowlNotifier:
     def _send(self, host,port,data,debug=False):
         if debug: print '<Sending>\n',data,'\n</Sending>'
         
-        response = ''
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host,port))
         s.send(data)

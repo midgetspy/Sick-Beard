@@ -21,8 +21,6 @@ import time
 import threading
 import traceback
 
-from lib.tvdb_api import tvdb_exceptions
-
 from sickbeard import logger
 
 class Scheduler:

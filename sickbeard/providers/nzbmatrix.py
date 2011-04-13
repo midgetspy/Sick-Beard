@@ -26,9 +26,8 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard import classes, logger, show_name_helpers, db
+from sickbeard import classes, logger, show_name_helpers
 from sickbeard import tvcache
-from sickbeard.common import *
 
 class NZBMatrixProvider(generic.NZBProvider):
 

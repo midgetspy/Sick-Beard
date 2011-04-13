@@ -19,11 +19,8 @@
 
 import urllib, urllib2
 import socket
-import sys
 import base64
 import time, struct
-
-#import config
 
 import sickbeard
 
@@ -235,7 +232,7 @@ def wakeOnLan(ethernet_address):
 # Test Connection function
 def isHostUp(host,port):
 
-    (family, socktype, proto, garbage, address) = socket.getaddrinfo(host, port)[0]
+    (family, socktype, proto, garbage, address) = socket.getaddrinfo(host, port)[0] #@UnusedVariable
     s = socket.socket(family, socktype, proto)
 
     try:

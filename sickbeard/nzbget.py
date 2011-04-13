@@ -28,8 +28,7 @@ import xmlrpclib
 
 from sickbeard.providers.generic import GenericProvider
 
-from sickbeard.common import *
-from sickbeard import logger, classes
+from sickbeard import logger
 
 def sendNZB(nzb):
 

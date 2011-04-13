@@ -16,13 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime, re
+import datetime
+import os
+import re
 
 import sickbeard
 
 import generic
 
-from sickbeard.common import *
+from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -264,8 +266,6 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         
         eps_to_write = [ep_obj] + ep_obj.relatedEps
         
-        shouldSave = False
-
         tvdb_lang = ep_obj.show.lang
     
         try:

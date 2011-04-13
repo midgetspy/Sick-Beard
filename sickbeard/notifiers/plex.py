@@ -75,7 +75,7 @@ class PLEXNotifier(XBMCNotifier):
                 url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, s.getAttribute('key'))
 
                 try:
-                    x = urllib.urlopen(url)
+                    urllib.urlopen(url)
                 except Exception, e:
                     logger.log(u"Error updating library section: "+str(e).decode('utf-8'), logger.ERROR)
                     return False

@@ -56,6 +56,9 @@ MY_FULLNAME = None
 MY_NAME = None
 MY_ARGS = []
 SYS_ENCODING = ''
+DATA_DIR = ''
+CREATEPID = False
+PIDFILE = ''
 
 DAEMON = None
 
@@ -95,6 +98,7 @@ WEB_IPV6 = None
 
 LAUNCH_BROWSER = None
 CACHE_DIR = None
+ACTUAL_CACHE_DIR = None
 ROOT_DIRS = None
 
 USE_BANNER = None
@@ -184,7 +188,7 @@ SAB_USERNAME = None
 SAB_PASSWORD = None
 SAB_APIKEY = None
 SAB_CATEGORY = None
-SAB_HOST = None
+SAB_HOST = ''
 
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
@@ -195,7 +199,7 @@ XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
 XBMC_UPDATE_LIBRARY = False
 XBMC_UPDATE_FULL = False
-XBMC_HOST = None
+XBMC_HOST = ''
 XBMC_USERNAME = None
 XBMC_PASSWORD = None
 
@@ -211,7 +215,7 @@ PLEX_PASSWORD = None
 USE_GROWL = False
 GROWL_NOTIFY_ONSNATCH = False
 GROWL_NOTIFY_ONDOWNLOAD = False
-GROWL_HOST = None
+GROWL_HOST = ''
 GROWL_PASSWORD = None
 
 USE_PROWL = False
@@ -252,6 +256,8 @@ COMING_EPS_SORT = None
 EXTRA_SCRIPTS = []
 
 GIT_PATH = None
+
+IGNORE_WORDS = "german,french,core2hd,dutch,swedish"
 
 __INITIALIZED__ = False
 
@@ -334,7 +340,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
 
 
 def get_backlog_cycle_time():
-    cycletime = sickbeard.SEARCH_FREQUENCY*2+7
+    cycletime = SEARCH_FREQUENCY*2+7
     return max([cycletime, 720])
 
 
@@ -359,7 +365,7 @@ def initialize(consoleLogging=True):
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
-                NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, TVDB_API_PARMS, \
+                NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
@@ -368,7 +374,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD,FANZUB, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, ANIMESUPPORT
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, ANIMESUPPORT, IGNORE_WORDS
 
         if __INITIALIZED__:
             return False
@@ -408,10 +414,17 @@ def initialize(consoleLogging=True):
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
 
-        CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
+        ACTUAL_CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         # fix bad configs due to buggy code
-        if CACHE_DIR == 'None':
-            CACHE_DIR = 'cache'
+        if ACTUAL_CACHE_DIR == 'None':
+            ACTUAL_CACHE_DIR = 'cache'
+        
+        # unless they specify, put the cache dir inside the data dir
+        if not os.path.isabs(ACTUAL_CACHE_DIR):
+            CACHE_DIR = os.path.join(DATA_DIR, ACTUAL_CACHE_DIR)
+        else:
+            CACHE_DIR = ACTUAL_CACHE_DIR
+        
         if not helpers.makeDir(CACHE_DIR):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
@@ -580,6 +593,8 @@ def initialize(consoleLogging=True):
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
+        IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
+
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
         USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
@@ -648,7 +663,7 @@ def initialize(consoleLogging=True):
 
         providerList = providers.makeProviderList()
         
-        logger.initLogging(consoleLogging=consoleLogging)
+        logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
         db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
@@ -851,27 +866,27 @@ def saveAndShutdown(restart=False):
     logger.log(u"Killing cherrypy")
     cherrypy.engine.exit()
 
-    if sickbeard.CREATEPID:
-        logger.log(u"Removing pidfile " + str(sickbeard.PIDFILE))
-        os.remove(sickbeard.PIDFILE)
+    if CREATEPID:
+        logger.log(u"Removing pidfile " + str(PIDFILE))
+        os.remove(PIDFILE)
 
     if restart:
-        install_type = sickbeard.versionCheckScheduler.action.install_type
+        install_type = versionCheckScheduler.action.install_type
 
         popen_list = []
 
         if install_type in ('git', 'source'):
-            popen_list = [sys.executable, sickbeard.MY_FULLNAME]
+            popen_list = [sys.executable, MY_FULLNAME]
         elif install_type == 'win':
             if hasattr(sys, 'frozen'):
                 # c:\dir\to\updater.exe 12345 c:\dir\to\sickbeard.exe
-                popen_list = [os.path.join(sickbeard.PROG_DIR, 'updater.exe'), str(sickbeard.PID), sys.executable]
+                popen_list = [os.path.join(PROG_DIR, 'updater.exe'), str(PID), sys.executable]
             else:
                 logger.log(u"Unknown SB launch method, please file a bug report about this", logger.ERROR)
-                popen_list = [sys.executable, os.path.join(sickbeard.PROG_DIR, 'updater.py'), str(sickbeard.PID), sys.executable, sickbeard.MY_FULLNAME ]
+                popen_list = [sys.executable, os.path.join(PROG_DIR, 'updater.py'), str(PID), sys.executable, MY_FULLNAME ]
 
         if popen_list:
-            popen_list += sickbeard.MY_ARGS + ['--nolaunch']
+            popen_list += MY_ARGS + ['--nolaunch']
             logger.log(u"Restarting Sick Beard with " + str(popen_list))
             subprocess.Popen(popen_list, cwd=os.getcwd())
 
@@ -881,14 +896,14 @@ def saveAndShutdown(restart=False):
 def invoke_command(to_call, *args, **kwargs):
     def delegate():
         to_call(*args, **kwargs)
-    sickbeard.invoked_command = delegate
-    logger.log(u"Placed invoked command: "+repr(sickbeard.invoked_command)+" for "+repr(to_call)+" with "+repr(args)+" and "+repr(kwargs), logger.DEBUG)
+    invoked_command = delegate
+    logger.log(u"Placed invoked command: "+repr(invoked_command)+" for "+repr(to_call)+" with "+repr(args)+" and "+repr(kwargs), logger.DEBUG)
 
 def invoke_restart(soft=True):
-    invoke_command(sickbeard.restart, soft=soft)
+    invoke_command(restart, soft=soft)
 
 def invoke_shutdown():
-    invoke_command(sickbeard.saveAndShutdown)
+    invoke_command(saveAndShutdown)
 
 
 def restart(soft=True):
@@ -909,7 +924,7 @@ def restart(soft=True):
 def save_config():
 
     new_config = ConfigObj()
-    new_config.filename = sickbeard.CONFIG_FILE
+    new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
     new_config['General']['log_dir'] = LOG_DIR
@@ -951,7 +966,7 @@ def save_config():
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
     new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
 
-    new_config['General']['cache_dir'] = CACHE_DIR if CACHE_DIR else 'cache'
+    new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
@@ -961,6 +976,7 @@ def save_config():
     
     new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
     new_config['General']['git_path'] = GIT_PATH
+    new_config['General']['ignore_words'] = IGNORE_WORDS
 
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
@@ -1106,7 +1122,7 @@ def getEpList(epIDs, showid=None):
     if epIDs == None or len(epIDs) == 0:
         return []
 
-    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(["?" for x in epIDs]),)
+    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(['?']*len(epIDs)),)
     params = epIDs
 
     if showid != None:
@@ -1119,7 +1135,7 @@ def getEpList(epIDs, showid=None):
     epList = []
 
     for curEp in sqlResults:
-        curShowObj = helpers.findCertainShow(sickbeard.showList, int(curEp["showid"]))
+        curShowObj = helpers.findCertainShow(showList, int(curEp["showid"]))
         curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]))
         epList.append(curEpObj)
 
