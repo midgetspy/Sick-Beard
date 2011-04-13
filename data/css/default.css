@@ -2,7 +2,7 @@
 img { border: 0; vertical-align: middle;}
 
 body {
-background-color:#fff;
+background-color:#F5F1E4;
 color:#000;
 font-family:'Verdana', 'Helvetica', 'Sans-serif', 'sans';
 font-size:12px;
@@ -36,6 +36,7 @@ display:inline;
 
 /* these are for incl_top.tmpl */
 #header {
+background-color:#fff;
 padding: 5px 0;
 z-index:2;
 }
@@ -130,6 +131,7 @@ background-color:#F5F1E4;
 border-top:1px solid #b3b3b3;
 color:#4e4e4e;
 line-height: 1.4em;
+font-size: 1em;
 }
 
 .sickbeardTable {
@@ -350,3 +352,12 @@ div#addShowPortal  button .buttontext { position: relative; display: block; padd
 .optionWrapper br { clear: both; }
 
 a.whitelink { color: white; }
+
+/* for displayShow notice */
+#show_message {
+    padding: 5px 8px;
+    background: #ffd575;
+    color: #333333;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+    font-size: 1em;
+}
