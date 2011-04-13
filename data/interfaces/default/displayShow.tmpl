@@ -11,6 +11,7 @@
 
 <script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
 
+
 <div class="h2footer align-right">
 #if (len($seasonResults) > 14):
     <select id="seasonJump">
@@ -33,6 +34,10 @@
     #end for
 #end if
 </div><br/>
+
+#if $show_message:
+    <div id="show_message" class="ui-corner-all">$show_message</div><br />
+#end if
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 

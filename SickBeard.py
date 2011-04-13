@@ -125,7 +125,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'nolaunch', 'config=', 'datadir=']) #@UnusedVariable
     except getopt.GetoptError:
-        print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile --config --datadir"
+        print "Available options: --quiet, --forceupdate, --port, --daemon, --pidfile, --config, --datadir"
         sys.exit()
 
     forceUpdate = False
@@ -137,7 +137,7 @@ def main():
         if o in ('-q', '--quiet'):
             consoleLogging = False
         # for now we'll just silence the logging
-        if o in ('--tvbinz'):
+        if o in ('--tvbinz',):
             sickbeard.SHOW_TVBINZ = True
 
         # should we update right away?
@@ -145,7 +145,7 @@ def main():
             forceUpdate = True
 
         # should we update right away?
-        if o in ('--nolaunch'):
+        if o in ('--nolaunch',):
             noLaunch = True
 
         # use a different port
@@ -161,15 +161,15 @@ def main():
                 sickbeard.DAEMON = True
 
         # config file
-        if (o in ('--config')):
+        if o in ('--config',):
             sickbeard.CONFIG_FILE = os.path.abspath(a)
 
         # datadir
-        if (o in ('--datadir')):
+        if o in ('--datadir',):
             sickbeard.DATA_DIR = os.path.abspath(a)
 
         # write a pidfile if requested
-        if o in ('--pidfile'):
+        if o in ('--pidfile',):
             sickbeard.PIDFILE = str(a)
 
             # if the pidfile already exists, sickbeard may still be running, so exit

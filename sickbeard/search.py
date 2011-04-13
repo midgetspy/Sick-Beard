@@ -31,6 +31,7 @@ from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
+from sickbeard import ui
 
 from sickbeard import encodingKludge as ek
 
@@ -84,6 +85,9 @@ def _downloadResult(result):
     else:
         logger.log(u"Invalid provider type - this is a coding error, report it please", logger.ERROR)
         return False
+
+    if newResult:
+        ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (result.name, resProvider.name))
 
     return newResult
 

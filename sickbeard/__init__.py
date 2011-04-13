@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, nzbs_org, nzbmatrix, tvbinz, nzbsrus, newznab, womble, newzbin, fanzub
+from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, tvbinz, nzbsrus, newznab, womble, newzbin, fanzub
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
@@ -719,7 +719,6 @@ def initialize(consoleLogging=True):
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
 
 
-
         showList = []
         loadingShowList = {}
 
@@ -886,7 +885,9 @@ def saveAndShutdown(restart=False):
                 popen_list = [sys.executable, os.path.join(PROG_DIR, 'updater.py'), str(PID), sys.executable, MY_FULLNAME ]
 
         if popen_list:
-            popen_list += MY_ARGS + ['--nolaunch']
+            popen_list += MY_ARGS
+            if '--nolaunch' not in popen_list:
+                popen_list += ['--nolaunch']
             logger.log(u"Restarting Sick Beard with " + str(popen_list))
             subprocess.Popen(popen_list, cwd=os.getcwd())
 
@@ -894,6 +895,7 @@ def saveAndShutdown(restart=False):
 
 
 def invoke_command(to_call, *args, **kwargs):
+    global invoked_command
     def delegate():
         to_call(*args, **kwargs)
     invoked_command = delegate

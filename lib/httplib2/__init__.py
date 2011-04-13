@@ -660,7 +660,7 @@ class FileCache(object):
             f = file(cacheFullPath, "rb")
             retval = f.read()
             f.close()
-        except IOError:
+        except IOError, e:
             pass
         return retval
 
@@ -1147,7 +1147,7 @@ a string that contains the response entity body.
                     content = e.content
                     response.status = 500
                     response.reason = str(e) 
-                elif isinstance(e, socket.timeout):
+                elif isinstance(e, socket.timeout) or (isinstance(e, socket.error) and 'timed out' in str(e)):
                     content = "Request Timeout"
                     response = Response( {
                             "content-type": "text/plain",

@@ -91,6 +91,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     </script>
     <script type="text/javascript" src="$sbRoot/js/jquery.scrolltopcontrol-1.1.js"></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/ajaxNotifications.js"></script>
     
 <script type="text/javascript">
 <!--
@@ -138,22 +139,6 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     \$.pnotify.defaults.pnotify_width = "340px";
     \$.pnotify.defaults.pnotify_history = false;
     \$.pnotify.defaults.pnotify_delay = 4000;
-
-    #for $curMessage in $flash.messages():
-        \$.pnotify({
-            pnotify_title: decodeURIComponent('$urllib.quote($curMessage[0].encode('UTF-8'))'),
-            pnotify_text: decodeURIComponent('$urllib.quote($curMessage[1].encode('UTF-8'))')
-        });
-    #end for
-
-    #for $curError in $flash.errors():
-        \$.pnotify({
-            pnotify_type: 'error',
-            pnotify_hide: false,
-            pnotify_title: decodeURIComponent('$urllib.quote($curError[0].encode('UTF-8'))'),
-            pnotify_text: decodeURIComponent('$urllib.quote($curError[1].encode('UTF-8'))')
-        });
-    #end for
 
     });
 //-->
