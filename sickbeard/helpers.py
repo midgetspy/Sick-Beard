@@ -26,7 +26,7 @@ import shutil
 
 import sickbeard
 
-from sickbeard.exceptions import MultipleShowObjectsException
+from sickbeard.exceptions import MultipleShowObjectsException, EpisodeNotFoundByAbsoluteNumerException
 from sickbeard import logger, classes
 from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
