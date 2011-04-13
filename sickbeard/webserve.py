@@ -75,7 +75,6 @@ class PageTemplate (Template):
             { 'title': 'Config',          'key': 'config'         },
             { 'title': logPageTitle,      'key': 'errorlogs'      },
         ]
-        self.flash = ui.Flash()
 
 def redirect(abspath, *args, **KWs):
     assert abspath[0] == '/'
@@ -147,7 +146,7 @@ class ManageSearches:
         result = sickbeard.currentSearchScheduler.forceRun()
         if result:
             logger.log(u"Search forced")
-            ui.flash.message('Episode search started',
+            ui.notifications.message('Episode search started',
                           'Note: RSS feeds may not be updated if retrieved recently')
 
         redirect("/manage/manageSearches")
@@ -444,7 +443,7 @@ class Manage:
                 errors.append('<b>%s:</b><br />\n<ul>' % showObj.name + '\n'.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
 
         if len(errors) > 0:
-            ui.flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
+            ui.notifications.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
                         "<br />\n".join(errors))
 
         redirect("/manage")
@@ -517,7 +516,7 @@ class Manage:
                 renames.append(showObj.name)
 
         if len(errors) > 0:
-            ui.flash.error("Errors encountered",
+            ui.notifications.error("Errors encountered",
                         '<br >\n'.join(errors))
 
         messageDetail = ""
@@ -538,7 +537,7 @@ class Manage:
             messageDetail += "</li></ul>"
 
         if len(updates+refreshes+renames) > 0:
-            ui.flash.message("The following actions were queued:",
+            ui.notifications.message("The following actions were queued:",
                           messageDetail)
 
         redirect("/manage")
@@ -569,7 +568,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
-        ui.flash.message('History cleared')
+        ui.notifications.message('History cleared')
         redirect("/history")
 
 
@@ -578,7 +577,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
-        ui.flash.message('Removed history entries greater than 30 days old')
+        ui.notifications.message('Removed history entries greater than 30 days old')
         redirect("/history")
 
 
@@ -674,10 +673,10 @@ class ConfigGeneral:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            ui.flash.error('Error(s) Saving Configuration',
+            ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/general/")
 
@@ -755,10 +754,10 @@ class ConfigSearch:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            ui.flash.error('Error(s) Saving Configuration',
+            ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/search/")
 
@@ -862,10 +861,10 @@ class ConfigPostProcessing:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            ui.flash.error('Error(s) Saving Configuration',
+            ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/postProcessing/")
 
@@ -1122,10 +1121,10 @@ class ConfigProviders:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            ui.flash.error('Error(s) Saving Configuration',
+            ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/providers/")
 
@@ -1312,10 +1311,10 @@ class ConfigNotifications:
         if len(results) > 0:
             for x in results:
                 logger.log(x, logger.ERROR)
-            ui.flash.error('Error(s) Saving Configuration',
+            ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.flash.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/notifications/")
 
@@ -1595,14 +1594,14 @@ class NewHomeAddShows:
         
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
-            ui.flash.error("Unable to add show", "Folder "+show_dir+" exists already")
+            ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home')
         
         # create the dir and make sure it worked
         dir_exists = helpers.makeDir(show_dir)
         if not dir_exists:
             logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
-            ui.flash.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
+            ui.notifications.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
         else:
             helpers.chmodAsParent(show_dir)
@@ -1625,7 +1624,7 @@ class NewHomeAddShows:
         
         # add the show
         sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang) #@UndefinedVariable
-        ui.flash.message('Show added', 'Adding the specified show into '+show_dir)
+        ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
         
@@ -1699,7 +1698,7 @@ class NewHomeAddShows:
             num_added += 1
          
         if num_added:
-            ui.flash.message("Shows Added", "Automatically added "+str(num_added)+" from their existing metadata files")
+            ui.notifications.message("Shows Added", "Automatically added "+str(num_added)+" from their existing metadata files")
 
         # if we're done then go home
         if not dirs_only:
@@ -1995,20 +1994,22 @@ class Home:
         except sickbeard.exceptions.ShowDirNotFoundException:
             t.showLoc = (showObj._location, False)
 
+        show_message = ''
+
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
-            ui.flash.message('This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.')
+            show_message = 'This show is in the process of being downloaded from theTVDB.com - the info below is incomplete.'
 
         elif sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
-            ui.flash.message('The information below is in the process of being updated.')
+            show_message = 'The information below is in the process of being updated.'
 
         elif sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj): #@UndefinedVariable
-            ui.flash.message('The episodes below are currently being refreshed from disk')
+            show_message = 'The episodes below are currently being refreshed from disk'
 
         elif sickbeard.showQueueScheduler.action.isInRefreshQueue(showObj): #@UndefinedVariable
-            ui.flash.message('This show is queued to be refreshed.')
+            show_message = 'This show is queued to be refreshed.'
 
         elif sickbeard.showQueueScheduler.action.isInUpdateQueue(showObj): #@UndefinedVariable
-            ui.flash.message('This show is queued and awaiting an update.')
+            show_message = 'This show is queued and awaiting an update.'
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
@@ -2021,6 +2022,7 @@ class Home:
         t.show = showObj
         t.sqlResults = sqlResults
         t.seasonResults = seasonResults
+        t.show_message = show_message
 
         epCounts = {}
         epCats = {}
@@ -2168,7 +2170,7 @@ class Home:
             return errors
 
         if len(errors) > 0:
-            ui.flash.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
+            ui.notifications.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
                         '<ul>' + '\n'.join(['<li>%s</li>' % error for error in errors]) + "</ul>")
 
         redirect("/home/displayShow?show=" + show)
@@ -2189,7 +2191,7 @@ class Home:
 
         showObj.deleteShow()
 
-        ui.flash.message('<b>%s</b> has been deleted' % showObj.name)
+        ui.notifications.message('<b>%s</b> has been deleted' % showObj.name)
         redirect("/home")
 
     @cherrypy.expose
@@ -2207,7 +2209,7 @@ class Home:
         try:
             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
         except exceptions.CantRefreshException, e:
-            ui.flash.error("Unable to refresh this show.",
+            ui.notifications.error("Unable to refresh this show.",
                         str(e))
 
         time.sleep(3)
@@ -2229,7 +2231,7 @@ class Home:
         try:
             sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force)) #@UndefinedVariable
         except exceptions.CantUpdateException, e:
-            ui.flash.error("Unable to update this show.",
+            ui.notifications.error("Unable to update this show.",
                         str(e))
 
         # just give it some time
@@ -2243,9 +2245,9 @@ class Home:
 
         for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
             if notifiers.xbmc_notifier._update_library(curHost, showName=showName):
-                ui.flash.message("Command sent to XBMC host " + curHost + " to update library")
+                ui.notifications.message("Command sent to XBMC host " + curHost + " to update library")
             else:
-                ui.flash.error("Unable to contact XBMC host " + curHost)
+                ui.notifications.error("Unable to contact XBMC host " + curHost)
         redirect('/home')
 
 
@@ -2253,10 +2255,10 @@ class Home:
     def updatePLEX(self):
 
         if notifiers.plex_notifier._update_library():
-            ui.flash.message("Command sent to Plex Media Server host " + sickbeard.PLEX_HOST + " to update library")
+            ui.notifications.message("Command sent to Plex Media Server host " + sickbeard.PLEX_HOST + " to update library")
             logger.log(u"Plex library update initiated for host " + sickbeard.PLEX_HOST, logger.DEBUG)
         else:
-            ui.flash.error("Unable to contact Plex Media Server host " + sickbeard.PLEX_HOST)
+            ui.notifications.error("Unable to contact Plex Media Server host " + sickbeard.PLEX_HOST)
             logger.log(u"Plex library update failed for host " + sickbeard.PLEX_HOST, logger.ERROR)
         redirect('/home')
 
@@ -2285,7 +2287,7 @@ class Home:
         if show == None or eps == None or status == None:
             errMsg = "You must specify a show and at least one episode"
             if direct:
-                ui.flash.error('Error', errMsg)
+                ui.notifications.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -2293,7 +2295,7 @@ class Home:
         if not statusStrings.has_key(int(status)):
             errMsg = "Invalid status"
             if direct:
-                ui.flash.error('Error', errMsg)
+                ui.notifications.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -2303,7 +2305,7 @@ class Home:
         if showObj == None:
             errMsg = "Error", "Show not in show list"
             if direct:
-                ui.flash.error('Error', errMsg)
+                ui.notifications.error('Error', errMsg)
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -2355,7 +2357,7 @@ class Home:
         msg += "</ul>"
 
         if segment_list:
-            ui.flash.message("Backlog started", msg)
+            ui.notifications.message("Backlog started", msg)
 
         if direct:
             return json.dumps({'result': 'success'})
@@ -2378,7 +2380,7 @@ class Home:
 
         if not foundEpisode:
             message = 'No downloads were found'
-            ui.flash.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
+            ui.notifications.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
             logger.log(message)
 
         else:
@@ -2388,17 +2390,38 @@ class Home:
             result = search.snatchEpisode(foundEpisode)
             providerModule = foundEpisode.provider
             if not result:
-                ui.flash.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')
+                ui.notifications.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')
             elif providerModule == None:
-                ui.flash.error('Provider is configured incorrectly, unable to download')
-            else:
-                ui.flash.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
+                ui.notifications.error('Provider is configured incorrectly, unable to download')
+            #else:
+                #ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
 
             #TODO: check if the download was successful
 
         redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
 
 
+class UI:
+    
+    @cherrypy.expose
+    def add_message(self):
+        
+        ui.notifications.message('Test 1', 'This is test number 1')
+        ui.notifications.error('Test 2', 'This is test number 2')
+        
+        return "ok"
+
+    @cherrypy.expose
+    def get_messages(self):
+        messages = {}
+        cur_notification_num = 1
+        for cur_notification in ui.notifications.get_notifications():
+            messages['notification-'+str(cur_notification_num)] = {'title': cur_notification.title,
+                                                                   'message': cur_notification.message,
+                                                                   'type': cur_notification.type}
+            cur_notification_num += 1
+
+        return json.dumps(messages)
 
 class WebInterface:
 
@@ -2553,3 +2576,5 @@ class WebInterface:
     browser = browser.WebFileBrowser()
 
     errorlogs = ErrorLogs()
+    
+    ui = UI()

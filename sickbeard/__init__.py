@@ -707,7 +707,6 @@ def initialize(consoleLogging=True):
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
 
 
-
         showList = []
         loadingShowList = {}
 

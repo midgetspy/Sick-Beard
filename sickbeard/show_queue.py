@@ -220,12 +220,12 @@ class QueueItemAdd(ShowQueueItem):
                 # this usually only happens if they have an NFO in their show dir which gave us a TVDB ID that has no
                 # proper english version of the show
                 if not s or not s['seriesname']:
-                    ui.flash.error("Unable to add show", "Show in "+self.showDir+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
+                    ui.notifications.error("Unable to add show", "Show in "+self.showDir+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
                     self._finishEarly()
                     return
             except tvdb_exceptions.tvdb_exception, e:
                 logger.log(u"Error contacting TVDB: "+str(e), logger.ERROR)
-                ui.flash.error("Unable to add show", "Unable to look up the show in "+self.showDir+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
+                ui.notifications.error("Unable to add show", "Unable to look up the show in "+self.showDir+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
                 self._finishEarly()
                 return
 
@@ -250,15 +250,15 @@ class QueueItemAdd(ShowQueueItem):
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to add show due to an error with TVDB: "+str(e).decode('utf-8'), logger.ERROR)
             if self.show:
-                ui.flash.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
+                ui.notifications.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
             else:
-                ui.flash.error("Unable to add show due to an error with TVDB")
+                ui.notifications.error("Unable to add show due to an error with TVDB")
             self._finishEarly()
             return
 
         except exceptions.MultipleShowObjectsException:
             logger.log(u"The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
-            ui.flash.error('Show skipped', "The show in " + self.showDir + " is already in your show list")
+            ui.notifications.error('Show skipped', "The show in " + self.showDir + " is already in your show list")
             self._finishEarly()
             return
 

@@ -16,9 +16,99 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
+import datetime
+import cherrypy
 import sickbeard
+
+MESSAGE = 'notice'
+ERROR = 'error'
+
+class Notifications(object):
+    """
+    A queue of Notification objects.
+    """
+    def __init__(self):
+        self._messages = []
+        self._errors = []
+        
+    def message(self, title, message=''):
+        """
+        Add a regular notification to the queue
+        
+        title: The title of the notification
+        message: The message portion of the notification  
+        """
+        self._messages.append(Notification(title, message, MESSAGE))
+
+    def error(self, title, message=''):
+        """
+        Add an error notification to the queue
+
+        title: The title of the notification
+        message: The message portion of the notification  
+        """
+        self._errors.append(Notification(title, message, ERROR))
+
+    def get_notifications(self):
+        """
+        Return all the available notifications in a list. Marks them all as seen
+        as it returns them. Also removes timed out Notifications from the queue.
+        
+        Returns: A list of Notification objects
+        """
+        
+        # filter out expired notifications 
+        self._errors = [x for x in self._errors if not x.is_expired()]
+        self._messages = [x for x in self._messages if not x.is_expired()]
+        
+        # return any notifications that haven't been shown to the client already
+        return [x.see() for x in self._errors + self._messages if x.is_new()]
+
+# static notification queue object
+notifications = Notifications()
+
+    
+class Notification(object):
+    """
+    Represents a single notification. Tracks its own timeout and a list of which clients have
+    seen it before.
+    """
+    def __init__(self, title, message='', type=None, timeout=None):
+        self.title = title
+        self.message = message
+        
+        self._when = datetime.datetime.now()
+        self._seen = []
+
+        if type:
+            self.type = type
+        else:
+            self.type = MESSAGE
+        
+        if timeout:
+            self._timeout = timeout
+        else:
+            self._timeout = datetime.timedelta(minutes=1)
+
+    def is_new(self):
+        """
+        Returns True if the notification hasn't been displayed to the current client (aka IP address).
+        """
+        return cherrypy.request.remote.ip not in self._seen
+    
+    def is_expired(self):
+        """
+        Returns True if the notification is older than the specified timeout value.
+        """
+        return datetime.datetime.now() - self._when > self._timeout
+
+    
+    def see(self):
+        """
+        Returns this notification object and marks it as seen by the client ip
+        """
+        self._seen.append(cherrypy.request.remote.ip)
+        return self
 
 class ProgressIndicator():
 
@@ -87,25 +177,4 @@ class LoadingTVShow():
         self.dir = dir
         self.show = None
 
-class Flash:
-    _messages = []
-    _errors = []
-
-    def message(self, title, detail=''):
-        Flash._messages.append((title, detail))
-
-    def error(self, title, detail=''):
-        Flash._errors.append((title, detail))
-
-    def messages(self):
-        tempMessages = Flash._messages
-        Flash._messages = []
-        return tempMessages
-
-    def errors(self):
-        tempErrors = Flash._errors
-        Flash._errors = []
-        return tempErrors
-
-flash = Flash()
 
