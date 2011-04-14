@@ -498,12 +498,17 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
     
     return (season, episodes)
 
-def parseResultWrapper(show,toParse):
-    
+def parse_result_wrapper(show,toParse):
+    """Retruns a parse result or a InvalidNameException
+        it will try to take the correct regex for the show if given
+    """
     if show and show.is_anime:
         modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
-    else:
+    elif show and not show.is_anime:
         modeList = [NameParser.NORMAL_REGEX]
+    else: # this will be chosen if no show is given so in cache-,rss-,ppsearch
+        modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
+        
     for mode in modeList:
         try:
             myParser = NameParser(regexMode=mode)                
@@ -511,10 +516,37 @@ def parseResultWrapper(show,toParse):
         except InvalidNameException:
             pass
         else:
+            # if at one point a normal show gets parsed by an anime regex uncomment this
+            """
+            if mode == NameParser.ANIME_REGEX:
+                tvdbid = get_tvdbid(parse_result.series_name)
+                if tvdbid and not check_for_anime(tvdbid):
+                    pass
+            """
             break
     else:
-        return None
+        raise InvalidNameException("Unable to parse "+toParse)
     return parse_result
+
+def get_tvdbid(name):
+    myDB = db.DBConnection()
+    isAbsoluteNumberSQlResult = myDB.select("SELECT tvdb_id,show_name FROM tv_shows WHERE show_name = ?", [name.lower()])
+    if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
+        return int(isAbsoluteNumberSQlResult[0][0])
+    return 0 
+    
+ 
+def check_for_anime(tvdb_id):
+    """
+    Check if the show is a anime
+    """
+    if tvdb_id:
+        myDB = db.DBConnection()
+        isAbsoluteNumberSQlResult = myDB.select("SELECT anime,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
+        if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
+            logger.log(u"This show (tvdbid:"+str(tvdb_id)+") is flaged as an anime", logger.DEBUG)
+            return True
+    return False 
     
 
 def sanitizeSceneName (name, ezrss=False):

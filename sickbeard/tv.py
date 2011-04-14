@@ -28,7 +28,7 @@ import sickbeard
 
 import xml.etree.cElementTree as etree
 
-from name_parser.parser import NameParser, InvalidNameException
+from name_parser.parser import InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -41,7 +41,7 @@ from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek
 
-from sickbeard.helpers import parseResultWrapper
+from sickbeard.helpers import parse_result_wrapper
 from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
 
@@ -126,7 +126,7 @@ class TVShow(object):
         # if we get an anime get the real season and episode
         if self.anime and absolute_number != None and season == None and episode == None:
             myDB = db.DBConnection()
-            sql = "SELECT * FROM tv_episodes WHERE showid = ? and absolute_number = ?"
+            sql = "SELECT * FROM tv_episodes WHERE showid = ? and absolute_number = ? and season <> 0"
             sqlResults = myDB.select(sql, [self.tvdbid,absolute_number])
             if len(sqlResults) == 1:
                 episode = int(sqlResults[0]["episode"])
@@ -383,8 +383,9 @@ class TVShow(object):
 
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
-        parse_result = parseResultWrapper(self,file)
-        if not parse_result:
+        try:
+            parse_result = parse_result_wrapper(self,file)
+        except InvalidNameException:
             logger.log(u"tv: Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
             return None
 

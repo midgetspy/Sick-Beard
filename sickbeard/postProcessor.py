@@ -41,6 +41,8 @@ from sickbeard import encodingKludge as ek
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
+from sickbeard.helpers import parse_result_wrapper
+
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class PostProcessor(object):
@@ -262,7 +264,7 @@ class PostProcessor(object):
         
         return dest_folder
 
-    def _history_lookup(self, regexMode=NameParser.NORMAL_REGEX):
+    def _history_lookup(self):
         """
         Look up the NZB name in the history and see if it contains a record for self.nzb_name
         
@@ -303,7 +305,7 @@ class PostProcessor(object):
         self.in_history = False
         return to_return
     
-    def _analyze_name(self, name, file=True, regexMode=NameParser.ALL_REGEX): # FIXME:this shouldnt always consider anime !
+    def _analyze_name(self, name, file=True):
         """
         Takes a name and tries to figure out a show, season, and episode from it.
         
@@ -318,8 +320,7 @@ class PostProcessor(object):
             return to_return
     
         # parse the name to break it into show name, season, and episode
-        np = NameParser(file, regexMode)
-        parse_result = np.parse(name)
+        parse_result = parse_result_wrapper(None,name)
         self._log("Parsed "+name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
 
         if parse_result.air_by_date:
@@ -413,16 +414,16 @@ class PostProcessor(object):
         attempt_list = [self._history_lookup,
     
                         # try to analyze the file name
-                        lambda regexMode: self._analyze_name(self.file_name, regexMode=regexMode),
+                        lambda : self._analyze_name(self.file_name),
 
                         # try to analyze the dir name
-                        lambda regexMode: self._analyze_name(self.folder_name, regexMode=regexMode),
+                        lambda : self._analyze_name(self.folder_name),
 
                          # try to analyze the file path
-                        lambda regexMode: self._analyze_name(self.file_path, regexMode=regexMode),
+                        lambda : self._analyze_name(self.file_path),
 
                         # try to analyze the nzb name
-                        lambda regexMode: self._analyze_name(self.nzb_name, regexMode=regexMode)
+                        lambda : self._analyze_name(self.nzb_name)
                         ]
         return attempt_list
     
@@ -438,15 +439,8 @@ class PostProcessor(object):
 
         # attempt every possible method to get our info
         for cur_attempt in attempt_list:
-            try:                
-                (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt(regexMode=NameParser.ALL_REGEX)
-                if cur_tvdb_id and self._check_for_anime(cur_tvdb_id):
-                    logger.log(u"tvdb_id: "+str(cur_tvdb_id)+u" is an anime", logger.DEBUG)
-                    (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt(regexMode=NameParser.ANIME_REGEX)
-                else:
-                    logger.log(u"tvdb_id: "+str(cur_tvdb_id)+u" is a normal show", logger.DEBUG)
-                    (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt(regexMode=NameParser.NORMAL_REGEX)
-            
+            try:
+                (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
             except InvalidNameException, e:
                 logger.log(u"Unable to parse, skipping: "+str(e), logger.DEBUG)
                 continue

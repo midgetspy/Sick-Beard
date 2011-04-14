@@ -34,6 +34,7 @@ import xml.etree.cElementTree as etree
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from name_parser.parser import NameParser, InvalidNameException
+from sickbeard.helpers import parse_result_wrapper
 
 
 class CacheDBConnection(db.DBConnection):
@@ -195,11 +196,14 @@ class TVCache():
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
             try:
+                """
                 if self.provider.supportsAbsoluteNumbering:                
                     myParser = NameParser(regexMode=NameParser.ALL_REGEX)
                 else:
                     myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
                 parse_result = myParser.parse(curName)
+                """
+                parse_result = parse_result_wrapper(None,curName)
             except InvalidNameException:
                 logger.log(u"tvcache: Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
                 continue

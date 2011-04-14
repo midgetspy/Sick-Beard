@@ -19,7 +19,7 @@
 import sickbeard
 
 from sickbeard.common import countryList
-from sickbeard.helpers import sanitizeSceneName
+from sickbeard.helpers import sanitizeSceneName, parse_result_wrapper
 from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
 from sickbeard import db
@@ -45,8 +45,7 @@ def filterBadReleases(name):
     """
 
     try:
-        fp = NameParser(regexMode=NameParser.ALL_REGEX)
-        parse_result = fp.parse(name)
+        parse_result = parse_result_wrapper(None,name)
     except InvalidNameException:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
