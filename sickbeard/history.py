@@ -20,6 +20,7 @@ import db
 import datetime
 
 from sickbeard.common import SNATCHED, Quality
+from sickbeard import ui
 
 dateFormat = "%Y%m%d%H%M%S"
 
@@ -33,6 +34,8 @@ def _logHistoryItem(action, showid, season, episode, quality, resource, provider
 
 
 def logSnatch(searchResult):
+
+    ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (searchResult.name, searchResult.provider.name))
 
     for curEpObj in searchResult.episodes:
 

@@ -19,6 +19,7 @@
 from __future__ import with_statement
 
 import os
+import time
 import traceback
 
 import sickbeard
@@ -26,8 +27,6 @@ import sickbeard
 from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
-from sickbeard import sab
-from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
@@ -35,8 +34,9 @@ from sickbeard import ui
 
 from sickbeard import encodingKludge as ek
 
-#from sickbeard.providers import *
 from sickbeard import providers
+
+from sickbeard.download_clients import sab, nzbget
 
 def _downloadResult(result):
     """
@@ -91,7 +91,50 @@ def _downloadResult(result):
 
     return newResult
 
-def snatchEpisode(result, endStatus=SNATCHED):
+def _downloadResults(results):
+    """
+    Downloads a list of SearchResults to the appropriate black hole folder.
+    
+    result: SearchResult instance to download.
+
+    Returns a bool, True if all downloads succeeded, False if otherwise.
+    """
+
+    if not results:
+        return False
+
+    res_provider = results[0].provider
+
+    combine_results = res_provider.combine_results
+
+    # if we get here this is a mistake but we'll deal with it as best as possible
+    if not combine_results:
+        return all([_downloadResult(result) for result in results])
+
+    if res_provider == None:
+        logger.log(u"Invalid provider name - this is a coding error, report it please", logger.ERROR)
+        return False
+
+    nzb_results = [nzb_result for nzb_result in results if nzb_result.resultType == "nzb"]
+    nzbdata_results = [nzb_result for nzb_result in results if nzb_result.resultType == "nzbdata"]
+    torrent_results = [nzb_result for nzb_result in results if nzb_result.resultType == "torrent"]
+
+    newResult = True
+
+    # nzbs with an URL can just be downloaded from the provider
+    if nzb_results:
+        newResult = newResult and res_provider.downloadResults(nzb_results)
+
+    # if it's an nzb data result 
+    for result in nzbdata_results:
+        newResult = newResult and _downloadResult(result)
+
+    if torrent_results:
+        newResult = res_provider.downloadResults(torrent_results)
+
+    return newResult
+
+def snatchEpisodes(results, endStatus=SNATCHED):
     """
     Contains the internal logic necessary to actually "snatch" a result that
     has been found.
@@ -102,38 +145,82 @@ def snatchEpisode(result, endStatus=SNATCHED):
     endStatus: the episode status that should be used for the episode object once it's snatched.
     """
 
-    # NZBs can be sent straight to SAB or saved to disk
-    if result.resultType in ("nzb", "nzbdata"):
-        if sickbeard.NZB_METHOD == "blackhole":
-            dlResult = _downloadResult(result)
-        elif sickbeard.NZB_METHOD == "sabnzbd":
-            dlResult = sab.sendNZB(result)
-        elif sickbeard.NZB_METHOD == "nzbget":
-            dlResult = nzbget.sendNZB(result)
+    # separate results by provider
+    separate_results = []
+    provider_list = set([result.provider for result in results])
+    for cur_provider in provider_list:
+        # for providers that support combined results we keep them in one big list
+        if cur_provider.combine_results:
+            separate_results.append([result for result in results if result.provider == cur_provider])
+        # for other providers we separate each result
         else:
-            logger.log(u"Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
-            dlResult = False
+            for cur_result in [result for result in results if result.provider == cur_provider]:
+                separate_results.append([cur_result])
+
+    # we deal with lists of results ordered by provider
+    for cur_results in separate_results:
+
+        # retrieve the nzb/torrent from the provider        
+        dl_result = retrieve_episodes(cur_results)
+
+        if not dl_result:
+            continue
+
+        # do the post-snatch routine for each episode individually
+        for individual_result in cur_results:
+            history.logSnatch(individual_result)
+        
+            # don't notify when we re-download an episode
+            for curEpObj in result.episodes:
+                with curEpObj.lock:
+                    curEpObj.status = Quality.compositeStatus(endStatus, result.quality)
+                    curEpObj.saveToDB()
+        
+                if curEpObj.status not in Quality.DOWNLOADED:
+                    notifiers.notify_snatch(curEpObj.prettyName(True))
+
+        time.sleep(5)
+
+
+def retrieve_episodes(cur_results):
+    """
+    Takes a list of results and retrieves each one from its provider according to your SB settings.
+    
+    cur_results: A list of SearchResult objects to snatch
+    
+    Returns: True or False depending on success 
+    """
+
+    if not cur_results:
+        return False
+
+    if len(cur_results) == 1:
+        retrieval_method = {'blackhole': _downloadResult,
+                            'sabnzbd': sab.sendNZB,
+                            'nzbget': nzbget.sendNZB,
+                            }
+        result_param = cur_results[0]
+    else:
+        retrieval_method = {'blackhole': _downloadResults,
+                            'sabnzbd': sab.sendNZBs,
+                            'nzbget': nzbget.sendNZBs,
+                            }
+        result_param = cur_results
+
+    # NZBs can be sent straight to SAB or saved to disk. we assume the first result is representative of the whole set
+    if cur_results[0].resultType in ("nzb", "nzbdata"):
+        dlResult = retrieval_method[sickbeard.NZB_METHOD](result_param)
 
     # torrents are always saved to disk
-    elif result.resultType == "torrent":
-        dlResult = _downloadResult(result)
+    elif cur_results[0].resultType == "torrent":
+        dlResult = retrieval_method['blackhole'](result_param)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False
 
+    # if we failed to retrieve the result then bail out
     if dlResult == False:
         return False
-
-    history.logSnatch(result)
-
-    # don't notify when we re-download an episode
-    for curEpObj in result.episodes:
-        with curEpObj.lock:
-            curEpObj.status = Quality.compositeStatus(endStatus, result.quality)
-            curEpObj.saveToDB()
-
-        if curEpObj.status not in Quality.DOWNLOADED:
-            notifiers.notify_snatch(curEpObj.prettyName(True))
 
     return True
 

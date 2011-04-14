@@ -30,6 +30,9 @@ from sickbeard.providers.generic import GenericProvider
 
 from sickbeard import logger
 
+def sendNZBs(nzb_list):
+    return all([sendNZB(nzb) for nzb in nzb_list])
+
 def sendNZB(nzb):
 
     addToTop = False

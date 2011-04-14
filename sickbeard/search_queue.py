@@ -153,10 +153,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
 
         results = search.findSeason(self.show, self.segment)
 
-        # download whatever we find
-        for curResult in results:
-            search.snatchEpisode(curResult)
-            time.sleep(5)
+        search.snatchEpisodes(results)
 
         self.finish()
 

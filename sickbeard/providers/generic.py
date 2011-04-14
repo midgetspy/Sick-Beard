@@ -49,6 +49,7 @@ class GenericProvider:
         self.url = ''
 
         self.supportsBacklog = False
+        self.combine_results = False
 
         self.cache = tvcache.TVCache(self)
 
@@ -114,6 +115,20 @@ class GenericProvider:
             return None
 
         return result
+
+    def amalgamate_results(self, results):
+        """
+        Takes a list of results and combines them into a single result that represents all of them
+        """
+        
+        return None
+
+    def downloadResults(self, results):
+        """
+        Saves a list of results to disk.
+        """
+        
+        return all([self.downloadResult(result) for result in results])
 
     def downloadResult(self, result):
         """

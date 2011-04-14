@@ -47,6 +47,7 @@ class NewznabProvider(generic.NZBProvider):
 
 		self.enabled = True
 		self.supportsBacklog = True
+		self.combine_results = True
 
 		self.default = False
 
@@ -58,6 +59,61 @@ class NewznabProvider(generic.NZBProvider):
 
 	def isEnabled(self):
 		return self.enabled
+
+	def _get_id_from_url(self, url):
+		"""
+		Split the URL up into the pieces that matter.
+		
+		Returns: a tuple containing the first part of the URL, the ID, and the rest of the URL.
+
+		Eg. http://www.newznab.com/getnzb/203ba7dc120049dff03cd94d468a1948.nzb&i=123&r=ecd38ab63c46d626416e8241afcc58a2
+		
+		Returns: ('http://www.newznab.com/getnzb', '203ba7dc120049dff03cd94d468a1948', '&i=123&r=ecd38ab63c46d626416e8241afcc58a2')
+		"""
+		match = re.match("(.*getnzb)/(.*?)\.nzb(.*)", url)
+		if not match:
+			logger.log(u"url didn't match: "+str(url), logger.WARNING)
+			return None
+		
+		return (match.group(1), match.group(2), match.group(3))
+			
+	def amalgamate_results(self, results):
+		"""
+		Newznab allows us to retrieve multiple NZBs at once by specifying comma separated IDs and then &zip=1.
+		This function takes a list of SearchResult instances and makes a single NZBSearchResult out of them with
+		the multi-snatch URL in it.
+		
+		results: A list of SearchResults
+		
+		Returns: A single NZBSearchResult with a single multi-snatch URL, all relevant episodes, and a concatenated name.
+		"""
+	
+		if not results:
+			return None
+
+		# retrieve the relevant info from our results		
+		id_list = []
+		ep_list = []
+		name_list = []
+		for cur_result in results:
+			start, cur_id, end = self._get_id_from_url(cur_result.url)
+			id_list.append(cur_id)
+			ep_list += cur_result.episodes
+			name_list.append(cur_result.name)
+
+		# make the multi-snatch URL		
+		final_url = start + '?id=' + ','.join(id_list) + end + '&zip=1'
+		final_name = ', '.join(name_list)
+		
+		logger.log(u"final url: "+str(final_url))
+
+		# set the relevant fields on the amalgamated result. note no quality since it's not necessary or sensical		
+		final_result = classes.NZBSearchResult(ep_list)
+		final_result.provider = self
+		final_result.url = final_url
+		final_result.name = final_name
+		
+		return final_result
 
 	def _get_season_search_strings(self, show, season=None):
 
@@ -141,6 +197,8 @@ class NewznabProvider(generic.NZBProvider):
 		# hack this in until it's fixed server side
 		if not data.startswith('<?xml'):
 			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
+
+		logger.log(u"data: "+str(data), logger.DEBUG)
 
 		try:
 			responseSoup = etree.ElementTree(etree.XML(data))

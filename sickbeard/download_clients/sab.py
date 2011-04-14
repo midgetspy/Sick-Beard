@@ -29,6 +29,23 @@ import urllib2, cookielib
 from sickbeard.common import USER_AGENT
 from sickbeard import logger
 
+def sendNZBs(nzb_list):
+    """
+    Amalgamates the nzbs into a single result and sends that to SAB
+    """
+    
+    if not nzb_list:
+        return False
+    
+    amalgamated_result = nzb_list[0].provider.amalgamate_results(nzb_list)
+    
+    if not amalgamated_result:
+        return False
+    
+    sendNZB(amalgamated_result)
+    
+    pass
+
 def sendNZB(nzb):
 
     params = {}
