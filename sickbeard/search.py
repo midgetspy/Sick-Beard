@@ -86,9 +86,6 @@ def _downloadResult(result):
         logger.log(u"Invalid provider type - this is a coding error, report it please", logger.ERROR)
         return False
 
-    if newResult:
-        ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (result.name, resProvider.name))
-
     return newResult
 
 def _downloadResults(results):
@@ -157,13 +154,17 @@ def snatchEpisodes(results, endStatus=SNATCHED):
             for cur_result in [result for result in results if result.provider == cur_provider]:
                 separate_results.append([cur_result])
 
+    dl_result = True
+
     # we deal with lists of results ordered by provider
     for cur_results in separate_results:
 
         # retrieve the nzb/torrent from the provider        
         dl_result = retrieve_episodes(cur_results)
 
+        # if we failed the snatch then skip the rest of the steps
         if not dl_result:
+            dl_result = False
             continue
 
         # do the post-snatch routine for each episode individually
@@ -180,6 +181,8 @@ def snatchEpisodes(results, endStatus=SNATCHED):
                     notifiers.notify_snatch(curEpObj.prettyName(True))
 
         time.sleep(5)
+
+    return dl_result
 
 
 def retrieve_episodes(cur_results):

@@ -2386,8 +2386,7 @@ class Home:
         else:
 
             # just use the first result for now
-            logger.log(u"Downloading episode from " + foundEpisode.url)
-            result = search.snatchEpisode(foundEpisode)
+            result = search.snatchEpisodes([foundEpisode])
             providerModule = foundEpisode.provider
             if not result:
                 ui.notifications.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')

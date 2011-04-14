@@ -209,8 +209,6 @@ class NewznabProvider(generic.NZBProvider):
 		if not data.startswith('<?xml'):
 			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
-		logger.log(u"data: "+str(data), logger.DEBUG)
-
 		try:
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
