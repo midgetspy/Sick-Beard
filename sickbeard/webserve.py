@@ -501,7 +501,7 @@ class Manage:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
                     updates.append(showObj.name)
                 except exceptions.CantUpdateException, e:
-                    errors.append("Unable to update show "+showObj.name+": "+str(e).decode('utf-8'))
+                    errors.append("Unable to update show "+showObj.name+": "+e.message.decode('utf-8'))
 
             # don't bother refreshing shows that were updated anyway
             if curShowID in toRefresh and curShowID not in toUpdate:
@@ -509,7 +509,7 @@ class Manage:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                     refreshes.append(showObj.name)
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh show "+showObj.name+": "+str(e).decode('utf-8'))
+                    errors.append("Unable to refresh show "+showObj.name+": "+e.message.decode('utf-8'))
 
             if curShowID in toRename:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj) #@UndefinedVariable
@@ -1419,7 +1419,7 @@ class NewHomeAddShows:
         try:
             seriesXML = etree.ElementTree(etree.XML(urlData))
         except Exception, e:
-            logger.log(u"Unable to parse XML for some reason: "+str(e).decode('utf-8')+" from XML: "+urlData, logger.ERROR)
+            logger.log(u"Unable to parse XML for some reason: "+e.message.decode('utf-8')+" from XML: "+urlData, logger.ERROR)
             return ''
 
         series = seriesXML.getiterator('Series')
@@ -2128,7 +2128,7 @@ class Home:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh this show: "+str(e).decode('utf-8'))
+                    errors.append("Unable to refresh this show: "+e.message.decode('utf-8'))
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
@@ -2148,7 +2148,7 @@ class Home:
                         try:
                             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                         except exceptions.CantRefreshException, e:
-                            errors.append("Unable to refresh this show:"+str(e).decode('utf-8'))
+                            errors.append("Unable to refresh this show:"+e.message.decode('utf-8'))
                         # grab updated info from TVDB
                         #showObj.loadEpisodesFromTVDB()
                         # rescan the episodes in the new folder
@@ -2210,7 +2210,7 @@ class Home:
             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
         except exceptions.CantRefreshException, e:
             ui.notifications.error("Unable to refresh this show.",
-                        str(e))
+                        e.message.decode(sickbeard.SYS_ENCODING))
 
         time.sleep(3)
 
@@ -2232,7 +2232,7 @@ class Home:
             sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force)) #@UndefinedVariable
         except exceptions.CantUpdateException, e:
             ui.notifications.error("Unable to update this show.",
-                        str(e))
+                        e.message.decode(sickbeard.SYS_ENCODING))
 
         # just give it some time
         time.sleep(3)

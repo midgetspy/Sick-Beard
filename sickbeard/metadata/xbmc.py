@@ -187,9 +187,9 @@ class XBMCMetadata(generic.GenericMetadata):
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             myShow = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
+            raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+e.message.decode('utf-8'), logger.ERROR)
             return
 
         if len(eps_to_write) > 1:

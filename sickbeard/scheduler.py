@@ -69,7 +69,7 @@ class Scheduler:
                         logger.log(u"Starting new thread: "+self.threadName, logger.DEBUG)
                     self.action.run()
                 except Exception, e:
-                    logger.log(u"Exception generated in thread "+self.threadName+": " + str(e), logger.ERROR)
+                    logger.log(u"Exception generated in thread "+self.threadName+": " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
                     logger.log(traceback.format_exc(), logger.DEBUG)
 
             if self.abort:

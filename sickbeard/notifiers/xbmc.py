@@ -104,8 +104,7 @@ class XBMCNotifier:
             response = handle.read()
             logger.log(u"response: " + response, logger.DEBUG)
         except IOError, e:
-            # print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
-            logger.log(u"Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
+            logger.log(u"Warning: Couldn't contact XBMC HTTP server at " + host + ": " + e.message.decode(sickbeard.SYS_ENCODING))
             response = ''
     
         return response
@@ -179,7 +178,7 @@ class XBMCNotifier:
             try:
                 et = etree.fromstring(encSqlXML)
             except SyntaxError, e:
-                logger.log("Unable to parse XML returned from XBMC: "+str(e), logger.ERROR)
+                logger.log("Unable to parse XML returned from XBMC: "+e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
                 return False
     
             paths = et.findall('.//field')

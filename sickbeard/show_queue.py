@@ -224,7 +224,7 @@ class QueueItemAdd(ShowQueueItem):
                     self._finishEarly()
                     return
             except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Error contacting TVDB: "+str(e), logger.ERROR)
+                logger.log(u"Error contacting TVDB: "+e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
                 ui.notifications.error("Unable to add show", "Unable to look up the show in "+self.showDir+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
                 self._finishEarly()
                 return
@@ -248,7 +248,7 @@ class QueueItemAdd(ShowQueueItem):
                 self.show.air_by_date = 1
 
         except tvdb_exceptions.tvdb_exception, e:
-            logger.log(u"Unable to add show due to an error with TVDB: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to add show due to an error with TVDB: "+e.message.decode('utf-8'), logger.ERROR)
             if self.show:
                 ui.notifications.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
             else:
@@ -263,7 +263,7 @@ class QueueItemAdd(ShowQueueItem):
             return
 
         except Exception, e:
-            logger.log(u"Error trying to add show: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to add show: "+e.message.decode('utf-8'), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             self._finishEarly()
             raise
@@ -274,7 +274,7 @@ class QueueItemAdd(ShowQueueItem):
         try:
             self.show.loadEpisodesFromDir()
         except Exception, e:
-            logger.log(u"Error searching dir for episodes: " + str(e), logger.ERROR)
+            logger.log(u"Error searching dir for episodes: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         try:
@@ -285,13 +285,13 @@ class QueueItemAdd(ShowQueueItem):
             self.show.populateCache()
             
         except Exception, e:
-            logger.log(u"Error with TVDB, not creating episode list: " + str(e), logger.ERROR)
+            logger.log(u"Error with TVDB, not creating episode list: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         try:
             self.show.saveToDB()
         except Exception, e:
-            logger.log(u"Error saving the episode to the database: " + str(e), logger.ERROR)
+            logger.log(u"Error saving the episode to the database: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         # if they gave a custom status then change all the eps to it
@@ -364,7 +364,7 @@ class QueueItemUpdate(ShowQueueItem):
         try:
             self.show.loadFromTVDB(cache=not self.force)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to contact TVDB, aborting: "+str(e), logger.WARNING)
+            logger.log(u"Unable to contact TVDB, aborting: "+e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
             return
 
         # get episode list from DB
@@ -376,7 +376,7 @@ class QueueItemUpdate(ShowQueueItem):
         try:
             TVDBEpList = self.show.loadEpisodesFromTVDB(cache=not self.force)
         except tvdb_exceptions.tvdb_exception, e:
-            logger.log(u"Unable to get info from TVDB, the show info will not be refreshed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to get info from TVDB, the show info will not be refreshed: "+e.message.decode('utf-8'), logger.ERROR)
             TVDBEpList = None
 
         if TVDBEpList == None:

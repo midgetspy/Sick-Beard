@@ -407,7 +407,7 @@ def rename_file(old_path, new_name):
     try:
         ek.ek(os.rename, old_path, new_path)
     except (OSError, IOError), e:
-        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + str(e), logger.ERROR)
+        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
         return False
 
     return new_path

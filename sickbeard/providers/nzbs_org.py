@@ -87,7 +87,7 @@ class NZBsProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log(u"Error trying to load NZBs.org RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+			logger.log(u"Error trying to load NZBs.org RSS feed: "+e.message.decode('utf-8'), logger.ERROR)
 			return []
 
 		results = []

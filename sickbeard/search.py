@@ -76,7 +76,7 @@ def _downloadResult(result):
             fileOut.close()
             helpers.chmodAsParent(fileName)
         except IOError, e:
-            logger.log(u"Error trying to save NZB to black hole: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to save NZB to black hole: "+e.message.decode('utf-8'), logger.ERROR)
             newResult = False
 
     elif resProvider.providerType == "torrent":
@@ -156,10 +156,10 @@ def searchForNeededEpisodes():
         try:
             curFoundResults = curProvider.searchRSS()
         except exceptions.AuthException, e:
-            logger.log(u"Authentication error: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Authentication error: "+e.message.decode('utf-8'), logger.ERROR)
             continue
         except Exception, e:
-            logger.log(u"Error while searching "+curProvider.name+", skipping: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error while searching "+curProvider.name+", skipping: "+e.message.decode('utf-8'), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             continue
 
@@ -237,10 +237,10 @@ def findEpisode(episode, manualSearch=False):
         try:
             curFoundResults = curProvider.findEpisode(episode, manualSearch=manualSearch)
         except exceptions.AuthException, e:
-            logger.log(u"Authentication error: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Authentication error: "+e.message.decode('utf-8'), logger.ERROR)
             continue
         except Exception, e:
-            logger.log(u"Error while searching "+curProvider.name+", skipping: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error while searching "+curProvider.name+", skipping: "+e.message.decode('utf-8'), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             continue
 
@@ -286,10 +286,10 @@ def findSeason(show, season):
                     foundResults[curEp] = curResults[curEp]
 
         except exceptions.AuthException, e:
-            logger.log(u"Authentication error: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Authentication error: "+e.message.decode('utf-8'), logger.ERROR)
             continue
         except Exception, e:
-            logger.log(u"Error while searching "+curProvider.name+", skipping: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error while searching "+curProvider.name+", skipping: "+e.message.decode('utf-8'), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             continue
 

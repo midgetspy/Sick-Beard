@@ -242,9 +242,9 @@ class GenericMetadata():
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             tvdb_show_obj = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
+            raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+e.message.decode('utf-8'), logger.ERROR)
             return None
     
         # try all included episodes in case some have thumbs and others don't
@@ -299,7 +299,7 @@ class GenericMetadata():
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
         except IOError, e:
-            logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+e.message.decode('utf-8'), logger.ERROR)
             return False
         
         return True
@@ -343,7 +343,7 @@ class GenericMetadata():
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
         except IOError, e:
-            logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to write file to "+nfo_file_path+" - are you sure the folder is writable? "+e.message.decode('utf-8'), logger.ERROR)
             return False
         
         return True
@@ -500,7 +500,7 @@ class GenericMetadata():
             outFile.close()
             helpers.chmodAsParent(image_path)
         except IOError, e:
-            logger.log(u"Unable to write image to "+image_path+" - are you sure the show folder is writable? "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to write image to "+image_path+" - are you sure the show folder is writable? "+e.message.decode('utf-8'), logger.ERROR)
             return False
     
         return True
@@ -529,7 +529,7 @@ class GenericMetadata():
             t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
             tvdb_show_obj = t[show_obj.tvdbid]
         except (tvdb_exceptions.tvdb_error, IOError), e:
-            logger.log(u"Unable to look up show on TVDB, not downloading images: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to look up show on TVDB, not downloading images: "+e.message.decode('utf-8'), logger.ERROR)
             return None
     
         if image_type not in ('fanart', 'poster', 'banner'):
@@ -566,7 +566,7 @@ class GenericMetadata():
             t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
             tvdb_show_obj = t[show_obj.tvdbid]
         except (tvdb_exceptions.tvdb_error, IOError), e:
-            logger.log(u"Unable to look up show on TVDB, not downloading images: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to look up show on TVDB, not downloading images: "+e.message.decode('utf-8'), logger.ERROR)
             return result
     
         #  How many seasons?
@@ -633,7 +633,7 @@ class GenericMetadata():
                 return empty_return
     
         except (exceptions.NoNFOException, SyntaxError, ValueError), e:
-            logger.log(u"There was an error parsing your existing metadata file: " + str(e), logger.WARNING)
+            logger.log(u"There was an error parsing your existing metadata file: " + e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
             return empty_return
     
         return (tvdb_id, name)

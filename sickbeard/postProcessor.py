@@ -200,7 +200,7 @@ class PostProcessor(object):
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+e.message.decode('utf-8'), logger.ERROR)
                 raise e
                 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
@@ -220,7 +220,7 @@ class PostProcessor(object):
                 helpers.copyFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+e.message.decode('utf-8'), logger.ERROR)
                 raise e
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
@@ -422,7 +422,7 @@ class PostProcessor(object):
             try:
                 (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
             except InvalidNameException, e:
-                logger.log(u"Unable to parse, skipping: "+str(e), logger.DEBUG)
+                logger.log(u"Unable to parse, skipping: "+e.message.decode(sickbeard.SYS_ENCODING), logger.DEBUG)
                 continue
             
             if cur_tvdb_id:
@@ -504,7 +504,7 @@ class PostProcessor(object):
             try:
                 curEp = show_obj.getEpisode(season, episode)
             except exceptions.EpisodeNotFoundException, e:
-                self._log(u"Unable to create episode: "+str(e).decode('utf-8'), logger.DEBUG)
+                self._log(u"Unable to create episode: "+e.message.decode('utf-8'), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()
     
             if root_ep == None:
@@ -559,7 +559,7 @@ class PostProcessor(object):
                 out, err = p.communicate() #@UnusedVariable
                 self._log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
-                self._log(u"Unable to run extra_script: "+str(e).decode('utf-8'))
+                self._log(u"Unable to run extra_script: "+e.message.decode('utf-8'))
     
     def _is_priority(self, ep_obj, new_ep_quality):
         
