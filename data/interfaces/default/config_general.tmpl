@@ -129,7 +129,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">SSL Certificate</span>
-                                <input type="text" name="ssl_cert_file" value="$sickbeard.SSL_CERT_FILE" size="35" />
+                                <input type="text" name="ssl_cert_file" id="ssl_cert_file" value="$sickbeard.SSL_CERT_FILE" size="35" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -141,7 +141,7 @@
                          <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">SSL Key</span>
-                                <input type="text" name="ssl_key_file" value="$sickbeard.SSL_KEY_FILE" size="35" />
+                                <input type="text" name="ssl_key_file" id="ssl_key_file" value="$sickbeard.SSL_KEY_FILE" size="35" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -163,6 +163,8 @@
 <script type="text/javascript" charset="utf-8">
 <!--
     jQuery('#log_dir').fileBrowser({ title: 'Select Log Directory' });
+    jQuery('#ssl_key_file').fileBrowser({ title: 'Select Log Directory' });
+    jQuery('#ssl_cert_file').fileBrowser({ title: 'Select Log Directory' });
 //-->
 </script>
 
