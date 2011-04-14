@@ -130,7 +130,7 @@ class GenericProvider:
         
         return all([self.downloadResult(result) for result in results])
 
-    def downloadResult(self, result):
+    def downloadResult(self, result, zip=False):
         """
         Save the result to disk.
         """
@@ -145,15 +145,23 @@ class GenericProvider:
         # use the appropriate watch folder
         if self.providerType == GenericProvider.NZB:
             saveDir = sickbeard.NZB_DIR
-            writeMode = 'w'
+            if zip:
+                writeMode = 'wb'
+            else:
+                writeMode = 'w'
         elif self.providerType == GenericProvider.TORRENT:
             saveDir = sickbeard.TORRENT_DIR
             writeMode = 'wb'
         else:
             return False
 
+        if zip:
+            extension = 'zip'
+        else:
+            extension = self.providerType
+
         # use the result name as the filename
-        fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
+        fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + extension)
 
         logger.log(u"Saving to " + fileName, logger.DEBUG)
 

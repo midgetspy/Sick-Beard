@@ -76,18 +76,20 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
 
         logger.log(u"Beginning search for new episodes on RSS")
 
+        # check the feed for anything that we need
         foundResults = search.searchForNeededEpisodes()
 
         if not len(foundResults):
             logger.log(u"No needed episodes found on the RSS feeds")
         else:
-            for curResult in foundResults:
-                search.snatchEpisode(curResult)
-                time.sleep(2)
+            search.snatchEpisodes(foundResults)
 
         generic_queue.QueueItem.finish(self)
 
     def _changeMissingEpisodes(self):
+        """
+        Checks for episodes that are past their air date and switches them from UNAIRED to WANTED.
+        """
 
         logger.log(u"Changing all old missing episodes to status WANTED")
 

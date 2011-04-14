@@ -171,9 +171,9 @@ def snatchEpisodes(results, endStatus=SNATCHED):
             history.logSnatch(individual_result)
         
             # don't notify when we re-download an episode
-            for curEpObj in result.episodes:
+            for curEpObj in individual_result.episodes:
                 with curEpObj.lock:
-                    curEpObj.status = Quality.compositeStatus(endStatus, result.quality)
+                    curEpObj.status = Quality.compositeStatus(endStatus, individual_result.quality)
                     curEpObj.saveToDB()
         
                 if curEpObj.status not in Quality.DOWNLOADED:

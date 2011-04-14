@@ -40,7 +40,6 @@ class NZBsProvider(generic.NZBProvider):
 		generic.NZBProvider.__init__(self, "NZBs.org")
 
 		self.supportsBacklog = True
-		self.combine_results = False
 
 		self.cache = NZBsCache(self)
 
@@ -48,14 +47,6 @@ class NZBsProvider(generic.NZBProvider):
 
 	def isEnabled(self):
 		return sickbeard.NZBS
-
-	def amalgamate_results(self, results):
-		final_result = None
-		
-		for cur_result in results:
-			logger.log(u"Amalgamating result "+str(cur_result.url))
-		
-		return final_result
 
 	def _checkAuth(self):
 		if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):

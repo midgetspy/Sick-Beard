@@ -105,8 +105,6 @@ class NewznabProvider(generic.NZBProvider):
 		final_url = start + '?id=' + ','.join(id_list) + end + '&zip=1'
 		final_name = ', '.join(name_list)
 		
-		logger.log(u"final url: "+str(final_url))
-
 		# set the relevant fields on the amalgamated result. note no quality since it's not necessary or sensical		
 		final_result = classes.NZBSearchResult(ep_list)
 		final_result.provider = self
@@ -114,6 +112,19 @@ class NewznabProvider(generic.NZBProvider):
 		final_result.name = final_name
 		
 		return final_result
+
+	def downloadResults(self, nzb_list):
+		"""
+		Downloads a list of NZBs as a single request and saves it as a zip file.
+		
+		nzb_list: A list of NZBSearchResult objects to download.
+		
+		Returns: bool representing success
+		"""
+		
+		amalgamated_result = self.amalgamate_results(nzb_list)
+		
+		return self.downloadResult(amalgamated_result, zip=True)
 
 	def _get_season_search_strings(self, show, season=None):
 
