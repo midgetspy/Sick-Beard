@@ -52,7 +52,7 @@ signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 def create_https_certificates(ssl_cert, ssl_key):
     try:
         from OpenSSL import crypto
-        from sickbeard.utils.certgen import createKeyPair, createCertRequest, createCertificate,\
+        from lib.pyopenssl.certgen import createKeyPair, createCertRequest, createCertificate,\
              TYPE_RSA, serial
     except:
         logger.log(u"Error initializing pyopenssl")
