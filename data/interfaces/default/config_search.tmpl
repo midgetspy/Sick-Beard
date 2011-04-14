@@ -14,7 +14,8 @@
 <div id="config">
 <div id="config-content">
 <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
-<form action="saveSearch" method="post">
+
+<form id="configForm" action="saveSearch" method="post">
 
             <div id="config-components">
                 
@@ -57,7 +58,7 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         
                     </fieldset>
                 </div><!-- /component-group1 //-->
@@ -213,7 +214,7 @@
                         </div>
                         
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         
                         </div><!-- /content_use_nzbs //-->
                         
@@ -250,13 +251,13 @@
                         </div>
                         
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         </div><!-- /content_use_torrents //-->
                         
                     </fieldset>
                 </div><!-- /component-group3 //-->
 
-            <br/><input type="submit" value="Save Changes" /><br/>
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
 

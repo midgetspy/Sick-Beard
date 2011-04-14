@@ -22,6 +22,8 @@ import re
 
 import regexes
 
+import sickbeard
+
 from sickbeard import logger
 
 class NameParser(object):
@@ -111,7 +113,7 @@ class NameParser(object):
                 try:
                     result.air_date = datetime.date(year, month, day)
                 except ValueError, e:
-                    raise InvalidNameException(str(e))
+                    raise InvalidNameException(e.message)
 
             if 'extra_info' in named_groups:
                 tmp_extra_info = match.group('extra_info')
@@ -228,7 +230,7 @@ class NameParser(object):
 
         # if there's no useful info in it then raise an exception
         if final_result.season_number == None and not final_result.episode_numbers and final_result.air_date == None and not final_result.series_name:
-            raise InvalidNameException("Unable to parse "+name)
+            raise InvalidNameException("Unable to parse "+name.encode(sickbeard.SYS_ENCODING))
 
         # return it
         return final_result
@@ -285,7 +287,7 @@ class ParseResult(object):
             to_return += 'S'+str(self.season_number)
         if self.episode_numbers and len(self.episode_numbers):
             for e in self.episode_numbers:
-                to_return += 'E'+str(e)
+                to_return += 'E'+e.message
 
         if self.air_by_date:
             to_return += str(self.air_date)

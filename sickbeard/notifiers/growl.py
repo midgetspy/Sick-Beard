@@ -124,7 +124,7 @@ class GrowlNotifier:
             try:
                 return self._send_growl(opts, message)
             except socket.error, e:
-                logger.log(u"Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+str(e).decode('utf-8'))
+                logger.log(u"Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+e.message.decode('utf-8'))
                 return False
 
     def _sendRegistration(self, host=None, password=None, name='Sick Beard Notification'):

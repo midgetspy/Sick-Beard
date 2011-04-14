@@ -110,7 +110,7 @@ class GenericProvider:
         try:
             result = helpers.getURL(url, headers)
         except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
+            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
             return None
 
         return result
@@ -148,7 +148,7 @@ class GenericProvider:
             fileOut.close()
             helpers.chmodAsParent(fileName)
         except IOError, e:
-            logger.log("Unable to save the file: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log("Unable to save the file: "+e.message.decode('utf-8'), logger.ERROR)
             return False
 
         # as long as it's a valid download then consider it a successful snatch

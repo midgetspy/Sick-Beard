@@ -93,7 +93,7 @@ class NZBMatrixProvider(generic.NZBProvider):
             responseSoup = etree.ElementTree(etree.XML(searchResult))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load NZBMatrix RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load NZBMatrix RSS feed: "+e.message.decode('utf-8'), logger.ERROR)
             return []
 
         results = []

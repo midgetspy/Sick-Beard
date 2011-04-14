@@ -119,7 +119,7 @@ class TwitterNotifier:
         try:
             api.PostUpdate(message)
         except Exception, e:
-            logger.log(u"Error Sending Tweet: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error Sending Tweet: "+e.message.decode('utf-8'), logger.ERROR)
             return False
     
         return True
