@@ -72,8 +72,6 @@ class GenericQueue(object):
                     Sorts by priority descending then time ascending
                     """
                     if x.priority == y.priority:
-                        logger.log(x.ep_obj.prettyName(True)+'=='+y.ep_obj.prettyName(True))
-                        logger.log(str(x.added)+'=='+str(y.added))
                         if y.added == x.added:
                             return 0
                         elif y.added < x.added:
