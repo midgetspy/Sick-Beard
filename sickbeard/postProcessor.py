@@ -329,7 +329,7 @@ class PostProcessor(object):
         elif parse_result.is_anime:
             try:
                 season = parse_result.season_number # better then nothing or ?
-                episodes = parse_result.episode_numbers # better then nothing or ?
+                episodes = parse_result.ab_episode_numbers # better then nothing or ?
             except:
                 season = None
                 episodes = []
@@ -532,12 +532,18 @@ class PostProcessor(object):
         root_ep = None
         for cur_episode in episodes:
             episode = int(cur_episode)
-    
-            self._log(u"Retrieving episode object for " + str(season) + "x" + str(episode), logger.DEBUG)
-    
+            
+            if show_obj.is_anime:
+                self._log(u"Retrieving episode object for absolute number " + str(episode), logger.DEBUG)
+            else:
+                self._log(u"Retrieving episode object for " + str(season) + "x" + str(episode), logger.DEBUG)
+            
             # now that we've figured out which episode this file is just load it manually
             try:
-                curEp = show_obj.getEpisode(season, episode)
+                if show_obj.is_anime:
+                    curEp = show_obj.getEpisode(None, None, absolute_number=episode)
+                else:
+                    curEp = show_obj.getEpisode(season, episode)
             except exceptions.EpisodeNotFoundException, e:
                 self._log(u"Unable to create episode: "+str(e).decode('utf-8'), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()
