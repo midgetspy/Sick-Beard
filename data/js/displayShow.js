@@ -1,12 +1,41 @@
 $(document).ready(function(){
 
+    $('.epSearch').click(function(){
+      var parent = $(this).parent();
+      
+      // put the ajax spinner there while we wait
+      parent.empty();
+      parent.append($("<img/>").attr("src", sbRoot+"/images/loading16.gif"));
+      
+      $.getJSON($(this).attr('href'), function(data){
+	  	  // if they failed then just put the red X
+	      if (data.result == 'failure') {
+	    	  img_name = 'no16.png';
+	      
+	      // if the snatch was successful then put the green check and fill in the row appropriately
+	      } else {
+	    	  img_name = 'yes16.png';
+	    	  // color the row
+	    	  parent.parent().removeClass('skipped wanted qual good unaired').addClass('good');
+	    	  parent.siblings('.status_column').html(data.result);
+	      }
+	
+	      // put the right image into the row
+	      parent.empty();
+		  parent.append($("<img/>").attr({"src": sbRoot+"/images/"+img_name, "height": "16"}));
+      });
+
+      // fon't follow the link
+      return false;
+    });
+      
     $('#seasonJump').change(function() {
-    var id = $(this).val();
-    if (id && id != 'jump') {
-        $('html,body').animate({scrollTop: $(id).offset().top},'slow');
-        location.hash = id;
-    }
-    $(this).val('jump');
+	    var id = $(this).val();
+	    if (id && id != 'jump') {
+	        $('html,body').animate({scrollTop: $(id).offset().top},'slow');
+	        location.hash = id;
+	    }
+	    $(this).val('jump');
     });
 
     $("#prevShow").click(function(){

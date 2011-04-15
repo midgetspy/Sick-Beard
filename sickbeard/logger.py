@@ -123,10 +123,8 @@ class SBRotatingLogHandler(object):
         for i in range(self._num_logs(), -1, -1):
             cur_file_name = self._log_file_name(i)
             if i >= NUM_LOGS:
-                print "removing", cur_file_name
                 os.remove(cur_file_name)
             else:
-                print "renaming", cur_file_name, "to", self._log_file_name(i+1)
                 os.rename(cur_file_name, self._log_file_name(i+1))
         
         # the new log handler will always be on the un-numbered .log file

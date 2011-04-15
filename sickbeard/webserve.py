@@ -501,7 +501,7 @@ class Manage:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
                     updates.append(showObj.name)
                 except exceptions.CantUpdateException, e:
-                    errors.append("Unable to update show "+showObj.name+": "+str(e).decode('utf-8'))
+                    errors.append("Unable to update show "+showObj.name+": "+e.message.decode('utf-8'))
 
             # don't bother refreshing shows that were updated anyway
             if curShowID in toRefresh and curShowID not in toUpdate:
@@ -509,7 +509,7 @@ class Manage:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                     refreshes.append(showObj.name)
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh show "+showObj.name+": "+str(e).decode('utf-8'))
+                    errors.append("Unable to refresh show "+showObj.name+": "+e.message.decode('utf-8'))
 
             if curShowID in toRename:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj) #@UndefinedVariable
@@ -1456,7 +1456,7 @@ class NewHomeAddShows:
         try:
             seriesXML = etree.ElementTree(etree.XML(urlData))
         except Exception, e:
-            logger.log(u"Unable to parse XML for some reason: "+str(e).decode('utf-8')+" from XML: "+urlData, logger.ERROR)
+            logger.log(u"Unable to parse XML for some reason: "+e.message.decode('utf-8')+" from XML: "+urlData, logger.ERROR)
             return ''
 
         series = seriesXML.getiterator('Series')
@@ -2175,7 +2175,7 @@ class Home:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh this show: "+str(e).decode('utf-8'))
+                    errors.append("Unable to refresh this show: "+e.message.decode('utf-8'))
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
@@ -2196,7 +2196,7 @@ class Home:
                         try:
                             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                         except exceptions.CantRefreshException, e:
-                            errors.append("Unable to refresh this show:"+str(e).decode('utf-8'))
+                            errors.append("Unable to refresh this show:"+e.message.decode('utf-8'))
                         # grab updated info from TVDB
                         #showObj.loadEpisodesFromTVDB()
                         # rescan the episodes in the new folder
@@ -2258,7 +2258,7 @@ class Home:
             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
         except exceptions.CantRefreshException, e:
             ui.notifications.error("Unable to refresh this show.",
-                        str(e))
+                        e.message.decode(sickbeard.SYS_ENCODING))
 
         time.sleep(3)
 
@@ -2280,7 +2280,7 @@ class Home:
             sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force)) #@UndefinedVariable
         except exceptions.CantUpdateException, e:
             ui.notifications.error("Unable to update this show.",
-                        str(e))
+                        e.message.decode(sickbeard.SYS_ENCODING))
 
         # just give it some time
         time.sleep(3)
@@ -2415,39 +2415,24 @@ class Home:
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
 
-        outStr = ""
-        epObj = _getEpisode(show, season, episode)
+        # retrieve the episode object and fail if we can't get one 
+        ep_obj = _getEpisode(show, season, episode)
+        if isinstance(ep_obj, str):
+            return json.dumps({'result': 'failure'})
 
-        if isinstance(epObj, str):
-            return _genericMessage("Error", epObj)
+        # make a queue item for it and put it on the queue
+        ep_queue_item = search_queue.ManualSearchQueueItem(ep_obj)
+        sickbeard.searchQueueScheduler.action.add_item(ep_queue_item) #@UndefinedVariable
 
-        tempStr = "Searching for download for " + epObj.prettyName(True)
-        logger.log(tempStr)
-        outStr += tempStr + "<br />\n"
-        foundEpisode = search.findEpisode(epObj, manualSearch=True)
+        # wait until the queue item tells us whether it worked or not
+        while ep_queue_item.success == None: #@UndefinedVariable
+            time.sleep(1)
 
-        if not foundEpisode:
-            message = 'No downloads were found'
-            ui.notifications.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
-            logger.log(message)
+        # return the correct json value
+        if ep_queue_item.success:
+            return json.dumps({'result': statusStrings[ep_obj.status]})
 
-        else:
-
-            # just use the first result for now
-            logger.log(u"Downloading episode from " + foundEpisode.url)
-            result = search.snatchEpisode(foundEpisode)
-            providerModule = foundEpisode.provider
-            if not result:
-                ui.notifications.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')
-            elif providerModule == None:
-                ui.notifications.error('Provider is configured incorrectly, unable to download')
-            #else:
-                #ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
-
-            #TODO: check if the download was successful
-
-        redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
-
+        return json.dumps({'result': 'failure'})
 
 class UI:
     

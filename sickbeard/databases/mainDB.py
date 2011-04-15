@@ -141,7 +141,7 @@ class NewQualitySettings (NumericProviders):
                 logger.log(u"Done backup, proceeding with migration.")
                 break
             except Exception, e:
-                logger.log(u"Error while trying to back up your sickbeard.db: "+str(e).decode('utf-8'))
+                logger.log(u"Error while trying to back up your sickbeard.db: "+e.message.decode('utf-8'))
                 numTries += 1
                 time.sleep(1)
                 logger.log(u"Trying again.")

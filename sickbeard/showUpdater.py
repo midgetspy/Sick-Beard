@@ -60,6 +60,6 @@ class ShowUpdater():
                 piList.append(curQueueItem)
 
             except (exceptions.CantUpdateException, exceptions.CantRefreshException), e:
-                logger.log(u"Automatic update failed: " + str(e), logger.ERROR)
+                logger.log(u"Automatic update failed: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
 
         ui.ProgressIndicators.setIndicator('dailyUpdate', ui.QueueProgressIndicator("Daily Update", piList))

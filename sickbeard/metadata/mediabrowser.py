@@ -279,9 +279,9 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             myShow = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
+            raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log("Unable to connect to TVDB while creating meta files - skipping - "+str(e), logger.ERROR)
+            logger.log("Unable to connect to TVDB while creating meta files - skipping - "+e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
             return False
 
         rootNode = etree.Element("Item")
