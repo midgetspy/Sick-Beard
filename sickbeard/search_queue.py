@@ -25,9 +25,11 @@ import sickbeard
 from sickbeard import db, logger, common, exceptions, helpers
 from sickbeard import generic_queue
 from sickbeard import search
+from sickbeard import ui
 
 BACKLOG_SEARCH = 10
 RSS_SEARCH = 20
+MANUAL_SEARCH = 30
 
 class SearchQueue(generic_queue.GenericQueue):
     
@@ -38,6 +40,12 @@ class SearchQueue(generic_queue.GenericQueue):
     def is_in_queue(self, show, segment):
         for cur_item in self.queue:
             if isinstance(cur_item, BacklogQueueItem) and cur_item.show == show and cur_item.segment == segment:
+                return True
+        return False
+
+    def is_ep_in_queue(self, ep_obj):
+        for cur_item in self.queue:
+            if isinstance(cur_item, ManualSearchQueueItem) and cur_item.ep_obj == ep_obj:
                 return True
         return False
 
@@ -58,16 +66,58 @@ class SearchQueue(generic_queue.GenericQueue):
         return False
 
     def add_item(self, item):
+        if isinstance(item, RSSSearchQueueItem):
+            generic_queue.GenericQueue.add_item(self, item)
         # don't do duplicates
-        if isinstance(item, RSSSearchQueueItem) or not self.is_in_queue(item.show, item.segment):
+        elif isinstance(item, BacklogQueueItem) and not self.is_in_queue(item.show, item.segment):
+            generic_queue.GenericQueue.add_item(self, item)
+        elif isinstance(item, ManualSearchQueueItem) and not self.is_ep_in_queue(item.ep_obj):
             generic_queue.GenericQueue.add_item(self, item)
         else:
             logger.log(u"Not adding item, it's already in the queue", logger.DEBUG)
 
+class ManualSearchQueueItem(generic_queue.QueueItem):
+    def __init__(self, ep_obj):
+        generic_queue.QueueItem.__init__(self, 'Manual Search', MANUAL_SEARCH)
+        self.priority = generic_queue.QueuePriorities.HIGH
+        
+        self.ep_obj = ep_obj
+        
+        self.success = None
+
+    def execute(self):
+        generic_queue.QueueItem.execute(self)
+
+        logger.log("Searching for download for " + self.ep_obj.prettyName(True))
+
+        foundEpisode = search.findEpisode(self.ep_obj, manualSearch=True)
+
+        if not foundEpisode:
+            ui.notifications.message('No downloads were found', "Couldn't find a download for <i>%s</i>" % self.ep_obj.prettyName(True))
+            logger.log(u"Unable to find a download for "+self.ep_obj.prettyName(True))
+
+        else:
+
+            # just use the first result for now
+            logger.log(u"Downloading episode from " + foundEpisode.url)
+            result = search.snatchEpisode(foundEpisode)
+            providerModule = foundEpisode.provider
+            if not result:
+                ui.notifications.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')
+            elif providerModule == None:
+                ui.notifications.error('Provider is configured incorrectly, unable to download')
+
+        self.success = foundEpisode
+
+    def finish(self):
+        # don't let this linger if something goes wrong
+        if self.success == None:
+            self.success = False
+        generic_queue.QueueItem.finish(self)
+
 class RSSSearchQueueItem(generic_queue.QueueItem):
     def __init__(self):
         generic_queue.QueueItem.__init__(self, 'RSS Search', RSS_SEARCH)
-        self.priority = generic_queue.QueuePriorities.HIGH
 
     def execute(self):
         generic_queue.QueueItem.execute(self)
@@ -119,6 +169,7 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
 class BacklogQueueItem(generic_queue.QueueItem):
     def __init__(self, show, segment):
         generic_queue.QueueItem.__init__(self, 'Backlog', BACKLOG_SEARCH)
+        self.priority = generic_queue.QueuePriorities.LOW
         self.thread_name = 'BACKLOG-'+str(show.tvdbid)
         
         self.show = show
