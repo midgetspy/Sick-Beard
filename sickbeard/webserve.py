@@ -1821,9 +1821,9 @@ class Home:
             pw_append = " with password: " + password
 
         if result:
-            return "Test growl sent successfully to "+urllib.unquote_plus(host)+pw_append
+            return "Registered and Tested growl successfully "+urllib.unquote_plus(host)+pw_append
         else:
-            return "Test growl failed to "+urllib.unquote_plus(host)+pw_append
+            return "Registration and Testing of growl failed "+urllib.unquote_plus(host)+pw_append
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):
