@@ -287,7 +287,7 @@ class ParseResult(object):
             to_return += 'S'+str(self.season_number)
         if self.episode_numbers and len(self.episode_numbers):
             for e in self.episode_numbers:
-                to_return += 'E'+e.message
+                to_return += 'E'+str(e)
 
         if self.air_by_date:
             to_return += str(self.air_date)
