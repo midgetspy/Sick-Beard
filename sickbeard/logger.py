@@ -122,10 +122,13 @@ class SBRotatingLogHandler(object):
         # rename or delete all the old log files
         for i in range(self._num_logs(), -1, -1):
             cur_file_name = self._log_file_name(i)
-            if i >= NUM_LOGS:
-                os.remove(cur_file_name)
-            else:
-                os.rename(cur_file_name, self._log_file_name(i+1))
+            try:
+                if i >= NUM_LOGS:
+                    os.remove(cur_file_name)
+                else:
+                    os.rename(cur_file_name, self._log_file_name(i+1))
+            except WindowsError:
+                pass
         
         # the new log handler will always be on the un-numbered .log file
         new_file_handler = self._config_handler()
