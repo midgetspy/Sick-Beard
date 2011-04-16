@@ -39,7 +39,7 @@ class Fanzub(generic.NZBProvider):
 
 		generic.NZBProvider.__init__(self, "Fanzub")
 
-		self.supportsBacklog = True
+		self.supportsBacklog = False
 		self.description = u"Only useful for anime.<br>Pseudo backlog support."
 		self.supportsAbsoluteNumbering = True
 
@@ -56,7 +56,7 @@ class Fanzub(generic.NZBProvider):
 	def _get_season_search_strings(self, show, season):
 		params = {
 				"q": show.name.encode('utf-8'),
-				"max": "1000".encode('utf-8')
+				"max": "50".encode('utf-8')
 				  }
 		return [params]
 
@@ -75,8 +75,7 @@ class Fanzub(generic.NZBProvider):
 					"cat": "anime".encode('utf-8')
 				  }
 		
-		if search_params:
-			params.update(search_params)
+		params.update(search_params)
 			
 		searchURL = self.url + "rss?" + urllib.urlencode(params)
 
