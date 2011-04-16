@@ -498,15 +498,20 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
     
     return (season, episodes)
 
-def parse_result_wrapper(show,toParse):
+def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
     """Retruns a parse result or a InvalidNameException
         it will try to take the correct regex for the show if given
+        if not given it will try Anime first then Normal
+        if name is parsed as anime it will lookup the tvdbid and check if we have it as an anime
+        only if both is true we will consider it an anime
+        
+        to get the tvdbid the tvdbapi might be used if tvdbActiveLookUp is True
     """
     if show and show.is_anime:
         modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
     elif show and not show.is_anime:
         modeList = [NameParser.NORMAL_REGEX]
-    else: # this will be chosen if no show is given so in cache-,rss-,ppsearch
+    else: # this will be chosen if no show is given so in cache-,rss-,pp search
         modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
         
     for mode in modeList:
@@ -516,23 +521,47 @@ def parse_result_wrapper(show,toParse):
         except InvalidNameException:
             pass
         else:
-            # if at one point a normal show gets parsed by an anime regex uncomment this
-            """
-            if mode == NameParser.ANIME_REGEX:
-                tvdbid = get_tvdbid(parse_result.series_name)
-                if tvdbid and not check_for_anime(tvdbid):
-                    pass
-            """
+            if mode == NameParser.ANIME_REGEX and not (show and show.is_anime):
+                tvdbid = get_tvdbid(parse_result.series_name, tvdbActiveLookUp)
+                if not tvdbid or not check_for_anime(tvdbid): # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
+                    continue
+                else: # this means it was an anime
+                    break
             break
     else:
         raise InvalidNameException("Unable to parse "+toParse)
     return parse_result
 
-def get_tvdbid(name):
+def get_tvdbid(name, useTvdb):
+    logger.log(u"trying to get the tvdbid for "+str(name), logger.DEBUG)
+            
     myDB = db.DBConnection()
     isAbsoluteNumberSQlResult = myDB.select("SELECT tvdb_id,show_name FROM tv_shows WHERE show_name = ?", [name.lower()])
     if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
         return int(isAbsoluteNumberSQlResult[0][0])
+    if useTvdb:
+        try:
+            t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
+            showObj = t[name]
+        except (tvdb_exceptions.tvdb_exception):
+            # if none found, search on all languages
+            try:
+                # There's gotta be a better way of doing this but we don't wanna
+                # change the language value elsewhere
+                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+    
+                ltvdb_api_parms['search_all_languages'] = True
+                t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **ltvdb_api_parms)
+                showObj = t[name]
+            except (tvdb_exceptions.tvdb_exception, IOError):
+                pass
+    
+            return 0
+        except (IOError):
+            return 0
+        else:
+            return int(showObj["id"])
+            
     return 0 
     
  

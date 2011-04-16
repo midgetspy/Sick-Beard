@@ -333,7 +333,7 @@ class BasicTests(unittest.TestCase):
                 
     def test_anime_and_normal(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_and_normal')
+        self._test_names(np, 'anime_and_normal',verbose=True)
                 
     def test_anime_and_normal_reverse(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
@@ -345,7 +345,7 @@ class BasicTests(unittest.TestCase):
 
     def test_anime_bare(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_bare',verbose=True)
+        self._test_names(np, 'anime_bare')
 
     def test_standard_file_names(self):
         np = parser.NameParser()

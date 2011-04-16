@@ -320,7 +320,7 @@ class PostProcessor(object):
             return to_return
     
         # parse the name to break it into show name, season, and episode
-        parse_result = parse_result_wrapper(None,name)
+        parse_result = parse_result_wrapper(None,name,tvdbActiveLookUp=True)
         self._log("Parsed "+name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
 
         if parse_result.air_by_date:
@@ -540,7 +540,7 @@ class PostProcessor(object):
             
             # now that we've figured out which episode this file is just load it manually
             try:
-                if show_obj.is_anime:
+                if show_obj.is_anime and (not season or season <= 1):
                     curEp = show_obj.getEpisode(None, None, absolute_number=episode)
                 else:
                     curEp = show_obj.getEpisode(season, episode)
