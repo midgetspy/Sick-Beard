@@ -31,7 +31,6 @@ from sickbeard import classes
 from sickbeard.helpers import sanitizeSceneName
 
 from sickbeard import exceptions
-from sickbeard.common import *
 from sickbeard import logger
 from sickbeard import tvcache
 
@@ -236,7 +235,7 @@ class NewznabCache(tvcache.TVCache):
 
 		try:
 			responseSoup = etree.ElementTree(etree.XML(data))
-		except Exception, e:
+		except Exception:
 			return True
 
 		if responseSoup.getroot().tag == 'error':

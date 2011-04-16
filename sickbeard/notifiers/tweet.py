@@ -16,18 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import socket
-import os
-import sys
 import sickbeard
 
 from sickbeard import logger, common
 
 # parse_qsl moved to urlparse module in v2.6
 try:
-    from urlparse import parse_qsl
+    from urlparse import parse_qsl #@UnusedImport
 except:
-    from cgi import parse_qsl
+    from cgi import parse_qsl #@Reimport
 
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
@@ -55,7 +52,7 @@ class TwitterNotifier:
 
     def _get_authorization(self):
     
-        signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1()
+        signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
         oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         oauth_client               = oauth.Client(oauth_consumer)
     
@@ -85,7 +82,7 @@ class TwitterNotifier:
     
         logger.log('Generating and signing request for an access token using key '+key)
     
-        signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1()
+        signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1() #@UnusedVariable
         oauth_consumer             = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         logger.log('oauth_consumer: '+str(oauth_consumer))
         oauth_client  = oauth.Client(oauth_consumer, token)
@@ -120,7 +117,7 @@ class TwitterNotifier:
         api = twitter.Api(username, password, access_token_key, access_token_secret)
     
         try:
-            status = api.PostUpdate(message)
+            api.PostUpdate(message)
         except Exception, e:
             logger.log(u"Error Sending Tweet: "+str(e).decode('utf-8'), logger.ERROR)
             return False

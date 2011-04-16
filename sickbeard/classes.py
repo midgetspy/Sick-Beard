@@ -23,9 +23,7 @@ import sickbeard
 import urllib
 import datetime
 
-from common import *
-
-from sickbeard import providers
+from common import USER_AGENT
 
 class SickBeardURLopener(urllib.FancyURLopener):
     version = USER_AGENT

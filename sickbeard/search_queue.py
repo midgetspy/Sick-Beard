@@ -144,7 +144,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
             statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ?",
                                         [self.show.tvdbid, min_date.toordinal(), max_date.toordinal()])
             
-        anyQualities, bestQualities = common.Quality.splitQuality(self.show.quality)
+        anyQualities, bestQualities = common.Quality.splitQuality(self.show.quality) #@UnusedVariable
         self.wantSeason = self._need_any_episodes(statusResults, bestQualities)
 
     def execute(self):

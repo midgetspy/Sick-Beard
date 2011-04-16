@@ -18,11 +18,12 @@
 
 from __future__ import with_statement
 
+import os
 import traceback
 
 import sickbeard
 
-from common import *
+from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
@@ -30,10 +31,11 @@ from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
+from sickbeard import ui
 
 from sickbeard import encodingKludge as ek
 
-from sickbeard.providers import *
+#from sickbeard.providers import *
 from sickbeard import providers
 
 def _downloadResult(result):
@@ -83,6 +85,9 @@ def _downloadResult(result):
     else:
         logger.log(u"Invalid provider type - this is a coding error, report it please", logger.ERROR)
         return False
+
+    if newResult:
+        ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (result.name, resProvider.name))
 
     return newResult
 

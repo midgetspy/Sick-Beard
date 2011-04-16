@@ -18,16 +18,16 @@
 
 from __future__ import with_statement
 
-import os.path
-import threading
 import traceback
+
+import sickbeard
 
 from lib.tvdb_api import tvdb_exceptions, tvdb_api
 
-from sickbeard.common import *
+from sickbeard.common import SKIPPED, WANTED
 
 from sickbeard.tv import TVShow
-from sickbeard import exceptions, helpers, logger, ui, db
+from sickbeard import exceptions, logger, ui, db
 from sickbeard import generic_queue
 from sickbeard import name_cache
 
@@ -149,7 +149,7 @@ class ShowQueueItem(generic_queue.QueueItem):
         self.show = show
     
     def isInQueue(self):
-        return self in sickbeard.showQueueScheduler.action.queue+[sickbeard.showQueueScheduler.action.currentItem]
+        return self in sickbeard.showQueueScheduler.action.queue+[sickbeard.showQueueScheduler.action.currentItem] #@UndefinedVariable
 
     def _getName(self):
         return str(self.show.tvdbid)
@@ -220,12 +220,12 @@ class QueueItemAdd(ShowQueueItem):
                 # this usually only happens if they have an NFO in their show dir which gave us a TVDB ID that has no
                 # proper english version of the show
                 if not s or not s['seriesname']:
-                    ui.flash.error("Unable to add show", "Show in "+self.showDir+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
+                    ui.notifications.error("Unable to add show", "Show in "+self.showDir+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
                     self._finishEarly()
                     return
             except tvdb_exceptions.tvdb_exception, e:
                 logger.log(u"Error contacting TVDB: "+str(e), logger.ERROR)
-                ui.flash.error("Unable to add show", "Unable to look up the show in "+self.showDir+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
+                ui.notifications.error("Unable to add show", "Unable to look up the show in "+self.showDir+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
                 self._finishEarly()
                 return
 
@@ -250,15 +250,15 @@ class QueueItemAdd(ShowQueueItem):
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to add show due to an error with TVDB: "+str(e).decode('utf-8'), logger.ERROR)
             if self.show:
-                ui.flash.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
+                ui.notifications.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
             else:
-                ui.flash.error("Unable to add show due to an error with TVDB")
+                ui.notifications.error("Unable to add show due to an error with TVDB")
             self._finishEarly()
             return
 
         except exceptions.MultipleShowObjectsException:
             logger.log(u"The show in " + self.showDir + " is already in your show list, skipping", logger.ERROR)
-            ui.flash.error('Show skipped', "The show in " + self.showDir + " is already in your show list")
+            ui.notifications.error('Show skipped', "The show in " + self.showDir + " is already in your show list")
             self._finishEarly()
             return
 
@@ -303,7 +303,7 @@ class QueueItemAdd(ShowQueueItem):
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
             logger.log(u"Launching backlog for this show since its episodes are WANTED")
-            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show])
+            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show]) #@UndefinedVariable
 
         self.show.flushEpisodes()
 
@@ -361,7 +361,11 @@ class QueueItemUpdate(ShowQueueItem):
         logger.log(u"Beginning update of "+self.show.name)
 
         logger.log(u"Retrieving show info from TVDB", logger.DEBUG)
-        self.show.loadFromTVDB(cache=not self.force)
+        try:
+            self.show.loadFromTVDB(cache=not self.force)
+        except tvdb_exceptions.tvdb_error, e:
+            logger.log(u"Unable to contact TVDB, aborting: "+str(e), logger.WARNING)
+            return
 
         # get episode list from DB
         logger.log(u"Loading all episodes from the database", logger.DEBUG)
@@ -404,7 +408,7 @@ class QueueItemUpdate(ShowQueueItem):
             if self.show.tvrid == 0:
                 self.show.setTVRID()
 
-        sickbeard.showQueueScheduler.action.refreshShow(self.show, True)
+        sickbeard.showQueueScheduler.action.refreshShow(self.show, True) #@UndefinedVariable
 
 class QueueItemForceUpdate(QueueItemUpdate):
     def __init__(self, show=None):

@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glob
 import string
 import cherrypy
 
@@ -38,7 +37,7 @@ def getWinDrives():
     assert os.name == 'nt'
 
     drives = []
-    bitmask = windll.kernel32.GetLogicalDrives()
+    bitmask = windll.kernel32.GetLogicalDrives() #@UndefinedVariable
     for letter in string.uppercase:
         if bitmask & 1:
             drives.append(letter)

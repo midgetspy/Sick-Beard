@@ -24,9 +24,7 @@ import re
 
 import sickbeard
 
-from sickbeard.common import *
-from sickbeard import logger, exceptions, helpers
-from sickbeard import encodingKludge as ek
+from sickbeard import exceptions, helpers
 from sickbeard.metadata import helpers as metadata_helpers
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -453,7 +451,7 @@ class GenericMetadata():
                 continue
     
             # Just grab whatever's there for now
-            art_id, season_url = cur_season_art.popitem()
+            art_id, season_url = cur_season_art.popitem() #@UnusedVariable
 
             season_thumb_file_path = self.get_season_thumb_path(show_obj, cur_season)
             

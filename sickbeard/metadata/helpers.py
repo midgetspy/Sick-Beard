@@ -17,12 +17,11 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import os.path
 import urllib2
 
 import sickbeard
 
-from sickbeard.common import *
+#from sickbeard.common import *
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
 
@@ -31,8 +30,6 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 import xml.etree.cElementTree as etree
 
 def getTVDBIDFromNFO(dir):
-
-    show_lang = None
 
     if not ek.ek(os.path.isdir, dir):
         logger.log(u"Show dir doesn't exist, can't load NFO")
@@ -52,7 +49,6 @@ def getTVDBIDFromNFO(dir):
                 + str(showXML.findtext('tvdbid')) + " " \
                 + str(showXML.findtext('id')))
 
-        name = showXML.findtext('title')
         if showXML.findtext('tvdbid') != None:
             tvdb_id = int(showXML.findtext('tvdbid'))
         elif showXML.findtext('id'):

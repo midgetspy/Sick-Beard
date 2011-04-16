@@ -53,6 +53,8 @@ class SBRotatingLogHandler(object):
         self.log_file = log_file
         self.cur_handler = None
 
+        self.writes_since_check = 0
+
         self.log_lock = threading.Lock()
 
     def initLogging(self, consoleLogging=True):
@@ -128,7 +130,7 @@ class SBRotatingLogHandler(object):
                 os.rename(cur_file_name, self._log_file_name(i+1))
         
         # the new log handler will always be on the un-numbered .log file
-        new_file_handler = self._config_handler(self.log_file)
+        new_file_handler = self._config_handler()
         
         self.cur_handler = new_file_handler
         
@@ -139,8 +141,12 @@ class SBRotatingLogHandler(object):
         with self.log_lock:
     
             # check the size and see if we need to rotate
-            if os.path.isfile(self.log_file) and os.path.getsize(self.log_file) >= LOG_SIZE:
-                self._rotate_logs()
+            if self.writes_since_check >= 10:
+                if os.path.isfile(self.log_file) and os.path.getsize(self.log_file) >= LOG_SIZE:
+                    self._rotate_logs()
+                self.writes_since_check = 0
+            else:
+                self.writes_since_check += 1
     
             meThread = threading.currentThread().getName()
             message = meThread + u" :: " + toLog

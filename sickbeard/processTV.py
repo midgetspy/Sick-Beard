@@ -18,16 +18,17 @@
 
 from __future__ import with_statement
 
-import os, os.path
+import os
 import shutil
 
+import sickbeard 
 from sickbeard import postProcessor
 from sickbeard import db, helpers, exceptions
 
 from sickbeard import encodingKludge as ek
 
 from sickbeard import logger
-from sickbeard.common import *
+#from sickbeard.common import *
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)

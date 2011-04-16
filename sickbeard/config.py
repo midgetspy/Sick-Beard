@@ -132,5 +132,5 @@ def change_VERSION_NOTIFY(version_notify):
         sickbeard.NEWEST_VERSION_STRING = None;
         
     if oldSetting == False and version_notify == True:
-        sickbeard.versionCheckScheduler.action.run()
+        sickbeard.versionCheckScheduler.action.run() #@UndefinedVariable
 

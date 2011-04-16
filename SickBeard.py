@@ -21,15 +21,13 @@ import sys
 
 # we only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:
-    from multiprocessing import Process, freeze_support
+    from multiprocessing import freeze_support
 
 import locale
 import os
-import os.path
 import threading
 import time
 import signal
-import sqlite3
 import traceback
 import getopt
 
@@ -38,7 +36,6 @@ import sickbeard
 from sickbeard import db
 from sickbeard.tv import TVShow
 from sickbeard import logger
-from sickbeard.common import *
 from sickbeard.version import SICKBEARD_VERSION
 
 from sickbeard.webserveInit import initWebServer
@@ -66,14 +63,14 @@ def loadShowsFromDB():
 def daemonize():
     # Make a non-session-leader child process
     try:
-        pid = os.fork()
+        pid = os.fork() #@UndefinedVariable - only available in UNIX
         if pid != 0:
             sys.exit(0)
     except OSError, e:
         raise RuntimeError("1st fork failed: %s [%d]" %
                    (e.strerror, e.errno))
 
-    os.setsid()
+    os.setsid() #@UndefinedVariable - only available in UNIX
 
     # Make sure I can read my own files and shut out others
     prev = os.umask(0)
@@ -81,7 +78,7 @@ def daemonize():
 
     # Make the child a session-leader by detaching from the terminal
     try:
-        pid = os.fork()
+        pid = os.fork() #@UndefinedVariable - only available in UNIX
         if pid != 0:
             sys.exit(0)
     except OSError, e:
@@ -107,16 +104,17 @@ def main():
     sickbeard.MY_ARGS = sys.argv[1:]
     sickbeard.CREATEPID = False
 
+    sickbeard.SYS_ENCODING = None
+
     try:
         locale.setlocale(locale.LC_ALL, "")
+        sickbeard.SYS_ENCODING = locale.getpreferredencoding()
     except (locale.Error, IOError):
         pass
-    sickbeard.SYS_ENCODING = locale.getpreferredencoding()
-    
-    # for OSes that are poorly configured I'll just force UTF-8
-    if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII'):
-        sickbeard.SYS_ENCODING = 'UTF-8'
 
+    # for OSes that are poorly configured I'll just force UTF-8
+    if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
+        sickbeard.SYS_ENCODING = 'UTF-8'
 
     # need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
@@ -125,9 +123,9 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'nolaunch', 'config=', 'datadir='])
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'nolaunch', 'config=', 'datadir=']) #@UnusedVariable
     except getopt.GetoptError:
-        print "Available options: --quiet, --forceupdate, --port, --daemon --pidfile --config --datadir"
+        print "Available options: --quiet, --forceupdate, --port, --daemon, --pidfile, --config, --datadir"
         sys.exit()
 
     forceUpdate = False
@@ -139,7 +137,7 @@ def main():
         if o in ('-q', '--quiet'):
             consoleLogging = False
         # for now we'll just silence the logging
-        if o in ('--tvbinz'):
+        if o in ('--tvbinz',):
             sickbeard.SHOW_TVBINZ = True
 
         # should we update right away?
@@ -147,7 +145,7 @@ def main():
             forceUpdate = True
 
         # should we update right away?
-        if o in ('--nolaunch'):
+        if o in ('--nolaunch',):
             noLaunch = True
 
         # use a different port
@@ -163,15 +161,15 @@ def main():
                 sickbeard.DAEMON = True
 
         # config file
-        if (o in ('--config')):
+        if o in ('--config',):
             sickbeard.CONFIG_FILE = os.path.abspath(a)
 
         # datadir
-        if (o in ('--datadir')):
+        if o in ('--datadir',):
             sickbeard.DATA_DIR = os.path.abspath(a)
 
         # write a pidfile if requested
-        if o in ('--pidfile'):
+        if o in ('--pidfile',):
             sickbeard.PIDFILE = str(a)
 
             # if the pidfile already exists, sickbeard may still be running, so exit
@@ -211,7 +209,7 @@ def main():
         elif not os.access(os.path.dirname(sickbeard.CONFIG_FILE), os.W_OK):
             raise SystemExit("Config file root dir '" + os.path.dirname(sickbeard.CONFIG_FILE) + "' must be writeable") 
         
-    os.chdir(sickbeard.PROG_DIR)
+    os.chdir(sickbeard.DATA_DIR)
     
     if consoleLogging:
         print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
@@ -287,7 +285,7 @@ def main():
 
     # start an update if we're supposed to
     if forceUpdate:
-        sickbeard.showUpdateScheduler.action.run(force=True)
+        sickbeard.showUpdateScheduler.action.run(force=True) #@UndefinedVariable
 
     # stay alive while my threads do the work
     while (True):

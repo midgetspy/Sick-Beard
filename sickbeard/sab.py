@@ -26,8 +26,8 @@ import sickbeard
 from lib import MultipartPostHandler
 import urllib2, cookielib
 
-from sickbeard.common import *
-from sickbeard import logger, classes
+from sickbeard.common import USER_AGENT
+from sickbeard import logger
 
 def sendNZB(nzb):
 

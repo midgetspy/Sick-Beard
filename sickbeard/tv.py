@@ -41,7 +41,8 @@ from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek
 
-from common import *
+from common import Quality, Overview
+from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
 
 class TVShow(object):
 
@@ -70,7 +71,7 @@ class TVShow(object):
         self._isDirGood = False
 
         self.episodes = {}
-
+        
         otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdbid)
         if otherShow != None:
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
@@ -313,7 +314,7 @@ class TVShow(object):
 
         try:
             # load the tvrage object, it will set the ID in its constructor if possible
-            tvr = tvrage.TVRage(self)
+            tvrage.TVRage(self)
             self.saveToDB()
         except exceptions.TVRageException, e:
             logger.log(u"Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e).decode('utf-8'), logger.DEBUG)
@@ -390,8 +391,11 @@ class TVShow(object):
                 epObj = t[self.tvdbid].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
-            except tvdb_exceptions.tvdb_episodenotfound, e:
+            except tvdb_exceptions.tvdb_episodenotfound:
                 logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
+                return None
+            except tvdb_exceptions.tvdb_error, e:
+                logger.log(u"Unable to contact TVDB: "+str(e), logger.WARNING)
                 return None
 
         for curEpNum in episodes:
@@ -538,6 +542,7 @@ class TVShow(object):
                 ltvdb_api_parms['language'] = self.lang
 
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
+
         else:
             t = tvapi
 
@@ -753,7 +758,6 @@ class TVShow(object):
 
             goodName = rootEp.prettyName()
             actualName = os.path.splitext(os.path.basename(curLocation))
-            curEpDir = os.path.dirname(curLocation)
 
             if goodName == actualName[0]:
                 logger.log(str(self.tvdbid) + ": File " + rootEp.location + " is already named correctly, skipping", logger.DEBUG)
@@ -890,7 +894,7 @@ class TVShow(object):
             return Overview.GOOD
         elif epStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
 
-            anyQualities, bestQualities = Quality.splitQuality(self.quality)
+            anyQualities, bestQualities = Quality.splitQuality(self.quality) #@UnusedVariable
             if bestQualities:
                 maxBestQuality = max(bestQualities)
             else:
@@ -1420,7 +1424,7 @@ class TVEpisode(object):
             finalName += goodName
 
         if naming_quality:
-            epStatus, epQual = Quality.splitCompositeStatus(self.status)
+            epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
             if epQual != Quality.NONE:
                 finalName += config.naming_sep_type[naming_sep_type] + Quality.qualityStrings[epQual]
 

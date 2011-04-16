@@ -25,7 +25,7 @@ import re
 from name_parser.parser import NameParser, InvalidNameException
 
 from sickbeard import logger, classes, helpers
-from sickbeard.common import *
+from sickbeard.common import Quality
 
 def getSeasonNZBs(name, urlData, season):
 
@@ -43,7 +43,7 @@ def getSeasonNZBs(name, urlData, season):
 
     sceneNameMatch = re.search(regex, filename, re.I)
     if sceneNameMatch:
-        showName, qualitySection, groupName = sceneNameMatch.groups()
+        showName, qualitySection, groupName = sceneNameMatch.groups() #@UnusedVariable
     else:
         logger.log(u"Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
         return ({},'')
@@ -102,7 +102,7 @@ def splitResult(result):
 
     try:
         urlData = helpers.getURL(result.url)
-    except urllib2.URLError, e:
+    except urllib2.URLError:
         logger.log(u"Unable to load url "+result.url+", can't download season NZB", logger.ERROR)
         return False
 

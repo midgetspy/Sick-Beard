@@ -61,7 +61,7 @@ class DBResult(list):
 
 class DBConnection:
     '''
-    Convenience wrapper around an sqlite3 database that provides locking
+    Convenience wrapper around an sqlite3 database which provides locking
     for concurrent access.
 
     >>> db = DBConnection(dbFileName=":memory:")
@@ -99,6 +99,7 @@ class DBConnection:
             if query is None:
                 return None
     
+            sqlResult = None
             attempt = 0
     
             while attempt < 5:
