@@ -32,7 +32,7 @@ import cherrypy.lib
 import sickbeard
 
 from sickbeard import config
-from sickbeard import history, notifiers, processTV, search
+from sickbeard import history, notifiers, processTV
 from sickbeard import tv, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
@@ -2367,39 +2367,24 @@ class Home:
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
 
-        outStr = ""
-        epObj = _getEpisode(show, season, episode)
+        # retrieve the episode object and fail if we can't get one 
+        ep_obj = _getEpisode(show, season, episode)
+        if isinstance(ep_obj, str):
+            return json.dumps({'result': 'failure'})
 
-        if isinstance(epObj, str):
-            return _genericMessage("Error", epObj)
+        # make a queue item for it and put it on the queue
+        ep_queue_item = search_queue.ManualSearchQueueItem(ep_obj)
+        sickbeard.searchQueueScheduler.action.add_item(ep_queue_item) #@UndefinedVariable
 
-        tempStr = "Searching for download for " + epObj.prettyName(True)
-        logger.log(tempStr)
-        outStr += tempStr + "<br />\n"
-        foundEpisode = search.findEpisode(epObj, manualSearch=True)
+        # wait until the queue item tells us whether it worked or not
+        while ep_queue_item.success == None: #@UndefinedVariable
+            time.sleep(1)
 
-        if not foundEpisode:
-            message = 'No downloads were found'
-            ui.notifications.error(message, "Couldn't find a download for <i>%s</i>" % epObj.prettyName(True))
-            logger.log(message)
+        # return the correct json value
+        if ep_queue_item.success:
+            return json.dumps({'result': statusStrings[ep_obj.status]})
 
-        else:
-
-            # just use the first result for now
-            logger.log(u"Downloading episode from " + foundEpisode.url)
-            result = search.snatchEpisode(foundEpisode)
-            providerModule = foundEpisode.provider
-            if not result:
-                ui.notifications.error('Error while attempting to snatch '+foundEpisode.name+', check your logs')
-            elif providerModule == None:
-                ui.notifications.error('Provider is configured incorrectly, unable to download')
-            #else:
-                #ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (foundEpisode.name, providerModule.name))
-
-            #TODO: check if the download was successful
-
-        redirect("/home/displayShow?show=" + str(epObj.show.tvdbid))
-
+        return json.dumps({'result': 'failure'})
 
 class UI:
     

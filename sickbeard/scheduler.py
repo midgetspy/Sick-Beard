@@ -21,6 +21,8 @@ import time
 import threading
 import traceback
 
+import sickbeard
+
 from sickbeard import logger
 
 class Scheduler:
