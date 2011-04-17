@@ -9,7 +9,7 @@
 *   http://en.wikipedia.org/wiki/MIT_License
 *   http://en.wikipedia.org/wiki/GNU_General_Public_License
 *
-* Date: Wed Mar  9 14:08:00 PST 2011
+* Date: Thu Apr 14 16:58:32 PDT 2011
 */
 
 /* Fluid class for determining actual width in IE */
@@ -20,13 +20,13 @@
 	float: left !important;
 }
 
-.ui-tooltip, .qtip, .ui-tooltip-hidden{
+.ui-tooltip, .qtip{
 	position: absolute;
-	left: -31000px;
-	top: -31000px;
-	display: block;
+	left: -28000px;
+	top: -28000px;
+	display: none;
 
-	max-width: 500px;
+	max-width: 280px;
 	min-width: 50px;
 	
 	font-size: 10.5px;
@@ -259,7 +259,6 @@
 	.ui-tooltip-blue .ui-state-default .ui-tooltip-icon{
 		background-position: -2px 0;
 	}.ui-tooltip .ui-tooltip-tip{
-	position: absolute;
 	margin: 0 auto;
 	overflow: hidden;
 
@@ -270,6 +269,8 @@
 
 	.ui-tooltip .ui-tooltip-tip,
 	.ui-tooltip .ui-tooltip-tip *{
+		position: absolute;
+		
 		line-height: 0.1px !important;
 		font-size: 0.1px !important;
 		color: #123456;
@@ -278,7 +279,7 @@
 		border: 0px dashed transparent;
 	}
 
-/*! Add shadows to your tooltips in: FF3+, Chrome 2+, Opera 10.6+, IE6+, Safari 2+ */
+	.ui-tooltip .ui-tooltip-tip canvas{ position: static; }/*! Add shadows to your tooltips in: FF3+, Chrome 2+, Opera 10.6+, IE6+, Safari 2+ */
 .ui-tooltip-shadow{
 	-webkit-box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);
 	-moz-box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);
