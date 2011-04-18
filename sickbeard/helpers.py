@@ -312,9 +312,9 @@ def buildNFOXML(myShow):
 
 def searchDBForShow(regShowName):
     """Return False|(tvdb_id,show_name)
-    Sanitize given show name into multiple versions and see if we have arecord of that show name in the DB
+    Sanitize given show name into multiple versions and see if we have a record of that show name in the DB
     """
-    showNames = [re.sub('[. -]', ' ', regShowName)]
+    showNames = [re.sub('[. -]', ' ', regShowName),regShowName]
 
     myDB = db.DBConnection()
 
