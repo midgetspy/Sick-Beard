@@ -45,6 +45,9 @@ from sickbeard.helpers import parse_result_wrapper
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
+from lib.anidb_api.aniDBAbstracter import Episode as aniDBEpisode
+from lib.anidb_api.anidb import AniDBInterface
+
 class PostProcessor(object):
 
     EXISTS_LARGER = 1
@@ -409,10 +412,31 @@ class PostProcessor(object):
         _finalize(parse_result)
         return to_return
     
+    def _analyze_anidb(self,filePath):
+                
+                
+        anidb = AniDBInterface()
+        anidb.auth('<user>', '<user_pw>')
+        ep = aniDBEpisode(anidb,filePath=filePath,
+             paramsF=["quality","anidb_file_name","crc32"],
+             paramsA=["epno","english_name","other_name"])
+        try:
+            self._log(u"Trying to lookup "+str(filePath)+" on anidb", logger.DEBUG)
+            ep.load_data()
+        except Exception,e :
+            self._log(u"exception msg: "+str(e))
+            raise InvalidNameException
+        
+        if ep.anidb_file_name:
+            self._log(u"Lookup successful, using anidb filename "+str(ep.anidb_file_name), logger.DEBUG)
+            return self._analyze_name(ep.anidb_file_name)
+        raise InvalidNameException
+        
+    
     def _make_attempt_list(self):
                         # try to look up the nzb in history
         attempt_list = [self._history_lookup,
-    
+
                         # try to analyze the file name
                         lambda : self._analyze_name(self.file_name),
 
@@ -422,6 +446,9 @@ class PostProcessor(object):
                          # try to analyze the file path
                         lambda : self._analyze_name(self.file_path),
 
+                        # try to analyze the file path with the help of aniDB
+                        lambda : self._analyze_anidb(self.file_path),
+                        
                         # try to analyze the nzb name
                         lambda : self._analyze_name(self.nzb_name)
                         ]
