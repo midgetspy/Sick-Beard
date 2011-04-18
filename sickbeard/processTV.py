@@ -112,7 +112,7 @@ def processDir (dirName, nzbName=None, recurse=False):
                 try:
                     shutil.rmtree(dirName)
                 except (OSError, IOError), e:
-                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + str(e).decode('utf-8'), logger.ERROR)
+                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + e.message.decode('utf-8'), logger.ERROR)
 
             returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
             

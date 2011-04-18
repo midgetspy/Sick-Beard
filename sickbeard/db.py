@@ -114,15 +114,15 @@ class DBConnection:
                     # get out of the connection attempt loop since we were successful
                     return sqlResult
                 except sqlite3.OperationalError, e:
-                    if "unable to open database file" in str(e) or "database is locked" in str(e):
-                        logger.log(u"DB error: "+str(e).decode('utf-8'), logger.WARNING)
+                    if "unable to open database file" in e.message or "database is locked" in e.message:
+                        logger.log(u"DB error: "+e.message.decode('utf-8'), logger.WARNING)
                         attempt += 1
                         time.sleep(1)
                     else:
-                        logger.log(u"DB error: "+str(e).decode('utf-8'), logger.ERROR)
+                        logger.log(u"DB error: "+e.message.decode('utf-8'), logger.ERROR)
                         raise
                 except sqlite3.DatabaseError, e:
-                    logger.log(u"Fatal error executing query: " + str(e), logger.ERROR)
+                    logger.log(u"Fatal error executing query: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
                     raise
     
             return None
@@ -189,7 +189,7 @@ def _processUpgrade(connection, upgradeClass):
         try:
             instance.execute()
         except sqlite3.DatabaseError, e:
-            print "Error in " + str(upgradeClass.__name__) + ": " + str(e)
+            print "Error in " + str(upgradeClass.__name__) + ": " + e.message.decode(sickbeard.SYS_ENCODING)
             raise
         logger.log(upgradeClass.__name__ + " upgrade completed", logger.DEBUG)
     else:

@@ -77,7 +77,7 @@ class PLEXNotifier(XBMCNotifier):
                 try:
                     urllib.urlopen(url)
                 except Exception, e:
-                    logger.log(u"Error updating library section: "+str(e).decode('utf-8'), logger.ERROR)
+                    logger.log(u"Error updating library section: "+e.message.decode('utf-8'), logger.ERROR)
                     return False
 
         return True

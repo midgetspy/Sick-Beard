@@ -10,6 +10,7 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
@@ -25,7 +26,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div id="config">
 <div id="config-content">
 
-<form action="saveProviders" method="post">
+<form id="configForm" action="saveProviders" method="post">
 
             <div id="config-components">
                 
@@ -62,7 +63,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         #end for
                         </ul>
                         <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
-                        <br/><input type="submit" value="Save Changes" /><br/>
+                        <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group1 //-->
 
@@ -207,7 +208,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 <!-- end div for editing providers -->
 
-                    <input type="submit" value="Save Changes" /><br/>
+                    <input type="submit" class="config_submitter" value="Save Changes" /><br/>
             
                     </fieldset>
                 </div><!-- /component-group2 //-->
@@ -268,7 +269,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                 </div><!-- /component-group3 //-->
 
                     
-            <br/><input type="submit" value="Save Changes" /><br/>
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
                 
             </div><!-- /config-components //-->
 
