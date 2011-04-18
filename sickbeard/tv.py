@@ -439,7 +439,7 @@ class TVShow(object):
                     season = parse_result.season_number
                     episodes = parse_result.episode_numbers
                 else: # we cant figure out what this is
-                    return False
+                    return None
             
             
         for curEpNum in episodes:
