@@ -775,8 +775,8 @@ class ConfigPostProcessing:
     def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
                     naming_sep_type=None, naming_quality=None, naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, use_banner=None,
-                    keep_processed_dir=None, process_automatically=None, rename_episodes=None,
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
+                    use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None):
 
         results = []
@@ -843,6 +843,7 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
+        sickbeard.metadata_provider_dict['TIVO'].set_config(tivo_data)
         
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
 
