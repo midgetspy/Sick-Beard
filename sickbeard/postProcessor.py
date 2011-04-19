@@ -401,8 +401,8 @@ class PostProcessor(object):
                 continue
             except (IOError):
                 continue
-            
-            self._log(u"Lookup successful, using tvdb id "+str(showObj["id"]), logger.DEBUG)
+            tvdb_id = int(showObj["id"])
+            self._log(u"Lookup successful, using tvdb id "+str(tvdb_id), logger.DEBUG)
             show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
             if show.is_anime and len(parse_result.ab_episode_numbers) > 0:
                 try:
@@ -412,7 +412,7 @@ class PostProcessor(object):
                     continue
 
             _finalize(parse_result)
-            return (int(showObj["id"]), season, episodes)
+            return (tvdb_id, season, episodes)
 
         _finalize(parse_result)
         return to_return
