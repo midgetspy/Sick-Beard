@@ -39,9 +39,9 @@ class NotifoNotifier:
         msg = msg.strip()
         apiurl = API_URL % {"username": username, "secret": apisecret}
         data = urllib.urlencode({
-			"title": title,
+            "title": title,
             "label": label,
-			"msg": msg
+            "msg": msg
         })
 
         try:
