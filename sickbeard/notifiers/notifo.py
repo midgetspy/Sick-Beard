@@ -21,7 +21,7 @@ import urllib
 
 import sickbeard
 
-from sickbeard import logger, common
+from sickbeard import logger
 
 try:
     import lib.simplejson as json #@UnusedImport

@@ -1017,12 +1017,12 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, tvbinz_uid=None, tvbinz_hash=None, nzbs_org_uid=None,
-                      nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
-                      tvbinz_auth=None, provider_order=None,
+    def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
+                      nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
-                      newzbin_username=None, newzbin_password=None):
+                      newzbin_username=None, newzbin_password=None,
+                      provider_order=None):
 
         results = []
 
@@ -1068,10 +1068,7 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'tvbinz':
-                if curEnabled or sickbeard.SHOW_TVBINZ:
-                    sickbeard.TVBINZ = curEnabled
-            elif curProvider == 'nzbs_org':
+            if curProvider == 'nzbs_org':
                 sickbeard.NZBS = curEnabled
             elif curProvider == 'nzbs_r_us':
                 sickbeard.NZBSRUS = curEnabled
@@ -1092,13 +1089,6 @@ class ConfigProviders:
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
-        if tvbinz_uid:
-            sickbeard.TVBINZ_UID = tvbinz_uid.strip()
-        if tvbinz_hash:
-            sickbeard.TVBINZ_HASH = tvbinz_hash.strip()
-        if tvbinz_auth:
-            sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
-            
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
