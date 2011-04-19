@@ -345,6 +345,7 @@ class ParseResult(object):
 
         to_return += ' [ABD: '+str(self.air_by_date)+']'
         to_return += ' [ANIME: '+str(self.is_anime)+']' 
+        to_return += ' [whichReg: '+str(self.which_regex)+']'
 
         return to_return.encode('utf-8')
 

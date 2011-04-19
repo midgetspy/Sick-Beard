@@ -312,9 +312,9 @@ def buildNFOXML(myShow):
 
 def searchDBForShow(regShowName):
     """Return False|(tvdb_id,show_name)
-    Sanitize given show name into multiple versions and see if we have arecord of that show name in the DB
+    Sanitize given show name into multiple versions and see if we have a record of that show name in the DB
     """
-    showNames = [re.sub('[. -]', ' ', regShowName)]
+    showNames = [re.sub('[. -]', ' ', regShowName),regShowName]
 
     myDB = db.DBConnection()
 
@@ -535,10 +535,13 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
 def get_tvdbid(name, useTvdb):
     logger.log(u"trying to get the tvdbid for "+str(name), logger.DEBUG)
             
-    myDB = db.DBConnection()
-    isAbsoluteNumberSQlResult = myDB.select("SELECT tvdb_id,show_name FROM tv_shows WHERE show_name = ?", [name.lower()])
-    if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
-        return int(isAbsoluteNumberSQlResult[0][0])
+    for show in sickbeard.showList:
+        nameFromList = re.sub('[. -]', ' ', show.name).lower().lstrip()
+        nameInQuestion = re.sub('[. -]', ' ', name).lower().lstrip()
+        if nameFromList.find(nameInQuestion) == 0:
+            logger.log(u"Matched "+str(name)+" in the showlist to the show "+str(show.name), logger.DEBUG)
+            return show.tvdbid
+
     if useTvdb:
         try:
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
