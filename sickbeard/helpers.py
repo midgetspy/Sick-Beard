@@ -535,10 +535,14 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
 def get_tvdbid(name, useTvdb):
     logger.log(u"trying to get the tvdbid for "+str(name), logger.DEBUG)
             
-    myDB = db.DBConnection()
-    isAbsoluteNumberSQlResult = myDB.select("SELECT tvdb_id,show_name FROM tv_shows WHERE show_name = ?", [name.lower()])
-    if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
-        return int(isAbsoluteNumberSQlResult[0][0])
+    for show in sickbeard.showList:
+        nameFromList = re.sub('[. -]', ' ', show.name).lower().lstrip()
+        nameInQuestion = re.sub('[. -]', ' ', name).lower().lstrip()
+        logger.log(str(nameFromList)+" vs  "+str(nameInQuestion), logger.DEBUG)
+        if nameFromList.find(nameInQuestion) == 0:
+            logger.log(u"Matched "+str(name)+" in the showlist to the show "+str(show.name), logger.DEBUG)
+            return show.tvdbid
+
     if useTvdb:
         try:
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
