@@ -538,7 +538,6 @@ def get_tvdbid(name, useTvdb):
     for show in sickbeard.showList:
         nameFromList = re.sub('[. -]', ' ', show.name).lower().lstrip()
         nameInQuestion = re.sub('[. -]', ' ', name).lower().lstrip()
-        logger.log(str(nameFromList)+" vs  "+str(nameInQuestion), logger.DEBUG)
         if nameFromList.find(nameInQuestion) == 0:
             logger.log(u"Matched "+str(name)+" in the showlist to the show "+str(show.name), logger.DEBUG)
             return show.tvdbid
