@@ -136,8 +136,10 @@ class TVShow(object):
                 logger.log("Multiple entries for absolute number: "+str(absolute_number)+" in show: "+self.name+" found ", logger.ERROR)
                 return None
             else:
-                logger.log("No entries for absolute number: "+str(absolute_number)+" in show: "+self.name+" found ", logger.DEBUG)
-                return None
+                logger.log("No entries for absolute number: "+str(absolute_number)+" in show: "+self.name+" found. will try with absolute number as episode number from first season", logger.DEBUG)
+                # this fix the first season for shows that dont have absolute numbering from the tvdb
+                season = 1
+                episode = absolute_number
         
         if not season in self.episodes:
             self.episodes[season] = {}
@@ -1497,13 +1499,20 @@ class TVEpisode(object):
 
         # anime ?
         if self.show.anime:
+            #FIXME: this should be set on show creation !!
+            if self.absolute_number == 0:
+                curAbsolute_number = self.episode
+            else:
+                curAbsolute_number = self.absolute_number
             if naming_anime == 1: # this crazy person wants both !
-                goodEpString += config.naming_sep_type[naming_sep_type]+"%(#)03d" % {"#":self.absolute_number}
+                goodEpString += config.naming_sep_type[naming_sep_type]+"%(#)03d" % {"#":curAbsolute_number}
             elif naming_anime == 2: # total anime freak only need the absolute number !
-                goodEpString = "%(#)03d" % {"#":self.absolute_number}
+                goodEpString = "%(#)03d" % {"#":curAbsolute_number}
             for relEp in self.relatedEps:
-                goodEpString += "-"+"%(#)03d" % {"#":relEp.absolute_number}
-        
+                if relEp.absolute_number != 0:
+                    goodEpString += "-"+"%(#)03d" % {"#":relEp.absolute_number}
+                else:
+                    goodEpString += "-"+"%(#)03d" % {"#":relEp.episode}
             
         #episode string end
         
