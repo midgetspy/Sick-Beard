@@ -426,7 +426,8 @@ class PostProcessor(object):
                 logger.log(u"Unable to parse, skipping: "+e.message.decode(sickbeard.SYS_ENCODING), logger.DEBUG)
                 continue
             
-            if cur_tvdb_id:
+            # if we already did a successful history lookup then keep that tvdb_id value
+            if cur_tvdb_id and not (self.in_history and tvdb_id):
                 tvdb_id = cur_tvdb_id
             if cur_season != None:
                 season = cur_season
