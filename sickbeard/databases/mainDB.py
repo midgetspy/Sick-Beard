@@ -25,8 +25,7 @@ from sickbeard import logger
 from sickbeard.providers.generic import GenericProvider
 
 from sickbeard import encodingKludge as ek
-
-
+from sickbeard.exceptions import ex
 
 class MainSanityCheck(db.DBSanityCheck):
 
@@ -141,7 +140,7 @@ class NewQualitySettings (NumericProviders):
                 logger.log(u"Done backup, proceeding with migration.")
                 break
             except Exception, e:
-                logger.log(u"Error while trying to back up your sickbeard.db: "+e.message.decode('utf-8'))
+                logger.log(u"Error while trying to back up your sickbeard.db: "+ex(e))
                 numTries += 1
                 time.sleep(1)
                 logger.log(u"Trying again.")

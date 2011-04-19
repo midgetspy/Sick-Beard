@@ -19,9 +19,11 @@
 import urllib
 import sickbeard
 
-from xml.dom import minidom
 from sickbeard import logger, common
 from sickbeard.notifiers.xbmc import XBMCNotifier 
+from sickbeard.exceptions import ex
+
+from xml.dom import minidom
 
 class PLEXNotifier(XBMCNotifier):
 
@@ -77,7 +79,7 @@ class PLEXNotifier(XBMCNotifier):
                 try:
                     urllib.urlopen(url)
                 except Exception, e:
-                    logger.log(u"Error updating library section: "+e.message.decode('utf-8'), logger.ERROR)
+                    logger.log(u"Error updating library section: "+ex(e), logger.ERROR)
                     return False
 
         return True

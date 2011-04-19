@@ -34,6 +34,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
+from sickbeard.exceptions import ex
 from sickbeard import tvrage
 from sickbeard import config
 from sickbeard import image_cache
@@ -199,7 +200,7 @@ class TVShow(object):
             try:
                 curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
             except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException), e:
-                logger.log(u"Episode "+mediaFile+" returned an exception: "+e.message.decode('utf-8'), logger.ERROR)
+                logger.log(u"Episode "+mediaFile+" returned an exception: "+ex(e), logger.ERROR)
             except exceptions.EpisodeDeletedException:
                 logger.log(u"The episode deleted itself when I tried making an object for it", logger.DEBUG)
 
@@ -317,7 +318,7 @@ class TVShow(object):
             tvrage.TVRage(self)
             self.saveToDB()
         except exceptions.TVRageException, e:
-            logger.log(u"Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+e.message.decode('utf-8'), logger.DEBUG)
+            logger.log(u"Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+ex(e), logger.DEBUG)
             return
 
     def getImages(self, fanart=None, poster=None):
@@ -1082,7 +1083,7 @@ class TVEpisode(object):
                 myEp = cachedSeason[episode]
 
         except (tvdb_exceptions.tvdb_error, IOError), e:
-            logger.log(u"TVDB threw up an error: "+e.message.decode('utf-8'), logger.DEBUG)
+            logger.log(u"TVDB threw up an error: "+ex(e), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
             if self.name:
                 logger.log(u"TVDB timed out but we have enough info from other sources, allowing the error", logger.DEBUG)

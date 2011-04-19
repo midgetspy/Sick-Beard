@@ -28,6 +28,7 @@ from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard.helpers import sanitizeSceneName
+from sickbeard.exceptions import ex
 
 class EZRSSProvider(generic.TorrentProvider):
 
@@ -117,7 +118,7 @@ class EZRSSProvider(generic.TorrentProvider):
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load EZRSS RSS feed: "+e.message.decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load EZRSS RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"RSS data: "+data, logger.DEBUG)
             return []
         

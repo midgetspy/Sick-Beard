@@ -31,6 +31,7 @@ from sickbeard import helpers, classes, logger, db
 from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from lib.hachoir_parser import createParser
 
@@ -148,7 +149,7 @@ class GenericProvider:
             fileOut.close()
             helpers.chmodAsParent(fileName)
         except IOError, e:
-            logger.log("Unable to save the file: "+e.message.decode('utf-8'), logger.ERROR)
+            logger.log("Unable to save the file: "+ex(e), logger.ERROR)
             return False
 
         # as long as it's a valid download then consider it a successful snatch

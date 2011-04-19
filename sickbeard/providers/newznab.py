@@ -33,6 +33,7 @@ from sickbeard.helpers import sanitizeSceneName
 from sickbeard import exceptions
 from sickbeard import logger
 from sickbeard import tvcache
+from sickbeard.exceptions import ex
 
 class NewznabProvider(generic.NZBProvider):
 
@@ -146,7 +147,7 @@ class NewznabProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log(u"Error trying to load "+self.name+" RSS feed: "+e.message.decode('utf-8'), logger.ERROR)
+			logger.log(u"Error trying to load "+self.name+" RSS feed: "+ex(e), logger.ERROR)
 			logger.log(u"RSS data: "+data, logger.DEBUG)
 			return []
 

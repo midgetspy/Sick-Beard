@@ -26,9 +26,9 @@ from sickbeard import postProcessor
 from sickbeard import db, helpers, exceptions
 
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from sickbeard import logger
-#from sickbeard.common import *
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
@@ -112,7 +112,7 @@ def processDir (dirName, nzbName=None, recurse=False):
                 try:
                     shutil.rmtree(dirName)
                 except (OSError, IOError), e:
-                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + e.message.decode('utf-8'), logger.ERROR)
+                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + ex(e), logger.ERROR)
 
             returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
             
