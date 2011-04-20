@@ -1,12 +1,10 @@
 """Native adapter for serving CherryPy via its builtin server."""
 
 import logging
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+import sys
 
 import cherrypy
+from cherrypy._cpcompat import BytesIO
 from cherrypy._cperror import format_exc, bare_error
 from cherrypy.lib import httputil
 from cherrypy import wsgiserver
@@ -52,7 +50,8 @@ class NativeGateway(wsgiserver.Gateway):
                         try:
                             request.run(method, path, qs, req.request_protocol, headers, rfile)
                             break
-                        except cherrypy.InternalRedirect, ir:
+                        except cherrypy.InternalRedirect:
+                            ir = sys.exc_info()[1]
                             app.release_serving()
                             prev = request
                             
@@ -70,7 +69,7 @@ class NativeGateway(wsgiserver.Gateway):
                             method = "GET"
                             path = ir.path
                             qs = ir.query_string
-                            rfile = StringIO()
+                            rfile = BytesIO()
                     
                     self.send_response(
                         response.output_status, response.header_list,

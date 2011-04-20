@@ -1,12 +1,12 @@
 
-from Cookie import SimpleCookie, CookieError
 import os
 import sys
 import time
-import types
 import warnings
 
 import cherrypy
+from cherrypy._cpcompat import basestring, copykeys, ntob, unicodestr
+from cherrypy._cpcompat import SimpleCookie, CookieError
 from cherrypy import _cpreqbody, _cpconfig
 from cherrypy._cperror import format_exc, bare_error
 from cherrypy.lib import httputil, file_generator
@@ -15,26 +15,24 @@ from cherrypy.lib import httputil, file_generator
 class Hook(object):
     """A callback and its metadata: failsafe, priority, and kwargs."""
     
-    __metaclass__ = cherrypy._AttributeDocstrings
-    
     callback = None
-    callback__doc = """
+    """
     The bare callable that this Hook object is wrapping, which will
     be called when the Hook is called."""
     
     failsafe = False
-    failsafe__doc = """
+    """
     If True, the callback is guaranteed to run even if other callbacks
     from the same call point raise exceptions."""
     
     priority = 50
-    priority__doc = """
+    """
     Defines the order of execution for a list of Hooks. Priority numbers
     should be limited to the closed interval [0, 100], but values outside
     this range are acceptable, as are fractional values."""
     
     kwargs = {}
-    kwargs__doc = """
+    """
     A set of keyword arguments that will be passed to the
     callable on each call."""
     
@@ -119,7 +117,7 @@ class HookMap(dict):
     
     def __repr__(self):
         cls = self.__class__
-        return "%s.%s(points=%r)" % (cls.__module__, cls.__name__, self.keys())
+        return "%s.%s(points=%r)" % (cls.__module__, cls.__name__, copykeys(self))
 
 
 # Config namespace handlers
@@ -179,34 +177,30 @@ class Request(object):
     the given URL, and the execution plan for generating a response.
     """
     
-    __metaclass__ = cherrypy._AttributeDocstrings
-    
     prev = None
-    prev__doc = """
+    """
     The previous Request object (if any). This should be None
     unless we are processing an InternalRedirect."""
     
     # Conversation/connection attributes
     local = httputil.Host("127.0.0.1", 80)
-    local__doc = \
-        "An httputil.Host(ip, port, hostname) object for the server socket."
+    "An httputil.Host(ip, port, hostname) object for the server socket."
     
     remote = httputil.Host("127.0.0.1", 1111)
-    remote__doc = \
-        "An httputil.Host(ip, port, hostname) object for the client socket."
+    "An httputil.Host(ip, port, hostname) object for the client socket."
     
     scheme = "http"
-    scheme__doc = """
+    """
     The protocol used between client and server. In most cases,
     this will be either 'http' or 'https'."""
     
     server_protocol = "HTTP/1.1"
-    server_protocol__doc = """
+    """
     The HTTP version for which the HTTP server is at least
     conditionally compliant."""
     
     base = ""
-    base__doc = """The (scheme://host) portion of the requested URL.
+    """The (scheme://host) portion of the requested URL.
     In some cases (e.g. when proxying via mod_rewrite), this may contain
     path segments which cherrypy.url uses when constructing url's, but
     which otherwise are ignored by CherryPy. Regardless, this value
@@ -214,13 +208,13 @@ class Request(object):
     
     # Request-Line attributes
     request_line = ""
-    request_line__doc = """
+    """
     The complete Request-Line received from the client. This is a
     single string consisting of the request method, URI, and protocol
     version (joined by spaces). Any final CRLF is removed."""
     
     method = "GET"
-    method__doc = """
+    """
     Indicates the HTTP method to be performed on the resource identified
     by the Request-URI. Common methods include GET, HEAD, POST, PUT, and
     DELETE. CherryPy allows any extension method; however, various HTTP
@@ -228,7 +222,7 @@ class Request(object):
     CherryPy applications SHOULD restrict the set (on a per-URI basis)."""
     
     query_string = ""
-    query_string__doc = """
+    """
     The query component of the Request-URI, a string of information to be
     interpreted by the resource. The query portion of a URI follows the
     path component, and is separated by a '?'. For example, the URI
@@ -236,7 +230,7 @@ class Request(object):
     'a=3&b=4'."""
     
     query_string_encoding = 'utf8'
-    query_string_encoding__doc = """
+    """
     The encoding expected for query string arguments after % HEX HEX decoding).
     If a query string is provided that cannot be decoded with this encoding,
     404 is raised (since technically it's a different URI). If you want
@@ -245,15 +239,15 @@ class Request(object):
     """
     
     protocol = (1, 1)
-    protocol__doc = """The HTTP protocol version corresponding to the set
-        of features which should be allowed in the response. If BOTH
-        the client's request message AND the server's level of HTTP
-        compliance is HTTP/1.1, this attribute will be the tuple (1, 1).
-        If either is 1.0, this attribute will be the tuple (1, 0).
-        Lower HTTP protocol versions are not explicitly supported."""
+    """The HTTP protocol version corresponding to the set
+    of features which should be allowed in the response. If BOTH
+    the client's request message AND the server's level of HTTP
+    compliance is HTTP/1.1, this attribute will be the tuple (1, 1).
+    If either is 1.0, this attribute will be the tuple (1, 0).
+    Lower HTTP protocol versions are not explicitly supported."""
     
     params = {}
-    params__doc = """
+    """
     A dict which combines query string (GET) and request entity (POST)
     variables. This is populated in two stages: GET params are added
     before the 'on_start_resource' hook, and POST params are added
@@ -261,27 +255,24 @@ class Request(object):
     
     # Message attributes
     header_list = []
-    header_list__doc = """
+    """
     A list of the HTTP request headers as (name, value) tuples.
     In general, you should use request.headers (a dict) instead."""
     
     headers = httputil.HeaderMap()
-    headers__doc = """
+    """
     A dict-like object containing the request headers. Keys are header
     names (in Title-Case format); however, you may get and set them in
     a case-insensitive manner. That is, headers['Content-Type'] and
     headers['content-type'] refer to the same value. Values are header
-    values (decoded according to RFC 2047 if necessary). See also:
+    values (decoded according to :rfc:`2047` if necessary). See also:
     httputil.HeaderMap, httputil.HeaderElement."""
     
     cookie = SimpleCookie()
-    cookie__doc = """See help(Cookie)."""
-    
-    body = None
-    body__doc = """See help(cherrypy.request.body)"""
+    """See help(Cookie)."""
     
     rfile = None
-    rfile__doc = """
+    """
     If the request included an entity (body), it will be available
     as a stream in this attribute. However, the rfile will normally
     be read for you between the 'before_request_body' hook and the
@@ -301,36 +292,26 @@ class Request(object):
     """
     
     process_request_body = True
-    process_request_body__doc = """
+    """
     If True, the rfile (if any) is automatically read and parsed,
     and the result placed into request.params or request.body."""
     
     methods_with_bodies = ("POST", "PUT")
-    methods_with_bodies__doc = """
+    """
     A sequence of HTTP methods for which CherryPy will automatically
     attempt to read a body from the rfile."""
     
     body = None
-    body__doc = """
+    """
     If the request Content-Type is 'application/x-www-form-urlencoded'
-    or multipart, this will be None. Otherwise, this will contain the
-    request entity body as an open file object (which you can .read());
-    this value is set between the 'before_request_body' and 'before_handler'
-    hooks (assuming that process_request_body is True)."""
-    
-    body_params = None
-    body_params__doc = """
-    If the request Content-Type is 'application/x-www-form-urlencoded' or
-    multipart, this will be a dict of the params pulled from the entity
-    body; that is, it will be the portion of request.params that come
-    from the message body (sometimes called "POST params", although they
-    can be sent with various HTTP method verbs). This value is set between
-    the 'before_request_body' and 'before_handler' hooks (assuming that
-    process_request_body is True)."""
+    or multipart, this will be None. Otherwise, this will be an instance
+    of :class:`RequestBody<cherrypy._cpreqbody.RequestBody>` (which you
+    can .read()); this value is set between the 'before_request_body' and
+    'before_handler' hooks (assuming that process_request_body is True)."""
     
     # Dispatch attributes
     dispatch = cherrypy.dispatch.Dispatcher()
-    dispatch__doc = """
+    """
     The object which looks up the 'page handler' callable and collects
     config for the current request based on the path_info, other
     request attributes, and the application architecture. The core
@@ -342,7 +323,7 @@ class Request(object):
     See help(cherrypy.dispatch) for more information."""
     
     script_name = ""
-    script_name__doc = """
+    """
     The 'mount point' of the application which is handling this request.
     
     This attribute MUST NOT end in a slash. If the script_name refers to
@@ -350,13 +331,13 @@ class Request(object):
     """
     
     path_info = "/"
-    path_info__doc = """
+    """
     The 'relative path' portion of the Request-URI. This is relative
     to the script_name ('mount point') of the application which is
     handling this request."""
 
     login = None
-    login__doc = """
+    """
     When authentication is used during the request processing this is
     set to 'False' if it failed and to the 'username' value if it succeeded.
     The default 'None' implies that no authentication happened."""
@@ -364,11 +345,10 @@ class Request(object):
     # Note that cherrypy.url uses "if request.app:" to determine whether
     # the call is during a real HTTP request or not. So leave this None.
     app = None
-    app__doc = \
-        """The cherrypy.Application object which is handling this request."""
+    """The cherrypy.Application object which is handling this request."""
     
     handler = None
-    handler__doc = """
+    """
     The function, method, or other callable which CherryPy will call to
     produce the response. The discovery of the handler and the arguments
     it will receive are determined by the request.dispatch object.
@@ -377,12 +357,12 @@ class Request(object):
     (from the query string and POST body) as keyword arguments."""
     
     toolmaps = {}
-    toolmaps__doc = """
+    """
     A nested dict of all Toolboxes and Tools in effect for this request,
     of the form: {Toolbox.namespace: {Tool.name: config dict}}."""
     
     config = None
-    config__doc = """
+    """
     A flat dict of all configuration entries which apply to the
     current request. These entries are collected from global config,
     application config (based on request.path_info), and from handler
@@ -392,7 +372,7 @@ class Request(object):
     and inherits downward)."""
     
     is_index = None
-    is_index__doc = """
+    """
     This will be True if the current request is mapped to an 'index'
     resource handler (also, a 'default' handler if path_info ends with
     a slash). The value may be used to automatically redirect the
@@ -400,7 +380,7 @@ class Request(object):
     the trailing slash. See cherrypy.tools.trailing_slash."""
     
     hooks = HookMap(hookpoints)
-    hooks__doc = """
+    """
     A HookMap (dict-like object) of the form: {hookpoint: [hook, ...]}.
     Each key is a str naming the hook point, and each value is a list
     of hooks which will be called at that hook point during this request.
@@ -409,7 +389,7 @@ class Request(object):
     See also: _cprequest.Hook, _cprequest.HookMap, and cherrypy.tools."""
     
     error_response = cherrypy.HTTPError(500).set_response
-    error_response__doc = """
+    """
     The no-arg callable which will handle unexpected, untrapped errors
     during request processing. This is not used for expected exceptions
     (like NotFound, HTTPError, or HTTPRedirect) which are raised in
@@ -419,7 +399,7 @@ class Request(object):
     error response to the user-agent."""
     
     error_page = {}
-    error_page__doc = """
+    """
     A dict of {error code: response filename or callable} pairs.
     
     The error code must be an int representing a given HTTP error code,
@@ -443,30 +423,28 @@ class Request(object):
     """
     
     show_tracebacks = True
-    show_tracebacks__doc = """
+    """
     If True, unexpected errors encountered during request processing will
     include a traceback in the response body."""
 
     show_mismatched_params = True
-    show_mismatched_params__doc = """
+    """
     If True, mismatched parameters encountered during PageHandler invocation
     processing will be included in the response body."""
     
     throws = (KeyboardInterrupt, SystemExit, cherrypy.InternalRedirect)
-    throws__doc = \
-        """The sequence of exceptions which Request.run does not trap."""
+    """The sequence of exceptions which Request.run does not trap."""
     
     throw_errors = False
-    throw_errors__doc = """
+    """
     If True, Request.run will not trap any errors (except HTTPRedirect and
     HTTPError, which are more properly called 'exceptions', not errors)."""
     
     closed = False
-    closed__doc = """
-    True once the close method has been called, False otherwise."""
+    """True once the close method has been called, False otherwise."""
     
     stage = None
-    stage__doc = """
+    """
     A string containing the stage reached in the request-handling process.
     This is useful when debugging a live server with hung requests."""
     
@@ -513,16 +491,23 @@ class Request(object):
         """Process the Request. (Core)
         
         method, path, query_string, and req_protocol should be pulled directly
-            from the Request-Line (e.g. "GET /path?key=val HTTP/1.0").
-        path should be %XX-unquoted, but query_string should not be.
+        from the Request-Line (e.g. "GET /path?key=val HTTP/1.0").
+        
+        path
+            This should be %XX-unquoted, but query_string should not be.
             They both MUST be byte strings, not unicode strings.
-        headers should be a list of (name, value) tuples.
-        rfile should be a file-like object containing the HTTP request entity.
+        
+        headers
+            A list of (name, value) tuples.
+        
+        rfile
+            A file-like object containing the HTTP request entity.
         
         When run() is done, the returned object should have 3 attributes:
-          status, e.g. "200 OK"
-          header_list, a list of (name, value) tuples
-          body, an iterable yielding strings
+        
+          * status, e.g. "200 OK"
+          * header_list, a list of (name, value) tuples
+          * body, an iterable yielding strings
         
         Consumer code (HTTP servers) should then access these response
         attributes to build the outbound stream.
@@ -663,7 +648,8 @@ class Request(object):
                     self.stage = 'before_finalize'
                     self.hooks.run('before_finalize')
                     response.finalize()
-                except (cherrypy.HTTPRedirect, cherrypy.HTTPError), inst:
+                except (cherrypy.HTTPRedirect, cherrypy.HTTPError):
+                    inst = sys.exc_info()[1]
                     inst.set_response()
                     self.stage = 'before_finalize (HTTPError)'
                     self.hooks.run('before_finalize')
@@ -686,7 +672,7 @@ class Request(object):
         except UnicodeDecodeError:
             raise cherrypy.HTTPError(
                 404, "The given query string could not be processed. Query "
-                "strings for this resource must be encoded with %r." % 
+                "strings for this resource must be encoded with %r." %
                 self.query_string_encoding)
         
         # Python 2 only: keyword arguments must be byte strings (type 'str').
@@ -753,7 +739,8 @@ class Request(object):
                 self.error_response()
             self.hooks.run("after_error_response")
             cherrypy.serving.response.finalize()
-        except cherrypy.HTTPRedirect, inst:
+        except cherrypy.HTTPRedirect:
+            inst = sys.exc_info()[1]
             inst.set_response()
             cherrypy.serving.response.finalize()
     
@@ -767,7 +754,7 @@ class Request(object):
             )
         return self.body.params
     body_params = property(_get_body_params,
-                      doc="""
+                      doc= """
     If the request Content-Type is 'application/x-www-form-urlencoded' or
     multipart, this will be a dict of the params pulled from the entity
     body; that is, it will be the portion of request.params that come
@@ -776,7 +763,8 @@ class Request(object):
     the 'before_request_body' and 'before_handler' hooks (assuming that
     process_request_body is True).
     
-    Deprecated in 3.2, will be removed for 3.3""")
+    Deprecated in 3.2, will be removed for 3.3 in favor of
+    :attr:`request.body.params<cherrypy._cprequest.RequestBody.params>`.""")
 
 
 class ResponseBody(object):
@@ -800,7 +788,9 @@ class ResponseBody(object):
             else:
                 # [''] doesn't evaluate to False, so replace it with [].
                 value = []
-        elif isinstance(value, types.FileType):
+        # Don't use isinstance here; io.IOBase which has an ABC takes
+        # 1000 times as long as, say, isinstance(value, str)
+        elif hasattr(value, 'read'):
             value = file_generator(value)
         elif value is None:
             value = []
@@ -808,53 +798,48 @@ class ResponseBody(object):
 
 
 class Response(object):
-    """An HTTP Response, including status, headers, and body.
+    """An HTTP Response, including status, headers, and body."""
     
-    Application developers should use Response.headers (a dict) to
-    set or modify HTTP response headers. When the response is finalized,
-    Response.headers is transformed into Response.header_list as
-    (key, value) tuples.
-    """
-    
-    __metaclass__ = cherrypy._AttributeDocstrings
-    
-    # Class attributes for dev-time introspection.
     status = ""
-    status__doc = """The HTTP Status-Code and Reason-Phrase."""
+    """The HTTP Status-Code and Reason-Phrase."""
     
     header_list = []
-    header_list__doc = """
+    """
     A list of the HTTP response headers as (name, value) tuples.
-    In general, you should use response.headers (a dict) instead."""
+    In general, you should use response.headers (a dict) instead. This
+    attribute is generated from response.headers and is not valid until
+    after the finalize phase."""
     
     headers = httputil.HeaderMap()
-    headers__doc = """
+    """
     A dict-like object containing the response headers. Keys are header
     names (in Title-Case format); however, you may get and set them in
     a case-insensitive manner. That is, headers['Content-Type'] and
     headers['content-type'] refer to the same value. Values are header
-    values (decoded according to RFC 2047 if necessary). See also:
-    httputil.HeaderMap, httputil.HeaderElement."""
+    values (decoded according to :rfc:`2047` if necessary).
+    
+    .. seealso:: classes :class:`HeaderMap`, :class:`HeaderElement`
+    """
     
     cookie = SimpleCookie()
-    cookie__doc = """See help(Cookie)."""
+    """See help(Cookie)."""
     
     body = ResponseBody()
-    body__doc = """The body (entity) of the HTTP response."""
+    """The body (entity) of the HTTP response."""
     
     time = None
-    time__doc = """The value of time.time() when created. Use in HTTP dates."""
+    """The value of time.time() when created. Use in HTTP dates."""
     
     timeout = 300
-    timeout__doc = """Seconds after which the response will be aborted."""
+    """Seconds after which the response will be aborted."""
     
     timed_out = False
-    timed_out__doc = """
+    """
     Flag to indicate the response should be aborted, because it has
     exceeded its timeout."""
     
     stream = False
-    stream__doc = """If False, buffer the response body."""
+    """If False, buffer the response body."""
     
     def __init__(self):
         self.status = None
@@ -876,8 +861,9 @@ class Response(object):
         """Collapse self.body to a single string; replace it and return it."""
         if isinstance(self.body, basestring):
             return self.body
-
+        
         newbody = ''.join([chunk for chunk in self.body])
+        
         self.body = newbody
         return newbody
     
@@ -885,12 +871,12 @@ class Response(object):
         """Transform headers (and cookies) into self.header_list. (Core)"""
         try:
             code, reason, _ = httputil.valid_status(self.status)
-        except ValueError, x:
-            raise cherrypy.HTTPError(500, x.args[0])
+        except ValueError:
+            raise cherrypy.HTTPError(500, sys.exc_info()[1].args[0])
         
         headers = self.headers
         
-        self.output_status = str(code) + " " + headers.encode(reason)
+        self.output_status = ntob(str(code), 'ascii') + ntob(" ") + headers.encode(reason)
         
         if self.stream:
             # The upshot: wsgiserver will chunk the response if
@@ -903,7 +889,7 @@ class Response(object):
             # and 304 (not modified) responses MUST NOT
             # include a message-body."
             dict.pop(headers, 'Content-Length', None)
-            self.body = ""
+            self.body = ntob("")
         else:
             # Responses which are not streamed should have a Content-Length,
             # but allow user code to set Content-Length if desired.
@@ -921,9 +907,9 @@ class Response(object):
                     # Python 2.4 emits cookies joined by LF but 2.5+ by CRLF.
                     line = line[:-1]
                 name, value = line.split(": ", 1)
-                if isinstance(name, unicode):
+                if isinstance(name, unicodestr):
                     name = name.encode("ISO-8859-1")
-                if isinstance(value, unicode):
+                if isinstance(value, unicodestr):
                     value = headers.encode(value)
                 h.append((name, value))
     
