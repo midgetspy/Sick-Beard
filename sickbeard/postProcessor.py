@@ -38,6 +38,7 @@ from sickbeard import show_name_helpers
 from sickbeard import scene_exceptions
 
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
@@ -105,9 +106,6 @@ class PostProcessor(object):
             return PostProcessor.DOESNT_EXIST
 
     def _list_associated_files(self, file_path):
-        
-        self._log(u"Looking for associated files in the path: "+str(file_path), logger.DEBUG)
-            
         if not file_path:
             return []
 
@@ -115,7 +113,6 @@ class PostProcessor(object):
     
         base_name = file_path.rpartition('.')[0]+'.'
         
-        # FIME: the escaping dosent work at all
         # don't confuse glob with chars we didn't mean to use
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
     
@@ -125,8 +122,6 @@ class PostProcessor(object):
                 continue
 
             file_path_list.append(associated_file_path)
-            
-        self._log(u"Found associated files: "+str(file_path_list), logger.DEBUG)
         
         return file_path_list
 
@@ -175,18 +170,19 @@ class PostProcessor(object):
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
+            # get the extension
+            cur_extension = cur_file_path.rpartition('.')[-1]
+        
+            # replace .nfo with .nfo-orig to avoid conflicts
+            if cur_extension == 'nfo':
+                cur_extension = 'nfo-orig'
+
             # If new base name then convert name
             if new_base_name:
-                # get the extension
-                cur_extension = cur_file_path.rpartition('.')[-1]
-            
-                # replace .nfo with .nfo-orig to avoid conflicts
-                if cur_extension == 'nfo':
-                    cur_extension = 'nfo-orig'
-                    
                 new_file_name = new_base_name +'.' + cur_extension
+            # if we're not renaming we still want to change extensions sometimes
             else:
-                new_file_name = cur_file_name
+                new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
             
             new_file_path = ek.ek(os.path.join, new_path, new_file_name)
 
@@ -207,7 +203,7 @@ class PostProcessor(object):
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+e.message.decode('utf-8'), logger.ERROR)
+                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
                 raise e
                 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
@@ -227,7 +223,7 @@ class PostProcessor(object):
                 helpers.copyFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+e.message.decode('utf-8'), logger.ERROR)
+                logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
                 raise e
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
@@ -453,7 +449,8 @@ class PostProcessor(object):
                 logger.log(u"Unable to parse, skipping: "+e.message.decode(sickbeard.SYS_ENCODING), logger.DEBUG)
                 continue
             
-            if cur_tvdb_id:
+            # if we already did a successful history lookup then keep that tvdb_id value
+            if cur_tvdb_id and not (self.in_history and tvdb_id):
                 tvdb_id = cur_tvdb_id
             if cur_season:
                 season = cur_season
@@ -495,7 +492,7 @@ class PostProcessor(object):
                     episodes = []
 
                     continue
-               
+              
             # if there's no season then we can hopefully just use 1 automatically
             elif season == None and tvdb_id:
                 myDB = db.DBConnection()
@@ -540,7 +537,7 @@ class PostProcessor(object):
         root_ep = None
         for cur_episode in episodes:
             episode = int(cur_episode)
-            
+            #FIXME: at this moint we should have the real episode and season allready
             if show_obj.is_anime:
                 self._log(u"Retrieving episode object for absolute number " + str(episode), logger.DEBUG)
             else:
@@ -553,7 +550,7 @@ class PostProcessor(object):
                 else:
                     curEp = show_obj.getEpisode(season, episode)
             except exceptions.EpisodeNotFoundException, e:
-                self._log(u"Unable to create episode: "+e.message.decode('utf-8'), logger.DEBUG)
+                self._log(u"Unable to create episode: "+ex(e), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()
     
             if root_ep == None:
@@ -608,7 +605,7 @@ class PostProcessor(object):
                 out, err = p.communicate() #@UnusedVariable
                 self._log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
-                self._log(u"Unable to run extra_script: "+e.message.decode('utf-8'))
+                self._log(u"Unable to run extra_script: "+ex(e))
     
     def _is_priority(self, ep_obj, new_ep_quality):
         
@@ -687,7 +684,7 @@ class PostProcessor(object):
             try:
                 self._delete(cur_ep.location, associated_files=True)
             except OSError, IOError:
-                raise exceptions.PostProcessingFailed(u"Unable to delete the existing files")
+                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
         try:

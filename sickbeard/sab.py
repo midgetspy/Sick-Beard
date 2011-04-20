@@ -28,6 +28,7 @@ import urllib2, cookielib
 
 from sickbeard.common import USER_AGENT
 from sickbeard import logger
+from sickbeard.exceptions import ex
 
 def sendNZB(nzb):
 
@@ -92,7 +93,7 @@ def sendNZB(nzb):
         return False
 
     except httplib.InvalidURL, e:
-        logger.log(u"Invalid SAB host, check your config: "+e.message.decode('utf-8'), logger.ERROR)
+        logger.log(u"Invalid SAB host, check your config: "+ex(e), logger.ERROR)
         return False
 
     if f == None:

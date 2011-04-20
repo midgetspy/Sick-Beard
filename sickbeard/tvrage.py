@@ -29,6 +29,7 @@ from sickbeard.common import UNAIRED
 
 from sickbeard import db
 from sickbeard import exceptions, helpers
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -137,7 +138,7 @@ class TVRage:
 
                 # if we couldn't compare with TVDB try comparing it with the local database
                 except tvdb_exceptions.tvdb_exception, e:
-                    logger.log(u"Unable to check TVRage info against TVDB: "+e.message.decode('utf-8'))
+                    logger.log(u"Unable to check TVRage info against TVDB: "+ex(e))
 
                     logger.log(u"Trying against DB instead", logger.DEBUG)
 
@@ -198,7 +199,7 @@ class TVRage:
                 airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
 
             except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Unable to check TVRage info against TVDB: "+e.message.decode('utf-8'))
+                logger.log(u"Unable to check TVRage info against TVDB: "+ex(e))
 
                 logger.log(u"Trying against DB instead", logger.DEBUG)
 

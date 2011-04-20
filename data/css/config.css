@@ -12,6 +12,7 @@
 #config-content{display:block;width:835px;text-align:left;clear:both;background:#fff;margin:0 auto;padding:0 0 40px;}
 #config-components{float:left;width:auto;}
 #config-components-border{float:left;width:auto;border-top:1px solid #999;padding:5px 0;}
+#config .title-group{border-bottom:1px dotted #666;position:relative;padding:25px 15px 25px;}
 #config .component-group{border-bottom:1px dotted #666;position:relative;padding:15px 15px 25px;}
 #config .component-group-desc{float:left;width:235px;}
 #config .component-group-desc h3{font-size:1.5em;}
@@ -58,3 +59,10 @@
 .infoTableHeader{font-weight:700;}
 
 #config div.testNotification {border: 1px dotted #CCCCCC; padding: 5px; margin-bottom: 10px; line-height:20px;}
+
+.config_message {
+    width: 100%;
+    text-align: center;
+    font-size: 1.3em;
+    background: #ffecac;
+}

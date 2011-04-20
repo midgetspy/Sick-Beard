@@ -28,6 +28,7 @@ from sickbeard.common import Quality
 
 from sickbeard import helpers, exceptions, show_name_helpers
 from sickbeard import name_cache
+from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
@@ -114,7 +115,7 @@ class TVCache():
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+e.message.decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
             return []
 

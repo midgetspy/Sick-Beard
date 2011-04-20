@@ -42,6 +42,7 @@ from sickbeard import image_cache
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api
 
@@ -501,7 +502,7 @@ class Manage:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
                     updates.append(showObj.name)
                 except exceptions.CantUpdateException, e:
-                    errors.append("Unable to update show "+showObj.name+": "+e.message.decode('utf-8'))
+                    errors.append("Unable to update show "+showObj.name+": "+ex(e))
 
             # don't bother refreshing shows that were updated anyway
             if curShowID in toRefresh and curShowID not in toUpdate:
@@ -509,7 +510,7 @@ class Manage:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                     refreshes.append(showObj.name)
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh show "+showObj.name+": "+e.message.decode('utf-8'))
+                    errors.append("Unable to refresh show "+showObj.name+": "+ex(e))
 
             if curShowID in toRename:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj) #@UndefinedVariable
@@ -1052,12 +1053,12 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, tvbinz_uid=None, tvbinz_hash=None, nzbs_org_uid=None,
-                      nzbs_org_hash=None, nzbmatrix_username=None, nzbmatrix_apikey=None,
-                      tvbinz_auth=None, provider_order=None,
+    def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
+                      nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
-                      newzbin_username=None, newzbin_password=None):
+                      newzbin_username=None, newzbin_password=None,
+                      provider_order=None):
 
         results = []
 
@@ -1103,10 +1104,7 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'tvbinz':
-                if curEnabled or sickbeard.SHOW_TVBINZ:
-                    sickbeard.TVBINZ = curEnabled
-            elif curProvider == 'nzbs_org':
+            if curProvider == 'nzbs_org':
                 sickbeard.NZBS = curEnabled
             elif curProvider == 'nzbs_r_us':
                 sickbeard.NZBSRUS = curEnabled
@@ -1129,13 +1127,6 @@ class ConfigProviders:
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
-        if tvbinz_uid:
-            sickbeard.TVBINZ_UID = tvbinz_uid.strip()
-        if tvbinz_hash:
-            sickbeard.TVBINZ_HASH = tvbinz_hash.strip()
-        if tvbinz_auth:
-            sickbeard.TVBINZ_AUTH = tvbinz_auth.strip()
-            
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
@@ -1456,7 +1447,7 @@ class NewHomeAddShows:
         try:
             seriesXML = etree.ElementTree(etree.XML(urlData))
         except Exception, e:
-            logger.log(u"Unable to parse XML for some reason: "+e.message.decode('utf-8')+" from XML: "+urlData, logger.ERROR)
+            logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+urlData, logger.ERROR)
             return ''
 
         series = seriesXML.getiterator('Series')
@@ -1863,9 +1854,9 @@ class Home:
             pw_append = " with password: " + password
 
         if result:
-            return "Test growl sent successfully to "+urllib.unquote_plus(host)+pw_append
+            return "Registered and Tested growl successfully "+urllib.unquote_plus(host)+pw_append
         else:
-            return "Test growl failed to "+urllib.unquote_plus(host)+pw_append
+            return "Registration and Testing of growl failed "+urllib.unquote_plus(host)+pw_append
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):
@@ -2175,7 +2166,7 @@ class Home:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh this show: "+e.message.decode('utf-8'))
+                    errors.append("Unable to refresh this show: "+ex(e))
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
@@ -2196,7 +2187,7 @@ class Home:
                         try:
                             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                         except exceptions.CantRefreshException, e:
-                            errors.append("Unable to refresh this show:"+e.message.decode('utf-8'))
+                            errors.append("Unable to refresh this show:"+ex(e))
                         # grab updated info from TVDB
                         #showObj.loadEpisodesFromTVDB()
                         # rescan the episodes in the new folder

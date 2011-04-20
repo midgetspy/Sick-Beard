@@ -27,6 +27,7 @@ import threading
 import sickbeard
 
 from sickbeard import logger
+from sickbeard.exceptions import ex
 
 db_lock = threading.Lock()
 
@@ -61,11 +62,11 @@ class DBConnection:
                     break
                 except sqlite3.OperationalError, e:
                     if "unable to open database file" in e.message or "database is locked" in e.message:
-                        logger.log(u"DB error: "+e.message.decode('utf-8'), logger.WARNING)
+                        logger.log(u"DB error: "+ex(e), logger.WARNING)
                         attempt += 1
                         time.sleep(1)
                     else:
-                        logger.log(u"DB error: "+e.message.decode('utf-8'), logger.ERROR)
+                        logger.log(u"DB error: "+ex(e), logger.ERROR)
                         raise
                 except sqlite3.DatabaseError, e:
                     logger.log(u"Fatal error executing query: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)

@@ -17,7 +17,7 @@
 
 var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+#\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
 #end for
 });
 //-->
@@ -44,9 +44,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                     <fieldset class="component-group-list">
                         <ul id="provider_order_list">
                         #for $curProvider in $sickbeard.providers.sortedProviderList():
-                            #if $curProvider.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
-                                #continue
-                            #end if
                             #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                 #continue
                             #elif $curProvider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
@@ -80,11 +77,8 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvbinz", "tvtorrents"):
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
-                                        #if $cur_provider_obj.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
-                                            #continue
-                                        #end if
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
                                         #elif $cur_provider_obj.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
@@ -108,29 +102,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 
 <!-- start div for editing providers //-->
-#if $sickbeard.SHOW_TVBINZ:
-<div class="providerDiv" id="tvbinzDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">TVBinz Cookie UID</span>
-                                <input class="component-desc" type="text" name="tvbinz_uid" value="$sickbeard.TVBINZ_UID" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">TVBinz Hash</span>
-                                <input class="component-desc" type="text" name="tvbinz_hash" value="$sickbeard.TVBINZ_HASH" size="40" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">TVBinz Auth String</span>
-                                <input class="component-desc" type="text" name="tvbinz_auth" value="$sickbeard.TVBINZ_AUTH" size="40" />
-                            </label>
-                        </div>
-</div>
-#end if
-
 <div class="providerDiv" id="nzbs_orgDiv">
                         <div class="field-pair">
                             <label class="clearfix">

@@ -21,9 +21,9 @@ import urllib2
 
 import sickbeard
 
-#from sickbeard.common import *
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -97,7 +97,7 @@ def getShowImage(url, imgNum=None):
         logger.log(u"There was an error trying to retrieve the image, aborting", logger.ERROR)
         return None
     except urllib2.HTTPError, e:
-        logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+e.message.decode('utf-8'), logger.ERROR)
+        logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+ex(e), logger.ERROR)
         return None
 
     return image_data
