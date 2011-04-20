@@ -248,6 +248,8 @@ NMJ_DATABASE = None
 NMJ_MOUNT = None
 
 ANIMESUPPORT = False
+ANIDB_USERNAME = None
+ANIDB_PASSWORD = None
 
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
@@ -374,7 +376,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD,FANZUB, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, ANIMESUPPORT, IGNORE_WORDS
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, ANIMESUPPORT, ANIDB_USERNAME, ANIDB_PASSWORD, IGNORE_WORDS
 
         if __INITIALIZED__:
             return False
@@ -604,6 +606,9 @@ def initialize(consoleLogging=True):
         metadata_provider_dict = metadata.get_metadata_generator_dict()
         
         ANIMESUPPORT = False
+        
+        ANIDB_USERNAME = check_setting_str(CFG, 'ANIDB', 'anidb_username', '')
+        ANIDB_PASSWORD = check_setting_str(CFG, 'ANIDB', 'anidb_password', '')
         
         # if this exists it's legacy, use the info to upgrade metadata to the new settings
         if METADATA_TYPE:
@@ -1098,6 +1103,10 @@ def save_config():
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+
+    new_config['ANIDB'] = {}
+    new_config['ANIDB']['anidb_username'] = ANIDB_USERNAME
+    new_config['ANIDB']['anidb_password'] = ANIDB_PASSWORD
 
     new_config['GUI'] = {}
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT

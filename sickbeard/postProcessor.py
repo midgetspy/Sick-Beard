@@ -421,13 +421,14 @@ class PostProcessor(object):
         return to_return
     
     def _analyze_anidb(self,filePath):
-                
+        if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
+            return (None, None, None)
                 
         anidb = AniDBInterface()
-        anidb.auth('<user>', '<user_pw>')
+        anidb.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
         ep = aniDBEpisode(anidb,filePath=filePath,
              paramsF=["quality","anidb_file_name","crc32"],
-             paramsA=["epno","english_name","other_name"])
+             paramsA=["epno","english_name","short_name_list"])
         try:
             self._log(u"Trying to lookup "+str(filePath)+" on anidb", logger.DEBUG)
             ep.load_data()
@@ -435,9 +436,36 @@ class PostProcessor(object):
             self._log(u"exception msg: "+str(e))
             raise InvalidNameException
         
+        names = ep.short_name_list
+        if ep.english_name:
+            names.append(ep.english_name)
+            
+            
+        self._log(u"names "+str(names) , logger.DEBUG)
+            
+        for name in names:
+            try:
+                name = name.encode('utf-8')
+            except:
+                continue
+            else:
+                tvdb_id = helpers.get_tvdbid(name,True)
+        if tvdb_id:
+            try:
+                show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                (season, episodes) = helpers.get_all_episodes_from_absolute_number(show, None, [ep.epno])
+            except exceptions.EpisodeNotFoundByAbsoluteNumerException:
+                logger.log(str(tvdb_id) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, skipping this episode")
+            else:
+                if len(episodes):
+                    anidb.logout()
+                    return (tvdb_id, season, episodes)
+
         if ep.anidb_file_name:
             self._log(u"Lookup successful, using anidb filename "+str(ep.anidb_file_name), logger.DEBUG)
+            anidb.logout()
             return self._analyze_name(ep.anidb_file_name)
+        anidb.logout()
         raise InvalidNameException
         
     

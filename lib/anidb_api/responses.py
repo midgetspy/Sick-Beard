@@ -340,18 +340,12 @@ class FileResponse(Response):
 		
 		codeListF = self.maper.getFileCodesF(fmask)
 		codeListA = self.maper.getFileCodesA(amask)
-		print "File - codelistF: "+str(codeListF)
-		print "File - codelistA: "+str(codeListA)
+		#print "File - codelistF: "+str(codeListF)
+		#print "File - codelistA: "+str(codeListA)
 		
 		
 		self.codetail=tuple(['fid']+codeListF+codeListA)
-		""" the old code
-		fmask=int(fmask==None and 2+4+8+256+512+1024+1073741824 or fmask,16)
-		amask=int(amask!=None and amask or 0,16)
-		cmd_codes=fmask|(amask*(2**32))
 
-		self.codetail=tuple(['fid']+[self.all_codes[i] for i in range(64) if cmd_codes&(2**i) and self.all_codes[i]!=''])
-		"""
 class MylistResponse(Response):
 	def __init__(self,cmd,restag,rescode,resstr,datalines):
 		"""
