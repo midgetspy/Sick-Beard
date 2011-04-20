@@ -23,6 +23,7 @@ import time
 import urllib
 
 import xml.etree.cElementTree as etree
+from datetime import datetime, timedelta
 
 import sickbeard
 import generic
@@ -73,6 +74,8 @@ class NewzbinProvider(generic.NZBProvider):
         self.url = 'https://www.newzbin.com/'
 
         self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
+
+        self.NEWZBIN_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
 
     def _report(self, name):
         return '{'+self.NEWZBIN_NS+'}'+name
@@ -281,6 +284,15 @@ class NewzbinProvider(generic.NZBProvider):
             title = cur_item.findtext('title')
             if title == 'Feed Error':
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
+            if sickbeard.USENET_RETENTION is not None:
+                try:
+                    post_date = datetime.strptime(cur_item.findtext('{http://www.newzbin.com/DTD/2007/feeds/report/}postdate'), self.NEWZBIN_DATE_FORMAT)
+                    retention_date = datetime.now() - timedelta(days=sickbeard.USENET_RETENTION)
+                    if post_date < retention_date:
+                        continue
+                except Exception, e:
+                    logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
+                    continue
 
             item_list.append(cur_item)
 
