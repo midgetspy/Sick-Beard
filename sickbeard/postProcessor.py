@@ -169,18 +169,19 @@ class PostProcessor(object):
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
+            # get the extension
+            cur_extension = cur_file_path.rpartition('.')[-1]
+        
+            # replace .nfo with .nfo-orig to avoid conflicts
+            if cur_extension == 'nfo':
+                cur_extension = 'nfo-orig'
+
             # If new base name then convert name
             if new_base_name:
-                # get the extension
-                cur_extension = cur_file_path.rpartition('.')[-1]
-            
-                # replace .nfo with .nfo-orig to avoid conflicts
-                if cur_extension == 'nfo':
-                    cur_extension = 'nfo-orig'
-                    
                 new_file_name = new_base_name +'.' + cur_extension
+            # if we're not renaming we still want to change extensions sometimes
             else:
-                new_file_name = cur_file_name
+                new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
             
             new_file_path = ek.ek(os.path.join, new_path, new_file_name)
 
