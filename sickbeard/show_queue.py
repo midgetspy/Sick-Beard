@@ -88,7 +88,7 @@ class ShowQueue(generic_queue.GenericQueue):
         else:
             queueItemObj = QueueItemForceUpdate(show)
 
-        self.queue.append(queueItemObj)
+        self.add_item(queueItemObj)
 
         return queueItemObj
 
@@ -103,7 +103,7 @@ class ShowQueue(generic_queue.GenericQueue):
 
         queueItemObj = QueueItemRefresh(show)
         
-        self.queue.append(queueItemObj)
+        self.add_item(queueItemObj)
 
         return queueItemObj
 
@@ -111,13 +111,14 @@ class ShowQueue(generic_queue.GenericQueue):
 
         queueItemObj = QueueItemRename(show)
 
-        self.queue.append(queueItemObj)
+        self.add_item(queueItemObj)
 
         return queueItemObj
 
     def addShow(self, tvdb_id, showDir, default_status=None, quality=None, season_folders=None, lang="en"):
         queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, season_folders, lang)
-        generic_queue.GenericQueue.add_item(self, queueItemObj)
+        
+        self.add_item(queueItemObj)
 
         return queueItemObj
 
