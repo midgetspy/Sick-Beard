@@ -17,7 +17,7 @@
 
 var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-#\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
 #end for
 });
 //-->
