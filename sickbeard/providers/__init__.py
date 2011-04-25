@@ -70,6 +70,11 @@ def getNewznabProviderList(data):
             providerDict[curDefault.name].default = True
             providerDict[curDefault.name].name = curDefault.name
             providerDict[curDefault.name].url = curDefault.url
+        
+        # a 0 in the key spot indicates that no key is needed, so set this on the object
+        if curDefault.key == '0':
+            providerDict[curDefault.name].key = ''
+            providerDict[curDefault.name].needs_auth = False
 
     return filter(lambda x: x, providerList)
 
