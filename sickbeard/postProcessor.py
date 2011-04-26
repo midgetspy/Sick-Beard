@@ -424,7 +424,7 @@ class PostProcessor(object):
             try:
                 (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
             except InvalidNameException, e:
-                logger.log(u"Unable to parse, skipping: "+e.message.decode(sickbeard.SYS_ENCODING), logger.DEBUG)
+                logger.log(u"Unable to parse, skipping: "+ex(e), logger.DEBUG)
                 continue
             
             # if we already did a successful history lookup then keep that tvdb_id value

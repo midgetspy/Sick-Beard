@@ -226,7 +226,7 @@ class QueueItemAdd(ShowQueueItem):
                     self._finishEarly()
                     return
             except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Error contacting TVDB: "+e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+                logger.log(u"Error contacting TVDB: "+ex(e), logger.ERROR)
                 ui.notifications.error("Unable to add show", "Unable to look up the show in "+self.showDir+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
                 self._finishEarly()
                 return
@@ -276,7 +276,7 @@ class QueueItemAdd(ShowQueueItem):
         try:
             self.show.loadEpisodesFromDir()
         except Exception, e:
-            logger.log(u"Error searching dir for episodes: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log(u"Error searching dir for episodes: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         try:
@@ -287,13 +287,13 @@ class QueueItemAdd(ShowQueueItem):
             self.show.populateCache()
             
         except Exception, e:
-            logger.log(u"Error with TVDB, not creating episode list: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log(u"Error with TVDB, not creating episode list: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         try:
             self.show.saveToDB()
         except Exception, e:
-            logger.log(u"Error saving the episode to the database: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log(u"Error saving the episode to the database: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         # if they gave a custom status then change all the eps to it
@@ -366,7 +366,7 @@ class QueueItemUpdate(ShowQueueItem):
         try:
             self.show.loadFromTVDB(cache=not self.force)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to contact TVDB, aborting: "+e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+            logger.log(u"Unable to contact TVDB, aborting: "+ex(e), logger.WARNING)
             return
 
         # get episode list from DB

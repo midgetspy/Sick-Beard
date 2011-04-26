@@ -23,6 +23,7 @@ import sickbeard
 from sickbeard import logger
 from sickbeard import exceptions
 from sickbeard import ui
+from sickbeard.exceptions import ex
 
 class ShowUpdater():
 
@@ -60,6 +61,6 @@ class ShowUpdater():
                 piList.append(curQueueItem)
 
             except (exceptions.CantUpdateException, exceptions.CantRefreshException), e:
-                logger.log(u"Automatic update failed: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+                logger.log(u"Automatic update failed: " + ex(e), logger.ERROR)
 
         ui.ProgressIndicators.setIndicator('dailyUpdate', ui.QueueProgressIndicator("Daily Update", piList))

@@ -347,7 +347,7 @@ class TVShow(object):
 
             # make an episode out of it
         except exceptions.TVRageException, e:
-            logger.log(u"Unable to add TVRage info: " + e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+            logger.log(u"Unable to add TVRage info: " + ex(e), logger.WARNING)
 
 
 
@@ -396,7 +396,7 @@ class TVShow(object):
                 logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
                 return None
             except tvdb_exceptions.tvdb_error, e:
-                logger.log(u"Unable to contact TVDB: "+e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return None
 
         for curEpNum in episodes:
@@ -601,14 +601,14 @@ class TVShow(object):
                 raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
         except (exceptions.NoNFOException, SyntaxError, ValueError), e:
-            logger.log(u"There was an error parsing your existing tvshow.nfo file: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log(u"There was an error parsing your existing tvshow.nfo file: " + ex(e), logger.ERROR)
             logger.log(u"Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 
             try:
                 xmlFileObj.close()
                 ek.ek(os.rename, xmlFile, xmlFile + ".old")
             except Exception, e:
-                logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+                logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + ex(e), logger.ERROR)
             raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
         if showXML.findtext('studio') != None:
@@ -1203,11 +1203,11 @@ class TVEpisode(object):
                 try:
                     showXML = etree.ElementTree(file = nfoFile)
                 except (SyntaxError, ValueError), e:
-                    logger.log(u"Error loading the NFO, backing up the NFO and skipping for now: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR) #TODO: figure out what's wrong and fix it
+                    logger.log(u"Error loading the NFO, backing up the NFO and skipping for now: " + ex(e), logger.ERROR) #TODO: figure out what's wrong and fix it
                     try:
                         ek.ek(os.rename, nfoFile, nfoFile + ".old")
                     except Exception, e:
-                        logger.log(u"Failed to rename your episode's NFO file - you need to delete it or fix it: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+                        logger.log(u"Failed to rename your episode's NFO file - you need to delete it or fix it: " + ex(e), logger.ERROR)
                     raise exceptions.NoNFOException("Error in NFO format")
 
                 for epDetails in showXML.getiterator('episodedetails'):

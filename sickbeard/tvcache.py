@@ -295,7 +295,7 @@ class TVCache():
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                 return False
             except tvdb_exceptions.tvdb_error, e:
-                logger.log(u"Unable to contact TVDB: "+e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return False
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
