@@ -31,6 +31,7 @@ import sickbeard.encodingKludge as ek
 from sickbeard import classes, logger, helpers, exceptions, show_name_helpers
 from sickbeard import tvcache
 from sickbeard.common import Quality
+from sickbeard.exceptions import ex
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -218,7 +219,7 @@ class NewzbinProvider(generic.NZBProvider):
             logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
             self.downloadResult(nzb)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return False
 
         return True
@@ -229,7 +230,7 @@ class NewzbinProvider(generic.NZBProvider):
         try:
             f = myOpener.openit(url)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
 
         data = f.read()
@@ -274,7 +275,7 @@ class NewzbinProvider(generic.NZBProvider):
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log("Error trying to load Newzbin RSS feed: "+e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
             return []
 
         for cur_item in items:
