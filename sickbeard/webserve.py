@@ -2201,7 +2201,7 @@ class Home:
             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
         except exceptions.CantRefreshException, e:
             ui.notifications.error("Unable to refresh this show.",
-                        e.message.decode(sickbeard.SYS_ENCODING))
+                        ex(e))
 
         time.sleep(3)
 
@@ -2223,7 +2223,7 @@ class Home:
             sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force)) #@UndefinedVariable
         except exceptions.CantUpdateException, e:
             ui.notifications.error("Unable to update this show.",
-                        e.message.decode(sickbeard.SYS_ENCODING))
+                        ex(e))
 
         # just give it some time
         time.sleep(3)

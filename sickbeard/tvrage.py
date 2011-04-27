@@ -160,7 +160,7 @@ class TVRage:
                 logger.log(u"Date from TVRage for episode " + str(curSeason) + "x1: " + str(curEpInfo['airdate']), logger.DEBUG)
 
         except Exception, e:
-            logger.log(u"Error encountered while checking TVRage<->TVDB sync: " + e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+            logger.log(u"Error encountered while checking TVRage<->TVDB sync: " + ex(e), logger.WARNING)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         return False
@@ -218,7 +218,7 @@ class TVRage:
                 return True
 
         except Exception, e:
-            logger.log(u"Error encountered while checking TVRage<->TVDB sync: " + e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+            logger.log(u"Error encountered while checking TVRage<->TVDB sync: " + ex(e), logger.WARNING)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         return False
@@ -251,7 +251,7 @@ class TVRage:
         try:
             result = helpers.getURL(url).decode('utf-8')
         except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Unable to load TVRage info: " + e.message.decode(sickbeard.SYS_ENCODING))
+            logger.log(u"Unable to load TVRage info: " + ex(e))
             raise exceptions.TVRageException("urlopen call to " + url + " failed")
 
         urlData = result.splitlines()
@@ -336,6 +336,6 @@ class TVRage:
         try:
             ep = self.show.getEpisode(self.nextEpInfo['season'], self.nextEpInfo['episode'])
         except exceptions.SickBeardException, e:
-            logger.log(u"Unable to create episode from tvrage (could be for a variety of reasons): " + e.message.decode(sickbeard.SYS_ENCODING))
+            logger.log(u"Unable to create episode from tvrage (could be for a variety of reasons): " + ex(e))
 
         return ep

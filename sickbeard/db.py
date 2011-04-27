@@ -69,7 +69,7 @@ class DBConnection:
                         logger.log(u"DB error: "+ex(e), logger.ERROR)
                         raise
                 except sqlite3.DatabaseError, e:
-                    logger.log(u"Fatal error executing query: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+                    logger.log(u"Fatal error executing query: " + ex(e), logger.ERROR)
                     raise
     
             return sqlResult
@@ -136,7 +136,7 @@ def _processUpgrade(connection, upgradeClass):
         try:
             instance.execute()
         except sqlite3.DatabaseError, e:
-            print "Error in " + str(upgradeClass.__name__) + ": " + e.message.decode(sickbeard.SYS_ENCODING)
+            print "Error in " + str(upgradeClass.__name__) + ": " + ex(e)
             raise
         logger.log(upgradeClass.__name__ + " upgrade completed", logger.DEBUG)
     else:

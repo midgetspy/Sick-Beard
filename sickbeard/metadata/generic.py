@@ -633,7 +633,7 @@ class GenericMetadata():
                 return empty_return
     
         except (exceptions.NoNFOException, SyntaxError, ValueError), e:
-            logger.log(u"There was an error parsing your existing metadata file: " + e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+            logger.log(u"There was an error parsing your existing metadata file: " + ex(e), logger.WARNING)
             return empty_return
     
         return (tvdb_id, name)

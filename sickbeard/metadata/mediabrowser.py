@@ -28,6 +28,7 @@ from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
+from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
@@ -281,7 +282,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log("Unable to connect to TVDB while creating meta files - skipping - "+e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log("Unable to connect to TVDB while creating meta files - skipping - "+ex(e), logger.ERROR)
             return False
 
         rootNode = etree.Element("Item")

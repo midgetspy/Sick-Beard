@@ -32,6 +32,7 @@ from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -407,7 +408,7 @@ def rename_file(old_path, new_name):
     try:
         ek.ek(os.rename, old_path, new_path)
     except (OSError, IOError), e:
-        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + ex(e), logger.ERROR)
         return False
 
     return new_path

@@ -79,6 +79,7 @@ class SceneTests(unittest.TestCase):
     def test_filterBadReleases(self):
         
         self._test_filterBadReleases('Show.S02.German.Stuff-Grp', False)
+        self._test_filterBadReleases('Show.S02.Some.Stuff-Core2HD', False)
         self._test_filterBadReleases('Show.S02.Some.German.Stuff-Grp', False)
         self._test_filterBadReleases('German.Show.S02.Some.Stuff-Grp', True)
         self._test_filterBadReleases('Show.S02.This.Is.German', False)

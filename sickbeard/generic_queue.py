@@ -52,6 +52,8 @@ class GenericQueue(object):
     def add_item(self, item):
         item.added = datetime.datetime.now()
         self.queue.append(item)
+        
+        return item
 
     def run(self):
 

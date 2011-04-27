@@ -89,7 +89,7 @@ def sendNZB(nzb):
             f = opener.open(req)
 
     except (EOFError, IOError), e:
-        logger.log(u"Unable to connect to SAB: "+e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+        logger.log(u"Unable to connect to SAB: "+ex(e), logger.ERROR)
         return False
 
     except httplib.InvalidURL, e:
@@ -103,7 +103,7 @@ def sendNZB(nzb):
     try:
         result = f.readlines()
     except Exception, e:
-        logger.log(u"Error trying to get result from SAB, NZB not sent: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+        logger.log(u"Error trying to get result from SAB, NZB not sent: " + ex(e), logger.ERROR)
         return False
 
     if len(result) == 0:
