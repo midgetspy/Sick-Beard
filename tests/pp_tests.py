@@ -1,33 +1,91 @@
+# coding=UTF-8
 import random
 import unittest
+
+import test_lib as test
 
 import sys, os.path
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../lib'))
 
-class TestSequenceFunctions(unittest.TestCase):
+
+from sickbeard.postProcessor import PostProcessor
+import sickbeard
+from sickbeard.tv import TVEpisode,TVShow
+
+class PPInitTests(unittest.TestCase):
 
     def setUp(self):
-        self.seq = range(10)
+        self.pp = PostProcessor(test.FILEPATH)
+        
+    def test_init_file_name(self):
+        self.assertEqual(self.pp.file_name, test.FILENAME)
+ 
+    def test_init_folder_name(self):
+        self.assertEqual(self.pp.folder_name, test.SHOWNAME)
 
-    def test_shuffle(self):
-        # make sure the shuffled sequence does not lose any elements
-        random.shuffle(self.seq)
-        self.seq.sort()
-        self.assertEqual(self.seq, range(10))
+class PPPrivateTests(test.SickbeardTestDBCase):
 
-        # should raise an exception for an immutable sequence
-        self.assertRaises(TypeError, random.shuffle, (1,2,3))
 
-    def test_choice(self):
-        element = random.choice(self.seq)
-        self.assertTrue(element in self.seq)
+    def setUp(self):
+        super(PPPrivateTests, self).setUp()
+        
+        sickbeard.showList = [TVShow(0000),TVShow(0001)]
+        
+        self.pp = PostProcessor(test.FILEPATH)
+        self.show_obj = TVShow(0002)
+        
+        self.db = test.db.DBConnection()
+        newValueDict = {"tvdbid": 1002,
+                        "name": test.SHOWNAME,
+                        "description": "description",
+                        "airdate": 1234,
+                        "hasnfo": 1,
+                        "hastbn": 1,
+                        "status": 404,
+                        "location": test.FILEPATH}
+        controlValueDict = {"showid": 0002,
+                            "season": test.SEASON,
+                            "episode": test.EPISODE}
 
-    def test_sample(self):
-        with self.assertRaises(ValueError):
-            random.sample(self.seq, 20)
-        for element in random.sample(self.seq, 5):
-            self.assertTrue(element in self.seq)
+        # use a custom update/insert method to get the data into the DB
+        self.db.upsert("tv_episodes", newValueDict, controlValueDict)
+        
+        self.ep_obj = TVEpisode(self.show_obj, test.SEASON, test.EPISODE, test.FILEPATH)
+    
+    def test__find_ep_destination_folder(self):
+        self.show_obj.location = test.TESTDIR
+        self.ep_obj.show.seasonfolders = 1
+        sickbeard.SEASON_FOLDERS_FORMAT = 'Season %02d'
+        calculatedPath = self.pp._find_ep_destination_folder(self.ep_obj)
+        ecpectedPath = os.path.join(test.TESTDIR, "Season 0"+str(test.SEASON))
+        self.assertEqual(calculatedPath,ecpectedPath)
+
+
+class PPBasicTests(test.SickbeardTestDBCase):
+    def setUp(self):
+        super(PPBasicTests, self).setUp()
+        
+        sickbeard.showList = [TVShow(0000),TVShow(0001)]
+        
+        self.pp = PostProcessor(test.FILEPATH)
+        self.show_obj = TVShow(0002)
+    
+    @unittest.skip("this test is not fully configured")
+    def test_process(self):
+        self.assertTrue(self.pp.process())
+
 
 if __name__ == '__main__':
-    unittest.main()
+    print "=================="
+    print "STARTING - PostProcessor TESTS"
+    print "=================="
+    print "######################################################################"
+    suite = unittest.TestLoader().loadTestsFromTestCase(PPInitTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    print "######################################################################"
+    suite = unittest.TestLoader().loadTestsFromTestCase(PPPrivateTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    print "######################################################################"
+    suite = unittest.TestLoader().loadTestsFromTestCase(PPBasicTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
