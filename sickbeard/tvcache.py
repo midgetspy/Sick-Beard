@@ -48,7 +48,7 @@ class CacheDBConnection(db.DBConnection):
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
-            if e.message != "table "+providerName+" already exists":
+            if str(e) != "table "+providerName+" already exists":
                 raise
 
         # Create the table if it's not already there
@@ -57,7 +57,7 @@ class CacheDBConnection(db.DBConnection):
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
-            if e.message != "table lastUpdate already exists":
+            if str(e) != "table lastUpdate already exists":
                 raise
 
 class TVCache():
