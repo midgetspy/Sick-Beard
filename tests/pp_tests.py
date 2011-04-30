@@ -65,11 +65,7 @@ class PPPrivateTests(test.SickbeardTestDBCase):
 class PPBasicTests(test.SickbeardTestDBCase):
     def setUp(self):
         super(PPBasicTests, self).setUp()
-        
-        sickbeard.showList = [TVShow(0000),TVShow(0001)]
-        
         self.pp = PostProcessor(test.FILEPATH)
-        self.show_obj = TVShow(0002)
     
     @unittest.skip("this test is not fully configured")
     def test_process(self):
