@@ -328,6 +328,16 @@ def searchDBForShow(regShowName):
         # if we find exactly one show return its name and tvdb_id
         if len(sqlResults) == 1:
             return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+        else:
+           tvdbid = get_tvdbid(showName)
+       
+       
+        #TODO: this is bad taking the other function and doing a lookup in the db. REFACTORE! this whole thing
+        if tvdbid:
+            sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = ?", [tvdbid])
+            # if we find exactly one show return its name and tvdb_id
+            if len(sqlResults) == 1:
+                return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
         else:
             # if we didn't get exactly one result then try again with the year stripped off if possible
@@ -533,8 +543,8 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
         raise InvalidNameException("Unable to parse "+toParse)
     return parse_result
 
-def get_tvdbid(name, useTvdb):
-    logger.log(u"trying to get the tvdbid for "+str(name), logger.DEBUG)
+def get_tvdbid(name, useTvdb=False):
+    logger.log(u"Trying to get the tvdbid for "+str(name), logger.DEBUG)
             
     for show in sickbeard.showList:
         nameFromList = re.sub('[. -]', ' ', show.name).lower().lstrip()
