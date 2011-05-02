@@ -547,8 +547,27 @@ def get_tvdbid(name, useTvdb=False):
     logger.log(u"Trying to get the tvdbid for "+str(name), logger.DEBUG)
             
     for show in sickbeard.showList:
-        nameFromList = re.sub('[. -]', ' ', show.name).lower().lstrip()
-        nameInQuestion = re.sub('[. -]', ' ', name).lower().lstrip()
+        nameFromList = re.sub('[. -]', ' ', sanitizeSceneName(show.name)).lower().lstrip()
+        nameInQuestion = re.sub('[. -]', ' ', sanitizeSceneName(name)).lower().lstrip()
+        
+        #nameFromList = sanitizeSceneName(show.name)
+        #nameInQuestion = sanitizeSceneName(name)
+        
+        # FIXME: this is ok for most shows but will give fals positives on:
+        """nameFromList = "show name: special version"
+           nameInQuestion = "show name"
+           ->will match
+           
+           but the otherway around:
+           
+           nameFromList = "show name"
+           nameInQuestion = "show name: special version"
+           ->will not work
+           
+           athough the first example will only occur during pp
+           and the second example is good that it wont match
+           
+        """
         if nameFromList.find(nameInQuestion) == 0:
             logger.log(u"Matched "+str(name)+" in the showlist to the show "+str(show.name), logger.DEBUG)
             return show.tvdbid

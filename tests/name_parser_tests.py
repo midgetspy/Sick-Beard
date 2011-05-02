@@ -5,9 +5,11 @@ import sys, os.path
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../lib'))
 
+import sickbeard # we need to import this so we can override the SYS_ENCODING which is needed by the parser
 from sickbeard.name_parser import parser
 
 DEBUG = VERBOSE = False
+sickbeard.SYS_ENCODING = "UTF-8"
 
 simple_test_cases = {
               'standard': {
@@ -135,6 +137,9 @@ simple_test_cases = {
               'Bleach - s16e03-04 - 313-314': parser.ParseResult(None, 'Bleach', 16, [3,4], None, None, None, [313,314]),
               'Blue Submarine No. 6 s16e03e04 313-314': parser.ParseResult(None, 'Blue Submarine No. 6', 16, [3,4], None, None, None, [313,314]),
               'Bleach.s16e03-04.313-314': parser.ParseResult(None, 'Bleach', 16, [3,4], None, None, None, [313,314]),
+              '.hack roots s01e01 001.mkv': parser.ParseResult(None, 'hack roots', 1, [1], None, None, None, [1]),
+              '.hack sign s01e01 001.mkv': parser.ParseResult(None, 'hack sign', 1, [1], None, None, None, [1])
+              
               },
               
               'anime_and_normal_reverse':{
