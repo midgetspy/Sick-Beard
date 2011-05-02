@@ -180,12 +180,13 @@ anime_ep_regexes = [
                # [Group Name] Show Name - 13
                # Show Name 13
                '''
-               ^(\[(?P<release_group>.+)\][ ._-]*)?                         # Release Group and separator
+               ^(\[(?P<release_group>.+?)\][ ._-]*)?                        # Release Group and separator
                (?P<series_name>.+?)[ ._-]*                                  # Show_Name and separator
                (?P<ep_ab_num>\d{1,3})                                       # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
                (v(?P<version>[0-9]))?                                       # version
-               [ ._-]+\[(?P<extra_info>(\d{3,4}[xp]?\d{0,3})|XviD)[ ._-]?[\w\s]*\] # Source_Quality_Etc-
+               [ ._-]+\[(?P<extra_info>\d{3,4}[xp]?\d{0,4}[\.\w\s-]*)\]       # Source_Quality_Etc-
+               (\[(?P<crc>\w{8})\])?                                        # CRC
                .*?                                                          # Separator and EOL
                '''),
                ('anime_standard_round',
@@ -193,25 +194,27 @@ anime_ep_regexes = [
                # [Stratos-Subs]_Infinite_Stratos_-_12_(1280x720_H.264_AAC)_[379759DB]
                # [ShinBunBu-Subs] Bleach - 02-03 (CX 1280x720 x264 AAC)
                '''
-               ^(\[(?P<release_group>.+)\][ ._-]*)?                         # Release Group and separator
-               (?P<series_name>.+?)[ ._-]*                                  # Show_Name and separator
-               (?P<ep_ab_num>\d{1,3})                                       # E01
-               (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
-               (v(?P<version>[0-9]))?                                       # version
-               [ ._-]+\((CX[ ._-]?)*(?P<extra_info>\d{3,4}[xp]?\d{0,3})([ ._-]?[\w\s])*\) # Source_Quality_Etc-
-               .*?                                                          # Separator and EOL
+               ^(\[(?P<release_group>.+?)\][ ._-]*)?                                    # Release Group and separator
+               (?P<series_name>.+?)[ ._-]*                                              # Show_Name and separator
+               (?P<ep_ab_num>\d{1,3})                                                   # E01
+               (-(?P<extra_ab_ep_num>\d{1,3}))?                                         # E02
+               (v(?P<version>[0-9]))?                                                   # version
+               [ ._-]+\((?P<extra_info>(CX[ ._-]?)?\d{3,4}[xp]?\d{0,4}[\.\w\s-]*)\)     # Source_Quality_Etc-
+               (\[(?P<crc>\w{8})\])?                                                    # CRC
+               .*?                                                                      # Separator and EOL
                '''),
                
                ('anime_slash',
-               # TODO examples
+               # [SGKK] Bleach 312v1 [720p/MKV]
                '''
-               ^(\[(?P<release_group>.+)\][ ._-]*)? # Release Group and separator
-               (?P<series_name>.+?)[ ._-]*          # Show_Name and separator
-               (?P<ep_ab_num>\d{1,3})               # E01
-               (-(?P<extra_ab_ep_num>\d{1,3}))?     # E02
-               (v(?P<version>[0-9]))?               # version
-               [ ._-]+\[(?P<extra_info>\d{3,4}p)    # Source_Quality_Etc-
-               $                                    # Separator and EOL
+               ^(\[(?P<release_group>.+?)\][ ._-]*)? # Release Group and separator
+               (?P<series_name>.+?)[ ._-]*           # Show_Name and separator
+               (?P<ep_ab_num>\d{1,3})                # E01
+               (-(?P<extra_ab_ep_num>\d{1,3}))?      # E02
+               (v(?P<version>[0-9]))?                # version
+               [ ._-]+\[(?P<extra_info>\d{3,4}p)     # Source_Quality_Etc-
+               (\[(?P<crc>\w{8})\])?                 # CRC
+               .*?                                   # Separator and EOL
                '''),
                
                ('anime_standard_codec',
@@ -219,27 +222,15 @@ anime_ep_regexes = [
                # [Ayako] Infinite Stratos - IS - 07v2 [H264][720p][44419534]
                # [Ayako-Shikkaku] Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne - 10 [LQ][h264][720p] [8853B21C]
                '''
-               ^(\[(?P<release_group>.+)\][ ._-]*)?                         # Release Group and separator
+               ^(\[(?P<release_group>.+?)\][ ._-]*)?                        # Release Group and separator
                (?P<series_name>.+?)[ ._]*                                   # Show_Name and separator
                ([ ._-]+-[ ._-]+[A-Z]+[ ._-]+)?[ ._-]*                       # funny stuff, this is sooo nuts ! this will kick me in the butt one day
                (?P<ep_ab_num>\d{1,3})                                       # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
                (v(?P<version>[0-9]))?                                       # version
-               ([ ._-](\[\w{1,2}\])*\[[\w.]{3,5}\])?                        #codec
-               [ ._-]*\[(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
-               .*?                                                          # Separator and EOL
-               '''),
-               
-               ('anime_standard_codec2',
-               # [UTW]_Fractale_-_01_[h264-720p][96D3F1BF]
-               '''
-               ^(\[(?P<release_group>.+)\][ ._-]*)?                         # Release Group and separator
-               (?P<series_name>.+?)[ ._]*                                   # Show_Name and separator
-               ([ ._-]+-[ ._-]+[A-Z]+[ ._-]+)?[ ._-]*                       # funny stuff, this is sooo nuts ! this will kick me in the butt one day
-               (?P<ep_ab_num>\d{1,3})                                       # E01
-               (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
-               (v(?P<version>[0-9]))?                                       # version
-               [ ._-]*\[h264-(?P<extra_info>\d{3,4}[xp]?\d{0,3})[ ._-]?[\w\s]*\] # Source_Quality_Etc-
+               ([ ._-](\[\w{1,2}\])?\[\w[.]?\w{2,4}\])?                        #codec
+               [ ._-]*\[(?P<extra_info>(\d{3,4}[xp]?\d{0,4})?[\.\w\s-]*)\]    # Source_Quality_Etc-
+               (\[(?P<crc>\w{8})\])?
                .*?                                                          # Separator and EOL
                '''),
                
