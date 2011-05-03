@@ -27,7 +27,7 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard import classes
+from sickbeard import classes, show_name_helpers
 
 from sickbeard import exceptions, logger, db
 from sickbeard.common import *
@@ -54,29 +54,22 @@ class Fanzub(generic.NZBProvider):
 		return True
 
 	def _get_season_search_strings(self, show, season):
-		params = {
-				"q": show.name.encode('utf-8'),
-				"max": "50".encode('utf-8')
-				  }
-		return [params]
+		return show_name_helpers.makeSceneSeasonSearchString(show, season)
 
 	def _get_episode_search_strings(self, ep_obj):
-		params = {
-				"q":ep_obj.show.name+" "+str(ep_obj.absolute_number).encode('utf-8')
-				  }
-		return [params]
+		return show_name_helpers.makeSceneSearchString(ep_obj)
 
-	def _doSearch(self, search_params, show=None):
+	def _doSearch(self, search_string, show=None):
 		if show and not show.is_anime:
 			logger.log(u""+str(show.name)+" is not an anime skiping "+str(self.name))
-			return [];
-		
+			return []
+
 		params = {
-					"cat": "anime".encode('utf-8')
-				  }
-		
-		params.update(search_params)
-			
+			"cat": "anime",
+			"q": search_string.encode('utf-8'),
+			"max": "50"
+		}
+
 		searchURL = self.url + "rss?" + urllib.urlencode(params)
 
 		logger.log(u"Search string: " + searchURL, logger.DEBUG)
@@ -115,11 +108,11 @@ class Fanzub(generic.NZBProvider):
 	def findPropers(self, date=None):
 
 		results = []
-		
+
 		for i in [2,3]: # we will look for a version 2 or 3
 			params = {
 				"q":"v"+str(i).encode('utf-8')
-				  } 
+				  }
 
 			for curResult in self._doSearch(params):
 
@@ -149,7 +142,7 @@ class FanzubCache(tvcache.TVCache):
 		urlArgs = {"cat": "anime".encode('utf-8'),
 					"max": "100".encode('utf-8')
 					}
-		
+
 		url += urllib.urlencode(urlArgs)
 
 		logger.log(u"FANZUB cache update URL: "+ url, logger.DEBUG)
@@ -160,6 +153,6 @@ class FanzubCache(tvcache.TVCache):
 
 	def _checkItemAuth(self, title, url):
 		return True
-	
-	
+
+
 provider = Fanzub()
