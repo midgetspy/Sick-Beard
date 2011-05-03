@@ -1,5 +1,7 @@
 #import datetime
 #from sickbeard import history
+#from sickbeard import providers
+#from sickbeard.providers import generic
 #from sickbeard.common import *
 
 <feed xmlns="http://www.w3.org/2005/Atom">
@@ -7,22 +9,28 @@
     <id href="$sbRoot/history/"/>
     <link rel="alternate" href="$sbRoot/history/" type="text/html"/>
     <link rel="self" href="$sbRoot/history/feed/}" type="application/atom+xml"/>
-    <updated>#if $historyResults
+    <updated>#if $historyResults:
                 $datetime.datetime.strptime(str($historyResults[0]["date"]),$history.dateFormat)
              #else:
                  $datetime.datetime.now()
              #end if
     </updated>
 
-  	#if $historyResults
+  	#if $historyResults:
         #for $hItem in $historyResults:
-        #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
-        <entry>
-            <title>$statusStrings[$curStatus] - $hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></title>
-            <link href="$sbRoot/home/displayShow?show=$hItem['showid']#season-$hItem['season']" type="text/html" />
-            <id>$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></id>
-            <updated>$datetime.datetime.strptime(str($hItem["date"]),$history.dateFormat)</updated>
-        </entry>
+            #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
+            #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
+            <entry>
+                <title>$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></title>
+                <link href="$sbRoot/home/displayShow?show=$hItem['showid']#season-$hItem['season']" type="text/html" />
+                <id>$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></id>
+                <updated>$datetime.datetime.strptime(str($hItem["date"]),$history.dateFormat)</updated>
+                <content>
+                    Status: $statusStrings[$curStatus]
+                    Quality: $Quality.qualityStrings[$curQuality]
+                    Provider: $provider.name
+                </content>
+            </entry>
         #end for
     #end if
 </feed>
