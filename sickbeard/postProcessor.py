@@ -452,7 +452,7 @@ class PostProcessor(object):
             # if we already did a successful history lookup then keep that tvdb_id value
             if cur_tvdb_id and not (self.in_history and tvdb_id):
                 tvdb_id = cur_tvdb_id
-            if cur_season:
+            if cur_season != None:
                 season = cur_season
             if cur_episodes:
                 episodes = cur_episodes
@@ -537,18 +537,9 @@ class PostProcessor(object):
         root_ep = None
         for cur_episode in episodes:
             episode = int(cur_episode)
-            #FIXME: at this moint we should have the real episode and season allready
-            if show_obj.is_anime:
-                self._log(u"Retrieving episode object for absolute number " + str(episode), logger.DEBUG)
-            else:
-                self._log(u"Retrieving episode object for " + str(season) + "x" + str(episode), logger.DEBUG)
-            
-            # now that we've figured out which episode this file is just load it manually
+            self._log(u"Retrieving episode object for " + str(season) + "x" + str(episode), logger.DEBUG)
             try:
-                if show_obj.is_anime and (not season or season <= 1):
-                    curEp = show_obj.getEpisode(None, None, absolute_number=episode)
-                else:
-                    curEp = show_obj.getEpisode(season, episode)
+                curEp = show_obj.getEpisode(season, episode)
             except exceptions.EpisodeNotFoundException, e:
                 self._log(u"Unable to create episode: "+ex(e), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()
