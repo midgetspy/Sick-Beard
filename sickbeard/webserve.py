@@ -570,7 +570,7 @@ class History:
         
         sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
         
-        t = PageTemplate(file="history-feed.tmpl")
+        t = PageTemplate(file="history_feed.tmpl")
         t.historyResults = sqlResults
         
         return _munge(t)
