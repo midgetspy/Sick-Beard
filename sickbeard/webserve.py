@@ -563,6 +563,17 @@ class History:
 
         return _munge(t)
 
+    @cherrypy.expose
+    def feed(self):
+        
+        myDB = db.DBConnection()
+        
+        sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+        
+        t = PageTemplate(file="history-feed.tmpl")
+        t.historyResults = sqlResults
+        
+        return _munge(t)
 
     @cherrypy.expose
     def clearHistory(self):
