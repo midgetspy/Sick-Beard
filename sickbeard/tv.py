@@ -1505,15 +1505,18 @@ class TVEpisode(object):
                 curAbsolute_number = self.episode
             else:
                 curAbsolute_number = self.absolute_number
-            if naming_anime == 1: # this crazy person wants both !
-                goodEpString += config.naming_sep_type[naming_sep_type]+"%(#)03d" % {"#":curAbsolute_number}
-            elif naming_anime == 2: # total anime freak only need the absolute number !
-                goodEpString = "%(#)03d" % {"#":curAbsolute_number}
-            for relEp in self.relatedEps:
-                if relEp.absolute_number != 0:
-                    goodEpString += "-"+"%(#)03d" % {"#":relEp.absolute_number}
-                else:
-                    goodEpString += "-"+"%(#)03d" % {"#":relEp.episode}
+            
+            if self.season != 0: # dont set absolute numbers if we are on specials !
+                if naming_anime == 1: # this crazy person wants both ! (note: +=)
+                    goodEpString += config.naming_sep_type[naming_sep_type]+"%(#)03d" % {"#":curAbsolute_number}
+                elif naming_anime == 2: # total anime freak only need the absolute number ! (note: =)
+                    goodEpString = "%(#)03d" % {"#":curAbsolute_number}
+            
+                for relEp in self.relatedEps:
+                    if relEp.absolute_number != 0:
+                        goodEpString += "-"+"%(#)03d" % {"#":relEp.absolute_number}
+                    else:
+                        goodEpString += "-"+"%(#)03d" % {"#":relEp.episode}
             
         #episode string end
         
