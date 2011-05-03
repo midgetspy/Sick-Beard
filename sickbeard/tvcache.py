@@ -193,6 +193,7 @@ class TVCache():
         myDB = self._getDB()
 
         parse_result = None
+        tvdb_lang = None
         
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
