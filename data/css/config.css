@@ -42,6 +42,9 @@
 #provider_order_list li{font-size:1.3em;height:1.3em;font-family:Verdana;margin:0 5px 5px;padding:6px;}
 #provider_order_list input{margin:0px 2px;}
 .providerDiv{display:none;padding-left:20px;}
+#plugin_order_list{list-style-type:none;width:250px;margin:0;padding:0;}
+#plugin_order_list li{font-size:1.3em;height:1.3em;font-family:Verdana;margin:0 5px 5px;padding:6px;}
+#plugin_order_list input{margin:0px 2px;}
 #config div.metadataDiv{display:none;}
 #config div.metadata_options{float:left;font-size:14px;font-family:Verdana;width:185px;color:#036;background:#F5F1E4;overflow:auto;border-left:1px solid #404040;border-top:1px solid #404040;border-bottom:1px solid #d4d0c8;border-right:1px solid #d4d0c8;padding:7px;}
 #config div.metadata_options label:hover{background-color:#9f9;}

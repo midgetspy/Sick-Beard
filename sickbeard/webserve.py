@@ -38,6 +38,7 @@ from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
+from sickbeard import subtitles
 
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
@@ -588,6 +589,7 @@ ConfigMenu = [
     { 'title': 'Search Providers',  'path': 'config/providers/'        },
     { 'title': 'Post Processing',   'path': 'config/postProcessing/'   },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
+    { 'title': 'Subtitles',         'path': 'config/subtitles/'        },
 ]
 
 class ConfigGeneral:
@@ -1309,6 +1311,53 @@ class ConfigNotifications:
 
         redirect("/config/notifications/")
 
+class ConfigSubtitles:
+
+    @cherrypy.expose
+    def index(self):
+        t = PageTemplate(file="config_subtitles.tmpl")
+        t.submenu = ConfigMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_multi=None):
+        results = []
+
+        if use_subtitles == "on":
+            use_subtitles = 1
+        else:
+            use_subtitles = 0
+
+        if subtitles_multi == "on":
+            subtitles_multi = 1
+        else:
+            subtitles_multi = 0
+
+        plugins_str_list = subtitles_plugins.split()
+        subtitles_plugins_list = []
+        subtitles_plugins_enabled = []
+        for curPluginStr in plugins_str_list:
+            curPlugin, curEnabled = curPluginStr.split(':')
+            subtitles_plugins_list.append(curPlugin)
+            subtitles_plugins_enabled.append(int(curEnabled))
+
+        sickbeard.USE_SUBTITLES = use_subtitles
+        sickbeard.SUBTITLES_LANGUAGES = subtitles_languages.replace(' ', '').split(',')
+        sickbeard.SUBTITLES_MULTI = subtitles_multi
+        sickbeard.SUBTITLES_PLUGINS_LIST = subtitles_plugins_list
+        sickbeard.SUBTITLES_PLUGINS_ENABLED = subtitles_plugins_enabled
+
+        sickbeard.save_config()
+
+        if len(results) > 0:
+            for x in results:
+                logger.log(x, logger.ERROR)
+            ui.notifications.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
+        else:
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+
+        redirect("/config/subtitles/")
 
 class Config:
 
@@ -1329,11 +1378,14 @@ class Config:
 
     notifications = ConfigNotifications()
 
+    subtitles = ConfigSubtitles()
+
 def haveXBMC():
     return sickbeard.XBMC_HOST
 
 def havePLEX():
     return sickbeard.PLEX_SERVER_HOST
+
 
 def HomeMenu():
     return [
