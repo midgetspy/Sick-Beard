@@ -568,7 +568,7 @@ class History:
         
         myDB = db.DBConnection()
         
-        sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+        sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC LIMIT 25" )
         
         t = PageTemplate(file="history_feed.tmpl")
         t.historyResults = sqlResults
