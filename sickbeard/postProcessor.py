@@ -506,18 +506,6 @@ class PostProcessor(object):
     
         return (tvdb_id, season, episodes)
     
-    def _check_for_anime(self, tvdb_id):
-        """
-        Check if the show is a anime
-        """
-        if tvdb_id:
-            myDB = db.DBConnection()
-            isAbsoluteNumberSQlResult = myDB.select("SELECT anime,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
-            if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
-                self._log(u"This show (tvdbid:"+str(tvdb_id)+") is flaged as an anime", logger.DEBUG)
-                return True
-        return False
-        
         
     def _get_ep_obj(self, tvdb_id, season, episodes):
 
