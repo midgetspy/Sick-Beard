@@ -107,6 +107,7 @@ simple_test_cases = {
               '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [], '480p AAC', 'SJSUBS', None, [2]),
               '[SFW-Chihiro] Dance in the Vampire Bund - 12 [1920x1080 Blu-ray FLAC][2F6DBC66].mkv': parser.ParseResult(None, 'Dance in the Vampire Bund', None, [], '1920x1080 Blu-ray FLAC', 'SFW-Chihiro', None, [12]),
               '[SHiN-gx] Hanasaku Iroha - 01 [1280x720 h.264 AAC][BDC36683]': parser.ParseResult(None, 'Hanasaku Iroha', None, [], '1280x720 h.264 AAC', 'SHiN-gx', None, [1]),
+              '[SFW-Chihiro] Dance in the Vampire Bund - 02 [1920x1080 Blu-ray FLAC][C1FA0A09]': parser.ParseResult(None, 'Dance in the Vampire Bund', None, [], '1920x1080 Blu-ray FLAC', 'SFW-Chihiro', None, [2]),
               },
                
               'anime_standard_round': {
