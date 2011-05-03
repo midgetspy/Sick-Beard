@@ -28,7 +28,9 @@
                 <content>
                     Status: $statusStrings[$curStatus]
                     Quality: $Quality.qualityStrings[$curQuality]
-                    Provider: $provider.name
+                    Provider: #if $provider != None:
+                    			$provider.name
+                    		  #end if
                 </content>
             </entry>
         #end for
