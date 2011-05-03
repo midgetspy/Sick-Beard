@@ -54,10 +54,14 @@ class Fanzub(generic.NZBProvider):
 		return True
 
 	def _get_season_search_strings(self, show, season):
-		return show_name_helpers.makeSceneSeasonSearchString(show, season)
+		names = [show.name.encode('utf-8')]
+		names.extend(show_name_helpers.makeSceneSeasonSearchString(show, season))
+		return names
 
 	def _get_episode_search_strings(self, ep_obj):
-		return show_name_helpers.makeSceneSearchString(ep_obj)
+		names = [(ep_obj.show.name + " " + str(ep_obj.absolute_number)).encode('utf-8')]
+		names.extend(show_name_helpers.makeSceneSearchString(ep_obj))
+		return names
 
 	def _doSearch(self, search_string, show=None):
 		if show and not show.is_anime:
