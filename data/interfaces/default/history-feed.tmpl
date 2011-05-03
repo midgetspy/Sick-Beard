@@ -1,0 +1,28 @@
+#import datetime
+#from sickbeard import history
+#from sickbeard.common import *
+
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Sick-Beard History</title>
+    <id href="$sbRoot/history/"/>
+    <link rel="alternate" href="$sbRoot/history/" type="text/html"/>
+    <link rel="self" href="$sbRoot/history/feed/}" type="application/atom+xml"/>
+    <updated>#if $historyResults
+                $datetime.datetime.strptime(str($historyResults[0]["date"]),$history.dateFormat)
+             #else:
+                 $datetime.datetime.now()
+             #end if
+    </updated>
+
+  	#if $historyResults
+        #for $hItem in $historyResults:
+        #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
+        <entry>
+            <title>$statusStrings[$curStatus] - $hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></title>
+            <link href="$sbRoot/home/displayShow?show=$hItem['showid']#season-$hItem['season']" type="text/html" />
+            <id>$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></id>
+            <updated>$datetime.datetime.strptime(str($hItem["date"]),$history.dateFormat)</updated>
+        </entry>
+        #end for
+    #end if
+</feed>
