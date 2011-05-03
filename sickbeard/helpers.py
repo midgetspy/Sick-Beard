@@ -329,7 +329,7 @@ def searchDBForShow(regShowName):
         if len(sqlResults) == 1:
             return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
         else:
-           tvdbid = get_tvdbid(showName)
+            tvdbid = get_tvdbid(showName,sickbeard.showList)
        
        
         #TODO: this is bad taking the other function and doing a lookup in the db. REFACTORE! this whole thing
@@ -509,7 +509,7 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
     
     return (season, episodes)
 
-def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
+def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False):
     """Retruns a parse result or a InvalidNameException
         it will try to take the correct regex for the show if given
         if not given it will try Anime first then Normal
@@ -518,6 +518,9 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
         
         to get the tvdbid the tvdbapi might be used if tvdbActiveLookUp is True
     """
+    if len(showList) == 0:
+        showList = sickbeard.showList
+
     if show and show.is_anime:
         modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
     elif show and not show.is_anime:
@@ -533,8 +536,8 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
             pass
         else:
             if mode == NameParser.ANIME_REGEX and not (show and show.is_anime):
-                tvdbid = get_tvdbid(parse_result.series_name, tvdbActiveLookUp)
-                if not tvdbid or not check_for_anime(tvdbid): # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
+                tvdbid = get_tvdbid(parse_result.series_name, showList, tvdbActiveLookUp)
+                if not tvdbid or not check_for_anime(tvdbid,showList): # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
                     continue
                 else: # this means it was an anime
                     break
@@ -543,10 +546,10 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
         raise InvalidNameException("Unable to parse "+toParse)
     return parse_result
 
-def get_tvdbid(name, useTvdb=False):
+def get_tvdbid(name, showList, useTvdb=False):
     logger.log(u"Trying to get the tvdbid for "+str(name), logger.DEBUG)
             
-    for show in sickbeard.showList:
+    for show in showList:
         nameFromList = re.sub('[. -]', ' ', sanitizeSceneName(show.name)).lower().lstrip()
         nameInQuestion = re.sub('[. -]', ' ', sanitizeSceneName(name)).lower().lstrip()
         
@@ -598,11 +601,17 @@ def get_tvdbid(name, useTvdb=False):
     return 0 
     
  
-def check_for_anime(tvdb_id):
+def check_for_anime(tvdb_id,showList=[],forceDB=False):
     """
     Check if the show is a anime
     """
-    if tvdb_id:
+    if not forceDB and len(showList):
+        for show in showList:
+            if show.tvdbid == tvdb_id and show.is_anime:
+                return True
+    
+    
+    elif tvdb_id:
         myDB = db.DBConnection()
         isAbsoluteNumberSQlResult = myDB.select("SELECT anime,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
         if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
