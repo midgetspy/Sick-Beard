@@ -200,6 +200,8 @@ class TVCache():
             logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
             return False
 
+        tvdb_lang = None
+
         # if we need tvdb_id or tvrage_id then search the DB for them
         if not tvdb_id or not tvrage_id:
 
