@@ -73,8 +73,8 @@ def getNewznabProviderList(data):
         
         # a 0 in the key spot indicates that no key is needed, so set this on the object
         if curDefault.key == '0':
-            providerDict[curDefault.name].key = ''
-            providerDict[curDefault.name].needs_auth = False
+            curDefault.key = ''
+            curDefault.needs_auth = False
 
     return filter(lambda x: x, providerList)
 
@@ -95,7 +95,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'NZB.su|https://nzb.su/||0'
+    return 'NZB.su|https://nzb.su/||0!!!Sick Beard Index|http://momo.sickbeard.com/|0|0'
 
 
 def getProviderModule(name):
