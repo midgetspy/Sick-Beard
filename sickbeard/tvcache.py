@@ -49,7 +49,7 @@ class CacheDBConnection(db.DBConnection):
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
-            if e.message != "table "+providerName+" already exists":
+            if str(e) != "table "+providerName+" already exists":
                 raise
 
         # Create the table if it's not already there
@@ -58,7 +58,7 @@ class CacheDBConnection(db.DBConnection):
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
-            if e.message != "table lastUpdate already exists":
+            if str(e) != "table lastUpdate already exists":
                 raise
 
 class TVCache():
@@ -217,6 +217,8 @@ class TVCache():
         if not parse_result.series_name:
             logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
             return False
+
+        tvdb_lang = None
 
         # if we need tvdb_id or tvrage_id then search the DB for them
         # if this is called from the a generic provider none of this will be present

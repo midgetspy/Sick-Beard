@@ -26,17 +26,29 @@ import threading
 
 import sickbeard
 
+from sickbeard import encodingKludge as ek
 from sickbeard import logger
 from sickbeard.exceptions import ex
 
 db_lock = threading.Lock()
 
+def dbFilename(filename="sickbeard.db", suffix=None):
+    """
+    @param filename: The sqlite database filename to use. If not specified,
+                     will be made to be sickbeard.db
+    @param suffix: The suffix to append to the filename. A '.' will be added
+                   automatically, i.e. suffix='v0' will make dbfile.db.v0
+    @return: the correct location of the database file.
+    """
+    if suffix:
+        filename = "%s.%s" % (filename, suffix)
+    return ek.ek(os.path.join, sickbeard.DATA_DIR, filename)
+
 class DBConnection:
-    def __init__(self, dbFileName="sickbeard.db"):
+    def __init__(self, filename="sickbeard.db", suffix=None):
 
-        self.dbFileName = dbFileName
-
-        self.connection = sqlite3.connect(os.path.join(sickbeard.DATA_DIR, self.dbFileName), 20)
+        self.filename = filename
+        self.connection = sqlite3.connect(dbFilename(filename), 20)
         self.connection.row_factory = sqlite3.Row
 
     def action(self, query, args=None):
@@ -52,10 +64,10 @@ class DBConnection:
             while attempt < 5:
                 try:
                     if args == None:
-                        logger.log(self.dbFileName+": "+query, logger.DEBUG)
+                        logger.log(self.filename+": "+query, logger.DEBUG)
                         sqlResult = self.connection.execute(query)
                     else:
-                        logger.log(self.dbFileName+": "+query+" with args "+str(args), logger.DEBUG)
+                        logger.log(self.filename+": "+query+" with args "+str(args), logger.DEBUG)
                         sqlResult = self.connection.execute(query, args)
                     self.connection.commit()
                     # get out of the connection attempt loop since we were successful

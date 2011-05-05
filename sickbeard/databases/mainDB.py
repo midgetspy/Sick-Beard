@@ -130,13 +130,13 @@ class NewQualitySettings (NumericProviders):
     def execute(self):
 
         numTries = 0
-        while not ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0')):
-            if not ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db')):
+        while not ek.ek(os.path.isfile, db.dbFilename(suffix='v0')):
+            if not ek.ek(os.path.isfile, db.dbFilename()):
                 break
 
             try:
                 logger.log(u"Attempting to back up your sickbeard.db file before migration...")
-                shutil.copy(ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db'), ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0'))
+                shutil.copy(db.dbFilename(), db.dbFilename(suffix='v0'))
                 logger.log(u"Done backup, proceeding with migration.")
                 break
             except Exception, e:
@@ -211,7 +211,7 @@ class NewQualitySettings (NumericProviders):
 
         # if no updates were done then the backup is useless
         if didUpdate:
-            os.remove(ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0'))
+            os.remove(db.dbFilename(suffix='v0'))
 
 
         ### Update show qualities
