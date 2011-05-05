@@ -20,7 +20,7 @@ from periscope import periscope
 import sickbeard
 
 def sortedPluginList():
-    pluginsMapping = dict([(x.lower(), x) for x in periscope.Periscope.listAPIPlugins()])
+    pluginsMapping = dict([(x.lower(), x) for x in periscope.Periscope.listExistingPlugins()])
 
     newList = []
 
@@ -28,14 +28,14 @@ def sortedPluginList():
     curIndex = 0
     for curPlugin in sickbeard.SUBTITLES_PLUGINS_LIST:
         if curPlugin in pluginsMapping:
-            curPluginDict = {'id': curPlugin, 'image': curPlugin+'.png', 'name': pluginsMapping[curPlugin], 'enabled': sickbeard.SUBTITLES_PLUGINS_ENABLED[curIndex] == 1}
+            curPluginDict = {'id': curPlugin, 'image': curPlugin+'.png', 'name': pluginsMapping[curPlugin], 'enabled': sickbeard.SUBTITLES_PLUGINS_ENABLED[curIndex] == 1, 'api_based': periscope.Periscope.isAPIBasedPlugin(pluginsMapping[curPlugin])}
             newList.append(curPluginDict)
         curIndex += 1
 
     # add any plugins that are missing from that list
     for curPlugin in pluginsMapping.keys():
         if curPlugin not in [x["id"] for x in newList]:
-            curPluginDict = {'id': curPlugin, 'image': curPlugin+'.png', 'name': pluginsMapping[curPlugin], 'enabled': False}
+            curPluginDict = {'id': curPlugin, 'image': curPlugin+'.png', 'name': pluginsMapping[curPlugin], 'enabled': False, 'api_based': periscope.Periscope.isAPIBasedPlugin(pluginsMapping[curPlugin])}
             newList.append(curPluginDict)
 
     return newList

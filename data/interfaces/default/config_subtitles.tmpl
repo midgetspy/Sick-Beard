@@ -44,6 +44,7 @@
                         <h3>Subtitle Plugins</h3>
                         <p>Check off and drag the plugins into the order you want them to be used.</p>
                         <p class="note">At least one plugin is required.</p>
+                        <p class="note"><span style="color: #654B24; font-size: 16px;">*</span> Web-scraping plugin</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -53,6 +54,7 @@
                             <input type="checkbox" id="enable_$curPlugin.id" class="plugin_enabler" #if $curPlugin.enabled then "checked=\"checked\"" else ""#/>
                             <a href="$curPlugin.id" class="imgLink" target="_new"><img src="$sbRoot/images/subtitles/$curPlugin.image" alt="$curPlugin.name" title="$curPlugin.name" width="16" height="16" /></a>
                             $curPlugin.name
+                            #if not $curPlugin.api_based then "*" else ""#
                           </li>
                         #end for
                         </ul>
