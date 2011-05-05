@@ -3,7 +3,7 @@ import unittest
 import sys, os.path
 sys.path.append(os.path.abspath('..'))
 
-from sickbeard import show_name_helpers, scene_exceptions, common
+from sickbeard import show_name_helpers, scene_exceptions, common, name_cache
 
 import sickbeard
 from sickbeard import db
@@ -108,6 +108,24 @@ class SceneExceptionTestCase(unittest.TestCase):
     def test_sceneExceptionByNameEmpty(self):
         self.assertEqual(scene_exceptions.get_scene_exception_by_name('nothing useful'), None)
 
+    def test_sceneExceptionsResetNameCache(self):
+        # clear the exceptions
+        myDB = db.DBConnection("cache.db")
+        myDB.action("DELETE FROM scene_exceptions")
+        
+        # put something in the cache
+        name_cache.addNameToCache('Cached Name', 0)
+        
+        # updating should clear the cache so our previously "Cached Name" won't be in there
+        scene_exceptions.retrieve_exceptions()
+        self.assertEqual(name_cache.retrieveNameFromCache('Cached Name'), None)
+
+        # put something in the cache
+        name_cache.addNameToCache('Cached Name', 0)
+        
+        # updating should not clear the cache this time since our exceptions didn't change
+        scene_exceptions.retrieve_exceptions()
+        self.assertEqual(name_cache.retrieveNameFromCache('Cached Name'), 0)
 
 
 if __name__ == '__main__':
