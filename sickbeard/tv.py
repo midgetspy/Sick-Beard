@@ -127,21 +127,27 @@ class TVShow(object):
         # if we get an anime get the real season and episode
         if self.anime and absolute_number != None and season == None and episode == None:
             myDB = db.DBConnection()
-            sql = "SELECT * FROM tv_episodes WHERE showid = ? and absolute_number = ? and season <> 0"
+            sql = "SELECT * FROM tv_episodes WHERE showid = ? and absolute_number = ? and season != 0"
             sqlResults = myDB.select(sql, [self.tvdbid,absolute_number])
             if len(sqlResults) == 1:
                 episode = int(sqlResults[0]["episode"])
                 season = int(sqlResults[0]["season"])
-                logger.log("Found episode by absolute_number:"+str(absolute_number)+" which is "+str(season)+"x"+str(episode), logger.DEBUG)  
+                logger.log("Found episode by absolute_number:"+str(absolute_number)+" which is "+str(season)+"x"+str(episode), logger.DEBUG)
             elif len(sqlResults) > 1:
                 logger.log("Multiple entries for absolute number: "+str(absolute_number)+" in show: "+self.name+" found ", logger.ERROR)
                 return None
+            else:
+                logger.log("No entries for absolute number: "+str(absolute_number)+" in show: "+self.name+" found.", logger.DEBUG)
+                return None
+            
+            """
+            i am taking this out because it is not the right way to go and is prducing errors
             else:
                 logger.log("No entries for absolute number: "+str(absolute_number)+" in show: "+self.name+" found. will try with absolute number as episode number from first season", logger.DEBUG)
                 # this fix the first season for shows that dont have absolute numbering from the tvdb
                 season = 1
                 episode = absolute_number
-        
+            """
         if not season in self.episodes:
             self.episodes[season] = {}
 
@@ -211,9 +217,9 @@ class TVShow(object):
         if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, not loading episodes from disk")
             return
-
+        logger.log(str(self.tvdbid) + ": ############################################ ")
         logger.log(str(self.tvdbid) + ": Loading all episodes from the show directory " + self._location)
-
+        logger.log(str(self.tvdbid) + ": ############################################ ")
         # get file list
         mediaFiles = helpers.listMediaFiles(self._location)
 
@@ -379,13 +385,14 @@ class TVShow(object):
 
     # make a TVEpisode object from a media file
     def makeEpFromFile(self, file):
-
+        
         if not ek.ek(os.path.isfile, file):
             logger.log(str(self.tvdbid) + ": That isn't even a real file dude... " + file)
             return None
-
+        
+        logger.log(str(self.tvdbid) + ": -------------------------------------------- ")
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
-
+        logger.log(str(self.tvdbid) + ": -------------------------------------------- ")
         try:
             parse_result = parse_result_wrapper(self,file)
         except InvalidNameException:
