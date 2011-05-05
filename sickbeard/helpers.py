@@ -548,13 +548,13 @@ def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False):
 
 
 def _check_against_names(name, show):
-    nameInQuestion = re.sub('[. -]', ' ', sanitizeSceneName(name)).lower().lstrip()
+    nameInQuestion = full_sanitizeSceneName(name)
 
     showNames = [show.name]
     showNames.extend(sickbeard.scene_exceptions.get_scene_exceptions(show.tvdbid))
 
     for showName in showNames:
-        nameFromList = re.sub('[. -]', ' ', sanitizeSceneName(showName)).lower().lstrip()
+        nameFromList = full_sanitizeSceneName(showName)
         # FIXME: this is ok for most shows but will give fals positives on:
         """nameFromList = "show name: special version"
            nameInQuestion = "show name"
@@ -629,6 +629,9 @@ def check_for_anime(tvdb_id,showList=[],forceDB=False):
             return True
     return False 
     
+def full_sanitizeSceneName(name):
+    return re.sub('[. -]', ' ', sanitizeSceneName(name)).lower().lstrip()
+
 
 def sanitizeSceneName (name, ezrss=False):
     """
