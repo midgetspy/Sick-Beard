@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath('../lib'))
 import sickbeard # we need to import this so we can override the SYS_ENCODING which is needed by the parser
 from sickbeard import helpers, scene_exceptions
 
+
 DEBUG = VERBOSE = False
 sickbeard.SYS_ENCODING = "UTF-8"
 sickbeard.QUALITY_DEFAULT = 4
@@ -27,15 +28,19 @@ class DumyTVShow(object):
         return self.anime
 
 
-showDict = {DumyTVShow(1,"Dance in the Vampire Bund",True):"[SFW-Chihiro] Dance in the Vampire Bund - 12 [1920x1080 Blu-ray FLAC][2F6DBC66].mkv",
-            DumyTVShow(2,"Infinite Stratos",True):"[Stratos-Subs]_Infinite_Stratos_-_12_(1280x720_H.264_AAC)_[379759DB]",
-            DumyTVShow(3,"Blue Exorcist",True):"[Stratos-Subs]_Ao no Exorcist_-_12_(1280x720)_[379759DB]",
-            DumyTVShow(4,"Dexter",True):"Dexter S05E07 1080p HDTV DD5.1 H.264",
+showDict = {1:["Dance in the Vampire Bund",True,"Dance in the Vampire Bund"],
+            2:["Infinite Stratos",True,"IS",True],
+            3:["Blue Exorcist",True,"Ao no Exorcist"],
+            4:["Dexter",True,"Dexter"],
+            
+            
             }
-showList =[x for x,y in showDict.items()]
 
-showExceptions = {2:["IS"]
+showExceptions = {2:["IS"],
+                  3:["Ao no Exorcist"]
                   }
+
+showList =[DumyTVShow(x,y[0],y[1]) for x,y in showDict.items()]
 
 def dummy_get_scene_exceptions(id):
     try:
@@ -45,31 +50,20 @@ def dummy_get_scene_exceptions(id):
     
 scene_exceptions.get_scene_exceptions = dummy_get_scene_exceptions
 
-def generator_get_tvdbid(show,name,list):
+def generator_get_tvdbid(show,sceneName,list):
     def test(self):
-        result = helpers.get_tvdbid(show.name,list, False)
+        result = helpers.get_tvdbid(sceneName,list, False)
         self.assertEqual(result, show.tvdbid)
     return test
-
-def generator_parse_result_wrapper(show,name,list):
-    def test(self):
-        result = helpers.parse_result_wrapper(None, name, list, False)
-        self.assertEqual(result.series_name , show.name)
-    return test
-
 
 class HelperTests(unittest.TestCase):
     def setUP(self):
         pass
       
-for show,name in showDict.items():
+for show in showList:
+    sceneName = showDict[show.tvdbid][2]
     test_name = 'test_get_tvdbid_%s' % show.tvdbid
-    test = generator_get_tvdbid(show, name, showList)
-    setattr(HelperTests, test_name, test)
-
-for show,name in showDict.items():
-    test_name = 'test_parse_result_wrapper_%s' % show.tvdbid
-    test = generator_parse_result_wrapper(show, name, showList)
+    test = generator_get_tvdbid(show, sceneName, showList)
     setattr(HelperTests, test_name, test)
 
 if __name__ == '__main__':
