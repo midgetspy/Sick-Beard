@@ -274,12 +274,6 @@ class QueueItemAdd(ShowQueueItem):
         sickbeard.showList.append(self.show)
 
         try:
-            self.show.loadEpisodesFromDir()
-        except Exception, e:
-            logger.log(u"Error searching dir for episodes: " + ex(e), logger.ERROR)
-            logger.log(traceback.format_exc(), logger.DEBUG)
-
-        try:
             self.show.loadEpisodesFromTVDB()
             self.show.setTVRID()
 
@@ -288,6 +282,12 @@ class QueueItemAdd(ShowQueueItem):
             
         except Exception, e:
             logger.log(u"Error with TVDB, not creating episode list: " + ex(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
+
+        try:
+            self.show.loadEpisodesFromDir()
+        except Exception, e:
+            logger.log(u"Error searching dir for episodes: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         try:
