@@ -38,7 +38,8 @@ SHOWNAME = u"show name"
 SEASON = 4
 EPISODE = 2
 FILENAME = u"show name - s0"+str(SEASON)+"e0"+str(EPISODE)+".mkv"
-FILEPATH = u"/user/name/dir/"+SHOWNAME+"/"+FILENAME
+FILEDIR = os.path.join(TESTDIR, SHOWNAME)
+FILEPATH = os.path.join(FILEDIR,FILENAME)
 
 #=================
 # dummy functions
@@ -57,10 +58,12 @@ class SickbeardTestDBCase(unittest.TestCase):
     def setUp(self):
         sickbeard.showList = []
         setUp_test_db()
+        setUp_test_episode_file()
     
     def tearDown(self):
         sickbeard.showList = []
         tearDown_test_db() 
+        tearDown_test_episode_file()
 
 class TestDBConnection(db.DBConnection,object):
     def __init__(self, dbFileName=TESTDBNAME):
@@ -89,10 +92,16 @@ def tearDown_test_db():
     """
     os.remove(ek.ek(os.path.join, TESTDIR, TESTDBNAME))
 
-def setUp_test_episode():
-    f = open('/anyfile','w')
+def setUp_test_episode_file():
+    if not os.path.exists(FILEDIR):
+        os.makedirs(FILEDIR)
+
+    f = open(FILEPATH,"w")
     f.write("foo bar")
     f.close()
+
+def tearDown_test_episode_file():
+    shutil.rmtree(FILEDIR)
 
 if __name__ == '__main__':
     print "=================="
