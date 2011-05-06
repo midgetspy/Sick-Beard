@@ -54,11 +54,11 @@ class PPPrivateTests(test.SickbeardTestDBCase):
         self.ep_obj = TVEpisode(self.show_obj, test.SEASON, test.EPISODE, test.FILEPATH)
     
     def test__find_ep_destination_folder(self):
-        self.show_obj.location = test.TESTDIR
+        self.show_obj.location = test.FILEDIR
         self.ep_obj.show.seasonfolders = 1
         sickbeard.SEASON_FOLDERS_FORMAT = 'Season %02d'
         calculatedPath = self.pp._find_ep_destination_folder(self.ep_obj)
-        ecpectedPath = os.path.join(test.TESTDIR, "Season 0"+str(test.SEASON))
+        ecpectedPath = os.path.join(test.FILEDIR, "Season 0"+str(test.SEASON))
         self.assertEqual(calculatedPath,ecpectedPath)
 
 
