@@ -38,13 +38,12 @@ class JRMCMetadata(generic.GenericMetadata):
     
     The following file structure is used:
     
-    show_root/series.xml                           (show metadata)
-    show_root/folder.jpg                           (poster)
-    show_root/backdrop.jpg                         (fanart)
-    show_root/Season 01/folder.jpg                 (season thumb)
-    show_root/Season 01/show - 1x01 - episode.avi  (* example of existing ep of course)
+    show_root/folder.jpg                                         (poster)
+    show_root/backdrop.jpg                                       (fanart)
+    show_root/Season 01/folder.jpg                               (season thumb)
+    show_root/Season 01/show - 1x01 - episode.avi                (* example of existing ep of course)
     show_root/Season 01/show - 1x01 - episode_avi_JRSidecar.xml  (episode metadata)
-    show_root/metadata/show - 1x01 - episode.jpg   (episode thumb)
+    show_root/thumbnails/show - 1x01 - episode.jpg               (episode thumb)
     """
     
     def __init__(self,
@@ -64,16 +63,15 @@ class JRMCMetadata(generic.GenericMetadata):
                                          season_thumbnails)
         
         self.fanart_name = "backdrop.jpg"
-        self._show_file_name = 'series.xml'
         self._ep_nfo_append = '_JRSidecar.xml'
 
         self.name = 'JRMC'
 
         self.eg_show_metadata = "<i>not supported</i>"
-        self.eg_episode_metadata = "Season##\\<i>filename</i>_<i>extension</i>_JRSidecar.xml"
+        self.eg_episode_metadata = "Season##\\<i>filename</i>_<i>ext</i>_JRSidecar.xml"
         self.eg_fanart = "backdrop.jpg"
         self.eg_poster = "folder.jpg"
-        self.eg_episode_thumbnails = "Season##\\metadata\\<i>filename</i>.jpg"
+        self.eg_episode_thumbnails = "Season##\\thumbnails\\<i>filename</i>.jpg"
         self.eg_season_thumbnails = "Season##\\folder.jpg"
 
     def create_show_metadata(self, show_obj):
@@ -100,7 +98,7 @@ class JRMCMetadata(generic.GenericMetadata):
 
     def get_episode_thumb_path(self, ep_obj):
         """
-        Returns a full show dir/metadata/episode.jpg path for JRMC
+        Returns a full show dir/thumbnails/episode.jpg path for JRMC
         episode thumbs.
         
         ep_obj: a TVEpisode object to get the path from
@@ -108,7 +106,7 @@ class JRMCMetadata(generic.GenericMetadata):
 
         if ek.ek(os.path.isfile, ep_obj.location):
             tbn_file_name = helpers.replaceExtension(ek.ek(os.path.basename, ep_obj.location), 'jpg')
-            metadata_dir_name = ek.ek(os.path.join, ek.ek(os.path.dirname, ep_obj.location), 'metadata')
+            metadata_dir_name = ek.ek(os.path.join, ek.ek(os.path.dirname, ep_obj.location), 'thumbnails')
             tbn_file_path = ek.ek(os.path.join, metadata_dir_name, tbn_file_name)
         else:
             return None
@@ -231,6 +229,19 @@ class JRMCMetadata(generic.GenericMetadata):
         description = etree.SubElement(episode, "Field", {"Name": "Description"})
         if ep_obj.description != None:
             description.text = ep_obj.description
+            
+        image_path = self.get_episode_thumb_path(ep_obj)
+        if image_path != None:
+            image = etree.SubElement(episode, "Field", {"Name": "Image File"})
+            image.text = image_path
+        
+        if my_ep["firstaired"] != None:
+            jrmc_epoch = datetime.date(1899, 12, 30)
+            first_aired_str = my_ep["firstaired"]
+            first_aired = datetime.datetime.strptime(first_aired_str, "%Y-%m-%d").date()
+            delta = first_aired - jrmc_epoch
+            date_ = etree.SubElement(episode, "Field", {"Name": "Date"})
+            date_.text = str(delta.days)
 
         # Make it purdy
         helpers.indentXML(rootNode)
