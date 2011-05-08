@@ -40,7 +40,7 @@ class NZBMatrixProvider(generic.NZBProvider):
 
         self.cache = NZBMatrixCache(self)
 
-        self.url = 'http://www.nzbmatrix.com/'
+        self.url = 'https://nzbmatrix.com/'
 
     def isEnabled(self):
         return sickbeard.NZBMATRIX
