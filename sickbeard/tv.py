@@ -31,6 +31,7 @@ import xml.etree.cElementTree as etree
 from name_parser.parser import NameParser, InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
+import periscope
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
@@ -715,6 +716,19 @@ class TVShow(object):
                     curEp.saveToDB()
 
 
+    def downloadSubtitles(self):
+        #TODO: Add support for force option
+        #TODO: Share the same global periscope instance would be way better as it has its own queue
+        if not os.path.isdir(self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't download subtitles")
+            return
+        peri = periscope.Periscope(config=False, cache_dir=sickbeard.CACHE_DIR, workers=1, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3, autostart=False)
+        peri.languages = sickbeard.SUBTITLES_LANGUAGES
+        peri.plugins = sickbeard.subtitles.getEnabledPluginList()
+        peri.startWorkers()
+        peri.downloadSubtitles([self._location])
+        peri.stopWorkers()
+    
 
     def fixEpisodeNames(self):
 

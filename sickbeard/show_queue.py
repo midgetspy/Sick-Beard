@@ -54,6 +54,9 @@ class ShowQueue(generic_queue.GenericQueue):
 
     def isInRenameQueue(self, show):
         return self._isInQueue(show, (ShowQueueActions.RENAME,))
+        
+    def isInSubtitleQueue(self, show):
+        return self._isInQueue(show, (ShowQueueActions.SUBTITLE,))
 
     def isBeingAdded(self, show):
         return self._isBeingSomethinged(show, (ShowQueueActions.ADD,))
@@ -66,6 +69,9 @@ class ShowQueue(generic_queue.GenericQueue):
 
     def isBeingRenamed(self, show):
         return self._isBeingSomethinged(show, (ShowQueueActions.RENAME,))
+        
+    def isBeingSubtitled(self, show):
+        return self._isBeingSomethinged(show, (ShowQueueActions.SUBTITLE,))
 
     def _getLoadingShowList(self):
         return [x for x in self.queue+[self.currentItem] if x != None and x.isLoading]
@@ -114,6 +120,14 @@ class ShowQueue(generic_queue.GenericQueue):
         self.add_item(queueItemObj)
 
         return queueItemObj
+        
+    def downloadSubtitles(self, show, force=False):
+
+        queueItemObj = QueueItemSubtitle(show)
+
+        self.add_item(queueItemObj)
+
+        return queueItemObj
 
     def addShow(self, tvdb_id, showDir, default_status=None, quality=None, season_folders=None, lang="en"):
         queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, season_folders, lang)
@@ -128,12 +142,14 @@ class ShowQueueActions:
     UPDATE=3
     FORCEUPDATE=4
     RENAME=5
+    SUBTITLE=6
     
     names = {REFRESH: 'Refresh',
                     ADD: 'Add',
                     UPDATE: 'Update',
                     FORCEUPDATE: 'Force Update',
                     RENAME: 'Rename',
+                    SUBTITLE: 'Subtitle',
                     }
 
 class ShowQueueItem(generic_queue.QueueItem):
@@ -145,6 +161,7 @@ class ShowQueueItem(generic_queue.QueueItem):
     - show being refreshed
     - show being updated
     - show being force updated
+    - show being subtitled
     """
     def __init__(self, action_id, show):
         generic_queue.QueueItem.__init__(self, ShowQueueActions.names[action_id], action_id)
@@ -348,6 +365,20 @@ class QueueItemRename(ShowQueueItem):
         logger.log(u"Performing rename on "+self.show.name)
 
         self.show.fixEpisodeNames()
+
+        self.inProgress = False
+
+class QueueItemSubtitle(ShowQueueItem):
+    def __init__(self, show=None):
+        ShowQueueItem.__init__(self, ShowQueueActions.SUBTITLE, show)
+
+    def execute(self):
+
+        ShowQueueItem.execute(self)
+
+        logger.log(u"Downloading subtitles for "+self.show.name)
+
+        self.show.downloadSubtitles()
 
         self.inProgress = False
 
