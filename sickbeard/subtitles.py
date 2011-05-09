@@ -43,3 +43,5 @@ def sortedPluginList():
 def getEnabledPluginList():
     return [x['name'] for x in sortedPluginList() if x['enabled']]
     
+def isValidLanguage(language):
+    return periscope.Periscope.isValidLanguage(language)

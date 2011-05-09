@@ -1357,7 +1357,7 @@ class ConfigSubtitles:
             subtitles_plugins_enabled.append(int(curEnabled))
 
         sickbeard.USE_SUBTITLES = use_subtitles
-        sickbeard.SUBTITLES_LANGUAGES = subtitles_languages.replace(' ', '').split(',')
+        sickbeard.SUBTITLES_LANGUAGES = filter(subtitles.isValidLanguage, subtitles_languages.replace(' ', '').split(','))
         sickbeard.SUBTITLES_MULTI = subtitles_multi
         sickbeard.SUBTITLES_PLUGINS_LIST = subtitles_plugins_list
         sickbeard.SUBTITLES_PLUGINS_ENABLED = subtitles_plugins_enabled
