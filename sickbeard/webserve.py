@@ -451,7 +451,7 @@ class Manage:
         redirect("/manage")
 
     @cherrypy.expose
-    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None):
+    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None, toSubtitle=None):
 
         if toUpdate != None:
             toUpdate = toUpdate.split('|')
@@ -468,6 +468,11 @@ class Manage:
         else:
             toRename = []
 
+        if toSubtitle != None:
+            toSubtitle = toSubtitle.split('|')
+        else:
+            toSubtitle = []
+
         if toDelete != None:
             toDelete = toDelete.split('|')
         else:
@@ -482,8 +487,9 @@ class Manage:
         refreshes = []
         updates = []
         renames = []
+        subtitles = []
 
-        for curShowID in set(toUpdate+toRefresh+toRename+toDelete+toMetadata):
+        for curShowID in set(toUpdate+toRefresh+toRename+toSubtitle+toDelete+toMetadata):
 
             if curShowID == '':
                 continue
@@ -517,6 +523,10 @@ class Manage:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj) #@UndefinedVariable
                 renames.append(showObj.name)
 
+            if curShowID in toSubtitle:
+                sickbeard.showQueueScheduler.action.downloadSubtitles(showObj) #@UndefinedVariable
+                subtitles.append(showObj.name)
+
         if len(errors) > 0:
             ui.notifications.error("Errors encountered",
                         '<br >\n'.join(errors))
@@ -538,7 +548,12 @@ class Manage:
             messageDetail += "</li><li>".join(renames)
             messageDetail += "</li></ul>"
 
-        if len(updates+refreshes+renames) > 0:
+        if len(subtitles) > 0:
+            messageDetail += "<br /><b>Subtitles</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(subtitles)
+            messageDetail += "</li></ul>"
+
+        if len(updates+refreshes+renames+subtitles) > 0:
             ui.notifications.message("The following actions were queued:",
                           messageDetail)
 
