@@ -111,7 +111,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end if
 #set $curRefresh = "<input type=\"checkbox\" class=\"refreshCheck\" id=\"refresh-"+str($curShow.tvdbid)+"\" "+$curRefresh_disabled+"/>"
 #if $sickbeard.showQueueScheduler.action.isBeingRenamed($curShow) or $sickbeard.showQueueScheduler.action.isInRenameQueue($curShow):
-  #set $curRename = "disabled=\"disabled\" "
+  #set $curRename_disabled = "disabled=\"disabled\" "
 #end if
 #set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\" "+$curRename_disabled+"/>"
 #if $sickbeard.showQueueScheduler.action.isBeingSubtitled($curShow) or $sickbeard.showQueueScheduler.action.isInSubtitleQueue($curShow):
@@ -119,7 +119,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end if
 #set $curSubtitle = "<input type=\"checkbox\" class=\"subtitleCheck\" id=\"subtitle-"+str($curShow.tvdbid)+"\" "+$curSubtitle_disabled+"/>"
 #if $sickbeard.showQueueScheduler.action.isBeingRenamed($curShow) or $sickbeard.showQueueScheduler.action.isInRenameQueue($curShow) or $sickbeard.showQueueScheduler.action.isInRefreshQueue($curShow):
-  #set $curDelete = "disabled=\"disabled\" "
+  #set $curDelete_disabled = "disabled=\"disabled\" "
 #end if
 #set $curDelete = "<input type=\"checkbox\" class=\"deleteCheck\" id=\"delete-"+str($curShow.tvdbid)+"\" "+$curDelete_disabled+"/>"
 
