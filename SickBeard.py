@@ -123,7 +123,7 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'tvbinz', 'pidfile=', 'nolaunch', 'config=', 'datadir=']) #@UnusedVariable
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'pidfile=', 'nolaunch', 'config=', 'datadir=']) #@UnusedVariable
     except getopt.GetoptError:
         print "Available options: --quiet, --forceupdate, --port, --daemon, --pidfile, --config, --datadir"
         sys.exit()
@@ -136,9 +136,6 @@ def main():
         # for now we'll just silence the logging
         if o in ('-q', '--quiet'):
             consoleLogging = False
-        # for now we'll just silence the logging
-        if o in ('--tvbinz',):
-            sickbeard.SHOW_TVBINZ = True
 
         # should we update right away?
         if o in ('-f', '--forceupdate'):

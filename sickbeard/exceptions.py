@@ -16,7 +16,28 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from sickbeard.encodingKludge import fixStupidEncodings
 
+def ex(e):
+	"""
+	Returns a unicode string from the exception text if it exists.
+	"""
+	
+	# sanity check
+	if not e.args or not e.args[0]:
+		return ""
+
+	e_message = fixStupidEncodings(e.args[0])
+	
+	# if fixStupidEncodings doesn't fix it then maybe it's not a string, in which case we'll try printing it anyway
+	if not e_message:
+		try:
+			e_message = str(e.args[0])
+		except:
+			e_message = ""
+	
+	return e_message
+	
 
 class SickBeardException(Exception):
 	"Generic SickBeard Exception - should never be thrown, only subclassed"

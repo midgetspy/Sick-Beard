@@ -34,6 +34,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
+from sickbeard.exceptions import ex
 from sickbeard import tvrage
 from sickbeard import config
 from sickbeard import image_cache
@@ -199,7 +200,7 @@ class TVShow(object):
             try:
                 curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
             except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException), e:
-                logger.log(u"Episode "+mediaFile+" returned an exception: "+e.message.decode('utf-8'), logger.ERROR)
+                logger.log(u"Episode "+mediaFile+" returned an exception: "+ex(e), logger.ERROR)
             except exceptions.EpisodeDeletedException:
                 logger.log(u"The episode deleted itself when I tried making an object for it", logger.DEBUG)
 
@@ -317,7 +318,7 @@ class TVShow(object):
             tvrage.TVRage(self)
             self.saveToDB()
         except exceptions.TVRageException, e:
-            logger.log(u"Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+e.message.decode('utf-8'), logger.DEBUG)
+            logger.log(u"Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+ex(e), logger.DEBUG)
             return
 
     def getImages(self, fanart=None, poster=None):
@@ -346,7 +347,7 @@ class TVShow(object):
 
             # make an episode out of it
         except exceptions.TVRageException, e:
-            logger.log(u"Unable to add TVRage info: " + e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+            logger.log(u"Unable to add TVRage info: " + ex(e), logger.WARNING)
 
 
 
@@ -395,7 +396,7 @@ class TVShow(object):
                 logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
                 return None
             except tvdb_exceptions.tvdb_error, e:
-                logger.log(u"Unable to contact TVDB: "+e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return None
 
         for curEpNum in episodes:
@@ -600,14 +601,14 @@ class TVShow(object):
                 raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
         except (exceptions.NoNFOException, SyntaxError, ValueError), e:
-            logger.log(u"There was an error parsing your existing tvshow.nfo file: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log(u"There was an error parsing your existing tvshow.nfo file: " + ex(e), logger.ERROR)
             logger.log(u"Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 
             try:
                 xmlFileObj.close()
                 ek.ek(os.rename, xmlFile, xmlFile + ".old")
             except Exception, e:
-                logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+                logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + ex(e), logger.ERROR)
             raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
         if showXML.findtext('studio') != None:
@@ -1082,7 +1083,7 @@ class TVEpisode(object):
                 myEp = cachedSeason[episode]
 
         except (tvdb_exceptions.tvdb_error, IOError), e:
-            logger.log(u"TVDB threw up an error: "+e.message.decode('utf-8'), logger.DEBUG)
+            logger.log(u"TVDB threw up an error: "+ex(e), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
             if self.name:
                 logger.log(u"TVDB timed out but we have enough info from other sources, allowing the error", logger.DEBUG)
@@ -1202,11 +1203,11 @@ class TVEpisode(object):
                 try:
                     showXML = etree.ElementTree(file = nfoFile)
                 except (SyntaxError, ValueError), e:
-                    logger.log(u"Error loading the NFO, backing up the NFO and skipping for now: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR) #TODO: figure out what's wrong and fix it
+                    logger.log(u"Error loading the NFO, backing up the NFO and skipping for now: " + ex(e), logger.ERROR) #TODO: figure out what's wrong and fix it
                     try:
                         ek.ek(os.rename, nfoFile, nfoFile + ".old")
                     except Exception, e:
-                        logger.log(u"Failed to rename your episode's NFO file - you need to delete it or fix it: " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+                        logger.log(u"Failed to rename your episode's NFO file - you need to delete it or fix it: " + ex(e), logger.ERROR)
                     raise exceptions.NoNFOException("Error in NFO format")
 
                 for epDetails in showXML.getiterator('episodedetails'):

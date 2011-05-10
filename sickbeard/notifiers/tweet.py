@@ -19,6 +19,7 @@
 import sickbeard
 
 from sickbeard import logger, common
+from sickbeard.exceptions import ex
 
 # parse_qsl moved to urlparse module in v2.6
 try:
@@ -119,7 +120,7 @@ class TwitterNotifier:
         try:
             api.PostUpdate(message)
         except Exception, e:
-            logger.log(u"Error Sending Tweet: "+e.message.decode('utf-8'), logger.ERROR)
+            logger.log(u"Error Sending Tweet: "+ex(e), logger.ERROR)
             return False
     
         return True

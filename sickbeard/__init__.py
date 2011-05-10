@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, tvbinz, nzbsrus, newznab, womble, newzbin
+from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
@@ -155,12 +155,6 @@ PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
 TV_DOWNLOAD_DIR = None
-
-SHOW_TVBINZ = False
-TVBINZ = False
-TVBINZ_UID = None
-TVBINZ_HASH = None
-TVBINZ_AUTH = None
 
 NZBS = False
 NZBS_UID = None
@@ -343,7 +337,7 @@ def initialize(consoleLogging=True):
     with INIT_LOCK:
 
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, \
-                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, TVBINZ, TVBINZ_UID, TVBINZ_HASH, DOWNLOAD_PROPERS, \
+                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
@@ -358,7 +352,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                TVBINZ_AUTH, showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
+                showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
@@ -378,7 +372,6 @@ def initialize(consoleLogging=True):
         CheckSection('General')
         CheckSection('Blackhole')
         CheckSection('Newzbin')
-        CheckSection('TVBinz')
         CheckSection('SABnzbd')
         CheckSection('NZBget')
         CheckSection('XBMC')
@@ -494,11 +487,6 @@ def initialize(consoleLogging=True):
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
-
-        TVBINZ = bool(check_setting_int(CFG, 'TVBinz', 'tvbinz', 0))
-        TVBINZ_UID = check_setting_str(CFG, 'TVBinz', 'tvbinz_uid', '')
-        TVBINZ_HASH = check_setting_str(CFG, 'TVBinz', 'tvbinz_hash', '')
-        TVBINZ_AUTH = check_setting_str(CFG, 'TVBinz', 'tvbinz_auth', '')
 
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -977,12 +965,6 @@ def save_config():
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
-
-    new_config['TVBinz'] = {}
-    new_config['TVBinz']['tvbinz'] = int(TVBINZ)
-    new_config['TVBinz']['tvbinz_uid'] = TVBINZ_UID
-    new_config['TVBinz']['tvbinz_hash'] = TVBINZ_HASH
-    new_config['TVBinz']['tvbinz_auth'] = TVBINZ_AUTH
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)

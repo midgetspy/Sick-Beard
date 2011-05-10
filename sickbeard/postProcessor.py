@@ -38,6 +38,7 @@ from sickbeard import show_name_helpers
 from sickbeard import scene_exceptions
 
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
@@ -168,18 +169,19 @@ class PostProcessor(object):
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
+            # get the extension
+            cur_extension = cur_file_path.rpartition('.')[-1]
+        
+            # replace .nfo with .nfo-orig to avoid conflicts
+            if cur_extension == 'nfo':
+                cur_extension = 'nfo-orig'
+
             # If new base name then convert name
             if new_base_name:
-                # get the extension
-                cur_extension = cur_file_path.rpartition('.')[-1]
-            
-                # replace .nfo with .nfo-orig to avoid conflicts
-                if cur_extension == 'nfo':
-                    cur_extension = 'nfo-orig'
-                    
                 new_file_name = new_base_name +'.' + cur_extension
+            # if we're not renaming we still want to change extensions sometimes
             else:
-                new_file_name = cur_file_name
+                new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
             
             new_file_path = ek.ek(os.path.join, new_path, new_file_name)
 
@@ -200,7 +202,7 @@ class PostProcessor(object):
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+e.message.decode('utf-8'), logger.ERROR)
+                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
                 raise e
                 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
@@ -220,7 +222,7 @@ class PostProcessor(object):
                 helpers.copyFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+e.message.decode('utf-8'), logger.ERROR)
+                logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
                 raise e
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
@@ -422,10 +424,11 @@ class PostProcessor(object):
             try:
                 (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
             except InvalidNameException, e:
-                logger.log(u"Unable to parse, skipping: "+e.message.decode(sickbeard.SYS_ENCODING), logger.DEBUG)
+                logger.log(u"Unable to parse, skipping: "+ex(e), logger.DEBUG)
                 continue
             
-            if cur_tvdb_id:
+            # if we already did a successful history lookup then keep that tvdb_id value
+            if cur_tvdb_id and not (self.in_history and tvdb_id):
                 tvdb_id = cur_tvdb_id
             if cur_season != None:
                 season = cur_season
@@ -504,7 +507,7 @@ class PostProcessor(object):
             try:
                 curEp = show_obj.getEpisode(season, episode)
             except exceptions.EpisodeNotFoundException, e:
-                self._log(u"Unable to create episode: "+e.message.decode('utf-8'), logger.DEBUG)
+                self._log(u"Unable to create episode: "+ex(e), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()
     
             if root_ep == None:
@@ -559,7 +562,7 @@ class PostProcessor(object):
                 out, err = p.communicate() #@UnusedVariable
                 self._log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
-                self._log(u"Unable to run extra_script: "+e.message.decode('utf-8'))
+                self._log(u"Unable to run extra_script: "+ex(e))
     
     def _is_priority(self, ep_obj, new_ep_quality):
         

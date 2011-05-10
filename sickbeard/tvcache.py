@@ -28,6 +28,7 @@ from sickbeard.common import Quality
 
 from sickbeard import helpers, exceptions, show_name_helpers
 from sickbeard import name_cache
+from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
@@ -47,7 +48,7 @@ class CacheDBConnection(db.DBConnection):
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
-            if e.message != "table "+providerName+" already exists":
+            if str(e) != "table "+providerName+" already exists":
                 raise
 
         # Create the table if it's not already there
@@ -56,7 +57,7 @@ class CacheDBConnection(db.DBConnection):
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
-            if e.message != "table lastUpdate already exists":
+            if str(e) != "table lastUpdate already exists":
                 raise
 
 class TVCache():
@@ -113,7 +114,7 @@ class TVCache():
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+e.message.decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
             return []
 
@@ -198,6 +199,8 @@ class TVCache():
         if not parse_result.series_name:
             logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
             return False
+
+        tvdb_lang = None
 
         # if we need tvdb_id or tvrage_id then search the DB for them
         if not tvdb_id or not tvrage_id:
@@ -294,7 +297,7 @@ class TVCache():
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                 return False
             except tvdb_exceptions.tvdb_error, e:
-                logger.log(u"Unable to contact TVDB: "+e.message.decode(sickbeard.SYS_ENCODING), logger.WARNING)
+                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return False
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"

@@ -23,6 +23,7 @@ import time
 import urllib
 
 import xml.etree.cElementTree as etree
+from datetime import datetime, timedelta
 
 import sickbeard
 import generic
@@ -31,6 +32,7 @@ import sickbeard.encodingKludge as ek
 from sickbeard import classes, logger, helpers, exceptions, show_name_helpers
 from sickbeard import tvcache
 from sickbeard.common import Quality
+from sickbeard.exceptions import ex
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -73,6 +75,8 @@ class NewzbinProvider(generic.NZBProvider):
         self.url = 'https://www.newzbin.com/'
 
         self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
+
+        self.NEWZBIN_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
 
     def _report(self, name):
         return '{'+self.NEWZBIN_NS+'}'+name
@@ -218,7 +222,7 @@ class NewzbinProvider(generic.NZBProvider):
             logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
             self.downloadResult(nzb)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return False
 
         return True
@@ -229,7 +233,7 @@ class NewzbinProvider(generic.NZBProvider):
         try:
             f = myOpener.openit(url)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
 
         data = f.read()
@@ -274,13 +278,22 @@ class NewzbinProvider(generic.NZBProvider):
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log("Error trying to load Newzbin RSS feed: "+e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+            logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
             return []
 
         for cur_item in items:
             title = cur_item.findtext('title')
             if title == 'Feed Error':
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
+            if sickbeard.USENET_RETENTION is not None:
+                try:
+                    post_date = datetime.strptime(cur_item.findtext('{http://www.newzbin.com/DTD/2007/feeds/report/}postdate'), self.NEWZBIN_DATE_FORMAT)
+                    retention_date = datetime.now() - timedelta(days=sickbeard.USENET_RETENTION)
+                    if post_date < retention_date:
+                        continue
+                except Exception, e:
+                    logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
+                    continue
 
             item_list.append(cur_item)
 
