@@ -253,7 +253,10 @@ class PostProcessor(object):
                 if ep_obj.show.air_by_date:
                     season_folder = str(ep_obj.airdate.year)
                 else:
-                    season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
+                    try:
+                        season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
+                    except TypeError:
+                        logger.log(u"Error: Your season folder format is incorrect, try setting it back to the default")
         
         dest_folder = ek.ek(os.path.join, ep_obj.show.location, season_folder)
         
