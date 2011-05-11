@@ -21,7 +21,7 @@ import StringIO, zlib, gzip
 import os
 import stat
 import urllib, urllib2
-import re
+import re, socket
 import shutil
 
 import sickbeard
@@ -125,17 +125,21 @@ def getURL (url, headers=[]):
 
     encoding = usock.info().get("Content-Encoding")
 
-    if encoding in ('gzip', 'x-gzip', 'deflate'):
-        content = usock.read()
-        if encoding == 'deflate':
-            data = StringIO.StringIO(zlib.decompress(content))
-        else:
-            data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
-        result = data.read()
+    try:
+        if encoding in ('gzip', 'x-gzip', 'deflate'):
+            content = usock.read()
+            if encoding == 'deflate':
+                data = StringIO.StringIO(zlib.decompress(content))
+            else:
+                data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
+            result = data.read()
 
-    else:
-        result = usock.read()
-        usock.close()
+        else:
+            result = usock.read()
+            usock.close()
+    except socket.timeout:
+        logger.log(u"Timed out while loading URL "+url, logger.WARNING)
+        return None
 
     return result
 
