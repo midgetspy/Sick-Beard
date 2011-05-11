@@ -95,7 +95,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'NZB.su|https://nzb.su/||0!!!Sick Beard Index|http://momo.sickbeard.com/|0|0'
+    return 'Sick Beard Index|http://momo.sickbeard.com/|0|0'
 
 
 def getProviderModule(name):
