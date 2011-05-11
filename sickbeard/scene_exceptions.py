@@ -64,10 +64,36 @@ def retrieve_exceptions():
     scene_exceptions table in cache.db. Also clears the scene name cache.
     """
 
-    exception_dict = {}
-
     # exceptions are stored on github pages
     url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
+    url2 = 'http://lad1337.github.com/sb_tvdb_scene_exceptions/anime_exceptions.txt'
+   
+    exception_dict = retrieve_exceptions_fetcher(url)
+    exception_dict.update(retrieve_exceptions_fetcher(url2))
+
+    myDB = db.DBConnection("cache.db")
+
+    changed_exceptions = False
+
+    # write all the exceptions we got off the net into the database
+    for cur_tvdb_id in exception_dict:
+
+        # get a list of the existing exceptions for this ID
+        existing_exceptions = [x["show_name"] for x in myDB.select("SELECT * FROM scene_exceptions WHERE tvdb_id = ?", [cur_tvdb_id])]
+        
+        for cur_exception in exception_dict[cur_tvdb_id]:
+            # if this exception isn't already in the DB then add it
+            if cur_exception not in existing_exceptions:
+                myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
+                changed_exceptions = True
+
+    # since this could invalidate the results of the cache we clear it out after updating
+    if changed_exceptions:
+        name_cache.clearCache()
+    
+def retrieve_exceptions_fetcher(url):
+    
+    exception_dict = {}
     open_url = urllib.urlopen(url)
     
     # each exception is on one line with the format tvdb_id: 'show name 1', 'show name 2', etc
@@ -83,14 +109,5 @@ def retrieve_exceptions():
         alias_list = [re.sub(r'\\(.)', r'\1', x) for x in re.findall(r"'(.*?)(?<!\\)',?", aliases)]
         
         exception_dict[tvdb_id] = alias_list
-
-    myDB = db.DBConnection("cache.db")
-    myDB.action("DELETE FROM scene_exceptions WHERE 1=1")
-
-    # write all the exceptions we got off the net into the database
-    for cur_tvdb_id in exception_dict:
-        for cur_exception in exception_dict[cur_tvdb_id]:
-            myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
-
-    # since this could invalidate the results of the cache we clear it out after updating
-    name_cache.clearCache()
+    return exception_dict
+    

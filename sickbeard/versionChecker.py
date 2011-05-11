@@ -20,6 +20,7 @@ import sickbeard
 from sickbeard import version, ui
 from sickbeard import logger
 from sickbeard import scene_exceptions
+from sickbeard.exceptions import ex
 
 import os, platform, shutil
 import subprocess, re
@@ -191,7 +192,7 @@ class WindowsUpdateManager(UpdateManager):
             os.remove(filename)
 
         except Exception, e:
-            logger.log(u"Error while trying to update: "+e.message.decode('utf-8'), logger.ERROR)
+            logger.log(u"Error while trying to update: "+ex(e), logger.ERROR)
             return False
 
         return True
@@ -478,7 +479,7 @@ class SourceUpdateManager(GitUpdateManager):
             ver_file.write(self._newest_commit_hash)
             ver_file.close()
         except IOError, e:
-            logger.log(u"Unable to write version file, update not complete: "+e.message.decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to write version file, update not complete: "+ex(e), logger.ERROR)
             return False
 
         return True

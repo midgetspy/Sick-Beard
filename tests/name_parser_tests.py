@@ -5,9 +5,11 @@ import sys, os.path
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../lib'))
 
+import sickbeard # we need to import this so we can override the SYS_ENCODING which is needed by the parser
 from sickbeard.name_parser import parser
 
 DEBUG = VERBOSE = False
+sickbeard.SYS_ENCODING = "UTF-8"
 
 simple_test_cases = {
               'standard': {
@@ -100,18 +102,21 @@ simple_test_cases = {
               'anime_standard': {
               '[Tsuki] Bleach - 301 [1280x720][61D1D4EE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'Tsuki', None, [301]),
               '[Tsuki] Fairy Tail - 70 [1280x720][C4807111]': parser.ParseResult(None, 'Fairy Tail', None, [], '1280x720', 'Tsuki', None, [70]),
-              '[Tsuki] Fairy Tail - 72 [XviD][C4807111]': parser.ParseResult(None, 'Fairy Tail', None, [], 'XviD', 'Tsuki', None, [72]),
-              '[SGKK] Bleach 312v2 [720p MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p', 'SGKK', None, [312]),
+              '[SGKK] Bleach 312v2 [720p MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p MKV', 'SGKK', None, [312]),
               '[BSS-Anon] Tengen Toppa Gurren Lagann - 22-23 [1280x720][h264][6039D9AF]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '1280x720', 'BSS-Anon', None, [22,23]),
-              '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [], '480p', 'SJSUBS', None, [2]),
+              '[SJSUBS]_Naruto_Shippuden_-_02_[480p AAC]': parser.ParseResult(None, 'Naruto Shippuden', None, [], '480p AAC', 'SJSUBS', None, [2]),
+              '[SFW-Chihiro] Dance in the Vampire Bund - 12 [1920x1080 Blu-ray FLAC][2F6DBC66].mkv': parser.ParseResult(None, 'Dance in the Vampire Bund', None, [], '1920x1080 Blu-ray FLAC', 'SFW-Chihiro', None, [12]),
+              '[SHiN-gx] Hanasaku Iroha - 01 [1280x720 h.264 AAC][BDC36683]': parser.ParseResult(None, 'Hanasaku Iroha', None, [], '1280x720 h.264 AAC', 'SHiN-gx', None, [1]),
+              '[SFW-Chihiro] Dance in the Vampire Bund - 02 [1920x1080 Blu-ray FLAC][C1FA0A09]': parser.ParseResult(None, 'Dance in the Vampire Bund', None, [], '1920x1080 Blu-ray FLAC', 'SFW-Chihiro', None, [2]),
               },
                
               'anime_standard_round': {
-              '[SGKK] Bleach - 312v2 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'SGKK', None, [312]),
+              '[SGKK] Bleach - 312v2 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720 h264 AAC', 'SGKK', None, [312]),
               '[HorribleSubs] D Gray-Man - 312 (480p) [F501C9BE]': parser.ParseResult(None, 'D Gray-Man', None, [], '480p', 'HorribleSubs', None, [312]),
-              '[SGKK] Tengen Toppa Gurren Lagann - 45-46 (720p h264) [F501C9BE]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '720p', 'SGKK', None, [45,46]),
-              '[Stratos-Subs]_Infinite_Stratos_-_12_(1280x720_H.264_AAC)_[379759DB]': parser.ParseResult(None, 'Infinite Stratos', None, [], '1280x720', 'Stratos-Subs', None, [12]),
-              '[ShinBunBu-Subs] Bleach - 02-03 (CX 1280x720 x264 AAC)': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'ShinBunBu-Subs', None, [02,03]),
+              '[SGKK] Tengen Toppa Gurren Lagann - 45-46 (720p h264) [F501C9BE]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '720p h264', 'SGKK', None, [45,46]),
+              '[Stratos-Subs]_Infinite_Stratos_-_12_(1280x720_H.264_AAC)_[379759DB]': parser.ParseResult(None, 'Infinite Stratos', None, [], '1280x720_H.264_AAC', 'Stratos-Subs', None, [12]),
+              '[ShinBunBu-Subs] Bleach - 02-03 (CX 1280x720 x264 AAC)': parser.ParseResult(None, 'Bleach', None, [], 'CX 1280x720 x264 AAC', 'ShinBunBu-Subs', None, [02,03]),
+              '[Doki] Hanasaku Iroha - 03 (848x480 h264 AAC) [CB1AA73B]': parser.ParseResult(None, 'Hanasaku Iroha', None, [], '848x480 h264 AAC', 'Doki', None, [03]),
                },
                
               'anime_slash': {
@@ -123,18 +128,20 @@ simple_test_cases = {
               '[Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
               '[Ayako] Infinite Stratos - IS - 07v2 [H264][720p][44419534]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
               '[Ayako-Shikkaku] Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne - 10 [LQ][h264][720p] [8853B21C]': parser.ParseResult(None, 'Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne', None, [], '720p', 'Ayako-Shikkaku',None, [10]),
+              '[Tsuki] Fairy Tail - 72 [XviD][C4807111]': parser.ParseResult(None, 'Fairy Tail', None, [], 'C4807111', 'Tsuki', None, [72]),
+              '[UTW]_Fractal_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractal', None, [], 'h264-720p', 'UTW', None, [1]),
+              
               },
               
-              'anime_standard_codec2': {
-              '[UTW]_Fractale_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractale', None, [], '720p', 'UTW', None, [1])
-                                    
-              },
               'anime_and_normal':{
               'Bleach - s02e03 - 012 - Name & Name': parser.ParseResult(None, 'Bleach', 2, [3], None, None, None, [12]),
               'Bleach - s02e03e04 - 012-013 - Name & Name': parser.ParseResult(None, 'Bleach', 2, [3,4], None, None, None, [12,13]),
               'Bleach - s16e03-04 - 313-314': parser.ParseResult(None, 'Bleach', 16, [3,4], None, None, None, [313,314]),
               'Blue Submarine No. 6 s16e03e04 313-314': parser.ParseResult(None, 'Blue Submarine No. 6', 16, [3,4], None, None, None, [313,314]),
               'Bleach.s16e03-04.313-314': parser.ParseResult(None, 'Bleach', 16, [3,4], None, None, None, [313,314]),
+              '.hack roots s01e01 001.mkv': parser.ParseResult(None, 'hack roots', 1, [1], None, None, None, [1]),
+              '.hack sign s01e01 001.mkv': parser.ParseResult(None, 'hack sign', 1, [1], None, None, None, [1])
+              
               },
               
               'anime_and_normal_reverse':{
@@ -313,11 +320,11 @@ class BasicTests(unittest.TestCase):
         
     def test_anime_standard(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard')
+        self._test_names(np, 'anime_standard',verbose=True)
         
     def test_anime_standard_round(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_round')
+        self._test_names(np, 'anime_standard_round',verbose=False)
         
     def test_anime_slash(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
@@ -325,15 +332,11 @@ class BasicTests(unittest.TestCase):
         
     def test_anime_codec(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_codec')
-        
-    def test_anime_codec2(self):
-        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_codec2')
+        self._test_names(np, 'anime_standard_codec',verbose=False)
                 
     def test_anime_and_normal(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_and_normal',verbose=True)
+        self._test_names(np, 'anime_and_normal')
                 
     def test_anime_and_normal_reverse(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)

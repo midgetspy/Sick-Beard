@@ -32,6 +32,7 @@ from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -327,6 +328,16 @@ def searchDBForShow(regShowName):
         # if we find exactly one show return its name and tvdb_id
         if len(sqlResults) == 1:
             return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+        else:
+            tvdbid = get_tvdbid(showName,sickbeard.showList)
+       
+       
+        #TODO: this is bad taking the other function and doing a lookup in the db. REFACTORE! this whole thing
+        if tvdbid:
+            sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = ?", [tvdbid])
+            # if we find exactly one show return its name and tvdb_id
+            if len(sqlResults) == 1:
+                return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
         else:
             # if we didn't get exactly one result then try again with the year stripped off if possible
@@ -410,7 +421,7 @@ def rename_file(old_path, new_name):
     try:
         ek.ek(os.rename, old_path, new_path)
     except (OSError, IOError), e:
-        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + e.message.decode(sickbeard.SYS_ENCODING), logger.ERROR)
+        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + ex(e), logger.ERROR)
         return False
 
     return new_path
@@ -498,7 +509,7 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
     
     return (season, episodes)
 
-def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
+def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False):
     """Retruns a parse result or a InvalidNameException
         it will try to take the correct regex for the show if given
         if not given it will try Anime first then Normal
@@ -507,6 +518,9 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
         
         to get the tvdbid the tvdbapi might be used if tvdbActiveLookUp is True
     """
+    if len(showList) == 0:
+        showList = sickbeard.showList
+
     if show and show.is_anime:
         modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
     elif show and not show.is_anime:
@@ -522,8 +536,8 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
             pass
         else:
             if mode == NameParser.ANIME_REGEX and not (show and show.is_anime):
-                tvdbid = get_tvdbid(parse_result.series_name, tvdbActiveLookUp)
-                if not tvdbid or not check_for_anime(tvdbid): # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
+                tvdbid = get_tvdbid(parse_result.series_name, showList, tvdbActiveLookUp)
+                if not tvdbid or not check_for_anime(tvdbid,showList): # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
                     continue
                 else: # this means it was an anime
                     break
@@ -532,13 +546,42 @@ def parse_result_wrapper(show,toParse,tvdbActiveLookUp=False):
         raise InvalidNameException("Unable to parse "+toParse)
     return parse_result
 
-def get_tvdbid(name, useTvdb):
-    logger.log(u"trying to get the tvdbid for "+str(name), logger.DEBUG)
-            
-    for show in sickbeard.showList:
-        nameFromList = re.sub('[. -]', ' ', show.name).lower().lstrip()
-        nameInQuestion = re.sub('[. -]', ' ', name).lower().lstrip()
+
+def _check_against_names(name, show):
+    nameInQuestion = full_sanitizeSceneName(name)
+
+    showNames = [show.name]
+    showNames.extend(sickbeard.scene_exceptions.get_scene_exceptions(show.tvdbid))
+
+    for showName in showNames:
+        nameFromList = full_sanitizeSceneName(showName)
+        # FIXME: this is ok for most shows but will give fals positives on:
+        """nameFromList = "show name: special version"
+           nameInQuestion = "show name"
+           ->will match
+
+           but the otherway around:
+
+           nameFromList = "show name"
+           nameInQuestion = "show name: special version"
+           ->will not work
+
+           athough the first example will only occur during pp
+           and the second example is good that it wont match
+
+        """
+
         if nameFromList.find(nameInQuestion) == 0:
+            return True
+
+    return False
+
+
+def get_tvdbid(name, showList, useTvdb=False):
+    logger.log(u"Trying to get the tvdbid for "+str(name), logger.DEBUG)
+            
+    for show in showList:
+        if _check_against_names(name, show):
             logger.log(u"Matched "+str(name)+" in the showlist to the show "+str(show.name), logger.DEBUG)
             return show.tvdbid
 
@@ -568,11 +611,17 @@ def get_tvdbid(name, useTvdb):
     return 0 
     
  
-def check_for_anime(tvdb_id):
+def check_for_anime(tvdb_id,showList=[],forceDB=False):
     """
     Check if the show is a anime
     """
-    if tvdb_id:
+    if not forceDB and len(showList):
+        for show in showList:
+            if show.tvdbid == tvdb_id and show.is_anime:
+                return True
+    
+    
+    elif tvdb_id:
         myDB = db.DBConnection()
         isAbsoluteNumberSQlResult = myDB.select("SELECT anime,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
         if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
@@ -580,6 +629,9 @@ def check_for_anime(tvdb_id):
             return True
     return False 
     
+def full_sanitizeSceneName(name):
+    return re.sub('[. -]', ' ', sanitizeSceneName(name)).lower().lstrip()
+
 
 def sanitizeSceneName (name, ezrss=False):
     """

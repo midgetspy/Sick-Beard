@@ -1048,7 +1048,7 @@ a string that contains the response entity body.
                         feedparser.feed(info)
                         info = feedparser.close()
                         feedparser._parse = None
-                    except IndexError:
+                    except IndexError, ValueError:
                         self.cache.delete(cachekey)
                         cachekey = None
                         cached_value = None

@@ -3,39 +3,41 @@ $(document).ready(function(){
     $('.epSearch').click(function(){
       var parent = $(this).parent();
       
-      // put the ajax spinner there while we wait
+      // put the ajax spinner (for non white bg) placeholder while we wait
       parent.empty();
-      parent.append($("<img/>").attr("src", sbRoot+"/images/loading16.gif"));
+      parent.append($("<img/>").attr({"src": sbRoot+"/images/loading16_dddddd.gif", "height": "16", "alt": "", "title": "loading"}));
       
       $.getJSON($(this).attr('href'), function(data){
-	  	  // if they failed then just put the red X
-	      if (data.result == 'failure') {
-	    	  img_name = 'no16.png';
-	      
-	      // if the snatch was successful then put the green check and fill in the row appropriately
-	      } else {
-	    	  img_name = 'yes16.png';
-	    	  // color the row
-	    	  parent.parent().removeClass('skipped wanted qual good unaired').addClass('good');
-	    	  parent.siblings('.status_column').html(data.result);
-	      }
-	
-	      // put the right image into the row
-	      parent.empty();
-		  parent.append($("<img/>").attr({"src": sbRoot+"/images/"+img_name, "height": "16"}));
+          // if they failed then just put the red X
+          if (data.result == 'failure') {
+              img_name = 'no16.png';
+              img_result = 'failed';
+
+          // if the snatch was successful then apply the corresponding class and fill in the row appropriately
+          } else {
+              img_name = 'yes16.png';
+              img_result = 'success';
+              // color the row
+              parent.parent().removeClass('skipped wanted qual good unaired').addClass('good');
+              parent.siblings('.status_column').html(data.result);
+          }
+
+          // put the corresponding image as the result for the the row
+          parent.empty();
+          parent.append($("<img/>").attr({"src": sbRoot+"/images/"+img_name, "height": "16", "alt": img_result, "title": img_result}));
       });
 
       // fon't follow the link
       return false;
     });
-      
+
     $('#seasonJump').change(function() {
-	    var id = $(this).val();
-	    if (id && id != 'jump') {
-	        $('html,body').animate({scrollTop: $(id).offset().top},'slow');
-	        location.hash = id;
-	    }
-	    $(this).val('jump');
+        var id = $(this).val();
+        if (id && id != 'jump') {
+            $('html,body').animate({scrollTop: $(id).offset().top},'slow');
+            location.hash = id;
+        }
+        $(this).val('jump');
     });
 
     $("#prevShow").click(function(){
@@ -49,7 +51,6 @@ $(document).ready(function(){
     });
 
     $('#changeStatus').click(function(){
-  
         var sbRoot = $('#sbRoot').val()
         var epArr = new Array()
 
@@ -65,13 +66,11 @@ $(document).ready(function(){
             return false
 
         url = sbRoot+'/home/setStatus?show='+$('#showID').attr('value')+'&eps='+epArr.join('|')+'&status='+$('#statusSelect').attr('value')
-
         window.location.href = url
 
     });
 
     $('.seasonCheck').click(function(){
-    
         var seasCheck = this;
         var seasNo = $(seasCheck).attr('id');
 
@@ -79,8 +78,8 @@ $(document).ready(function(){
             var epParts = $(this).attr('id').split('x')
 
             if (epParts[0] == seasNo) {
-                this.checked = seasCheck.checked 
-            } 
+                this.checked = seasCheck.checked
+            }
         });
     });
 
