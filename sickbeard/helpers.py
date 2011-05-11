@@ -18,20 +18,21 @@
 
 
 import StringIO, zlib, gzip
-import os.path, os
+import os
 import stat
 import urllib, urllib2
-import re
+import re, socket
 import shutil
 
 import sickbeard
 
-from sickbeard.exceptions import *
+from sickbeard.exceptions import MultipleShowObjectsException
 from sickbeard import logger, classes
-from sickbeard.common import *
+from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -124,17 +125,21 @@ def getURL (url, headers=[]):
 
     encoding = usock.info().get("Content-Encoding")
 
-    if encoding in ('gzip', 'x-gzip', 'deflate'):
-        content = usock.read()
-        if encoding == 'deflate':
-            data = StringIO.StringIO(zlib.decompress(content))
-        else:
-            data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
-        result = data.read()
+    try:
+        if encoding in ('gzip', 'x-gzip', 'deflate'):
+            content = usock.read()
+            if encoding == 'deflate':
+                data = StringIO.StringIO(zlib.decompress(content))
+            else:
+                data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
+            result = data.read()
 
-    else:
-        result = usock.read()
-        usock.close()
+        else:
+            result = usock.read()
+            usock.close()
+    except socket.timeout:
+        logger.log(u"Timed out while loading URL "+url, logger.WARNING)
+        return None
 
     return result
 
@@ -407,7 +412,7 @@ def rename_file(old_path, new_name):
     try:
         ek.ek(os.rename, old_path, new_path)
     except (OSError, IOError), e:
-        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + str(e), logger.ERROR)
+        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + ex(e), logger.ERROR)
         return False
 
     return new_path
@@ -417,6 +422,11 @@ def chmodAsParent(childPath):
         return
 
     parentPath = ek.ek(os.path.dirname, childPath)
+    
+    if not parentPath:
+        logger.log(u"No parent path provided in "+childPath+", unable to get permissions from it", logger.DEBUG)
+        return
+    
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
 
     if ek.ek(os.path.isfile, childPath):
@@ -453,7 +463,7 @@ def fixSetGroupID(childPath):
             return
 
         try:
-            ek.ek(os.chown, childPath, -1, parentGID)
+            ek.ek(os.chown, childPath, -1, parentGID)  #@UndefinedVariable - only available on UNIX
             logger.log(u"Respecting the set-group-ID bit on the parent directory for %s" % (childPath), logger.DEBUG)
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)

@@ -16,15 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
-
-import sickbeard
+import os
 
 import generic
-
-from sickbeard.common import *
-from sickbeard import logger, exceptions, helpers
-from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import encodingKludge as ek
 

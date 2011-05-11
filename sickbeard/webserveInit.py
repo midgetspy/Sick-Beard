@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import cherrypy
+#import cherrypy
 import cherrypy.lib.auth_basic
 import os.path
 

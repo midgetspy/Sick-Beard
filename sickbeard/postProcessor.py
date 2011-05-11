@@ -20,7 +20,6 @@ from __future__ import with_statement
 
 import glob
 import os
-import os.path
 import re
 import shlex
 import subprocess
@@ -39,6 +38,7 @@ from sickbeard import show_name_helpers
 from sickbeard import scene_exceptions
 
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
@@ -113,7 +113,7 @@ class PostProcessor(object):
         base_name = file_path.rpartition('.')[0]+'.'
         
         # don't confuse glob with chars we didn't mean to use
-        base_name = re.sub(r'[\[\]\*\?]', r'\\\g<0>', base_name)
+        base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
     
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
             # only list it if the only non-shared part is the extension
@@ -169,18 +169,19 @@ class PostProcessor(object):
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
+            # get the extension
+            cur_extension = cur_file_path.rpartition('.')[-1]
+        
+            # replace .nfo with .nfo-orig to avoid conflicts
+            if cur_extension == 'nfo':
+                cur_extension = 'nfo-orig'
+
             # If new base name then convert name
             if new_base_name:
-                # get the extension
-                cur_extension = cur_file_path.rpartition('.')[-1]
-            
-                # replace .nfo with .nfo-orig to avoid conflicts
-                if cur_extension == 'nfo':
-                    cur_extension = 'nfo-orig'
-                    
                 new_file_name = new_base_name +'.' + cur_extension
+            # if we're not renaming we still want to change extensions sometimes
             else:
-                new_file_name = cur_file_name
+                new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
             
             new_file_path = ek.ek(os.path.join, new_path, new_file_name)
 
@@ -201,7 +202,7 @@ class PostProcessor(object):
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
                 raise e
                 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
@@ -221,7 +222,7 @@ class PostProcessor(object):
                 helpers.copyFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+str(e).decode('utf-8'), logger.ERROR)
+                logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
                 raise e
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
@@ -252,7 +253,10 @@ class PostProcessor(object):
                 if ep_obj.show.air_by_date:
                     season_folder = str(ep_obj.airdate.year)
                 else:
-                    season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
+                    try:
+                        season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
+                    except TypeError:
+                        logger.log(u"Error: Your season folder format is incorrect, try setting it back to the default")
         
         dest_folder = ek.ek(os.path.join, ep_obj.show.location, season_folder)
         
@@ -363,7 +367,7 @@ class PostProcessor(object):
     
                 self._log(u"Looking up name "+cur_name+u" on TVDB", logger.DEBUG)
                 showObj = t[cur_name]
-            except (tvdb_exceptions.tvdb_exception), e:
+            except (tvdb_exceptions.tvdb_exception):
                 # if none found, search on all languages
                 try:
                     # There's gotta be a better way of doing this but we don't wanna
@@ -375,11 +379,11 @@ class PostProcessor(object):
 
                     self._log(u"Looking up name "+cur_name+u" in all languages on TVDB", logger.DEBUG)
                     showObj = t[cur_name]
-                except (tvdb_exceptions.tvdb_exception, IOError), e:
+                except (tvdb_exceptions.tvdb_exception, IOError):
                     pass
 
                 continue
-            except (IOError), e:
+            except (IOError):
                 continue
             
             self._log(u"Lookup successful, using tvdb id "+str(showObj["id"]), logger.DEBUG)
@@ -423,10 +427,11 @@ class PostProcessor(object):
             try:
                 (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
             except InvalidNameException, e:
-                logger.log(u"Unable to parse, skipping: "+str(e), logger.DEBUG)
+                logger.log(u"Unable to parse, skipping: "+ex(e), logger.DEBUG)
                 continue
             
-            if cur_tvdb_id:
+            # if we already did a successful history lookup then keep that tvdb_id value
+            if cur_tvdb_id and not (self.in_history and tvdb_id):
                 tvdb_id = cur_tvdb_id
             if cur_season != None:
                 season = cur_season
@@ -434,7 +439,7 @@ class PostProcessor(object):
                 episodes = cur_episodes
             
             # for air-by-date shows we need to look up the season/episode from tvdb
-            if season == -1 and tvdb_id:
+            if season == -1 and tvdb_id and episodes:
                 self._log(u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
                 
                 # try to get language set for this show
@@ -505,7 +510,7 @@ class PostProcessor(object):
             try:
                 curEp = show_obj.getEpisode(season, episode)
             except exceptions.EpisodeNotFoundException, e:
-                self._log(u"Unable to create episode: "+str(e).decode('utf-8'), logger.DEBUG)
+                self._log(u"Unable to create episode: "+ex(e), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()
     
             if root_ep == None:
@@ -519,10 +524,10 @@ class PostProcessor(object):
     def _get_quality(self, ep_obj):
         
         ep_quality = common.Quality.UNKNOWN
-        oldStatus = None
+
         # make sure the quality is set right before we continue
         if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
-            oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
+            oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
             if ep_quality != common.Quality.UNKNOWN:
                 self._log(u"The old status had a quality in it, using that: "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
                 return ep_quality
@@ -557,10 +562,10 @@ class PostProcessor(object):
             self._log(u"Absolute path to script: "+ek.ek(os.path.abspath, script_cmd[0]), logger.DEBUG)
             try:
                 p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
-                out, err = p.communicate()
+                out, err = p.communicate() #@UnusedVariable
                 self._log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
-                self._log(u"Unable to run extra_script: "+str(e).decode('utf-8'))
+                self._log(u"Unable to run extra_script: "+ex(e))
     
     def _is_priority(self, ep_obj, new_ep_quality):
         
@@ -575,7 +580,7 @@ class PostProcessor(object):
             return True
         
         # if the user downloaded it manually and it appears to be a PROPER/REPACK then it's priority
-        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
+        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
         if self.is_proper and new_ep_quality >= old_ep_quality:
             self._log(u"This was manually downloaded but it appears to be a proper so I'm marking it as priority", logger.DEBUG)
             return True 

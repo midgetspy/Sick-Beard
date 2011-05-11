@@ -20,7 +20,6 @@ __all__ = ['ezrss',
            'tvtorrents',
            'nzbmatrix',
            'nzbs_org',
-           'tvbinz',
            'nzbsrus',
            'womble',
            'newzbin',
@@ -71,6 +70,11 @@ def getNewznabProviderList(data):
             providerDict[curDefault.name].default = True
             providerDict[curDefault.name].name = curDefault.name
             providerDict[curDefault.name].url = curDefault.url
+        
+        # a 0 in the key spot indicates that no key is needed, so set this on the object
+        if curDefault.key == '0':
+            curDefault.key = ''
+            curDefault.needs_auth = False
 
     return filter(lambda x: x, providerList)
 
@@ -91,7 +95,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'NZB.su|https://nzb.su/||0'
+    return 'Sick Beard Index|http://momo.sickbeard.com/|0|0'
 
 
 def getProviderModule(name):

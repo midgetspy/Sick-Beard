@@ -72,7 +72,7 @@ def retrieve_exceptions():
     
     # each exception is on one line with the format tvdb_id: 'show name 1', 'show name 2', etc
     for cur_line in open_url.readlines():
-        tvdb_id, sep, aliases = cur_line.partition(':')
+        tvdb_id, sep, aliases = cur_line.partition(':') #@UnusedVariable
         
         if not aliases:
             continue
@@ -85,12 +85,21 @@ def retrieve_exceptions():
         exception_dict[tvdb_id] = alias_list
 
     myDB = db.DBConnection("cache.db")
-    myDB.action("DELETE FROM scene_exceptions WHERE 1=1")
+
+    changed_exceptions = False
 
     # write all the exceptions we got off the net into the database
     for cur_tvdb_id in exception_dict:
+
+        # get a list of the existing exceptions for this ID
+        existing_exceptions = [x["show_name"] for x in myDB.select("SELECT * FROM scene_exceptions WHERE tvdb_id = ?", [cur_tvdb_id])]
+        
         for cur_exception in exception_dict[cur_tvdb_id]:
-            myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
+            # if this exception isn't already in the DB then add it
+            if cur_exception not in existing_exceptions:
+                myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
+                changed_exceptions = True
 
     # since this could invalidate the results of the cache we clear it out after updating
-    name_cache.clearCache()
+    if changed_exceptions:
+        name_cache.clearCache()

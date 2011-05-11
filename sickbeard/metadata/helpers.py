@@ -17,22 +17,19 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import os.path
 import urllib2
 
 import sickbeard
 
-from sickbeard.common import *
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
 
 def getTVDBIDFromNFO(dir):
-
-    show_lang = None
 
     if not ek.ek(os.path.isdir, dir):
         logger.log(u"Show dir doesn't exist, can't load NFO")
@@ -52,7 +49,6 @@ def getTVDBIDFromNFO(dir):
                 + str(showXML.findtext('tvdbid')) + " " \
                 + str(showXML.findtext('id')))
 
-        name = showXML.findtext('title')
         if showXML.findtext('tvdbid') != None:
             tvdb_id = int(showXML.findtext('tvdbid'))
         elif showXML.findtext('id'):
@@ -69,14 +65,14 @@ def getTVDBIDFromNFO(dir):
             raise exceptions.NoNFOException("Unable to look up the show on TVDB, not using the NFO")
 
     except (exceptions.NoNFOException, SyntaxError, ValueError), e:
-        logger.log(u"There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
+        logger.log(u"There was an error parsing your existing tvshow.nfo file: " + ex(e), logger.ERROR)
         logger.log(u"Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 
         try:
             xmlFileObj.close()
             ek.ek(os.rename, xmlFile, xmlFile + ".old")
         except Exception, e:
-            logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
+            logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + ex(e), logger.ERROR)
         raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
     return tvdb_id
@@ -101,7 +97,7 @@ def getShowImage(url, imgNum=None):
         logger.log(u"There was an error trying to retrieve the image, aborting", logger.ERROR)
         return None
     except urllib2.HTTPError, e:
-        logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+str(e).decode('utf-8'), logger.ERROR)
+        logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+ex(e), logger.ERROR)
         return None
 
     return image_data

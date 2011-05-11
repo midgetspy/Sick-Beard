@@ -13,8 +13,9 @@
 
 <div id="config">
 <div id="config-content">
-<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.PROG_DIR</span> "</h5>
-<form action="saveSearch" method="post">
+<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
+
+<form id="configForm" action="saveSearch" method="post">
 
             <div id="config-components">
                 
@@ -57,7 +58,7 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         
                     </fieldset>
                 </div><!-- /component-group1 //-->
@@ -213,12 +214,16 @@
                         </div>
                         
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         
                         </div><!-- /content_use_nzbs //-->
                         
                     </fieldset>
                 </div><!-- /component-group2 //-->
+
+                <div class="title-group clearfix" id="no-torrents">
+                    <div class="ui-corner-all config_message">Note: Sick Beard works better with Usenet than with Torrents, <a href="http://www.sickbeard.com/usenet.html" target="_blank">here's why</a>.</div>
+                </div>
 
                 <div id="core-component-group3" class="component-group clearfix">
 
@@ -250,13 +255,13 @@
                         </div>
                         
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         </div><!-- /content_use_torrents //-->
                         
                     </fieldset>
                 </div><!-- /component-group3 //-->
 
-            <br/><input type="submit" value="Save Changes" /><br/>
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
 

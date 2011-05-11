@@ -28,7 +28,7 @@ def diagnose():
     user-readable message indicating possible issues.
     '''
     try:
-        import pynotify
+        import pynotify  #@UnusedImport
     except ImportError:
         return (u"<p>Error: pynotify isn't installed.  On Ubuntu/Debian, install the "
                 u"<a href=\"apt:python-notify\">python-notify</a> package.")
@@ -58,6 +58,7 @@ def diagnose():
 class LibnotifyNotifier:
     def __init__(self):
         self.pynotify = None
+        self.gobject = None
 
     def init_pynotify(self):
         if self.pynotify is not None:
@@ -67,10 +68,16 @@ class LibnotifyNotifier:
         except ImportError:
             logger.log(u"Unable to import pynotify. libnotify notifications won't work.")
             return False
+        try:
+            import gobject
+        except ImportError:
+            logger.log(u"Unable to import gobject. We can't catch a GError in display.")
+            return False
         if not pynotify.init('Sick Beard'):
             logger.log(u"Initialization of pynotify failed. libnotify notifications won't work.")
             return False
         self.pynotify = pynotify
+        self.gobject = gobject
         return True
 
     def notify_snatch(self, ep_name):
@@ -99,7 +106,9 @@ class LibnotifyNotifier:
         # will be printed but the call to show() will still return True.
         # pynotify doesn't seem too keen on error handling.
         n = self.pynotify.Notification(title, message, icon_uri)
-        return n.show()
-
+        try:
+            return n.show()
+        except self.gobject.GError:
+            return False
 
 notifier = LibnotifyNotifier

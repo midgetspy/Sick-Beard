@@ -21,6 +21,7 @@
 import urllib
 import datetime
 import re
+import os
 
 import xml.etree.cElementTree as etree
 
@@ -29,11 +30,12 @@ import generic
 
 from sickbeard import classes
 from sickbeard.helpers import sanitizeSceneName
+from sickbeard import encodingKludge as ek
 
 from sickbeard import exceptions
-from sickbeard.common import *
 from sickbeard import logger
 from sickbeard import tvcache
+from sickbeard.exceptions import ex
 
 class NewznabProvider(generic.NZBProvider):
 
@@ -45,6 +47,9 @@ class NewznabProvider(generic.NZBProvider):
 
 		self.url = url
 		self.key = key
+		
+		# if a provider doesn't need an api key then this can be false
+		self.needs_auth = True
 
 		self.enabled = True
 		self.supportsBacklog = True
@@ -55,6 +60,8 @@ class NewznabProvider(generic.NZBProvider):
 		return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
 
 	def imageName(self):
+		if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID()+'.gif')):
+			return self.getID()+'.gif'
 		return 'newznab.gif'
 
 	def isEnabled(self):
@@ -112,7 +119,6 @@ class NewznabProvider(generic.NZBProvider):
 
 		return [params]
 
-
 	def _doGeneralSearch(self, search_string):
 		return self._doSearch({'q': search_string})
 
@@ -147,7 +153,7 @@ class NewznabProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log(u"Error trying to load "+self.name+" RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+			logger.log(u"Error trying to load "+self.name+" RSS feed: "+ex(e), logger.ERROR)
 			logger.log(u"RSS data: "+data, logger.DEBUG)
 			return []
 
@@ -236,7 +242,7 @@ class NewznabCache(tvcache.TVCache):
 
 		try:
 			responseSoup = etree.ElementTree(etree.XML(data))
-		except Exception, e:
+		except Exception:
 			return True
 
 		if responseSoup.getroot().tag == 'error':

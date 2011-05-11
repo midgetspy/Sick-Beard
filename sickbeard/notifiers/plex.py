@@ -19,9 +19,11 @@
 import urllib
 import sickbeard
 
-from xml.dom import minidom
 from sickbeard import logger, common
 from sickbeard.notifiers.xbmc import XBMCNotifier 
+from sickbeard.exceptions import ex
+
+from xml.dom import minidom
 
 class PLEXNotifier(XBMCNotifier):
 
@@ -67,7 +69,12 @@ class PLEXNotifier(XBMCNotifier):
         logger.log(u"Plex Media Server updating " + sickbeard.PLEX_SERVER_HOST, logger.DEBUG)
 
         url = "http://%s/library/sections" % sickbeard.PLEX_SERVER_HOST
-        xml_sections = minidom.parse(urllib.urlopen(url))
+        try:
+            xml_sections = minidom.parse(urllib.urlopen(url))
+        except IOError, e:
+            logger.log(u"Error while trying to contact your plex server: "+ex(e), logger.ERROR)
+            return False
+
         sections = xml_sections.getElementsByTagName('Directory')
 
         for s in sections:
@@ -75,9 +82,9 @@ class PLEXNotifier(XBMCNotifier):
                 url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, s.getAttribute('key'))
 
                 try:
-                    x = urllib.urlopen(url)
+                    urllib.urlopen(url)
                 except Exception, e:
-                    logger.log(u"Error updating library section: "+str(e).decode('utf-8'), logger.ERROR)
+                    logger.log(u"Error updating library section: "+ex(e), logger.ERROR)
                     return False
 
         return True
