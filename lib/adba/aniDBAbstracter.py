@@ -1,8 +1,32 @@
-import anidb as anidblib
+#!/usr/bin/env python
+#
+# This file is part of aDBa.
+#
+# aDBa is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# aDBa is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with aDBa.  If not, see <http://www.gnu.org/licenses/>.
+
 from time import time,sleep
-import hasher
-from maper import AniDBMaper
-class aniDBabstractObject:
+import aniDBfileInfo as fileInfo
+from aniDBmaper import AniDBMaper
+
+
+class aniDBabstractObject(object):
+    
+    def __init__(self,aniDB,load=False):
+        self.aniDB = aniDB
+        if load:
+            self.load_data()
+    
     def _fill(self,dataline):
         for key in dataline:
             try:
@@ -34,23 +58,23 @@ class aniDBabstractObject:
 
     def check_last_call(self, last):
         now = time()
-        print "last " +str(last) + " now " + str(now)
         if last and now-last > 3:
             print "sleeping for 3"
             sleep(3)  
         return time()
-
-
+    
+    def load_data(self):
+        return False
+    
+    
+    
 class Anime(aniDBabstractObject):
-    def __init__(self,aniDB,name=None,aid=None,paramsA=None):
+    def __init__(self,aniDB,name=None,aid=None,paramsA=None,load=False):
         if not name and not aid:
             raise 
-        
+        self.maper = AniDBMaper() 
         self.name = name
         self.aid = aid
-            
-        self.maper = AniDBMaper()    
-        self.aniDB = aniDB
         
         if not paramsA:
             self.bitCode = "b2f0e0fc000000"
@@ -59,10 +83,10 @@ class Anime(aniDBabstractObject):
             self.paramsA = paramsA
             self.bitCode = self.maper.getAnimeBitsA(self.paramsA)
         
-        #self._fill(dataline)
-        #self._builPreSequal()
+        super(Anime, self).__init__(aniDB,load)
         
     def load_data(self):
+        """load the data from anidb"""
         self.lastCommandTime = aniDBabstractObject.check_last_call(self, self.lastCommandTime)
         
         self.rawData = self.aniDB.anime(aid=self.aniDBid,aname=self.name,amask=self.bitCode)
@@ -87,12 +111,11 @@ class Anime(aniDBabstractObject):
                     
 class Episode(aniDBabstractObject):
     
-    def __init__(self,aniDB,number=None,epid=None,filePath=None,fid=None,epno=None,paramsA=None,paramsF=None):
+    def __init__(self,aniDB,number=None,epid=None,filePath=None,fid=None,epno=None,paramsA=None,paramsF=None,load=False):
         if not aniDB and not number and not epid and not file and not fid:
             return None
         
         self.maper = AniDBMaper()
-        self.aniDB = aniDB
         self.epid = epid
         self.filePath = filePath
         self.fid = fid
@@ -112,9 +135,11 @@ class Episode(aniDBabstractObject):
             self.paramsF = paramsF
             self.bitCodeF = self.maper.getFileBitsF(self.paramsF)
         
+        super(Episode, self).__init__(aniDB,load)
         
     def load_data(self):
-        (self.ed2k, self.size) = self._calculate_fiel_stuff(self.filePath)
+        """load the data from anidb"""
+        (self.ed2k, self.size) = self._calculate_file_stuff(self.filePath)
         
         self.lastCommandTime = aniDBabstractObject.check_last_call(self, self.lastCommandTime)
         
@@ -122,11 +147,11 @@ class Episode(aniDBabstractObject):
         self._fill(self.rawData.datalines[0])
         
     
-    def _calculate_fiel_stuff(self, filePath):
+    def _calculate_file_stuff(self, filePath):
         if not filePath:
             return (None, None)
-        ed2k = hasher.get_file_hash(filePath)
-        size = hasher.get_file_size(filePath)
+        ed2k = fileInfo.get_file_hash(filePath)
+        size = fileInfo.get_file_size(filePath)
         return (ed2k, size)
     
     

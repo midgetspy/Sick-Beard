@@ -1,14 +1,33 @@
-from anidblink import AniDBLink
-#from database import *
-from commands import *
-from errors import *
+#!/usr/bin/env python
+#
+# This file is part of aDBa.
+#
+# aDBa is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# aDBa is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with aDBa.  If not, see <http://www.gnu.org/licenses/>.
 
-class AniDBInterface:
-	def __init__(self,clientname='libpyanidb',clientver='3',server='api.anidb.info',port=9000,myport=9876,user=None,password=None,session=None,dburl=None):
+from aniDBlink import AniDBLink
+from aniDBcommands import *
+from aniDBerrors import *
+from aniDBAbstracter import Anime,Episode
+
+version = "1"
+
+class Connection:
+	def __init__(self,clientname='adba',server='api.anidb.info',port=9000,myport=9876,user=None,password=None,session=None,dburl=None,verbos=False):
 		self.clientname=clientname
-		self.clientver=clientver
+		self.clientver=version
 
-		self.link=AniDBLink(server,port,myport)
+		self.link=AniDBLink(server,port,myport,verbos=verbos)
 		self.link.session=session
 		self.user=user
 		self.password=password
@@ -236,66 +255,8 @@ class AniDBInterface:
 		(aid|aname) [amask]
 		
 		structure of amask:
-		bit	key		description
-		0	int_aid
-		1	unused
-		2	str_year
-		3	str_type
-		4	str_related_aid_list
-		5	str_related_aid_type
-		6	str_category_list
-		7	str_category_weight_list
-		8	str_romaji_name
-		9	str_kanji_name
-		10	str_english_name
-		11	str_other_name
-		12	str_short_name_list
-		13	str_synonym_list
-		14	retired
-		15	retired
-		16	int4_episodes
-		17	int4_highest_episode_number
-		18	int4_special_ep_count
-		19	int_air_date
-		20	int_end_date
-		21	str_url
-		22	str_picname
-		23	str_category_id_list
-		24	int4_rating
-		25	int_vote_count
-		26	int4_temp_rating
-		27	int_temp_vote_count
-		28	int4_average_review_rating
-		29	int_review_count
-		30	str_award_list
-		31	bool_is_18_restricted
-		32	int_anime_planet_id
-		33	int_ANN_id
-		34	int_allcinema_id
-		35	str_AnimeNfo_id
-		36	unused
-		37	unused
-		38	unused
-		39	int_date_record_updated
-		40	int_character_id_list
-		41	int_creator_id_list
-		42	int_main_creator_id_list
-		43	str_main_creator_name_list
-		44	unused
-		45	unused
-		46	unused
-		47	unused
-		48	int4_specials_count
-		49	int4_credits_count
-		50	int4_other_count
-		51	int4_trailer_count
-		52	int4_parody_count
-		53	unused
-		54	unused
-		55	unused
 		
 		"""
-		# prepare the int into a hex string
 		return self.handle(AnimeCommand(aid,aname,amask),callback)
 
 	def episode(self,eid=None,aid=None,aname=None,epno=None,callback=None):

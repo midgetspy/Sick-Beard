@@ -1,4 +1,19 @@
-from random import shuffle
+#!/usr/bin/env python
+#
+# This file is part of aDBa.
+#
+# aDBa is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# aDBa is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with aDBa.  If not, see <http://www.gnu.org/licenses/>.
 
 class AniDBMaper:
     
@@ -86,6 +101,8 @@ class AniDBMaper:
         return map 
 
     def checkMapping(self,verbos=False):
+        
+        from random import shuffle
         print "------"
         print "File F: "+ str(self.checkMapFileF(verbos))
         print "------"
@@ -106,7 +123,7 @@ class AniDBMaper:
     
     def _checkMapGeneral(self,getGeneralMap,getBits,getCodes,verbos=False):
         map = getGeneralMap()
-        shuffle(map)
+        self.shuffle(map)
         mask = [elem for elem in map if elem not in self.blacklist][:5]
         bits = getBits(mask)
         mask_re = getCodes(bits)

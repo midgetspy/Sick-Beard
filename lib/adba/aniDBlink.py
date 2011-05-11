@@ -1,10 +1,29 @@
+#!/usr/bin/env python
+#
+# This file is part of aDBa.
+#
+# aDBa is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# aDBa is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with aDBa.  If not, see <http://www.gnu.org/licenses/>.
+
 import socket,sys,zlib
 from time import time,sleep
 from threading import Thread
-from responses import ResponseResolver
+from aniDBresponses import ResponseResolver
+from aniDBerrors import *
+
 
 class AniDBLink(Thread):
-	def __init__(self,server,port,myport,delay=2,timeout=20):
+	def __init__(self,server,port,myport,delay=2,timeout=20,verbos=False):
 		Thread.__init__(self)
 		self.server=server
 		self.port=port
@@ -24,13 +43,19 @@ class AniDBLink(Thread):
 		self.session=None
 		self.banned=False
 		self.crypt=None
-		self.log=self.print_log
+		if(verbos):
+			self.log=self.print_log
+		else:
+			self.log=self.print_log_dummy
 
 		self.setDaemon(True)
 		self.start()
 	
 	def print_log(self,data):
 		print data
+		
+	def print_log_dummy(self,data):
+		pass
 	
 	def run(self):
 		while 1:
@@ -45,10 +70,6 @@ class AniDBLink(Thread):
 					try:
 						tmp=data
 						resp=None
-						if self.crypt:
-							tmp=self.crypt.decrypt(tmp)
-							tmp=pkcs5padding_strip(tmp)
-							self.log("DeCry | %s"%repr(tmp))
 						if tmp[:2]=='\x00\x00':
 							tmp=zlib.decompressobj().decompress(tmp[2:])
 							self.log("UnZip | %s"%repr(tmp))
@@ -60,7 +81,7 @@ class AniDBLink(Thread):
 					else:
 						break
 				if not resp:
-					raise AniDBPacketCorrupted,"Either decrypting, decompressing or parsing the packet failed"
+					raise AniDBPacketCorruptedError,"Either decrypting, decompressing or parsing the packet failed"
 				cmd=self._cmd_dequeue(resp)
 				resp=resp.resolve(cmd)
 				resp.parse()
@@ -144,10 +165,7 @@ class AniDBLink(Thread):
 		self.lastpacket=time()
 		command.started=time()
 		data=command.raw_data()
-		if self.crypt:
-			self.log("EnCry | %s"%repr(data))
-			data=pkcs5padding_pad(data)
-			data=self.crypt.encrypt(data)
+		
 		self.sock.sendto(data,self.target)
 		self.log("NetIO > %s"%repr(data))
 	

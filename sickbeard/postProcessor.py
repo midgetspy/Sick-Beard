@@ -46,8 +46,7 @@ from sickbeard.helpers import parse_result_wrapper
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-from lib.anidb_api.aniDBAbstracter import Episode as aniDBEpisode
-from lib.anidb_api.anidb import AniDBInterface
+import lib.adba as adba
 
 class PostProcessor(object):
 
@@ -423,9 +422,9 @@ class PostProcessor(object):
         if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
             return (None, None, None)
                 
-        anidb = AniDBInterface()
+        anidb = adba.Connection()
         anidb.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
-        ep = aniDBEpisode(anidb,filePath=filePath,
+        ep = adba.Episode(anidb,filePath=filePath,
              paramsF=["quality","anidb_file_name","crc32"],
              paramsA=["epno","english_name","short_name_list"])
         try:
@@ -454,7 +453,7 @@ class PostProcessor(object):
                 show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
                 (season, episodes) = helpers.get_all_episodes_from_absolute_number(show, None, [ep.epno])
             except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                logger.log(str(tvdb_id) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, skipping this episode")
+                logger.log(str(tvdb_id) + ": TVDB object absolute number " + str(ep.epno) + " is incomplete, skipping this episode")
             else:
                 if len(episodes):
                     anidb.logout()
