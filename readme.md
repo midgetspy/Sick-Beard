@@ -29,6 +29,7 @@ Sick Beard makes use of the following projects:
 * [jQuery][jquery]
 * [Python GNTP][pythongntp]
 * [SocksiPy][socks]
+* [adba][adba_url]
 
 ## Dependencies
 
@@ -50,3 +51,4 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 [googledownloads]: http://code.google.com/p/sickbeard/downloads/list
 [googleissues]: http://code.google.com/p/sickbeard/issues/list
 [googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
+[adba_url]: https://github.com/lad1337/adba
