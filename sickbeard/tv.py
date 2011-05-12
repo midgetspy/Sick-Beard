@@ -933,6 +933,7 @@ class TVEpisode(object):
         self._hastbn = False
         self._status = UNKNOWN
         self._tvdbid = 0
+        self._cherry_pick_status = UNKNOWN
 
         # setting any of the above sets the dirty flag
         self.dirty = True
@@ -958,6 +959,7 @@ class TVEpisode(object):
     status = property(lambda self: self._status, dirty_setter("_status"))
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
     location = property(lambda self: self._location, dirty_setter("_location"))
+    cherry_pick_status = property(lambda self: self._cherry_pick_status, dirty_setter("_cherry_pick_status"))
 
     def checkForMetaFiles(self):
 
@@ -1322,6 +1324,7 @@ class TVEpisode(object):
                         "hasnfo": self.hasnfo,
                         "hastbn": self.hastbn,
                         "status": self.status,
+                        "cherry_pick_status": self.cherry_pick_status,
                         "location": self.location}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,

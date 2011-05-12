@@ -1,18 +1,26 @@
 $(document).ready(function() { 
 
-    function make_row(tvdb_id, season, episode, name, checked) {
+    function make_row(tvdb_id, season, episode, name, checked, cherry_status) {
         if (checked)
             var checked = ' checked';
         else
             var checked = '';
         
-        var row_class = $('#row_class').val();
         
         var row = '';
-        row += ' <tr class="'+row_class+'">';
+        if ( cherry_status == 3 ) {
+            row += ' <tr class="wanted">';
+        } else {
+            row += ' <tr class="unaired">';
+        }
         row += '  <td><input type="checkbox" class="'+tvdb_id+'-epcheck" name="'+tvdb_id+'-'+season+'x'+episode+'"'+checked+'></td>';
         row += '  <td>'+season+'x'+episode+'</td>';
-        row += '  <td style="width: 100%">'+name+'</td>';
+        row += '  <td style="width: 90%">'+name+'</td>';
+        if ( cherry_status == 3 ) {
+            row += '  <td>Wanted</td>';
+        } else {
+            row += '  <td>Unaired</td>';
+        }
         row += ' </tr>'
         
         return row;
@@ -35,8 +43,8 @@ $(document).ready(function() {
                   function (data) {
                       $.each(data, function(season,eps){
                           $.each(eps, function(episode, name) {
-                              //alert(season+'x'+episode+': '+name);
-                              last_row.after(make_row(cur_tvdb_id, season, episode, name, checked));
+                                  //alert(season+'x'+episode+': '+name);
+                                  last_row.after(make_row(cur_tvdb_id, season, episode, name.name, checked, name.cherry_pick_status));
                           });
                       });
                   });

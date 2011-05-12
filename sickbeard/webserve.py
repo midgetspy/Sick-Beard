@@ -203,7 +203,7 @@ class Manage:
                 result[cur_season] = {}
             
             result[cur_season][cur_episode] = cur_result["name"]
-        
+
         return json.dumps(result)
 
     @cherrypy.expose
@@ -315,19 +315,53 @@ class Manage:
     def showCherryPickPaused(self, tvdb_id):
         myDB = db.DBConnection()
 
-        cur_cherry_results = myDB.select("select show_name,season,episode,name,tv_episodes.status,tv_shows.tvdb_id as tvdb_id from tv_shows,tv_episodes where showid = ? and tv_episodes.showid = tv_shows.tvdb_id and paused = 1 and tv_episodes.status = 1", [int(tvdb_id)])
+        cur_cherry_results = myDB.select("select show_name,season,episode,name,tv_episodes.status,cherry_pick_status,tv_shows.tvdb_id as tvdb_id from tv_shows,tv_episodes where showid = ? and tv_episodes.showid = tv_shows.tvdb_id and paused = 1 and tv_episodes.status = 1", [int(tvdb_id)])
         
         result = {}
         for cur_result in cur_cherry_results:
+
             cur_season = int(cur_result["season"])
             cur_episode = int(cur_result["episode"])
+            cur_cherry_pick_status = int(cur_result["cherry_pick_status"])
             
             if cur_season not in result:
                 result[cur_season] = {}
             
-            result[cur_season][cur_episode] = cur_result["name"]
-        
+            result[cur_season][cur_episode] = dict({'name': cur_result["name"], 'cherry_pick_status': cur_cherry_pick_status})
+       
         return json.dumps(result)
+
+    @cherrypy.expose
+    def changeCherryPickPaused(self, newStatus, *args, **kwargs):
+        
+        to_change = {}
+        
+        # make a list of all shows and their associated args
+        for arg in kwargs:
+            tvdb_id, what = arg.split('-')
+            
+            # we don't care about unchecked checkboxes
+            if kwargs[arg] != 'on':
+                continue
+            
+            if tvdb_id not in to_change:
+                to_change[tvdb_id] = []
+            
+            to_change[tvdb_id].append(what)
+        
+        myDB = db.DBConnection()
+
+        for cur_tvdb_id in to_change:
+
+            # get a list of all the eps we want to change if they just said "all"
+            if 'all' in to_change[cur_tvdb_id]:
+                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status = 1 AND season != 0 AND showid = ?", [cur_tvdb_id])
+                all_eps = [str(x["season"])+'x'+str(x["episode"]) for x in all_eps_results]
+                to_change[cur_tvdb_id] = all_eps
+
+            Home().setCherryPickStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
+            
+        redirect('/manage/cherryPickPaused')
 
     @cherrypy.expose
     def backlogShow(self, tvdb_id):
@@ -2384,6 +2418,80 @@ class Home:
                         continue
 
                     epObj.status = int(status)
+                    epObj.saveToDB()
+
+        msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
+        for cur_segment in segment_list:
+            msg += "<li>Season "+str(cur_segment)+"</li>"
+            logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
+            cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
+            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
+        msg += "</ul>"
+
+        if segment_list:
+            ui.notifications.message("Backlog started", msg)
+
+        if direct:
+            return json.dumps({'result': 'success'})
+        else:
+            redirect("/home/displayShow?show=" + show)
+
+    @cherrypy.expose
+    def setCherryPickStatus(self, show=None, eps=None, status=None, direct=False):
+
+        if show == None or eps == None or status == None:
+            errMsg = "You must specify a show and at least one episode"
+            if direct:
+                ui.notifications.error('Error', errMsg)
+                return json.dumps({'result': 'error'})
+            else:
+                return _genericMessage("Error", errMsg)
+
+        if not statusStrings.has_key(int(status)):
+            errMsg = "Invalid status"
+            if direct:
+                ui.notifications.error('Error', errMsg)
+                return json.dumps({'result': 'error'})
+            else:
+                return _genericMessage("Error", errMsg)
+
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+        if showObj == None:
+            errMsg = "Error", "Show not in show list"
+            if direct:
+                ui.notifications.error('Error', errMsg)
+                return json.dumps({'result': 'error'})
+            else:
+                return _genericMessage("Error", errMsg)
+
+        segment_list = []
+
+        if eps != None:
+
+            for curEp in eps.split('|'):
+
+                logger.log(u"Attempting to set cherry pick status on episode "+curEp+" to "+status, logger.DEBUG)
+
+                epInfo = curEp.split('x')
+
+                epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+
+                if int(status) == WANTED:
+                    # figure out what segment the episode is in and remember it so we can backlog it
+                    if epObj.show.air_by_date:
+                        ep_segment = str(epObj.airdate)[:7]
+                    else:
+                        ep_segment = epObj.season
+    
+                    if ep_segment not in segment_list:
+                        segment_list.append(ep_segment)
+
+                if epObj == None:
+                    return _genericMessage("Error", "Episode couldn't be retrieved")
+
+                with epObj.lock:
+                    epObj.cherry_pick_status = int(status)
                     epObj.saveToDB()
 
         msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"

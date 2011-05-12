@@ -398,3 +398,11 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
                 self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
         self.incDBVersion()
+
+class AddCherryPickStatus (FixAirByDateSetting):
+    def test(self):
+        return self.hasColumn("tv_episodes", "cherry_pick_status")
+
+    def execute(self):
+        self.addColumn("tv_episodes", "cherry_pick_status", "NUMERIC")
+
