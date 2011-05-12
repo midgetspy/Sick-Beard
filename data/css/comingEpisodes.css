@@ -134,6 +134,11 @@ span.pause {
     font-size: 12px;
 }
 
+span.cherrypick {
+    color: #336600;
+    font-size: 12px;
+}
+
 .ep_summaryTrigger {
     float: left;
     padding-top: 5px;

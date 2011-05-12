@@ -121,7 +121,7 @@
 
     #for $cur_result in $sql_results:
 
-        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED and int($cur_result["cherry_pick_status"]) != $sickbeard.common.WANTED:
             #continue
         #end if
 
@@ -150,7 +150,11 @@
         <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
         <td><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
             #if int($cur_result["paused"]):
-            <span class="pause">[paused]</span>
+                #if int($cur_result["cherry_pick_status"]) == $sickbeard.common.WANTED:
+                    <span class="cherrypick">[cherry picked]</span>
+                #else
+                    <span class="pause">[paused]</span>
+                #end if
             #end if
         </td>
         <td align="center">$cur_result["network"]</td>
