@@ -125,6 +125,7 @@ ManageMenu = [
             { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
             { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
             { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
+            { 'title': 'Cherry Pick Paused Episodes', 'path': 'manage/cherryPickPaused' },
             ]
 
 class ManageSearches:
@@ -281,6 +282,52 @@ class Manage:
             Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
             
         redirect('/manage/episodeStatuses')
+
+    @cherrypy.expose
+    def cherryPickPaused(self):
+
+        t = PageTemplate(file="manage_cherryPickPaused.tmpl")
+        t.submenu = ManageMenu
+
+        myDB = db.DBConnection()
+        cherry_results = myDB.select("select show_name,season,episode,name,tv_episodes.status,tv_shows.tvdb_id as tvdb_id from tv_shows,tv_episodes where tv_episodes.showid = tv_shows.tvdb_id and paused = 1 and tv_episodes.status = 1")
+
+        ep_counts = {}
+        show_names = {}
+        sorted_show_ids = []
+        for cur_cherry_result in cherry_results:
+            cur_tvdb_id = int(cur_cherry_result["tvdb_id"])
+            if cur_tvdb_id not in ep_counts:
+                ep_counts[cur_tvdb_id] = 1
+            else:
+                ep_counts[cur_tvdb_id] += 1
+        
+            show_names[cur_tvdb_id] = cur_cherry_result["show_name"]
+            if cur_tvdb_id not in sorted_show_ids:
+                sorted_show_ids.append(cur_tvdb_id)
+        
+        t.show_names = show_names
+        t.ep_counts = ep_counts
+        t.sorted_show_ids = sorted_show_ids
+        return _munge(t)
+
+    @cherrypy.expose
+    def showCherryPickPaused(self, tvdb_id):
+        myDB = db.DBConnection()
+
+        cur_cherry_results = myDB.select("select show_name,season,episode,name,tv_episodes.status,tv_shows.tvdb_id as tvdb_id from tv_shows,tv_episodes where showid = ? and tv_episodes.showid = tv_shows.tvdb_id and paused = 1 and tv_episodes.status = 1", [int(tvdb_id)])
+        
+        result = {}
+        for cur_result in cur_cherry_results:
+            cur_season = int(cur_result["season"])
+            cur_episode = int(cur_result["episode"])
+            
+            if cur_season not in result:
+                result[cur_season] = {}
+            
+            result[cur_season][cur_episode] = cur_result["name"]
+        
+        return json.dumps(result)
 
     @cherrypy.expose
     def backlogShow(self, tvdb_id):
