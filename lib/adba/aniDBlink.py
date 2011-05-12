@@ -17,21 +17,20 @@
 
 import socket,sys,zlib
 from time import time,sleep
-from threading import Thread
+import threading
 from aniDBresponses import ResponseResolver
 from aniDBerrors import *
 
 
-class AniDBLink(Thread):
+class AniDBLink(threading.Thread):
 	def __init__(self,server,port,myport,delay=2,timeout=20,verbos=False):
-		Thread.__init__(self)
+		super(AniDBLink, self).__init__()
 		self.server=server
 		self.port=port
 		self.target=(server,port)
-		self.sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-		
-		self.sock.bind(('',myport))
-		self.sock.settimeout(timeout)
+		self.timeout=timeout
+		self.myport=myport
+		self.connectSocket(self.myport,self.timeout)
 
 		self.cmd_queue={None:None}
 		self.resp_tagged_queue={}
@@ -39,7 +38,6 @@ class AniDBLink(Thread):
 		self.tags=[]
 		self.lastpacket=time()
 		self.delay=delay
-		self.timeout=timeout
 		self.session=None
 		self.banned=False
 		self.crypt=None
@@ -48,8 +46,30 @@ class AniDBLink(Thread):
 		else:
 			self.log=self.print_log_dummy
 
+
+		self._stop = threading.Event()
+		self._quiting = False
 		self.setDaemon(True)
 		self.start()
+	
+	def connectSocket(self,myport,timeout):
+		self.sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+		self.sock.bind(('',myport))
+		self.sock.settimeout(timeout)
+	
+	def disconnectSocket(self,hard=False):
+		if(hard):
+			self.sock.shutdown()
+		self.sock.close()
+	
+	def stop (self):
+		self.log("Releasing socket and stopping link thread")
+		self._quiting = True
+		self.disconnectSocket()
+		self._stop.set()
+
+	def stopped (self):
+		return self._stop.isSet()
 	
 	def print_log(self,data):
 		print data
@@ -58,7 +78,7 @@ class AniDBLink(Thread):
 		pass
 	
 	def run(self):
-		while 1:
+		while not self._quiting:
 			try:
 				data=self.sock.recv(8192)
 			except socket.timeout:

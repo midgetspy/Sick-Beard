@@ -420,6 +420,7 @@ class PostProcessor(object):
     
     def _analyze_anidb(self,filePath):
         if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
+            self._log(u"anidb username and/or password are not set", logger.DEBUG)
             return (None, None, None)
                 
         anidb = adba.Connection()
@@ -436,56 +437,58 @@ class PostProcessor(object):
         
         names = ep.short_name_list
         if ep.english_name:
-            names.append(ep.english_name)
+            names = [ep.english_name]+names
             
             
         self._log(u"names "+str(names) , logger.DEBUG)
             
+        #TODO: clean code it looks like from hell
         for name in names:
             try:
                 name = name.encode('utf-8')
             except:
                 continue
             else:
-                tvdb_id = helpers.get_tvdbid(name,True)
-        if tvdb_id:
-            try:
-                show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                (season, episodes) = helpers.get_all_episodes_from_absolute_number(show, None, [ep.epno])
-            except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                logger.log(str(tvdb_id) + ": TVDB object absolute number " + str(ep.epno) + " is incomplete, skipping this episode")
-            else:
-                if len(episodes):
-                    anidb.logout()
-                    return (tvdb_id, season, episodes)
+                tvdb_id = helpers.get_tvdbid(name,sickbeard.showList,True)
+                if tvdb_id:
+                    try:
+                        show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                        (season, episodes) = helpers.get_all_episodes_from_absolute_number(show, None, [ep.epno])
+                    except exceptions.EpisodeNotFoundByAbsoluteNumerException:
+                        logger.log(str(tvdb_id) + ": TVDB object absolute number " + str(ep.epno) + " is incomplete, skipping this episode")
+                    else:
+                        if len(episodes):
+                            self._log(u"Lookup successful from anidb. ", logger.DEBUG)
+                            anidb.logout(True)
+                            return (tvdb_id, season, episodes)
 
         if ep.anidb_file_name:
             self._log(u"Lookup successful, using anidb filename "+str(ep.anidb_file_name), logger.DEBUG)
-            anidb.logout()
+            anidb.logout(True)
             return self._analyze_name(ep.anidb_file_name)
-        anidb.logout()
+        anidb.logout(True)
         raise InvalidNameException
         
     
     def _make_attempt_list(self):
                         # try to look up the nzb in history
-        attempt_list = [self._history_lookup,
+        attempt_list = {"history":self._history_lookup,
 
                         # try to analyze the file name
-                        lambda : self._analyze_name(self.file_name),
+                        "file name":lambda : self._analyze_name(self.file_name),
 
                         # try to analyze the dir name
-                        lambda : self._analyze_name(self.folder_name),
+                        "dir name":lambda : self._analyze_name(self.folder_name),
 
-                         # try to analyze the file path
-                        lambda : self._analyze_name(self.file_path),
+                        # try to analyze the file path
+                        "file path":lambda : self._analyze_name(self.file_path),
 
                         # try to analyze the file path with the help of aniDB
-                        lambda : self._analyze_anidb(self.file_path),
+                        "anidb":lambda : self._analyze_anidb(self.file_path),
                         
                         # try to analyze the nzb name
-                        lambda : self._analyze_name(self.nzb_name)
-                        ]
+                        "nzb name":lambda : self._analyze_name(self.nzb_name)
+                        }
         return attempt_list
     
     def _find_info(self):
@@ -499,8 +502,9 @@ class PostProcessor(object):
         attempt_list = self._make_attempt_list()
 
         # attempt every possible method to get our info
-        for cur_attempt in attempt_list:
+        for name,cur_attempt in attempt_list.items():
             try:
+                logger.log(u"Attempting to pp by analysing the: "+name, logger.DEBUG)
                 (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
             except InvalidNameException, e:
                 logger.log(u"Unable to parse, skipping: "+ex(e), logger.DEBUG)

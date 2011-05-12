@@ -20,7 +20,7 @@ from aniDBcommands import *
 from aniDBerrors import *
 from aniDBAbstracter import Anime,Episode
 
-version = "1"
+version = 1
 
 class Connection:
 	def __init__(self,clientname='adba',server='api.anidb.info',port=9000,myport=9876,user=None,password=None,session=None,dburl=None,verbos=False):
@@ -34,6 +34,9 @@ class Connection:
 
 		self.mode=1	#mode: 0=queue,1=unlock,2=callback
 		self.dburl=dburl
+	
+	def close(self):
+		self.link.stop()
 	
 	def handle_response(self,response):
 		if response.rescode in ('501','506') and self.user and self.password and response.req.command!='AUTH':
@@ -80,12 +83,15 @@ class Connection:
 		"""
 		return self.handle(AuthCommand(username,password,3,self.clientname,self.clientver,nat,1,'utf8',mtu),callback)
 	
-	def logout(self,callback=None):
+	def logout(self,cutConnection=False,callback=None):
 		"""
 		Log out from AniDB UDP API
 		
 		"""
-		return self.handle(LogoutCommand(),callback)
+		result = self.handle(LogoutCommand(),callback)
+		if(cutConnection):
+			self.close()
+		return result
 
 	def push(self,notify,msg,buddy=None,callback=None):
 		"""
