@@ -420,7 +420,7 @@ class PostProcessor(object):
     
     def _analyze_anidb(self,filePath):
         if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
-            self._log(u"anidb username and/or password are not set", logger.DEBUG)
+            self._log(u"anidb username and/or password are not set. please do it manually in the config file!", logger.DEBUG)
             return (None, None, None)
                 
         anidb = adba.Connection()
@@ -429,7 +429,7 @@ class PostProcessor(object):
              paramsF=["quality","anidb_file_name","crc32"],
              paramsA=["epno","english_name","short_name_list"])
         try:
-            self._log(u"Trying to lookup "+str(filePath)+" on anidb", logger.DEBUG)
+            self._log(u"Trying to lookup "+str(filePath)+" on anidb (this might take some time because we have to calculate the hash)", logger.MESSAGE)
             ep.load_data()
         except Exception,e :
             self._log(u"exception msg: "+str(e))
