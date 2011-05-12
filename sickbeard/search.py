@@ -23,7 +23,7 @@ import traceback
 
 import sickbeard
 
-from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
+from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT, WANTED
 
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
@@ -168,7 +168,10 @@ def searchForNeededEpisodes():
 
             if curEp.show.paused:
                 logger.log(u"Show "+curEp.show.name+" is paused, ignoring all RSS items for "+curEp.prettyName(True), logger.DEBUG)
-                continue
+                if curEp.cherry_pick_status == WANTED:
+                    logger.log(u"Wait, change of plans, thanks to cherry picking, ignore that ", logger.DEBUG)
+                else:
+                    continue
 
             # find the best result for the current episode
             bestResult = None

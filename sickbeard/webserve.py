@@ -290,7 +290,7 @@ class Manage:
         t.submenu = ManageMenu
 
         myDB = db.DBConnection()
-        cherry_results = myDB.select("select show_name,season,episode,name,tv_episodes.status,tv_shows.tvdb_id as tvdb_id from tv_shows,tv_episodes where tv_episodes.showid = tv_shows.tvdb_id and paused = 1 and tv_episodes.status = 1")
+        cherry_results = myDB.select("select show_name,season,episode,name,tv_episodes.status,tv_shows.tvdb_id as tvdb_id from tv_shows,tv_episodes where tv_episodes.showid = tv_shows.tvdb_id and paused = 1 and tv_episodes.status = 1 ORDER BY show_name")
 
         ep_counts = {}
         show_names = {}
@@ -315,8 +315,8 @@ class Manage:
     def showCherryPickPaused(self, tvdb_id):
         myDB = db.DBConnection()
 
-        cur_cherry_results = myDB.select("select show_name,season,episode,name,tv_episodes.status,cherry_pick_status,tv_shows.tvdb_id as tvdb_id from tv_shows,tv_episodes where showid = ? and tv_episodes.showid = tv_shows.tvdb_id and paused = 1 and tv_episodes.status = 1", [int(tvdb_id)])
-        
+        cur_cherry_results = myDB.select("select show_name,season,episode,name,tv_episodes.status,cherry_pick_status,tv_shows.tvdb_id as tvdb_id from tv_shows,tv_episodes where showid = ? and tv_episodes.showid = tv_shows.tvdb_id and paused = 1 and tv_episodes.status = 1 ORDER BY episode ASC", [int(tvdb_id)])
+
         result = {}
         for cur_result in cur_cherry_results:
 

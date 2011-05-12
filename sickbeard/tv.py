@@ -846,20 +846,25 @@ class TVShow(object):
             return False
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
+        sqlResults = myDB.select("SELECT status, cherry_pick_status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
 
         if not sqlResults or not len(sqlResults):
             logger.log(u"Unable to find the episode", logger.DEBUG)
             return False
 
         epStatus = int(sqlResults[0]["status"])
+        epCherryPickStatus = int(sqlResults[0]["cherry_pick_status"])
 
         logger.log(u"current episode status: "+str(epStatus), logger.DEBUG)
+        logger.log(u"current episode cherry_pick_status: "+str(epCherryPickStatus), logger.DEBUG)
 
         # if we know we don't want it then just say no
         if epStatus in (SKIPPED, IGNORED, ARCHIVED) and not manualSearch:
-            logger.log(u"Ep is skipped, not bothering", logger.DEBUG)
-            return False
+            if epCherryPickStatus == WANTED:
+                logger.log(u"Ep is cherry picked, going ahead", logger.DEBUG)
+            else:
+                logger.log(u"Ep is skipped, not bothering", logger.DEBUG)
+                return False
 
         # if it's one of these then we want it as long as it's in our allowed initial qualities
         if quality in anyQualities + bestQualities:
@@ -1042,6 +1047,7 @@ class TVEpisode(object):
             self.airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
             #logger.log(u"1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
             self.status = int(sqlResults[0]["status"])
+            self.cherry_pick_status = int(sqlResults[0]["cherry_pick_status"])
 
             # don't overwrite my location
             if sqlResults[0]["location"] != "" and sqlResults[0]["location"] != None:
@@ -1255,6 +1261,7 @@ class TVEpisode(object):
         toReturn += "hasnfo: " + str(self.hasnfo) + "\n"
         toReturn += "hastbn: " + str(self.hastbn) + "\n"
         toReturn += "status: " + str(self.status) + "\n"
+        toReturn += "cherry_pick_status: " + str(self.cherry_pick_status) + "\n"
         return toReturn
 
 
