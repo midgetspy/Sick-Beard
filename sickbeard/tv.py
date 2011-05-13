@@ -1152,6 +1152,7 @@ class TVEpisode(object):
                 # and it hasn't aired yet set the status to UNAIRED
                 logger.log(u"Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
+                self.cherry_pick_status = UNAIRED
             # if there's no airdate then set it to skipped (and respect ignored)
             elif self.airdate == datetime.date.fromordinal(1):
                 if self.status == IGNORED:
