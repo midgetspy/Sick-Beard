@@ -173,6 +173,7 @@ NZBMATRIX_APIKEY = None
 NEWZBIN = False
 NEWZBIN_USERNAME = None
 NEWZBIN_PASSWORD = None
+NEWZBIN_IGNORESOURCE = False
 
 SAB_USERNAME = None
 SAB_PASSWORD = None
@@ -361,7 +362,7 @@ def initialize(consoleLogging=True):
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, NEWZBIN_IGNORESOURCE, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, IGNORE_WORDS
 
         if __INITIALIZED__:
@@ -503,6 +504,7 @@ def initialize(consoleLogging=True):
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
         NEWZBIN_USERNAME = check_setting_str(CFG, 'Newzbin', 'newzbin_username', '')
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
+        NEWZBIN_IGNORESOURCE = bool(check_setting_int(CFG, 'Newzbin', 'newzbin_ignoresource', 0))
 
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
 
@@ -985,6 +987,7 @@ def save_config():
     new_config['Newzbin']['newzbin'] = int(NEWZBIN)
     new_config['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
+    new_config['Newzbin']['newzbin_ignoresource'] = NEWZBIN_IGNORESOURCE
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
