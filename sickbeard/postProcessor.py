@@ -422,14 +422,23 @@ class PostProcessor(object):
         if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
             self._log(u"anidb username and/or password are not set. please do it manually in the config file!", logger.DEBUG)
             return (None, None, None)
-                
-        anidb = adba.Connection()
-        anidb.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
-        ep = adba.Episode(anidb,filePath=filePath,
+        
+        if not sickbeard.ADBA_CONNECTION:
+            sickbeard.ADBA_CONNECTION = adba.Connection()
+        
+        if not sickbeard.ADBA_CONNECTION.authed():
+            try:
+                sickbeard.ADBA_CONNECTION.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
+            except Exception,e :
+                self._log(u"exception msg: "+str(e))
+                raise InvalidNameException
+        
+
+        ep = adba.Episode(sickbeard.ADBA_CONNECTION,filePath=filePath,
              paramsF=["quality","anidb_file_name","crc32"],
              paramsA=["epno","english_name","short_name_list"])
         try:
-            self._log(u"Trying to lookup "+str(filePath)+" on anidb (this might take some time because we have to calculate the hash)", logger.MESSAGE)
+            self._log(u"Trying to lookup "+str(filePath)+" on anidb (this might take some time because we have to calculate the hash)", logger.MESSAGE)        
             ep.load_data()
         except Exception,e :
             self._log(u"exception msg: "+str(e))
@@ -438,8 +447,6 @@ class PostProcessor(object):
         names = ep.short_name_list
         if ep.english_name:
             names = [ep.english_name]+names
-            
-            
         self._log(u"names "+str(names) , logger.DEBUG)
             
         #TODO: clean code it looks like from hell
@@ -459,14 +466,11 @@ class PostProcessor(object):
                     else:
                         if len(episodes):
                             self._log(u"Lookup successful from anidb. ", logger.DEBUG)
-                            anidb.logout(True)
                             return (tvdb_id, season, episodes)
 
         if ep.anidb_file_name:
             self._log(u"Lookup successful, using anidb filename "+str(ep.anidb_file_name), logger.DEBUG)
-            anidb.logout(True)
             return self._analyze_name(ep.anidb_file_name)
-        anidb.logout(True)
         raise InvalidNameException
         
     
