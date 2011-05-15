@@ -853,7 +853,10 @@ class TVShow(object):
             return False
 
         epStatus = int(sqlResults[0]["status"])
-        epCherryPickStatus = int(sqlResults[0]["cherry_pick_status"])
+        if "cherry_pick_status" in sqlresults[0]: 
+            epCherryPickStatus = int(sqlResults[0]["cherry_pick_status"])
+        else:
+            epCherryPickStatus = UNAIRED
 
         logger.log(u"current episode status: "+str(epStatus), logger.DEBUG)
         logger.log(u"current episode cherry_pick_status: "+str(epCherryPickStatus), logger.DEBUG)
@@ -1047,7 +1050,10 @@ class TVEpisode(object):
             self.airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
             #logger.log(u"1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
             self.status = int(sqlResults[0]["status"])
-            self.cherry_pick_status = int(sqlResults[0]["cherry_pick_status"])
+            if "cherry_pick_status" in sqlResults[0]:
+                self.cherry_pick_status = int(sqlResults[0]["cherry_pick_status"])
+            else:
+                self.cherry_pick_status = UNAIRED
 
             # don't overwrite my location
             if sqlResults[0]["location"] != "" and sqlResults[0]["location"] != None:

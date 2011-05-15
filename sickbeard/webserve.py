@@ -322,7 +322,10 @@ class Manage:
 
             cur_season = int(cur_result["season"])
             cur_episode = int(cur_result["episode"])
-            cur_cherry_pick_status = int(cur_result["cherry_pick_status"])
+            if "cherry_pick_status" in cur_result:
+                cur_cherry_pick_status = int(cur_result["cherry_pick_status"])
+            else:
+                cur_cherry_pick_status = common.UNAIRED
             
             if cur_season not in result:
                 result[cur_season] = {}
