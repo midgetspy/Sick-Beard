@@ -594,6 +594,26 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
+                <div id="core-component-group9" class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synoindex.gif" alt="Synology Indexer" title="Synology Indexer" width="16" height="16" /> Synology Indexer</a></h3>
+                        <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_synoindex">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?</span>
+                            </label>
+                        </div>
+                        <div id="content_use_synoindex">
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_synoindex //-->
+                    </fieldset>
+                </div><!-- /component-group //-->
+
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
