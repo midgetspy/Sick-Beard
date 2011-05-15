@@ -1022,7 +1022,7 @@ class ConfigProviders:
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
-                      newzbin_username=None, newzbin_password=None,
+                      newzbin_username=None, newzbin_password=None, newzbin_ignoresource=False,
                       provider_order=None):
 
         results = []
@@ -1104,6 +1104,7 @@ class ConfigProviders:
 
         sickbeard.NEWZBIN_USERNAME = newzbin_username
         sickbeard.NEWZBIN_PASSWORD = newzbin_password
+        sickbeard.NEWZBIN_IGNORESOURCE = bool(newzbin_ignoresource)
 
         sickbeard.PROVIDER_ORDER = provider_list
 
