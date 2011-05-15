@@ -14,6 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with aDBa.  If not, see <http://www.gnu.org/licenses/>.
+import threading
 
 from aniDBlink import AniDBLink
 from aniDBcommands import *
@@ -34,6 +35,9 @@ class Connection:
 
 		self.mode=1	#mode: 0=queue,1=unlock,2=callback
 		self.dburl=dburl
+		
+		self.lock = threading.Lock()
+		
 	
 	def close(self):
 		self.link.stop()
@@ -47,6 +51,8 @@ class Connection:
 		
 	
 	def handle(self,command,callback):
+		
+		self.lock.acquire()
 		
 		def callback_wrapper(resp):
 			self.handle_response(resp)
@@ -63,12 +69,20 @@ class Connection:
 			try:
 				command.resp
 			except:
+				self.lock.release()
 				raise AniDBCommandTimeoutError,"Command has timed out"
+			
 			self.handle_response(command.resp)
+			self.lock.release()
 			return command.resp
+		else:
+			self.lock.release()
 
 	def authed(self):
-		return (self.link.session!=None)
+		self.lock.acquire()
+		result = (self.link.session!=None)
+		self.lock.release()
+		return result
 
 	def auth(self,username,password,nat=None,mtu=None,callback=None):
 		"""

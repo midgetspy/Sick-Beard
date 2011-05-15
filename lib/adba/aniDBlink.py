@@ -29,8 +29,9 @@ class AniDBLink(threading.Thread):
 		self.port=port
 		self.target=(server,port)
 		self.timeout=timeout
-		self.myport=myport
-		self.connectSocket(self.myport,self.timeout)
+		
+		self.myport=0
+		self.bound = self.connectSocket(myport,self.timeout)
 
 		self.cmd_queue={None:None}
 		self.resp_tagged_queue={}
@@ -54,12 +55,20 @@ class AniDBLink(threading.Thread):
 	
 	def connectSocket(self,myport,timeout):
 		self.sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-		self.sock.bind(('',myport))
 		self.sock.settimeout(timeout)
+		portlist = [myport]+[7654,6543,5432]
+		for port in portlist:
+			try:
+				self.sock.bind(('',port))
+			except:
+				continue
+			else:
+				self.myport=port
+				return True
+		else:
+			return False;
 	
-	def disconnectSocket(self,hard=False):
-		if(hard):
-			self.sock.shutdown()
+	def disconnectSocket(self):
 		self.sock.close()
 	
 	def stop (self):
