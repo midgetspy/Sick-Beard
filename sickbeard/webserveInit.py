@@ -95,15 +95,16 @@ def initWebServer(options = {}):
                         return ipaddr & mask == ipnet & mask
 
                 def check_ip():
-                        if addressInNetwork(cherrypy.request.remote.ip, options['ip_whitelist']):
-                                old_hooks = cherrypy.request.hooks['before_handler']
-                                new_hooks = []
-				for hook in old_hooks:
-				        if hook.callback != cherrypy.lib.auth_basic.basic_auth:
-				                new_hooks.append(hook)
+                        for whitelist_network in options['ip_whitelist'].split(','):
+                                if addressInNetwork(cherrypy.request.remote.ip, whitelist_network.strip()):
+                                        old_hooks = cherrypy.request.hooks['before_handler']
+                                        new_hooks = []
+                                        for hook in old_hooks:
+                                                if hook.callback != cherrypy.lib.auth_basic.basic_auth:
+                                                        new_hooks.append(hook)
 
-                                cherrypy.request.hooks['before_handler'] = new_hooks
-                                #logger.log('Disabled auth on local request')
+                                        cherrypy.request.hooks['before_handler'] = new_hooks
+                                        #logger.log('Disabled auth on local request')
                         return True
 
                 checkipaddress = cherrypy.Tool('on_start_resource', check_ip, 1)
