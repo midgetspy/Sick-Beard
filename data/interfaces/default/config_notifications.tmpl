@@ -602,15 +602,18 @@
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="use_synoindex">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?</span>
+                                <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?<br /><br />
+                                </span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_synoindex">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Note: Requires SB to be running on your Synology NAS.</span>
                             </label>
                         </div>
-                        <div id="content_use_synoindex">
                         <input type="submit" class="config_submitter" value="Save Changes" />
-                        </div><!-- /content_use_synoindex //-->
                     </fieldset>
                 </div><!-- /component-group //-->
 
