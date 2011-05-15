@@ -21,8 +21,11 @@ $(document).ready(function(){
         var newData = [isDefault, [name, url, key]];
         newznabProviders[id] = newData;
 
-        $('#editANewznabProvider').addOption(id, name);
-        $(this).populateNewznabSection();
+        if (!isDefault)
+        {
+	        $('#editANewznabProvider').addOption(id, name);
+	        $(this).populateNewznabSection();
+        }
 
         if ($('#provider_order_list > #'+id).length == 0 && showProvider != false) {
             var toAdd = '<li class="ui-state-default" id="'+id+'"> <input type="checkbox" id="enable_'+id+'" class="provider_enabler" CHECKED> <a href="'+url+'" class="imgLink" target="_new"><img src="'+sbRoot+'/images/providers/newznab.gif" alt="'+name+'" width="16" height="16"></a> '+name+'</li>'
@@ -120,10 +123,22 @@ $(document).ready(function(){
     }
 
     var newznabProviders = new Array();
+
+    $('.newznab_key').change(function(){
+
+    	var provider_id = $(this).attr('id');
+    	provider_id = provider_id.substring(0, provider_id.length-'_hash'.length);
+    	
+    	var url = $('#'+provider_id+'_url').val();
+    	var key = $(this).val();
+
+    	$(this).updateProvider(provider_id, url, key);
+    	
+    });
     
     $('#newznab_key').change(function(){
         
-        var selectedProvider = $('#editANewznabProvider :selected').val();
+    	var selectedProvider = $('#editANewznabProvider :selected').val();
 
         var url = $('#newznab_url').val();
         var key = $('#newznab_key').val();

@@ -18,13 +18,10 @@
 
 
 
-import urllib
-
 import sickbeard
 
-from sickbeard import exceptions, logger
+from sickbeard import logger
 
-from sickbeard.common import *
 from sickbeard import tvcache
 
 import generic

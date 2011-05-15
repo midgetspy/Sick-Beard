@@ -16,16 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime, re
+import datetime
+import os
+import re
 
 import sickbeard
 
 import generic
 
-from sickbeard.common import *
+from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
+from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
@@ -264,8 +267,6 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         
         eps_to_write = [ep_obj] + ep_obj.relatedEps
         
-        shouldSave = False
-
         tvdb_lang = ep_obj.show.lang
     
         try:
@@ -279,9 +280,9 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             myShow = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
+            raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log("Unable to connect to TVDB while creating meta files - skipping - "+str(e), logger.ERROR)
+            logger.log("Unable to connect to TVDB while creating meta files - skipping - "+ex(e), logger.ERROR)
             return False
 
         rootNode = etree.Element("Item")

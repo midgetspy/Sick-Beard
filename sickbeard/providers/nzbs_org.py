@@ -18,9 +18,10 @@
 
 
 
-import urllib
 import datetime
+import re
 import time
+import urllib
 
 import xml.etree.cElementTree as etree
 
@@ -29,9 +30,9 @@ import generic
 
 from sickbeard import classes, show_name_helpers
 
-from sickbeard import exceptions, logger, db
-from sickbeard.common import *
+from sickbeard import exceptions, logger
 from sickbeard import tvcache
+from sickbeard.exceptions import ex
 
 class NZBsProvider(generic.NZBProvider):
 
@@ -87,7 +88,7 @@ class NZBsProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log(u"Error trying to load NZBs.org RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+			logger.log(u"Error trying to load NZBs.org RSS feed: "+ex(e), logger.ERROR)
 			return []
 
 		results = []

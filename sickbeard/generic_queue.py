@@ -16,10 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import operator
+import datetime
 import threading
 
-import sickbeard
 from sickbeard import logger
 
 class QueuePriorities:
@@ -51,7 +50,10 @@ class GenericQueue(object):
         self.min_priority = 0
 
     def add_item(self, item):
+        item.added = datetime.datetime.now()
         self.queue.append(item)
+        
+        return item
 
     def run(self):
 
@@ -67,7 +69,21 @@ class GenericQueue(object):
             if len(self.queue) > 0:
 
                 # sort by priority
-                self.queue.sort(key=operator.attrgetter('priority'), reverse=True)
+                def sorter(x,y):
+                    """
+                    Sorts by priority descending then time ascending
+                    """
+                    if x.priority == y.priority:
+                        if y.added == x.added:
+                            return 0
+                        elif y.added < x.added:
+                            return 1
+                        elif y.added > x.added:
+                            return -1
+                    else:
+                        return y.priority-x.priority
+
+                self.queue.sort(cmp=sorter)
                 
                 queueItem = self.queue[0]
 
@@ -96,6 +112,8 @@ class QueueItem:
         self.thread_name = None
 
         self.action_id = action_id
+        
+        self.added = None
 
     def get_thread_name(self):
         if self.thread_name:

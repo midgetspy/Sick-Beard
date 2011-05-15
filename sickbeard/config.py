@@ -46,7 +46,7 @@ def change_LOG_DIR(log_dir):
     if os.path.normpath(sickbeard.LOG_DIR) != os.path.normpath(log_dir):
         if helpers.makeDir(log_dir):
             sickbeard.LOG_DIR = os.path.normpath(log_dir)
-            logger.initLogging()
+            logger.sb_log_instance.initLogging()
             logger.log(u"Initialized new log file in " + log_dir)
 
             cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
@@ -132,5 +132,5 @@ def change_VERSION_NOTIFY(version_notify):
         sickbeard.NEWEST_VERSION_STRING = None;
         
     if oldSetting == False and version_notify == True:
-        sickbeard.versionCheckScheduler.action.run()
+        sickbeard.versionCheckScheduler.action.run() #@UndefinedVariable
 

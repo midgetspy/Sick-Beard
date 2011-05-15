@@ -26,9 +26,9 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard import classes, logger, show_name_helpers, db
+from sickbeard import classes, logger, show_name_helpers
 from sickbeard import tvcache
-from sickbeard.common import *
+from sickbeard.exceptions import ex
 
 class NZBMatrixProvider(generic.NZBProvider):
 
@@ -94,7 +94,7 @@ class NZBMatrixProvider(generic.NZBProvider):
             responseSoup = etree.ElementTree(etree.XML(searchResult))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load NZBMatrix RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load NZBMatrix RSS feed: "+ex(e), logger.ERROR)
             return []
 
         results = []

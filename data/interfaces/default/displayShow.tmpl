@@ -11,6 +11,7 @@
 
 <script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
 
+
 <div class="h2footer align-right">
 #if (len($seasonResults) > 14):
     <select id="seasonJump">
@@ -33,6 +34,10 @@
     #end for
 #end if
 </div><br/>
+
+#if $show_message:
+    <div id="show_message" class="ui-corner-all">$show_message</div><br />
+#end if
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
@@ -150,10 +155,10 @@ $epLoc
 #end if
 
     </td>
-    <td>$statusStrings[int($epResult["status"])]</td>
+    <td class="status_column">$statusStrings[int($epResult["status"])]</td>
     <td align="center">
-    #if int($epResult["season"]) != 0: 
-    <a href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
+    #if int($epResult["season"]) != 0:
+      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
     #end if
     </td>
    </tr>

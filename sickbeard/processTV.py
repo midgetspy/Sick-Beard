@@ -18,16 +18,17 @@
 
 from __future__ import with_statement
 
-import os, os.path
+import os
 import shutil
 
+import sickbeard 
 from sickbeard import postProcessor
 from sickbeard import db, helpers, exceptions
 
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from sickbeard import logger
-from sickbeard.common import *
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
@@ -94,8 +95,10 @@ def processDir (dirName, nzbName=None, recurse=False):
         try:
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
             process_result = processor.process()
-        except exceptions.PostProcessingFailed:
+            process_fail_message = ""
+        except exceptions.PostProcessingFailed, e:
             process_result = False
+            process_fail_message = ex(e)
 
         returnStr += processor.log 
 
@@ -111,11 +114,11 @@ def processDir (dirName, nzbName=None, recurse=False):
                 try:
                     shutil.rmtree(dirName)
                 except (OSError, IOError), e:
-                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + str(e).decode('utf-8'), logger.ERROR)
+                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + ex(e), logger.WARNING)
 
             returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
             
         else:
-            returnStr += logHelper(u"Processing failed for "+cur_video_file_path)
+            returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
 
     return returnStr

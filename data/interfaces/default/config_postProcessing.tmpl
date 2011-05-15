@@ -13,12 +13,13 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/configPostProcessing.js"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
 
 <div id="config">
 <div id="config-content">
 <h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
 
-<form action="savePostProcessing" method="post">
+<form id="configForm" action="savePostProcessing" method="post">
 
             <div id="config-components">
                 
@@ -91,7 +92,7 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>
                 </div><!-- /component-group3 //-->
@@ -159,7 +160,7 @@
                             </label>
                         </div>
 
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>
                 </div><!-- /component-group2 //-->
@@ -287,11 +288,11 @@
                             </label>
                         </div>
 
-                        <input type="submit" value="Save Changes" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group4 //-->
 
-            <br/><input type="submit" value="Save Changes" /><br/>
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components -->
 
 </form>
