@@ -1137,7 +1137,7 @@ class ConfigNotifications:
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
-                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None):
+                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
         results = []
 
@@ -1248,6 +1248,11 @@ class ConfigNotifications:
         else:
             use_nmj = 0
 
+        if use_synoindex == "on":
+            use_synoindex = 1
+        else:
+            use_synoindex = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1296,6 +1301,8 @@ class ConfigNotifications:
         sickbeard.NMJ_HOST = nmj_host
         sickbeard.NMJ_DATABASE = nmj_database
         sickbeard.NMJ_MOUNT = nmj_mount
+
+        sickbeard.USE_SYNOINDEX = use_synoindex
 
         sickbeard.save_config()
 
