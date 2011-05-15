@@ -77,6 +77,25 @@ def initWebServer(options = {}):
         }
         app = cherrypy.tree.mount(WebInterface(), options['web_root'], conf)
 
+        #trusted networks
+        if True:
+                def check_ip():
+                        if cherrypy.request.remote.ip == '192.168.2.1':
+                                old_hooks = cherrypy.request.hooks['before_handler']
+                                new_hooks = []
+				for hook in old_hooks:
+				        if hook.callback != cherrypy.lib.auth_basic.basic_auth:
+				                new_hooks.append(hook)
+
+                                cherrypy.request.hooks['before_handler'] = new_hooks
+                                #logger.log('Disabled auth on local request', logLevel = logger.DEBUG)
+                        return True
+
+                checkipaddress = cherrypy.Tool('on_start_resource', check_ip, 1)
+                cherrypy.tools.checkipaddress = checkipaddress
+
+                app.merge({'/': { 'tools.checkipaddress.on': True } })
+
         # auth
         if options['username'] != "" and options['password'] != "":
                 checkpassword = cherrypy.lib.auth_basic.checkpassword_dict({options['username']: options['password']})
