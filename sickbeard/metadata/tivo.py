@@ -112,9 +112,16 @@ class TIVOMetadata(generic.GenericMetadata):
         Creates a key value structure for a Tivo episode metadata file and
         returns the resulting data object.
         
-        show_obj: a TVEpisode instance to create the metadata file for
+        ep_obj: a TVEpisode instance to create the metadata file for.
         
-        The key values for the metadata file are from:
+        Lookup the show in http://thetvdb.com/ using the python library:
+        
+        https://github.com/dbr/tvdb_api/
+        
+        The results are saved in the object myShow.
+            
+        The key values for the tivo metadata file are from:
+            
         http://pytivo.sourceforge.net/wiki/index.php/Metadata
         """
         
@@ -139,7 +146,6 @@ class TIVOMetadata(generic.GenericMetadata):
         except tvdb_exceptions.tvdb_error, e:
             logger.log("Unable to connect to TVDB while creating meta files - skipping - "+str(e), logger.ERROR)
             return False
-        
         
         for curEpToWrite in eps_to_write:
         
@@ -181,7 +187,6 @@ class TIVOMetadata(generic.GenericMetadata):
 
             # NOTE: May not be correct format, missing season, but based on description from wiki leaving as is.
 
-            #str(curEpToWrite.season)
             data += ("episodeNumber : " + str(curEpToWrite.episode) + "\n")
             
             
@@ -198,6 +203,7 @@ class TIVOMetadata(generic.GenericMetadata):
             
             
             # Usually starts with "SH" and followed by 6-8 digits.
+            # Tivo uses zap2it for thier data, so the series id is the zap2it_id.
             if myShow["zap2it_id"] != None:
                 data += ("seriesId : " + myShow["zap2it_id"] + "\n")
                 
@@ -206,16 +212,20 @@ class TIVOMetadata(generic.GenericMetadata):
             if myShow["network"] != None:
                 data += ("callsign : " + myShow["network"] + "\n")
             
+                    
             # This must be entered as yyyy-mm-ddThh:mm:ssZ (the t is capitalized and never changes, the Z is also 
             # capitalized and never changes). This is the original air date of the episode. 
-            # NOTE: Hard coded the time to T00:00:00Z.
+            # NOTE: Hard coded the time to T00:00:00Z as we really don't know when during the day the first run happened.
             if curEpToWrite.airdate != datetime.date.fromordinal(1):
                 data += ("originalAirDate : " + str(curEpToWrite.airdate) + "T00:00:00Z\n")
                
+                    
             # This shows up at the beginning of the description on the Program screen and on the Details screen.
-            # TODO: Parse actor list correctly
-            #if myShow["actors"] != None:
-            #   data += ("vActor : " + myShow["actors"] + "\n")
+            if myShow["actors"]:
+                for actor in myShow["actors"].split('|'):
+                    if actor:
+                        data += ("vActor : " + str(actor) + "\n")
+                    
                
             # This is shown on both the Program screen and the Details screen. It uses a single digit to determine the 
             # number of stars: 1 for 1 star, 7 for 4 stars
@@ -227,17 +237,20 @@ class TIVOMetadata(generic.GenericMetadata):
                 rating = rating / 10 * 4
                 data += ("starRating : " + str(rating) + "\n")
 
+                    
             # This is shown on both the Program screen and the Details screen.
             # It uses the standard TV rating system of: TV-Y7, TV-Y, TV-G, TV-PG, TV-14, TV-MA and TV-NR.
-            # TODO: tvRating, not sure if this is available
             if myShow["contentrating"]:
                 data += ("tvRating : " + str(myShow["contentrating"]) + "\n")
             
+                    
             # This field can be repeated as many times as necessary or omitted completely.
-            # TODO: vProgramGenre, not sure if this is available
             if ep_obj.show.genre:
-                data += ("vProgramGenre : " + str(ep_obj.show.genre[0]) + "\n")
+                for genre in ep_obj.show.genre.split('|'):
+                    if genre:
+                        data += ("vProgramGenre : " + str(genre) + "\n")
 
+                        
             # NOTE: The following are metadata keywords are not used
             # displayMajorNumber
             # showingBits
