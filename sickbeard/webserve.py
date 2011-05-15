@@ -632,7 +632,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
-                    web_password=None, version_notify=None):
+                    web_password=None, version_notify=None, web_ip_whitelist=None):
 
         results = []
 
@@ -666,6 +666,7 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+        sickbeard.WEB_IP_WHITELIST = web_ip_whitelist
 
         config.change_VERSION_NOTIFY(version_notify)
 

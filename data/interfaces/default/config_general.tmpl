@@ -121,6 +121,17 @@
                             </label>
                         </div>
 
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Trusted Networks</span>
+                                <input type="text" name="web_ip_whitelist" value="$sickbeard.WEB_IP_WHITELIST" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">A network (ex. 192.168.0.1/24) which does not require auth (leave blank to always ask for auth) [restart after changing]</span>
+                            </label>
+                        </div>
+
                         <input type="submit" class="config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group3 //-->
