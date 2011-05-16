@@ -290,7 +290,7 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits.forBranch('midgetspy', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits.forBranch(version.SICKBEARD_ACCOUNT, version.SICKBEARD_REPOSITORY, version.SICKBEARD_VERSION):
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit.id
                 if not self._cur_commit_hash:
@@ -307,7 +307,10 @@ class GitUpdateManager(UpdateManager):
 
         # if we're up to date then don't set this
         if self._num_commits_behind == 35:
-            message = "or else you're ahead of master"
+            if version.SICKBEARD_ACCOUNT != "midgetspy":
+                message = "or else you're ahead of the repository " + version.SICKBEARD_REPOSITORY + " ( " + version.SICKBEARD_VERSION + " )"
+            else:
+                message = "or else you're ahead of the repository ( " + version.SICKBEARD_VERSION + " )"
 
         elif self._num_commits_behind > 0:
             message = "you're "+str(self._num_commits_behind)+' commits behind'
@@ -316,9 +319,9 @@ class GitUpdateManager(UpdateManager):
             return
 
         if self._newest_commit_hash:
-            url = 'http://github.com/midgetspy/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
+            url = 'http://github.com/'+ version.SICKBEARD_ACCOUNT +'/'+ version.SICKBEARD_REPOSITORY +'/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
         else:
-            url = 'http://github.com/midgetspy/Sick-Beard/commits/'
+            url = 'http://github.com/'+ version.SICKBEARD_ACCOUNT +'/'+ version.SICKBEARD_REPOSITORY +'/commits/'
 
         new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
@@ -424,7 +427,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'http://github.com/midgetspy/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
+        tar_download_url = 'http://github.com/'+ version.SICKBEARD_ACCOUNT +'/'+ version.SICKBEARD_REPOSITORY +'/tarball/'+version.SICKBEARD_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 
