@@ -36,6 +36,7 @@ from sickbeard import logger
 from sickbeard import notifiers
 from sickbeard import show_name_helpers
 from sickbeard import scene_exceptions
+from sickbeard import name_cache
 
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -440,7 +441,7 @@ class PostProcessor(object):
 
         ep = adba.Episode(sickbeard.ADBA_CONNECTION,filePath=filePath,
              paramsF=["quality","anidb_file_name","crc32"],
-             paramsA=["epno","english_name","short_name_list"])
+             paramsA=["epno","english_name","short_name_list","other_name","synonym_list"])
         try:
             self._log(u"Trying to lookup "+str(filePath)+" on anidb (this might take some time because we have to calculate the hash)", logger.MESSAGE)        
             ep.load_data()
@@ -448,19 +449,32 @@ class PostProcessor(object):
             self._log(u"exception msg: "+str(e))
             raise InvalidNameException
         
-        names = ep.short_name_list
+        names = []
+        if len(ep.short_name_list):
+            names = ep.short_name_list
+        
+        if len(ep.synonym_list):
+            names = [ep.synonym_list]+names
+
+        if ep.other_name:
+            names = [ep.other_name]+names
+        
         if ep.english_name:
             names = [ep.english_name]+names
         self._log(u"names "+str(names) , logger.DEBUG)
             
-        #TODO: clean code it looks like from hell
+        #TODO: clean code. it looks like it's from hell
         for name in names:
             try:
                 name = name.encode('utf-8')
             except:
                 continue
             else:
-                tvdb_id = helpers.get_tvdbid(name,sickbeard.showList,True)
+                tvdb_id = name_cache.retrieveNameFromCache(name)
+                if not tvdb_id:
+                    tvdb_id = helpers.get_tvdbid(name, sickbeard.showList, True)
+                    if tvdb_id:
+                        name_cache.addNameToCache(name, tvdb_id)
                 if tvdb_id:
                     try:
                         show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
