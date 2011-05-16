@@ -218,6 +218,43 @@ def pickBestResult(results, quality_list=None):
 
     return bestResult
 
+def isFinalResult(result):
+    """
+    Checks if the given result is good enough quality that we can stop searching for other ones.
+    
+    If the result is the highest quality in both the any/best quality lists then this function
+    returns True, if not then it's False
+
+    """
+    
+    logger.log(u"Checking if we should keep searching after we've found "+result.name)
+    
+    show_obj = result.episodes[0].show
+    
+    any_qualities, best_qualities = Quality.splitQuality(show_obj.quality)
+    
+    # if there is a redownload that's higher than this then we definitely need to keep looking
+    if best_qualities and result.quality < max(best_qualities):
+        return False
+
+    # if there's no redownload that's higher (above) and this is the highest initial download then we're good
+    elif any_qualities and result.quality == max(any_qualities):
+        return True
+    
+    elif best_qualities and result.quality == max(best_qualities):
+        
+        # if this is the best redownload but we have a higher initial download then keep looking
+        if any_qualities and result.quality < max(any_qualities):
+            return False
+        
+        # if this is the best redownload and we don't have a higher initial download then we're done
+        else:
+            return True
+
+    # if we got here than it's either not on the lists, they're empty, or it's lower than the highest required
+    else:
+        return False
+
 
 def findEpisode(episode, manualSearch=False):
 
@@ -247,7 +284,19 @@ def findEpisode(episode, manualSearch=False):
         # skip non-tv crap
         curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
 
+        # loop all results and see if any of them are good enough that we can stop searching
+        done_searching = False
+        for x in curFoundResults:
+            done_searching = isFinalResult(x)
+            logger.log(u"Should we stop searching: "+str(done_searching), logger.DEBUG)
+            if done_searching:
+                break
+        
         foundResults += curFoundResults
+
+        # if we did find a result that's good enough to stop then don't continue
+        if done_searching:
+            break
 
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
