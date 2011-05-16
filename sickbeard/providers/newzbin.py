@@ -311,7 +311,6 @@ class NewzbinProvider(generic.NZBProvider):
                 'u_comment_posts_only': 0,
                 'u_show_passworded': 0,
                 'u_v3_retention': 0,
-                'ps_rb_source': 3008,
                 'ps_rb_video_format': 3082257,
                 'ps_rb_language': 4096,
                 'sort': 'date',

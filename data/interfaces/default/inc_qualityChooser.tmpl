@@ -5,13 +5,13 @@
 
 <div class="field-pair">
     <label for="qualityPreset" class="nocheck clearfix">
-
+#set $overall_quality = $Quality.combineQualities($anyQualities, $bestQualities)
 <span class="component-title">
 #set $selected = None
 <select id="qualityPreset">
 <option value="0">Custom</option>
 #for $curPreset in sorted($qualityPresets):
-<option value="$curPreset" #if $curPreset == $sickbeard.QUALITY_DEFAULT then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
+<option value="$curPreset" #if $curPreset == $overall_quality then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
 #end for
 </select>
 </span>
