@@ -227,7 +227,7 @@ def isFinalResult(result):
 
     """
     
-    logger.log(u"Checking if we should keep searching after we've found "+result.name)
+    logger.log(u"Checking if we should keep searching after we've found "+result.name, logger.DEBUG)
     
     show_obj = result.episodes[0].show
     
@@ -286,9 +286,9 @@ def findEpisode(episode, manualSearch=False):
 
         # loop all results and see if any of them are good enough that we can stop searching
         done_searching = False
-        for x in curFoundResults:
-            done_searching = isFinalResult(x)
-            logger.log(u"Should we stop searching: "+str(done_searching), logger.DEBUG)
+        for cur_result in curFoundResults:
+            done_searching = isFinalResult(cur_result)
+            logger.log(u"Should we stop searching after finding "+cur_result.name+": "+str(done_searching), logger.DEBUG)
             if done_searching:
                 break
         
