@@ -53,9 +53,6 @@ class FreshOnTVCache(tvcache.TVCache):
 
 
     def _getRSSData(self):
-        # These will be ignored on the serverside.
-        ignore_regex = "all.month|month.of|season[\s\d]*complete"
-    
         url = 'http://freshon.tv/rss.php?feed=dl&passkey='+ sickbeard.FRESHONTV_PASSKEY
         logger.log(u"FreshOn.tv cache update URL: "+ url, logger.DEBUG)
 
