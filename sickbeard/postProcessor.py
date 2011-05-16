@@ -419,8 +419,12 @@ class PostProcessor(object):
         return to_return
     
     def _analyze_anidb(self,filePath):
+        if not sickbeard.USE_ANIDB:
+            self._log(u"Usage of anidb disabled. Skiping", logger.DEBUG)
+            return (None, None, None)
+        
         if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
-            self._log(u"anidb username and/or password are not set. please do it manually in the config file!", logger.DEBUG)
+            self._log(u"anidb username and/or password are not set. Aborting anidb lookup.", logger.DEBUG)
             return (None, None, None)
         
         if not sickbeard.ADBA_CONNECTION:

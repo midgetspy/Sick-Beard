@@ -588,6 +588,7 @@ ConfigMenu = [
     { 'title': 'Search Providers',  'path': 'config/providers/'        },
     { 'title': 'Post Processing',   'path': 'config/postProcessing/'   },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
+    { 'title': 'Anime',             'path': 'config/anime/'    },
 ]
 
 class ConfigGeneral:
@@ -1346,6 +1347,40 @@ class ConfigNotifications:
 
         redirect("/config/notifications/")
 
+class ConfigAnime:
+
+    @cherrypy.expose
+    def index(self):
+
+        t = PageTemplate(file="config_anime.tmpl")
+        t.submenu = ConfigMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveAnime(self, use_anidb=None, anidb_username=None, anidb_password=None):
+
+        results = []
+
+        if use_anidb == "on":
+            use_anidb = 1
+        else:
+            use_anidb = 0
+        
+        sickbeard.USE_ANIDB = use_anidb
+        sickbeard.ANIDB_USERNAME = anidb_username
+        sickbeard.ANIDB_PASSWORD = anidb_password
+
+        sickbeard.save_config()
+
+        if len(results) > 0:
+            for x in results:
+                logger.log(x, logger.ERROR)
+            ui.notifications.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
+        else:
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+
+        redirect("/config/anime/")
 
 class Config:
 
@@ -1365,6 +1400,8 @@ class Config:
     providers = ConfigProviders()
 
     notifications = ConfigNotifications()
+    
+    anime = ConfigAnime()
 
 def haveXBMC():
     return sickbeard.XBMC_HOST

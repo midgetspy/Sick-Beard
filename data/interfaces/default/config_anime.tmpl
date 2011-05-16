@@ -1,0 +1,76 @@
+#import sickbeard
+#set global $title="Config - Anime"
+#set global $header="Anime"
+
+#set global $sbPath="../.."
+
+#set global $topmenu="config"#
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+
+<div id="config">
+<div id="config-content">
+
+<form id="configForm" action="saveAnime" method="post">
+
+            <div id="config-components">
+
+                <div id="core-component-group1" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3><a href="http://anidb.info" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/providers/anidb.gif" alt="AniDB" title="AniDB" width="16" height="16" /> AniDB</a></h3>
+                        <p>AniDB is non-profit database of anime information that is freely open to the public</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_anidb" id="use_anidb" #if $sickbeard.USE_ANIDB then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_notifo">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard use data from AniDB?</span>
+                            </label>
+                        </div>
+						
+						<div id="content_use_anidb">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">AniDB Username</span>
+                                <input type="text" name="anidb_username" id="anidb_username" value="$sickbeard.ANIDB_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your AniDB account</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">AniDB Password</span>
+                                <input type="password" name="anidb_password" id="anidb_password" value="$sickbeard.ANIDB_PASSWORD" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Password of your AniDB account</span>
+                            </label>
+                        </div>
+						</div>
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_notifo //-->
+
+                    </fieldset>
+
+                </div><!-- /component-group //-->
+
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+
+            </div><!-- /config-components //-->
+
+</form>
+
+
+</div></div>
+<div class="clearfix"></div>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
