@@ -11,15 +11,33 @@
 
 <script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
 
-<div class="h2footer align-right" style="margin-left:250px; line-height: 20px;">
+
+<div class="h2footer align-right">
+#if (len($seasonResults) > 14):
+    <select id="seasonJump">
+        <option value="jump">Jump to Season</option>
+    #for $seasonNum in $seasonResults:
+        <option value="#season-$seasonNum["season"]">#if int($seasonNum["season"]) == 0 then "Specials" else "Season " + str($seasonNum["season"])#</option>
+    #end for
+    </select>
+#else:
     <b>Season:</b>
     #for $seasonNum in $seasonResults:
-        #if int($seasonNum["season"]) == 0 then "<span class=\"separator\">|</span> " else ""#
-        <a href="#season-$seasonNum["season"]">
-        #if int($seasonNum["season"]) == 0 then "Specials</a>" else str($seasonNum["season"])+"</a> "#
-        #if int($seasonNum["season"]) >1 then "<span class=\"separator\">|</span> " else ""#
+        #if int($seasonNum["season"]) == 0:
+            <a href="#season-$seasonNum["season"]">Specials</a>
+        #else:
+            <a href="#season-$seasonNum["season"]">${str($seasonNum["season"])}</a>
+        #end if
+        #if $seasonNum != $seasonResults[-1]:
+            <span class="separator">|</span>
+        #end if
     #end for
+#end if
 </div><br/>
+
+#if $show_message:
+    <div id="show_message" class="ui-corner-all">$show_message</div><br />
+#end if
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
@@ -66,7 +84,7 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 #set $air_by_date = False
 #end if
     <tr><td class="showLegend">Active: </td><td><img src="$sbRoot/images/#if int($show.paused) == 0 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Absolute Numbering: </td><td><img src="$sbRoot/images/#if int($show.absolute_numbering) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 </table>
 </div>
@@ -147,15 +165,15 @@ $epLoc
 #end if
 
     </td>
-    <td>$statusStrings[int($epResult["status"])]</td>
+    <td class="status_column">$statusStrings[int($epResult["status"])]</td>
     <td align="center">
-    #if int($epResult["season"]) != 0: 
-    <a href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
+    #if int($epResult["season"]) != 0:
+      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
     #end if
     </td>
    </tr>
 
 #end for
-</table><br /><br />
+</table><br />
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

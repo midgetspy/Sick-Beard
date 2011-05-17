@@ -18,21 +18,22 @@
 
 
 
-import urllib2
-import os.path
-import sys
 import datetime
-import time
-
-import xml.etree.cElementTree as etree
+import os
+import sys
+import re
+import urllib2
 
 import sickbeard
 
-from sickbeard import helpers, classes, exceptions, logger, db
+from sickbeard import helpers, classes, logger, db
 
-from sickbeard.common import *
+from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
+
+from lib.hachoir_parser import createParser
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
@@ -110,12 +111,15 @@ class GenericProvider:
         try:
             result = helpers.getURL(url, headers)
         except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
+            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
 
         return result
 
     def downloadResult(self, result):
+        """
+        Save the result to disk.
+        """
 
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
 
@@ -124,6 +128,7 @@ class GenericProvider:
         if data == None:
             return False
 
+        # use the appropriate watch folder
         if self.providerType == GenericProvider.NZB:
             saveDir = sickbeard.NZB_DIR
             writeMode = 'w'
@@ -133,6 +138,7 @@ class GenericProvider:
         else:
             return False
 
+        # use the result name as the filename
         fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
 
         logger.log(u"Saving to " + fileName, logger.DEBUG)
@@ -141,9 +147,31 @@ class GenericProvider:
             fileOut = open(fileName, writeMode)
             fileOut.write(data)
             fileOut.close()
+            helpers.chmodAsParent(fileName)
         except IOError, e:
-            logger.log("Unable to save the NZB: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log("Unable to save the file: "+ex(e), logger.ERROR)
             return False
+
+        # as long as it's a valid download then consider it a successful snatch
+        return self._verify_download(fileName)
+
+    def _verify_download(self, file_name=None):
+        """
+        Checks the saved file to see if it was actually valid, if not then consider the download a failure.
+        """
+
+        # primitive verification of torrents, just make sure we didn't get a text file or something
+        if self.providerType == GenericProvider.TORRENT:
+            parser = createParser(file_name)
+            if parser:
+                mime_type = parser._getMimeType()
+                try:
+                    parser.stream._input.close()
+                except:
+                    pass
+                if mime_type != 'application/x-bittorrent':
+                    logger.log(u"Result is not a valid torrent file", logger.WARNING)
+                    return False
 
         return True
 
@@ -206,7 +234,7 @@ class GenericProvider:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-            if episode.show.is_air_by_date:
+            if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
                     continue
@@ -277,7 +305,17 @@ class GenericProvider:
                 if len(actual_episodes) < 1:
                     logger.log(u"Tried to look up the real episode number for episode "+title+" but the database didn't give proper results, skipping it", logger.ERROR)
                     continue
-            elif show.is_air_by_date:
+            elif not show.is_air_by_date:
+                # this check is meaningless for non-season searches
+                if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
+                    logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
+                    continue
+
+                # we just use the existing info for normal searches
+                actual_season = season
+                actual_episodes = parse_result.episode_numbers
+            
+            else:
                 if not parse_result.air_by_date:
                     logger.log(u"This is supposed to be an air-by-date search but the result "+title+" didn't parse as one, skipping it", logger.DEBUG)
                     continue
@@ -291,15 +329,6 @@ class GenericProvider:
                 
                 actual_season = int(sql_results[0]["season"])
                 actual_episodes = [int(sql_results[0]["episode"])]
-            else:
-                # this check is meaningless for non-season searches
-                if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
-                    logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
-                    continue
-
-                # we just use the existing info for normal searches
-                actual_season = season
-                actual_episodes = parse_result.episode_numbers
 
             # make sure we want the episode
             wantEp = True

@@ -34,13 +34,16 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
+from sickbeard.exceptions import ex
 from sickbeard import tvrage
 from sickbeard import config
 from sickbeard import image_cache
+from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek
 
-from common import *
+from common import Quality, Overview
+from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
 
 class TVShow(object):
 
@@ -70,7 +73,7 @@ class TVShow(object):
         self._isDirGood = False
 
         self.episodes = {}
-
+        
         otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdbid)
         if otherShow != None:
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
@@ -79,11 +82,6 @@ class TVShow(object):
 
         self.saveToDB()
 
-    def _is_air_by_date(self):
-        return self.air_by_date or (self.genre and "Talk Show" in self.genre)
-    
-    is_air_by_date = property(_is_air_by_date)
-    
     def _getLocation(self):
         if ek.ek(os.path.isdir, self._location):
             return self._location
@@ -203,7 +201,7 @@ class TVShow(object):
             try:
                 curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
             except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException), e:
-                logger.log(u"Episode "+mediaFile+" returned an exception: "+str(e).decode('utf-8'), logger.ERROR)
+                logger.log(u"Episode "+mediaFile+" returned an exception: "+ex(e), logger.ERROR)
             except exceptions.EpisodeDeletedException:
                 logger.log(u"The episode deleted itself when I tried making an object for it", logger.DEBUG)
 
@@ -318,10 +316,10 @@ class TVShow(object):
 
         try:
             # load the tvrage object, it will set the ID in its constructor if possible
-            tvr = tvrage.TVRage(self)
+            tvrage.TVRage(self)
             self.saveToDB()
         except exceptions.TVRageException, e:
-            logger.log(u"Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+str(e).decode('utf-8'), logger.DEBUG)
+            logger.log(u"Couldn't get TVRage ID because we're unable to sync TVDB and TVRage: "+ex(e), logger.DEBUG)
             return
 
     def getImages(self, fanart=None, poster=None):
@@ -350,7 +348,7 @@ class TVShow(object):
 
             # make an episode out of it
         except exceptions.TVRageException, e:
-            logger.log(u"Unable to add TVRage info: " + str(e), logger.WARNING)
+            logger.log(u"Unable to add TVRage info: " + ex(e), logger.WARNING)
 
 
 
@@ -395,8 +393,11 @@ class TVShow(object):
                 epObj = t[self.tvdbid].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
-            except tvdb_exceptions.tvdb_episodenotfound, e:
+            except tvdb_exceptions.tvdb_episodenotfound:
                 logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
+                return None
+            except tvdb_exceptions.tvdb_error, e:
+                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return None
 
         # if we have an absolute numbered show than get the real season/episode numbers
@@ -566,6 +567,7 @@ class TVShow(object):
                 ltvdb_api_parms['language'] = self.lang
 
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
+
         else:
             t = tvapi
 
@@ -623,14 +625,14 @@ class TVShow(object):
                 raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
         except (exceptions.NoNFOException, SyntaxError, ValueError), e:
-            logger.log(u"There was an error parsing your existing tvshow.nfo file: " + str(e), logger.ERROR)
+            logger.log(u"There was an error parsing your existing tvshow.nfo file: " + ex(e), logger.ERROR)
             logger.log(u"Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 
             try:
                 xmlFileObj.close()
                 ek.ek(os.rename, xmlFile, xmlFile + ".old")
             except Exception, e:
-                logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + str(e), logger.ERROR)
+                logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + ex(e), logger.ERROR)
             raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
 
         if showXML.findtext('studio') != None:
@@ -781,7 +783,6 @@ class TVShow(object):
 
             goodName = rootEp.prettyName()
             actualName = os.path.splitext(os.path.basename(curLocation))
-            curEpDir = os.path.dirname(curLocation)
 
             if goodName == actualName[0]:
                 logger.log(str(self.tvdbid) + ": File " + rootEp.location + " is already named correctly, skipping", logger.DEBUG)
@@ -794,7 +795,8 @@ class TVShow(object):
                     for relEp in rootEp.relatedEps:
                         relEp.location = result
 
-            fileList = ek.ek(glob.glob, ek.ek(os.path.join, curEpDir, actualName[0] + "*").replace("[","*").replace("]","*"))
+            fileList = postProcessor.PostProcessor(curLocation)._list_associated_files(curLocation)
+            logger.log(u"Files associated to "+curLocation+": "+str(fileList), logger.DEBUG)
 
             for file in fileList:
                 result = helpers.rename_file(file, rootEp.prettyName())
@@ -918,7 +920,7 @@ class TVShow(object):
             return Overview.GOOD
         elif epStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
 
-            anyQualities, bestQualities = Quality.splitQuality(self.quality)
+            anyQualities, bestQualities = Quality.splitQuality(self.quality) #@UnusedVariable
             if bestQualities:
                 maxBestQuality = max(bestQualities)
             else:
@@ -1109,7 +1111,7 @@ class TVEpisode(object):
                 myEp = cachedSeason[episode]
 
         except (tvdb_exceptions.tvdb_error, IOError), e:
-            logger.log(u"TVDB threw up an error: "+str(e).decode('utf-8'), logger.DEBUG)
+            logger.log(u"TVDB threw up an error: "+ex(e), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
             if self.name:
                 logger.log(u"TVDB timed out but we have enough info from other sources, allowing the error", logger.DEBUG)
@@ -1124,10 +1126,9 @@ class TVEpisode(object):
                 self.deleteEpisode()
             return
 
-
         if not myEp["firstaired"]:
             myEp["firstaired"] = str(datetime.date.fromordinal(1))
-			
+            
         if not myEp["absolute_number"]:
             myEp["absolute_number"] = 0
 
@@ -1233,11 +1234,11 @@ class TVEpisode(object):
                 try:
                     showXML = etree.ElementTree(file = nfoFile)
                 except (SyntaxError, ValueError), e:
-                    logger.log(u"Error loading the NFO, backing up the NFO and skipping for now: " + str(e), logger.ERROR) #TODO: figure out what's wrong and fix it
+                    logger.log(u"Error loading the NFO, backing up the NFO and skipping for now: " + ex(e), logger.ERROR) #TODO: figure out what's wrong and fix it
                     try:
                         ek.ek(os.rename, nfoFile, nfoFile + ".old")
                     except Exception, e:
-                        logger.log(u"Failed to rename your episode's NFO file - you need to delete it or fix it: " + str(e), logger.ERROR)
+                        logger.log(u"Failed to rename your episode's NFO file - you need to delete it or fix it: " + ex(e), logger.ERROR)
                     raise exceptions.NoNFOException("Error in NFO format")
 
                 for epDetails in showXML.getiterator('episodedetails'):
@@ -1429,7 +1430,7 @@ class TVEpisode(object):
         if naming_quality == None:
             naming_quality = sickbeard.NAMING_QUALITY
 
-        if ((self.show.genre and "Talk Show" in self.show.genre) or self.show.air_by_date) and sickbeard.NAMING_DATES:
+        if self.show.air_by_date and sickbeard.NAMING_DATES:
             try:
                 goodEpString = self.airdate.strftime("%Y.%m.%d")
             except ValueError:
@@ -1460,7 +1461,7 @@ class TVEpisode(object):
             finalName += goodName
 
         if naming_quality:
-            epStatus, epQual = Quality.splitCompositeStatus(self.status)
+            epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
             if epQual != Quality.NONE:
                 finalName += config.naming_sep_type[naming_sep_type] + Quality.qualityStrings[epQual]
 

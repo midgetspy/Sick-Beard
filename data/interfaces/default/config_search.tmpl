@@ -13,8 +13,9 @@
 
 <div id="config">
 <div id="config-content">
-<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.PROG_DIR</span> "</h5>
-<form action="saveSearch" method="post">
+<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
+
+<form id="configForm" action="saveSearch" method="post">
 
             <div id="config-components">
                 
@@ -57,7 +58,7 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         
                     </fieldset>
                 </div><!-- /component-group1 //-->
@@ -85,8 +86,8 @@
                                 <span class="component-title jumbo">NZB Method:</span>
                                 <span class="component-desc">
                                     <select name="nzb_method" id="nzb_method">
-                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd"}
-                                    #for $curAction in ('sabnzbd', 'blackhole'):
+                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
+                                    #for $curAction in ('sabnzbd', 'blackhole', 'nzbget'):
                                       #if $sickbeard.NZB_METHOD == $curAction:
                                         #set $nzb_method = "selected=\"selected\""
                                       #else
@@ -172,16 +173,59 @@
                                 </label>
                             </div>
                         </div>
+
+                        <div id="nzbget_settings">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZBget HOST:PORT</span>
+                                    <input type="text" name="nzbget_host" value="$sickbeard.NZBGET_HOST" size="45" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Hostname and portnumber of the NZBget RPC (not NZBgetweb!)</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(eg. localhost:6789)</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZBget Password</span>
+                                    <input type="password" name="nzbget_password" value="$sickbeard.NZBGET_PASSWORD" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Password found in nzbget.conf (by default tegbzn6789)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZBget Category</span>
+                                    <input type="text" name="nzbget_category" value="$sickbeard.NZBGET_CATEGORY" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Category for downloads to go into (eg. TV)</span>
+                                </label>
+                            </div>
+                        </div>
                         
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         
                         </div><!-- /content_use_nzbs //-->
                         
                     </fieldset>
                 </div><!-- /component-group2 //-->
 
-                <div id="core-component-group2" class="component-group clearfix">
+                <div class="title-group clearfix" id="no-torrents">
+                    <div class="ui-corner-all config_message">Note: Sick Beard works better with Usenet than with Torrents, <a href="http://www.sickbeard.com/usenet.html" target="_blank">here's why</a>.</div>
+                </div>
+
+                <div id="core-component-group3" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Torrent Search</h3>
@@ -211,13 +255,13 @@
                         </div>
                         
                         <div class="clearfix"></div>
-                        <input type="submit" value="Save Changes" /><br/>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         </div><!-- /content_use_torrents //-->
                         
                     </fieldset>
-                </div><!-- /component-group2 //-->
+                </div><!-- /component-group3 //-->
 
-            <br/><input type="submit" value="Save Changes" /><br/>
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
 

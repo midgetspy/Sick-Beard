@@ -1,8 +1,25 @@
+# Author: Nic Wolfe <nic@wolfeden.ca>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
 __all__ = ['ezrss',
            'tvtorrents',
            'nzbmatrix',
            'nzbs_org',
-           'tvbinz',
            'nzbsrus',
            'womble',
            'newzbin',
@@ -46,6 +63,11 @@ def getNewznabProviderList(data):
         if not curDefault:
             continue
 
+        # a 0 in the key spot indicates that no key is needed, so set this on the object
+        if curDefault.key == '0':
+            curDefault.key = ''
+            curDefault.needs_auth = False
+
         if curDefault.name not in providerDict:
             curDefault.default = True
             providerList.append(curDefault)
@@ -53,7 +75,8 @@ def getNewznabProviderList(data):
             providerDict[curDefault.name].default = True
             providerDict[curDefault.name].name = curDefault.name
             providerDict[curDefault.name].url = curDefault.url
-
+            providerDict[curDefault.name].needs_auth = curDefault.needs_auth
+        
     return filter(lambda x: x, providerList)
 
 
@@ -73,7 +96,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'NZB.su|https://nzb.su/||0'
+    return 'Sick Beard Index|http://momo.sickbeard.com/|0|0'
 
 
 def getProviderModule(name):

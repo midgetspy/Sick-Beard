@@ -19,16 +19,14 @@
 
 import urllib, urllib2
 import socket
-import sys
 import base64
 import time, struct
-
-#import config
 
 import sickbeard
 
 from sickbeard import logger
 from sickbeard import common
+from sickbeard.exceptions import ex
 
 try:
     import xml.etree.cElementTree as etree
@@ -57,6 +55,17 @@ class XBMCNotifier:
                     logger.log(u"Update of show directory failed on " + curHost + ", trying full update as requested", logger.ERROR)
                     self._update_library(curHost)
 
+    def _username(self):
+        return sickbeard.XBMC_USERNAME
+
+    def _password(self):
+        return sickbeard.XBMC_PASSWORD
+
+    def _use_me(self):
+        return sickbeard.USE_XBMC
+
+    def _hostname(self):
+        return sickbeard.XBMC_HOST
 
     def _sendToXBMC(self, command, host, username=None, password=None):
         '''
@@ -69,9 +78,9 @@ class XBMCNotifier:
         '''
     
         if not username:
-            username = sickbeard.XBMC_USERNAME
+            username = self._username()
         if not password:
-            password = sickbeard.XBMC_PASSWORD
+            password = self._password()
     
         for key in command:
             if type(command[key]) == unicode:
@@ -96,33 +105,38 @@ class XBMCNotifier:
             response = handle.read()
             logger.log(u"response: " + response, logger.DEBUG)
         except IOError, e:
-            # print "Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e)
-            logger.log(u"Warning: Couldn't contact XBMC HTTP server at " + host + ": " + str(e))
+            logger.log(u"Warning: Couldn't contact XBMC HTTP server at " + host + ": " + ex(e))
             response = ''
     
         return response
 
     def _notifyXBMC(self, input, title="Sick Beard", host=None, username=None, password=None, force=False):
     
-        if not sickbeard.USE_XBMC and not force:
+        if not self._use_me() and not force:
             logger.log("Notification for XBMC not enabled, skipping this notification", logger.DEBUG)
             return False
     
         if not host:
-            host = sickbeard.XBMC_HOST
+            host = self._hostname()
         if not username:
-            username = sickbeard.XBMC_USERNAME
+            username = self._username()
         if not password:
-            password = sickbeard.XBMC_PASSWORD
+            password = self._password()
     
         logger.log(u"Sending notification for " + input, logger.DEBUG)
     
         fileString = title + "," + input
     
+        result = ''
+    
         for curHost in [x.strip() for x in host.split(",")]:
             command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' +fileString + ')' }
             logger.log(u"Sending notification to XBMC via host: "+ curHost +"username: "+ username + " password: " + password, logger.DEBUG)
-            return self._sendToXBMC(command, curHost, username, password)
+            if result:
+                result += ', '
+            result += curHost + ':' + self._sendToXBMC(command, curHost, username, password)
+
+        return result
 
     def _update_library(self, host, showName=None):
     
@@ -165,7 +179,7 @@ class XBMCNotifier:
             try:
                 et = etree.fromstring(encSqlXML)
             except SyntaxError, e:
-                logger.log("Unable to parse XML returned from XBMC: "+str(e), logger.ERROR)
+                logger.log("Unable to parse XML returned from XBMC: "+ex(e), logger.ERROR)
                 return False
     
             paths = et.findall('.//field')
@@ -218,7 +232,7 @@ def wakeOnLan(ethernet_address):
 # Test Connection function
 def isHostUp(host,port):
 
-    (family, socktype, proto, garbage, address) = socket.getaddrinfo(host, port)[0]
+    (family, socktype, proto, garbage, address) = socket.getaddrinfo(host, port)[0] #@UnusedVariable
     s = socket.socket(family, socktype, proto)
 
     try:

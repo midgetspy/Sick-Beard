@@ -1,5 +1,12 @@
 $(document).ready(function(){
 
+	function toggle_torrent_title(){
+		if ($('#use_torrents').attr('checked'))
+			$('#no-torrents').show();
+		else
+			$('#no-torrents').hide();
+	}
+	
     $.fn.nzb_method_handler = function() {
         
         var selectedProvider = $('#nzb_method :selected').val();
@@ -7,9 +14,15 @@ $(document).ready(function(){
         if (selectedProvider == "blackhole") {
             $('#blackhole_settings').show();
             $('#sabnzbd_settings').hide();
+            $('#nzbget_settings').hide();
+        } else if (selectedProvider == "nzbget") {
+            $('#blackhole_settings').hide();
+            $('#sabnzbd_settings').hide();
+            $('#nzbget_settings').show();
         } else {
             $('#blackhole_settings').hide();
             $('#sabnzbd_settings').show();
+            $('#nzbget_settings').hide();
         }
 
     }
@@ -18,4 +31,10 @@ $(document).ready(function(){
 
     $(this).nzb_method_handler();
 
+    $('#use_torrents').click(function(){
+    	toggle_torrent_title();
+    });
+    
+    toggle_torrent_title();
+    
 });

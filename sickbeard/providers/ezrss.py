@@ -1,3 +1,21 @@
+# Author: Nic Wolfe <nic@wolfeden.ca>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
 import urllib
 import re
 
@@ -6,9 +24,11 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard.common import *
+from sickbeard.common import Quality
 from sickbeard import logger
-from sickbeard import tvcache, sceneHelpers
+from sickbeard import tvcache
+from sickbeard.helpers import sanitizeSceneName
+from sickbeard.exceptions import ex
 
 class EZRSSProvider(generic.TorrentProvider):
 
@@ -40,10 +60,10 @@ class EZRSSProvider(generic.TorrentProvider):
         
         results = {}
         
-        if show.is_air_by_date:
+        if show.air_by_date:
             logger.log(u"EZRSS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
             return results
-		
+        
         elif show.absolute_numbering:
             logger.log(u"EZRSS doesn't support absolute numbered backlog", logger.WARNING)
             return results
@@ -58,7 +78,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = sceneHelpers.sanitizeSceneName(show.name).replace('.',' ').encode('utf-8')
+        params['show_name'] = sanitizeSceneName(show.name, ezrss=True).replace('.',' ').encode('utf-8')
           
         if season != None:
             params['season'] = season
@@ -72,9 +92,9 @@ class EZRSSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name).replace('.',' ').encode('utf-8')
+        params['show_name'] = sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
         
-        if ep_obj.show.is_air_by_date:
+        if ep_obj.show.air_by_date:
             params['date'] = str(ep_obj.airdate)
         else:
             params['season'] = ep_obj.season
@@ -82,7 +102,7 @@ class EZRSSProvider(generic.TorrentProvider):
     
         return [params]
 
-    def _doSearch(self, search_params, show=None):
+    def _doSearch(self, search_params, quotes=False, show=None, english=True):
     
         params = {"mode": "rss"}
     
@@ -102,7 +122,7 @@ class EZRSSProvider(generic.TorrentProvider):
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load EZRSS RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load EZRSS RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"RSS data: "+data, logger.DEBUG)
             return []
         

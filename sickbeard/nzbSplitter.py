@@ -1,3 +1,21 @@
+# Author: Nic Wolfe <nic@wolfeden.ca>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
 import urllib2
 
 import xml.etree.cElementTree as etree
@@ -7,7 +25,7 @@ import re
 from name_parser.parser import NameParser, InvalidNameException
 
 from sickbeard import logger, classes, helpers
-from sickbeard.common import *
+from sickbeard.common import Quality
 
 def getSeasonNZBs(name, urlData, season):
 
@@ -25,7 +43,7 @@ def getSeasonNZBs(name, urlData, season):
 
     sceneNameMatch = re.search(regex, filename, re.I)
     if sceneNameMatch:
-        showName, qualitySection, groupName = sceneNameMatch.groups()
+        showName, qualitySection, groupName = sceneNameMatch.groups() #@UnusedVariable
     else:
         logger.log(u"Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
         return ({},'')
@@ -84,7 +102,7 @@ def splitResult(result):
 
     try:
         urlData = helpers.getURL(result.url)
-    except urllib2.URLError, e:
+    except urllib2.URLError:
         logger.log(u"Unable to load url "+result.url+", can't download season NZB", logger.ERROR)
         return False
 
