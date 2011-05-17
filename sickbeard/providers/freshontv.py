@@ -1,3 +1,6 @@
+# Author: Daniel Pavel <daniel.pavel@gmail.com>
+# Mostly copied from tvtorrents.py
+#
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -48,8 +51,8 @@ class FreshOnTVCache(tvcache.TVCache):
 
         tvcache.TVCache.__init__(self, provider)
 
-        # only poll TvTorrents every 15 minutes max
-        self.minTime = 15
+        # only poll freshon.tv every 30 minutes max
+        self.minTime = 30
 
 
     def _getRSSData(self):
@@ -63,9 +66,7 @@ class FreshOnTVCache(tvcache.TVCache):
         return data
 
     def _parseItem(self, item):
-
-        title = item.findtext('title')
-        url = item.findtext('link')
+        (title, url) = self.provider._get_title_and_url(item)
 
         if not title or not url:
             logger.log(u"The XML returned from the FreshOn.tv RSS feed is incomplete, this result is unusable", logger.ERROR)
