@@ -23,7 +23,7 @@ from aniDBerrors import *
 
 
 class AniDBLink(threading.Thread):
-	def __init__(self,server,port,myport,delay=2,timeout=20,verbos=False):
+	def __init__(self,server,port,myport,delay=2,timeout=20,logFunction=False):
 		super(AniDBLink, self).__init__()
 		self.server=server
 		self.port=port
@@ -42,8 +42,8 @@ class AniDBLink(threading.Thread):
 		self.session=None
 		self.banned=False
 		self.crypt=None
-		if(verbos):
-			self.log=self.print_log
+		if(logFunction):
+			self.log=logFunction
 		else:
 			self.log=self.print_log_dummy
 

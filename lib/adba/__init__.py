@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with aDBa.  If not, see <http://www.gnu.org/licenses/>.
 import threading
+from time import time,sleep,strftime,localtime
+from types import *
 
 from aniDBlink import AniDBLink
 from aniDBcommands import *
@@ -23,29 +25,52 @@ from aniDBAbstracter import Anime,Episode
 
 version = 1
 
-class Connection:
-	def __init__(self,clientname='adba',server='api.anidb.info',port=9000,myport=9876,user=None,password=None,session=None,dburl=None,verbos=False):
+class Connection(threading.Thread):
+	def __init__(self,clientname='adba',server='api.anidb.info',port=9000,myport=9876,user=None,password=None,session=None,log=False,keepAlive=False):
+		super(Connection, self).__init__()
+		# setting the log function
+		if type(log) in (FunctionType,MethodType):# if we get a function or a method use that.
+			self.log = log
+		elif log:# if it something else (like True) use the own print_log
+			self.log=self.print_log
+		else:# dont log at all
+			self.log=self.print_log_dummy
+
+
+		self.link=AniDBLink(server,port,myport,logFunction=self.log)
+		self.link.session=session
+		
 		self.clientname=clientname
 		self.clientver=version
 
-		self.link=AniDBLink(server,port,myport,verbos=verbos)
-		self.link.session=session
-		self.user=user
-		self.password=password
-
+		# from original lib 
 		self.mode=1	#mode: 0=queue,1=unlock,2=callback
-		self.dburl=dburl
 		
-		self.lock = threading.Lock()
+		# to lock other threads out
+		self.lock = threading.RLock()
 		
+		# thread keep alive stuff
+		self.keepAlive = keepAlive
+		self.setDaemon(True)
+		self.lastKeepAliveCheck = 0
+		self.lastAuth = 0
+		self._username = password
+		self._password = user
+		
+	
+	def print_log(self,data):
+		print(strftime("%Y-%m-%d %H:%M:%S", localtime(time()))+": "+str(data))
+		
+	def print_log_dummy(self,data):
+		pass
 	
 	def close(self):
 		self.link.stop()
 	
 	def handle_response(self,response):
-		if response.rescode in ('501','506') and self.user and self.password and response.req.command!='AUTH':
-			resp=self.auth(self.user,self.password)
-			if resp.rescode not in ('500'):
+		if response.rescode in ('501','506') and response.req.command!='AUTH':
+			self.log("seams like the last command got a not authed error back tring to reconnect now")
+			if self._reAuthenticate():
 				response.req.resp=None
 				response=self.handle(response.req,response.req.callback)
 		
@@ -53,16 +78,20 @@ class Connection:
 	def handle(self,command,callback):
 		
 		self.lock.acquire()
-		
+		if self.keepAlive and command.command not in ('AUTH','PING','ENCRYPT'):
+			self.authed()
+
 		def callback_wrapper(resp):
 			self.handle_response(resp)
 			if callback:
 				callback(resp)
 		
+		self.log("handling command "+str(command.command))
+		
 		#make live request
 		command.authorize(self.mode,self.link.new_tag(),self.link.session,callback_wrapper)
 		self.link.request(command)
-		
+			
 		#handle mode 1 (wait for response)
 		if self.mode==1:
 			command.wait_response()
@@ -78,11 +107,50 @@ class Connection:
 		else:
 			self.lock.release()
 
-	def authed(self):
+	def authed(self,reAuthenticate=False):
 		self.lock.acquire()
-		result = (self.link.session!=None)
+		authed = (self.link.session!=None)
+		if not authed and (reAuthenticate or self.keepAlive):
+			self._reAuthenticate()
+			authed = (self.link.session!=None)
 		self.lock.release()
-		return result
+		return authed
+
+	def _reAuthenticate(self):
+		if self._username and self._password:
+			self.log("auto re authenticating !")
+			resp = self.auth(self._username, self._password)
+			if resp.rescode not in ('500'):
+				return True
+		else:
+			return False
+		
+	def _keep_alive(self):
+		self.lastKeepAliveCheck = time()
+		self.log("auto check !")			
+		# check every 30 minutes if the session is still valid
+		# if not reauthenticate 
+		if self.lastAuth and time()-self.lastAuth>1800:
+			self.log("auto uptime !")
+			self.uptime() # this will update the self.link.session and will refresh the session if it is still alive
+			
+			if self.authed(): # if we are authed we set the time
+				self.lastAuth = time()
+			else: # if we aren't authed and we have the user and pw then reauthenticate
+				self._reAuthenticate()
+
+		# issue a ping every 20 minutes after the last package
+		# this ensures the connection will be kept alive
+		if self.link.lastpacket and time()-self.link.lastpacket>1200:
+			self.log("auto ping !")
+			self.ping()
+
+	
+	def run(self):
+		while self.keepAlive:
+			self._keep_alive()
+			sleep(120)
+
 
 	def auth(self,username,password,nat=None,mtu=None,callback=None):
 		"""
@@ -95,6 +163,14 @@ class Connection:
 		mtu	 - maximum transmission unit (max packet size) (default: 1400)
 		
 		"""
+		if self.keepAlive:
+			self._username = username
+			self._password = password
+			if not self.isAlive():			
+				self.log("you wanted to keep this thing alive. starting thread now...")
+				self.start()
+				
+		self.lastAuth = time()
 		return self.handle(AuthCommand(username,password,3,self.clientname,self.clientver,nat,1,'utf8',mtu),callback)
 	
 	def logout(self,cutConnection=False,callback=None):

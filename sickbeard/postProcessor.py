@@ -429,7 +429,7 @@ class PostProcessor(object):
             return (None, None, None)
         
         if not sickbeard.ADBA_CONNECTION:
-            sickbeard.ADBA_CONNECTION = adba.Connection()
+            sickbeard.ADBA_CONNECTION = adba.Connection(keepAlive=True)
         
         if not sickbeard.ADBA_CONNECTION.authed():
             try:
