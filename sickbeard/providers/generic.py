@@ -305,7 +305,7 @@ class GenericProvider:
                 if len(actual_episodes) < 1:
                     logger.log(u"Tried to look up the real episode number for episode "+title+" but the database didn't give proper results, skipping it", logger.ERROR)
                     continue
-            elif not show.is_air_by_date:
+            elif not show.air_by_date:
                 # this check is meaningless for non-season searches
                 if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
                     logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring")
