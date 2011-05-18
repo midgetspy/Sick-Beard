@@ -270,6 +270,7 @@ def main():
                 'log_dir':   log_dir,
                 'username':  sickbeard.WEB_USERNAME,
                 'password':  sickbeard.WEB_PASSWORD,
+                'ip_whitelist': sickbeard.WEB_IP_WHITELIST
         })
     except IOError:
         logger.log(u"Unable to start web server, is something else running on port %d?" % startPort, logger.ERROR)
