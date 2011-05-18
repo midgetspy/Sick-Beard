@@ -1,0 +1,15 @@
+# SickBeard service
+
+description     "SickBeard"
+
+start on (net-device-up
+          and local-filesystems
+	  and runlevel [2345])
+stop on runlevel [016]
+
+respawn
+
+chdir /usr/local/sickbeard
+
+exec /usr/bin/sudo -H -u sickbeard /usr/bin/python /usr/local/sickbeard/SickBeard.py -q
+
