@@ -428,8 +428,9 @@ class PostProcessor(object):
             self._log(u"anidb username and/or password are not set. Aborting anidb lookup.", logger.DEBUG)
             return (None, None, None)
         
+        anidb_logger = lambda x : logger.log("ANIDB: "+str(x), logger.DEBUG)
         if not sickbeard.ADBA_CONNECTION:
-            sickbeard.ADBA_CONNECTION = adba.Connection(keepAlive=True)
+            sickbeard.ADBA_CONNECTION = adba.Connection(keepAlive=True,log=anidb_logger)
         
         if not sickbeard.ADBA_CONNECTION.authed():
             try:
