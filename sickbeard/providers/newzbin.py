@@ -25,6 +25,7 @@ import urllib
 import xml.etree.cElementTree as etree
 from datetime import datetime, timedelta
 
+import locale
 import sickbeard
 import generic
 
@@ -84,7 +85,7 @@ class NewzbinProvider(generic.NZBProvider):
     def isEnabled(self):
         return sickbeard.NEWZBIN
 
-    def getQuality(self, item):
+    def getQuality(self, item, anime=False):
         attributes = item.find(self._report('attributes'))
         attr_dict = {}
 
@@ -97,17 +98,17 @@ class NewzbinProvider(generic.NZBProvider):
 
         logger.log("Finding quality of item based on attributes "+str(attr_dict), logger.DEBUG)
 
-        if self._is_SDTV(attr_dict):
+        if self._is_SDTV(attr_dict,anime):
             quality = Quality.SDTV
-        elif self._is_SDDVD(attr_dict):
+        elif self._is_SDDVD(attr_dict,anime):
             quality = Quality.SDDVD
-        elif self._is_HDTV(attr_dict):
+        elif self._is_HDTV(attr_dict,anime):
             quality = Quality.HDTV
-        elif self._is_WEBDL(attr_dict):
+        elif self._is_WEBDL(attr_dict,anime):
             quality = Quality.HDWEBDL
-        elif self._is_720pBluRay(attr_dict):
+        elif self._is_720pBluRay(attr_dict,anime):
             quality = Quality.HDBLURAY
-        elif self._is_1080pBluRay(attr_dict):
+        elif self._is_1080pBluRay(attr_dict,anime):
             quality = Quality.FULLHDBLURAY
         else:
             quality = Quality.UNKNOWN
@@ -116,22 +117,30 @@ class NewzbinProvider(generic.NZBProvider):
 
         return quality
 
-    def _is_SDTV(self, attrs):
+    def _is_SDTV(self, attrs, anime=False):
 
         # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
         video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
                             and ('1080p' not in attrs['Video Fmt'])
 
+
+        
         # Source: TV Cap or HDTV or (None)
         source = 'Source' not in attrs or 'TV Cap' in attrs['Source'] or 'HDTV' in attrs['Source']
+        if anime:
+            source = True
 
         # Subtitles: (None)
-        subs = 'Subtitles' not in attrs
-
+        if not anime:
+            subs = 'Subtitles' not in attrs
+        else:
+            subs = 'Subtitles' in attrs
+        
+        logger.log("sdtv: "+str(video_fmt)+" and "+str(source)+" and "+str(subs), logger.DEBUG)
         return video_fmt and source and subs
 
-    def _is_SDDVD(self, attrs):
+    def _is_SDDVD(self, attrs, anime=False):
 
         # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
         video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
@@ -142,35 +151,50 @@ class NewzbinProvider(generic.NZBProvider):
         source = 'Source' in attrs and 'DVD' in attrs['Source']
 
         # Subtitles: (None)
-        subs = 'Subtitles' not in attrs
+        if not anime:
+            subs = 'Subtitles' not in attrs
+        else:
+            subs = 'Subtitles' in attrs
 
+        logger.log("sddvd: "+str(video_fmt)+" and "+str(source)+" and "+str(subs), logger.DEBUG)
         return video_fmt and source and subs
 
-    def _is_HDTV(self, attrs):
+    def _is_HDTV(self, attrs, anime=False):
         # Video Fmt: x264, 720p
         video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
 
         # Source: TV Cap or HDTV or (None)
         source = 'Source' not in attrs or 'TV Cap' in attrs['Source'] or 'HDTV' in attrs['Source']
+        if anime:
+            source = True
 
         # Subtitles: (None)
-        subs = 'Subtitles' not in attrs
+        if not anime:
+            subs = 'Subtitles' not in attrs
+        else:
+            subs = 'Subtitles' in attrs
 
+        logger.log("hdtv: "+str(video_fmt)+" and "+str(source)+" and "+str(subs), logger.DEBUG)
         return video_fmt and source and subs
 
-    def _is_WEBDL(self, attrs):
+    def _is_WEBDL(self, attrs, anime=False):
 
         # Video Fmt: H.264, 720p
         video_fmt = 'Video Fmt' in attrs and ('H.264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
 
         # Subtitles: (None)
-        subs = 'Subtitles' not in attrs
+        if not anime:
+            subs = 'Subtitles' not in attrs
+        else:
+            subs = 'Subtitles' in attrs
+            
 
+        logger.log("webdl: "+str(video_fmt)+" and "+str(subs), logger.DEBUG)
         return video_fmt and subs
 
-    def _is_720pBluRay(self, attrs):
+    def _is_720pBluRay(self, attrs, anime=False):
 
         # Video Fmt: x264, 720p
         video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
@@ -179,9 +203,10 @@ class NewzbinProvider(generic.NZBProvider):
         # Source: Blu-ray or HD-DVD
         source = 'Source' in attrs and ('Blu-ray' in attrs['Source'] or 'HD-DVD' in attrs['Source'])
 
+        logger.log("720pbluray: "+str(video_fmt)+" and "+str(source), logger.DEBUG)
         return video_fmt and source
 
-    def _is_1080pBluRay(self, attrs):
+    def _is_1080pBluRay(self, attrs, anime=False):
 
         # Video Fmt: x264, 1080p
         video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
@@ -190,6 +215,7 @@ class NewzbinProvider(generic.NZBProvider):
         # Source: Blu-ray or HD-DVD
         source = 'Source' in attrs and ('Blu-ray' in attrs['Source'] or 'HD-DVD' in attrs['Source'])
 
+        logger.log("1080pbluray: "+str(video_fmt)+" and "+str(source), logger.DEBUG)
         return video_fmt and source
 
 
@@ -262,15 +288,17 @@ class NewzbinProvider(generic.NZBProvider):
     def _get_episode_search_strings(self, ep_obj):
 
         nameList = set(show_name_helpers.allPossibleShowNames(ep_obj.show))
-        if not ep_obj.show.air_by_date:
+        if not ep_obj.show.air_by_date and not ep_obj.show.is_anime:
             searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(ep_obj.season, ep_obj.episode) for x in nameList])
+        elif ep_obj.show.is_anime:
+            searchStr = " OR ".join(['^"'+x+' - %02d"'%ep_obj.absolute_number for x in nameList])
         else:
             searchStr = " OR ".join(['^"'+x+' - '+str(ep_obj.airdate)+'"' for x in nameList])
         return [searchStr]
 
     def _doSearch(self, searchStr, show=None):
 
-        data = self._getRSSData(searchStr.encode('utf-8'))
+        data = self._getRSSData(searchStr.encode('utf-8'), show=show)
         
         item_list = []
 
@@ -280,7 +308,8 @@ class NewzbinProvider(generic.NZBProvider):
         except Exception, e:
             logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
             return []
-
+        
+        self._set_locale_to_us()
         for cur_item in items:
             title = cur_item.findtext('title')
             if title == 'Feed Error':
@@ -292,15 +321,30 @@ class NewzbinProvider(generic.NZBProvider):
                     if post_date < retention_date:
                         continue
                 except Exception, e:
+                    self._set_default()
                     logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
                     continue
 
             item_list.append(cur_item)
-
+        
+        self._set_default()
         return item_list
+    
+    def _set_locale_to_us(self):
+        if locale.getdefaultlocale() != ('en_US', 'ISO8859-1'): 
+            try:
+                locale.setlocale(locale.LC_TIME, 'en_US')
+            except Exception, e:
+                logger.log("can't set local to en_US this might lead to errors durin time parsing: " + str(e), logger.ERROR)
+        
+    def _set_default(self):
+        if locale.getdefaultlocale() != locale.getlocale(locale.LC_ALL): 
+            try:
+                locale.setlocale(locale.LC_ALL,'')
+            except Exception, e:
+                logger.log("can't set local (back) to the default. this might lead to further errors!!: " + str(e), logger.ERROR)
 
-
-    def _getRSSData(self, search=None):
+    def _getRSSData(self, search=None, show=None):
 
         params = {
                 'searchaction': 'Search',
@@ -319,14 +363,21 @@ class NewzbinProvider(generic.NZBProvider):
                 'feed': 'rss',
                 'hauth': 1,
         }
-
-        if search:
-            params['q'] = search + " AND "
+        
+        if show and show.is_anime:
+            del params['ps_rb_language']
+            params['category'] = 11
+            params['q'] = search +" AND Attr:Language=Japanese AND Attr:SubtitledLanguage=English"
         else:
-            params['q'] = ''
-
-        params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
-
+            if search:
+                params['q'] = search + " AND "
+            else:
+                params['q'] = ''
+                
+            params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
+            
+            
+            
         url = self.url + "search/?%s" % urllib.urlencode(params)
         logger.log("Newzbin search URL: " + url, logger.DEBUG)
 
