@@ -35,7 +35,7 @@ def fixStupidEncodings(x):
     elif type(x) == unicode:
         return x
     else:
-        logger.log(u"Unknown value passed in, ignoring it: "+str(type(x)), logger.ERROR)
+        logger.log(u"Unknown value passed in, ignoring it. type: "+str(type(x))+" value: "+str(x), logger.ERROR)
         return None
 
     return None
