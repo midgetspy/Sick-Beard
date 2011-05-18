@@ -23,7 +23,7 @@ from aniDBerrors import *
 
 
 class AniDBLink(threading.Thread):
-	def __init__(self,server,port,myport,delay=2,timeout=20,logFunction=False):
+	def __init__(self,server,port,myport,logFunction,delay=2,timeout=20,logPrivate=False):
 		super(AniDBLink, self).__init__()
 		self.server=server
 		self.port=port
@@ -42,11 +42,9 @@ class AniDBLink(threading.Thread):
 		self.session=None
 		self.banned=False
 		self.crypt=None
-		if(logFunction):
-			self.log=logFunction
-		else:
-			self.log=self.print_log_dummy
-
+		
+		self.log=logFunction
+		self.logPrivate=logPrivate
 
 		self._stop = threading.Event()
 		self._quiting = False
@@ -188,7 +186,7 @@ class AniDBLink(threading.Thread):
 	
 	def _send(self,command):
 		if self.banned:
-			print "NetIO | BANNED"
+			self.log("NetIO | BANNED")
 			raise AniDBError,"Not sending, banned"
 		self._do_delay()
 		self.lastpacket=time()
@@ -196,7 +194,10 @@ class AniDBLink(threading.Thread):
 		data=command.raw_data()
 		
 		self.sock.sendto(data,self.target)
-		self.log("NetIO > %s"%repr(data))
+		if command.command == 'AUTH' and self.logPrivate:
+			self.log("NetIO > sensitive data is not logged!")
+		else:
+			self.log("NetIO > %s"%repr(data))
 	
 	def new_tag(self):
 		if not len(self.tags):

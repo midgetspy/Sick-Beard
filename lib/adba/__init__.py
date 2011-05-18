@@ -26,18 +26,20 @@ from aniDBAbstracter import Anime,Episode
 version = 1
 
 class Connection(threading.Thread):
-	def __init__(self,clientname='adba',server='api.anidb.info',port=9000,myport=9876,user=None,password=None,session=None,log=False,keepAlive=False):
+	def __init__(self,clientname='adba',server='api.anidb.info',port=9000,myport=9876,user=None,password=None,session=None,log=False,logPrivate=False,keepAlive=False):
 		super(Connection, self).__init__()
 		# setting the log function
+		self.logPrivate = logPrivate
 		if type(log) in (FunctionType,MethodType):# if we get a function or a method use that.
 			self.log = log
+			self.logPrivate = True
 		elif log:# if it something else (like True) use the own print_log
 			self.log=self.print_log
 		else:# dont log at all
 			self.log=self.print_log_dummy
 
 
-		self.link=AniDBLink(server,port,myport,logFunction=self.log)
+		self.link=AniDBLink(server,port,myport,self.log,logPrivate=self.logPrivate)
 		self.link.session=session
 		
 		self.clientname=clientname
