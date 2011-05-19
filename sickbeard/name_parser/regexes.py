@@ -49,13 +49,14 @@ ep_regexes = [
                # Show.Name.S01E02.Source.Quality.Etc-Group
                # Show Name - S01E02 - My Ep Name
                # Show.Name.S01.E03.My.Ep.Name
+               # Show.Name.S01.EP03.My.Ep.Name
                # Show.Name.S01E02E03.Source.Quality.Etc-Group
                # Show Name - S01E02-03 - My Ep Name
                # Show.Name.S01.E02.E03
                '''
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
                s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
-               e(?P<ep_num>\d+)                            # E02 and separator
+               ep?(?P<ep_num>\d+)                            # E02 and separator
                (([. _-]*e|-)                               # linking e/- char
                (?P<extra_ep_num>(?!(1080|720)[pi])\d+))*   # additional E03/etc
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
