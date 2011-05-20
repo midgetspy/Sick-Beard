@@ -9,6 +9,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
 
 <div class="h2footer align-right">
     <b>Key:</b> 
@@ -83,7 +84,7 @@
     }
   }
 });
- 
+
 \$(document).ready(function(){ 
 
 #set $sort_codes = {'date': 2, 'show': 3, 'network': 4}
@@ -105,6 +106,8 @@
             7: { sorter: false}
         }
     });
+
+    \$('#sbRoot').ajaxEpSearch();
 
 });
 //-->
@@ -162,7 +165,9 @@ Custom
 #end if
         </td>
         <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/search32.png" /></a></td>
-        <td align="center"><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></td>
+        <td align="center">
+        <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
+        </td>
       </tr>
     <!-- end $cur_result["show_name"] //-->
     #end for
@@ -174,6 +179,7 @@ Custom
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){ 
+  \$('#sbRoot').ajaxEpSearch({'size': 20, 'loadingImage': 'loading16_333333.gif'});
   \$(".ep_summary").hide();
   \$(".ep_summaryTrigger").click(function() {
     \$(this).next(".ep_summary").slideToggle('normal', function() {
@@ -253,7 +259,10 @@ Custom
             <span class="pause">[paused]</span>
             #end if            
             </a></span>
-            <span class="tvshowTitleIcons"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/search32.png" /></a> <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
+            <span class="tvshowTitleIcons">
+                <a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/search32.png" /></a>
+                <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
+            </span>
           </th>
         </tr>
         <tr>
@@ -303,5 +312,5 @@ Custom
 setInterval(window.location.reload, 180000); // Refresh every 3 minutes
 //-->
 </script>
-<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
+<!--<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

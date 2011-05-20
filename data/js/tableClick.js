@@ -1,8 +1,8 @@
 $(document).ready(function(){
 
    $("table.sickbeardTable td").hover( 
-       function() { $(this).find("a").parent().addClass("hover"); }, 
-       function() { $(this).find("a").parent().removeClass("hover");
+	       function() { $(this).find("a").parent().addClass("hover"); }, 
+	       function() { $(this).find("a").parent().removeClass("hover");
    } );
 
    $("table.sickbeardTable td").click( function() {
