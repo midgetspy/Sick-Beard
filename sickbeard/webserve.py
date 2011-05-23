@@ -975,6 +975,21 @@ class ConfigProviders:
             return json.dumps({'success': tempProvider.getID()})
 
     @cherrypy.expose
+    def canAddTorrentProvider(self, name):
+
+        if not name:
+            return json.dumps({'error': 'Invalid name specified'})
+
+        providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+
+        tempProvider = newznab.NewznabProvider(name, '')
+
+        if tempProvider.getID() in providerDict:
+            return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
+        else:
+            return json.dumps({'success': tempProvider.getID()})
+
+    @cherrypy.expose
     def saveNewznabProvider(self, name, url, key=''):
 
         if not name or not url:
