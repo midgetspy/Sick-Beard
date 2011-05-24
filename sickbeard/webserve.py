@@ -39,6 +39,7 @@ from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
+from sickbeard import naming
 
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
@@ -823,9 +824,7 @@ class ConfigPostProcessing:
         return _munge(t)
 
     @cherrypy.expose
-    def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
-                    naming_sep_type=None, naming_quality=None, naming_dates=None,
+    def savePostProcessing(self, season_folders_format=None, naming_dir_pattern=None, naming_name_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None):
@@ -834,31 +833,6 @@ class ConfigPostProcessing:
 
         if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
             results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
-
-        if naming_show_name == "on":
-            naming_show_name = 1
-        else:
-            naming_show_name = 0
-
-        if naming_ep_name == "on":
-            naming_ep_name = 1
-        else:
-            naming_ep_name = 0
-
-        if naming_use_periods == "on":
-            naming_use_periods = 1
-        else:
-            naming_use_periods = 0
-
-        if naming_quality == "on":
-            naming_quality = 1
-        else:
-            naming_quality = 0
-
-        if naming_dates == "on":
-            naming_dates = 1
-        else:
-            naming_dates = 0
 
         if use_banner == "on":
             use_banner = 1
@@ -898,14 +872,9 @@ class ConfigPostProcessing:
         
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
 
-        sickbeard.NAMING_SHOW_NAME = naming_show_name
-        sickbeard.NAMING_EP_NAME = naming_ep_name
-        sickbeard.NAMING_USE_PERIODS = naming_use_periods
-        sickbeard.NAMING_QUALITY = naming_quality
-        sickbeard.NAMING_DATES = naming_dates
-        sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
-        sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
-        sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
+        sickbeard.NAMING_DIR_PATTERN = naming_dir_pattern
+        sickbeard.NAMING_NAME_PATTERN = naming_name_pattern
+        sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
 
         sickbeard.USE_BANNER = use_banner
 
@@ -922,86 +891,18 @@ class ConfigPostProcessing:
         redirect("/config/postProcessing/")
 
     @cherrypy.expose
-    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
-                   sep_type=None, use_periods=None, quality=None, whichTest="single"):
+    def testNaming(self, pattern=None, multi=False):
 
-        if show_name == None:
-            show_name = sickbeard.NAMING_SHOW_NAME
-        else:
-            if show_name == "0":
-                show_name = False
-            else:
-                show_name = True
+        if multi != False:
+            multi = int(multi)
 
-        if ep_name == None:
-            ep_name = sickbeard.NAMING_EP_NAME
-        else:
-            if ep_name == "0":
-                ep_name = False
-            else:
-                ep_name = True
+        result = naming.test_name(pattern, multi)
+        
+        result = ek.ek(os.path.join, result['dir'], result['name']) 
 
-        if use_periods == None:
-            use_periods = sickbeard.NAMING_USE_PERIODS
-        else:
-            if use_periods == "0":
-                use_periods = False
-            else:
-                use_periods = True
-
-        if quality == None:
-            quality = sickbeard.NAMING_QUALITY
-        else:
-            if quality == "0":
-                quality = False
-            else:
-                quality = True
-
-        if ep_type == None:
-            ep_type = sickbeard.NAMING_EP_TYPE
-        else:
-            ep_type = int(ep_type)
-
-        if multi_ep_type == None:
-            multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
-        else:
-            multi_ep_type = int(multi_ep_type)
-
-        if sep_type == None:
-            sep_type = sickbeard.NAMING_SEP_TYPE
-        else:
-            sep_type = int(sep_type)
-
-        class TVShow():
-            def __init__(self):
-                self.name = "Show Name"
-                self.genre = "Comedy"
-                self.air_by_date = 0
-
-        # fake a TVShow (hack since new TVShow is coming anyway)
-        class TVEpisode(tv.TVEpisode):
-            def __init__(self, season, episode, name):
-                self.relatedEps = []
-                self._name = name
-                self._season = season
-                self._episode = episode
-                self.show = TVShow()
-
-
-        # make a fake episode object
-        ep = TVEpisode(1,2,"Ep Name")
-        ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
-
-        if whichTest == "multi":
-            ep._name = "Ep Name (1)"
-            secondEp = TVEpisode(1,3,"Ep Name (2)")
-            ep.relatedEps.append(secondEp)
-
-        # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality)
-
-        return name
-
+        return result
+        
+        
 class ConfigProviders:
 
     @cherrypy.expose

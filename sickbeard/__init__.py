@@ -36,7 +36,7 @@ from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker,
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 
-from sickbeard.common import *
+from common import SD, SKIPPED, NAMING_REPEAT
 
 from sickbeard.databases import mainDB, cache_db
 
@@ -117,20 +117,18 @@ METADATA_PS3 = None
 METADATA_WDTV = None
 METADATA_TIVO = None
 
+MULTI_FORMAT = NAMING_REPEAT
+NAME_FORMATTING = r'%RN/%0Sx%0E - %E.N (%RG)'
+
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
 SEASON_FOLDERS_FORMAT = None
 SEASON_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = []
 
-NAMING_SHOW_NAME = None
-NAMING_EP_NAME = None
-NAMING_EP_TYPE = None
-NAMING_MULTI_EP_TYPE = None
-NAMING_SEP_TYPE = None
-NAMING_USE_PERIODS = None
-NAMING_QUALITY = None
-NAMING_DATES = None
+NAMING_MULTI_EP = None
+NAMING_DIR_PATTERN = None
+NAMING_NAME_PATTERN = None
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
@@ -386,11 +384,10 @@ def initialize(consoleLogging=True):
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
-                NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                NAMING_DIR_PATTERN, NAMING_NAME_PATTERN, NAMING_MULTI_EP, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
+                EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
@@ -498,14 +495,9 @@ def initialize(consoleLogging=True):
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
-        NAMING_SHOW_NAME = bool(check_setting_int(CFG, 'General', 'naming_show_name', 1))
-        NAMING_EP_NAME = bool(check_setting_int(CFG, 'General', 'naming_ep_name', 1))
-        NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
-        NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
-        NAMING_SEP_TYPE = check_setting_int(CFG, 'General', 'naming_sep_type', 0)
-        NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
-        NAMING_QUALITY = bool(check_setting_int(CFG, 'General', 'naming_quality', 0))
-        NAMING_DATES = bool(check_setting_int(CFG, 'General', 'naming_dates', 1))
+        NAMING_DIR_PATTERN = check_setting_str(CFG, 'General', 'naming_dir_pattern', '')
+        NAMING_NAME_PATTERN = check_setting_str(CFG, 'General', 'naming_ep_name', '')
+        NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
@@ -1005,14 +997,9 @@ def save_config():
     new_config['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
-    new_config['General']['naming_ep_name'] = int(NAMING_EP_NAME)
-    new_config['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
-    new_config['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
-    new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
-    new_config['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
-    new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
-    new_config['General']['naming_quality'] = int(NAMING_QUALITY)
-    new_config['General']['naming_dates'] = int(NAMING_DATES)
+    new_config['General']['naming_ep_name'] = NAMING_DIR_PATTERN
+    new_config['General']['naming_show_name'] = NAMING_NAME_PATTERN
+    new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
     new_config['General']['use_banner'] = int(USE_BANNER)

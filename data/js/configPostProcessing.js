@@ -1,61 +1,72 @@
 $(document).ready(function(){
 
-    $.fn.setExampleText = function() { 
+	function fill_examples() {
 
-        params = {'show_name': $('#naming_show_name').prop('checked')?"1":"0",
-                  'ep_type': $('#naming_ep_type :selected').val(),
-                  'multi_ep_type': $('#naming_multi_ep_type :selected').val(),
-                  'ep_name': $('#naming_ep_name').prop('checked')?"1":"0",
-                  'use_periods': $('#naming_use_periods').prop('checked')?"1":"0",
-                  'quality': $('#naming_quality').prop('checked')?"1":"0",
-                  'sep_type': $('#naming_sep_type :selected').val(),
-                  'whichTest': 'single'
-                  }
-        
-        $.get(sbRoot+"/config/postProcessing/testNaming", params,
-              function(data){
-                  $('#normalExampleText').text(data);
-        });
+		var dir_pattern = $('#naming_dir_pattern').val();
+		var name_pattern = $('#naming_name_pattern').val();
+		
+		var pattern = dir_pattern + '/' + name_pattern;
+		var multi = $('#naming_multi_ep :selected').val();
+		
+		$.get(sbRoot+'/config/postProcessing/testNaming', {pattern: pattern},
+			function(data){
+				$('#naming_example').text(data+'.ext');
+		});
 
-        params['whichTest'] = 'multi'
-        $.get(sbRoot+"/config/postProcessing/testNaming", params,
-              function(data){
-                  $('#multiExampleText').text(data);
-        });
+		$.get(sbRoot+'/config/postProcessing/testNaming', {pattern: pattern, multi: multi},
+			function(data){
+				$('#naming_example_multi').text(data+'.ext');
+		});
+	}
+	
+	function do_custom_help() {
+		var show_help = false;
+		$('.naming_custom_span').each(function(){
+			if ($(this).is(':visible')) {
+				show_help = true;
+				return false;
+			}
+		});
 
-        return
+		if (show_help)
+			$('#naming_custom_help').show();
+		else
+			$('#naming_custom_help').hide();
+	}
+	
+	function do_preset(me) {
+		
+		var preset = $(me+' :selected').attr('id');
 
-    };
+		if (preset == 'none')
+			preset = '';
+		
+		if (preset == 'custom')
+			$(me).parent().siblings('.naming_custom_span').show();
+		else
+			$(me).parent().siblings('.naming_custom_span').hide();
 
-  $(this).setExampleText();
+		if (preset != 'custom')
+			$(me).parent().siblings('.naming_custom_span').children('.component-desc').children('.naming_pattern').val(preset);
 
-  $('#naming_ep_name').click(function(){
-        $(this).setExampleText();
-    });  
+		fill_examples();
+		
+		do_custom_help();
+	}
 
-  $('#naming_show_name').click(function(){
-        $(this).setExampleText();
-    });  
+	// initialize the presets
+	do_preset('#dir_presets');
+	do_preset('#name_presets');
+	
+	$('.naming_preset_select').change(function(){
+		var me = '#'+$(this).attr('id');
+		do_preset(me);
+	});
+	
+	$('#naming_multi_ep').change(fill_examples);
+	$('.naming_pattern').change(fill_examples);
 
-  $('#naming_use_periods').click(function(){
-        $(this).setExampleText();
-    });  
-
-  $('#naming_quality').click(function(){
-        $(this).setExampleText();
-    });  
-
-  $('#naming_multi_ep_type').change(function(){
-        $(this).setExampleText();
-    });  
-
-  $('#naming_ep_type').change(function(){
-        $(this).setExampleText();
-    });  
-
-  $('#naming_sep_type').change(function(){
-        $(this).setExampleText();
-    });  
+	
 
     // -- start of metadata options div toggle code --
     $('#metadataType').change(function(){

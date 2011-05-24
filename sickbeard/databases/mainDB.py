@@ -356,10 +356,53 @@ class PopulateRootDirs (AddLang):
         
         self.incDBVersion()
         
-class AddSizeAndSceneNameFields(SetNzbTorrentSettings):
+class SetNzbTorrentSettings(PopulateRootDirs):
 
     def test(self):
+        return self.checkDBVersion() >= 8
+    
+    def execute(self):
+
+        use_torrents = False
+        use_nzbs = False
+
+        for cur_provider in sickbeard.providers.sortedProviderList():
+            if cur_provider.isEnabled():
+                if cur_provider.providerType == GenericProvider.NZB:
+                    use_nzbs = True
+                    logger.log(u"Provider "+cur_provider.name+" is enabled, enabling NZBs in the upgrade")
+                    break
+                elif cur_provider.providerType == GenericProvider.TORRENT:
+                    use_torrents = True
+                    logger.log(u"Provider "+cur_provider.name+" is enabled, enabling Torrents in the upgrade")
+                    break
+
+        sickbeard.USE_TORRENTS = use_torrents
+        sickbeard.USE_NZBS = use_nzbs
+        
+        sickbeard.save_config()
+        
+        self.incDBVersion()
+
+class FixAirByDateSetting(SetNzbTorrentSettings):
+    
+    def test(self):
         return self.checkDBVersion() >= 9
+
+    def execute(self):
+        
+        shows = self.connection.select("SELECT * FROM tv_shows")
+        
+        for cur_show in shows:
+            if cur_show["genre"] and "talk show" in cur_show["genre"].lower():
+                self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
+        
+        self.incDBVersion()
+
+class AddSizeAndSceneNameFields(FixAirByDateSetting):
+
+    def test(self):
+        return self.checkDBVersion() >= 10
     
     def execute(self):
 
@@ -425,45 +468,4 @@ class AddSizeAndSceneNameFields(SetNzbTorrentSettings):
                     break
 
         self.incDBVersion()
-        class SetNzbTorrentSettings(PopulateRootDirs):
 
-    def test(self):
-        return self.checkDBVersion() >= 8
-    
-    def execute(self):
-
-        use_torrents = False
-        use_nzbs = False
-
-        for cur_provider in sickbeard.providers.sortedProviderList():
-            if cur_provider.isEnabled():
-                if cur_provider.providerType == GenericProvider.NZB:
-                    use_nzbs = True
-                    logger.log(u"Provider "+cur_provider.name+" is enabled, enabling NZBs in the upgrade")
-                    break
-                elif cur_provider.providerType == GenericProvider.TORRENT:
-                    use_torrents = True
-                    logger.log(u"Provider "+cur_provider.name+" is enabled, enabling Torrents in the upgrade")
-                    break
-
-        sickbeard.USE_TORRENTS = use_torrents
-        sickbeard.USE_NZBS = use_nzbs
-        
-        sickbeard.save_config()
-        
-        self.incDBVersion()
-
-class FixAirByDateSetting(SetNzbTorrentSettings):
-    
-    def test(self):
-        return self.checkDBVersion() >= 9
-
-    def execute(self):
-        
-        shows = self.connection.select("SELECT * FROM tv_shows")
-        
-        for cur_show in shows:
-            if cur_show["genre"] and "talk show" in cur_show["genre"].lower():
-                self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
-        
-        self.incDBVersion()

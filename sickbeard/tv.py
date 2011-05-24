@@ -44,6 +44,7 @@ from sickbeard import encodingKludge as ek
 
 from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
+from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_REPEAT
 
 class TVShow(object):
 
@@ -1480,3 +1481,143 @@ class TVEpisode(object):
 
         return finalName
 
+    def _replace_map(self):
+        def dot(name):
+            return name.replace(' ','.')
+        
+        def us(name):
+            return name.replace(' ','_')
+        
+        def release_group(name):
+            if not name or '-' not in name:
+                return ''
+            return name.split('-')[-1]
+
+        epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
+        
+        return {
+                       '%SN': self.show.name,
+                       '%S.N': dot(self.show.name),
+                       '%S_N': us(self.show.name),
+                       '%EN': self.name,
+                       '%E.N': dot(self.name),
+                       '%E_N': us(self.name),
+                       '%QN': Quality.qualityStrings[epQual],
+                       '%Q.N': dot(Quality.qualityStrings[epQual]),
+                       '%Q_N': us(Quality.qualityStrings[epQual]),
+                       '%S': str(self.season),
+                       '%0S': '%02d' % self.season,
+                       '%E': str(self.episode),
+                       '%0E': '%02d' % self.episode,
+                       '%RN': self.release_name,
+                       '%RG': release_group(self.release_name),
+                       }
+
+    def _formatted_string(self, pattern=None, multi=None):
+        
+        replace_map = self._replace_map()
+        
+        if pattern == None:
+            pattern = sickbeard.NAME_FORMATTING
+        
+        if multi == None:
+            multi = sickbeard.MULTI_FORMAT
+        
+        # split off ep name part only
+        name_groups = re.split(r'[\\/]', pattern)
+        
+        result_name = pattern
+        
+        # figure out the double-ep naming style for each group, if applicable
+        for cur_name_group in name_groups:
+        
+            season_format = sep = ep_sep = ep_format = None
+        
+            season_ep_regex = '''
+                                (?P<pre_sep>[ _.-]*)
+                                ((?:s(?:eason|eries)?\s*)?%0?S(?![._]?N))
+                                (.*?)
+                                (%0?E(?![._]?N))
+                                (?P<post_sep>[ _.-]*)
+                              '''
+            ep_only_regex = '(%0?E(?![._]?N))'
+        
+            # try the normal way
+            season_ep_match = re.search(season_ep_regex, cur_name_group, re.I|re.X)
+            ep_only_match = re.search(ep_only_regex, cur_name_group, re.I|re.X)
+            
+            # if we have a season and episode then collect the necessary data
+            if season_ep_match:
+                season_format = season_ep_match.group(2)
+                ep_sep = season_ep_match.group(3)
+                ep_format = season_ep_match.group(4)
+                sep = season_ep_match.group('pre_sep')
+                if not sep:
+                    sep = season_ep_match.group('post_sep')
+                if not sep:
+                    sep = ' '
+
+                # force 2-3-4 format if they chose to extend
+                if multi == NAMING_EXTEND:
+                    ep_sep = '-'
+
+            # if there's no season then there's not much choice so we'll just force them to use 03-04-05 style
+            elif ep_only_match:
+                season_format = ''
+                ep_sep = '-'
+                ep_format = ep_only_match.group(1)
+                sep = ''
+
+            # we need at least this much info to continue
+            if not ep_sep or not ep_format:
+                continue
+            
+            # start with the ep string, eg. E03
+            ep_string = replace_map[ep_format.upper()]
+            for other_eps in self.relatedEps:
+                if multi == NAMING_DUPLICATE:
+                    # add " - S01"
+                    ep_string += sep + season_format
+                # add "E04"
+                ep_string += ep_sep
+                ep_string += other_eps._replace_map()[ep_format.upper()]
+
+            # fill out the template for this piece and then insert this piece into the actual pattern
+            cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
+            result_name = result_name.replace(cur_name_group, cur_name_group_result)
+        
+        # do the replacements
+        for cur_replacement in sorted(replace_map.keys(), reverse=True):
+            result_name = result_name.replace(cur_replacement, replace_map[cur_replacement])
+            result_name = result_name.replace(cur_replacement.lower(), replace_map[cur_replacement].lower())
+        
+        return result_name
+
+    def formatted_dir(self, pattern=None, multi=None):
+        """
+        Just the folder name of the episode
+        """
+        
+        if pattern == None:
+            pattern = sickbeard.NAME_FORMATTING
+        
+        # split off the dirs only, if they exist
+        name_groups = re.split(r'[\\/]', pattern)
+        
+        if len(name_groups) == 1:
+            return ''
+        else:
+            return self._formatted_string(os.sep.join(name_groups[:-1]), multi)
+
+    def formatted_filename(self, pattern=None, multi=None):
+        """
+        Just the filename of the episode, formatted based on the naming settings
+        """
+        
+        if pattern == None:
+            pattern = sickbeard.NAME_FORMATTING
+        
+        # split off the filename only, if they exist
+        name_groups = re.split(r'[\\/]', pattern)
+
+        return self._formatted_string(name_groups[-1], multi)
