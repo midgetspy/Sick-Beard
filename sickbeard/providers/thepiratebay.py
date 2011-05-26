@@ -26,9 +26,8 @@ import generic
 from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard import sceneHelpers
+from sickbeard import show_name_helpers
 from sickbeard import db
-from sickbeard import sceneHelpers
 from sickbeard.common import Overview
 
 
@@ -96,11 +95,11 @@ class ThePirateBayProvider(generic.TorrentProvider):
             if show.getOverview(int(sqlEp["status"])) in (Overview.WANTED, Overview.QUAL):
                 
                 if show.air_by_date:
-                    for show_name in set(sceneHelpers.allPossibleShowNames(show)):
+                    for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                         ep_string = sceneHelpers.sanitizeSceneName(show_name) +' '+ str(datetime.date.fromordinal(sqlEp["airdate"])).replace('-', '.')
                         search_string.append(ep_string)
                 else:
-                    for show_name in set(sceneHelpers.allPossibleShowNames(show)):
+                    for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                         ep_string = sceneHelpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': season, 'episodenumber': int(sqlEp["episode"])}
                         search_string.append(ep_string)                       
         
@@ -114,12 +113,12 @@ class ThePirateBayProvider(generic.TorrentProvider):
             return []
                 
         if ep_obj.show.air_by_date:
-            for show_name in set(sceneHelpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = sceneHelpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate).replace('-', '.')
+            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate).replace('-', '.')
                 search_string.append(ep_string)
         else:
-            for show_name in set(sceneHelpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = sceneHelpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
+            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
                 search_string.append(ep_string)
     
         return search_string
