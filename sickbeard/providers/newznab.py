@@ -21,18 +21,21 @@
 import urllib
 import datetime
 import re
+import os
 
 import xml.etree.cElementTree as etree
 
 import sickbeard
 import generic
 
-from sickbeard import classes, sceneHelpers
+from sickbeard import classes
+from sickbeard.helpers import sanitizeSceneName
+from sickbeard import encodingKludge as ek
 
 from sickbeard import exceptions
-from sickbeard.common import *
 from sickbeard import logger
 from sickbeard import tvcache
+from sickbeard.exceptions import ex
 
 class NewznabProvider(generic.NZBProvider):
 
@@ -44,6 +47,9 @@ class NewznabProvider(generic.NZBProvider):
 
 		self.url = url
 		self.key = key
+		
+		# if a provider doesn't need an api key then this can be false
+		self.needs_auth = True
 
 		self.enabled = True
 		self.supportsBacklog = True
@@ -54,6 +60,8 @@ class NewznabProvider(generic.NZBProvider):
 		return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
 
 	def imageName(self):
+		if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID()+'.gif')):
+			return self.getID()+'.gif'
 		return 'newznab.gif'
 
 	def isEnabled(self):
@@ -71,11 +79,11 @@ class NewznabProvider(generic.NZBProvider):
 			params['rid'] = show.tvrid
 		# if we can't then fall back on a very basic name search
 		else:
-			params['q'] = sceneHelpers.sanitizeSceneName(show.name)
+			params['q'] = sanitizeSceneName(show.name)
 
 		if season != None:
 			# air-by-date means &season=2010&q=2010.03, no other way to do it atm
-			if show.is_air_by_date:
+			if show.air_by_date:
 				params['season'] = season.split('-')[0]
 				if 'q' in params:
 					params['q'] += '.' + season.replace('-', '.')
@@ -98,9 +106,9 @@ class NewznabProvider(generic.NZBProvider):
 			params['rid'] = ep_obj.show.tvrid
 		# if we can't then fall back on a very basic name search
 		else:
-			params['q'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name)
+			params['q'] = sanitizeSceneName(ep_obj.show.name)
 
-		if ep_obj.show.is_air_by_date:
+		if ep_obj.show.air_by_date:
 			date_str = str(ep_obj.airdate)
 			
 			params['season'] = date_str.partition('-')[0]
@@ -110,7 +118,6 @@ class NewznabProvider(generic.NZBProvider):
 			params['ep'] = ep_obj.episode
 
 		return [params]
-
 
 	def _doGeneralSearch(self, search_string):
 		return self._doSearch({'q': search_string})
@@ -146,7 +153,7 @@ class NewznabProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log(u"Error trying to load "+self.name+" RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+			logger.log(u"Error trying to load "+self.name+" RSS feed: "+ex(e), logger.ERROR)
 			logger.log(u"RSS data: "+data, logger.DEBUG)
 			return []
 
@@ -235,7 +242,7 @@ class NewznabCache(tvcache.TVCache):
 
 		try:
 			responseSoup = etree.ElementTree(etree.XML(data))
-		except Exception, e:
+		except Exception:
 			return True
 
 		if responseSoup.getroot().tag == 'error':

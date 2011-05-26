@@ -18,20 +18,21 @@
 
 
 import StringIO, zlib, gzip
-import os.path, os
+import os
 import stat
 import urllib, urllib2
-import re
+import re, socket
 import shutil
 
 import sickbeard
 
-from sickbeard.exceptions import *
+from sickbeard.exceptions import MultipleShowObjectsException
 from sickbeard import logger, classes
-from sickbeard.common import *
+from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -124,17 +125,21 @@ def getURL (url, headers=[]):
 
     encoding = usock.info().get("Content-Encoding")
 
-    if encoding in ('gzip', 'x-gzip', 'deflate'):
-        content = usock.read()
-        if encoding == 'deflate':
-            data = StringIO.StringIO(zlib.decompress(content))
-        else:
-            data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
-        result = data.read()
+    try:
+        if encoding in ('gzip', 'x-gzip', 'deflate'):
+            content = usock.read()
+            if encoding == 'deflate':
+                data = StringIO.StringIO(zlib.decompress(content))
+            else:
+                data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
+            result = data.read()
 
-    else:
-        result = usock.read()
-        usock.close()
+        else:
+            result = usock.read()
+            usock.close()
+    except socket.timeout:
+        logger.log(u"Timed out while loading URL "+url, logger.WARNING)
+        return None
 
     return result
 
@@ -315,7 +320,7 @@ def searchDBForShow(regShowName):
 
     myDB = db.DBConnection()
 
-    yearRegex = "(.*?)\s*([(]?)(\d{4})(?(2)[)]?).*"
+    yearRegex = "([^()]+?)\s*(\()?(\d{4})(?(2)\))$"
 
     for showName in showNames:
 
@@ -328,7 +333,7 @@ def searchDBForShow(regShowName):
 
             # if we didn't get exactly one result then try again with the year stripped off if possible
             match = re.match(yearRegex, showName)
-            if match:
+            if match and match.group(1):
                 logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
                 sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
 
@@ -407,7 +412,7 @@ def rename_file(old_path, new_name):
     try:
         ek.ek(os.rename, old_path, new_path)
     except (OSError, IOError), e:
-        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + str(e), logger.ERROR)
+        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + ex(e), logger.ERROR)
         return False
 
     return new_path
@@ -417,6 +422,11 @@ def chmodAsParent(childPath):
         return
 
     parentPath = ek.ek(os.path.dirname, childPath)
+    
+    if not parentPath:
+        logger.log(u"No parent path provided in "+childPath+", unable to get permissions from it", logger.DEBUG)
+        return
+    
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
 
     if ek.ek(os.path.isfile, childPath):
@@ -453,10 +463,38 @@ def fixSetGroupID(childPath):
             return
 
         try:
-            ek.ek(os.chown, childPath, -1, parentGID)
+            ek.ek(os.chown, childPath, -1, parentGID)  #@UndefinedVariable - only available on UNIX
             logger.log(u"Respecting the set-group-ID bit on the parent directory for %s" % (childPath), logger.DEBUG)
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)
+
+def sanitizeSceneName (name, ezrss=False):
+    """
+    Takes a show name and returns the "scenified" version of it.
+    
+    ezrss: If true the scenified version will follow EZRSS's cracksmoker rules as best as possible
+    
+    Returns: A string containing the scene version of the show name given.
+    """
+
+    if not ezrss:
+        bad_chars = ",:()'!?"
+    # ezrss leaves : and ! in their show names as far as I can tell
+    else:
+        bad_chars = ",()'?"
+
+    # strip out any bad chars
+    for x in bad_chars:
+        name = name.replace(x, "")
+
+    # tidy up stuff that doesn't belong in scene names
+    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
+    name = re.sub("\.\.*", ".", name)
+
+    if name.endswith('.'):
+        name = name[:-1]
+
+    return name
 
 
 if __name__ == '__main__':

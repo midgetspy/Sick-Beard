@@ -1,6 +1,6 @@
 *.pyc
 cache/*
-cache.db
+cache.db*
 config.ini
 Logs/*
 sickbeard.db*

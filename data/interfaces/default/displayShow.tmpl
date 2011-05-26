@@ -11,6 +11,7 @@
 
 <script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
 
+
 <div class="h2footer align-right">
 #if (len($seasonResults) > 14):
     <select id="seasonJump">
@@ -34,10 +35,15 @@
 #end if
 </div><br/>
 
+#if $show_message:
+    <div id="show_message" class="ui-corner-all">$show_message</div><br />
+#end if
+
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
 
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
@@ -73,13 +79,8 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
     </td></tr>
     <tr><td class="showLegend">Language:</td><td>$show.lang</td></tr>
     <tr><td class="showLegend">Season Folders: </td><td><img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-#if $show.air_by_date or ($show.genre and "Talk Show" in $show.genre):
-#set $air_by_date = True
-#else
-#set $air_by_date = False
-#end if
     <tr><td class="showLegend">Active: </td><td><img src="$sbRoot/images/#if int($show.paused) == 0 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 </table>
 </div>
 
@@ -155,10 +156,10 @@ $epLoc
 #end if
 
     </td>
-    <td>$statusStrings[int($epResult["status"])]</td>
+    <td class="status_column">$statusStrings[int($epResult["status"])]</td>
     <td align="center">
-    #if int($epResult["season"]) != 0: 
-    <a href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
+    #if int($epResult["season"]) != 0:
+      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
     #end if
     </td>
    </tr>

@@ -18,11 +18,12 @@
 
 import datetime
 
-from sickbeard.common import *
+import sickbeard
 
 from sickbeard import logger
 from sickbeard import exceptions
 from sickbeard import ui
+from sickbeard.exceptions import ex
 
 class ShowUpdater():
 
@@ -51,15 +52,15 @@ class ShowUpdater():
             try:
 
                 if curShow.status != "Ended":
-                    curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)
+                    curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True) #@UndefinedVariable
                 else:
                     #TODO: maybe I should still update specials?
                     logger.log(u"Not updating episodes for show "+curShow.name+" because it's marked as ended.", logger.DEBUG)
-                    curQueueItem = sickbeard.showQueueScheduler.action.refreshShow(curShow, True)
+                    curQueueItem = sickbeard.showQueueScheduler.action.refreshShow(curShow, True) #@UndefinedVariable
 
                 piList.append(curQueueItem)
 
             except (exceptions.CantUpdateException, exceptions.CantRefreshException), e:
-                logger.log(u"Automatic update failed: " + str(e), logger.ERROR)
+                logger.log(u"Automatic update failed: " + ex(e), logger.ERROR)
 
         ui.ProgressIndicators.setIndicator('dailyUpdate', ui.QueueProgressIndicator("Daily Update", piList))

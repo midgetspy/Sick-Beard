@@ -1,5 +1,12 @@
 $(document).ready(function(){
 
+	function toggle_torrent_title(){
+		if ($('#use_torrents').attr('checked'))
+			$('#no-torrents').show();
+		else
+			$('#no-torrents').hide();
+	}
+	
     $.fn.nzb_method_handler = function() {
         
         var selectedProvider = $('#nzb_method :selected').val();
@@ -24,4 +31,10 @@ $(document).ready(function(){
 
     $(this).nzb_method_handler();
 
+    $('#use_torrents').click(function(){
+    	toggle_torrent_title();
+    });
+    
+    toggle_torrent_title();
+    
 });

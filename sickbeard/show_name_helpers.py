@@ -16,21 +16,32 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import sickbeard
+
 from sickbeard.common import countryList
+from sickbeard.helpers import sanitizeSceneName
+from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
 from sickbeard import db
 
 import re
 import datetime
-import urllib
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ("sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
+resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
-                 "dub(bed)?", "german", "french", "core2hd")
+                 "dub(bed)?"]
 
 def filterBadReleases(name):
+    """
+    Filters out non-english and just all-around stupid releases by comparing them
+    to the resultFilters contents.
+    
+    name: the release name to check
+    
+    Returns: True if the release name is OK, False if it's bad.
+    """
 
     try:
         fp = NameParser()
@@ -39,36 +50,36 @@ def filterBadReleases(name):
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
 
+    # use the extra info and the scene group to filter against
+    check_string = ''
+    if parse_result.extra_info:
+        check_string = parse_result.extra_info
+    if parse_result.release_group:
+        if check_string:
+            check_string = check_string + '-' + parse_result.release_group
+        else:
+            check_string = parse_result.release_group 
+
     # if there's no info after the season info then assume it's fine
-    if not parse_result.extra_info:
+    if not check_string:
         return True
 
     # if any of the bad strings are in the name then say no
-    for x in resultFilters:
-        if re.search('(^|[\W_])'+x+'($|[\W_])', parse_result.extra_info, re.I):
+    for x in resultFilters + sickbeard.IGNORE_WORDS.split(','):
+        if re.search('(^|[\W_])'+x+'($|[\W_])', check_string, re.I):
             logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
 
     return True
 
-def sanitizeSceneName (name, ezrss=False):
-    if not ezrss:
-        bad_chars = ",:()'!?"
-    else:
-        bad_chars = ",()'?"
-
-    for x in bad_chars:
-        name = name.replace(x, "")
-
-    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
-    name = re.sub("\.\.*", ".", name)
-
-    if name.endswith('.'):
-        name = name[:-1]
-
-    return name
-
 def sceneToNormalShowNames(name):
+    """
+    Takes a show name from a scene dirname and converts it to a more "human-readable" format.
+    
+    name: The show name to convert
+    
+    Returns: a list of all the possible "normal" names
+    """
 
     if not name:
         return []
@@ -106,7 +117,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
 
     myDB = db.DBConnection()
 
-    if show.is_air_by_date:
+    if show.air_by_date:
         numseasons = 0
         
         # the search string for air by date shows is just 
@@ -146,7 +157,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                 toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
             else:
                 term_list = [x+'*' for x in seasonStrings]
-                if show.is_air_by_date:
+                if show.air_by_date:
                     term_list = ['"'+x+'"' for x in term_list]
 
                 toReturn.append('"'+curShow+'"')
@@ -165,7 +176,7 @@ def makeSceneSearchString (episode):
     numseasons = int(numseasonsSQlResult[0][0])
 
     # see if we should use dates instead of episodes
-    if episode.show.is_air_by_date and episode.airdate != datetime.date.fromordinal(1):
+    if episode.show.air_by_date and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate)]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
@@ -185,7 +196,39 @@ def makeSceneSearchString (episode):
 
     return toReturn
 
+def isGoodResult(name, show, log=True):
+    """
+    Use an automatically-created regex to make sure the result actually is the show it claims to be
+    """
+
+    all_show_names = allPossibleShowNames(show)
+    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
+
+    for curName in set(showNames):
+        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
+        curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
+        if log:
+            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
+
+        match = re.search(curRegex, name, re.I)
+
+        if match:
+            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
+            return True
+
+    if log:
+        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+    return False
+
 def allPossibleShowNames(show):
+    """
+    Figures out every possible variation of the name for a particular show. Includes TVDB name, TVRage name,
+    country codes on the end, eg. "Show Name (AU)", and any scene exception names.
+    
+    show: a TVShow object that we should get the names of
+    
+    Returns: a list of all the possible show names
+    """
 
     showNames = [show.name]
     showNames += [name for name in get_scene_exceptions(show.tvdbid)]
@@ -214,90 +257,4 @@ def allPossibleShowNames(show):
     showNames += newShowNames
 
     return showNames
-
-def isGoodResult(name, show, log=True):
-    """
-    Use an automatically-created regex to make sure the result actually is the show it claims to be
-    """
-
-    all_show_names = allPossibleShowNames(show)
-    showNames = map(sanitizeSceneName, all_show_names) + all_show_names
-
-    for curName in set(showNames):
-        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
-        curRegex = '^' + escaped_name + '\W+(?:(?:S\d\d)|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
-        if log:
-            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
-
-        match = re.search(curRegex, name, re.I)
-
-        if match:
-            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
-            return True
-
-    if log:
-        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
-    return False
-
-def get_scene_exceptions(tvdb_id):
-    """
-    Given a tvdb_id, return a list of all the scene exceptions.
-    """
-
-    myDB = db.DBConnection("cache.db")
-    exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
-    return [cur_exception["show_name"] for cur_exception in exceptions]
-
-def get_scene_exception_by_name(show_name):
-    """
-    Given a show name, return the tvdbid of the exception, None if no exception
-    is present.
-    """
-
-    myDB = db.DBConnection("cache.db")
-    
-    # try the obvious case first
-    exception_result = myDB.select("SELECT tvdb_id FROM scene_exceptions WHERE LOWER(show_name) = ?", [show_name.lower()])
-    if exception_result:
-        return int(exception_result[0]["tvdb_id"])
-
-    all_exception_results = myDB.select("SELECT show_name, tvdb_id FROM scene_exceptions")
-    for cur_exception in all_exception_results:
-
-        cur_exception_name = cur_exception["show_name"]
-        cur_tvdb_id = int(cur_exception["tvdb_id"])
-
-        if show_name.lower() in (cur_exception_name.lower(), sanitizeSceneName(cur_exception_name).lower().replace('.',' ')):
-            logger.log(u"Scene exception lookup got tvdb id "+str(cur_tvdb_id)+u", using that", logger.DEBUG)
-            return cur_tvdb_id
-
-    return None
-
-def retrieve_exceptions():
-
-    exception_dict = {}
-
-    url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
-    open_url = urllib.urlopen(url)
-    
-    # each exception is on one line with the format tvdb_id: 'show name 1', 'show name 2', etc
-    for cur_line in open_url.readlines():
-        tvdb_id, sep, aliases = cur_line.partition(':')
-        
-        if not aliases:
-            continue
-    
-        tvdb_id = int(tvdb_id)
-        
-        # regex out the list of shows, taking \' into account
-        alias_list = [re.sub(r'\\(.)', r'\1', x) for x in re.findall(r"'(.*?)(?<!\\)',?", aliases)]
-        
-        exception_dict[tvdb_id] = alias_list
-
-    myDB = db.DBConnection("cache.db")
-    myDB.action("DELETE FROM scene_exceptions WHERE 1=1")
-    
-    for cur_tvdb_id in exception_dict:
-        for cur_exception in exception_dict[cur_tvdb_id]:
-            myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
 

@@ -24,10 +24,11 @@ import sickbeard
 
 from sickbeard import db
 from sickbeard import logger
-from sickbeard.common import *
+from sickbeard.common import Quality
 
-from sickbeard import helpers, classes, exceptions, sceneHelpers
-from sickbeard import providers
+from sickbeard import helpers, exceptions, show_name_helpers
+from sickbeard import name_cache
+from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
@@ -113,7 +114,7 @@ class TVCache():
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
             return []
 
@@ -199,6 +200,8 @@ class TVCache():
             logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
             return False
 
+        tvdb_lang = None
+
         # if we need tvdb_id or tvrage_id then search the DB for them
         if not tvdb_id or not tvrage_id:
 
@@ -225,30 +228,52 @@ class TVCache():
             # if they're both empty then fill out as much info as possible by searching the show name
             else:
 
-                showResult = helpers.searchDBForShow(parse_result.series_name)
-                if showResult:
-                    logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
-                    tvdb_id = showResult[0]
-
+                # check the name cache and see if we already know what show this is
+                logger.log(u"Checking the cache to see if we already know the tvdb id of "+parse_result.series_name, logger.DEBUG)
+                tvdb_id = name_cache.retrieveNameFromCache(parse_result.series_name)
+                
+                # remember if the cache lookup worked or not so we know whether we should bother updating it later
+                if tvdb_id == None:
+                    logger.log(u"No cache results returned, continuing on with the search", logger.DEBUG)
+                    from_cache = False
                 else:
+                    logger.log(u"Cache lookup found "+repr(tvdb_id)+", using that", logger.DEBUG)
+                    from_cache = True
+                
+                # if the cache failed, try looking up the show name in the database
+                if tvdb_id == None:
+                    logger.log(u"Trying to look the show up in the show database", logger.DEBUG)
+                    showResult = helpers.searchDBForShow(parse_result.series_name)
+                    if showResult:
+                        logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
+                        tvdb_id = showResult[0]
+
+                # if the DB lookup fails then do a comprehensive regex search
+                if tvdb_id == None:
                     logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
                     for curShow in sickbeard.showList:
-                        if sceneHelpers.isGoodResult(name, curShow, False):
+                        if show_name_helpers.isGoodResult(name, curShow, False):
                             logger.log(u"Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
                             tvdb_id = curShow.tvdbid
                             tvdb_lang = curShow.lang
                             break
 
+                # if tvdb_id was anything but None (0 or a number) then 
+                if not from_cache:
+                    name_cache.addNameToCache(parse_result.series_name, tvdb_id)
+
+                # if we came out with tvdb_id = None it means we couldn't figure it out at all, just use 0 for that
+                if tvdb_id == None:
+                    tvdb_id = 0
+
+                # if we found the show then retrieve the show object
                 if tvdb_id:
-
                     showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                    if not showObj:
-                        logger.log(u"This should never have happened, post a bug about this!", logger.ERROR)
-                        raise Exception("BAD STUFF HAPPENED")
-                    tvrage_id = showObj.tvrid
-                    tvdb_lang = showObj.lang
+                    if showObj:
+                        tvrage_id = showObj.tvrid
+                        tvdb_lang = showObj.lang
 
-
+        # if we weren't provided with season/episode information then get it from the name that we parsed
         if not season:
             season = parse_result.season_number if parse_result.season_number != None else 1
         if not episodes:
@@ -268,12 +293,14 @@ class TVCache():
                 epObj = t[tvdb_id].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
-            except tvdb_exceptions.tvdb_episodenotfound, e:
+            except tvdb_exceptions.tvdb_episodenotfound:
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
+                return False
+            except tvdb_exceptions.tvdb_error, e:
+                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return False
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
-
 
         # get the current timestamp
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
@@ -318,7 +345,7 @@ class TVCache():
         for curResult in sqlResults:
 
             # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
-            if self.providerID != 'newzbin' and not sceneHelpers.filterBadReleases(curResult["name"]):
+            if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult["name"]):
                 continue
 
             # get the show object, or if it's not one of our shows then ignore it

@@ -10,6 +10,7 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
@@ -25,7 +26,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div id="config">
 <div id="config-content">
 
-<form action="saveProviders" method="post">
+<form id="configForm" action="saveProviders" method="post">
 
             <div id="config-components">
                 
@@ -43,9 +44,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                     <fieldset class="component-group-list">
                         <ul id="provider_order_list">
                         #for $curProvider in $sickbeard.providers.sortedProviderList():
-                            #if $curProvider.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
-                                #continue
-                            #end if
                             #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                 #continue
                             #elif $curProvider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
@@ -62,14 +60,14 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         #end for
                         </ul>
                         <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
-                        <br/><input type="submit" value="Save Changes" /><br/>
+                        <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group1 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3>Configure Providers</h3>
+                        <h3>Configure Built-In<br />Providers</h3>
                         <p>Check with provider's website on how to obtain an API key if needed.</p>
                     </div>
                     
@@ -79,11 +77,12 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
+<<<<<<< HEAD
                                     #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "thepiratebay"):
+=======
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents"):
+>>>>>>> 54d3ef1417bfc2fc6acc89f940a1389092dad118
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
-                                        #if $cur_provider_obj.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
-                                            #continue
-                                        #end if
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
                                         #elif $cur_provider_obj.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
@@ -94,7 +93,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
                                     #if $provider_config_list:                                        
                                     <select id="editAProvider">
-                                        #for $cur_provider in $provider_config_list:
+                                        #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
                                             <option value="$cur_provider.getID()">$cur_provider.name</option>
                                         #end for
                                     </select>
@@ -107,28 +106,23 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 
 <!-- start div for editing providers //-->
-#if $sickbeard.SHOW_TVBINZ:
-<div class="providerDiv" id="tvbinzDiv">
+#for $curNewznabProvider in [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
+<div class="providerDiv" id="${curNewznabProvider.getID()}Div">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">TVBinz Cookie UID</span>
-                                <input class="component-desc" type="text" name="tvbinz_uid" value="$sickbeard.TVBINZ_UID" size="10" />
+                                <span class="component-title">$curNewznabProvider.name URL</span>
+                                <input class="component-desc" type="text" id="${curNewznabProvider.getID()}_url" value="$curNewznabProvider.url" size="40" disabled/>
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">TVBinz Hash</span>
-                                <input class="component-desc" type="text" name="tvbinz_hash" value="$sickbeard.TVBINZ_HASH" size="40" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">TVBinz Auth String</span>
-                                <input class="component-desc" type="text" name="tvbinz_auth" value="$sickbeard.TVBINZ_AUTH" size="40" />
+                                <span class="component-title">$curNewznabProvider.name API Key</span>
+                                <input class="component-desc newznab_key" type="text" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" size="40" />
                             </label>
                         </div>
 </div>
-#end if
+#end for
+
 
 <div class="providerDiv" id="nzbs_orgDiv">
                         <div class="field-pair">
@@ -217,7 +211,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 <!-- end div for editing providers -->
 
-                    <input type="submit" value="Save Changes" /><br/>
+                    <input type="submit" class="config_submitter" value="Save Changes" /><br/>
             
                     </fieldset>
                 </div><!-- /component-group2 //-->
@@ -225,9 +219,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                 <div id="core-component-group3" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3>Newznab Providers</h3>
-                        <p>Add and setup newznab providers.</p>
-                        <p>NZB.su has already been added as an example and can not be deleted.</p>
+                        <h3>Configure Custom<br />Newznab Providers</h3>
+                        <p>Add and setup custom Newznab providers.</p>
+                        <p>Some built-in Newznab providers are already available above.</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -278,7 +272,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                 </div><!-- /component-group3 //-->
 
                     
-            <br/><input type="submit" value="Save Changes" /><br/>
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
                 
             </div><!-- /config-components //-->
 

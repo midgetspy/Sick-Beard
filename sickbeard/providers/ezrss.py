@@ -24,9 +24,11 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard.common import *
+from sickbeard.common import Quality
 from sickbeard import logger
-from sickbeard import tvcache, sceneHelpers
+from sickbeard import tvcache
+from sickbeard.helpers import sanitizeSceneName
+from sickbeard.exceptions import ex
 
 class EZRSSProvider(generic.TorrentProvider):
 
@@ -58,7 +60,7 @@ class EZRSSProvider(generic.TorrentProvider):
         
         results = {}
         
-        if show.is_air_by_date:
+        if show.air_by_date:
             logger.log(u"EZRSS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
             return results
         
@@ -72,7 +74,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if not show:
             return params
         
-        params['show_name'] = sceneHelpers.sanitizeSceneName(show.name, ezrss=True).replace('.',' ').encode('utf-8')
+        params['show_name'] = sanitizeSceneName(show.name, ezrss=True).replace('.',' ').encode('utf-8')
           
         if season != None:
             params['season'] = season
@@ -86,9 +88,9 @@ class EZRSSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = sceneHelpers.sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
+        params['show_name'] = sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
         
-        if ep_obj.show.is_air_by_date:
+        if ep_obj.show.air_by_date:
             params['date'] = str(ep_obj.airdate)
         else:
             params['season'] = ep_obj.season
@@ -116,7 +118,7 @@ class EZRSSProvider(generic.TorrentProvider):
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load EZRSS RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load EZRSS RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"RSS data: "+data, logger.DEBUG)
             return []
         

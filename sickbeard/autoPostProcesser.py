@@ -16,16 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import sickbeard
-from sickbeard import helpers
-from sickbeard import logger
-
-from sickbeard import encodingKludge as ek
-from sickbeard import processTV
-from sickbeard import db
-
 import os.path
 
+import sickbeard
+
+from sickbeard import logger
+from sickbeard import encodingKludge as ek
+from sickbeard import processTV
 
 class PostProcesser():
 
@@ -40,10 +37,5 @@ class PostProcesser():
         if not ek.ek(os.path.isabs, sickbeard.TV_DOWNLOAD_DIR):
             logger.log(u"Automatic post-processing attempted but dir "+sickbeard.TV_DOWNLOAD_DIR+" is relative (and probably not what you really want to process)", logger.ERROR)
             return
-
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_shows WHERE location = ? OR location LIKE ?",
-                                 [os.path.abspath(sickbeard.TV_DOWNLOAD_DIR),
-                                  ek.ek(os.path.join, os.path.abspath(sickbeard.TV_DOWNLOAD_DIR), '%')])
 
         processTV.processDir(sickbeard.TV_DOWNLOAD_DIR)

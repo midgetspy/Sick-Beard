@@ -26,6 +26,7 @@ import tweet
 from . import libnotify
 import notifo
 import nmj
+import synoindex
 
 from sickbeard.common import *
 
@@ -37,6 +38,7 @@ twitter_notifier = tweet.TwitterNotifier()
 notifo_notifier = notifo.NotifoNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
+synoindex_notifier = synoindex.synoIndexNotifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
@@ -48,6 +50,7 @@ notifiers = [
     prowl_notifier,
     twitter_notifier,
     nmj_notifier,
+    synoindex_notifier,
 ]
 
 def notify_download(ep_name):
@@ -59,20 +62,3 @@ def notify_snatch(ep_name):
     for n in notifiers:
         n.notify_snatch(ep_name)
     notifo_notifier.notify_snatch(ep_name)
-
-def notify(type, message):
-
-    if type == NOTIFY_DOWNLOAD and sickbeard.XBMC_NOTIFY_ONDOWNLOAD == True:
-            xbmc.notifyXBMC(message, notifyStrings[type])
-
-    if type == NOTIFY_SNATCH and sickbeard.XBMC_NOTIFY_ONSNATCH:
-            xbmc.notifyXBMC(message, notifyStrings[type])
-
-    growl.sendGrowl(notifyStrings[type], message)
-    
-    prowl.sendProwl(message)
-
-    notifo.notifyNotifo(message)
-
-    if type == NOTIFY_DOWNLOAD:
-        tweet.notifyTwitter(message)

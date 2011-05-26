@@ -17,11 +17,12 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
-from sickbeard import helpers, version, ui
+from sickbeard import version, ui
 from sickbeard import logger
-from sickbeard import sceneHelpers
+from sickbeard import scene_exceptions
+from sickbeard.exceptions import ex
 
-import os, os.path, platform, shutil, time
+import os, platform, shutil
 import subprocess, re
 import urllib, urllib2
 import zipfile, tarfile
@@ -50,7 +51,7 @@ class CheckVersion():
         self.check_for_new_version()
         
         # refresh scene exceptions too
-        sceneHelpers.retrieve_exceptions()
+        scene_exceptions.retrieve_exceptions()
 
     def find_install_type(self):
         """
@@ -89,7 +90,7 @@ class CheckVersion():
         if not self.updater.need_update():
             logger.log(u"No update needed")
             if force:
-                ui.flash.message('No update needed')
+                ui.notifications.message('No update needed')
             return False
 
         self.updater.set_newest_text()
@@ -160,7 +161,7 @@ class WindowsUpdateManager(UpdateManager):
         # download the zip
         try:
             logger.log(u"Downloading update file from "+str(new_link))
-            (filename, headers) = urllib.urlretrieve(new_link)
+            (filename, headers) = urllib.urlretrieve(new_link) #@UnusedVariable
 
             # prepare the update dir
             sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
@@ -177,7 +178,7 @@ class WindowsUpdateManager(UpdateManager):
             # find update dir name
             update_dir_contents = os.listdir(sb_update_dir)
             if len(update_dir_contents) != 1:
-                logger.log("Invalid update data, update failed.", logger.ERROR)
+                logger.log("Invalid update data, update failed. Maybe try deleting your sb-update folder?", logger.ERROR)
                 return False
 
             content_dir = os.path.join(sb_update_dir, update_dir_contents[0])
@@ -191,7 +192,7 @@ class WindowsUpdateManager(UpdateManager):
             os.remove(filename)
 
         except Exception, e:
-            logger.log(u"Error while trying to update: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error while trying to update: "+ex(e), logger.ERROR)
             return False
 
         return True
@@ -233,7 +234,7 @@ class GitUpdateManager(UpdateManager):
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
                 output, err = p.communicate()
                 logger.log(u"git output: "+output, logger.DEBUG)
-            except OSError, e:
+            except OSError:
                 logger.log(u"Command "+cmd+" didn't work, couldn't find git.")
                 continue
             
@@ -258,7 +259,7 @@ class GitUpdateManager(UpdateManager):
         Returns: True for success or False for failure
         """
 
-        output, err = self._run_git('rev-parse HEAD')
+        output, err = self._run_git('rev-parse HEAD') #@UnusedVariable
 
         if not output:
             return self._git_error()
@@ -328,7 +329,7 @@ class GitUpdateManager(UpdateManager):
         self._find_installed_version()
         try:
             self._check_github_for_update()
-        except Exception, e:
+        except Exception:
             logger.log(u"Unable to contact github, can't check for update", logger.ERROR)
             return False
 
@@ -345,7 +346,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION)
+        output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION) #@UnusedVariable
 
         if not output:
             return self._git_error()
@@ -462,7 +463,7 @@ class SourceUpdateManager(GitUpdateManager):
         content_dir = os.path.join(sb_update_dir, update_dir_contents[0])
 
         # walk temp folder and move files to main folder
-        for dirname, dirnames, filenames in os.walk(content_dir):
+        for dirname, dirnames, filenames in os.walk(content_dir): #@UnusedVariable
             dirname = dirname[len(content_dir)+1:]
             for curfile in filenames:
                 old_path = os.path.join(content_dir, dirname, curfile)
@@ -478,7 +479,7 @@ class SourceUpdateManager(GitUpdateManager):
             ver_file.write(self._newest_commit_hash)
             ver_file.close()
         except IOError, e:
-            logger.log(u"Unable to write version file, update not complete: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to write version file, update not complete: "+ex(e), logger.ERROR)
             return False
 
         return True

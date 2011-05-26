@@ -25,10 +25,11 @@ import traceback
 import sickbeard
 
 from sickbeard import logger
-from sickbeard.common import *
+from sickbeard.common import UNAIRED
 
 from sickbeard import db
 from sickbeard import exceptions, helpers
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -137,7 +138,7 @@ class TVRage:
 
                 # if we couldn't compare with TVDB try comparing it with the local database
                 except tvdb_exceptions.tvdb_exception, e:
-                    logger.log(u"Unable to check TVRage info against TVDB: "+str(e).decode('utf-8'))
+                    logger.log(u"Unable to check TVRage info against TVDB: "+ex(e))
 
                     logger.log(u"Trying against DB instead", logger.DEBUG)
 
@@ -159,7 +160,7 @@ class TVRage:
                 logger.log(u"Date from TVRage for episode " + str(curSeason) + "x1: " + str(curEpInfo['airdate']), logger.DEBUG)
 
         except Exception, e:
-            logger.log(u"Error encountered while checking TVRage<->TVDB sync: " + str(e), logger.WARNING)
+            logger.log(u"Error encountered while checking TVRage<->TVDB sync: " + ex(e), logger.WARNING)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         return False
@@ -198,7 +199,7 @@ class TVRage:
                 airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
 
             except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Unable to check TVRage info against TVDB: "+str(e).decode('utf-8'))
+                logger.log(u"Unable to check TVRage info against TVDB: "+ex(e))
 
                 logger.log(u"Trying against DB instead", logger.DEBUG)
 
@@ -217,7 +218,7 @@ class TVRage:
                 return True
 
         except Exception, e:
-            logger.log(u"Error encountered while checking TVRage<->TVDB sync: " + str(e), logger.WARNING)
+            logger.log(u"Error encountered while checking TVRage<->TVDB sync: " + ex(e), logger.WARNING)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         return False
@@ -250,7 +251,7 @@ class TVRage:
         try:
             result = helpers.getURL(url).decode('utf-8')
         except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Unable to load TVRage info: " + str(e))
+            logger.log(u"Unable to load TVRage info: " + ex(e))
             raise exceptions.TVRageException("urlopen call to " + url + " failed")
 
         urlData = result.splitlines()
@@ -296,10 +297,10 @@ class TVRage:
 
         try:
             date = datetime.datetime.strptime(epInfo[2], "%b/%d/%Y").date()
-        except ValueError, e:
+        except ValueError:
             try:
                 date = datetime.datetime.strptime(epInfo[2], "%d/%b/%Y").date()
-            except ValueError, e:
+            except ValueError:
                 logger.log(u"Unable to figure out the time from the TVRage data "+epInfo[2])
                 return None
 
@@ -335,6 +336,6 @@ class TVRage:
         try:
             ep = self.show.getEpisode(self.nextEpInfo['season'], self.nextEpInfo['episode'])
         except exceptions.SickBeardException, e:
-            logger.log(u"Unable to create episode from tvrage (could be for a variety of reasons): " + str(e))
+            logger.log(u"Unable to create episode from tvrage (could be for a variety of reasons): " + ex(e))
 
         return ep

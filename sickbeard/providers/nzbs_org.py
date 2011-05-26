@@ -18,20 +18,21 @@
 
 
 
-import urllib
 import datetime
+import re
 import time
+import urllib
 
 import xml.etree.cElementTree as etree
 
 import sickbeard
 import generic
 
-from sickbeard import classes, sceneHelpers
+from sickbeard import classes, show_name_helpers
 
-from sickbeard import exceptions, logger, db
-from sickbeard.common import *
+from sickbeard import exceptions, logger
 from sickbeard import tvcache
+from sickbeard.exceptions import ex
 
 class NZBsProvider(generic.NZBProvider):
 
@@ -53,14 +54,14 @@ class NZBsProvider(generic.NZBProvider):
 			raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
 
 	def _get_season_search_strings(self, show, season):
-		return ['^'+x for x in sceneHelpers.makeSceneSeasonSearchString(show, season)]
+		return ['^'+x for x in show_name_helpers.makeSceneSeasonSearchString(show, season)]
 
 	def _get_episode_search_strings(self, ep_obj):
-		return ['^'+x for x in sceneHelpers.makeSceneSearchString(ep_obj)]
+		return ['^'+x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
 	def _doSearch(self, curString, show=None):
 
-		curString = curString.replace('.', ' ').replace('-', '.')
+		curString = curString.replace('.', ' ')
 
 		params = {"action": "search",
 				  "q": curString.encode('utf-8'),
@@ -87,7 +88,7 @@ class NZBsProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log(u"Error trying to load NZBs.org RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+			logger.log(u"Error trying to load NZBs.org RSS feed: "+ex(e), logger.ERROR)
 			return []
 
 		results = []

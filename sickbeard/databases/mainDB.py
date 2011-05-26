@@ -25,8 +25,7 @@ from sickbeard import logger
 from sickbeard.providers.generic import GenericProvider
 
 from sickbeard import encodingKludge as ek
-
-
+from sickbeard.exceptions import ex
 
 class MainSanityCheck(db.DBSanityCheck):
 
@@ -132,17 +131,17 @@ class NewQualitySettings (NumericProviders):
     def execute(self):
 
         numTries = 0
-        while not ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0')):
-            if not ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db')):
+        while not ek.ek(os.path.isfile, db.dbFilename(suffix='v0')):
+            if not ek.ek(os.path.isfile, db.dbFilename()):
                 break
 
             try:
                 logger.log(u"Attempting to back up your sickbeard.db file before migration...")
-                shutil.copy(ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db'), ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0'))
+                shutil.copy(db.dbFilename(), db.dbFilename(suffix='v0'))
                 logger.log(u"Done backup, proceeding with migration.")
                 break
             except Exception, e:
-                logger.log(u"Error while trying to back up your sickbeard.db: "+str(e).decode('utf-8'))
+                logger.log(u"Error while trying to back up your sickbeard.db: "+ex(e))
                 numTries += 1
                 time.sleep(1)
                 logger.log(u"Trying again.")
@@ -213,7 +212,7 @@ class NewQualitySettings (NumericProviders):
 
         # if no updates were done then the backup is useless
         if didUpdate:
-            os.remove(ek.ek(os.path.join, sickbeard.PROG_DIR, 'sickbeard.db.v0'))
+            os.remove(db.dbFilename(suffix='v0'))
 
 
         ### Update show qualities
@@ -383,5 +382,20 @@ class SetNzbTorrentSettings(PopulateRootDirs):
         sickbeard.USE_NZBS = use_nzbs
         
         sickbeard.save_config()
+        
+        self.incDBVersion()
+
+class FixAirByDateSetting(SetNzbTorrentSettings):
+    
+    def test(self):
+        return self.checkDBVersion() >= 9
+
+    def execute(self):
+        
+        shows = self.connection.select("SELECT * FROM tv_shows")
+        
+        for cur_show in shows:
+            if cur_show["genre"] and "talk show" in cur_show["genre"].lower():
+                self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
         self.incDBVersion()

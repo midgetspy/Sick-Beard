@@ -17,8 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os.path
-import sys
-import traceback
 
 import sickbeard
 
@@ -214,7 +212,7 @@ class ImageCache:
                         logger.log(u"Found an image in the show dir that doesn't exist in the cache, caching it: "+cur_file_name+", type "+str(cur_file_type), logger.DEBUG)
                         self._cache_image_from_file(cur_file_name, cur_file_type, show_obj.tvdbid)
                         need_images[cur_file_type] = False
-        except exceptions.ShowDirNotFoundException, e:
+        except exceptions.ShowDirNotFoundException:
             logger.log(u"Unable to search for images in show dir because it doesn't exist", logger.WARNING)
                     
         # download from TVDB for missing ones

@@ -22,12 +22,12 @@ import operator
 import sickbeard
 
 from sickbeard import db
-from sickbeard import classes, common, helpers, logger, sceneHelpers
+from sickbeard import helpers, logger, show_name_helpers
 from sickbeard import providers
 from sickbeard import search
 from sickbeard import history
 
-from sickbeard.common import *
+from sickbeard.common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, Quality
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -105,7 +105,7 @@ class ProperFinder():
 
             # populate our Proper instance
             if parse_result.air_by_date:
-                curProper.season == -1
+                curProper.season = -1
                 curProper.episode = parse_result.air_date
             else:
                 curProper.season = parse_result.season_number if parse_result.season_number != None else 1
@@ -118,7 +118,7 @@ class ProperFinder():
                 genericName = self._genericName(parse_result.series_name)
 
                 # get the scene name masks
-                sceneNames = set(sceneHelpers.makeSceneShowSearchStrings(curShow))
+                sceneNames = set(show_name_helpers.makeSceneShowSearchStrings(curShow))
 
                 # for each scene name mask
                 for curSceneName in sceneNames:
@@ -140,7 +140,7 @@ class ProperFinder():
             if curProper.tvdbid == -1:
                 continue
             
-            if not sceneHelpers.filterBadReleases(curProper.name):
+            if not show_name_helpers.filterBadReleases(curProper.name):
                 logger.log(u"Proper "+curProper.name+" isn't a valid scene release that we want, igoring it", logger.DEBUG)
                 continue
 
@@ -162,9 +162,9 @@ class ProperFinder():
                 try:
                     t = tvdb_api.Tvdb(**ltvdb_api_parms)
                     epObj = t[curProper.tvdbid].airedOn(curProper.episode)[0]
-                    season = int(epObj["seasonnumber"])
-                    episodes = [int(epObj["episodenumber"])]
-                except tvdb_exceptions.tvdb_episodenotfound, e:
+                    curProper.season = int(epObj["seasonnumber"])
+                    curProper.episodes = [int(epObj["episodenumber"])]
+                except tvdb_exceptions.tvdb_episodenotfound:
                     logger.log(u"Unable to find episode with date "+str(curProper.episode)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
                     continue
 
@@ -232,6 +232,8 @@ class ProperFinder():
 
                 # snatch it
                 downloadResult = search.snatchEpisode(result, SNATCHED_PROPER)
+                
+                return downloadResult
 
     def _genericName(self, name):
         return name.replace(".", " ").replace("-"," ").replace("_"," ").lower()

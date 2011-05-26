@@ -28,6 +28,8 @@ import warnings
 import logging
 import datetime
 import time
+import traceback
+import socket
 
 try:
     import xml.etree.cElementTree as ElementTree
@@ -71,9 +73,9 @@ def clean_cache(cachedir):
 
     # Does our cachedir exists
     if not os.path.isdir(cachedir):
-	log().debug("Told to clean cache dir %s but it does not exist" %
-		cachedir)
-	return
+        log().debug("Told to clean cache dir %s but it does not exist" %
+                cachedir)
+        return
     now = time.time()
     day = 86400
 
@@ -81,14 +83,14 @@ def clean_cache(cachedir):
     files = os.listdir(cachedir)
 
     for file in files:
-	ffile = os.path.join(cachedir,file)
-	# If modified time is > 24 hrs ago, die!
-	# log().debug("Comparing %s mtime" % ffile)
-	if now - os.stat(ffile).st_mtime > day:
-	    try:
-		os.remove(ffile)
-	    except:
-		raise tvdb_error("Couldn't remove %s" % ffile)
+        ffile = os.path.join(cachedir,file)
+        # If modified time is > 24 hrs ago, die!
+        # log().debug("Comparing %s mtime" % ffile)
+        if now - os.stat(ffile).st_mtime > day:
+            try:
+                os.remove(ffile)
+            except:
+                raise tvdb_error("Couldn't remove %s" % ffile)
 
 class ShowContainer(dict):
     """Simple dict that holds a series of Show instances
@@ -309,7 +311,7 @@ class Tvdb:
                 select_first = False,
                 debug = False,
                 cache = True,
-		cache_dir = False,
+                cache_dir = False,
                 banners = False,
                 actors = False,
                 custom_ui = None,
@@ -336,11 +338,11 @@ class Tvdb:
         cache (True/False/Recache):
             Retrieved XML are persisted to to disc. If true, stores in tvdb_api
             folder under directory specified by cache_dir.  If False, disables
-	    caching entirely.  If Refresh, requests a fresh copy and caches it
-	    for further use.
+            caching entirely.  If Refresh, requests a fresh copy and caches it
+            for further use.
 
-	cache_dir (str/unicode):
-	    Location for the cache directory, defaults to systems TEMP_DIR.
+        cache_dir (str/unicode):
+            Location for the cache directory, defaults to systems TEMP_DIR.
 
         banners (True/False):
             Retrieves the banners for a show. These are accessed
@@ -416,20 +418,20 @@ class Tvdb:
 
         self.config['search_all_languages'] = search_all_languages
 
-	if cache_dir:
-	    self.config['cache_location'] = cache_dir
-	else:
+        if cache_dir:
+            self.config['cache_location'] = cache_dir
+        else:
             self.config['cache_location'] = self._getTempDir()
 
-	if cache:
-	    self.config['cache_enabled'] = cache
-	else:
+        if cache:
+            self.config['cache_enabled'] = cache
+        else:
             self.config['cache_enabled'] = False
 
-	# Clean cache, this might need to be moved elsewhere
-	if self.config['cache_enabled'] and self.config['cache_location']:
-	    # log().debug("Cleaning cache %s " % self.config['cache_location'])
-	    clean_cache(self.config['cache_location'])
+        # Clean cache, this might need to be moved elsewhere
+        if self.config['cache_enabled'] and self.config['cache_location']:
+            # log().debug("Cleaning cache %s " % self.config['cache_location'])
+            clean_cache(self.config['cache_location'])
 
         self.config['banners_enabled'] = banners
         self.config['actors_enabled'] = actors
@@ -496,11 +498,11 @@ class Tvdb:
 
     def _loadUrl(self, url, recache = False):
         global lastTimeout
-	# Do we want caching?
-	if self.config['cache_enabled'] and self.config['cache_location']:
-	    h_cache = self.config['cache_location']
-	else:
-	    h_cache = False
+        # Do we want caching?
+        if self.config['cache_enabled'] and self.config['cache_location']:
+            h_cache = self.config['cache_location']
+        else:
+            h_cache = False
 
         if self.config['http_proxy'] != '' and self.config['http_proxy'] != None and socks != None:
             parsedURI = socks.parseproxyuri(self.config['http_proxy'])
@@ -508,24 +510,24 @@ class Tvdb:
         else:
             h = httplib2.Http(cache=h_cache)
 
-	# Handle a recache request, this will get fresh content and cache again
-	# if enabled
-	if str(self.config['cache_enabled']).lower() == 'recache' or recache:
-	    h_header = {'cache-control':'no-cache'}
-	else:
-	    h_header = {}
+        # Handle a recache request, this will get fresh content and cache again
+        # if enabled
+        if str(self.config['cache_enabled']).lower() == 'recache' or recache:
+            h_header = {'cache-control':'no-cache'}
+        else:
+            h_header = {}
 
         try:
             log().debug("Retrieving URL %s" % url)
             header, resp = h.request(url, headers=h_header)
-        except (IOError, httplib2.HttpLib2Error), errormsg:
+        except (socket.error, IOError, httplib2.HttpLib2Error), errormsg:
             if not str(errormsg).startswith('HTTP Error'):
                 lastTimeout = datetime.datetime.now()
             raise tvdb_error("Could not connect to server %s: %s" % (url, errormsg))
-	except (AttributeError), errormsg:
-	    raise tvdb_error("Silly upstream module timed out and didn't give a \
-	    good error.  Failed hitting %s, error message: %s" % (url,
-		str(errormsg)))
+        except (AttributeError), errormsg:
+            raise tvdb_error("Silly upstream module timed out and didn't give a \
+            good error.  Failed hitting %s, error message: %s" % (url,
+                str(errormsg)))
         #end try
         
         return str(resp)

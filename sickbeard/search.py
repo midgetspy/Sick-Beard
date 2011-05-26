@@ -18,22 +18,22 @@
 
 from __future__ import with_statement
 
+import os
 import traceback
 
 import sickbeard
 
-from common import *
+from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 
-from sickbeard import logger, db, sceneHelpers, exceptions, helpers
+from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
 from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
-
+from sickbeard import ui
 from sickbeard import encodingKludge as ek
-
-from sickbeard.providers import *
+from sickbeard.exceptions import ex
 from sickbeard import providers
 
 def _downloadResult(result):
@@ -74,7 +74,7 @@ def _downloadResult(result):
             fileOut.close()
             helpers.chmodAsParent(fileName)
         except IOError, e:
-            logger.log(u"Error trying to save NZB to black hole: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to save NZB to black hole: "+ex(e), logger.ERROR)
             newResult = False
 
     elif resProvider.providerType == "torrent":
@@ -83,6 +83,9 @@ def _downloadResult(result):
     else:
         logger.log(u"Invalid provider type - this is a coding error, report it please", logger.ERROR)
         return False
+
+    if newResult:
+        ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (result.name, resProvider.name))
 
     return newResult
 
@@ -151,10 +154,10 @@ def searchForNeededEpisodes():
         try:
             curFoundResults = curProvider.searchRSS()
         except exceptions.AuthException, e:
-            logger.log(u"Authentication error: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Authentication error: "+ex(e), logger.ERROR)
             continue
         except Exception, e:
-            logger.log(u"Error while searching "+curProvider.name+", skipping: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error while searching "+curProvider.name+", skipping: "+ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             continue
 
@@ -194,7 +197,7 @@ def pickBestResult(results, quality_list=None):
     # find the best result for the current episode
     bestResult = None
     for cur_result in results:
-        logger.log("Quality of "+cur_result.name+" is "+str(cur_result.quality))
+        logger.log("Quality of "+cur_result.name+" is "+Quality.qualityStrings[cur_result.quality])
         
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
@@ -215,6 +218,43 @@ def pickBestResult(results, quality_list=None):
 
     return bestResult
 
+def isFinalResult(result):
+    """
+    Checks if the given result is good enough quality that we can stop searching for other ones.
+    
+    If the result is the highest quality in both the any/best quality lists then this function
+    returns True, if not then it's False
+
+    """
+    
+    logger.log(u"Checking if we should keep searching after we've found "+result.name, logger.DEBUG)
+    
+    show_obj = result.episodes[0].show
+    
+    any_qualities, best_qualities = Quality.splitQuality(show_obj.quality)
+    
+    # if there is a redownload that's higher than this then we definitely need to keep looking
+    if best_qualities and result.quality < max(best_qualities):
+        return False
+
+    # if there's no redownload that's higher (above) and this is the highest initial download then we're good
+    elif any_qualities and result.quality == max(any_qualities):
+        return True
+    
+    elif best_qualities and result.quality == max(best_qualities):
+        
+        # if this is the best redownload but we have a higher initial download then keep looking
+        if any_qualities and result.quality < max(any_qualities):
+            return False
+        
+        # if this is the best redownload and we don't have a higher initial download then we're done
+        else:
+            return True
+
+    # if we got here than it's either not on the lists, they're empty, or it's lower than the highest required
+    else:
+        return False
+
 
 def findEpisode(episode, manualSearch=False):
 
@@ -232,19 +272,31 @@ def findEpisode(episode, manualSearch=False):
         try:
             curFoundResults = curProvider.findEpisode(episode, manualSearch=manualSearch)
         except exceptions.AuthException, e:
-            logger.log(u"Authentication error: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Authentication error: "+ex(e), logger.ERROR)
             continue
         except Exception, e:
-            logger.log(u"Error while searching "+curProvider.name+", skipping: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error while searching "+curProvider.name+", skipping: "+ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             continue
 
         didSearch = True
 
         # skip non-tv crap
-        curFoundResults = filter(lambda x: sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, episode.show), curFoundResults)
+        curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
 
+        # loop all results and see if any of them are good enough that we can stop searching
+        done_searching = False
+        for cur_result in curFoundResults:
+            done_searching = isFinalResult(cur_result)
+            logger.log(u"Should we stop searching after finding "+cur_result.name+": "+str(done_searching), logger.DEBUG)
+            if done_searching:
+                break
+        
         foundResults += curFoundResults
+
+        # if we did find a result that's good enough to stop then don't continue
+        if done_searching:
+            break
 
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
@@ -273,7 +325,7 @@ def findSeason(show, season):
             for curEp in curResults:
 
                 # skip non-tv crap
-                curResults[curEp] = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), curResults[curEp])
+                curResults[curEp] = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), curResults[curEp])
 
                 if curEp in foundResults:
                     foundResults[curEp] += curResults[curEp]
@@ -281,10 +333,10 @@ def findSeason(show, season):
                     foundResults[curEp] = curResults[curEp]
 
         except exceptions.AuthException, e:
-            logger.log(u"Authentication error: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Authentication error: "+ex(e), logger.ERROR)
             continue
         except Exception, e:
-            logger.log(u"Error while searching "+curProvider.name+", skipping: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error while searching "+curProvider.name+", skipping: "+ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             continue
 
@@ -348,7 +400,7 @@ def findSeason(show, season):
             # if not, break it apart and add them as the lowest priority results
             individualResults = nzbSplitter.splitResult(bestSeasonNZB)
 
-            individualResults = filter(lambda x:  sceneHelpers.filterBadReleases(x.name) and sceneHelpers.isGoodResult(x.name, show), individualResults)
+            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
 
             for curResult in individualResults:
                 if len(curResult.episodes) == 1:

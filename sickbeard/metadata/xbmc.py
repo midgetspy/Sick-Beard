@@ -22,9 +22,10 @@ import sickbeard
 
 import generic
 
-from sickbeard.common import *
+from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
-from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
+
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
@@ -188,9 +189,9 @@ class XBMCMetadata(generic.GenericMetadata):
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             myShow = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
-            raise exceptions.ShowNotFoundException(str(e))
+            raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - "+ex(e), logger.ERROR)
             return
 
         if len(eps_to_write) > 1:

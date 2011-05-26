@@ -26,9 +26,9 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard import classes, logger, sceneHelpers, db
+from sickbeard import classes, logger, show_name_helpers
 from sickbeard import tvcache
-from sickbeard.common import *
+from sickbeard.exceptions import ex
 
 class NZBMatrixProvider(generic.NZBProvider):
 
@@ -46,14 +46,14 @@ class NZBMatrixProvider(generic.NZBProvider):
         return sickbeard.NZBMATRIX
 
     def _get_season_search_strings(self, show, season):
-        sceneSearchStrings = set(sceneHelpers.makeSceneSeasonSearchString(show, season, "nzbmatrix"))
+        sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, "nzbmatrix"))
 
         # search for all show names and episode numbers like ("a","b","c") in a single search
         return [' '.join(sceneSearchStrings)]
 
     def _get_episode_search_strings(self, ep_obj):
 
-        sceneSearchStrings = set(sceneHelpers.makeSceneSearchString(ep_obj))
+        sceneSearchStrings = set(show_name_helpers.makeSceneSearchString(ep_obj))
 
         # search for all show names and episode numbers like ("a","b","c") in a single search
         return ['("' + '","'.join(sceneSearchStrings) + '")']
@@ -94,7 +94,7 @@ class NZBMatrixProvider(generic.NZBProvider):
             responseSoup = etree.ElementTree(etree.XML(searchResult))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load NZBMatrix RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load NZBMatrix RSS feed: "+ex(e), logger.ERROR)
             return []
 
         results = []

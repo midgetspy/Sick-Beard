@@ -660,7 +660,7 @@ class FileCache(object):
             f = file(cacheFullPath, "rb")
             retval = f.read()
             f.close()
-        except IOError:
+        except IOError, e:
             pass
         return retval
 
@@ -869,7 +869,9 @@ the same interface as FileCache."""
                 conn.close()
                 raise ServerNotFoundError("Unable to find the server at %s" % conn.host)
             except socket.error, e:
-                if e.errno == errno.ECONNREFUSED: # Connection refused
+                if not hasattr(e, 'errno'): # I don't know what this is so lets raise it if it happens
+                    raise
+                elif e.errno == errno.ECONNREFUSED: # Connection refused
                     raise
                 # Just because the server closed the connection doesn't apparently mean
                 # that the server didn't send a response.
@@ -1046,7 +1048,7 @@ a string that contains the response entity body.
                         feedparser.feed(info)
                         info = feedparser.close()
                         feedparser._parse = None
-                    except IndexError:
+                    except IndexError, ValueError:
                         self.cache.delete(cachekey)
                         cachekey = None
                         cached_value = None
@@ -1145,7 +1147,7 @@ a string that contains the response entity body.
                     content = e.content
                     response.status = 500
                     response.reason = str(e) 
-                elif isinstance(e, socket.timeout):
+                elif isinstance(e, socket.timeout) or (isinstance(e, socket.error) and 'timed out' in str(e)):
                     content = "Request Timeout"
                     response = Response( {
                             "content-type": "text/plain",

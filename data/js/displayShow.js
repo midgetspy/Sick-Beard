@@ -1,12 +1,14 @@
 $(document).ready(function(){
 
+	$('#sbRoot').ajaxEpSearch({'colorRow': true});
+	
     $('#seasonJump').change(function() {
-    var id = $(this).val();
-    if (id && id != 'jump') {
-        $('html,body').animate({scrollTop: $(id).offset().top},'slow');
-        location.hash = id;
-    }
-    $(this).val('jump');
+        var id = $(this).val();
+        if (id && id != 'jump') {
+            $('html,body').animate({scrollTop: $(id).offset().top},'slow');
+            location.hash = id;
+        }
+        $(this).val('jump');
     });
 
     $("#prevShow").click(function(){
@@ -20,7 +22,6 @@ $(document).ready(function(){
     });
 
     $('#changeStatus').click(function(){
-  
         var sbRoot = $('#sbRoot').val()
         var epArr = new Array()
 
@@ -36,13 +37,11 @@ $(document).ready(function(){
             return false
 
         url = sbRoot+'/home/setStatus?show='+$('#showID').attr('value')+'&eps='+epArr.join('|')+'&status='+$('#statusSelect').attr('value')
-
         window.location.href = url
 
     });
 
     $('.seasonCheck').click(function(){
-    
         var seasCheck = this;
         var seasNo = $(seasCheck).attr('id');
 
@@ -50,8 +49,8 @@ $(document).ready(function(){
             var epParts = $(this).attr('id').split('x')
 
             if (epParts[0] == seasNo) {
-                this.checked = seasCheck.checked 
-            } 
+                this.checked = seasCheck.checked
+            }
         });
     });
 
