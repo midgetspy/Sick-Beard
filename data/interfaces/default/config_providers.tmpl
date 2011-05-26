@@ -20,6 +20,12 @@
     \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
     #end for
 #end if
+
+#if $sickbeard.USE_TORRENTS:
+    #for $curCustomTorrentProvider in $sickbeard.customTorrentProviderList:
+    \$(this).addTorrentProvider('$curCustomTorrentProvider.getID()', '$curCustomTorrentProvider.name', '$curCustomTorrentProvider.url', $int($curCustomTorrentProvider.default));
+    #end for
+#end if
 });
 //-->
 </script>
@@ -27,7 +33,7 @@
 <div id="config">
 <div id="config-content">
 
-<form id="configForm" action="saveProviders" method="post">
+<form id="configForma" action="saveProviders" method="post">
 
             <div id="config-components">
                 
@@ -296,9 +302,12 @@
                                     <input class="component-desc" type="text" id="torrent_url" size="40" />
                                 </label>
                             </div>
+
+                            <div class="testNotification" id="test_torrent_feed_result">You must test the feed before adding.</div>
+
                             <div id="torrent_add_div">
                                 <input type="button" class="torrent_test" id="torrent_test" value="Test" />
-                                <input type="button" class="torrent_save" id="torrent_add" value="Add" />
+                                <input type="button" class="torrent_save" id="torrent_add" value="Add" disabled />
                             </div>
                             <div id="torrent_update_div" style="display: none;">
                                 <input type="button" class="torrent_delete" id="torrent_delete" value="Delete" />

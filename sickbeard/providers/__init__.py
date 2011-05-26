@@ -31,7 +31,7 @@ from os import sys
 
 def sortedProviderList():
 
-    initialList = sickbeard.providerList + sickbeard.newznabProviderList
+    initialList = sickbeard.providerList + sickbeard.newznabProviderList + sickbeard.customTorrentProviderList
     providerDict = dict(zip([x.getID() for x in initialList], initialList))
 
     newList = []
@@ -97,6 +97,47 @@ def makeNewznabProvider(configString):
 
 def getDefaultNewznabProviders():
     return 'Sick Beard Index|http://momo.sickbeard.com/|0|0'
+
+
+def getCustomTorrentProviderList(data):
+
+    defaultList = [makeCustomTorrentProvider(x) for x in getDefaultCustomTorrentProviders().split('!!!')]
+    providerList = filter(lambda x: x, [makeCustomTorrentProvider(x) for x in data.split('!!!')])
+
+    providerDict = dict(zip([x.name for x in providerList], providerList))
+
+    for curDefault in defaultList:
+        if not curDefault:
+            continue
+
+        if curDefault.name not in providerDict:
+            curDefault.default = True
+            providerList.append(curDefault)
+        else:
+            providerDict[curDefault.name].default = True
+            providerDict[curDefault.name].name = curDefault.name
+            providerDict[curDefault.name].url = curDefault.url
+        
+    return filter(lambda x: x, providerList)
+
+
+def makeCustomTorrentProvider(configString):
+
+    if not configString:
+        return None
+
+    name, url, enabled = configString.split('|')
+
+    custom_torrents = sys.modules['sickbeard.providers.custom_torrents']
+
+    newProvider = custom_torrents.CustomTorrentsProvider(name, url)
+    newProvider.enabled = enabled == '1'
+
+    return newProvider
+
+def getDefaultCustomTorrentProviders():
+    return ''
+
 
 
 def getProviderModule(name):

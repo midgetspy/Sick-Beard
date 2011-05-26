@@ -39,7 +39,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 
-from sickbeard.providers import newznab
+from sickbeard.providers import newznab, custom_torrents
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
@@ -980,58 +980,58 @@ class ConfigProviders:
         if not name:
             return json.dumps({'error': 'Invalid name specified'})
 
-        providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+        providerDict = dict(zip([x.getID() for x in sickbeard.customTorrentProviderList], sickbeard.customTorrentProviderList))
 
-        tempProvider = newznab.NewznabProvider(name, '')
+        tempProvider = custom_torrents.CustomTorrentsProvider(name, '')
 
         if tempProvider.getID() in providerDict:
             return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
         else:
             return json.dumps({'success': tempProvider.getID()})
 
-    @cherrypy.expose
-    def saveNewznabProvider(self, name, url, key=''):
-
-        if not name or not url:
-            return '0'
-
-        if not url.endswith('/'):
-            url = url + '/'
-
-        providerDict = dict(zip([x.name for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
-
-        if name in providerDict:
-            if not providerDict[name].default:
-                providerDict[name].name = name
-                providerDict[name].url = url
-            providerDict[name].key = key
-
-            return providerDict[name].getID() + '|' + providerDict[name].configStr()
-
-        else:
-
-            newProvider = newznab.NewznabProvider(name, url, key)
-            sickbeard.newznabProviderList.append(newProvider)
-            return newProvider.getID() + '|' + newProvider.configStr()
-
-
 
     @cherrypy.expose
-    def deleteNewznabProvider(self, id):
+    def testTorrentProvider(self, url):
 
-        providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+        if not url:
+            return json.dumps({'error': 'No URL specified'})
 
-        if id not in providerDict or providerDict[id].default:
-            return '0'
+        tempProvider = custom_torrents.CustomTorrentsProvider('SBTemp', url)
 
-        # delete it from the list
-        sickbeard.newznabProviderList.remove(providerDict[id])
+        try:
+            data = tempProvider.cache._getRSSData()
+        except ValueError, e:
+            return json.dumps({'error': 'Invalid URL'})
+        
+        if not data:
+            return json.dumps({'error': 'Unable to load URL'})
 
-        if id in sickbeard.PROVIDER_ORDER:
-            sickbeard.PROVIDER_ORDER.remove(id)
+        try:
+            responseSoup = etree.ElementTree(etree.XML(data))
+            items = responseSoup.getiterator('item')
+        except Exception, e:
+            logger.log(u"Error trying to load RSS feed: "+ex(e), logger.ERROR)
+            logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
+            return json.dumps({'error': 'Invalid feed content'})
 
-        return '1'
+        if responseSoup.getroot().tag != 'rss':
+            logger.log(u"Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
+            return json.dumps({'error': 'Invalid feed content'})
 
+        title = url = None
+        for item in items:
+            title = item.findtext('title')
+            url = item.findtext('link')
+            break
+
+        if not title or not url:
+            logger.log(u"The XML returned from the feed is incomplete, this result is unusable", logger.ERROR)
+            return json.dumps({'error': 'Feed must contain a <title> and <link> to be usable'})
+        
+        if not url.endswith('.torrent'):
+            return json.dumps({'error': '<link> section must contain a link to a .torrent file'})
+
+        return json.dumps({'success': 'Feed looks valid'})
 
     @cherrypy.expose
     def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
@@ -1039,7 +1039,7 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
                       newzbin_username=None, newzbin_password=None,
-                      provider_order=None):
+                      provider_order=None, torrent_string=None):
 
         results = []
 
@@ -1047,36 +1047,67 @@ class ConfigProviders:
         provider_list = []
 
         newznabProviderDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
-
+        customTorrentProviderDict = dict(zip([x.getID() for x in sickbeard.customTorrentProviderList], sickbeard.customTorrentProviderList))
         finishedNames = []
 
-        # add all the newznab info we got into our list
-        for curNewznabProviderStr in newznab_string.split('!!!'):
+        if newznab_string != None:
+    
+            # add all the newznab info we got into our list
+            for curNewznabProviderStr in newznab_string.split('!!!'):
+    
+                if not curNewznabProviderStr:
+                    continue
+    
+                curName, curURL, curKey = curNewznabProviderStr.split('|')
+    
+                newProvider = newznab.NewznabProvider(curName, curURL, curKey)
+    
+                curID = newProvider.getID()
+    
+                # if it already exists then update it
+                if curID in newznabProviderDict:
+                    newznabProviderDict[curID].name = curName
+                    newznabProviderDict[curID].url = curURL
+                    newznabProviderDict[curID].key = curKey
+                else:
+                    sickbeard.newznabProviderList.append(newProvider)
+    
+                finishedNames.append(curID)
+    
+            # delete anything that is missing
+            for curProvider in sickbeard.newznabProviderList:
+                if curProvider.getID() not in finishedNames:
+                    sickbeard.newznabProviderList.remove(curProvider)
 
-            if not curNewznabProviderStr:
-                continue
 
-            curName, curURL, curKey = curNewznabProviderStr.split('|')
+        if torrent_string != None:
 
-            newProvider = newznab.NewznabProvider(curName, curURL, curKey)
-
-            curID = newProvider.getID()
-
-            # if it already exists then update it
-            if curID in newznabProviderDict:
-                newznabProviderDict[curID].name = curName
-                newznabProviderDict[curID].url = curURL
-                newznabProviderDict[curID].key = curKey
-            else:
-                sickbeard.newznabProviderList.append(newProvider)
-
-            finishedNames.append(curID)
-
-
-        # delete anything that is missing
-        for curProvider in sickbeard.newznabProviderList:
-            if curProvider.getID() not in finishedNames:
-                sickbeard.newznabProviderList.remove(curProvider)
+            # add all the customTorrent info we got into our list
+            for curTorrentProviderStr in torrent_string.split('!!!'):
+    
+                if not curTorrentProviderStr:
+                    continue
+    
+                curName, curURL = curTorrentProviderStr.split('|')
+    
+                newProvider = custom_torrents.CustomTorrentsProvider(curName, curURL)
+    
+                curID = newProvider.getID()
+    
+                # if it already exists then update it
+                if curID in customTorrentProviderDict:
+                    customTorrentProviderDict[curID].name = curName
+                    customTorrentProviderDict[curID].url = curURL
+                else:
+                    sickbeard.customTorrentProviderList.append(newProvider)
+    
+                finishedNames.append(curID)
+    
+    
+            # delete anything that is missing
+            for curProvider in sickbeard.customTorrentProviderList:
+                if curProvider.getID() not in finishedNames:
+                    sickbeard.customTorrentProviderList.remove(curProvider)
 
         # do the enable/disable
         for curProviderStr in provider_str_list:
@@ -1103,6 +1134,8 @@ class ConfigProviders:
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
+            elif curProvider in customTorrentProviderDict:
+                customTorrentProviderDict[curProvider].enabled = bool(curEnabled)
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 

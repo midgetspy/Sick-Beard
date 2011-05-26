@@ -251,6 +251,7 @@ $(document).ready(function(){
             var data = ['',''];
             var isDefault = 0;
             $('#torrent_add_div').show();
+            $('#torrent_add').attr('disabled', true);
             $('#torrent_update_div').hide();
         } else {
             var data = torrentProviders[selectedProvider][1];
@@ -316,6 +317,25 @@ $(document).ready(function(){
         
     });
 
+    
+    $('#torrent_test').click(function(){
+    	
+    	$.getJSON(sbRoot+'/config/providers/testTorrentProvider',
+    			{url: $('#torrent_url').val()},
+    			function(data){
+    				if (data.error != undefined) {
+    					$('#test_torrent_feed_result').text('Error: '+data.error);
+    					$('#torrent_add').attr('disabled',true);
+    					return;
+    				}
+    			
+					$('#test_torrent_feed_result').text(data.success);
+					$('#torrent_add').attr('disabled',false);
+    			}
+    	);
+    	
+    });
+    
     // updates the torrent provider dict with the new config info for a provider
     $.fn.updateTorrentProvider = function (id, url) {
 
