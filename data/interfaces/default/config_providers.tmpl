@@ -79,7 +79,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvbinz", "tvtorrents"):
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "thepiratebay"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.getID() == 'tvbinz' and not $sickbeard.SHOW_TVBINZ
                                             #continue
@@ -201,6 +201,16 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix">
                                 <span class="component-title">TvTorrents Hash:</span>
                                 <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
+                            </label>
+                        </div>
+</div>
+
+<div class="providerDiv" id="thepiratebayDiv">
+                        <div class="field-pair">
+                            <input type="checkbox" name="thepiratebay_trusted" id="thepiratebay_trusted" #if $sickbeard.THEPIRATEBAY_TRUSTED then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="thepiratebay_trusted">
+                                <span class="component-title">Trusted Download</span>
+                                <span class="component-desc">Do you want download torrent only from trusted uploaders?</span>
                             </label>
                         </div>
 </div>
