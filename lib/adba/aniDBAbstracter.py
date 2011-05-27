@@ -38,7 +38,7 @@ class aniDBabstractObject(object):
                         try:
                             newList.append(int(i))
                         except:
-                            newList.append(i)
+                            newList.append(unicode(i, "utf-8"))
                     self.__dict__[key] = newList
                     continue
             except:
@@ -46,7 +46,7 @@ class aniDBabstractObject(object):
             try:
                 self.__dict__[key] = int(dataline[key])
             except:
-                self.__dict__[key] = dataline[key]
+                self.__dict__[key] = unicode(dataline[key], "utf-8")
             key = property(lambda x: dataline[key])
 
     def __getattr__(self, name):
@@ -57,9 +57,6 @@ class aniDBabstractObject(object):
     
     def _build_names(self):
         names = []
-        
-        names.append(self.english_name)
-        
         names = self._easy_extend(names,self.english_name)
         names = self._easy_extend(names,self.short_name_list)
         names = self._easy_extend(names,self.synonym_list)

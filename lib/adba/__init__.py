@@ -32,7 +32,7 @@ class Connection(threading.Thread):
 		self.logPrivate = logPrivate
 		if type(log) in (FunctionType,MethodType):# if we get a function or a method use that.
 			self.log = log
-			self.logPrivate = True
+			self.logPrivate = True # true means sensitive data will not be NOT be logged ... yeah i know oO
 		elif log:# if it something else (like True) use the own print_log
 			self.log=self.print_log
 		else:# dont log at all
