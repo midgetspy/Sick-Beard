@@ -44,6 +44,8 @@ from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
 
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
+
 from lib.tvdb_api import tvdb_api
 
 try:
@@ -985,7 +987,7 @@ class ConfigProviders:
         tempProvider = custom_torrents.CustomTorrentsProvider(name, '')
 
         if tempProvider.getID() in providerDict:
-            return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
+            return json.dumps({'error': 'Provider already exists as '+providerDict[tempProvider.getID()].name})
         else:
             return json.dumps({'success': tempProvider.getID()})
 
@@ -996,10 +998,10 @@ class ConfigProviders:
         if not url:
             return json.dumps({'error': 'No URL specified'})
 
-        tempProvider = custom_torrents.CustomTorrentsProvider('SBTemp', url)
+        temp_provider = custom_torrents.CustomTorrentsProvider('SBTemp', url)
 
         try:
-            data = tempProvider.cache._getRSSData()
+            data = temp_provider.cache._getRSSData()
         except ValueError, e:
             return json.dumps({'error': 'Invalid URL'})
         
@@ -1019,18 +1021,59 @@ class ConfigProviders:
             return json.dumps({'error': 'Invalid feed content'})
 
         title = url = None
+        num_bad_quality = 0
+        num_not_tv = 0
+        num_items = 0
+
         for item in items:
             title = item.findtext('title')
             url = item.findtext('link')
-            break
+            num_items += 1
 
-        if not title or not url:
-            logger.log(u"The XML returned from the feed is incomplete, this result is unusable", logger.ERROR)
-            return json.dumps({'error': 'Feed must contain a <title> and <link> to be usable'})
+            # sanity check the feed
+            if not title or not url:
+                logger.log(u"The XML returned from the feed is incomplete, some results are unusable", logger.ERROR)
+                return json.dumps({'error': 'Feed must contain a <title> and <link> to be usable'})
+
+            # check the name to see if it's actually TV
+            try:
+                np = NameParser(False)
+                np.parse(title)
+            except:
+                num_not_tv += 1
+                continue
+            
+            # see if there's a recognizable quality in the name
+            cur_quality = Quality.nameQuality(title)
+            if cur_quality == Quality.UNKNOWN:
+                num_bad_quality += 1
         
-        if not url.endswith('.torrent'):
-            return json.dumps({'error': '<link> section must contain a link to a .torrent file'})
+        
+        import tempfile
+        
+        # make a temp file and write the torrent data to it
+        (tmp_torrent, tmp_torrent_filename) = tempfile.mkstemp()
+        tmp_torrent_fd = os.fdopen(tmp_torrent, 'wb')
+        tmp_data = temp_provider.getURL(url)
+        tmp_torrent_fd.write(tmp_data)
+        tmp_torrent_fd.close()
 
+        # test the result to make sure it links to a downloadable torrent not an HTML page or something
+        is_good = temp_provider._verify_download(unicode(tmp_torrent_filename))
+        os.remove(tmp_torrent_filename)
+        
+        if not is_good:
+            return json.dumps({'error': 'The link in the <link> section of the feed must link directly to a .torrent'})
+
+        # consider these success but give the user a warning that the feed might be full of garbage 
+        logger.log(u"% not TV: " + str(num_not_tv/float(num_items)))
+        if num_not_tv/float(num_items) > 0.25:
+            return json.dumps({'success': 'Warning: Many of these torrents aren\'t recognizable as TV episodes'})
+        
+        logger.log(u"% bad quality: " + str(num_bad_quality/float(num_items)))
+        if num_bad_quality/float(num_items) > 0.1:
+            return json.dumps({'success': 'Warning: Many of these torrents are unknown quality'})
+        
         return json.dumps({'success': 'Feed looks valid'})
 
     @cherrypy.expose

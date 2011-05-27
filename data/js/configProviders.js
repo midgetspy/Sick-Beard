@@ -266,15 +266,16 @@ $(document).ready(function(){
         if (selectedProvider == 'addTorrent') {
             $('#torrent_name').removeAttr("disabled");
             $('#torrent_url').removeAttr("disabled");
+            $('#test_torrent_feed_result').show()
         } else {
 
             $('#torrent_name').attr("disabled", "disabled");
+            $('#torrent_url').attr("disabled", "disabled");
+            $('#test_torrent_feed_result').hide()
             
             if (isDefault) {
-                $('#torrent_url').attr("disabled", "disabled");
                 $('#torrent_delete').attr("disabled", "disabled");
             } else {
-                $('#torrent_url').removeAttr("disabled");
                 $('#torrent_delete').removeAttr("disabled");
             }
         }
