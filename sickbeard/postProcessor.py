@@ -420,35 +420,18 @@ class PostProcessor(object):
         return to_return
     
     def _analyze_anidb(self,filePath):
-        if not sickbeard.USE_ANIDB:
-            self._log(u"Usage of anidb disabled. Skiping", logger.DEBUG)
+        if not self._set_up_anidb_connection():
             return (None, None, None)
         
-        if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
-            self._log(u"anidb username and/or password are not set. Aborting anidb lookup.", logger.DEBUG)
-            return (None, None, None)
-        
-        anidb_logger = lambda x : logger.log("ANIDB: "+str(x), logger.DEBUG)
-        if not sickbeard.ADBA_CONNECTION:
-            sickbeard.ADBA_CONNECTION = adba.Connection(keepAlive=True,log=anidb_logger)
-        
-        if not sickbeard.ADBA_CONNECTION.authed():
-            try:
-                sickbeard.ADBA_CONNECTION.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
-            except Exception,e :
-                self._log(u"exception msg: "+str(e))
-                raise InvalidNameException
-        
-
-        ep = adba.Episode(sickbeard.ADBA_CONNECTION,filePath=filePath,
-             paramsF=["quality","anidb_file_name","crc32"],
-             paramsA=["epno","english_name","short_name_list","other_name","synonym_list"])
+        ep = self._build_anidb_episode(sickbeard.ADBA_CONNECTION,filePath)
         try:
-            self._log(u"Trying to lookup "+str(filePath)+" on anidb (this might take some time because we have to calculate the hash)", logger.MESSAGE)        
+            self._log(u"Trying to lookup "+str(filePath)+" on anidb", logger.MESSAGE)        
             ep.load_data()
         except Exception,e :
             self._log(u"exception msg: "+str(e))
             raise InvalidNameException
+        else:
+            self.anidbEpisode = ep
         
         names = []
         if len(ep.short_name_list):
@@ -463,7 +446,7 @@ class PostProcessor(object):
         if ep.english_name:
             names = [ep.english_name]+names
         self._log(u"names "+str(names) , logger.DEBUG)
-            
+        
         #TODO: clean code. it looks like it's from hell
         for name in names:
             try:
@@ -491,8 +474,48 @@ class PostProcessor(object):
             self._log(u"Lookup successful, using anidb filename "+str(ep.anidb_file_name), logger.DEBUG)
             return self._analyze_name(ep.anidb_file_name)
         raise InvalidNameException
-        
     
+    def _set_up_anidb_connection(self):
+        if not sickbeard.USE_ANIDB:
+            self._log(u"Usage of anidb disabled. Skiping", logger.DEBUG)
+            return False
+        
+        if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
+            self._log(u"anidb username and/or password are not set. Aborting anidb lookup.", logger.DEBUG)
+            return False
+        
+        if not sickbeard.ADBA_CONNECTION:
+            anidb_logger = lambda x : logger.log("ANIDB: "+str(x), logger.DEBUG)
+            sickbeard.ADBA_CONNECTION = adba.Connection(keepAlive=True,log=anidb_logger)
+        
+        if not sickbeard.ADBA_CONNECTION.authed():
+            try:
+                sickbeard.ADBA_CONNECTION.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
+            except Exception,e :
+                self._log(u"exception msg: "+str(e))
+                return False
+            
+        return True
+    
+    def _build_anidb_episode(self,connection,filePath):
+        ep = adba.Episode(connection,filePath=filePath,
+             paramsF=["quality","anidb_file_name","crc32"],
+             paramsA=["epno","english_name","short_name_list","other_name","synonym_list"])
+
+        return ep
+    
+    def _add_to_anidb_mylist(self,filePath):
+        # TODO: make a setting
+        #sickbeard.ANIDB_ADDTOMYLIST:
+        if self._set_up_anidb_connection():
+            if not self.anidbEpisode: # seams like we could parse the name before, now lets build the anidb object
+                self.anidbEpisode = self._build_anidb_episode(sickbeard.ADBA_CONNECTION,filePath)
+            
+            try:
+                self.anidbEpisode.add_to_mylist(status=1)
+            except Exception,e :
+                self._log(u"exception msg: "+str(e))
+        
     def _make_attempt_list(self):
                         # try to look up the nzb in history
         attempt_list = {"history":self._history_lookup,
@@ -699,6 +722,8 @@ class PostProcessor(object):
         
         # reset per-file stuff
         self.in_history = False
+        # reset the anidb episode object
+        self.anidbEpisode = None
         
         # try to find the file info
         (tvdb_id, season, episodes) = self._find_info()
@@ -817,6 +842,10 @@ class PostProcessor(object):
 
         # do the library update for synoindex
         notifiers.synoindex_notifier.update_library(ep_obj)
+        
+        # add to anidb
+        if ep_obj.show.is_anime and sickbeard.ANIDB_USE_MYLIST:
+            self._add_to_anidb_mylist(self.file_path)
 
         # run extra_scripts
         self._run_extra_scripts(ep_obj)
