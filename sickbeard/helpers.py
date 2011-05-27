@@ -582,11 +582,11 @@ def _check_against_names(name, show):
 
 
 def get_tvdbid(name, showList, useTvdb=False):
-    logger.log(u"Trying to get the tvdbid for "+str(name), logger.DEBUG)
+    logger.log(u"Trying to get the tvdbid for "+name, logger.DEBUG)
             
     for show in showList:
         if _check_against_names(name, show):
-            logger.log(u"Matched "+str(name)+" in the showlist to the show "+str(show.name), logger.DEBUG)
+            logger.log(u"Matched "+name+" in the showlist to the show "+show.name, logger.DEBUG)
             return show.tvdbid
 
     if useTvdb:

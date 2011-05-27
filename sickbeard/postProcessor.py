@@ -435,26 +435,22 @@ class PostProcessor(object):
         
         #TODO: clean code. it looks like it's from hell
         for name in ep.allNames:
-            try:
-                name = name.encode('utf-8')
-            except:
-                continue
-            else:
-                tvdb_id = name_cache.retrieveNameFromCache(name)
-                if not tvdb_id:
-                    tvdb_id = helpers.get_tvdbid(name, sickbeard.showList, True)
-                    if tvdb_id:
-                        name_cache.addNameToCache(name, tvdb_id)
+            
+            tvdb_id = name_cache.retrieveNameFromCache(name)
+            if not tvdb_id:
+                tvdb_id = helpers.get_tvdbid(name, sickbeard.showList, True)
                 if tvdb_id:
-                    try:
-                        show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                        (season, episodes) = helpers.get_all_episodes_from_absolute_number(show, None, [ep.epno])
-                    except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                        logger.log(str(tvdb_id) + ": TVDB object absolute number " + str(ep.epno) + " is incomplete, skipping this episode")
-                    else:
-                        if len(episodes):
-                            self._log(u"Lookup successful from anidb. ", logger.DEBUG)
-                            return (tvdb_id, season, episodes)
+                    name_cache.addNameToCache(name, tvdb_id)
+            if tvdb_id:
+                try:
+                    show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                    (season, episodes) = helpers.get_all_episodes_from_absolute_number(show, None, [ep.epno])
+                except exceptions.EpisodeNotFoundByAbsoluteNumerException:
+                    self._log(str(tvdb_id) + ": TVDB object absolute number " + str(ep.epno) + " is incomplete, skipping this episode")
+                else:
+                    if len(episodes):
+                        self._log(u"Lookup successful from anidb. ", logger.DEBUG)
+                        return (tvdb_id, season, episodes)
 
         if ep.anidb_file_name:
             self._log(u"Lookup successful, using anidb filename "+str(ep.anidb_file_name), logger.DEBUG)
@@ -495,10 +491,12 @@ class PostProcessor(object):
             if not self.anidbEpisode: # seams like we could parse the name before, now lets build the anidb object
                 self.anidbEpisode = self._build_anidb_episode(sickbeard.ADBA_CONNECTION,filePath)
             
+            self._log(u"Adding the file to the anidb mylist", logger.DEBUG)
             try:
                 self.anidbEpisode.add_to_mylist(status=1) # status = 1 sets the status of the file to "internal HDD"
             except Exception,e :
                 self._log(u"exception msg: "+str(e))
+            
         
     def _make_attempt_list(self):
                         # try to look up the nzb in history
