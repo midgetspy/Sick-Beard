@@ -120,4 +120,9 @@ def createParser(filename, real_filename=None, tags=None):
     if not tags:
         tags = []
     stream = FileInputStream(filename, real_filename, tags=tags)
-    return guessParser(stream)
+    
+    # don't hold onto the file handle, especially if guessParser returns None, in which case it's impossible to close the file
+    guessed_parser = guessParser(stream)
+    stream._input.close()
+    
+    return guessed_parser
