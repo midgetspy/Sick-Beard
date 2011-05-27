@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with aDBa.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
 import hashlib
 # http://www.radicand.org/blog/orz/2010/2/21/edonkey2000-hash-in-python/
 def get_file_hash(filePath):

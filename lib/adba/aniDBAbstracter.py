@@ -24,6 +24,7 @@ class aniDBabstractObject(object):
     
     def __init__(self,aniDB,load=False):
         self.aniDB = aniDB
+        self.log = self.aniDB.log
         if load:
             self.load_data()
     
@@ -53,15 +54,28 @@ class aniDBabstractObject(object):
             return object.__getattribute__(self, name)
         except:
             return None
-
     
-
-    def check_last_call(self, last):
-        now = time()
-        if last and now-last > 3:
-            print "sleeping for 3"
-            sleep(3)  
-        return time()
+    def _build_names(self):
+        names = []
+        
+        names.append(self.english_name)
+        
+        names = self._easy_extend(names,self.english_name)
+        names = self._easy_extend(names,self.short_name_list)
+        names = self._easy_extend(names,self.synonym_list)
+        names = self._easy_extend(names,self.other_name)
+            
+        self.allNames = names
+    
+    def _easy_extend(self,initialList,item):
+        if item:
+            if isinstance(item, list):
+                initialList.extend(item)
+            elif isinstance(item, basestring):
+                initialList.append(item)
+            
+        return initialList
+         
     
     def load_data(self):
         return False
@@ -70,8 +84,8 @@ class aniDBabstractObject(object):
     
 class Anime(aniDBabstractObject):
     def __init__(self,aniDB,name=None,aid=None,paramsA=None,load=False):
-        if not name and not aid:
-            raise 
+        if not (name or aid):
+            raise AniDBIncorrectParameterError,"Anime error"
         self.maper = AniDBMaper() 
         self.name = name
         self.aid = aid
@@ -87,12 +101,11 @@ class Anime(aniDBabstractObject):
         
     def load_data(self):
         """load the data from anidb"""
-        self.lastCommandTime = aniDBabstractObject.check_last_call(self, self.lastCommandTime)
         
-        self.rawData = self.aniDB.anime(aid=self.aniDBid,aname=self.name,amask=self.bitCode)
+        self.rawData = self.aniDB.anime(aid=self.aid,aname=self.name,amask=self.bitCode)
         self._fill(self.rawData.datalines[0])
         self._builPreSequal()
-        
+
         
     def _builPreSequal(self):
         if self.related_aid_list and self.related_aid_type:
@@ -111,7 +124,7 @@ class Anime(aniDBabstractObject):
                     
 class Episode(aniDBabstractObject):
     
-    def __init__(self,aniDB,number=None,epid=None,filePath=None,fid=None,epno=None,paramsA=None,paramsF=None,load=False):
+    def __init__(self,aniDB,number=None,epid=None,filePath=None,fid=None,epno=None,paramsA=None,paramsF=None,load=False,calculate=False):
         if not aniDB and not number and not epid and not file and not fid:
             return None
         
@@ -120,6 +133,9 @@ class Episode(aniDBabstractObject):
         self.filePath = filePath
         self.fid = fid
         self.epno = epno
+        if calculate:
+            (self.ed2k, self.size) = self._calculate_file_stuff(self.filePath)
+        
         
         if not paramsA:
             self.bitCodeA = "C000F0C0"
@@ -139,17 +155,37 @@ class Episode(aniDBabstractObject):
         
     def load_data(self):
         """load the data from anidb"""
-        (self.ed2k, self.size) = self._calculate_file_stuff(self.filePath)
-        
-        self.lastCommandTime = aniDBabstractObject.check_last_call(self, self.lastCommandTime)
+        if self.filePath and not (self.ed2k or self.size):
+            (self.ed2k, self.size) = self._calculate_file_stuff(self.filePath)
         
         self.rawData = self.aniDB.file(fid=self.fid,size=self.size,ed2k=self.ed2k,aid=self.aid,aname=None,gid=None,gname=None,epno=self.epno,fmask=self.bitCodeF,amask=self.bitCodeA)
         self._fill(self.rawData.datalines[0])
+        self._build_names()
         
+    def add_to_mylist(self,status=None):
+        """
+        status:
+        0    unknown    - state is unknown or the user doesn't want to provide this information (default)
+        1    on hdd    - the file is stored on hdd
+        2    on cd    - the file is stored on cd
+        3    deleted    - the file has been deleted or is not available for other reasons (i.e. reencoded)
+        
+        """
+        if self.filePath and not (self.ed2k or self.size):
+            (self.ed2k, self.size) = self._calculate_file_stuff(self.filePath)
+            
+        try:
+            self.aniDB.mylistadd(size=self.size,ed2k=self.ed2k,state=status)
+        except Exception,e :
+            self.log(u"exception msg: "+str(e))
+        else:
+            # TODO: add the name or something
+            self.log(u"Added the episode to anidb")
     
     def _calculate_file_stuff(self, filePath):
         if not filePath:
             return (None, None)
+        self.log("Calculating the ed2k. Please wait...")
         ed2k = fileInfo.get_file_hash(filePath)
         size = fileInfo.get_file_size(filePath)
         return (ed2k, size)
