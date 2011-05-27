@@ -790,6 +790,11 @@ class PostProcessor(object):
             # if we're not renaming then there's no new base name, we'll just use the existing name
             new_base_name = None
             new_file_name = self.file_name 
+        
+        
+        # add to anidb
+        if ep_obj.show.is_anime and sickbeard.ANIDB_USE_MYLIST:
+            self._add_to_anidb_mylist(self.file_path)
                        
         try:
             # move the episode and associated files to the show dir
@@ -825,10 +830,6 @@ class PostProcessor(object):
         # do the library update for synoindex
         notifiers.synoindex_notifier.update_library(ep_obj)
         
-        # add to anidb
-        if ep_obj.show.is_anime and sickbeard.ANIDB_USE_MYLIST:
-            self._add_to_anidb_mylist(self.file_path)
-
         # run extra_scripts
         self._run_extra_scripts(ep_obj)
 
