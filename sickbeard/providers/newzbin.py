@@ -18,7 +18,7 @@
 
 import os
 import re
-import sys
+import traceback
 import time
 import urllib
 
@@ -222,7 +222,7 @@ class NewzbinProvider(generic.NZBProvider):
             logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
             self.downloadResult(nzb)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+            logger.log("Error downloading NZB: " + traceback.format_exc() + " - " + ex(e), logger.ERROR)
             return False
 
         return True
@@ -233,7 +233,7 @@ class NewzbinProvider(generic.NZBProvider):
         try:
             f = myOpener.openit(url)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+            logger.log("Error loading search results: " + traceback.format_exc() + " - " + ex(e), logger.ERROR)
             return None
 
         data = f.read()

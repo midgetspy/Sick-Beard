@@ -20,7 +20,7 @@
 
 import datetime
 import os
-import sys
+import traceback
 import re
 import urllib2
 
@@ -111,7 +111,8 @@ class GenericProvider:
         try:
             result = helpers.getURL(url, headers)
         except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+            logger.log(u"Error loading "+self.name+" URL: " + url + " - " + ex(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
             return None
 
         return result
@@ -165,13 +166,12 @@ class GenericProvider:
             parser = createParser(file_name)
             if parser:
                 mime_type = parser._getMimeType()
-                try:
-                    parser.stream._input.close()
-                except:
-                    pass
                 if mime_type != 'application/x-bittorrent':
                     logger.log(u"Result is not a valid torrent file", logger.WARNING)
                     return False
+            else:
+                logger.log(u"Unable to parse the torrent file, probably not a torrent", logger.WARNING)
+                return False
 
         return True
 
