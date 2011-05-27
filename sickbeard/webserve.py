@@ -1365,7 +1365,7 @@ class ConfigAnime:
         return _munge(t)
 
     @cherrypy.expose
-    def saveAnime(self, use_anidb=None, anidb_username=None, anidb_password=None):
+    def saveAnime(self, use_anidb=None, anidb_username=None, anidb_password=None, anidb_use_mylist=None):
 
         results = []
 
@@ -1374,9 +1374,16 @@ class ConfigAnime:
         else:
             use_anidb = 0
         
+        if anidb_use_mylist == "on":
+            anidb_use_mylist = 1
+        else:
+            anidb_use_mylist = 0
+        
+
         sickbeard.USE_ANIDB = use_anidb
         sickbeard.ANIDB_USERNAME = anidb_username
         sickbeard.ANIDB_PASSWORD = anidb_password
+        sickbeard.ANIDB_USE_MYLIST = anidb_use_mylist
 
         sickbeard.save_config()
 

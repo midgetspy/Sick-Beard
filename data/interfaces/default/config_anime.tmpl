@@ -33,27 +33,37 @@
                         </div>
 						
 						<div id="content_use_anidb">
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">AniDB Username</span>
-                                <input type="text" name="anidb_username" id="anidb_username" value="$sickbeard.ANIDB_USERNAME" size="35" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Username of your AniDB account</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">AniDB Password</span>
-                                <input type="password" name="anidb_password" id="anidb_password" value="$sickbeard.ANIDB_PASSWORD" size="35" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Password of your AniDB account</span>
-                            </label>
-                        </div>
+	                        <div class="field-pair">
+	                            <label class="nocheck clearfix">
+	                                <span class="component-title">AniDB Username</span>
+	                                <input type="text" name="anidb_username" id="anidb_username" value="$sickbeard.ANIDB_USERNAME" size="35" />
+	                            </label>
+	                            <label class="nocheck clearfix">
+	                                <span class="component-title">&nbsp;</span>
+	                                <span class="component-desc">Username of your AniDB account</span>
+	                            </label>
+	                        </div>
+	
+	                        <div class="field-pair">
+	                            <label class="nocheck clearfix">
+	                                <span class="component-title">AniDB Password</span>
+	                                <input type="password" name="anidb_password" id="anidb_password" value="$sickbeard.ANIDB_PASSWORD" size="35" />
+	                            </label>
+	                            <label class="nocheck clearfix">
+	                                <span class="component-title">&nbsp;</span>
+	                                <span class="component-desc">Password of your AniDB account</span>
+	                            </label>
+	                        </div>
+	                        <div class="field-pair">
+	                            <label class="nocheck clearfix">
+	                                <span class="component-title">AniDB MyList</span>
+	                                <input type="checkbox" name="anidb_use_mylist" id="anidb_use_mylist" #if $sickbeard.ANIDB_USE_MYLIST then "checked=\"checked\"" else ""# />
+	                            </label>
+	                            <label class="nocheck clearfix">
+	                                <span class="component-title">&nbsp;</span>
+	                                <span class="component-desc">Do you want to add the PostProcessed Episodes to the MyList ?</span>
+	                            </label>
+	                        </div>
 						</div>
                         <input type="submit" class="config_submitter" value="Save Changes" />
                         

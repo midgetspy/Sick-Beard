@@ -246,6 +246,7 @@ ANIMESUPPORT = False
 USE_ANIDB = False
 ANIDB_USERNAME = None
 ANIDB_PASSWORD = None
+ANIDB_USE_MYLIST = 0
 ADBA_CONNECTION = None
 
 USE_SYNOINDEX = False
@@ -375,7 +376,8 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD,FANZUB, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, ANIMESUPPORT, USE_ANIDB,ANIDB_USERNAME, ANIDB_PASSWORD, METADATA_TIVO, IGNORE_WORDS
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, \
+                ANIMESUPPORT, USE_ANIDB, ANIDB_USERNAME, ANIDB_PASSWORD, ANIDB_USE_MYLIST
 
         if __INITIALIZED__:
             return False
@@ -604,6 +606,7 @@ def initialize(consoleLogging=True):
         USE_ANIDB = check_setting_str(CFG, 'ANIDB', 'use_anidb', '')
         ANIDB_USERNAME = check_setting_str(CFG, 'ANIDB', 'anidb_username', '')
         ANIDB_PASSWORD = check_setting_str(CFG, 'ANIDB', 'anidb_password', '')
+        ANIDB_USE_MYLIST = check_setting_str(CFG, 'ANIDB', 'anidb_use_mylist', '')
         
         # if this exists it's legacy, use the info to upgrade metadata to the new settings
         if METADATA_TYPE:
@@ -1103,6 +1106,7 @@ def save_config():
     new_config['ANIDB']['use_anidb'] = USE_ANIDB
     new_config['ANIDB']['anidb_username'] = ANIDB_USERNAME
     new_config['ANIDB']['anidb_password'] = ANIDB_PASSWORD
+    new_config['ANIDB']['anidb_use_mylist'] = ANIDB_USE_MYLIST
 
     new_config['GUI'] = {}
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
