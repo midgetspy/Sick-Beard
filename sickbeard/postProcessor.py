@@ -433,22 +433,8 @@ class PostProcessor(object):
         else:
             self.anidbEpisode = ep
         
-        names = []
-        if len(ep.short_name_list):
-            names = ep.short_name_list
-        
-        if len(ep.synonym_list):
-            names = [ep.synonym_list]+names
-
-        if ep.other_name:
-            names = [ep.other_name]+names
-        
-        if ep.english_name:
-            names = [ep.english_name]+names
-        self._log(u"names "+str(names) , logger.DEBUG)
-        
         #TODO: clean code. it looks like it's from hell
-        for name in names:
+        for name in ep.allNames:
             try:
                 name = name.encode('utf-8')
             except:
@@ -505,14 +491,12 @@ class PostProcessor(object):
         return ep
     
     def _add_to_anidb_mylist(self,filePath):
-        # TODO: make a setting
-        #sickbeard.ANIDB_ADDTOMYLIST:
         if self._set_up_anidb_connection():
             if not self.anidbEpisode: # seams like we could parse the name before, now lets build the anidb object
                 self.anidbEpisode = self._build_anidb_episode(sickbeard.ADBA_CONNECTION,filePath)
             
             try:
-                self.anidbEpisode.add_to_mylist(status=1)
+                self.anidbEpisode.add_to_mylist(status=1) # status = 1 sets the status of the file to "internal HDD"
             except Exception,e :
                 self._log(u"exception msg: "+str(e))
         
