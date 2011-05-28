@@ -96,11 +96,11 @@ class ThePirateBayProvider(generic.TorrentProvider):
                 
                 if show.air_by_date:
                     for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                        ep_string = sceneHelpers.sanitizeSceneName(show_name) +' '+ str(datetime.date.fromordinal(sqlEp["airdate"])).replace('-', '.')
+                        ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(datetime.date.fromordinal(sqlEp["airdate"])).replace('-', '.')
                         search_string.append(ep_string)
                 else:
                     for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                        ep_string = sceneHelpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': season, 'episodenumber': int(sqlEp["episode"])}
+                        ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': season, 'episodenumber': int(sqlEp["episode"])}
                         search_string.append(ep_string)                       
         
         return search_string
