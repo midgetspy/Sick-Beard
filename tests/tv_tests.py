@@ -65,7 +65,7 @@ class TVEpisodeTests(test.SickbeardTestDBCase):
 class TVTests(test.SickbeardTestDBCase):
     
     def setUp(self):
-        super(TVEpisodeTests, self).setUp()
+        super(TVTests, self).setUp()
         sickbeard.showList = []
 
     def test_getEpisode(self):
@@ -80,10 +80,7 @@ class TVTests(test.SickbeardTestDBCase):
         show.startyear = 1987
         show.saveToDB()
         sickbeard.showList = [show]
-        
-        
-        
-        
+        #TODO: implement
         pass 
 
 
