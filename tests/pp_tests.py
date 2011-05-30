@@ -67,7 +67,7 @@ class PPBasicTests(test.SickbeardTestDBCase):
         super(PPBasicTests, self).setUp()
         self.pp = PostProcessor(test.FILEPATH)
     
-    @unittest.skip("this test is not fully configured")
+    @unittest.skip("this test is not fully configured / implmented")
     def test_process(self):
         self.assertTrue(self.pp.process())
 
