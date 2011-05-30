@@ -1,5 +1,13 @@
 (function(){
 
+    $.Browser = {
+        defaults: {
+            title:             'Choose Directory',
+            url:               sbRoot+'/browser/',
+            autocompleteURL:   sbRoot+'/browser/complete'
+        }
+    };
+
     var fileBrowserDialog  = null;
     var currentBrowserPath = null;
     var currentRequest     = null;
