@@ -51,9 +51,6 @@
 #config div.metadataDiv .disabled{color:#ccc;}
 #config div #metadataLegend{font-size:14px;font-family:Verdana;font-weight:900;display:block;width:auto;text-align:center;padding-bottom:3px;}
 
-#upgrade-notification{line-height:1;color:#57442b;font-size:130%;font-weight:700;height:0;left:0;text-align:center;top:0;width:100%;z-index:100;margin:0;padding:0;}
-#upgrade-notification div{background-color:#c6b695;border-bottom:1px solid #af986b;padding:7px 0;}
-#header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;}
 .infoTable {border-collapse: collapse;}
 .infoTableHeader, .infoTableCell {padding: 5px;}
 .infoTableHeader{font-weight:700;}
