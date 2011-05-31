@@ -16,52 +16,52 @@
 <br />
 #end if
 
-<form action="$sbRoot/manage/episodeStatuses" method="GET">
+<form action="$sbRoot/manage/episodeStatuses" method="get">
 Manage episodes with status <select name="whichStatus">
 #for $curStatus in [$common.SKIPPED, $common.SNATCHED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]:
 <option value="$curStatus">$common.statusStrings[$curStatus]</option>
 #end for
 </select>
-<input type="submit" value="Manage"> 
+<input type="submit" value="Manage" /> 
 </form>
 
 #else
 
 <script type="text/javascript" src="$sbRoot/js/manageEpisodeStatuses.js"></script>
 
-<form action="$sbRoot/manage/changeEpisodeStatuses" method="POST">
-<input type="hidden" id="oldStatus" name="oldStatus" value="$whichStatus">
+<form action="$sbRoot/manage/changeEpisodeStatuses" method="post">
+<input type="hidden" id="oldStatus" name="oldStatus" value="$whichStatus" />
 
 <h2>Shows containing $common.statusStrings[$int($whichStatus)] episodes</h2>
 
-<br/ >
+<br />
 
 #if $whichStatus in ($common.ARCHIVED, $common.IGNORED, $common.SNATCHED):
 #set $row_class = "good"
 #else
 #set $row_class = $common.Overview.overviewStrings[$whichStatus]
 #end if
-<input type="hidden" id="row_class" value="$row_class">
+<input type="hidden" id="row_class" value="$row_class" />
 
 Set checked shows/episodes to <select name="newStatus">
 #set $statusList = [$common.SKIPPED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]
 #if $int($whichStatus) in $statusList
-#$statusList.remove($int($whichStatus))
+$statusList.remove($int($whichStatus))
 #end if
+
 #for $curStatus in $statusList:
 <option value="$curStatus">$common.statusStrings[$curStatus]</option>
 #end for
 </select>
-<input type="submit" value="Go">
-<br />
-<br />
-<br />
+<input type="submit" value="Go" />
+
+<br /><br /><br />
 
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
 #for $cur_tvdb_id in $sorted_show_ids:
  <tr id="$cur_tvdb_id">
-  <th><input type="checkbox" class="allCheck" id="allCheck-$cur_tvdb_id" name="$cur_tvdb_id-all" checked></th>
-  <th colspan="2" style="width: 100%; text-align: left;"><a class="whitelink" href="$sbRoot/home/displayShow?show=$cur_tvdb_id">$show_names[$cur_tvdb_id]</a> ($ep_counts[$cur_tvdb_id]) <input type="button" class="get_more_eps" id="$cur_tvdb_id" value="Expand"></th>
+  <th><input type="checkbox" class="allCheck" id="allCheck-$cur_tvdb_id" name="$cur_tvdb_id-all" checked="checked" /></th>
+  <th colspan="2" style="width: 100%; text-align: left;"><a class="whitelink" href="$sbRoot/home/displayShow?show=$cur_tvdb_id">$show_names[$cur_tvdb_id]</a> ($ep_counts[$cur_tvdb_id]) <input type="button" class="get_more_eps" id="$cur_tvdb_id" value="Expand" /></th>
  </tr>
 #end for
 </table>
