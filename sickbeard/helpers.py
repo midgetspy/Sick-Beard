@@ -506,7 +506,7 @@ def set_locale_to_us():
         try:
             locale.setlocale(locale.LC_ALL, 'en_US')
         except Exception, e:
-            logger.log("Can't set local to en_US this might lead to errors during time parsing: " + str(e), logger.ERROR)
+            logger.log("Can't set local to en_US this might lead to errors during time parsing: " + ex(e), logger.ERROR)
 
 def set_locale_to_default():
     """This will set the local var to the default / environment setting. does it gracefully
@@ -518,7 +518,7 @@ def set_locale_to_default():
         try:
             locale.setlocale(locale.LC_ALL,'')
         except Exception, e:
-            logger.log("Can't set local (back) to the default. this might lead to further errors!!: " + str(e), logger.ERROR)
+            logger.log("Can't set local (back) to the default. this might lead to further errors!!: " + ex(e), logger.ERROR)
 
 
 
