@@ -1,5 +1,5 @@
 /*
- * jQuery UI CSS Framework 1.8.11
+ * jQuery UI CSS Framework 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -42,7 +42,7 @@
 
 
 /*
- * jQuery UI CSS Framework 1.8.11
+ * jQuery UI CSS Framework 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -50,7 +50,7 @@
  *
  * http://docs.jquery.com/UI/Theming/API
  *
- * To view and modify this theme, visit http://jqueryui.com/themeroller/?ctl=themeroller&ctl=themeroller&ffDefault=Verdana,Arial,sans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=ffffff&bgTextureHeader=01_flat.png&bgImgOpacityHeader=0&borderColorHeader=aaaaaa&fcHeader=222222&iconColorHeader=222222&bgColorContent=dcdcdc&bgTextureContent=03_highlight_soft.png&bgImgOpacityContent=75&borderColorContent=aaaaaa&fcContent=222222&iconColorContent=222222&bgColorDefault=efefef&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=75&borderColorDefault=aaaaaa&fcDefault=222222&iconColorDefault=8c291d&bgColorHover=dddddd&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=999999&fcHover=222222&iconColorHover=222222&bgColorActive=dfdfdf&bgTextureActive=05_inset_soft.png&bgImgOpacityActive=75&borderColorActive=aaaaaa&fcActive=140f06&iconColorActive=8c291d&bgColorHighlight=fbf9ee&bgTextureHighlight=02_glass.png&bgImgOpacityHighlight=55&borderColorHighlight=aaaaaa&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=aaaaaa&fcError=8c291d&iconColorError=cd0a0a&bgColorOverlay=6e4f1c&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=000000&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
+ * To view and modify this theme, visit http://jqueryui.com/themeroller/?ctl=themeroller&ctl=themeroller&ctl=themeroller&ffDefault=Verdana,Arial,sans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=ffffff&bgTextureHeader=01_flat.png&bgImgOpacityHeader=0&borderColorHeader=aaaaaa&fcHeader=222222&iconColorHeader=222222&bgColorContent=dcdcdc&bgTextureContent=03_highlight_soft.png&bgImgOpacityContent=75&borderColorContent=aaaaaa&fcContent=222222&iconColorContent=222222&bgColorDefault=efefef&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=75&borderColorDefault=aaaaaa&fcDefault=222222&iconColorDefault=8c291d&bgColorHover=dddddd&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=999999&fcHover=222222&iconColorHover=222222&bgColorActive=dfdfdf&bgTextureActive=05_inset_soft.png&bgImgOpacityActive=75&borderColorActive=aaaaaa&fcActive=140f06&iconColorActive=8c291d&bgColorHighlight=fbf9ee&bgTextureHighlight=02_glass.png&bgImgOpacityHighlight=55&borderColorHighlight=aaaaaa&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=aaaaaa&fcError=8c291d&iconColorError=cd0a0a&bgColorOverlay=6e4f1c&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=000000&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
  */
 
 
@@ -298,7 +298,7 @@
 .ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url(images/ui-bg_flat_0_000000_40x100.png) 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
 */
 /*
- * jQuery UI Resizable 1.8.11
+ * jQuery UI Resizable 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -307,7 +307,12 @@
  * http://docs.jquery.com/UI/Resizable#theming
  */
 .ui-resizable { position: relative;}
-.ui-resizable-handle { position: absolute;font-size: 0.1px;z-index: 99999; display: block;}
+.ui-resizable-handle { position: absolute;font-size: 0.1px;z-index: 99999; display: block;
+	/* http://bugs.jqueryui.com/ticket/7233
+	 - Resizable: resizable handles fail to work in IE if transparent and content overlaps
+	*/
+	background-image:url(data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=);
+}
 .ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
 .ui-resizable-n { cursor: n-resize; height: 7px; width: 100%; top: -5px; left: 0; }
 .ui-resizable-s { cursor: s-resize; height: 7px; width: 100%; bottom: -5px; left: 0; }
@@ -317,7 +322,7 @@
 .ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
 .ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
 .ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px;}/*
- * jQuery UI Selectable 1.8.11
+ * jQuery UI Selectable 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -327,7 +332,7 @@
  */
 .ui-selectable-helper { position: absolute; z-index: 100; border:1px dotted black; }
 /*
- * jQuery UI Accordion 1.8.11
+ * jQuery UI Accordion 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -346,7 +351,7 @@
 .ui-accordion .ui-accordion-content { padding: 1em 2.2em; border-top: 0; margin-top: -2px; position: relative; top: 1px; margin-bottom: 2px; overflow: auto; display: none; zoom: 1; }
 .ui-accordion .ui-accordion-content-active { display: block; }
 /*
- * jQuery UI Button 1.8.11
+ * jQuery UI Button 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -384,7 +389,7 @@ input.ui-button { padding: .4em 1em; }
 /* workarounds */
 button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra padding in Firefox */
 /*
- * jQuery UI Dialog 1.8.11
+ * jQuery UI Dialog 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -405,7 +410,7 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-dialog .ui-resizable-se { width: 14px; height: 14px; right: 3px; bottom: 3px; }
 .ui-draggable .ui-dialog-titlebar { cursor: move; }
 /*
- * jQuery UI Slider 1.8.11
+ * jQuery UI Slider 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -429,7 +434,7 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-slider-vertical .ui-slider-range-min { bottom: 0; }
 .ui-slider-vertical .ui-slider-range-max { top: 0; }
 /*
- * jQuery UI Tabs 1.8.11
+ * jQuery UI Tabs 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -447,74 +452,7 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: 1em 1.4em; background: none; }
 .ui-tabs .ui-tabs-hide { display: none !important; }
 /*
- * jQuery UI Datepicker 1.8.11
- *
- * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Datepicker#theming
- */
-.ui-datepicker { width: 17em; padding: .2em .2em 0; display: none; }
-.ui-datepicker .ui-datepicker-header { position:relative; padding:.2em 0; }
-.ui-datepicker .ui-datepicker-prev, .ui-datepicker .ui-datepicker-next { position:absolute; top: 2px; width: 1.8em; height: 1.8em; }
-.ui-datepicker .ui-datepicker-prev-hover, .ui-datepicker .ui-datepicker-next-hover { top: 1px; }
-.ui-datepicker .ui-datepicker-prev { left:2px; }
-.ui-datepicker .ui-datepicker-next { right:2px; }
-.ui-datepicker .ui-datepicker-prev-hover { left:1px; }
-.ui-datepicker .ui-datepicker-next-hover { right:1px; }
-.ui-datepicker .ui-datepicker-prev span, .ui-datepicker .ui-datepicker-next span { display: block; position: absolute; left: 50%; margin-left: -8px; top: 50%; margin-top: -8px;  }
-.ui-datepicker .ui-datepicker-title { margin: 0 2.3em; line-height: 1.8em; text-align: center; }
-.ui-datepicker .ui-datepicker-title select { font-size:1em; margin:1px 0; }
-.ui-datepicker select.ui-datepicker-month-year {width: 100%;}
-.ui-datepicker select.ui-datepicker-month, 
-.ui-datepicker select.ui-datepicker-year { width: 49%;}
-.ui-datepicker table {width: 100%; font-size: .9em; border-collapse: collapse; margin:0 0 .4em; }
-.ui-datepicker th { padding: .7em .3em; text-align: center; font-weight: bold; border: 0;  }
-.ui-datepicker td { border: 0; padding: 1px; }
-.ui-datepicker td span, .ui-datepicker td a { display: block; padding: .2em; text-align: right; text-decoration: none; }
-.ui-datepicker .ui-datepicker-buttonpane { background-image: none; margin: .7em 0 0 0; padding:0 .2em; border-left: 0; border-right: 0; border-bottom: 0; }
-.ui-datepicker .ui-datepicker-buttonpane button { float: right; margin: .5em .2em .4em; cursor: pointer; padding: .2em .6em .3em .6em; width:auto; overflow:visible; }
-.ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current { float:left; }
-
-/* with multiple calendars */
-.ui-datepicker.ui-datepicker-multi { width:auto; }
-.ui-datepicker-multi .ui-datepicker-group { float:left; }
-.ui-datepicker-multi .ui-datepicker-group table { width:95%; margin:0 auto .4em; }
-.ui-datepicker-multi-2 .ui-datepicker-group { width:50%; }
-.ui-datepicker-multi-3 .ui-datepicker-group { width:33.3%; }
-.ui-datepicker-multi-4 .ui-datepicker-group { width:25%; }
-.ui-datepicker-multi .ui-datepicker-group-last .ui-datepicker-header { border-left-width:0; }
-.ui-datepicker-multi .ui-datepicker-group-middle .ui-datepicker-header { border-left-width:0; }
-.ui-datepicker-multi .ui-datepicker-buttonpane { clear:left; }
-.ui-datepicker-row-break { clear:both; width:100%; }
-
-/* RTL support */
-.ui-datepicker-rtl { direction: rtl; }
-.ui-datepicker-rtl .ui-datepicker-prev { right: 2px; left: auto; }
-.ui-datepicker-rtl .ui-datepicker-next { left: 2px; right: auto; }
-.ui-datepicker-rtl .ui-datepicker-prev:hover { right: 1px; left: auto; }
-.ui-datepicker-rtl .ui-datepicker-next:hover { left: 1px; right: auto; }
-.ui-datepicker-rtl .ui-datepicker-buttonpane { clear:right; }
-.ui-datepicker-rtl .ui-datepicker-buttonpane button { float: left; }
-.ui-datepicker-rtl .ui-datepicker-buttonpane button.ui-datepicker-current { float:right; }
-.ui-datepicker-rtl .ui-datepicker-group { float:right; }
-.ui-datepicker-rtl .ui-datepicker-group-last .ui-datepicker-header { border-right-width:0; border-left-width:1px; }
-.ui-datepicker-rtl .ui-datepicker-group-middle .ui-datepicker-header { border-right-width:0; border-left-width:1px; }
-
-/* IE6 IFRAME FIX (taken from datepicker 1.5.3 */
-.ui-datepicker-cover {
-    display: none; /*sorry for IE5*/
-    display/**/: block; /*sorry for IE5*/
-    position: absolute; /*must have*/
-    z-index: -1; /*must have*/
-    filter: mask(); /*must have*/
-    top: -4px; /*must have*/
-    left: -4px; /*must have*/
-    width: 200px; /*must have*/
-    height: 200px; /*must have*/
-}/*
- * jQuery UI Progressbar 1.8.11
+ * jQuery UI Progressbar 1.8.13
  *
  * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
