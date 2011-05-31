@@ -23,6 +23,7 @@ import stat
 import urllib, urllib2
 import re, socket
 import shutil
+import locale
 
 import sickbeard
 
@@ -495,6 +496,31 @@ def sanitizeSceneName (name, ezrss=False):
         name = name[:-1]
 
     return name
+
+def set_locale_to_us():
+    """This will set the local var to en_US. does it gracefully
+    """
+    # if the default is not "en_US" and if the manual set locale is not "en_US"
+    # try to set it
+    if locale.getdefaultlocale() != ('en_US', 'ISO8859-1') and locale.getlocale(locale.LC_ALL) != ('en_US', 'ISO8859-1'):
+        try:
+            locale.setlocale(locale.LC_ALL, 'en_US')
+        except Exception, e:
+            logger.log("Can't set local to en_US this might lead to errors during time parsing: " + str(e), logger.ERROR)
+
+def set_locale_to_default():
+    """This will set the local var to the default / environment setting. does it gracefully
+    """
+    # if getdefaultlocale and getlocale is not the same we are not on the default
+    # getlocale gives back (None, None) if it was never set manually
+    # so on the initial call this will set the default even if we never changed it in the first place
+    if locale.getdefaultlocale() != locale.getlocale(locale.LC_ALL):
+        try:
+            locale.setlocale(locale.LC_ALL,'')
+        except Exception, e:
+            logger.log("Can't set local (back) to the default. this might lead to further errors!!: " + str(e), logger.ERROR)
+
+
 
 
 if __name__ == '__main__':

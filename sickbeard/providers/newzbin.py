@@ -33,6 +33,7 @@ from sickbeard import classes, logger, helpers, exceptions, show_name_helpers
 from sickbeard import tvcache
 from sickbeard.common import Quality
 from sickbeard.exceptions import ex
+from sickbeard.helpers import set_locale_to_us, set_locale_to_default
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -280,10 +281,11 @@ class NewzbinProvider(generic.NZBProvider):
         except Exception, e:
             logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
             return []
-
+        set_locale_to_us() # set the locale to "en_US" so we can parse the date string we get from newzbin
         for cur_item in items:
             title = cur_item.findtext('title')
             if title == 'Feed Error':
+                set_locale_to_default() # before we raise the exception set the locale back to default
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
             if sickbeard.USENET_RETENTION is not None:
                 try:
@@ -296,7 +298,7 @@ class NewzbinProvider(generic.NZBProvider):
                     continue
 
             item_list.append(cur_item)
-
+        set_locale_to_default() # set locale back to default
         return item_list
 
 
