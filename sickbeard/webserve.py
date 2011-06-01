@@ -28,6 +28,7 @@ import datetime
 
 from Cheetah.Template import Template
 import cherrypy.lib
+from cherrypy import tools
 
 import sickbeard
 
@@ -80,6 +81,10 @@ class PageTemplate (Template):
 def redirect(abspath, *args, **KWs):
     assert abspath[0] == '/'
     raise cherrypy.HTTPRedirect(sickbeard.WEB_ROOT + abspath, *args, **KWs)
+
+def jsonify(msg):
+    cherrypy.response.headers['Content-Type'] = 'application/json'
+    return json.dumps(msg)
 
 class TVDBWebUI:
     def __init__(self, config, log=None):
@@ -184,6 +189,7 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
+    @tools.json_out()
     def showEpisodeStatuses(self, tvdb_id, whichStatus):
         myDB = db.DBConnection()
 
@@ -203,7 +209,7 @@ class Manage:
             
             result[cur_season][cur_episode] = cur_result["name"]
         
-        return json.dumps(result)
+        return result
 
     @cherrypy.expose
     def episodeStatuses(self, whichStatus=None):
@@ -960,19 +966,20 @@ class ConfigProviders:
         return _munge(t)
 
     @cherrypy.expose
+    @tools.json_out()
     def canAddNewznabProvider(self, name):
 
         if not name:
-            return json.dumps({'error': 'Invalid name specified'})
+            return {'error': 'Invalid name specified'}
 
         providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
 
         tempProvider = newznab.NewznabProvider(name, '')
 
         if tempProvider.getID() in providerDict:
-            return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
+            return {'error': 'Exists as '+providerDict[tempProvider.getID()].name}
         else:
-            return json.dumps({'success': tempProvider.getID()})
+            return {'success': tempProvider.getID()}
 
     @cherrypy.expose
     def saveNewznabProvider(self, name, url, key=''):
@@ -1386,6 +1393,7 @@ class NewHomeAddShows:
         return _munge(t)
 
     @cherrypy.expose
+    @tools.json_out()
     def getTVDBLanguages(self):
         result = tvdb_api.Tvdb().config['valid_languages']
 
@@ -1395,13 +1403,14 @@ class NewHomeAddShows:
         result.sort()
         result.insert(0,'en')
 
-        return json.dumps({'results': result})
+        return {'results': result}
 
     @cherrypy.expose
     def sanitizeFileName(self, name):
         return helpers.sanitizeFileName(name)
 
     @cherrypy.expose
+    @tools.json_out()
     def searchTVDBForShowName(self, name, lang="en"):
         if not lang or lang == 'null':
                 lang = "en"
@@ -1430,7 +1439,7 @@ class NewHomeAddShows:
 
         lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
 
-        return json.dumps({'results': results, 'langid': lang_id})
+        return {'results': results, 'langid': lang_id}
 
     @cherrypy.expose
     def massAddTable(self, rootDir=None):
@@ -2287,7 +2296,7 @@ class Home:
             errMsg = "You must specify a show and at least one episode"
             if direct:
                 ui.notifications.error('Error', errMsg)
-                return json.dumps({'result': 'error'})
+                return jsonify({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
 
@@ -2295,7 +2304,7 @@ class Home:
             errMsg = "Invalid status"
             if direct:
                 ui.notifications.error('Error', errMsg)
-                return json.dumps({'result': 'error'})
+                return jsonify({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
 
@@ -2305,7 +2314,7 @@ class Home:
             errMsg = "Error", "Show not in show list"
             if direct:
                 ui.notifications.error('Error', errMsg)
-                return json.dumps({'result': 'error'})
+                return jsonify({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
 
@@ -2359,17 +2368,18 @@ class Home:
             ui.notifications.message("Backlog started", msg)
 
         if direct:
-            return json.dumps({'result': 'success'})
+            return jsonify({'result': 'success'})
         else:
             redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
+    @tools.json_out()
     def searchEpisode(self, show=None, season=None, episode=None):
 
         # retrieve the episode object and fail if we can't get one 
         ep_obj = _getEpisode(show, season, episode)
         if isinstance(ep_obj, str):
-            return json.dumps({'result': 'failure'})
+            return {'result': 'failure'}
 
         # make a queue item for it and put it on the queue
         ep_queue_item = search_queue.ManualSearchQueueItem(ep_obj)
@@ -2381,9 +2391,9 @@ class Home:
 
         # return the correct json value
         if ep_queue_item.success:
-            return json.dumps({'result': statusStrings[ep_obj.status]})
+            return {'result': statusStrings[ep_obj.status]}
 
-        return json.dumps({'result': 'failure'})
+        return {'result': 'failure'}
 
 class UI:
     
@@ -2396,6 +2406,7 @@ class UI:
         return "ok"
 
     @cherrypy.expose
+    @tools.json_out()
     def get_messages(self):
         messages = {}
         cur_notification_num = 1
@@ -2405,7 +2416,7 @@ class UI:
                                                                    'type': cur_notification.type}
             cur_notification_num += 1
 
-        return json.dumps(messages)
+        return messages
 
 class WebInterface:
 
