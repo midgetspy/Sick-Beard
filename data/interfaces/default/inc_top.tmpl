@@ -122,10 +122,12 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
         \$("#NAV$topmenu").addClass("current");
 
-        \$("a.confirm").bind("click",function() {
+        \$("a.confirm").bind("click",function(e) {
+            e.preventDefault();
             var target = \$( this ).attr('href');
-            if ( confirm("Are you sure you want to " + \$(this).attr('text') + "?") )
+            if ( confirm("Are you sure you want to " + \$(this).prop('text') + "?") )
                 location.href = target;
+            \$('#MainMenu.sf-menu').hideSuperfishUl();
             return false;
         });
 
