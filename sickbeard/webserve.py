@@ -122,10 +122,10 @@ def _getEpisode(show, season, episode):
     return epObj
 
 ManageMenu = [
-            { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
-            { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
-            { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
-            ]
+    { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview' },
+    { 'title': 'Manage Searches',           'path': 'manage/manageSearches'  },
+    { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
+]
 
 class ManageSearches:
 
@@ -1345,12 +1345,12 @@ def havePLEX():
 
 def HomeMenu():
     return [
-    { 'title': 'Add Shows',               'path': 'home/addShows/',                         },
-    { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
-    { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
-    { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX   },
-    { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
-    { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
+        { 'title': 'Add Shows',              'path': 'home/addShows/',                                          },
+        { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                                        },
+        { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
+        { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX                   },
+        { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID), 'confirm': True   },
+        { 'title': 'Shutdown',               'path': 'home/shutdown/', 'confirm': True                          },
     ]
 
 class HomePostProcess:
@@ -1986,7 +1986,7 @@ class Home:
         )
 
         t = PageTemplate(file="displayShow.tmpl")
-        t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
+        t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
 
         try:
             t.showLoc = (showObj.location, True)
@@ -2012,11 +2012,11 @@ class Home:
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
-                t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
-                t.submenu.append({ 'title': 'Re-scan files',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
-                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
-                t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
-            t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
+                t.submenu.append({ 'title': 'Delete',               'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
+                t.submenu.append({ 'title': 'Re-scan files',        'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
+                t.submenu.append({ 'title': 'Rename Episodes',      'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
 
         t.show = showObj
         t.sqlResults = sqlResults
@@ -2528,7 +2528,7 @@ class WebInterface:
                                             'Show': 'setComingEpsSort/?sort=show',
                                             'Network': 'setComingEpsSort/?sort=network',
                                            }},
-                                           
+
             { 'title': 'Layout:', 'path': {'Banner': 'setComingEpsLayout/?layout=banner',
                                            'Poster': 'setComingEpsLayout/?layout=poster',
                                            'List': 'setComingEpsLayout/?layout=list',
