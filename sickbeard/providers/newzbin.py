@@ -335,7 +335,7 @@ class NewzbinProvider(generic.NZBProvider):
             try:
                 locale.setlocale(locale.LC_TIME, 'en_US')
             except Exception, e:
-                logger.log("can't set local to en_US this might lead to errors durin time parsing: " + str(e), logger.ERROR)
+                logger.log("can't set local to en_US this might lead to errors during time parsing: " + str(e), logger.ERROR)
         
     def _set_default(self):
         if locale.getdefaultlocale() != locale.getlocale(locale.LC_ALL): 
