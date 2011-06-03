@@ -115,7 +115,7 @@ $(document).ready(function(){
             var idArr = $("#provider_order_list").sortable('toArray');
             var finalArr = new Array();
             $.each(idArr, function(key, val) {
-                    var checked = + $('#enable_'+val).attr('checked') ? '1' : '0';
+                    var checked = + $('#enable_'+val).prop('checked') ? '1' : '0';
                     finalArr.push(val + ':' + checked);
             });
 
