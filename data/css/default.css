@@ -178,6 +178,7 @@ background-color:#fff;
 padding:0;
 }
 tr.seasonheader h2 {
+display:inline;
 font-size:22px;
 line-height:20px;
 letter-spacing:1px;
