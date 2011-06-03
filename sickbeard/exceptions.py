@@ -27,7 +27,7 @@ def ex(e):
 	if not e.args or not e.args[0]:
 		return ""
 
-	e_message = fixStupidEncodings(e.args[0])
+	e_message = fixStupidEncodings(e.args[0], True)
 	
 	# if fixStupidEncodings doesn't fix it then maybe it's not a string, in which case we'll try printing it anyway
 	if not e_message:
