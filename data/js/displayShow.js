@@ -108,7 +108,7 @@ $(document).ready(function(){
     
     $.fn.showHideRows = function(whichClass){
 
-        var status = $('#checkboxControls > input, #'+whichClass).attr('checked')
+        var status = $('#checkboxControls > input, #'+whichClass).prop('checked')
         $("tr."+whichClass).each(function(e){
             if (status) {
                 $(this).show();

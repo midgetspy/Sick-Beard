@@ -20,12 +20,12 @@ $(document).ready(function() {
 
     $('.allCheck').click(function(){
         var tvdb_id = $(this).attr('id').split('-')[1];
-        $('.'+tvdb_id+'-epcheck').attr('checked', $(this).attr('checked'));
+        $('.'+tvdb_id+'-epcheck').prop('checked', $(this).prop('checked'));
     });
 
     $('.get_more_eps').click(function(){
         var cur_tvdb_id = $(this).attr('id');
-        var checked = $('#allCheck-'+cur_tvdb_id).attr('checked');
+        var checked = $('#allCheck-'+cur_tvdb_id).prop('checked');
         var last_row = $('tr#'+cur_tvdb_id);
         
         $.getJSON(sbRoot+'/manage/showEpisodeStatuses',
