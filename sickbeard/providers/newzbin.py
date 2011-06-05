@@ -72,7 +72,7 @@ class NewzbinProvider(generic.NZBProvider):
 
         self.cache = NewzbinCache(self)
 
-        self.url = 'https://www.newzbin.com/'
+        self.url = 'http://www.newzbin.com/'
 
         self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
 
