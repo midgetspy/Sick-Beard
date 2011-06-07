@@ -123,8 +123,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
         \$("#NAV$topmenu").addClass("current");
 
         \$("a.confirm").bind("click",function() {
-            var target = \$( this ).attr('href');
-            if ( confirm("Are you sure you want to " + \$(this).attr('text') + "?") )
+            var target = \$( this ).prop('href');
+            if ( confirm("Are you sure you want to " + \$(this).prop('text') + "?") )
                 location.href = target;
             return false;
         });
