@@ -25,7 +25,7 @@ import sickbeard
 # encodings. It tries to just use unicode, but if that fails then it tries forcing it to utf-8. Any functions
 # which return something should always return unicode.
 
-def fixStupidEncodings(x):
+def fixStupidEncodings(x, silent=False):
     if type(x) == str:
         try:
             return x.decode(sickbeard.SYS_ENCODING)
@@ -35,7 +35,7 @@ def fixStupidEncodings(x):
     elif type(x) == unicode:
         return x
     else:
-        logger.log(u"Unknown value passed in, ignoring it: "+str(type(x))+" ("+repr(x)+":"+repr(type(x))+")", logger.ERROR)
+        logger.log(u"Unknown value passed in, ignoring it: "+str(type(x))+" ("+repr(x)+":"+repr(type(x))+")", logger.DEBUG if silent else logger.ERROR)
         return None
 
     return None

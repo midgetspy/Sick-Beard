@@ -1437,6 +1437,8 @@ class TVEpisode(object):
 
         goodEpString = ''
 
+        self.relatedEps = sorted(self.relatedEps, key=lambda x: x.episode)
+
         if len(self.relatedEps) == 0:
             goodName = self.name
 
