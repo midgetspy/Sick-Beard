@@ -7,7 +7,10 @@ sys.path.append(os.path.abspath('../lib'))
 
 from sickbeard.name_parser import parser
 
-DEBUG = VERBOSE = False
+import sickbeard
+sickbeard.SYS_ENCODING = 'UTF-8'
+
+DEBUG = VERBOSE = True
 
 simple_test_cases = {
               'standard': {
@@ -29,6 +32,7 @@ simple_test_cases = {
               'fov': {
               'Show_Name.1x02.Source_Quality_Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2], 'Source_Quality_Etc', 'Group'),
               'Show Name 1x02': parser.ParseResult(None, 'Show Name', 1, [2]),
+              'Show Name 1x02 x264 Test': parser.ParseResult(None, 'Show Name', 1, [2], 'x264 Test'),
               'Show Name - 1x02 - My Ep Name': parser.ParseResult(None, 'Show Name', 1, [2], 'My Ep Name'),
               'Show_Name.1x02x03x04.Source_Quality_Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'Source_Quality_Etc', 'Group'),
               'Show Name - 1x02-03-04 - My Ep Name': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'My Ep Name'),
