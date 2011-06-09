@@ -204,7 +204,7 @@ class GitUpdateManager(UpdateManager):
         self._newest_commit_hash = None
         self._num_commits_behind = 0
 
-        self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
+        self.git_url = 'git://github.com/tubbo/Sick-Beard.git'
 
     def _git_error(self):
         error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
