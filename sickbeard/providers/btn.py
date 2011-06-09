@@ -28,7 +28,7 @@ class BTNProvider(generic.TorrentProvider):
 
     def __init__(self):
 
-        generic.TorrentProvider.__init__(self, "BroadcasThe.Net")
+        generic.TorrentProvider.__init__(self, "BTN")
         
         self.supportsBacklog = False
 
