@@ -77,7 +77,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents"):
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "freshontv", "tvtorrents"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -176,6 +176,15 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix">
                                 <span class="component-title">NZBs'R'US Hash</span>
                                 <input class="component-desc" type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="40" />
+                            </label>
+                        </div>
+</div>
+
+<div class="providerDiv" id="freshontvDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">FreshOnTV Passkey:</span>
+                                <input class="component-desc" type="text" name="freshontv_passkey" value="$sickbeard.FRESHONTV_PASSKEY" size="40" />
                             </label>
                         </div>
 </div>
