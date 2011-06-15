@@ -91,6 +91,7 @@ class ManualSearchQueueItem(generic_queue.QueueItem):
         logger.log("Searching for download for " + self.ep_obj.prettyName(True))
 
         foundEpisode = search.findEpisode(self.ep_obj, manualSearch=True)
+        result = False
 
         if not foundEpisode:
             ui.notifications.message('No downloads were found', "Couldn't find a download for <i>%s</i>" % self.ep_obj.prettyName(True))
@@ -107,7 +108,7 @@ class ManualSearchQueueItem(generic_queue.QueueItem):
             elif providerModule == None:
                 ui.notifications.error('Provider is configured incorrectly, unable to download')
 
-        self.success = foundEpisode
+        self.success = result
 
     def finish(self):
         # don't let this linger if something goes wrong

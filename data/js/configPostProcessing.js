@@ -2,12 +2,12 @@ $(document).ready(function(){
 
     $.fn.setExampleText = function() { 
 
-        params = {'show_name': $('#naming_show_name').attr('checked')?"1":"0",
+        params = {'show_name': $('#naming_show_name').prop('checked')?"1":"0",
                   'ep_type': $('#naming_ep_type :selected').val(),
                   'multi_ep_type': $('#naming_multi_ep_type :selected').val(),
-                  'ep_name': $('#naming_ep_name').attr('checked')?"1":"0",
-                  'use_periods': $('#naming_use_periods').attr('checked')?"1":"0",
-                  'quality': $('#naming_quality').attr('checked')?"1":"0",
+                  'ep_name': $('#naming_ep_name').prop('checked')?"1":"0",
+                  'use_periods': $('#naming_use_periods').prop('checked')?"1":"0",
+                  'quality': $('#naming_quality').prop('checked')?"1":"0",
                   'sep_type': $('#naming_sep_type :selected').val(),
                   'whichTest': 'single'
                   }
@@ -91,12 +91,12 @@ $(document).ready(function(){
             var generator_name = $(this).attr('id');
 
             var config_arr = new Array();
-            var show_metadata = $("#"+generator_name+"_show_metadata").attr('checked');
-            var episode_metadata = $("#"+generator_name+"_episode_metadata").attr('checked');
-            var fanart = $("#"+generator_name+"_fanart").attr('checked');
-            var poster = $("#"+generator_name+"_poster").attr('checked');
-            var episode_thumbnails = $("#"+generator_name+"_episode_thumbnails").attr('checked');
-            var season_thumbnails = $("#"+generator_name+"_season_thumbnails").attr('checked');
+            var show_metadata = $("#"+generator_name+"_show_metadata").prop('checked');
+            var episode_metadata = $("#"+generator_name+"_episode_metadata").prop('checked');
+            var fanart = $("#"+generator_name+"_fanart").prop('checked');
+            var poster = $("#"+generator_name+"_poster").prop('checked');
+            var episode_thumbnails = $("#"+generator_name+"_episode_thumbnails").prop('checked');
+            var season_thumbnails = $("#"+generator_name+"_season_thumbnails").prop('checked');
 
             config_arr.push(show_metadata ? '1':'0');
             config_arr.push(episode_metadata ? '1':'0');

@@ -9,7 +9,7 @@ $(document).ready(function(){
         $.get(sbRoot+'/config/general/saveAddShowDefaults', {defaultStatus: $('#statusSelect').val(),
                                                              anyQualities: anyQualArray.join(','),
                                                              bestQualities: bestQualArray.join(','),
-                                                             defaultSeasonFolders: $('#seasonFolders').attr('checked')} );
+                                                             defaultSeasonFolders: $('#seasonFolders').prop('checked')} );
         $(this).attr('disabled', true);
         $.pnotify({
             pnotify_title: 'Saved Defaults',

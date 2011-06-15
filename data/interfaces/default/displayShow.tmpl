@@ -43,6 +43,7 @@
 
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
 
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
@@ -56,7 +57,13 @@
 
 <div id="summary" class="align-left">
 <table class="infoTable" cellspacing="1" border="0" cellpadding="0">
+#if $show.network and $show.airs:
     <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
+#else if $show.network:
+    <tr><td class="showLegend">Airs: </td><td>$show.network</td></tr>
+#else if $show.airs:
+    <tr><td class="showLegend">Airs: </td><td>$show.airs</td></tr>
+#end if
     <tr><td class="showLegend">Status: </td><td>$show.status</td></tr>
 #if $showLoc[1]:
     <tr><td class="showLegend">Location: </td><td>$showLoc[0]</td></tr>

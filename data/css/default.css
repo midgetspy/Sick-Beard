@@ -17,24 +17,11 @@ margin:0;
 padding:0;
 }
 
-/* only used in config_timezones.tmpl */
-fieldset.EntryFieldSet {
-vertical-align:top;
-display:inline;
-border-color:#3a3a3a;
-margin:5px;
-padding:7px;
-}
-legend {
-font:bold 16px Arial;
-color: #57442B;
-}
-div.EntryBlock,div.EntryBlock form {
-display:inline;
-}
-/* --------------------------------------------- */
+/* these are for inc_top.tmpl */
+#upgrade-notification{line-height:1;color:#57442b;font-size:130%;font-weight:700;height:0;left:0;text-align:center;top:0;width:100%;z-index:100;margin:0;padding:0;}
+#upgrade-notification div{background-color:#c6b695;border-bottom:1px solid #af986b;padding:7px 0;}
+#header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;}
 
-/* these are for incl_top.tmpl */
 #header {
 background-color:#fff;
 padding: 5px 0;
@@ -336,8 +323,9 @@ margin-left: auto;
 margin-right: auto;
 width: 480px;
 }
-div#addShowPortal  button { padding: 10px; width: 100%; }
-div#addShowPortal  button div.button img{ position: absolute; display: block; overflow: hidden; top: 35%; padding-left: 0.4em; text-align: center;}
+
+div#addShowPortal  button { padding: 10px; }
+div#addShowPortal  button div.button img{ position: absolute; display: block; top: 35%; padding-left: 0.4em; text-align: center; }
 div#addShowPortal  button .buttontext { position: relative; display: block; padding: 0.1em 0.4em 0.1em 4.4em; text-align: left; }
 
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
