@@ -398,3 +398,27 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
                 self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
         self.incDBVersion()
+
+class Blacklist(FixAirByDateSetting):
+
+    def test(self):
+        return self.hasTable("blacklist")
+        #and self.hasTable("whitelist")
+
+    def execute(self):
+
+        query = "CREATE TABLE blacklist (show_id INTEGER, range TEXT, keyword TEXT);"
+        self.connection.action(query)
+        #self.incDBVersion()
+
+class Whitelist(Blacklist):
+
+    def test(self):
+        return self.hasTable("whitelist")
+        #and self.hasTable("whitelist")
+
+    def execute(self):
+
+        query = "CREATE TABLE whitelist (show_id INTEGER, range TEXT, keyword TEXT);"
+        self.connection.action(query)
+        #self.incDBVersion()
