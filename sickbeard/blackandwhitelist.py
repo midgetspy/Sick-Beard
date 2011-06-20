@@ -115,9 +115,11 @@ class BlackAndWhiteList(object):
         return (list,dict)
     
 class BlackWhiteKeyword(object):
+    range = ""
+    value = []
     def __init__(self, range, values):
         self.range = range # "global" or a parser group
-        self.value = values # a list of values may contain onyl one item (still a list)
+        self.value = values # a list of values may contain only one item (still a list)
         
 
 class BlackWhitelistNoShowIDException(Exception):
