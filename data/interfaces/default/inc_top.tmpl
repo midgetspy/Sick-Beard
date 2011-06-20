@@ -124,7 +124,7 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
         \$("a.confirm").bind("click",function() {
             var target = \$( this ).attr('href');
-            if ( confirm("Are you sure you want to " + \$(this).attr('text') + "?") )
+            if ( confirm("Are you sure you want to " + \$(this).text + "?") )
                 location.href = target;
             return false;
         });
