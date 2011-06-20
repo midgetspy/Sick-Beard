@@ -21,11 +21,15 @@ from sickbeard import db, logger
 class BlackAndWhiteList(object):
     _tabeBlack = "blacklist"
     _tabeWhite = "whitelist"
+    blackList = []
+    whiteList = []
+    blackDict = {}
+    whiteDict = {}
     
     def __init__(self,show_id):
         if not show_id:
             raise BlackWhitelistNoShowIDException()
-        self.show_id
+        self.show_id = show_id
         self.myDB = db.DBConnection()
         self.refresh()
        
@@ -65,8 +69,9 @@ class BlackAndWhiteList(object):
     
     def _add_keywords(self,table,range,values):
         for value in values:
-            self.myDB.action("INSERT INTO "+table+" show_id, range , keyword VALUES ?,?,?", [self.show_id,range,value])        
-    
+            self.myDB.action("INSERT INTO "+table+" (show_id, range , keyword) VALUES (?,?,?)", [self.show_id,range,value])        
+        self.refresh()
+        
     def _del_all_black_keywors(self):
         self._del_all_keywords(self._tabeBlack)
     
@@ -82,11 +87,13 @@ class BlackAndWhiteList(object):
     def _del_all_keywords(self,table):
         logger.log(u"Deleting all "+table+" keywords for "+str(self.show_id), logger.DEBUG)
         self.myDB.action("DELETE FROM "+table+" WHERE show_id = ?", [self.show_id])
+        self.refresh()
     
     def _del_all_keywords_for(self,table,range):
         logger.log(u"Deleting all "+range+" "+table+" keywords for "+str(self.show_id), logger.DEBUG)
         self.myDB.action("DELETE FROM "+table+" WHERE show_id = ? and range = ?", [self.show_id,range])
-    
+        self.refresh()
+        
     def _load_list(self,table):
         sqlResults = self.myDB.select("SELECT range,keyword FROM "+table+" WHERE show_id = ? ", [self.show_id])
         if not sqlResults or not len(sqlResults):
@@ -99,7 +106,10 @@ class BlackAndWhiteList(object):
         dict = {}
         for row in sql_result:
             list.append(BlackWhiteKeyword(row["range"],[row["keyword"]]))
-            dict[row["range"]].update(row["keyword"])
+            if(dict.has_key(row["range"])):
+                dict[row["range"]].append(row["keyword"])
+            else:
+                dict[row["range"]] = [row["keyword"]]
         for range in dict:
             dict[range] = BlackWhiteKeyword(range,dict[range])
         return (list,dict)
@@ -112,4 +122,3 @@ class BlackWhiteKeyword(object):
 
 class BlackWhitelistNoShowIDException(Exception):
     "No show_id was given"
- 
