@@ -19,8 +19,8 @@
 from sickbeard import db, logger
 
 class BlackAndWhiteList(object):
-    _tabeBlack = "blacklist"
-    _tabeWhite = "whitelist"
+    _tableBlack = "blacklist"
+    _tableWhite = "whitelist"
     blackList = []
     whiteList = []
     blackDict = {}
@@ -40,32 +40,32 @@ class BlackAndWhiteList(object):
         (self.whiteList,self.whiteDict) = self.load_whitelist()
 
     def load_blacklist(self):
-        return self._load_list(self._tabeBlack)
+        return self._load_list(self._tableBlack)
     
     def load_whitelist(self):
-        return self._load_list(self._tabeWhite)    
+        return self._load_list(self._tableWhite)    
     
     def set_black_keywords(self,range,values):
         self._del_all_black_keywors()
-        self._add_keywords(self._tabeBlack, range, values)
+        self._add_keywords(self._tableBlack, range, values)
 
     def set_white_keywords(self,range,values):
         self._del_all_white_keywors()
-        self._add_keywords(self._tabeWhite, range, values)
+        self._add_keywords(self._tableWhite, range, values)
   
     def set_black_keywords_for(self,range,values):
         self._del_all_black_keywors_for(range)
-        self._add_keywords(self._tabeBlack, range, values)
+        self._add_keywords(self._tableBlack, range, values)
 
     def set_white_keywords_for(self,range,values):
         self._del_all_white_keywors_for(range)
-        self._add_keywords(self._tabeWhite, range, values)
+        self._add_keywords(self._tableWhite, range, values)
     
     def add_black_keyword(self,range,value):
-        self._add_keywords(self._tabeBlack, range, [value])
+        self._add_keywords(self._tableBlack, range, [value])
         
     def add_white_keyword(self,range,value):
-        self._add_keywords(self._tabeWhite, range, [value])
+        self._add_keywords(self._tableWhite, range, [value])
     
     def _add_keywords(self,table,range,values):
         for value in values:
@@ -73,16 +73,16 @@ class BlackAndWhiteList(object):
         self.refresh()
         
     def _del_all_black_keywors(self):
-        self._del_all_keywords(self._tabeBlack)
+        self._del_all_keywords(self._tableBlack)
     
     def _del_all_white_keywors(self):
-        self._del_all_keywords(self._tabeWhite)
+        self._del_all_keywords(self._tableWhite)
         
     def _del_all_black_keywors_for(self,range):
-        self._del_all_keywords_for(self._tabeBlack,range)
+        self._del_all_keywords_for(self._tableBlack,range)
     
     def _del_all_white_keywors_for(self,range):
-        self._del_all_keywords_for(self._tabeWhite.range)
+        self._del_all_keywords_for(self._tableWhite,range)
     
     def _del_all_keywords(self,table):
         logger.log(u"Deleting all "+table+" keywords for "+str(self.show_id), logger.DEBUG)
@@ -110,10 +110,35 @@ class BlackAndWhiteList(object):
                 dict[row["range"]].append(row["keyword"])
             else:
                 dict[row["range"]] = [row["keyword"]]
-        for range in dict:
-            dict[range] = BlackWhiteKeyword(range,dict[range])
+        
         return (list,dict)
     
+    def is_valid_for_black(self,haystack):
+        return self._is_valid_for(self.blackDict, True, haystack)
+
+    def is_valid_for_white(self,haystack):
+        return self._is_valid_for(self.whiteDict, False, haystack)
+
+    def is_valid(self,haystack):
+        return self.is_valid_for_black(haystack) and self.is_valid_for_white(haystack)
+    
+    def _is_valid_for(self,list,mod,haystack):
+        for range in list:
+            for keyword in list[range]:
+                if range == "global":
+                    # if the keyword was found the term in () becomes true
+                    if (haystack.name.find(keyword) >= 0) == mod:
+                        return False
+    
+                elif range == "release_group":
+                    # dont test the release_group if we are on the black list since it might be none
+                    if not haystack.release_group and not mod:
+                        continue
+                    # if the keyword was found the term in () becomes true
+                    if (haystack.release_group.find(keyword) >= 0) == mod:
+                        return False
+        return True
+
 class BlackWhiteKeyword(object):
     range = ""
     value = []
