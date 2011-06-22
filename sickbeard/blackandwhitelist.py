@@ -131,7 +131,7 @@ class BlackAndWhiteList(object):
                 if range == "global":
                     # if the keyword was found the term in () becomes true
                     if (haystack.name.find(keyword) >= 0) == mod:
-                        logger.log(u"Does not match "+mode+"list. keyword: '"+keyword+"' is not in "+range+": '"+haystack.name+"'", logger.DEBUG)
+                        logger.log(u"Does not match "+mode+"list for tvdbid "+str(self.show_id)+". keyword: '"+keyword+"' is not in "+range+": '"+haystack.name+"'", logger.DEBUG)
                         return False
     
                 elif range == "release_group":
@@ -140,7 +140,7 @@ class BlackAndWhiteList(object):
                         continue
                     # if the keyword was found the term in () becomes true
                     if (haystack.release_group.find(keyword) >= 0) == mod:
-                        logger.log(u"Does not match "+mode+"list. keyword: '"+keyword+"' is not in "+range+": '"+haystack.release_group+"'", logger.DEBUG)
+                        logger.log(u"Does not match "+mode+"list for tvdbid "+str(self.show_id)+". keyword: '"+keyword+"' is not in "+range+": '"+haystack.release_group+"'", logger.DEBUG)
                         return False
         return True
 
