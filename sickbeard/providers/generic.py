@@ -254,6 +254,7 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
+            result.release_group = parse_result.release_group
 
             results.append(result)
 
