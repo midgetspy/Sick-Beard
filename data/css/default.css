@@ -18,9 +18,9 @@ padding:0;
 }
 
 /* these are for inc_top.tmpl */
-#upgrade-notification{line-height:1;color:#57442b;font-size:130%;font-weight:700;height:0;left:0;text-align:center;top:0;width:100%;z-index:100;margin:0;padding:0;}
+#upgrade-notification{line-height:0.5em;color:#57442b;font-size:1em;font-weight:700;height:0px;text-align:center;width:100%;z-index:100;margin:0;padding:0;}
 #upgrade-notification div{background-color:#c6b695;border-bottom:1px solid #af986b;padding:7px 0;}
-#header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;}
+#header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;} 
 
 #header {
 background-color:#fff;
@@ -178,6 +178,7 @@ background-color:#fff;
 padding:0;
 }
 tr.seasonheader h2 {
+display:inline;
 font-size:22px;
 line-height:20px;
 letter-spacing:1px;

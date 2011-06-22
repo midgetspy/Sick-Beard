@@ -4,12 +4,12 @@ $(document).ready(function(){
         $('.providerDiv').each(function(){
             var providerName = $(this).attr('id');
             var selectedProvider = $('#editAProvider :selected').val();
-            
+
             if (selectedProvider+'Div' == providerName)
                 $(this).show();
             else
                 $(this).hide();
-            
+
         });
     } 
 
@@ -23,8 +23,8 @@ $(document).ready(function(){
 
         if (!isDefault)
         {
-	        $('#editANewznabProvider').addOption(id, name);
-	        $(this).populateNewznabSection();
+            $('#editANewznabProvider').addOption(id, name);
+            $(this).populateNewznabSection();
         }
 
         if ($('#provider_order_list > #'+id).length == 0 && showProvider != false) {
@@ -33,9 +33,9 @@ $(document).ready(function(){
             $('#provider_order_list').append(toAdd);
             $('#provider_order_list').sortable("refresh");
         }
-        
+
         $(this).makeNewznabProviderString();
-    
+
     }
 
     $.fn.updateProvider = function (id, url, key) {
@@ -58,13 +58,13 @@ $(document).ready(function(){
         $('#provider_order_list > #'+id).remove();
 
         $(this).makeNewznabProviderString();
-    
+
     }
 
     $.fn.populateNewznabSection = function() {
-    
+
         var selectedProvider = $('#editANewznabProvider :selected').val();
-    
+
         if (selectedProvider == 'addNewznab') {
             var data = ['','',''];
             var isDefault = 0;
@@ -76,7 +76,7 @@ $(document).ready(function(){
             $('#newznab_add_div').hide();
             $('#newznab_update_div').show();
         }
-        
+
         $('#newznab_name').val(data[0]);
         $('#newznab_url').val(data[1]);
         $('#newznab_key').val(data[2]);
@@ -87,7 +87,7 @@ $(document).ready(function(){
         } else {
 
             $('#newznab_name').attr("disabled", "disabled");
-            
+
             if (isDefault) {
                 $('#newznab_url').attr("disabled", "disabled");
                 $('#newznab_delete').attr("disabled", "disabled");
@@ -96,19 +96,19 @@ $(document).ready(function(){
                 $('#newznab_delete').removeAttr("disabled");
             }
         }
-            
+
     }
     
     $.fn.makeNewznabProviderString = function() {
-        
+
         var provStrings = new Array();
         
         for (var id in newznabProviders) {
             provStrings.push(newznabProviders[id][1].join('|'));
         }
-        
+
         $('#newznab_string').val(provStrings.join('!!!'))
-        
+
     }
     
     $.fn.refreshProviderList = function() {
@@ -126,19 +126,19 @@ $(document).ready(function(){
 
     $('.newznab_key').change(function(){
 
-    	var provider_id = $(this).attr('id');
-    	provider_id = provider_id.substring(0, provider_id.length-'_hash'.length);
-    	
-    	var url = $('#'+provider_id+'_url').val();
-    	var key = $(this).val();
+        var provider_id = $(this).attr('id');
+        provider_id = provider_id.substring(0, provider_id.length-'_hash'.length);
 
-    	$(this).updateProvider(provider_id, url, key);
-    	
+        var url = $('#'+provider_id+'_url').val();
+        var key = $(this).val();
+
+        $(this).updateProvider(provider_id, url, key);
+
     });
     
     $('#newznab_key').change(function(){
         
-    	var selectedProvider = $('#editANewznabProvider :selected').val();
+        var selectedProvider = $('#editANewznabProvider :selected').val();
 
         var url = $('#newznab_url').val();
         var key = $('#newznab_key').val();
@@ -180,8 +180,8 @@ $(document).ready(function(){
 
                 $(this).addProvider(data.success, name, url, key, 0);
         });
-        
-        
+
+
     });
 
     $('.newznab_delete').click(function(){
@@ -202,7 +202,7 @@ $(document).ready(function(){
             $(this).refreshProviderList();
         }
     });
-    
+
     $("#provider_order_list").disableSelection();
 
 });

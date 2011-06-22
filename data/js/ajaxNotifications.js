@@ -1,4 +1,7 @@
 var message_url = sbRoot + '/ui/get_messages';
+$.pnotify.defaults.pnotify_width = "340px";
+$.pnotify.defaults.pnotify_history = false;
+$.pnotify.defaults.pnotify_delay = 4000;
 
 function check_notifications() {
     $.getJSON(message_url, function(data){
