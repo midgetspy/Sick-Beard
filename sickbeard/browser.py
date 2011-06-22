@@ -96,7 +96,7 @@ class WebFileBrowser:
         return json.dumps(foldersAtPath(path, True))
 
     @cherrypy.expose
-    def complete(self, q, limit=30, timestamp=None):
-        cherrypy.response.headers['Content-Type'] = "text/plain"
-        paths = [entry['path'] for entry in foldersAtPath(os.path.dirname(q)) if 'path' in entry]
-        return "\n".join(paths[0:int(limit)])
+    def complete(self, term):
+        cherrypy.response.headers['Content-Type'] = "application/json"
+        paths = [entry['path'] for entry in foldersAtPath(os.path.dirname(term)) if 'path' in entry]
+        return json.dumps( paths )
