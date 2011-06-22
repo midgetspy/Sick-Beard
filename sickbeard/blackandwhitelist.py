@@ -123,11 +123,15 @@ class BlackAndWhiteList(object):
         return self.is_valid_for_black(haystack) and self.is_valid_for_white(haystack)
     
     def _is_valid_for(self,list,mod,haystack):
+        mode = "white"
+        if mod:
+            mode = "black"
         for range in list:
             for keyword in list[range]:
                 if range == "global":
                     # if the keyword was found the term in () becomes true
                     if (haystack.name.find(keyword) >= 0) == mod:
+                        logger.log(u"Does not match "+mode+"list. keyword: '"+keyword+"' is not in "+range+": '"+haystack.name+"'", logger.DEBUG)
                         return False
     
                 elif range == "release_group":
@@ -136,6 +140,7 @@ class BlackAndWhiteList(object):
                         continue
                     # if the keyword was found the term in () becomes true
                     if (haystack.release_group.find(keyword) >= 0) == mod:
+                        logger.log(u"Does not match "+mode+"list. keyword: '"+keyword+"' is not in "+range+": '"+haystack.release_group+"'", logger.DEBUG)
                         return False
         return True
 
