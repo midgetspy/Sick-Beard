@@ -34,6 +34,7 @@ if os.name == 'nt':
 
 # adapted from http://stackoverflow.com/questions/827371/is-there-a-way-to-list-all-the-available-drive-letters-in-python/827490
 def getWinDrives():
+    """ Return list of detected drives """
     assert os.name == 'nt'
 
     drives = []
@@ -45,10 +46,12 @@ def getWinDrives():
 
     return drives
 
-# Returns a list of dictionaries with the folders contained at the given path
-# Give the empty string as the path to list the contents of the root path
-# (under Unix this means "/", on Windows this will be a list of drive letters)
+
 def foldersAtPath(path, includeParent = False):
+    """ Returns a list of dictionaries with the folders contained at the given path
+        Give the empty string as the path to list the contents of the root path
+        under Unix this means "/", on Windows this will be a list of drive letters)
+    """
     assert os.path.isabs(path) or path == ""
 
     # walk up the tree until we find a valid path
