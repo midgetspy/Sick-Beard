@@ -35,6 +35,7 @@ from sickbeard import ui
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
 from sickbeard import providers
+from sickbeard.blackandwhitelist import *
 
 def _downloadResult(result):
     """
@@ -177,7 +178,7 @@ def searchForNeededEpisodes():
                 if not bestResult or bestResult.quality < curResult.quality:
                     bestResult = curResult
 
-            bestResult = pickBestResult(curFoundResults[curEp])
+            bestResult = pickBestResult(curFoundResults[curEp],show=curEp.show)
 
             # if it's already in the list (from another provider) and the newly found quality is no better then skip it
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
@@ -191,15 +192,23 @@ def searchForNeededEpisodes():
     return foundResults.values()
 
 
-def pickBestResult(results, quality_list=None):
+def pickBestResult(results, quality_list=None,show=None):
 
     logger.log(u"Picking the best result out of "+str([x.name for x in results]), logger.DEBUG)
+
+    # build the black And white list
+    if show:
+        bwl = BlackAndWhiteList(show.tvdbid)
 
     # find the best result for the current episode
     bestResult = None
     for cur_result in results:
         logger.log("Quality of "+cur_result.name+" is "+Quality.qualityStrings[cur_result.quality])
         
+        if bwl and not bwl.is_valid(cur_result):
+            logger.log(cur_result.name+" does not match the blacklist or the whitelist, rejecting it", logger.DEBUG)
+            continue
+
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
             continue
@@ -232,10 +241,16 @@ def isFinalResult(result):
     
     show_obj = result.episodes[0].show
     
+    bwl = BlackAndWhiteList(show_obj.tvdbid)
+
     any_qualities, best_qualities = Quality.splitQuality(show_obj.quality)
     
     # if there is a redownload that's higher than this then we definitely need to keep looking
     if best_qualities and result.quality < max(best_qualities):
+        return False
+
+    # if it does not match the shows black and white list its no good
+    elif not bwl.is_valid(result):
         return False
 
     # if there's no redownload that's higher (above) and this is the highest initial download then we're good
@@ -302,7 +317,7 @@ def findEpisode(episode, manualSearch=False):
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
 
-    bestResult = pickBestResult(foundResults)
+    bestResult = pickBestResult(foundResults,show=episode.show)
 
     return bestResult
 
@@ -353,7 +368,7 @@ def findSeason(show, season):
     # pick the best season NZB
     bestSeasonNZB = None
     if SEASON_RESULT in foundResults:
-        bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities)
+        bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities,show=show)
 
     highest_quality_overall = 0
     for cur_season in foundResults:
@@ -481,6 +496,6 @@ def findSeason(show, season):
         if len(foundResults[curEp]) == 0:
             continue
 
-        finalResults.append(pickBestResult(foundResults[curEp]))
+        finalResults.append(pickBestResult(foundResults[curEp]),show=show)
 
     return finalResults

@@ -412,3 +412,26 @@ class AddAbsoluteEpisodeTVEpisode(AddAbsoluteEpisodeTVShow):
 
     def execute(self):
         self.addColumn("tv_episodes", "absolute_number", "NUMERIC", "NULL")
+class Blacklist(AddAbsoluteEpisodeTVShow):
+
+    def test(self):
+        return self.hasTable("blacklist")
+        #and self.hasTable("whitelist")
+
+    def execute(self):
+
+        query = "CREATE TABLE blacklist (show_id INTEGER, range TEXT, keyword TEXT);"
+        self.connection.action(query)
+        #self.incDBVersion()
+
+class Whitelist(Blacklist):
+
+    def test(self):
+        return self.hasTable("whitelist")
+        #and self.hasTable("whitelist")
+
+    def execute(self):
+
+        query = "CREATE TABLE whitelist (show_id INTEGER, range TEXT, keyword TEXT);"
+        self.connection.action(query)
+        #self.incDBVersion()
