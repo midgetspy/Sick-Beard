@@ -666,7 +666,6 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
-        sickbeard.WEB_IP_WHITELIST = web_ip_whitelist
 
         config.change_VERSION_NOTIFY(version_notify)
 
