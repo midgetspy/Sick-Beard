@@ -20,6 +20,9 @@
 import cherrypy.lib.auth_basic
 import os.path
 
+import binascii
+import base64
+
 from sickbeard import logger
 from sickbeard.webserve import WebInterface
 
@@ -42,8 +45,6 @@ def initWebServer(options = {}):
 
         #HTTP Errors
         def http_error_401_hander(status, message, traceback, version):
-            import binascii
-            import base64
             args = [status, message, traceback, version]
 
             logger.log(u"Authentication error, check cherrypy log for more details", logger.WARNING)
