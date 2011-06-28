@@ -199,7 +199,15 @@ class TIVOMetadata(generic.GenericMetadata):
             
             
             # Write the synopsis of the video here. 
-            data += ("description : " + curEpToWrite.description + "\n")
+            
+            # Micrsoft Word's smartquotes can die in a fire.
+            sanitizedDescription = curEpToWrite.description
+            # Replace double curly quotes
+            sanitizedDescription = sanitizedDescription.replace(u"\u201c", "\"").replace(u"\u201d", "\"")
+            # Replace single curly quotes
+            sanitizedDescription = sanitizedDescription.replace(u"\u2018", "'").replace(u"\u2019", "'").replace(u"\u02BC", "'")
+
+            data += ("description : " + sanitizedDescription + "\n")
             
             
             # Usually starts with "SH" and followed by 6-8 digits.
