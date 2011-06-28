@@ -1,13 +1,12 @@
 $(document).ready(function(){
 
-   $("table.sickbeardTable td").hover( 
-	       function() { $(this).find("a").parent().addClass("hover"); }, 
-	       function() { $(this).find("a").parent().removeClass("hover");
-   } );
-
-   $("table.sickbeardTable td").click( function() {
-        var href = $(this).find("a").attr("href");
-        if(href) { window.location = href; }
-   });
+    $("table.sickbeardTable td.tvShow").live('click', function(e) {
+        if( (!$.browser.msie && e.button == 0) || ($.browser.msie && e.button == 1) ) {
+            if(!e.shiftKey) {
+                var href = $(this).find("a").attr("href");
+                if(href) { window.location = href; }
+            }
+        }
+    });
 
 });
