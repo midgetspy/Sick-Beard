@@ -114,35 +114,44 @@ class BlackAndWhiteList(object):
         return (list,dict)
     
     def is_valid_for_black(self,haystack):
-        return self._is_valid_for(self.blackDict, True, haystack)
+        return self._is_valid_for(self.blackDict, False, haystack)
 
     def is_valid_for_white(self,haystack):
-        return self._is_valid_for(self.whiteDict, False, haystack)
+        return self._is_valid_for(self.whiteDict, True, haystack)
 
     def is_valid(self,haystack):
         return self.is_valid_for_black(haystack) and self.is_valid_for_white(haystack)
     
-    def _is_valid_for(self,list,mod,haystack):
-        mode = "white"
-        if mod:
-            mode = "black"
+    def _is_valid_for(self,list,mood,haystack):
+
+        results = []
         for range in list:
             for keyword in list[range]:
                 if range == "global":
-                    # if the keyword was found the term in () becomes true
-                    if (haystack.name.find(keyword) >= 0) == mod:
-                        logger.log(u"Does not match "+mode+"list for tvdbid "+str(self.show_id)+". keyword: '"+keyword+"' is not in "+range+": '"+haystack.name+"'", logger.DEBUG)
-                        return False
+                    string = haystack.name
+                elif haystack.__dict__.has_key(range):
+                    string = haystack.__dict__[range]
+                elif not haystack.__dict__.has_key(range):
+                    results.append((not mood))
+                else:
+                    results.append(False)
+                
+                if string:
+                    results.append(self._is_keyword_in_string(string, keyword) == mood)
+
+        # black: mood = False
+        # white: mood = True
+        if mood in results:
+            return mood
+        else:
+            return (not mood)
     
-                elif range == "release_group":
-                    # dont test the release_group if we are on the black list since it might be none
-                    if not haystack.release_group and not mod:
-                        continue
-                    # if the keyword was found the term in () becomes true
-                    if (haystack.release_group.find(keyword) >= 0) == mod:
-                        logger.log(u"Does not match "+mode+"list for tvdbid "+str(self.show_id)+". keyword: '"+keyword+"' is not in "+range+": '"+haystack.release_group+"'", logger.DEBUG)
-                        return False
-        return True
+    def _is_keyword_in_string(self,string,needle):
+        """
+        will return true if needle is found in string
+        for now a basic find is used
+        """
+        return (string.find(needle) >= 0)
 
 class BlackWhiteKeyword(object):
     range = ""
