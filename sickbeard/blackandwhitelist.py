@@ -123,6 +123,8 @@ class BlackAndWhiteList(object):
         return self.is_valid_for_black(haystack) and self.is_valid_for_white(haystack)
     
     def _is_valid_for(self,list,mood,haystack):
+        if not len(list):
+            return True
 
         results = []
         for range in list:
