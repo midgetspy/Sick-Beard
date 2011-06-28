@@ -470,7 +470,7 @@ def initialize(consoleLogging=True):
         NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
         NAMING_QUALITY = bool(check_setting_int(CFG, 'General', 'naming_quality', 0))
         NAMING_DATES = bool(check_setting_int(CFG, 'General', 'naming_dates', 1))
-        NAMING_ANIME = bool(check_setting_int(CFG, 'General', 'naming_anime', 1))
+        NAMING_ANIME = check_setting_int(CFG, 'General', 'naming_anime', 1)
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
