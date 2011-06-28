@@ -119,7 +119,7 @@
 
 <br/>
     <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Force</th></tr></thead>
+    <thead><tr><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Search</th></tr></thead>
     <tbody>
 
     #for $cur_result in $sql_results:
@@ -151,7 +151,7 @@
         </td>
         <td>$cur_result["name"]</td>
         <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
-        <td><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
+        <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if
@@ -166,7 +166,7 @@ Custom
         </td>
         <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
         <td align="center">
-        <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[update]" height="16" width="16" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
+        <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
         </td>
       </tr>
     <!-- end $cur_result["show_name"] //-->
@@ -179,7 +179,7 @@ Custom
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){ 
-  \$('#sbRoot').ajaxEpSearch({'size': 20, 'loadingImage': 'loading16_333333.gif'});
+  \$('#sbRoot').ajaxEpSearch({'size': 16, 'loadingImage': 'loading16_333333.gif'});
   \$(".ep_summary").hide();
   \$(".ep_summaryTrigger").click(function() {
     \$(this).next(".ep_summary").slideToggle('normal', function() {
@@ -260,8 +260,8 @@ Custom
             #end if            
             </a></span>
             <span class="tvshowTitleIcons">
-                <a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="20" width="20" src="$sbRoot/images/search32.png" /></a>
-                <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Force Update" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[update]" height="20" width="20" src="$sbRoot/images/forceUpdate32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
+                <a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
+                <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
             </span>
           </th>
         </tr>
