@@ -55,6 +55,8 @@ import xml.etree.cElementTree as etree
 
 from sickbeard import browser
 
+from icalendar import Calendar, Event
+import random
 
 class PageTemplate (Template):
     def __init__(self, *args, **KWs):
@@ -2548,6 +2550,83 @@ class WebInterface:
                 
 
         return _munge(t)
+    
+    # Provides a URL to generate an .ics/iCalendar subscribable URL to have an upcoming episode schedule
+    @cherrypy.expose
+    def generateCalendar(self):
+        # Get the current instance URL to set up banner image links later on
+        poster_url = cherrypy.url().replace('generateCalendar', '')
+        
+        # Separate out the hours/minutes/AMPM
+        time_re = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})')
+        
+        # Create an iCalendar object in UTC
+        cal = Calendar()
+        from icalendar import UTC
+        cal.add('version', '2.0')
+        cal.add('prodid', '//Sick-Beard Upcoming Episodes//')
+        
+        myDB = db.DBConnection()
+        
+        today = datetime.date.today().toordinal()
+        next_month = (datetime.date.today() + datetime.timedelta(days=30)).toordinal()
+
+        # Get all the shows that are not paused and are currently on air
+        calendar_shows = myDB.select("SELECT show_name, tvdb_id, network, airs, runtime FROM tv_shows WHERE status = 'Continuing' AND paused != '1'");
+        
+        # Loop through the shows, get all episodes airing today or after and earlier than next_month
+        for show in calendar_shows:
+            episode_list = myDB.select("SELECT tvdbid, name, season, episode, description, airdate FROM tv_episodes WHERE airdate >= ? AND airdate < ? AND showid = ?", (today, next_month, int(show["tvdb_id"])))
+            
+            # Loop through the found episodes
+            for episode in episode_list:
+                # Create an iCalendar event
+            	event = Event()
+            	# Add the show summary (usually just title)
+            	event.add('summary', show["show_name"] + ": " + episode["name"])
+            	# Get the air date
+            	air_date = datetime.datetime.fromordinal(int(episode["airdate"]))
+            	# Get the air time
+            	air_time = time_re.search(show["airs"])
+            	
+            	# Parse out the air time
+            	if(air_time.group(4).lower() == 'pm'):
+            	    t = datetime.time((int(air_time.group(1)) + 12), int(air_time.group(2)))
+            	else:
+            		t = datetime.time(int(air_time.group(1)), int(air_time.group(2)))
+            	
+            	# Combine air time and air date into one datetime object
+            	at = datetime.datetime.combine(air_date, t)
+            	
+            	# Add start time
+            	event.add('dtstart', at)
+            	
+            	# If the runtime is defined, we can set an end time.  Otherwise it'll just show up as the start time.
+            	# Sick-Beard in its current incarnation doesn't populate this value for some reason, so for now this doesn't work.
+            	# I'm also assuming if/when it does start getting set it will be getting set in minutes.  I've opened an issue
+            	# at http://code.google.com/p/sickbeard/issues/detail?id=1573 to get more info on why runtime is never set
+            	# even though it's available from TVRage/TVDB
+            	if(show["runtime"] != "0"):
+            		event.add('dtend', datetime.datetime.fromtimestamp(int((time.mktime(at.timetuple()) + (int(show["runtime"]) * 60)))))
+            	
+            	# Add Google Calendar stuff, I'm not sure if this works yet because Google Calendar only updates every 24 hours.
+            	# This should add a Sick-Beard icon and posters and junk.
+            	event.add('X-GOOGLE-CALENDAR-CONTENT-TYPE', 'image/jpeg')
+            	event.add('X-GOOGLE-CALENDAR-CONTENT-URL', poster_url + "showPoster/?show=" + str(show["tvdb_id"]) + "&which=banner")
+            	event.add('X-GOOGLE-CALENDAR-CONTENT-ICON', poster_url + "images/favicon.ico")
+            	
+            	# Generate a random UID to refer to this date
+            	event['uid'] = datetime.date.today().isoformat() + "-" + str(random.randint(10000,99999)) + "@Sick-Beard"
+            	
+            	# Add the event to the Calendar object
+            	cal.add_component(event)
+        
+        # Pass the calendar string to the tmpl file
+        t = PageTemplate(file="generateCalendar.tmpl")
+        t.calendarString = cal.as_string()
+        
+        return _munge(t)
+
 
     manage = Manage()
 
