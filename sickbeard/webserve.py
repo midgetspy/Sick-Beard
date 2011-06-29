@@ -122,10 +122,10 @@ def _getEpisode(show, season, episode):
     return epObj
 
 ManageMenu = [
-            { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
-            { 'title': 'Manage Searches', 'path': 'manage/manageSearches' },
-            { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
-            ]
+    { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview' },
+    { 'title': 'Manage Searches',           'path': 'manage/manageSearches'  },
+    { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
+]
 
 class ManageSearches:
 
@@ -775,8 +775,8 @@ class ConfigPostProcessing:
     def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
                     naming_sep_type=None, naming_quality=None, naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, use_banner=None,
-                    keep_processed_dir=None, process_automatically=None, rename_episodes=None,
+                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
+                    use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None):
 
         results = []
@@ -843,6 +843,7 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
+        sickbeard.metadata_provider_dict['TIVO'].set_config(tivo_data)
         
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
 
@@ -1137,7 +1138,7 @@ class ConfigNotifications:
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
-                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None):
+                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
         results = []
 
@@ -1248,6 +1249,11 @@ class ConfigNotifications:
         else:
             use_nmj = 0
 
+        if use_synoindex == "on":
+            use_synoindex = 1
+        else:
+            use_synoindex = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1297,6 +1303,8 @@ class ConfigNotifications:
         sickbeard.NMJ_DATABASE = nmj_database
         sickbeard.NMJ_MOUNT = nmj_mount
 
+        sickbeard.USE_SYNOINDEX = use_synoindex
+
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -1337,12 +1345,12 @@ def havePLEX():
 
 def HomeMenu():
     return [
-    { 'title': 'Add Shows',               'path': 'home/addShows/',                         },
-    { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                        },
-    { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC   },
-    { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX   },
-    { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID)    },
-    { 'title': 'Shutdown',               'path': 'home/shutdown/'                           },
+        { 'title': 'Add Shows',              'path': 'home/addShows/',                                          },
+        { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                                        },
+        { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
+        { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX                   },
+        { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID), 'confirm': True   },
+        { 'title': 'Shutdown',               'path': 'home/shutdown/', 'confirm': True                          },
     ]
 
 class HomePostProcess:
@@ -1978,7 +1986,7 @@ class Home:
         )
 
         t = PageTemplate(file="displayShow.tmpl")
-        t.submenu = [ { 'title': 'Edit',              'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
+        t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
 
         try:
             t.showLoc = (showObj.location, True)
@@ -2004,11 +2012,11 @@ class Home:
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
-                t.submenu.append({ 'title': 'Delete',            'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
-                t.submenu.append({ 'title': 'Re-scan files',           'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
-                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
-                t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
-            t.submenu.append({ 'title': 'Rename Episodes',   'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
+                t.submenu.append({ 'title': 'Delete',               'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
+                t.submenu.append({ 'title': 'Re-scan files',        'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
+                t.submenu.append({ 'title': 'Rename Episodes',      'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
 
         t.show = showObj
         t.sqlResults = sqlResults
@@ -2520,7 +2528,7 @@ class WebInterface:
                                             'Show': 'setComingEpsSort/?sort=show',
                                             'Network': 'setComingEpsSort/?sort=network',
                                            }},
-                                           
+
             { 'title': 'Layout:', 'path': {'Banner': 'setComingEpsLayout/?layout=banner',
                                            'Poster': 'setComingEpsLayout/?layout=poster',
                                            'List': 'setComingEpsLayout/?layout=list',

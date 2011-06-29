@@ -253,7 +253,10 @@ class PostProcessor(object):
                 if ep_obj.show.air_by_date:
                     season_folder = str(ep_obj.airdate.year)
                 else:
-                    season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
+                    try:
+                        season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
+                    except TypeError:
+                        logger.log(u"Error: Your season folder format is incorrect, try setting it back to the default")
         
         dest_folder = ek.ek(os.path.join, ep_obj.show.location, season_folder)
         
@@ -707,6 +710,9 @@ class PostProcessor(object):
 
         # do the library update for Plex Media Server
         notifiers.plex_notifier.update_library()
+
+        # do the library update for synoindex
+        notifiers.synoindex_notifier.update_library(ep_obj)
 
         # run extra_scripts
         self._run_extra_scripts(ep_obj)

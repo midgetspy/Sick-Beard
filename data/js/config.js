@@ -1,11 +1,11 @@
 $(document).ready(function(){
     $(".enabler").each(function(){
-        if (!$(this).attr('checked'))
+        if (!$(this).prop('checked'))
             $('#content_'+$(this).attr('id')).hide();
     });
 
     $(".enabler").click(function() {
-        if ($(this).attr('checked'))
+        if ($(this).prop('checked'))
             $('#content_'+$(this).attr('id')).show();
         else
             $('#content_'+$(this).attr('id')).hide();
