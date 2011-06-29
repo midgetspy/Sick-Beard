@@ -66,6 +66,6 @@ class TVTorrentzCache(tvcache.TVCache):
 
         logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
 
-        self._addCacheEntry(title, url)
+        self._addCacheEntry(title, url, quality=common.Quality.nameQuality(url))
 
 provider = TVTorrentzProvider()
