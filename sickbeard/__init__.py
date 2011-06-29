@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin
+from providers import ezrss, tvtorrents, tvtorrentz, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
@@ -144,6 +144,8 @@ MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 60
 
 EZRSS = False
+TVTORRENTZ = False
+TVTORRENTZ_PASSKEY = None
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
@@ -487,7 +489,10 @@ def initialize(consoleLogging=True):
         EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         if not EZRSS:
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
-            
+       
+        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTZ', 'tvtorrentz', 0))    
+        TVTORRENTZ_PASSKEY = check_setting_str(CFG, 'TVTORRENTZ', 'tvtorrentz_passkey', '')
+
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
@@ -969,6 +974,10 @@ def save_config():
     new_config['EZRSS'] = {}
     new_config['EZRSS']['ezrss'] = int(EZRSS)
     
+    new_config['TVTORRENTZ'] = {}
+    new_config['TVTORRENTZ']['tvtorrentz'] = int(TVTORRENTZ)
+    new_config['TVTORRENTZ']['tvtorrentz_passkey'] = TVTORRENTZ_PASSKEY
+ 
     new_config['TVTORRENTS'] = {}
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
