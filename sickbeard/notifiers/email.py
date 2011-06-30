@@ -54,6 +54,9 @@ class EmailNotifier:
         except smtperror, e:
             logger.log(u"Error Sending Email: "+ex(e), logger.ERROR)
             return False
+        except smtplib.SMTPRecipientsRefused, e:
+            logger.log(u"Error Sending Email: "+ex(e), logger.ERROR)
+            return False
     
         return True
     
