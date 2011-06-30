@@ -47,7 +47,7 @@ class EmailNotifier:
         msg = header + message
     
         try:
-            server = smtplib.SMTP('localhost')
+            server = smtplib.SMTP(sickbeard.EMAIL_SMTPHOST)
             server.set_debuglevel(0)
             server.sendmail(sickbeard.EMAIL_FROMADDR, sickbeard.EMAIL_TOADDR, msg)
             server.quit()
