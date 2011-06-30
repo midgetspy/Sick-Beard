@@ -617,8 +617,82 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
+          <div id="core-component-group10" class="component-group clearfix">
+                   <div class="component-group-desc">
+                        <h3><img src="$sbRoot/images/notifiers/twitter.gif" alt="Email" title="Email" width="16" height="16" /> Email</a></h3>
+                        <p>Send notifications via your SMTP Server.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_email" id="use_email" #if $sickbeard.USE_EMAIL then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_email">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send email notifications?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_email">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">You will need relay access via a SMTP server.</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_email">
+                        <div class="field-pair">
+                            <input type="checkbox" name="email_notify_onsnatch" id="email_notify_onsnatch" #if $sickbeard.EMAIL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="email_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="email_notify_ondownload" id="email_notify_ondownload" #if $sickbeard.EMAIL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="email_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">From Address</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">This will be who the notification is sent from.<br/></span>
+                                <input type="text" id="email_fromaddr" value="$sickbeard.EMAIL_FROMADDR" size="35" /><br />
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">To Address</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">This is who we will send notification to.<br/></span>
+                                <input type="text" id="email_toaddr" value="$sickbeard.EMAIL_TOADDR" size="35" /><br />
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">SMTP Server</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">A SMTP server you have relay access for.<br/></span>
+                                <input type="text" id="email_smtphost" value="$sickbeard.EMAIL_SMTPHOST" size="35" /><br />
+                            </label>
+                        </div>
+
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_email //-->
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+
+
+		<br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components //-->
 
 </form>
