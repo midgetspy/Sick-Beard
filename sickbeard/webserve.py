@@ -2552,7 +2552,7 @@ class WebInterface:
     # Provides a URL to generate an .ics/iCalendar subscribable URL to have an upcoming episode schedule
     @cherrypy.expose
     def ical(self):
-	from icalendar import Calendar, Event
+	from lib.icalendar import Calendar, Event
 	import random
 
 	logger.log(u"Receiving iCal request from " + str(cherrypy.request.remote.ip))
@@ -2571,7 +2571,7 @@ class WebInterface:
         
         # Create an iCalendar object with FixedOffset as air times are in EST
         cal = Calendar()
-        from icalendar import FixedOffset, UTC
+        from lib.icalendar import FixedOffset, UTC
 	# Create the EST tzinfo object
         EST = FixedOffset(-240, "EST")
         cal.add('version', '2.0')
