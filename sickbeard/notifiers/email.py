@@ -39,7 +39,7 @@ class EmailNotifier:
 
     def _send_email(self, message=None):
     
-        logger.log(u"Sending email: "+message)
+        logger.log(u"Sending email: "+ message)
     
         header = ("From: %s\r\nTo: %s\r\nSubject: %s\r\n"
                     % (sickbeard.EMAIL_FROMADDR, sickbeard.EMAIL_TOADDR, '[Sickbeard Notifier]'))
@@ -58,11 +58,10 @@ class EmailNotifier:
         return True
     
     def _notifyEmail(self, message='', force=False):
-        prefix = sickbeard.EMAIL_PREFIX
     
         if not sickbeard.USE_EMAIL and not force:
             return False
     
-        return self._send_email(prefix+": "+message)
+        return self._send_email(message)
 
 notifier = EmailNotifier

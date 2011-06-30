@@ -228,7 +228,6 @@ EMAIL_NOTIFY_ONDOWNLOAD = False
 EMAIL_TOADDR = None
 EMAIL_FROMADDR = None
 EMAIL_SMTPHOST = None
-EMAIL_PREFIX = None
 
 USE_NOTIFO = False
 NOTIFO_NOTIFY_ONSNATCH = False
@@ -369,7 +368,7 @@ def initialize(consoleLogging=True):
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                USE_EMAIL, EMAIL_TOADDR, EMAIL_FROMADDR, EMAIL_SMTPHOST, TWITTER_PREFIX, \
+                USE_EMAIL, EMAIL_TOADDR, EMAIL_FROMADDR, EMAIL_SMTPHOST, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
@@ -572,7 +571,6 @@ def initialize(consoleLogging=True):
         EMAIL_FROMADDR = check_setting_str(CFG, 'Email', 'email_fromaddr', '')
         EMAIL_TOADDR = check_setting_str(CFG, 'Email', 'email_toaddr', '')
         EMAIL_SMTPHOST = check_setting_str(CFG, 'Email', 'email_smtphost', '')
-        EMAIL_PREFIX = check_setting_str(CFG, 'Email', 'email_prefix', 'Sick Beard')
 
         USE_NOTIFO = bool(check_setting_int(CFG, 'Notifo', 'use_notifo', 0))
         NOTIFO_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_onsnatch', 0))
@@ -1074,7 +1072,7 @@ def save_config():
     new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
     new_config['Email']['email_fromaddr'] = EMAIL_FROMADDR
     new_config['Email']['email_toaddr'] = EMAIL_TOADDR
-    new_config['Email']['email_prefix'] = EMAIL_PREFIX
+    new_config['Email']['email_smtphost'] = EMAIL_SMTPHOST
 
     new_config['Notifo'] = {}
     new_config['Notifo']['use_notifo'] = int(USE_NOTIFO)
