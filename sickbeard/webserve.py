@@ -1139,6 +1139,7 @@ class ConfigNotifications:
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_fromaddr=None, email_toaddr=None, email_smtphost=None,
+                          email_smtpport=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
         results = []
@@ -1327,6 +1328,7 @@ class ConfigNotifications:
         sickbeard.EMAIL_FROMADDR = email_fromaddr
         sickbeard.EMAIL_TOADDR = email_toaddr
         sickbeard.EMAIL_SMTPHOST = email_smtphost
+        sickbeard.EMAIL_SMTPPORT = email_smtpport
 
         sickbeard.save_config()
 
