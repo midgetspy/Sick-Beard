@@ -1139,6 +1139,7 @@ class ConfigNotifications:
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_fromaddr=None, email_toaddr=None, email_smtphost=None,
+                          use_sms=None, sms_notify_onsnatch=None, sms_notify_ondownload=None, sms_email=None, sms_password=None, sms_phonenumber=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
         results = []
@@ -1270,6 +1271,21 @@ class ConfigNotifications:
         else:
             email_notify_ondownload = 0
 
+        if use_sms == "on":
+            use_sms = 1
+        else:
+            use_sms = 0
+
+        if sms_notify_onsnatch == "on":
+            sms_notify_onsnatch = 1
+        else:
+            sms_notify_onsnatch = 0
+
+        if sms_notify_ondownload == "on":
+            sms_notify_ondownload = 1
+        else:
+            sms_notify_ondownload = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1327,6 +1343,13 @@ class ConfigNotifications:
         sickbeard.EMAIL_FROMADDR = email_fromaddr
         sickbeard.EMAIL_TOADDR = email_toaddr
         sickbeard.EMAIL_SMTPHOST = email_smtphost
+
+        sickbeard.USE_SMS = use_sms
+        sickbeard.SMS_NOTIFY_ONSNATCH = sms_notify_onsnatch
+        sickbeard.SMS_NOTIFY_ONDOWNLOAD = sms_notify_ondownload
+        sickbeard.SMS_EMAIL = sms_email
+        sickbeard.SMS_PASSWORD = sms_password
+        sickbeard.SMS_PHONENUMBER = sms_phonenumber
 
         sickbeard.save_config()
 
@@ -1904,6 +1927,15 @@ class Home:
         else:
             return "Test notice failed to "+urllib.unquote_plus(host)
 
+    @cherrypy.expose
+    def testSMS(self, email=None, password=None, phonenumber=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.sms_notifier.test_notify(email, password, phonenumber)
+        if result:
+            return "Test notice sent successfully to "+phonenumber
+        else:
+            return "Test notice failed to "+phonenumber
     @cherrypy.expose
     def testPLEX(self, host=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"

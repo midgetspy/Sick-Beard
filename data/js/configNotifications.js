@@ -27,6 +27,16 @@ $(document).ready(function(){
         function (data){ $('#testXBMC-result').html(data); });
     });
 
+    $('#testSMS').click(function(){
+        $('#testSMS-result').html(loading);
+        var sms_email = $("#sms_email").val();
+        var sms_password = $("#sms_password").val();
+        var sms_phonenumber = $("#sms_phonenumber").val();
+        
+        $.get(sbRoot+"/home/testSMS", {'email': sms_email, 'password': sms_password, 'phonenumber': sms_phonenumber}, 
+        function (data){ $('#testSMS-result').html(data); });
+    });
+
     $('#testPLEX').click(function(){
         $('#testPLEX-result').html(loading);
         var plex_host = $("#plex_host").val();

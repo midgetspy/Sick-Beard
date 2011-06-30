@@ -38,23 +38,29 @@ class SmsNotifier:
         if sickbeard.SMS_NOTIFY_ONDOWNLOAD:
             self._notifySms(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)
 
-    def test_notify(self):
-        return self._notifySms("This is a test notification from Sick Beard", force=True)
+    def test_notify(self, email, password, phonenumber):
+        return self._send_sms(message='This is a test notification from Sick Beard', email=email, password=password, phonenumber=phonenumber)
 
-    def _send_sms(self, message=None):
-    
+    def _send_sms(self, message=None, email=None, password=None, phonenumber=None):
+
+        # if we didnt pass creds this is not a test and should pull from config
+        if not email and not password and not phonenumber:
+            email = sickbeard.SMS_EMAIL
+            password = sickbeard.SMS_PASSWORD
+            phonenumber = sickbeard.SMS_PHONENUMBER
+
         # If we didnt load module return false
         if loaded:
             logger.log(u"Sending SMS: "+ message)
 
             voice = Voice()
             try:
-                voice.login(email=sickbeard.SMS_EMAIL ,passwd=sickbeard.SMS_PASSWORD)
+                voice.login(email=email ,passwd=password)
             except googlevoice.util.LoginError, e:
                 logger.log(u"Error Sending SMS: "+ex(e), logger.ERROR)
                 return False
 
-            voice.send_sms(sickbeard.SMS_PHONENUMBER, message)
+            voice.send_sms(phonenumber, message)
             return True
         else:
             logger.log(u"Error importing module pygooglevoice, SMS Notification disabled", logger.ERROR)

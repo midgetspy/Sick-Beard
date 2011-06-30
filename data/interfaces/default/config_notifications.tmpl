@@ -620,7 +620,7 @@
 
           <div id="core-component-group10" class="component-group clearfix">
                    <div class="component-group-desc">
-                        <h3><img src="$sbRoot/images/notifiers/email.gif" alt="Email" title="Email" width="16" height="16" /> Email</a></h3>
+                        <h3><img src="$sbRoot/images/notifiers/email.gif" alt="Email" title="Email" width="16" height="16" /> Email</h3>
                         <p>Send notifications via your SMTP Server.</p>
                     </div>
 
@@ -690,7 +690,79 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
+          <div id="core-component-group10" class="component-group clearfix">
+                   <div class="component-group-desc">
+                        <h3><a href="http://code.google.com/p/pygooglevoice/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/sms.gif" alt="Sms" title="Sms" width="16" height="16" /> SMS</a></h3>
+                        <p>Send notifications via SMS using pygooglevoice</p>
+                    </div>
 
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_sms" id="use_sms" #if $sickbeard.USE_SMS then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_sms">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send SMS notifications?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_sms">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">This notifier requires pygooglevoice to be installed.</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_sms">
+                        <div class="field-pair">
+                            <input type="checkbox" name="sms_notify_onsnatch" id="sms_notify_onsnatch" #if $sickbeard.SMS_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="sms_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="sms_notify_ondownload" id="sms_notify_ondownload" #if $sickbeard.SMS_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="sms_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Google Voice Email Address</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">This is the email address of your Google Voice Account.<br/></span>
+                                <input type="text" name="sms_email" id="sms_email" value="$sickbeard.SMS_EMAIL" size="35" /><br />
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Google Voice Passowrd</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">This is your Google Voice Account's Password.<br/></span>
+                                <input type="password" name="sms_password" id="sms_password" value="$sickbeard.SMS_PASSWORD" size="35" /><br />
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Phone Number</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-desc">The Phone Number to send SMS notifications too.<br/></span>
+                                <input type="text" name="sms_phonenumber" id="sms_phonenumber" value="$sickbeard.SMS_PHONENUMBER" size="35" /><br />
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testSMS-result">Click below to test.</div>
+                        <input type="button" value="Test SMS" id="testSMS" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_email //-->
+                    </fieldset>
+                </div><!-- /component-group //-->
 
 		<br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components //-->
