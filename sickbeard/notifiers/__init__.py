@@ -24,6 +24,7 @@ import growl
 import prowl
 import tweet
 import email
+import sms
 from . import libnotify
 import notifo
 import nmj
@@ -37,6 +38,7 @@ growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
 email_notifier = email.EmailNotifier()
+sms_notifier = sms.SmsNotifier()
 notifo_notifier = notifo.NotifoNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
@@ -52,6 +54,7 @@ notifiers = [
     prowl_notifier,
     twitter_notifier,
     email_notifier,
+    sms_notifier,
     nmj_notifier,
     synoindex_notifier,
 ]

@@ -229,6 +229,13 @@ EMAIL_TOADDR = None
 EMAIL_FROMADDR = None
 EMAIL_SMTPHOST = None
 
+USE_SMS = False
+SMS_NOTIFY_ONSNATCH = False
+SMS_NOTIFY_ONDOWNLOAD = False
+SMS_EMAIL = None
+SMS_PASSWORD = None
+SMS_PHONENUMBER = None
+
 USE_NOTIFO = False
 NOTIFO_NOTIFY_ONSNATCH = False
 NOTIFO_NOTIFY_ONDOWNLOAD = False
@@ -359,6 +366,7 @@ def initialize(consoleLogging=True):
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, \
+                SMS_NOTIFY_ONSNATCH, SMS_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
@@ -369,6 +377,7 @@ def initialize(consoleLogging=True):
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_EMAIL, EMAIL_TOADDR, EMAIL_FROMADDR, EMAIL_SMTPHOST, \
+                USE_SMS, SMS_EMAIL, SMS_PASSWORD, SMS_PHONENUMBER, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
@@ -571,6 +580,13 @@ def initialize(consoleLogging=True):
         EMAIL_FROMADDR = check_setting_str(CFG, 'Email', 'email_fromaddr', '')
         EMAIL_TOADDR = check_setting_str(CFG, 'Email', 'email_toaddr', '')
         EMAIL_SMTPHOST = check_setting_str(CFG, 'Email', 'email_smtphost', '')
+
+        USE_SMS = bool(check_setting_int(CFG, 'Sms', 'use_sms', 0))
+        SMS_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Sms', 'sms_notify_onsnatch', 0))
+        SMS_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Sms', 'sms_notify_ondownload', 0))        
+        SMS_EMAIL = check_setting_str(CFG, 'Sms', 'sms_email', '')
+        SMS_PASSWORD = check_setting_str(CFG, 'Sms', 'sms_password', '')
+        SMS_PHONENUMBER = check_setting_str(CFG, 'Sms', 'sms_phonenumber', '')
 
         USE_NOTIFO = bool(check_setting_int(CFG, 'Notifo', 'use_notifo', 0))
         NOTIFO_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_onsnatch', 0))
@@ -1073,6 +1089,14 @@ def save_config():
     new_config['Email']['email_fromaddr'] = EMAIL_FROMADDR
     new_config['Email']['email_toaddr'] = EMAIL_TOADDR
     new_config['Email']['email_smtphost'] = EMAIL_SMTPHOST
+
+    new_config['Sms'] = {}
+    new_config['Sms']['use_sms'] = int(USE_SMS)
+    new_config['Sms']['sms_notify_onsnatch'] = int(SMS_NOTIFY_ONSNATCH)
+    new_config['Sms']['sms_notify_ondownload'] = int(SMS_NOTIFY_ONDOWNLOAD)
+    new_config['Sms']['sms_email'] = SMS_EMAIL
+    new_config['Sms']['sms_password'] = SMS_PASSWORD
+    new_config['Sms']['sms_phonenumber'] = SMS_PHONENUMBER
 
     new_config['Notifo'] = {}
     new_config['Notifo']['use_notifo'] = int(USE_NOTIFO)
