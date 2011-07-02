@@ -3,6 +3,7 @@
 img { border: 0; vertical-align: middle;}
 
 body {
+text-rendering: optimizeLegibility;
 background-color:#F5F1E4;
 color:#000;
 font-family:'Verdana', 'Helvetica', 'Sans-serif', 'sans';
@@ -148,9 +149,7 @@ clear:left;
 
 .plotInfo {
 cursor:help;
-margin-left: 8px;
-position: relative;
-float: right;
+font-weight: 700;
 }
 
 #tooltip {
@@ -334,6 +333,7 @@ div#addShowPortal  button .buttontext { position: relative; display: block; padd
 
 td.tvShow { font-weight: bold; }
 
+td.tvShow a {text-decoration: none; font-size: 1.2em; }
 td.tvShow:hover { background-color: #cfcfcf !important; cursor: pointer; }
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
 
