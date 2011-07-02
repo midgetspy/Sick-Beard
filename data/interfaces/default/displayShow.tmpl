@@ -153,7 +153,7 @@ Change selected episodes to
 #end if
     </td>
     <td>$epResult["name"]</td>
-    <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 $epLoc[len($show._location)+1:]
