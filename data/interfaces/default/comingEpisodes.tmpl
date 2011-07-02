@@ -87,7 +87,7 @@
 
 \$(document).ready(function(){ 
 
-#set $sort_codes = {'date': 2, 'show': 3, 'network': 4}
+#set $sort_codes = {'date': 0, 'show': 1, 'network': 4}
 #if $sort not in $sort_codes:
     $sort = 'date'
 #end if
@@ -96,10 +96,10 @@
     \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: sortList,
         headers: {
-            0: { sorter: false},
-            1: { sorter: false},
-            2: { sorter: 'nextAirDate' },
-            3: { sorter: 'loadingNames' },
+            0: { sorter: 'nextAirDate' },
+            1: { sorter: 'loadingNames' },
+            2: { sorter: false},
+            3: { sorter: false},
             4: { sorter: 'loadingNames' },
             5: { sorter: 'quality' },
             6: { sorter: false},
@@ -119,7 +119,7 @@
 
 <br/>
     <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Airdate</th><th>Show</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Search</th></tr></thead>
+    <thead><tr><th>Airdate</th><th>Show</th><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Search</th></tr></thead>
     <tbody>
 
     #for $cur_result in $sql_results:
@@ -143,19 +143,18 @@
 
     <!-- start $cur_result["show_name"] //-->
       <tr class="$show_div">
-        <td class="nowrap">
-        #if $cur_result["description"] != "" and $cur_result["description"] != None:
-            <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
-        #end if
-            <span><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></span>
-        </td>
-        <td>$cur_result["name"]</td>
+#if $cur_result["description"] != "" and $cur_result["description"] != None:
+        <td class="nowrap" align="center"><span class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>">$datetime.date.fromordinal(int($cur_result["airdate"]))</span></td>
+#else:
         <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
+#end if
         <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if
         </td>
+        <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
+        <td>$cur_result["name"]</td>
         <td align="center">$cur_result["network"]</td>
         <td align="center">
 #if int($cur_result["quality"]) in $qualityPresets:
