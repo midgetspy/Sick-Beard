@@ -159,9 +159,9 @@
         <td align="center">$cur_result["network"]</td>
         <td align="center">
 #if int($cur_result["quality"]) in $qualityPresets:
-$qualityPresetStrings[int($cur_result["quality"])]
+    <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
 #else:
-Custom
+    <span class="quality Custom">Custom</span>
 #end if
         </td>
         <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
