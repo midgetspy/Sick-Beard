@@ -151,7 +151,6 @@ Change selected episodes to
 #else:
     <td align="center">$epResult["episode"]</td>
 #end if
-    </td>
     <td>$epResult["name"]</td>
     <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
