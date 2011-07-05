@@ -26,6 +26,11 @@ import subprocess
 
 import sickbeard
 
+try:
+    import subliminal
+except:
+    pass
+
 from sickbeard import db
 from sickbeard import classes
 from sickbeard import common
@@ -116,8 +121,8 @@ class PostProcessor(object):
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
     
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
-            # only list it if the only non-shared part is the extension
-            if '.' in associated_file_path[len(base_name):]:
+            # only list it if the only non-shared part is the extension or if it is a subtitle
+            if '.' in associated_file_path[len(base_name):] and not 'srt' in associated_file_path[len(base_name):]:
                 continue
 
             file_path_list.append(associated_file_path)
@@ -170,7 +175,7 @@ class PostProcessor(object):
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
             # get the extension
-            cur_extension = cur_file_path.rpartition('.')[-1]
+            cur_extension = cur_file_path[len(file_path.rpartition('.')[0]+'.'):]
         
             # replace .nfo with .nfo-orig to avoid conflicts
             if cur_extension == 'nfo':
@@ -403,6 +408,7 @@ class PostProcessor(object):
         episodes = []
         
                         # try to look up the nzb in history
+
         attempt_list = [self._history_lookup,
     
                         # try to analyze the episode name
@@ -565,6 +571,7 @@ class PostProcessor(object):
                 out, err = p.communicate() #@UnusedVariable
                 self._log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
+
                 self._log(u"Unable to run extra_script: "+ex(e))
     
     def _is_priority(self, ep_obj, new_ep_quality):
@@ -668,6 +675,16 @@ class PostProcessor(object):
             with cur_ep.lock:
                 cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
                 cur_ep.saveToDB()
+
+        # download associated subtitles
+        if sickbeard.USE_SUBTITLES:
+            self._log(u"Downloading subtitles for %s" % self.file_name, logger.DEBUG)
+            subli = subliminal.Subliminal(config=False, cache_dir=sickbeard.CACHE_DIR, workers=1, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=1, autostart=False)
+            subli.languages = sickbeard.SUBTITLES_LANGUAGES
+            subli.plugins = sickbeard.subtitles.getEnabledPluginList()
+            subli.startWorkers()
+            subli.downloadSubtitles([self.file_path])
+            subli.stopWorkers()
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:

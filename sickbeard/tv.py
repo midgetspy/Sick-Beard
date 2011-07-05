@@ -26,6 +26,11 @@ import glob
 
 import sickbeard
 
+try:
+    import subliminal
+except:
+    pass
+
 import xml.etree.cElementTree as etree
 
 from name_parser.parser import NameParser, InvalidNameException
@@ -715,6 +720,19 @@ class TVShow(object):
                     curEp.saveToDB()
 
 
+    def downloadSubtitles(self):
+        #TODO: Add support for force option
+        #TODO: Share the same global subliminal instance?
+        if not os.path.isdir(self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't download subtitles")
+            return
+        subli = subliminal.Subliminal(config=False, cache_dir=sickbeard.CACHE_DIR, workers=1, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3, autostart=False)
+        subli.languages = sickbeard.SUBTITLES_LANGUAGES
+        subli.plugins = sickbeard.subtitles.getEnabledPluginList()
+        subli.startWorkers()
+        subli.downloadSubtitles([self._location])
+        subli.stopWorkers()
+    
 
     def fixEpisodeNames(self):
 

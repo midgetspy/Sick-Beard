@@ -18,6 +18,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+sys.path.append('lib')
 
 # we only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:

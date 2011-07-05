@@ -1,0 +1,106 @@
+#import sickbeard
+#from sickbeard import subtitles
+
+#set global $title="Config - Subtitles"
+#set global $header="Subtitles"
+
+#set global $sbPath="../.."
+
+#set global $topmenu="config"
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/configSubtitles.js"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+
+<div id="config">
+<div id="config-content">
+
+<form id="configForm" action="saveSubtitles" method="post">
+
+            <div id="config-components">
+                
+                <div id="core-component-group1" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Subtitles support</h3>
+                        <p>Enable or disable subtitles support</p>
+                    </div>
+                    
+                    <fieldset class="component-group-list">
+
+			            <div class="field-pair">
+                            <input type="checkbox"#if $sickbeard.USE_SUBTITLES and $subtitles.SUBTITLES_SUPPORTED then " checked=\"checked\"" else ""##if $subtitles.SUBTITLES_SUPPORTED then "" else " disabled=\"disabled\""# id="use_subtitles" name="use_subtitles">
+                            <label for="use_subtitles" class="clearfix">
+                                <span class="component-title">Enable</span>
+                            </label>
+                        </div>
+
+                    </fieldset>
+                </div><!-- /component-group1 //-->
+                #if $subtitles.SUBTITLES_SUPPORTED
+                <div id="core-component-group2" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Subtitle Plugins</h3>
+                        <p>Check off and drag the plugins into the order you want them to be used.</p>
+                        <p class="note">At least one plugin is required.</p>
+                        <p class="note"><span style="color: #654B24; font-size: 16px;">*</span> Web-scraping plugin</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <ul id="plugin_order_list">
+                        #for $curPlugin in $sickbeard.subtitles.sortedPluginList():
+                          <li class="ui-state-default" id="$curPlugin.id">
+                            <input type="checkbox" id="enable_$curPlugin.id" class="plugin_enabler" #if $curPlugin.enabled then "checked=\"checked\"" else ""#/>
+                            <a href="$curPlugin.url" class="imgLink" target="_new">
+                                <img src="$sbRoot/images/subtitles/$curPlugin.image" alt="$curPlugin.name" title="$curPlugin.name" width="16" height="16" />
+                                $curPlugin.name
+                                #if not $curPlugin.api_based then "*" else ""#
+                            </a>
+                          </li>
+                        #end for
+                        </ul>
+                        <input type="hidden" name="subtitles_plugins" id="subtitles_plugins" value="<%=" ".join([x['id'] + ':' + str(int(x['enabled'])) for x in sickbeard.subtitles.sortedPluginList()])%>"/>
+                        <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                    </fieldset>
+                </div><!-- /component-group2 //-->
+
+                <div id="core-component-group3" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Configure Subtitles</h3>
+                        <p>Choose languages and options for your subtitles</p>
+                    </div>
+                    
+                    <fieldset class="component-group-list">
+
+			            <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Languages</span>
+                                <input type="text" size="15" value="<%=",".join(sickbeard.SUBTITLES_LANGUAGES)%>" id="subtitles_languages" name="subtitles_languages">
+                                <span class="component-desc">In order of preferences, comma separated</span>
+                            </label>
+                        </div>
+			            <div class="field-pair">
+                            <input type="checkbox" #if $sickbeard.SUBTITLES_MULTI then "checked=\"checked\"" else ""# id="subtitles_multi" name="subtitles_multi">
+                            <label for="subtitles_multi" class="clearfix">
+                                <span class="component-title">Multi-languages</span>
+                                <span class="component-desc">Download subtitles in multiple languages? (e.g. .en.srt, .fr.srt)</span>
+                            </label>
+                        </div>
+
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                    </fieldset>
+                </div><!-- /component-group3 //-->
+                #end if
+
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+
+            </div><!-- /config-components //-->
+
+</form>
+</div></div>
+<div class="clearfix"></div>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
