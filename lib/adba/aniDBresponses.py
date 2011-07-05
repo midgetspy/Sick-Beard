@@ -525,6 +525,30 @@ class GroupResponse(Response):
 		self.codehead=()
 		self.codetail=('gid', 'rating', 'votes', 'animes', 'files', 'name', 'shortname', 'ircchannel', 'ircserver', 'url')
 		self.coderep=()
+		
+class GroupstatusResponse(Response):
+	def __init__(self,cmd,restag,rescode,resstr,datalines):
+		"""
+		attributes:
+
+		data:
+		gid	   - group id
+		rating	   - rating
+		votes	   - votes
+		animes	   - anime count
+		files	   - file count
+		name	   - name
+		shortname  - short
+		ircchannel - irc channel
+		ircserver  - irc server
+		url	   - url
+
+		"""
+		Response.__init__(self,cmd,restag,rescode,resstr,datalines)
+		self.codestr='GROUPSTATUS'
+		self.codehead=()
+		self.codetail=('gid', 'name', 'state', ' last_episode_number', 'rating', 'votes', 'episode_range')
+		self.coderep=()
 
 class BuddyListResponse(Response):
 	def __init__(self,cmd,restag,rescode,resstr,datalines):
@@ -682,6 +706,38 @@ class VoteRevokedResponse(Response):
 		self.codestr='VOTE_REVOKED'
 		self.codehead=()
 		self.codetail=('name', 'value')
+		self.coderep=()
+
+
+
+class NotificationAddedResponse(Response):
+	def __init__(self,cmd,restag,rescode,resstr,datalines):
+		"""
+		attributes:
+
+		data: 
+		nid - notofication id
+
+		"""
+		Response.__init__(self,cmd,restag,rescode,resstr,datalines)
+		self.codestr='NOTIFICATION_ITEM_ADDED'
+		self.codehead=()
+		self.codetail=('nid')
+		self.coderep=()
+
+class NotificationUpdatedResponse(Response):
+	def __init__(self,cmd,restag,rescode,resstr,datalines):
+		"""
+		attributes:
+
+		data: 
+		nid - notofication id
+
+		"""
+		Response.__init__(self,cmd,restag,rescode,resstr,datalines)
+		self.codestr='NOTIFICATION_ITEM_UPDATED'
+		self.codehead=()
+		self.codetail=('nid')
 		self.coderep=()
 
 class NotificationEnabledResponse(Response):
@@ -1114,6 +1170,20 @@ class MultipleFilesFoundResponse(Response):
 		self.codetail=()
 		self.coderep=('fid',)
 
+class NoGroupsFoundResponse(Response):
+	def __init__(self,cmd,restag,rescode,resstr,datalines):
+		"""
+		attributes:
+
+		data:
+
+		"""
+		Response.__init__(self,cmd,restag,rescode,resstr,datalines)
+		self.codestr='NO GROUPS FOUND'
+		self.codehead=()
+		self.codetail=()
+		self.coderep=()
+
 class NoSuchAnimeResponse(Response):
 	def __init__(self,cmd,restag,rescode,resstr,datalines):
 		"""
@@ -1396,6 +1466,20 @@ class NoSuchUserResponse(Response):
 		self.codetail=()
 		self.coderep=()
 
+class NoChanges(Response):
+	def __init__(self,cmd,restag,rescode,resstr,datalines):
+		"""
+		attributes:
+
+		data:
+
+		"""
+		Response.__init__(self,cmd,restag,rescode,resstr,datalines)
+		self.codestr='NO_CHANGES'
+		self.codehead=()
+		self.codetail=()
+		self.coderep=()
+
 class NotLoggedInResponse(Response):
 	def __init__(self,cmd,restag,rescode,resstr,datalines):
 		"""
@@ -1663,6 +1747,7 @@ class VersionResponse(Response):
 		self.codetail=('version',)
 		self.coderep=()
 
+
 responses={
 	'200':LoginAcceptedResponse,
 	'201':LoginAcceptedNewVerResponse,
@@ -1680,11 +1765,14 @@ responses={
 	'220':FileResponse,
 	'221':MylistResponse,
 	'222':MylistStatsResponse,
+	'225':GroupstatusResponse,
 	'230':AnimeResponse,
 	'231':AnimeBestMatchResponse,
 	'232':RandomanimeResponse,
 	'240':EpisodeResponse,
 	'245':ProducerResponse,
+	'246':NotificationAddedResponse,
+	'248':NotificationUpdatedResponse,
 	'250':GroupResponse,
 	'253':BuddyListResponse,
 	'254':BuddyStateResponse,
@@ -1723,6 +1811,7 @@ responses={
 	'320':NoSuchFileResponse,
 	'321':NoSuchEntryResponse,
 	'322':MultipleFilesFoundResponse,
+	'325':NoGroupsFoundResponse,
 	'330':NoSuchAnimeResponse,
 	'340':NoSuchEpisodeResponse,
 	'345':NoSuchProducerResponse,
@@ -1743,6 +1832,7 @@ responses={
 	'392':NoSuchMessageResponse,
 	'393':NoSuchNotifyResponse,
 	'394':NoSuchUserResponse,
+	'399':NoChanges,
 	'403':NotLoggedInResponse,
 	'410':NoSuchMylistFileResponse,
 	'411':NoSuchMylistEntryResponse,

@@ -25,8 +25,10 @@ class aniDBabstractObject(object):
     def __init__(self,aniDB,load=False):
         self.aniDB = aniDB
         self.log = self.aniDB.log
+        self.laoded = False
         if load:
             self.load_data()
+        
     
     def _fill(self,dataline):
         for key in dataline:
@@ -77,6 +79,14 @@ class aniDBabstractObject(object):
     def load_data(self):
         return False
     
+    def add_notification(self):
+        """
+        type - Type of notification: type=>  0=all, 1=new, 2=group, 3=complete
+        priority - low = 0, medium = 1, high = 2 (unconfirmed)
+        
+        """
+        if(self.aid):
+            self.aniDB.notifyadd(aid=self.aid,type=1, priority=1)
     
     
 class Anime(aniDBabstractObject):
@@ -102,8 +112,15 @@ class Anime(aniDBabstractObject):
         self.rawData = self.aniDB.anime(aid=self.aid,aname=self.name,amask=self.bitCode)
         self._fill(self.rawData.datalines[0])
         self._builPreSequal()
-
-        
+        self.laoded = True
+    
+    def get_groups(self):
+        self.rawData = self.aniDB.groupstatus(aid=self.aid)
+        self.release_groups = []
+        for line in self.rawData.datalines:
+            self.release_groups.append(unicode(line["name"], "utf-8"))
+        return self.release_groups
+    
     def _builPreSequal(self):
         if self.related_aid_list and self.related_aid_type:
             try:
@@ -117,7 +134,8 @@ class Anime(aniDBabstractObject):
                     self.__dict__["prequal"] = self.related_aid_list
                 elif self.str_related_aid_type == 1:
                     self.__dict__["sequal"] = self.related_aid_list
-                    
+    
+                  
                     
 class Episode(aniDBabstractObject):
     
@@ -158,6 +176,7 @@ class Episode(aniDBabstractObject):
         self.rawData = self.aniDB.file(fid=self.fid,size=self.size,ed2k=self.ed2k,aid=self.aid,aname=None,gid=None,gname=None,epno=self.epno,fmask=self.bitCodeF,amask=self.bitCodeA)
         self._fill(self.rawData.datalines[0])
         self._build_names()
+        self.laoded = True
         
     def add_to_mylist(self,status=None):
         """
@@ -178,6 +197,7 @@ class Episode(aniDBabstractObject):
         else:
             # TODO: add the name or something
             self.log(u"Added the episode to anidb")
+
     
     def _calculate_file_stuff(self, filePath):
         if not filePath:

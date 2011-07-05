@@ -95,6 +95,13 @@ class PushAckCommand(Command):
 		parameters={'nid':nid}
 		Command.__init__(self,'PUSHACK',**parameters)
 
+class NotifyAddCommand(Command):
+	def __init__(self,aid=None,gid=None,type=None,priority=None):
+		if not (aid or gid) or (aid and gid):
+			raise AniDBIncorrectParameterError,"You must provide aid OR gid for NOTIFICATIONADD command"
+		parameters={'aid':aid,"gid":gid,"type":type,"priority":priority}
+		Command.__init__(self,'NOTIFICATIONADD',**parameters)
+		
 class NotifyCommand(Command):
 	def __init__(self,buddy=None):
 		parameters={'buddy':buddy}
@@ -174,6 +181,13 @@ class GroupCommand(Command):
 			raise AniDBIncorrectParameterError,"You must provide <g(id|name)> for GROUP command"
 		parameters={'gid':gid,'gname':gname}
 		Command.__init__(self,'GROUP',**parameters)
+
+class GroupstatusCommand(Command):
+	def __init__(self,aid=None,status=None):
+		if not aid:
+			raise AniDBIncorrectParameterError,"You must provide aid for GROUPSTATUS command"
+		parameters={'aid':aid,'status':status}
+		Command.__init__(self,'GROUPSTATUS',**parameters)
 
 class ProducerCommand(Command):
 	def __init__(self,pid=None,pname=None):
