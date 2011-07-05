@@ -420,7 +420,7 @@ class PostProcessor(object):
         return to_return
     
     def _analyze_anidb(self,filePath):
-        if not self._set_up_anidb_connection():
+        if not helpers.set_up_anidb_connection():
             return (None, None, None)
         
         ep = self._build_anidb_episode(sickbeard.ADBA_CONNECTION,filePath)
@@ -456,28 +456,7 @@ class PostProcessor(object):
             self._log(u"Lookup successful, using anidb filename "+str(ep.anidb_file_name), logger.DEBUG)
             return self._analyze_name(ep.anidb_file_name)
         raise InvalidNameException
-    
-    def _set_up_anidb_connection(self):
-        if not sickbeard.USE_ANIDB:
-            self._log(u"Usage of anidb disabled. Skiping", logger.DEBUG)
-            return False
-        
-        if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
-            self._log(u"anidb username and/or password are not set. Aborting anidb lookup.", logger.DEBUG)
-            return False
-        
-        if not sickbeard.ADBA_CONNECTION:
-            anidb_logger = lambda x : logger.log("ANIDB: "+str(x), logger.DEBUG)
-            sickbeard.ADBA_CONNECTION = adba.Connection(keepAlive=True,log=anidb_logger)
-        
-        if not sickbeard.ADBA_CONNECTION.authed():
-            try:
-                sickbeard.ADBA_CONNECTION.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
-            except Exception,e :
-                self._log(u"exception msg: "+str(e))
-                return False
-            
-        return True
+
     
     def _build_anidb_episode(self,connection,filePath):
         ep = adba.Episode(connection,filePath=filePath,
@@ -487,7 +466,7 @@ class PostProcessor(object):
         return ep
     
     def _add_to_anidb_mylist(self,filePath):
-        if self._set_up_anidb_connection():
+        if helpers.set_up_anidb_connection():
             if not self.anidbEpisode: # seams like we could parse the name before, now lets build the anidb object
                 self.anidbEpisode = self._build_anidb_episode(sickbeard.ADBA_CONNECTION,filePath)
             

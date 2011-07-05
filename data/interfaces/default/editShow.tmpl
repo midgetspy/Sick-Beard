@@ -1,6 +1,7 @@
 #import sickbeard
 #from sickbeard import common
 #from sickbeard import exceptions
+#from sickbeard import helpers
 #set global $title="Edit "+$show.name
 #set global $header=$show.name
 
@@ -69,6 +70,9 @@ Air by date:
 Anime: <input type="checkbox" name="anime" #if $show.is_anime then "CHECKED" else ""#><br />
 (check this if the show is released as Show.265 rather than Show.S02E03, this show is an anime)<br />
 <br />
+
+
+
 <input type="submit" value="Submit" />
 </form>
 

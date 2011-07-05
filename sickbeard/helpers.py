@@ -38,6 +38,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
+import lib.adba as adba
 
 urllib._urlopener = classes.SickBeardURLopener()
 
@@ -559,7 +560,7 @@ def _check_against_names(name, show):
 
     for showName in showNames:
         nameFromList = full_sanitizeSceneName(showName)
-        # FIXME: this is ok for most shows but will give fals positives on:
+        # FIXME: this is ok for most shows but will give false positives on:
         """nameFromList = "show name: special version"
            nameInQuestion = "show name"
            ->will match
@@ -574,8 +575,17 @@ def _check_against_names(name, show):
            and the second example is good that it wont match
 
         """
-
-        if nameFromList.find(nameInQuestion) == 0:
+        """
+        regex = "^."+ ".*"
+        match = re.match(regex, curName)
+        
+        if not match:
+            singleName = False
+            break
+        """
+        
+        logger.log(u"----------Comparing names: '"+nameFromList+"' vs '"+nameInQuestion+"'", logger.DEBUG)
+        if nameFromList == nameInQuestion:
             return True
 
     return False
@@ -632,7 +642,30 @@ def check_for_anime(tvdb_id,showList=[],forceDB=False):
             logger.log(u"This show (tvdbid:"+str(tvdb_id)+") is flaged as an anime", logger.DEBUG)
             return True
     return False 
-    
+
+def set_up_anidb_connection(self):
+        if not sickbeard.USE_ANIDB:
+            self._log(u"Usage of anidb disabled. Skiping", logger.DEBUG)
+            return False
+        
+        if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
+            self._log(u"anidb username and/or password are not set. Aborting anidb lookup.", logger.DEBUG)
+            return False
+        
+        if not sickbeard.ADBA_CONNECTION:
+            anidb_logger = lambda x : logger.log("ANIDB: "+str(x), logger.DEBUG)
+            sickbeard.ADBA_CONNECTION = adba.Connection(keepAlive=True,log=anidb_logger)
+        
+        if not sickbeard.ADBA_CONNECTION.authed():
+            try:
+                sickbeard.ADBA_CONNECTION.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
+            except Exception,e :
+                self._log(u"exception msg: "+str(e))
+                return False
+            
+        return True
+
+   
 def full_sanitizeSceneName(name):
     return re.sub('[. -]', ' ', sanitizeSceneName(name)).lower().lstrip()
 
