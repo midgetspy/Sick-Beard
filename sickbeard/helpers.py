@@ -643,13 +643,13 @@ def check_for_anime(tvdb_id,showList=[],forceDB=False):
             return True
     return False 
 
-def set_up_anidb_connection(self):
+def set_up_anidb_connection():
         if not sickbeard.USE_ANIDB:
-            self._log(u"Usage of anidb disabled. Skiping", logger.DEBUG)
+            logger.log(u"Usage of anidb disabled. Skiping", logger.DEBUG)
             return False
         
         if not sickbeard.ANIDB_USERNAME and not sickbeard.ANIDB_PASSWORD:
-            self._log(u"anidb username and/or password are not set. Aborting anidb lookup.", logger.DEBUG)
+            logger.log(u"anidb username and/or password are not set. Aborting anidb lookup.", logger.DEBUG)
             return False
         
         if not sickbeard.ADBA_CONNECTION:
@@ -660,7 +660,7 @@ def set_up_anidb_connection(self):
             try:
                 sickbeard.ADBA_CONNECTION.auth(sickbeard.ANIDB_USERNAME, sickbeard.ANIDB_PASSWORD)
             except Exception,e :
-                self._log(u"exception msg: "+str(e))
+                logger.log(u"exception msg: "+str(e))
                 return False
             
         return True
