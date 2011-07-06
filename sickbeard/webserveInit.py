@@ -84,17 +84,26 @@ def initWebServer(options = {}):
         if options['ip_whitelist'] != "":
                 def addressInNetwork(ip,net):
                         "Is an address in a network"
-                        ipaddr = struct.unpack('>L',socket.inet_aton(ip))[0]
-                        netaddr,bits = net.split('/')
-                        ipnet = struct.unpack('>L',socket.inet_aton(netaddr))[0]
-                        mask = ((2L<<(int(bits))-1) - 1)<<(32-int(bits))
-                        # print net.split('/')
-                        # print bin(ipaddr)
-                        # print bin(ipnet)
-                        # print bin(mask)
-                        # print bin(ipaddr & mask)
-                        # print bin(ipnet & mask)
-                        return ipaddr & mask == ipnet & mask
+                        
+                        if net == "":
+                            return False
+                        
+                        try:
+                            ipaddr = struct.unpack('>L',socket.inet_aton(ip))[0]
+                            netaddr,bits = net.split('/')
+                            ipnet = struct.unpack('>L',socket.inet_aton(netaddr))[0]
+                            mask = ((2L<<(int(bits))-1) - 1)<<(32-int(bits))
+                            # print net.split('/')
+                            # print bin(ipaddr)
+                            # print bin(ipnet)
+                            # print bin(mask)
+                            # print bin(ipaddr & mask)
+                            # print bin(ipnet & mask)
+                            return ipaddr & mask == ipnet & mask
+                        except ValueError: #Will get here if ip_whitelist is incorrectly formatted
+                            logger.log(u'Configuration Error: \'ip_whitelist\' option is malformed. Value: %s, assuming no whitelisted hosts until restart.' % net, logger.ERROR )
+                            options['ip_whitelist'] = ""
+                            return False
 
                 def check_ip():
                         for whitelist_network in options['ip_whitelist'].split(','):
