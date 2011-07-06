@@ -80,44 +80,53 @@ def initWebServer(options = {}):
         }
         app = cherrypy.tree.mount(WebInterface(), options['web_root'], conf)
 
-        #trusted networks
+        def addressInNetwork(ip,net):
+                """Is an address in a network. 
+                   Returns: 
+                      True - If 'ip' is an address in 'net' which is a string in the format x.x.x.x/y
+                      False - If 'ip' not in 'net' or if there is an error."""
+                
+                if net == "":
+                    return False
+                
+                try:
+                    ipaddr = struct.unpack('>L',socket.inet_aton(ip))[0]
+                    netaddr,bits = net.split('/')
+                    ipnet = struct.unpack('>L',socket.inet_aton(netaddr))[0]
+                    mask = ((2L<<(int(bits))-1) - 1)<<(32-int(bits))
+
+                    return ipaddr & mask == ipnet & mask
+                except ValueError: # Will get here if ip_whitelist is incorrectly formatted
+                    logger.log(u'Configuration Error: \'ip_whitelist\' option is malformed. Value: %s, assuming no whitelisted hosts until restart.' % net, logger.ERROR )
+                    options['ip_whitelist'] = ""
+                    
+                    return False
+
+        def check_ip():
+                """Will check current request address against 'ip_whitelist' and will disable authentication with those that match. 'ip_whitelist' is a list in the form of 'a.a.a.a/b[,c.c.c.c/d]'"""
+                try:
+                    # Iterate through whitelisted networks
+                    for whitelist_network in options['ip_whitelist'].split(','): 
+                            # Check if current network matches remote address
+                            if addressInNetwork(cherrypy.request.remote.ip, whitelist_network.strip()):
+                                
+                                    # Search for and remove basic_auth hook from list of hooks to execute
+                                    old_hooks = cherrypy.request.hooks['before_handler']
+                                    new_hooks = []
+                                    for hook in old_hooks:
+                                            if hook.callback != cherrypy.lib.auth_basic.basic_auth:
+                                                    new_hooks.append(hook)
+
+                                    cherrypy.request.hooks['before_handler'] = new_hooks
+                                    
+                                    # No need to continue checking if already matched once
+                                    return True 
+                except Exception:
+                    logger.log(u'webserverInit.py:check_ip() - Error while processing whitelist. ip_whitelist = %s' % options['ip_whitelist'], logger.ERROR)
+
+                return True
+
         if options['ip_whitelist'] != "":
-                def addressInNetwork(ip,net):
-                        "Is an address in a network"
-                        
-                        if net == "":
-                            return False
-                        
-                        try:
-                            ipaddr = struct.unpack('>L',socket.inet_aton(ip))[0]
-                            netaddr,bits = net.split('/')
-                            ipnet = struct.unpack('>L',socket.inet_aton(netaddr))[0]
-                            mask = ((2L<<(int(bits))-1) - 1)<<(32-int(bits))
-                            # print net.split('/')
-                            # print bin(ipaddr)
-                            # print bin(ipnet)
-                            # print bin(mask)
-                            # print bin(ipaddr & mask)
-                            # print bin(ipnet & mask)
-                            return ipaddr & mask == ipnet & mask
-                        except ValueError: #Will get here if ip_whitelist is incorrectly formatted
-                            logger.log(u'Configuration Error: \'ip_whitelist\' option is malformed. Value: %s, assuming no whitelisted hosts until restart.' % net, logger.ERROR )
-                            options['ip_whitelist'] = ""
-                            return False
-
-                def check_ip():
-                        for whitelist_network in options['ip_whitelist'].split(','):
-                                if addressInNetwork(cherrypy.request.remote.ip, whitelist_network.strip()):
-                                        old_hooks = cherrypy.request.hooks['before_handler']
-                                        new_hooks = []
-                                        for hook in old_hooks:
-                                                if hook.callback != cherrypy.lib.auth_basic.basic_auth:
-                                                        new_hooks.append(hook)
-
-                                        cherrypy.request.hooks['before_handler'] = new_hooks
-                                        #logger.log('Disabled auth on local request')
-                        return True
-
                 checkipaddress = cherrypy.Tool('on_start_resource', check_ip, 1)
                 cherrypy.tools.checkipaddress = checkipaddress
 
