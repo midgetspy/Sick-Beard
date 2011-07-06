@@ -197,9 +197,12 @@ def pickBestResult(results, quality_list=None,show=None):
     logger.log(u"Picking the best result out of "+str([x.name for x in results]), logger.DEBUG)
 
     # build the black And white list
+    bwl = None
     if show:
         bwl = BlackAndWhiteList(show.tvdbid)
-
+    else:
+        logger.log("Could not create black and white list no show was given", logger.DEBUG)
+        
     # find the best result for the current episode
     bestResult = None
     for cur_result in results:
