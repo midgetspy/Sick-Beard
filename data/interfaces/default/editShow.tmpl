@@ -1,4 +1,5 @@
 #import sickbeard
+#import lib.adba as adba
 #from sickbeard import common
 #from sickbeard import exceptions
 #from sickbeard import helpers
@@ -70,9 +71,15 @@ Air by date:
 Anime: <input type="checkbox" name="anime" #if $show.is_anime then "CHECKED" else ""#><br />
 (check this if the show is released as Show.265 rather than Show.S02E03, this show is an anime)<br />
 <br />
-
-
-
+<ul>
+#if helpers.set_up_anidb_connection():
+	#set $anime = adba.Anime($sickbeard.ADBA_CONNECTION,name=$show.name,paramsA=['aid'],load=True)
+	#set $groups = $anime.get_groups()
+	#for $group in $groups:
+		<li>$group</li>
+	#end for
+#end if
+</ul>
 <input type="submit" value="Submit" />
 </form>
 
