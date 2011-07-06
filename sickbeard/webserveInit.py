@@ -48,6 +48,7 @@ def initWebServer(options = {}):
             args = [status, message, traceback, version]
 
             logger.log(u"Authentication error, check cherrypy log for more details", logger.WARNING)
+            logger.log(u" - URL = %s" % str(cherrypy.request.path_info), logger.WARNING)
             logger.log(u" - IP = %s" % str(cherrypy.request.remote.ip), logger.WARNING)
             auth_header = cherrypy.request.headers.get('authorization')
             if auth_header:
