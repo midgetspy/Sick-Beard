@@ -383,3 +383,26 @@ span.false {
 span.true {
     color: #669966; /* green */
 }
+
+
+div.blackwhiteliste{
+	float:left;
+}
+
+div.blackwhiteliste span{
+	display:block;
+	text-align: center;
+}
+div.blackwhiteliste select{
+	min-width: 150px;
+}
+div.blackwhiteliste{
+	text-align: center;
+}
+div.blackwhiteliste.black input{
+	float: right;
+}
+div.blackwhiteliste.white input{
+	float: left;
+}
+

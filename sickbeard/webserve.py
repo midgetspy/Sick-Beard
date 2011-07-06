@@ -45,6 +45,7 @@ from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, AR
 from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api
+from sickbeard.blackandwhitelist import *
 
 try:
     import json
@@ -2144,7 +2145,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, anime=None ,directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, anime=None, blacklist=None, whitelist=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2207,6 +2208,17 @@ class Home:
 
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
+
+        if whitelist:
+            whitelist = whitelist.split(",")
+        if blacklist:
+            blacklist = blacklist.split(",")
+        
+        bwl = BlackAndWhiteList(showObj.tvdbid)
+        if whitelist:
+            bwl.set_white_keywords_for("release_group", whitelist)
+        if blacklist:
+            bwl.set_black_keywords_for("release_group", blacklist)
 
         errors = []
         with showObj.lock:

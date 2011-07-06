@@ -3,6 +3,7 @@
 #from sickbeard import common
 #from sickbeard import exceptions
 #from sickbeard import helpers
+#from sickbeard.blackandwhitelist import *
 #set global $title="Edit "+$show.name
 #set global $header=$show.name
 
@@ -41,6 +42,7 @@
   });
 
 });
+
 //-->
 </script>
 
@@ -71,21 +73,97 @@ Air by date:
 Anime: <input type="checkbox" name="anime" #if $show.is_anime then "CHECKED" else ""#><br />
 (check this if the show is released as Show.265 rather than Show.S02E03, this show is an anime)<br />
 <br />
-<ul>
-#if helpers.set_up_anidb_connection():
-	#set $anime = adba.Anime($sickbeard.ADBA_CONNECTION,name=$show.name,paramsA=['aid'],load=True)
-	#set $groups = $anime.get_groups()
-	#for $group in $groups:
-		<li>$group</li>
-	#end for
+#if $show.is_anime
+<p>
+Realease Groups:
+</p>
+<div class="blackwhiteliste white">
+	<span>White:</span>
+	<select multiple id="white">
+		#set $bwl = BlackAndWhiteList($show.tvdbid)
+		#if $bwl.whiteDict.has_key("release_group")
+			#set $list = $bwl.whiteDict["release_group"]
+			#for $keyword in $list:
+				<option value="$keyword">$keyword</option>
+			#end for
+		#end if
+	</select>
+	<br/>
+	<input id="removeW" value="Remove &gt;&gt;" type="button"/>
+</div>
+
+<div class="blackwhiteliste pool">
+	<span>Pool:</span>
+	<select multiple id="pool">
+	
+	#if helpers.set_up_anidb_connection():
+		#set $anime = adba.Anime($sickbeard.ADBA_CONNECTION,name=$show.name,paramsA=['aid'],load=True)
+		#set $groups = $anime.get_groups()
+		#for $group in $groups:
+			<option value="$group">$group</option>
+		#end for
+	#end if
+	</select>
+	<br/>
+	<input id="addW" value="&lt;&lt; Add" type="button"/>
+	<input id="addB" value="Add &gt;&gt;" type="button"/>
+</div>
+
+<div class="blackwhiteliste black">
+	<span>Black:</span>
+	<select multiple id="black">
+		#set $bwl = BlackAndWhiteList($show.tvdbid)
+		#if $bwl.blackDict.has_key("release_group")
+			#set $list = $bwl.blackDict["release_group"]
+			#for $keyword in $list:
+				<option value="$keyword">$keyword</option>
+			#end for
+		#end if
+	</select>
+	<br/>
+	<input id="removeB" value="&lt;&lt; Remove" type="button"/>
+</div>
+<br style="clear:both;"/>
 #end if
-</ul>
-<input type="submit" value="Submit" />
+<input type="hidden" name="whitelist" id="whitelist"/>
+<input type="hidden" name="blacklist" id="blacklist"/>
+
+<input type="submit" value="Submit" id="submit"/>
 </form>
 
 <script type="text/javascript" charset="utf-8">
 <!--
     jQuery('#location').fileBrowser({ title: 'Select Show Location' });
+
+	\$('#submit').click(function(){
+		var realvalues = [];
+
+		\$('#white option').each(function(i, selected) {
+		    realvalues[i] = \$(selected).val();
+		});
+		\$("#whitelist").val(realvalues.join(","));
+		
+		realvalues = [];
+		\$('#black option').each(function(i, selected) {
+		    realvalues[i] = \$(selected).val();
+		});
+		\$("#blacklist").val(realvalues.join(","));
+	});
+
+	\$('#removeW').click(function() {
+		return !\$('#white option:selected').remove().appendTo('#pool');
+	});
+	\$('#addW').click(function() {
+	 	return !\$('#pool option:selected').remove().appendTo('#white');
+	});
+	\$('#addB').click(function() {
+	 	return !\$('#pool option:selected').remove().appendTo('#black');
+	 });
+	\$('#removeB').click(function() {
+		return !\$('#black option:selected').remove().appendTo('#pool');
+	});
+	
+	
 //-->
 </script>
 
