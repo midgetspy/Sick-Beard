@@ -11,7 +11,7 @@ import shutil, time, os.path, sys
 from sickbeard import encodingKludge as ek 
 from sickbeard import db
 from sickbeard.databases import mainDB
-
+from lib.configobj import ConfigObj
 
 
 
@@ -23,7 +23,6 @@ sickbeard.showList = []
 sickbeard.QUALITY_DEFAULT = 4
 sickbeard.SEASON_FOLDERS_DEFAULT = 1
 sickbeard.SEASON_FOLDERS_FORMAT = 'Season %02d'
-
 
 sickbeard.PROG_DIR = os.path.abspath('..')
 sickbeard.DATA_DIR = sickbeard.PROG_DIR
@@ -73,6 +72,12 @@ class TestDBConnection(db.DBConnection,object):
 # this will override the normal db connection
 sickbeard.db.DBConnection = TestDBConnection
 
+class SickbeardTestConfigCase(unittest.TestCase):
+    
+    def setUp(self):
+        sickbeard.CONFIG_FILE = "../config.ini"
+        sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
+        sickbeard.initialize(consoleLogging=False)
 
 #=================
 # test functions
