@@ -78,16 +78,6 @@ Anime: <input type="checkbox" name="anime" #if $show.is_anime then "CHECKED" els
 Realease Groups:
 </p>
 
-#set $bwl = BlackAndWhiteList($show.tvdbid)
-#set $whitelist = []
-#if $bwl.whiteDict.has_key("release_group")
-	#set $whitelist = $bwl.whiteDict["release_group"]
-#end if
-#set $blacklist = []
-#if $bwl.blackDict.has_key("release_group")
-	#set $blacklist = $bwl.blackDict["release_group"]
-#end if
-
 <div class="blackwhiteliste white">
 	<span>White:</span>
 	<select multiple id="white">
@@ -102,16 +92,11 @@ Realease Groups:
 <div class="blackwhiteliste pool">
 	<span>Pool:</span>
 	<select multiple id="pool">
-	
-	#if helpers.set_up_anidb_connection():
-		#set $anime = adba.Anime($sickbeard.ADBA_CONNECTION,name=$show.name,paramsA=['aid'],load=True)
-		#set $groups = $anime.get_groups()
-		#for $group in $groups:
-			#if $group not in $whitelist and $group not in $blacklist:
-				<option value="$group">$group</option>
-			#end if
-		#end for
-	#end if
+	#for $group in $groups
+		#if $group not in $whitelist and $group not in $blacklist:
+			<option value="$group">$group</option>
+		#end if
+	#end for
 	</select>
 	<br/>
 	<input id="addW" value="&lt;&lt; Add" type="button"/>

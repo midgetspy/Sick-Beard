@@ -46,6 +46,7 @@ from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api
 from sickbeard.blackandwhitelist import *
+from lib import adba
 
 try:
     import json
@@ -2164,9 +2165,26 @@ class Home:
                 return _genericMessage("Error", errString)
 
         if not location and not anyQualities and not bestQualities and not seasonfolders:
-
+            
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu()
+            
+            if showObj.is_anime:
+
+                bwl = BlackAndWhiteList(showObj.tvdbid)
+                t.whitelist = []
+                if bwl.whiteDict.has_key("release_group"):
+                    t.whitelist = bwl.whiteDict["release_group"]
+                
+                t.blacklist = []
+                if bwl.blackDict.has_key("release_group"):
+                    t.blacklist = bwl.blackDict["release_group"]
+                
+                t.groups = []
+                if helpers.set_up_anidb_connection():
+                    anime = adba.Anime(sickbeard.ADBA_CONNECTION,name=showObj.name,paramsA=['aid'],load=True)
+                    t.groups = anime.get_groups()
+
             with showObj.lock:
                 t.show = showObj
 
