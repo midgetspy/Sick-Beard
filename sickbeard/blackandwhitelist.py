@@ -45,6 +45,18 @@ class BlackAndWhiteList(object):
     def load_whitelist(self):
         return self._load_list(self._tableWhite)    
     
+    def get_black_keywords_for(self,range):
+        if self.blackDict.has_key(range):
+            return self.blackDict[range]
+        else:
+            return []
+    
+    def get_white_keywords_for(self,range):
+        if self.whiteDict.has_key(range):
+            return self.whiteDict[range]
+        else:
+            return []
+
     def set_black_keywords(self,range,values):
         self._del_all_black_keywors()
         self._add_keywords(self._tableBlack, range, values)
