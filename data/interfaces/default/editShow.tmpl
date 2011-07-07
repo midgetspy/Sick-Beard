@@ -77,16 +77,23 @@ Anime: <input type="checkbox" name="anime" #if $show.is_anime then "CHECKED" els
 <p>
 Realease Groups:
 </p>
+
+#set $bwl = BlackAndWhiteList($show.tvdbid)
+#set $whitelist = []
+#if $bwl.whiteDict.has_key("release_group")
+	#set $whitelist = $bwl.whiteDict["release_group"]
+#end if
+#set $blacklist = []
+#if $bwl.blackDict.has_key("release_group")
+	#set $blacklist = $bwl.blackDict["release_group"]
+#end if
+
 <div class="blackwhiteliste white">
 	<span>White:</span>
 	<select multiple id="white">
-		#set $bwl = BlackAndWhiteList($show.tvdbid)
-		#if $bwl.whiteDict.has_key("release_group")
-			#set $list = $bwl.whiteDict["release_group"]
-			#for $keyword in $list:
+			#for $keyword in $whitelist:
 				<option value="$keyword">$keyword</option>
 			#end for
-		#end if
 	</select>
 	<br/>
 	<input id="removeW" value="Remove &gt;&gt;" type="button"/>
@@ -100,7 +107,9 @@ Realease Groups:
 		#set $anime = adba.Anime($sickbeard.ADBA_CONNECTION,name=$show.name,paramsA=['aid'],load=True)
 		#set $groups = $anime.get_groups()
 		#for $group in $groups:
-			<option value="$group">$group</option>
+			#if $group not in $whitelist and $group not in $blacklist:
+				<option value="$group">$group</option>
+			#end if
 		#end for
 	#end if
 	</select>
@@ -112,13 +121,9 @@ Realease Groups:
 <div class="blackwhiteliste black">
 	<span>Black:</span>
 	<select multiple id="black">
-		#set $bwl = BlackAndWhiteList($show.tvdbid)
-		#if $bwl.blackDict.has_key("release_group")
-			#set $list = $bwl.blackDict["release_group"]
-			#for $keyword in $list:
-				<option value="$keyword">$keyword</option>
-			#end for
-		#end if
+		#for $keyword in $blacklist:
+			<option value="$keyword">$keyword</option>
+		#end for
 	</select>
 	<br/>
 	<input id="removeB" value="&lt;&lt; Remove" type="button"/>
