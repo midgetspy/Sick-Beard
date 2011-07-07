@@ -14,6 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with aDBa.  If not, see <http://www.gnu.org/licenses/>.
+from random import shuffle
 
 class AniDBMaper:
     
@@ -54,7 +55,7 @@ class AniDBMaper:
             if field in wanted and not field in self.blacklist:
                 bit = bit ^ (1<<len(map)-index-1)
                 
-        bit = str(hex(bit)).lstrip("0x")
+        bit = str(hex(bit)).lstrip("0x").rstrip("L")
         bit = ''.join(["0" for unused in xrange(len(map)/4 - len(bit))])+bit
         return bit
     
@@ -102,7 +103,6 @@ class AniDBMaper:
 
     def checkMapping(self,verbos=False):
         
-        from random import shuffle
         print "------"
         print "File F: "+ str(self.checkMapFileF(verbos))
         print "------"
@@ -123,7 +123,7 @@ class AniDBMaper:
     
     def _checkMapGeneral(self,getGeneralMap,getBits,getCodes,verbos=False):
         map = getGeneralMap()
-        self.shuffle(map)
+        shuffle(map)
         mask = [elem for elem in map if elem not in self.blacklist][:5]
         bits = getBits(mask)
         mask_re = getCodes(bits)
