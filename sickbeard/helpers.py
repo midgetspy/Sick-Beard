@@ -662,8 +662,10 @@ def set_up_anidb_connection():
             except Exception,e :
                 logger.log(u"exception msg: "+str(e))
                 return False
-            
-        return True
+        else:
+            return True
+ 
+        return sickbeard.ADBA_CONNECTION.authed()
 
    
 def full_sanitizeSceneName(name):
