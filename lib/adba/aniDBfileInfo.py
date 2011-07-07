@@ -20,7 +20,8 @@ import hashlib
 # http://www.radicand.org/blog/orz/2010/2/21/edonkey2000-hash-in-python/
 def get_file_hash(filePath):
     """ Returns the ed2k hash of a given file."""
-
+    if not filePath:
+        return None
     md4 = hashlib.new('md4').copy
 
     def gen(f):

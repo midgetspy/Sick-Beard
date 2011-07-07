@@ -110,11 +110,14 @@ class Anime(aniDBabstractObject):
         """load the data from anidb"""
         
         self.rawData = self.aniDB.anime(aid=self.aid,aname=self.name,amask=self.bitCode)
-        self._fill(self.rawData.datalines[0])
-        self._builPreSequal()
-        self.laoded = True
+        if self.rawData.datalines:
+            self._fill(self.rawData.datalines[0])
+            self._builPreSequal()
+            self.laoded = True
     
     def get_groups(self):
+        if not self.aid:
+            return []
         self.rawData = self.aniDB.groupstatus(aid=self.aid)
         self.release_groups = []
         for line in self.rawData.datalines:
