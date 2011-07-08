@@ -49,6 +49,11 @@ class FreshOnTvCache(tvcache.TVCache):
 
     def _getRSSData(self):
         passkey = sickbeard.FRESHONTV_PASSKEY
+        if not passkey:
+            logger.log("No passkey has been specified, cannot search",
+                       logger.ERROR)
+            return
+
         url = self.provider.url + 'rss.php?feed=dl&passkey=' + passkey
 
         logger.log("FreshOnTV cache update URL: " + url, logger.DEBUG)
