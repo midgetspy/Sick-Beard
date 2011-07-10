@@ -47,10 +47,16 @@ def check_auth(users, encrypt=None, realm=None):
 def basic_auth(realm, users, encrypt=None, debug=False):
     """If auth fails, raise 401 with a basic authentication header.
     
-    realm: a string containing the authentication realm.
-    users: a dict of the form: {username: password} or a callable returning a dict.
-    encrypt: callable used to encrypt the password returned from the user-agent.
-             if None it defaults to a md5 encryption.
+    realm
+        A string containing the authentication realm.
+        
+    users
+        A dict of the form: {username: password} or a callable returning a dict.
+        
+    encrypt
+        callable used to encrypt the password returned from the user-agent.
+        if None it defaults to a md5 encryption.
+        
     """
     if check_auth(users, encrypt):
         if debug:
@@ -65,8 +71,10 @@ def basic_auth(realm, users, encrypt=None, debug=False):
 def digest_auth(realm, users, debug=False):
     """If auth fails, raise 401 with a digest authentication header.
     
-    realm: a string containing the authentication realm.
-    users: a dict of the form: {username: password} or a callable returning a dict.
+    realm
+        A string containing the authentication realm.
+    users
+        A dict of the form: {username: password} or a callable returning a dict.
     """
     if check_auth(users, realm=realm):
         if debug:

@@ -1,7 +1,7 @@
 """A high-speed, production ready, thread pooled, generic HTTP server.
 
 Simplest example on how to use this module directly
-(without using CherryPy's application machinery):
+(without using CherryPy's application machinery)::
 
     from cherrypy import wsgiserver
     
@@ -9,14 +9,15 @@ Simplest example on how to use this module directly
         status = '200 OK'
         response_headers = [('Content-type','text/plain')]
         start_response(status, response_headers)
-        return ['Hello world!\n']
+        return ['Hello world!']
     
     server = wsgiserver.CherryPyWSGIServer(
                 ('0.0.0.0', 8070), my_crazy_app,
                 server_name='www.cherrypy.example')
+    server.start()
     
 The CherryPy WSGI server can serve as many WSGI applications 
-as you want in one instance by using a WSGIPathInfoDispatcher:
+as you want in one instance by using a WSGIPathInfoDispatcher::
     
     d = WSGIPathInfoDispatcher({'/': my_crazy_app, '/blog': my_blog_app})
     server = wsgiserver.CherryPyWSGIServer(('0.0.0.0', 80), d)
@@ -30,7 +31,7 @@ its origin, not its coupling.
 
 For those of you wanting to understand internals of this module, here's the
 basic call flow. The server's listening thread runs a very tight loop,
-sticking incoming connections onto a Queue:
+sticking incoming connections onto a Queue::
 
     server = CherryPyWSGIServer(...)
     server.start()
@@ -43,7 +44,7 @@ sticking incoming connections onto a Queue:
 
 Worker threads are kept in a pool and poll the Queue, popping off and then
 handling each connection in turn. Each connection can consist of an arbitrary
-number of requests and their responses, so we run a nested loop:
+number of requests and their responses, so we run a nested loop::
 
     while True:
         conn = server.requests.get()
@@ -81,12 +82,22 @@ try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO
+DEFAULT_BUFFER_SIZE = -1
 
 _fileobject_uses_str_type = isinstance(socket._fileobject(None)._rbuf, basestring)
 
 import threading
 import time
 import traceback
+def format_exc(limit=None):
+    """Like print_exc() but return a string. Backport for Python 2.3."""
+    try:
+        etype, value, tb = sys.exc_info()
+        return ''.join(traceback.format_exception(etype, value, tb, limit))
+    finally:
+        etype = value = tb = None
+
+
 from urllib import unquote
 from urlparse import urlparse
 import warnings
@@ -130,6 +141,10 @@ comma_separated_headers = ['Accept', 'Accept-Charset', 'Accept-Encoding',
     'If-Match', 'If-None-Match', 'Pragma', 'Proxy-Authenticate', 'TE',
     'Trailer', 'Transfer-Encoding', 'Upgrade', 'Vary', 'Via', 'Warning',
     'WWW-Authenticate']
+
+
+import logging
+if not hasattr(logging, 'statistics'): logging.statistics = {}
 
 
 def read_headers(rfile, hdict=None):
@@ -303,10 +318,6 @@ class KnownLengthRFile(object):
         return data
 
 
-class MaxSizeExceeded(Exception):
-    pass
-
-
 class ChunkedRFile(object):
     """Wraps a file-like object, returning an empty string when exhausted.
     
@@ -463,26 +474,37 @@ class HTTPRequest(object):
     """An HTTP Request (and response).
     
     A single HTTP connection may consist of multiple request/response pairs.
-    
-    server: the Server object which is receiving this request.
-    conn: the HTTPConnection object on which this request connected.
-    
-    inheaders: a dict of request headers.
-    outheaders: a list of header tuples to write in the response.
-    ready: when True, the request has been parsed and is ready to begin
-        generating the response. When False, signals the calling Connection
-        that the response should not be generated and the connection should
-        close.
-    close_connection: signals the calling Connection that the request
-        should close. This does not imply an error! The client and/or
-        server may each request that the connection be closed.
-    chunked_write: if True, output will be encoded with the "chunked"
-        transfer-coding. This value is set automatically inside
-        send_headers.
     """
     
+    server = None
+    """The HTTPServer object which is receiving this request."""
+    
+    conn = None
+    """The HTTPConnection object on which this request connected."""
+    
+    inheaders = {}
+    """A dict of request headers."""
+    
+    outheaders = []
+    """A list of header tuples to write in the response."""
+    
+    ready = False
+    """When True, the request has been parsed and is ready to begin generating
+    the response. When False, signals the calling Connection that the response
+    should not be generated and the connection should close."""
+    
+    close_connection = False
+    """Signals the calling Connection that the request should close. This does
+    not imply an error! The client and/or server may each request that the
+    connection be closed."""
+    
+    chunked_write = False
+    """If True, output will be encoded with the "chunked" transfer-coding.
+    
+    This value is set automatically inside send_headers."""
+    
     def __init__(self, server, conn):
-        self.server = server
+        self.server= server
         self.conn = conn
         
         self.ready = False
@@ -490,25 +512,43 @@ class HTTPRequest(object):
         self.scheme = "http"
         if self.server.ssl_adapter is not None:
             self.scheme = "https"
+        # Use the lowest-common protocol in case read_request_line errors.
+        self.response_protocol = 'HTTP/1.0'
         self.inheaders = {}
         
         self.status = ""
         self.outheaders = []
         self.sent_headers = False
-        self.close_connection = False
-        self.chunked_write = False
+        self.close_connection = self.__class__.close_connection
+        self.chunked_read = False
+        self.chunked_write = self.__class__.chunked_write
     
     def parse_request(self):
         """Parse the next HTTP request start-line and message-headers."""
         self.rfile = SizeCheckWrapper(self.conn.rfile,
                                       self.server.max_request_header_size)
         try:
-            self._parse_request()
+            self.read_request_line()
         except MaxSizeExceeded:
-            self.simple_response("413 Request Entity Too Large")
+            self.simple_response("414 Request-URI Too Long",
+                "The Request-URI sent with the request exceeds the maximum "
+                "allowed bytes.")
             return
+        
+        try:
+            success = self.read_request_headers()
+        except MaxSizeExceeded:
+            self.simple_response("413 Request Entity Too Large",
+                "The headers sent with the request exceed the maximum "
+                "allowed bytes.")
+            return
+        else:
+            if not success:
+                return
+        
+        self.ready = True
     
-    def _parse_request(self):
+    def read_request_line(self):
         # HTTP/1.1 connections are persistent by default. If a client
         # requests a page, then idles (leaves the connection open),
         # then rfile.readline() will raise socket.error("timed out").
@@ -537,13 +577,14 @@ class HTTPRequest(object):
                 return
         
         if not request_line.endswith(CRLF):
-            self.simple_response(400, "HTTP requires CRLF terminators")
+            self.simple_response("400 Bad Request", "HTTP requires CRLF terminators")
             return
         
         try:
             method, uri, req_protocol = request_line.strip().split(" ", 2)
-        except ValueError:
-            self.simple_response(400, "Malformed Request-Line")
+            rp = int(req_protocol[5]), int(req_protocol[7])
+        except (ValueError, IndexError):
+            self.simple_response("400 Bad Request", "Malformed Request-Line")
             return
         
         self.uri = uri
@@ -594,7 +635,6 @@ class HTTPRequest(object):
         # Notice that, in (b), the response will be "HTTP/1.1" even though
         # the client only understands 1.0. RFC 2616 10.5.6 says we should
         # only return 505 if the _major_ version is different.
-        rp = int(req_protocol[5]), int(req_protocol[7])
         sp = int(self.server.protocol[5]), int(self.server.protocol[7])
         
         if sp[0] != rp[0]:
@@ -602,18 +642,23 @@ class HTTPRequest(object):
             return
         self.request_protocol = req_protocol
         self.response_protocol = "HTTP/%s.%s" % min(rp, sp)
+    
+    def read_request_headers(self):
+        """Read self.rfile into self.inheaders. Return success."""
         
         # then all the http headers
         try:
             read_headers(self.rfile, self.inheaders)
         except ValueError, ex:
             self.simple_response("400 Bad Request", ex.args[0])
-            return
+            return False
         
         mrbs = self.server.max_request_body_size
         if mrbs and int(self.inheaders.get("Content-Length", 0)) > mrbs:
-            self.simple_response("413 Request Entity Too Large")
-            return
+            self.simple_response("413 Request Entity Too Large",
+                "The entity sent with the request exceeds the maximum "
+                "allowed bytes.")
+            return False
         
         # Persistent connection support
         if self.response_protocol == "HTTP/1.1":
@@ -643,7 +688,7 @@ class HTTPRequest(object):
                     # if there is an extension we don't recognize.
                     self.simple_response("501 Unimplemented")
                     self.close_connection = True
-                    return
+                    return False
         
         # From PEP 333:
         # "Servers and gateways that implement HTTP 1.1 must provide
@@ -671,23 +716,22 @@ class HTTPRequest(object):
             except socket.error, x:
                 if x.args[0] not in socket_errors_to_ignore:
                     raise
-        
-        self.ready = True
+        return True
     
     def parse_request_uri(self, uri):
         """Parse a Request-URI into (scheme, authority, path).
         
-        Note that Request-URI's must be one of:
+        Note that Request-URI's must be one of::
             
             Request-URI    = "*" | absoluteURI | abs_path | authority
         
         Therefore, a Request-URI which starts with a double forward-slash
-        cannot be a "net_path":
+        cannot be a "net_path"::
         
             net_path      = "//" authority [ abs_path ]
         
         Instead, it must be interpreted as an "abs_path" with an empty first
-        path segment:
+        path segment::
         
             abs_path      = "/"  path_segments
             path_segments = segment *( "/" segment )
@@ -722,7 +766,9 @@ class HTTPRequest(object):
             cl = int(self.inheaders.get("Content-Length", 0))
             if mrbs and mrbs < cl:
                 if not self.sent_headers:
-                    self.simple_response("413 Request Entity Too Large")
+                    self.simple_response("413 Request Entity Too Large",
+                        "The entity sent with the request exceeds the maximum "
+                        "allowed bytes.")
                 return
             self.rfile = KnownLengthRFile(self.conn.rfile, cl)
         
@@ -737,15 +783,23 @@ class HTTPRequest(object):
     def simple_response(self, status, msg=""):
         """Write a simple response back to the client."""
         status = str(status)
-        buf = [self.server.protocol + " " + 
+        buf = [self.server.protocol + " " +
                status + CRLF,
                "Content-Length: %s\r\n" % len(msg),
                "Content-Type: text/plain\r\n"]
         
-        if status[:3] == "413" and self.response_protocol == 'HTTP/1.1':
-            # Request Entity Too Large
+        if status[:3] in ("413", "414"):
+            # Request Entity Too Large / Request-URI Too Long
             self.close_connection = True
-            buf.append("Connection: close\r\n")
+            if self.response_protocol == 'HTTP/1.1':
+                # This will not be true for 414, since read_request_line
+                # usually raises 414 before reading the whole line, and we
+                # therefore cannot know the proper response_protocol.
+                buf.append("Connection: close\r\n")
+            else:
+                # HTTP/1.0 had no 413/414 status nor Connection header.
+                # Emit 400 instead and trust the message body is enough.
+                status = "400 Bad Request"
         
         buf.append(CRLF)
         if msg:
@@ -844,39 +898,48 @@ class FatalSSLAlert(Exception):
     pass
 
 
-if not _fileobject_uses_str_type:
-    class CP_fileobject(socket._fileobject):
-        """Faux file object attached to a socket object."""
+class CP_fileobject(socket._fileobject):
+    """Faux file object attached to a socket object."""
 
-        def sendall(self, data):
-            """Sendall for non-blocking sockets."""
-            while data:
-                try:
-                    bytes_sent = self.send(data)
-                    data = data[bytes_sent:]
-                except socket.error, e:
-                    if e.args[0] not in socket_errors_nonblocking:
-                        raise
+    def __init__(self, *args, **kwargs):
+        self.bytes_read = 0
+        self.bytes_written = 0
+        socket._fileobject.__init__(self, *args, **kwargs)
+    
+    def sendall(self, data):
+        """Sendall for non-blocking sockets."""
+        while data:
+            try:
+                bytes_sent = self.send(data)
+                data = data[bytes_sent:]
+            except socket.error, e:
+                if e.args[0] not in socket_errors_nonblocking:
+                    raise
 
-        def send(self, data):
-            return self._sock.send(data)
+    def send(self, data):
+        bytes_sent = self._sock.send(data)
+        self.bytes_written += bytes_sent
+        return bytes_sent
 
-        def flush(self):
-            if self._wbuf:
-                buffer = "".join(self._wbuf)
-                self._wbuf = []
-                self.sendall(buffer)
+    def flush(self):
+        if self._wbuf:
+            buffer = "".join(self._wbuf)
+            self._wbuf = []
+            self.sendall(buffer)
 
-        def recv(self, size):
-            while True:
-                try:
-                    return self._sock.recv(size)
-                except socket.error, e:
-                    if (e.args[0] not in socket_errors_nonblocking
-                        and e.args[0] not in socket_error_eintr):
-                        raise
+    def recv(self, size):
+        while True:
+            try:
+                data = self._sock.recv(size)
+                self.bytes_read += len(data)
+                return data
+            except socket.error, e:
+                if (e.args[0] not in socket_errors_nonblocking
+                    and e.args[0] not in socket_error_eintr):
+                    raise
 
-        def read(self, size= -1):
+    if not _fileobject_uses_str_type:
+        def read(self, size=-1):
             # Use max, disallow tiny reads in a loop as they are very inefficient.
             # We never leave read() with any leftover data from a new recv() call
             # in our internal buffer.
@@ -936,7 +999,7 @@ if not _fileobject_uses_str_type:
                     #assert buf_len == buf.tell()
                 return buf.getvalue()
 
-        def readline(self, size= -1):
+        def readline(self, size=-1):
             buf = self._rbuf
             buf.seek(0, 2)  # seek end
             if buf.tell() > 0:
@@ -1021,40 +1084,8 @@ if not _fileobject_uses_str_type:
                     buf_len += n
                     #assert buf_len == buf.tell()
                 return buf.getvalue()
-
-else:
-    class CP_fileobject(socket._fileobject):
-        """Faux file object attached to a socket object."""
-
-        def sendall(self, data):
-            """Sendall for non-blocking sockets."""
-            while data:
-                try:
-                    bytes_sent = self.send(data)
-                    data = data[bytes_sent:]
-                except socket.error, e:
-                    if e.args[0] not in socket_errors_nonblocking:
-                        raise
-
-        def send(self, data):
-            return self._sock.send(data)
-
-        def flush(self):
-            if self._wbuf:
-                buffer = "".join(self._wbuf)
-                self._wbuf = []
-                self.sendall(buffer)
-
-        def recv(self, size):
-            while True:
-                try:
-                    return self._sock.recv(size)
-                except socket.error, e:
-                    if (e.args[0] not in socket_errors_nonblocking
-                        and e.args[0] not in socket_error_eintr):
-                        raise
-
-        def read(self, size= -1):
+    else:
+        def read(self, size=-1):
             if size < 0:
                 # Read until EOF
                 buffers = [self._rbuf]
@@ -1096,7 +1127,7 @@ else:
                     buf_len += n
                 return "".join(buffers)
 
-        def readline(self, size= -1):
+        def readline(self, size=-1):
             data = self._rbuf
             if size < 0:
                 # Read until \n or EOF, whichever comes first
@@ -1178,14 +1209,16 @@ class HTTPConnection(object):
     remote_addr = None
     remote_port = None
     ssl_env = None
-    rbufsize = -1
+    rbufsize = DEFAULT_BUFFER_SIZE
+    wbufsize = DEFAULT_BUFFER_SIZE
     RequestHandlerClass = HTTPRequest
     
     def __init__(self, server, sock, makefile=CP_fileobject):
         self.server = server
         self.socket = sock
         self.rfile = makefile(sock, "rb", self.rbufsize)
-        self.wfile = makefile(sock, "wb", -1)
+        self.wfile = makefile(sock, "wb", self.wbufsize)
+        self.requests_seen = 0
     
     def communicate(self):
         """Read each request and respond appropriately."""
@@ -1200,6 +1233,8 @@ class HTTPConnection(object):
                 
                 # This order of operations should guarantee correct pipelining.
                 req.parse_request()
+                if self.server.stats['Enabled']:
+                    self.requests_seen += 1
                 if not req.ready:
                     # Something went wrong in the parsing (and the server has
                     # probably already made a simple_response). Return and
@@ -1212,7 +1247,8 @@ class HTTPConnection(object):
                     return
         except socket.error, e:
             errnum = e.args[0]
-            if errnum == 'timed out':
+            # sadly SSL sockets return a different (longer) time out string
+            if errnum == 'timed out' or errnum == 'The read operation timed out':
                 # Don't error if we're between requests; only error
                 # if 1) no request has been started at all, or 2) we're
                 # in the middle of a request.
@@ -1243,7 +1279,7 @@ class HTTPConnection(object):
         except NoSSLError:
             if req and not req.sent_headers:
                 # Unwrap our wfile
-                self.wfile = CP_fileobject(self.socket._sock, "wb", -1)
+                self.wfile = CP_fileobject(self.socket._sock, "wb", self.wbufsize)
                 req.simple_response("400 Bad Request",
                     "The client sent a plain HTTP request, but "
                     "this server only speaks HTTPS on this port.")
@@ -1281,24 +1317,10 @@ class HTTPConnection(object):
             pass
 
 
-def format_exc(limit=None):
-    """Like print_exc() but return a string. Backport for Python 2.3."""
-    try:
-        etype, value, tb = sys.exc_info()
-        return ''.join(traceback.format_exception(etype, value, tb, limit))
-    finally:
-        etype = value = tb = None
-
-
 _SHUTDOWNREQUEST = None
 
 class WorkerThread(threading.Thread):
     """Thread which continuously polls a Queue for Connection objects.
-    
-    server: the HTTP Server which spawned this thread, and which owns the
-        Queue and is placing active connections into it.
-    ready: a simple flag for the calling server to know when this thread
-        has begun polling the Queue.
     
     Due to the timing issues of polling a Queue, a WorkerThread does not
     check its own 'ready' flag after it has started. To stop the thread,
@@ -1307,13 +1329,38 @@ class WorkerThread(threading.Thread):
     """
     
     conn = None
+    """The current connection pulled off the Queue, or None."""
+    
+    server = None
+    """The HTTP Server which spawned this thread, and which owns the
+    Queue and is placing active connections into it."""
+    
+    ready = False
+    """A simple flag for the calling server to know when this thread
+    has begun polling the Queue."""
+    
     
     def __init__(self, server):
         self.ready = False
         self.server = server
+        
+        self.requests_seen = 0
+        self.bytes_read = 0
+        self.bytes_written = 0
+        self.start_time = None
+        self.work_time = 0
+        self.stats = {
+            'Requests': lambda s: self.requests_seen + ((self.start_time is None) and 0 or self.conn.requests_seen),
+            'Bytes Read': lambda s: self.bytes_read + ((self.start_time is None) and 0 or self.conn.rfile.bytes_read),
+            'Bytes Written': lambda s: self.bytes_written + ((self.start_time is None) and 0 or self.conn.wfile.bytes_written),
+            'Work Time': lambda s: self.work_time + ((self.start_time is None) and 0 or time.time() - self.start_time),
+            'Read Throughput': lambda s: s['Bytes Read'](s) / (s['Work Time'](s) or 1e-6),
+            'Write Throughput': lambda s: s['Bytes Written'](s) / (s['Work Time'](s) or 1e-6),
+        }
         threading.Thread.__init__(self)
     
     def run(self):
+        self.server.stats['Worker Threads'][self.getName()] = self.stats
         try:
             self.ready = True
             while True:
@@ -1322,10 +1369,18 @@ class WorkerThread(threading.Thread):
                     return
                 
                 self.conn = conn
+                if self.server.stats['Enabled']:
+                    self.start_time = time.time()
                 try:
                     conn.communicate()
                 finally:
                     conn.close()
+                    if self.server.stats['Enabled']:
+                        self.requests_seen += self.conn.requests_seen
+                        self.bytes_read += self.conn.rfile.bytes_read
+                        self.bytes_written += self.conn.wfile.bytes_written
+                        self.work_time += time.time() - self.start_time
+                        self.start_time = None
                     self.conn = None
         except (KeyboardInterrupt, SystemExit), exc:
             self.server.interrupt = exc
@@ -1338,7 +1393,7 @@ class ThreadPool(object):
     and stop(timeout) attributes.
     """
     
-    def __init__(self, server, min=10, max= -1):
+    def __init__(self, server, min=10, max=-1):
         self.server = server
         self.min = min
         self.max = max
@@ -1430,6 +1485,10 @@ class ThreadPool(object):
                         # See http://www.cherrypy.org/ticket/691.
                         KeyboardInterrupt), exc1:
                     pass
+    
+    def _get_qsize(self):
+        return self._queue.qsize()
+    qsize = property(_get_qsize)
 
 
 
@@ -1456,6 +1515,13 @@ else:
 
 
 class SSLAdapter(object):
+    """Base class for SSL driver library adapters.
+    
+    Required methods:
+    
+        * ``wrap(sock) -> (wrapped socket, ssl environ dict)``
+        * ``makefile(sock, mode='r', bufsize=DEFAULT_BUFFER_SIZE) -> socket file object``
+    """
     
     def __init__(self, certificate, private_key, certificate_chain=None):
         self.certificate = certificate
@@ -1465,60 +1531,72 @@ class SSLAdapter(object):
     def wrap(self, sock):
         raise NotImplemented
     
-    def makefile(self, sock, mode='r', bufsize= -1):
+    def makefile(self, sock, mode='r', bufsize=DEFAULT_BUFFER_SIZE):
         raise NotImplemented
 
 
 class HTTPServer(object):
-    """An HTTP server.
+    """An HTTP server."""
     
-    bind_addr: The interface on which to listen for connections.
-        For TCP sockets, a (host, port) tuple. Host values may be any IPv4
-        or IPv6 address, or any valid hostname. The string 'localhost' is a
-        synonym for '127.0.0.1' (or '::1', if your hosts file prefers IPv6).
-        The string '0.0.0.0' is a special IPv4 entry meaning "any active
-        interface" (INADDR_ANY), and '::' is the similar IN6ADDR_ANY for
-        IPv6. The empty string or None are not allowed.
-        
-        For UNIX sockets, supply the filename as a string.
-    gateway: a Gateway instance.
-    minthreads: the minimum number of worker threads to create (default 10).
-    maxthreads: the maximum number of worker threads to create (default -1 = no limit).
-    server_name: defaults to socket.gethostname().
+    _bind_addr = "127.0.0.1"
+    _interrupt = None
     
-    request_queue_size: the 'backlog' argument to socket.listen();
-        specifies the maximum number of queued connections (default 5).
-    timeout: the timeout in seconds for accepted connections (default 10).
-    nodelay: if True (the default since 3.1), sets the TCP_NODELAY socket
-        option.
-    protocol: the version string to write in the Status-Line of all
-        HTTP responses. For example, "HTTP/1.1" (the default). This
-        also limits the supported features used in the response.
+    gateway = None
+    """A Gateway instance."""
     
+    minthreads = None
+    """The minimum number of worker threads to create (default 10)."""
     
-    SSL/HTTPS
-    ---------
-    You must have an ssl library installed and set self.ssl_adapter to an
-    instance of SSLAdapter (or a subclass) which provides the methods:
-        wrap(sock) -> wrapped socket, ssl environ dict
-        makefile(sock, mode='r', bufsize=-1) -> socket file object
-    """
+    maxthreads = None
+    """The maximum number of worker threads to create (default -1 = no limit)."""
+    
+    server_name = None
+    """The name of the server; defaults to socket.gethostname()."""
     
     protocol = "HTTP/1.1"
-    _bind_addr = "127.0.0.1"
-    version = "CherryPy/3.2.0rc1"
-    response_header = None
+    """The version string to write in the Status-Line of all HTTP responses.
+    
+    For example, "HTTP/1.1" is the default. This also limits the supported
+    features used in the response."""
+    
+    request_queue_size = 5
+    """The 'backlog' arg to socket.listen(); max queued connections (default 5)."""
+    
+    shutdown_timeout = 5
+    """The total time, in seconds, to wait for worker threads to cleanly exit."""
+    
+    timeout = 10
+    """The timeout in seconds for accepted connections (default 10)."""
+    
+    version = "CherryPy/3.2.0"
+    """A version string for the HTTPServer."""
+    
+    software = None
+    """The value to set for the SERVER_SOFTWARE entry in the WSGI environ.
+    
+    If None, this defaults to ``'%s Server' % self.version``."""
+    
     ready = False
-    _interrupt = None
+    """An internal flag which marks whether the socket is accepting connections."""
+    
     max_request_header_size = 0
+    """The maximum size, in bytes, for request headers, or 0 for no limit."""
+    
     max_request_body_size = 0
+    """The maximum size, in bytes, for request bodies, or 0 for no limit."""
+    
     nodelay = True
+    """If True (the default since 3.1), sets the TCP_NODELAY socket option."""
     
     ConnectionClass = HTTPConnection
+    """The class to use for handling HTTP connections."""
     
     ssl_adapter = None
+    """An instance of SSLAdapter (or a subclass).
     
-    def __init__(self, bind_addr, gateway, minthreads=10, maxthreads= -1,
+    You must have the corresponding SSL driver library installed."""
+    
+    def __init__(self, bind_addr, gateway, minthreads=10, maxthreads=-1,
                  server_name=None):
         self.bind_addr = bind_addr
         self.gateway = gateway
@@ -1528,6 +1606,44 @@ class HTTPServer(object):
         if not server_name:
             server_name = socket.gethostname()
         self.server_name = server_name
+        self.clear_stats()
+    
+    def clear_stats(self):
+        self._start_time = None
+        self._run_time = 0
+        self.stats = {
+            'Enabled': False,
+            'Bind Address': lambda s: repr(self.bind_addr),
+            'Run time': lambda s: (not s['Enabled']) and 0 or self.runtime(),
+            'Accepts': 0,
+            'Accepts/sec': lambda s: s['Accepts'] / self.runtime(),
+            'Queue': lambda s: getattr(self.requests, "qsize", None),
+            'Threads': lambda s: len(getattr(self.requests, "_threads", [])),
+            'Threads Idle': lambda s: getattr(self.requests, "idle", None),
+            'Socket Errors': 0,
+            'Requests': lambda s: (not s['Enabled']) and 0 or sum([w['Requests'](w) for w
+                                       in s['Worker Threads'].values()], 0),
+            'Bytes Read': lambda s: (not s['Enabled']) and 0 or sum([w['Bytes Read'](w) for w
+                                         in s['Worker Threads'].values()], 0),
+            'Bytes Written': lambda s: (not s['Enabled']) and 0 or sum([w['Bytes Written'](w) for w
+                                            in s['Worker Threads'].values()], 0),
+            'Work Time': lambda s: (not s['Enabled']) and 0 or sum([w['Work Time'](w) for w
+                                         in s['Worker Threads'].values()], 0),
+            'Read Throughput': lambda s: (not s['Enabled']) and 0 or sum(
+                [w['Bytes Read'](w) / (w['Work Time'](w) or 1e-6)
+                 for w in s['Worker Threads'].values()], 0),
+            'Write Throughput': lambda s: (not s['Enabled']) and 0 or sum(
+                [w['Bytes Written'](w) / (w['Work Time'](w) or 1e-6)
+                 for w in s['Worker Threads'].values()], 0),
+            'Worker Threads': {},
+            }
+        logging.statistics["CherryPy HTTPServer %d" % id(self)] = self.stats
+    
+    def runtime(self):
+        if self._start_time is None:
+            return self._run_time
+        else:
+            return self._run_time + (time.time() - self._start_time)
     
     def __str__(self):
         return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
@@ -1570,6 +1686,9 @@ class HTTPServer(object):
         # If you're using this server with another framework, you should
         # trap those exceptions in whatever code block calls start().
         self._interrupt = None
+        
+        if self.software is None:
+            self.software = "%s Server" % self.version
         
         # SSL backward compatibility
         if (self.ssl_adapter is None and
@@ -1624,7 +1743,7 @@ class HTTPServer(object):
             af, socktype, proto, canonname, sa = res
             try:
                 self.bind(af, socktype, proto)
-            except socket.error, msg:
+            except socket.error:
                 if self.socket:
                     self.socket.close()
                 self.socket = None
@@ -1641,6 +1760,7 @@ class HTTPServer(object):
         self.requests.start()
         
         self.ready = True
+        self._start_time = time.time()
         while self.ready:
             self.tick()
             if self.interrupt:
@@ -1663,7 +1783,7 @@ class HTTPServer(object):
         
         # If listening on the IPV6 any address ('::' = IN6ADDR_ANY),
         # activate dual-stack. See http://www.cherrypy.org/ticket/871.
-        if (family == socket.AF_INET6
+        if (hasattr(socket, 'AF_INET6') and family == socket.AF_INET6
             and self.bind_addr[0] in ('::', '::0', '::0.0.0.0')):
             try:
                 self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
@@ -1678,15 +1798,14 @@ class HTTPServer(object):
         """Accept a new connection and put it on the Queue."""
         try:
             s, addr = self.socket.accept()
+            if self.stats['Enabled']:
+                self.stats['Accepts'] += 1
             if not self.ready:
                 return
             
             prevent_socket_inheritance(s)
             if hasattr(s, 'settimeout'):
                 s.settimeout(self.timeout)
-            
-            if self.response_header is None:
-                self.response_header = "%s Server" % self.version
             
             makefile = CP_fileobject
             ssl_env = {}
@@ -1702,7 +1821,7 @@ class HTTPServer(object):
                            "Content-Type: text/plain\r\n\r\n",
                            msg]
                     
-                    wfile = CP_fileobject(s, "wb", -1)
+                    wfile = CP_fileobject(s, "wb", DEFAULT_BUFFER_SIZE)
                     try:
                         wfile.sendall("".join(buf))
                     except socket.error, x:
@@ -1712,6 +1831,9 @@ class HTTPServer(object):
                 if not s:
                     return
                 makefile = self.ssl_adapter.makefile
+                # Re-apply our timeout since we may have a new socket object
+                if hasattr(s, 'settimeout'):
+                    s.settimeout(self.timeout)
             
             conn = self.ConnectionClass(self, s, makefile)
             
@@ -1738,6 +1860,8 @@ class HTTPServer(object):
             # accept() by default
             return
         except socket.error, x:
+            if self.stats['Enabled']:
+                self.stats['Socket Errors'] += 1
             if x.args[0] in socket_error_eintr:
                 # I *think* this is right. EINTR should occur when a signal
                 # is received during the accept() call; all docs say retry
@@ -1767,6 +1891,9 @@ class HTTPServer(object):
     def stop(self):
         """Gracefully shutdown a server that is serving forever."""
         self.ready = False
+        if self._start_time is not None:
+            self._run_time += (time.time() - self._start_time)
+        self._start_time = None
         
         sock = getattr(self, "socket", None)
         if sock:
@@ -1850,10 +1977,10 @@ def get_ssl_adapter_class(name='pyopenssl'):
 
 class CherryPyWSGIServer(HTTPServer):
     
-    wsgi_version = (1, 1)
+    wsgi_version = (1, 0)
     
     def __init__(self, bind_addr, wsgi_app, numthreads=10, server_name=None,
-                 max= -1, request_queue_size=5, timeout=10, shutdown_timeout=5):
+                 max=-1, request_queue_size=5, timeout=10, shutdown_timeout=5):
         self.requests = ThreadPool(self, min=numthreads or 1, max=max)
         self.wsgi_app = wsgi_app
         self.gateway = wsgi_gateways[self.wsgi_version]
@@ -1866,6 +1993,7 @@ class CherryPyWSGIServer(HTTPServer):
         
         self.timeout = timeout
         self.shutdown_timeout = shutdown_timeout
+        self.clear_stats()
     
     def _get_numthreads(self):
         return self.requests.min
@@ -1880,6 +2008,7 @@ class WSGIGateway(Gateway):
         self.req = req
         self.started_response = False
         self.env = self.get_environ()
+        self.remaining_bytes_out = None
     
     def get_environ(self):
         """Return a new environ dict targeting the given wsgi.version"""
@@ -1903,7 +2032,7 @@ class WSGIGateway(Gateway):
             if hasattr(response, "close"):
                 response.close()
     
-    def start_response(self, status, headers, exc_info=None):
+    def start_response(self, status, headers, exc_info = None):
         """WSGI callable to begin the HTTP response."""
         # "The application may call start_response more than once,
         # if and only if the exc_info argument is provided."
@@ -1927,6 +2056,8 @@ class WSGIGateway(Gateway):
                 raise TypeError("WSGI response header key %r is not a byte string." % k)
             if not isinstance(v, str):
                 raise TypeError("WSGI response header value %r is not a byte string." % v)
+            if k.lower() == 'content-length':
+                self.remaining_bytes_out = int(v)
         self.req.outheaders.extend(headers)
         
         return self.write
@@ -1940,11 +2071,30 @@ class WSGIGateway(Gateway):
         if not self.started_response:
             raise AssertionError("WSGI write called before start_response.")
         
+        chunklen = len(chunk)
+        rbo = self.remaining_bytes_out
+        if rbo is not None and chunklen > rbo:
+            if not self.req.sent_headers:
+                # Whew. We can send a 500 to the client.
+                self.req.simple_response("500 Internal Server Error",
+                    "The requested resource returned more bytes than the "
+                    "declared Content-Length.")
+            else:
+                # Dang. We have probably already sent data. Truncate the chunk
+                # to fit (so the client doesn't hang) and raise an error later.
+                chunk = chunk[:rbo]
+        
         if not self.req.sent_headers:
             self.req.sent_headers = True
             self.req.send_headers()
         
         self.req.write(chunk)
+        
+        if rbo is not None:
+            rbo -= chunklen
+            if rbo < 0:
+                raise ValueError(
+                    "Response body exceeds the declared Content-Length.")
 
 
 class WSGIGateway_10(WSGIGateway):
@@ -1967,6 +2117,7 @@ class WSGIGateway_10(WSGIGateway):
             'SERVER_NAME': req.server.server_name,
             # Bah. "SERVER_PROTOCOL" is actually the REQUEST protocol.
             'SERVER_PROTOCOL': req.request_protocol,
+            'SERVER_SOFTWARE': req.server.software,
             'wsgi.errors': sys.stderr,
             'wsgi.input': req.rfile,
             'wsgi.multiprocess': False,
@@ -1983,9 +2134,11 @@ class WSGIGateway_10(WSGIGateway):
         else:
             env["SERVER_PORT"] = str(req.server.bind_addr[1])
         
-        # CONTENT_TYPE/CONTENT_LENGTH
+        # Request headers
         for k, v in req.inheaders.iteritems():
             env["HTTP_" + k.upper().replace("-", "_")] = v
+        
+        # CONTENT_TYPE/CONTENT_LENGTH
         ct = env.pop("HTTP_CONTENT_TYPE", None)
         if ct is not None:
             env["CONTENT_TYPE"] = ct
@@ -1996,14 +2149,6 @@ class WSGIGateway_10(WSGIGateway):
         if req.conn.ssl_env:
             env.update(req.conn.ssl_env)
         
-        return env
-
-
-class WSGIGateway_11(WSGIGateway_10):
-    
-    def get_environ(self):
-        env = WSGIGateway_10.get_environ(self)
-        env['wsgi.version'] = (1, 1)
         return env
 
 
@@ -2035,7 +2180,6 @@ class WSGIGateway_u0(WSGIGateway_10):
 
 wsgi_gateways = {
     (1, 0): WSGIGateway_10,
-    (1, 1): WSGIGateway_11,
     ('u', 0): WSGIGateway_u0,
 }
 
@@ -2052,7 +2196,7 @@ class WSGIPathInfoDispatcher(object):
             pass
         
         # Sort the apps by len(path), descending
-        apps.sort(cmp=lambda x, y: cmp(len(x[0]), len(y[0])))
+        apps.sort(cmp=lambda x,y: cmp(len(x[0]), len(y[0])))
         apps.reverse()
         
         # The path_prefix strings must start, but not end, with a slash.
@@ -2072,3 +2216,4 @@ class WSGIPathInfoDispatcher(object):
         start_response('404 Not Found', [('Content-Type', 'text/plain'),
                                          ('Content-Length', '0')])
         return ['']
+

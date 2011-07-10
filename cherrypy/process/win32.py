@@ -24,7 +24,7 @@ class ConsoleCtrlHandler(plugins.SimplePlugin):
         
         result = win32api.SetConsoleCtrlHandler(self.handle, 1)
         if result == 0:
-            self.bus.log('Could not SetConsoleCtrlHandler (error %r)' % 
+            self.bus.log('Could not SetConsoleCtrlHandler (error %r)' %
                          win32api.GetLastError(), level=40)
         else:
             self.bus.log('Set handler for console events.', level=40)
@@ -42,7 +42,7 @@ class ConsoleCtrlHandler(plugins.SimplePlugin):
             result = 1
         
         if result == 0:
-            self.bus.log('Could not remove SetConsoleCtrlHandler (error %r)' % 
+            self.bus.log('Could not remove SetConsoleCtrlHandler (error %r)' %
                          win32api.GetLastError(), level=40)
         else:
             self.bus.log('Removed handler for console events.', level=40)
@@ -83,7 +83,7 @@ class Win32Bus(wspbus.Bus):
             return self.events[state]
         except KeyError:
             event = win32event.CreateEvent(None, 0, 0,
-                                           "WSPBus %s Event (pid=%r)" % 
+                                           "WSPBus %s Event (pid=%r)" %
                                            (state.name, os.getpid()))
             self.events[state] = event
             return event

@@ -1,12 +1,9 @@
-"""A library for integrating pyOpenSSL with CherryPy.
+"""A library for integrating Python's builtin ``ssl`` library with CherryPy.
 
 The ssl module must be importable for SSL functionality.
 
-To use this module, set CherryPyWSGIServer.ssl_adapter to an instance of
-BuiltinSSLAdapter.
-
-    ssl_adapter.certificate: the filename of the server SSL certificate.
-    ssl_adapter.private_key: the filename of the server's private key file.
+To use this module, set ``CherryPyWSGIServer.ssl_adapter`` to an instance of
+``BuiltinSSLAdapter``.
 """
 
 try:
@@ -19,6 +16,12 @@ from cherrypy import wsgiserver
 
 class BuiltinSSLAdapter(wsgiserver.SSLAdapter):
     """A wrapper for integrating Python's builtin ssl module with CherryPy."""
+    
+    certificate = None
+    """The filename of the server SSL certificate."""
+    
+    private_key = None
+    """The filename of the server's private key file."""
     
     def __init__(self, certificate, private_key, certificate_chain=None):
         if ssl is None:
@@ -64,6 +67,6 @@ class BuiltinSSLAdapter(wsgiserver.SSLAdapter):
             }
         return ssl_environ
     
-    def makefile(self, sock, mode='r', bufsize= -1):
+    def makefile(self, sock, mode='r', bufsize=-1):
         return wsgiserver.CP_fileobject(sock, mode, bufsize)
 

@@ -7,14 +7,6 @@ import cherrypy
 from cherrypy import wsgiserver
 
 
-class CPHTTPRequest(wsgiserver.HTTPRequest):
-    pass
-
-
-class CPHTTPConnection(wsgiserver.HTTPConnection):
-    pass
-
-
 class CPWSGIServer(wsgiserver.CherryPyWSGIServer):
     """Wrapper for wsgiserver.CherryPyWSGIServer.
     
@@ -38,10 +30,10 @@ class CPWSGIServer(wsgiserver.CherryPyWSGIServer):
         s.__init__(self, server_adapter.bind_addr, cherrypy.tree,
                    self.server_adapter.thread_pool,
                    server_name,
-                   max=self.server_adapter.thread_pool_max,
-                   request_queue_size=self.server_adapter.socket_queue_size,
-                   timeout=self.server_adapter.socket_timeout,
-                   shutdown_timeout=self.server_adapter.shutdown_timeout,
+                   max = self.server_adapter.thread_pool_max,
+                   request_queue_size = self.server_adapter.socket_queue_size,
+                   timeout = self.server_adapter.socket_timeout,
+                   shutdown_timeout = self.server_adapter.shutdown_timeout,
                    )
         self.protocol = self.server_adapter.protocol_version
         self.nodelay = self.server_adapter.nodelay

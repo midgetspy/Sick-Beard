@@ -6,28 +6,28 @@ You can obtain it from http://pyopenssl.sourceforge.net/
 To use this module, set CherryPyWSGIServer.ssl_adapter to an instance of
 SSLAdapter. There are two ways to use SSL:
 
-Method One:
-    ssl_adapter.context: an instance of SSL.Context.
-    
-    If this is not None, it is assumed to be an SSL.Context instance,
-    and will be passed to SSL.Connection on bind(). The developer is
-    responsible for forming a valid Context object. This approach is
-    to be preferred for more flexibility, e.g. if the cert and key are
-    streams instead of files, or need decryption, or SSL.SSLv3_METHOD
-    is desired instead of the default SSL.SSLv23_METHOD, etc. Consult
-    the pyOpenSSL documentation for complete options.
+Method One
+----------
 
-Method Two (shortcut):
-    ssl_adapter.certificate: the filename of the server SSL certificate.
-    ssl_adapter.private_key: the filename of the server's private key file.
-    
-    Both are None by default. If ssl_adapter.context is None, but .private_key
-    and .certificate are both given and valid, they will be read, and the
-    context will be automatically created from them.
-    
-    ssl_adapter.certificate_chain: (optional) the filename of CA's intermediate
-        certificate bundle. This is needed for cheaper "chained root" SSL
-        certificates, and should be left as None if not required.
+ * ``ssl_adapter.context``: an instance of SSL.Context.
+
+If this is not None, it is assumed to be an SSL.Context instance,
+and will be passed to SSL.Connection on bind(). The developer is
+responsible for forming a valid Context object. This approach is
+to be preferred for more flexibility, e.g. if the cert and key are
+streams instead of files, or need decryption, or SSL.SSLv3_METHOD
+is desired instead of the default SSL.SSLv23_METHOD, etc. Consult
+the pyOpenSSL documentation for complete options.
+
+Method Two (shortcut)
+---------------------
+
+ * ``ssl_adapter.certificate``: the filename of the server SSL certificate.
+ * ``ssl_adapter.private_key``: the filename of the server's private key file.
+
+Both are None by default. If ssl_adapter.context is None, but .private_key
+and .certificate are both given and valid, they will be read, and the
+context will be automatically created from them.
 """
 
 import socket
@@ -53,7 +53,7 @@ class SSL_fileobject(wsgiserver.CP_fileobject):
         """Wrap the given call with SSL error-trapping.
         
         is_reader: if False EOF errors will be raised. If True, EOF errors
-            will return "" (to emulate normal sockets).
+        will return "" (to emulate normal sockets).
         """
         start = time.time()
         while True:
@@ -118,7 +118,7 @@ class SSL_fileobject(wsgiserver.CP_fileobject):
 class SSLConnection:
     """A thread-safe wrapper for an SSL.Connection.
     
-    *args: the arguments to create the wrapped SSL.Connection(*args).
+    ``*args``: the arguments to create the wrapped ``SSL.Connection(*args)``.
     """
     
     def __init__(self, *args):
@@ -152,6 +152,21 @@ class SSLConnection:
 
 class pyOpenSSLAdapter(wsgiserver.SSLAdapter):
     """A wrapper for integrating pyOpenSSL with CherryPy."""
+    
+    context = None
+    """An instance of SSL.Context."""
+    
+    certificate = None
+    """The filename of the server SSL certificate."""
+    
+    private_key = None
+    """The filename of the server's private key file."""
+    
+    certificate_chain = None
+    """Optional. The filename of CA's intermediate certificate bundle.
+    
+    This is needed for cheaper "chained root" SSL certificates, and should be
+    left as None if not required."""
     
     def __init__(self, certificate, private_key, certificate_chain=None):
         if SSL is None:
@@ -230,7 +245,7 @@ class pyOpenSSLAdapter(wsgiserver.SSLAdapter):
         
         return ssl_environ
     
-    def makefile(self, sock, mode='r', bufsize= -1):
+    def makefile(self, sock, mode='r', bufsize=-1):
         if SSL and isinstance(sock, SSL.ConnectionType):
             timeout = sock.gettimeout()
             f = SSL_fileobject(sock, mode, bufsize)
