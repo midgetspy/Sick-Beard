@@ -141,6 +141,7 @@ class BlackAndWhiteList(object):
         results = []
         for range in list:
             for keyword in list[range]:
+                string = None
                 if range == "global":
                     string = haystack.name
                 elif haystack.__dict__.has_key(range):
