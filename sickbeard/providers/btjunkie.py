@@ -89,7 +89,7 @@ class BTJunkieProvider(generic.TorrentProvider):
 	result = {}
 	
 	if show.air_by_date:
-    	    logger.log(u"BTJunkie doesn't support air-by-date backlog searches", logger.WARNING)
+    	    logger.log(u"BTJunkie doesn't support air-by-date backlog searches", logger.ERROR)
 	    return results
 
 	results = generic.TorrentProvider.findSeasonResults(self, show, season)
@@ -124,6 +124,8 @@ class BTJunkieProvider(generic.TorrentProvider):
 
 	if 'season' in search_params:
 	    season = 'S' + '%(season)02d' % search_params
+	    if season is 'S00':
+		logger.log(u"BTJunkie does not usually have specials listed in the correct format (i.e. S00E01)", logger.WARNING)
 
 	if 'episode' in search_params:
 	    epsiode = 'E' + '%(episode)02d' % search_params
@@ -147,35 +149,33 @@ class BTJunkieProvider(generic.TorrentProvider):
         results = []
 
         for curItem in items:
-            
-            (title, url) = self._get_title_and_url(curItem)
-            
-            if not title or not url:
-                logger.log(u"The XML returned from the BTJunkie RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-                continue
-    
-            results.append(curItem)
+	    try:
+		rawTitle = curItem.findtext('title')
 
+		if not rawTitle:
+		    logger.log(u"The XML returned from the BTJunkie RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+		    continue
+
+	        regex_seeds = '\[([0-9]+)/[0-9]+\]'
+
+	        logger.log("Comparing seeds regex " + regex_seeds + " against " + rawTitle, logger.DEBUG)
+    
+    	        match = re.search(regex_seeds, rawTitle, re.I)
+	        if match:
+	 	    seeds = match.group(1)
+		    logger.log("Torrent had " + seeds + " seeds", logger.DEBUG)
+		    if int(seeds) >= 10:	# Minimum number of seeds
+		        results.append(curItem)
+	    except Exception, e:
+	        logger.log("Exception parsing XML item: " + ex(e), logger.ERROR)
+            
         return results
 
     def _get_title_and_url(self, item):
         title = item.findtext('title')
         url = item.findtext('link').replace('&amp;','&') + '/download.torrent'
         
-        new_title = self._extract_name_from_filename(title.replace(" ", "."))
-        if new_title:
-            title = new_title
-            logger.log(u"Extracted the name "+title+" from the torrent title", logger.DEBUG)
-
-        return (title, url)
-
-    def _extract_name_from_filename(self, filename):
-        name_regex = '(.*?)\.?(\[.*]|\d+\.TPB)$'
-        logger.log(u"Comparing "+name_regex+" against "+filename, logger.DEBUG)
-        match = re.match(name_regex, filename, re.I)
-        if match:
-            return match.group(1)
-        return None
+	return (title, url)
 
 class BTJunkieCache(tvcache.TVCache):
 
