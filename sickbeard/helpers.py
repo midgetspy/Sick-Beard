@@ -560,6 +560,7 @@ def _check_against_names(name, show):
 
     for showName in showNames:
         nameFromList = full_sanitizeSceneName(showName)
+        # i'll leave this here for historical resons but i changed the find() into a "==" which resolves this problem
         # FIXME: this is ok for most shows but will give false positives on:
         """nameFromList = "show name: special version"
            nameInQuestion = "show name"
@@ -584,7 +585,7 @@ def _check_against_names(name, show):
             break
         """
         
-        logger.log(u"----------Comparing names: '"+nameFromList+"' vs '"+nameInQuestion+"'", logger.DEBUG)
+        #logger.log(u"Comparing names: '"+nameFromList+"' vs '"+nameInQuestion+"'", logger.DEBUG)
         if nameFromList == nameInQuestion:
             return True
 
