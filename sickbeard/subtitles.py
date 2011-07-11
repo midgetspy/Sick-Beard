@@ -15,12 +15,23 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+
+import datetime
 import sickbeard
+from sickbeard.common import *
+from sickbeard import logger
+from sickbeard import helpers
+from sickbeard import encodingKludge as ek
+from sickbeard import db
+
+
+SINGLE = u'srt'
 try:
     import subliminal
     SUBTITLES_SUPPORTED = True
 except:
     SUBTITLES_SUPPORTED = False
+
 
 def sortedPluginList():
     pluginsMapping = dict([(x.lower(), x) for x in subliminal.Subliminal.listExistingPlugins()])
@@ -38,7 +49,7 @@ def sortedPluginList():
 
     # add any plugins that are missing from that list
     for curPlugin in pluginsMapping.keys():
-        if curPlugin not in [x["id"] for x in newList]:
+        if curPlugin not in [x['id'] for x in newList]:
             curPluginDict = {'id': curPlugin, 'image': curPlugin+'.png', 'name': pluginsMapping[curPlugin], 'enabled': False,
                 'api_based': subliminal.Subliminal.isAPIBasedPlugin(pluginsMapping[curPlugin]), 'url': getattr(subliminal.plugins, pluginsMapping[curPlugin]).site_url}
             newList.append(curPluginDict)
@@ -50,3 +61,120 @@ def getEnabledPluginList():
     
 def isValidLanguage(language):
     return subliminal.Subliminal.isValidLanguage(language)
+
+def wantedLanguages(sqlLike = False):
+    if sickbeard.SUBTITLES_MULTI:
+        wantedLanguages = ','.join(sorted(sickbeard.SUBTITLES_LANGUAGES))
+    else:
+        wantedLanguages = SINGLE
+    if sqlLike:
+        return '%' + wantedLanguages + '%'
+    return wantedLanguages
+
+def subtitlesLanguagesFromFiles(files):
+    """Return a list of languages on 2 characters from a list of subtitles files"""
+    subtitlesLanguages = []
+    single = False
+    for f in files:
+        if f[-7:-4].startswith('.'):
+            subtitlesLanguages.append(f[-6:-4])
+        else:
+            single = True
+    subtitlesLanguages.sort()
+    if single:
+        subtitlesLanguages.append(SINGLE)
+    return subtitlesLanguages
+
+
+class SubtitlesFinder():
+    """
+    The SubtitlesFinder will be executed every hour but will not necessarly search
+    and download subtitles. Only if the defined rule is true
+    """
+    def run(self):
+        # TODO: Put that in the __init__ before starting the thread?
+        if not SUBTITLES_SUPPORTED or not sickbeard.USE_SUBTITLES:
+            logger.log(u'No subtitles support of subtitles support disabled', logger.DEBUG)
+            return
+        if len(sickbeard.subtitles.getEnabledPluginList()) < 2:
+            logger.log(u'Not enough plugins selected. At least 2 plugins are required to search subtitles in the background', logger.ERROR)
+            return
+
+        logger.log(u'Checking for subtitles', logger.MESSAGE)
+        subli = subliminal.Subliminal(config=False, cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3, autostart=False)
+        subli.languages = sickbeard.SUBTITLES_LANGUAGES
+        subli.plugins = sickbeard.subtitles.getEnabledPluginList()
+
+        # get episodes on which we want subtitles
+        # criteria is: 
+        #  - show subtitles = 1
+        #  - episode subtitles != config wanted languages or SINGLE (depends on config multi)
+        #  - search count < 2 and diff(airdate, now) > 1 week : now -> 1d
+        #  - search count < 7 and diff(airdate, now) <= 1 week : now -> 4h -> 8h -> 16h -> 1d -> 1d -> 1d
+        
+        myDB = db.DBConnection()
+        today = datetime.date.today().toordinal()
+        # you have 5 minutes to understand that one. Good luck
+        sqlResults = myDB.select('SELECT s.show_name, e.showid, e.season, e.episode, e.subtitles_searchcount AS searchcount, e.subtitles_lastsearch AS lastsearch, e.location, (? - e.airdate) AS airdate_daydiff FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE s.subtitles = 1 AND e.subtitles NOT LIKE (?) AND ((e.subtitles_searchcount <= 2 AND (? - e.airdate) > 7) OR (e.subtitles_searchcount <= 7 AND (? - e.airdate) <= 7)) AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+') AND e.location != ""))', [today, wantedLanguages(True), today, today])
+        locations = []
+        toRefresh = []
+        rules = self._getRules()
+        now = datetime.datetime.now()
+        for epToSub in sqlResults:
+            if not ek.ek(os.path.isfile, epToSub['location']):
+                logger.log('Episode file does not exist, cannot download subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
+                continue
+            # Old shows rule
+            if epToSub['airdate_daydiff'] > 7 and epToSub['searchcount'] < 2 and now - epToSub['lastsearch'] > datetime.timedelta(hours=rules['old'][epToSub['searchcount']]):
+                logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
+                locations.append(epToSub['location'])
+                toRefresh.append((epToSub['showid'], epToSub['season'], epToSub['episode']))
+                continue
+            # Recent shows rule
+            if epToSub['airdate_daydiff'] <= 7 and epToSub['searchcount'] < 7 and now - epToSub['lastsearch'] > datetime.timedelta(hours=rules['new'][epToSub['searchcount']]):
+                logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
+                locations.append(epToSub['location'])
+                toRefresh.append((epToSub['showid'], epToSub['season'], epToSub['episode']))
+                continue
+            # Not matching my rules
+            logger.log('Do not match criteria to get downloaded: %s - %dx%d' % (epToSub['showid'], epToSub['season'], epToSub['episode']), logger.DEBUG)
+
+        # stop here if we don't have subtitles to download
+        if not locations:
+            logger.log('No subtitles to download', logger.MESSAGE)
+            return
+
+        # download subtitles
+        self._downloadSubtitles(subli, locations)
+
+        # refresh each show
+        self._refreshShows(toRefresh, now)
+
+    def _getRules(self):
+        """
+        Define the hours to wait between 2 subtitles search depending on:
+        - the episode: new or old
+        - the number of searches done so far (searchcount), represented by the index of the list
+        """
+        return {'old': [0, 24], 'new': [0, 4, 8, 16, 24, 24, 24]}
+
+    def _downloadSubtitles(self, subli, locations):
+        """Download subtitles from file locations using an initialized subliminal instance"""
+        subli.startWorkers()
+        downloaded_subs = subli.downloadSubtitles(locations)
+        subli.stopWorkers()
+        if downloaded_subs:
+            logger.log('Downloaded %d subtitles' % len(downloaded_subs), logger.MESSAGE)
+        else:
+            logger.log('No subtitles found', logger.MESSAGE)
+
+    def _refreshShows(self, toRefresh, now):
+        """Refresh episodes with new subtitles"""
+        for (showid, season, episode) in toRefresh:
+            show = helpers.findCertainShow(sickbeard.showList, showid)
+            episode = show.getEpisode(season, episode)
+            episode.subtitles_searchcount = episode.subtitles_searchcount + 1
+            episode.subtitles_lastsearch = now
+            episode.refreshSubtitles()
+            episode.saveToDB()
+
