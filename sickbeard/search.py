@@ -499,6 +499,6 @@ def findSeason(show, season):
         if len(foundResults[curEp]) == 0:
             continue
 
-        finalResults.append(pickBestResult(foundResults[curEp]),show=show)
+        finalResults.append(pickBestResult(foundResults[curEp],show=show))
 
     return finalResults
