@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 #
 # Subliminal - Subtitles, faster than your thoughts
+# Copyright (c) 2008-2011 Patrick Dessalle <patrick@dessalle.be>
 # Copyright (c) 2011 Antoine Bertin <diaoulael@gmail.com>
+#
+# This file is part of Subliminal.
 #
 # Subliminal is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -30,7 +33,7 @@ class OpenSubtitles(PluginBase.PluginBase):
     site_url = 'http://www.opensubtitles.org'
     site_name = 'OpenSubtitles'
     server_url = 'http://api.opensubtitles.org/xml-rpc'
-    user_agent = 'Subliminal v0.1'
+    user_agent = 'Subliminal v0.2'
     multi_languages_queries = True
     multi_filename_queries = False
     api_based = True

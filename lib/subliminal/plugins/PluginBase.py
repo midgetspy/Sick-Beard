@@ -3,6 +3,8 @@
 # Subliminal - Subtitles, faster than your thoughts
 # Copyright (c) 2011 Antoine Bertin <diaoulael@gmail.com>
 #
+# This file is part of Subliminal.
+#
 # Subliminal is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -112,7 +114,6 @@ class PluginBase(object):
     def getRevertLanguage(self, language):
         """Returns the short (two-character) representation from the long language name"""
         try:
-            self.logger.debug(language + "   " + repr(self.revertPluginLanguages))
             return self.revertPluginLanguages[language]
         except KeyError, e:
             self.logger.warn(u"Ooops, you found a missing language in the configuration file of %s: %s. Send a bug report to have it added." % (self.getClassName(), language))

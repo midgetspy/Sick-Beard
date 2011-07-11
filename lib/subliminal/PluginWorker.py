@@ -3,6 +3,8 @@
 # Subliminal - Subtitles, faster than your thoughts
 # Copyright (c) 2011 Antoine Bertin <diaoulael@gmail.com>
 #
+# This file is part of Subliminal.
+#
 # Subliminal is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or

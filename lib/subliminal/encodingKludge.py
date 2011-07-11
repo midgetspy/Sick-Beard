@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 #
 # Subliminal - Subtitles, faster than your thoughts
+# Copyright (c) 2011 Nic Wolfe <nic@wolfeden.ca>
 # Copyright (c) 2011 Antoine Bertin <diaoulael@gmail.com>
+#
+# This file is part of Subliminal.
 #
 # Subliminal is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
