@@ -350,6 +350,7 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
+            result.release_group = parse_result.release_group
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode
