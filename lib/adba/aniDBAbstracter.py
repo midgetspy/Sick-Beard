@@ -17,18 +17,29 @@
 
 from time import time,sleep
 import aniDBfileInfo as fileInfo
+import xml.etree.cElementTree as etree
+import os, re, string
 from aniDBmaper import AniDBMaper
+
 
 
 class aniDBabstractObject(object):
     
     def __init__(self,aniDB,load=False):
-        self.aniDB = aniDB
-        self.log = self.aniDB.log
         self.laoded = False
+        self.set_connection(aniDB)
         if load:
             self.load_data()
         
+    def set_connection(self,aniDB):
+        self.aniDB = aniDB
+        if self.aniDB:
+            self.log = self.aniDB.log
+        else:
+            self.log = self._fake_log()
+
+    def _fake_log(self,x=None):
+        pass
     
     def _fill(self,dataline):
         for key in dataline:
@@ -90,12 +101,18 @@ class aniDBabstractObject(object):
     
     
 class Anime(aniDBabstractObject):
-    def __init__(self,aniDB,name=None,aid=None,paramsA=None,load=False):
+    def __init__(self,aniDB,name=None,aid=None,paramsA=None,autoCorrectName=False,load=False):
         if not (name or aid):
             raise AniDBIncorrectParameterError,"Anime error"
-        self.maper = AniDBMaper() 
+        self.maper = AniDBMaper()
+        self.allAnimeXML = None 
         self.name = name
         self.aid = aid
+        if not self.aid:
+            self.aid = self._get_aid_from_xml(self.name)
+        if not self.name or autoCorrectName:
+            self.name = self._get_name_from_xml(self.aid)
+            
         
         if not paramsA:
             self.bitCode = "b2f0e0fc000000"
@@ -123,6 +140,44 @@ class Anime(aniDBabstractObject):
         for line in self.rawData.datalines:
             self.release_groups.append(unicode(line["name"], "utf-8"))
         return self.release_groups
+    
+    def _get_aid_from_xml(self,name):
+        if not self.allAnimeXML:
+            self.allAnimeXML = self._read_animetitels_xml()
+    
+        regex = re.compile('[%s]' % re.escape(string.punctuation))
+        name = regex.sub('', name.lower())
+        lastAid = 0
+        for element in self.allAnimeXML.iter():
+            if element.get("aid",False):
+                lastAid = int(element.get("aid"))
+            if element.text:
+                testname = regex.sub('', element.text.lower())
+                if testname == name:
+                    return lastAid
+        return 0
+    
+    def _get_name_from_xml(self,aid,onlyMain=True):
+        if not self.allAnimeXML:
+            self.allAnimeXML = self._read_animetitels_xml()
+
+        for anime in self.allAnimeXML.findall("anime"):
+            if int(anime.get("aid",False)) == aid:
+                for title in anime.iter():
+                    currentLang = title.get("{http://www.w3.org/XML/1998/namespace}lang",False)
+                    currentType = title.get("type",False)
+                    if (currentLang == "en" and not onlyMain) or currentType == "main":
+                        return title.text    
+        return ""     
+        
+    
+    def _read_animetitels_xml(self,path=None):
+        if not path:
+            path = os.path.join(os.path.dirname(os.path.abspath( __file__ )), "animetitles.xml")
+        
+        f = open(path,"r")
+        allAnimeXML = etree.ElementTree(file = f)
+        return allAnimeXML
     
     def _builPreSequal(self):
         if self.related_aid_list and self.related_aid_type:
