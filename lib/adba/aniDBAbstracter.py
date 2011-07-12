@@ -148,7 +148,7 @@ class Anime(aniDBabstractObject):
         regex = re.compile('[%s]' % re.escape(string.punctuation))
         name = regex.sub('', name.lower())
         lastAid = 0
-        for element in self.allAnimeXML.iter():
+        for element in self.allAnimeXML.getiterator():
             if element.get("aid",False):
                 lastAid = int(element.get("aid"))
             if element.text:
