@@ -23,6 +23,7 @@ from sickbeard.helpers import sanitizeSceneName, parse_result_wrapper
 from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
 from sickbeard import db
+from sickbeard.blackandwhitelist import *
 
 import re
 import datetime
@@ -205,7 +206,7 @@ def makeSceneSearchString (episode):
     myDB = db.DBConnection()
     numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
     numseasons = int(numseasonsSQlResult[0][0])
-
+    
     # see if we should use dates instead of episodes
     if episode.show.air_by_date and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate)]
@@ -216,16 +217,27 @@ def makeSceneSearchString (episode):
                     "%ix%02i" % (int(episode.season), int(episode.episode))]
 
     # for single-season shows just search for the show name
-    if numseasons == 1:
+    if numseasons == 1 and not episode.show.is_anime:
         epStrings = ['']
 
+
+        
+    bwl = BlackAndWhiteList(episode.show.tvdbid)
+    bwl.whiteList
+
+
     showNames = set(makeSceneShowSearchStrings(episode.show))
+
 
     toReturn = []
 
     for curShow in showNames:
         for curEpString in epStrings:
-            toReturn.append(curShow + '.' + curEpString)
+            if len(bwl.whiteList) > 0:
+                for keyword in bwl.whiteList:
+                    toReturn.append(keyword + '.' + curShow + '.' + curEpString)
+            else:
+                toReturn.append(curShow + '.' + curEpString)
 
     return toReturn
 
