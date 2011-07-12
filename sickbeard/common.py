@@ -19,7 +19,6 @@
 import os.path
 import operator, platform
 import re
-
 from sickbeard import version
 
 USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION.replace(' ','-')+' ('+platform.system()+' '+platform.release()+')'
@@ -149,13 +148,14 @@ class Quality:
     @staticmethod
     def nameQualityAnime(name):
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
-
+        
+        
         blueRayOptions = checkName(["bluray","blu-ray"],any)
         hdOptions = checkName(["720p","1280x720"], any)
 
         if checkName(["360p","XviD"], any):
             return Quality.SDTV
-        elif checkName(["dvd","480p"], any):
+        elif checkName(["dvd","480p","848x480"], any):
             return Quality.SDDVD
         elif hdOptions and not blueRayOptions:
             return Quality.HDTV
@@ -166,7 +166,7 @@ class Quality:
         elif blueRayOptions and checkName(["1080p", "1920x1080"],any):
             return Quality.FULLHDBLURAY
         else:
-            return Quality.UNKNOWN
+            return Quality.assumeQuality(name)
 
     @staticmethod
     def assumeQuality(name):
