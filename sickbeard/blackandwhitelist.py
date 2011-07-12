@@ -117,7 +117,7 @@ class BlackAndWhiteList(object):
         list = []
         dict = {}
         for row in sql_result:
-            list.append(BlackWhiteKeyword(row["range"],[row["keyword"]]))
+            list.append(row["keyword"])
             if(dict.has_key(row["range"])):
                 dict[row["range"]].append(row["keyword"])
             else:
