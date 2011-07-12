@@ -2182,7 +2182,7 @@ class Home:
                 
                 t.groups = []
                 if helpers.set_up_anidb_connection():
-                    anime = adba.Anime(sickbeard.ADBA_CONNECTION,name=showObj.name,paramsA=['aid'],load=True)
+                    anime = adba.Anime(sickbeard.ADBA_CONNECTION,name=showObj.name)
                     t.groups = anime.get_groups()
 
             with showObj.lock:
