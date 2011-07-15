@@ -309,7 +309,7 @@ class NewzbinProvider(generic.NZBProvider):
             logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
             return []
         
-        self._set_locale_to_us()
+        helpers.set_locale_to_us()
         for cur_item in items:
             title = cur_item.findtext('title')
             if title == 'Feed Error':
@@ -321,29 +321,15 @@ class NewzbinProvider(generic.NZBProvider):
                     if post_date < retention_date:
                         continue
                 except Exception, e:
-                    self._set_default()
+                    helpers.set_local_to_default()
                     logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
                     continue
 
             item_list.append(cur_item)
         
-        self._set_default()
+        helpers.set_local_to_default()
         return item_list
     
-    def _set_locale_to_us(self):
-        if locale.getdefaultlocale() != ('en_US', 'ISO8859-1'): 
-            try:
-                locale.setlocale(locale.LC_TIME, 'en_US')
-            except Exception, e:
-                logger.log("can't set local to en_US this might lead to errors during time parsing: " + str(e), logger.ERROR)
-        
-    def _set_default(self):
-        if locale.getdefaultlocale() != locale.getlocale(locale.LC_ALL): 
-            try:
-                locale.setlocale(locale.LC_ALL,'')
-            except Exception, e:
-                logger.log("can't set local (back) to the default. this might lead to further errors!!: " + str(e), logger.ERROR)
-
     def _getRSSData(self, search=None, show=None):
 
         params = {
