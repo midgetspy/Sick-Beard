@@ -27,7 +27,7 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard import classes, show_name_helpers
+from sickbeard import classes, show_name_helpers, helpers
 
 from sickbeard import exceptions, logger, db
 from sickbeard.common import *
@@ -113,19 +113,23 @@ class Fanzub(generic.NZBProvider):
 
 		results = []
 
-		for i in [2,3]: # we will look for a version 2 or 3
+		for i in [2,3,4]: # we will look for a version 2, 3 and 4
+			"""
+			because of this the proper search failed !!
+			well more precisly because _doSearch does not accept a dict rather then a string
 			params = {
 				"q":"v"+str(i).encode('utf-8')
 				  }
-
-			for curResult in self._doSearch(params):
+			"""
+			for curResult in self._doSearch("v"+str(i)):
 
 				match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
 				if not match:
 					continue
-
+				helpers.set_locale_to_us()
 				resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
-
+				helpers.set_local_to_default()
+				
 				if date == None or resultDate > date:
 					results.append(classes.Proper(curResult.findtext('title'), curResult.findtext('link'), resultDate))
 
