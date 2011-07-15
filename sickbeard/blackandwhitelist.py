@@ -161,13 +161,13 @@ class BlackAndWhiteList(object):
         else:
             return (not mood)
     
-    def _is_keyword_in_string(self,string,needle):
+    def _is_keyword_in_string(self,fromPost,fromBWList):
         """
-        will return true if needle is found in string
+        will return true if fromBWList is found in fromPost
         for now a basic find is used
         """
 
-        return (string.find(needle) >= 0)
+        return (fromPost.find(fromBWList) >= 0)
 
 class BlackWhiteKeyword(object):
     range = ""
