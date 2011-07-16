@@ -92,11 +92,11 @@ ep_regexes = [
                '''),
               
               ('stupid',
-               # tpz-abc102
+               # tpz-abc102 or tpz-abcs01e02
                '''
                (?P<release_group>.+?)-\w+?[\. ]?           # tpz-abc
-               (?P<season_num>\d{1,2})                     # 1
-               (?P<ep_num>\d{2})$                          # 02
+               s?(?P<season_num>\d{1,2})                   # 1 or s01
+               e?(?P<ep_num>\d{2})$                        # 02 or e02
                '''),
               
               ('verbose',
