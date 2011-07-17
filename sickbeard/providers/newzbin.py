@@ -25,7 +25,6 @@ import urllib
 import xml.etree.cElementTree as etree
 from datetime import datetime, timedelta
 
-import locale
 import sickbeard
 import generic
 
