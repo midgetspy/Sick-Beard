@@ -20,9 +20,11 @@ import re
 import urllib
 
 from sickbeard.helpers import sanitizeSceneName
-from sickbeard import name_cache
+from sickbeard import name_cache, helpers
 from sickbeard import logger
 from sickbeard import db
+import sickbeard
+from lib import adba
 
 def get_scene_exceptions(tvdb_id):
     """
@@ -31,7 +33,8 @@ def get_scene_exceptions(tvdb_id):
 
     myDB = db.DBConnection("cache.db")
     exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
-    return [cur_exception["show_name"] for cur_exception in exceptions]
+    
+    return [cur_exception["show_name"] for cur_exception in exceptions] + [retrieve_anidb_mainname(tvdb_id)]
 
 def get_scene_exception_by_name(show_name):
     """
@@ -110,4 +113,11 @@ def retrieve_exceptions_fetcher(url):
         
         exception_dict[tvdb_id] = alias_list
     return exception_dict
+    
+    
+def retrieve_anidb_mainname(tvdbid):
+    showObj = helpers.findCertainShow(sickbeard.showList,tvdbid)
+    anime = adba.Anime(None,name=showObj.name,autoCorrectName=True)
+    return anime.name
+    
     
