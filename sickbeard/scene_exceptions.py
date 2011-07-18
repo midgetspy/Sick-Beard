@@ -62,7 +62,7 @@ def get_scene_exception_by_name(show_name):
 
     return None
 
-def retrieve_exceptions():
+def retrieve_exceptions(localOnly=False):
     """
     Looks up the exceptions on github, parses them into a dict, and inserts them into the
     scene_exceptions table in cache.db. Also clears the scene name cache.
@@ -71,9 +71,10 @@ def retrieve_exceptions():
     # exceptions are stored on github pages
     url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
     url2 = 'http://lad1337.github.com/sb_tvdb_scene_exceptions/anime_exceptions.txt'
-   
-    exception_dict = _retrieve_exceptions_fetcher(url)
-    exception_dict.update(_retrieve_exceptions_fetcher(url2)) # server anime exceptions
+    exception_dict ={}
+    if not localOnly:
+        exception_dict = _retrieve_exceptions_fetcher(url)
+        exception_dict.update(_retrieve_exceptions_fetcher(url2)) # server anime exceptions
     exception_dict.update(_retrieve_anidb_mainnames()) # anidb xml anime exceptions
 
     myDB = db.DBConnection("cache.db")
