@@ -297,7 +297,7 @@ def findEpisode(episode, manualSearch=False):
         # this way we do not break the special abilities of the providers e.g. nzbmatrix
         searchStrings = curProvider.get_episode_search_strings(episode)
         logger.log("All searchstring permutations :"+str(searchStrings), logger.DEBUG)
-
+        done_searching = False
         for searchString in searchStrings:
             try:
                 curFoundResults = curProvider.findEpisode(episode, manualSearch=manualSearch, searchString=searchString)
@@ -315,7 +315,6 @@ def findEpisode(episode, manualSearch=False):
             curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
 
             # loop all results and see if any of them are good enough that we can stop searching
-            done_searching = False
             for cur_result in curFoundResults:
                 done_searching = isFinalResult(cur_result)
                 logger.log(u"Should we stop searching after finding "+cur_result.name+": "+str(done_searching), logger.DEBUG)
