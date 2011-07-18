@@ -33,8 +33,13 @@ def get_scene_exceptions(tvdb_id):
 
     myDB = db.DBConnection("cache.db")
     exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+    exceptionsList = [cur_exception["show_name"] for cur_exception in exceptions]
     
-    return [cur_exception["show_name"] for cur_exception in exceptions] + [retrieve_anidb_mainname(tvdb_id)]
+    anidb_mainname = retrieve_anidb_mainname(tvdb_id)
+    if anidb_mainname:
+        exceptionsList += [retrieve_anidb_mainname(tvdb_id)]
+
+    return exceptionsList
 
 def get_scene_exception_by_name(show_name):
     """
