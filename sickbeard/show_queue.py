@@ -30,6 +30,7 @@ from sickbeard.tv import TVShow
 from sickbeard import exceptions, logger, ui, db
 from sickbeard import generic_queue
 from sickbeard import name_cache
+from sickbeard import scene_exceptions
 from sickbeard.exceptions import ex
 
 class ShowQueue(generic_queue.GenericQueue):
@@ -274,7 +275,7 @@ class QueueItemAdd(ShowQueueItem):
 
         # add it to the show list
         sickbeard.showList.append(self.show)
-
+        
         try:
             self.show.loadEpisodesFromTVDB()
             self.show.setTVRID()
@@ -303,6 +304,10 @@ class QueueItemAdd(ShowQueueItem):
             logger.log(u"Setting all episodes to the specified default status: "+str(self.default_status))
             myDB = db.DBConnection();
             myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
+
+        # before we run the backlog lets update the local aliases if the new show is an anime
+        if self.show.is_anime:
+            scene_exceptions.retrieve_exceptions(localOnly=True)
 
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
