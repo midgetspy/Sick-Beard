@@ -288,34 +288,62 @@ def findEpisode(episode, manualSearch=False):
         if not curProvider.isActive():
             continue
 
-        try:
-            curFoundResults = curProvider.findEpisode(episode, manualSearch=manualSearch)
-        except exceptions.AuthException, e:
-            logger.log(u"Authentication error: "+ex(e), logger.ERROR)
-            continue
-        except Exception, e:
-            logger.log(u"Error while searching "+curProvider.name+", skipping: "+ex(e), logger.ERROR)
-            logger.log(traceback.format_exc(), logger.DEBUG)
-            continue
+        # we check our results after every search string
+        # this is done because in the future we will have a ordered list of all show aliases and release_group aliases
+        # ordered by success rate ...
 
-        didSearch = True
+        # lets get all search strings
+        # we use the method from the curProvider to accommodate for the internal join functions
+        # this way we do not break the special abilities of the providers e.g. nzbmatrix
+        searchStrings = curProvider.get_episode_search_strings(episode)
+        logger.log("All searchstring permutations :"+str(searchStrings), logger.DEBUG)
 
-        # skip non-tv crap
-        curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
+        for searchString in searchStrings:
+            try:
+                curFoundResults = curProvider.findEpisode(episode, manualSearch=manualSearch, searchString=searchString)
+            except exceptions.AuthException, e:
+                logger.log(u"Authentication error: "+ex(e), logger.ERROR)
+                break # break the while loop
+            except Exception, e:
+                logger.log(u"Error while searching "+curProvider.name+", skipping: "+ex(e), logger.ERROR)
+                logger.log(traceback.format_exc(), logger.DEBUG)
+                break # break the while loop
 
-        # loop all results and see if any of them are good enough that we can stop searching
-        done_searching = False
-        for cur_result in curFoundResults:
-            done_searching = isFinalResult(cur_result)
-            logger.log(u"Should we stop searching after finding "+cur_result.name+": "+str(done_searching), logger.DEBUG)
+            didSearch = True
+
+            # skip non-tv crap
+            curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
+
+            # loop all results and see if any of them are good enough that we can stop searching
+            done_searching = False
+            for cur_result in curFoundResults:
+                done_searching = isFinalResult(cur_result)
+                logger.log(u"Should we stop searching after finding "+cur_result.name+": "+str(done_searching), logger.DEBUG)
+                if done_searching:
+                    break
+
+            # if we are searching an anime we are a little more loose
+            # this means we check every turn for a possible result
+            # in contrast the isFinalResultlooks function looks for a perfect result (best quality)
+            # but this will accept any result that would have been picked in the end -> pickBestResult
+            # and then stop and use that
+            if episode.show.is_anime:
+                logger.log(u"We are searching an anime. i am checking if we got a good result with search provider "+curProvider.name, logger.DEBUG)
+                bestResult = pickBestResult(curFoundResults,show=episode.show)
+                if bestResult:
+                    return bestResult
+
+            foundResults += curFoundResults
+            # if we did find a result that's good enough to stop then don't continue
+            # this breaks the turn loop
             if done_searching:
                 break
-        
-        foundResults += curFoundResults
 
         # if we did find a result that's good enough to stop then don't continue
+        # this breaks the for each provider loop
         if done_searching:
             break
+
 
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)

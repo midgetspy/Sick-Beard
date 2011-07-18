@@ -117,7 +117,10 @@ class GenericProvider:
             return None
 
         return result
-
+    
+    def get_episode_search_strings(self,ep_obj):
+        return self._get_episode_search_strings(ep_obj)
+    
     def downloadResult(self, result):
         """
         Save the result to disk.
@@ -208,11 +211,13 @@ class GenericProvider:
         
         return (title, url)
     
-    def findEpisode (self, episode, manualSearch=False):
+    def findEpisode (self, episode, manualSearch=False, searchString=None):
 
         self._checkAuth()
-
-        logger.log(u"Searching "+self.name+" for " + episode.prettyName(True))
+        if searchString:
+            logger.log(u"Searching "+self.name+" for '" + searchString+"'")
+        else:
+            logger.log(u"Searching "+self.name+" for episode " + episode.prettyName(True))
 
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)
@@ -224,10 +229,15 @@ class GenericProvider:
         if results or not manualSearch:
             return results
 
-        itemList = []
+        if searchString: # if we already got a searchstring don't bother make one
+            search_strings = [searchString]
+        else:
+            search_strings = self._get_episode_search_strings(episode)
 
-        for cur_search_string in self._get_episode_search_strings(episode):
+        itemList = []
+        for cur_search_string in search_strings:
             itemList += self._doSearch(cur_search_string, show=episode.show)
+
 
         for item in itemList:
 
