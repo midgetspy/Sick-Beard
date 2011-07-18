@@ -20,6 +20,8 @@ import aniDBfileInfo as fileInfo
 import xml.etree.cElementTree as etree
 import os, re, string
 from aniDBmaper import AniDBMaper
+from aniDBtvDBmaper import TvDBMap
+from aniDBerrors import *
 
 
 
@@ -101,18 +103,29 @@ class aniDBabstractObject(object):
     
     
 class Anime(aniDBabstractObject):
-    def __init__(self,aniDB,name=None,aid=None,paramsA=None,autoCorrectName=False,load=False):
-        if not (name or aid):
-            raise AniDBIncorrectParameterError,"Anime error"
+    def __init__(self,aniDB,name=None,aid=None,tvdb_id=None,paramsA=None,autoCorrectName=False,load=False):
+       
         self.maper = AniDBMaper()
+        self.tvDBMap = TvDBMap()
         self.allAnimeXML = None 
+        
         self.name = name
         self.aid = aid
+        self.tvdb_id = tvdb_id
+        
+        if self.tvdb_id and not self.aid:
+            self.aid = self.tvDBMap.get_anidb_for_tvdb(self.tvdb_id)
+            
+        if not (self.name or self.aid):  
+            raise AniDBIncorrectParameterError("No aid or name available")
+        
         if not self.aid:
             self.aid = self._get_aid_from_xml(self.name)
         if not self.name or autoCorrectName:
             self.name = self._get_name_from_xml(self.aid)
-            
+        
+        if not self.tvdb_id:
+            self.tvdb_id = self.tvDBMap.get_tvdb_for_anidb(self.aid)
         
         if not paramsA:
             self.bitCode = "b2f0e0fc000000"
@@ -141,6 +154,7 @@ class Anime(aniDBabstractObject):
             self.release_groups.append(unicode(line["name"], "utf-8"))
         return self.release_groups
     
+    #TODO: refactor and use the new functions in anidbFileinfo
     def _get_aid_from_xml(self,name):
         if not self.allAnimeXML:
             self.allAnimeXML = self._read_animetitels_xml()
@@ -157,6 +171,7 @@ class Anime(aniDBabstractObject):
                     return lastAid
         return 0
     
+    #TODO: refactor and use the new functions in anidbFileinfo
     def _get_name_from_xml(self,aid,onlyMain=True):
         if not self.allAnimeXML:
             self.allAnimeXML = self._read_animetitels_xml()

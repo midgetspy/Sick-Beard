@@ -17,6 +17,10 @@
 
 from __future__ import with_statement
 import hashlib
+import os
+import xml.etree.cElementTree as etree
+
+
 # http://www.radicand.org/blog/orz/2010/2/21/edonkey2000-hash-in-python/
 def get_file_hash(filePath):
     """ Returns the ed2k hash of a given file."""
@@ -48,3 +52,26 @@ def get_file_size(path):
     size = len(f.read())
     f.close()
     return size
+
+
+
+def read_anidb_xml(filePath):
+    if not filePath:
+        filePath = os.path.join(os.path.dirname(os.path.abspath( __file__ )), "animetitles.xml")
+    return read_xml_into_etree(filePath)
+
+
+def read_tvdb_map_xml(filePath):
+    if not filePath:
+        filePath = os.path.join(os.path.dirname(os.path.abspath( __file__ )), "anime-list.xml")
+    return read_xml_into_etree(filePath)
+
+
+def read_xml_into_etree(filePath):
+        if not filePath:
+            return None
+        
+        f = open(filePath,"r")
+        xmlASetree = etree.ElementTree(file = f)
+        return xmlASetree
+    
