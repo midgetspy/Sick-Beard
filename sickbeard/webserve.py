@@ -2227,16 +2227,26 @@ class Home:
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
 
-        if whitelist:
-            whitelist = whitelist.split(",")
-        if blacklist:
-            blacklist = blacklist.split(",")
-        
+
         bwl = BlackAndWhiteList(showObj.tvdbid)
         if whitelist:
-            bwl.set_white_keywords_for("release_group", whitelist)
+            whitelist = whitelist.split(",")
+            shortWhiteList = []
+            if helpers.set_up_anidb_connection():
+                for groupName in whitelist:
+                    group = sickbeard.ADBA_CONNECTION.group(gname=groupName)
+                    for line in group.datalines:
+                        shortWhiteList.append(line["shortname"])
+            bwl.set_white_keywords_for("release_group", shortWhiteList)
         if blacklist:
-            bwl.set_black_keywords_for("release_group", blacklist)
+            blacklist = blacklist.split(",")
+            shortBlacklist = []
+            if helpers.set_up_anidb_connection():
+                for groupName in blacklist:
+                    group = sickbeard.ADBA_CONNECTION.group(gname=groupName)
+                    for line in group.datalines:
+                        shortBlacklist.append(line["shortname"])
+            bwl.set_black_keywords_for("release_group", shortBlacklist)
 
         errors = []
         with showObj.lock:
