@@ -34,10 +34,6 @@ def get_scene_exceptions(tvdb_id):
     myDB = db.DBConnection("cache.db")
     exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
     exceptionsList = [cur_exception["show_name"] for cur_exception in exceptions]
-    
-    anidb_mainname = retrieve_anidb_mainname(tvdb_id)
-    if anidb_mainname:
-        exceptionsList += [retrieve_anidb_mainname(tvdb_id)]
 
     return exceptionsList
 
@@ -76,8 +72,9 @@ def retrieve_exceptions():
     url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
     url2 = 'http://lad1337.github.com/sb_tvdb_scene_exceptions/anime_exceptions.txt'
    
-    exception_dict = retrieve_exceptions_fetcher(url)
-    exception_dict.update(retrieve_exceptions_fetcher(url2))
+    exception_dict = _retrieve_exceptions_fetcher(url)
+    exception_dict.update(_retrieve_exceptions_fetcher(url2)) # server anime exceptions
+    exception_dict.update(_retrieve_anidb_mainnames()) # anidb xml anime exceptions
 
     myDB = db.DBConnection("cache.db")
 
@@ -99,7 +96,7 @@ def retrieve_exceptions():
     if changed_exceptions:
         name_cache.clearCache()
     
-def retrieve_exceptions_fetcher(url):
+def _retrieve_exceptions_fetcher(url):
     
     exception_dict = {}
     open_url = urllib.urlopen(url)
@@ -120,9 +117,15 @@ def retrieve_exceptions_fetcher(url):
     return exception_dict
     
     
-def retrieve_anidb_mainname(tvdbid):
-    showObj = helpers.findCertainShow(sickbeard.showList,tvdbid)
-    anime = adba.Anime(None,name=showObj.name,autoCorrectName=True)
-    return anime.name
+def _retrieve_anidb_mainnames():
+    
+    anidb_mainNames = {}
+    for show in sickbeard.showList:
+        if show.is_anime:
+            anime = adba.Anime(None,name=show.name,autoCorrectName=True)
+            if anime.name and anime.name != show.name:
+                anidb_mainNames[show.tvdbid] = [anime.name]
+    
+    return anidb_mainNames
     
     
