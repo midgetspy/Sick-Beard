@@ -178,7 +178,7 @@ class Anime(aniDBabstractObject):
 
         for anime in self.allAnimeXML.findall("anime"):
             if int(anime.get("aid",False)) == aid:
-                for title in anime.iter():
+                for title in anime.getiterator():
                     currentLang = title.get("{http://www.w3.org/XML/1998/namespace}lang",False)
                     currentType = title.get("type",False)
                     if (currentLang == "en" and not onlyMain) or currentType == "main":
