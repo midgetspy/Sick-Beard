@@ -390,9 +390,9 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + ": That isn't even a real file dude... " + file)
             return None
         
-        logger.log(str(self.tvdbid) + ": -------------------------------------------- ")
+        logger.log(str(self.tvdbid) + ": -------------------------------------------- ", logger.DEBUG)
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
-        logger.log(str(self.tvdbid) + ": -------------------------------------------- ")
+        logger.log(str(self.tvdbid) + ": -------------------------------------------- ", logger.DEBUG)
         try:
             parse_result = parse_result_wrapper(self,file)
         except InvalidNameException:
@@ -1080,17 +1080,18 @@ class TVEpisode(object):
     def loadFromDB(self, season, episode):
 
         myDB = db.DBConnection()
-    
         logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
         sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, season, episode])
-    
+
+        """this might be malicious code ! dont use
         # only search for absolute numbering if we havent already found something and the show is flagged as such
         useInfoFromDB = False
         if self.show.is_anime and len(sqlResults) == 0 :
             logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for absolute number " + str(episode), logger.DEBUG)
             sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season != 0 AND absolute_number = ?", [self.show.tvdbid, episode])
             useInfoFromDB = True
-            
+        """
+
         if len(sqlResults) > 1:
             raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
         elif len(sqlResults) == 0:
@@ -1100,13 +1101,8 @@ class TVEpisode(object):
             #NAMEIT logger.log(u"AAAAA from" + str(self.season)+"x"+str(self.episode) + " -" + self.name + " to " + str(sqlResults[0]["name"]))
             if sqlResults[0]["name"] != None:
                 self.name = sqlResults[0]["name"]
-            # if 
-            if not useInfoFromDB:
-                self.season = season
-                self.episode = episode
-            else:
-                self.season = sqlResults[0]["season"]
-                self.episode = sqlResults[0]["episode"]
+            self.season = season
+            self.episode = episode
             # TODO: refactor db
             self.absolute_number = sqlResults[0]["absolute_number"]    
             self.description = sqlResults[0]["description"]
