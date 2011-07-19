@@ -87,6 +87,26 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
     <tr><td class="showLegend">Season Folders: </td><td><img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Active: </td><td><img src="$sbRoot/images/#if int($show.paused) == 0 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+
+#if $bwl.get_white_keywords_for("gloabl"):
+    <tr><td class="showLegend">Whitelist: </td><td>#echo ', '.join($bwl.get_white_keywords_for("gloabl"))#</td></tr>
+#end if
+#if $bwl.get_black_keywords_for("gloabl"):
+    <tr><td class="showLegend">Blacklist: </td><td>#echo  ', '.join($bwl.get_black_keywords_for("gloabl"))#</td></tr>
+#end if
+#if $bwl.get_white_keywords_for("release_group"):
+    <tr>
+        <td class="showLegend">Wanted Group#if len($bwl.get_white_keywords_for("release_group"))>1 then "s" else ""#:</td>
+        <td>#echo ', '.join($bwl.get_white_keywords_for("release_group"))#</td>
+    </tr>
+#end if
+#if $bwl.get_black_keywords_for("release_group"):
+    <tr>
+        <td class="showLegend">Unwanted Group#if len($bwl.get_black_keywords_for("release_group"))>1 then "s" else ""#:</td>
+        <td>#echo ', '.join($bwl.get_black_keywords_for("release_group"))#</td>
+    </tr>
+#end if
+
 </table>
 </div>
 

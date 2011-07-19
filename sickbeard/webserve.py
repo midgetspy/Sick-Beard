@@ -2135,6 +2135,9 @@ class Home:
             return x
         t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
 
+
+        t.bwl = BlackAndWhiteList(showObj.tvdbid)
+
         t.epCounts = epCounts
         t.epCats = epCats
 
