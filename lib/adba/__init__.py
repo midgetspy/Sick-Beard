@@ -23,7 +23,7 @@ from aniDBcommands import *
 from aniDBerrors import *
 from aniDBAbstracter import Anime,Episode
 
-version = 1
+version = 100
 
 class Connection(threading.Thread):
 	def __init__(self,clientname='adba',server='api.anidb.info',port=9000,myport=9876,user=None,password=None,session=None,log=False,logPrivate=False,keepAlive=False):
@@ -66,7 +66,11 @@ class Connection(threading.Thread):
 	def print_log_dummy(self,data):
 		pass
 	
-	def close(self):
+	def stop(self):
+		self.logout(cutConnection=True)
+		
+	
+	def cut(self):
 		self.link.stop()
 	
 	def handle_response(self,response):
@@ -182,7 +186,7 @@ class Connection(threading.Thread):
 		"""
 		result = self.handle(LogoutCommand(),callback)
 		if(cutConnection):
-			self.close()
+			self.cut()
 		return result
 
 	def push(self,notify,msg,buddy=None,callback=None):
