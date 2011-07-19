@@ -836,6 +836,14 @@ def halt ():
                 properFinderScheduler.thread.join(10)
             except:
                 pass
+            
+            if ADBA_CONNECTION:
+                ADBA_CONNECTION.stop()
+                logger.log(u"Waiting for the ANIDB CONNECTION thread to exit")
+                try:
+                    ADBA_CONNECTION.join(5)
+                except:
+                    pass
 
 
             __INITIALIZED__ = False
