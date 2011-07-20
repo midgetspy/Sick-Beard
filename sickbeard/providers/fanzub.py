@@ -32,6 +32,7 @@ from sickbeard import classes, show_name_helpers, helpers
 from sickbeard import exceptions, logger, db
 from sickbeard.common import *
 from sickbeard import tvcache
+from lib.dateutil.parser import parse as parseDate
 
 class Fanzub(generic.NZBProvider):
 
@@ -126,9 +127,9 @@ class Fanzub(generic.NZBProvider):
 				match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
 				if not match:
 					continue
-				helpers.set_locale_to_us()
-				resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
-				helpers.set_local_to_default()
+				
+				dateString = match.group(1), "%a, %d %b %Y %H:%M:%S"
+				resultDate = parseDate(dateString).replace(tzinfo=None)
 				
 				if date == None or resultDate > date:
 					results.append(classes.Proper(curResult.findtext('title'), curResult.findtext('link'), resultDate))

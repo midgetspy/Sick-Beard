@@ -669,21 +669,6 @@ def set_up_anidb_connection():
  
         return sickbeard.ADBA_CONNECTION.authed()
 
-def set_locale_to_us():
-    if locale.getdefaultlocale() != ('en_US', 'ISO8859-1'): 
-        try:
-            locale.setlocale(locale.LC_TIME, 'en_US')
-        except Exception, e:
-            logger.log("can't set local to en_US this might lead to errors during time parsing: " + str(e), logger.ERROR)
-    
-def set_local_to_default():
-    if locale.getdefaultlocale() != locale.getlocale(locale.LC_ALL): 
-        try:
-            locale.setlocale(locale.LC_ALL,'')
-        except Exception, e:
-            logger.log("can't set local (back) to the default. this might lead to further errors!!: " + str(e), logger.ERROR)
-
-
    
 def full_sanitizeSceneName(name):
     return re.sub('[. -]', ' ', sanitizeSceneName(name)).lower().lstrip()

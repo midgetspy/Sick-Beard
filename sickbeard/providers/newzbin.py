@@ -309,7 +309,6 @@ class NewzbinProvider(generic.NZBProvider):
             logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
             return []
         
-        helpers.set_locale_to_us()
         for cur_item in items:
             title = cur_item.findtext('title')
             if title == 'Feed Error':
@@ -325,13 +324,11 @@ class NewzbinProvider(generic.NZBProvider):
                     if post_date < retention_date:
                         continue
                 except Exception, e:
-                    helpers.set_local_to_default()
                     logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
                     continue
 
             item_list.append(cur_item)
         
-        helpers.set_local_to_default()
         return item_list
     
     def _getRSSData(self, search=None, show=None):
