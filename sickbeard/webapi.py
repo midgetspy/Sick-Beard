@@ -49,6 +49,8 @@ class Api:
         return outputCallback(outDict)
     
     def _out_as_jason(self,dict):
+        response = cherrypy.response
+        response.headers['Content-Type'] = 'application/json'
         return json.dumps(dict, indent=self.intent)
     
     def _out_as_xml(self,dict):
