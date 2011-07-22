@@ -40,9 +40,10 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 
 from sickbeard.providers import newznab
-from sickbeard.common import Quality, Overview, statusStrings
+from sickbeard.common import Quality, Overview, statusStrings, qualityPresetStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
+from sickbeard.webapi import Api
 
 from lib.tvdb_api import tvdb_api
 
@@ -2566,6 +2567,8 @@ class WebInterface:
     config = Config()
 
     home = Home()
+    
+    api = Api()
 
     browser = browser.WebFileBrowser()
 

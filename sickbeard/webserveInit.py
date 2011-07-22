@@ -85,6 +85,9 @@ def initWebServer(options = {}):
                                 'tools.auth_basic.on':            True,
                                 'tools.auth_basic.realm':         'SickBeard',
                                 'tools.auth_basic.checkpassword': checkpassword
+                        },
+                        '/api':{
+                                'tools.auth_basic.on':            False
                         }
                 })
 
