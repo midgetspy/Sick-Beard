@@ -30,8 +30,17 @@ from sickbeard import tvcache
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard.exceptions import ex
 
-class BTJunkieProvider(generic.TorrentProvider):
+class BTJunkieUtils:
+	regex_seeds = '\[([0-9]+)/[0-9]+\]'
 
+	@staticmethod
+	def getTorrentTitleAndUrl(item):
+	    	title = re.sub(BTJunkieUtils.regex_seeds, '', item.findtext('title')) # Remove seeds portion of title (seems to confuse Quality.nameQuality method)
+	    	url = item.findtext('link').replace('&amp;','&') + '/download.torrent'
+
+		return (title, url)
+
+class BTJunkieProvider(generic.TorrentProvider):
     def __init__(self):
         generic.TorrentProvider.__init__(self, "BTJunkie")
         self.supportsBacklog = True
@@ -45,17 +54,13 @@ class BTJunkieProvider(generic.TorrentProvider):
         return 'btjunkie.gif'
 
     def getQuality(self, item):
-	(title, url) = self._get_title_and_url(item)
-
-	if "HDTV" in title:
-		return Quality.HDTV
+	(title, url) = BTJunkieUtils.getTorrentTitleAndUrl(item)
 
         quality = Quality.nameQuality(title)
 
         return quality
 
     def _get_season_search_strings(self, show, season=None):
-    
         params = {}
     
         if not show:
@@ -69,7 +74,6 @@ class BTJunkieProvider(generic.TorrentProvider):
         return [params]
 
     def _get_episode_search_strings(self, ep_obj):
-    
         params = {}
         
         if not ep_obj:
@@ -156,11 +160,9 @@ class BTJunkieProvider(generic.TorrentProvider):
 		    logger.log(u"The XML returned from the BTJunkie RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 		    continue
 
-	        regex_seeds = '\[([0-9]+)/[0-9]+\]'
-
-	        logger.log("Comparing seeds regex " + regex_seeds + " against " + rawTitle, logger.DEBUG)
+	        logger.log("Comparing seeds regex " + BTJunkieUtils.regex_seeds + " against " + rawTitle, logger.DEBUG)
     
-    	        match = re.search(regex_seeds, rawTitle, re.I)
+    	        match = re.search(BTJunkieUtils.regex_seeds, rawTitle, re.I)
 	        if match:
 	 	    seeds = match.group(1)
 		    logger.log("Torrent had " + seeds + " seeds", logger.DEBUG)
@@ -172,10 +174,7 @@ class BTJunkieProvider(generic.TorrentProvider):
         return results
 
     def _get_title_and_url(self, item):
-        title = item.findtext('title')
-        url = item.findtext('link').replace('&amp;','&') + '/download.torrent'
-        
-	return (title, url)
+	return BTJunkieUtils.getTorrentTitleAndUrl(item)
 
 class BTJunkieCache(tvcache.TVCache):
 
@@ -197,8 +196,7 @@ class BTJunkieCache(tvcache.TVCache):
         return data
 
     def _parseItem(self, item):
-        title = item.findtext('title')
-        url = item.findtext('link') + '/download.torrent'
+	(title, url) = BTJunkieUtils.getTorrentTitleAndUrl(item)
 
         if not title or not url:
             logger.log(u"The XML returned from the BTJunkie RSS feed is incomplete, this result is unusable", logger.ERROR)
