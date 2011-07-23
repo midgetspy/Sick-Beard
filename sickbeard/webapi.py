@@ -9,6 +9,7 @@ from common import *
 import datetime
 import webserve
 from sickbeard import logger
+from sickbeard.exceptions import ex
 
 try:
     import json
@@ -58,8 +59,11 @@ class Api:
         else:
             logger.log("api key '"+str(apiKey)+"' NOT accepted",logger.DEBUG)
             return outputCallback(_error('Wrong API KEY'))
+        try:
+            outDict = call_dispatcher(args,kwargs) 
+        except Exception, e:
+            outDict = _error("An internal error occurred: "+ex(e))
         
-        outDict = call_dispatcher(args,kwargs) 
         return outputCallback(outDict)
     
     def _out_as_jason(self,dict):
@@ -243,7 +247,7 @@ def commingEpisodes(args,kwargs):
     sort,args = _check_params(args, kwargs, "sort", "date")
     
     if not sort in ["date","show","network"]:
-        return '{"error":"Sort by '+sort+' not possible"}'
+        return _error("Sort by '"+sort+"' not possible")
     
     epResults,today,next_week = webserve.WebInterface.commingEpisodesRaw(sort=sort ,row_type="dict")
     finalEpResults = {}
@@ -259,10 +263,10 @@ def commingEpisodes(args,kwargs):
                 ep["status"] = "Today"
             else:
                 ep["status"] = "Soon"
-
-        ep["airdate"] = _ordinal_to_dateForm(int(ep["airdate"]))
+        ordinalAirdate = int(ep["airdate"])
+        ep["airdate"] = _ordinal_to_dateForm(ordinalAirdate)
         ep["quality"] = _get_quality_string(ep["quality"])
-        ep["weekday"] = dayofWeek[airdate.weekday()]
+        ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
         del ep["genre"]
         del ep["episode_id"]
         del ep["lang"]
