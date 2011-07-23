@@ -2484,6 +2484,29 @@ class Home:
 
         return json.dumps({'result': 'failure'})
 
+    @cherrypy.expose
+    def searchEpisodeSubtitles(self, show=None, season=None, episode=None):
+
+        # retrieve the episode object and fail if we can't get one 
+        ep_obj = _getEpisode(show, season, episode)
+        if isinstance(ep_obj, str):
+            return json.dumps({'result': 'failure'})
+
+        # try do download subtitles for that episode
+        previous_subtitles = ep_obj.subtitles
+        try:
+            ep_obj.downloadSubtitles()
+        except:
+            return json.dumps({'subtitles': 'oops'})
+
+        # return the correct json value
+        if previous_subtitles != ep_obj.subtitles:
+            status = 'New subtitles downloaded: %s' % ','.join(sorted(list(set(ep_obj.subtitles).difference(previous_subtitles))))
+        else:
+            status = 'No subtitles downloaded'
+        ui.notifications.message('Subtitles Search', status)
+        return json.dumps({'result': status, 'subtitles': ','.join(ep_obj.subtitles)})
+
 class UI:
     
     @cherrypy.expose

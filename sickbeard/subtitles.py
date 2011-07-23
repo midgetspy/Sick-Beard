@@ -64,11 +64,11 @@ def isValidLanguage(language):
 
 def wantedLanguages(sqlLike = False):
     if sickbeard.SUBTITLES_MULTI:
-        wantedLanguages = ','.join(sorted(sickbeard.SUBTITLES_LANGUAGES))
+        wantedLanguages = sorted(sickbeard.SUBTITLES_LANGUAGES)
     else:
-        wantedLanguages = SINGLE
+        wantedLanguages = [SINGLE]
     if sqlLike:
-        return '%' + wantedLanguages + '%'
+        return '%' + ','.join(wantedLanguages) + '%'
     return wantedLanguages
 
 def subtitlesLanguagesFromFiles(files):

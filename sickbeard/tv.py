@@ -1027,7 +1027,7 @@ class TVEpisode(object):
         downloaded_subs = subli.downloadSubtitles([self._location])
         subli.stopWorkers()
         if downloaded_subs:
-            logger.log(str(self.show.tvdbid) + ": Downloaded %d subtitles for episode " + str(self.season) + "x" + str(self.episode) % len(downloaded_subs), logger.DEBUG)
+            logger.log(str(self.show.tvdbid) + ": Downloaded " + str(downloaded_subs) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         else:
             logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         self.refreshSubtitles()
