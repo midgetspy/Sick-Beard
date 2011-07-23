@@ -244,7 +244,7 @@ def getEpisode(args, kwargs):
     s,args = _check_params(args, kwargs, "s", None)
     e,args = _check_params(args, kwargs, "e", None)
     x,args = _check_params(args, kwargs, "x", None)
-    
+    pathType,args = _check_params(args, kwargs, "pathType", "rel")
     
     if x:
         try:
@@ -255,7 +255,9 @@ def getEpisode(args, kwargs):
             pass
     if s == "all":
         s = None
-
+        
+    show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(sid))
+    
     myDB = db.DBConnection(row_type="dict")
     sqlResults = myDB.select( "SELECT * FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [sid,e,s])
     episode = {}
@@ -267,6 +269,14 @@ def getEpisode(args, kwargs):
         del episode["episode_id"]
     except:
         pass
+    if pathType == "rel":
+        try:
+            showPathLength = len(show.location)+1
+            episode["location"] = episode["location"][showPathLength:]
+        except:
+            pass
+    
+    
     return episode
 
 def commingEpisodes(args,kwargs):
@@ -359,10 +369,7 @@ def _get_episodes(showId,season=None,status=[]):
     elif season:
         season = str(season)
         pure = True
-        
-    
-    show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(showId))
-          
+              
     myDB = db.DBConnection(row_type="dict")
     sqlResults = myDB.select( "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC", [showId])
     episodes = {}
@@ -394,12 +401,6 @@ def _get_episodes(showId,season=None,status=[]):
         # give ambiguous field a prefix
         epResult = _add_prefix(epResult,"ep_","tvdbid")
         epResult = _add_prefix(epResult,"ep_","airdate")
-        #FIXME: this dosen't work
-        try:
-            epResult["location"] = epResult["location"].lstrip(show.location)
-        except:
-            pass
-        
         
     return episodes, season_list, episode_count
     
