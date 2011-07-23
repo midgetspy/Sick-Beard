@@ -38,7 +38,7 @@ class Api:
         global dateFormat
         dateFormat = "%Y-%m-%d"
         if kwargs.has_key("dateForm"):
-            dateFormat = kwargs["dateForm"]
+            dateFormat = str(kwargs["dateForm"])
             del kwargs["dateForm"]
 
         logger.log("api: dateFormat '"+str(dateFormat)+"'",logger.DEBUG)
@@ -46,9 +46,7 @@ class Api:
         # set the output callback
         # default json
         outputCallback = self._out_as_jason
-        if kwargs.get("out") == "xml": # output xml can only be set with post/get
-            outputCallback = self._out_as_xml
-        
+ 
         if access:
             logger.log(accessMsg,logger.DEBUG)
         else:
@@ -72,12 +70,7 @@ class Api:
             out = '{"error": "while composing output: "'+ex(e)+'"}'
         return out
     
-    def _out_as_xml(self,dict):
-        #TODO: implement
-        response = cherrypy.response
-        response.headers['Content-Type'] = 'application/xml'
-        return "error: implement me!"
-    
+  
     def _grand_access(self,realKey,args,kwargs):
         remoteIp = cherrypy.request.remote.ip
         
