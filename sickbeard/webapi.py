@@ -28,8 +28,60 @@ class Api:
     
     @cherrypy.expose
     def default(self, *args, **kwargs):
-        # key
+        
+        
         self.apiKey = "1234"
+        access,accessMsg,args,kwargs = self._grand_access(self.apiKey,args,kwargs)
+        
+        # global dateForm
+        # TODO: refactor dont change the module var all the time
+        global dateFormat
+        dateFormat = "%Y-%m-%d"
+        if kwargs.has_key("dateForm"):
+            dateFormat = kwargs["dateForm"]
+            del kwargs["dateForm"]
+
+        logger.log("api: dateFormat '"+str(dateFormat)+"'",logger.DEBUG)
+
+        # set the output callback
+        # default json
+        outputCallback = self._out_as_jason
+        if kwargs.get("out") == "xml": # output xml can only be set with post/get
+            outputCallback = self._out_as_xml
+        
+        if access:
+            logger.log(accessMsg,logger.DEBUG)
+        else:
+            logger.log(accessMsg,logger.WARNING)
+            return outputCallback(_error(accessMsg))
+
+        try:
+            outDict = call_dispatcher(args,kwargs)
+        except Exception, e:
+            logger.log("An internal error occurred: "+ex(e),logger.WARNING)
+            outDict = _error("An internal error occurred: "+ex(e))
+
+        return outputCallback(outDict)
+    
+    def _out_as_jason(self,dict):
+        response = cherrypy.response
+        response.headers['Content-Type'] = 'application/json'
+        try:
+            out = json.dumps(dict, indent=self.intent)
+        except Exception, e:
+            out = '{"error": "while composing output: "'+ex(e)+'"}'
+        return out
+    
+    def _out_as_xml(self,dict):
+        #TODO: implement
+        response = cherrypy.response
+        response.headers['Content-Type'] = 'application/xml'
+        return "error: implement me!"
+    
+    def _grand_access(self,realKey,args,kwargs):
+        remoteIp = cherrypy.request.remote.ip
+        
+        
         apiKey = None
         if args: # if we have keyless vars we assume first one is the api key
             apiKey = args[0]
@@ -38,42 +90,16 @@ class Api:
             apiKey = kwargs.get("key")
             del kwargs["key"]
         
-        # global dateForm
-        # TODO: refactor dont change the module var all the time 
-        global dateFormat
-        dateFormat = "%Y-%m-%d"
-    
-        if kwargs.has_key("dateForm"):
-            dateFormat = kwargs["dateForm"]
-            del kwargs["dateForm"]
-
-        logger.log("api: dateFormat '"+str(dateFormat)+"'",logger.DEBUG)
-
-        # defauld is json ^^
-        outputCallback = self._out_as_jason
-        if kwargs.get("out") == "xml": # output xml can only be set with post/get
-            outputCallback = self._out_as_xml
-        
-        if apiKey == self.apiKey:
-            logger.log("api key '"+str(apiKey)+"' accepted",logger.DEBUG)
+        if apiKey == realKey:
+            msg = "Api key '"+str(apiKey)+"' accepted. ACCESS GRANTED"
+            return True, msg, args, kwargs
+        elif not apiKey:
+            msg = "NO api key given by '"+remoteIp+"'. ACCESS DENIED"
+            return False, msg, args, kwargs
         else:
-            logger.log("api key '"+str(apiKey)+"' NOT accepted",logger.DEBUG)
-            return outputCallback(_error('Wrong API KEY'))
-        try:
-            outDict = call_dispatcher(args,kwargs) 
-        except Exception, e:
-            outDict = _error("An internal error occurred: "+ex(e))
+            msg = "Api key '"+str(apiKey)+"' given by '"+remoteIp+"' NOT accepted. ACCESS DENIED"
+            return False, msg, args, kwargs
         
-        return outputCallback(outDict)
-    
-    def _out_as_jason(self,dict):
-        response = cherrypy.response
-        response.headers['Content-Type'] = 'application/json'
-        return json.dumps(dict, indent=self.intent)
-    
-    def _out_as_xml(self,dict):
-        #TODO: implement
-        return "implement me!"
     
 dayofWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
