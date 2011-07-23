@@ -79,9 +79,9 @@ class Api:
         if args: # if we have keyless vars we assume first one is the api key
             apiKey = args[0]
             args = args[1:] # remove the apikey from the args tuple
-        if kwargs.get("key"):
-            apiKey = kwargs.get("key")
-            del kwargs["key"]
+        if kwargs.get("apikey"):
+            apiKey = kwargs.get("apikey")
+            del kwargs["apikey"]
         
         if apiKey == realKey:
             msg = "Api key '"+str(apiKey)+"' accepted. ACCESS GRANTED"
@@ -109,8 +109,8 @@ def call_dispatcher(args, kwargs):
         func = args[0]
         args = args[1:]
         
-    if kwargs.get("func"):
-        func = kwargs.get("func")
+    if kwargs.get("cmd"):
+        func = kwargs.get("cmd")
     
     if _functionMaper.get(func, False):
         outDict = _functionMaper.get(func)(args,kwargs)
