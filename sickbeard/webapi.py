@@ -14,26 +14,40 @@ try:
     import json
 except ImportError:
     from lib import simplejson as json
-    
+  
+  
+dateFormat = ""  
 class Api:
     
     """
         generic api will always return json
     """
     intent = 4
+
     
     @cherrypy.expose
     def default(self, *args, **kwargs):
+        # key
         self.apiKey = "1234"
         apiKey = None
         if args: # if we have keyless vars we assume first one is the api key
             apiKey = args[0]
             args = args[1:] # remove the apikey from the args tuple
-        
         if kwargs.get("key"):
             apiKey = kwargs.get("key")
             del kwargs["key"]
         
+        # global dateForm
+        # TODO: refactor dont change the module var all the time 
+        global dateFormat
+        dateFormat = "%Y-%m-%d"
+    
+        if kwargs.has_key("dateForm"):
+            dateFormat = kwargs["dateForm"]
+            del kwargs["dateForm"]
+
+        logger.log("api: dateFormat '"+str(dateFormat)+"'",logger.DEBUG)
+
         # defauld is json ^^
         outputCallback = self._out_as_jason
         if kwargs.get("out") == "xml": # output xml can only be set with post/get
@@ -58,13 +72,14 @@ class Api:
         return "implement me!"
     
 dayofWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-intent = 4
+
 
 
 def call_dispatcher(args, kwargs):
     
-    logger.log("all args: '"+str(args)+"'",logger.DEBUG)
-    logger.log("all kwargs '"+str(kwargs)+"'",logger.DEBUG)
+    logger.log("api: all args: '"+str(args)+"'",logger.DEBUG)
+    logger.log("api: all kwargs '"+str(kwargs)+"'",logger.DEBUG)
+    logger.log("api: dateFormat '"+str(dateFormat)+"'",logger.DEBUG)
     
     func = None
     if args:
@@ -159,6 +174,7 @@ def getShow(id=None, ep=None, season=None, status=[], pure=False):
     showDict["paused"] = show.paused
     showDict["air_by_date"] = show.air_by_date
     showDict["seasonfolders"] = show.seasonfolders
+    showDict["airs"] = show.airs
     
     return showDict
 
@@ -166,6 +182,9 @@ def getShow(id=None, ep=None, season=None, status=[], pure=False):
 def getSeason(args, kwargs):
     sid,args = _check_params(args, kwargs, "sid", None)
     s,args = _check_params(args, kwargs, "s", None)
+    
+    if s == "all":
+        s = None
     
     if s and not _is_int(s):
         return _error("Season not parsable")
@@ -241,8 +260,7 @@ def commingEpisodes(args,kwargs):
             else:
                 ep["status"] = "Soon"
 
-        airdate = datetime.date.fromordinal(int(ep["airdate"]))
-        ep["airdate"] = str(airdate)
+        ep["airdate"] = _ordinal_to_dateForm(int(ep["airdate"]))
         ep["quality"] = _get_quality_string(ep["quality"])
         ep["weekday"] = dayofWeek[airdate.weekday()]
         del ep["genre"]
@@ -343,20 +361,48 @@ def _get_episodes(showId,season=None,status=[]):
         
         # delete not needed fields
         epResult = _remove_clutter(epResult)
+        # give ambiguous field a prefix
+        epResult = _add_prefix(epResult,"ep_","tvdbid")
+        epResult = _add_prefix(epResult,"ep_","airdate")
         #FIXME: this dosen't work
         try:
             epResult["location"] = epResult["location"].lstrip(show.location)
         except:
             pass
         
+        
     return episodes, season_list, episode_count
     
 def _make_episode_nice(epResult):
     epResult["status"] = statusStrings[epResult["status"]]
-    epResult["airdate"] = str(datetime.date.fromordinal(int(epResult["airdate"])))
-      
+    epResult["airdate"] = _ordinal_to_dateForm(int(epResult["airdate"]))
+    
     return epResult
 
+
+
+def _add_prefixs(epResult,prefix):
+    for key in epResult:
+        epResult = _add_prefix(epResult, prefix, key)
+    
+    return epResult
+
+def _add_prefix(epResult,prefix,key):
+    try:
+        if key.find(prefix) < 0:
+            epResult[prefix+key] = epResult[key]
+            del epResult[key]
+    except:
+        pass  
+    return epResult
+
+def _ordinal_to_dateForm(ordinal):
+    airdate = datetime.date.fromordinal(ordinal)
+    if not dateFormat or dateFormat == "ordinal":
+        return ordinal
+    return airdate.strftime(dateFormat)
+    
+    
 def _remove_clutter(epResult):
     del epResult["showid"]
     del epResult["description"]
@@ -384,7 +430,6 @@ def _check_params(args,kwargs,key,default,remove=True):
     if args:
         default = args[0]
         if remove:
-            logger.log("deleting first tuple element",logger.DEBUG)
             args = args[1:]
     if kwargs.get(key):
         default = kwargs.get(key)
