@@ -1,15 +1,31 @@
+# Author: Dennis Lutter <lad1337@gmail.com>
+# URL: http://code.google.com/p/sickbeard/
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import cherrypy
 import sqlite3
 import tv
-import sickbeard
-from sickbeard import db
-from common import *
 import datetime
+import sickbeard
 import webserve
-from sickbeard import logger
+from sickbeard import db, logger, exceptions
 from sickbeard.exceptions import ex
+from common import *
 
 try:
     import json
@@ -104,18 +120,18 @@ def call_dispatcher(args, kwargs):
     logger.log("api: all kwargs '"+str(kwargs)+"'",logger.DEBUG)
     logger.log("api: dateFormat '"+str(dateFormat)+"'",logger.DEBUG)
     
-    func = None
+    cmd = None
     if args:
-        func = args[0]
+        cmd = args[0]
         args = args[1:]
         
     if kwargs.get("cmd"):
-        func = kwargs.get("cmd")
+        cmd = kwargs.get("cmd")
     
-    if _functionMaper.get(func, False):
-        outDict = _functionMaper.get(func)(args,kwargs)
-    elif _is_int(func):
-        outDict = id_url_wrapper(func,args,kwargs)        
+    if _functionMaper.get(cmd, False):
+        outDict = _functionMaper.get(cmd)(args,kwargs)
+    elif _is_int(cmd):
+        outDict = id_url_wrapper(cmd,args,kwargs)        
     else:
         outDict = index(args,kwargs)
     
@@ -237,7 +253,7 @@ def getEpisode(args, kwargs):
     s,args = _check_params(args, kwargs, "s", None)
     e,args = _check_params(args, kwargs, "e", None)
     x,args = _check_params(args, kwargs, "x", None)
-    pathType,args = _check_params(args, kwargs, "pathType", "rel")
+    fullPath,args = _check_params(args, kwargs, "fullPath", False)
     
     if x:
         try:
@@ -262,14 +278,23 @@ def getEpisode(args, kwargs):
         del episode["episode_id"]
     except:
         pass
-    if pathType == "rel":
-        try:
-            showPathLength = len(show.location)+1
-            episode["location"] = episode["location"][showPathLength:]
-        except:
-            pass
     
+    showPath = None
+    try:
+        showPath = show.location
+    except exceptions.NoNFOException:
+        pass
+
+    if not fullPath and showPath:
+        #i am using the length because lstrip does remove to much
+        showPathLength = len(showPath)+1 # the / or \ yeah not that nice i know
+        episode["location"] = episode["location"][showPathLength:]
+    elif not showPath: # show dir is broken ... episode path will be empty
+        episode["location"] = ""
+    elif fullPath and showPath: # we get the full path by default so no need to change
+        pass
     
+
     return episode
 
 def commingEpisodes(args,kwargs):
@@ -316,13 +341,14 @@ def id_url_wrapper(sid,args,kwargs):
     logger.log("args "+str(args),logger.DEBUG)
     s,args = _check_params(args, kwargs, "s", None)
     e,args = _check_params(args, kwargs, "e", None)
+    x,args = _check_params(args, kwargs, "x", None)
     # how to add a var to a tuple
     # http://stackoverflow.com/questions/1380860/add-variables-to-tuple
     argstmp = (0,sid) # make a new tuple
     args = argstmp + origArgs # add both
     args = args[1:] # remove first fake element
     logger.log("args "+str(args),logger.DEBUG)
-    if e:
+    if e or x:
         return getEpisode(args, kwargs)
     elif s:
         if s == "all":
@@ -335,7 +361,7 @@ def id_url_wrapper(sid,args,kwargs):
 def _is_int(foo):
     try:
         int(foo)
-    except:
+    except ValueError:
         return False
     else:
         return True
@@ -403,8 +429,6 @@ def _make_episode_nice(epResult):
     
     return epResult
 
-
-
 def _add_prefixs(epResult,prefix):
     for key in epResult:
         epResult = _add_prefix(epResult, prefix, key)
@@ -416,7 +440,7 @@ def _add_prefix(epResult,prefix,key):
         if key.find(prefix) < 0:
             epResult[prefix+key] = epResult[key]
             del epResult[key]
-    except:
+    except KeyError:
         pass  
     return epResult
 
@@ -443,10 +467,10 @@ def _remove_clutter(epResult):
 def _check_params(args,kwargs,key,default,remove=True):
     """
         this will return a tuple of mixed and mixed
-        if we have any values in args default becomes the first value
+        if we have any values in args default becomes the first value we find in args
         this args element is then removed if remove = True
         if a value is in kwargs with key = key defauld becomes the value of that element with given key
-        yes this might override the value allready set by the first args element
+        yes this might override the value already set by the first args element
         kwargs overrides args ... period
         if none of the above is True default is send back
         and we send the new args back 
