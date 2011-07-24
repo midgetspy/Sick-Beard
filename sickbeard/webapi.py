@@ -79,7 +79,7 @@ class Api:
     
     def _out_as_jason(self,dict):
         response = cherrypy.response
-        response.headers['Content-Type'] = 'application/json'
+        response.headers['Content-Type'] = 'application/json;charset=UTF-8'
         try:
             out = json.dumps(dict, indent=self.intent)
         except Exception, e:
