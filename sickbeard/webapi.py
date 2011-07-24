@@ -16,11 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-import cherrypy
-import sqlite3
-import tv
+import traceback
 import datetime
+import cherrypy
 import sickbeard
 import webserve
 from sickbeard import db, logger, exceptions
@@ -69,11 +67,16 @@ class Api:
             logger.log(accessMsg,logger.WARNING)
             return outputCallback(_error(accessMsg))
 
+
+        if kwargs.has_key("debug"):
+            outDict = call_dispatcher(args,kwargs)
+
         try:
             outDict = call_dispatcher(args,kwargs)
         except Exception, e:
-            logger.log("An internal error occurred: "+ex(e),logger.WARNING)
-            outDict = _error("An internal error occurred: "+ex(e))
+            logger.log("An internal error occurred: "+ex(e),logger.ERROR)
+            #logger.log("traceback of error in the api: "+str(traceback.extract_stack()),logger.ERROR)
+            outDict = _error("An internal error occurred: '"+ex(e))
 
         return outputCallback(outDict)
     
@@ -92,12 +95,13 @@ class Api:
         
         
         apiKey = None
-        if args: # if we have keyless vars we assume first one is the api key
-            apiKey = args[0]
-            args = args[1:] # remove the apikey from the args tuple
         if kwargs.get("apikey"):
             apiKey = kwargs.get("apikey")
             del kwargs["apikey"]
+        if not apiKey:
+            if args: # if we have keyless vars we assume first one is the api key
+                apiKey = args[0]
+                args = args[1:] # remove the apikey from the args tuple
         
         if apiKey == realKey:
             msg = "Api key '"+str(apiKey)+"' accepted. ACCESS GRANTED"
@@ -144,7 +148,7 @@ def index(args,kwargs):
 
 
 def shows(args,kwargs):
-    # this garanties that order is either by the first args element
+    # this qgranties that order is either by the first args element
     # or by the the kwargs value with the key "order"
     # it will default to "id"
     # if we found a args element the first element is removed !!
@@ -173,25 +177,29 @@ def shows(args,kwargs):
     return showsSorted
 
 
-def getShow(id=None, ep=None, season=None, status=[], pure=False):
+def getShow(args, kwargs):
+    id,args = _check_params(args, kwargs, "id", None)
+    season,args = _check_params(args, kwargs, "season", None)
+    status,args = _check_params(args, kwargs, "status", [])
+    
+    
     if id == None:
         return _error("No show id given")
-    if season and not _is_int(season):
-            return _error("Season not parsable")
 
     show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(id))
     if not show:
         return _error("Show not Found")
 
     showDict = {}
-    episodes = {}
-    if ep or season:
-        episodes,sList,eCount = _get_episodes(id, season=season, status=status, pure=pure)
-        showDict["episodes"] = episodes
-    eUnused,sList,eCount = _get_episodes(id)
+    _episodes = {}
+    if season:
+        _episodes,episodeCounts,sList = _get_episodes(id, season=season, status=status) #@UnsusedVariable
+        showDict["episodes"] = _episodes
+    else:
+        _episodes,episodeCounts,sList = _get_episodes(id)
     
     showDict["season_list"] = sList
-    showDict["episode_count"] = eCount
+    showDict["episode_stats"] = episodeCounts
     
     genreList = []
     if show.genre:
@@ -222,13 +230,8 @@ def getSeason(args, kwargs):
     sid,args = _check_params(args, kwargs, "sid", None)
     s,args = _check_params(args, kwargs, "s", None)
     
-    if s == "all":
-        s = None
+    episodes,episodeCounts,sList = _get_episodes(sid,season=s)
     
-    if s and not _is_int(s):
-        return _error("Season not parsable")
-
-    episodes,sList,eCount = _get_episodes(sid,season=s)
     return episodes
 
 
@@ -237,9 +240,6 @@ def getEpisodes(args, kwargs):
     s,args = _check_params(args, kwargs, "s", None)
     status,args = _check_params(args, kwargs, "status", [])
     
-    if s == "all":
-        s = None
-     
     if status:
         status = status.split(";")
     episodes,sList,eCount = _get_episodes(sid, season=s, status=status)
@@ -252,9 +252,9 @@ def getEpisode(args, kwargs):
     sid,args = _check_params(args, kwargs, "sid", None)
     s,args = _check_params(args, kwargs, "s", None)
     e,args = _check_params(args, kwargs, "e", None)
-    x,args = _check_params(args, kwargs, "x", None)
+    x,args = _check_params(args, kwargs, "x", None) # do we need this ?
     fullPath,args = _check_params(args, kwargs, "fullPath", False)
-    
+
     if x:
         try:
             tmpList = x.split("x")
@@ -264,7 +264,11 @@ def getEpisode(args, kwargs):
             pass
     if s == "all":
         s = None
-        
+    
+    parseError,parseErrorMsg = _is_int_multi(sid,e,s)
+    if not parseError:
+        return _error(parseErrorMsg)
+    
     show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(sid))
     
     myDB = db.DBConnection(row_type="dict")
@@ -272,6 +276,10 @@ def getEpisode(args, kwargs):
     episode = {}
     if len(sqlResults) == 1:
         episode = _make_episode_nice(sqlResults[0])
+    else:
+        return _error("No episode found")
+    
+    # delete unneeded info
     try:
         del episode["hastbn"]
         del episode["hasnfo"]
@@ -279,12 +287,13 @@ def getEpisode(args, kwargs):
     except:
         pass
     
+    # handle path options
+    # absolute vs relative vs broken
     showPath = None
     try:
         showPath = show.location
     except exceptions.NoNFOException:
         pass
-
     if not fullPath and showPath:
         #i am using the length because lstrip does remove to much
         showPathLength = len(showPath)+1 # the / or \ yeah not that nice i know
@@ -293,6 +302,11 @@ def getEpisode(args, kwargs):
         episode["location"] = ""
     elif fullPath and showPath: # we get the full path by default so no need to change
         pass
+    
+    # rename
+    episode = _rename_element(episode,"sid","show_tvdbid")
+    episode = _rename_element(episode,"tvdbid","ep_tvdbid")
+    
     
 
     return episode
@@ -356,7 +370,7 @@ def id_url_wrapper(sid,args,kwargs):
         else:    
             return getSeason(args, kwargs)
     else:
-        return getShow(sid)
+        return getShow(args, kwargs)
 
 def _is_int(foo):
     try:
@@ -365,6 +379,20 @@ def _is_int(foo):
         return False
     else:
         return True
+
+def _is_int_multi(*vars):
+    for var in vars:
+        if var and not _is_int(var):
+            return False,"'"+var + "' is not parsable into a int, but is supposed to be. Canceling"
+    return True,"all good"
+
+def _rename_element(dict,oldKey,newKey):
+    try:
+        dict[newKey] = dict[oldKey]
+        del dict[oldKey]
+    except:
+        pass
+    return dict
 
 def _error(msg):
     return {'error':msg}
@@ -385,43 +413,81 @@ def _get_episodes(showId,season=None,status=[]):
     pure = False
     if season == "all":
         season = None
+
+    parseError,parseErrorMsg = _is_int_multi(season)
+    if not parseError:
+        return _error(parseErrorMsg)
+        
     elif season:
         season = str(season)
         pure = True
               
     myDB = db.DBConnection(row_type="dict")
     sqlResults = myDB.select( "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC", [showId])
-    episodes = {}
-    episode_count = 0
-    season_list = []
+    episodes = {} # will contain all episodes that selected
+    
+    # show stats
+    all_count = 0 # all episodes
+    loaded_count = 0
+    season_list = [] # a list with all season numbers
+    
+    episode_status_counts = {}
+    for statusString in statusStrings.statusStrings:
+        episode_status_counts[statusStrings[statusString]] = 0
+    
+    
+    #loaded_status = ["Downloaded","Archived"]
+    
+    
+    # loop through ALL episodes of show
     for epResult in sqlResults:
+
         curSeason = str(epResult["season"])      
+        if curSeason != 0:
+            all_count += 1
+            if epResult["status"] in Quality.DOWNLOADED:
+                loaded_count += 1
+
+        epResult = _make_episode_nice(epResult)
+                
+        # just a safety precaution
+        if not episode_status_counts.has_key(epResult["status"]):
+            episode_status_counts[epResult["status"]] = 0
+        episode_status_counts[epResult["status"]] += 1
+            
         if season and season != curSeason:
             continue
 
-        epResult = _make_episode_nice(epResult)
-        
+        # skip episodes that dont match the status filter
         if status and not epResult["status"] in status:
             continue
 
+        # pure is true if we only requested one season
         if pure:
             episodes[epResult["episode"]] = epResult
-        else:   
+        else:
+            # do we have the season container already
             if not episodes.has_key(epResult["season"]):
                 episodes[epResult["season"]] = {}
                 season_list.append(curSeason)
+            # add the episode to the season container
             episodes[epResult["season"]][epResult["episode"]] = epResult
         
-        if curSeason != 0:
-            episode_count += 1
         
         # delete not needed fields
         epResult = _remove_clutter(epResult)
         # give ambiguous field a prefix
         epResult = _add_prefix(epResult,"ep_","tvdbid")
         epResult = _add_prefix(epResult,"ep_","airdate")
-        
-    return episodes, season_list, episode_count
+    
+    episodes_stats = {}
+    for episode_status_count in episode_status_counts:
+        episodes_stats[episode_status_count] = episode_status_counts[episode_status_count]
+    
+    episodes_stats["All"] = all_count
+    episodes_stats["Downloaded"] = loaded_count
+    
+    return episodes, episodes_stats, season_list
     
 def _make_episode_nice(epResult):
     epResult["status"] = statusStrings[epResult["status"]]
@@ -487,6 +553,7 @@ def _check_params(args,kwargs,key,default,remove=True):
 
 
 _functionMaper = {"index":index,
+                  "show":getShow,
                   "shows":shows,
                   "episodes":getEpisodes,
                   "episode":getEpisode,
