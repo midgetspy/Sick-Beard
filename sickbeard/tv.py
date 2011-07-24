@@ -975,7 +975,7 @@ class TVEpisode(object):
         self._description = ""
         self._subtitles = []
         self._subtitles_searchcount = 0
-        self._subtitles_lastsearch = 0
+        self._subtitles_lastsearch = str(datetime.datetime.min)
         self._airdate = datetime.date.fromordinal(1)
         self._hasnfo = False
         self._hastbn = False
