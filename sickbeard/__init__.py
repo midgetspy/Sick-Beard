@@ -20,7 +20,10 @@ from __future__ import with_statement
 
 import cherrypy
 import webbrowser
-import sqlite3
+try:
+    import sqlite3
+except:
+    from pysqlite2 import dbapi2 as sqlite3
 import datetime
 import socket
 import os, sys, subprocess, re
