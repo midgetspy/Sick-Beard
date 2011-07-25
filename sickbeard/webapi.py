@@ -313,8 +313,7 @@ def commingEpisodes(args,kwargs):
         return _error("Sort by '"+sort+"' not possible")
     
     epResults,today,next_week = webserve.WebInterface.commingEpisodesRaw(sort=sort ,row_type="dict")
-    finalEpResults = {}
-    count = 0
+    finalEpResults = []
     for ep in epResults:
 
         if ep["airdate"] < today:
@@ -339,8 +338,8 @@ def commingEpisodes(args,kwargs):
         del ep["seasonfolders"]
         del ep["show_id"]
         
-        finalEpResults[count] = _remove_clutter(ep)
-        count += 1
+        finalEpResults.append(_remove_clutter(ep))
+        
        
     return finalEpResults
 
