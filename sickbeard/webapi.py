@@ -104,7 +104,7 @@ class Api:
         
         
         apiKey = kwargs.get("apikey",None)
-       
+
         if not apiKey:
             if args: # if we have keyless vars we assume first one is the api key
                 apiKey = args[0]
@@ -120,7 +120,7 @@ class Api:
             msg = u"NO api key given by '"+remoteIp+"'. ACCESS DENIED"
             return False, msg, args, kwargs
         else:
-            msg = u"Api key '"+ek.ek(unicode, apiKey)+"' given by '"+remoteIp+"' NOT accepted. ACCESS DENIED"
+            msg = u"Api key '"+apiKey+"' given by '"+remoteIp+"' NOT accepted. ACCESS DENIED"
             return False, msg, args, kwargs
         
 
