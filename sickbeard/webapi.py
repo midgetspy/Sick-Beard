@@ -50,7 +50,7 @@ class Api:
 
         # set the output callback
         # default json
-        outputCallback = self._out_as_jason
+        outputCallback = self._out_as_json
 
         # do we have acces ?
         if access:
@@ -89,7 +89,7 @@ class Api:
 
         return outputCallback(outDict)
     
-    def _out_as_jason(self,dict):
+    def _out_as_json(self,dict):
         response = cherrypy.response
         response.headers['Content-Type'] = 'application/json;charset=UTF-8'
         try:
