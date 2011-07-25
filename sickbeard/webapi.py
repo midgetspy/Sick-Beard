@@ -20,7 +20,7 @@ import datetime
 import cherrypy
 import sickbeard
 import webserve
-from sickbeard import db, logger, exceptions
+from sickbeard import db, logger, exceptions, history
 from sickbeard.exceptions import ex
 from common import *
 
@@ -30,6 +30,7 @@ except ImportError:
     from lib import simplejson as json
 
 
+_dateFormat = "%Y-%m-%d %H:%M"
 dateFormat = ""
 dayofWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
  
@@ -61,7 +62,7 @@ class Api:
         # global dateForm
         # TODO: refactor dont change the module var all the time
         global dateFormat
-        dateFormat = "%Y-%m-%d"
+        dateFormat = _dateFormat
         if kwargs.has_key("dateForm"):
             dateFormat = str(kwargs["dateForm"])
             del kwargs["dateForm"]
@@ -299,7 +300,7 @@ def getEpisode(args, kwargs):
         episode["location"] = ""
     
     # rename
-    episode = _rename_element(episode,"sid","show_tvdbid")
+    episode = _rename_element(episode,"showid","show_tvdbid")
     episode = _rename_element(episode,"tvdbid","ep_tvdbid")
     
     
@@ -344,12 +345,45 @@ def commingEpisodes(args,kwargs):
     return finalEpResults
 
 
+def getHistory(args,kwargs):
+    limit,args = _check_params(args, kwargs, "limit", 100)
+    type,args = _check_params(args, kwargs, "type", None)
+    
+    if limit == "all":
+        limit = None
+    _is_int_multi(limit)
+
+    if type == "d":
+        type = "Downloaded"
+    elif type == "s":
+        type = "Snatched"
+
+    myDB = db.DBConnection(row_type="dict")
+    
+    if limit:
+        hResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC LIMIT ?",[limit] )
+    else:
+        hResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+
+    finalHresults = []
+    for row in hResults:
+        status, quality = Quality.splitCompositeStatus(int(row["action"]))
+        status = _get_status_Strings(status)
+        if type and not status == type:
+            continue
+        row["action"] = status
+        row["quality"] = _get_quality_string(quality)
+        row["date"] = _historyDate_to_dateForm(str(row["date"]))
+        _rename_element(row, "showid", "show_tvdbid")
+        finalHresults.append(row)
+    return finalHresults
+
+
 def id_url_wrapper(sid,args,kwargs):
     origArgs = args
     logger.log("args "+str(args),logger.DEBUG)
     s,args = _check_params(args, kwargs, "s", None)
     e,args = _check_params(args, kwargs, "e", None)
-    x,args = _check_params(args, kwargs, "x", None)
     # how to add a var to a tuple
     # http://stackoverflow.com/questions/1380860/add-variables-to-tuple
     argstmp = (0,sid) # make a new tuple
@@ -395,7 +429,13 @@ def _get_quality_string(q):
     qualityString = "Custom"
     if q in qualityPresetStrings:
         qualityString = qualityPresetStrings[q]
+    else:
+        qualityString = Quality.qualityStrings[q]
     return qualityString
+
+def _get_status_Strings(s):
+    return statusStrings[s]
+
 
 def _get_episodes(showId,season=None,status=[]):
     """
@@ -501,12 +541,18 @@ def _add_prefix(epResult,prefix,key):
     return epResult
 
 def _ordinal_to_dateForm(ordinal):
-    airdate = datetime.date.fromordinal(ordinal)
-    if not dateFormat or dateFormat == "ordinal":
-        return ordinal
-    return airdate.strftime(dateFormat)
+    date = datetime.date.fromordinal(ordinal)
+    return _convert_date_dateform(date,ordinal)
+
+def _historyDate_to_dateForm(timeString):
+    date = datetime.datetime.strptime(timeString,history.dateFormat)
+    return _convert_date_dateform(date,timeString)
     
-    
+def _convert_date_dateform(date,raw):
+    if not dateFormat or dateFormat == "raw":
+        return raw
+    return date.strftime(dateFormat)
+
 def _remove_clutter(epResult):
     del epResult["showid"]
     del epResult["description"]
@@ -549,6 +595,7 @@ _functionMaper = {"index":index,
                   "episode":getEpisode,
                   "season":getSeason,
                   "future":commingEpisodes,
+                  "history":getHistory,
                   }
 
 class ApiError(Exception):
