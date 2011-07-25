@@ -143,12 +143,12 @@ def call_dispatcher(args, kwargs):
     elif _is_int(cmd):
         outDict = id_url_wrapper(cmd,args,kwargs)        
     else:
-        outDict = index(args,kwargs)
+        outDict = getIndex(args,kwargs)
     
     return outDict
 
 
-def index(args,kwargs):
+def getIndex(args,kwargs):
     
     return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':0.1}
 
@@ -307,7 +307,7 @@ def getEpisode(args, kwargs):
 
     return episode
 
-def commingEpisodes(args,kwargs):
+def getCommingEpisodes(args,kwargs):
     sort,args = _check_params(args, kwargs, "sort", "date")
     
     if not sort in ["date","show","network"]:
@@ -429,7 +429,7 @@ def _get_quality_string(q):
     qualityString = "Custom"
     if q in qualityPresetStrings:
         qualityString = qualityPresetStrings[q]
-    else:
+    elif q in Quality.qualityStrings:
         qualityString = Quality.qualityStrings[q]
     return qualityString
 
@@ -588,13 +588,13 @@ def _check_params(args,kwargs,key,default,remove=True):
 
 
 
-_functionMaper = {"index":index,
+_functionMaper = {"index":getIndex,
                   "show":getShow,
                   "shows":getShows,
                   "episodes":getEpisodes,
                   "episode":getEpisode,
                   "season":getSeason,
-                  "future":commingEpisodes,
+                  "future":getCommingEpisodes,
                   "history":getHistory,
                   }
 
