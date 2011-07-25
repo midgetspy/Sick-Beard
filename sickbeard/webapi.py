@@ -275,12 +275,9 @@ def getEpisode(args, kwargs):
         raise ApiError("No episode found")
     
     # delete unneeded info
-    try:
-        del episode["hastbn"]
-        del episode["hasnfo"]
-        del episode["episode_id"]
-    except:
-        pass
+    del episode["hastbn"]
+    del episode["hasnfo"]
+    del episode["episode_id"]
     
     # handle path options
     # absolute vs relative vs broken
