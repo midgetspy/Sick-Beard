@@ -22,7 +22,6 @@ import sickbeard
 import webserve
 from sickbeard import db, logger, exceptions
 from sickbeard.exceptions import ex
-from sickbeard import encodingKludge as ek
 from common import *
 
 try:
