@@ -259,7 +259,7 @@ def getEpisode(args, kwargs):
     s,args = _check_params(args, kwargs, "s", None)
     e,args = _check_params(args, kwargs, "e", None)
     x,args = _check_params(args, kwargs, "x", None) # do we need this ?
-    fullPath,args = _check_params(args, kwargs, "fullPath", False)
+    fullPath,args = _check_params(args, kwargs, "fullPath", "0")
 
     if x:
         try:
@@ -298,14 +298,15 @@ def getEpisode(args, kwargs):
         showPath = show.location
     except exceptions.NoNFOException:
         pass
-    if not fullPath and showPath:
-        #i am using the length because lstrip does remove to much
+    
+    if fullPath == "1" and showPath: # we get the full path by default so no need to change
+        pass 
+    elif fullPath and showPath:
+        #i am using the length because lstrip removes to much
         showPathLength = len(showPath)+1 # the / or \ yeah not that nice i know
         episode["location"] = episode["location"][showPathLength:]
     elif not showPath: # show dir is broken ... episode path will be empty
         episode["location"] = ""
-    elif fullPath and showPath: # we get the full path by default so no need to change
-        pass
     
     # rename
     episode = _rename_element(episode,"sid","show_tvdbid")
