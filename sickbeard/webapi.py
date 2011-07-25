@@ -153,7 +153,7 @@ def index(args,kwargs):
     return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':0.1}
 
 
-def shows(args,kwargs):
+def getShows(args,kwargs):
     # this qgranties that order is either by the first args element
     # or by the the kwargs value with the key "order"
     # it will default to "id"
@@ -390,7 +390,7 @@ def id_url_wrapper(sid,args,kwargs):
     args = argstmp + origArgs # add both
     args = args[1:] # remove first fake element
     logger.log("args "+str(args),logger.DEBUG)
-    if e or x:
+    if e:
         return getEpisode(args, kwargs)
     elif s:
         if s == "all":
@@ -403,7 +403,7 @@ def id_url_wrapper(sid,args,kwargs):
 def _is_int(foo):
     try:
         int(foo)
-    except ValueError:
+    except ValueError, TypeError:
         return False
     else:
         return True
@@ -590,7 +590,7 @@ def _check_params(args,kwargs,key,default,remove=True):
 
 _functionMaper = {"index":index,
                   "show":getShow,
-                  "shows":shows,
+                  "shows":getShows,
                   "episodes":getEpisodes,
                   "episode":getEpisode,
                   "season":getSeason,
