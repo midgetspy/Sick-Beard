@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import traceback
 import datetime
 import cherrypy
 import sickbeard
@@ -29,9 +28,11 @@ try:
     import json
 except ImportError:
     from lib import simplejson as json
-  
-  
-dateFormat = ""  
+
+
+dateFormat = ""
+dayofWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+ 
 class Api:
     
     """
@@ -39,13 +40,23 @@ class Api:
     """
     intent = 4
 
-    
     @cherrypy.expose
     def default(self, *args, **kwargs):
         
         
         self.apiKey = "1234"
         access,accessMsg,args,kwargs = self._grand_access(self.apiKey,args,kwargs)
+
+        # set the output callback
+        # default json
+        outputCallback = self._out_as_jason
+
+        # do we have acces ?
+        if access:
+            logger.log(accessMsg,logger.DEBUG)
+        else:
+            logger.log(accessMsg,logger.WARNING)
+            return outputCallback(_error(accessMsg))
         
         # global dateForm
         # TODO: refactor dont change the module var all the time
@@ -55,28 +66,25 @@ class Api:
             dateFormat = str(kwargs["dateForm"])
             del kwargs["dateForm"]
 
-        logger.log("api: dateFormat '"+str(dateFormat)+"'",logger.DEBUG)
+        
+        # set the original call_dispatcher as the local _call_dispatcher
+        _call_dispatcher = call_dispatcher
+        # if profile was set wrap "_call_dispatcher" in the profile function
+        if kwargs.has_key("profile"):
+            from lib.profilehooks import profile
+            _call_dispatcher = profile(_call_dispatcher,immediate=True)
+            del kwargs["profile"]
 
-        # set the output callback
-        # default json
-        outputCallback = self._out_as_jason
- 
-        if access:
-            logger.log(accessMsg,logger.DEBUG)
-        else:
-            logger.log(accessMsg,logger.WARNING)
-            return outputCallback(_error(accessMsg))
-
-
+        # if debug was set call the "call_dispatcher"
         if kwargs.has_key("debug"):
-            outDict = call_dispatcher(args,kwargs)
-
-        try:
-            outDict = call_dispatcher(args,kwargs)
-        except Exception, e:
-            logger.log("An internal error occurred: "+ex(e),logger.ERROR)
-            #logger.log("traceback of error in the api: "+str(traceback.extract_stack()),logger.ERROR)
-            outDict = _error("An internal error occurred: '"+ex(e))
+            outDict = _call_dispatcher(args,kwargs) # this way we can debug the cherry.py traceback in the browser
+            del kwargs["debug"]
+        else:# if debug was not set we wrap the "call_dispatcher" in a try block to assure a json output
+            try:
+                outDict = _call_dispatcher(args,kwargs)
+            except Exception, e:
+                logger.log("API: "+ex(e),logger.ERROR)
+                outDict = _error(ex(e))
 
         return outputCallback(outDict)
     
@@ -85,7 +93,7 @@ class Api:
         response.headers['Content-Type'] = 'application/json;charset=UTF-8'
         try:
             out = json.dumps(dict, indent=self.intent)
-        except Exception, e:
+        except Exception, e: # if we fail to generate the output fake a error
             out = '{"error": "while composing output: "'+ex(e)+'"}'
         return out
     
@@ -94,17 +102,18 @@ class Api:
         remoteIp = cherrypy.request.remote.ip
         
         
-        apiKey = None
-        if kwargs.get("apikey"):
-            apiKey = kwargs.get("apikey")
-            del kwargs["apikey"]
+        apiKey = kwargs.get("apikey",None)
+       
         if not apiKey:
             if args: # if we have keyless vars we assume first one is the api key
                 apiKey = args[0]
                 args = args[1:] # remove the apikey from the args tuple
-        
+        else:
+            del kwargs["apikey"]
+
+     
         if apiKey == realKey:
-            msg = "Api key '"+str(apiKey)+"' accepted. ACCESS GRANTED"
+            msg = "Api key accepted. ACCESS GRANTED"
             return True, msg, args, kwargs
         elif not apiKey:
             msg = "NO api key given by '"+remoteIp+"'. ACCESS DENIED"
@@ -113,16 +122,12 @@ class Api:
             msg = "Api key '"+str(apiKey)+"' given by '"+remoteIp+"' NOT accepted. ACCESS DENIED"
             return False, msg, args, kwargs
         
-    
-dayofWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
-
 
 def call_dispatcher(args, kwargs):
     
     logger.log("api: all args: '"+str(args)+"'",logger.DEBUG)
-    logger.log("api: all kwargs '"+str(kwargs)+"'",logger.DEBUG)
-    logger.log("api: dateFormat '"+str(dateFormat)+"'",logger.DEBUG)
+    logger.log("api: all kwargs: '"+str(kwargs)+"'",logger.DEBUG)
+    logger.log("api: dateFormat: '"+str(dateFormat)+"'",logger.DEBUG)
     
     cmd = None
     if args:
@@ -184,11 +189,11 @@ def getShow(args, kwargs):
     
     
     if id == None:
-        return _error("No show id given")
+        raise ApiError("No show id given")
 
     show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(id))
     if not show:
-        return _error("Show not Found")
+        raise ApiError("Show not Found")
 
     showDict = {}
     _episodes = {}
@@ -265,9 +270,7 @@ def getEpisode(args, kwargs):
     if s == "all":
         s = None
     
-    parseError,parseErrorMsg = _is_int_multi(sid,e,s)
-    if not parseError:
-        return _error(parseErrorMsg)
+    _is_int_multi(sid,e,s)
     
     show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(sid))
     
@@ -277,7 +280,7 @@ def getEpisode(args, kwargs):
     if len(sqlResults) == 1:
         episode = _make_episode_nice(sqlResults[0])
     else:
-        return _error("No episode found")
+        raise ApiError("No episode found")
     
     # delete unneeded info
     try:
@@ -383,8 +386,8 @@ def _is_int(foo):
 def _is_int_multi(*vars):
     for var in vars:
         if var and not _is_int(var):
-            return False,"'"+var + "' is not parsable into a int, but is supposed to be. Canceling"
-    return True,"all good"
+            raise IntParseError("'" +var + "' is not parsable into a int, but is supposed to be. Canceling")
+    return True
 
 def _rename_element(dict,oldKey,newKey):
     try:
@@ -410,16 +413,15 @@ def _get_episodes(showId,season=None,status=[]):
         if pure there is no season container around the episodes
         if status only gets episodes that have the a status in status
     """
+    
     pure = False
     if season == "all":
         season = None
 
-    parseError,parseErrorMsg = _is_int_multi(season)
-    if not parseError:
-        return _error(parseErrorMsg)
+    _is_int_multi(season)
         
-    elif season:
-        season = str(season)
+    if season:
+        season = int(season)
         pure = True
               
     myDB = db.DBConnection(row_type="dict")
@@ -432,25 +434,23 @@ def _get_episodes(showId,season=None,status=[]):
     season_list = [] # a list with all season numbers
     
     episode_status_counts = {}
+    # add the default status
     for statusString in statusStrings.statusStrings:
         episode_status_counts[statusStrings[statusString]] = 0
     
-    
-    #loaded_status = ["Downloaded","Archived"]
-    
-    
     # loop through ALL episodes of show
     for epResult in sqlResults:
-
-        curSeason = str(epResult["season"])      
+        
+        curSeason = int(epResult["season"])  
         if curSeason != 0:
             all_count += 1
             if epResult["status"] in Quality.DOWNLOADED:
                 loaded_count += 1
+        
 
         epResult = _make_episode_nice(epResult)
-                
-        # just a safety precaution
+        
+        # add the specific status like "Downloaded (HDTV)"
         if not episode_status_counts.has_key(epResult["status"]):
             episode_status_counts[epResult["status"]] = 0
         episode_status_counts[epResult["status"]] += 1
@@ -472,21 +472,20 @@ def _get_episodes(showId,season=None,status=[]):
                 season_list.append(curSeason)
             # add the episode to the season container
             episodes[epResult["season"]][epResult["episode"]] = epResult
-        
-        
+
         # delete not needed fields
         epResult = _remove_clutter(epResult)
-        # give ambiguous field a prefix
+        # give ambiguous fields a prefix
         epResult = _add_prefix(epResult,"ep_","tvdbid")
         epResult = _add_prefix(epResult,"ep_","airdate")
-    
+
     episodes_stats = {}
     for episode_status_count in episode_status_counts:
         episodes_stats[episode_status_count] = episode_status_counts[episode_status_count]
-    
+
     episodes_stats["All"] = all_count
     episodes_stats["Downloaded"] = loaded_count
-    
+
     return episodes, episodes_stats, season_list
     
 def _make_episode_nice(epResult):
@@ -560,3 +559,9 @@ _functionMaper = {"index":index,
                   "season":getSeason,
                   "future":commingEpisodes,
                   }
+
+class ApiError(Exception):
+    "Generic API error"
+
+class IntParseError(Exception):
+    "A value could not be parsed into a int. But should be parsable to a int "
