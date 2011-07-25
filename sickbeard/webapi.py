@@ -22,6 +22,7 @@ import sickbeard
 import webserve
 from sickbeard import db, logger, exceptions
 from sickbeard.exceptions import ex
+from sickbeard import encodingKludge as ek
 from common import *
 
 try:
@@ -113,13 +114,13 @@ class Api:
 
      
         if apiKey == realKey:
-            msg = "Api key accepted. ACCESS GRANTED"
+            msg = u"Api key accepted. ACCESS GRANTED"
             return True, msg, args, kwargs
         elif not apiKey:
-            msg = "NO api key given by '"+remoteIp+"'. ACCESS DENIED"
+            msg = u"NO api key given by '"+remoteIp+"'. ACCESS DENIED"
             return False, msg, args, kwargs
         else:
-            msg = "Api key '"+str(apiKey)+"' given by '"+remoteIp+"' NOT accepted. ACCESS DENIED"
+            msg = u"Api key '"+ek.ek(unicode, apiKey)+"' given by '"+remoteIp+"' NOT accepted. ACCESS DENIED"
             return False, msg, args, kwargs
         
 
