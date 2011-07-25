@@ -158,13 +158,15 @@ def shows(args,kwargs):
     # it will default to "id"
     # if we found a args element the first element is removed !!
     order,args = _check_params(args, kwargs, "order", "id")
-    # one args element is gone so the next one should be onlyActive
-    onlyActive,args = _check_params(args, kwargs, "onlyActive", None)
+    # one args element is gone so the next one should be paused
+    paused,args = _check_params(args, kwargs, "paused", None)
     # you will see this pattern in all function that can called directly
+    
+    
     
     shows = {}
     for show in sickbeard.showList:
-        if onlyActive and show.paused:
+        if paused and not paused == str(show.paused):
             continue
         
         showDict = {"paused":show.paused,"quality":_get_quality_string(show.quality),"language":show.lang}
