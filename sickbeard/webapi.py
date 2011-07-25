@@ -258,16 +258,8 @@ def getEpisode(args, kwargs):
     sid,args = _check_params(args, kwargs, "sid", None)
     s,args = _check_params(args, kwargs, "s", None)
     e,args = _check_params(args, kwargs, "e", None)
-    x,args = _check_params(args, kwargs, "x", None) # do we need this ?
     fullPath,args = _check_params(args, kwargs, "fullPath", "0")
 
-    if x:
-        try:
-            tmpList = x.split("x")
-            s = tmpList[0]
-            e = tmpList[1]
-        except:
-            pass
     if s == "all":
         s = None
     
