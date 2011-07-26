@@ -94,7 +94,7 @@ class Api:
         response = cherrypy.response
         response.headers['Content-Type'] = 'application/json;charset=UTF-8'
         try:
-            out = json.dumps(dict, indent=self.intent)
+            out = json.dumps(dict, indent=self.intent, sort_keys=True)
         except Exception, e: # if we fail to generate the output fake a error
             out = '{"error": "while composing output: "'+ex(e)+'"}'
         return out
@@ -182,35 +182,31 @@ def getShows(args,kwargs):
             showDict["name"] = show.name
             shows[show.tvdbid] = showDict
     
-    showsSorted = {}
-    for key in sorted(shows.iterkeys()):
-        showsSorted[key] = shows[key]
-        
-    return showsSorted
+    return shows
 
 
 def getShow(args, kwargs):
-    id,args,missing = _check_params(args, kwargs, "id", None, [])
+    tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
     if missing:
         return _missing_param(missing)
     season,args,missing = _check_params(args, kwargs, "season", None)
     status,args,missing = _check_params(args, kwargs, "status", [])
     
 
-    show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(id))
+    show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(tvdbid))
     if not show:
         raise ApiError("Show not Found")
 
     showDict = {}
     _episodes = {}
     if season:
-        _episodes,episodeCounts,sList = _get_episodes(id, season=season, status=status) #@UnsusedVariable
+        _episodes,episodeCounts,sList = _get_episodes(tvdbid, season=season, status=status) #@UnsusedVariable
         showDict["episodes"] = _episodes
     else:
-        _episodes,episodeCounts,sList = _get_episodes(id)
+        _episodes,episodeCounts,sList = _get_episodes(tvdbid)
     
     showDict["season_list"] = sList
-    showDict["episode_stats"] = episodeCounts
+    showDict["stats"] = episodeCounts
     
     genreList = []
     if show.genre:
@@ -238,32 +234,32 @@ def getShow(args, kwargs):
 
 
 def getSeason(args, kwargs):
-    sid,args,missing = _check_params(args, kwargs, "sid", None, [])
+    tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
     s,args,missing = _check_params(args, kwargs, "s", None, missing)
     if missing:
         return _missing_param(missing)
-    episodes,episodes_stats, season_list = _get_episodes(sid,season=s)
+    episodes,episodes_stats, season_list = _get_episodes(tvdbid,season=s)
     
     return episodes
 
 
 def getEpisodes(args, kwargs):
-    sid,args,missing = _check_params(args, kwargs, "id", None, [])
+    tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
     s,args,missing = _check_params(args, kwargs, "s", None, missing)
     if missing:
         return _missing_param(missing)
     status,args,missing = _check_params(args, kwargs, "status", [])
     
     if status:
-        status = status.split(";")
-    episodes,episodes_stats, season_list = _get_episodes(sid, season=s, status=status)
+        status = status.split(",")
+    episodes,episodes_stats, season_list = _get_episodes(tvdbid, season=s, status=status)
     
     return episodes
     
 
  
 def getEpisode(args, kwargs):
-    sid,args,missing = _check_params(args, kwargs, "sid", None, [])
+    tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
     s,args,missing = _check_params(args, kwargs, "s", None, missing)
     e,args,missing = _check_params(args, kwargs, "e", None, missing)
     if missing:
@@ -273,12 +269,12 @@ def getEpisode(args, kwargs):
     if s == "all":
         s = None
     
-    _is_int_multi(sid,e,s)
+    _is_int_multi(tvdbid,e,s)
     
-    show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(sid))
+    show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(tvdbid))
     
     myDB = db.DBConnection(row_type="dict")
-    sqlResults = myDB.select( "SELECT * FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [sid,e,s])
+    sqlResults = myDB.select( "SELECT * FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [tvdbid,e,s])
     episode = {}
     if len(sqlResults) == 1:
         episode = _make_episode_nice(sqlResults[0])
@@ -289,6 +285,7 @@ def getEpisode(args, kwargs):
     del episode["hastbn"]
     del episode["hasnfo"]
     del episode["episode_id"]
+    del episode["tvdbid"]
     
     # handle path options
     # absolute vs relative vs broken
@@ -308,8 +305,7 @@ def getEpisode(args, kwargs):
         episode["location"] = ""
     
     # rename
-    episode = _rename_element(episode,"showid","show_tvdbid")
-    episode = _rename_element(episode,"tvdbid","ep_tvdbid")
+    episode = _rename_element(episode,"showid","tvdbid")
     
     
 
@@ -324,7 +320,12 @@ def getCommingEpisodes(args,kwargs):
     epResults,today,next_week = webserve.WebInterface.commingEpisodesRaw(sort=sort ,row_type="dict")
     finalEpResults = []
     for ep in epResults:
-
+        """
+            Missed:   yesterday... i don't know how far back we go
+            Today:    today
+            Soon:     tomorrow till next week
+            Later:    later than next week
+        """
         if ep["airdate"] < today:
             ep["status"] = "Missed"
         elif ep["airdate"] >= next_week:
@@ -338,6 +339,8 @@ def getCommingEpisodes(args,kwargs):
         ep["airdate"] = _ordinal_to_dateForm(ordinalAirdate)
         ep["quality"] = _get_quality_string(ep["quality"])
         ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
+        
+        _rename_element(ep, "show_id", "tvdbid")
         del ep["genre"]
         del ep["episode_id"]
         del ep["lang"]
@@ -345,7 +348,6 @@ def getCommingEpisodes(args,kwargs):
         del ep["tvr_id"]
         del ep["startyear"]
         del ep["seasonfolders"]
-        del ep["show_id"]
         
         finalEpResults.append(_remove_clutter(ep))
         
@@ -382,7 +384,7 @@ def getHistory(args,kwargs):
         row["action"] = status
         row["quality"] = _get_quality_string(quality)
         row["date"] = _historyDate_to_dateForm(str(row["date"]))
-        _rename_element(row, "showid", "show_tvdbid")
+        _rename_element(row, "showid", "tvdbid")
         finalHresults.append(row)
     return finalHresults
 
@@ -468,7 +470,10 @@ def _get_episodes(showId,season=None,status=[]):
     if season:
         season = int(season)
         pure = True
-              
+    
+    status = _replace_statusStrings_with_statusCodes(status)
+    
+
     myDB = db.DBConnection(row_type="dict")
     sqlResults = myDB.select( "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC", [showId])
     episodes = {} # will contain all episodes that selected
@@ -476,6 +481,7 @@ def _get_episodes(showId,season=None,status=[]):
     # show stats
     all_count = 0 # all episodes
     loaded_count = 0
+    snatched_count = 0
     season_list = [] # a list with all season numbers
     
     episode_status_counts = {}
@@ -491,7 +497,12 @@ def _get_episodes(showId,season=None,status=[]):
             all_count += 1
             if epResult["status"] in Quality.DOWNLOADED:
                 loaded_count += 1
+            elif epResult["status"] in Quality.SNATCHED:
+                snatched_count += 1
         
+        # skip episodes that dont match the status filter
+        if status and not epResult["status"] in status:
+            continue
 
         epResult = _make_episode_nice(epResult)
         
@@ -501,10 +512,6 @@ def _get_episodes(showId,season=None,status=[]):
         episode_status_counts[epResult["status"]] += 1
             
         if season and season != curSeason:
-            continue
-
-        # skip episodes that dont match the status filter
-        if status and not epResult["status"] in status:
             continue
 
         # pure is true if we only requested one season
@@ -521,15 +528,15 @@ def _get_episodes(showId,season=None,status=[]):
         # delete not needed fields
         epResult = _remove_clutter(epResult)
         # give ambiguous fields a prefix
-        epResult = _add_prefix(epResult,"ep_","tvdbid")
-        epResult = _add_prefix(epResult,"ep_","airdate")
+        del epResult["tvdbid"]
 
     episodes_stats = {}
     for episode_status_count in episode_status_counts:
         episodes_stats[episode_status_count] = episode_status_counts[episode_status_count]
 
-    episodes_stats["All"] = all_count
+    episodes_stats["Total"] = all_count
     episodes_stats["Downloaded"] = loaded_count
+    episodes_stats["Snatched"] = loaded_count
 
     return episodes, episodes_stats, season_list
     
@@ -537,21 +544,6 @@ def _make_episode_nice(epResult):
     epResult["status"] = statusStrings[epResult["status"]]
     epResult["airdate"] = _ordinal_to_dateForm(int(epResult["airdate"]))
     
-    return epResult
-
-def _add_prefixs(epResult,prefix):
-    for key in epResult:
-        epResult = _add_prefix(epResult, prefix, key)
-    
-    return epResult
-
-def _add_prefix(epResult,prefix,key):
-    try:
-        if key.find(prefix) < 0:
-            epResult[prefix+key] = epResult[key]
-            del epResult[key]
-    except KeyError:
-        pass  
     return epResult
 
 def _ordinal_to_dateForm(ordinal):
@@ -573,12 +565,30 @@ def _remove_clutter(epResult):
     del epResult["location"]
     del epResult["hastbn"]
     del epResult["hasnfo"]
+    del epResult["episode_id"]
     
     del epResult["episode"]
     del epResult["season"]
     
     return epResult
 
+def _replace_statusStrings_with_statusCodes(statusStrings):
+    statusCodes = []
+    if "snatched" in statusStrings:
+        statusCodes += Quality.SNATCHED
+    if "downloaded" in statusStrings:
+        statusCodes += Quality.DOWNLOADED
+    if "skipped" in statusStrings:
+        statusCodes.append(SKIPPED)
+    if "wanted" in statusStrings:
+        statusCodes.append(WANTED)
+    if "archived" in statusStrings:
+        statusCodes.append(ARCHIVED)
+    if "ignored" in statusStrings:
+        statusCodes.append(IGNORED)
+    if "unaired" in statusStrings:
+        statusCodes.append(UNAIRED)
+    return statusCodes
 
 def _check_params(args,kwargs,key,default,missingList=[],remove=True):
     """
