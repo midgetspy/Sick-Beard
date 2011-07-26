@@ -158,9 +158,9 @@ def getShows(args,kwargs):
     # or by the the kwargs value with the key "order"
     # it will default to "id"
     # if we found a args element the first element is removed !!
-    order,args = _check_params(args, kwargs, "order", "id")
+    order,args,missing = _check_params(args, kwargs, "order", "id")
     # one args element is gone so the next one should be paused
-    paused,args = _check_params(args, kwargs, "paused", None)
+    paused,args,missing = _check_params(args, kwargs, "paused", None, missing)
     # you will see this pattern in all function that can called directly
     
     
@@ -186,9 +186,11 @@ def getShows(args,kwargs):
 
 
 def getShow(args, kwargs):
-    id,args = _check_params(args, kwargs, "id", None)
-    season,args = _check_params(args, kwargs, "season", None)
-    status,args = _check_params(args, kwargs, "status", [])
+    id,args,missing = _check_params(args, kwargs, "id", None, [])
+    if missing:
+        return _missing_param(missing)
+    season,args,missing = _check_params(args, kwargs, "season", None)
+    status,args,missing = _check_params(args, kwargs, "status", [])
     
     
     if id == None:
@@ -235,32 +237,37 @@ def getShow(args, kwargs):
 
 
 def getSeason(args, kwargs):
-    sid,args = _check_params(args, kwargs, "sid", None)
-    s,args = _check_params(args, kwargs, "s", None)
-    
-    episodes,episodeCounts,sList = _get_episodes(sid,season=s)
+    sid,args,missing = _check_params(args, kwargs, "sid", None, [])
+    s,args,missing = _check_params(args, kwargs, "s", None, missing)
+    if missing:
+        return _missing_param(missing)
+    episodes,episodes_stats, season_list = _get_episodes(sid,season=s)
     
     return episodes
 
 
 def getEpisodes(args, kwargs):
-    sid,args = _check_params(args, kwargs, "id", None)
-    s,args = _check_params(args, kwargs, "s", None)
-    status,args = _check_params(args, kwargs, "status", [])
+    sid,args,missing = _check_params(args, kwargs, "id", None, [])
+    s,args,missing = _check_params(args, kwargs, "s", None, missing)
+    if missing:
+        return _missing_param(missing)
+    status,args,missing = _check_params(args, kwargs, "status", [])
     
     if status:
         status = status.split(";")
-    episodes,sList,eCount = _get_episodes(sid, season=s, status=status)
+    episodes,episodes_stats, season_list = _get_episodes(sid, season=s, status=status)
     
     return episodes
     
 
  
 def getEpisode(args, kwargs):
-    sid,args = _check_params(args, kwargs, "sid", None)
-    s,args = _check_params(args, kwargs, "s", None)
-    e,args = _check_params(args, kwargs, "e", None)
-    fullPath,args = _check_params(args, kwargs, "fullPath", "0")
+    sid,args,missing = _check_params(args, kwargs, "sid", None, [])
+    s,args,missing = _check_params(args, kwargs, "s", None, missing)
+    e,args,missing = _check_params(args, kwargs, "e", None, missing)
+    if missing:
+        return _missing_param(missing)
+    fullPath,args,missing = _check_params(args, kwargs, "fullPath", "0")
 
     if s == "all":
         s = None
@@ -308,7 +315,7 @@ def getEpisode(args, kwargs):
     return episode
 
 def getCommingEpisodes(args,kwargs):
-    sort,args = _check_params(args, kwargs, "sort", "date")
+    sort,args,missing = _check_params(args, kwargs, "sort", "date")
     
     if not sort in ["date","show","network"]:
         return _error("Sort by '"+sort+"' not possible")
@@ -346,8 +353,8 @@ def getCommingEpisodes(args,kwargs):
 
 
 def getHistory(args,kwargs):
-    limit,args = _check_params(args, kwargs, "limit", 100)
-    type,args = _check_params(args, kwargs, "type", None)
+    limit,args,missing = _check_params(args, kwargs, "limit", 100)
+    type,args,missing = _check_params(args, kwargs, "type", None)
     
     if limit == "all":
         limit = None
@@ -382,8 +389,8 @@ def getHistory(args,kwargs):
 def id_url_wrapper(sid,args,kwargs):
     origArgs = args
     logger.log("args "+str(args),logger.DEBUG)
-    s,args = _check_params(args, kwargs, "s", None)
-    e,args = _check_params(args, kwargs, "e", None)
+    s,args,missing = _check_params(args, kwargs, "s", None)
+    e,args,missing = _check_params(args, kwargs, "e", None)
     # how to add a var to a tuple
     # http://stackoverflow.com/questions/1380860/add-variables-to-tuple
     argstmp = (0,sid) # make a new tuple
@@ -436,6 +443,12 @@ def _get_quality_string(q):
 def _get_status_Strings(s):
     return statusStrings[s]
 
+def _missing_param(missingList):
+    if len(missingList) == 1:
+        msg = "The required parameter: " + missingList[0] +" was not set"
+    else:
+        msg = "The required parameters: " + ",".join(missingList) +" where not set"
+    return _error(msg)
 
 def _get_episodes(showId,season=None,status=[]):
     """
@@ -566,7 +579,7 @@ def _remove_clutter(epResult):
     return epResult
 
 
-def _check_params(args,kwargs,key,default,remove=True):
+def _check_params(args,kwargs,key,default,missingList=[],remove=True):
     """
         this will return a tuple of mixed and mixed
         if we have any values in args default becomes the first value we find in args
@@ -577,15 +590,18 @@ def _check_params(args,kwargs,key,default,remove=True):
         if none of the above is True default is send back
         and we send the new args back 
     """
+    missing = True
     if args:
         default = args[0]
+        missing = False
         if remove:
             args = args[1:]
     if kwargs.get(key):
         default = kwargs.get(key)
-    
-    return default,args
-
+        missing = False
+    if missing:
+        missingList.append(key)
+    return default,args,missingList
 
 
 _functionMaper = {"index":getIndex,
