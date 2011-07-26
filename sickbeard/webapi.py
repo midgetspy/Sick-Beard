@@ -150,7 +150,7 @@ def call_dispatcher(args, kwargs):
 
 
 def getIndex(args,kwargs):
-    return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':Api.version, 'help':_create_help()}
+    return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':Api.version}
 
 
 def getShows(args,kwargs):
@@ -227,29 +227,88 @@ def getShow(args, kwargs):
 
     return showDict
 
+def getStats(args, kwargs):
+    tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
+    myDB = db.DBConnection(row_type="dict")
+    sqlResults = myDB.select( "SELECT status FROM tv_episodes WHERE showid = ?", [tvdbid])
+    
+    # show stats
+    all_count = 0 # all episodes
+    loaded_count = 0
+    snatched_count = 0
+    season_list = [] # a list with all season numbers
+    episode_status_counts = {}
+    # add the default status
+    for statusString in statusStrings.statusStrings:
+        episode_status_counts[statusStrings[statusString]] = 0
+
+    for row in sqlResults:
+        all_count += 1
+        if row["status"] in Quality.DOWNLOADED:
+            loaded_count += 1
+        elif row["status"] in Quality.SNATCHED:
+            snatched_count += 1
+        statusString = statusStrings[row["status"]]
+        # add the specific status like "Downloaded (HDTV)"
+        if not episode_status_counts.has_key(statusString):
+            episode_status_counts[statusString] = 0
+        episode_status_counts[statusString] += 1
+    
+    episodes_stats = {}
+    for episode_status_count in episode_status_counts:
+        episodes_stats[episode_status_count] = episode_status_counts[episode_status_count]
+
+    episodes_stats["total"] = all_count
+    episodes_stats["downloaded"] = loaded_count
+    episodes_stats["snatched"] = loaded_count
+    
+    
+    cleanStats = {}
+    for key in episodes_stats:
+        cleanStats[key.lower().replace(" ","_").replace("(","").replace(")","")] = episodes_stats[key] 
+    
+    return cleanStats
+
+def getSeasons(args, kwargs):
+    tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
+    if missing:
+        return _missing_param(missing)
+    myDB = db.DBConnection(row_type="dict")
+    sqlResults = myDB.select( "SELECT name,episode,status,season FROM tv_episodes WHERE showid = ?", [tvdbid])
+    seasons = {}
+    for row in sqlResults:
+        row["status"] = statusStrings[row["status"]]
+        curSeason = int(row["season"])
+        curEpisode = int(row["episode"])
+        del row["season"]
+        del row["episode"]
+        if not seasons.has_key(curSeason):
+            seasons[curSeason] = {}
+        seasons[curSeason][curEpisode] = row
+    
+    return seasons
 
 def getSeason(args, kwargs):
     tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
-    s,args,missing = _check_params(args, kwargs, "s", None, missing)
+    season,args,missing = _check_params(args, kwargs, "season", None, missing)
     if missing:
         return _missing_param(missing)
-    episodes,episodes_stats, season_list = _get_episodes(tvdbid,season=s)
-    
+    myDB = db.DBConnection(row_type="dict")
+    sqlResults = myDB.select( "SELECT name,episode,status FROM tv_episodes WHERE showid = ? AND season = ?", [tvdbid,season])
+    episodes = {}
+    for row in sqlResults:
+        curEpisode = int(row["episode"])
+        del row["episode"]
+        row["status"] = statusStrings[row["status"]]
+        if not episodes.has_key(curEpisode):
+            episodes[curEpisode] = {}
+        episodes[curEpisode] = row
+            
     return episodes
 
 
 def getEpisodes(args, kwargs):
-    tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
-    s,args,missing = _check_params(args, kwargs, "s", None, missing)
-    if missing:
-        return _missing_param(missing)
-    status,args,missing = _check_params(args, kwargs, "status", [])
-
-    if status:
-        status = status.split(",")
-    episodes,episodes_stats, season_list = _get_episodes(tvdbid, season=s, status=status)
-
-    return episodes
+    return getSeason(args, kwargs)
 
 
 def getEpisode(args, kwargs):
@@ -622,26 +681,14 @@ def _check_params(args,kwargs,key,default,missingList=[],remove=True):
     return default,args,missingList
 
 
-def _create_help():
-    help = {}
-    for function in _functionMaper:
-        if function == "index":
-            continue
-        t = tuple()
-        result = _functionMaper[function](t,{})
-        if result.has_key("error"):
-            help[function] = result["error"]
-        else:
-            help[function] = "No required params."
-    return help
-
-
 _functionMaper = {"index":getIndex,
                   "show":getShow,
                   "shows":getShows,
+                  "stats":getStats,
                   "episodes":getEpisodes,
                   "episode":getEpisode,
                   "season":getSeason,
+                  "seasons":getSeasons,
                   "future":getComingEpisodes,
                   "history":getHistory,
                   }
