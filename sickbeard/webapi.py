@@ -150,7 +150,7 @@ def call_dispatcher(args, kwargs):
 
 
 def getIndex(args,kwargs):
-    return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':Api.version}
+    return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':Api.version, 'help':_create_help()}
 
 
 def getShows(args,kwargs):
@@ -336,7 +336,7 @@ def getComingEpisodes(args,kwargs):
         
         _rename_element(ep, "show_id", "tvdbid")
         del ep["genre"]
-        del ep["episode_id"]
+        # del ep["episode_id"]
         del ep["lang"]
         del ep["tvdbid"]
         del ep["tvr_id"]
@@ -620,6 +620,20 @@ def _check_params(args,kwargs,key,default,missingList=[],remove=True):
     if missing:
         missingList.append(key)
     return default,args,missingList
+
+
+def _create_help():
+    help = {}
+    for function in _functionMaper:
+        if function == "index":
+            continue
+        t = tuple()
+        result = _functionMaper[function](t,{})
+        if result.has_key("error"):
+            help[function] = result["error"]
+        else:
+            help[function] = "No required params."
+    return help
 
 
 _functionMaper = {"index":getIndex,
