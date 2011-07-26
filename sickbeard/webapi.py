@@ -39,6 +39,7 @@ class Api:
     """
         generic api will always return json
     """
+    version = 0.1 
     intent = 4
 
     @cherrypy.expose
@@ -153,7 +154,7 @@ def call_dispatcher(args, kwargs):
 
 def getIndex(args,kwargs):
     
-    return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':0.1}
+    return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':Api.version}
 
 
 def getShows(args,kwargs):
