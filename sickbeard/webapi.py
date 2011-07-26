@@ -410,7 +410,7 @@ def id_url_wrapper(sid,args,kwargs):
 def _is_int(foo):
     try:
         int(foo)
-    except ValueError, TypeError:
+    except:
         return False
     else:
         return True
