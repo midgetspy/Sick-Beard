@@ -106,6 +106,9 @@ class Api:
         apiKey = kwargs.get("apikey",None)
 
         if not apiKey:
+            # this also checks if the length of the first element
+            # is the length of the realKey .. it is nice but will through the error "no key" even if you miss one char 
+            # if args and len(args[0]) == len(realKey):
             if args: # if we have keyless vars we assume first one is the api key
                 apiKey = args[0]
                 args = args[1:] # remove the apikey from the args tuple
@@ -192,9 +195,6 @@ def getShow(args, kwargs):
     season,args,missing = _check_params(args, kwargs, "season", None)
     status,args,missing = _check_params(args, kwargs, "status", [])
     
-    
-    if id == None:
-        raise ApiError("No show id given")
 
     show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(id))
     if not show:
@@ -294,7 +294,7 @@ def getEpisode(args, kwargs):
     showPath = None
     try:
         showPath = show.location
-    except exceptions.NoNFOException:
+    except:
         pass
     
     if fullPath == "1" and showPath: # we get the full path by default so no need to change
@@ -360,9 +360,9 @@ def getHistory(args,kwargs):
         limit = None
     _is_int_multi(limit)
 
-    if type == "d":
+    if type == "downloaded":
         type = "Downloaded"
-    elif type == "s":
+    elif type == "snatched":
         type = "Snatched"
 
     myDB = db.DBConnection(row_type="dict")
