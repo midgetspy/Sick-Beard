@@ -152,7 +152,7 @@ def call_dispatcher(args, kwargs):
     return outDict
 
 class ApiCall(object):
-    _help = {"desc":"No help message available. Pleas tell the devs that a help msg is missing for ths cmd"}
+    _help = {"desc":"No help message available. Pleas tell the devs that a help msg is missing for this cmd"}
     _missing = []
     def __init__(self, args, kwargs, missing=[]):
         # missing
@@ -186,9 +186,7 @@ class Index(ApiCall):
 
 
 class Shows(ApiCall):
-    _help = {"requiredParameters":["tvdbid"],
-            "desc":"Display Show information including satitics"
-            }
+    _help = {"desc":"Display all Shows"}
     def __init__(self,args,kwargs):
         # required
         # optional
@@ -214,7 +212,7 @@ class Shows(ApiCall):
 
 class Show(ApiCall):
     _help = {"requiredParameters":["tvdbid"],
-             "desc":"Display Show information including satitics"}
+             "desc":"Display Show information including episode statistics"}
 
     def __init__(self,args,kwargs):
         # required
@@ -403,7 +401,7 @@ class Episode(ApiCall):
 
 class ComingEpisodes(ApiCall):
     _help = {"desc":"Display comming episodes",
-             "optinalPramameters":["sort"]}
+             "optionalPramameters":["sort"]}
     def __init__(self, args, kwargs): 
         # required
         # optional
@@ -492,7 +490,21 @@ class History(ApiCall):
             results.append(row)
         return results
 
-
+class Help(ApiCall):
+    _help = {"desc":"Get help for a subject/cmd",
+             "optionalPramameters":["subject"]}
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        self.subject,args = _check_params(args, kwargs, "subject", "help")
+        ApiCall.__init__(self, args, kwargs)
+    def run(self):
+        if _functionMaper.has_key(self.subject):
+            msg = _functionMaper.get(self.subject)((),{"help":1}).run()
+        else:
+            msg = _error("no such cmd")
+        return msg
+        
 ################################
 #     helper functions         #
 ################################
@@ -632,7 +644,8 @@ _functionMaper = {"index":Index,
                   "seasons":Seasons,
                   "episode":Episode,
                   "future":ComingEpisodes,
-                  "history":History
+                  "history":History,
+                  "help":Help
                   }
 
 class ApiError(Exception):
