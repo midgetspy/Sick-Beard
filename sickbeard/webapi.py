@@ -89,7 +89,8 @@ class Api:
     
     @cherrypy.expose
     def builder(self, *args, **kwargs):
-        return "WEBPAGE"
+        t = webserve.PageTemplate(file="apiBuilder.tmpl")
+        return webserve._munge(t)
 
     def _out_as_json(self,dict):
         response = cherrypy.response
