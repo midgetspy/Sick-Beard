@@ -253,7 +253,7 @@ def getStats(args, kwargs):
         if not episode_status_counts.has_key(statusString):
             episode_status_counts[statusString] = 0
         episode_status_counts[statusString] += 1
-    
+
     episodes_stats = {}
     for episode_status_count in episode_status_counts:
         episodes_stats[episode_status_count] = episode_status_counts[episode_status_count]
@@ -261,12 +261,12 @@ def getStats(args, kwargs):
     episodes_stats["total"] = all_count
     episodes_stats["downloaded"] = loaded_count
     episodes_stats["snatched"] = loaded_count
-    
-    
+
+
     cleanStats = {}
     for key in episodes_stats:
         cleanStats[key.lower().replace(" ","_").replace("(","").replace(")","")] = episodes_stats[key] 
-    
+
     return cleanStats
 
 def getSeasons(args, kwargs):
@@ -274,18 +274,20 @@ def getSeasons(args, kwargs):
     if missing:
         return _missing_param(missing)
     myDB = db.DBConnection(row_type="dict")
-    sqlResults = myDB.select( "SELECT name,episode,status,season FROM tv_episodes WHERE showid = ?", [tvdbid])
+    sqlResults = myDB.select( "SELECT name,episode,status,season,airdate FROM tv_episodes WHERE showid = ?", [tvdbid])
     seasons = {}
     for row in sqlResults:
-        row["status"] = statusStrings[row["status"]]
         curSeason = int(row["season"])
         curEpisode = int(row["episode"])
         del row["season"]
         del row["episode"]
+        row["status"] = statusStrings[row["status"]]
+        row["airdate"] = _ordinal_to_dateForm( int(row["airdate"]) )
+
         if not seasons.has_key(curSeason):
             seasons[curSeason] = {}
         seasons[curSeason][curEpisode] = row
-    
+
     return seasons
 
 def getSeason(args, kwargs):
@@ -294,16 +296,18 @@ def getSeason(args, kwargs):
     if missing:
         return _missing_param(missing)
     myDB = db.DBConnection(row_type="dict")
-    sqlResults = myDB.select( "SELECT name,episode,status FROM tv_episodes WHERE showid = ? AND season = ?", [tvdbid,season])
+    sqlResults = myDB.select( "SELECT name,episode,status,airdate FROM tv_episodes WHERE showid = ? AND season = ?", [tvdbid,season])
     episodes = {}
     for row in sqlResults:
         curEpisode = int(row["episode"])
         del row["episode"]
         row["status"] = statusStrings[row["status"]]
+        row["airdate"] = _ordinal_to_dateForm( int(row["airdate"]) )
+
         if not episodes.has_key(curEpisode):
             episodes[curEpisode] = {}
         episodes[curEpisode] = row
-            
+
     return episodes
 
 
