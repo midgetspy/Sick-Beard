@@ -66,7 +66,6 @@ class Api:
             dateFormat = str(kwargs["dateForm"])
             del kwargs["dateForm"]
 
-
         # set the original call_dispatcher as the local _call_dispatcher
         _call_dispatcher = call_dispatcher
         # if profile was set wrap "_call_dispatcher" in the profile function
@@ -104,9 +103,7 @@ class Api:
 
     def _grand_access(self,realKey,args,kwargs):
         remoteIp = cherrypy.request.remote.ip
-
         apiKey = kwargs.get("apikey",None)
-
         if not apiKey:
             # this also checks if the length of the first element
             # is the length of the realKey .. it is nice but will through the error "no key" even if you miss one char 
@@ -116,7 +113,6 @@ class Api:
                 args = args[1:] # remove the apikey from the args tuple
         else:
             del kwargs["apikey"]
-
 
         if apiKey == realKey:
             msg = u"Api key accepted. ACCESS GRANTED"
@@ -145,35 +141,64 @@ def call_dispatcher(args, kwargs):
     if _functionMaper.get(cmd, False):
         outDict = _functionMaper.get(cmd)(args,kwargs).run() 
     elif _is_int(cmd):
-        outDict = id_url_wrapper(cmd,args,kwargs)   
+        outDict = ShorthandWrapper(args,kwargs,cmd).run() 
     else:
-        outDict = Index(args,kwargs).run()
+        outDict = CMDIndex(args,kwargs).run()
 
     return outDict
 
 class ApiCall(object):
     _help = {"desc":"No help message available. Pleas tell the devs that a help msg is missing for this cmd"}
-    _missing = []
-    def __init__(self, args, kwargs, missing=[]):
+    
+    def __init__(self, args, kwargs):
         # missing
-        self._missing = missing
-        if self._missing:
-            self.run = self.returnMissing
+        try:
+            if self._missing:
+                self.run = self.return_missing
+        except AttributeError:
+            pass
         # help
         if kwargs.has_key("help"):
-            self.run = self.returnHelp
+            self.run = self.return_help
 
     def run(self):
-        # plz override with real output function in subclass
+        # override with real output function in subclass
         return {}
 
-    def returnHelp(self):
+    def return_help(self):
         return self._help
     
-    def returnMissing(self):
-        return _missing_param(self._missing)
+    def return_missing(self):
+        if len(self._missing) == 1:
+            msg = "The required parameter: '" + self._missing[0] +"' was not set"
+        else:
+            msg = "The required parameters: '" + "','".join(self._missing) +"' where not set"
+        return _error(msg)
+    
+    def check_params(self,args,kwargs,key,default,required=False):
+        # TODO: explain this
+        """
+            this does the url shorthand magic
+            and saves missing keys in self._missing
+        """
+        missing = True
+        if args:
+            default = args[0]
+            missing = False
+            args = args[1:]
+        if kwargs.get(key):
+            default = kwargs.get(key)
+            missing = False
+        if required:
+            try:
+                self._missing
+            except AttributeError:
+                self._missing = []
+            if missing and key not in self._missing:
+                self._missing.append(key)
+        return default,args
 
-class Index(ApiCall):
+class CMDIndex(ApiCall):
     _help = {"desc":"Display this Message"}
     def __init__(self,args,kwargs):
         # required
@@ -185,13 +210,13 @@ class Index(ApiCall):
         return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':Api.version, "cmdOverview":"TODO"}
 
 
-class Shows(ApiCall):
+class CMDShows(ApiCall):
     _help = {"desc":"Display all Shows"}
     def __init__(self,args,kwargs):
         # required
         # optional
-        self.order,args = _check_params(args, kwargs, "order", "id")
-        self.paused,args = _check_params(args, kwargs, "paused", None)
+        self.sort,args = self.check_params(args, kwargs, "sort", "id")
+        self.paused,args = self.check_params(args, kwargs, "paused", None)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
            
@@ -200,9 +225,11 @@ class Shows(ApiCall):
         for show in sickbeard.showList:
             if self.paused and not self.paused == str(show.paused):
                 continue
-    
-            showDict = {"paused":show.paused,"quality":_get_quality_string(show.quality),"language":show.lang}
-            if self.order == "name":
+            showDict = {"paused":show.paused,
+                        "quality":_get_quality_string(show.quality),
+                        "language":show.lang,
+                        "tvrage_name":show.tvrname}
+            if self.sort == "name":
                 showDict["tvdbid"] = show.tvdbid
                 shows[show.name] = showDict
             else:
@@ -210,16 +237,16 @@ class Shows(ApiCall):
                 shows[show.tvdbid] = showDict
         return shows
 
-class Show(ApiCall):
+class CMDShow(ApiCall):
     _help = {"requiredParameters":["tvdbid"],
              "desc":"Display Show information including episode statistics"}
 
     def __init__(self,args,kwargs):
         # required
-        self.tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
         # super, missing, help
-        ApiCall.__init__(self, args, kwargs, missing=missing) 
+        ApiCall.__init__(self, args, kwargs) 
     
     def run(self):
         show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
@@ -227,7 +254,7 @@ class Show(ApiCall):
             raise ApiError("Show not Found")
     
         showDict = {}
-        stats, seasonList = Stats((), {"tvdbid":self.tvdbid}, outPutSeasonList=True).run()
+        stats, seasonList = CMDStats((), {"tvdbid":self.tvdbid}, outPutSeasonList=True).run()
         showDict["season_list"] = seasonList
         showDict["stats"] = stats
 
@@ -251,19 +278,20 @@ class Show(ApiCall):
         showDict["air_by_date"] = show.air_by_date
         showDict["seasonfolders"] = show.seasonfolders
         showDict["airs"] = show.airs
-
+        showDict["tvrage_name"] = show.tvrname
+    
         return showDict
 
-class Stats(ApiCall):
+class CMDStats(ApiCall):
     _help = {"requiredParameters":["tvdbid"],
              "desc":"Display episodes statistcs for a given show"}
 
     def __init__(self, args, kwargs, outPutSeasonList=False):
         # required
-        self.tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, False)
         # optional
         # super, missing, help
-        ApiCall.__init__(self, args, kwargs, missing=missing )
+        ApiCall.__init__(self, args, kwargs)
         
         self.outPutSeasonList = outPutSeasonList
         
@@ -315,13 +343,13 @@ class Stats(ApiCall):
         else:
             return cleanStats
 
-class Seasons(ApiCall):
+class CMDSeasons(ApiCall):
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
         # super, missing, help
-        ApiCall.__init__(self, args, kwargs, missing=missing )
+        ApiCall.__init__(self, args, kwargs)
     
     def run(self):
         myDB = db.DBConnection(row_type="dict")
@@ -340,19 +368,21 @@ class Seasons(ApiCall):
         
         return seasons
 
-class Season(ApiCall):
+class CMDSeason(ApiCall):
     
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args,self._missing = _check_params(args, kwargs, "tvdbid", None, [])
-        self.season,args,self._missing = _check_params(args, kwargs, "season", None, self._missing)
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.season,args = self.check_params(args, kwargs, "season", None, True)
         # optional
         # super, missing, help
-        ApiCall.__init__(self, args, kwargs, missing=self._missing)
+        ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid,self.season])
+        if len(sqlResults) is 0:
+            raise ApiError("No season found")
         episodes = {}
         for row in sqlResults:
             curEpisode = int(row["episode"])
@@ -364,16 +394,17 @@ class Season(ApiCall):
             episodes[curEpisode] = row
         return episodes
 
-class Episode(ApiCall):
+class CMDEpisode(ApiCall):
     def __init__(self, args, kwargs):   
         # required
-        self.tvdbid,args,missing = _check_params(args, kwargs, "tvdbid", None, [])
-        self.s,args,missing = _check_params(args, kwargs, "s", None, missing)
-        self.e,args,missing = _check_params(args, kwargs, "e", None, missing)
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.s,args = self.check_params(args, kwargs, "season", None, True)
+        self.e,args = self.check_params(args, kwargs, "episode", None, True)
         # optional
-        self.fullPath,args = _check_params(args, kwargs, "fullPath", "0")
+        self.fullPath,args = self.check_params(args, kwargs, "fullPath", "0")
         # super, missing, help
-        ApiCall.__init__(self, args, kwargs, missing=missing)
+        ApiCall.__init__(self, args, kwargs)
+
     def run(self):
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select( "SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid,self.e,self.s])
@@ -402,13 +433,13 @@ class Episode(ApiCall):
         episode["status"] = _get_status_Strings(episode["status"])
         return episode
 
-class ComingEpisodes(ApiCall):
+class CMDComingEpisodes(ApiCall):
     _help = {"desc":"Display comming episodes",
              "optionalPramameters":["sort"]}
     def __init__(self, args, kwargs): 
         # required
         # optional
-        self.sort,args = _check_params(args, kwargs, "sort", "date")
+        self.sort,args = self.check_params(args, kwargs, "sort", "date")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -457,12 +488,12 @@ class ComingEpisodes(ApiCall):
             finalEpResults.append(ep)
         return finalEpResults
 
-class History(ApiCall):
+class CMDHistory(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.limit,args = _check_params(args, kwargs, "limit", 100)
-        self.type,args = _check_params(args, kwargs, "type", None)
+        self.limit,args = self.check_params(args, kwargs, "limit", 100)
+        self.type,args = self.check_params(args, kwargs, "type", None)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -493,13 +524,13 @@ class History(ApiCall):
             results.append(row)
         return results
 
-class Help(ApiCall):
+class CMDHelp(ApiCall):
     _help = {"desc":"Get help for a subject/cmd",
              "optionalPramameters":["subject"]}
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.subject,args = _check_params(args, kwargs, "subject", "help")
+        self.subject,args = self.check_params(args, kwargs, "subject", "help")
         ApiCall.__init__(self, args, kwargs)
     def run(self):
         if _functionMaper.has_key(self.subject):
@@ -509,30 +540,41 @@ class Help(ApiCall):
         return msg
         
 ################################
+#     shorthand wrapper        #
+################################
+class ShorthandWrapper(ApiCall):
+    _help = {"desc":"This is a internal function wrapper. To get help for a command call the command direclty"}
+    def __init__(self, args, kwargs, sid):
+        self.origArgs = args
+        self.kwargs = kwargs
+        self.sid = sid
+        
+        self.s,args = self.check_params(args, kwargs, "s", None)
+        self.e,args = self.check_params(args, kwargs, "e", None)
+        self.args = args
+        
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        # how to add a var to a tuple
+        # http://stackoverflow.com/questions/1380860/add-variables-to-tuple
+        argstmp = (0,self.sid) # make a new tuple
+        args = argstmp + self.origArgs # add both
+        args = args[1:] # remove first fake element
+        if self.e:
+            return CMDEpisode(args, self.kwargs).run()
+        elif self.s:
+            if self.s == "all":
+                return CMDSeasons(args, self.kwargs).run()
+            else:    
+                return CMDSeason(args, self.kwargs).run()
+        else:
+            return CMDShow(args, self.kwargs).run()
+
+
+################################
 #     helper functions         #
 ################################
-def id_url_wrapper(sid,args,kwargs):
-    origArgs = args
-    logger.log("args "+str(args),logger.DEBUG)
-    s,args = _check_params(args, kwargs, "s", None)
-    e,args = _check_params(args, kwargs, "e", None)
-    # how to add a var to a tuple
-    # http://stackoverflow.com/questions/1380860/add-variables-to-tuple
-    argstmp = (0,sid) # make a new tuple
-    args = argstmp + origArgs # add both
-    args = args[1:] # remove first fake element
-    logger.log("args "+str(args),logger.DEBUG)
-    if e:
-        return Episode(args, kwargs).run()
-    elif s:
-        if s == "all":
-            return Seasons(args, kwargs).run()
-        else:    
-            return Season(args, kwargs).run()
-    else:
-        return Show(args, kwargs).run()
-
-
 def _is_int(foo):
     try:
         int(foo)
@@ -569,13 +611,6 @@ def _get_quality_string(q):
 def _get_status_Strings(s):
     return statusStrings[s]
 
-def _missing_param(missingList):
-    if len(missingList) == 1:
-        msg = "The required parameter: " + missingList[0] +" was not set"
-    else:
-        msg = "The required parameters: " + ",".join(missingList) +" where not set"
-    return _error(msg)
-
 def _ordinal_to_dateForm(ordinal):
     # workaround for episodes with no airdate
     if int(ordinal) != 1:
@@ -584,17 +619,14 @@ def _ordinal_to_dateForm(ordinal):
         return ""
     return _convert_date_dateform(date,ordinal)
 
-
 def _historyDate_to_dateForm(timeString):
     date = datetime.datetime.strptime(timeString,history.dateFormat)
     return _convert_date_dateform(date,timeString)
-
 
 def _convert_date_dateform(date,raw):
     if not dateFormat or dateFormat == "raw":
         return raw
     return date.strftime(dateFormat)
-
 
 def _replace_statusStrings_with_statusCodes(statusStrings):
     statusCodes = []
@@ -614,45 +646,16 @@ def _replace_statusStrings_with_statusCodes(statusStrings):
         statusCodes.append(UNAIRED)
     return statusCodes
 
-
-def _check_params(args,kwargs,key,default,missingList=None,remove=True):
-    """
-        this will return a tuple of mixed and mixed
-        if we have any values in args default becomes the first value we find in args
-        this args element is then removed if remove = True
-        if a value is in kwargs with key = key defauld becomes the value of that element with given key
-        yes this might override the value already set by the first args element
-        kwargs overrides args ... period
-        if none of the above is True default is send back
-        and we send the new args back 
-    """
-    missing = True
-    if args:
-        default = args[0]
-        missing = False
-        if remove:
-            args = args[1:]
-    if kwargs.get(key):
-        default = kwargs.get(key)
-        missing = False
-    if missing and missingList != None:
-        missingList.append(key)
-    
-    if missingList != None:
-        return default,args,missingList
-    else:
-        return default,args
-
-_functionMaper = {"index":Index,
-                  "shows":Shows,
-                  "show":Show,
-                  "stats":Stats,
-                  "season":Season,
-                  "seasons":Seasons,
-                  "episode":Episode,
-                  "future":ComingEpisodes,
-                  "history":History,
-                  "help":Help
+_functionMaper = {"index":CMDIndex,
+                  "shows":CMDShows,
+                  "show":CMDShow,
+                  "stats":CMDStats,
+                  "season":CMDSeason,
+                  "seasons":CMDSeasons,
+                  "episode":CMDEpisode,
+                  "future":CMDComingEpisodes,
+                  "history":CMDHistory,
+                  "help":CMDHelp
                   }
 
 class ApiError(Exception):
