@@ -11,7 +11,19 @@ var _disable_empty_list=false;
 var _hide_empty_list=false;
 
 function goListGroup(apikey, L3, L2, L1){
-    alert("/api/"+ apikey + "/" + L1 + L2 + L3);
+    // alert("/api/"+ apikey + "/" + L1 + L2 + L3);
+    // document.getElementById('apiResponse').innerHTML = "/api/"+ apikey + "/" + L1 + L2 + L3;
+    // $('#apiResponse').html("/api/"+ apikey + "/" + L1 + L2 + L3);
+
+    var html = "/api/"+ apikey + "/" + L1 + L2 + L3 + "<br/><pre>"
+    html += $.ajax({
+      url: "/api/"+ apikey + "/"+L1+L2+L3,
+      async: false,
+      dataType: "html",
+    }).responseText;
+
+    html += '</pre>';
+    $('#apiResponse').html(html);
 }
 
 // ------

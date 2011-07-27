@@ -90,6 +90,7 @@ class Api:
     @cherrypy.expose
     def builder(self, *args, **kwargs):
         t = webserve.PageTemplate(file="apiBuilder.tmpl")
+        t.showList = sickbeard.showList
         return webserve._munge(t)
 
     def _out_as_json(self,dict):

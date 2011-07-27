@@ -37,11 +37,13 @@ addOption("shows", "Show Only Paused", "&paused=1");
 addOption("shows", "Show Only Not Paused", "&paused=0");
 addOption("shows", "Sort by Show Name", "&sort=name");
 
-addOption("show", "America\'s Next Top Model", "&tvdbid=71721");
-addOption("show", "White Collar", "&tvdbid=108611"); 
+#for $curShow in $showList:
+addOption("show", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+#end for
 
-addOption("stats", "America\'s Next Top Model", "&tvdbid=71721");
-addOption("stats", "White Collar", "&tvdbid=108611"); 
+#for $curShow in $showList:
+addOption("stats", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+#end for
 
 addOption("season", "Select Optional Param", "", 1);
 
@@ -88,6 +90,8 @@ addList("history-limit", "Show Only Snatched", "&type=snatched", "history-type")
     </tr>
 </table>
 </form>
+
+<div id="apiResponse"></div>
 
 </body>
 
