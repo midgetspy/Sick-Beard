@@ -324,10 +324,11 @@ class Seasons(ApiCall):
     
     def run(self):
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT name,episode,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        sqlResults = myDB.select( "SELECT name,episode,airdate,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
         seasons = {}
         for row in sqlResults:
             row["status"] = statusStrings[row["status"]]
+            row["airdate"] = _ordinal_to_dateForm(row["airdate"])
             curSeason = int(row["season"])
             curEpisode = int(row["episode"])
             del row["season"]
@@ -350,12 +351,13 @@ class Season(ApiCall):
 
     def run(self):
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT name,episode,status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid,self.season])
+        sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid,self.season])
         episodes = {}
         for row in sqlResults:
             curEpisode = int(row["episode"])
             del row["episode"]
             row["status"] = statusStrings[row["status"]]
+            row["airdate"] = _ordinal_to_dateForm(row["airdate"])
             if not episodes.has_key(curEpisode):
                 episodes[curEpisode] = {}
             episodes[curEpisode] = row
@@ -396,7 +398,7 @@ class Episode(ApiCall):
             episode["location"] = ""
         # convert stuff to human form
         episode["airdate"] = _ordinal_to_dateForm(episode["airdate"])
-        episode["status"] = _get_quality_string(episode["status"])
+        episode["status"] = _get_status_Strings(episode["status"])
         return episode
 
 class ComingEpisodes(ApiCall):
@@ -574,7 +576,11 @@ def _missing_param(missingList):
     return _error(msg)
 
 def _ordinal_to_dateForm(ordinal):
-    date = datetime.date.fromordinal(ordinal)
+    # workaround for episodes with no airdate
+    if int(ordinal) != 1:
+        date = datetime.date.fromordinal(ordinal)
+    else:
+        return ""
     return _convert_date_dateform(date,ordinal)
 
 
