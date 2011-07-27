@@ -126,6 +126,11 @@ class Api:
 
 
 def call_dispatcher(args, kwargs):
+    """calls the appropriate CMD class
+        looks for a cmd in args and kwargs
+        or calls the ShorthandWrapper when the first args element is a number
+        it falls back to the index cmd
+    """
     logger.log("api: all args: '"+str(args)+"'",logger.DEBUG)
     logger.log("api: all kwargs: '"+str(kwargs)+"'",logger.DEBUG)
     logger.log("api: dateFormat: '"+str(dateFormat)+"'",logger.DEBUG)
