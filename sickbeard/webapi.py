@@ -454,11 +454,38 @@ class CMDComingEpisodes(ApiCall):
         self.sort,args = self.check_params(args, kwargs, "sort", "date")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
-
     def run(self):
-        epResults,today,next_week = webserve.WebInterface.commingEpisodesRaw(sort=self.sort ,row_type="dict")
+
+        today = datetime.date.today().toordinal()
+        next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
+        recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
+
+        done_show_list = []
+        qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
+        
+        myDB = db.DBConnection(row_type="dict")
+        sql_results = myDB.select("SELECT airdate,airs,episode,name,network,season,showid,show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
+        for cur_result in sql_results:
+            done_show_list.append(int(cur_result["showid"]))
+
+        more_sql_results = myDB.select("SELECT airdate,airs,episode,name,network,season,showid,show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results += more_sql_results
+
+        more_sql_results = myDB.select("SELECT airdate,airs,episode,name,network,season,showid,show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
+        sql_results += more_sql_results
+
+
+        # sort by air date
+        sorts = {
+            'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
+            'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
+            'network': (lambda a, b: cmp(a["network"], b["network"])),
+        }
+
+        #epList.sort(sorts[sort])
+        sql_results.sort(sorts[self.sort])
         finalEpResults = []
-        for ep in epResults:
+        for ep in sql_results:
             """
                 Missed:   yesterday... (less than 1week)
                 Today:    today
@@ -479,23 +506,6 @@ class CMDComingEpisodes(ApiCall):
             ep["quality"] = _get_quality_string(ep["quality"])
             ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
             # this is disgusting 
-            del ep["air_by_date"]
-            del ep["description"]
-            del ep["episode_id"]
-            del ep["genre"]
-            del ep["hasnfo"]
-            del ep["hastbn"]
-            del ep["lang"]
-            del ep["location"]
-            del ep["paused"]
-            del ep["quality"]
-            del ep["runtime"]
-            del ep["seasonfolders"]
-            del ep["startyear"]
-            del ep["tvdb_id"]
-            del ep["tvr_id"]
-            del ep["show_id"]
-            del ep["tvr_name"]
             ep = _rename_element(ep, "showid", "tvdbid")
             finalEpResults.append(ep)
         return finalEpResults
