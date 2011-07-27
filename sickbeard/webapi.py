@@ -87,7 +87,10 @@ class Api:
                 outDict = _error(ex(e))
 
         return outputCallback(outDict)
-
+    
+    @cherrypy.expose
+    def builder(self, *args, **kwargs):
+        return "WEBPAGE"
 
     def _out_as_json(self,dict):
         response = cherrypy.response
