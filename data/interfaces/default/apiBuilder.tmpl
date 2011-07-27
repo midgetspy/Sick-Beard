@@ -1,0 +1,94 @@
+<html>
+
+<head>
+<title>API Builder</title>
+<script type="text/javascript" charset="utf-8">
+<!--
+sbRoot = "$sbRoot";
+//-->
+</script>
+<script type="text/javascript" src="$sbRoot/js/jquery-1.6.1.min.js"></script>
+<script type="text/javascript" src="$sbRoot/js/apibuilder.js"></script>
+
+<style type="text/css">
+<!--
+td select { padding: 2px 8px; }
+-->
+</style>
+
+<script type="text/javascript">
+var hide_empty_list=true; 
+var disable_empty_list=true;
+
+addListGroup("api", "Command");
+
+addOption("Command", "Index", "?cmd=index", 1); //make default
+addList("Command", "Shows", "?cmd=shows", "shows");
+addList("Command", "Show", "?cmd=show", "show");
+addList("Command", "Stats", "?cmd=stats", "stats");
+addOption("Command", "Seasons", "?cmd=seasons");
+addList("Command", "Season", "?cmd=season", "season");
+addList("Command", "Episode", "?cmd=episode", "episode");
+addList("Command", "Coming Episodes", "?cmd=future", "future");
+addList("Command", "History", "?cmd=history", "history");
+
+addOption("shows", "Select Optional Param", "", 1);
+addOption("shows", "Show Only Paused", "&paused=1");
+addOption("shows", "Show Only Not Paused", "&paused=0");
+addOption("shows", "Sort by Show Name", "&sort=name");
+
+addOption("show", "America\'s Next Top Model", "&tvdbid=71721");
+addOption("show", "White Collar", "&tvdbid=108611"); 
+
+addOption("stats", "America\'s Next Top Model", "&tvdbid=71721");
+addOption("stats", "White Collar", "&tvdbid=108611"); 
+
+addOption("season", "Select Optional Param", "", 1);
+
+addOption("episode", "Select Optional Param", "", 1);
+
+addOption("future", "Select Optional Param", "", 1);
+addOption("future", "Sort by Date", "&sort=date");
+
+addOption("history", "Select Optional Param", "", 1);
+addList("history", "Show Only Downloaded", "&type=downloaded", "history-type");
+addList("history", "Show Only Snatched", "&type=snatched", "history-type");
+//addOptGroup("history", "Limit Results");
+addList("history", "Limit Results (2)", "&limit=2", "history-limit");
+addList("history", "Limit Results (25)", "&limit=25", "history-limit");
+addList("history", "Limit Results (50)", "&limit=50", "history-limit");
+//endOptGroup("history");
+
+addOption("history-type", "Select Optional Param", "", 1);
+addList("history-type", "Limit Results (2)", "&limit=2");
+addList("history-type", "Limit Results (25)", "&limit=25");
+addList("history-type", "Limit Results (50)", "&limit=50");
+
+addOption("history-limit", "Select Optional Param", "", 1);
+addList("history-limit", "Show Only Downloaded", "&type=downloaded", "history-type");
+addList("history-limit", "Show Only Snatched", "&type=snatched", "history-type");
+
+</script>
+</head>
+
+<body onload="initListGroup('api', document.apibuilder.firstlevel, document.apibuilder.secondlevel, document.apibuilder.thirdlevel)">
+
+<form name="apibuilder" id="apibuilder" action="">
+<table align="center">
+<thead><tr><th>apikey</th><th>command</th></tr></thead>
+    <tr>
+        <td><input type="text" size="4" id="apikey" name="apikey" value="1234"></td>
+        <td><select name="firstlevel"><option></option></select></td>
+        <td><select name="secondlevel"><option></option></select></td>
+        <td><select name="thirdlevel"><option></option></select></td>
+        <td>
+            <input type="button" value="Go" onclick="goListGroup(this.form['apikey'].value, this.form['thirdlevel'].value, this.form['secondlevel'].value, this.form['firstlevel'].value)" />
+            <input type="button" value="Reset" onclick="resetListGroup('api',1)" />
+        </td>
+    </tr>
+</table>
+</form>
+
+</body>
+
+</html>
