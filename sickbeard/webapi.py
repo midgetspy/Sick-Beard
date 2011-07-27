@@ -310,6 +310,7 @@ class Stats(ApiCall):
             cleanStats[key.lower().replace(" ","_").replace("(","").replace(")","")] = episodes_stats[key]
 
         if self.outPutSeasonList:
+            seasonList.sort(reverse=True)
             return cleanStats, seasonList
         else:
             return cleanStats
