@@ -395,6 +395,11 @@ class CMDSeason(ApiCall):
         return episodes
 
 class CMDEpisode(ApiCall):
+    _help = {"desc":"Get detailed info on a episode",
+             "requiredParameters":{"tvdbid":"the tvdb id of the show",
+                                   "season":"the season number",
+                                   "episode":"the episode number"},
+             }
     def __init__(self, args, kwargs):   
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
