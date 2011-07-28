@@ -285,7 +285,7 @@ class CMDShow(ApiCall):
         showDict["show_name"] = show.name
         showDict["paused"] = show.paused
         showDict["air_by_date"] = show.air_by_date
-        showDict["seasonfolders"] = show.seasonfolders
+        showDict["season_folders"] = show.seasonfolders
         showDict["airs"] = show.airs
         showDict["tvrage_name"] = show.tvrname
 
@@ -362,7 +362,7 @@ class CMDSeasons(ApiCall):
     
     def run(self):
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT name,episode,airdate,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        sqlResults = myDB.select( "SELECT name AS 'ep_name',episode,airdate,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
         seasons = {}
         for row in sqlResults:
             row["status"] = statusStrings[row["status"]]
