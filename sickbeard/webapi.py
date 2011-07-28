@@ -91,7 +91,17 @@ class Api:
     def builder(self, *args, **kwargs):
         t = webserve.PageTemplate(file="apiBuilder.tmpl")
         #t.showList = sickbeard.showList
-        t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(int(x.tvdbid), int(y.tvdbid)))
+
+        def titler(x):
+            if not x:
+                return x
+            if x.lower().startswith('a '):
+                    x = x[2:]
+            elif x.lower().startswith('the '):
+                    x = x[4:]
+            return x
+
+        t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
         return webserve._munge(t)
 
     def _out_as_json(self,dict):
@@ -236,6 +246,7 @@ class CMDShows(ApiCall):
             showDict = {"paused":show.paused,
                         "quality":_get_quality_string(show.quality),
                         "language":show.lang,
+                        "tvrage_id":show.tvrid,
                         "tvrage_name":show.tvrname}
             if self.sort == "show":
                 showDict["tvdbid"] = show.tvdbid
@@ -287,6 +298,7 @@ class CMDShow(ApiCall):
         showDict["air_by_date"] = show.air_by_date
         showDict["season_folders"] = show.seasonfolders
         showDict["airs"] = show.airs
+        showDict["tvrage_id"] = show.tvrid
         showDict["tvrage_name"] = show.tvrname
 
         return showDict
@@ -362,7 +374,7 @@ class CMDSeasons(ApiCall):
     
     def run(self):
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT name AS 'ep_name',episode,airdate,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        sqlResults = myDB.select( "SELECT name,episode,airdate,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
         seasons = {}
         for row in sqlResults:
             row["status"] = statusStrings[row["status"]]
