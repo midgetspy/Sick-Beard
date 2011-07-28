@@ -35,13 +35,13 @@ addList("Command", "History", "?cmd=history", "history");
 addOption("shows", "Select Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&paused=1");
 addOption("shows", "Show Only Not Paused", "&paused=0");
-addOption("shows", "Sort by Show Name", "&sort=name");
+addOption("shows", "Sort by Show Name", "&sort=show");
 
 #for $curShow in $showList:
 addOption("show", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 #end for
 
-#for $curShow in $showList:
+#for $curShow in $sortedShowList:
 addOption("stats", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 #end for
 
