@@ -90,7 +90,8 @@ class Api:
     @cherrypy.expose
     def builder(self, *args, **kwargs):
         t = webserve.PageTemplate(file="apiBuilder.tmpl")
-        t.showList = sickbeard.showList
+        #t.showList = sickbeard.showList
+        t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(int(x.tvdbid), int(y.tvdbid)))
         return webserve._munge(t)
 
     def _out_as_json(self,dict):
@@ -236,11 +237,11 @@ class CMDShows(ApiCall):
                         "quality":_get_quality_string(show.quality),
                         "language":show.lang,
                         "tvrage_name":show.tvrname}
-            if self.sort == "name":
+            if self.sort == "show":
                 showDict["tvdbid"] = show.tvdbid
                 shows[show.name] = showDict
             else:
-                showDict["name"] = show.name
+                showDict["show_name"] = show.name
                 shows[show.tvdbid] = showDict
         return shows
 
@@ -280,13 +281,14 @@ class CMDShow(ApiCall):
             showDict["location"] = ""
     
         # easy stuff
-        showDict["name"] = show.name
+        showDict["language"] = show.lang
+        showDict["show_name"] = show.name
         showDict["paused"] = show.paused
         showDict["air_by_date"] = show.air_by_date
         showDict["seasonfolders"] = show.seasonfolders
         showDict["airs"] = show.airs
         showDict["tvrage_name"] = show.tvrname
-    
+
         return showDict
 
 class CMDStats(ApiCall):
@@ -464,14 +466,14 @@ class CMDComingEpisodes(ApiCall):
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
         
         myDB = db.DBConnection(row_type="dict")
-        sql_results = myDB.select("SELECT airdate,airs,episode,name,network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
+        sql_results = myDB.select("SELECT airdate,airs,episode,name AS 'ep_name',network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["tvdbid"]))
 
-        more_sql_results = myDB.select("SELECT airdate,airs,episode,name,network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT airdate,airs,episode,name AS 'ep_name',network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT airdate,airs,episode,name,network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
+        more_sql_results = myDB.select("SELECT airdate,airs,episode,name AS 'ep_name',network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
 
