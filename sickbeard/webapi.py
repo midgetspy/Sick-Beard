@@ -520,19 +520,25 @@ class CMDHistory(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
+        self.typeCodes = []
         if self.type == "downloaded":
             self.type = "Downloaded"
+            self.typeCodes = Quality.DOWNLOADED
         elif self.type == "snatched":
             self.type = "Snatched"
-    
+            self.typeCodes = Quality.SNATCHED
+        else:
+            self.typeCodes = Quality.SNATCHED + Quality.DOWNLOADED
+        
+        
         myDB = db.DBConnection(row_type="dict")
     
         ulimit = min(int(self.limit), 100)
         if ulimit == 0:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC" )
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in ("+','.join(['?']*len(self.typeCodes))+") ORDER BY date DESC",self.typeCodes )
         else:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC LIMIT ?",[ ulimit ] )
-    
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in ("+','.join(['?']*len(self.typeCodes))+") ORDER BY date DESC LIMIT ?",self.typeCodes+[ ulimit ] )
+        
         results = []
         for row in sqlResults:
             status, quality = Quality.splitCompositeStatus(int(row["action"]))
