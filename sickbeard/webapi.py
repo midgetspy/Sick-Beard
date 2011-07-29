@@ -578,6 +578,8 @@ class CMDComingEpisodes(ApiCall):
                 else:
                     ep["status"] = "Soon"
             ordinalAirdate = int(ep["airdate"])
+            if not ep["network"]:
+                ep["network"] = ""
             ep["airdate"] = _ordinal_to_dateForm(ordinalAirdate)
             ep["quality"] = _get_quality_string(ep["quality"])
             ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
