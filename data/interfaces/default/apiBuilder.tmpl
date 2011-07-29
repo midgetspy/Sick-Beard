@@ -28,7 +28,7 @@ addList("Command", "Shows", "?cmd=shows", "shows");
 addList("Command", "Show", "?cmd=show", "show");
 addList("Command", "Stats", "?cmd=stats", "stats");
 addList("Command", "Seasons", "?cmd=seasons", "seasons");
-addList("Command", "Season List", "?cmd=seasonList", "season_list");
+addList("Command", "Season List", "?cmd=season_list", "season_list");
 addList("Command", "Season", "?cmd=season", "season");
 addList("Command", "Episode", "?cmd=episode", "episode", "", "", "disabled");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
@@ -52,8 +52,11 @@ addOption("seasons", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 #end for
 
 #for $curShow in $sortedShowList:
-addOption("season_list", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+addList("season_list", "$curShow.name", "&tvdbid=$curShow.tvdbid", "season_list-sort");
 #end for
+
+addOption("season_list-sort", "Select Optional Param", "", 1);
+addOption("season_list-sort", "Sort by Ascending", "&sort=asc");
 
 #for $curShow in $sortedShowList:
 addList("season", "$curShow.name", "&tvdbid=$curShow.tvdbid", "$curShow.tvdbid");
