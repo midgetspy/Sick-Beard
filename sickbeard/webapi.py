@@ -417,6 +417,27 @@ class CMDStats(ApiCall):
         else:
             return episodes_stats
 
+class CMDSeasonList(ApiCall):
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        # optional
+        self.sort,args = self.check_params(args, kwargs, "sort", "desc") # "asc" and "desc" default and fallback is "desc"
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        myDB = db.DBConnection(row_type="dict")
+        if self.sort == "asc":
+            sqlResults = myDB.select( "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season ASC", [self.tvdbid])
+        else:
+            sqlResults = myDB.select( "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season DESC", [self.tvdbid])
+        seasonList = [] # a list with all season numbers
+        for row in sqlResults:
+            seasonList.append(int(row["season"]))
+
+        return seasonList
+
 class CMDSeasons(ApiCall):
     def __init__(self, args, kwargs):
         # required
@@ -743,6 +764,7 @@ _functionMaper = {"index":CMDIndex,
                   "shows":CMDShows,
                   "show":CMDShow,
                   "stats":CMDStats,
+                  "seasonList":CMDSeasonList,
                   "season":CMDSeason,
                   "seasons":CMDSeasons,
                   "episode":CMDEpisode,
