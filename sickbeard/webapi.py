@@ -362,6 +362,8 @@ class CMDStats(ApiCall):
             elif status in Quality.SNATCHED+Quality.SNATCHED_PROPER:
                 episode_qualities_counts_snatch["total"] += 1
                 episode_qualities_counts_snatch[int(row["status"])] += 1
+            elif status == 0: # we dont count NONE = 0 = N/A
+                pass
             else:
                 episode_status_counts_total[status] += 1 
         
