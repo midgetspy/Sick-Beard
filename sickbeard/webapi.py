@@ -590,6 +590,7 @@ class CMDComingEpisodes(ApiCall):
                 ep["network"] = ""
             ep["airdate"] = _ordinal_to_dateForm(ordinalAirdate)
             ep["quality"] = _get_quality_string(ep["quality"])
+            # TODO: choose eng weekday string OR number of weekday as int
             ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
             finalEpResults.append(ep)
         return finalEpResults
