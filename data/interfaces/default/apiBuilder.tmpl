@@ -28,7 +28,8 @@ addList("Command", "Shows", "?cmd=shows", "shows");
 addList("Command", "Show", "?cmd=show", "show");
 addList("Command", "Stats", "?cmd=stats", "stats");
 addList("Command", "Seasons", "?cmd=seasons", "seasons");
-addList("Command", "Season", "?cmd=season", "season", "", "", "disabled");
+addList("Command", "Season List", "?cmd=seasonList", "season_list");
+addList("Command", "Season", "?cmd=season", "season");
 addList("Command", "Episode", "?cmd=episode", "episode", "", "", "disabled");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
 addList("Command", "History", "?cmd=history", "history");
@@ -50,7 +51,20 @@ addOption("stats", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 addOption("seasons", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 #end for
 
-addOption("season", "Select Optional Param", "", 1);
+#for $curShow in $sortedShowList:
+addOption("season_list", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+#end for
+
+#for $curShow in $sortedShowList:
+addList("season", "$curShow.name", "&tvdbid=$curShow.tvdbid", "$curShow.tvdbid");
+#end for
+
+// build out each show's season list for season cmd
+#for $curShow in $seasonSQLResults:
+    #for $curShowSeason in $seasonSQLResults[$curShow]:
+addOption("$curShow", "$curShowSeason", "&season=$curShowSeason");
+    #end for
+#end for
 
 addOption("episode", "Select Optional Param", "", 1);
 
