@@ -273,9 +273,7 @@ class CMDShow(ApiCall):
             raise ApiError("Show not Found")
     
         showDict = {}
-        stats, seasonList = CMDStats((), {"tvdbid":self.tvdbid}, outPutSeasonList=True).run()
-        showDict["season_list"] = seasonList
-        showDict["stats"] = stats
+        showDict["season_list"] = CMDSeasonList((), {"tvdbid":self.tvdbid}).run()
     
         genreList = []
         if show.genre:
@@ -307,14 +305,12 @@ class CMDStats(ApiCall):
     _help = {"requiredParameters":["tvdbid"],
              "desc":"Display episodes statistcs for a given show"}
 
-    def __init__(self, args, kwargs, outPutSeasonList=False):
+    def __init__(self, args, kwargs):
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, False)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
-        
-        self.outPutSeasonList = outPutSeasonList
         
     def run(self):
         """this is sparta
@@ -332,8 +328,6 @@ class CMDStats(ApiCall):
             if status in [UNKNOWN,DOWNLOADED,SNATCHED,SNATCHED_PROPER]:
                 continue
             episode_status_counts_total[status] = 0
-        
-        seasonList = [] # a list with all season numbers
         
         # add all the downloaded qualities
         episode_qualities_counts_download = {}
@@ -357,10 +351,6 @@ class CMDStats(ApiCall):
         sqlResults = myDB.select( "SELECT status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
         # the main loop that goes through all episodes
         for row in sqlResults:
-            curSeason = int(row["season"])
-            if not curSeason in seasonList:
-                seasonList.append(curSeason)
-            
             status, quality = Quality.splitCompositeStatus(int(row["status"]))
             
             episode_status_counts_total["total"] += 1
@@ -411,11 +401,7 @@ class CMDStats(ApiCall):
             statusString = statusStrings.statusStrings[statusCode].lower().replace(" ","_").replace("(","").replace(")","")
             episodes_stats[statusString] = episode_status_counts_total[statusCode]
         
-        if self.outPutSeasonList:
-            seasonList.sort(reverse=True)
-            return episodes_stats, seasonList
-        else:
-            return episodes_stats
+        return episodes_stats
 
 class CMDSeasonList(ApiCall):
     def __init__(self, args, kwargs):
