@@ -33,6 +33,13 @@ addList("Command", "Season", "?cmd=season", "season");
 addList("Command", "Episode", "?cmd=episode", "episode", "", "", "disabled");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
 addList("Command", "History", "?cmd=history", "history");
+addOption("Command", "Scene Exceptions", "?cmd=exceptions", "", "exceptions");
+
+// this really should be part of exceptions
+addList("Command", "Scene Exception (Show)", "?cmd=exception", "exception");
+#for $curShow in $sortedShowList:
+addOption("exception", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+#end for
 
 addOption("shows", "Select Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&paused=1");
