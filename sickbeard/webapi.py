@@ -102,6 +102,14 @@ class Api:
             return x
 
         t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
+
+        myDB = db.DBConnection()
+        seasonSQLResults = {}
+
+        for curShow in t.sortedShowList:
+            seasonSQLResults[curShow.tvdbid] = CMDSeasonList((), {"tvdbid":curShow.tvdbid}).run()
+
+        t.seasonSQLResults = seasonSQLResults
         return webserve._munge(t)
 
     def _out_as_json(self,dict):
