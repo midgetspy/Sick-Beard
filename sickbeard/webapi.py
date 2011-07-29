@@ -317,52 +317,105 @@ class CMDStats(ApiCall):
         self.outPutSeasonList = outPutSeasonList
         
     def run(self):
+        """this is sparta
+            no realy this is crazy ... i don't even understand all of this
+            and some is done by trial and error
+            if anyone can or has the will to check this please do
+
+            TODO: remove the seasonlist from this cmd
+        """
+
+        # show stats
+        episode_status_counts_total = {}
+        episode_status_counts_total["total"] = 0
+        for status in statusStrings.statusStrings.keys():
+            if status in [UNKNOWN,DOWNLOADED,SNATCHED,SNATCHED_PROPER]:
+                continue
+            episode_status_counts_total[status] = 0
+        
+        seasonList = [] # a list with all season numbers
+        
+        # add all the downloaded qualities
+        episode_qualities_counts_download = {}
+        episode_qualities_counts_download["total"] = 0
+        for statusCode in Quality.DOWNLOADED:
+            status, quality = Quality.splitCompositeStatus(statusCode)
+            if quality in [Quality.NONE]:
+                continue
+            episode_qualities_counts_download[statusCode] = 0
+
+        # add all snatched qualities
+        episode_qualities_counts_snatch = {}
+        episode_qualities_counts_snatch["total"] = 0
+        for statusCode in Quality.SNATCHED + Quality.SNATCHED_PROPER:
+            status, quality = Quality.splitCompositeStatus(statusCode)
+            if quality in [Quality.NONE]:
+                continue
+            episode_qualities_counts_snatch[statusCode] = 0
+    
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select( "SELECT status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
-        # show stats
-        all_count = 0 # all episodes
-        loaded_count = 0
-        snatched_count = 0
-        seasonList = [] # a list with all season numbers
-        episode_status_counts = {}
-        # add the default status
-        for statusString in statusStrings.statusStrings:
-            episode_status_counts[statusStrings[statusString]] = 0
-    
+        # the main loop that goes through all episodes
         for row in sqlResults:
-            all_count += 1
             curSeason = int(row["season"])
             if not curSeason in seasonList:
                 seasonList.append(curSeason)
             
+            status, quality = Quality.splitCompositeStatus(int(row["status"]))
             
-            if row["status"] in Quality.DOWNLOADED:
-                loaded_count += 1
-            elif row["status"] in Quality.SNATCHED:
-                snatched_count += 1
-            statusString = statusStrings[row["status"]]
-            # add the specific status like "Downloaded (HDTV)"
-            if not episode_status_counts.has_key(statusString):
-                episode_status_counts[statusString] = 0
-            episode_status_counts[statusString] += 1
+            episode_status_counts_total["total"] += 1
+            
+            if status in Quality.DOWNLOADED:
+                episode_qualities_counts_download["total"] += 1
+                episode_qualities_counts_download[int(row["status"])] += 1
+            
+            elif status in Quality.SNATCHED+Quality.SNATCHED_PROPER:
+                episode_qualities_counts_snatch["total"] += 1
+                episode_qualities_counts_snatch[int(row["status"])] += 1
+            else:
+                episode_status_counts_total[status] += 1 
         
+        # the outgoing container
         episodes_stats = {}
-        for episode_status_count in episode_status_counts:
-            episodes_stats[episode_status_count] = episode_status_counts[episode_status_count]
-    
-        episodes_stats["total"] = all_count
-        episodes_stats["downloaded"] = loaded_count
-        episodes_stats["snatched"] = snatched_count
+        episodes_stats["downloaded"] = {}
+        # truning codes into strings
+        for statusCode in episode_qualities_counts_download:
+            if statusCode is "total":
+                episodes_stats["downloaded"]["total"] = episode_qualities_counts_download[statusCode]
+                continue
+            status, quality = Quality.splitCompositeStatus(statusCode)
+            statusString = Quality.qualityStrings[quality].lower().replace(" ","_").replace("(","").replace(")","")
+            episodes_stats["downloaded"][statusString] = episode_qualities_counts_download[statusCode]
+        
+         
+        episodes_stats["snatched"] = {}
+        # truning codes into strings
+        # and combining proper and normal
+        for statusCode in episode_qualities_counts_snatch:
+            if statusCode is "total":
+                episodes_stats["snatched"]["total"] = episode_qualities_counts_snatch[statusCode]
+                continue
+            status, quality = Quality.splitCompositeStatus(statusCode)
+            statusString = Quality.qualityStrings[quality].lower().replace(" ","_").replace("(","").replace(")","")
+            if episodes_stats["snatched"].has_key(Quality.qualityStrings[quality]):
+                episodes_stats["snatched"][statusString] += episode_qualities_counts_snatch[statusCode]
+            else:
+                episodes_stats["snatched"][statusString] = episode_qualities_counts_snatch[statusCode]
 
-        cleanStats = {}
-        for key in episodes_stats:
-            cleanStats[key.lower().replace(" ","_").replace("(","").replace(")","")] = episodes_stats[key]
-
+        #episodes_stats["total"] = {}
+        for statusCode in episode_status_counts_total:
+            if statusCode is "total":
+                episodes_stats["total"] = episode_status_counts_total[statusCode]
+                continue
+            status, quality = Quality.splitCompositeStatus(statusCode)
+            statusString = statusStrings.statusStrings[statusCode].lower().replace(" ","_").replace("(","").replace(")","")
+            episodes_stats[statusString] = episode_status_counts_total[statusCode]
+        
         if self.outPutSeasonList:
             seasonList.sort(reverse=True)
-            return cleanStats, seasonList
+            return episodes_stats, seasonList
         else:
-            return cleanStats
+            return episodes_stats
 
 class CMDSeasons(ApiCall):
     def __init__(self, args, kwargs):
