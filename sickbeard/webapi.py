@@ -103,13 +103,18 @@ class Api:
 
         t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
 
-        myDB = db.DBConnection()
+        myDB = db.DBConnection(row_type="dict")
         seasonSQLResults = {}
+        episodeSQLResults = {}
 
         for curShow in t.sortedShowList:
-            seasonSQLResults[curShow.tvdbid] = CMDSeasonList((), {"tvdbid":curShow.tvdbid}).run()
+            seasonSQLResults[curShow.tvdbid] = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season DESC", [curShow.tvdbid])
+
+        for curShow in t.sortedShowList:
+            episodeSQLResults[curShow.tvdbid] = myDB.select("SELECT DISTINCT season,episode FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC", [curShow.tvdbid])
 
         t.seasonSQLResults = seasonSQLResults
+        t.episodeSQLResults = episodeSQLResults
         return webserve._munge(t)
 
     def _out_as_json(self,dict):
@@ -497,7 +502,7 @@ class CMDEpisode(ApiCall):
         self.s,args = self.check_params(args, kwargs, "season", None, True)
         self.e,args = self.check_params(args, kwargs, "episode", None, True)
         # optional
-        self.fullPath,args = self.check_params(args, kwargs, "fullPath", "0")
+        self.fullPath,args = self.check_params(args, kwargs, "full_path", "0")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 

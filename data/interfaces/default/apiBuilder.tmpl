@@ -30,7 +30,8 @@ addList("Command", "Stats", "?cmd=stats", "stats");
 addList("Command", "Seasons", "?cmd=seasons", "seasons");
 addList("Command", "Season List", "?cmd=season_list", "season_list");
 addList("Command", "Season", "?cmd=season", "season");
-addList("Command", "Episode", "?cmd=episode", "episode", "", "", "disabled");
+//addList("Command", "Episode", "?cmd=episode", "episode", "", "", "disabled");
+addList("Command", "Episode", "?cmd=episode", "episode");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
 addList("Command", "History", "?cmd=history", "history");
 addOption("Command", "Scene Exceptions", "?cmd=exceptions", "", "exceptions");
@@ -66,17 +67,28 @@ addOption("season_list-sort", "Select Optional Param", "", 1);
 addOption("season_list-sort", "Sort by Ascending", "&sort=asc");
 
 #for $curShow in $sortedShowList:
-addList("season", "$curShow.name", "&tvdbid=$curShow.tvdbid", "$curShow.tvdbid");
+addList("season", "$curShow.name", "&tvdbid=$curShow.tvdbid", "season-$curShow.tvdbid");
 #end for
 
 // build out each show's season list for season cmd
 #for $curShow in $seasonSQLResults:
     #for $curShowSeason in $seasonSQLResults[$curShow]:
-addOption("$curShow", "$curShowSeason", "&season=$curShowSeason");
+addOption("season-$curShow", "$curShowSeason.season", "&season=$curShowSeason.season");
     #end for
 #end for
 
-addOption("episode", "Select Optional Param", "", 1);
+#for $curShow in $sortedShowList:
+addList("episode", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episode-$curShow.tvdbid");
+#end for
+
+// build out each show's season+episode list for episode cmd
+#for $curShow in $episodeSQLResults:
+    #for $curShowSeason in $episodeSQLResults[$curShow]:
+addList("episode-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-$curShow-full");
+    #end for
+addOption("episode-$curShow-full", "Select Optional Param", "", 1);
+addOption("episode-$curShow-full", "Show Full Path", "&full_path=1");
+#end for
 
 addOption("future", "Select Optional Param", "", 1);
 //addOption("future", "Sort by Date", "&sort=date");
@@ -104,7 +116,7 @@ addList("history-limit", "Show Only Snatched", "&type=snatched", "history-type")
 </script>
 </head>
 
-<body onload="initListGroup('api', document.apibuilder.firstlevel, document.apibuilder.secondlevel, document.apibuilder.thirdlevel)">
+<body onload="initListGroup('api', document.apibuilder.firstlevel, document.apibuilder.secondlevel, document.apibuilder.thirdlevel, document.apibuilder.forthlevel)">
 
 <form name="apibuilder" id="apibuilder" action="">
 <table align="center">
@@ -114,12 +126,14 @@ addList("history-limit", "Show Only Snatched", "&type=snatched", "history-type")
         <td><select name="firstlevel"><option></option></select></td>
         <td><select name="secondlevel"><option></option></select></td>
         <td><select name="thirdlevel"><option></option></select></td>
+        <td><select name="forthlevel"><option></option></select></td>
         <td>
-            <input type="button" value="Go" onclick="goListGroup(this.form['apikey'].value, this.form['thirdlevel'].value, this.form['secondlevel'].value, this.form['firstlevel'].value)" />
             <input type="button" value="Reset" onclick="resetListGroup('api',1)" />
+            <input type="button" value="Go" onclick="goListGroup(this.form['apikey'].value, this.form['forthlevel'].value, this.form['thirdlevel'].value, this.form['secondlevel'].value, this.form['firstlevel'].value)" />
         </td>
     </tr>
 </table>
+
 </form>
 
 <div id="apiResponse"></div>
