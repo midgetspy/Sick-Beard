@@ -238,7 +238,13 @@ class CMDIndex(ApiCall):
         ApiCall.__init__(self, args, kwargs)
         
     def run(self):
-        return {'sb_version': sickbeard.version.SICKBEARD_VERSION, 'api_version':Api.version, "cmdOverview":"TODO"}
+        myDB = db.DBConnection(row_type="dict")
+        sqlResults = myDB.select( "SELECT last_backlog FROM info")
+        # these just seems sloppy.. and were not really doing a true json output? 
+        for row in sqlResults:
+            row["last_backlog"] = _ordinal_to_dateForm(row["last_backlog"])
+
+        return {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version":Api.version, "cmdOverview":"TODO", "last_backlog": row["last_backlog"]}
 
 
 class CMDShows(ApiCall):
