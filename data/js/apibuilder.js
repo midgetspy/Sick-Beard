@@ -25,7 +25,7 @@ function goListGroup(apikey, L4, L3, L2, L1){
         
     var html = "/api/"+ apikey + "/" + L1 + L2 + L3 + L4 + GlobalOptions + "<br/><pre>";
     html += $.ajax({
-      url: "/api/"+ apikey + "/"+L1+L2+L3+L4,
+      url: "/api/"+ apikey + "/"+L1+L2+L3+L4+GlobalOptions,
       async: false,
       dataType: "html",
     }).responseText;
