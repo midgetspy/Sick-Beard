@@ -15,7 +15,15 @@ function goListGroup(apikey, L4, L3, L2, L1){
     // document.getElementById('apiResponse').innerHTML = "/api/"+ apikey + "/" + L1 + L2 + L3;
     // $('#apiResponse').html("/api/"+ apikey + "/" + L1 + L2 + L3);
 
-    var html = "/api/"+ apikey + "/" + L1 + L2 + L3 + L4 + "<br/><pre>"
+    var GlobalOptions = "";
+    $('.global').each(function(){
+        var checked = $(this).prop('checked');
+        if(checked) {
+            GlobalOptions = GlobalOptions + "&" + $(this).attr('id') + "=1";
+        }
+    });
+        
+    var html = "/api/"+ apikey + "/" + L1 + L2 + L3 + L4 + GlobalOptions + "<br/><pre>";
     html += $.ajax({
       url: "/api/"+ apikey + "/"+L1+L2+L3+L4,
       async: false,

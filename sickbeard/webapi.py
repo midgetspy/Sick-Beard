@@ -643,7 +643,40 @@ class CMDHistory(ApiCall):
         return results
 
 class CMDExceptions(ApiCall):
-    _help = {"desc":"Display all existing scene excpetions for all shows/tvdbid"}
+    _help = {"desc":"Display all existing scene exceptions for all shows/tvdbid"}
+
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None)
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        myDB = db.DBConnection("cache.db",row_type="dict")
+        exceptions = []
+
+        if not self.tvdbid:
+            sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions")
+            for row in sqlResults:
+                tvdbid = row["tvdbid"]
+                if not exceptions.has_key(tvdbid):
+                    exceptions[tvdbid] = []
+                exceptions[tvdbid].append(row["show_name"])
+
+        else:
+            show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+            if not show:
+                raise ApiError("Show not Found")
+
+            sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
+            for row in sqlResults:
+                exceptions.append(row["show_name"])
+
+        return exceptions
+
+class CMDOldExceptions(ApiCall):
+    _help = {"desc":"Display all existing scene exceptions for all shows/tvdbid"}
 
     def __init__(self, args, kwargs):
         # required
@@ -654,18 +687,18 @@ class CMDExceptions(ApiCall):
     def run(self):
         myDB = db.DBConnection("cache.db",row_type="dict")
         sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions")
-        excpetions = {}
+        exceptions = {}
         for row in sqlResults:
             tvdbid = row["tvdbid"]
-            if not excpetions.has_key(tvdbid):
-                excpetions[tvdbid] = []
-            excpetions[tvdbid].append(row["show_name"])
+            if not exceptions.has_key(tvdbid):
+                exceptions[tvdbid] = []
+            exceptions[tvdbid].append(row["show_name"])
 
-        return excpetions
+        return exceptions
 
-class CMDException(ApiCall):
+class CMDOldException(ApiCall):
     _help = {"requiredParameters":["tvdbid"],
-             "desc":"Display all scene excpetions for the given show/tvdbid"}
+             "desc":"Display all scene exceptions for the given show/tvdbid"}
 
     def __init__(self, args, kwargs):
         # required
@@ -677,11 +710,11 @@ class CMDException(ApiCall):
     def run(self):
         myDB = db.DBConnection("cache.db",row_type="dict")
         sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
-        excpetions = []
+        exceptions = []
         for row in sqlResults:
-            excpetions.append(row["show_name"])
+            exceptions.append(row["show_name"])
 
-        return excpetions
+        return exceptions
 
 class CMDHelp(ApiCall):
     _help = {"desc":"Get help for a subject/cmd",
@@ -816,7 +849,8 @@ _functionMaper = {"index":CMDIndex,
                   "future":CMDComingEpisodes,
                   "history":CMDHistory,
                   "exceptions":CMDExceptions,
-                  "exception":CMDException,
+                  "oldexceptions":CMDOldExceptions,
+                  "oldexception":CMDOldException,
                   "help":CMDHelp
                   }
 
