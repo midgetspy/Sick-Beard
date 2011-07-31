@@ -11,10 +11,6 @@ var _disable_empty_list=false;
 var _hide_empty_list=false;
 
 function goListGroup(apikey, L4, L3, L2, L1){
-    // alert("/api/"+ apikey + "/" + L1 + L2 + L3);
-    // document.getElementById('apiResponse').innerHTML = "/api/"+ apikey + "/" + L1 + L2 + L3;
-    // $('#apiResponse').html("/api/"+ apikey + "/" + L1 + L2 + L3);
-
     var GlobalOptions = "";
     $('.global').each(function(){
         var checked = $(this).prop('checked');
@@ -25,7 +21,7 @@ function goListGroup(apikey, L4, L3, L2, L1){
         
     var html = "/api/"+ apikey + "/" + L1 + L2 + L3 + L4 + GlobalOptions + "<br/><pre>";
     html += $.ajax({
-      url: "/api/"+ apikey + "/"+L1+L2+L3+L4+GlobalOptions,
+      url: "/api/"+apikey+"/"+L1+L2+L3+L4+GlobalOptions,
       async: false,
       dataType: "html",
     }).responseText;
@@ -111,12 +107,12 @@ function cs_submenuOBJ(dis,link,sub,label,css) {
   this.addM=cs_addM; this.addL=cs_addL; this.addG=cs_addG, this.endG=cs_endG;
 
   if (typeof(cs_names[sub])=="undefined") {
-	  this.items=new Array();
-  	cs_names[sub] = this;
+      this.items=new Array();
+      cs_names[sub] = this;
   }
   else
   {
-  	this.items = cs_names[sub].items;
+      this.items = cs_names[sub].items;
   }
 }
 function cs_linkOBJ(dis,link,label,css) {
