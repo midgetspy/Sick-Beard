@@ -654,16 +654,16 @@ class CMDExceptions(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None)
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, False)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         myDB = db.DBConnection("cache.db",row_type="dict")
-        exceptions = []
 
-        if not self.tvdbid:
+        if self.tvdbid == None:
             sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions")
+            exceptions = {}
             for row in sqlResults:
                 tvdbid = row["tvdbid"]
                 if not exceptions.has_key(tvdbid):
@@ -676,6 +676,7 @@ class CMDExceptions(ApiCall):
                 raise ApiError("Show not Found")
 
             sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
+            exceptions = []
             for row in sqlResults:
                 exceptions.append(row["show_name"])
 
