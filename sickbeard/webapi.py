@@ -815,8 +815,6 @@ _functionMaper = {"index":CMDIndex,
                   "future":CMDComingEpisodes,
                   "history":CMDHistory,
                   "exceptions":CMDExceptions,
-                  "oldexceptions":CMDOldExceptions,
-                  "oldexception":CMDOldException,
                   "help":CMDHelp
                   }
 
