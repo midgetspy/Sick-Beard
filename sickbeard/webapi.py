@@ -90,7 +90,6 @@ class Api:
     @cherrypy.expose
     def builder(self, *args, **kwargs):
         t = webserve.PageTemplate(file="apiBuilder.tmpl")
-        #t.showList = sickbeard.showList
 
         def titler(x):
             if not x:
@@ -128,6 +127,7 @@ class Api:
 
 
     def _grand_access(self,realKey,args,kwargs):
+        """ validate api key and log result """
         remoteIp = cherrypy.request.remote.ip
         apiKey = kwargs.get("apikey",None)
         if not apiKey:
@@ -152,7 +152,7 @@ class Api:
 
 
 def call_dispatcher(args, kwargs):
-    """calls the appropriate CMD class
+    """ calls the appropriate CMD class
         looks for a cmd in args and kwargs
         or calls the ShorthandWrapper when the first args element is a number
         it falls back to the index cmd
@@ -179,7 +179,7 @@ def call_dispatcher(args, kwargs):
     return outDict
 
 class ApiCall(object):
-    _help = {"desc":"No help message available. Pleas tell the devs that a help msg is missing for this cmd"}
+    _help = {"desc":"No help message available. Please tell the devs that a help msg is missing for this cmd"}
     
     def __init__(self, args, kwargs):
         # missing
@@ -230,7 +230,11 @@ class ApiCall(object):
         return default,args
 
 class CMDIndex(ApiCall):
-    _help = {"desc":"Display this Message"}
+    _help = {"desc":"display misc sickbeard related information",
+             "requiredParameters":[""],
+             "optionalPramameters":[""]
+             }
+
     def __init__(self,args,kwargs):
         # required
         # optional
@@ -240,7 +244,6 @@ class CMDIndex(ApiCall):
     def run(self):
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select( "SELECT last_backlog FROM info")
-        # these just seems sloppy.. and were not really doing a true json output? 
         for row in sqlResults:
             row["last_backlog"] = _ordinal_to_dateForm(row["last_backlog"])
 
@@ -248,7 +251,15 @@ class CMDIndex(ApiCall):
 
 
 class CMDShows(ApiCall):
-    _help = {"desc":"Display all Shows"}
+    # we need to be able to show the user what is acceptable values for the optional parameters... 
+    # 0/1 true/false int/string something.. this is going to be a huge thing when we start doing the setter functions
+    _help = {"desc":"display all shows in sickbeard",
+             "requiredParameters":[""],
+             "optionalPramameters":{"sort":"show - sort the list of shows by show name instead of tvdbid",
+                                    "paused":"0/1 - only show the shows that are set to paused",
+                                  },
+             }
+
     def __init__(self,args,kwargs):
         # required
         # optional
@@ -276,8 +287,11 @@ class CMDShows(ApiCall):
         return shows
 
 class CMDShow(ApiCall):
-    _help = {"requiredParameters":["tvdbid"],
-             "desc":"Display Show information including episode statistics"}
+    _help = {"desc":"display information for a given show",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  },
+             "optionalPramameters":[""]
+             }
 
     def __init__(self,args,kwargs):
         # required
@@ -321,8 +335,11 @@ class CMDShow(ApiCall):
         return showDict
 
 class CMDStats(ApiCall):
-    _help = {"requiredParameters":["tvdbid"],
-             "desc":"Display episodes statistcs for a given show"}
+    _help = {"desc":"display episode statistics for a given show",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  },
+             "optionalPramameters":[""]
+             }
 
     def __init__(self, args, kwargs):
         # required
@@ -425,6 +442,12 @@ class CMDStats(ApiCall):
         return episodes_stats
 
 class CMDSeasonList(ApiCall):
+    _help = {"desc":"display the season list for a given show",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  },
+             "optionalPramameters":{"sort":"asc - change the sort order from descending to ascending"}
+             }
+
     def __init__(self, args, kwargs):
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
@@ -446,6 +469,12 @@ class CMDSeasonList(ApiCall):
         return seasonList
 
 class CMDSeasons(ApiCall):
+    _help = {"desc":"display a listing of episodes from all season",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  },
+             "optionalPramameters":[""]
+             }
+
     def __init__(self, args, kwargs):
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
@@ -471,7 +500,13 @@ class CMDSeasons(ApiCall):
         return seasons
 
 class CMDSeason(ApiCall):
-    
+    _help = {"desc":"display a listing of episodes from a season",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                   "season":"## - the season number",
+                                  },
+             "optionalPramameters":[""]
+             }
+
     def __init__(self, args, kwargs):
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
@@ -497,11 +532,14 @@ class CMDSeason(ApiCall):
         return episodes
 
 class CMDEpisode(ApiCall):
-    _help = {"desc":"Get detailed info on a episode",
-             "requiredParameters":{"tvdbid":"the tvdb id of the show",
-                                   "season":"the season number",
-                                   "episode":"the episode number"},
+    _help = {"desc":"display detailed info about an episode",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                   "season":"## - the season number",
+                                   "episode":"## - the episode number"
+                                  },
+             "optionalPramameters":{"full_path":"show the full absolute path (if valid) instead of a relative path for the episode location"}
              }
+
     def __init__(self, args, kwargs):   
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
@@ -541,8 +579,11 @@ class CMDEpisode(ApiCall):
         return episode
 
 class CMDComingEpisodes(ApiCall):
-    _help = {"desc":"Display comming episodes",
-             "optionalPramameters":["sort"]}
+    _help = {"desc":"display the coming episodes",
+             "requiredParameters":[""],
+             "optionalPramameters":{"sort":"date/network/show - change the sort order"}
+             }
+
     def __init__(self, args, kwargs): 
         # required
         # optional
@@ -607,6 +648,13 @@ class CMDComingEpisodes(ApiCall):
         return finalEpResults
 
 class CMDHistory(ApiCall):
+    _help = {"desc":"display detailed info about an episode",
+             "requiredParameters":[""],
+             "optionalPramameters":{"limit":"## - limit returned results",
+                                    "type":"downloaded/snatched - only show a specific type of results",
+                                   }
+             }
+
     def __init__(self, args, kwargs):
         # required
         # optional
@@ -649,7 +697,11 @@ class CMDHistory(ApiCall):
         return results
 
 class CMDExceptions(ApiCall):
-    _help = {"desc":"Display all existing scene exceptions for all shows/tvdbid"}
+    _help = {"desc":"display scene exceptions for all or a given show",
+             "requiredParameters":[""],
+             "optionalPramameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  }
+             }
 
     def __init__(self, args, kwargs):
         # required
@@ -683,12 +735,16 @@ class CMDExceptions(ApiCall):
         return exceptions
 
 class CMDHelp(ApiCall):
-    _help = {"desc":"Get help for a subject/cmd",
-             "optionalPramameters":["subject"]}
+    _help = {"desc":"display help information for a given subject/command",
+             "requiredParameters":[""],
+             "optionalPramameters":{"cmd":"command - the top level command",
+                                  }
+             }
+
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.subject,args = self.check_params(args, kwargs, "subject", "help")
+        self.subject,args = self.check_params(args, kwargs, "cmd", "help")
         ApiCall.__init__(self, args, kwargs)
     def run(self):
         if _functionMaper.has_key(self.subject):

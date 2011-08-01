@@ -29,14 +29,15 @@ addOption("Command", "Index", "?cmd=index", 1); //make default
 addList("Command", "Shows", "?cmd=shows", "shows");
 addList("Command", "Show", "?cmd=show", "show");
 addList("Command", "Stats", "?cmd=stats", "stats");
-addList("Command", "Seasons", "?cmd=seasons", "seasons");
 addList("Command", "Season List", "?cmd=season_list", "season_list");
+addList("Command", "Seasons", "?cmd=seasons", "seasons");
 addList("Command", "Season", "?cmd=season", "season");
-//addList("Command", "Episode", "?cmd=episode", "episode", "", "", "disabled");
 addList("Command", "Episode", "?cmd=episode", "episode");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
 addList("Command", "History", "?cmd=history", "history");
 addList("Command", "Scene Exceptions", "?cmd=exceptions", "exceptions");
+
+addList("Command", "Delete Show", "?cmd=delete_show", "delete_show", "", "", "disabled");
 
 addOption("exceptions", "Select Optional Param", "", 1);
 #for $curShow in $sortedShowList:
@@ -135,8 +136,9 @@ addList("history-limit", "Show Only Snatched", "&type=snatched", "history-type")
     </tr>
     <tr>
         <td colspan="4">
-            <input type="checkbox" id="debug" class="global"><label for="debug"> Show Debug?</label>
-            <input type="checkbox" id="profile" class="global"><label for="profile"> Show Profiler?</label>
+            <input type="checkbox" id="debug" class="global"><label for="debug"> Debug?</label>
+            <input type="checkbox" id="profile" class="global"><label for="profile"> Profiler?</label>
+            <input type="checkbox" id="help" class="global"><label for="help"> Help?</label>
         </td>
     <tr/>
 </table>
