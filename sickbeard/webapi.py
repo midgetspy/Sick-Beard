@@ -469,67 +469,57 @@ class CMDSeasonList(ApiCall):
         return seasonList
 
 class CMDSeasons(ApiCall):
-    _help = {"desc":"display a listing of episodes from all season",
+    _help = {"desc":"display a listing of episodes for all or a given season",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
                                   },
-             "optionalPramameters":[""]
+             "optionalPramameters":{"season":"## - the season number",
+                                  }
              }
 
     def __init__(self, args, kwargs):
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
+        self.season,args = self.check_params(args, kwargs, "season", None, False)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
-    
+
     def run(self):
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT name,episode,airdate,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
-        seasons = {}
-        for row in sqlResults:
-            row["status"] = statusStrings[row["status"]]
-            row["airdate"] = _ordinal_to_dateForm(row["airdate"])
-            curSeason = int(row["season"])
-            curEpisode = int(row["episode"])
-            del row["season"]
-            del row["episode"]
-            if not seasons.has_key(curSeason):
-                seasons[curSeason] = {}
-            seasons[curSeason][curEpisode] = row
-        
+
+        if self.season == None:
+            sqlResults = myDB.select( "SELECT name,episode,airdate,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+            seasons = {}
+            for row in sqlResults:
+                row["status"] = statusStrings[row["status"]]
+                row["airdate"] = _ordinal_to_dateForm(row["airdate"])
+                curSeason = int(row["season"])
+                curEpisode = int(row["episode"])
+                del row["season"]
+                del row["episode"]
+                if not seasons.has_key(curSeason):
+                    seasons[curSeason] = {}
+                seasons[curSeason][curEpisode] = row
+
+        else:
+            show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+            if not show:
+                raise ApiError("Show not Found")
+
+            sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid,self.season])
+            if len(sqlResults) is 0:
+                raise ApiError("No season found")
+            seasons = {}
+            for row in sqlResults:
+                curEpisode = int(row["episode"])
+                del row["episode"]
+                row["status"] = statusStrings[row["status"]]
+                row["airdate"] = _ordinal_to_dateForm(row["airdate"])
+                if not seasons.has_key(curEpisode):
+                    seasons[curEpisode] = {}
+                seasons[curEpisode] = row
+
         return seasons
-
-class CMDSeason(ApiCall):
-    _help = {"desc":"display a listing of episodes from a season",
-             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                   "season":"## - the season number",
-                                  },
-             "optionalPramameters":[""]
-             }
-
-    def __init__(self, args, kwargs):
-        # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
-        self.season,args = self.check_params(args, kwargs, "season", None, True)
-        # optional
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-        myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid,self.season])
-        if len(sqlResults) is 0:
-            raise ApiError("No season found")
-        episodes = {}
-        for row in sqlResults:
-            curEpisode = int(row["episode"])
-            del row["episode"]
-            row["status"] = statusStrings[row["status"]]
-            row["airdate"] = _ordinal_to_dateForm(row["airdate"])
-            if not episodes.has_key(curEpisode):
-                episodes[curEpisode] = {}
-            episodes[curEpisode] = row
-        return episodes
 
 class CMDEpisode(ApiCall):
     _help = {"desc":"display detailed info about an episode",
@@ -737,14 +727,14 @@ class CMDExceptions(ApiCall):
 class CMDHelp(ApiCall):
     _help = {"desc":"display help information for a given subject/command",
              "requiredParameters":[""],
-             "optionalPramameters":{"cmd":"command - the top level command",
+             "optionalPramameters":{"subject":"command - the top level command",
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.subject,args = self.check_params(args, kwargs, "cmd", "help")
+        self.subject,args = self.check_params(args, kwargs, "subject", "help")
         ApiCall.__init__(self, args, kwargs)
     def run(self):
         if _functionMaper.has_key(self.subject):
@@ -865,7 +855,6 @@ _functionMaper = {"index":CMDIndex,
                   "show":CMDShow,
                   "stats":CMDStats,
                   "season_list":CMDSeasonList,
-                  "season":CMDSeason,
                   "seasons":CMDSeasons,
                   "episode":CMDEpisode,
                   "future":CMDComingEpisodes,
