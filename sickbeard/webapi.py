@@ -744,7 +744,33 @@ class CMDHelp(ApiCall):
         else:
             msg = _error("no such cmd")
         return msg
+
+class CMDTrimHistory(ApiCall):
+    _help = {"desc":"trim sickbeard's history",
+             "requiredParameters":[""],
+             "optionalPramameters":{"clear":"1 - trim all of history (same as clear history)",
+                                  }
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        # optional
+        self.clear,args = self.check_params(args, kwargs, "clear", 0)
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
         
+    def run(self):
+        """ trim sickbeard's history """
+        myDB = db.DBConnection()
+        #why does this work if clear= any int?
+        if (self.clear) and (_is_int(self.clear) == 1):
+            myDB.action("DELETE FROM history WHERE 1=1")
+            return {"result": "History Cleared"}
+        else:
+            myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
+            return {"result": "Removed history entries greater than 30 days old"}
+
+
 ################################
 #     shorthand wrapper        #
 ################################
@@ -863,7 +889,8 @@ _functionMaper = {"index":CMDIndex,
                   "future":CMDComingEpisodes,
                   "history":CMDHistory,
                   "exceptions":CMDExceptions,
-                  "help":CMDHelp
+                  "help":CMDHelp,
+                  "trim_history":CMDTrimHistory
                   }
 
 class ApiError(Exception):

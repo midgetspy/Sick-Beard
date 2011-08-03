@@ -39,13 +39,9 @@ addList("Command", "Scene Exceptions", "?cmd=exceptions", "exceptions");
 endOptGroup("Command");
 
 addOptGroup("Command", "setter");
+addList("Command", "Trim History", "?cmd=trim_history", "trim_history");
 addList("Command", "Delete Show", "?cmd=delete_show", "delete_show", "", "", "disabled");
 endOptGroup("Command");
-
-addOption("exceptions", "Optional Param", "", 1);
-#for $curShow in $sortedShowList:
-addOption("exceptions", "$curShow.name", "&tvdbid=$curShow.tvdbid");
-#end for
 
 addOption("shows", "Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&paused=1");
@@ -114,6 +110,14 @@ addList("history-type", "Limit Results (50)", "&limit=50");
 addOption("history-limit", "Optional Param", "", 1);
 addList("history-limit", "Show Only Downloaded", "&type=downloaded", "history-type");
 addList("history-limit", "Show Only Snatched", "&type=snatched", "history-type");
+
+addOption("exceptions", "Optional Param", "", 1);
+#for $curShow in $sortedShowList:
+addOption("exceptions", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+#end for
+
+addOption("trim_history", "Optional Param", "", 1);
+addOption("trim_history", "Clear All", "&clear=1");
 
 </script>
 </head>
