@@ -35,9 +35,7 @@ dateFormat = ""
 dayofWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
  
 class Api:
-    """
-        generic api will always return json
-    """
+    """ api class that returns json results """
     version = 0.1 
     intent = 4
 
@@ -208,9 +206,8 @@ class ApiCall(object):
     
     def check_params(self,args,kwargs,key,default,required=False):
         # TODO: explain this
-        """
-            this does the url shorthand magic
-            and saves missing keys in self._missing
+        """ function to check passed params for the shorthand wrapper
+            and to detect missing/required param
         """
         missing = True
         if args:
@@ -242,6 +239,7 @@ class CMDIndex(ApiCall):
         ApiCall.__init__(self, args, kwargs)
         
     def run(self):
+        """ display misc sickbeard related information """
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select( "SELECT last_backlog FROM info")
         for row in sqlResults:
@@ -269,6 +267,7 @@ class CMDShows(ApiCall):
         ApiCall.__init__(self, args, kwargs)
            
     def run(self):
+        """ display all shows in sickbeard """
         shows = {}
         for show in sickbeard.showList:
             if self.paused and not self.paused == str(show.paused):
@@ -301,6 +300,7 @@ class CMDShow(ApiCall):
         ApiCall.__init__(self, args, kwargs) 
     
     def run(self):
+        """ display information for a given show """
         show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not show:
             raise ApiError("Show not Found")
@@ -349,13 +349,7 @@ class CMDStats(ApiCall):
         ApiCall.__init__(self, args, kwargs)
         
     def run(self):
-        """this is sparta
-            no realy this is crazy ... i don't even understand all of this
-            and some is done by trial and error
-            if anyone can or has the will to check this please do
-
-            TODO: remove the seasonlist from this cmd
-        """
+        """ display episode statistics for a given show """
 
         # show stats
         episode_status_counts_total = {}
@@ -457,6 +451,7 @@ class CMDSeasonList(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
+        """ display the season list for a given show """
         myDB = db.DBConnection(row_type="dict")
         if self.sort == "asc":
             sqlResults = myDB.select( "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season ASC", [self.tvdbid])
@@ -485,6 +480,7 @@ class CMDSeasons(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
+        """ display a listing of episodes for all or a given show """
         myDB = db.DBConnection(row_type="dict")
 
         if self.season == None:
@@ -530,7 +526,7 @@ class CMDEpisode(ApiCall):
              "optionalPramameters":{"full_path":"show the full absolute path (if valid) instead of a relative path for the episode location"}
              }
 
-    def __init__(self, args, kwargs):   
+    def __init__(self, args, kwargs):
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
         self.s,args = self.check_params(args, kwargs, "season", None, True)
@@ -541,6 +537,7 @@ class CMDEpisode(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
+        """ display detailed info about an episode """
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select( "SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid,self.e,self.s])
         if not len(sqlResults) == 1:
@@ -580,8 +577,9 @@ class CMDComingEpisodes(ApiCall):
         self.sort,args = self.check_params(args, kwargs, "sort", "date")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
-    def run(self):
 
+    def run(self):
+        """ display the coming episodes """
         today = datetime.date.today().toordinal()
         next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
@@ -638,7 +636,7 @@ class CMDComingEpisodes(ApiCall):
         return finalEpResults
 
 class CMDHistory(ApiCall):
-    _help = {"desc":"display detailed info about an episode",
+    _help = {"desc":"display sickbeard downloaded/snatched history",
              "requiredParameters":[""],
              "optionalPramameters":{"limit":"## - limit returned results",
                                     "type":"downloaded/snatched - only show a specific type of results",
@@ -654,6 +652,7 @@ class CMDHistory(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
+        """ display sickbeard downloaded/snatched history """
         self.typeCodes = []
         if self.type == "downloaded":
             self.type = "Downloaded"
@@ -701,6 +700,7 @@ class CMDExceptions(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
+        """ display scene exceptions for all or a given show """
         myDB = db.DBConnection("cache.db",row_type="dict")
 
         if self.tvdbid == None:
@@ -736,7 +736,9 @@ class CMDHelp(ApiCall):
         # optional
         self.subject,args = self.check_params(args, kwargs, "subject", "help")
         ApiCall.__init__(self, args, kwargs)
+
     def run(self):
+        """ display help information for a given subject/command """
         if _functionMaper.has_key(self.subject):
             msg = _functionMaper.get(self.subject)((),{"help":1}).run()
         else:
@@ -747,7 +749,7 @@ class CMDHelp(ApiCall):
 #     shorthand wrapper        #
 ################################
 class ShorthandWrapper(ApiCall):
-    _help = {"desc":"This is a internal function wrapper. To get help for a command call the command direclty"}
+    _help = {"desc":"this is an internal function wrapper. call the help command directly for more information"}
     def __init__(self, args, kwargs, sid):
         self.origArgs = args
         self.kwargs = kwargs
@@ -760,6 +762,7 @@ class ShorthandWrapper(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
+        """ internal function wrapper """
         # how to add a var to a tuple
         # http://stackoverflow.com/questions/1380860/add-variables-to-tuple
         argstmp = (0,self.sid) # make a new tuple
