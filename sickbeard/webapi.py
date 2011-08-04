@@ -833,10 +833,7 @@ class ShorthandWrapper(ApiCall):
         if self.e:
             return CMDEpisode(args, self.kwargs).run()
         elif self.s:
-            if self.s == "all":
-                return CMDSeasons(args, self.kwargs).run()
-            else:    
-                return CMDSeason(args, self.kwargs).run()
+            return CMDSeasons(args, self.kwargs).run()
         else:
             return CMDShow(args, self.kwargs).run()
 
