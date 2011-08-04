@@ -270,20 +270,20 @@ class CMDShows(ApiCall):
     def run(self):
         """ display all shows in sickbeard """
         shows = {}
-        for show in sickbeard.showList:
-            if self.paused and not self.paused == str(show.paused):
+        for curShow in sickbeard.showList:
+            if self.paused and not self.paused == str(curShow.paused):
                 continue
-            showDict = {"paused":show.paused,
-                        "quality":_get_quality_string(show.quality),
-                        "language":show.lang,
-                        "tvrage_id":show.tvrid,
-                        "tvrage_name":show.tvrname}
+            showDict = {"paused":curShow.paused,
+                        "quality":_get_quality_string(curShow.quality),
+                        "language":curShow.lang,
+                        "tvrage_id":curShow.tvrid,
+                        "tvrage_name":curShow.tvrname}
             if self.sort == "show":
-                showDict["tvdbid"] = show.tvdbid
-                shows[show.name] = showDict
+                showDict["tvdbid"] = curShow.tvdbid
+                shows[curShow.name] = showDict
             else:
-                showDict["show_name"] = show.name
-                shows[show.tvdbid] = showDict
+                showDict["show_name"] = curShow.name
+                shows[curShow.tvdbid] = showDict
         return shows
 
 class CMDShow(ApiCall):
@@ -302,36 +302,36 @@ class CMDShow(ApiCall):
     
     def run(self):
         """ display information for a given show """
-        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not show:
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
             raise ApiError("Show not Found")
     
         showDict = {}
         showDict["season_list"] = CMDSeasonList((), {"tvdbid":self.tvdbid}).run()
 
         genreList = []
-        if show.genre:
-            genreListTmp = show.genre.split("|")
+        if showObj.genre:
+            genreListTmp = showObj.genre.split("|")
             for genre in genreListTmp:
                 if genre:
                     genreList.append(genre)
         showDict["genre"] = genreList
-        showDict["quality"] = _get_quality_string(show.quality)
+        showDict["quality"] = _get_quality_string(showObj.quality)
     
         try:
-            showDict["location"] = show.location
+            showDict["location"] = showObj.location
         except:
             showDict["location"] = ""
     
         # easy stuff
-        showDict["language"] = show.lang
-        showDict["show_name"] = show.name
-        showDict["paused"] = show.paused
-        showDict["air_by_date"] = show.air_by_date
-        showDict["season_folders"] = show.seasonfolders
-        showDict["airs"] = show.airs
-        showDict["tvrage_id"] = show.tvrid
-        showDict["tvrage_name"] = show.tvrname
+        showDict["language"] = showObj.lang
+        showDict["show_name"] = showObj.name
+        showDict["paused"] = showObj.paused
+        showDict["air_by_date"] = showObj.air_by_date
+        showDict["season_folders"] = showObj.seasonfolders
+        showDict["airs"] = showObj.airs
+        showDict["tvrage_id"] = showObj.tvrid
+        showDict["tvrage_name"] = showObj.tvrname
 
         return showDict
 
@@ -351,8 +351,8 @@ class CMDStats(ApiCall):
         
     def run(self):
         """ display episode statistics for a given show """
-        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not show:
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
             raise ApiError("Show not Found")
 
         # show stats
@@ -456,8 +456,8 @@ class CMDSeasonList(ApiCall):
 
     def run(self):
         """ display the season list for a given show """
-        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not show:
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
             raise ApiError("Show not Found")
 
         myDB = db.DBConnection(row_type="dict")
@@ -489,8 +489,8 @@ class CMDSeasons(ApiCall):
 
     def run(self):
         """ display a listing of episodes for all or a given show """
-        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not show:
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
             raise ApiError("Show not Found")
 
         myDB = db.DBConnection(row_type="dict")
@@ -512,7 +512,7 @@ class CMDSeasons(ApiCall):
         else:
             sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid,self.season])
             if len(sqlResults) is 0:
-                raise ApiError("No season found")
+                raise ApiError("Season not Found")
             seasons = {}
             for row in sqlResults:
                 curEpisode = int(row["episode"])
@@ -546,20 +546,20 @@ class CMDEpisode(ApiCall):
 
     def run(self):
         """ display detailed info about an episode """
-        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not show:
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
             raise ApiError("Show not Found")
 
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select( "SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid,self.e,self.s])
         if not len(sqlResults) == 1:
-            raise ApiError("No episode found")
+            raise ApiError("Episode not Found")
         episode = sqlResults[0]
         # handle path options
         # absolute vs relative vs broken
         showPath = None
         try:
-            showPath = show.location
+            showPath = showObj.location
         except:
             pass
     
@@ -726,8 +726,8 @@ class CMDExceptions(ApiCall):
                 exceptions[tvdbid].append(row["show_name"])
 
         else:
-            show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-            if not show:
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+            if not showObj:
                 raise ApiError("Show not Found")
 
             sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
@@ -800,15 +800,43 @@ class CMDDeleteShow(ApiCall):
         
     def run(self):
         """ delete a show from sickbeard """
-        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not show:
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
             raise ApiError("Show not Found")
 
-        if sickbeard.showQueueScheduler.action.isBeingAdded(show) or sickbeard.showQueueScheduler.action.isBeingUpdated(show): #@UndefinedVariable
-            raise ApiError("Shows can't be deleted while they're being added or updated.")
+        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
+            raise ApiError("Show can not be deleted while being added or updated")
 
-        show.deleteShow()
-        return {"result": str(show.name)+" has been deleted"}
+        showObj.deleteShow()
+        return {"result": str(showObj.name)+" has been deleted"}
+
+
+class CMDRefreshShow(ApiCall):
+    _help = {"desc":"refresh a show from sickbeard",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  },
+             "optionalPramameters":[""]
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ refresh a show from sickbeard """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
+        try:
+            sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
+            return {"result": str(showObj.name)+" has queued to be refreshed"}
+        except exceptions.CantRefreshException, e:
+            return {"result": "Unable to refresh " + str(showObj.name), "error": ex(e)}
+
 
 ################################
 #     shorthand wrapper        #
@@ -927,7 +955,8 @@ _functionMaper = {"index":CMDIndex,
                   "exceptions":CMDExceptions,
                   "help":CMDHelp,
                   "trim_history":CMDTrimHistory,
-                  "delete_show":CMDDeleteShow
+                  "delete_show":CMDDeleteShow,
+                  "refresh_show":CMDRefreshShow
                   }
 
 class ApiError(Exception):
