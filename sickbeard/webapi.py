@@ -297,6 +297,7 @@ class CMDShow(ApiCall):
         # required
         self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
+        self.action,args = self.check_params(args, kwargs, "action", None)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs) 
     
@@ -305,35 +306,59 @@ class CMDShow(ApiCall):
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
-    
-        showDict = {}
-        showDict["season_list"] = CMDSeasonList((), {"tvdbid":self.tvdbid}).run()
-    
-        genreList = []
-        if showObj.genre:
-            genreListTmp = showObj.genre.split("|")
-            for genre in genreListTmp:
-                if genre:
-                    genreList.append(genre)
-        showDict["genre"] = genreList
-        showDict["quality"] = _get_quality_string(showObj.quality)
-    
-        try:
-            showDict["location"] = showObj.location
-        except:
-            showDict["location"] = ""
-    
-        # easy stuff
-        showDict["language"] = showObj.lang
-        showDict["show_name"] = showObj.name
-        showDict["paused"] = showObj.paused
-        showDict["air_by_date"] = showObj.air_by_date
-        showDict["season_folders"] = showObj.seasonfolders
-        showDict["airs"] = showObj.airs
-        showDict["tvrage_id"] = showObj.tvrid
-        showDict["tvrage_name"] = showObj.tvrname
 
-        return showDict
+        if self.action == None:
+            showDict = {}
+            showDict["season_list"] = CMDSeasonList((), {"tvdbid":self.tvdbid}).run()
+        
+            genreList = []
+            if showObj.genre:
+                genreListTmp = showObj.genre.split("|")
+                for genre in genreListTmp:
+                    if genre:
+                        genreList.append(genre)
+            showDict["genre"] = genreList
+            showDict["quality"] = _get_quality_string(showObj.quality)
+        
+            try:
+                showDict["location"] = showObj.location
+            except:
+                showDict["location"] = ""
+        
+            # easy stuff
+            showDict["language"] = showObj.lang
+            showDict["show_name"] = showObj.name
+            showDict["paused"] = showObj.paused
+            showDict["air_by_date"] = showObj.air_by_date
+            showDict["season_folders"] = showObj.seasonfolders
+            showDict["airs"] = showObj.airs
+            showDict["tvrage_id"] = showObj.tvrid
+            showDict["tvrage_name"] = showObj.tvrname
+    
+            return showDict
+
+        else:
+            if self.action == "add":
+                return {"result": "add not yet implemented" }
+            elif self.action == "delete":
+                #delete_show
+                if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
+                    raise ApiError("Show can not be deleted while being added or updated")
+        
+                showObj.deleteShow()
+                return {"result": str(showObj.name)+" has been deleted"}
+
+            elif self.action == "refresh":
+                #refresh_show
+                try:
+                    sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
+                    return {"result": str(showObj.name)+" has queued to be refreshed"}
+                except exceptions.CantRefreshException, e:
+                    return {"result": "Unable to refresh " + str(showObj.name), "error": ex(e)}
+
+            else:
+                raise ApiError("Action not Found")
+
 
 class CMDStats(ApiCall):
     _help = {"desc":"display episode statistics for a given show",
