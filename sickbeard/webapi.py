@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+import os.path
 import cherrypy
 import sickbeard
 import webserve
@@ -692,6 +693,8 @@ class CMDHistory(ApiCall):
             row["quality"] = _get_quality_string(quality)
             row["date"] = _historyDate_to_dateForm(str(row["date"]))
             _rename_element(row, "showid", "tvdbid")
+            row["resource_path"] = os.path.dirname(row["resource"])
+            row["resource"] = os.path.basename(row["resource"])
             results.append(row)
         return results
 
