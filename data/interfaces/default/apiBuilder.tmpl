@@ -41,6 +41,7 @@ endOptGroup("Command");
 addOptGroup("Command", "setter");
 addList("Command", "Trim History", "?cmd=trim_history", "trim_history");
 addList("Command", "Delete Show", "?cmd=delete_show", "delete_show");
+addList("Command", "Refresh Show", "?cmd=refresh_show", "refresh_show");
 addList("Command", "Add Show", "?cmd=add_show", "add_show", "", "", "disabled");
 endOptGroup("Command");
 
@@ -123,6 +124,11 @@ addOption("trim_history", "Clear All", "&clear=1");
 #for $curShow in $sortedShowList:
 addOption("delete_show", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 #end for
+
+#for $curShow in $sortedShowList:
+addOption("refresh_show", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+#end for
+
 
 </script>
 </head>
