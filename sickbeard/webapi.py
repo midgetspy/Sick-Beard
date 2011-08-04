@@ -350,6 +350,9 @@ class CMDStats(ApiCall):
         
     def run(self):
         """ display episode statistics for a given show """
+        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not show:
+            raise ApiError("Show not Found")
 
         # show stats
         episode_status_counts_total = {}
@@ -452,6 +455,10 @@ class CMDSeasonList(ApiCall):
 
     def run(self):
         """ display the season list for a given show """
+        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not show:
+            raise ApiError("Show not Found")
+
         myDB = db.DBConnection(row_type="dict")
         if self.sort == "asc":
             sqlResults = myDB.select( "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season ASC", [self.tvdbid])
@@ -481,6 +488,10 @@ class CMDSeasons(ApiCall):
 
     def run(self):
         """ display a listing of episodes for all or a given show """
+        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not show:
+            raise ApiError("Show not Found")
+
         myDB = db.DBConnection(row_type="dict")
 
         if self.season == None:
@@ -498,10 +509,6 @@ class CMDSeasons(ApiCall):
                 seasons[curSeason][curEpisode] = row
 
         else:
-            show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-            if not show:
-                raise ApiError("Show not Found")
-
             sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid,self.season])
             if len(sqlResults) is 0:
                 raise ApiError("No season found")
@@ -538,6 +545,10 @@ class CMDEpisode(ApiCall):
 
     def run(self):
         """ display detailed info about an episode """
+        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not show:
+            raise ApiError("Show not Found")
+
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select( "SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid,self.e,self.s])
         if not len(sqlResults) == 1:
@@ -546,7 +557,6 @@ class CMDEpisode(ApiCall):
         # handle path options
         # absolute vs relative vs broken
         showPath = None
-        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         try:
             showPath = show.location
         except:
@@ -771,6 +781,32 @@ class CMDTrimHistory(ApiCall):
             return {"result": "Removed history entries greater than 30 days old"}
 
 
+class CMDDeleteShow(ApiCall):
+    _help = {"desc":"delete a show from sickbeard",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  },
+             "optionalPramameters":[""]
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ delete a show from sickbeard """
+        show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not show:
+            raise ApiError("Show not Found")
+
+        if sickbeard.showQueueScheduler.action.isBeingAdded(show) or sickbeard.showQueueScheduler.action.isBeingUpdated(show): #@UndefinedVariable
+            raise ApiError("Shows can't be deleted while they're being added or updated.")
+
+        show.deleteShow()
+        return {"result": str(show.name)+" has been deleted"}
+
 ################################
 #     shorthand wrapper        #
 ################################
@@ -890,7 +926,8 @@ _functionMaper = {"index":CMDIndex,
                   "history":CMDHistory,
                   "exceptions":CMDExceptions,
                   "help":CMDHelp,
-                  "trim_history":CMDTrimHistory
+                  "trim_history":CMDTrimHistory,
+                  "delete_show":CMDDeleteShow
                   }
 
 class ApiError(Exception):
