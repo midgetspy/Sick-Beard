@@ -154,7 +154,7 @@ class Api:
 def call_dispatcher(args, kwargs):
     """ calls the appropriate CMD class
         looks for a cmd in args and kwargs
-        or calls the ShorthandWrapper when the first args element is a number
+        or calls the TVDBShorthandWrapper when the first args element is a number
         it falls back to the index cmd
     """
     logger.log("api: all args: '"+str(args)+"'",logger.DEBUG)
@@ -172,7 +172,7 @@ def call_dispatcher(args, kwargs):
     if _functionMaper.get(cmd, False):
         outDict = _functionMaper.get(cmd)(args,kwargs).run() 
     elif _is_int(cmd):
-        outDict = ShorthandWrapper(args,kwargs,cmd).run() 
+        outDict = TVDBShorthandWrapper(args,kwargs,cmd).run() 
     else:
         outDict = CMD_SB(args,kwargs).run()
 
@@ -264,7 +264,7 @@ class ApiCall(object):
         return default,args
 
 
-class ShorthandWrapper(ApiCall):
+class TVDBShorthandWrapper(ApiCall):
     _help = {"desc":"this is an internal function wrapper. call the help command directly for more information"}
     def __init__(self, args, kwargs, sid):
         self.origArgs = args
@@ -285,11 +285,11 @@ class ShorthandWrapper(ApiCall):
         args = argstmp + self.origArgs # add both
         args = args[1:] # remove first fake element
         if self.e:
-            return CMDEpisode(args, self.kwargs).run()
+            return CMD_Episode(args, self.kwargs).run()
         elif self.s:
-            return CMDSeasons(args, self.kwargs).run()
+            return CMD_Seasons(args, self.kwargs).run()
         else:
-            return CMDShow(args, self.kwargs).run()
+            return CMD_Show(args, self.kwargs).run()
 
 
 ################################
