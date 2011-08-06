@@ -197,6 +197,31 @@ class ApiCall(object):
         return {}
 
     def return_help(self):
+        try:
+            if self._requiredParams:
+                pass
+        except AttributeError:
+            self._requiredParams = []
+        try:
+            if self._optionalParams:
+                pass
+        except AttributeError:
+            self._optionalParams = []
+
+        for list,type in [(self._requiredParams,"requiredParameters"),
+                          (self._optionalParams,"optionalPramameters")]:
+            if self._help.has_key(type):
+                for key in list:
+                    if self._help[type].has_key(key):
+                        continue
+                    self._help[type][key] = "no description"
+            elif list:
+                for key in list:
+                    self._help[type] = {}
+                    self._help[type][key] = "no description"
+            else:
+                self._help[type] = {}
+
         return self._help
     
     def return_missing(self):
@@ -222,10 +247,20 @@ class ApiCall(object):
         if required:
             try:
                 self._missing
+                self._requiredParams.append(key)
             except AttributeError:
                 self._missing = []
+                self._requiredParams = []
+                self._requiredParams.append(key)
             if missing and key not in self._missing:
                 self._missing.append(key)
+        else:
+            try:
+                self._optionalParams.append(key)
+            except AttributeError:
+                self._optionalParams = []
+                self._optionalParams.append(key)
+
         return default,args
 
 
@@ -341,7 +376,6 @@ class IntParseError(Exception):
 
 class CMD_Help(ApiCall):
     _help = {"desc":"display help information for a given subject/command",
-             "requiredParameters":[""],
              "optionalPramameters":{"subject":"command - the top level command",
                                   }
              }
@@ -363,7 +397,6 @@ class CMD_Help(ApiCall):
 
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc":"display the coming episodes",
-             "requiredParameters":[""],
              "optionalPramameters":{"sort":"date/network/show - change the sort order"}
              }
 
@@ -485,9 +518,7 @@ class CMD_Episode(ApiCall):
 
 
 class CMD_EpisodePostProcess(ApiCall):
-    _help = {"desc":"post process an episode",
-             "requiredParameters":[""],
-             "optionalPramameters":[""]
+    _help = {"desc":"post process an episode"
              }
 
     def __init__(self, args, kwargs):
@@ -506,8 +537,7 @@ class CMD_EpisodeSearch(ApiCall):
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
                                    "season":"## - the season number",
                                    "episode":"## - the episode number"
-                                  },
-             "optionalPramameters":[""]
+                                  }
              }
 
     def __init__(self, args, kwargs):
@@ -530,7 +560,6 @@ class CMD_EpisodeSearch(ApiCall):
 
 class CMD_Exceptions(ApiCall):
     _help = {"desc":"display scene exceptions for all or a given show",
-             "requiredParameters":[""],
              "optionalPramameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
                                   }
              }
@@ -570,7 +599,6 @@ class CMD_Exceptions(ApiCall):
 
 class CMD_History(ApiCall):
     _help = {"desc":"display sickbeard downloaded/snatched history",
-             "requiredParameters":[""],
              "optionalPramameters":{"limit":"## - limit returned results",
                                     "type":"downloaded/snatched - only show a specific type of results",
                                    }
@@ -623,8 +651,6 @@ class CMD_History(ApiCall):
 
 class CMD_HistoryClear(ApiCall):
     _help = {"desc":"clear sickbeard's history",
-             "requiredParameters":[""],
-             "optionalPramameters":[""]
              }
 
     def __init__(self,args,kwargs):
@@ -641,9 +667,7 @@ class CMD_HistoryClear(ApiCall):
 
 
 class CMD_HistoryTrim(ApiCall):
-    _help = {"desc":"trim sickbeard's history",
-             "requiredParameters":[""],
-             "optionalPramameters":[""]
+    _help = {"desc":"trim sickbeard's history"
              }
 
     def __init__(self,args,kwargs):
@@ -660,9 +684,7 @@ class CMD_HistoryTrim(ApiCall):
 
 
 class CMD_Logs(ApiCall):
-    _help = {"desc":"insert description here",
-             "requiredParameters":[""],
-             "optionalPramameters":[""]
+    _help = {"desc":"insert description here"
              }
 
     def __init__(self, args, kwargs):
@@ -721,9 +743,7 @@ class CMD_Logs(ApiCall):
 
 
 class CMD_SB(ApiCall):
-    _help = {"desc":"display misc sickbeard related information",
-             "requiredParameters":[""],
-             "optionalPramameters":[""]
+    _help = {"desc":"display misc sickbeard related information"
              }
 
     def __init__(self,args,kwargs):
@@ -833,8 +853,7 @@ class CMD_Seasons(ApiCall):
 class CMD_Show(ApiCall):
     _help = {"desc":"display information for a given show",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                  },
-             "optionalPramameters":[""]
+                                  }
              }
 
     def __init__(self,args,kwargs):
@@ -882,8 +901,6 @@ class CMD_Show(ApiCall):
 
 class CMD_ShowAdd(ApiCall):
     _help = {"desc":"add a show in sickbeard",
-             "requiredParameters":[""],
-             "optionalPramameters":[""]
              }
 
     def __init__(self, args, kwargs):
@@ -900,8 +917,7 @@ class CMD_ShowAdd(ApiCall):
 class CMD_ShowDelete(ApiCall):
     _help = {"desc":"delete a show in sickbeard",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                  },
-             "optionalPramameters":[""]
+                                  }
              }
 
     def __init__(self,args,kwargs):
@@ -927,8 +943,7 @@ class CMD_ShowDelete(ApiCall):
 class CMD_ShowRefresh(ApiCall):
     _help = {"desc":"refresh a show in sickbeard",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                  },
-             "optionalPramameters":[""]
+                                  }
              }
 
     def __init__(self,args,kwargs):
@@ -954,8 +969,7 @@ class CMD_ShowRefresh(ApiCall):
 class CMD_ShowUpdate(ApiCall):
     _help = {"desc":"update a show in sickbeard",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                  },
-             "optionalPramameters":[""]
+                                  }
              }
 
     def __init__(self,args,kwargs):
@@ -982,7 +996,6 @@ class CMD_Shows(ApiCall):
     # we need to be able to show the user what is acceptable values for the optional parameters... 
     # 0/1 true/false int/string something.. this is going to be a huge thing when we start doing the setter functions
     _help = {"desc":"display all shows in sickbeard",
-             "requiredParameters":[""],
              "optionalPramameters":{"sort":"show - sort the list of shows by show name instead of tvdbid",
                                     "paused":"0/1 - only show the shows that are set to paused",
                                   },
@@ -1019,8 +1032,7 @@ class CMD_Shows(ApiCall):
 class CMD_Stats(ApiCall):
     _help = {"desc":"display episode statistics for a given show",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                  },
-             "optionalPramameters":[""]
+                                  }
              }
 
     def __init__(self, args, kwargs):
