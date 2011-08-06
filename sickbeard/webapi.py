@@ -668,14 +668,14 @@ class CMD_Logs(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.minLevel,args = self.check_params(args, kwargs, "minlevel", 40)
+        self.minLevel,args = self.check_params(args, kwargs, "minlevel", "error")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ view log """
         # 10 = Debug / 20 = Info / 30 = Warning / 40 = Error
-        minLevel = int(self.minLevel)
+        minLevel = logger.reverseNames[self.minLevel.upper()]
 
         data = []
         if os.path.isfile(logger.sb_log_instance.log_file):
@@ -690,7 +690,6 @@ class CMD_Logs(ApiCall):
         numLines = 0
         lastLine = False
         numToShow = min(50, len(data))
-        logdetail = []
 
         for x in reversed(data):
 
@@ -705,7 +704,7 @@ class CMD_Logs(ApiCall):
 
                 if logger.reverseNames[level] >= minLevel:
                     lastLine = True
-                    finalData.append(x)
+                    finalData.append(x.rstrip("\n"))
                 else:
                     lastLine = False
                     continue
@@ -718,10 +717,7 @@ class CMD_Logs(ApiCall):
             if numLines >= numToShow:
                 break
 
-        #result = "".join(finalData)
-        logdetail.append(finalData)
-
-        return logdetail
+        return finalData
 
 
 class CMD_SB(ApiCall):
