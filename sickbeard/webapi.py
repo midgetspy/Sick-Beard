@@ -990,6 +990,43 @@ class CMD_ShowUpdate(ApiCall):
             return {"result": str(showObj.name)+" has queued to be updated"}
         except exceptions.CantUpdateException, e:
             return {"result": "Unable to update " + str(showObj.name), "error": ex(e)}
+class CMD_ShowPoster(ApiCall):
+    _help = {"desc":"get the url for the show poster",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  }
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ update a show in sickbeard """
+        requestDomain = cherrypy.url().split("/api")[0]
+        internal = requestDomain+"/showPoster/?show="+self.tvdbid+"&which=poster"
+        return {"url":internal}
+
+class CMD_ShowBanner(ApiCall):
+    _help = {"desc":"get the url for the show banner",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  }
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ update a show in sickbeard """
+        requestDomain = cherrypy.url().split("/api")[0]
+        internal = requestDomain+"/showPoster/?show="+self.tvdbid+"&which=banner"
+        return {"url":internal}
 
 
 class CMD_Shows(ApiCall):
@@ -1151,6 +1188,8 @@ _functionMaper = {"help":CMD_Help,
                   "show.delete":CMD_ShowDelete,
                   "show.refresh":CMD_ShowRefresh,
                   "show.update":CMD_ShowUpdate,
+                  "show.poster":CMD_ShowPoster,
+                  "show.banner":CMD_ShowBanner,
                   "shows":CMD_Shows,
                   "stats":CMD_Stats
                   }
