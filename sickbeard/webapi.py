@@ -23,6 +23,7 @@ import sickbeard
 import webserve
 from sickbeard import db, logger, exceptions, history
 from sickbeard.exceptions import ex
+from sickbeard import encodingKludge as ek
 from common import *
 
 try:
@@ -667,29 +668,60 @@ class CMD_Logs(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
+        self.minLevel,args = self.check_params(args, kwargs, "minlevel", 40)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ view log """
-        return {"result": "Not yet implmented"}
+        # 10 = Debug / 20 = Info / 30 = Warning / 40 = Error
+        minLevel = int(self.minLevel)
 
+        data = []
+        if os.path.isfile(logger.sb_log_instance.log_file):
+            f = ek.ek(open, logger.sb_log_instance.log_file)
+            data = f.readlines()
+            f.close()
 
-class CMD_LogsClear(ApiCall):
-    _help = {"desc":"insert description here",
-             "requiredParameters":[""],
-             "optionalPramameters":[""]
-             }
+        regex =  "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
 
-    def __init__(self, args, kwargs):
-        # required
-        # optional
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
+        finalData = []
 
-    def run(self):
-        """ clear log """
-        return {"result": "Not yet implmented"}
+        numLines = 0
+        lastLine = False
+        numToShow = min(50, len(data))
+        logdetail = []
+
+        for x in reversed(data):
+
+            x = x.decode('utf-8')
+            match = re.match(regex, x)
+
+            if match:
+                level = match.group(6)
+                if level not in logger.reverseNames:
+                    lastLine = False
+                    continue
+
+                if logger.reverseNames[level] >= minLevel:
+                    lastLine = True
+                    finalData.append(x)
+                else:
+                    lastLine = False
+                    continue
+
+            elif lastLine:
+                finalData.append("AA"+x)
+
+            numLines += 1
+
+            if numLines >= numToShow:
+                break
+
+        #result = "".join(finalData)
+        logdetail.append(finalData)
+
+        return logdetail
 
 
 class CMD_SB(ApiCall):
@@ -1103,7 +1135,6 @@ _functionMaper = {"help":CMD_Help,
                   "history.clear":CMD_HistoryClear,
                   "history.trim":CMD_HistoryTrim,
                   "logs":CMD_Logs,
-                  "logs.clear":CMD_LogsClear,
                   "sb":CMD_SB,
                   "seasonlist":CMD_SeasonList,
                   "seasons":CMD_Seasons,
