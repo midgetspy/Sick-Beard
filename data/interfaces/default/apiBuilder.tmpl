@@ -25,44 +25,38 @@ var disable_empty_list=true;
 
 addListGroup("api", "Command");
 
-addOptGroup("Command", "getter");
-addOption("Command", "Index", "?cmd=index", 1); //make default
-addList("Command", "Shows", "?cmd=shows", "shows");
-addList("Command", "Show", "?cmd=show", "show");
-addList("Command", "Stats", "?cmd=stats", "stats");
-addList("Command", "Season List", "?cmd=season_list", "season_list");
-addList("Command", "Seasons", "?cmd=seasons", "seasons");
-addList("Command", "Episode", "?cmd=episode", "episode");
-addList("Command", "Coming Episodes", "?cmd=future", "future");
-addList("Command", "History", "?cmd=history", "history");
-addList("Command", "Scene Exceptions", "?cmd=exceptions", "exceptions");
-endOptGroup("Command");
+addOption("Command", "SickBeard", "?cmd=sb", 1); //make default
 
-addOptGroup("Command", "setter");
-addList("Command", "Trim History", "?cmd=trim_history", "trim_history");
-addList("Command", "Delete Show", "?cmd=delete_show", "delete_show");
-addList("Command", "Refresh Show", "?cmd=refresh_show", "refresh_show");
-addList("Command", "Add Show", "?cmd=add_show", "add_show", "", "", "disabled");
-endOptGroup("Command");
+addList("Command", "Coming Episodes", "?cmd=future", "future");
+addList("Command", "Episode", "?cmd=episode", "episode");
+addList("Command", "Episode.PostProcess", "?cmd=episode.pp", "episode.pp", "", "", "disabled");
+addList("Command", "Episode.Search", "?cmd=episode.search", "episode.search", "", "", "disabled");
+addList("Command", "Episode.Status", "?cmd=episode.status", "episode.status", "", "", "disabled");
+addList("Command", "Scene Exceptions", "?cmd=exceptions", "exceptions");
+addList("Command", "History", "?cmd=history", "history");
+addOption("Command", "History.Clear", "?cmd=history.clear");
+addOption("Command", "History.Trim", "?cmd=history.trim");
+addOption("Command", "Logs", "?cmd=logs", "", "", "disabled");
+addOption("Command", "Logs.Clear", "?cmd=logs.clear", "", "", "disabled");
+addList("Command", "Season List", "?cmd=seasonlist", "season_list");
+addList("Command", "Seasons", "?cmd=seasons", "seasons");
+addList("Command", "Show", "?cmd=show", "tvdbid");
+addList("Command", "Show.Add", "?cmd=show.add", "", "", "disabled");
+addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid");
+addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid");
+addList("Command", "Show.Update", "?cmd=show.update", "tvdbid");
+addList("Command", "Shows", "?cmd=shows", "shows");
+addList("Command", "Stats", "?cmd=stats", "tvdbid");
+
+// addOption("tvdbid", "Optional Param", "", 1);
+#for $curShow in $sortedShowList:
+addOption("tvdbid", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+#end for
 
 addOption("shows", "Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&paused=1");
 addOption("shows", "Show Only Not Paused", "&paused=0");
 addOption("shows", "Sort by Show Name", "&sort=show");
-
-#for $curShow in $sortedShowList:
-addList("show", "$curShow.name", "&tvdbid=$curShow.tvdbid", "show-action");
-#end for
-
-addOption("show-action", "Optional Param", "", 1);
-addOption("show-action", "Add", "&action=add");
-addOption("show-action", "Delete", "&action=delete");
-addOption("show-action", "Refresh", "&action=refresh");
-addOption("show-action", "Update", "&action=update");
-
-#for $curShow in $sortedShowList:
-addOption("stats", "$curShow.name", "&tvdbid=$curShow.tvdbid");
-#end for
 
 #for $curShow in $sortedShowList:
 addList("seasons", "$curShow.name", "&tvdbid=$curShow.tvdbid", "seasons-$curShow.tvdbid");
@@ -111,28 +105,17 @@ addList("history", "Limit Results (50)", "&limit=50", "history-limit");
 //endOptGroup("history");
 
 addOption("history-type", "Optional Param", "", 1);
-addList("history-type", "Limit Results (2)", "&limit=2");
-addList("history-type", "Limit Results (25)", "&limit=25");
-addList("history-type", "Limit Results (50)", "&limit=50");
+addOption("history-type", "Limit Results (2)", "&limit=2");
+addOption("history-type", "Limit Results (25)", "&limit=25");
+addOption("history-type", "Limit Results (50)", "&limit=50");
 
 addOption("history-limit", "Optional Param", "", 1);
-addList("history-limit", "Show Only Downloaded", "&type=downloaded", "history-type");
-addList("history-limit", "Show Only Snatched", "&type=snatched", "history-type");
+addOption("history-limit", "Show Only Downloaded", "&type=downloaded");
+addOption("history-limit", "Show Only Snatched", "&type=snatched");
 
 addOption("exceptions", "Optional Param", "", 1);
 #for $curShow in $sortedShowList:
 addOption("exceptions", "$curShow.name", "&tvdbid=$curShow.tvdbid");
-#end for
-
-addOption("trim_history", "Optional Param", "", 1);
-addOption("trim_history", "Clear All", "&clear=1");
-
-#for $curShow in $sortedShowList:
-addOption("delete_show", "$curShow.name", "&tvdbid=$curShow.tvdbid");
-#end for
-
-#for $curShow in $sortedShowList:
-addOption("refresh_show", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 #end for
 
 
