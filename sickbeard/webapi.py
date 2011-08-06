@@ -16,14 +16,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
 import os.path
+import time
+import datetime
+
 import cherrypy
 import sickbeard
 import webserve
 from sickbeard import db, logger, exceptions, history
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
+from sickbeard import search_queue
 from common import *
 
 try:
@@ -318,8 +321,13 @@ def _rename_element(dict,oldKey,newKey):
     return dict
 
 def _error(msg):
-    return {'error':msg}
+    return {"error":msg}
 
+def _result(msg,error=None):
+    if error == None:
+        return {"result":msg}
+    else:
+        return {"result":msg,"error":error}
 def _get_quality_string(q):
     qualityString = "Custom"
     if q in qualityPresetStrings:
@@ -529,11 +537,11 @@ class CMD_EpisodePostProcess(ApiCall):
 
     def run(self):
         """ post process an episode """
-        return {"result": "Not yet implmented"}
+        return _result("failure","Not yet implmented")
 
 
 class CMD_EpisodeSearch(ApiCall):
-    _help = {"desc":"search for an episode",
+    _help = {"desc":"search for an episode. the response might take some time",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
                                    "season":"## - the season number",
                                    "episode":"## - the episode number"
@@ -551,11 +559,24 @@ class CMD_EpisodeSearch(ApiCall):
 
     def run(self):
         """ search for an episode """
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not showObj:
-            raise ApiError("Show not Found")
+        # retrieve the episode object and fail if we can't get one 
+        ep_obj = webserve._getEpisode(self.tvdbid,self.s, self.e)
+        if isinstance(ep_obj, str):
+            return _result('failure')
 
-        return {"result": "Not yet implmented"}
+        # make a queue item for it and put it on the queue
+        ep_queue_item = search_queue.ManualSearchQueueItem(ep_obj)
+        sickbeard.searchQueueScheduler.action.add_item(ep_queue_item) #@UndefinedVariable
+
+        # wait until the queue item tells us whether it worked or not
+        while ep_queue_item.success == None: #@UndefinedVariable
+            time.sleep(1)
+
+        # return the correct json value
+        if ep_queue_item.success:
+            return _result(statusStrings[ep_obj.status])
+
+        return _result('failure','Unable to find episode')
 
 
 class CMD_Exceptions(ApiCall):
@@ -663,11 +684,11 @@ class CMD_HistoryClear(ApiCall):
         """ clear sickbeard's history """
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
-        return {"result": "History Cleared"}
+        return _result("History Cleared")
 
 
 class CMD_HistoryTrim(ApiCall):
-    _help = {"desc":"trim sickbeard's history"
+    _help = {"desc":"trim sickbeard's history by removing entries greater than 30 days old"
              }
 
     def __init__(self,args,kwargs):
@@ -680,7 +701,7 @@ class CMD_HistoryTrim(ApiCall):
         """ trim sickbeard's history """
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
-        return {"result": "Removed history entries greater than 30 days old"}
+        return _result("Removed history entries greater than 30 days old")
 
 
 class CMD_Logs(ApiCall):
@@ -911,7 +932,7 @@ class CMD_ShowAdd(ApiCall):
 
     def run(self):
         """ add a show in sickbeard """
-        return {"result": "Not yet implmented"}
+        return _result("Not yet implmented")
 
 
 class CMD_ShowDelete(ApiCall):
@@ -937,7 +958,7 @@ class CMD_ShowDelete(ApiCall):
             raise ApiError("Show can not be deleted while being added or updated")
 
         showObj.deleteShow()
-        return {"result": str(showObj.name)+" has been deleted"}
+        return _result(str(showObj.name)+" has been deleted")
 
 
 class CMD_ShowRefresh(ApiCall):
@@ -961,9 +982,9 @@ class CMD_ShowRefresh(ApiCall):
 
         try:
             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
-            return {"result": str(showObj.name)+" has queued to be refreshed"}
+            return _result(str(showObj.name)+" has queued to be refreshed")
         except exceptions.CantRefreshException, e:
-            return {"result": "Unable to refresh " + str(showObj.name), "error": ex(e)}
+            return _result("Unable to refresh " + str(showObj.name), ex(e))
 
 
 class CMD_ShowUpdate(ApiCall):
@@ -987,9 +1008,10 @@ class CMD_ShowUpdate(ApiCall):
 
         try:
             sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force)) #@UndefinedVariable
-            return {"result": str(showObj.name)+" has queued to be updated"}
+            return _result(str(showObj.name)+" has queued to be updated")
         except exceptions.CantUpdateException, e:
-            return {"result": "Unable to update " + str(showObj.name), "error": ex(e)}
+            return _result("Unable to update " + str(showObj.name), ex(e))
+
 class CMD_ShowPoster(ApiCall):
     _help = {"desc":"get the url for the show poster",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
