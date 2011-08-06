@@ -36,8 +36,7 @@ addList("Command", "Scene Exceptions", "?cmd=exceptions", "exceptions");
 addList("Command", "History", "?cmd=history", "history");
 addOption("Command", "History.Clear", "?cmd=history.clear");
 addOption("Command", "History.Trim", "?cmd=history.trim");
-addOption("Command", "Logs", "?cmd=logs", "", "", "disabled");
-addOption("Command", "Logs.Clear", "?cmd=logs.clear", "", "", "disabled");
+addList("Command", "Logs", "?cmd=logs", "viewlog");
 addList("Command", "Season List", "?cmd=seasonlist", "season_list");
 addList("Command", "Seasons", "?cmd=seasons", "seasons");
 addList("Command", "Show", "?cmd=show", "tvdbid");
@@ -52,6 +51,12 @@ addList("Command", "Stats", "?cmd=stats", "tvdbid");
 #for $curShow in $sortedShowList:
 addOption("tvdbid", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 #end for
+
+addOption("viewlog", "Optional Param", "", 1);
+addOption("viewlog", "Debug", "&minlevel=10");
+addOption("viewlog", "Info", "&minlevel=20");
+addOption("viewlog", "Warning", "&minlevel=30");
+addOption("viewlog", "Error", "&minlevel=40");
 
 addOption("shows", "Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&paused=1");
