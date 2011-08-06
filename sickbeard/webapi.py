@@ -780,7 +780,7 @@ class CMD_SB(ApiCall):
         for row in sqlResults:
             row["last_backlog"] = _ordinal_to_dateForm(row["last_backlog"])
 
-        return {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version":Api.version, "cmdOverview":"TODO", "last_backlog": row["last_backlog"]}
+        return {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version":Api.version, "cmdOverview":sorted(_functionMaper.keys()), "last_backlog": row["last_backlog"]}
 
 
 class CMD_SeasonList(ApiCall):
