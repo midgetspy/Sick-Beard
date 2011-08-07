@@ -32,9 +32,8 @@ addOption("Command", "SickBeard.Restart", "?cmd=sb.restart", "", "", "setter");
 addOption("Command", "SickBeard.Shutdown", "?cmd=sb.shutdown", "", "", "setter");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
 addList("Command", "Episode", "?cmd=episode", "episode");
-addList("Command", "Episode.PostProcess", "?cmd=episode.pp", "episode.pp", "", "", "setter disabled");
 addList("Command", "Episode.Search", "?cmd=episode.search", "episode.search", "", "", "setter");
-addList("Command", "Episode.Status", "?cmd=episode.status", "episode.status", "", "", "setter disabled");
+addList("Command", "Episode.SetStatus", "?cmd=episode.setstatus", "episode.setstatus", "", "", "setter");
 addList("Command", "Scene Exceptions", "?cmd=exceptions", "exceptions");
 addList("Command", "History", "?cmd=history", "history");
 addOption("Command", "History.Clear", "?cmd=history.clear", "", "", "setter");
@@ -112,16 +111,20 @@ addOption("episode.search-$curShow", "$curShowSeason.season x $curShowSeason.epi
     #end for
 #end for
 
-// build out tvshow list for episode.status
+// build out tvshow list for episode.setstatus
 #for $curShow in $sortedShowList:
-addList("episode.status", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episode.status-$curShow.tvdbid");
+addList("episode.setstatus", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episode.setstatus-$curShow.tvdbid");
 #end for
 
-// build out each show's season+episode list for episode.status cmd
+// build out each show's season+episode list for episode.setstatus cmd
 #for $curShow in $episodeSQLResults:
     #for $curShowSeason in $episodeSQLResults[$curShow]:
-addOption("episode.status-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode");
+addList("episode.setstatus-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-status-$curShow");
     #end for
+addOption("episode-status-$curShow", "Wanted", "&status=3");
+addOption("episode-status-$curShow", "Skipped", "&status=5");
+addOption("episode-status-$curShow", "Archived", "&status=6");
+addOption("episode-status-$curShow", "Ignored", "&status=7");
 #end for
 
 addOption("future", "Optional Param", "", 1);
