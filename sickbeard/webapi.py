@@ -19,6 +19,7 @@
 import os.path
 import time
 import datetime
+import threading
 
 import cherrypy
 import sickbeard
@@ -177,7 +178,7 @@ def call_dispatcher(args, kwargs):
     elif _is_int(cmd):
         outDict = TVDBShorthandWrapper(args,kwargs,cmd).run() 
     else:
-        outDict = CMD_SB(args,kwargs).run()
+        outDict = CMD_SickBeard(args,kwargs).run()
 
     return outDict
 
@@ -763,7 +764,7 @@ class CMD_Logs(ApiCall):
         return finalData
 
 
-class CMD_SB(ApiCall):
+class CMD_SickBeard(ApiCall):
     _help = {"desc":"display misc sickbeard related information"
              }
 
@@ -781,6 +782,38 @@ class CMD_SB(ApiCall):
             row["last_backlog"] = _ordinal_to_dateForm(row["last_backlog"])
 
         return {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version":Api.version, "cmdOverview":sorted(_functionMaper.keys()), "last_backlog": row["last_backlog"]}
+
+
+class CMD_SickBeardRestart(ApiCall):
+    _help = {"desc":"restart sickbeard"
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ restart sickbeard """
+        threading.Timer(2, sickbeard.invoke_restart, [False]).start()
+        return {"result":"Sick Beard is restarting..."}
+
+
+class CMD_SickBeardShutdown(ApiCall):
+    _help = {"desc":"shutdown sickbeard"
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ shutdown sickbeard """
+        threading.Timer(2, sickbeard.invoke_shutdown).start()
+        return {"result":"Sick Beard is shutting down..."}
 
 
 class CMD_SeasonList(ApiCall):
@@ -1202,7 +1235,9 @@ _functionMaper = {"help":CMD_Help,
                   "history.clear":CMD_HistoryClear,
                   "history.trim":CMD_HistoryTrim,
                   "logs":CMD_Logs,
-                  "sb":CMD_SB,
+                  "sb":CMD_SickBeard,
+                  "sb.restart":CMD_SickBeardRestart,
+                  "sb.shutdown":CMD_SickBeardShutdown,
                   "seasonlist":CMD_SeasonList,
                   "seasons":CMD_Seasons,
                   "show":CMD_Show,
