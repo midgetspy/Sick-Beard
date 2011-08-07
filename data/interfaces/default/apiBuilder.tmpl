@@ -16,7 +16,7 @@ sbRoot = "$sbRoot";
 #apibuilder select { padding: 1px 2px 1px 6px; }
 #apibuilder select option { padding: 1px 6px; line-height: 1.2em; }
 #apibuilder .disabled { color: #ccc; }
-#apibuilder .setter { background-color: #eee; }
+#apibuilder .action { background-color: #efefef; }
 -->
 </style>
 
@@ -28,26 +28,29 @@ addListGroup("api", "Command");
 
 
 addOption("Command", "SickBeard", "?cmd=sb", 1); //make default
-addOption("Command", "SickBeard.Restart", "?cmd=sb.restart", "", "", "setter");
-addOption("Command", "SickBeard.Shutdown", "?cmd=sb.shutdown", "", "", "setter");
+addOption("Command", "SickBeard.CheckScheduler", "?cmd=sb.checkscheduler", "", "", "action");
+addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "action");
+addOption("Command", "SickBeard.Ping", "?cmd=sb.ping", "", "", "action");
+addOption("Command", "SickBeard.Restart", "?cmd=sb.restart", "", "", "action");
+addOption("Command", "SickBeard.Shutdown", "?cmd=sb.shutdown", "", "", "action");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
 addList("Command", "Episode", "?cmd=episode", "episode");
-addList("Command", "Episode.Search", "?cmd=episode.search", "episode.search", "", "", "setter");
-addList("Command", "Episode.SetStatus", "?cmd=episode.setstatus", "episode.setstatus", "", "", "setter");
+addList("Command", "Episode.Search", "?cmd=episode.search", "episode.search", "", "", "action");
+addList("Command", "Episode.SetStatus", "?cmd=episode.setstatus", "episode.setstatus", "", "", "action");
 addList("Command", "Scene Exceptions", "?cmd=exceptions", "exceptions");
 addList("Command", "History", "?cmd=history", "history");
-addOption("Command", "History.Clear", "?cmd=history.clear", "", "", "setter");
-addOption("Command", "History.Trim", "?cmd=history.trim", "", "", "setter");
+addOption("Command", "History.Clear", "?cmd=history.clear", "", "", "action");
+addOption("Command", "History.Trim", "?cmd=history.trim", "", "", "action");
 addList("Command", "Logs", "?cmd=logs", "viewlog");
 addList("Command", "Season List", "?cmd=seasonlist", "season_list");
 addList("Command", "Seasons", "?cmd=seasons", "seasons");
 addList("Command", "Show", "?cmd=show", "tvdbid");
-addList("Command", "Show.Add", "?cmd=show.add", "show_add", "", "", "setter disabled");
-addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "setter");
-addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "setter");
-addList("Command", "Show.Update", "?cmd=show.update", "tvdbid", "", "", "setter");
-addList("Command", "Show.Banner", "?cmd=show.banner", "tvdbid", "", "", "setter");
-addList("Command", "Show.Poster", "?cmd=show.poster", "tvdbid", "", "", "setter");
+addList("Command", "Show.Add", "?cmd=show.add", "show_add", "", "", "action disabled");
+addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action");
+addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
+addList("Command", "Show.Update", "?cmd=show.update", "tvdbid", "", "", "action");
+addList("Command", "Show.Banner", "?cmd=show.banner", "tvdbid", "", "", "action");
+addList("Command", "Show.Poster", "?cmd=show.poster", "tvdbid", "", "", "action");
 addList("Command", "Shows", "?cmd=shows", "shows");
 addList("Command", "Stats", "?cmd=stats", "tvdbid");
 
