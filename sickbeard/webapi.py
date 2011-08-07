@@ -526,21 +526,6 @@ class CMD_Episode(ApiCall):
         return episode
 
 
-class CMD_EpisodePostProcess(ApiCall):
-    _help = {"desc":"post process an episode"
-             }
-
-    def __init__(self, args, kwargs):
-        # required
-        # optional
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-        """ post process an episode """
-        return _result("failure","Not yet implmented")
-
-
 class CMD_EpisodeSearch(ApiCall):
     _help = {"desc":"search for an episode. the response might take some time",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
@@ -560,13 +545,18 @@ class CMD_EpisodeSearch(ApiCall):
 
     def run(self):
         """ search for an episode """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
         # retrieve the episode object and fail if we can't get one 
-        ep_obj = webserve._getEpisode(self.tvdbid,self.s, self.e)
+        epObj = webserve._getEpisode(self.tvdbid,self.s, self.e)
+        #if epObj == None:
         if isinstance(ep_obj, str):
-            return _result('failure')
+            raise ApiError("Episode not Found")
 
         # make a queue item for it and put it on the queue
-        ep_queue_item = search_queue.ManualSearchQueueItem(ep_obj)
+        ep_queue_item = search_queue.ManualSearchQueueItem(epObj)
         sickbeard.searchQueueScheduler.action.add_item(ep_queue_item) #@UndefinedVariable
 
         # wait until the queue item tells us whether it worked or not
@@ -575,9 +565,72 @@ class CMD_EpisodeSearch(ApiCall):
 
         # return the correct json value
         if ep_queue_item.success:
-            return _result(statusStrings[ep_obj.status])
+            return _result(statusStrings[epObj.status])
 
         return _result('failure','Unable to find episode')
+
+
+class CMD_EpisodeSetStatus(ApiCall):
+    _help = {"desc":"set status of an episode",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                   "season":"## - the season number",
+                                   "episode":"## - the episode number",
+                                   "status":"# - the status value"
+                                  }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.s,args = self.check_params(args, kwargs, "season", None, True)
+        self.e,args = self.check_params(args, kwargs, "episode", None, True)
+        self.status,args = self.check_params(args, kwargs, "status", None, True)
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ set status of an episode """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
+        if not statusStrings.has_key(int(self.status)):
+            raise ApiError("Invalid Status")
+
+        epObj = showObj.getEpisode(int(self.s), int(self.e))
+        if epObj == None:
+            raise ApiError("Episode not Found")
+
+        segment_list = []
+        if int(self.status) == WANTED:
+            # figure out what segment the episode is in and remember it so we can backlog it
+            if epObj.show.air_by_date:
+                ep_segment = str(epObj.airdate)[:7]
+            else:
+                ep_segment = epObj.season
+
+            if ep_segment not in segment_list:
+                segment_list.append(ep_segment)
+
+        with epObj.lock:
+            # don't let them mess up UNAIRED episodes
+            if epObj.status == UNAIRED:
+                raise ApiError("Refusing to change status because it is UNAIRED")
+    
+            if int(self.status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
+                raise ApiError("Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
+    
+            epObj.status = int(self.status)
+            epObj.saveToDB()
+
+            for cur_segment in segment_list:
+                cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
+                sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
+                logger.log(u"Starting backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
+                return {"result": "Episode status changed to Wanted, and backlog started" }
+
+        return {"result": "Episode status successfully changed" }
 
 
 class CMD_Exceptions(ApiCall):
@@ -1228,8 +1281,8 @@ class CMD_Stats(ApiCall):
 _functionMaper = {"help":CMD_Help,
                   "future":CMD_ComingEpisodes,
                   "episode":CMD_Episode,
-                  "episode.pp":CMD_EpisodePostProcess,
                   "episode.search":CMD_EpisodeSearch,
+                  "episode.setstatus":CMD_EpisodeSetStatus,
                   "exceptions":CMD_Exceptions,
                   "history":CMD_History,
                   "history.clear":CMD_HistoryClear,
