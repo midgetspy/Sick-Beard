@@ -126,7 +126,7 @@ class BlackAndWhiteList(object):
         return (list,dict)
     
     def is_valid_for_black(self,haystack):
-        logger.log(u"BWL: "+str(self.show_id)+" is valid white", logger.DEBUG)
+        logger.log(u"BWL: "+str(self.show_id)+" is valid black", logger.DEBUG)
         return self._is_valid_for(self.blackDict, False, haystack)
 
     def is_valid_for_white(self,haystack):
