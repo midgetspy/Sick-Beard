@@ -126,9 +126,11 @@ class BlackAndWhiteList(object):
         return (list,dict)
     
     def is_valid_for_black(self,haystack):
+        logger.log(u"BWL: "+self.show_id+" is valid white", logger.DEBUG)
         return self._is_valid_for(self.blackDict, False, haystack)
 
     def is_valid_for_white(self,haystack):
+        logger.log(u"BWL: "+self.show_id+" is valid white", logger.DEBUG)
         return self._is_valid_for(self.whiteDict, True, haystack)
 
     def is_valid(self,haystack):
@@ -166,7 +168,7 @@ class BlackAndWhiteList(object):
         will return true if fromBWList is found in fromPost
         for now a basic find is used
         """
-
+        logger.log(u"BWL: "+self.show_id+" comparing fromPost: "+fromPost+" vs fromBWlist: "+fromBWList, logger.DEBUG)
         return (fromPost.find(fromBWList) >= 0)
 
 class BlackWhiteKeyword(object):
