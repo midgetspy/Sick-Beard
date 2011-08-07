@@ -551,7 +551,6 @@ class CMD_EpisodeSearch(ApiCall):
 
         # retrieve the episode object and fail if we can't get one 
         epObj = webserve._getEpisode(self.tvdbid,self.s, self.e)
-        #if epObj == None:
         if isinstance(epObj, str):
             raise ApiError("Episode not Found")
 
@@ -840,6 +839,65 @@ class CMD_SickBeard(ApiCall):
             row["last_backlog"] = _ordinal_to_dateForm(row["last_backlog"])
 
         return {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version":Api.version, "cmdOverview":sorted(_functionMaper.keys()), "last_backlog": row["last_backlog"]}
+
+
+class CMD_SickBeardCheckScheduler(ApiCall):
+    _help = {"desc":"force the daily episode search early"
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ force the daily episode search early """
+        backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused() #@UndefinedVariable
+        backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
+        searchStatus = sickbeard.currentSearchScheduler.action.amActive #@UndefinedVariable
+
+        return {"backlogPaused": bool(backlogPaused), "backlogRunning": bool(backlogRunning), "searchStatus": bool(searchStatus)}
+
+
+class CMD_SickBeardForceSearch(ApiCall):
+    _help = {"desc":"force the episode search early"
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ force the episode search early """
+        # Changing all old missing episodes to status WANTED
+        # Beginning search for new episodes on RSS
+        # Searching all providers for any needed episodes
+        result = sickbeard.currentSearchScheduler.forceRun()
+        if result:
+            return {"result": "Episode search forced"}
+        return {"result": "Failure"}
+
+
+class CMD_SickBeardPing(ApiCall):
+    _help = {"desc":"check to see if sickbeard is running"
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ check to see if sickbeard is running """
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        if sickbeard.started:
+            return {"result": "Pong ("+str(sickbeard.PID)+")"}
+        else:
+            return {"result": "Pong"}
 
 
 class CMD_SickBeardRestart(ApiCall):
@@ -1294,6 +1352,9 @@ _functionMaper = {"help":CMD_Help,
                   "history.trim":CMD_HistoryTrim,
                   "logs":CMD_Logs,
                   "sb":CMD_SickBeard,
+                  "sb.checkscheduler":CMD_SickBeardCheckScheduler,
+                  "sb.forcesearch":CMD_SickBeardForceSearch,
+                  "sb.ping":CMD_SickBeardPing,
                   "sb.restart":CMD_SickBeardRestart,
                   "sb.shutdown":CMD_SickBeardShutdown,
                   "seasonlist":CMD_SeasonList,
