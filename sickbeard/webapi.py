@@ -552,7 +552,7 @@ class CMD_EpisodeSearch(ApiCall):
         # retrieve the episode object and fail if we can't get one 
         epObj = webserve._getEpisode(self.tvdbid,self.s, self.e)
         #if epObj == None:
-        if isinstance(ep_obj, str):
+        if isinstance(epObj, str):
             raise ApiError("Episode not Found")
 
         # make a queue item for it and put it on the queue
@@ -575,7 +575,7 @@ class CMD_EpisodeSetStatus(ApiCall):
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
                                    "season":"## - the season number",
                                    "episode":"## - the episode number",
-                                   "status":"# - the status value"
+                                   "status":"# - the status value: "+",".join(statusStrings.statusStrings.values()) # adding a list of all possible values
                                   }
              }
 
@@ -595,6 +595,11 @@ class CMD_EpisodeSetStatus(ApiCall):
         if not showObj:
             raise ApiError("Show not Found")
 
+        # convert the string status to a int
+        for status in statusStrings.statusStrings:
+            if statusStrings[status].lower() == self.status.lower():
+                self.status = status
+        # this should be obsolete bcause of the above
         if not statusStrings.has_key(int(self.status)):
             raise ApiError("Invalid Status")
 
@@ -630,7 +635,7 @@ class CMD_EpisodeSetStatus(ApiCall):
                 logger.log(u"Starting backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
                 return {"result": "Episode status changed to Wanted, and backlog started" }
 
-        return {"result": "Episode status successfully changed" }
+        return {"result": "Episode status successfully changed to "+statusStrings[epObj.status]}
 
 
 class CMD_Exceptions(ApiCall):
