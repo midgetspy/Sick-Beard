@@ -30,6 +30,7 @@ addListGroup("api", "Command");
 addOption("Command", "SickBeard", "?cmd=sb", 1); //make default
 addOption("Command", "SickBeard.CheckScheduler", "?cmd=sb.checkscheduler", "", "", "action");
 addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "action");
+addList("Command", "SickBeard.PauseBacklog", "?cmd=sb.pausebacklog", "sb.pausebacklog", "", "", "action");
 addOption("Command", "SickBeard.Ping", "?cmd=sb.ping", "", "", "action");
 addOption("Command", "SickBeard.Restart", "?cmd=sb.restart", "", "", "action");
 addOption("Command", "SickBeard.Shutdown", "?cmd=sb.shutdown", "", "", "action");
@@ -49,8 +50,6 @@ addList("Command", "Show.Add", "?cmd=show.add", "show_add", "", "", "action disa
 addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.Update", "?cmd=show.update", "tvdbid", "", "", "action");
-addList("Command", "Show.Banner", "?cmd=show.banner", "tvdbid", "", "", "action");
-addList("Command", "Show.Poster", "?cmd=show.poster", "tvdbid", "", "", "action");
 addList("Command", "Shows", "?cmd=shows", "shows");
 addList("Command", "Stats", "?cmd=stats", "tvdbid");
 
@@ -157,6 +156,10 @@ addOption("exceptions", "Optional Param", "", 1);
 #for $curShow in $sortedShowList:
 addOption("exceptions", "$curShow.name", "&tvdbid=$curShow.tvdbid");
 #end for
+
+addOption("sb.pausebacklog", "Optional Param", "", 1);
+addOption("sb.pausebacklog", "Pause", "&pause=1");
+addOption("sb.pausebacklog", "Unpause", "&pause=0");
 
 
 </script>

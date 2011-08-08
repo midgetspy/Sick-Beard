@@ -842,7 +842,7 @@ class CMD_SickBeard(ApiCall):
 
 
 class CMD_SickBeardCheckScheduler(ApiCall):
-    _help = {"desc":"force the daily episode search early"
+    _help = {"desc":"query the scheduler"
              }
 
     def __init__(self,args,kwargs):
@@ -852,7 +852,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         ApiCall.__init__(self, args, kwargs)
         
     def run(self):
-        """ force the daily episode search early """
+        """ query the scheduler """
         backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused() #@UndefinedVariable
         backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
         searchStatus = sickbeard.currentSearchScheduler.action.amActive #@UndefinedVariable
@@ -879,6 +879,28 @@ class CMD_SickBeardForceSearch(ApiCall):
         if result:
             return {"result": "Episode search forced"}
         return {"result": "Failure"}
+
+
+class CMD_SickBeardPauseBacklog(ApiCall):
+    _help = {"desc":"pause the backlog search"
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        # optional
+        self.paused,args = self.check_params(args, kwargs, "pause", None)
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ pause the backlog search """
+        if self.paused == "1":
+            sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
+            return {"result": "Backlog Paused"}
+        else:
+            sickbeard.searchQueueScheduler.action.unpause_backlog() #@UndefinedVariable
+            return {"result": "Backlog Unpaused"}
+
 
 
 class CMD_SickBeardPing(ApiCall):
@@ -1161,48 +1183,8 @@ class CMD_ShowUpdate(ApiCall):
         except exceptions.CantUpdateException, e:
             return _result("Unable to update " + str(showObj.name), ex(e))
 
-class CMD_ShowPoster(ApiCall):
-    _help = {"desc":"get the url for the show poster",
-             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                  }
-             }
-
-    def __init__(self,args,kwargs):
-        # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
-        # optional
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-        """ update a show in sickbeard """
-        requestDomain = cherrypy.url().split("/api")[0]
-        internal = requestDomain+"/showPoster/?show="+self.tvdbid+"&which=poster"
-        return {"url":internal}
-
-class CMD_ShowBanner(ApiCall):
-    _help = {"desc":"get the url for the show banner",
-             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                  }
-             }
-
-    def __init__(self,args,kwargs):
-        # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
-        # optional
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-        """ update a show in sickbeard """
-        requestDomain = cherrypy.url().split("/api")[0]
-        internal = requestDomain+"/showPoster/?show="+self.tvdbid+"&which=banner"
-        return {"url":internal}
-
 
 class CMD_Shows(ApiCall):
-    # we need to be able to show the user what is acceptable values for the optional parameters... 
-    # 0/1 true/false int/string something.. this is going to be a huge thing when we start doing the setter functions
     _help = {"desc":"display all shows in sickbeard",
              "optionalPramameters":{"sort":"show - sort the list of shows by show name instead of tvdbid",
                                     "paused":"0/1 - only show the shows that are set to paused",
@@ -1354,6 +1336,7 @@ _functionMaper = {"help":CMD_Help,
                   "sb":CMD_SickBeard,
                   "sb.checkscheduler":CMD_SickBeardCheckScheduler,
                   "sb.forcesearch":CMD_SickBeardForceSearch,
+                  "sb.pausebacklog":CMD_SickBeardPauseBacklog,
                   "sb.ping":CMD_SickBeardPing,
                   "sb.restart":CMD_SickBeardRestart,
                   "sb.shutdown":CMD_SickBeardShutdown,
@@ -1364,8 +1347,6 @@ _functionMaper = {"help":CMD_Help,
                   "show.delete":CMD_ShowDelete,
                   "show.refresh":CMD_ShowRefresh,
                   "show.update":CMD_ShowUpdate,
-                  "show.poster":CMD_ShowPoster,
-                  "show.banner":CMD_ShowBanner,
                   "shows":CMD_Shows,
                   "stats":CMD_Stats
                   }
