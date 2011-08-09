@@ -574,7 +574,7 @@ class CMD_EpisodeSetStatus(ApiCall):
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
                                    "season":"## - the season number",
                                    "episode":"## - the episode number",
-                                   "status":"# - the status value: "+",".join(statusStrings.statusStrings.values()) # adding a list of all possible values
+                                   "status":"# - the status value: wanted, skipped, archived, ignored"
                                   }
              }
 
