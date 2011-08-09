@@ -606,6 +606,9 @@ class CMD_EpisodeSetStatus(ApiCall):
         if epObj == None:
             raise ApiError("Episode not Found")
 
+        if int(self.status) not in (3,5,6,7):
+            raise ApiError("Status Prohibited")
+
         segment_list = []
         if int(self.status) == WANTED:
             # figure out what segment the episode is in and remember it so we can backlog it
