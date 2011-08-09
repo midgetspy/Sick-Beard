@@ -598,6 +598,7 @@ class CMD_EpisodeSetStatus(ApiCall):
         for status in statusStrings.statusStrings:
             if statusStrings[status].lower() == self.status.lower():
                 self.status = status
+                break
         # this should be obsolete bcause of the above
         if not statusStrings.has_key(int(self.status)):
             raise ApiError("Invalid Status")
