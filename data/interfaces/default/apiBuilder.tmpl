@@ -123,10 +123,10 @@ addList("episode.setstatus", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episod
     #for $curShowSeason in $episodeSQLResults[$curShow]:
 addList("episode.setstatus-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-status-$curShow");
     #end for
-addOption("episode-status-$curShow", "Wanted", "&status=3");
-addOption("episode-status-$curShow", "Skipped", "&status=5");
-addOption("episode-status-$curShow", "Archived", "&status=6");
-addOption("episode-status-$curShow", "Ignored", "&status=7");
+addOption("episode-status-$curShow", "Wanted", "&status=wanted");
+addOption("episode-status-$curShow", "Skipped", "&status=skipped");
+addOption("episode-status-$curShow", "Archived", "&status=archived");
+addOption("episode-status-$curShow", "Ignored", "&status=ignored");
 #end for
 
 addOption("future", "Optional Param", "", 1);

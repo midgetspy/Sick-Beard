@@ -600,13 +600,14 @@ class CMD_EpisodeSetStatus(ApiCall):
                 self.status = status
                 break
         # this should be obsolete bcause of the above
-        if not statusStrings.has_key(int(self.status)):
+        if not statusStrings.has_key(self.status):
             raise ApiError("Invalid Status")
 
         epObj = showObj.getEpisode(int(self.s), int(self.e))
         if epObj == None:
             raise ApiError("Episode not Found")
 
+        #only allow the status options we want
         if int(self.status) not in (3,5,6,7):
             raise ApiError("Status Prohibited")
 
