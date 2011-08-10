@@ -67,7 +67,8 @@ addOption("viewlog", "Error", "&minlevel=error");
 addOption("shows", "Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&paused=1");
 addOption("shows", "Show Only Not Paused", "&paused=0");
-addOption("shows", "Sort by Show Name", "&sort=show");
+addOption("shows", "Sort by Show Name", "&sort=name");
+addOption("shows", "Sort by TVDB ID", "&sort=id");
 
 #for $curShow in $sortedShowList:
 addList("seasons", "$curShow.name", "&tvdbid=$curShow.tvdbid", "seasons-$curShow.tvdbid");
@@ -130,7 +131,7 @@ addOption("episode-status-$curShow", "Ignored", "&status=ignored");
 #end for
 
 addOption("future", "Optional Param", "", 1);
-//addOption("future", "Sort by Date", "&sort=date");
+addOption("future", "Sort by Date", "&sort=date");
 addOption("future", "Sort by Network", "&sort=network");
 addOption("future", "Sort by Show Name", "&sort=show");
 

@@ -1215,7 +1215,7 @@ class CMD_Shows(ApiCall):
                         "language":curShow.lang,
                         "tvrage_id":curShow.tvrid,
                         "tvrage_name":curShow.tvrname}
-            if self.sort == "show":
+            if self.sort == "name":
                 showDict["tvdbid"] = curShow.tvdbid
                 shows[curShow.name] = showDict
             else:
