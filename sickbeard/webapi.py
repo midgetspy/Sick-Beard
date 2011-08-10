@@ -838,12 +838,7 @@ class CMD_SickBeard(ApiCall):
         
     def run(self):
         """ display misc sickbeard related information """
-        myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT last_backlog FROM info")
-        for row in sqlResults:
-            row["last_backlog"] = _ordinal_to_dateForm(row["last_backlog"])
-
-        return {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version":Api.version, "cmdOverview":sorted(_functionMaper.keys()), "last_backlog": row["last_backlog"]}
+        return {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version":Api.version, "api_commands":sorted(_functionMaper.keys())}
 
 
 class CMD_SickBeardCheckScheduler(ApiCall):
@@ -858,11 +853,14 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         
     def run(self):
         """ query the scheduler """
+        myDB = db.DBConnection()
+        sqlResults = myDB.select( "SELECT last_backlog FROM info")
+
         backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused() #@UndefinedVariable
         backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
         searchStatus = sickbeard.currentSearchScheduler.action.amActive #@UndefinedVariable
 
-        return {"backlogPaused": bool(backlogPaused), "backlogRunning": bool(backlogRunning), "searchStatus": bool(searchStatus)}
+        return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus)}
 
 
 class CMD_SickBeardForceSearch(ApiCall):
