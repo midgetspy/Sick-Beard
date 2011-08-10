@@ -768,7 +768,7 @@ class CMD_HistoryTrim(ApiCall):
 
 
 class CMD_Logs(ApiCall):
-    _help = {"desc":"insert description here"
+    _help = {"desc":"view sickbeard's log "
              }
 
     def __init__(self, args, kwargs):
@@ -779,7 +779,7 @@ class CMD_Logs(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
-        """ view log """
+        """ view sickbeard's log """
         # 10 = Debug / 20 = Info / 30 = Warning / 40 = Error
         minLevel = logger.reverseNames[self.minLevel.upper()]
 
