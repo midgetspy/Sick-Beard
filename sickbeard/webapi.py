@@ -145,13 +145,13 @@ class Api:
             del kwargs["apikey"]
 
         if apiKey == realKey:
-            msg = u"Api key accepted. ACCESS GRANTED"
+            msg = u"API key accepted. ACCESS GRANTED"
             return True, msg, args, kwargs
         elif not apiKey:
-            msg = u"NO api key given by '"+remoteIp+"'. ACCESS DENIED"
+            msg = u"NO API key given by '"+remoteIp+"'. ACCESS DENIED"
             return False, msg, args, kwargs
         else:
-            msg = u"Api key '"+apiKey+"' given by '"+remoteIp+"' NOT accepted. ACCESS DENIED"
+            msg = u"API key '"+apiKey+"' given by '"+remoteIp+"' NOT accepted. ACCESS DENIED"
             return False, msg, args, kwargs
 
 
@@ -163,7 +163,7 @@ def call_dispatcher(args, kwargs):
     """
     logger.log("api: all args: '"+str(args)+"'",logger.DEBUG)
     logger.log("api: all kwargs: '"+str(kwargs)+"'",logger.DEBUG)
-    logger.log("api: dateFormat: '"+str(dateFormat)+"'",logger.DEBUG)
+    #logger.log("api: dateFormat: '"+str(dateFormat)+"'",logger.DEBUG)
 
     cmd = None
     if args:
@@ -468,6 +468,8 @@ class CMD_ComingEpisodes(ApiCall):
                 ep["network"] = ""
             ep["airdate"] = _ordinal_to_dateForm(ordinalAirdate)
             ep["quality"] = _get_quality_string(ep["quality"])
+            #clean up tvdb horrible airs field
+            ep["airs"] = str(ep["airs"]).replace('am', ' AM').replace('pm',' PM').replace('  ', ' ')
             # TODO: choose eng weekday string OR number of weekday as int
             ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
             finalEpResults.append(ep)
