@@ -1183,7 +1183,7 @@ class CMD_ShowUpdate(ApiCall):
             raise ApiError("Show not Found")
 
         try:
-            sickbeard.showQueueScheduler.action.updateShow(showObj, bool(force)) #@UndefinedVariable
+            sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
             return _result(str(showObj.name)+" has queued to be updated")
         except exceptions.CantUpdateException, e:
             return _result("Unable to update " + str(showObj.name), ex(e))
@@ -1213,6 +1213,7 @@ class CMD_Shows(ApiCall):
             showDict = {"paused":curShow.paused,
                         "quality":_get_quality_string(curShow.quality),
                         "language":curShow.lang,
+                        "air_by_date":curShow.air_by_date,
                         "tvrage_id":curShow.tvrid,
                         "tvrage_name":curShow.tvrname}
             if self.sort == "name":
