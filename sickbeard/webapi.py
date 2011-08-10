@@ -893,13 +893,13 @@ class CMD_SickBeardPauseBacklog(ApiCall):
     def __init__(self,args,kwargs):
         # required
         # optional
-        self.paused,args = self.check_params(args, kwargs, "pause", None)
+        self.pause,args = self.check_params(args, kwargs, "pause", 0)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
         
     def run(self):
         """ pause the backlog search """
-        if self.paused == "1":
+        if self.pause == "1":
             sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
             return {"result": "Backlog Paused"}
         else:
