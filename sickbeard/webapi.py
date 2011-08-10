@@ -1089,7 +1089,8 @@ class CMD_Show(ApiCall):
         showDict["paused"] = showObj.paused
         showDict["air_by_date"] = showObj.air_by_date
         showDict["season_folders"] = showObj.seasonfolders
-        showDict["airs"] = showObj.airs
+        #clean up tvdb horrible airs field
+        showDict["airs"] = str(showObj.airs).replace('am', ' AM').replace('pm',' PM').replace('  ', ' ')
         showDict["tvrage_id"] = showObj.tvrid
         showDict["tvrage_name"] = showObj.tvrname
 
