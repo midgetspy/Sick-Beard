@@ -1163,69 +1163,7 @@ class CMD_ShowRefresh(ApiCall):
             return _result("Unable to refresh " + str(showObj.name), ex(e))
 
 
-class CMD_ShowUpdate(ApiCall):
-    _help = {"desc":"update a show in sickbeard",
-             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
-                                  }
-             }
-
-    def __init__(self,args,kwargs):
-        # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
-        # optional
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-        
-    def run(self):
-        """ update a show in sickbeard """
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not showObj:
-            raise ApiError("Show not Found")
-
-        try:
-            sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
-            return _result(str(showObj.name)+" has queued to be updated")
-        except exceptions.CantUpdateException, e:
-            return _result("Unable to update " + str(showObj.name), ex(e))
-
-
-class CMD_Shows(ApiCall):
-    _help = {"desc":"display all shows in sickbeard",
-             "optionalPramameters":{"sort":"show - sort the list of shows by show name instead of tvdbid",
-                                    "paused":"0/1 - only show the shows that are set to paused",
-                                  },
-             }
-
-    def __init__(self,args,kwargs):
-        # required
-        # optional
-        self.sort,args = self.check_params(args, kwargs, "sort", "id")
-        self.paused,args = self.check_params(args, kwargs, "paused", None)
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-           
-    def run(self):
-        """ display all shows in sickbeard """
-        shows = {}
-        for curShow in sickbeard.showList:
-            if self.paused and not self.paused == str(curShow.paused):
-                continue
-            showDict = {"paused":curShow.paused,
-                        "quality":_get_quality_string(curShow.quality),
-                        "language":curShow.lang,
-                        "air_by_date":curShow.air_by_date,
-                        "tvrage_id":curShow.tvrid,
-                        "tvrage_name":curShow.tvrname}
-            if self.sort == "name":
-                showDict["tvdbid"] = curShow.tvdbid
-                shows[curShow.name] = showDict
-            else:
-                showDict["show_name"] = curShow.name
-                shows[curShow.tvdbid] = showDict
-        return shows
-
-
-class CMD_Stats(ApiCall):
+class CMD_ShowStats(ApiCall):
     _help = {"desc":"display episode statistics for a given show",
              "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
                                   }
@@ -1329,6 +1267,68 @@ class CMD_Stats(ApiCall):
         return episodes_stats
 
 
+class CMD_ShowUpdate(ApiCall):
+    _help = {"desc":"update a show in sickbeard",
+             "requiredParameters":{"tvdbid":"tvdbid - thetvdb.com unique id of a show",
+                                  }
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ update a show in sickbeard """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
+        try:
+            sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
+            return _result(str(showObj.name)+" has queued to be updated")
+        except exceptions.CantUpdateException, e:
+            return _result("Unable to update " + str(showObj.name), ex(e))
+
+
+class CMD_Shows(ApiCall):
+    _help = {"desc":"display all shows in sickbeard",
+             "optionalPramameters":{"sort":"show - sort the list of shows by show name instead of tvdbid",
+                                    "paused":"0/1 - only show the shows that are set to paused",
+                                  },
+             }
+
+    def __init__(self,args,kwargs):
+        # required
+        # optional
+        self.sort,args = self.check_params(args, kwargs, "sort", "id")
+        self.paused,args = self.check_params(args, kwargs, "paused", None)
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+           
+    def run(self):
+        """ display all shows in sickbeard """
+        shows = {}
+        for curShow in sickbeard.showList:
+            if self.paused and not self.paused == str(curShow.paused):
+                continue
+            showDict = {"paused":curShow.paused,
+                        "quality":_get_quality_string(curShow.quality),
+                        "language":curShow.lang,
+                        "air_by_date":curShow.air_by_date,
+                        "tvrage_id":curShow.tvrid,
+                        "tvrage_name":curShow.tvrname}
+            if self.sort == "name":
+                showDict["tvdbid"] = curShow.tvdbid
+                shows[curShow.name] = showDict
+            else:
+                showDict["show_name"] = curShow.name
+                shows[curShow.tvdbid] = showDict
+        return shows
+
+
 _functionMaper = {"help":CMD_Help,
                   "future":CMD_ComingEpisodes,
                   "episode":CMD_Episode,
@@ -1352,7 +1352,7 @@ _functionMaper = {"help":CMD_Help,
                   "show.add":CMD_ShowAdd,
                   "show.delete":CMD_ShowDelete,
                   "show.refresh":CMD_ShowRefresh,
+                  "show.stats":CMD_ShowStats,
                   "show.update":CMD_ShowUpdate,
-                  "shows":CMD_Shows,
-                  "stats":CMD_Stats
+                  "shows":CMD_Shows
                   }
