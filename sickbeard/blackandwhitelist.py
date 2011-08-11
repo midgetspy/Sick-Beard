@@ -168,6 +168,8 @@ class BlackAndWhiteList(object):
         will return true if fromBWList is found in fromPost
         for now a basic find is used
         """
+        fromPost = fromPost.lower()
+        fromBWList = fromBWList.lower()
         logger.log(u"BWL: "+str(self.show_id)+" comparing fromPost: "+fromPost+" vs fromBWlist: "+fromBWList, logger.DEBUG)
         return (fromPost.find(fromBWList) >= 0)
 
