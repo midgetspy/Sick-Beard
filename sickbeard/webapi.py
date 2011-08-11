@@ -49,7 +49,7 @@ class Api:
     def default(self, *args, **kwargs):
 
         self.apiKey = "1234"
-        access,accessMsg,args,kwargs = self._grand_access(self.apiKey,args,kwargs)
+        access, accessMsg, args, kwargs = self._grand_access(self.apiKey, args, kwargs)
 
         # set the output callback
         # default json
@@ -57,9 +57,9 @@ class Api:
 
         # do we have acces ?
         if access:
-            logger.log(accessMsg,logger.DEBUG)
+            logger.log(accessMsg, logger.DEBUG)
         else:
-            logger.log(accessMsg,logger.WARNING)
+            logger.log(accessMsg, logger.WARNING)
             return outputCallback(_error(accessMsg))
 
         # global dateForm
@@ -75,33 +75,34 @@ class Api:
         # if profile was set wrap "_call_dispatcher" in the profile function
         if kwargs.has_key("profile"):
             from lib.profilehooks import profile
-            _call_dispatcher = profile(_call_dispatcher,immediate=True)
+            _call_dispatcher = profile(_call_dispatcher, immediate=True)
             del kwargs["profile"]
 
         # if debug was set call the "call_dispatcher"
         if kwargs.has_key("debug"):
-            outDict = _call_dispatcher(args,kwargs) # this way we can debug the cherry.py traceback in the browser
+            outDict = _call_dispatcher(args, kwargs) # this way we can debug the cherry.py traceback in the browser
             del kwargs["debug"]
         else:# if debug was not set we wrap the "call_dispatcher" in a try block to assure a json output
             try:
-                outDict = _call_dispatcher(args,kwargs)
+                outDict = _call_dispatcher(args, kwargs)
             except Exception, e:
-                logger.log("API: "+ex(e),logger.ERROR)
+                logger.log("API: "+ex(e), logger.ERROR)
                 outDict = _error(ex(e))
 
         return outputCallback(outDict)
     
     @cherrypy.expose
     def builder(self, *args, **kwargs):
+        """ expose the api-builder template """
         t = webserve.PageTemplate(file="apiBuilder.tmpl")
 
         def titler(x):
             if not x:
                 return x
             if x.lower().startswith('a '):
-                    x = x[2:]
+                x = x[2:]
             elif x.lower().startswith('the '):
-                    x = x[4:]
+                x = x[4:]
             return x
 
         t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
@@ -120,7 +121,8 @@ class Api:
         t.episodeSQLResults = episodeSQLResults
         return webserve._munge(t)
 
-    def _out_as_json(self,dict):
+    def _out_as_json(self, dict):
+        """ set cherrypy response to json """
         response = cherrypy.response
         response.headers['Content-Type'] = 'application/json;charset=UTF-8'
         try:
@@ -130,10 +132,10 @@ class Api:
         return out
 
 
-    def _grand_access(self,realKey,args,kwargs):
+    def _grand_access(self, realKey, args, kwargs):
         """ validate api key and log result """
         remoteIp = cherrypy.request.remote.ip
-        apiKey = kwargs.get("apikey",None)
+        apiKey = kwargs.get("apikey", None)
         if not apiKey:
             # this also checks if the length of the first element
             # is the length of the realKey .. it is nice but will through the error "no key" even if you miss one char 
@@ -161,9 +163,9 @@ def call_dispatcher(args, kwargs):
         or calls the TVDBShorthandWrapper when the first args element is a number
         it falls back to the index cmd
     """
-    logger.log("api: all args: '"+str(args)+"'",logger.DEBUG)
-    logger.log("api: all kwargs: '"+str(kwargs)+"'",logger.DEBUG)
-    #logger.log("api: dateFormat: '"+str(dateFormat)+"'",logger.DEBUG)
+    logger.log("api: all args: '"+str(args)+"'", logger.DEBUG)
+    logger.log("api: all kwargs: '"+str(kwargs)+"'", logger.DEBUG)
+    #logger.log("api: dateFormat: '"+str(dateFormat)+"'", logger.DEBUG)
 
     cmd = None
     if args:
@@ -174,11 +176,11 @@ def call_dispatcher(args, kwargs):
         cmd = kwargs.get("cmd")
 
     if _functionMaper.get(cmd, False):
-        outDict = _functionMaper.get(cmd)(args,kwargs).run() 
+        outDict = _functionMaper.get(cmd)(args, kwargs).run() 
     elif _is_int(cmd):
-        outDict = TVDBShorthandWrapper(args,kwargs,cmd).run() 
+        outDict = TVDBShorthandWrapper(args, kwargs, cmd).run() 
     else:
-        outDict = CMD_SickBeard(args,kwargs).run()
+        outDict = CMD_SickBeard(args, kwargs).run()
 
     return outDict
 
@@ -212,8 +214,8 @@ class ApiCall(object):
         except AttributeError:
             self._optionalParams = []
 
-        for list,type in [(self._requiredParams,"requiredParameters"),
-                          (self._optionalParams,"optionalPramameters")]:
+        for list, type in [(self._requiredParams, "requiredParameters"),
+                          (self._optionalParams, "optionalPramameters")]:
             if self._help.has_key(type):
                 for key in list:
                     if self._help[type].has_key(key):
@@ -235,7 +237,7 @@ class ApiCall(object):
             msg = "The required parameters: '" + "','".join(self._missing) +"' where not set"
         return _error(msg)
     
-    def check_params(self,args,kwargs,key,default,required=False):
+    def check_params(self, args, kwargs, key, default, required=False):
         # TODO: explain this
         """ function to check passed params for the shorthand wrapper
             and to detect missing/required param
@@ -265,7 +267,7 @@ class ApiCall(object):
                 self._optionalParams = []
                 self._optionalParams.append(key)
 
-        return default,args
+        return default, args
 
 
 class TVDBShorthandWrapper(ApiCall):
@@ -275,8 +277,8 @@ class TVDBShorthandWrapper(ApiCall):
         self.kwargs = kwargs
         self.sid = sid
         
-        self.s,args = self.check_params(args, kwargs, "s", None)
-        self.e,args = self.check_params(args, kwargs, "e", None)
+        self.s, args = self.check_params(args, kwargs, "s", None)
+        self.e, args = self.check_params(args, kwargs, "e", None)
         self.args = args
         
         ApiCall.__init__(self, args, kwargs)
@@ -285,7 +287,7 @@ class TVDBShorthandWrapper(ApiCall):
         """ internal function wrapper """
         # how to add a var to a tuple
         # http://stackoverflow.com/questions/1380860/add-variables-to-tuple
-        argstmp = (0,self.sid) # make a new tuple
+        argstmp = (0, self.sid) # make a new tuple
         args = argstmp + self.origArgs # add both
         args = args[1:] # remove first fake element
         if self.e:
@@ -313,7 +315,7 @@ def _is_int_multi(*vars):
             raise IntParseError("'" +var + "' is not parsable into a int, but is supposed to be. Canceling")
     return True
 
-def _rename_element(dict,oldKey,newKey):
+def _rename_element(dict, oldKey, newKey):
     try:
         dict[newKey] = dict[oldKey]
         del dict[oldKey]
@@ -324,11 +326,11 @@ def _rename_element(dict,oldKey,newKey):
 def _error(msg):
     return {"error":msg}
 
-def _result(msg,error=None):
+def _result(msg, error=None):
     if error == None:
         return {"result":msg}
     else:
-        return {"result":msg,"error":error}
+        return {"result":msg, "error":error}
 def _get_quality_string(q):
     qualityString = "Custom"
     if q in qualityPresetStrings:
@@ -346,13 +348,13 @@ def _ordinal_to_dateForm(ordinal):
         date = datetime.date.fromordinal(ordinal)
     else:
         return ""
-    return _convert_date_dateform(date,ordinal)
+    return _convert_date_dateform(date, ordinal)
 
 def _historyDate_to_dateForm(timeString):
-    date = datetime.datetime.strptime(timeString,history.dateFormat)
-    return _convert_date_dateform(date,timeString)
+    date = datetime.datetime.strptime(timeString, history.dateFormat)
+    return _convert_date_dateform(date, timeString)
 
-def _convert_date_dateform(date,raw):
+def _convert_date_dateform(date, raw):
     if not dateFormat or dateFormat == "raw":
         return raw
     return date.strftime(dateFormat)
@@ -392,13 +394,13 @@ class CMD_Help(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.subject,args = self.check_params(args, kwargs, "subject", "help")
+        self.subject, args = self.check_params(args, kwargs, "subject", "help")
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display help information for a given subject/command """
         if _functionMaper.has_key(self.subject):
-            msg = _functionMaper.get(self.subject)((),{"help":1}).run()
+            msg = _functionMaper.get(self.subject)((), {"help":1}).run()
         else:
             msg = _error("no such cmd")
         return msg
@@ -412,7 +414,7 @@ class CMD_ComingEpisodes(ApiCall):
     def __init__(self, args, kwargs): 
         # required
         # optional
-        self.sort,args = self.check_params(args, kwargs, "sort", "date")
+        self.sort, args = self.check_params(args, kwargs, "sort", "date")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -426,14 +428,14 @@ class CMD_ComingEpisodes(ApiCall):
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
         
         myDB = db.DBConnection(row_type="dict")
-        sql_results = myDB.select("SELECT airdate,airs,episode,name AS 'ep_name',network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
+        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["tvdbid"]))
 
-        more_sql_results = myDB.select("SELECT airdate,airs,episode,name AS 'ep_name',network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT airdate,airs,episode,name AS 'ep_name',network,season,showid AS 'tvdbid',show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
 
@@ -487,11 +489,11 @@ class CMD_Episode(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
-        self.s,args = self.check_params(args, kwargs, "season", None, True)
-        self.e,args = self.check_params(args, kwargs, "episode", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.s, args = self.check_params(args, kwargs, "season", None, True)
+        self.e, args = self.check_params(args, kwargs, "episode", None, True)
         # optional
-        self.fullPath,args = self.check_params(args, kwargs, "full_path", "0")
+        self.fullPath, args = self.check_params(args, kwargs, "full_path", "0")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -502,7 +504,7 @@ class CMD_Episode(ApiCall):
             raise ApiError("Show not Found")
 
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid,self.e,self.s])
+        sqlResults = myDB.select( "SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
         if not len(sqlResults) == 1:
             raise ApiError("Episode not Found")
         episode = sqlResults[0]
@@ -538,9 +540,9 @@ class CMD_EpisodeSearch(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
-        self.s,args = self.check_params(args, kwargs, "season", None, True)
-        self.e,args = self.check_params(args, kwargs, "episode", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.s, args = self.check_params(args, kwargs, "season", None, True)
+        self.e, args = self.check_params(args, kwargs, "episode", None, True)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -552,7 +554,7 @@ class CMD_EpisodeSearch(ApiCall):
             raise ApiError("Show not Found")
 
         # retrieve the episode object and fail if we can't get one 
-        epObj = webserve._getEpisode(self.tvdbid,self.s, self.e)
+        epObj = webserve._getEpisode(self.tvdbid, self.s, self.e)
         if isinstance(epObj, str):
             raise ApiError("Episode not Found")
 
@@ -582,10 +584,10 @@ class CMD_EpisodeSetStatus(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
-        self.s,args = self.check_params(args, kwargs, "season", None, True)
-        self.e,args = self.check_params(args, kwargs, "episode", None, True)
-        self.status,args = self.check_params(args, kwargs, "status", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.s, args = self.check_params(args, kwargs, "season", None, True)
+        self.e, args = self.check_params(args, kwargs, "episode", None, True)
+        self.status, args = self.check_params(args, kwargs, "status", None, True)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -610,7 +612,7 @@ class CMD_EpisodeSetStatus(ApiCall):
             raise ApiError("Episode not Found")
 
         #only allow the status options we want
-        if int(self.status) not in (3,5,6,7):
+        if int(self.status) not in (3, 5, 6, 7):
             raise ApiError("Status Prohibited")
 
         segment_list = []
@@ -653,16 +655,16 @@ class CMD_Exceptions(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, False)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, False)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display scene exceptions for all or a given show """
-        myDB = db.DBConnection("cache.db",row_type="dict")
+        myDB = db.DBConnection("cache.db", row_type="dict")
 
         if self.tvdbid == None:
-            sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions")
+            sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions")
             exceptions = {}
             for row in sqlResults:
                 tvdbid = row["tvdbid"]
@@ -675,7 +677,7 @@ class CMD_Exceptions(ApiCall):
             if not showObj:
                 raise ApiError("Show not Found")
 
-            sqlResults = myDB.select("SELECT show_name,tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
+            sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
             exceptions = []
             for row in sqlResults:
                 exceptions.append(row["show_name"])
@@ -693,8 +695,8 @@ class CMD_History(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.limit,args = self.check_params(args, kwargs, "limit", 100)
-        self.type,args = self.check_params(args, kwargs, "type", None)
+        self.limit, args = self.check_params(args, kwargs, "limit", 100)
+        self.type, args = self.check_params(args, kwargs, "type", None)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -715,9 +717,9 @@ class CMD_History(ApiCall):
     
         ulimit = min(int(self.limit), 100)
         if ulimit == 0:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in ("+','.join(['?']*len(self.typeCodes))+") ORDER BY date DESC",self.typeCodes )
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in ("+','.join(['?']*len(self.typeCodes))+") ORDER BY date DESC", self.typeCodes )
         else:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in ("+','.join(['?']*len(self.typeCodes))+") ORDER BY date DESC LIMIT ?",self.typeCodes+[ ulimit ] )
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in ("+','.join(['?']*len(self.typeCodes))+") ORDER BY date DESC LIMIT ?", self.typeCodes+[ ulimit ] )
         
         results = []
         for row in sqlResults:
@@ -739,7 +741,7 @@ class CMD_HistoryClear(ApiCall):
     _help = {"desc":"clear sickbeard's history",
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
         # super, missing, help
@@ -756,7 +758,7 @@ class CMD_HistoryTrim(ApiCall):
     _help = {"desc":"trim sickbeard's history by removing entries greater than 30 days old"
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
         # super, missing, help
@@ -776,7 +778,7 @@ class CMD_Logs(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.minLevel,args = self.check_params(args, kwargs, "minlevel", "error")
+        self.minLevel, args = self.check_params(args, kwargs, "minlevel", "error")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -832,7 +834,7 @@ class CMD_SickBeard(ApiCall):
     _help = {"desc":"display misc sickbeard related information"
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
         # super, missing, help
@@ -847,7 +849,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
     _help = {"desc":"query the scheduler"
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
         # super, missing, help
@@ -869,7 +871,7 @@ class CMD_SickBeardForceSearch(ApiCall):
     _help = {"desc":"force the episode search early"
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
         # super, missing, help
@@ -890,10 +892,10 @@ class CMD_SickBeardPauseBacklog(ApiCall):
     _help = {"desc":"pause the backlog search"
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
-        self.pause,args = self.check_params(args, kwargs, "pause", 0)
+        self.pause, args = self.check_params(args, kwargs, "pause", 0)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
         
@@ -912,7 +914,7 @@ class CMD_SickBeardPing(ApiCall):
     _help = {"desc":"check to see if sickbeard is running"
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
         # super, missing, help
@@ -931,7 +933,7 @@ class CMD_SickBeardRestart(ApiCall):
     _help = {"desc":"restart sickbeard"
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
         # super, missing, help
@@ -947,7 +949,7 @@ class CMD_SickBeardShutdown(ApiCall):
     _help = {"desc":"shutdown sickbeard"
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
         # super, missing, help
@@ -968,9 +970,9 @@ class CMD_SeasonList(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
-        self.sort,args = self.check_params(args, kwargs, "sort", "desc") # "asc" and "desc" default and fallback is "desc"
+        self.sort, args = self.check_params(args, kwargs, "sort", "desc") # "asc" and "desc" default and fallback is "desc"
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1002,9 +1004,9 @@ class CMD_Seasons(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
-        self.season,args = self.check_params(args, kwargs, "season", None, False)
+        self.season, args = self.check_params(args, kwargs, "season", None, False)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1017,7 +1019,7 @@ class CMD_Seasons(ApiCall):
         myDB = db.DBConnection(row_type="dict")
 
         if self.season == None:
-            sqlResults = myDB.select( "SELECT name,episode,airdate,status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+            sqlResults = myDB.select( "SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
             seasons = {}
             for row in sqlResults:
                 row["status"] = statusStrings[row["status"]]
@@ -1031,7 +1033,7 @@ class CMD_Seasons(ApiCall):
                 seasons[curSeason][curEpisode] = row
 
         else:
-            sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid,self.season])
+            sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
             if len(sqlResults) is 0:
                 raise ApiError("Season not Found")
             seasons = {}
@@ -1053,9 +1055,9 @@ class CMD_Show(ApiCall):
                                   }
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs) 
@@ -1118,9 +1120,9 @@ class CMD_ShowDelete(ApiCall):
                                   }
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1144,9 +1146,9 @@ class CMD_ShowRefresh(ApiCall):
                                   }
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1172,7 +1174,7 @@ class CMD_ShowStats(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, False)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, False)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1187,7 +1189,7 @@ class CMD_ShowStats(ApiCall):
         episode_status_counts_total = {}
         episode_status_counts_total["total"] = 0
         for status in statusStrings.statusStrings.keys():
-            if status in [UNKNOWN,DOWNLOADED,SNATCHED,SNATCHED_PROPER]:
+            if status in [UNKNOWN, DOWNLOADED, SNATCHED, SNATCHED_PROPER]:
                 continue
             episode_status_counts_total[status] = 0
         
@@ -1210,7 +1212,7 @@ class CMD_ShowStats(ApiCall):
             episode_qualities_counts_snatch[statusCode] = 0
     
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT status,season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        sqlResults = myDB.select( "SELECT status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
         # the main loop that goes through all episodes
         for row in sqlResults:
             status, quality = Quality.splitCompositeStatus(int(row["status"]))
@@ -1274,9 +1276,9 @@ class CMD_ShowUpdate(ApiCall):
                                   }
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
-        self.tvdbid,args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1301,11 +1303,11 @@ class CMD_Shows(ApiCall):
                                   },
              }
 
-    def __init__(self,args,kwargs):
+    def __init__(self, args, kwargs):
         # required
         # optional
-        self.sort,args = self.check_params(args, kwargs, "sort", "id")
-        self.paused,args = self.check_params(args, kwargs, "paused", None)
+        self.sort, args = self.check_params(args, kwargs, "sort", "id")
+        self.paused, args = self.check_params(args, kwargs, "paused", None)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
            
