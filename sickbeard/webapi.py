@@ -1331,6 +1331,32 @@ class CMD_Shows(ApiCall):
                 shows[curShow.tvdbid] = showDict
         return shows
 
+class CMD_ShowsStats(ApiCall):
+    _help = {"desc":"display the global shows and episode stats"
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ display the global shows and episode stats """
+        stats = {}
+
+        myDB = db.DBConnection()
+        today = str(datetime.date.today().toordinal())
+        stats["shows_total"] = len(sickbeard.showList)
+        stats["shows_active"] = len([x for x in sickbeard.showList if x.paused == 0 and x.status != "Ended"])
+        stats["ep_downloaded"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE status IN ("+",".join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+") AND season != 0 and episode != 0 AND airdate <= "+today+"")[0][0]
+        stats["ep_total"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]])+")) AND airdate <= "+today+" AND status != "+str(IGNORED)+"")[0][0]
+
+        # what todo with these stats ?
+        #stats["next_search"] = str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]
+        #stats["next_backlog"] = sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d").decode(sickbeard.SYS_ENCODING)
+        return stats
+
 
 _functionMaper = {"help":CMD_Help,
                   "future":CMD_ComingEpisodes,
@@ -1357,5 +1383,6 @@ _functionMaper = {"help":CMD_Help,
                   "show.refresh":CMD_ShowRefresh,
                   "show.stats":CMD_ShowStats,
                   "show.update":CMD_ShowUpdate,
-                  "shows":CMD_Shows
+                  "shows":CMD_Shows,
+                  "shows.stats":CMD_ShowsStats
                   }
