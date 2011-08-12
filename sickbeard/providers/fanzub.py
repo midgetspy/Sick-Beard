@@ -142,9 +142,9 @@ class FanzubCache(tvcache.TVCache):
 
 		tvcache.TVCache.__init__(self, provider)
 
-		# only poll Fanzub every 35 minutes max
+		# only poll Fanzub every 20 minutes max
 		# we get 100 post each call !
-		self.minTime = 35
+		self.minTime = 20
 
 	def _getRSSData(self):
 		url = self.provider.url + 'rss?'
