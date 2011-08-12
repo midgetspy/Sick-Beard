@@ -35,8 +35,6 @@ class NMA_Notifier:
         logger.log(u"NMA title: " + title, logger.DEBUG)
         logger.log(u"NMA event: " + event, logger.DEBUG)
         logger.log(u"NMA message: " + message, logger.DEBUG)
-        #logger.log(u"NMA api: " + nma_api, logger.DEBUG)
-        #logger.log(u"NMA priority: " + nma_priority, logger.DEBUG)
         
         batch = False
         
@@ -47,11 +45,11 @@ class NMA_Notifier:
         if len(keys) > 1: batch = True
         
         response = p.push(title, event, message, priority=nma_priority, batch_mode=batch)
-        
-        for key in keys:
-            if not response[str(key)]['code'] == u'200':
-                logger.log(u'Could not send notification to NotifyMyAndroid (%s). %s' % (key,response[key]['message']), logger.ERROR)
-            else:
-                return True
+               
+        if not response[nma_api][u'code'] == u'200':
+            logger.log(u'Could not send notification to NotifyMyAndroid', logger.ERROR)
+            return False
+        else:
+            return True
                         
 notifier = NMA_Notifier
