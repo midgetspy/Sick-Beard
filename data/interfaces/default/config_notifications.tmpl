@@ -349,7 +349,7 @@
                     </fieldset>
                 </div><!-- /component-group //-->
                 
-            <div id="core-component-group5" class="component-group clearfix">
+            	<div id="core-component-group5" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3><a href="http://www.prowlapp.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/prowl.gif" alt="Prowl" title="Prowl" width="16" height="16" /> Prowl</a></h3>
@@ -419,7 +419,7 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
-                 <div id="core-component-group6" class="component-group clearfix">
+                <div id="core-component-group6" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3><a href="http://notifo.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/notifo.gif" alt="Notifo" title="Notifo" width="16" height="16" /> Notifo</a></h3>
@@ -483,7 +483,6 @@
                     </fieldset>
 
                 </div>
-
 
                 <div id="core-component-group7" class="component-group clearfix">
                     <div class="component-group-desc">
@@ -595,6 +594,76 @@
                 </div><!-- /component-group //-->
 
                 <div id="core-component-group9" class="component-group clearfix">
+					<div class="component-group-desc">
+						<h3><a href="http://nma.usk.bz" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nma.jpg" alt="NMA" title="NMA" width="16" height="16" /> Notify My Android</a></h3>
+						<p>Notify My Android is a Prowl-like Android App and API that offers an easy way to send notifications from your application directly to your Android device.</p>
+					</div>
+				
+					<fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_nma" id="use_nma" #if $sickbeard.USE_NMA then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_nma">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send NMA notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_nma">
+                        	<div class="field-pair">
+                            	<input type="checkbox" name="nma_notify_onsnatch" id="nma_notify_onsnatch" #if $sickbeard.NMA_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                            	<label class="clearfix" for="nma_notify_onsnatch">
+                                	<span class="component-title">Notify on Snatch</span>
+                                	<span class="component-desc">Send notification when we start a download?</span>
+                            	</label>
+                        	</div>
+
+                        	<div class="field-pair">
+                            	<input type="checkbox" name="nma_notify_ondownload" id="nma_notify_ondownload" #if $sickbeard.NMA_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            	<label class="clearfix" for="nma_notify_ondownload">
+                                	<span class="component-title">Notify on Download</span>
+                                	<span class="component-desc">Send notification when we finish a download?</span>
+                            	</label>
+                        	</div>
+                        
+                        	<div class="field-pair">
+                            	<label class="nocheck clearfix">
+                               		<span class="component-title">NMA API key:</span>
+                                	<input type="text" name="nma_api" id="nma_api" value="$sickbeard.NMA_API" size="55" />
+                            	</label>
+                            	<label class="nocheck clearfix">
+                                	<span class="component-title">&nbsp;</span>
+                                	<span class="component-desc">Multiple keys must be seperated by a , (comma). Up to a maximum of 5</span>
+                            	</label>
+                        	</div>
+                        
+                        	<div class="field-pair">
+                            	<label class="nocheck clearfix">
+                                	<span class="component-title">NMA priority:</span>
+                               		<select id="nma_priority" name="nma_priority">
+                                    	<option value="-2" #if $sickbeard.NMA_PRIORITY == "-2" then 'selected="selected"' else ""#>Very Low</option>
+                                    	<option value="-1" #if $sickbeard.NMA_PRIORITY == "-1" then 'selected="selected"' else ""#>Moderate</option>
+                                    	<option value="0" #if $sickbeard.NMA_PRIORITY == "0" then 'selected="selected"' else ""#>Normal</option>
+                                    	<option value="1" #if $sickbeard.NMA_PRIORITY == "1" then 'selected="selected"' else ""#>High</option>
+                                    	<option value="2" #if $sickbeard.NMA_PRIORITY == "2" then 'selected="selected"' else ""#>Emergency</option>
+                                	</select>
+                            	</label>
+                            	<label class="nocheck clearfix">
+                                	<span class="component-title">&nbsp;</span>
+                                	<span class="component-desc">Priority of NMA messages from Sick-Beard.</span>
+                            	</label>
+                        	</div>
+
+                        	<div class="testNotification" id="testNMA-result">Click below to test.</div>
+                        	<input type="button" value="Test NMA" id="testNMA" />
+                        	<input type="submit" class="config_submitter" value="Save Changes" />
+
+                        </div><!-- /content_use_nma //-->
+
+                    </fieldset>
+                    
+				</div>
+                
+                <div id="core-component-group10" class="component-group clearfix">
                     <div class="component-group-desc">
                         <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synoindex.gif" alt="Synology Indexer" title="Synology Indexer" width="16" height="16" /> Synology Indexer</a></h3>
                         <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>

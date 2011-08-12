@@ -233,6 +233,12 @@ USE_LIBNOTIFY = False
 LIBNOTIFY_NOTIFY_ONSNATCH = False
 LIBNOTIFY_NOTIFY_ONDOWNLOAD = False
 
+USE_NMA = False
+NMA_NOTIFY_ONSNATCH = False
+NMA_NOTIFY_ONDOWNLOAD = False
+NMA_API = None
+NMA_PRIORITY = 0
+
 USE_NMJ = False
 NMJ_HOST = None
 NMJ_DATABASE = None
@@ -362,7 +368,8 @@ def initialize(consoleLogging=True):
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
+                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, \
+                NMA_API, NMA_PRIORITY, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS
@@ -379,11 +386,13 @@ def initialize(consoleLogging=True):
         CheckSection('NZBget')
         CheckSection('XBMC')
         CheckSection('PLEX')
+        
         CheckSection('Growl')
         CheckSection('Prowl')
         CheckSection('Twitter')
         CheckSection('NMJ')
         CheckSection('Synology')
+        CheckSection('NMA')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -566,7 +575,13 @@ def initialize(consoleLogging=True):
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
         LIBNOTIFY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onsnatch', 0))
         LIBNOTIFY_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_ondownload', 0))
-
+        
+        USE_NMA = bool(check_setting_int(CFG, 'NMA', 'use_nma', 0))
+        NMA_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_notify_onsnatch', 0))
+        NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
+        NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
+        NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+		
         USE_NMJ = bool(check_setting_int(CFG, 'NMJ', 'use_nmj', 0))
         NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
         NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
@@ -1019,11 +1034,15 @@ def save_config():
     new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
 
+   
     new_config['Plex'] = {}
+    
     new_config['Plex']['use_plex'] = int(USE_PLEX)
+    
     new_config['Plex']['plex_notify_onsnatch'] = int(PLEX_NOTIFY_ONSNATCH)
     new_config['Plex']['plex_notify_ondownload'] = int(PLEX_NOTIFY_ONDOWNLOAD)
     new_config['Plex']['plex_update_library'] = int(PLEX_UPDATE_LIBRARY)
+    
     new_config['Plex']['plex_server_host'] = PLEX_SERVER_HOST
     new_config['Plex']['plex_host'] = PLEX_HOST
     new_config['Plex']['plex_username'] = PLEX_USERNAME
@@ -1062,6 +1081,14 @@ def save_config():
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
     new_config['Libnotify']['libnotify_notify_onsnatch'] = int(LIBNOTIFY_NOTIFY_ONSNATCH)
     new_config['Libnotify']['libnotify_notify_ondownload'] = int(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
+
+    new_config['NMA'] = {}
+    new_config['NMA']['use_nma'] = int(USE_NMA)
+    new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
+    new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
+    new_config['NMA']['nma_api'] = NMA_API
+    new_config['NMA']['nma_priority'] = NMA_PRIORITY
+
 
     new_config['NMJ'] = {}
     new_config['NMJ']['use_nmj'] = int(USE_NMJ)
