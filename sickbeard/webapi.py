@@ -408,18 +408,23 @@ class CMD_Help(ApiCall):
 
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc":"display the coming episodes",
-             "optionalPramameters":{"sort":"date/network/show - change the sort order"}
+             "optionalPramameters":{"sort":"date/network/show - change the sort order",
+                                    "type":"one or more of missed/later/today/soon separated by |"}
              }
 
     def __init__(self, args, kwargs): 
         # required
         # optional
         self.sort, args = self.check_params(args, kwargs, "sort", "date")
+        self.type, args = self.check_params(args, kwargs, "type", None)
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display the coming episodes """
+        if self.type != None:
+            self.type = self.type.split("|")
+
         today = datetime.date.today().toordinal()
         next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
@@ -448,7 +453,7 @@ class CMD_ComingEpisodes(ApiCall):
 
         #epList.sort(sorts[sort])
         sql_results.sort(sorts[self.sort])
-        finalEpResults = []
+        finalEpResults = {}
         for ep in sql_results:
             """
                 Missed:   yesterday... (less than 1week)
@@ -456,15 +461,21 @@ class CMD_ComingEpisodes(ApiCall):
                 Soon:     tomorrow till next week
                 Later:    later than next week
             """
+            status = "soon"
             if ep["airdate"] < today:
-                ep["status"] = "Missed"
+                status = "missed"
             elif ep["airdate"] >= next_week:
-                ep["status"] = "Later"
+                status = "later"
             elif ep["airdate"] >= today and ep["airdate"] < next_week:
                 if ep["airdate"] == today:
-                    ep["status"] = "Today"
+                    status = "today"
                 else:
-                    ep["status"] = "Soon"
+                    status = "soon"
+
+            # skip unwanted
+            if self.type != None and not status in self.type:
+                continue
+
             ordinalAirdate = int(ep["airdate"])
             if not ep["network"]:
                 ep["network"] = ""
@@ -474,7 +485,12 @@ class CMD_ComingEpisodes(ApiCall):
             ep["airs"] = str(ep["airs"]).replace('am', ' AM').replace('pm',' PM').replace('  ', ' ')
             # TODO: choose eng weekday string OR number of weekday as int
             ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
-            finalEpResults.append(ep)
+
+            if finalEpResults.has_key(status):
+                finalEpResults[status].append(ep)
+            else:
+                finalEpResults[status] = []
+
         return finalEpResults
 
 
