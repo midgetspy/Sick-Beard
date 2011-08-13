@@ -20,17 +20,16 @@
 
 import os
 import subprocess
-import urllib
-import urllib2
-
 import sickbeard
+
+from urllib import urlencode
+from urllib2 import Request, urlopen, URLError
 
 from sickbeard import logger
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
 
 from httplib import HTTPSConnection
-#from urllib import urlencode
 
 class pyTivoNotifier:
 
@@ -41,15 +40,8 @@ class pyTivoNotifier:
         pass
 
     def update_library(self, ep_obj):
-        logger.log(u"pyTivo update_library called")
-
 
 		# Values from config
-        
-        # Hard Coded for now.                
-        #host="http://media:9032/"
-        #tsn="Tee Vee"
-        #shareName = "Media/"
         
         host = sickbeard.PYTIVO_HOST
         shareName = sickbeard.PYTIVO_SHARE_NAME
@@ -64,10 +56,10 @@ class pyTivoNotifier:
         absPath = ep_obj.location
         
         
-        logger.log(u"showPath:          " + showPath )
-        logger.log(u"showName:          " + showName )
-        logger.log(u"rootShowAndSeason: " + rootShowAndSeason )
-        logger.log(u"absPath:           " + absPath )
+        #logger.log(u"showPath:          " + showPath )
+        #logger.log(u"showName:          " + showName )
+        #logger.log(u"rootShowAndSeason: " + rootShowAndSeason )
+        #logger.log(u"absPath:           " + absPath )
 
                 
         root = showPath.replace(showName, "")
@@ -80,25 +72,25 @@ class pyTivoNotifier:
         
         # Finally create the url and make request
         
-        requestUrl = "http://" + host + "/TiVoConnect?" + urllib.urlencode( {'Command':'Push', 'Container':container, 'File':file, 'tsn':tsn} )
+        requestUrl = "http://" + host + "/TiVoConnect?" + urlencode( {'Command':'Push', 'Container':container, 'File':file, 'tsn':tsn} )
                
-        logger.log(u"request: " + requestUrl )
+        logger.log(u"pyTivo notification: Requesting " + requestUrl)
         
-        request = urllib2.Request( requestUrl )
-        response = urllib2.urlopen(request)
+        request = Request( requestUrl )
 
-		
-		# Parse response
-
-        logger.log(u"response.status: " + response.status);
-
-        request_status = response.status
-
-        if request_status == 200:
-            logger.log(u"pyTivo notifications sent.", logger.DEBUG)
-            return True
+        try:
+            response = urlopen(request)      
+        except URLError, e:
+            if hasattr(e, 'reason'):
+                logger.log(u"pyTivo notification: Error, failed to reach a server")
+                logger.log(u"'Error reason: " + e.reason)
+                return False
+            elif hasattr(e, 'code'):
+                logger.log(u"pyTivo notification: Error, the server couldn't fulfill the request")
+                logger.log(u"Error code: " + e.code)
+                return False
         else:
-            logger.log(u"pyTivo notification failed.", logger.ERROR)
-            return False
+            logger.log(u"pyTivo notification: Successfully requested transfer of file")
+            return True
 
 notifier = pyTivoNotifier
