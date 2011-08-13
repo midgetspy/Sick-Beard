@@ -359,9 +359,9 @@ def _ordinal_to_dateForm(ordinal):
         return ""
     return date.strftime(dateFormat)
 
-def _historyDate_to_dateForm(timeString):
+def _historyDate_to_dateTimeForm(timeString):
     date = datetime.datetime.strptime(timeString, history.dateFormat)
-    return date.strftime(dateFormat)
+    return date.strftime(dateTimeFormat)
 
 def _replace_statusStrings_with_statusCodes(statusStrings):
     statusCodes = []
@@ -749,7 +749,7 @@ class CMD_History(ApiCall):
                 continue
             row["action"] = status
             row["quality"] = _get_quality_string(quality)
-            row["date"] = _historyDate_to_dateForm(str(row["date"]))
+            row["date"] = _historyDate_to_dateTimeForm(str(row["date"]))
             _rename_element(row, "showid", "tvdbid")
             row["resource_path"] = os.path.dirname(row["resource"])
             row["resource"] = os.path.basename(row["resource"])
@@ -884,7 +884,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
         searchStatus = sickbeard.currentSearchScheduler.action.amActive #@UndefinedVariable
 
-        return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateTimeForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus)}
+        return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus)}
 
 
 class CMD_SickBeardForceSearch(ApiCall):
