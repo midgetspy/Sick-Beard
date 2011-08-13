@@ -486,10 +486,10 @@ class CMD_ComingEpisodes(ApiCall):
             # TODO: choose eng weekday string OR number of weekday as int
             ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
 
-            if finalEpResults.has_key(status):
-                finalEpResults[status].append(ep)
-            else:
+            if not finalEpResults.has_key(status):
                 finalEpResults[status] = []
+
+            finalEpResults[status].append(ep)
 
         return finalEpResults
 
