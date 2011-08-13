@@ -707,13 +707,16 @@ class PostProcessor(object):
 
         # do the library update
         notifiers.xbmc_notifier.update_library(ep_obj.show.name)
-
+        
         # do the library update for Plex Media Server
         notifiers.plex_notifier.update_library()
-
+        
         # do the library update for synoindex
         notifiers.synoindex_notifier.update_library(ep_obj)
-
+                
+        # do the library update for pyTivo
+        notifiers.pytivo_notifier.update_library(ep_obj)
+        
         # run extra_scripts
         self._run_extra_scripts(ep_obj)
 
