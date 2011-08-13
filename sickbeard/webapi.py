@@ -36,8 +36,9 @@ except ImportError:
     from lib import simplejson as json
 
 
-_dateFormat = "%Y-%m-%d %H:%M"
-dateFormat = ""
+dateFormat = "%Y-%m-%d"
+dateTimeFormat = "%Y-%m-%d %H:%M"
+
 dayofWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
  
 class Api:
@@ -62,6 +63,7 @@ class Api:
             logger.log(accessMsg, logger.WARNING)
             return outputCallback(_error(accessMsg))
 
+        """
         # global dateForm
         # TODO: refactor dont change the module var all the time
         global dateFormat
@@ -69,7 +71,7 @@ class Api:
         if kwargs.has_key("dateForm"):
             dateFormat = str(kwargs["dateForm"])
             del kwargs["dateForm"]
-
+        """
         # set the original call_dispatcher as the local _call_dispatcher
         _call_dispatcher = call_dispatcher
         # if profile was set wrap "_call_dispatcher" in the profile function
@@ -342,21 +344,23 @@ def _get_quality_string(q):
 def _get_status_Strings(s):
     return statusStrings[s]
 
-def _ordinal_to_dateForm(ordinal):
+def _ordinal_to_dateTimeForm(ordinal):
     # workaround for episodes with no airdate
     if int(ordinal) != 1:
         date = datetime.date.fromordinal(ordinal)
     else:
         return ""
-    return _convert_date_dateform(date, ordinal)
+    return date.strftime(dateTimeFormat)
+
+def _ordinal_to_dateForm(ordinal):
+    if int(ordinal) != 1:
+        date = datetime.date.fromordinal(ordinal)
+    else:
+        return ""
+    return date.strftime(dateFormat)
 
 def _historyDate_to_dateForm(timeString):
     date = datetime.datetime.strptime(timeString, history.dateFormat)
-    return _convert_date_dateform(date, timeString)
-
-def _convert_date_dateform(date, raw):
-    if not dateFormat or dateFormat == "raw":
-        return raw
     return date.strftime(dateFormat)
 
 def _replace_statusStrings_with_statusCodes(statusStrings):
@@ -880,7 +884,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
         searchStatus = sickbeard.currentSearchScheduler.action.amActive #@UndefinedVariable
 
-        return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus)}
+        return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateTimeForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus)}
 
 
 class CMD_SickBeardForceSearch(ApiCall):
