@@ -94,7 +94,7 @@ class Api:
         return outputCallback(outDict)
     
     @cherrypy.expose
-    def builder(self, *args, **kwargs):
+    def builder(self):
         """ expose the api-builder template """
         t = webserve.PageTemplate(file="apiBuilder.tmpl")
 
@@ -303,10 +303,10 @@ class TVDBShorthandWrapper(ApiCall):
 ################################
 #     helper functions         #
 ################################
-def _is_int(foo):
+def _is_int(data):
     try:
-        int(foo)
-    except:
+        int(data)
+    except (RuntimeError, TypeError, NameError):
         return False
     else:
         return True
@@ -321,7 +321,7 @@ def _rename_element(dict, oldKey, newKey):
     try:
         dict[newKey] = dict[oldKey]
         del dict[oldKey]
-    except:
+    except (RuntimeError, TypeError, NameError):
         pass
     return dict
 
@@ -533,7 +533,7 @@ class CMD_Episode(ApiCall):
         showPath = None
         try:
             showPath = showObj.location
-        except:
+        except sickbeard.exceptions.ShowDirNotFoundException:
             pass
     
         if self.fullPath == "1" and showPath: # we get the full path by default so no need to change
@@ -1102,9 +1102,9 @@ class CMD_Show(ApiCall):
     
         try:
             showDict["location"] = showObj.location
-        except:
+        except sickbeard.exceptions.ShowDirNotFoundException:
             showDict["location"] = ""
-    
+
         # easy stuff
         showDict["language"] = showObj.lang
         showDict["show_name"] = showObj.name
@@ -1242,7 +1242,6 @@ class CMD_ShowStats(ApiCall):
             if status in Quality.DOWNLOADED:
                 episode_qualities_counts_download["total"] += 1
                 episode_qualities_counts_download[int(row["status"])] += 1
-            
             elif status in Quality.SNATCHED+Quality.SNATCHED_PROPER:
                 episode_qualities_counts_snatch["total"] += 1
                 episode_qualities_counts_snatch[int(row["status"])] += 1
@@ -1262,8 +1261,8 @@ class CMD_ShowStats(ApiCall):
             status, quality = Quality.splitCompositeStatus(statusCode)
             statusString = Quality.qualityStrings[quality].lower().replace(" ","_").replace("(","").replace(")","")
             episodes_stats["downloaded"][statusString] = episode_qualities_counts_download[statusCode]
-        
-         
+
+
         episodes_stats["snatched"] = {}
         # truning codes into strings
         # and combining proper and normal
