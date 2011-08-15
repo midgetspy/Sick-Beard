@@ -477,14 +477,13 @@ class CMD_ComingEpisodes(ApiCall):
         # required
         # optional
         self.sort, args = self.check_params(args, kwargs, "sort", "date")
-        self.type, args = self.check_params(args, kwargs, "type", None)
+        self.type, args = self.check_params(args, kwargs, "type", "today|missed|soon|later")
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display the coming episodes """
-        if self.type != None:
-            self.type = self.type.split("|")
+        self.type = self.type.split("|")
 
         today = datetime.date.today().toordinal()
         next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
@@ -515,6 +514,14 @@ class CMD_ComingEpisodes(ApiCall):
         #epList.sort(sorts[sort])
         sql_results.sort(sorts[self.sort])
         finalEpResults = {}
+
+        # add all requested types or all
+        for type in self.type:
+            if type in ["today","missed","soon","later"]:
+                finalEpResults[type] = []
+            else:
+                return _error("Invalid type: "+type)
+
         for ep in sql_results:
             """
                 Missed:   yesterday... (less than 1week)
@@ -547,6 +554,8 @@ class CMD_ComingEpisodes(ApiCall):
             # TODO: choose eng weekday string OR number of weekday as int
             ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
 
+            # TODO: check if this obsolete
+            # this might be obsolete
             if not status in finalEpResults:
                 finalEpResults[status] = []
 
