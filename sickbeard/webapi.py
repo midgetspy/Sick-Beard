@@ -29,7 +29,7 @@ from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from common import *
-from lib.tvdb_api import tvdb_api
+from sickbeard import image_cache
 
 try:
     import json
@@ -214,7 +214,7 @@ def filter_params(cmd, args, kwargs):
     for arg in args:
         curArgs.append(arg.lower())
     curArgs = tuple(curArgs)
-        
+
     curKwargs = {}
     for kwarg in kwargs:
         # logger.log("cmd: "+cmd+" kwarg: "+kwarg+" find: "+str(kwarg.find(cmd+".")), logger.DEBUG)
@@ -516,10 +516,10 @@ class CMD_ComingEpisodes(ApiCall):
 
         # add all requested types or all
         for type in self.type:
-            if type in ["today","missed","soon","later"]:
+            if type in ["today", "missed", "soon", "later"]:
                 finalEpResults[type] = []
             else:
-                return _error("Invalid type: "+type)
+                return _error("Invalid type: " + type)
 
         for ep in sql_results:
             """
@@ -1154,6 +1154,7 @@ class CMD_Show(ApiCall):
 
         showDict = {}
         showDict["season_list"] = CMD_SeasonList((), {"tvdbid": self.tvdbid}).run()
+        showDict["cache"] = CMD_ShowCache((), {"tvdbid": self.tvdbid}).run()
 
         genreList = []
         if showObj.genre:
@@ -1195,8 +1196,38 @@ class CMD_ShowAdd(ApiCall):
 
     def run(self):
         """ add a show in sickbeard """
-        t = tvdb_api.Tvdb()
-        return t['Scrubs']
+        return "not yet implemented"
+
+
+class CMD_ShowCache(ApiCall):
+    _help = {"desc": "check sickbeard's cache to see if the banner or poster image for a show is valid",
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ check sickbeard's cache to see if the banner or poster image for a show is valid """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
+        cache_obj = image_cache.ImageCache()
+
+        if ek.ek(os.path.isfile, cache_obj.poster_path(showObj.tvdbid)):
+            has_poster = 1
+        else:
+            has_poster = 0
+        if ek.ek(os.path.isfile, cache_obj.banner_path(showObj.tvdbid)):
+            has_banner = 1
+        else:
+            has_banner = 0
+
+        return {"poster": has_poster, "banner": has_banner}
 
 
 class CMD_ShowDelete(ApiCall):
@@ -1407,6 +1438,7 @@ class CMD_Shows(ApiCall):
                         "air_by_date": curShow.air_by_date,
                         "tvrage_id": curShow.tvrid,
                         "tvrage_name": curShow.tvrname}
+            showDict["cache"] = CMD_ShowCache((), {"tvdbid": curShow.tvdbid}).run()
             if self.sort == "name":
                 showDict["tvdbid"] = curShow.tvdbid
                 shows[curShow.name] = showDict
@@ -1464,6 +1496,7 @@ _functionMaper = {"help": CMD_Help,
                   "seasons": CMD_Seasons,
                   "show": CMD_Show,
                   "show.add": CMD_ShowAdd,
+                  "show.cache": CMD_ShowCache,
                   "show.delete": CMD_ShowDelete,
                   "show.refresh": CMD_ShowRefresh,
                   "show.stats": CMD_ShowStats,
