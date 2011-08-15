@@ -210,10 +210,11 @@ def filter_params(cmd, args, kwargs):
 
         all args and kwarks are lowerd
     """
-    curArgs = ()
+    curArgs = []
     for arg in args:
-        curArgs = curArgs + (arg.lower())
-
+        curArgs.append(arg.lower())
+    curArgs = tuple(curArgs)
+        
     curKwargs = {}
     for kwarg in kwargs:
         # logger.log("cmd: "+cmd+" kwarg: "+kwarg+" find: "+str(kwarg.find(cmd+".")), logger.DEBUG)
