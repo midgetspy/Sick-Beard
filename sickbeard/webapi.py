@@ -163,28 +163,58 @@ def call_dispatcher(args, kwargs):
     """ calls the appropriate CMD class
         looks for a cmd in args and kwargs
         or calls the TVDBShorthandWrapper when the first args element is a number
-        it falls back to the index cmd
+        or returns an error that there is no such cmd
     """
     logger.log("api: all args: '"+str(args)+"'", logger.DEBUG)
     logger.log("api: all kwargs: '"+str(kwargs)+"'", logger.DEBUG)
     #logger.log("api: dateFormat: '"+str(dateFormat)+"'", logger.DEBUG)
 
-    cmd = None
+    cmds = None
     if args:
-        cmd = args[0]
+        cmds = args[0]
         args = args[1:]
 
     if kwargs.get("cmd"):
-        cmd = kwargs.get("cmd")
+        cmds = kwargs.get("cmd")
 
-    if _functionMaper.get(cmd, False):
-        outDict = _functionMaper.get(cmd)(args, kwargs).run() 
-    elif _is_int(cmd):
-        outDict = TVDBShorthandWrapper(args, kwargs, cmd).run() 
-    else:
-        outDict = CMD_SickBeard(args, kwargs).run()
+    outDict = {}
+    if cmds != None:
+        cmds = cmds.split("|")
+        for cmd in cmds:
+            curArgs, curKwargs = filter_params(cmd, args, kwargs)
+            logger.log(cmd+": curKwargs "+str(curKwargs), logger.DEBUG)
+
+            if _functionMaper.get(cmd, False):
+                curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run()
+            elif _is_int(cmd):
+                curOutDict = TVDBShorthandWrapper(curArgs, curKwargs, cmd).run()
+            else:
+                curOutDict = _error("No such cmd: '"+cmd+"'")
+
+            if len(cmds) > 1:
+                outDict["cmd_"+cmd] = curOutDict
+            else:
+                outDict = curOutDict
+                break
+    else: # index / no cmd given
+        outDict = CMD_SickBeard(args,kwargs).run()
 
     return outDict
+
+def filter_params(cmd, args, kwargs):
+    """ return only params kwargs that are for cmd
+        and rename them to a clean version (remove "<cmd>_")
+        args are shared across all cmds
+    """
+    curArgs = args
+    curKwargs = {}
+
+    for kwarg in kwargs:
+        # logger.log("cmd: "+cmd+" kwarg: "+kwarg+" find: "+str(kwarg.find(cmd+".")), logger.DEBUG)
+        if kwarg.find(cmd+".") == 0:
+            cleanKey = kwarg.rpartition(".")[2]
+            curKwargs[cleanKey] = kwargs[kwarg]
+    return curArgs, curKwargs
 
 class ApiCall(object):
     _help = {"desc":"No help message available. Please tell the devs that a help msg is missing for this cmd"}
