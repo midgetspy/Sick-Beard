@@ -213,6 +213,7 @@ def filter_params(cmd, args, kwargs):
 
     for kwarg in kwargs:
         # logger.log("cmd: "+cmd+" kwarg: "+kwarg+" find: "+str(kwarg.find(cmd+".")), logger.DEBUG)
+        curKwargs[kwarg] = kwargs[kwarg]
         if kwarg.find(cmd+".") == 0:
             cleanKey = kwarg.rpartition(".")[2]
             curKwargs[cleanKey] = kwargs[kwarg]
