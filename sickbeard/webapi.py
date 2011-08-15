@@ -1211,7 +1211,7 @@ class CMD_ShowStats(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, False)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
