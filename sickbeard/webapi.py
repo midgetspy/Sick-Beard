@@ -207,16 +207,20 @@ def filter_params(cmd, args, kwargs):
     """ return only params kwargs that are for cmd
         and rename them to a clean version (remove "<cmd>_")
         args are shared across all cmds
-    """
-    curArgs = args
-    curKwargs = {}
 
+        all args and kwarks are lowerd
+    """
+    curArgs = ()
+    for arg in args:
+        curArgs = curArgs + (arg.lower())
+
+    curKwargs = {}
     for kwarg in kwargs:
         # logger.log("cmd: "+cmd+" kwarg: "+kwarg+" find: "+str(kwarg.find(cmd+".")), logger.DEBUG)
-        curKwargs[kwarg] = kwargs[kwarg]
+        curKwargs[kwarg] = kwargs[kwarg].lower()
         if kwarg.find(cmd + ".") == 0:
             cleanKey = kwarg.rpartition(".")[2]
-            curKwargs[cleanKey] = kwargs[kwarg]
+            curKwargs[cleanKey] = kwargs[kwarg].lower()
     return curArgs, curKwargs
 
 
