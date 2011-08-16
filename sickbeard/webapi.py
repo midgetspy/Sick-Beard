@@ -123,7 +123,7 @@ class Api:
 
         t.seasonSQLResults = seasonSQLResults
         t.episodeSQLResults = episodeSQLResults
-        
+
         myDB.connection.close()
         return webserve._munge(t)
 
@@ -193,7 +193,6 @@ def call_dispatcher(args, kwargs):
                 curOutDict = TVDBShorthandWrapper(curArgs, curKwargs, cmd).run()
             else:
                 curOutDict = _error("No such cmd: '" + cmd + "'")
-
 
             if len(cmds) > 1:
                 outDict["cmd_" + cmd] = curOutDict
@@ -504,7 +503,6 @@ class CMD_ComingEpisodes(ApiCall):
         more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
-
         # sort by air date
         sorts = {
             'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
@@ -614,7 +612,7 @@ class CMD_Episode(ApiCall):
         # convert stuff to human form
         episode["airdate"] = _ordinal_to_dateForm(episode["airdate"])
         episode["status"] = _get_status_Strings(episode["status"])
-        
+
         myDB.connection.close()
         return episode
 
@@ -802,14 +800,13 @@ class CMD_History(ApiCall):
         else:
             self.typeCodes = Quality.SNATCHED + Quality.DOWNLOADED
 
-
         myDB = db.DBConnection(row_type="dict")
 
         ulimit = min(int(self.limit), 100)
         if ulimit == 0:
             sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC", self.typeCodes )
         else:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC LIMIT ?", self.typeCodes + [ ulimit ] )
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC LIMIT ?", self.typeCodes + [ulimit] )
 
         results = []
         for row in sqlResults:
@@ -862,7 +859,7 @@ class CMD_HistoryTrim(ApiCall):
         """ trim sickbeard's history """
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < " + str((datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)))
-        
+
         myDB.connection.close()
         return _result("Removed history entries greater than 30 days old")
 
@@ -954,14 +951,16 @@ class CMD_SickBeardCheckScheduler(ApiCall):
     def run(self):
         """ query the scheduler """
         myDB = db.DBConnection()
-        sqlResults = myDB.select( "SELECT last_backlog FROM info")
+        sqlResults = myDB.select("SELECT last_backlog FROM info")
 
         backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused() #@UndefinedVariable
         backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
         searchStatus = sickbeard.currentSearchScheduler.action.amActive #@UndefinedVariable
+        nextSearch = str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]
+        nextBacklog = sickbeard.backlogSearchScheduler.nextRun().strftime(dateFormat).decode(sickbeard.SYS_ENCODING)
 
         myDB.connection.close()
-        return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus)}
+        return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
 
 
 class CMD_SickBeardForceSearch(ApiCall):
@@ -1080,13 +1079,13 @@ class CMD_SeasonList(ApiCall):
 
         myDB = db.DBConnection(row_type="dict")
         if self.sort == "asc":
-            sqlResults = myDB.select( "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season ASC", [self.tvdbid])
+            sqlResults = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season ASC", [self.tvdbid])
         else:
-            sqlResults = myDB.select( "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season DESC", [self.tvdbid])
+            sqlResults = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season DESC", [self.tvdbid])
         seasonList = [] # a list with all season numbers
         for row in sqlResults:
             seasonList.append(int(row["season"]))
-        
+
         myDB.connection.close()
         return seasonList
 
@@ -1116,7 +1115,7 @@ class CMD_Seasons(ApiCall):
         myDB = db.DBConnection(row_type="dict")
 
         if self.season == None:
-            sqlResults = myDB.select( "SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+            sqlResults = myDB.select("SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
             seasons = {}
             for row in sqlResults:
                 row["status"] = statusStrings[row["status"]]
@@ -1130,14 +1129,14 @@ class CMD_Seasons(ApiCall):
                 seasons[curSeason][curEpisode] = row
 
         else:
-            if self.season in ["last","first"]:
-                seasonList = CMD_SeasonList((),{"tvdbid":self.tvdbid}).run()
+            if self.season in ["last", "first"]:
+                seasonList = CMD_SeasonList((), {"tvdbid": self.tvdbid}).run()
                 if self.season == "last":
                     self.season = seasonList[0]
                 else:
                     self.season = seasonList[-1]
-            
-            sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
+
+            sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
             if len(sqlResults) is 0:
                 raise ApiError("Season not Found")
             seasons = {}
@@ -1149,7 +1148,7 @@ class CMD_Seasons(ApiCall):
                 if not curEpisode in seasons:
                     seasons[curEpisode] = {}
                 seasons[curEpisode] = row
-        
+
         myDB.connection.close()
         return seasons
 
@@ -1349,7 +1348,7 @@ class CMD_ShowStats(ApiCall):
             episode_qualities_counts_snatch[statusCode] = 0
 
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select( "SELECT status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        sqlResults = myDB.select("SELECT status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
         # the main loop that goes through all episodes
         for row in sqlResults:
             status, quality = Quality.splitCompositeStatus(int(row["status"]))
@@ -1378,7 +1377,6 @@ class CMD_ShowStats(ApiCall):
             status, quality = Quality.splitCompositeStatus(statusCode)
             statusString = Quality.qualityStrings[quality].lower().replace(" ", "_").replace("(", "").replace(")", "")
             episodes_stats["downloaded"][statusString] = episode_qualities_counts_download[statusCode]
-
 
         episodes_stats["snatched"] = {}
         # truning codes into strings
@@ -1491,10 +1489,6 @@ class CMD_ShowsStats(ApiCall):
         stats["ep_downloaded"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE status IN (" + ",".join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]]) + ") AND season != 0 and episode != 0 AND airdate <= " + today + "")[0][0]
         stats["ep_total"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN (" + ",".join([str(x) for x in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]]) + ")) AND airdate <= " + today + " AND status != " + str(IGNORED) + "")[0][0]
 
-        # what todo with these stats ?
-        #stats["next_search"] = str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]
-        #stats["next_backlog"] = sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d").decode(sickbeard.SYS_ENCODING)
-        
         myDB.connection.close()
         return stats
 
