@@ -1082,7 +1082,7 @@ class CMD_Seasons(ApiCall):
     _help = {"desc": "display a listing of episodes for all or a given season",
              "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
                                   },
-             "optionalPramameters": {"season": "## - the season number",
+             "optionalPramameters": {"season": "## - the season number OR 'last' OR 'first'",
                                   }
              }
 
@@ -1117,6 +1117,13 @@ class CMD_Seasons(ApiCall):
                 seasons[curSeason][curEpisode] = row
 
         else:
+            if self.season in ["last","first"]:
+                seasonList = CMD_SeasonList((),{"tvdbid":self.tvdbid}).run()
+                if self.season == "last":
+                    self.season = seasonList[0]
+                else:
+                    self.season = seasonList[-1]
+            
             sqlResults = myDB.select( "SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
             if len(sqlResults) is 0:
                 raise ApiError("Season not Found")
