@@ -24,7 +24,7 @@ import threading
 import cherrypy
 import sickbeard
 import webserve
-from sickbeard import db, logger, exceptions, history
+from sickbeard import db as org_db, logger, exceptions, history
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
@@ -201,6 +201,12 @@ def call_dispatcher(args, kwargs):
     else: # index / no cmd given
         outDict = CMD_SickBeard(args, kwargs).run()
 
+    global openConnections
+    for con in openConnections:
+        logger.log("api: closing db connection: "+str(con), logger.DEBUG)
+        con.connection.close()
+    openConnections = []
+
     return outDict
 
 
@@ -345,6 +351,16 @@ class TVDBShorthandWrapper(ApiCall):
 #     helper functions         #
 ################################
 
+openConnections = [] # will hold all connection objs
+class APIDB:
+    """fake db interface to log all connections"""
+    def DBConnection(self,filename="sickbeard.db", suffix=None, row_type=None):
+        dbcon = org_db.DBConnection(filename, suffix, row_type)
+        global openConnections
+        openConnections.append(dbcon)
+        return dbcon
+
+db = APIDB() # save fake interface instance as normal interface name
 
 def _is_int(data):
     try:
