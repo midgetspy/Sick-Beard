@@ -24,7 +24,7 @@ import threading
 import cherrypy
 import sickbeard
 import webserve
-from sickbeard import db as org_db, logger, exceptions, history
+from sickbeard import db, logger, exceptions, history
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
@@ -123,6 +123,8 @@ class Api:
 
         t.seasonSQLResults = seasonSQLResults
         t.episodeSQLResults = episodeSQLResults
+        
+        myDB.connection.close()
         return webserve._munge(t)
 
     def _out_as_json(self, dict):
@@ -200,12 +202,6 @@ def call_dispatcher(args, kwargs):
                 break
     else: # index / no cmd given
         outDict = CMD_SickBeard(args, kwargs).run()
-
-    global openConnections
-    for con in openConnections:
-        logger.log("api: closing db connection: "+str(con), logger.DEBUG)
-        con.connection.close()
-    openConnections = []
 
     return outDict
 
@@ -350,17 +346,6 @@ class TVDBShorthandWrapper(ApiCall):
 ################################
 #     helper functions         #
 ################################
-
-openConnections = [] # will hold all connection objs
-class APIDB:
-    """fake db interface to log all connections"""
-    def DBConnection(self,filename="sickbeard.db", suffix=None, row_type=None):
-        dbcon = org_db.DBConnection(filename, suffix, row_type)
-        global openConnections
-        openConnections.append(dbcon)
-        return dbcon
-
-db = APIDB() # save fake interface instance as normal interface name
 
 def _is_int(data):
     try:
@@ -576,7 +561,7 @@ class CMD_ComingEpisodes(ApiCall):
                 finalEpResults[status] = []
 
             finalEpResults[status].append(ep)
-
+        myDB.connection.close()
         return finalEpResults
 
 
@@ -629,6 +614,8 @@ class CMD_Episode(ApiCall):
         # convert stuff to human form
         episode["airdate"] = _ordinal_to_dateForm(episode["airdate"])
         episode["status"] = _get_status_Strings(episode["status"])
+        
+        myDB.connection.close()
         return episode
 
 
@@ -784,6 +771,7 @@ class CMD_Exceptions(ApiCall):
             for row in sqlResults:
                 exceptions.append(row["show_name"])
 
+        myDB.connection.close()
         return exceptions
 
 
@@ -836,6 +824,8 @@ class CMD_History(ApiCall):
             row["resource_path"] = os.path.dirname(row["resource"])
             row["resource"] = os.path.basename(row["resource"])
             results.append(row)
+
+        myDB.connection.close()
         return results
 
 
@@ -853,6 +843,8 @@ class CMD_HistoryClear(ApiCall):
         """ clear sickbeard's history """
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
+
+        myDB.connection.close()
         return _result("History Cleared")
 
 
@@ -870,6 +862,8 @@ class CMD_HistoryTrim(ApiCall):
         """ trim sickbeard's history """
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < " + str((datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)))
+        
+        myDB.connection.close()
         return _result("Removed history entries greater than 30 days old")
 
 
@@ -966,6 +960,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
         searchStatus = sickbeard.currentSearchScheduler.action.amActive #@UndefinedVariable
 
+        myDB.connection.close()
         return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus)}
 
 
@@ -1091,7 +1086,8 @@ class CMD_SeasonList(ApiCall):
         seasonList = [] # a list with all season numbers
         for row in sqlResults:
             seasonList.append(int(row["season"]))
-
+        
+        myDB.connection.close()
         return seasonList
 
 
@@ -1153,7 +1149,8 @@ class CMD_Seasons(ApiCall):
                 if not curEpisode in seasons:
                     seasons[curEpisode] = {}
                 seasons[curEpisode] = row
-
+        
+        myDB.connection.close()
         return seasons
 
 
@@ -1406,6 +1403,7 @@ class CMD_ShowStats(ApiCall):
             statusString = statusStrings.statusStrings[statusCode].lower().replace(" ", "_").replace("(", "").replace(")", "")
             episodes_stats[statusString] = episode_status_counts_total[statusCode]
 
+        myDB.connection.close()
         return episodes_stats
 
 
@@ -1496,6 +1494,8 @@ class CMD_ShowsStats(ApiCall):
         # what todo with these stats ?
         #stats["next_search"] = str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]
         #stats["next_backlog"] = sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d").decode(sickbeard.SYS_ENCODING)
+        
+        myDB.connection.close()
         return stats
 
 
