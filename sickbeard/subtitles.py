@@ -163,6 +163,8 @@ class SubtitlesFinder():
         subli.startWorkers()
         downloaded_subs = subli.downloadSubtitles(locations)
         subli.stopWorkers()
+        for downloaded_sub_path in downloaded_subs:
+            helpers.chmodAsParent(downloaded_sub_path['subtitlepath'])
         if downloaded_subs:
             logger.log('Downloaded %d subtitles' % len(downloaded_subs), logger.MESSAGE)
         else:

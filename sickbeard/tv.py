@@ -748,6 +748,8 @@ class TVShow(object):
         subli.startWorkers()
         downloaded_subs = subli.downloadSubtitles([self._location])
         subli.stopWorkers()
+        for downloaded_sub_path in downloaded_subs:
+            helpers.chmodAsParent(downloaded_sub_path['subtitlepath'])
         if downloaded_subs:
             logger.log(str(self.tvdbid) + ": Downloaded %d subtitles" % len(downloaded_subs), logger.DEBUG)
         else:
@@ -1026,6 +1028,8 @@ class TVEpisode(object):
         subli.startWorkers()
         downloaded_subs = subli.downloadSubtitles([self._location])
         subli.stopWorkers()
+        for downloaded_sub_path in downloaded_subs:
+            helpers.chmodAsParent(downloaded_sub_path['subtitlepath'])
         if downloaded_subs:
             logger.log(str(self.show.tvdbid) + ": Downloaded " + str(downloaded_subs) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         else:
