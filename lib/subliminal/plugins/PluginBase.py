@@ -95,6 +95,7 @@ class PluginBase(object):
             f = urllib2.urlopen(req, data=data)
             dump = ek.ek(open, filename, "wb")
             dump.write(f.read())
+            self.adjustPermissions(filename)
             dump.close()
             f.close()
             self.logger.debug(u"Download finished for file %s. Size: %s" % (filename, ek.ek(os.path.getsize, filename)))
@@ -102,6 +103,10 @@ class PluginBase(object):
             self.logger.error(u"HTTP Error:", e.code, url)
         except urllib2.URLError, e:
             self.logger.error(u"URL Error:", e.reason, url)
+
+    def adjustPermissions(self, filepath):
+        if self.config_dict and 'files_mode' in self.config_dict and self.config_dict['files_mode'] != -1:
+            ek.ek(os.chmod, filepath, self.config_dict['files_mode'])
 
     @abc.abstractmethod
     def list(self, filenames, languages):

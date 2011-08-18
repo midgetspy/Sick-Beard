@@ -50,7 +50,7 @@ if not SYS_ENCODING or SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
 class Subliminal(object):
     """Main Subliminal class"""
 
-    def __init__(self, config=True, cache_dir=True, workers=4, multi=False, force=False, max_depth=3, autostart=False, plugins_config=None):
+    def __init__(self, config=True, cache_dir=True, workers=4, multi=False, force=False, max_depth=3, autostart=False, plugins_config=None, files_mode=-1):
         # set default values
         self.multi = multi
         self.force = force
@@ -64,6 +64,7 @@ class Subliminal(object):
         self._plugins = self.listAPIPlugins()
         self.workers = workers
         self.plugins_config = plugins_config
+        self.files_mode = files_mode
         if autostart:
             self.startWorkers()
         # handle configuration file preferences
@@ -193,7 +194,7 @@ class Subliminal(object):
 
     def set_plugins(self, value):
         """Set plugins and save to configuration file if specified by the constructor"""
-        logger.debug(u"Setting plugins to %s" % value)
+        logger.debug(u'Setting plugins to %r' % value)
         self._plugins = filter(self.isValidPlugin, value)
         if self.config:
             self._savePluginsToConfig()
@@ -422,4 +423,5 @@ class Subliminal(object):
         if self.plugins_config and 'subtitlesource_key' in self.plugins_config:
             config['subtitlesource_key'] = self.plugins_config['subtitlesource_key']
         config['force'] = self.force
+        config['files_mode'] = self.files_mode
         return config

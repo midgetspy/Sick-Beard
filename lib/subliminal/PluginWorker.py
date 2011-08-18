@@ -54,10 +54,10 @@ class PluginWorker(threading.Thread):
                     while task['subtitle']:
                         subtitle = task['subtitle'].pop(0)
                         # get the corresponding plugin
-                        plugin = getattr(plugins, subtitle["plugin"])(task['config'])
+                        plugin = getattr(plugins, subtitle['plugin'])(task['config'])
                         path = plugin.download(subtitle)
                         if path:
-                            subtitle["subtitlepath"] = path
+                            subtitle['subtitlepath'] = path
                             result = subtitle
                             break
                 else:
@@ -68,4 +68,4 @@ class PluginWorker(threading.Thread):
             finally:
                 self.resultQueue.put(result)
                 self.taskQueue.task_done()
-        self.logger.debug(u"Thread %s terminated" % self.name)
+        self.logger.debug(u'Thread %s terminated' % self.name)

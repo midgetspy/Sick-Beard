@@ -33,7 +33,7 @@ class OpenSubtitles(PluginBase.PluginBase):
     site_url = 'http://www.opensubtitles.org'
     site_name = 'OpenSubtitles'
     server_url = 'http://api.opensubtitles.org/xml-rpc'
-    user_agent = 'Subliminal v0.2'
+    user_agent = 'Subliminal v0.3'
     multi_languages_queries = True
     multi_filename_queries = False
     api_based = True
@@ -112,6 +112,7 @@ class OpenSubtitles(PluginBase.PluginBase):
         f = ek.ek(gzip.open, subtitleFilename + ".gz")
         dump = ek.ek(open, subtitleFilename, "wb")
         dump.write(f.read())
+        self.adjustPermissions(subtitleFilename)
         dump.close()
         f.close()
         ek.ek(os.remove, subtitleFilename + ".gz")
@@ -133,7 +134,7 @@ class OpenSubtitles(PluginBase.PluginBase):
         if not imdbID and not moviehash and not bytesize:
             self.logger.debug(u"No search term, we'll use the filename")
             guess = guessit.guess_file_info(filepath, 'autodetect')
-            if guess['type'] == 'episode':
+            if guess['type'] == 'episode' and 'series' in guess:
                 search['query'] = guess['series']
             elif guess['type'] == 'movie':
                 search['query'] = guess['title']

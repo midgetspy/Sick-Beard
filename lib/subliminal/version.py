@@ -19,5 +19,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from subliminal import Subliminal
-from version import __version__
+__version__ = '0.3'

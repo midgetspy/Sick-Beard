@@ -75,7 +75,7 @@ class Subtitulos(PluginBase.PluginBase):
                 release_group.add(guess['title'].lower())
             if 'screenSize' in guess:
                 release_group.add(guess['screenSize'].lower())
-        if len(release_group) == 0:
+        if 'series' not in guess or len(release_group) == 0:
             return []
         self.release_group = release_group  # used to sort results
         return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, languages)

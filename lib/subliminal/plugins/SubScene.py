@@ -113,6 +113,7 @@ class SubScene(PluginBase.PluginBase):
                     outfile = ek.ek(open, subtitlefilename, "wb")
                     outfile.write(zf.read(el.orig_filename))
                     outfile.flush()
+                    self.adjustPermissions(subtitlefilename)
                     outfile.close()
                 else:
                     self.logger.info(u"File %s does not seem to be valid " % el.orig_filename)
