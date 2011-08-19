@@ -18,6 +18,7 @@
 
 import os.path
 import time
+import urllib
 import datetime
 import threading
 
@@ -36,6 +37,7 @@ try:
 except ImportError:
     from lib import simplejson as json
 
+import xml.etree.cElementTree as etree
 
 dateFormat = "%Y-%m-%d"
 dateTimeFormat = "%Y-%m-%d %H:%M"
@@ -220,7 +222,7 @@ def filter_params(cmd, args, kwargs):
     curKwargs = {}
     for kwarg in kwargs:
         # logger.log("cmd: "+cmd+" kwarg: "+kwarg+" find: "+str(kwarg.find(cmd+".")), logger.DEBUG)
-        curKwargs[kwarg] = kwargs[kwarg].lower()
+        curKwargs[kwarg] = kwargs[kwarg]
         if kwarg.find(cmd + ".") == 0:
             cleanKey = kwarg.rpartition(".")[2]
             curKwargs[cleanKey] = kwargs[kwarg].lower()
@@ -511,6 +513,9 @@ class CMD_ComingEpisodes(ApiCall):
         }
 
         #epList.sort(sorts[sort])
+        if self.sort not in sorts:
+            raise ApiError("Sort type invalid")
+
         sql_results.sort(sorts[self.sort])
         finalEpResults = {}
 
@@ -1302,6 +1307,48 @@ class CMD_ShowRefresh(ApiCall):
             return _result("Unable to refresh " + str(showObj.name), ex(e))
 
 
+class CMD_ShowSearchTVDB(ApiCall):
+    _help = {"desc": "search for show at tvdb with a given string and language", }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.name, args = self.check_params(args, kwargs, "name", None, True)
+        # optional
+        self.lang, args = self.check_params(args, kwargs, "lang", "en")
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ search for show at tvdb with a given string and language """
+        valid_languages = {
+            'el': 20, 'en': 7, 'zh': 27, 'it': 15, 'cs': 28, 'es': 16, 'ru': 22,
+            'nl': 13, 'pt': 26, 'no': 9, 'tr': 21, 'pl': 18, 'fr': 17, 'hr': 31,
+            'de': 14, 'da': 10, 'fi': 11, 'hu': 19, 'ja': 25, 'he': 24, 'ko': 32,
+            'sv': 8, 'sl': 30}
+
+        if self.lang not in valid_languages:
+            raise ApiError("Invalid language '%s', options are: %s" % (self.lang, valid_languages) )
+
+        baseURL = "http://thetvdb.com/api/GetSeries.php?"
+        params = {'seriesname': self.name.encode('utf-8'), 'language': self.lang}
+        finalURL = baseURL + urllib.urlencode(params)
+        urlData = sickbeard.helpers.getURL(finalURL)
+
+        try:
+            seriesXML = etree.ElementTree(etree.XML(urlData))
+        except Exception, e:
+            logger.log(u"Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
+            return ''
+
+        series = seriesXML.getiterator('Series')
+        results = []
+        for curSeries in series:
+            results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
+
+        lang_id = valid_languages[self.lang]
+        return {'results': results, 'langid': lang_id}
+
+
 class CMD_ShowStats(ApiCall):
     _help = {"desc": "display episode statistics for a given show",
              "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
@@ -1517,6 +1564,7 @@ _functionMaper = {"help": CMD_Help,
                   "show.cache": CMD_ShowCache,
                   "show.delete": CMD_ShowDelete,
                   "show.refresh": CMD_ShowRefresh,
+                  "show.searchtvdb": CMD_ShowSearchTVDB,
                   "show.stats": CMD_ShowStats,
                   "show.update": CMD_ShowUpdate,
                   "shows": CMD_Shows,

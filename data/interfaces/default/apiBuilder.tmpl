@@ -50,6 +50,7 @@ addList("Command", "Show.Add", "?cmd=show.add", "show_add", "", "", "action disa
 addList("Command", "Show.Cache", "?cmd=show.cache", "tvdbid", "", "", "action");
 addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
+addList("Command", "Show.SearchTVDB", "?cmd=show.searchtvdb", "show.searchtvdb", "", "", "action");
 addList("Command", "Show.Stats", "?cmd=show.stats", "tvdbid", "", "", "action");
 addList("Command", "Show.Update", "?cmd=show.update", "tvdbid", "", "", "action");
 addList("Command", "Shows", "?cmd=shows", "shows");
@@ -57,120 +58,151 @@ addOption("Command", "Shows.Stats", "?cmd=shows.stats", "", "", "action");
 
 // addOption("tvdbid", "Optional Param", "", 1);
 #for $curShow in $sortedShowList:
-addOption("tvdbid", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+addOption("tvdbid", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid");
 #end for
 
 addOption("viewlog", "Optional Param", "", 1);
-addOption("viewlog", "Debug", "&minlevel=debug");
-addOption("viewlog", "Info", "&minlevel=info");
-addOption("viewlog", "Warning", "&minlevel=warning");
-addOption("viewlog", "Error", "&minlevel=error");
+addOption("viewlog", "Debug", "&amp;minlevel=debug");
+addOption("viewlog", "Info", "&amp;minlevel=info");
+addOption("viewlog", "Warning", "&amp;minlevel=warning");
+addOption("viewlog", "Error", "&amp;minlevel=error");
 
 addOption("shows", "Optional Param", "", 1);
-addOption("shows", "Show Only Paused", "&paused=1");
-addOption("shows", "Show Only Not Paused", "&paused=0");
-addOption("shows", "Sort by Show Name", "&sort=name");
-addOption("shows", "Sort by TVDB ID", "&sort=id");
+addOption("shows", "Show Only Paused", "&amp;paused=1");
+addOption("shows", "Show Only Not Paused", "&amp;paused=0");
+addOption("shows", "Sort by Show Name", "&amp;sort=name");
+addOption("shows", "Sort by TVDB ID", "&amp;sort=id");
+
+addList("show.searchtvdb", "Lost", "&amp;name=Lost", "show.searchtvdb-lang");
+addList("show.searchtvdb", "office", "&amp;name=office", "show.searchtvdb-lang");
+addList("show.searchtvdb", "OffiCE", "&amp;name=OffiCE", "show.searchtvdb-lang");
+addList("show.searchtvdb", "Leno", "&amp;name=leno", "show.searchtvdb-lang");
+addList("show.searchtvdb", "Top Gear", "&amp;name=Top Gear", "show.searchtvdb-lang");
+
+addOption("show.searchtvdb-lang", "Optional Param", "", 1);
+addOption("show.searchtvdb-lang", "Chinese", "&amp;lang=zh");   // 27
+addOption("show.searchtvdb-lang", "Croatian", "&amp;lang=hr");  // 31
+addOption("show.searchtvdb-lang", "Czech", "&amp;lang=cs");     // 28
+addOption("show.searchtvdb-lang", "Danish", "&amp;lang=da");    // 10
+addOption("show.searchtvdb-lang", "Dutch", "&amp;lang=nl");     // 13
+addOption("show.searchtvdb-lang", "English", "&amp;lang=en");   // 7
+addOption("show.searchtvdb-lang", "Finnish", "&amp;lang=fi");   // 11 -- Suomeksi
+addOption("show.searchtvdb-lang", "French", "&amp;lang=fr");    // 17
+addOption("show.searchtvdb-lang", "German", "&amp;lang=de");    // 14
+addOption("show.searchtvdb-lang", "Greek", "&amp;lang=el");     // 20
+addOption("show.searchtvdb-lang", "Hebrew", "&amp;lang=he");    // 24
+addOption("show.searchtvdb-lang", "Hungarian", "&amp;lang=hu"); // 19 -- Magyar
+addOption("show.searchtvdb-lang", "Italian", "&amp;lang=it");   // 15
+addOption("show.searchtvdb-lang", "Japanese", "&amp;lang=ja");  // 25
+addOption("show.searchtvdb-lang", "Korean", "&amp;lang=ko");    // 32
+addOption("show.searchtvdb-lang", "Norwegian", "&amp;lang=no"); // 9
+addOption("show.searchtvdb-lang", "Polish", "&amp;lang=pl");    // 18
+addOption("show.searchtvdb-lang", "Portuguese", "&amp;lang=pt");// 26
+addOption("show.searchtvdb-lang", "Russian", "&amp;lang=ru");   // 22
+addOption("show.searchtvdb-lang", "Slovenian", "&amp;lang=sl"); // 30
+addOption("show.searchtvdb-lang", "Spanish", "&amp;lang=es");   // 16
+addOption("show.searchtvdb-lang", "Swedish", "&amp;lang=sv");   // 8
+addOption("show.searchtvdb-lang", "Turkish", "&amp;lang=tr");   // 21
 
 #for $curShow in $sortedShowList:
-addList("seasons", "$curShow.name", "&tvdbid=$curShow.tvdbid", "seasons-$curShow.tvdbid");
+addList("seasons", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "seasons-$curShow.tvdbid");
 #end for
 
 #for $curShow in $sortedShowList:
-addList("season_list", "$curShow.name", "&tvdbid=$curShow.tvdbid", "season_list-sort");
+addList("season_list", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "season_list-sort");
 #end for
 
 addOption("season_list-sort", "Optional Param", "", 1);
-addOption("season_list-sort", "Sort by Ascending", "&sort=asc");
+addOption("season_list-sort", "Sort by Ascending", "&amp;sort=asc");
 
 // build out each show's season list for season cmd
 #for $curShow in $seasonSQLResults:
 addOption("seasons-$curShow", "Optional Param", "", 1);
     #for $curShowSeason in $seasonSQLResults[$curShow]:
-addOption("seasons-$curShow", "$curShowSeason.season", "&season=$curShowSeason.season");
+addOption("seasons-$curShow", "$curShowSeason.season", "&amp;season=$curShowSeason.season");
     #end for
 #end for
 
 #for $curShow in $sortedShowList:
-addList("episode", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episode-$curShow.tvdbid");
+addList("episode", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "episode-$curShow.tvdbid");
 #end for
 
 // build out each show's season+episode list for episode cmd
 #for $curShow in $episodeSQLResults:
     #for $curShowSeason in $episodeSQLResults[$curShow]:
-addList("episode-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-$curShow-full");
+addList("episode-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&amp;season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-$curShow-full");
     #end for
 addOption("episode-$curShow-full", "Optional Param", "", 1);
-addOption("episode-$curShow-full", "Show Full Path", "&full_path=1");
+addOption("episode-$curShow-full", "Show Full Path", "&amp;full_path=1");
 #end for
 
 // build out tvshow list for episode.search
 #for $curShow in $sortedShowList:
-addList("episode.search", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episode.search-$curShow.tvdbid");
+addList("episode.search", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "episode.search-$curShow.tvdbid");
 #end for
 
 // build out each show's season+episode list for episode.search cmd
 #for $curShow in $episodeSQLResults:
     #for $curShowSeason in $episodeSQLResults[$curShow]:
-addOption("episode.search-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode");
+addOption("episode.search-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&amp;season=$curShowSeason.season&episode=$curShowSeason.episode");
     #end for
 #end for
 
 // build out tvshow list for episode.setstatus
 #for $curShow in $sortedShowList:
-addList("episode.setstatus", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episode.setstatus-$curShow.tvdbid");
+addList("episode.setstatus", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "episode.setstatus-$curShow.tvdbid");
 #end for
 
 // build out each show's season+episode list for episode.setstatus cmd
 #for $curShow in $episodeSQLResults:
     #for $curShowSeason in $episodeSQLResults[$curShow]:
-addList("episode.setstatus-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-status-$curShow");
+addList("episode.setstatus-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&amp;season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-status-$curShow");
     #end for
-addOption("episode-status-$curShow", "Wanted", "&status=wanted");
-addOption("episode-status-$curShow", "Skipped", "&status=skipped");
-addOption("episode-status-$curShow", "Archived", "&status=archived");
-addOption("episode-status-$curShow", "Ignored", "&status=ignored");
+addOption("episode-status-$curShow", "Wanted", "&amp;status=wanted");
+addOption("episode-status-$curShow", "Skipped", "&amp;status=skipped");
+addOption("episode-status-$curShow", "Archived", "&amp;status=archived");
+addOption("episode-status-$curShow", "Ignored", "&amp;status=ignored");
 #end for
 
 addOption("future", "Optional Param", "", 1);
-addList("future", "Sort by Date", "&sort=date", "future-type");
-addList("future", "Sort by Network", "&sort=network", "future-type");
-addList("future", "Sort by Show Name", "&sort=show", "future-type");
+addList("future", "Sort by Date", "&amp;sort=date", "future-type");
+addList("future", "Sort by Network", "&amp;sort=network", "future-type");
+addList("future", "Sort by Show Name", "&amp;sort=show", "future-type");
 
 addOption("future-type", "Optional Param", "", 1);
-addOption("future-type", "Show All Types", "&type=today|missed|soon|later");
-addOption("future-type", "Show Today", "&type=today");
-addOption("future-type", "Show Missed", "&type=missed");
-addOption("future-type", "Show Soon", "&type=soon");
-addOption("future-type", "Show Later", "&type=later");
-addOption("future-type", "Show Today & Missed", "&type=today|missed");
+addOption("future-type", "Show All Types", "&amp;type=today|missed|soon|later");
+addOption("future-type", "Show Today", "&amp;type=today");
+addOption("future-type", "Show Missed", "&amp;type=missed");
+addOption("future-type", "Show Soon", "&amp;type=soon");
+addOption("future-type", "Show Later", "&amp;type=later");
+addOption("future-type", "Show Today & Missed", "&amp;type=today|missed");
 
 addOption("history", "Optional Param", "", 1);
-addList("history", "Show Only Downloaded", "&type=downloaded", "history-type");
-addList("history", "Show Only Snatched", "&type=snatched", "history-type");
+addList("history", "Show Only Downloaded", "&amp;type=downloaded", "history-type");
+addList("history", "Show Only Snatched", "&amp;type=snatched", "history-type");
 //addOptGroup("history", "Limit Results");
-addList("history", "Limit Results (2)", "&limit=2", "history-limit");
-addList("history", "Limit Results (25)", "&limit=25", "history-limit");
-addList("history", "Limit Results (50)", "&limit=50", "history-limit");
+addList("history", "Limit Results (2)", "&amp;limit=2", "history-limit");
+addList("history", "Limit Results (25)", "&amp;limit=25", "history-limit");
+addList("history", "Limit Results (50)", "&amp;limit=50", "history-limit");
 //endOptGroup("history");
 
 addOption("history-type", "Optional Param", "", 1);
-addOption("history-type", "Limit Results (2)", "&limit=2");
-addOption("history-type", "Limit Results (25)", "&limit=25");
-addOption("history-type", "Limit Results (50)", "&limit=50");
+addOption("history-type", "Limit Results (2)", "&amp;limit=2");
+addOption("history-type", "Limit Results (25)", "&amp;limit=25");
+addOption("history-type", "Limit Results (50)", "&amp;limit=50");
 
 addOption("history-limit", "Optional Param", "", 1);
-addOption("history-limit", "Show Only Downloaded", "&type=downloaded");
-addOption("history-limit", "Show Only Snatched", "&type=snatched");
+addOption("history-limit", "Show Only Downloaded", "&amp;type=downloaded");
+addOption("history-limit", "Show Only Snatched", "&amp;type=snatched");
 
 addOption("exceptions", "Optional Param", "", 1);
 #for $curShow in $sortedShowList:
-addOption("exceptions", "$curShow.name", "&tvdbid=$curShow.tvdbid");
+addOption("exceptions", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid");
 #end for
 
 addOption("sb.pausebacklog", "Optional Param", "", 1);
-addOption("sb.pausebacklog", "Pause", "&pause=1");
-addOption("sb.pausebacklog", "Unpause", "&pause=0");
+addOption("sb.pausebacklog", "Pause", "&amp;pause=1");
+addOption("sb.pausebacklog", "Unpause", "&amp;pause=0");
 
 
 </script>
