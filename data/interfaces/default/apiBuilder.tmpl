@@ -26,9 +26,9 @@ var disable_empty_list=true;
 
 addListGroup("api", "Command");
 
-
 addOption("Command", "SickBeard", "?cmd=sb", 1); //make default
 addOption("Command", "SickBeard.CheckScheduler", "?cmd=sb.checkscheduler", "", "", "action");
+addOption("Command", "SickBeard.Defaults", "?cmd=sb.defaults", "", "", "action disabled");
 addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "action");
 addList("Command", "SickBeard.PauseBacklog", "?cmd=sb.pausebacklog", "sb.pausebacklog", "", "", "action");
 addOption("Command", "SickBeard.Ping", "?cmd=sb.ping", "", "", "action");
@@ -46,11 +46,13 @@ addList("Command", "Logs", "?cmd=logs", "viewlog");
 addList("Command", "Season List", "?cmd=seasonlist", "season_list");
 addList("Command", "Seasons", "?cmd=seasons", "seasons");
 addList("Command", "Show", "?cmd=show", "tvdbid");
-addList("Command", "Show.Add", "?cmd=show.add", "show_add", "", "", "action disabled");
+addList("Command", "Show.AddExisting", "?cmd=show.addexisting", "show.addexisting", "", "", "action");
+addList("Command", "Show.AddNew", "?cmd=show.addnew", "show.addnew", "", "", "action disabled");
 addList("Command", "Show.Cache", "?cmd=show.cache", "tvdbid", "", "", "action");
 addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.SearchTVDB", "?cmd=show.searchtvdb", "show.searchtvdb", "", "", "action");
+addList("Command", "Show.SetQuality", "?cmd=show.setquality", "show.setquality", "", "", "action disabled");
 addList("Command", "Show.Stats", "?cmd=show.stats", "tvdbid", "", "", "action");
 addList("Command", "Show.Update", "?cmd=show.update", "tvdbid", "", "", "action");
 addList("Command", "Shows", "?cmd=shows", "shows");
@@ -72,6 +74,20 @@ addOption("shows", "Show Only Paused", "&amp;paused=1");
 addOption("shows", "Show Only Not Paused", "&amp;paused=0");
 addOption("shows", "Sort by Show Name", "&amp;sort=name");
 addOption("shows", "Sort by TVDB ID", "&amp;sort=id");
+
+addList("show.addexisting", "C:\\temp\\show1", "&amp;location=C:\\temp\\show1", "show.addexisting-tvdbid");
+addList("show.addexisting", "D:\\Temp\\show2", "&amp;location=D:\\Temp\\show2", "show.addexisting-tvdbid");
+addList("show.addexisting", "S:\\TV\\Ancient Aliens", "&amp;location=S:\\TV\\Ancient Aliens", "show.addexisting-tvdbid");
+addList("show.addexisting", "S:\\TV\\Chuck", "&amp;location=S:\\TV\\Chuck", "show.addexisting-tvdbid");
+
+addList("show.addexisting-tvdbid", "101501 (Ancient Aliens)", "&amp;tvdbid=101501", "show.addexisting-opt");
+addList("show.addexisting-tvdbid", "80348 (Chuck)", "&amp;tvdbid=80348", "show.addexisting-opt");
+
+addOption("show.addexisting-opt", "Optional Param", "", 1);
+addOption("show.addexisting-opt", "No Season Folder", "&amp;season_folder=0");
+addOption("show.addexisting-opt", "SD Quality", "&amp;quality=3");
+addOption("show.addexisting-opt", "HD Quality", "&amp;quality=28");
+addOption("show.addexisting-opt", "Any Quality", "&amp;quality=32799");
 
 addList("show.searchtvdb", "Lost", "&amp;name=Lost", "show.searchtvdb-lang");
 addList("show.searchtvdb", "office", "&amp;name=office", "show.searchtvdb-lang");

@@ -1209,19 +1209,35 @@ class CMD_Show(ApiCall):
         return showDict
 
 
-class CMD_ShowAdd(ApiCall):
-    _help = {"desc": "add a show in sickbeard",
+class CMD_ShowAddExisting(ApiCall):
+    _help = {"desc": "add a show in sickbeard with an existing folder",
              }
 
     def __init__(self, args, kwargs):
         # required
+        self.location, args = self.check_params(args, kwargs, "location", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        #self.name, args = self.check_params(args, kwargs, "name", None, True)
         # optional
+        self.quality, args = self.check_params(args, kwargs, "quality", int(sickbeard.QUALITY_DEFAULT))
+        self.season_folder, args = self.check_params(args, kwargs, "season_folder", int(sickbeard.SEASON_FOLDERS_DEFAULT))
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
-        """ add a show in sickbeard """
-        return "not yet implemented"
+        """ add a show in sickbeard with an existing folder """
+        #_is_int_multi( int(self.tvdbid), int(self.season_folder) ) #why does this not work?
+        #TODO: should we allow users to submit quality via 3 or 'SD/HD/ANY' or what
+        #TODO: Show.SetQuality
+        #TODO: makes me think we should just be using bools instead of int when we have a fixed 0/1 limited input argument
+        if int(self.season_folder) not in (0, 1):
+            self.season_folder = int(sickbeard.SEASON_FOLDERS_DEFAULT)
+
+        if not ek.ek(os.path.isdir, self.location):
+            return _result('failure', 'Not a valid location')
+
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, int(self.quality), bool(self.season_folder)) #@UndefinedVariable
+        return _result("Show has been queued to be added")
 
 
 class CMD_ShowCache(ApiCall):
@@ -1560,7 +1576,7 @@ _functionMaper = {"help": CMD_Help,
                   "seasonlist": CMD_SeasonList,
                   "seasons": CMD_Seasons,
                   "show": CMD_Show,
-                  "show.add": CMD_ShowAdd,
+                  "show.addexisting": CMD_ShowAddExisting,
                   "show.cache": CMD_ShowCache,
                   "show.delete": CMD_ShowDelete,
                   "show.refresh": CMD_ShowRefresh,
