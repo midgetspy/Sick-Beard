@@ -261,15 +261,18 @@ class ApiCall(object):
 
         for list, type in [(self._requiredParams, "requiredParameters"),
                           (self._optionalParams, "optionalPramameters")]:
+
             if type in self._help:
-                for key in list:
-                    if key in self._help[type]:
-                        continue
-                    self._help[type][key] = "no description"
+                for paramName in list:
+                    self._help[type][paramName]["allowedValues"] = "see desc"
+                    if list[paramName]["allowedValues"]:
+                        self._help[type][paramName]["allowedValues"] = list[paramName]["allowedValues"]
+                    self._help[type][paramName]["defaultValue"] = list[paramName]["defaultValue"]
+
             elif list:
-                for key in list:
+                for paramName in list:
                     self._help[type] = {}
-                    self._help[type][key] = "no description"
+                    self._help[type][paramName] = list[paramName]
             else:
                 self._help[type] = {}
 
@@ -282,12 +285,17 @@ class ApiCall(object):
             msg = "The required parameters: '" + "','".join(self._missing) + "' where not set"
         return _error(msg)
 
-    def check_params(self, args, kwargs, key, default, required=False):
+    def check_params(self, args, kwargs, key, default, required, type, allowedValues):
         # TODO: explain this
         """ function to check passed params for the shorthand wrapper
             and to detect missing/required param
         """
         missing = True
+        orgDefault = default
+
+        if type == "bool":
+            allowedValues = [0, 1]
+
         if args:
             default = args[0]
             missing = False
@@ -301,18 +309,86 @@ class ApiCall(object):
                 self._requiredParams.append(key)
             except AttributeError:
                 self._missing = []
-                self._requiredParams = []
-                self._requiredParams.append(key)
+                self._requiredParams = {}
+                self._requiredParams[key] = {"allowedValues":allowedValues,
+                                             "defaultValue":orgDefault}
             if missing and key not in self._missing:
                 self._missing.append(key)
         else:
             try:
-                self._optionalParams.append(key)
+                self._optionalParams[key] = {"allowedValues":allowedValues,
+                                             "defaultValue":orgDefault}
             except AttributeError:
-                self._optionalParams = []
-                self._optionalParams.append(key)
+                self._optionalParams = {}
+                self._optionalParams[key] = {"allowedValues":allowedValues,
+                                             "defaultValue":orgDefault}
+
+        if default:
+            logger.log("checking param type and value..."+str(type), logger.DEBUG)
+            default = self._check_param_type(default, key, type)
+            if type == "bool":
+                type = []
+            self._check_param_value(default, key, allowedValues)
 
         return default, args
+
+    def _check_param_type(self, value, name, type):
+        """ checks if value can be converted / parsed to type
+            will raise an error on failure
+            or will convert it to type and return new converted value
+            can check for:
+            - int: will be converted into int
+            - bool: will be converted to False / True
+            - list: will always return a list
+            - string: will do nothing for now
+            - ignore: will ignore it, just like "string"
+        """
+        error = False
+        if type == "int":
+            if _is_int(value):
+                value = int(value)
+            else:
+                error = True
+        elif type == "bool":
+            if value in ("0","1"):
+                value = bool(int(value))
+            elif value == "true":
+                value = True
+            elif value == "false":
+                value = False
+            else:
+                error = True
+        elif type == "list":
+            value = value.split("|")
+        elif type == "string":
+            pass
+        elif type == "ignore":
+            pass
+        else:
+            logger.log("Invalid param type set "+str(type)+" can not check or convert ignoring it", logger.ERROR)
+
+        if error:
+            raise ApiError(u"param: '"+str(name)+"' with given value: '"+str(value)+"' could not be parsed into '"+str(type)+"'")
+
+        return value
+
+    def _check_param_value(self, value, name, allowedValues):
+        """ will check if value (or all values in it ) are in allowed values
+            will raise an exception if value is "out of range"
+            if bool(allowedValue) == False a check is not performed and all values are excepted
+        """
+        if allowedValues:
+            error = False
+            if isinstance(value, list):
+                for item in value:
+                    if not item in allowedValues:
+                        error = True
+            else:
+                if not value in allowedValues:
+                    error = True
+
+            if error:
+                raise ApiError(u"param: '"+str(name)+"' with given value: '"+str(value)+"' is out of allowed range '"+str(allowedValues)+"'")
 
 
 class TVDBShorthandWrapper(ApiCall):
@@ -323,8 +399,8 @@ class TVDBShorthandWrapper(ApiCall):
         self.kwargs = kwargs
         self.sid = sid
 
-        self.s, args = self.check_params(args, kwargs, "s", None)
-        self.e, args = self.check_params(args, kwargs, "e", None)
+        self.s, args = self.check_params(args, kwargs, "s", None, False, "ignore", [])
+        self.e, args = self.check_params(args, kwargs, "e", None, False, "ignore", [])
         self.args = args
 
         ApiCall.__init__(self, args, kwargs)
@@ -357,7 +433,7 @@ def _is_int(data):
         return True
 
 
-def _is_int_multi(*vars):
+def _is_int_multi_blupp(*vars):
     for var in vars:
         if var and not _is_int(var):
             raise IntParseError("'" + var + "' is not parsable into a int, but is supposed to be. Canceling")
@@ -450,14 +526,14 @@ class IntParseError(Exception):
 
 class CMD_Help(ApiCall):
     _help = {"desc": "display help information for a given subject/command",
-             "optionalPramameters": {"subject": "command - the top level command",
+             "optionalPramameters": {"subject": {"desc":"command - the top level command"},
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.subject, args = self.check_params(args, kwargs, "subject", "help")
+        self.subject, args = self.check_params(args, kwargs, "subject", "help", False, "string", [])
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
@@ -471,15 +547,16 @@ class CMD_Help(ApiCall):
 
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc": "display the coming episodes",
-             "optionalPramameters": {"sort": "date/network/show - change the sort order",
-                                     "type": "one or more of missed/later/today/soon separated by |"}
+             "optionalPramameters": {"sort": {"desc":"change the sort order"},
+                                     "type": {"desc":"one or more of allowedValues separated by |"}
+                                     }
              }
 
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.sort, args = self.check_params(args, kwargs, "sort", "date")
-        self.type, args = self.check_params(args, kwargs, "type", "today|missed|soon|later")
+        self.sort, args = self.check_params(args, kwargs, "sort", "date", False, "string", ["date", "show", "network"])
+        self.type, args = self.check_params(args, kwargs, "type", "today|missed|soon|later", False, "list", ["missed", "later", "today", "soon"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -487,7 +564,8 @@ class CMD_ComingEpisodes(ApiCall):
         """ display the coming episodes """
         if self.sort not in ("date", "show", "network"):
             raise ApiError("Invalid sort type")
-        self.type = self.type.split("|")
+        #
+        # self.type = self.type.split("|")
 
         today = datetime.date.today().toordinal()
         next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
@@ -570,26 +648,25 @@ class CMD_ComingEpisodes(ApiCall):
 
 class CMD_Episode(ApiCall):
     _help = {"desc": "display detailed info about an episode",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
-                                   "season": "## - the season number",
-                                   "episode": "## - the episode number"
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+                                   "season": {"desc":"the season number"},
+                                   "episode": {"desc":"the episode number"}
                                   },
              "optionalPramameters": {"full_path": "show the full absolute path (if valid) instead of a relative path for the episode location"}
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
-        self.s, args = self.check_params(args, kwargs, "season", None, True)
-        self.e, args = self.check_params(args, kwargs, "episode", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        self.s, args = self.check_params(args, kwargs, "season", None, True, "int", [])
+        self.e, args = self.check_params(args, kwargs, "episode", None, True, "int", [])
         # optional
-        self.fullPath, args = self.check_params(args, kwargs, "full_path", "0")
+        self.fullPath, args = self.check_params(args, kwargs, "full_path", "0", False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display detailed info about an episode """
-        _is_int_multi( self.tvdbid, self.s, self.e, self.fullPath )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -625,24 +702,23 @@ class CMD_Episode(ApiCall):
 
 class CMD_EpisodeSearch(ApiCall):
     _help = {"desc": "search for an episode. the response might take some time",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
-                                   "season": "## - the season number",
-                                   "episode": "## - the episode number"
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+                                   "season": {"desc":"the season number"},
+                                   "episode": {"desc":"the episode number"}
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
-        self.s, args = self.check_params(args, kwargs, "season", None, True)
-        self.e, args = self.check_params(args, kwargs, "episode", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        self.s, args = self.check_params(args, kwargs, "season", None, True, "int", [])
+        self.e, args = self.check_params(args, kwargs, "episode", None, True, "int", [])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ search for an episode """
-        _is_int_multi( self.tvdbid, self.s, self.e )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -669,26 +745,25 @@ class CMD_EpisodeSearch(ApiCall):
 
 class CMD_EpisodeSetStatus(ApiCall):
     _help = {"desc": "set status of an episode",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
-                                   "season": "## - the season number",
-                                   "episode": "## - the episode number",
-                                   "status": "# - the status value: wanted, skipped, archived, ignored"
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+                                   "season": {"desc":"the season number"},
+                                   "episode": {"desc":"the episode number"},
+                                   "status": {"desc":"the status value: wanted, skipped, archived, ignored"}
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
-        self.s, args = self.check_params(args, kwargs, "season", None, True)
-        self.e, args = self.check_params(args, kwargs, "episode", None, True)
-        self.status, args = self.check_params(args, kwargs, "status", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        self.s, args = self.check_params(args, kwargs, "season", None, True, "int", [])
+        self.e, args = self.check_params(args, kwargs, "episode", None, True, "int", [])
+        self.status, args = self.check_params(args, kwargs, "status", None, True, "string", [])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ set status of an episode """
-        _is_int_multi( self.tvdbid, self.s, self.e )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -743,14 +818,14 @@ class CMD_EpisodeSetStatus(ApiCall):
 
 class CMD_Exceptions(ApiCall):
     _help = {"desc": "display scene exceptions for all or a given show",
-             "optionalPramameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
+             "optionalPramameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, False)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, False, "int", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -768,7 +843,6 @@ class CMD_Exceptions(ApiCall):
                 exceptions[tvdbid].append(row["show_name"])
 
         else:
-            _is_int_multi( self.tvdbid )
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
             if not showObj:
                 raise ApiError("Show not Found")
@@ -784,22 +858,21 @@ class CMD_Exceptions(ApiCall):
 
 class CMD_History(ApiCall):
     _help = {"desc": "display sickbeard downloaded/snatched history",
-             "optionalPramameters": {"limit": "## - limit returned results",
-                                    "type": "downloaded/snatched - only show a specific type of results",
+             "optionalPramameters": {"limit": {"desc":"limit returned results"},
+                                    "type": {"desc":"only show a specific type of results"},
                                    }
              }
 
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.limit, args = self.check_params(args, kwargs, "limit", 100)
-        self.type, args = self.check_params(args, kwargs, "type", None)
+        self.limit, args = self.check_params(args, kwargs, "limit", 100, False, "int", [])
+        self.type, args = self.check_params(args, kwargs, "type", None, False, "string", ["downloaded","snatched"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display sickbeard downloaded/snatched history """
-        _is_int_multi( self.limit )
 
         self.typeCodes = []
         if self.type == "downloaded":
@@ -882,7 +955,7 @@ class CMD_Logs(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.minLevel, args = self.check_params(args, kwargs, "minlevel", "error")
+        self.minLevel, args = self.check_params(args, kwargs, "minlevel", "error", False, "string", ["error","warning","info","debug"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -999,13 +1072,12 @@ class CMD_SickBeardPauseBacklog(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.pause, args = self.check_params(args, kwargs, "pause", 0)
+        self.pause, args = self.check_params(args, kwargs, "pause", 0, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ pause the backlog search """
-        _is_int_multi( self.pause )
         if self.pause == "1":
             sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
             return {"result": "Backlog Paused"}
@@ -1064,22 +1136,22 @@ class CMD_SickBeardShutdown(ApiCall):
 
 class CMD_SeasonList(ApiCall):
     _help = {"desc": "display the season list for a given show",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
-                                  },
-             "optionalPramameters": {"sort": "asc - change the sort order from descending to ascending"}
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+                                    },
+             "optionalPramameters": {"sort": {"desc":"change the sort order from descending to ascending"}
+                                     }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.sort, args = self.check_params(args, kwargs, "sort", "desc") # "asc" and "desc" default and fallback is "desc"
+        self.sort, args = self.check_params(args, kwargs, "sort", "desc", False, "string", ["asc", "desc"]) # "asc" and "desc" default and fallback is "desc"
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display the season list for a given show """
-        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1099,23 +1171,23 @@ class CMD_SeasonList(ApiCall):
 
 class CMD_Seasons(ApiCall):
     _help = {"desc": "display a listing of episodes for all or a given season",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
                                   },
-             "optionalPramameters": {"season": "## - the season number OR 'last' OR 'first'",
+             "optionalPramameters": {"season": {"desc":"the season number"},
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.season, args = self.check_params(args, kwargs, "season", None, False)
+        self.season, args = self.check_params(args, kwargs, "season", None, False, "int", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display a listing of episodes for all or a given show """
-        _is_int_multi( self.tvdbid, self.season )
+        # _is_int_multi( self.tvdbid, self.season )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1137,13 +1209,6 @@ class CMD_Seasons(ApiCall):
                 seasons[curSeason][curEpisode] = row
 
         else:
-            if self.season in ["last", "first"]:
-                seasonList = CMD_SeasonList((), {"tvdbid": self.tvdbid}).run()
-                if self.season == "last":
-                    self.season = seasonList[0]
-                else:
-                    self.season = seasonList[-1]
-
             sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
             if len(sqlResults) is 0:
                 raise ApiError("Season not Found")
@@ -1163,20 +1228,20 @@ class CMD_Seasons(ApiCall):
 
 class CMD_Show(ApiCall):
     _help = {"desc": "display information for a given show",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display information for a given show """
-        _is_int_multi( self.tvdbid )
+        # _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1218,17 +1283,17 @@ class CMD_ShowAddExisting(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.location, args = self.check_params(args, kwargs, "location", None, True)
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.quality, args = self.check_params(args, kwargs, "quality", int(sickbeard.QUALITY_DEFAULT))
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", int(sickbeard.SEASON_FOLDERS_DEFAULT))
+        self.quality, args = self.check_params(args, kwargs, "quality", int(sickbeard.QUALITY_DEFAULT), False, "int", [])
+        self.season_folder, args = self.check_params(args, kwargs, "season_folder", int(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ add a show in sickbeard with an existing folder """
-        _is_int_multi( self.tvdbid, self.quality, self.season_folder )
+        # _is_int_multi( self.tvdbid, self.quality, self.season_folder )
         if int(self.season_folder) not in (0, 1):
             self.season_folder = int(sickbeard.SEASON_FOLDERS_DEFAULT)
 
@@ -1248,14 +1313,14 @@ class CMD_ShowCache(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ check sickbeard's cache to see if the banner or poster image for a show is valid """
-        _is_int_multi( self.tvdbid )
+        # _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1276,20 +1341,20 @@ class CMD_ShowCache(ApiCall):
 
 class CMD_ShowDelete(ApiCall):
     _help = {"desc": "delete a show in sickbeard",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ delete a show in sickbeard """
-        _is_int_multi( self.tvdbid )
+        # _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1303,20 +1368,20 @@ class CMD_ShowDelete(ApiCall):
 
 class CMD_ShowRefresh(ApiCall):
     _help = {"desc": "refresh a show in sickbeard",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ refresh a show in sickbeard """
-        _is_int_multi( self.tvdbid )
+        # _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1333,9 +1398,9 @@ class CMD_ShowSearchTVDB(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.name, args = self.check_params(args, kwargs, "name", None, True)
+        self.name, args = self.check_params(args, kwargs, "name", None, True, "string", [])
         # optional
-        self.lang, args = self.check_params(args, kwargs, "lang", "en")
+        self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1372,20 +1437,19 @@ class CMD_ShowSearchTVDB(ApiCall):
 
 class CMD_ShowStats(ApiCall):
     _help = {"desc": "display episode statistics for a given show",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display episode statistics for a given show """
-        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1476,20 +1540,19 @@ class CMD_ShowStats(ApiCall):
 
 class CMD_ShowUpdate(ApiCall):
     _help = {"desc": "update a show in sickbeard",
-             "requiredParameters": {"tvdbid": "tvdbid - thetvdb.com unique id of a show",
+             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
                                   }
              }
 
     def __init__(self, args, kwargs):
         # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ update a show in sickbeard """
-        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1503,16 +1566,16 @@ class CMD_ShowUpdate(ApiCall):
 
 class CMD_Shows(ApiCall):
     _help = {"desc": "display all shows in sickbeard",
-             "optionalPramameters": {"sort": "show - sort the list of shows by show name instead of tvdbid",
-                                    "paused": "0/1 - only show the shows that are set to paused",
+             "optionalPramameters": {"sort": {"desc":"sort the list of shows by show name instead of tvdbid"},
+                                    "paused": {"desc":"only show the shows that are set to paused"},
                                   },
              }
 
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.sort, args = self.check_params(args, kwargs, "sort", "id")
-        self.paused, args = self.check_params(args, kwargs, "paused", None)
+        self.sort, args = self.check_params(args, kwargs, "sort", "id", False, "string", ["id","name"])
+        self.paused, args = self.check_params(args, kwargs, "paused", None, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
