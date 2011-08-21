@@ -351,7 +351,7 @@ class TVDBShorthandWrapper(ApiCall):
 def _is_int(data):
     try:
         int(data)
-    except (RuntimeError, TypeError, NameError):
+    except (TypeError, ValueError):
         return False
     else:
         return True
@@ -368,7 +368,7 @@ def _rename_element(dict, oldKey, newKey):
     try:
         dict[newKey] = dict[oldKey]
         del dict[oldKey]
-    except (RuntimeError, TypeError, NameError):
+    except (ValueError, TypeError, NameError):
         pass
     return dict
 
@@ -485,6 +485,8 @@ class CMD_ComingEpisodes(ApiCall):
 
     def run(self):
         """ display the coming episodes """
+        if self.sort not in ("date", "show", "network"):
+            raise ApiError("Invalid sort type")
         self.type = self.type.split("|")
 
         today = datetime.date.today().toordinal()
@@ -513,8 +515,6 @@ class CMD_ComingEpisodes(ApiCall):
         }
 
         #epList.sort(sorts[sort])
-        if self.sort not in sorts:
-            raise ApiError("Sort type invalid")
 
         sql_results.sort(sorts[self.sort])
         finalEpResults = {}
@@ -589,6 +589,7 @@ class CMD_Episode(ApiCall):
 
     def run(self):
         """ display detailed info about an episode """
+        _is_int_multi( self.tvdbid, self.s, self.e, self.fullPath )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -641,6 +642,7 @@ class CMD_EpisodeSearch(ApiCall):
 
     def run(self):
         """ search for an episode """
+        _is_int_multi( self.tvdbid, self.s, self.e )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -686,6 +688,7 @@ class CMD_EpisodeSetStatus(ApiCall):
 
     def run(self):
         """ set status of an episode """
+        _is_int_multi( self.tvdbid, self.s, self.e )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -696,7 +699,7 @@ class CMD_EpisodeSetStatus(ApiCall):
                 self.status = status
                 break
         # this should be obsolete bcause of the above
-        if not self.status in statusStrings:
+        if not statusStrings.has_key(self.status):
             raise ApiError("Invalid Status")
 
         epObj = showObj.getEpisode(int(self.s), int(self.e))
@@ -765,6 +768,7 @@ class CMD_Exceptions(ApiCall):
                 exceptions[tvdbid].append(row["show_name"])
 
         else:
+            _is_int_multi( self.tvdbid )
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
             if not showObj:
                 raise ApiError("Show not Found")
@@ -795,6 +799,8 @@ class CMD_History(ApiCall):
 
     def run(self):
         """ display sickbeard downloaded/snatched history """
+        _is_int_multi( self.limit )
+
         self.typeCodes = []
         if self.type == "downloaded":
             self.type = "Downloaded"
@@ -929,8 +935,7 @@ class CMD_Logs(ApiCall):
 
 
 class CMD_SickBeard(ApiCall):
-    _help = {"desc": "display misc sickbeard related information"
-             }
+    _help = {"desc": "display misc sickbeard related information"}
 
     def __init__(self, args, kwargs):
         # required
@@ -944,8 +949,7 @@ class CMD_SickBeard(ApiCall):
 
 
 class CMD_SickBeardCheckScheduler(ApiCall):
-    _help = {"desc": "query the scheduler"
-             }
+    _help = {"desc": "query the scheduler"}
 
     def __init__(self, args, kwargs):
         # required
@@ -990,8 +994,7 @@ class CMD_SickBeardForceSearch(ApiCall):
 
 
 class CMD_SickBeardPauseBacklog(ApiCall):
-    _help = {"desc": "pause the backlog search"
-             }
+    _help = {"desc": "pause the backlog search"}
 
     def __init__(self, args, kwargs):
         # required
@@ -1002,6 +1005,7 @@ class CMD_SickBeardPauseBacklog(ApiCall):
 
     def run(self):
         """ pause the backlog search """
+        _is_int_multi( self.pause )
         if self.pause == "1":
             sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
             return {"result": "Backlog Paused"}
@@ -1011,8 +1015,7 @@ class CMD_SickBeardPauseBacklog(ApiCall):
 
 
 class CMD_SickBeardPing(ApiCall):
-    _help = {"desc": "check to see if sickbeard is running"
-             }
+    _help = {"desc": "check to see if sickbeard is running"}
 
     def __init__(self, args, kwargs):
         # required
@@ -1030,8 +1033,7 @@ class CMD_SickBeardPing(ApiCall):
 
 
 class CMD_SickBeardRestart(ApiCall):
-    _help = {"desc": "restart sickbeard"
-             }
+    _help = {"desc": "restart sickbeard"}
 
     def __init__(self, args, kwargs):
         # required
@@ -1046,8 +1048,7 @@ class CMD_SickBeardRestart(ApiCall):
 
 
 class CMD_SickBeardShutdown(ApiCall):
-    _help = {"desc": "shutdown sickbeard"
-             }
+    _help = {"desc": "shutdown sickbeard"}
 
     def __init__(self, args, kwargs):
         # required
@@ -1078,6 +1079,7 @@ class CMD_SeasonList(ApiCall):
 
     def run(self):
         """ display the season list for a given show """
+        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1113,6 +1115,7 @@ class CMD_Seasons(ApiCall):
 
     def run(self):
         """ display a listing of episodes for all or a given show """
+        _is_int_multi( self.tvdbid, self.season )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1173,6 +1176,7 @@ class CMD_Show(ApiCall):
 
     def run(self):
         """ display information for a given show """
+        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1210,14 +1214,12 @@ class CMD_Show(ApiCall):
 
 
 class CMD_ShowAddExisting(ApiCall):
-    _help = {"desc": "add a show in sickbeard with an existing folder",
-             }
+    _help = {"desc": "add a show in sickbeard with an existing folder"}
 
     def __init__(self, args, kwargs):
         # required
         self.location, args = self.check_params(args, kwargs, "location", None, True)
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True)
-        #self.name, args = self.check_params(args, kwargs, "name", None, True)
         # optional
         self.quality, args = self.check_params(args, kwargs, "quality", int(sickbeard.QUALITY_DEFAULT))
         self.season_folder, args = self.check_params(args, kwargs, "season_folder", int(sickbeard.SEASON_FOLDERS_DEFAULT))
@@ -1226,12 +1228,13 @@ class CMD_ShowAddExisting(ApiCall):
 
     def run(self):
         """ add a show in sickbeard with an existing folder """
-        #_is_int_multi( int(self.tvdbid), int(self.season_folder) ) #why does this not work?
-        #TODO: should we allow users to submit quality via 3 or 'SD/HD/ANY' or what
-        #TODO: Show.SetQuality
-        #TODO: makes me think we should just be using bools instead of int when we have a fixed 0/1 limited input argument
+        _is_int_multi( self.tvdbid, self.quality, self.season_folder )
         if int(self.season_folder) not in (0, 1):
             self.season_folder = int(sickbeard.SEASON_FOLDERS_DEFAULT)
+
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if showObj:
+            raise ApiError("An existing tvdbid already exists in database")
 
         if not ek.ek(os.path.isdir, self.location):
             return _result('failure', 'Not a valid location')
@@ -1241,8 +1244,7 @@ class CMD_ShowAddExisting(ApiCall):
 
 
 class CMD_ShowCache(ApiCall):
-    _help = {"desc": "check sickbeard's cache to see if the banner or poster image for a show is valid",
-             }
+    _help = {"desc": "check sickbeard's cache to see if the banner or poster image for a show is valid"}
 
     def __init__(self, args, kwargs):
         # required
@@ -1253,6 +1255,7 @@ class CMD_ShowCache(ApiCall):
 
     def run(self):
         """ check sickbeard's cache to see if the banner or poster image for a show is valid """
+        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1286,6 +1289,7 @@ class CMD_ShowDelete(ApiCall):
 
     def run(self):
         """ delete a show in sickbeard """
+        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1312,6 +1316,7 @@ class CMD_ShowRefresh(ApiCall):
 
     def run(self):
         """ refresh a show in sickbeard """
+        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1380,6 +1385,7 @@ class CMD_ShowStats(ApiCall):
 
     def run(self):
         """ display episode statistics for a given show """
+        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1483,6 +1489,7 @@ class CMD_ShowUpdate(ApiCall):
 
     def run(self):
         """ update a show in sickbeard """
+        _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1510,7 +1517,9 @@ class CMD_Shows(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
-        """ display all shows in sickbeard """
+        """ display_is_int_multi( self.tvdbid )shows in sickbeard """
+        if self.paused and ( int(self.paused) not in (0, 1) ):
+            raise ApiError("Paused can only be 0 or 1")
         shows = {}
         for curShow in sickbeard.showList:
             if self.paused and not self.paused == str(curShow.paused):
