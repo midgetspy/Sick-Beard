@@ -178,13 +178,14 @@ def searchForNeededEpisodes():
                 if not bestResult or bestResult.quality < curResult.quality:
                     bestResult = curResult
 
-            bestResult = pickBestResult(curFoundResults[curEp],show=curEp.show)
+            bestResult = pickBestResult(curFoundResults[curEp], show=curEp.show)
 
             # if it's already in the list (from another provider) and the newly found quality is no better then skip it
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
                 continue
 
-            foundResults[curEp] = bestResult
+            if bestResult != None: #if we didn't find any result don't add None
+                foundResults[curEp] = bestResult
 
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
@@ -192,7 +193,7 @@ def searchForNeededEpisodes():
     return foundResults.values()
 
 
-def pickBestResult(results, quality_list=None,show=None):
+def pickBestResult(results, quality_list=None, show=None):
 
     logger.log(u"Picking the best result out of "+str([x.name for x in results]), logger.DEBUG)
 
@@ -208,9 +209,10 @@ def pickBestResult(results, quality_list=None,show=None):
     for cur_result in results:
         logger.log("Quality of "+cur_result.name+" is "+Quality.qualityStrings[cur_result.quality])
         
-        if bwl and not bwl.is_valid(cur_result):
-            logger.log(cur_result.name+" does not match the blacklist or the whitelist, rejecting it", logger.DEBUG)
-            continue
+        if bwl:
+            if not bwl.is_valid(cur_result):
+                logger.log(cur_result.name+" does not match the blacklist or the whitelist, rejecting it", logger.DEBUG)
+                continue
 
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
@@ -328,7 +330,7 @@ def findEpisode(episode, manualSearch=False):
             # and then stop and use that
             if episode.show.is_anime:
                 logger.log(u"We are searching an anime. i am checking if we got a good result with search provider "+curProvider.name, logger.DEBUG)
-                bestResult = pickBestResult(curFoundResults,show=episode.show)
+                bestResult = pickBestResult(curFoundResults, show=episode.show)
                 if bestResult:
                     return bestResult
 
@@ -347,7 +349,7 @@ def findEpisode(episode, manualSearch=False):
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
 
-    bestResult = pickBestResult(foundResults,show=episode.show)
+    bestResult = pickBestResult(foundResults, show=episode.show)
 
     return bestResult
 
