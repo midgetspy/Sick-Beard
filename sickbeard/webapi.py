@@ -310,21 +310,21 @@ class ApiCall(object):
             except AttributeError:
                 self._missing = []
                 self._requiredParams = {}
-                self._requiredParams[key] = {"allowedValues":allowedValues,
-                                             "defaultValue":orgDefault}
+                self._requiredParams[key] = {"allowedValues": allowedValues,
+                                             "defaultValue": orgDefault}
             if missing and key not in self._missing:
                 self._missing.append(key)
         else:
             try:
-                self._optionalParams[key] = {"allowedValues":allowedValues,
-                                             "defaultValue":orgDefault}
+                self._optionalParams[key] = {"allowedValues": allowedValues,
+                                             "defaultValue": orgDefault}
             except AttributeError:
                 self._optionalParams = {}
-                self._optionalParams[key] = {"allowedValues":allowedValues,
-                                             "defaultValue":orgDefault}
+                self._optionalParams[key] = {"allowedValues": allowedValues,
+                                             "defaultValue": orgDefault}
 
         if default:
-            logger.log("checking param type and value..."+str(type), logger.DEBUG)
+            logger.log("checking param type and value..." + str(type), logger.DEBUG)
             default = self._check_param_type(default, key, type)
             if type == "bool":
                 type = []
@@ -350,11 +350,11 @@ class ApiCall(object):
             else:
                 error = True
         elif type == "bool":
-            if value in ("0","1"):
+            if value in ("0", "1"):
                 value = bool(int(value))
-            elif value == "true":
+            elif value == "true" or "True":
                 value = True
-            elif value == "false":
+            elif value == "false" or "False":
                 value = False
             else:
                 error = True
@@ -365,10 +365,10 @@ class ApiCall(object):
         elif type == "ignore":
             pass
         else:
-            logger.log("Invalid param type set "+str(type)+" can not check or convert ignoring it", logger.ERROR)
+            logger.log("Invalid param type set " + str(type) + " can not check or convert ignoring it", logger.ERROR)
 
         if error:
-            raise ApiError(u"param: '"+str(name)+"' with given value: '"+str(value)+"' could not be parsed into '"+str(type)+"'")
+            raise ApiError(u"param: '" + str(name) + "' with given value: '" + str(value) + "' could not be parsed into '" + str(type) + "'")
 
         return value
 
@@ -388,7 +388,7 @@ class ApiCall(object):
                     error = True
 
             if error:
-                raise ApiError(u"param: '"+str(name)+"' with given value: '"+str(value)+"' is out of allowed range '"+str(allowedValues)+"'")
+                raise ApiError(u"param: '" + str(name) + "' with given value: '" + str(value) + "' is out of allowed range '" + str(allowedValues) + "'")
 
 
 class TVDBShorthandWrapper(ApiCall):
@@ -526,7 +526,7 @@ class IntParseError(Exception):
 
 class CMD_Help(ApiCall):
     _help = {"desc": "display help information for a given subject/command",
-             "optionalPramameters": {"subject": {"desc":"command - the top level command"},
+             "optionalPramameters": {"subject": {"desc": "command - the top level command"},
                                   }
              }
 
@@ -547,8 +547,8 @@ class CMD_Help(ApiCall):
 
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc": "display the coming episodes",
-             "optionalPramameters": {"sort": {"desc":"change the sort order"},
-                                     "type": {"desc":"one or more of allowedValues separated by |"}
+             "optionalPramameters": {"sort": {"desc": "change the sort order"},
+                                     "type": {"desc": "one or more of allowedValues separated by |"}
                                      }
              }
 
@@ -562,11 +562,6 @@ class CMD_ComingEpisodes(ApiCall):
 
     def run(self):
         """ display the coming episodes """
-        if self.sort not in ("date", "show", "network"):
-            raise ApiError("Invalid sort type")
-        #
-        # self.type = self.type.split("|")
-
         today = datetime.date.today().toordinal()
         next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
@@ -648,9 +643,9 @@ class CMD_ComingEpisodes(ApiCall):
 
 class CMD_Episode(ApiCall):
     _help = {"desc": "display detailed info about an episode",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
-                                   "season": {"desc":"the season number"},
-                                   "episode": {"desc":"the episode number"}
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                   "season": {"desc": "the season number"},
+                                   "episode": {"desc": "the episode number"}
                                   },
              "optionalPramameters": {"full_path": "show the full absolute path (if valid) instead of a relative path for the episode location"}
              }
@@ -661,7 +656,7 @@ class CMD_Episode(ApiCall):
         self.s, args = self.check_params(args, kwargs, "season", None, True, "int", [])
         self.e, args = self.check_params(args, kwargs, "episode", None, True, "int", [])
         # optional
-        self.fullPath, args = self.check_params(args, kwargs, "full_path", "0", False, "bool", [])
+        self.fullPath, args = self.check_params(args, kwargs, "full_path", 0, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -684,9 +679,9 @@ class CMD_Episode(ApiCall):
         except sickbeard.exceptions.ShowDirNotFoundException:
             pass
 
-        if self.fullPath == "1" and showPath: # we get the full path by default so no need to change
+        if bool(self.fullPath) == True and showPath:
             pass
-        elif self.fullPath and showPath:
+        elif bool(self.fullPath) == False and showPath:
             #i am using the length because lstrip removes to much
             showPathLength = len(showPath) + 1 # the / or \ yeah not that nice i know
             episode["location"] = episode["location"][showPathLength:]
@@ -702,9 +697,9 @@ class CMD_Episode(ApiCall):
 
 class CMD_EpisodeSearch(ApiCall):
     _help = {"desc": "search for an episode. the response might take some time",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
-                                   "season": {"desc":"the season number"},
-                                   "episode": {"desc":"the episode number"}
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                   "season": {"desc": "the season number"},
+                                   "episode": {"desc": "the episode number"}
                                   }
              }
 
@@ -745,10 +740,10 @@ class CMD_EpisodeSearch(ApiCall):
 
 class CMD_EpisodeSetStatus(ApiCall):
     _help = {"desc": "set status of an episode",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
-                                   "season": {"desc":"the season number"},
-                                   "episode": {"desc":"the episode number"},
-                                   "status": {"desc":"the status value: wanted, skipped, archived, ignored"}
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                   "season": {"desc": "the season number"},
+                                   "episode": {"desc": "the episode number"},
+                                   "status": {"desc": "the status values: wanted, skipped, archived, ignored"}
                                   }
              }
 
@@ -757,7 +752,7 @@ class CMD_EpisodeSetStatus(ApiCall):
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         self.s, args = self.check_params(args, kwargs, "season", None, True, "int", [])
         self.e, args = self.check_params(args, kwargs, "episode", None, True, "int", [])
-        self.status, args = self.check_params(args, kwargs, "status", None, True, "string", [])
+        self.status, args = self.check_params(args, kwargs, "status", None, True, "string", ["wanted", "skipped", "archived", "ignored"])
         # optional
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -818,7 +813,7 @@ class CMD_EpisodeSetStatus(ApiCall):
 
 class CMD_Exceptions(ApiCall):
     _help = {"desc": "display scene exceptions for all or a given show",
-             "optionalPramameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+             "optionalPramameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   }
              }
 
@@ -858,8 +853,8 @@ class CMD_Exceptions(ApiCall):
 
 class CMD_History(ApiCall):
     _help = {"desc": "display sickbeard downloaded/snatched history",
-             "optionalPramameters": {"limit": {"desc":"limit returned results"},
-                                    "type": {"desc":"only show a specific type of results"},
+             "optionalPramameters": {"limit": {"desc": "limit returned results"},
+                                    "type": {"desc": "only show a specific type of results"},
                                    }
              }
 
@@ -867,7 +862,7 @@ class CMD_History(ApiCall):
         # required
         # optional
         self.limit, args = self.check_params(args, kwargs, "limit", 100, False, "int", [])
-        self.type, args = self.check_params(args, kwargs, "type", None, False, "string", ["downloaded","snatched"])
+        self.type, args = self.check_params(args, kwargs, "type", None, False, "string", ["downloaded", "snatched"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -955,7 +950,7 @@ class CMD_Logs(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.minLevel, args = self.check_params(args, kwargs, "minlevel", "error", False, "string", ["error","warning","info","debug"])
+        self.minLevel, args = self.check_params(args, kwargs, "minlevel", "error", False, "string", ["error", "warning", "info", "debug"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1078,7 +1073,7 @@ class CMD_SickBeardPauseBacklog(ApiCall):
 
     def run(self):
         """ pause the backlog search """
-        if self.pause == "1":
+        if self.pause == True:
             sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
             return {"result": "Backlog Paused"}
         else:
@@ -1136,9 +1131,9 @@ class CMD_SickBeardShutdown(ApiCall):
 
 class CMD_SeasonList(ApiCall):
     _help = {"desc": "display the season list for a given show",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                     },
-             "optionalPramameters": {"sort": {"desc":"change the sort order from descending to ascending"}
+             "optionalPramameters": {"sort": {"desc": "change the sort order from descending to ascending"}
                                      }
              }
 
@@ -1171,9 +1166,9 @@ class CMD_SeasonList(ApiCall):
 
 class CMD_Seasons(ApiCall):
     _help = {"desc": "display a listing of episodes for all or a given season",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   },
-             "optionalPramameters": {"season": {"desc":"the season number"},
+             "optionalPramameters": {"season": {"desc": "the season number"},
                                   }
              }
 
@@ -1187,7 +1182,6 @@ class CMD_Seasons(ApiCall):
 
     def run(self):
         """ display a listing of episodes for all or a given show """
-        # _is_int_multi( self.tvdbid, self.season )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1228,7 +1222,7 @@ class CMD_Seasons(ApiCall):
 
 class CMD_Show(ApiCall):
     _help = {"desc": "display information for a given show",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   }
              }
 
@@ -1241,7 +1235,6 @@ class CMD_Show(ApiCall):
 
     def run(self):
         """ display information for a given show """
-        # _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1287,16 +1280,12 @@ class CMD_ShowAddExisting(ApiCall):
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         self.quality, args = self.check_params(args, kwargs, "quality", int(sickbeard.QUALITY_DEFAULT), False, "int", [])
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", int(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
+        self.season_folder, args = self.check_params(args, kwargs, "season_folder", bool(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ add a show in sickbeard with an existing folder """
-        # _is_int_multi( self.tvdbid, self.quality, self.season_folder )
-        if int(self.season_folder) not in (0, 1):
-            self.season_folder = int(sickbeard.SEASON_FOLDERS_DEFAULT)
-
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if showObj:
             raise ApiError("An existing tvdbid already exists in database")
@@ -1304,7 +1293,7 @@ class CMD_ShowAddExisting(ApiCall):
         if not ek.ek(os.path.isdir, self.location):
             return _result('failure', 'Not a valid location')
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, int(self.quality), bool(self.season_folder)) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, int(self.quality), int(self.season_folder)) #@UndefinedVariable
         return _result("Show has been queued to be added")
 
 
@@ -1320,10 +1309,12 @@ class CMD_ShowCache(ApiCall):
 
     def run(self):
         """ check sickbeard's cache to see if the banner or poster image for a show is valid """
-        # _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
+
+        #TODO: catch if cache dir is missing/invalid.. so it doesn't break show/show.cache
+        #return {"poster": 0, "banner": 0}
 
         cache_obj = image_cache.ImageCache()
 
@@ -1341,7 +1332,7 @@ class CMD_ShowCache(ApiCall):
 
 class CMD_ShowDelete(ApiCall):
     _help = {"desc": "delete a show in sickbeard",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   }
              }
 
@@ -1354,7 +1345,6 @@ class CMD_ShowDelete(ApiCall):
 
     def run(self):
         """ delete a show in sickbeard """
-        # _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1368,7 +1358,7 @@ class CMD_ShowDelete(ApiCall):
 
 class CMD_ShowRefresh(ApiCall):
     _help = {"desc": "refresh a show in sickbeard",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   }
              }
 
@@ -1381,7 +1371,6 @@ class CMD_ShowRefresh(ApiCall):
 
     def run(self):
         """ refresh a show in sickbeard """
-        # _is_int_multi( self.tvdbid )
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
@@ -1437,7 +1426,7 @@ class CMD_ShowSearchTVDB(ApiCall):
 
 class CMD_ShowStats(ApiCall):
     _help = {"desc": "display episode statistics for a given show",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   }
              }
 
@@ -1540,7 +1529,7 @@ class CMD_ShowStats(ApiCall):
 
 class CMD_ShowUpdate(ApiCall):
     _help = {"desc": "update a show in sickbeard",
-             "requiredParameters": {"tvdbid": {"desc":"thetvdb.com unique id of a show"},
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   }
              }
 
@@ -1566,26 +1555,24 @@ class CMD_ShowUpdate(ApiCall):
 
 class CMD_Shows(ApiCall):
     _help = {"desc": "display all shows in sickbeard",
-             "optionalPramameters": {"sort": {"desc":"sort the list of shows by show name instead of tvdbid"},
-                                    "paused": {"desc":"only show the shows that are set to paused"},
+             "optionalPramameters": {"sort": {"desc": "sort the list of shows by show name instead of tvdbid"},
+                                    "paused": {"desc": "only show the shows that are set to paused"},
                                   },
              }
 
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.sort, args = self.check_params(args, kwargs, "sort", "id", False, "string", ["id","name"])
+        self.sort, args = self.check_params(args, kwargs, "sort", "id", False, "string", ["id", "name"])
         self.paused, args = self.check_params(args, kwargs, "paused", None, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ display_is_int_multi( self.tvdbid )shows in sickbeard """
-        if self.paused and ( int(self.paused) not in (0, 1) ):
-            raise ApiError("Paused can only be 0 or 1")
         shows = {}
         for curShow in sickbeard.showList:
-            if self.paused and not self.paused == str(curShow.paused):
+            if not bool(self.paused) == bool(curShow.paused):
                 continue
             showDict = {"paused": curShow.paused,
                         "quality": _get_quality_string(curShow.quality),
