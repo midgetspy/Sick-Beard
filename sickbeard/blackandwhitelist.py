@@ -26,10 +26,14 @@ class BlackAndWhiteList(object):
     blackDict = {}
     whiteDict = {}
 
+    last_black_valid_result = None
+    last_white_valid_result = None
+
     def __init__(self, show_id):
         if not show_id:
             raise BlackWhitelistNoShowIDException()
         self.show_id = show_id
+
         self.myDB = db.DBConnection()
         self.refresh()
 
@@ -78,6 +82,20 @@ class BlackAndWhiteList(object):
 
     def add_white_keyword(self, range, value):
         self._add_keywords(self._tableWhite, range, [value])
+
+    def get_last_result_msg(self):
+        blackResult = whiteResult = "Untested"
+        if self.last_black_valid_result == True:
+            blackResult = "Valid"
+        elif self.last_black_valid_result == False:
+            blackResult = "Unvalid"
+
+        if self.last_white_valid_result == True:
+            whiteResult = "Valid"
+        elif self.last_white_valid_result == False:
+            whiteResult = "Unvalid"
+
+        return "Blacklist: " + blackResult + ", Whitelist: " + whiteResult
 
     def _add_keywords(self, table, range, values):
         for value in values:
@@ -129,11 +147,15 @@ class BlackAndWhiteList(object):
 
     def is_valid_for_black(self, haystack):
         logger.log(u"BWL: " + str(self.show_id) + " is valid black", logger.DEBUG)
-        return self._is_valid_for(self.blackDict, False, haystack)
+        result = self._is_valid_for(self.blackDict, False, haystack)
+        self.last_black_valid_result = result
+        return result
 
     def is_valid_for_white(self, haystack):
         logger.log(u"BWL: " + str(self.show_id) + " is valid white", logger.DEBUG)
-        return self._is_valid_for(self.whiteDict, True, haystack)
+        result = self._is_valid_for(self.whiteDict, True, haystack)
+        self.last_white_valid_result = result
+        return result
 
     def is_valid(self, haystack):
         return self.is_valid_for_black(haystack) and self.is_valid_for_white(haystack)
