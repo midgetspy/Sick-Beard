@@ -211,7 +211,7 @@ def pickBestResult(results, quality_list=None, show=None):
         
         if bwl:
             if not bwl.is_valid(cur_result):
-                logger.log(cur_result.name+" does not match the blacklist or the whitelist, rejecting it", logger.DEBUG)
+                logger.log(cur_result.name+" does not match the blacklist or the whitelist, rejecting it. Result: " + bwl.get_last_result_msg(), logger.DEBUG)
                 continue
 
         if quality_list and cur_result.quality not in quality_list:
