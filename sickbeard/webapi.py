@@ -1424,6 +1424,28 @@ class CMD_ShowSearchTVDB(ApiCall):
         return {'results': results, 'langid': lang_id}
 
 
+class CMD_ShowSetQuality(ApiCall):
+    _help = {"desc": "set desired quality of a show in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                  }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ refresh a show in sickbeard """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
+        return "not yet implemented"
+
+
 class CMD_ShowStats(ApiCall):
     _help = {"desc": "display episode statistics for a given show",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
@@ -1640,6 +1662,7 @@ _functionMaper = {"help": CMD_Help,
                   "show.delete": CMD_ShowDelete,
                   "show.refresh": CMD_ShowRefresh,
                   "show.searchtvdb": CMD_ShowSearchTVDB,
+                  "show.setquality": CMD_ShowSetQuality,
                   "show.stats": CMD_ShowStats,
                   "show.update": CMD_ShowUpdate,
                   "shows": CMD_Shows,
