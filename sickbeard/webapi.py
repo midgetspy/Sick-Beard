@@ -352,9 +352,9 @@ class ApiCall(object):
         elif type == "bool":
             if value in ("0", "1"):
                 value = bool(int(value))
-            elif value == "true" or "True":
+            elif value in ("true", "True", "TRUE"):
                 value = True
-            elif value == "false" or "False":
+            elif value in ("false", "False", "FALSE"):
                 value = False
             else:
                 error = True
@@ -1280,7 +1280,7 @@ class CMD_ShowAddExisting(ApiCall):
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         self.quality, args = self.check_params(args, kwargs, "quality", int(sickbeard.QUALITY_DEFAULT), False, "int", [])
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", bool(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
+        self.season_folder, args = self.check_params(args, kwargs, "season_folder", str(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
