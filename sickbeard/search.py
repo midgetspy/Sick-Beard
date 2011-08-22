@@ -184,7 +184,7 @@ def searchForNeededEpisodes():
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
                 continue
 
-            if bestResult != None: #if we didn't find any result don't add None
+            if bestResult: #if we didn't find any result don't add None
                 foundResults[curEp] = bestResult
 
     if not didSearch:
@@ -527,7 +527,9 @@ def findSeason(show, season):
 
         if len(foundResults[curEp]) == 0:
             continue
-
-        finalResults.append(pickBestResult(foundResults[curEp],show=show))
+        
+        bestResult = pickBestResult(foundResults[curEp],show=show)
+        if bestResult:
+            finalResults.append(bestResult)
 
     return finalResults
