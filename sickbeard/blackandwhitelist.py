@@ -111,7 +111,9 @@ class BlackAndWhiteList(object):
         if not sqlResults or not len(sqlResults):
             return ([],{})
         
-        return self._build_keyword_dict(sqlResults)
+        list, dict = self._build_keyword_dict(sqlResults)
+        logger.log("BWL: "+str(self.show_id)+" loaded keywords from "+table+": "+str(dict), logger.DEBUG)
+        return list, dict
     
     def _build_keyword_dict(self,sql_result):
         list = []
