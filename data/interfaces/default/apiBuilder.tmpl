@@ -52,7 +52,7 @@ addList("Command", "Show.Cache", "?cmd=show.cache", "tvdbid", "", "", "action");
 addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.SearchTVDB", "?cmd=show.searchtvdb", "show.searchtvdb", "", "", "action");
-addList("Command", "Show.SetQuality", "?cmd=show.setquality", "show.setquality", "", "", "action disabled");
+addList("Command", "Show.SetQuality", "?cmd=show.setquality", "show.setquality", "", "", "action");
 addList("Command", "Show.Stats", "?cmd=show.stats", "tvdbid", "", "", "action");
 addList("Command", "Show.Update", "?cmd=show.update", "tvdbid", "", "", "action");
 addList("Command", "Shows", "?cmd=shows", "shows");
@@ -130,6 +130,25 @@ addList("season_list", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "season_l
 
 addOption("season_list-sort", "Optional Param", "", 1);
 addOption("season_list-sort", "Sort by Ascending", "&amp;sort=asc");
+
+#for $curShow in $sortedShowList:
+addList("show.setquality", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "showsetquality-quality");
+#end for
+
+addOptGroup("showsetquality-quality", "Templates");
+addOption("showsetquality-quality", "SD", "&amp;quality=sdtv|sddvd");
+addOption("showsetquality-quality", "HD", "&amp;quality=hdtv|hdwebdl|hdbluray");
+addOption("showsetquality-quality", "ANY", "&amp;quality=sdtv|sddvd|hdtv|hdwebdl|hdbluray|unknown");
+endOptGroup("showsetquality-quality");
+addOptGroup("showsetquality-quality", "Custom");
+addOption("showsetquality-quality", "SD TV", "&amp;quality=sdtv");
+addOption("showsetquality-quality", "SD DVD", "&amp;quality=sddvd");
+addOption("showsetquality-quality", "HD TV", "&amp;quality=hdtv");
+addOption("showsetquality-quality", "720p Web-DL", "&amp;quality=hdwebdl");
+addOption("showsetquality-quality", "720p BluRay", "&amp;quality=hdbluray");
+addOption("showsetquality-quality", "1080p BluRay", "&amp;quality=fullhdbluray");
+addOption("showsetquality-quality", "Unknown", "&amp;quality=unknown");
+endOptGroup("showsetquality-quality");
 
 // build out each show's season list for season cmd
 #for $curShow in $seasonSQLResults:
