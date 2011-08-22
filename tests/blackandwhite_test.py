@@ -118,7 +118,7 @@ class BlackAndWhiteListTests(test.SickbeardTestDBCase):
         bwl.set_black_keywords_for("global", ["gg","horrible"])
         bwl.set_white_keywords_for("global", ["taka","SGKK"])
         
-        result = ParseResult("[SGKK] Bleach - 326 (1280x720 h264 AAC) [3E33616B]",release_group="SGKK")
+        result = ParseResult("[SGKK] Bleach - 326 (1280x720 h264 AAC) [3E33616B]",release_group="sgkk")
         result.name = result.original_name
         
         self.assertTrue(bwl.is_valid_for_black(result))
@@ -133,6 +133,17 @@ class BlackAndWhiteListTests(test.SickbeardTestDBCase):
         result.name = result.original_name
         
         self.assertFalse(bwl.is_valid_for_black(result))
+    
+    def test_blackandwhite_success_empty(self):
+        bwl = BlackAndWhiteList(1337)
+        #bwl.set_black_keywords_for("global", ["taka"])
+        #bwl.set_white_keywords_for("global", ["SGKK"])
+        
+        result = ParseResult("[taka] Bleach - 326 (1280x720 h264 AAC) [3E33616B]",release_group="taka")
+        result.name = result.original_name
+        
+        self.assertTrue(bwl.is_valid(result))
+    
         
     
 if __name__ == '__main__':
