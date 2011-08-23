@@ -1426,16 +1426,19 @@ class CMD_ShowSearchTVDB(ApiCall):
 
 class CMD_ShowSetQuality(ApiCall):
     _help = {"desc": "set desired quality of a show in sickbeard",
-             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
-                                  }
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
+                                },
+             "optionalPramameters": {"inital": {"desc": "the new quality for the show. if archive is provided this will be the initial quality"},
+                                    "archive": {"desc": "if inital is provided this will be the archive quality"}
+                                    }
              }
 
     def __init__(self, args, kwargs):
         # required
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.inital, args = self.check_params(args, kwargs, "inital", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown"])
+        self.inital, args = self.check_params(args, kwargs, "inital", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1469,28 +1472,32 @@ class CMD_ShowSetQuality(ApiCall):
         "newQuality": 32799
         """
 
-        quality_map = { 'sdtv': 1, 'sddvd': 2, 'hdtv': 4, 'hdwebdl': 8, 'hdbluray': 16, 'fullhdbluray': 32, 'unknown': 32768 }
+        quality_map = {'sdtv': Quality.SDTV,
+                       'sddvd': Quality.SDDVD,
+                       'hdtv': Quality.HDTV,
+                       'hdwebdl': Quality.HDWEBDL,
+                       'hdbluray': Quality.HDBLURAY,
+                       'fullhdbluray': Quality.FULLHDBLURAY,
+                       'unknown': Quality.UNKNOWN,
+                       'any': ANY }
 
         #use default quality as a failsafe
         newQuality = int(sickbeard.QUALITY_DEFAULT)
         iqualityID = []
         aqualityID = []
 
-        if not self.inital:
-            self.inital = []
-        else:
+        if self.inital:
             for quality in self.inital:
-                iqualityID.append( int(quality_map[quality]) )
-        if not self.archive:
-            self.archive = []
-        else:
-            for quality in self.archive:
-                aqualityID.append( int(quality_map[quality]) )
+                iqualityID.append(quality_map[quality])
+            if self.archive:
+                for quality in self.archive:
+                    aqualityID.append(quality_map[quality])
 
-        newQuality = Quality.combineQualities(map(int, iqualityID), map(int, aqualityID))
+        if iqualityID:
+            newQuality = Quality.combineQualities(iqualityID, aqualityID)
         showObj.quality = newQuality
 
-        return _result(str(showObj.name) + " quality has been changed")
+        return _result(showObj.name + " quality has been changed to " + _get_quality_string(showObj.quality))
 
 
 class CMD_ShowStats(ApiCall):
