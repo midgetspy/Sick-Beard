@@ -1356,6 +1356,48 @@ class CMD_ShowDelete(ApiCall):
         return _result(str(showObj.name) + " has been deleted")
 
 
+class CMD_ShowGetQuality(ApiCall):
+    _help = {"desc": "get quality setting for a show in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
+                                }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ get quality setting for a show in sickbeard """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
+        quality_map = {Quality.SDTV: 'sdtv',
+                       Quality.SDDVD: 'sddvd',
+                       Quality.HDTV: 'hdtv',
+                       Quality.HDWEBDL: 'hdwebdl',
+                       Quality.HDBLURAY: 'hdbluray',
+                       Quality.FULLHDBLURAY: 'fullhdbluray',
+                       Quality.UNKNOWN: 'unknown',
+                       ANY: 'any'}
+
+        iqualityID = []
+        aqualityID = []
+
+        anyQualities, bestQualities = Quality.splitQuality(int(showObj.quality))
+        if anyQualities:
+            for quality in anyQualities:
+                iqualityID.append(quality_map[quality])
+        if bestQualities:
+            for quality in bestQualities:
+                aqualityID.append(quality_map[quality])
+
+        return {"initial": anyQualities, "archive": bestQualities}
+
+
 class CMD_ShowRefresh(ApiCall):
     _help = {"desc": "refresh a show in sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
@@ -1429,8 +1471,8 @@ class CMD_ShowSetQuality(ApiCall):
     _help = {"desc": "set desired quality of a show in sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
-             "optionalPramameters": {"inital": {"desc": "the new quality for the show. if archive is provided this will be the initial quality"},
-                                    "archive": {"desc": "if inital is provided this will be the archive quality"}
+             "optionalPramameters": {"initial ": {"desc": "the new quality for the show. if archive is provided this will be the initial quality"},
+                                    "archive": {"desc": "if initial is provided this will be the archive quality"}
                                     }
              }
 
@@ -1438,7 +1480,7 @@ class CMD_ShowSetQuality(ApiCall):
         # required
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.inital, args = self.check_params(args, kwargs, "inital", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1454,7 +1496,7 @@ class CMD_ShowSetQuality(ApiCall):
         map that to the # it corresponds to,
         then combine qualities to make a new quality
 
-        "self.inital": [
+        "self.initial": [
           "sdtv",
           "sddvd",
           "hdtv",
@@ -1487,8 +1529,8 @@ class CMD_ShowSetQuality(ApiCall):
         iqualityID = []
         aqualityID = []
 
-        if self.inital:
-            for quality in self.inital:
+        if self.initial:
+            for quality in self.initial:
                 iqualityID.append(quality_map[quality])
         if self.archive:
             for quality in self.archive:
@@ -1715,6 +1757,7 @@ _functionMaper = {"help": CMD_Help,
                   "show.addexisting": CMD_ShowAddExisting,
                   "show.cache": CMD_ShowCache,
                   "show.delete": CMD_ShowDelete,
+                  "show.getquality": CMD_ShowGetQuality,
                   "show.refresh": CMD_ShowRefresh,
                   "show.searchtvdb": CMD_ShowSearchTVDB,
                   "show.setquality": CMD_ShowSetQuality,
