@@ -1434,16 +1434,63 @@ class CMD_ShowSetQuality(ApiCall):
         # required
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
+        self.inital, args = self.check_params(args, kwargs, "inital", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
-        """ refresh a show in sickbeard """
+        """ set the quality for a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             raise ApiError("Show not Found")
 
-        return "not yet implemented"
+        """
+        take in a deliminated string of quality,
+        map that to the # it corresponds to,
+        then combine qualities to make a new quality
+
+        "self.inital": [
+          "sdtv",
+          "sddvd",
+          "hdtv",
+          "hdwebdl",
+          "hdbluray",
+          "unknown"
+        ],
+        "iqualityID": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32768
+        ],
+        "newQuality": 32799
+        """
+
+        quality_map = { 'sdtv': 1, 'sddvd': 2, 'hdtv': 4, 'hdwebdl': 8, 'hdbluray': 16, 'fullhdbluray': 32, 'unknown': 32768 }
+
+        #use default quality as a failsafe
+        newQuality = int(sickbeard.QUALITY_DEFAULT)
+        iqualityID = []
+        aqualityID = []
+
+        if not self.inital:
+            self.inital = []
+        else:
+            for quality in self.inital:
+                iqualityID.append( int(quality_map[quality]) )
+        if not self.archive:
+            self.archive = []
+        else:
+            for quality in self.archive:
+                aqualityID.append( int(quality_map[quality]) )
+
+        newQuality = Quality.combineQualities(map(int, iqualityID), map(int, aqualityID))
+        showObj.quality = newQuality
+
+        return _result(str(showObj.name) + " quality has been changed")
 
 
 class CMD_ShowStats(ApiCall):
