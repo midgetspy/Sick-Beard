@@ -50,7 +50,7 @@ addList("Command", "Show.AddExisting", "?cmd=show.addexisting", "show.addexistin
 addList("Command", "Show.AddNew", "?cmd=show.addnew", "show.addnew", "", "", "action disabled");
 addList("Command", "Show.Cache", "?cmd=show.cache", "tvdbid", "", "", "action");
 addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action");
-addList("Command", "Show.GetQuality", "?cmd=show.getquality", "tvdbid", "", "", "action disabled");
+addList("Command", "Show.GetQuality", "?cmd=show.getquality", "tvdbid", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.SearchTVDB", "?cmd=show.searchtvdb", "show.searchtvdb", "", "", "action");
 addList("Command", "Show.SetQuality", "?cmd=show.setquality", "show.setquality", "", "", "action");
@@ -137,22 +137,22 @@ addList("show.setquality", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "show
 #end for
 
 addOptGroup("showsetquality-iquality", "Templates");
-addOption("showsetquality-iquality", "SD", "&amp;inital=sdtv|sddvd");
-addOption("showsetquality-iquality", "HD", "&amp;inital=hdtv|hdwebdl|hdbluray");
-addOption("showsetquality-iquality", "ANY", "&amp;inital=sdtv|sddvd|hdtv|hdwebdl|hdbluray|unknown");
+addOption("showsetquality-iquality", "SD", "&amp;initial=sdtv|sddvd");
+addOption("showsetquality-iquality", "HD", "&amp;initial=hdtv|hdwebdl|hdbluray");
+addOption("showsetquality-iquality", "ANY", "&amp;initial=sdtv|sddvd|hdtv|hdwebdl|hdbluray|unknown");
 endOptGroup("showsetquality-iquality");
 addOptGroup("showsetquality-iquality", "Inital (Custom)");
-addList("showsetquality-iquality", "SD TV", "&amp;inital=sdtv", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "SD DVD", "&amp;inital=sddvd", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "HD TV", "&amp;inital=hdtv", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "720p Web-DL", "&amp;inital=hdwebdl", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "720p BluRay", "&amp;inital=hdbluray", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "1080p BluRay", "&amp;inital=fullhdbluray", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "Unknown", "&amp;inital=unknown", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "SD TV", "&amp;initial=sdtv", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "SD DVD", "&amp;initial=sddvd", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "HD TV", "&amp;initial=hdtv", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "720p Web-DL", "&amp;initial=hdwebdl", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "720p BluRay", "&amp;initial=hdbluray", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "1080p BluRay", "&amp;initial=fullhdbluray", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "Unknown", "&amp;initial=unknown", "showsetquality-iquality-aquality");
 endOptGroup("showsetquality-iquality");
 addOptGroup("showsetquality-iquality", "Random");
-addList("showsetquality-iquality", "SD DVD/720p Web-DL", "&amp;inital=sddvd|hdwebdl", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "SD TV/HD TV", "&amp;inital=sdtv|hdtv", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "SD DVD/720p Web-DL", "&amp;initial=sddvd|hdwebdl", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "SD TV/HD TV", "&amp;initial=sdtv|hdtv", "showsetquality-iquality-aquality");
 endOptGroup("showsetquality-iquality");
 
 addOption("showsetquality-iquality-aquality", "Optional Param", "", 1);
