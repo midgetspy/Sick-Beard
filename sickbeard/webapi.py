@@ -1384,16 +1384,16 @@ class CMD_ShowGetQuality(ApiCall):
                        Quality.UNKNOWN: 'unknown',
                        ANY: 'any'}
 
-        iqualityID = []
-        aqualityID = []
+        anyQualities = []
+        bestQualities = []
 
-        anyQualities, bestQualities = Quality.splitQuality(int(showObj.quality))
-        if anyQualities:
-            for quality in anyQualities:
-                iqualityID.append(quality_map[quality])
-        if bestQualities:
-            for quality in bestQualities:
-                aqualityID.append(quality_map[quality])
+        iqualityID, aqualityID = Quality.splitQuality(int(showObj.quality))
+        if iqualityID:
+            for quality in iqualityID:
+                anyQualities.append(quality_map[quality])
+        if aqualityID:
+            for quality in aqualityID:
+                bestQualities.append(quality_map[quality])
 
         return {"initial": anyQualities, "archive": bestQualities}
 
