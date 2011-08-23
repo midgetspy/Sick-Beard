@@ -50,6 +50,7 @@ addList("Command", "Show.AddExisting", "?cmd=show.addexisting", "show.addexistin
 addList("Command", "Show.AddNew", "?cmd=show.addnew", "show.addnew", "", "", "action disabled");
 addList("Command", "Show.Cache", "?cmd=show.cache", "tvdbid", "", "", "action");
 addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action");
+addList("Command", "Show.GetQuality", "?cmd=show.getquality", "tvdbid", "", "", "action disabled");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.SearchTVDB", "?cmd=show.searchtvdb", "show.searchtvdb", "", "", "action");
 addList("Command", "Show.SetQuality", "?cmd=show.setquality", "show.setquality", "", "", "action");
@@ -132,23 +133,41 @@ addOption("season_list-sort", "Optional Param", "", 1);
 addOption("season_list-sort", "Sort by Ascending", "&amp;sort=asc");
 
 #for $curShow in $sortedShowList:
-addList("show.setquality", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "showsetquality-quality");
+addList("show.setquality", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "showsetquality-iquality");
 #end for
 
-addOptGroup("showsetquality-quality", "Templates");
-addOption("showsetquality-quality", "SD", "&amp;quality=sdtv|sddvd");
-addOption("showsetquality-quality", "HD", "&amp;quality=hdtv|hdwebdl|hdbluray");
-addOption("showsetquality-quality", "ANY", "&amp;quality=sdtv|sddvd|hdtv|hdwebdl|hdbluray|unknown");
-endOptGroup("showsetquality-quality");
-addOptGroup("showsetquality-quality", "Custom");
-addOption("showsetquality-quality", "SD TV", "&amp;quality=sdtv");
-addOption("showsetquality-quality", "SD DVD", "&amp;quality=sddvd");
-addOption("showsetquality-quality", "HD TV", "&amp;quality=hdtv");
-addOption("showsetquality-quality", "720p Web-DL", "&amp;quality=hdwebdl");
-addOption("showsetquality-quality", "720p BluRay", "&amp;quality=hdbluray");
-addOption("showsetquality-quality", "1080p BluRay", "&amp;quality=fullhdbluray");
-addOption("showsetquality-quality", "Unknown", "&amp;quality=unknown");
-endOptGroup("showsetquality-quality");
+addOptGroup("showsetquality-iquality", "Templates");
+addOption("showsetquality-iquality", "SD", "&amp;inital=sdtv|sddvd");
+addOption("showsetquality-iquality", "HD", "&amp;inital=hdtv|hdwebdl|hdbluray");
+addOption("showsetquality-iquality", "ANY", "&amp;inital=sdtv|sddvd|hdtv|hdwebdl|hdbluray|unknown");
+endOptGroup("showsetquality-iquality");
+addOptGroup("showsetquality-iquality", "Inital (Custom)");
+addList("showsetquality-iquality", "SD TV", "&amp;inital=sdtv", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "SD DVD", "&amp;inital=sddvd", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "HD TV", "&amp;inital=hdtv", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "720p Web-DL", "&amp;inital=hdwebdl", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "720p BluRay", "&amp;inital=hdbluray", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "1080p BluRay", "&amp;inital=fullhdbluray", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "Unknown", "&amp;inital=unknown", "showsetquality-iquality-aquality");
+endOptGroup("showsetquality-iquality");
+addOptGroup("showsetquality-iquality", "Random");
+addList("showsetquality-iquality", "SD DVD/720p Web-DL", "&amp;inital=sddvd|hdwebdl", "showsetquality-iquality-aquality");
+addList("showsetquality-iquality", "SD TV/HD TV", "&amp;inital=sdtv|hdtv", "showsetquality-iquality-aquality");
+endOptGroup("showsetquality-iquality");
+
+addOption("showsetquality-iquality-aquality", "Optional Param", "", 1);
+addOptGroup("showsetquality-iquality-aquality", "Archive (Custom)");
+addList("showsetquality-iquality-aquality", "SD DVD", "&amp;archive=sddvd");
+addList("showsetquality-iquality-aquality", "HD TV", "&amp;archive=hdtv");
+addList("showsetquality-iquality-aquality", "720p Web-DL", "&amp;archive=hdwebdl");
+addList("showsetquality-iquality-aquality", "720p BluRay", "&amp;archive=hdbluray");
+addList("showsetquality-iquality-aquality", "1080p BluRay", "&amp;archive=fullhdbluray");
+addList("showsetquality-iquality-aquality", "Unknown", "&amp;archive=unknown");
+endOptGroup("showsetquality-iquality-aquality");
+addOptGroup("showsetquality-iquality-aquality", "Random");
+addList("showsetquality-iquality-aquality", "HD TV/1080p BluRay", "&amp;archive=hdtv|fullhdbluray");
+addList("showsetquality-iquality-aquality", "720p Web-DL/720p BluRay", "&amp;archive=hdwebdl|hdbluray");
+endOptGroup("showsetquality-iquality-aquality");
 
 // build out each show's season list for season cmd
 #for $curShow in $seasonSQLResults:
