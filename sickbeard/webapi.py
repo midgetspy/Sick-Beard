@@ -259,20 +259,20 @@ class ApiCall(object):
         except AttributeError:
             self._optionalParams = []
 
-        for list, type in [(self._requiredParams, "requiredParameters"),
+        for paramDict, type in [(self._requiredParams, "requiredParameters"),
                           (self._optionalParams, "optionalPramameters")]:
 
             if type in self._help:
-                for paramName in list:
+                for paramName in paramDict:
                     self._help[type][paramName]["allowedValues"] = "see desc"
-                    if list[paramName]["allowedValues"]:
-                        self._help[type][paramName]["allowedValues"] = list[paramName]["allowedValues"]
-                    self._help[type][paramName]["defaultValue"] = list[paramName]["defaultValue"]
+                    if paramDict[paramName]["allowedValues"]:
+                        self._help[type][paramName]["allowedValues"] = paramDict[paramName]["allowedValues"]
+                    self._help[type][paramName]["defaultValue"] = paramDict[paramName]["defaultValue"]
 
-            elif list:
-                for paramName in list:
+            elif paramDict:
+                for paramName in paramDict:
                     self._help[type] = {}
-                    self._help[type][paramName] = list[paramName]
+                    self._help[type][paramName] = paramDict[paramName]
             else:
                 self._help[type] = {}
 
@@ -533,7 +533,7 @@ class CMD_Help(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.subject, args = self.check_params(args, kwargs, "subject", "help", False, "string", [])
+        self.subject, args = self.check_params(args, kwargs, "subject", "help", False, "string", _functionMaper.keys())
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
@@ -1383,26 +1383,27 @@ class CMD_ShowRefresh(ApiCall):
 
 
 class CMD_ShowSearchTVDB(ApiCall):
-    _help = {"desc": "search for show at tvdb with a given string and language", }
+    _help = {"desc": "search for show at tvdb with a given string and language",
+             "requiredParameters": {"name": {"desc": "name of the show you want to search for"}
+                                }
+             }
 
-    def __init__(self, args, kwargs):
-        # required
-        self.name, args = self.check_params(args, kwargs, "name", None, True, "string", [])
-        # optional
-        self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", [])
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-        """ search for show at tvdb with a given string and language """
-        valid_languages = {
+    valid_languages = {
             'el': 20, 'en': 7, 'zh': 27, 'it': 15, 'cs': 28, 'es': 16, 'ru': 22,
             'nl': 13, 'pt': 26, 'no': 9, 'tr': 21, 'pl': 18, 'fr': 17, 'hr': 31,
             'de': 14, 'da': 10, 'fi': 11, 'hu': 19, 'ja': 25, 'he': 24, 'ko': 32,
             'sv': 8, 'sl': 30}
 
-        if self.lang not in valid_languages:
-            raise ApiError("Invalid language '%s', options are: %s" % (self.lang, valid_languages) )
+    def __init__(self, args, kwargs):
+        # required
+        self.name, args = self.check_params(args, kwargs, "name", None, True, "string", [])
+        # optional
+        self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ search for show at tvdb with a given string and language """
 
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
         params = {'seriesname': self.name.encode('utf-8'), 'language': self.lang}
@@ -1420,7 +1421,7 @@ class CMD_ShowSearchTVDB(ApiCall):
         for curSeries in series:
             results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
 
-        lang_id = valid_languages[self.lang]
+        lang_id = self.valid_languages[self.lang]
         return {'results': results, 'langid': lang_id}
 
 
