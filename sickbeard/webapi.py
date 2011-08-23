@@ -1490,11 +1490,11 @@ class CMD_ShowSetQuality(ApiCall):
         if self.inital:
             for quality in self.inital:
                 iqualityID.append(quality_map[quality])
-            if self.archive:
-                for quality in self.archive:
-                    aqualityID.append(quality_map[quality])
+        if self.archive:
+            for quality in self.archive:
+                aqualityID.append(quality_map[quality])
 
-        if iqualityID:
+        if iqualityID or aqualityID:
             newQuality = Quality.combineQualities(iqualityID, aqualityID)
         showObj.quality = newQuality
 
