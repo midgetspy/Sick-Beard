@@ -10,7 +10,7 @@
 var _disable_empty_list=false;
 var _hide_empty_list=false;
 
-function goListGroup(apikey, L4, L3, L2, L1){
+function goListGroup(apikey, L6, L5, L4, L3, L2, L1){
     var GlobalOptions = "";
     $('.global').each(function(){
         var checked = $(this).prop('checked');
@@ -19,9 +19,9 @@ function goListGroup(apikey, L4, L3, L2, L1){
         }
     });
         
-    var html = "/api/"+ apikey + "/" + L1 + L2 + L3 + L4 + GlobalOptions + "<br/><pre>";
+    var html = "/api/"+ apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + GlobalOptions + "<br/><pre>";
     html += $.ajax({
-      url: "/api/"+apikey+"/"+L1+L2+L3+L4+GlobalOptions,
+      url: "/api/" + apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + GlobalOptions,
       async: false,
       dataType: "html",
     }).responseText;
