@@ -13,7 +13,8 @@ sbRoot = "$sbRoot";
 
 <style type="text/css">
 <!--
-#apibuilder select { padding: 1px 2px 1px 6px; }
+#apibuilder select { padding: 2px 2px 2px 6px; display: block; float: left; margin: auto 8px 4px auto;
+}
 #apibuilder select option { padding: 1px 6px; line-height: 1.2em; }
 #apibuilder .disabled { color: #ccc; }
 #apibuilder .action { background-color: #efefef; }
@@ -85,10 +86,8 @@ addList("show.addexisting-tvdbid", "101501 (Ancient Aliens)", "&amp;tvdbid=10150
 addList("show.addexisting-tvdbid", "80348 (Chuck)", "&amp;tvdbid=80348", "show.addexisting-opt");
 
 addOption("show.addexisting-opt", "Optional Param", "", 1);
-addOption("show.addexisting-opt", "No Season Folder", "&amp;season_folder=0");
-addOption("show.addexisting-opt", "SD Quality", "&amp;quality=3");
-addOption("show.addexisting-opt", "HD Quality", "&amp;quality=28");
-addOption("show.addexisting-opt", "Any Quality", "&amp;quality=32799");
+addList("show.addexisting-opt", "No Season Folder", "&amp;season_folder=0", "quality");
+addList("show.addexisting-opt", "Use Season Folder", "&amp;season_folder=1", "quality");
 
 addList("show.searchtvdb", "Lost", "&amp;name=Lost", "show.searchtvdb-lang");
 addList("show.searchtvdb", "office", "&amp;name=office", "show.searchtvdb-lang");
@@ -133,41 +132,42 @@ addOption("season_list-sort", "Optional Param", "", 1);
 addOption("season_list-sort", "Sort by Ascending", "&amp;sort=asc");
 
 #for $curShow in $sortedShowList:
-addList("show.setquality", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "showsetquality-iquality");
+addList("show.setquality", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "quality");
 #end for
 
-addOptGroup("showsetquality-iquality", "Templates");
-addOption("showsetquality-iquality", "SD", "&amp;initial=sdtv|sddvd");
-addOption("showsetquality-iquality", "HD", "&amp;initial=hdtv|hdwebdl|hdbluray");
-addOption("showsetquality-iquality", "ANY", "&amp;initial=sdtv|sddvd|hdtv|hdwebdl|hdbluray|unknown");
-endOptGroup("showsetquality-iquality");
-addOptGroup("showsetquality-iquality", "Inital (Custom)");
-addList("showsetquality-iquality", "SD TV", "&amp;initial=sdtv", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "SD DVD", "&amp;initial=sddvd", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "HD TV", "&amp;initial=hdtv", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "720p Web-DL", "&amp;initial=hdwebdl", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "720p BluRay", "&amp;initial=hdbluray", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "1080p BluRay", "&amp;initial=fullhdbluray", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "Unknown", "&amp;initial=unknown", "showsetquality-iquality-aquality");
-endOptGroup("showsetquality-iquality");
-addOptGroup("showsetquality-iquality", "Random");
-addList("showsetquality-iquality", "SD DVD/720p Web-DL", "&amp;initial=sddvd|hdwebdl", "showsetquality-iquality-aquality");
-addList("showsetquality-iquality", "SD TV/HD TV", "&amp;initial=sdtv|hdtv", "showsetquality-iquality-aquality");
-endOptGroup("showsetquality-iquality");
+//build out generic quality options
+addOptGroup("quality", "Quality Templates");
+addOption("quality", "SD", "&amp;initial=sdtv|sddvd");
+addOption("quality", "HD", "&amp;initial=hdtv|hdwebdl|hdbluray");
+addOption("quality", "ANY", "&amp;initial=sdtv|sddvd|hdtv|hdwebdl|hdbluray|unknown");
+endOptGroup("quality");
+addOptGroup("quality", "Inital (Custom)");
+addList("quality", "SD TV", "&amp;initial=sdtv", "quality-archive");
+addList("quality", "SD DVD", "&amp;initial=sddvd", "quality-archive");
+addList("quality", "HD TV", "&amp;initial=hdtv", "quality-archive");
+addList("quality", "720p Web-DL", "&amp;initial=hdwebdl", "quality-archive");
+addList("quality", "720p BluRay", "&amp;initial=hdbluray", "quality-archive");
+addList("quality", "1080p BluRay", "&amp;initial=fullhdbluray", "quality-archive");
+addList("quality", "Unknown", "&amp;initial=unknown", "quality-archive");
+endOptGroup("quality");
+addOptGroup("quality", "Random (Custom)");
+addList("quality", "SD DVD/720p Web-DL", "&amp;initial=sddvd|hdwebdl", "quality-archive");
+addList("quality", "SD TV/HD TV", "&amp;initial=sdtv|hdtv", "quality-archive");
+endOptGroup("quality");
 
-addOption("showsetquality-iquality-aquality", "Optional Param", "", 1);
-addOptGroup("showsetquality-iquality-aquality", "Archive (Custom)");
-addList("showsetquality-iquality-aquality", "SD DVD", "&amp;archive=sddvd");
-addList("showsetquality-iquality-aquality", "HD TV", "&amp;archive=hdtv");
-addList("showsetquality-iquality-aquality", "720p Web-DL", "&amp;archive=hdwebdl");
-addList("showsetquality-iquality-aquality", "720p BluRay", "&amp;archive=hdbluray");
-addList("showsetquality-iquality-aquality", "1080p BluRay", "&amp;archive=fullhdbluray");
-addList("showsetquality-iquality-aquality", "Unknown", "&amp;archive=unknown");
-endOptGroup("showsetquality-iquality-aquality");
-addOptGroup("showsetquality-iquality-aquality", "Random");
-addList("showsetquality-iquality-aquality", "HD TV/1080p BluRay", "&amp;archive=hdtv|fullhdbluray");
-addList("showsetquality-iquality-aquality", "720p Web-DL/720p BluRay", "&amp;archive=hdwebdl|hdbluray");
-endOptGroup("showsetquality-iquality-aquality");
+addOption("quality-archive", "Optional Param", "", 1);
+addOptGroup("quality-archive", "Archive (Custom)");
+addList("quality-archive", "SD DVD", "&amp;archive=sddvd");
+addList("quality-archive", "HD TV", "&amp;archive=hdtv");
+addList("quality-archive", "720p Web-DL", "&amp;archive=hdwebdl");
+addList("quality-archive", "720p BluRay", "&amp;archive=hdbluray");
+addList("quality-archive", "1080p BluRay", "&amp;archive=fullhdbluray");
+addList("quality-archive", "Unknown", "&amp;archive=unknown");
+endOptGroup("quality-archive");
+addOptGroup("quality-archive", "Random (Custom)");
+addList("quality-archive", "HD TV/1080p BluRay", "&amp;archive=hdtv|fullhdbluray");
+addList("quality-archive", "720p Web-DL/720p BluRay", "&amp;archive=hdwebdl|hdbluray");
+endOptGroup("quality-archive");
 
 // build out each show's season list for season cmd
 #for $curShow in $seasonSQLResults:
@@ -262,31 +262,33 @@ addOption("sb.pausebacklog", "Unpause", "&amp;pause=0");
 </script>
 </head>
 
-<body onload="initListGroup('api', document.apibuilder.firstlevel, document.apibuilder.secondlevel, document.apibuilder.thirdlevel, document.apibuilder.forthlevel)">
+<body onload="initListGroup('api', document.apibuilder.firstlevel, document.apibuilder.secondlevel, document.apibuilder.thirdlevel, document.apibuilder.forthlevel, document.apibuilder.fifthlevel, document.apibuilder.sixthlevel)">
 
 <form name="apibuilder" id="apibuilder" action="">
 <table align="center">
-<thead><tr><th>apikey</th><th>command</th></tr></thead>
     <tr>
-        <td><input type="text" size="4" id="apikey" name="apikey" value="1234"></td>
-        <td><select name="firstlevel"><option></option></select></td>
-        <td><select name="secondlevel"><option></option></select></td>
-        <td><select name="thirdlevel"><option></option></select></td>
-        <td><select name="forthlevel"><option></option></select></td>
         <td>
-            <input type="button" value="Reset" onclick="resetListGroup('api',1)" />
-            <input type="button" value="Go" onclick="goListGroup(this.form['apikey'].value, this.form['forthlevel'].value, this.form['thirdlevel'].value, this.form['secondlevel'].value, this.form['firstlevel'].value)" />
-        </td>
-    </tr>
-    <tr>
-        <td colspan="4">
+            <input type="text" size="4" id="apikey" name="apikey" value="1234">
             <input type="checkbox" id="debug" class="global"><label for="debug"> Debug?</label>
             <input type="checkbox" id="profile" class="global"><label for="profile"> Profiler?</label>
             <input type="checkbox" id="help" class="global"><label for="help"> Help?</label>
         </td>
-    <tr/>
+    </tr>
+    <tr>
+        <td>
+            <select name="firstlevel"><option></option></select>
+            <select name="secondlevel"><option></option></select>
+            <select name="thirdlevel"><option></option></select>
+            <select name="forthlevel"><option></option></select>
+            <select name="fifthlevel"><option></option></select>
+            <select name="sixthlevel"><option></option></select>
+            <div style="float: left; ">
+                <input type="button" value="Reset" onclick="resetListGroup('api',1)" />
+                <input type="button" value="Go" onclick="goListGroup(this.form['apikey'].value, this.form['sixthlevel'].value, this.form['fifthlevel'].value, this.form['forthlevel'].value, this.form['thirdlevel'].value, this.form['secondlevel'].value, this.form['firstlevel'].value)" />
+            </div>
+        </td>
+    </tr>
 </table>
-
 </form>
 
 <div id="apiResponse"></div>

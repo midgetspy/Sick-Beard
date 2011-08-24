@@ -427,7 +427,7 @@ class TVDBShorthandWrapper(ApiCall):
 def _is_int(data):
     try:
         int(data)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return False
     else:
         return True
@@ -1272,14 +1272,23 @@ class CMD_Show(ApiCall):
 
 
 class CMD_ShowAddExisting(ApiCall):
-    _help = {"desc": "add a show in sickbeard with an existing folder"}
+    _help = {"desc": "add a show in sickbeard with an existing folder",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                    "location": {"desc": "full path to the existing folder for the show"}
+                                },
+             "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+                                    "archive": {"desc": "archive quality for the show"},
+                                    "season_folder": {"desc": "use season subfolders for the show"}
+                                    }
+             }
 
     def __init__(self, args, kwargs):
         # required
         self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.quality, args = self.check_params(args, kwargs, "quality", int(sickbeard.QUALITY_DEFAULT), False, "int", [])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.season_folder, args = self.check_params(args, kwargs, "season_folder", str(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1293,7 +1302,31 @@ class CMD_ShowAddExisting(ApiCall):
         if not ek.ek(os.path.isdir, self.location):
             return _result('failure', 'Not a valid location')
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, int(self.quality), int(self.season_folder)) #@UndefinedVariable
+        quality_map = {'sdtv': Quality.SDTV,
+                       'sddvd': Quality.SDDVD,
+                       'hdtv': Quality.HDTV,
+                       'hdwebdl': Quality.HDWEBDL,
+                       'hdbluray': Quality.HDBLURAY,
+                       'fullhdbluray': Quality.FULLHDBLURAY,
+                       'unknown': Quality.UNKNOWN,
+                       'any': ANY }
+
+        #use default quality as a failsafe
+        newQuality = int(sickbeard.QUALITY_DEFAULT)
+        iqualityID = []
+        aqualityID = []
+
+        if self.initial:
+            for quality in self.initial:
+                iqualityID.append(quality_map[quality])
+        if self.archive:
+            for quality in self.archive:
+                aqualityID.append(quality_map[quality])
+
+        if iqualityID or aqualityID:
+            newQuality = Quality.combineQualities(iqualityID, aqualityID)
+
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.season_folder)) #@UndefinedVariable
         return _result("Show has been queued to be added")
 
 
@@ -1471,8 +1504,8 @@ class CMD_ShowSetQuality(ApiCall):
     _help = {"desc": "set desired quality of a show in sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
-             "optionalPramameters": {"initial ": {"desc": "the new quality for the show. if archive is provided this will be the initial quality"},
-                                    "archive": {"desc": "if initial is provided this will be the archive quality"}
+             "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+                                    "archive": {"desc": "archive quality for the show"}
                                     }
              }
 
