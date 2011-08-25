@@ -327,7 +327,6 @@ class ApiCall(object):
                                              "defaultValue": orgDefault}
 
         if default:
-            logger.log("checking param type and value..." + str(type), logger.DEBUG)
             default = self._check_param_type(default, key, type)
             if type == "bool":
                 type = []
@@ -621,11 +620,11 @@ class CMD_ComingEpisodes(ApiCall):
         finalEpResults = {}
 
         # add all requested types or all
-        for type in self.type:
-            if type in ["today", "missed", "soon", "later"]:
-                finalEpResults[type] = []
+        for curType in self.type:
+            if curType in ["today", "missed", "soon", "later"]:
+                finalEpResults[curType] = []
             else:
-                return _error("Invalid type: " + type)
+                return _error("Invalid type: " + curType)
 
         for ep in sql_results:
             """
@@ -859,12 +858,12 @@ class CMD_Exceptions(ApiCall):
 
         if self.tvdbid == None:
             sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions")
-            exceptions = {}
+            scene_exceptions = {}
             for row in sqlResults:
                 tvdbid = row["tvdbid"]
-                if not tvdbid in exceptions:
-                    exceptions[tvdbid] = []
-                exceptions[tvdbid].append(row["show_name"])
+                if not tvdbid in scene_exceptions:
+                    scene_exceptions[tvdbid] = []
+                scene_exceptions[tvdbid].append(row["show_name"])
 
         else:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
@@ -872,12 +871,12 @@ class CMD_Exceptions(ApiCall):
                 raise ApiError("Show not Found")
 
             sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
-            exceptions = []
+            scene_exceptions = []
             for row in sqlResults:
-                exceptions.append(row["show_name"])
+                scene_exceptions.append(row["show_name"])
 
         myDB.connection.close()
-        return exceptions
+        return scene_exceptions
 
 
 class CMD_History(ApiCall):
@@ -1771,9 +1770,9 @@ class CMD_ShowsStats(ApiCall):
         myDB = db.DBConnection()
         today = str(datetime.date.today().toordinal())
         stats["shows_total"] = len(sickbeard.showList)
-        stats["shows_active"] = len([x for x in sickbeard.showList if x.paused == 0 and x.status != "Ended"])
-        stats["ep_downloaded"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE status IN (" + ",".join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]]) + ") AND season != 0 and episode != 0 AND airdate <= " + today + "")[0][0]
-        stats["ep_total"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN (" + ",".join([str(x) for x in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]]) + ")) AND airdate <= " + today + " AND status != " + str(IGNORED) + "")[0][0]
+        stats["shows_active"] = len([show for show in sickbeard.showList if show.paused == 0 and show.status != "Ended"])
+        stats["ep_downloaded"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE status IN (" + ",".join([str(show) for show in Quality.DOWNLOADED + [ARCHIVED]]) + ") AND season != 0 and episode != 0 AND airdate <= " + today + "")[0][0]
+        stats["ep_total"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN (" + ",".join([str(show) for show in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]]) + ")) AND airdate <= " + today + " AND status != " + str(IGNORED) + "")[0][0]
 
         myDB.connection.close()
         return stats
