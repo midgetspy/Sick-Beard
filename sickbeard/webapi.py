@@ -675,7 +675,7 @@ class CMD_Episode(ApiCall):
                                    "season": {"desc": "the season number"},
                                    "episode": {"desc": "the episode number"}
                                   },
-             "optionalPramameters": {"full_path":{"desc": "show the full absolute path (if valid) instead of a relative path for the episode location"}
+             "optionalPramameters": {"full_path": {"desc": "show the full absolute path (if valid) instead of a relative path for the episode location"}
                                      }
              }
 
@@ -798,7 +798,7 @@ class CMD_EpisodeSetStatus(ApiCall):
                 self.status = status
                 break
         # this should be obsolete bcause of the above
-        if not statusStrings.has_key(self.status):
+        if not self.status in statusStrings:
             raise ApiError("Invalid Status")
 
         epObj = showObj.getEpisode(int(self.s), int(self.e))
@@ -912,9 +912,9 @@ class CMD_History(ApiCall):
 
         ulimit = min(int(self.limit), 100)
         if ulimit == 0:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC", self.typeCodes )
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC", self.typeCodes)
         else:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC LIMIT ?", self.typeCodes + [ulimit] )
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC LIMIT ?", self.typeCodes + [ulimit])
 
         results = []
         for row in sqlResults:
