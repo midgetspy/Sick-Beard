@@ -514,6 +514,29 @@ def _replace_statusStrings_with_statusCodes(statusStrings):
     return statusCodes
 
 
+def _mapQuality(showObj):
+    quality_map = {Quality.SDTV: 'sdtv',
+                   Quality.SDDVD: 'sddvd',
+                   Quality.HDTV: 'hdtv',
+                   Quality.HDWEBDL: 'hdwebdl',
+                   Quality.HDBLURAY: 'hdbluray',
+                   Quality.FULLHDBLURAY: 'fullhdbluray',
+                   Quality.UNKNOWN: 'unknown',
+                   ANY: 'any'}
+
+    anyQualities = []
+    bestQualities = []
+
+    iqualityID, aqualityID = Quality.splitQuality(int(showObj.quality))
+    if iqualityID:
+        for quality in iqualityID:
+            anyQualities.append(quality_map[quality])
+    if aqualityID:
+        for quality in aqualityID:
+            bestQualities.append(quality_map[quality])
+    return anyQualities, bestQualities
+
+
 class ApiError(Exception):
     "Generic API error"
 
@@ -1252,12 +1275,14 @@ class CMD_Show(ApiCall):
         showDict["genre"] = genreList
         showDict["quality"] = _get_quality_string(showObj.quality)
 
+        anyQualities, bestQualities = _mapQuality(showObj)
+        showDict["quality_details"] = {"initial": anyQualities, "archive": bestQualities}
+
         try:
             showDict["location"] = showObj.location
         except sickbeard.exceptions.ShowDirNotFoundException:
             showDict["location"] = ""
 
-        # easy stuff
         showDict["language"] = showObj.lang
         showDict["show_name"] = showObj.name
         showDict["paused"] = showObj.paused
@@ -1351,14 +1376,13 @@ class CMD_ShowCache(ApiCall):
 
         cache_obj = image_cache.ImageCache()
 
+        has_poster = 0
+        has_banner = 0
+
         if ek.ek(os.path.isfile, cache_obj.poster_path(showObj.tvdbid)):
             has_poster = 1
-        else:
-            has_poster = 0
         if ek.ek(os.path.isfile, cache_obj.banner_path(showObj.tvdbid)):
             has_banner = 1
-        else:
-            has_banner = 0
 
         return {"poster": has_poster, "banner": has_banner}
 
@@ -1408,25 +1432,7 @@ class CMD_ShowGetQuality(ApiCall):
         if not showObj:
             raise ApiError("Show not Found")
 
-        quality_map = {Quality.SDTV: 'sdtv',
-                       Quality.SDDVD: 'sddvd',
-                       Quality.HDTV: 'hdtv',
-                       Quality.HDWEBDL: 'hdwebdl',
-                       Quality.HDBLURAY: 'hdbluray',
-                       Quality.FULLHDBLURAY: 'fullhdbluray',
-                       Quality.UNKNOWN: 'unknown',
-                       ANY: 'any'}
-
-        anyQualities = []
-        bestQualities = []
-
-        iqualityID, aqualityID = Quality.splitQuality(int(showObj.quality))
-        if iqualityID:
-            for quality in iqualityID:
-                anyQualities.append(quality_map[quality])
-        if aqualityID:
-            for quality in aqualityID:
-                bestQualities.append(quality_map[quality])
+        anyQualities, bestQualities = _mapQuality(showObj)
 
         return {"initial": anyQualities, "archive": bestQualities}
 
