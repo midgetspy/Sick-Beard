@@ -670,7 +670,8 @@ class CMD_Episode(ApiCall):
                                    "season": {"desc": "the season number"},
                                    "episode": {"desc": "the episode number"}
                                   },
-             "optionalPramameters": {"full_path": "show the full absolute path (if valid) instead of a relative path for the episode location"}
+             "optionalPramameters": {"full_path":{"desc": "show the full absolute path (if valid) instead of a relative path for the episode location"}
+                                     }
              }
 
     def __init__(self, args, kwargs):
