@@ -518,14 +518,7 @@ def _replace_statusStrings_with_statusCodes(statusStrings):
 
 
 def _mapQuality(showObj):
-    quality_map = {Quality.SDTV: 'sdtv',
-                   Quality.SDDVD: 'sddvd',
-                   Quality.HDTV: 'hdtv',
-                   Quality.HDWEBDL: 'hdwebdl',
-                   Quality.HDBLURAY: 'hdbluray',
-                   Quality.FULLHDBLURAY: 'fullhdbluray',
-                   Quality.UNKNOWN: 'unknown',
-                   ANY: 'any'}
+    quality_map = _getQualityMap()
 
     anyQualities = []
     bestQualities = []
@@ -539,6 +532,15 @@ def _mapQuality(showObj):
             bestQualities.append(quality_map[quality])
     return anyQualities, bestQualities
 
+def _getQualityMap():
+    return {Quality.SDTV: 'sdtv',
+            Quality.SDDVD: 'sddvd',
+            Quality.HDTV: 'hdtv',
+            Quality.HDWEBDL: 'hdwebdl',
+            Quality.HDBLURAY: 'hdbluray',
+            Quality.FULLHDBLURAY: 'fullhdbluray',
+            Quality.UNKNOWN: 'unknown',
+            ANY: 'any'}
 
 class ApiError(Exception):
     "Generic API error"
@@ -1511,10 +1513,10 @@ class CMD_ShowSearchTVDB(ApiCall):
 
 
 class CMD_ShowSetQuality(ApiCall):
-    _help = {"desc": "set desired quality of a show in sickbeard",
+    _help = {"desc": "set desired quality of a show in sickbeard. if neither initial or archive are provided it will set teh show quality to sickbeards defauld quality",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
-             "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"}
                                     }
              }
@@ -1523,8 +1525,8 @@ class CMD_ShowSetQuality(ApiCall):
         # required
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", _getQualityMap().values())
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", _getQualityMap().values()[1:])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
