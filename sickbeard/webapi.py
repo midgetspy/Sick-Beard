@@ -797,7 +797,7 @@ class CMD_EpisodeSetStatus(ApiCall):
                 self.status = status
                 break
         # this should be obsolete bcause of the above
-        if not self.status in statusStrings:
+        if not self.status in statusStrings.statusStrings:
             raise ApiError("Invalid Status")
 
         epObj = showObj.getEpisode(int(self.s), int(self.e))
