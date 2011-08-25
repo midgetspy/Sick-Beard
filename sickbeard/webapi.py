@@ -264,9 +264,12 @@ class ApiCall(object):
 
             if type in self._help:
                 for paramName in paramDict:
-                    self._help[type][paramName]["allowedValues"] = "see desc"
+                    if not paramName in self._help[type]:
+                        self._help[type][paramName] = {}
                     if paramDict[paramName]["allowedValues"]:
                         self._help[type][paramName]["allowedValues"] = paramDict[paramName]["allowedValues"]
+                    else:
+                        self._help[type][paramName]["allowedValues"] = "see desc"
                     self._help[type][paramName]["defaultValue"] = paramDict[paramName]["defaultValue"]
 
             elif paramDict:
