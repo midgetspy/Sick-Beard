@@ -417,7 +417,7 @@ class TVDBShorthandWrapper(ApiCall):
         if self.e:
             return CMD_Episode(args, self.kwargs).run()
         elif self.s:
-            return CMD_Seasons(args, self.kwargs).run()
+            return CMD_ShowSeasons(args, self.kwargs).run()
         else:
             return CMD_Show(args, self.kwargs).run()
 
@@ -1173,6 +1173,80 @@ class CMD_SickBeardRestart(ApiCall):
         return {"result": "Sick Beard is restarting..."}
 
 
+class CMD_SickBeardSetDefaults(ApiCall):
+    _help = {"desc": "set sickbeard user defaults"
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", _getQualityMap().values())
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", _getQualityMap().values()[1:])
+        self.season_folder, args = self.check_params(args, kwargs, "season_folder", None, False, "bool", [])
+        self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ set sickbeard user defaults """
+
+        quality_map = {'sdtv': Quality.SDTV,
+                       'sddvd': Quality.SDDVD,
+                       'hdtv': Quality.HDTV,
+                       'hdwebdl': Quality.HDWEBDL,
+                       'hdbluray': Quality.HDBLURAY,
+                       'fullhdbluray': Quality.FULLHDBLURAY,
+                       'unknown': Quality.UNKNOWN,
+                       'any': ANY }
+
+        newQuality = int(sickbeard.QUALITY_DEFAULT)
+        #-------------------------------------------------------------
+        iqualityID = []
+        aqualityID = []
+
+        if self.initial:
+            for quality in self.initial:
+                iqualityID.append(quality_map[quality])
+        if self.archive:
+            for quality in self.archive:
+                aqualityID.append(quality_map[quality])
+
+        if iqualityID or aqualityID:
+            newQuality = Quality.combineQualities(iqualityID, aqualityID)
+
+        sickbeard.QUALITY_DEFAULT = newQuality
+        #-------------------------------------------------------------
+
+        newStatus = int(sickbeard.STATUS_DEFAULT)
+        #-------------------------------------------------------------
+        if self.status:
+            # convert the string status to a int
+            for status in statusStrings.statusStrings:
+                if statusStrings[status].lower() == self.status.lower():
+                    self.status = status
+                    break
+            # this should be obsolete bcause of the above
+            if not self.status in statusStrings.statusStrings:
+                raise ApiError("Invalid Status")
+            #only allow the status options we want
+            if int(self.status) not in (3, 5, 6, 7):
+                raise ApiError("Status Prohibited")
+            newStatus = self.status
+
+        sickbeard.STATUS_DEFAULT = newStatus
+        #-------------------------------------------------------------
+
+        newSeasonFolders = sickbeard.SEASON_FOLDERS_DEFAULT
+        #-------------------------------------------------------------
+        if self.season_folder != None:
+            newSeasonFolders = int(self.season_folder)
+
+        sickbeard.SEASON_FOLDERS_DEFAULT = newSeasonFolders
+        #-------------------------------------------------------------
+
+        return _result("Saved Defaults")
+
+
 class CMD_SickBeardShutdown(ApiCall):
     _help = {"desc": "shutdown sickbeard"}
 
@@ -1186,97 +1260,6 @@ class CMD_SickBeardShutdown(ApiCall):
         """ shutdown sickbeard """
         threading.Timer(2, sickbeard.invoke_shutdown).start()
         return {"result": "Sick Beard is shutting down..."}
-
-
-class CMD_SeasonList(ApiCall):
-    _help = {"desc": "display the season list for a given show",
-             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
-                                    },
-             "optionalPramameters": {"sort": {"desc": "change the sort order from descending to ascending"}
-                                     }
-             }
-
-    def __init__(self, args, kwargs):
-        # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
-        # optional
-        self.sort, args = self.check_params(args, kwargs, "sort", "desc", False, "string", ["asc", "desc"]) # "asc" and "desc" default and fallback is "desc"
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-        """ display the season list for a given show """
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not showObj:
-            raise ApiError("Show not Found")
-
-        myDB = db.DBConnection(row_type="dict")
-        if self.sort == "asc":
-            sqlResults = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season ASC", [self.tvdbid])
-        else:
-            sqlResults = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season DESC", [self.tvdbid])
-        seasonList = [] # a list with all season numbers
-        for row in sqlResults:
-            seasonList.append(int(row["season"]))
-
-        myDB.connection.close()
-        return seasonList
-
-
-class CMD_Seasons(ApiCall):
-    _help = {"desc": "display a listing of episodes for all or a given season",
-             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
-                                  },
-             "optionalPramameters": {"season": {"desc": "the season number"},
-                                  }
-             }
-
-    def __init__(self, args, kwargs):
-        # required
-        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
-        # optional
-        self.season, args = self.check_params(args, kwargs, "season", None, False, "int", [])
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-        """ display a listing of episodes for all or a given show """
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
-        if not showObj:
-            raise ApiError("Show not Found")
-
-        myDB = db.DBConnection(row_type="dict")
-
-        if self.season == None:
-            sqlResults = myDB.select("SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
-            seasons = {}
-            for row in sqlResults:
-                row["status"] = statusStrings[row["status"]]
-                row["airdate"] = _ordinal_to_dateForm(row["airdate"])
-                curSeason = int(row["season"])
-                curEpisode = int(row["episode"])
-                del row["season"]
-                del row["episode"]
-                if not curSeason in seasons:
-                    seasons[curSeason] = {}
-                seasons[curSeason][curEpisode] = row
-
-        else:
-            sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
-            if len(sqlResults) is 0:
-                raise ApiError("Season not Found")
-            seasons = {}
-            for row in sqlResults:
-                curEpisode = int(row["episode"])
-                del row["episode"]
-                row["status"] = statusStrings[row["status"]]
-                row["airdate"] = _ordinal_to_dateForm(row["airdate"])
-                if not curEpisode in seasons:
-                    seasons[curEpisode] = {}
-                seasons[curEpisode] = row
-
-        myDB.connection.close()
-        return seasons
 
 
 class CMD_Show(ApiCall):
@@ -1299,7 +1282,7 @@ class CMD_Show(ApiCall):
             raise ApiError("Show not Found")
 
         showDict = {}
-        showDict["season_list"] = CMD_SeasonList((), {"tvdbid": self.tvdbid}).run()
+        showDict["season_list"] = CMD_ShowSeasonList((), {"tvdbid": self.tvdbid}).run()
         showDict["cache"] = CMD_ShowCache((), {"tvdbid": self.tvdbid}).run()
 
         genreList = []
@@ -1540,6 +1523,97 @@ class CMD_ShowSearchTVDB(ApiCall):
 
         lang_id = self.valid_languages[self.lang]
         return {'results': results, 'langid': lang_id}
+
+
+class CMD_ShowSeasonList(ApiCall):
+    _help = {"desc": "display the season list for a given show",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                    },
+             "optionalPramameters": {"sort": {"desc": "change the sort order from descending to ascending"}
+                                     }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        self.sort, args = self.check_params(args, kwargs, "sort", "desc", False, "string", ["asc", "desc"]) # "asc" and "desc" default and fallback is "desc"
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ display the season list for a given show """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
+        myDB = db.DBConnection(row_type="dict")
+        if self.sort == "asc":
+            sqlResults = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season ASC", [self.tvdbid])
+        else:
+            sqlResults = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season DESC", [self.tvdbid])
+        seasonList = [] # a list with all season numbers
+        for row in sqlResults:
+            seasonList.append(int(row["season"]))
+
+        myDB.connection.close()
+        return seasonList
+
+
+class CMD_ShowSeasons(ApiCall):
+    _help = {"desc": "display a listing of episodes for all or a given season",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                  },
+             "optionalPramameters": {"season": {"desc": "the season number"},
+                                  }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        self.season, args = self.check_params(args, kwargs, "season", None, False, "int", [])
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ display a listing of episodes for all or a given show """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            raise ApiError("Show not Found")
+
+        myDB = db.DBConnection(row_type="dict")
+
+        if self.season == None:
+            sqlResults = myDB.select("SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+            seasons = {}
+            for row in sqlResults:
+                row["status"] = statusStrings[row["status"]]
+                row["airdate"] = _ordinal_to_dateForm(row["airdate"])
+                curSeason = int(row["season"])
+                curEpisode = int(row["episode"])
+                del row["season"]
+                del row["episode"]
+                if not curSeason in seasons:
+                    seasons[curSeason] = {}
+                seasons[curSeason][curEpisode] = row
+
+        else:
+            sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
+            if len(sqlResults) is 0:
+                raise ApiError("Season not Found")
+            seasons = {}
+            for row in sqlResults:
+                curEpisode = int(row["episode"])
+                del row["episode"]
+                row["status"] = statusStrings[row["status"]]
+                row["airdate"] = _ordinal_to_dateForm(row["airdate"])
+                if not curEpisode in seasons:
+                    seasons[curEpisode] = {}
+                seasons[curEpisode] = row
+
+        myDB.connection.close()
+        return seasons
 
 
 class CMD_ShowSetQuality(ApiCall):
@@ -1826,9 +1900,8 @@ _functionMaper = {"help": CMD_Help,
                   "sb.pausebacklog": CMD_SickBeardPauseBacklog,
                   "sb.ping": CMD_SickBeardPing,
                   "sb.restart": CMD_SickBeardRestart,
+                  "sb.setdefaults": CMD_SickBeardSetDefaults,
                   "sb.shutdown": CMD_SickBeardShutdown,
-                  "seasonlist": CMD_SeasonList,
-                  "seasons": CMD_Seasons,
                   "show": CMD_Show,
                   "show.addexisting": CMD_ShowAddExisting,
                   "show.cache": CMD_ShowCache,
@@ -1836,6 +1909,8 @@ _functionMaper = {"help": CMD_Help,
                   "show.getquality": CMD_ShowGetQuality,
                   "show.refresh": CMD_ShowRefresh,
                   "show.searchtvdb": CMD_ShowSearchTVDB,
+                  "show.seasonlist": CMD_ShowSeasonList,
+                  "show.seasons": CMD_ShowSeasons,
                   "show.setquality": CMD_ShowSetQuality,
                   "show.stats": CMD_ShowStats,
                   "show.update": CMD_ShowUpdate,
