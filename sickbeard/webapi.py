@@ -531,6 +531,7 @@ def _mapQuality(showObj):
             bestQualities.append(quality_map[quality])
     return anyQualities, bestQualities
 
+
 def _getQualityMap():
     return {Quality.SDTV: 'sdtv',
             Quality.SDDVD: 'sddvd',
@@ -540,6 +541,7 @@ def _getQualityMap():
             Quality.FULLHDBLURAY: 'fullhdbluray',
             Quality.UNKNOWN: 'unknown',
             ANY: 'any'}
+
 
 class ApiError(Exception):
     "Generic API error"
@@ -1089,6 +1091,35 @@ class CMD_SickBeardForceSearch(ApiCall):
         return {"result": "Failure"}
 
 
+class CMD_SickBeardGetDefaults(ApiCall):
+    _help = {"desc": "get sickbeard user defaults"
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ get sickbeard user defaults """
+
+        quality_map = _getQualityMap()
+
+        anyQualities = []
+        bestQualities = []
+
+        iqualityID, aqualityID = Quality.splitQuality(int(sickbeard.QUALITY_DEFAULT))
+        if iqualityID:
+            for quality in iqualityID:
+                anyQualities.append(quality_map[quality])
+        if aqualityID:
+            for quality in aqualityID:
+                bestQualities.append(quality_map[quality])
+
+        return {"status": statusStrings[sickbeard.STATUS_DEFAULT], "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities}
+
+
 class CMD_SickBeardPauseBacklog(ApiCall):
     _help = {"desc": "pause the backlog search"}
 
@@ -1512,7 +1543,7 @@ class CMD_ShowSearchTVDB(ApiCall):
 
 
 class CMD_ShowSetQuality(ApiCall):
-    _help = {"desc": "set desired quality of a show in sickbeard. if neither initial or archive are provided it will set teh show quality to sickbeards defauld quality",
+    _help = {"desc": "set desired quality of a show in sickbeard. if neither initial or archive are provided then the config default quality will be used",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
              "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
@@ -1791,6 +1822,7 @@ _functionMaper = {"help": CMD_Help,
                   "sb": CMD_SickBeard,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
+                  "sb.getdefaults": CMD_SickBeardGetDefaults,
                   "sb.pausebacklog": CMD_SickBeardPauseBacklog,
                   "sb.ping": CMD_SickBeardPing,
                   "sb.restart": CMD_SickBeardRestart,
