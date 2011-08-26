@@ -1174,7 +1174,11 @@ class CMD_SickBeardRestart(ApiCall):
 
 
 class CMD_SickBeardSetDefaults(ApiCall):
-    _help = {"desc": "set sickbeard user defaults"
+    _help = {"desc": "set sickbeard user defaults",
+             "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+                                    "archive": {"desc": "archive quality for the show"},
+                                    "season_folder": {"desc": "use season subfolders for the show"}
+                                    }
              }
 
     def __init__(self, args, kwargs):
@@ -1199,8 +1203,6 @@ class CMD_SickBeardSetDefaults(ApiCall):
                        'unknown': Quality.UNKNOWN,
                        'any': ANY }
 
-        newQuality = int(sickbeard.QUALITY_DEFAULT)
-        #-------------------------------------------------------------
         iqualityID = []
         aqualityID = []
 
@@ -1212,13 +1214,8 @@ class CMD_SickBeardSetDefaults(ApiCall):
                 aqualityID.append(quality_map[quality])
 
         if iqualityID or aqualityID:
-            newQuality = Quality.combineQualities(iqualityID, aqualityID)
+            sickbeard.QUALITY_DEFAULT = Quality.combineQualities(iqualityID, aqualityID)
 
-        sickbeard.QUALITY_DEFAULT = newQuality
-        #-------------------------------------------------------------
-
-        newStatus = int(sickbeard.STATUS_DEFAULT)
-        #-------------------------------------------------------------
         if self.status:
             # convert the string status to a int
             for status in statusStrings.statusStrings:
@@ -1231,18 +1228,10 @@ class CMD_SickBeardSetDefaults(ApiCall):
             #only allow the status options we want
             if int(self.status) not in (3, 5, 6, 7):
                 raise ApiError("Status Prohibited")
-            newStatus = self.status
+            sickbeard.STATUS_DEFAULT = self.status
 
-        sickbeard.STATUS_DEFAULT = newStatus
-        #-------------------------------------------------------------
-
-        newSeasonFolders = sickbeard.SEASON_FOLDERS_DEFAULT
-        #-------------------------------------------------------------
         if self.season_folder != None:
-            newSeasonFolders = int(self.season_folder)
-
-        sickbeard.SEASON_FOLDERS_DEFAULT = newSeasonFolders
-        #-------------------------------------------------------------
+            sickbeard.SEASON_FOLDERS_DEFAULT = int(self.season_folder)
 
         return _result("Saved Defaults")
 
