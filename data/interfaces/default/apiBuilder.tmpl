@@ -29,11 +29,12 @@ addListGroup("api", "Command");
 
 addOption("Command", "SickBeard", "?cmd=sb", 1); //make default
 addOption("Command", "SickBeard.CheckScheduler", "?cmd=sb.checkscheduler", "", "", "action");
-addOption("Command", "SickBeard.Defaults", "?cmd=sb.defaults", "", "", "action disabled");
+addOption("Command", "SickBeard.GetDefaults", "?cmd=sb.getdefaults", "", "", "action");
 addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "action");
 addList("Command", "SickBeard.PauseBacklog", "?cmd=sb.pausebacklog", "sb.pausebacklog", "", "", "action");
 addOption("Command", "SickBeard.Ping", "?cmd=sb.ping", "", "", "action");
 addOption("Command", "SickBeard.Restart", "?cmd=sb.restart", "", "", "action");
+addOption("Command", "SickBeard.SetDefaults", "?cmd=sb.setdefaults", "", "", "action disabled");
 addOption("Command", "SickBeard.Shutdown", "?cmd=sb.shutdown", "", "", "action");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
 addList("Command", "Episode", "?cmd=episode", "episode");
