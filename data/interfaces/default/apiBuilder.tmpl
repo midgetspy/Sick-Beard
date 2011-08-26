@@ -34,7 +34,7 @@ addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "ac
 addList("Command", "SickBeard.PauseBacklog", "?cmd=sb.pausebacklog", "sb.pausebacklog", "", "", "action");
 addOption("Command", "SickBeard.Ping", "?cmd=sb.ping", "", "", "action");
 addOption("Command", "SickBeard.Restart", "?cmd=sb.restart", "", "", "action");
-addOption("Command", "SickBeard.SetDefaults", "?cmd=sb.setdefaults", "", "", "action disabled");
+addList("Command", "SickBeard.SetDefaults", "?cmd=sb.setdefaults", "sb.setdefaults", "", "", "action");
 addOption("Command", "SickBeard.Shutdown", "?cmd=sb.shutdown", "", "", "action");
 addList("Command", "Coming Episodes", "?cmd=future", "future");
 addList("Command", "Episode", "?cmd=episode", "episode");
@@ -45,8 +45,6 @@ addList("Command", "History", "?cmd=history", "history");
 addOption("Command", "History.Clear", "?cmd=history.clear", "", "", "action");
 addOption("Command", "History.Trim", "?cmd=history.trim", "", "", "action");
 addList("Command", "Logs", "?cmd=logs", "viewlog");
-addList("Command", "Season List", "?cmd=seasonlist", "season_list");
-addList("Command", "Seasons", "?cmd=seasons", "seasons");
 addList("Command", "Show", "?cmd=show", "tvdbid");
 addList("Command", "Show.AddExisting", "?cmd=show.addexisting", "show.addexisting", "", "", "action");
 addList("Command", "Show.AddNew", "?cmd=show.addnew", "show.addnew", "", "", "action disabled");
@@ -55,6 +53,8 @@ addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action"
 addList("Command", "Show.GetQuality", "?cmd=show.getquality", "tvdbid", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.SearchTVDB", "?cmd=show.searchtvdb", "show.searchtvdb", "", "", "action");
+addList("Command", "Show.Season List", "?cmd=show.seasonlist", "season_list", "", "", "action");
+addList("Command", "Show.Seasons", "?cmd=show.seasons", "seasons", "", "", "action");
 addList("Command", "Show.SetQuality", "?cmd=show.setquality", "show.setquality", "", "", "action");
 addList("Command", "Show.Stats", "?cmd=show.stats", "tvdbid", "", "", "action");
 addList("Command", "Show.Update", "?cmd=show.update", "tvdbid", "", "", "action");
@@ -71,6 +71,16 @@ addOption("viewlog", "Debug", "&amp;minlevel=debug");
 addOption("viewlog", "Info", "&amp;minlevel=info");
 addOption("viewlog", "Warning", "&amp;minlevel=warning");
 addOption("viewlog", "Error", "&amp;minlevel=error");
+
+addOption("sb.setdefaults", "Optional Param", "", 1);
+addList("sb.setdefaults", "Wanted", "&amp;status=wanted", "sb.setdefaults-opt");
+addList("sb.setdefaults", "Skipped", "&amp;status=skipped", "sb.setdefaults-opt");
+addList("sb.setdefaults", "Archived", "&amp;status=archived", "sb.setdefaults-opt");
+addList("sb.setdefaults", "Ignored", "&amp;status=ignored", "sb.setdefaults-opt");
+
+addOption("sb.setdefaults-opt", "Optional Param", "", 1);
+addList("sb.setdefaults-opt", "No Season Folder", "&amp;season_folder=0", "quality");
+addList("sb.setdefaults-opt", "Use Season Folder", "&amp;season_folder=1", "quality");
 
 addOption("shows", "Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&amp;paused=1");
