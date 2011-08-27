@@ -103,7 +103,7 @@ class aniDBabstractObject(object):
     
     
 class Anime(aniDBabstractObject):
-    def __init__(self,aniDB,name=None,aid=None,tvdb_id=None,paramsA=None,autoCorrectName=False,load=False):
+    def __init__(self,aniDB,name=None,aid=None,tvdbid=None,paramsA=None,autoCorrectName=False,load=False):
        
         self.maper = AniDBMaper()
         self.tvDBMap = TvDBMap()
@@ -111,7 +111,7 @@ class Anime(aniDBabstractObject):
         
         self.name = name
         self.aid = aid
-        self.tvdb_id = tvdb_id
+        self.tvdb_id = tvdbid
         
         if self.tvdb_id and not self.aid:
             self.aid = self.tvDBMap.get_anidb_for_tvdb(self.tvdb_id)
@@ -159,7 +159,8 @@ class Anime(aniDBabstractObject):
         if not self.allAnimeXML:
             self.allAnimeXML = self._read_animetitels_xml()
     
-        regex = re.compile('[%s]' % re.escape(string.punctuation))
+        regex = re.compile('( \(\d{4}\))|[%s]'  % re.escape(string.punctuation)) # remove any punctuation and e.g. ' (2011)'
+        #regex = re.compile('[%s]'  % re.escape(string.punctuation)) # remove any punctuation and e.g. ' (2011)'
         name = regex.sub('', name.lower())
         lastAid = 0
         for element in self.allAnimeXML.getiterator():
@@ -167,6 +168,7 @@ class Anime(aniDBabstractObject):
                 lastAid = int(element.get("aid"))
             if element.text:
                 testname = regex.sub('', element.text.lower())
+                
                 if testname == name:
                     return lastAid
         return 0
