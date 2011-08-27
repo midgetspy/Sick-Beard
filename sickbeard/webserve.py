@@ -356,6 +356,9 @@ class Manage:
         paused_all_same = True
         last_paused = None
 
+        subtitles_all_same = True
+        last_subtitles = None
+
         quality_all_same = True
         last_quality = None
 
@@ -387,16 +390,23 @@ class Manage:
                 else:
                     last_quality = curShow.quality
 
+            if subtitles_all_same:
+                if last_subtitles not in (None, curShow.subtitles):
+                    subtitles_all_same = False
+                else:
+                    last_subtitles = curShow.subtitles
+
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
         t.season_folders_value = last_season_folders if season_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
+        t.subtitles_value = last_subtitles if subtitles_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False,
+    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False, subtitles=None,
                        anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
 
         dir_map = {}
@@ -434,11 +444,18 @@ class Manage:
             else:
                 new_season_folders = True if season_folders == 'enable' else False
             new_season_folders = 'on' if new_season_folders else 'off'
+            
+            if subtitles == 'keep':
+                new_subtitles = showObj.subtitles
+            else:
+                new_subtitles = True if subtitles == 'enable' else False
+
+            new_subtitles = 'on' if new_subtitles else 'off'
 
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, subtitles=new_subtitles, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
