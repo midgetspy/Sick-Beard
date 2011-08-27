@@ -10,7 +10,7 @@ $(document).ready(function(){
                                                              anyQualities: anyQualArray.join(','),
                                                              bestQualities: bestQualArray.join(','),
                                                              defaultSeasonFolders: $('#seasonFolders').prop('checked'),
-                                                             anime: $('#anime').attr('checked')
+                                                             anime: $('#anime').prop('checked')
                                                              } );
         $(this).attr('disabled', true);
         $.pnotify({
