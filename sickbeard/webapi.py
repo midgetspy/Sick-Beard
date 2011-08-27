@@ -661,7 +661,6 @@ class CMD_ComingEpisodes(ApiCall):
             ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
 
             # TODO: check if this obsolete
-            # this might be obsolete
             if not status in finalEpResults:
                 finalEpResults[status] = []
 
@@ -795,7 +794,7 @@ class CMD_EpisodeSetStatus(ApiCall):
 
         # convert the string status to a int
         for status in statusStrings.statusStrings:
-            if statusStrings[status].lower() == self.status.lower():
+            if str(statusStrings[status]).lower() == str(self.status).lower():
                 self.status = status
                 break
         # this should be obsolete bcause of the above
@@ -899,23 +898,23 @@ class CMD_History(ApiCall):
     def run(self):
         """ display sickbeard downloaded/snatched history """
 
-        self.typeCodes = []
+        typeCodes = []
         if self.type == "downloaded":
             self.type = "Downloaded"
-            self.typeCodes = Quality.DOWNLOADED
+            typeCodes = Quality.DOWNLOADED
         elif self.type == "snatched":
             self.type = "Snatched"
-            self.typeCodes = Quality.SNATCHED
+            typeCodes = Quality.SNATCHED
         else:
-            self.typeCodes = Quality.SNATCHED + Quality.DOWNLOADED
+            typeCodes = Quality.SNATCHED + Quality.DOWNLOADED
 
         myDB = db.DBConnection(row_type="dict")
 
         ulimit = min(int(self.limit), 100)
         if ulimit == 0:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC", self.typeCodes)
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(typeCodes)) + ") ORDER BY date DESC", typeCodes)
         else:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(self.typeCodes)) + ") ORDER BY date DESC LIMIT ?", self.typeCodes + [ulimit])
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(typeCodes)) + ") ORDER BY date DESC LIMIT ?", typeCodes + [ulimit])
 
         results = []
         for row in sqlResults:
@@ -987,7 +986,7 @@ class CMD_Logs(ApiCall):
     def run(self):
         """ view sickbeard's log """
         # 10 = Debug / 20 = Info / 30 = Warning / 40 = Error
-        minLevel = logger.reverseNames[self.minLevel.upper()]
+        minLevel = logger.reverseNames[str(self.minLevel).upper()]
 
         data = []
         if os.path.isfile(logger.sb_log_instance.log_file):
@@ -1170,7 +1169,7 @@ class CMD_SickBeardRestart(ApiCall):
     def run(self):
         """ restart sickbeard """
         threading.Timer(2, sickbeard.invoke_restart, [False]).start()
-        return {"result": "Sick Beard is restarting..."}
+        return {"result": "SickBeard is restarting..."}
 
 
 class CMD_SickBeardSetDefaults(ApiCall):
@@ -1219,7 +1218,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
         if self.status:
             # convert the string status to a int
             for status in statusStrings.statusStrings:
-                if statusStrings[status].lower() == self.status.lower():
+                if statusStrings[status].lower() == str(self.status).lower():
                     self.status = status
                     break
             # this should be obsolete bcause of the above
@@ -1495,7 +1494,7 @@ class CMD_ShowSearchTVDB(ApiCall):
         """ search for show at tvdb with a given string and language """
 
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
-        params = {'seriesname': self.name.encode('utf-8'), 'language': self.lang}
+        params = {'seriesname': str(self.name).encode('utf-8'), 'language': self.lang}
         finalURL = baseURL + urllib.urlencode(params)
         urlData = sickbeard.helpers.getURL(finalURL)
 
