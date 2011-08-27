@@ -62,19 +62,19 @@ class BlackAndWhiteList(object):
             return []
 
     def set_black_keywords(self, range, values):
-        self._del_all_black_keywors()
+        self._del_all_black_keywords()
         self._add_keywords(self._tableBlack, range, values)
 
     def set_white_keywords(self, range, values):
-        self._del_all_white_keywors()
+        self._del_all_white_keywords()
         self._add_keywords(self._tableWhite, range, values)
 
     def set_black_keywords_for(self, range, values):
-        self._del_all_black_keywors_for(range)
+        self._del_all_black_keywords_for(range)
         self._add_keywords(self._tableBlack, range, values)
 
     def set_white_keywords_for(self, range, values):
-        self._del_all_white_keywors_for(range)
+        self._del_all_white_keywords_for(range)
         self._add_keywords(self._tableWhite, range, values)
 
     def add_black_keyword(self, range, value):
@@ -102,16 +102,16 @@ class BlackAndWhiteList(object):
             self.myDB.action("INSERT INTO " + table + " (show_id, range , keyword) VALUES (?,?,?)", [self.show_id, range, value])
         self.refresh()
 
-    def _del_all_black_keywors(self):
+    def _del_all_black_keywords(self):
         self._del_all_keywords(self._tableBlack)
 
-    def _del_all_white_keywors(self):
+    def _del_all_white_keywords(self):
         self._del_all_keywords(self._tableWhite)
 
-    def _del_all_black_keywors_for(self, range):
+    def _del_all_black_keywords_for(self, range):
         self._del_all_keywords_for(self._tableBlack, range)
 
-    def _del_all_white_keywors_for(self, range):
+    def _del_all_white_keywords_for(self, range):
         self._del_all_keywords_for(self._tableWhite, range)
 
     def _del_all_keywords(self, table):
