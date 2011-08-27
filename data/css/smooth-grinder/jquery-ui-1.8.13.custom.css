@@ -50,7 +50,7 @@
  *
  * http://docs.jquery.com/UI/Theming/API
  *
- * To view and modify this theme, visit http://jqueryui.com/themeroller/?ctl=themeroller&ctl=themeroller&ctl=themeroller&ffDefault=Verdana,Arial,sans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=ffffff&bgTextureHeader=01_flat.png&bgImgOpacityHeader=0&borderColorHeader=aaaaaa&fcHeader=222222&iconColorHeader=222222&bgColorContent=dcdcdc&bgTextureContent=03_highlight_soft.png&bgImgOpacityContent=75&borderColorContent=aaaaaa&fcContent=222222&iconColorContent=222222&bgColorDefault=efefef&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=75&borderColorDefault=aaaaaa&fcDefault=222222&iconColorDefault=8c291d&bgColorHover=dddddd&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=999999&fcHover=222222&iconColorHover=222222&bgColorActive=dfdfdf&bgTextureActive=05_inset_soft.png&bgImgOpacityActive=75&borderColorActive=aaaaaa&fcActive=140f06&iconColorActive=8c291d&bgColorHighlight=fbf9ee&bgTextureHighlight=02_glass.png&bgImgOpacityHighlight=55&borderColorHighlight=aaaaaa&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=aaaaaa&fcError=8c291d&iconColorError=cd0a0a&bgColorOverlay=6e4f1c&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=000000&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
+ * To view and modify this theme, visit http://jqueryui.com/themeroller/?ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ffDefault=Verdana,Arial,sans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=ffffff&bgTextureHeader=01_flat.png&bgImgOpacityHeader=0&borderColorHeader=aaaaaa&fcHeader=222222&iconColorHeader=222222&bgColorContent=dcdcdc&bgTextureContent=03_highlight_soft.png&bgImgOpacityContent=75&borderColorContent=aaaaaa&fcContent=222222&iconColorContent=222222&bgColorDefault=efefef&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=75&borderColorDefault=aaaaaa&fcDefault=222222&iconColorDefault=8c291d&bgColorHover=dddddd&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=999999&fcHover=222222&iconColorHover=222222&bgColorActive=dfdfdf&bgTextureActive=05_inset_soft.png&bgImgOpacityActive=75&borderColorActive=aaaaaa&fcActive=140f06&iconColorActive=8c291d&bgColorHighlight=fbf9ee&bgTextureHighlight=02_glass.png&bgImgOpacityHighlight=55&borderColorHighlight=aaaaaa&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=aaaaaa&fcError=8c291d&iconColorError=cd0a0a&bgColorOverlay=6e4f1c&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=000000&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
  */
 
 
@@ -350,6 +350,58 @@
 .ui-accordion .ui-accordion-header .ui-icon { position: absolute; left: .5em; top: 50%; margin-top: -8px; }
 .ui-accordion .ui-accordion-content { padding: 1em 2.2em; border-top: 0; margin-top: -2px; position: relative; top: 1px; margin-bottom: 2px; overflow: auto; display: none; zoom: 1; }
 .ui-accordion .ui-accordion-content-active { display: block; }
+/*
+ * jQuery UI Autocomplete 1.8.13
+ *
+ * Copyright 2011, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Autocomplete#theming
+ */
+.ui-autocomplete { position: absolute; cursor: default; }
+
+/* workarounds */
+* html .ui-autocomplete { width:1px; } /* without this, the menu expands to 100% in IE6 */
+/*
+ * jQuery UI Menu 1.8.13
+ *
+ * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Menu#theming
+ */
+.ui-menu {
+	list-style:none;
+	padding: 2px;
+	margin: 0;
+	display:block;
+	float: left;
+}
+.ui-menu .ui-menu {
+	margin-top: -3px;
+}
+.ui-menu .ui-menu-item {
+	margin:0;
+	padding: 0;
+	zoom: 1;
+	float: left;
+	clear: left;
+	width: 100%;
+}
+.ui-menu .ui-menu-item a {
+	text-decoration:none;
+	display:block;
+	padding:.2em .4em;
+	line-height:1.5;
+	zoom:1;
+}
+.ui-menu .ui-menu-item a.ui-state-hover,
+.ui-menu .ui-menu-item a.ui-state-active {
+	font-weight: normal;
+	margin: -1px;
+}
 /*
  * jQuery UI Button 1.8.13
  *

@@ -1,4 +1,5 @@
 * { outline: 0; }
+*:focus { outline: none; }
 img { border: 0; vertical-align: middle;}
 
 body {
@@ -331,7 +332,7 @@ div#addShowPortal  button .buttontext { position: relative; display: block; padd
 
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
 
-.hover { background-color: #cfcfcf !important; cursor: pointer; }
+td.tvShow:hover { background-color: #cfcfcf !important; cursor: pointer; }
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
 
 /* for manage_massEdit */
@@ -351,3 +352,34 @@ a.whitelink { color: white; }
     font-size: 1em;
 }
 div.ui-pnotify { min-width: 340px; max-width: 550px; width: auto !important;}
+
+span.quality {
+    font: bold 1em/1.2em verdana, sans-serif;
+    background: none repeat scroll 0 0 #999999;
+    color: #FFFFFF;
+    display: inline-block;
+    padding: 2px 4px;
+    text-align: center;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+span.Custom {
+    background: none repeat scroll 0 0 #444499; /* blue */
+}
+span.HD {
+    background: none repeat scroll 0 0 #449944; /* green */
+}
+span.SD {
+    background: none repeat scroll 0 0 #994444; /* red */
+}
+span.Any {
+    background: none repeat scroll 0 0 #444444; /* black */
+}
+
+span.false {
+    color: #993333; /* red */
+}
+span.true {
+    color: #669966; /* green */
+}
