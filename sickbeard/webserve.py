@@ -2241,6 +2241,9 @@ class Home:
                     for line in group.datalines:
                         shortWhiteList.append(line["shortname"])
             bwl.set_white_keywords_for("release_group", shortWhiteList)
+        else:
+            bwl.set_white_keywords_for("release_group", [])
+
         if blacklist:
             blacklist = blacklist.split(",")
             shortBlacklist = []
@@ -2250,6 +2253,8 @@ class Home:
                     for line in group.datalines:
                         shortBlacklist.append(line["shortname"])
             bwl.set_black_keywords_for("release_group", shortBlacklist)
+        else:
+            bwl.set_black_keywords_for("release_group", [])
 
         errors = []
         with showObj.lock:
