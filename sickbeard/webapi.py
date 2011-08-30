@@ -762,7 +762,8 @@ class CMD_EpisodeSearch(ApiCall):
 
         # return the correct json value
         if ep_queue_item.success:
-            return _result(statusStrings[epObj.status])
+            status, quality = Quality.splitCompositeStatus(epObj.status) #@UnusedVariable
+            return _result(_get_quality_string(quality))
 
         return _result('failure', 'Unable to find episode')
 
