@@ -128,7 +128,7 @@ class Fanzub(generic.NZBProvider):
 				if not match:
 					continue
 				
-				dateString = match.group(1), "%a, %d %b %Y %H:%M:%S"
+				dateString = match.group(1)
 				resultDate = parseDate(dateString).replace(tzinfo=None)
 				
 				if date == None or resultDate > date:
