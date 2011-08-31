@@ -23,7 +23,7 @@ lockfile=/var/lock/subsys/$prog
 ## the defaults
 username=${SB_USER-sickbeard}
 homedir=${SB_HOME-/opt/sickbeard}
-datadir=${SB_DATA-/home/sickbeard}
+datadir=${SB_DATA-~/.sickbeard}
 pidfile=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
 nice=${SB_NICE-}
 ##
@@ -35,6 +35,11 @@ options=" --daemon --pidfile=${pidfile} --datadir=${datadir}"
 if [ ! -d $pidpath ]; then
 	mkdir -p $pidpath
 	chown $username $pidpath
+fi
+
+if [ ! -d $datadir ]; then
+	mkdir -p $datadir
+	chown $username $datadir
 fi
 
 start() {
