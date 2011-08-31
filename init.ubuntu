@@ -31,7 +31,7 @@ DESC=SickBeard
 RUN_AS=SICKBEARD_USER
 
 # data directory
-DATA_DIR=~/.sickbeard
+DATA_DIR=SICKBEARD_DATADIR
 
 # startup args
 DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
@@ -43,15 +43,9 @@ test -x $DAEMON || exit 0
 set -e
 
 if [ ! -d $PID_PATH ]; then
-    mkdir -p $PID_PATH
-    chown $RUN_AS $PID_PATH
+        mkdir -p $PID_PATH
+        chown $RUN_AS $PID_PATH
 fi
-
-if [ ! -d $DATA_DIR ]; then
-    mkdir -p $DATA_DIR
-    chown $RUN_AS $DATA_DIR
-fi
-
 
 case "$1" in
   start)
