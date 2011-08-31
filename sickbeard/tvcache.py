@@ -45,7 +45,7 @@ class CacheDBConnection(db.DBConnection):
 
         # Create the table if it's not already there
         try:
-            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
+            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT, release_group TEXT);"
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
@@ -339,8 +339,12 @@ class TVCache():
         if not quality:
             quality = Quality.nameQuality(name, parse_result.is_anime)
 
-        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
-                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
+        release_group = parse_result.release_group
+        if not release_group:
+            release_group = "";
+
+        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality, release_group) VALUES (?,?,?,?,?,?,?,?,?)",
+                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality, release_group])
 
 
     def searchCache(self, episode, manualSearch=False):
@@ -415,6 +419,7 @@ class TVCache():
                 result.url = url
                 result.name = title
                 result.quality = curQuality
+                result.release_group = curResult["release_group"]
 
                 # add it to the list
                 if epObj not in neededEps:
