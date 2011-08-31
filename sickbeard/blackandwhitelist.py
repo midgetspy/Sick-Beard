@@ -88,12 +88,12 @@ class BlackAndWhiteList(object):
         if self.last_black_valid_result == True:
             blackResult = "Valid"
         elif self.last_black_valid_result == False:
-            blackResult = "Unvalid"
+            blackResult = "Invalid"
 
         if self.last_white_valid_result == True:
             whiteResult = "Valid"
         elif self.last_white_valid_result == False:
-            whiteResult = "Unvalid"
+            whiteResult = "Invalid"
 
         return "Blacklist: " + blackResult + ", Whitelist: " + whiteResult
 
