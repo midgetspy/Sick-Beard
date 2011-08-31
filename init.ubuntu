@@ -21,9 +21,6 @@ DAEMON=/usr/bin/python
 PID_FILE=/var/run/sickbeard/sickbeard.pid
 PID_PATH=`dirname $PID_FILE`
 
-# startup args
-DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE}"
-
 # script name
 NAME=sickbeard
 
@@ -32,6 +29,12 @@ DESC=SickBeard
 
 # user
 RUN_AS=SICKBEARD_USER
+
+# data directory
+DATA_DIR=SICKBEARD_DATADIR
+
+# startup args
+DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
 
 ############### END EDIT ME ##################
 
@@ -51,13 +54,12 @@ case "$1" in
         ;;
   stop)
         echo "Stopping $DESC"
-        start-stop-daemon --stop --pidfile $PID_FILE
+        start-stop-daemon --stop --pidfile $PID_FILE --retry 15
         ;;
 
   restart|force-reload)
         echo "Restarting $DESC"
-        start-stop-daemon --stop --pidfile $PID_FILE
-        sleep 15
+        start-stop-daemon --stop --pidfile $PID_FILE --retry 15
         start-stop-daemon -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
   *)
