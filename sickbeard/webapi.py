@@ -25,7 +25,7 @@ import threading
 import cherrypy
 import sickbeard
 import webserve
-from sickbeard import db, logger, exceptions, history
+from sickbeard import db, logger, exceptions, history, ui
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
@@ -1250,6 +1250,23 @@ class CMD_SickBeardShutdown(ApiCall):
         threading.Timer(2, sickbeard.invoke_shutdown).start()
         return {"result": "Sick Beard is shutting down..."}
 
+class CMD_SickBeardGetMessages(ApiCall):
+    _help = {"desc":"get all messages"}
+
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        messages = []
+        for cur_notification in ui.notifications.get_notifications():
+            messages.append({'title': cur_notification.title,
+                           'message': cur_notification.message,
+                           'type': cur_notification.type})
+        return messages
+
 
 class CMD_Show(ApiCall):
     _help = {"desc": "display information for a given show",
@@ -1891,6 +1908,7 @@ _functionMaper = {"help": CMD_Help,
                   "sb.restart": CMD_SickBeardRestart,
                   "sb.setdefaults": CMD_SickBeardSetDefaults,
                   "sb.shutdown": CMD_SickBeardShutdown,
+                  "sb.getmessages": CMD_SickBeardGetMessages,
                   "show": CMD_Show,
                   "show.addexisting": CMD_ShowAddExisting,
                   "show.cache": CMD_ShowCache,
