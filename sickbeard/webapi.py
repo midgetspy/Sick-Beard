@@ -974,20 +974,21 @@ class CMD_HistoryTrim(ApiCall):
 
 
 class CMD_Logs(ApiCall):
-    _help = {"desc": "view sickbeard's log "
+    _help = {"desc": "view sickbeard's log",
+             "optionalPramameters": {"min_level ": {"desc": "the minimum level classification of log entries to show, with each level inherting its above level"} }
              }
 
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.minLevel, args = self.check_params(args, kwargs, "minlevel", "error", False, "string", ["error", "warning", "info", "debug"])
+        self.min_level, args = self.check_params(args, kwargs, "min_level", "error", False, "string", ["error", "warning", "info", "debug"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ view sickbeard's log """
         # 10 = Debug / 20 = Info / 30 = Warning / 40 = Error
-        minLevel = logger.reverseNames[str(self.minLevel).upper()]
+        minLevel = logger.reverseNames[str(self.min_level).upper()]
 
         data = []
         if os.path.isfile(logger.sb_log_instance.log_file):
@@ -1139,7 +1140,9 @@ class CMD_SickBeardGetMessages(ApiCall):
 
 
 class CMD_SickBeardPauseBacklog(ApiCall):
-    _help = {"desc": "pause the backlog search"}
+    _help = {"desc": "pause the backlog search",
+             "optionalPramameters": {"pause ": {"desc": "pause or unpause the global backlog"} }
+             }
 
     def __init__(self, args, kwargs):
         # required
@@ -1195,7 +1198,8 @@ class CMD_SickBeardSetDefaults(ApiCall):
     _help = {"desc": "set sickbeard user defaults",
              "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
-                                    "season_folder": {"desc": "use season subfolders for the show"}
+                                    "season_folder": {"desc": "use season subfolders within the show directory"},
+                                    "status": {"desc": "status of missing episodes"}
                                     }
              }
 
@@ -1381,8 +1385,113 @@ class CMD_ShowAddExisting(ApiCall):
         return _result("Show has been queued to be added")
 
 
+class CMD_ShowAddNew(ApiCall):
+    _help = {"desc": "add a new show to sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                    "location": {"desc": "base path for where the show folder is to be created"}
+                                },
+             "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+                                    "archive": {"desc": "archive quality for the show"},
+                                    "season_folder": {"desc": "use season subfolders for the show"},
+                                    "status": {"desc": "status of missing episodes"},
+                                    "lang": {"desc": "the 2 letter lang abbreviation id"}
+                                    }
+             }
+
+    valid_languages = {
+            'el': 20, 'en': 7, 'zh': 27, 'it': 15, 'cs': 28, 'es': 16, 'ru': 22,
+            'nl': 13, 'pt': 26, 'no': 9, 'tr': 21, 'pl': 18, 'fr': 17, 'hr': 31,
+            'de': 14, 'da': 10, 'fi': 11, 'hu': 19, 'ja': 25, 'he': 24, 'ko': 32,
+            'sv': 8, 'sl': 30}
+
+    def __init__(self, args, kwargs):
+        # required
+        self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.season_folder, args = self.check_params(args, kwargs, "season_folder", str(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
+        self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
+        self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ add a show in sickbeard with an existing folder """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if showObj:
+            raise ApiError("An existing tvdbid already exists in database")
+
+        if not ek.ek(os.path.isdir, self.location):
+            return _result('failure', 'Not a valid location')
+
+        #TODO: this is where we would sanatize the show name
+        #      then create the show folder
+        #      then pass off the new location as our updated location
+        #      -- could wait to create the folder until the very end
+        #         to try to prevent empty folder in case something went wrong
+        #helpers.sanitizeFileName(name)
+        #updatedLocation = ek.ek(os.path.join, rootDir, helpers.sanitizeFileName(show_name))
+        updatedLocation = self.location
+        dir_exists = helpers.makeDir(updatedLocation)
+        if not dir_exists:
+            logger.log(u"Unable to create the folder " + updatedLocation + ", can't add the show", logger.ERROR)
+            return ApiError("Unable to create the folder " + updatedLocation + ", can't add the show")
+        else:
+            helpers.chmodAsParent(updatedLocation)
+
+        quality_map = {'sdtv': Quality.SDTV,
+                       'sddvd': Quality.SDDVD,
+                       'hdtv': Quality.HDTV,
+                       'hdwebdl': Quality.HDWEBDL,
+                       'hdbluray': Quality.HDBLURAY,
+                       'fullhdbluray': Quality.FULLHDBLURAY,
+                       'unknown': Quality.UNKNOWN,
+                       'any': ANY }
+
+        #use default quality as a failsafe
+        newQuality = int(sickbeard.QUALITY_DEFAULT)
+        iqualityID = []
+        aqualityID = []
+
+        if self.initial:
+            for quality in self.initial:
+                iqualityID.append(quality_map[quality])
+        if self.archive:
+            for quality in self.archive:
+                aqualityID.append(quality_map[quality])
+
+        if iqualityID or aqualityID:
+            newQuality = Quality.combineQualities(iqualityID, aqualityID)
+
+        #use default status as a failsafe
+        newStatus = sickbeard.STATUS_DEFAULT
+        if self.status:
+            # convert the string status to a int
+            for status in statusStrings.statusStrings:
+                if statusStrings[status].lower() == str(self.status).lower():
+                    self.status = status
+                    break
+            # this should be obsolete bcause of the above
+            if not self.status in statusStrings.statusStrings:
+                raise ApiError("Invalid Status")
+            #only allow the status options we want
+            if int(self.status) not in (3, 5, 6, 7):
+                raise ApiError("Status Prohibited")
+            newStatus = self.status
+
+        newLang = self.valid_languages[self.lang]
+
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), updatedLocation, newStatus, newQuality, int(self.season_folder), newLang) #@UndefinedVariable
+        return _result("Show has been queued to be added")
+
+
 class CMD_ShowCache(ApiCall):
-    _help = {"desc": "check sickbeard's cache to see if the banner or poster image for a show is valid"}
+    _help = {"desc": "check sickbeard's cache to see if the banner or poster image for a show is valid",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
+                                    }
+             }
 
     def __init__(self, args, kwargs):
         # required
@@ -1492,7 +1601,9 @@ class CMD_ShowRefresh(ApiCall):
 class CMD_ShowSearchTVDB(ApiCall):
     _help = {"desc": "search for show at tvdb with a given string and language",
              "requiredParameters": {"name": {"desc": "name of the show you want to search for"}
-                                }
+                                },
+             "optionalPramameters": {"lang": {"desc": "the 2 letter abbreviation lang id"}
+                                     }
              }
 
     valid_languages = {
@@ -1912,6 +2023,7 @@ _functionMaper = {"help": CMD_Help,
                   "sb.shutdown": CMD_SickBeardShutdown,
                   "show": CMD_Show,
                   "show.addexisting": CMD_ShowAddExisting,
+                  "show.addnew": CMD_ShowAddNew,
                   "show.cache": CMD_ShowCache,
                   "show.delete": CMD_ShowDelete,
                   "show.getquality": CMD_ShowGetQuality,
