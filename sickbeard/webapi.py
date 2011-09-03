@@ -1426,21 +1426,6 @@ class CMD_ShowAddNew(ApiCall):
         if not ek.ek(os.path.isdir, self.location):
             return _result('failure', 'Not a valid location')
 
-        #TODO: this is where we would sanatize the show name
-        #      then create the show folder
-        #      then pass off the new location as our updated location
-        #      -- could wait to create the folder until the very end
-        #         to try to prevent empty folder in case something went wrong
-        #helpers.sanitizeFileName(name)
-        #updatedLocation = ek.ek(os.path.join, rootDir, helpers.sanitizeFileName(show_name))
-        updatedLocation = self.location
-        dir_exists = helpers.makeDir(updatedLocation)
-        if not dir_exists:
-            logger.log(u"Unable to create the folder " + updatedLocation + ", can't add the show", logger.ERROR)
-            return ApiError("Unable to create the folder " + updatedLocation + ", can't add the show")
-        else:
-            helpers.chmodAsParent(updatedLocation)
-
         quality_map = {'sdtv': Quality.SDTV,
                        'sddvd': Quality.SDDVD,
                        'hdtv': Quality.HDTV,
@@ -1450,7 +1435,7 @@ class CMD_ShowAddNew(ApiCall):
                        'unknown': Quality.UNKNOWN,
                        'any': ANY }
 
-        #use default quality as a failsafe
+        # use default quality as a failsafe
         newQuality = int(sickbeard.QUALITY_DEFAULT)
         iqualityID = []
         aqualityID = []
@@ -1465,7 +1450,7 @@ class CMD_ShowAddNew(ApiCall):
         if iqualityID or aqualityID:
             newQuality = Quality.combineQualities(iqualityID, aqualityID)
 
-        #use default status as a failsafe
+        # use default status as a failsafe
         newStatus = sickbeard.STATUS_DEFAULT
         if self.status:
             # convert the string status to a int
@@ -1476,14 +1461,24 @@ class CMD_ShowAddNew(ApiCall):
             # this should be obsolete bcause of the above
             if not self.status in statusStrings.statusStrings:
                 raise ApiError("Invalid Status")
-            #only allow the status options we want
+            # only allow the status options we want
             if int(self.status) not in (3, 5, 6, 7):
                 raise ApiError("Status Prohibited")
             newStatus = self.status
 
         newLang = self.valid_languages[self.lang]
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), updatedLocation, newStatus, newQuality, int(self.season_folder), newLang) #@UndefinedVariable
+        # moved the logic check to the end in an attempt to eliminate empty directory being created from previous errors
+        #TODO: sanitizeFileName needs some work done (ex: strip . from leading or trailing)
+        showPath = ek.ek(os.path.join, self.location, helpers.sanitizeFileName(showObj.name))
+        dir_exists = helpers.makeDir(showPath)
+        if not dir_exists:
+            logger.log(u"Unable to create the folder " + showPath + ", can't add the show", logger.ERROR)
+            return ApiError("Unable to create the folder " + showPath + ", can't add the show")
+        else:
+            helpers.chmodAsParent(showPath)
+
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), newLang) #@UndefinedVariable
         return _result("Show has been queued to be added")
 
 
