@@ -398,7 +398,7 @@ def initialize(consoleLogging=True):
             WEB_PORT = 8081
 
         WEB_HOST = check_setting_str(CFG, 'General', 'web_host', '0.0.0.0')
-        WEB_IPV6 = bool(check_setting_int(CFG, 'General', 'web_ipv6', 0))
+        WEB_IPV6 = check_setting_int(CFG, 'General', 'web_ipv6', 0)
         WEB_ROOT = check_setting_str(CFG, 'General', 'web_root', '').rstrip("/")
         WEB_LOG = bool(check_setting_int(CFG, 'General', 'web_log', 0))
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
