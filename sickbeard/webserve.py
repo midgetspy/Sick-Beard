@@ -1135,6 +1135,7 @@ class ConfigNotifications:
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
+                          use_toasty=None, toasty_notify_onsnatch=None, toasty_notify_ondownload=None, toasty_api=None,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
@@ -1216,6 +1217,20 @@ class ConfigNotifications:
         else:
             use_prowl = 0
 
+        if toasty_notify_onsnatch == "on":
+            toasty_notify_onsnatch = 1
+        else:
+            toasty_notify_onsnatch = 0
+
+        if toasty_notify_ondownload == "on":
+            toasty_notify_ondownload = 1
+        else:
+            toasty_notify_ondownload = 0
+        if use_toasty == "on":
+            use_toasty = 1
+        else:
+            use_toasty = 0
+			
         if twitter_notify_onsnatch == "on":
             twitter_notify_onsnatch = 1
         else:
@@ -1284,6 +1299,11 @@ class ConfigNotifications:
         sickbeard.PROWL_API = prowl_api
         sickbeard.PROWL_PRIORITY = prowl_priority
 
+        sickbeard.USE_TOASTY = use_toasty
+        sickbeard.TOASTY_NOTIFY_ONSNATCH = toasty_notify_onsnatch
+        sickbeard.TOASTY_NOTIFY_ONDOWNLOAD = toasty_notify_ondownload
+        sickbeard.TOASTY_API = toasty_api
+		
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
@@ -1834,6 +1854,16 @@ class Home:
         else:
             return "Test prowl notice failed"
 
+    @cherrypy.expose
+    def testToasty(self, toasty_api=None):
+		cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+		result = notifiers.toasty_notifier.test_notify(toasty_api)
+		if result:
+			return "Test SuperToasty notice sent successfully"
+		else:
+			return "Test SuperToasty notice failed"
+			
     @cherrypy.expose
     def testNotifo(self, username=None, apisecret=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"

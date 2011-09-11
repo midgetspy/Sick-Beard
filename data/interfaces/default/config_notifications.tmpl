@@ -419,6 +419,69 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
+
+
+
+
+
+
+				<div id="core-component-group9" class="component-group clearfix">
+
+				        <div class="component-group-desc">
+				            <h3><a href="http://supertoasty.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/toasty.gif" alt="Toasty" title="Toasty" width="16" height="16" /> SuperToasty</a></h3>
+				            <p>A Toast Notifier for Windows Phone 7.</p>
+				        </div>
+
+				        <fieldset class="component-group-list">
+				            <div class="field-pair">
+				                <input type="checkbox" class="enabler" name="use_toasty" id="use_toasty" #if $sickbeard.USE_TOASTY then "checked=\"checked\"" else ""# /> 
+				                <label class="clearfix" for="use_toasty">
+				                    <span class="component-title">Enable</span>
+				                    <span class="component-desc">Should Sick Beard send SuperToasty notifications?</span>
+				                </label>
+				            </div>
+
+				            <div id="content_use_toasty">
+				            <div class="field-pair">
+				                <input type="checkbox" name="toasty_notify_onsnatch" id="toasty_notify_onsnatch" #if $sickbeard.TOASTY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+				                <label class="clearfix" for="toasty_notify_onsnatch">
+				                    <span class="component-title">Notify on Snatch</span>
+				                    <span class="component-desc">Send notification when we start a download?</span>
+				                </label>
+				            </div>
+
+				            <div class="field-pair">
+				                <input type="checkbox" name="toasty_notify_ondownload" id="toasty_notify_ondownload" #if $sickbeard.TOASTY_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+				                <label class="clearfix" for="toasty_notify_ondownload">
+				                    <span class="component-title">Notify on Download</span>
+				                    <span class="component-desc">Send notification when we finish a download?</span>
+				                </label>
+				            </div>
+
+				            <div class="field-pair">
+				                <label class="nocheck clearfix">
+				                    <span class="component-title">Toasty Device ID:</span>
+				                    <input type="text" name="toasty_api" id="toasty_api" value="$sickbeard.TOASTY_API" size="35" />
+				                </label>
+				                <label class="nocheck clearfix">
+				                    <span class="component-title">&nbsp;</span>
+				                    <span class="component-desc">Find your Device ID in Toasty's settings.</span>
+				                </label>
+				            </div>
+
+				            <div class="testNotification" id="testToasty-result">Click below to test.</div>
+				            <input type="button" value="Test Toasty" id="testToasty" />
+				            <input type="submit" class="config_submitter" value="Save Changes" />
+
+				            </div><!-- /content_use_toasty //-->
+
+				        </fieldset>
+				    </div><!-- /component-group //-->
+				
+				
+				
+				
+				
                  <div id="core-component-group6" class="component-group clearfix">
 
                     <div class="component-group-desc">
@@ -613,6 +676,8 @@
                                 <span class="component-desc">Note: Requires SB to be running on your Synology NAS.</span>
                             </label>
                         </div>
+
+
                         <input type="submit" class="config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group //-->
@@ -622,7 +687,6 @@
             </div><!-- /config-components //-->
 
 </form>
-
 
 </div></div>
 <div class="clearfix"></div>

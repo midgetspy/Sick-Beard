@@ -215,6 +215,11 @@ PROWL_NOTIFY_ONDOWNLOAD = False
 PROWL_API = None
 PROWL_PRIORITY = 0
 
+USE_TOASTY = False
+TOASTY_NOTIFY_ONSNATCH = False
+TOASTY_NOTIFY_ONDOWNLOAD = False
+TOASTY_API = None
+
 USE_TWITTER = False
 TWITTER_NOTIFY_ONSNATCH = False
 TWITTER_NOTIFY_ONDOWNLOAD = False
@@ -352,7 +357,8 @@ def initialize(consoleLogging=True):
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
+                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, \
+				USE_TOASTY, TOASTY_NOTIFY_ONSNATCH, TOASTY_NOTIFY_ONDOWNLOAD, TOASTY_API, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
@@ -381,6 +387,7 @@ def initialize(consoleLogging=True):
         CheckSection('PLEX')
         CheckSection('Growl')
         CheckSection('Prowl')
+        CheckSection('Toasty')
         CheckSection('Twitter')
         CheckSection('NMJ')
         CheckSection('Synology')
@@ -549,6 +556,11 @@ def initialize(consoleLogging=True):
         PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
         PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
+
+        USE_TOASTY = bool(check_setting_int(CFG, 'Toasty', 'use_toasty', 0))
+        TOASTY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Toasty', 'toasty_notify_onsnatch', 0))
+        TOASTY_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Toasty', 'toasty_notify_ondownload', 0))
+        TOASTY_API = check_setting_str(CFG, 'Toasty', 'toasty_api', '')
 
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
@@ -1043,6 +1055,12 @@ def save_config():
     new_config['Prowl']['prowl_api'] = PROWL_API
     new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
 
+    new_config['Toasty'] = {}
+    new_config['Toasty']['use_toasty'] = int(USE_TOASTY)
+    new_config['Toasty']['toasty_notify_onsnatch'] = int(TOASTY_NOTIFY_ONSNATCH)
+    new_config['Toasty']['toasty_notify_ondownload'] = int(TOASTY_NOTIFY_ONDOWNLOAD) 
+    new_config['Toasty']['toasty_api'] = TOASTY_API
+	
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
     new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)

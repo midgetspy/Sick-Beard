@@ -22,6 +22,7 @@ import xbmc
 import plex
 import growl
 import prowl
+import supertoasty
 import tweet
 from . import libnotify
 import notifo
@@ -34,6 +35,7 @@ xbmc_notifier = xbmc.XBMCNotifier()
 plex_notifier = plex.PLEXNotifier()
 growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
+toasty_notifier = supertoasty.ToastyNotifier()
 twitter_notifier = tweet.TwitterNotifier()
 notifo_notifier = notifo.NotifoNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
@@ -48,6 +50,7 @@ notifiers = [
     plex_notifier,
     growl_notifier,
     prowl_notifier,
+	toasty_notifier,
     twitter_notifier,
     nmj_notifier,
     synoindex_notifier,
