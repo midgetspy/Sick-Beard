@@ -20,13 +20,8 @@ $(document).ready(function(){
     $('#testToasty').click(function(){
         $('#testToasty-result').html(loading);
         var toasty_api = $("#toasty_api").val();
-
-        // var prowl_priority = $("#prowl_priority").val();
-
         var toasty_result = $.get(sbRoot+"/home/testToasty", { 'toasty_api': toasty_api }, 
-
         function (data){ $('#testToasty-result').html(data); });
-
     });
 
     $('#testXBMC').click(function(){
