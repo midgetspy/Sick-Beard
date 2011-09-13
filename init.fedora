@@ -23,17 +23,23 @@ lockfile=/var/lock/subsys/$prog
 ## the defaults
 username=${SB_USER-sickbeard}
 homedir=${SB_HOME-/opt/sickbeard}
+datadir=${SB_DATA-~/.sickbeard}
 pidfile=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
 nice=${SB_NICE-}
 ##
 
 pidpath=`dirname ${pidfile}`
-options=" --daemon --pidfile=${pidfile}"
+options=" --daemon --pidfile=${pidfile} --datadir=${datadir}"
 
 # create PID directory if not exist and ensure the SickBeard user can write to it
 if [ ! -d $pidpath ]; then
 	mkdir -p $pidpath
 	chown $username $pidpath
+fi
+
+if [ ! -d $datadir ]; then
+	mkdir -p $datadir
+	chown $username $datadir
 fi
 
 start() {

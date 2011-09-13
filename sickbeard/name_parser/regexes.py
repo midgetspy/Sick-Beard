@@ -95,6 +95,7 @@ ep_regexes = [
                # tpz-abc102
                '''
                (?P<release_group>.+?)-\w+?[\. ]?           # tpz-abc
+               (?!264)                                     # don't count x264
                (?P<season_num>\d{1,2})                     # 1
                (?P<ep_num>\d{2})$                          # 02
                '''),
