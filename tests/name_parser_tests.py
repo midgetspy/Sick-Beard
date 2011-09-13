@@ -166,7 +166,7 @@ class FailureCaseTests(unittest.TestCase):
             print 'Actual: ', parse_result.which_regex, parse_result
         return False
     
-    def test_unicode(self):
+    def test_failures(self):
         for name in failure_cases:
             self.assertTrue(self._test_name(name))
 
