@@ -2149,7 +2149,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, anime=None, blacklist=None, whitelist=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, anime=None, blackWords=None, whiteWords=None, blacklist=None, whitelist=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2171,10 +2171,17 @@ class Home:
             
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu()
-            
+
+            bwl = BlackAndWhiteList(showObj.tvdbid)
+            t.whiteWords = ""
+            if "global" in bwl.whiteDict:
+                t.whiteWords = ", ".join(bwl.whiteDict["global"])
+            t.blackWords = ""
+            if "global" in bwl.blackDict:
+                t.blackWords = ", ".join(bwl.blackDict["global"])
+
             if showObj.is_anime:
 
-                bwl = BlackAndWhiteList(showObj.tvdbid)
                 t.whitelist = []
                 if bwl.whiteDict.has_key("release_group"):
                     t.whitelist = bwl.whiteDict["release_group"]
@@ -2255,6 +2262,18 @@ class Home:
             bwl.set_black_keywords_for("release_group", shortBlacklist)
         else:
             bwl.set_black_keywords_for("release_group", [])
+
+        if whiteWords:
+            whiteWords = [x.strip() for x in whiteWords.split(",")]
+            bwl.set_white_keywords_for("global", whiteWords)
+        else:
+            bwl.set_black_keywords_for("global", [])
+
+        if blackWords:
+            blackWords = [x.strip() for x in blackWords.split(",")]
+            bwl.set_black_keywords_for("global", blackWords)
+        else:
+            bwl.set_black_keywords_for("global", [])
 
         errors = []
         with showObj.lock:

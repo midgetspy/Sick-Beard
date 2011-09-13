@@ -72,6 +72,12 @@ Air by date:
 <br /><br />
 Anime: <input type="checkbox" name="anime" #if $show.is_anime then "CHECKED" else ""#><br />
 (check this if the show is released as Show.265 rather than Show.S02E03, this show is an anime)<br />
+<br /><br />
+Ignore words: <input type="text" name="blackWords" value="$blackWords"><br />
+(Results that contain any of these words will be ignored. Comma seperated.)<br />
+<br /><br />
+Needed words: <input type="text" name="whiteWords" value="$whiteWords"><br />
+(Results must contain all of these words. Comma seperated.)<br />
 <br />
 #if $show.is_anime
 <p>
