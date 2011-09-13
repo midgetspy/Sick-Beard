@@ -220,17 +220,10 @@ def makeSceneSearchString (episode):
     if numseasons == 1 and not episode.show.is_anime:
         epStrings = ['']
 
-
-        
     bwl = BlackAndWhiteList(episode.show.tvdbid)
-    bwl.whiteList
-
-
     showNames = set(makeSceneShowSearchStrings(episode.show))
 
-
     toReturn = []
-
     for curShow in showNames:
         for curEpString in epStrings:
             if len(bwl.whiteList) > 0:
