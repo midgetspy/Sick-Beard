@@ -85,7 +85,7 @@ def _downloadResult(result):
         return False
 
     if newResult:
-        ui.notifications.message('Episode <b>%s</b> snatched from <b>%s</b>' % (result.name, resProvider.name))
+        ui.notifications.message('Episode snatched','<b>%s</b> snatched from <b>%s</b>' % (result.name, resProvider.name))
 
     return newResult
 
