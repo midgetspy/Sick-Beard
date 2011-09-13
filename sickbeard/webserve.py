@@ -2455,9 +2455,10 @@ class WebInterface:
                     size = 136, 200
                 else:
                     return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-                im.thumbnail(size, Image.ANTIALIAS)
+                im = im.resize(size, Image.ANTIALIAS)
                 buffer = StringIO()
-                im.save(buffer, 'JPEG')
+                im.save(buffer, 'JPEG', quality=85)
+                cherrypy.response.headers['Content-Type'] = 'image/jpeg'
                 return buffer.getvalue()
         else:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
