@@ -29,6 +29,7 @@ Sick Beard makes use of the following projects:
 * [jQuery][jquery]
 * [Python GNTP][pythongntp]
 * [SocksiPy][socks]
+* [python-dateutil][dateutil]
 
 ## Dependencies
 
@@ -47,6 +48,7 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 [jquery]: http://jquery.com
 [pythongntp]: http://github.com/kfdm/gntp
 [socks]: http://code.google.com/p/socksipy-branch/
+[dateutil]: http://labix.org/python-dateutil
 [googledownloads]: http://code.google.com/p/sickbeard/downloads/list
 [googleissues]: http://code.google.com/p/sickbeard/issues/list
 [googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
