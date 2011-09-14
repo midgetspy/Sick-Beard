@@ -49,12 +49,13 @@ RESULT_FAILURE = 20
 RESULT_TIMEOUT = 30
 RESULT_ERROR = 40
 RESULT_DENIED = 50
-result_type_map = {RESULT_SUCCESS:"success",
-                  RESULT_FAILURE:"failure",
-                  RESULT_TIMEOUT:"timeout",
-                  RESULT_ERROR:"error",
-                  RESULT_DENIED:"denied",
+result_type_map = {RESULT_SUCCESS: "success",
+                  RESULT_FAILURE: "failure",
+                  RESULT_TIMEOUT: "timeout",
+                  RESULT_ERROR: "error",
+                  RESULT_DENIED: "denied",
                   }
+
 
 class Api:
     """ api class that returns json results """
@@ -461,8 +462,10 @@ def _rename_element(dict, oldKey, newKey):
         pass
     return dict
 
+
 def _error(msg):
     return {"error": msg}
+
 
 def _responds(result_type, data=None, msg=""):
     """
@@ -472,9 +475,9 @@ def _responds(result_type, data=None, msg=""):
     """
     if data is None:
         data = {}
-    return {"result":result_type_map[result_type],
-            "message":msg,
-            "data":data}
+    return {"result": result_type_map[result_type],
+            "message": msg,
+            "data": data}
 
 
 def _get_quality_string(q):
@@ -670,10 +673,10 @@ class CMD_ComingEpisodes(ApiCall):
                 ep["network"] = ""
             ep["airdate"] = _ordinal_to_dateForm(ordinalAirdate)
             ep["quality"] = _get_quality_string(ep["quality"])
-            #clean up tvdb horrible airs field
+            # clean up tvdb horrible airs field
             ep["airs"] = str(ep["airs"]).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
-            # TODO: choose eng weekday string OR number of weekday as int
-            ep["weekday"] = datetime.date.fromordinal(ordinalAirdate).weekday()
+            # start day of the week on 1 (monday)
+            ep["weekday"] = 1 + datetime.date.fromordinal(ordinalAirdate).weekday()
 
             # TODO: check if this obsolete
             if not status in finalEpResults:
@@ -839,10 +842,10 @@ class CMD_EpisodeSetStatus(ApiCall):
         with epObj.lock:
             # don't let them mess up UNAIRED episodes
             if epObj.status == UNAIRED:
-                return _responds(RESULT_FAILURE, {"ep_status":statusStrings[epObj.status]}, "Refusing to change status because it is UNAIRED")
+                return _responds(RESULT_FAILURE, {"ep_status": statusStrings[epObj.status]}, "Refusing to change status because it is UNAIRED")
 
             if int(self.status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
-                return _responds(RESULT_FAILURE, {"ep_status":statusStrings[epObj.status]}, "Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
+                return _responds(RESULT_FAILURE, {"ep_status": statusStrings[epObj.status]}, "Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
 
             epObj.status = int(self.status)
             epObj.saveToDB()
@@ -851,9 +854,9 @@ class CMD_EpisodeSetStatus(ApiCall):
                 cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
                 sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
                 logger.log(u"Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
-                return _responds(RESULT_SUCCESS, {"ep_status":statusStrings[epObj.status]}, "Episode status changed to Wanted, and backlog started")
+                return _responds(RESULT_SUCCESS, {"ep_status": statusStrings[epObj.status]}, "Episode status changed to Wanted, and backlog started")
 
-        return _responds(RESULT_SUCCESS, {"ep_status":statusStrings[epObj.status]}, "Episode status successfully changed to " + statusStrings[epObj.status])
+        return _responds(RESULT_SUCCESS, {"ep_status": statusStrings[epObj.status]}, "Episode status successfully changed to " + statusStrings[epObj.status])
 
 
 class CMD_Exceptions(ApiCall):
@@ -1087,6 +1090,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         data = {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
         return _responds(RESULT_SUCCESS, data)
 
+
 class CMD_SickBeardForceSearch(ApiCall):
     _help = {"desc": "force the episode search early"
              }
@@ -1136,6 +1140,7 @@ class CMD_SickBeardGetDefaults(ApiCall):
         data = {"status": statusStrings[sickbeard.STATUS_DEFAULT], "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities}
         return _responds(RESULT_SUCCESS, data)
 
+
 class CMD_SickBeardGetMessages(ApiCall):
     _help = {"desc": "get all messages"}
 
@@ -1170,10 +1175,10 @@ class CMD_SickBeardPauseBacklog(ApiCall):
         """ pause the backlog search """
         if self.pause == True:
             sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
-            return _responds(RESULT_SUCCESS, {"status":0}, "Backlog Paused")
+            return _responds(RESULT_SUCCESS, {"status": 0}, "Backlog Paused")
         else:
             sickbeard.searchQueueScheduler.action.unpause_backlog() #@UndefinedVariable
-            return _responds(RESULT_SUCCESS, {"status":1}, "Backlog Unaused")
+            return _responds(RESULT_SUCCESS, {"status": 1}, "Backlog Unaused")
 
 
 class CMD_SickBeardPing(ApiCall):
@@ -1189,7 +1194,7 @@ class CMD_SickBeardPing(ApiCall):
         """ check to see if sickbeard is running """
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         if sickbeard.started:
-            return _responds(RESULT_SUCCESS, {"pid":sickbeard.PID}, "Pong")
+            return _responds(RESULT_SUCCESS, {"pid": sickbeard.PID}, "Pong")
         else:
             return _responds(RESULT_SUCCESS, msg="Pong")
 
@@ -1489,7 +1494,7 @@ class CMD_ShowAddNew(ApiCall):
         dir_exists = helpers.makeDir(showPath)
         if not dir_exists:
             logger.log(u"Unable to create the folder " + showPath + ", can't add the show", logger.ERROR)
-            return _responds(RESULT_FAILURE, {"path":showPath}, "Unable to create the folder " + showPath + ", can't add the show")
+            return _responds(RESULT_FAILURE, {"path": showPath}, "Unable to create the folder " + showPath + ", can't add the show")
         else:
             helpers.chmodAsParent(showPath)
 
