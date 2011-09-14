@@ -146,7 +146,7 @@ class Api:
         try:
             out = json.dumps(dict, indent=self.intent, sort_keys=True)
         except Exception, e: # if we fail to generate the output fake a error
-            out = '{"error": "while composing output: "' + ex(e) + '"}'
+            out = '{"result":"'+result_type_map[RESULT_ERROR]+'", "message": "error while composing output: "' + ex(e) + '"}'
         return out
 
     def _grand_access(self, realKey, args, kwargs):
