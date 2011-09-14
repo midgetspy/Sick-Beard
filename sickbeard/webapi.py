@@ -47,10 +47,12 @@ RESULT_SUCCESS = 10
 RESULT_FAILURE = 20
 RESULT_TIMEOUT = 30
 RESULT_ERROR = 40
+RESULT_DENIED = 50
 result_type_map = {RESULT_SUCCESS:"success",
                   RESULT_FAILURE:"failure",
                   RESULT_TIMEOUT:"timeout",
                   RESULT_ERROR:"error",
+                  RESULT_DENIED:"denied",
                   }
 
 class Api:
@@ -73,7 +75,7 @@ class Api:
             logger.log(accessMsg, logger.DEBUG)
         else:
             logger.log(accessMsg, logger.WARNING)
-            return outputCallback(_error(accessMsg))
+            return outputCallback(_responds(RESULT_DENIED, msg="Access Denied! Wrong Api Key"))
 
         """
         # global dateForm
