@@ -1,4 +1,5 @@
 # Author: Dennis Lutter <lad1337@gmail.com>
+# Author: Jonathon Saine <thezoggy@gmail.com>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -25,7 +26,7 @@ import threading
 import cherrypy
 import sickbeard
 import webserve
-from sickbeard import db, logger, exceptions, history, ui
+from sickbeard import db, logger, exceptions, history, ui, helpers
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
@@ -42,8 +43,18 @@ import xml.etree.cElementTree as etree
 dateFormat = "%Y-%m-%d"
 dateTimeFormat = "%Y-%m-%d %H:%M"
 
-dayofWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
+RESULT_SUCCESS = 10
+RESULT_FAILURE = 20
+RESULT_TIMEOUT = 30
+RESULT_ERROR = 40
+RESULT_DENIED = 50
+result_type_map = {RESULT_SUCCESS:"success",
+                  RESULT_FAILURE:"failure",
+                  RESULT_TIMEOUT:"timeout",
+                  RESULT_ERROR:"error",
+                  RESULT_DENIED:"denied",
+                  }
 
 class Api:
     """ api class that returns json results """
@@ -65,7 +76,7 @@ class Api:
             logger.log(accessMsg, logger.DEBUG)
         else:
             logger.log(accessMsg, logger.WARNING)
-            return outputCallback(_error(accessMsg))
+            return outputCallback(_responds(RESULT_DENIED, msg="Access Denied! Wrong Api Key"))
 
         """
         # global dateForm
@@ -84,7 +95,7 @@ class Api:
             _call_dispatcher = profile(_call_dispatcher, immediate=True)
             del kwargs["profile"]
 
-        # if debug was set call the "call_dispatcher"
+        # if debug was set call the "_call_dispatcher"
         if 'debug' in kwargs:
             outDict = _call_dispatcher(args, kwargs) # this way we can debug the cherry.py traceback in the browser
             del kwargs["debug"]
@@ -93,7 +104,7 @@ class Api:
                 outDict = _call_dispatcher(args, kwargs)
             except Exception, e:
                 logger.log("API: " + ex(e), logger.ERROR)
-                outDict = _error(ex(e))
+                outDict = _responds(RESULT_ERROR, msg=ex(e))
 
         return outputCallback(outDict)
 
@@ -450,16 +461,20 @@ def _rename_element(dict, oldKey, newKey):
         pass
     return dict
 
-
 def _error(msg):
     return {"error": msg}
 
-
-def _result(msg, error=None):
-    if error == None:
-        return {"result": msg}
-    else:
-        return {"result": msg, "error": error}
+def _responds(result_type, data=None, msg=""):
+    """
+    result is a string of given "type" (success/failure/timeout/error)
+    message is a human readable string, can be empty
+    data is either a dict or a array, can be a empty dict or empty array
+    """
+    if data is None:
+        data = {}
+    return {"result":result_type_map[result_type],
+            "message":msg,
+            "data":data}
 
 
 def _get_quality_string(q):
@@ -568,10 +583,10 @@ class CMD_Help(ApiCall):
     def run(self):
         """ display help information for a given subject/command """
         if self.subject in _functionMaper:
-            msg = _functionMaper.get(self.subject)((), {"help": 1}).run()
+            out = _responds(RESULT_SUCCESS, _functionMaper.get(self.subject)((), {"help": 1}).run())
         else:
-            msg = _error("no such cmd")
-        return msg
+            out = _responds(RESULT_FAILURE, msg="no such cmd")
+        return out
 
 
 class CMD_ComingEpisodes(ApiCall):
@@ -658,7 +673,7 @@ class CMD_ComingEpisodes(ApiCall):
             #clean up tvdb horrible airs field
             ep["airs"] = str(ep["airs"]).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
             # TODO: choose eng weekday string OR number of weekday as int
-            ep["weekday"] = dayofWeek[datetime.date.fromordinal(ordinalAirdate).weekday()]
+            ep["weekday"] = datetime.date.fromordinal(ordinalAirdate).weekday()
 
             # TODO: check if this obsolete
             if not status in finalEpResults:
@@ -666,7 +681,7 @@ class CMD_ComingEpisodes(ApiCall):
 
             finalEpResults[status].append(ep)
         myDB.connection.close()
-        return finalEpResults
+        return _responds(RESULT_SUCCESS, finalEpResults)
 
 
 class CMD_Episode(ApiCall):
@@ -721,7 +736,7 @@ class CMD_Episode(ApiCall):
         episode["status"] = _get_status_Strings(episode["status"])
 
         myDB.connection.close()
-        return episode
+        return _responds(RESULT_SUCCESS, episode)
 
 
 class CMD_EpisodeSearch(ApiCall):
@@ -763,9 +778,9 @@ class CMD_EpisodeSearch(ApiCall):
         # return the correct json value
         if ep_queue_item.success:
             status, quality = Quality.splitCompositeStatus(epObj.status) #@UnusedVariable
-            return _result(_get_quality_string(quality))
+            return _responds(RESULT_SUCCESS, msg=_get_quality_string(quality))
 
-        return _result('failure', 'Unable to find episode')
+        return _responds(RESULT_FAILURE, msg='Unable to find episode')
 
 
 class CMD_EpisodeSetStatus(ApiCall):
@@ -824,10 +839,10 @@ class CMD_EpisodeSetStatus(ApiCall):
         with epObj.lock:
             # don't let them mess up UNAIRED episodes
             if epObj.status == UNAIRED:
-                raise ApiError("Refusing to change status because it is UNAIRED")
+                return _responds(RESULT_FAILURE, {"ep_status":statusStrings[epObj.status]}, "Refusing to change status because it is UNAIRED")
 
             if int(self.status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
-                raise ApiError("Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
+                return _responds(RESULT_FAILURE, {"ep_status":statusStrings[epObj.status]}, "Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
 
             epObj.status = int(self.status)
             epObj.saveToDB()
@@ -836,9 +851,9 @@ class CMD_EpisodeSetStatus(ApiCall):
                 cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
                 sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
                 logger.log(u"Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
-                return {"result": "Episode status changed to Wanted, and backlog started" }
+                return _responds(RESULT_SUCCESS, {"ep_status":statusStrings[epObj.status]}, "Episode status changed to Wanted, and backlog started")
 
-        return {"result": "Episode status successfully changed to " + statusStrings[epObj.status]}
+        return _responds(RESULT_SUCCESS, {"ep_status":statusStrings[epObj.status]}, "Episode status successfully changed to " + statusStrings[epObj.status])
 
 
 class CMD_Exceptions(ApiCall):
@@ -870,7 +885,7 @@ class CMD_Exceptions(ApiCall):
         else:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
             if not showObj:
-                raise ApiError("Show not Found")
+                return _responds(RESULT_FAILURE, msg="Show not Found")
 
             sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
             scene_exceptions = []
@@ -878,7 +893,7 @@ class CMD_Exceptions(ApiCall):
                 scene_exceptions.append(row["show_name"])
 
         myDB.connection.close()
-        return scene_exceptions
+        return _responds(RESULT_SUCCESS, scene_exceptions)
 
 
 class CMD_History(ApiCall):
@@ -932,7 +947,7 @@ class CMD_History(ApiCall):
             results.append(row)
 
         myDB.connection.close()
-        return results
+        return _responds(RESULT_SUCCESS, results)
 
 
 class CMD_HistoryClear(ApiCall):
@@ -951,7 +966,7 @@ class CMD_HistoryClear(ApiCall):
         myDB.action("DELETE FROM history WHERE 1=1")
 
         myDB.connection.close()
-        return _result("History Cleared")
+        return _responds(RESULT_SUCCESS, "History Cleared")
 
 
 class CMD_HistoryTrim(ApiCall):
@@ -970,7 +985,7 @@ class CMD_HistoryTrim(ApiCall):
         myDB.action("DELETE FROM history WHERE date < " + str((datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)))
 
         myDB.connection.close()
-        return _result("Removed history entries greater than 30 days old")
+        return _responds(RESULT_SUCCESS, msg="Removed history entries greater than 30 days old")
 
 
 class CMD_Logs(ApiCall):
@@ -1030,7 +1045,7 @@ class CMD_Logs(ApiCall):
             if numLines >= numToShow:
                 break
 
-        return finalData
+        return _responds(RESULT_SUCCESS, finalData)
 
 
 class CMD_SickBeard(ApiCall):
@@ -1044,7 +1059,8 @@ class CMD_SickBeard(ApiCall):
 
     def run(self):
         """ display misc sickbeard related information """
-        return {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version": Api.version, "api_commands": sorted(_functionMaper.keys())}
+        data = {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version": Api.version, "api_commands": sorted(_functionMaper.keys())}
+        return _responds(RESULT_SUCCESS, data)
 
 
 class CMD_SickBeardCheckScheduler(ApiCall):
@@ -1068,8 +1084,8 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         nextBacklog = sickbeard.backlogSearchScheduler.nextRun().strftime(dateFormat).decode(sickbeard.SYS_ENCODING)
 
         myDB.connection.close()
-        return {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
-
+        data = {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
+        return _responds(RESULT_SUCCESS, data)
 
 class CMD_SickBeardForceSearch(ApiCall):
     _help = {"desc": "force the episode search early"
@@ -1088,8 +1104,8 @@ class CMD_SickBeardForceSearch(ApiCall):
         # Searching all providers for any needed episodes
         result = sickbeard.currentSearchScheduler.forceRun()
         if result:
-            return {"result": "Episode search forced"}
-        return {"result": "Failure"}
+            return _responds(RESULT_SUCCESS, msg="Episode search forced")
+        return _responds(RESULT_FAILURE, msg="can not search for episode")
 
 
 class CMD_SickBeardGetDefaults(ApiCall):
@@ -1117,9 +1133,8 @@ class CMD_SickBeardGetDefaults(ApiCall):
         if aqualityID:
             for quality in aqualityID:
                 bestQualities.append(quality_map[quality])
-
-        return {"status": statusStrings[sickbeard.STATUS_DEFAULT], "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities}
-
+        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT], "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities}
+        return _responds(RESULT_SUCCESS, data)
 
 class CMD_SickBeardGetMessages(ApiCall):
     _help = {"desc": "get all messages"}
@@ -1136,7 +1151,7 @@ class CMD_SickBeardGetMessages(ApiCall):
             messages.append({'title': cur_notification.title,
                            'message': cur_notification.message,
                            'type': cur_notification.type})
-        return messages
+        return _responds(RESULT_SUCCESS, messages)
 
 
 class CMD_SickBeardPauseBacklog(ApiCall):
@@ -1155,10 +1170,10 @@ class CMD_SickBeardPauseBacklog(ApiCall):
         """ pause the backlog search """
         if self.pause == True:
             sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
-            return {"result": "Backlog Paused"}
+            return _responds(RESULT_SUCCESS, {"status":0}, "Backlog Paused")
         else:
             sickbeard.searchQueueScheduler.action.unpause_backlog() #@UndefinedVariable
-            return {"result": "Backlog Unpaused"}
+            return _responds(RESULT_SUCCESS, {"status":1}, "Backlog Unaused")
 
 
 class CMD_SickBeardPing(ApiCall):
@@ -1174,9 +1189,9 @@ class CMD_SickBeardPing(ApiCall):
         """ check to see if sickbeard is running """
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         if sickbeard.started:
-            return {"result": "Pong (" + str(sickbeard.PID) + ")"}
+            return _responds(RESULT_SUCCESS, {"pid":sickbeard.PID}, "Pong")
         else:
-            return {"result": "Pong"}
+            return _responds(RESULT_SUCCESS, msg="Pong")
 
 
 class CMD_SickBeardRestart(ApiCall):
@@ -1191,7 +1206,7 @@ class CMD_SickBeardRestart(ApiCall):
     def run(self):
         """ restart sickbeard """
         threading.Timer(2, sickbeard.invoke_restart, [False]).start()
-        return {"result": "SickBeard is restarting..."}
+        return _responds(RESULT_SUCCESS, msg="SickBeard is restarting...")
 
 
 class CMD_SickBeardSetDefaults(ApiCall):
@@ -1255,7 +1270,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
         if self.season_folder != None:
             sickbeard.SEASON_FOLDERS_DEFAULT = int(self.season_folder)
 
-        return _result("Saved Defaults")
+        return _responds(RESULT_SUCCESS, msg="Saved Defaults")
 
 
 class CMD_SickBeardShutdown(ApiCall):
@@ -1270,7 +1285,7 @@ class CMD_SickBeardShutdown(ApiCall):
     def run(self):
         """ shutdown sickbeard """
         threading.Timer(2, sickbeard.invoke_shutdown).start()
-        return {"result": "Sick Beard is shutting down..."}
+        return _responds(RESULT_SUCCESS, msg="Sick Beard is shutting down...")
 
 
 class CMD_Show(ApiCall):
@@ -1293,8 +1308,8 @@ class CMD_Show(ApiCall):
             raise ApiError("Show not Found")
 
         showDict = {}
-        showDict["season_list"] = CMD_ShowSeasonList((), {"tvdbid": self.tvdbid}).run()
-        showDict["cache"] = CMD_ShowCache((), {"tvdbid": self.tvdbid}).run()
+        showDict["season_list"] = CMD_ShowSeasonList((), {"tvdbid": self.tvdbid}).run()["data"]
+        showDict["cache"] = CMD_ShowCache((), {"tvdbid": self.tvdbid}).run()["data"]
 
         genreList = []
         if showObj.genre:
@@ -1323,7 +1338,7 @@ class CMD_Show(ApiCall):
         showDict["tvrage_id"] = showObj.tvrid
         showDict["tvrage_name"] = showObj.tvrname
 
-        return showDict
+        return _responds(RESULT_SUCCESS, showDict)
 
 
 class CMD_ShowAddExisting(ApiCall):
@@ -1352,10 +1367,10 @@ class CMD_ShowAddExisting(ApiCall):
         """ add a show in sickbeard with an existing folder """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if showObj:
-            raise ApiError("An existing tvdbid already exists in database")
+            return _responds(RESULT_FAILURE, msg="An existing tvdbid already exists in database")
 
         if not ek.ek(os.path.isdir, self.location):
-            return _result('failure', 'Not a valid location')
+            return _responds(RESULT_FAILURE, msg='Not a valid location')
 
         quality_map = {'sdtv': Quality.SDTV,
                        'sddvd': Quality.SDDVD,
@@ -1382,7 +1397,7 @@ class CMD_ShowAddExisting(ApiCall):
             newQuality = Quality.combineQualities(iqualityID, aqualityID)
 
         sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.season_folder)) #@UndefinedVariable
-        return _result("Show has been queued to be added")
+        return _responds(RESULT_SUCCESS, msg="Show has been queued to be added")
 
 
 class CMD_ShowAddNew(ApiCall):
@@ -1424,7 +1439,7 @@ class CMD_ShowAddNew(ApiCall):
             raise ApiError("An existing tvdbid already exists in database")
 
         if not ek.ek(os.path.isdir, self.location):
-            return _result('failure', 'Not a valid location')
+            return _responds('failure', 'Not a valid location')
 
         quality_map = {'sdtv': Quality.SDTV,
                        'sddvd': Quality.SDDVD,
@@ -1463,7 +1478,7 @@ class CMD_ShowAddNew(ApiCall):
                 raise ApiError("Invalid Status")
             # only allow the status options we want
             if int(self.status) not in (3, 5, 6, 7):
-                raise ApiError("Status Prohibited")
+                return _responds(RESULT_FAILURE, msg="Status Prohibited")
             newStatus = self.status
 
         newLang = self.valid_languages[self.lang]
@@ -1474,12 +1489,12 @@ class CMD_ShowAddNew(ApiCall):
         dir_exists = helpers.makeDir(showPath)
         if not dir_exists:
             logger.log(u"Unable to create the folder " + showPath + ", can't add the show", logger.ERROR)
-            return ApiError("Unable to create the folder " + showPath + ", can't add the show")
+            return _responds(RESULT_FAILURE, {"path":showPath}, "Unable to create the folder " + showPath + ", can't add the show")
         else:
             helpers.chmodAsParent(showPath)
 
         sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), newLang) #@UndefinedVariable
-        return _result("Show has been queued to be added")
+        return _responds(RESULT_SUCCESS, msg="Show has been queued to be added")
 
 
 class CMD_ShowCache(ApiCall):
@@ -1499,7 +1514,7 @@ class CMD_ShowCache(ApiCall):
         """ check sickbeard's cache to see if the banner or poster image for a show is valid """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         #TODO: catch if cache dir is missing/invalid.. so it doesn't break show/show.cache
         #return {"poster": 0, "banner": 0}
@@ -1514,7 +1529,7 @@ class CMD_ShowCache(ApiCall):
         if ek.ek(os.path.isfile, cache_obj.banner_path(showObj.tvdbid)):
             has_banner = 1
 
-        return {"poster": has_poster, "banner": has_banner}
+        return _responds(RESULT_SUCCESS, {"poster": has_poster, "banner": has_banner})
 
 
 class CMD_ShowDelete(ApiCall):
@@ -1534,13 +1549,13 @@ class CMD_ShowDelete(ApiCall):
         """ delete a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
-            raise ApiError("Show can not be deleted while being added or updated")
+            return _responds(RESULT_FAILURE, msg="Show can not be deleted while being added or updated")
 
         showObj.deleteShow()
-        return _result(str(showObj.name) + " has been deleted")
+        return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has been deleted")
 
 
 class CMD_ShowGetQuality(ApiCall):
@@ -1564,7 +1579,7 @@ class CMD_ShowGetQuality(ApiCall):
 
         anyQualities, bestQualities = _mapQuality(showObj)
 
-        return {"initial": anyQualities, "archive": bestQualities}
+        return _responds(RESULT_SUCCESS, {"initial": anyQualities, "archive": bestQualities})
 
 
 class CMD_ShowRefresh(ApiCall):
@@ -1584,13 +1599,14 @@ class CMD_ShowRefresh(ApiCall):
         """ refresh a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         try:
             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
-            return _result(str(showObj.name) + " has queued to be refreshed")
+            return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has queued to be refreshed")
         except exceptions.CantRefreshException, e:
-            return _result("Unable to refresh " + str(showObj.name), ex(e))
+            # TODO: log the excption
+            return _responds(RESULT_FAILURE, "Unable to refresh " + str(showObj.name))
 
 
 class CMD_ShowSearchTVDB(ApiCall):
@@ -1627,7 +1643,7 @@ class CMD_ShowSearchTVDB(ApiCall):
             seriesXML = etree.ElementTree(etree.XML(urlData))
         except Exception, e:
             logger.log(u"Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
-            return ''
+            return _responds(RESULT_ERROR, msg="Unable to read result from tvdb")
 
         series = seriesXML.getiterator('Series')
         results = []
@@ -1635,7 +1651,7 @@ class CMD_ShowSearchTVDB(ApiCall):
             results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
 
         lang_id = self.valid_languages[self.lang]
-        return {'results': results, 'langid': lang_id}
+        return _responds(RESULT_SUCCESS, {'results': results, 'langid': lang_id})
 
 
 class CMD_ShowSeasonList(ApiCall):
@@ -1658,7 +1674,7 @@ class CMD_ShowSeasonList(ApiCall):
         """ display the season list for a given show """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         myDB = db.DBConnection(row_type="dict")
         if self.sort == "asc":
@@ -1670,7 +1686,7 @@ class CMD_ShowSeasonList(ApiCall):
             seasonList.append(int(row["season"]))
 
         myDB.connection.close()
-        return seasonList
+        return _responds(RESULT_SUCCESS, seasonList)
 
 
 class CMD_ShowSeasons(ApiCall):
@@ -1693,7 +1709,7 @@ class CMD_ShowSeasons(ApiCall):
         """ display a listing of episodes for all or a given show """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         myDB = db.DBConnection(row_type="dict")
 
@@ -1714,7 +1730,7 @@ class CMD_ShowSeasons(ApiCall):
         else:
             sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
             if len(sqlResults) is 0:
-                raise ApiError("Season not Found")
+                return _responds(RESULT_ERROR, msg="Season not Found")
             seasons = {}
             for row in sqlResults:
                 curEpisode = int(row["episode"])
@@ -1726,7 +1742,7 @@ class CMD_ShowSeasons(ApiCall):
                 seasons[curEpisode] = row
 
         myDB.connection.close()
-        return seasons
+        return _responds(RESULT_SUCCESS, seasons)
 
 
 class CMD_ShowSetQuality(ApiCall):
@@ -1751,7 +1767,7 @@ class CMD_ShowSetQuality(ApiCall):
         """ set the quality for a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         """
         take in a deliminated string of quality,
@@ -1802,7 +1818,7 @@ class CMD_ShowSetQuality(ApiCall):
             newQuality = Quality.combineQualities(iqualityID, aqualityID)
         showObj.quality = newQuality
 
-        return _result(showObj.name + " quality has been changed to " + _get_quality_string(showObj.quality))
+        return _responds(RESULT_SUCCESS, msg=showObj.name + " quality has been changed to " + _get_quality_string(showObj.quality))
 
 
 class CMD_ShowStats(ApiCall):
@@ -1822,7 +1838,7 @@ class CMD_ShowStats(ApiCall):
         """ display episode statistics for a given show """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         # show stats
         episode_status_counts_total = {}
@@ -1905,7 +1921,7 @@ class CMD_ShowStats(ApiCall):
             episodes_stats[statusString] = episode_status_counts_total[statusCode]
 
         myDB.connection.close()
-        return episodes_stats
+        return _responds(RESULT_SUCCESS, episodes_stats)
 
 
 class CMD_ShowUpdate(ApiCall):
@@ -1925,13 +1941,13 @@ class CMD_ShowUpdate(ApiCall):
         """ update a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         try:
             sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
-            return _result(str(showObj.name) + " has queued to be updated")
+            return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has queued to be updated")
         except exceptions.CantUpdateException, e:
-            return _result("Unable to update " + str(showObj.name), ex(e))
+            return _responds(RESULT_FAILURE, "Unable to update " + str(showObj.name), ex(e))
 
 
 class CMD_Shows(ApiCall):
@@ -1961,14 +1977,14 @@ class CMD_Shows(ApiCall):
                         "air_by_date": curShow.air_by_date,
                         "tvrage_id": curShow.tvrid,
                         "tvrage_name": curShow.tvrname}
-            showDict["cache"] = CMD_ShowCache((), {"tvdbid": curShow.tvdbid}).run()
+            showDict["cache"] = CMD_ShowCache((), {"tvdbid": curShow.tvdbid}).run()["data"]
             if self.sort == "name":
                 showDict["tvdbid"] = curShow.tvdbid
                 shows[curShow.name] = showDict
             else:
                 showDict["show_name"] = curShow.name
                 shows[curShow.tvdbid] = showDict
-        return shows
+        return _responds(RESULT_SUCCESS, shows)
 
 
 class CMD_ShowsStats(ApiCall):
@@ -1993,7 +2009,7 @@ class CMD_ShowsStats(ApiCall):
         stats["ep_total"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN (" + ",".join([str(show) for show in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]]) + ")) AND airdate <= " + today + " AND status != " + str(IGNORED) + "")[0][0]
 
         myDB.connection.close()
-        return stats
+        return _responds(RESULT_SUCCESS, stats)
 
 
 _functionMaper = {"help": CMD_Help,
