@@ -232,7 +232,7 @@ class TIVOMetadata(generic.GenericMetadata):
             if myShow["actors"]:
                 for actor in myShow["actors"].split('|'):
                     if actor:
-                        data += ("vActor : " + str(actor) + "\n")
+                        data += ("vActor : " + actor + "\n")
                     
                
             # This is shown on both the Program screen and the Details screen. It uses a single digit to determine the 
