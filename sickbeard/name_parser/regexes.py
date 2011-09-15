@@ -181,10 +181,12 @@ ep_regexes = [
 
               ('bare',
                # Show.Name.102.Source.Quality.Etc-Group
+               # Show.Name.102-103.Source.Quality.Etc-Group
                '''
                ^(?P<series_name>.+?)[. _-]+                # Show_Name and separator
                (?P<season_num>\d{1,2})                     # 1
-               (?P<ep_num>\d{2})                           # 02 and separator
+               (?P<ep_num>\d{2})                           # E01 and separator
+               (-(\d{1,2})(?P<extra_ep_num>\d{2}))?        # E02
                ([. _-]+(?P<extra_info>(?!\d{3}[. _-]+)[^-]+) # Source_Quality_Etc-
                (-(?P<release_group>.+))?)?$                # Group
                '''),
