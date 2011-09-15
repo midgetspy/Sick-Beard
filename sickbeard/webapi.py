@@ -766,12 +766,12 @@ class CMD_EpisodeSearch(ApiCall):
         """ search for an episode """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            raise ApiError("Show not Found")
+            return _responds(RESULT_ERROR, msg="Show not Found")
 
         # retrieve the episode object and fail if we can't get one
         epObj = webserve._getEpisode(self.tvdbid, self.s, self.e)
         if isinstance(epObj, str):
-            raise ApiError("Episode not Found")
+            return _responds(RESULT_ERROR, msg="Episode not Found")
 
         # make a queue item for it and put it on the queue
         ep_queue_item = search_queue.ManualSearchQueueItem(epObj)
@@ -784,7 +784,7 @@ class CMD_EpisodeSearch(ApiCall):
         # return the correct json value
         if ep_queue_item.success:
             status, quality = Quality.splitCompositeStatus(epObj.status) #@UnusedVariable
-            return _responds(RESULT_SUCCESS, msg=_get_quality_string(quality))
+            return _responds(RESULT_SUCCESS, {"quality": _get_quality_string(quality)}, "Snatched (" + _get_quality_string(quality) + ")")
 
         return _responds(RESULT_FAILURE, msg='Unable to find episode')
 
