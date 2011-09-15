@@ -176,7 +176,17 @@
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">SABnzbd Priority</span>
-                                    <input type="text" name="sab_category" value="$sickbeard.SAB_PRI" size="20" />
+                                    <select name="nzb_method" id="nzb_method">
+                                    #set $sab_pri_text = {'-100': "Default Priority", '-2': "Paused", '-1': "Low Priority", '0': "Normal Priority", '1':"High Priority" }
+                                    #for $curAction in ('-100', '-2', '-1', '0', '1'):
+                                      #if $sickbeard.SAB_PRI == $curAction:
+                                        #set $sab_pri = "selected=\"selected\""
+                                      #else
+                                        #set $sab_pri = ""
+                                      #end if
+                                    <option value="$curAction" $sab_pri>$sab_pri_text[$curAction]</option>
+                                    #end for
+                                    </select>
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
