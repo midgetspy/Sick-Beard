@@ -7,7 +7,10 @@ sys.path.append(os.path.abspath('../lib'))
 
 from sickbeard.name_parser import parser
 
-DEBUG = VERBOSE = False
+import sickbeard
+sickbeard.SYS_ENCODING = 'UTF-8'
+
+DEBUG = VERBOSE = True
 
 simple_test_cases = {
               'standard': {
@@ -29,6 +32,7 @@ simple_test_cases = {
               'fov': {
               'Show_Name.1x02.Source_Quality_Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2], 'Source_Quality_Etc', 'Group'),
               'Show Name 1x02': parser.ParseResult(None, 'Show Name', 1, [2]),
+              'Show Name 1x02 x264 Test': parser.ParseResult(None, 'Show Name', 1, [2], 'x264 Test'),
               'Show Name - 1x02 - My Ep Name': parser.ParseResult(None, 'Show Name', 1, [2], 'My Ep Name'),
               'Show_Name.1x02x03x04.Source_Quality_Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'Source_Quality_Etc', 'Group'),
               'Show Name - 1x02-03-04 - My Ep Name': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'My Ep Name'),
@@ -134,6 +138,9 @@ unicode_test_cases = [
                        ),
                       ]
 
+failure_cases = ['7sins-jfcs01e09-720p-bluray-x264']
+
+
 class UnicodeTests(unittest.TestCase):
     
     def _test_unicode(self, name, result):
@@ -145,6 +152,23 @@ class UnicodeTests(unittest.TestCase):
     def test_unicode(self):
         for (name, result) in unicode_test_cases:
             self._test_unicode(name, result)
+
+class FailureCaseTests(unittest.TestCase):
+    
+    def _test_name(self, name):
+        np = parser.NameParser(True)
+        try:
+            parse_result = np.parse(name)
+        except parser.InvalidNameException:
+            return True
+        
+        if VERBOSE:
+            print 'Actual: ', parse_result.which_regex, parse_result
+        return False
+    
+    def test_failures(self):
+        for name in failure_cases:
+            self.assertTrue(self._test_name(name))
 
 class ComboTests(unittest.TestCase):
     
@@ -303,4 +327,7 @@ if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(FailureCaseTests)
     unittest.TextTestRunner(verbosity=2).run(suite)

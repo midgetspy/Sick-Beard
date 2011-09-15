@@ -114,11 +114,11 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
   <tr>
     <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
-    <td><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+    <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
 #if $curShow.quality in $qualityPresets:
-    <td align="center">$qualityPresetStrings[$curShow.quality]</td>
+    <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
-    <td align="center">Custom</td>
+    <td align="center"><span class="quality Custom">Custom</span></td>
 #end if 
     <td align="center"><img src="$sbRoot/images/#if int($curShow.seasonfolders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>

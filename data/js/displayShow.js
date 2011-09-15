@@ -1,36 +1,7 @@
 $(document).ready(function(){
 
-    $('.epSearch').click(function(){
-      var parent = $(this).parent();
-      
-      // put the ajax spinner (for non white bg) placeholder while we wait
-      parent.empty();
-      parent.append($("<img/>").attr({"src": sbRoot+"/images/loading16_dddddd.gif", "height": "16", "alt": "", "title": "loading"}));
-      
-      $.getJSON($(this).attr('href'), function(data){
-          // if they failed then just put the red X
-          if (data.result == 'failure') {
-              img_name = 'no16.png';
-              img_result = 'failed';
-
-          // if the snatch was successful then apply the corresponding class and fill in the row appropriately
-          } else {
-              img_name = 'yes16.png';
-              img_result = 'success';
-              // color the row
-              parent.parent().removeClass('skipped wanted qual good unaired').addClass('good');
-              parent.siblings('.status_column').html(data.result);
-          }
-
-          // put the corresponding image as the result for the the row
-          parent.empty();
-          parent.append($("<img/>").attr({"src": sbRoot+"/images/"+img_name, "height": "16", "alt": img_result, "title": img_result}));
-      });
-
-      // fon't follow the link
-      return false;
-    });
-
+	$('#sbRoot').ajaxEpSearch({'colorRow': true});
+	
     $('#seasonJump').change(function() {
         var id = $(this).val();
         if (id && id != 'jump') {
@@ -137,7 +108,7 @@ $(document).ready(function(){
     
     $.fn.showHideRows = function(whichClass){
 
-        var status = $('#checkboxControls > input, #'+whichClass).attr('checked')
+        var status = $('#checkboxControls > input, #'+whichClass).prop('checked')
         $("tr."+whichClass).each(function(e){
             if (status) {
                 $(this).show();

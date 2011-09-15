@@ -58,9 +58,9 @@ class NZBsProvider(generic.NZBProvider):
 
 	def _get_episode_search_strings(self, ep_obj):
 		return ['^'+x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
-
+	
 	def _doSearch(self, curString, quotes=False, show=None, english=True):
-		curString = curString.replace('.', ' ').replace('-', '.')
+		curString = curString.replace('.', ' ')
 
 		params = {"action": "search",
 				  "q": curString.encode('utf-8'),
