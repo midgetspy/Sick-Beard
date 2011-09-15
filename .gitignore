@@ -30,4 +30,6 @@ desktop.ini
 ehthumbs.db
 Thumbs.db
 .directory
-*~
+*~.pydevproject
+.settings
+.pydevproject
