@@ -290,8 +290,11 @@ class ApiCall(object):
                     self._help[type][paramName] = paramDict[paramName]
             else:
                 self._help[type] = {}
-
-        return self._help
+        msg = "No description available"
+        if "desc" in self._help:
+            msg = self._help["desc"]
+            del self._help["desc"]
+        return _responds(RESULT_SUCCESS, self._help, msg)
 
     def return_missing(self):
         if len(self._missing) == 1:
