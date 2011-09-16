@@ -97,8 +97,6 @@ class Api:
         else:# if debug was not set we wrap the "call_dispatcher" in a try block to assure a json output
             try:
                 outDict = _call_dispatcher(args, kwargs)
-            except ApiError, e: # Api errors that we raised, they are harmless
-                outDict = _responds(RESULT_ERROR, msg=ex(e))
             except Exception, e: # real internal error oohhh nooo :(
                 logger.log("API: " + ex(e), logger.ERROR)
                 errorData = {"error_msg": ex(e),
@@ -155,10 +153,7 @@ class Api:
         remoteIp = cherrypy.request.remote.ip
         apiKey = kwargs.get("apikey", None)
         if not apiKey:
-            # this also checks if the length of the first element
-            # is the length of the realKey .. it is nice but will through the error "no key" even if you miss one char
-            # if args and len(args[0]) == len(realKey):
-            if args: # if we have keyless vars we assume first one is the api key
+            if args: # if we have keyless vars we assume first one is the api key, always !
                 apiKey = args[0]
                 args = args[1:] # remove the apikey from the args tuple
         else:
@@ -190,28 +185,46 @@ def call_dispatcher(args, kwargs):
         cmds = args[0]
         args = args[1:]
 
-    if kwargs.get("cmd"):
-        cmds = kwargs.get("cmd")
+    if "cmd" in kwargs:
+        cmds = kwargs["cmd"]
+        del kwargs["cmd"]
 
     outDict = {}
     if cmds != None:
         cmds = cmds.split("|")
+        multiCmds = bool(len(cmds) > 1)
         for cmd in cmds:
             curArgs, curKwargs = filter_params(cmd, args, kwargs)
+            cmdIndex = None
+            if len(cmd.split("_")) > 1: # was a index used for this cmd ?
+                cmd, cmdIndex = cmd.split("_") # this gives us the clear cmd and the index
+
             logger.log(cmd + ": curKwargs " + str(curKwargs), logger.DEBUG)
+            try:
+                if cmd in _functionMaper:
+                    curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run() # get the cmd class, init it and run()
+                elif _is_int(cmd):
+                    curOutDict = TVDBShorthandWrapper(curArgs, curKwargs, cmd).run()
+                else:
+                    curOutDict = _responds(RESULT_ERROR, "No such cmd: '" + cmd + "'")
+            except ApiError, e: # Api errors that we raised, they are harmless
+                curOutDict = _responds(RESULT_ERROR, msg=ex(e))
 
-            if _functionMaper.get(cmd, False):
-                curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run()
-            elif _is_int(cmd):
-                curOutDict = TVDBShorthandWrapper(curArgs, curKwargs, cmd).run()
-            else:
-                curOutDict = _responds(RESULT_FAILURE, "No such cmd: '" + cmd + "'")
-
-            if len(cmds) > 1:
-                outDict["cmd_" + cmd] = curOutDict
+            if multiCmds:
+                # note: if multiple same cmds are issued but one has not an index defined it will override all others
+                # or the other way around, this depends on the order of the cmds
+                # this is not a bug
+                if cmdIndex is None: # do we need a index dict for this cmd ?
+                    outDict[cmd] = curOutDict
+                else:
+                    if not cmd in outDict:
+                        outDict[cmd] = {}
+                    outDict[cmd][cmdIndex] = curOutDict
             else:
                 outDict = curOutDict
-                break
+
+        if multiCmds: # if we had multiple cmds we have to wrap it in a response dict
+            outDict = _responds(RESULT_SUCCESS, outDict)
     else: # index / no cmd given
         outDict = CMD_SickBeard(args, kwargs).run()
 
@@ -224,6 +237,18 @@ def filter_params(cmd, args, kwargs):
         args are shared across all cmds
 
         all args and kwarks are lowerd
+
+        cmd are separated by "|" e.g. &cmd=shows|future
+        kwargs are namespaced with "." e.g. show.tvdbid=101501
+        if a karg has no namespace asing it anyways (global)
+
+        full e.g.
+        /api?apikey=1234&cmd=show.seasonlist_asd|show.seasonlist_2&show.seasonlist_asd.tvdbid=101501&show.seasonlist_2.tvdbid=79488&sort=asc
+
+        two calls of show.seasonlist
+        one has the index "asd" the other one "2"
+        the "tvdbid" kwargs / params have the indexed cmd as a namspace
+        and the kwarg / param "sort" is a used as a global
     """
     curArgs = []
     for arg in args:
@@ -232,11 +257,11 @@ def filter_params(cmd, args, kwargs):
 
     curKwargs = {}
     for kwarg in kwargs:
-        # logger.log("cmd: "+cmd+" kwarg: "+kwarg+" find: "+str(kwarg.find(cmd+".")), logger.DEBUG)
-        curKwargs[kwarg] = kwargs[kwarg]
         if kwarg.find(cmd + ".") == 0:
             cleanKey = kwarg.rpartition(".")[2]
             curKwargs[cleanKey] = kwargs[kwarg].lower()
+        elif not "." in kwarg: # the kwarg was not namespaced therefore a "global"
+            curKwargs[kwarg] = kwargs[kwarg]
     return curArgs, curKwargs
 
 
@@ -2007,7 +2032,11 @@ class CMD_ShowsStats(ApiCall):
         myDB.connection.close()
         return _responds(RESULT_SUCCESS, stats)
 
+# WARNING: never define a cmd call string that contains a "_" (underscore)
+# this is reserved for cmd indexes used while cmd chaining
 
+# WARNING: never define a param name that contains a "." (dot)
+# this is reserved for cmd namspaces used while cmd chaining
 _functionMaper = {"help": CMD_Help,
                   "future": CMD_ComingEpisodes,
                   "episode": CMD_Episode,
