@@ -59,6 +59,7 @@ result_type_map = {RESULT_SUCCESS: "success",
                   }
 # basically everything except RESULT_SUCCESS / success is bad
 
+
 class Api:
     """ api class that returns json results """
     version = 0.1
@@ -100,11 +101,10 @@ class Api:
                 outDict = _responds(RESULT_ERROR, msg=ex(e))
             except Exception, e: # real internal error oohhh nooo :(
                 logger.log("API: " + ex(e), logger.ERROR)
-                errorData = {"error_msg":ex(e),
-                             "args":args,
+                errorData = {"error_msg": ex(e),
+                             "args": args,
                              "kwargs": kwargs}
                 outDict = _responds(RESULT_FATAL, errorData, "Sickbeard encountered an internal error! Please report to the Devs")
-
 
         return outputCallback(outDict)
 
