@@ -233,6 +233,11 @@ USE_LIBNOTIFY = False
 LIBNOTIFY_NOTIFY_ONSNATCH = False
 LIBNOTIFY_NOTIFY_ONDOWNLOAD = False
 
+USE_SUPERTOASTY = False
+SUPERTOASTY_NOTIFY_ONSNATCH = False
+SUPERTOASTY_NOTIFY_ONDOWNLOAD = False
+SUPERTOASTY_DEVICEID = None
+
 USE_NMJ = False
 NMJ_HOST = None
 NMJ_DATABASE = None
@@ -362,6 +367,7 @@ def initialize(consoleLogging=True):
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
+				USE_SUPERTOASTY, SUPERTOASTY_NOTIFY_ONSNATCH, SUPERTOASTY_NOTIFY_ONDOWNLOAD, SUPERTOASTY_DEVICEID, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
@@ -562,6 +568,11 @@ def initialize(consoleLogging=True):
         NOTIFO_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_ondownload', 0))
         NOTIFO_USERNAME = check_setting_str(CFG, 'Notifo', 'notifo_username', '')
         NOTIFO_APISECRET = check_setting_str(CFG, 'Notifo', 'notifo_apisecret', '')
+        
+        USE_SUPERTOASTY = bool(check_setting_int(CFG, 'SuperToasty', 'use_supertoasty', 0))
+        SUPERTOASTY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'SuperToasty', 'supertoasty_notify_onsnatch', 0))
+        SUPERTOASTY_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'SuperToasty', 'supertoasty_notify_ondownload', 0))
+        SUPERTOASTY_DEVICEID = check_setting_str(CFG, 'SuperToasty', 'supertoasty_deviceid', '')
 
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
         LIBNOTIFY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onsnatch', 0))
@@ -1057,6 +1068,12 @@ def save_config():
     new_config['Notifo']['notifo_notify_ondownload'] = int(NOTIFO_NOTIFY_ONDOWNLOAD)
     new_config['Notifo']['notifo_username'] = NOTIFO_USERNAME
     new_config['Notifo']['notifo_apisecret'] = NOTIFO_APISECRET
+
+    new_config['SuperToasty'] = {}
+    new_config['SuperToasty']['use_supertoasty'] = int(USE_SUPERTOASTY)
+    new_config['SuperToasty']['supertoasty_notify_onsnatch'] = int(SUPERTOASTY_NOTIFY_ONSNATCH)
+    new_config['SuperToasty']['supertoasty_notify_ondownload'] = int(SUPERTOASTY_NOTIFY_ONDOWNLOAD)
+    new_config['SuperToasty']['supertoasty_deviceid'] = SUPERTOASTY_DEVICEID
 
     new_config['Libnotify'] = {}
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
