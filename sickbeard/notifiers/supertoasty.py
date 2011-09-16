@@ -36,9 +36,11 @@ class SuperToastyNotifier:
             data = urllib.urlopen(apiurl)
         except IOError:
             return False
-        data.close()
         
-        return True
+        if not "Server Error" in data.read():
+            return True
+        else:
+            return False
 
 
     def notify_snatch(self, ep_name, title="Snatched:"):

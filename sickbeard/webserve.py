@@ -1137,7 +1137,7 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
-                          use_supertoasty=None, supertoasty_notify_onsnatch=None, supertoasty_notify_ondownload=None, supertoasty_deviceId=None,
+                          use_supertoasty=None, supertoasty_notify_onsnatch=None, supertoasty_notify_ondownload=None, supertoasty_deviceid=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
@@ -1312,7 +1312,7 @@ class ConfigNotifications:
         sickbeard.USE_SUPERTOASTY = use_supertoasty
         sickbeard.SUPERTOASTY_NOTIFY_ONSNATCH = supertoasty_notify_onsnatch
         sickbeard.SUPERTOASTY_NOTIFY_ONDOWNLOAD = supertoasty_notify_ondownload
-        sickbeard.SUPERTOASTY_DEVICEID = supertoasty_deviceId
+        sickbeard.SUPERTOASTY_DEVICEID = supertoasty_deviceid
 
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
