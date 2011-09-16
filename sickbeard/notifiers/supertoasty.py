@@ -21,7 +21,7 @@ import sickbeard
 
 from sickbeard import logger
 
-API_URL = "http://api.supertoasty.com/notify/{DEVICEID}?title={TITLE}&text={TEXT}&sender=SickBeard&image=https://github.com/midgetspy/Sick-Beard/raw/master/data/images/sickbeard_touch_icon.png"
+API_URL = "http://api.supertoasty.com/notify/%(DEVICEID)s?title=%(TITLE)s&text=%(TEXT)s&sender=SickBeard&image=https://github.com/midgetspy/Sick-Beard/raw/master/data/images/sickbeard_touch_icon.png"
 
 class SuperToastyNotifier:
 
@@ -31,13 +31,11 @@ class SuperToastyNotifier:
     def _sendSuperToasty(self, msg, title, deviceId):
         msg = msg.strip()
         apiurl = API_URL % {"DEVICEID": deviceId, "TITLE": title, "TEXT": msg}
-
+        
         try:
             data = urllib.urlopen(apiurl)
         except IOError:
             return False
-        
-        logger.log(data)
         data.close()
         
         return True
@@ -53,7 +51,7 @@ class SuperToastyNotifier:
 
     def _notifySuperToasty(self, title, message=None, deviceId=None, force=False):
         if not sickbeard.USE_SUPERTOASTY and not force:
-            logger.log("Notification for SuperToasty not enabled, skipping this notification", logger.DEBUG)
+            logger.log(u"Notification for SuperToasty not enabled, skipping this notification", logger.DEBUG)
             return False
 
         if not deviceId:

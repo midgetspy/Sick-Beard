@@ -37,6 +37,13 @@ $(document).ready(function(){
         function (data){ $('#testPLEX-result').html(data);});
     });
 
+    $('#testSuperToasty').click(function(){
+        $('#testSuperToasty-result').html(loading);
+        var supertoasty_deviceId = $("#supertoasty_deviceid").val();
+        $.get(sbRoot+"/home/testSuperToasty", {'deviceId': supertoasty_deviceId},
+        function (data){ $('#testSuperToasty-result').html(data); });
+    });
+    
     $('#testNotifo').click(function(){
         $('#testNotifo-result').html(loading);
         var notifo_username = $("#notifo_username").val();
