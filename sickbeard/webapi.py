@@ -102,7 +102,7 @@ class Api:
                 errorData = {"error_msg": ex(e),
                              "args": args,
                              "kwargs": kwargs}
-                outDict = _responds(RESULT_FATAL, errorData, "Sickbeard encountered an internal error! Please report to the Devs")
+                outDict = _responds(RESULT_FATAL, errorData, "SickBeard encountered an internal error! Please report to the Devs")
 
         return outputCallback(outDict)
 
@@ -606,7 +606,7 @@ class CMD_Help(ApiCall):
         if self.subject in _functionMaper:
             out = _responds(RESULT_SUCCESS, _functionMaper.get(self.subject)((), {"help": 1}).run())
         else:
-            out = _responds(RESULT_FAILURE, msg="no such cmd")
+            out = _responds(RESULT_FAILURE, msg="No such cmd")
         return out
 
 
@@ -726,12 +726,12 @@ class CMD_Episode(ApiCall):
         """ display detailed info about an episode """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         myDB = db.DBConnection(row_type="dict")
         sqlResults = myDB.select("SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
         if not len(sqlResults) == 1:
-            raise ApiError("Episode not Found")
+            raise ApiError("Episode not found")
         episode = sqlResults[0]
         # handle path options
         # absolute vs relative vs broken
@@ -751,7 +751,9 @@ class CMD_Episode(ApiCall):
             episode["location"] = ""
         # convert stuff to human form
         episode["airdate"] = _ordinal_to_dateForm(episode["airdate"])
-        episode["status"] = _get_status_Strings(episode["status"])
+        status, quality = Quality.splitCompositeStatus(int(episode["status"]))
+        episode["status"] = _get_status_Strings(status)
+        episode["quality"] = _get_quality_string(quality)
 
         myDB.connection.close()
         return _responds(RESULT_SUCCESS, episode)
@@ -778,12 +780,12 @@ class CMD_EpisodeSearch(ApiCall):
         """ search for an episode """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         # retrieve the episode object and fail if we can't get one
         epObj = webserve._getEpisode(self.tvdbid, self.s, self.e)
         if isinstance(epObj, str):
-            return _responds(RESULT_FAILURE, msg="Episode not Found")
+            return _responds(RESULT_FAILURE, msg="Episode not found")
 
         # make a queue item for it and put it on the queue
         ep_queue_item = search_queue.ManualSearchQueueItem(epObj)
@@ -796,6 +798,7 @@ class CMD_EpisodeSearch(ApiCall):
         # return the correct json value
         if ep_queue_item.success:
             status, quality = Quality.splitCompositeStatus(epObj.status) #@UnusedVariable
+            # TODO: split quality and status?
             return _responds(RESULT_SUCCESS, {"quality": _get_quality_string(quality)}, "Snatched (" + _get_quality_string(quality) + ")")
 
         return _responds(RESULT_FAILURE, msg='Unable to find episode')
@@ -824,7 +827,7 @@ class CMD_EpisodeSetStatus(ApiCall):
         """ set status of an episode """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         # convert the string status to a int
         for status in statusStrings.statusStrings:
@@ -837,11 +840,11 @@ class CMD_EpisodeSetStatus(ApiCall):
 
         epObj = showObj.getEpisode(int(self.s), int(self.e))
         if epObj == None:
-            return _responds(RESULT_FAILURE, msg="Episode not Found")
+            return _responds(RESULT_FAILURE, msg="Episode not found")
 
         #only allow the status options we want
         if int(self.status) not in (3, 5, 6, 7):
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         segment_list = []
         if int(self.status) == WANTED:
@@ -903,7 +906,7 @@ class CMD_Exceptions(ApiCall):
         else:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
             if not showObj:
-                return _responds(RESULT_FAILURE, msg="Show not Found")
+                return _responds(RESULT_FAILURE, msg="Show not found")
 
             sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
             scene_exceptions = []
@@ -956,9 +959,10 @@ class CMD_History(ApiCall):
             status = _get_status_Strings(status)
             if self.type and not status == self.type:
                 continue
-            row["action"] = status
+            row["status"] = status
             row["quality"] = _get_quality_string(quality)
             row["date"] = _historyDate_to_dateTimeForm(str(row["date"]))
+            del row["action"]
             _rename_element(row, "showid", "tvdbid")
             row["resource_path"] = os.path.dirname(row["resource"])
             row["resource"] = os.path.basename(row["resource"])
@@ -1102,7 +1106,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         nextBacklog = sickbeard.backlogSearchScheduler.nextRun().strftime(dateFormat).decode(sickbeard.SYS_ENCODING)
 
         myDB.connection.close()
-        data = {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_status": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
+        data = {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_running": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
         return _responds(RESULT_SUCCESS, data)
 
 
@@ -1325,7 +1329,7 @@ class CMD_Show(ApiCall):
         """ display information for a given show """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         showDict = {}
         showDict["season_list"] = CMD_ShowSeasonList((), {"tvdbid": self.tvdbid}).run()["data"]
@@ -1535,7 +1539,7 @@ class CMD_ShowCache(ApiCall):
         """ check sickbeard's cache to see if the banner or poster image for a show is valid """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         #TODO: catch if cache dir is missing/invalid.. so it doesn't break show/show.cache
         #return {"poster": 0, "banner": 0}
@@ -1570,7 +1574,7 @@ class CMD_ShowDelete(ApiCall):
         """ delete a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
             return _responds(RESULT_FAILURE, msg="Show can not be deleted while being added or updated")
@@ -1596,7 +1600,7 @@ class CMD_ShowGetQuality(ApiCall):
         """ get quality setting for a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         anyQualities, bestQualities = _mapQuality(showObj)
 
@@ -1620,7 +1624,7 @@ class CMD_ShowRefresh(ApiCall):
         """ refresh a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         try:
             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
@@ -1695,7 +1699,7 @@ class CMD_ShowSeasonList(ApiCall):
         """ display the season list for a given show """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         myDB = db.DBConnection(row_type="dict")
         if self.sort == "asc":
@@ -1730,7 +1734,7 @@ class CMD_ShowSeasons(ApiCall):
         """ display a listing of episodes for all or a given show """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         myDB = db.DBConnection(row_type="dict")
 
@@ -1738,7 +1742,9 @@ class CMD_ShowSeasons(ApiCall):
             sqlResults = myDB.select("SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
             seasons = {}
             for row in sqlResults:
-                row["status"] = statusStrings[row["status"]]
+                status, quality = Quality.splitCompositeStatus(int(row["status"]))
+                row["status"] = _get_status_Strings(status)
+                row["quality"] = _get_quality_string(quality)
                 row["airdate"] = _ordinal_to_dateForm(row["airdate"])
                 curSeason = int(row["season"])
                 curEpisode = int(row["episode"])
@@ -1751,12 +1757,14 @@ class CMD_ShowSeasons(ApiCall):
         else:
             sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
             if len(sqlResults) is 0:
-                return _responds(RESULT_FAILURE, msg="Season not Found")
+                return _responds(RESULT_FAILURE, msg="Season not found")
             seasons = {}
             for row in sqlResults:
                 curEpisode = int(row["episode"])
                 del row["episode"]
-                row["status"] = statusStrings[row["status"]]
+                status, quality = Quality.splitCompositeStatus(int(row["status"]))
+                row["status"] = _get_status_Strings(status)
+                row["quality"] = _get_quality_string(quality)
                 row["airdate"] = _ordinal_to_dateForm(row["airdate"])
                 if not curEpisode in seasons:
                     seasons[curEpisode] = {}
@@ -1788,7 +1796,7 @@ class CMD_ShowSetQuality(ApiCall):
         """ set the quality for a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         """
         take in a deliminated string of quality,
@@ -1859,7 +1867,7 @@ class CMD_ShowStats(ApiCall):
         """ display episode statistics for a given show """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         # show stats
         episode_status_counts_total = {}
@@ -1914,7 +1922,7 @@ class CMD_ShowStats(ApiCall):
             if statusCode is "total":
                 episodes_stats["downloaded"]["total"] = episode_qualities_counts_download[statusCode]
                 continue
-            status, quality = Quality.splitCompositeStatus(statusCode)
+            status, quality = Quality.splitCompositeStatus(int(statusCode))
             statusString = Quality.qualityStrings[quality].lower().replace(" ", "_").replace("(", "").replace(")", "")
             episodes_stats["downloaded"][statusString] = episode_qualities_counts_download[statusCode]
 
@@ -1925,7 +1933,7 @@ class CMD_ShowStats(ApiCall):
             if statusCode is "total":
                 episodes_stats["snatched"]["total"] = episode_qualities_counts_snatch[statusCode]
                 continue
-            status, quality = Quality.splitCompositeStatus(statusCode)
+            status, quality = Quality.splitCompositeStatus(int(statusCode))
             statusString = Quality.qualityStrings[quality].lower().replace(" ", "_").replace("(", "").replace(")", "")
             if Quality.qualityStrings[quality] in episodes_stats["snatched"]:
                 episodes_stats["snatched"][statusString] += episode_qualities_counts_snatch[statusCode]
@@ -1937,7 +1945,7 @@ class CMD_ShowStats(ApiCall):
             if statusCode is "total":
                 episodes_stats["total"] = episode_status_counts_total[statusCode]
                 continue
-            status, quality = Quality.splitCompositeStatus(statusCode)
+            status, quality = Quality.splitCompositeStatus(int(statusCode))
             statusString = statusStrings.statusStrings[statusCode].lower().replace(" ", "_").replace("(", "").replace(")", "")
             episodes_stats[statusString] = episode_status_counts_total[statusCode]
 
@@ -1962,7 +1970,7 @@ class CMD_ShowUpdate(ApiCall):
         """ update a show in sickbeard """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
-            return _responds(RESULT_FAILURE, msg="Show not Found")
+            return _responds(RESULT_FAILURE, msg="Show not found")
 
         try:
             sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
