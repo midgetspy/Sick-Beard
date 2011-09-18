@@ -558,7 +558,7 @@ def _mapQuality(showObj):
     anyQualities = []
     bestQualities = []
 
-    iqualityID, aqualityID = Quality.splitQuality(int(showObj.quality))
+    iqualityID, aqualityID = Quality.splitQuality(int(showObj))
     if iqualityID:
         for quality in iqualityID:
             anyQualities.append(quality_map[quality])
@@ -1106,7 +1106,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         nextBacklog = sickbeard.backlogSearchScheduler.nextRun().strftime(dateFormat).decode(sickbeard.SYS_ENCODING)
 
         myDB.connection.close()
-        data = {"backlog_paused": int(backlogPaused), "backlog_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_running": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
+        data = {"backlog_is_paused": int(backlogPaused), "backlog_is_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_is_running": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
         return _responds(RESULT_SUCCESS, data)
 
 
@@ -1144,18 +1144,8 @@ class CMD_SickBeardGetDefaults(ApiCall):
     def run(self):
         """ get sickbeard user defaults """
 
-        quality_map = _getQualityMap()
+        anyQualities, bestQualities = _mapQuality(sickbeard.QUALITY_DEFAULT)
 
-        anyQualities = []
-        bestQualities = []
-
-        iqualityID, aqualityID = Quality.splitQuality(int(sickbeard.QUALITY_DEFAULT))
-        if iqualityID:
-            for quality in iqualityID:
-                anyQualities.append(quality_map[quality])
-        if aqualityID:
-            for quality in aqualityID:
-                bestQualities.append(quality_map[quality])
         data = {"status": statusStrings[sickbeard.STATUS_DEFAULT], "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities}
         return _responds(RESULT_SUCCESS, data)
 
@@ -1197,7 +1187,7 @@ class CMD_SickBeardPauseBacklog(ApiCall):
             return _responds(RESULT_SUCCESS, {"status": 0}, "Backlog Paused")
         else:
             sickbeard.searchQueueScheduler.action.unpause_backlog() #@UndefinedVariable
-            return _responds(RESULT_SUCCESS, {"status": 1}, "Backlog Unaused")
+            return _responds(RESULT_SUCCESS, {"status": 1}, "Backlog Unpaused")
 
 
 class CMD_SickBeardPing(ApiCall):
@@ -1245,8 +1235,8 @@ class CMD_SickBeardSetDefaults(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", _getQualityMap().values())
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", _getQualityMap().values()[1:])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.season_folder, args = self.check_params(args, kwargs, "season_folder", None, False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         # super, missing, help
@@ -1309,7 +1299,7 @@ class CMD_SickBeardShutdown(ApiCall):
     def run(self):
         """ shutdown sickbeard """
         threading.Timer(2, sickbeard.invoke_shutdown).start()
-        return _responds(RESULT_SUCCESS, msg="Sick Beard is shutting down...")
+        return _responds(RESULT_SUCCESS, msg="SickBeard is shutting down...")
 
 
 class CMD_Show(ApiCall):
@@ -1344,7 +1334,7 @@ class CMD_Show(ApiCall):
         showDict["genre"] = genreList
         showDict["quality"] = _get_quality_string(showObj.quality)
 
-        anyQualities, bestQualities = _mapQuality(showObj)
+        anyQualities, bestQualities = _mapQuality(showObj.quality)
         showDict["quality_details"] = {"initial": anyQualities, "archive": bestQualities}
 
         try:
@@ -1602,7 +1592,7 @@ class CMD_ShowGetQuality(ApiCall):
         if not showObj:
             return _responds(RESULT_FAILURE, msg="Show not found")
 
-        anyQualities, bestQualities = _mapQuality(showObj)
+        anyQualities, bestQualities = _mapQuality(showObj.quality)
 
         return _responds(RESULT_SUCCESS, {"initial": anyQualities, "archive": bestQualities})
 
@@ -1787,8 +1777,10 @@ class CMD_ShowSetQuality(ApiCall):
         # required
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", _getQualityMap().values())
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", _getQualityMap().values()[1:])
+        # this for whatever reason removes hdbluray not sdtv... which is just wrong. reverting to previous code.. plus we didnt use the new code everywhere.
+        # self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", _getQualityMap().values()[1:])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
