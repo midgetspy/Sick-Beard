@@ -988,7 +988,7 @@ class CMD_HistoryClear(ApiCall):
         myDB.action("DELETE FROM history WHERE 1=1")
 
         myDB.connection.close()
-        return _responds(RESULT_SUCCESS, "History Cleared")
+        return _responds(RESULT_SUCCESS, msg="History Cleared")
 
 
 class CMD_HistoryTrim(ApiCall):
