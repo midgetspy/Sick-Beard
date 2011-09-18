@@ -860,10 +860,10 @@ class CMD_EpisodeSetStatus(ApiCall):
         with epObj.lock:
             # don't let them mess up UNAIRED episodes
             if epObj.status == UNAIRED:
-                return _responds(RESULT_FAILURE, {"ep_status": statusStrings[epObj.status]}, "Refusing to change status because it is UNAIRED")
+                return _responds(RESULT_FAILURE, msg="Refusing to change status because it is UNAIRED")
 
             if int(self.status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
-                return _responds(RESULT_FAILURE, {"ep_status": statusStrings[epObj.status]}, "Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
+                return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
 
             epObj.status = int(self.status)
             epObj.saveToDB()
@@ -872,9 +872,9 @@ class CMD_EpisodeSetStatus(ApiCall):
                 cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
                 sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
                 logger.log(u"Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
-                return _responds(RESULT_SUCCESS, {"ep_status": statusStrings[epObj.status]}, "Episode status changed to Wanted, and backlog started")
+                return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
 
-        return _responds(RESULT_SUCCESS, {"ep_status": statusStrings[epObj.status]}, "Episode status successfully changed to " + statusStrings[epObj.status])
+        return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
 
 
 class CMD_Exceptions(ApiCall):
@@ -1184,10 +1184,10 @@ class CMD_SickBeardPauseBacklog(ApiCall):
         """ pause the backlog search """
         if self.pause == True:
             sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
-            return _responds(RESULT_SUCCESS, {"status": 0}, "Backlog Paused")
+            return _responds(RESULT_SUCCESS, msg="Backlog Paused")
         else:
             sickbeard.searchQueueScheduler.action.unpause_backlog() #@UndefinedVariable
-            return _responds(RESULT_SUCCESS, {"status": 1}, "Backlog Unpaused")
+            return _responds(RESULT_SUCCESS, msg="Backlog Unpaused")
 
 
 class CMD_SickBeardPing(ApiCall):
