@@ -2267,7 +2267,7 @@ class Home:
             whiteWords = [x.strip() for x in whiteWords.split(",")]
             bwl.set_white_keywords_for("global", whiteWords)
         else:
-            bwl.set_black_keywords_for("global", [])
+            bwl.set_white_keywords_for("global", [])
 
         if blackWords:
             blackWords = [x.strip() for x in blackWords.split(",")]
