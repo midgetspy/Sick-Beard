@@ -177,7 +177,7 @@
                                 <label class="nocheck clearfix">
                                     <span class="component-title">SABnzbd New Priority</span>
                                     <select name="sab_prioritynew" id="sab_prioritynew">
-                                    #set $sab_prioritynew_text = {'-100': "Default Priority", '-2': "Paused", '-1': "Low Priority", '0': "Normal Priority", '1':"High Priority" }
+                                    #set $sab_prioritynew_text = {'-100': "Default Priority", '-2': "Paused", '-1': "Low Priority", '0': "Normal Priority", '1':"High Priority", '2':"Force" }
                                     #for $curAction in ('-100', '-2', '-1', '0', '1'):
                                       #if $sickbeard.SAB_PRIORITYNEW == $curAction:
                                         #set $sab_prioritynew = "selected=\"selected\""
@@ -198,7 +198,7 @@
                                 <label class="nocheck clearfix">
                                     <span class="component-title">SABnzbd Old Priority</span>
                                     <select name="sab_priorityold" id="sab_priorityold">
-                                    #set $sab_priorityold_text = {'-100': "Default Priority", '-2': "Paused", '-1': "Low Priority", '0': "Normal Priority", '1':"High Priority" }
+                                    #set $sab_priorityold_text = {'-100': "Default Priority", '-2': "Paused", '-1': "Low Priority", '0': "Normal Priority", '1':"High Priority", '2':"Force" }
                                     #for $curAction in ('-100', '-2', '-1', '0', '1'):
                                       #if $sickbeard.SAB_PRIORITYOLD == $curAction:
                                         #set $sab_priorityold = "selected=\"selected\""
