@@ -228,6 +228,7 @@ class TVShow(object):
 
         cachedShow = t[self.tvdbid]
         cachedSeasons = {}
+        deleteEp = False
 
         for curResult in sqlResults:
 
