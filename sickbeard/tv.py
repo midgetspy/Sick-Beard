@@ -228,10 +228,11 @@ class TVShow(object):
 
         cachedShow = t[self.tvdbid]
         cachedSeasons = {}
-        deleteEp = False
 
         for curResult in sqlResults:
 
+            deleteEp = False
+                    
             curSeason = int(curResult["season"])
             curEpisode = int(curResult["episode"])
             if curSeason not in cachedSeasons:
@@ -250,8 +251,8 @@ class TVShow(object):
                 curEp = self.getEpisode(curSeason, curEpisode)
                 
                 # if we found out that the ep is no longer on TVDB then delete it from our database too
-                #if deleteEp:
-                    #curEp.deleteEpisode()
+                if deleteEp:
+                    curEp.deleteEpisode()
                 
                 curEp.loadFromDB(curSeason, curEpisode)
                 curEp.loadFromTVDB(tvapi=t, cachedSeason=cachedSeasons[curSeason])
