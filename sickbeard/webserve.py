@@ -2253,6 +2253,8 @@ class Home:
                     group = sickbeard.ADBA_CONNECTION.group(gname=groupName)
                     for line in group.datalines:
                         shortWhiteList.append(line["shortname"])
+            else:
+                shortWhiteList = whitelist
             bwl.set_white_keywords_for("release_group", shortWhiteList)
         else:
             bwl.set_white_keywords_for("release_group", [])
@@ -2265,6 +2267,8 @@ class Home:
                     group = sickbeard.ADBA_CONNECTION.group(gname=groupName)
                     for line in group.datalines:
                         shortBlacklist.append(line["shortname"])
+            else:
+                shortBlacklist = blacklist
             bwl.set_black_keywords_for("release_group", shortBlacklist)
         else:
             bwl.set_black_keywords_for("release_group", [])

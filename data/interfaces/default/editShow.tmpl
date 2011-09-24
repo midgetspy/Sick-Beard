@@ -83,7 +83,9 @@ Needed words: <input type="text" name="whiteWords" value="$whiteWords"><br />
 <p>
 Realease Groups:
 </p>
-
+<input type="text" id="addToPoolText"/>
+<input type="button" value="Add to White" id="addToWhite">
+<input type="button" value="Add to Black" id="addToBlack"><br/>
 <div class="blackwhiteliste white">
 	<span>White:</span>
 	<select multiple id="white">
@@ -156,9 +158,28 @@ Realease Groups:
 	 	return !\$('#pool option:selected').remove().appendTo('#black');
 	 });
 	\$('#removeB').click(function() {
-		return !\$('#black option:selected').remove().appendTo('#pool');
-	});
-	
+        return !\$('#black option:selected').remove().appendTo('#pool');
+    });
+    \$('#addToWhite').click(function() {
+        var group = \$('#addToPoolText').attr("value")
+        if(group == "")
+            return
+        \$('#addToPoolText').attr("value", "")
+        var option = \$("<option>")
+        option.attr("value",group)
+        option.html(group)
+        return option.appendTo('#white');
+    });
+    \$('#addToBlack').click(function() {
+        var group = \$('#addToPoolText').attr("value")
+        if(group == "")
+            return
+        \$('#addToPoolText').attr("value", "")
+        var option = \$("<option>")
+        option.attr("value",group)
+        option.html(group)
+        return option.appendTo('#black');
+    });
 	
 //-->
 </script>
