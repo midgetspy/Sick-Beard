@@ -243,13 +243,14 @@ def isGoodResult(name, show, log=True):
     showNames = map(sanitizeSceneName, all_show_names) + all_show_names
 
     for curName in set(showNames):
-        escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
         if not show.is_anime:
+            escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
             curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         else:
-            curRegex = '^.*?'+escaped_name + '.*'# FIXME: find a "automatically-created" regex for anime releases
-            
-        
+            escaped_name = re.sub('\\\\[\\s.-]', '[\W_]+', re.escape(curName))
+            # FIXME: find a "automatically-created" regex for anime releases # test at http://regexr.com?2uon3
+            curRegex = '^(\[.*?\])?[ _.]*' + escaped_name + '(([ _.]*-)|([ ._-]+\d+)|([ ._-]+OVA)|([ ._-]+s\d{2})).*'
+
         if log:
             logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
 
