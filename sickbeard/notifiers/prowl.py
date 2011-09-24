@@ -64,10 +64,14 @@ class ProwlNotifier:
                 'description': message.encode('utf-8'),
                 'priority': prowl_priority }
 
-        http_handler.request("POST",
-                                "/publicapi/add",
-                                headers = {'Content-type': "application/x-www-form-urlencoded"},
-                                body = urlencode(data))
+        try:
+            http_handler.request("POST",
+                                    "/publicapi/add",
+                                    headers = {'Content-type': "application/x-www-form-urlencoded"},
+                                    body = urlencode(data))
+        except SSLError:
+            logger.log(u"Prowl notification failed.", logger.ERROR)
+            return False
         response = http_handler.getresponse()
         request_status = response.status
 
