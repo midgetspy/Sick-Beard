@@ -10,7 +10,9 @@ from sickbeard.name_parser import parser
 import sickbeard
 sickbeard.SYS_ENCODING = 'UTF-8'
 
+
 DEBUG = VERBOSE = True
+
 
 simple_test_cases = {
               'standard': {
@@ -60,7 +62,6 @@ simple_test_cases = {
               'show.name.2010.222.123.source.quality.etc-group': parser.ParseResult(None, 'show name 2010.222', 1, [23], 'source.quality.etc', 'group'),
               'Show.Name.102': parser.ParseResult(None, 'Show Name', 1, [2]),
               'the.event.401.hdtv-lol': parser.ParseResult(None, 'the event', 4, [1], 'hdtv', 'lol'),
-              'show.name.2010.special.hdtv-blah': None,
               },
               
               'stupid': {
@@ -101,7 +102,7 @@ simple_test_cases = {
               '2010-11-23 - Ep Name': parser.ParseResult(None, extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
                },
                
-              'anime_standard': {
+              'anime_ultimate': {
               '[Tsuki] Bleach - 301 [1280x720][61D1D4EE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720', 'Tsuki', None, [301]),
               '[Tsuki] Fairy Tail - 70 [1280x720][C4807111]': parser.ParseResult(None, 'Fairy Tail', None, [], '1280x720', 'Tsuki', None, [70]),
               '[SGKK] Bleach 312v2 [720p MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p MKV', 'SGKK', None, [312]),
@@ -110,16 +111,19 @@ simple_test_cases = {
               '[SFW-Chihiro] Dance in the Vampire Bund - 12 [1920x1080 Blu-ray FLAC][2F6DBC66].mkv': parser.ParseResult(None, 'Dance in the Vampire Bund', None, [], '1920x1080 Blu-ray FLAC', 'SFW-Chihiro', None, [12]),
               '[SHiN-gx] Hanasaku Iroha - 01 [1280x720 h.264 AAC][BDC36683]': parser.ParseResult(None, 'Hanasaku Iroha', None, [], '1280x720 h.264 AAC', 'SHiN-gx', None, [1]),
               '[SFW-Chihiro] Dance in the Vampire Bund - 02 [1920x1080 Blu-ray FLAC][C1FA0A09]': parser.ParseResult(None, 'Dance in the Vampire Bund', None, [], '1920x1080 Blu-ray FLAC', 'SFW-Chihiro', None, [2]),
-              },
-               
-              'anime_standard_round': {
-              '[SGKK] Bleach - 312v2 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720 h264 AAC', 'SGKK', None, [312]),
+              '[HorribleSubs] No. 6 - 11 [720p]': parser.ParseResult(None, 'No. 6', None, [], '720p', 'HorribleSubs', None, [11]),
               '[HorribleSubs] D Gray-Man - 312 (480p) [F501C9BE]': parser.ParseResult(None, 'D Gray-Man', None, [], '480p', 'HorribleSubs', None, [312]),
               '[SGKK] Tengen Toppa Gurren Lagann - 45-46 (720p h264) [F501C9BE]': parser.ParseResult(None, 'Tengen Toppa Gurren Lagann', None, [], '720p h264', 'SGKK', None, [45,46]),
               '[Stratos-Subs]_Infinite_Stratos_-_12_(1280x720_H.264_AAC)_[379759DB]': parser.ParseResult(None, 'Infinite Stratos', None, [], '1280x720_H.264_AAC', 'Stratos-Subs', None, [12]),
               '[ShinBunBu-Subs] Bleach - 02-03 (CX 1280x720 x264 AAC)': parser.ParseResult(None, 'Bleach', None, [], 'CX 1280x720 x264 AAC', 'ShinBunBu-Subs', None, [02,03]),
               '[Doki] Hanasaku Iroha - 03 (848x480 h264 AAC) [CB1AA73B]': parser.ParseResult(None, 'Hanasaku Iroha', None, [], '848x480 h264 AAC', 'Doki', None, [03]),
+              '[UTW]_Fractal_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractal', None, [], 'h264-720p', 'UTW', None, [1]),
+              
                },
+              
+              "anime_standard_round": {
+              '[SGKK] Bleach - 312v2 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720 h264 AAC', 'SGKK', None, [312]),
+              },
                
               'anime_slash': {
               '[SGKK] Bleach 312v1 [720p/MKV]': parser.ParseResult(None, 'Bleach', None, [], '720p', 'SGKK', None, [312]),
@@ -131,7 +135,7 @@ simple_test_cases = {
               '[Ayako] Infinite Stratos - IS - 07v2 [H264][720p][44419534]': parser.ParseResult(None, 'Infinite Stratos', None, [], '720p', 'Ayako', None, [7]),
               '[Ayako-Shikkaku] Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne - 10 [LQ][h264][720p] [8853B21C]': parser.ParseResult(None, 'Oniichan no Koto Nanka Zenzen Suki Janain Dakara ne', None, [], '720p', 'Ayako-Shikkaku',None, [10]),
               '[Tsuki] Fairy Tail - 72 [XviD][C4807111]': parser.ParseResult(None, 'Fairy Tail', None, [], 'C4807111', 'Tsuki', None, [72]),
-              '[UTW]_Fractal_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractal', None, [], 'h264-720p', 'UTW', None, [1]),
+              'Bubblegum Crisis Tokyo 2040 - 25 [aX] [F4E2E558]': parser.ParseResult(None, 'Bubblegum Crisis Tokyo 2040', None, [], "aX", None, None, [25]),
               
               },
               
@@ -241,7 +245,6 @@ class FailureCaseTests(unittest.TestCase):
 class ComboTests(unittest.TestCase):
     
     def _test_combo(self, name, result, which_regexes):
-        
         if VERBOSE:
             print
             print 'Testing', name 
@@ -251,9 +254,8 @@ class ComboTests(unittest.TestCase):
         
         if DEBUG:
             print test_result, test_result.which_regex
-            print result, which_regexes
-            
-
+            print result, which_regexes  
+        
         self.assertEqual(test_result, result)
         for cur_regex in which_regexes:
             self.assertTrue(cur_regex in test_result.which_regex)
@@ -264,20 +266,19 @@ class ComboTests(unittest.TestCase):
         for (name, result, which_regexes) in combination_test_cases:
             self._test_combo(name, result, which_regexes)
 
+
 class BasicTests(unittest.TestCase):
 
     def _test_names(self, np, section, transform=None, verbose=False):
-
-        if VERBOSE or verbose:
-            print
-            print 'Running', section, 'tests'
+        
         for cur_test_base in simple_test_cases[section]:
+            out = ""
+            
+            
             if transform:
                 cur_test = transform(cur_test_base)
             else:
                 cur_test = cur_test_base
-            if VERBOSE or verbose:
-                print 'Testing', cur_test
 
             result = simple_test_cases[section][cur_test_base]
             if not result:
@@ -285,16 +286,18 @@ class BasicTests(unittest.TestCase):
                 return
             else:
                 test_result = np.parse(cur_test)
+            result.which_regex = [section]
             
-            if DEBUG or verbose:
-                print 'using: ', test_result.which_regex
-                #print 'air_by_date:', test_result.air_by_date, 'air_date:', test_result.air_date
-                #print 'anime:', test_result.is_anime, 'absolute number:', test_result.ab_episode_numbers
-                print test_result
-                print result
-                print "----"
-            self.assertEqual(test_result.which_regex, [section])
+            #self.assertEqual(test_result.which_regex, [section])
+            if not test_result == result:
+                print  
+                out += "----\n"
+                out += 'Testing ' + cur_test + "\n"
+                out +=  "Should:" + str(result) +"\n"
+                out +=  "Is    :" + str(test_result)
+                print out
             self.assertEqual(test_result, result)
+
 
     def test_standard_names(self):
         np = parser.NameParser(False)
@@ -340,17 +343,13 @@ class BasicTests(unittest.TestCase):
         np = parser.NameParser(False)
         self._test_names(np, 'scene_date_format')
         
-    def test_anime_standard(self):
+    def test_anime_ultimate(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard',verbose=True)
-        
-    def test_anime_standard_round(self):
-        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_round',verbose=False)
+        self._test_names(np, 'anime_ultimate',verbose=False)
         
     def test_anime_slash(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_slash')
+        self._test_names(np, 'anime_slash',verbose=False)
         
     def test_anime_codec(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
@@ -358,20 +357,20 @@ class BasicTests(unittest.TestCase):
                 
     def test_anime_and_normal(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_and_normal')
+        self._test_names(np, 'anime_and_normal',verbose=False)
                 
     def test_anime_and_normal_reverse(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_and_normal_reverse')
+        self._test_names(np, 'anime_and_normal_reverse',verbose=False)
                 
     def test_anime_and_normal_front(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_and_normal_front')
+        self._test_names(np, 'anime_and_normal_front',verbose=False)
 
     def test_anime_bare(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_bare')
-
+        self._test_names(np, 'anime_bare',verbose=False)
+    
     def test_standard_file_names(self):
         np = parser.NameParser()
         self._test_names(np, 'standard', lambda x: x + '.avi')
@@ -422,9 +421,11 @@ class BasicTests(unittest.TestCase):
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         suite = unittest.TestLoader().loadTestsFromName('name_parser_tests.BasicTests.test_'+sys.argv[1])
+        unittest.TextTestRunner(verbosity=2).run(suite)
+        exit()
     else:
         suite = unittest.TestLoader().loadTestsFromTestCase(BasicTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+        unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
     unittest.TextTestRunner(verbosity=2).run(suite)
