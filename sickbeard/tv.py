@@ -250,8 +250,8 @@ class TVShow(object):
                 curEp = self.getEpisode(curSeason, curEpisode)
                 
                 # if we found out that the ep is no longer on TVDB then delete it from our database too
-                if deleteEp:
-                    curEp.deleteEpisode()
+                #if deleteEp:
+                    #curEp.deleteEpisode()
                 
                 curEp.loadFromDB(curSeason, curEpisode)
                 curEp.loadFromTVDB(tvapi=t, cachedSeason=cachedSeasons[curSeason])
