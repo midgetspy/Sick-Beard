@@ -36,6 +36,7 @@ class NameParser(object):
         
         self.file_name = file_name
         self.compiled_regexes = []
+        self.regexMode = regexMode
         self._compile_regexes(regexMode)
 
     def clean_series_name(self, series_name):
@@ -85,7 +86,8 @@ class NameParser(object):
             try:
                 cur_regex = re.compile(cur_pattern, re.VERBOSE | re.IGNORECASE)
             except re.error, errormsg:
-                logger.log(u"WARNING: Invalid episode_pattern, %s. %s" % (errormsg, cur_regex.pattern))
+                # we can use the cur_regex here since this is a error msg when we cant set it
+                logger.log(u"WARNING: Invalid episode_pattern, %s" % errormsg)
             else:
                 self.compiled_regexes.append((cur_pattern_name, cur_regex))
 
