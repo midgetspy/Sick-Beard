@@ -175,6 +175,19 @@ ep_regexes = [
                ),
               ]
 anime_ep_regexes = [
+               ('anime_ultimate',
+                """
+                ^(?:\[(?P<release_group>.+?)\][ ._-]*)
+                (?P<series_name>.+?)[ ._-]+
+                (?P<ep_ab_num>\d{1,3})
+                (-(?P<extra_ab_ep_num>\d{1,3}))?[ ._-]+
+                (?:v(?P<version>[0-9]))?
+                (?:(?:(?:[\[\(])(?P<extra_info>\d{3,4}[xp]?\d{0,4}[\.\w\s-]*)(?:[\]\)]))|(?:\d{3,4}[xp]))
+                (?:[ ._]?\[(?P<crc>\w+)\])?
+                .*?
+                """
+                ),
+
                ('anime_standard',
                # [Group Name] Show Name.13-14
                # [Group Name] Show Name - 13-14
@@ -184,7 +197,7 @@ anime_ep_regexes = [
                # Show Name 13
                '''
                ^(\[(?P<release_group>.+?)\][ ._-]*)?                        # Release Group and separator
-               (?P<series_name>.+?)[ ._-]*                                  # Show_Name and separator
+               (?P<series_name>.+?)[ ._-]+                                 # Show_Name and separator
                (?P<ep_ab_num>\d{1,3})                                       # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
                (v(?P<version>[0-9]))?                                       # version
@@ -198,7 +211,7 @@ anime_ep_regexes = [
                # [ShinBunBu-Subs] Bleach - 02-03 (CX 1280x720 x264 AAC)
                '''
                ^(\[(?P<release_group>.+?)\][ ._-]*)?                                    # Release Group and separator
-               (?P<series_name>.+?)[ ._-]*                                              # Show_Name and separator
+               (?P<series_name>.+?)[ ._-]+                                              # Show_Name and separator
                (?P<ep_ab_num>\d{1,3})                                                   # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                                         # E02
                (v(?P<version>[0-9]))?                                                   # version
@@ -211,7 +224,7 @@ anime_ep_regexes = [
                # [SGKK] Bleach 312v1 [720p/MKV]
                '''
                ^(\[(?P<release_group>.+?)\][ ._-]*)? # Release Group and separator
-               (?P<series_name>.+?)[ ._-]*           # Show_Name and separator
+               (?P<series_name>.+?)[ ._-]+           # Show_Name and separator
                (?P<ep_ab_num>\d{1,3})                # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?      # E02
                (v(?P<version>[0-9]))?                # version
@@ -227,11 +240,11 @@ anime_ep_regexes = [
                '''
                ^(\[(?P<release_group>.+?)\][ ._-]*)?                        # Release Group and separator
                (?P<series_name>.+?)[ ._]*                                   # Show_Name and separator
-               ([ ._-]+-[ ._-]+[A-Z]+[ ._-]+)?[ ._-]*                       # funny stuff, this is sooo nuts ! this will kick me in the butt one day
+               ([ ._-]+-[ ._-]+[A-Z]+[ ._-]+)?[ ._-]+                       # funny stuff, this is sooo nuts ! this will kick me in the butt one day
                (?P<ep_ab_num>\d{1,3})                                       # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
                (v(?P<version>[0-9]))?                                       # version
-               ([ ._-](\[\w{1,2}\])?\[\w[.]?\w{2,4}\])?                        #codec
+               ([ ._-](\[\w{1,2}\])?\[[a-z][.]?\w{2,4}\])?                        #codec
                [ ._-]*\[(?P<extra_info>(\d{3,4}[xp]?\d{0,4})?[\.\w\s-]*)\]    # Source_Quality_Etc-
                (\[(?P<crc>\w{8})\])?
                .*?                                                          # Separator and EOL
