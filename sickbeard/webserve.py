@@ -43,6 +43,7 @@ from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
+from sickbeard.scene_exceptions import get_scene_exceptions
 
 from lib.tvdb_api import tvdb_api
 from sickbeard.blackandwhitelist import *
@@ -2147,6 +2148,11 @@ class Home:
     def plotDetails(self, show, season, episode):
         result = db.DBConnection().action("SELECT description FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", (show, season, episode)).fetchone()
         return result['description'] if result else 'Episode not found.'
+
+    @cherrypy.expose
+    def sceneExceptions(self, show):
+        exceptionsList = get_scene_exceptions(show)
+        return ",".join(exceptionsList) if exceptionsList else "No scene exceptions"
 
     @cherrypy.expose
     def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, anime=None, blackWords=None, whiteWords=None, blacklist=None, whitelist=None, directCall=False, air_by_date=None, tvdbLang=None):
