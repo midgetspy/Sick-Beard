@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+# Modified: Marcos Almeida Jr. <junalmeida@gmail.com>
+# URL: https://github.com/junalmeida/Sick-Beard
+
 import traceback
 import urllib
 import re
@@ -51,11 +54,7 @@ class KICKASSProvider(generic.TorrentProvider):
     def findSeasonResults(self, show, season):
         
         results = {}
-        
-#        if show.air_by_date:
-#            logger.log(u"KICKASS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
-#            return results
-        
+       
         results = generic.TorrentProvider.findSeasonResults(self, show, season)
         
         return results
@@ -140,12 +139,6 @@ class KICKASSProvider(generic.TorrentProvider):
     def _get_title_and_url(self, item):
         title = item.findtext('title')
         url = item.findtext('torrentLink').replace('&amp;','&')
-#        filename = item.findtext('{%s}torrent/{%s}fileName' %(self.ezrss_ns,self.ezrss_ns))
-        
-#        new_title = self._extract_name_from_filename(filename)
-#        if new_title:
-#            title = new_title
-#            logger.log(u"Extracted the name "+title+" from the torrent link", logger.DEBUG)
 
         return (title, url)
 
