@@ -1,4 +1,5 @@
 * { outline: 0; }
+*:focus { outline: none; }
 img { border: 0; vertical-align: middle;}
 
 body {
@@ -18,9 +19,9 @@ padding:0;
 }
 
 /* these are for inc_top.tmpl */
-#upgrade-notification{line-height:1;color:#57442b;font-size:130%;font-weight:700;height:0;left:0;text-align:center;top:0;width:100%;z-index:100;margin:0;padding:0;}
+#upgrade-notification{line-height:0.5em;color:#57442b;font-size:1em;font-weight:700;height:0px;text-align:center;width:100%;z-index:100;margin:0;padding:0;}
 #upgrade-notification div{background-color:#c6b695;border-bottom:1px solid #af986b;padding:7px 0;}
-#header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;}
+#header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;} 
 
 #header {
 background-color:#fff;
@@ -178,6 +179,7 @@ background-color:#fff;
 padding:0;
 }
 tr.seasonheader h2 {
+display:inline;
 font-size:22px;
 line-height:20px;
 letter-spacing:1px;
@@ -330,7 +332,9 @@ div#addShowPortal  button .buttontext { position: relative; display: block; padd
 
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
 
-.hover { background-color: #cfcfcf !important; cursor: pointer; }
+td.tvShow { font-weight: bold; }
+
+td.tvShow:hover { background-color: #cfcfcf !important; cursor: pointer; }
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
 
 /* for manage_massEdit */
@@ -350,3 +354,34 @@ a.whitelink { color: white; }
     font-size: 1em;
 }
 div.ui-pnotify { min-width: 340px; max-width: 550px; width: auto !important;}
+
+span.quality {
+    font: bold 1em/1.2em verdana, sans-serif;
+    background: none repeat scroll 0 0 #999999;
+    color: #FFFFFF;
+    display: inline-block;
+    padding: 2px 4px;
+    text-align: center;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+span.Custom {
+    background: none repeat scroll 0 0 #444499; /* blue */
+}
+span.HD {
+    background: none repeat scroll 0 0 #449944; /* green */
+}
+span.SD {
+    background: none repeat scroll 0 0 #994444; /* red */
+}
+span.Any {
+    background: none repeat scroll 0 0 #444444; /* black */
+}
+
+span.false {
+    color: #993333; /* red */
+}
+span.true {
+    color: #669966; /* green */
+}
