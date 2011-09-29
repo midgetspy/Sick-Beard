@@ -35,6 +35,18 @@ class synoIndexNotifier:
     def notify_download(self, ep_name):
         pass
 
+    def insert_library(self, dest_path):
+        if sickbeard.USE_SYNOINDEX:
+            synoindex_cmd = ['/usr/syno/bin/synoindex', '-A', ek.ek(os.path.abspath, dest_path)]
+            logger.log(u"Executing command "+str(synoindex_cmd))
+            logger.log(u"Absolute path to command: "+ek.ek(os.path.abspath, synoindex_cmd[0]), logger.DEBUG)
+            try:
+                p = subprocess.Popen(synoindex_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
+                out, err = p.communicate() #@UnusedVariable
+                logger.log(u"Script result: "+str(out), logger.DEBUG)
+            except OSError, e:
+                logger.log(u"Unable to run synoindex: "+ex(e))           
+
     def update_library(self, ep_obj):
         if sickbeard.USE_SYNOINDEX:
             synoindex_cmd = ['/usr/syno/bin/synoindex', '-a', ek.ek(os.path.abspath, ep_obj.location)]
