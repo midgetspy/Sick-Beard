@@ -156,7 +156,7 @@ class BuddyStateCommand(Command):
 #first run
 class AnimeCommand(Command):
 	def __init__(self,aid=None,aname=None,amask=None):
-		if not (aid or aname) or (aid and aname):
+		if not (aid or aname):
 			raise AniDBIncorrectParameterError,"You must provide <a(id|name)> for ANIME command"
 		parameters={'aid':aid,'aname':aname,'amask':amask}
 		Command.__init__(self,'ANIME',**parameters)
