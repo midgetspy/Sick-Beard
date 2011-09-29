@@ -660,6 +660,8 @@ class PostProcessor(object):
             try:
                 ek.ek(os.mkdir, dest_path)
                 helpers.chmodAsParent(dest_path)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.insert_library(dest_path)
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
