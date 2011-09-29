@@ -98,11 +98,11 @@ Realease Groups:
 </div>
 
 <div class="blackwhiteliste pool">
-	<span>Pool:</span>
+	<span>Pool (Name|Rating|Subed Ep):</span>
 	<select multiple id="pool">
 	#for $group in $groups
-		#if $group not in $whitelist and $group not in $blacklist:
-			<option value="$group">$group</option>
+		#if $group not in $whitelist and $group['name'] not in $blacklist:
+			<option value="$group['name']">$group['name'] | $group['rating'] | $group['range']</option>
 		#end if
 	#end for
 	</select>
