@@ -157,7 +157,10 @@ class Anime(aniDBabstractObject):
         self.rawData = self.aniDB.groupstatus(aid=self.aid)
         self.release_groups = []
         for line in self.rawData.datalines:
-            self.release_groups.append(unicode(line["name"], "utf-8"))
+            self.release_groups.append({"name":unicode(line["name"], "utf-8"),
+                                        "rating":line["rating"],
+                                        "range":line["episode_range"]
+                                        })
         return self.release_groups
 
     #TODO: refactor and use the new functions in anidbFileinfo
