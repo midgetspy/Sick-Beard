@@ -742,21 +742,23 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't download subtitles", logger.DEBUG)
             return
         logger.log(str(self.tvdbid) + ": Downloading subtitles", logger.DEBUG)
-        subli = subliminal.Subliminal(config=False, cache_dir=sickbeard.CACHE_DIR, workers=1, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3, autostart=False)
+        subli = subliminal.Subliminal(cache_dir=sickbeard.CACHE_DIR, workers=1, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3)
         subli.languages = sickbeard.SUBTITLES_LANGUAGES
         subli.plugins = sickbeard.subtitles.getEnabledPluginList()
-        subli.startWorkers()
-        downloaded_subs = subli.downloadSubtitles([self._location])
-        subli.stopWorkers()
-        for downloaded_sub_path in downloaded_subs:
-            helpers.chmodAsParent(downloaded_sub_path['subtitlepath'])
-        if downloaded_subs:
-            logger.log(str(self.tvdbid) + ": Downloaded %d subtitles" % len(downloaded_subs), logger.DEBUG)
+        try:
+            subtitles = subli.downloadSubtitles([self._location])
+        except Exception as e:
+            logger.log("Error occurred when downloading subtitles: " + e.message, logger.DEBUG)
+            return
+        for subtitle in subtitles:
+            helpers.chmodAsParent(subtitle.path)
+        if subtitles:
+            logger.log(str(self.tvdbid) + ": Downloaded %d subtitles" % len(subtitles), logger.DEBUG)
         else:
             logger.log(str(self.tvdbid) + ": No subtitles downloaded", logger.DEBUG)
             
         # refresh episodes with new subtitles
-        for location in set([x["filename"] for x in downloaded_subs]):
+        for location in set([x.video_file for x in subtitles]):
             episode = self.getEpisodeFromLocation(location)
             if episode:
                 episode.refreshSubtitles()
@@ -1022,16 +1024,18 @@ class TVEpisode(object):
             logger.log(str(self.show.tvdbid) + ": Episode file doesn't exist, can't download subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             return
         logger.log(str(self.show.tvdbid) + ": Downloading subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
-        subli = subliminal.Subliminal(config=False, cache_dir=sickbeard.CACHE_DIR, workers=1, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3, autostart=False)
+        subli = subliminal.Subliminal(cache_dir=sickbeard.CACHE_DIR, workers=1, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3)
         subli.languages = sickbeard.SUBTITLES_LANGUAGES
         subli.plugins = sickbeard.subtitles.getEnabledPluginList()
-        subli.startWorkers()
-        downloaded_subs = subli.downloadSubtitles([self._location])
-        subli.stopWorkers()
-        for downloaded_sub_path in downloaded_subs:
-            helpers.chmodAsParent(downloaded_sub_path['subtitlepath'])
-        if downloaded_subs:
-            logger.log(str(self.show.tvdbid) + ": Downloaded " + str(downloaded_subs) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+        try:
+            subtitles = subli.downloadSubtitles([self._location])
+        except Exception as e:
+            logger.log("Error occurred when downloading subtitles: " + e.message, logger.DEBUG)
+            return
+        for subtitle in subtitles:
+            helpers.chmodAsParent(subtitle.path)
+        if subtitles:
+            logger.log(str(self.show.tvdbid) + ": Downloaded " + str(subtitles) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         else:
             logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         self.refreshSubtitles()

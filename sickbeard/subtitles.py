@@ -34,7 +34,7 @@ except:
 
 
 def sortedPluginList():
-    pluginsMapping = dict([(x.lower(), x) for x in subliminal.Subliminal.listExistingPlugins()])
+    pluginsMapping = dict([(x.lower(), x) for x in subliminal.PLUGINS])
 
     newList = []
 
@@ -43,7 +43,7 @@ def sortedPluginList():
     for curPlugin in sickbeard.SUBTITLES_PLUGINS_LIST:
         if curPlugin in pluginsMapping:
             curPluginDict = {'id': curPlugin, 'image': curPlugin+'.png', 'name': pluginsMapping[curPlugin], 'enabled': sickbeard.SUBTITLES_PLUGINS_ENABLED[curIndex] == 1,
-                'api_based': subliminal.Subliminal.isAPIBasedPlugin(pluginsMapping[curPlugin]), 'url': getattr(subliminal.plugins, pluginsMapping[curPlugin]).site_url}
+                'api_based': pluginsMapping[curPlugin] in subliminal.API_PLUGINS, 'url': getattr(subliminal.plugins, pluginsMapping[curPlugin]).site_url}
             newList.append(curPluginDict)
         curIndex += 1
 
@@ -51,7 +51,7 @@ def sortedPluginList():
     for curPlugin in pluginsMapping.keys():
         if curPlugin not in [x['id'] for x in newList]:
             curPluginDict = {'id': curPlugin, 'image': curPlugin+'.png', 'name': pluginsMapping[curPlugin], 'enabled': False,
-                'api_based': subliminal.Subliminal.isAPIBasedPlugin(pluginsMapping[curPlugin]), 'url': getattr(subliminal.plugins, pluginsMapping[curPlugin]).site_url}
+                'api_based': pluginsMapping[curPlugin] in subliminal.API_PLUGINS, 'url': getattr(subliminal.plugins, pluginsMapping[curPlugin]).site_url}
             newList.append(curPluginDict)
 
     return newList
@@ -60,7 +60,7 @@ def getEnabledPluginList():
     return [x['name'] for x in sortedPluginList() if x['enabled']]
     
 def isValidLanguage(language):
-    return subliminal.Subliminal.isValidLanguage(language)
+    return language in subliminal.LANGUAGES
 
 def wantedLanguages(sqlLike = False):
     if sickbeard.SUBTITLES_MULTI:
@@ -101,7 +101,7 @@ class SubtitlesFinder():
             return
 
         logger.log(u'Checking for subtitles', logger.MESSAGE)
-        subli = subliminal.Subliminal(config=False, cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3, autostart=False)
+        subli = subliminal.Subliminal(cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3)
         subli.languages = sickbeard.SUBTITLES_LANGUAGES
         subli.plugins = sickbeard.subtitles.getEnabledPluginList()
 
@@ -160,13 +160,11 @@ class SubtitlesFinder():
 
     def _downloadSubtitles(self, subli, locations):
         """Download subtitles from file locations using an initialized subliminal instance"""
-        subli.startWorkers()
-        downloaded_subs = subli.downloadSubtitles(locations)
-        subli.stopWorkers()
-        for downloaded_sub_path in downloaded_subs:
-            helpers.chmodAsParent(downloaded_sub_path['subtitlepath'])
+        subtitles = subli.downloadSubtitles(locations)
+        for subtitle in subtitles:
+            helpers.chmodAsParent(subtitle.path)
         if downloaded_subs:
-            logger.log('Downloaded %d subtitles' % len(downloaded_subs), logger.MESSAGE)
+            logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
         else:
             logger.log('No subtitles found', logger.MESSAGE)
 
