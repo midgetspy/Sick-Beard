@@ -28,7 +28,7 @@ import sickbeard
 
 try:
     import subliminal
-except:
+except ImportError:
     pass
 
 import xml.etree.cElementTree as etree

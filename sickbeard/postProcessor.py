@@ -26,11 +26,6 @@ import subprocess
 
 import sickbeard
 
-try:
-    import subliminal
-except:
-    pass
-
 from sickbeard import db
 from sickbeard import classes
 from sickbeard import common

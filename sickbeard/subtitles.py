@@ -28,9 +28,9 @@ from sickbeard import db
 SINGLE = u'srt'
 try:
     import subliminal
-    SUBTITLES_SUPPORTED = True
-except:
-    SUBTITLES_SUPPORTED = False
+    SUBLIMINAL_SUPPORT = True
+except ImportError:
+    SUBLIMINAL_SUPPORT = False
 
 
 def sortedPluginList():
@@ -93,7 +93,7 @@ class SubtitlesFinder():
     """
     def run(self):
         # TODO: Put that in the __init__ before starting the thread?
-        if not SUBTITLES_SUPPORTED or not sickbeard.USE_SUBTITLES:
+        if not SUBLIMINAL_SUPPORT or not sickbeard.USE_SUBTITLES:
             logger.log(u'No subtitles support of subtitles support disabled', logger.DEBUG)
             return
         if len(sickbeard.subtitles.getEnabledPluginList()) < 2:

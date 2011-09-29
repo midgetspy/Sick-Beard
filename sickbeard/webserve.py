@@ -2514,7 +2514,7 @@ class Home:
         try:
             ep_obj.downloadSubtitles()
         except:
-            return json.dumps({'subtitles': 'oops'})
+            return json.dumps({'result': 'failure'})
 
         # return the correct json value
         if previous_subtitles != ep_obj.subtitles:

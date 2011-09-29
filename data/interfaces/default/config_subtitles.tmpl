@@ -30,7 +30,7 @@
                     <fieldset class="component-group-list">
 
 			            <div class="field-pair">
-                            <input type="checkbox"#if $sickbeard.USE_SUBTITLES and $subtitles.SUBTITLES_SUPPORTED then " checked=\"checked\"" else ""##if $subtitles.SUBTITLES_SUPPORTED then "" else " disabled=\"disabled\""# id="use_subtitles" name="use_subtitles">
+                            <input type="checkbox"#if $sickbeard.USE_SUBTITLES and $subtitles.SUBLIMINAL_SUPPORT then " checked=\"checked\"" else ""##if $subtitles.SUBLIMINAL_SUPPORT then "" else " disabled=\"disabled\""# id="use_subtitles" name="use_subtitles">
                             <label for="use_subtitles" class="clearfix">
                                 <span class="component-title">Enable</span>
                             </label>
@@ -38,7 +38,7 @@
 
                     </fieldset>
                 </div><!-- /component-group1 //-->
-                #if $subtitles.SUBTITLES_SUPPORTED
+                #if $subtitles.SUBLIMINAL_SUPPORT
                 <div id="core-component-group2" class="component-group clearfix">
 
                     <div class="component-group-desc">
