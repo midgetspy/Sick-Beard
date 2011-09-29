@@ -142,6 +142,8 @@ class PostProcessor(object):
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 ek.ek(os.remove, cur_file)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.remove_library(cur_file)
                 
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
