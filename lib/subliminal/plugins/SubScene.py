@@ -26,17 +26,12 @@ import zipfile
 import os
 import urllib2
 import urllib
-import traceback
-import httplib
-from subliminal import encodingKludge as ek
 
 
 class SubScene(PluginBase.PluginBase):
     site_url = 'http://subscene.com'
     site_name = 'SubScene'
     server_url = 'http://subscene.com/s.aspx?subtitle='
-    multi_languages_queries = True
-    multi_filename_queries = False
     api_based = False
     _plugin_languages = {"en": "English",
             "se": "Swedish",
@@ -79,8 +74,6 @@ class SubScene(PluginBase.PluginBase):
 
     def list(self, filenames, languages):
         """Main method to call when you want to list subtitles"""
-        # as self.multi_filename_queries is false, we won't have multiple filenames in the list so pick the only one
-        # once multi-filename queries are implemented, set multi_filename_queries to true and manage a list of multiple filenames here
         filepath = filenames[0]
         fname = self.getFileName(filepath)
         subs = self.query(fname, filepath, languages)
@@ -110,7 +103,7 @@ class SubScene(PluginBase.PluginBase):
                 extension = el.orig_filename.rsplit(".", 1)[1]
                 if extension in ("srt", "sub", "txt"):
                     subtitlefilename = srtbasefilename + "." + extension
-                    outfile = ek.ek(open, subtitlefilename, "wb")
+                    outfile = open(subtitlefilename, "wb")
                     outfile.write(zf.read(el.orig_filename))
                     outfile.flush()
                     self.adjustPermissions(subtitlefilename)
@@ -119,7 +112,7 @@ class SubScene(PluginBase.PluginBase):
                     self.logger.info(u"File %s does not seem to be valid " % el.orig_filename)
             # Deleting the zip file
             zf.close()
-            ek.ek(os.remove, archivefilename)
+            os.remove(archivefilename)
             return subtitlefilename
         elif archivefilename.endswith('.rar'):
             self.logger.warn(u'Rar is not really supported yet. Trying to call unrar')
@@ -130,13 +123,13 @@ class SubScene(PluginBase.PluginBase):
                 for el in output.splitlines():
                     extension = el.rsplit(".", 1)[1]
                     if extension in ("srt", "sub"):
-                        args = ['unrar', 'e', archivefilename, el, ek.ek(os.path.dirname, archivefilename)]
+                        args = ['unrar', 'e', archivefilename, el, os.path.dirname(archivefilename)]
                         subprocess.Popen(args)
-                        tmpsubtitlefilename = ek.ek(os.path.join, ek.ek(os.path.dirname, archivefilename), el)
-                        subtitlefilename = ek.ek(os.path.join, ek.ek(os.path.dirname, archivefilename), srtbasefilename + "." + extension)
-                        if ek.ek(os.path.exists, tmpsubtitlefilename):
+                        tmpsubtitlefilename = os.path.join(os.path.dirname(archivefilename), el)
+                        subtitlefilename = os.path.join(os.path.dirname(archivefilename), srtbasefilename + "." + extension)
+                        if os.path.exists(tmpsubtitlefilename):
                             # rename it to match the file
-                            ek.ek(os.rename, tmpsubtitlefilename, subtitlefilename)
+                            os.rename(tmpsubtitlefilename, subtitlefilename)
                             # exit
                         return subtitlefilename
             except OSError, e:
@@ -172,6 +165,6 @@ class SubScene(PluginBase.PluginBase):
                 result["link"] = None
                 result["page"] = self.site_url + sub_page
                 result["filename"] = filepath
-                result["plugin"] = self.getClassName()
+                result["plugin"] = self.__class__.__name__
                 sublinks.append(result)
         return sublinks

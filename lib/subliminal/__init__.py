@@ -19,5 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from subliminal import Subliminal
+__all__ = ['FORMATS', 'LANGUAGES', 'PLUGINS', 'API_PLUGINS', 'Subliminal', 'Subtitle']
+from classes import *
+from subliminal import *
 from version import __version__

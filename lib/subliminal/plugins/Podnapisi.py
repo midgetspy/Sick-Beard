@@ -23,22 +23,14 @@
 from hashlib import md5, sha256
 import PluginBase
 import xmlrpclib
-import struct
 import socket
-import zipfile
 import os
-import urllib2
-import urllib
-import traceback
-from subliminal import encodingKludge as ek
 
 
 class Podnapisi(PluginBase.PluginBase):
     site_url = "http://www.podnapisi.net"
     site_name = "Podnapisi"
     server_url = 'http://ssp.podnapisi.net:8000'
-    multi_languages_queries = True
-    multi_filename_queries = False
     api_based = True
     _plugin_languages = {"sl": "1",
             "en": "2",
@@ -96,10 +88,8 @@ class Podnapisi(PluginBase.PluginBase):
 
     def list(self, filenames, languages):
         """Main method to call when you want to list subtitles"""
-        # as self.multi_filename_queries is false, we won't have multiple filenames in the list so pick the only one
-        # once multi-filename queries are implemented, set multi_filename_queries to true and manage a list of multiple filenames here
         filepath = filenames[0]
-        if not ek.ek(os.path.isfile, filepath):
+        if not os.path.isfile(filepath):
             return []
         return self.query(self.hashFile(filepath), languages)
 
@@ -116,7 +106,7 @@ class Podnapisi(PluginBase.PluginBase):
             self.logger.debug(u"Result: %s" % log_result)
             token = log_result["session"]
             nonce = log_result["nonce"]
-        except Exception, e:
+        except Exception:
             self.logger.error(u"Cannot login" % log_result)
             socket.setdefaulttimeout(None)
             return []
@@ -141,6 +131,5 @@ class Podnapisi(PluginBase.PluginBase):
         subs = []
         for sub in results['results']:
             subs.append(sub)
-        d = self.server.download(token, [173793])
         self.server.terminate(token)
         return subs

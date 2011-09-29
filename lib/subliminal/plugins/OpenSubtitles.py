@@ -26,97 +26,89 @@ import os
 import socket
 import xmlrpclib
 import guessit
-from subliminal import encodingKludge as ek
+from subliminal.classes import Subtitle
 
 
 class OpenSubtitles(PluginBase.PluginBase):
     site_url = 'http://www.opensubtitles.org'
     site_name = 'OpenSubtitles'
     server_url = 'http://api.opensubtitles.org/xml-rpc'
-    user_agent = 'Subliminal v0.3'
-    multi_languages_queries = True
-    multi_filename_queries = False
+    user_agent = 'Subliminal v1.0'
     api_based = True
-    _plugin_languages = {"en": "eng",
-            "fr": "fre",
-            "hu": "hun",
-            "cs": "cze",
-            "pl": "pol",
-            "sk": "slo",
-            "pt": "por",
-            "pt-br": "pob",
-            "es": "spa",
-            "el": "ell",
-            "ar": "ara",
-            "sq": "alb",
-            "hy": "arm",
-            "ay": "ass",
-            "bs": "bos",
-            "bg": "bul",
-            "ca": "cat",
-            "zh": "chi",
-            "hr": "hrv",
-            "da": "dan",
-            "nl": "dut",
-            "eo": "epo",
-            "et": "est",
-            "fi": "fin",
-            "gl": "glg",
-            "ka": "geo",
-            "de": "ger",
-            "he": "heb",
-            "hi": "hin",
-            "is": "ice",
-            "id": "ind",
-            "it": "ita",
-            "ja": "jpn",
-            "kk": "kaz",
-            "ko": "kor",
-            "lv": "lav",
-            "lt": "lit",
-            "lb": "ltz",
-            "mk": "mac",
-            "ms": "may",
-            "no": "nor",
-            "oc": "oci",
-            "fa": "per",
-            "ro": "rum",
-            "ru": "rus",
-            "sr": "scc",
-            "sl": "slv",
-            "sv": "swe",
-            "th": "tha",
-            "tr": "tur",
-            "uk": "ukr",
-            "vi": "vie"}
+    _plugin_languages = {'en': 'eng',
+            'fr': 'fre',
+            'hu': 'hun',
+            'cs': 'cze',
+            'pl': 'pol',
+            'sk': 'slo',
+            'pt': 'por',
+            'pt-br': 'pob',
+            'es': 'spa',
+            'el': 'ell',
+            'ar': 'ara',
+            'sq': 'alb',
+            'hy': 'arm',
+            'ay': 'ass',
+            'bs': 'bos',
+            'bg': 'bul',
+            'ca': 'cat',
+            'zh': 'chi',
+            'hr': 'hrv',
+            'da': 'dan',
+            'nl': 'dut',
+            'eo': 'epo',
+            'et': 'est',
+            'fi': 'fin',
+            'gl': 'glg',
+            'ka': 'geo',
+            'de': 'ger',
+            'he': 'heb',
+            'hi': 'hin',
+            'is': 'ice',
+            'id': 'ind',
+            'it': 'ita',
+            'ja': 'jpn',
+            'kk': 'kaz',
+            'ko': 'kor',
+            'lv': 'lav',
+            'lt': 'lit',
+            'lb': 'ltz',
+            'mk': 'mac',
+            'ms': 'may',
+            'no': 'nor',
+            'oc': 'oci',
+            'fa': 'per',
+            'ro': 'rum',
+            'ru': 'rus',
+            'sr': 'scc',
+            'sl': 'slv',
+            'sv': 'swe',
+            'th': 'tha',
+            'tr': 'tur',
+            'uk': 'ukr',
+            'vi': 'vie'}
 
     def __init__(self, config_dict=None):
         super(OpenSubtitles, self).__init__(self._plugin_languages, config_dict)
 
-    def list(self, filenames, languages):
-        """Main method to call when you want to list subtitles """
-        # as self.multi_filename_queries is false, we won't have multiple filenames in the list so pick the only one
-        # once multi-filename queries are implemented, set multi_filename_queries to true and manage a list of multiple filenames here
-        filepath = filenames[0]
-        if ek.ek(os.path.isfile, filepath):
+    def list(self, filepath, languages):
+        if os.path.isfile(filepath):
             filehash = self.hashFile(filepath)
-            size = ek.ek(os.path.getsize, filepath)
+            size = os.path.getsize(filepath)
             return self.query(moviehash=filehash, languages=languages, bytesize=size, filepath=filepath)
         else:
             return self.query(languages=languages, filepath=filepath)
 
     def download(self, subtitle):
-        """Main method to call when you want to download a subtitle """
-        subtitleFilename = subtitle["filename"].rsplit(".", 1)[0] + self.getExtension(subtitle)
-        self.downloadFile(subtitle["link"], subtitleFilename + ".gz")
-        f = ek.ek(gzip.open, subtitleFilename + ".gz")
-        dump = ek.ek(open, subtitleFilename, "wb")
-        dump.write(f.read())
-        self.adjustPermissions(subtitleFilename)
-        dump.close()
-        f.close()
-        ek.ek(os.remove, subtitleFilename + ".gz")
-        return subtitleFilename
+        self.downloadFile(subtitle.link, subtitle.path + '.gz')
+        gz = gzip.open(subtitle.path + '.gz')
+        srt = open(subtitle.path, 'wb')
+        srt.write(gz.read())
+        gz.close()
+        self.adjustPermissions(subtitle.path)
+        srt.close()
+        os.remove(subtitle.path + '.gz')
+        return subtitle
 
     def query(self, filepath, imdbID=None, moviehash=None, bytesize=None, languages=None):
         """Makes a query on OpenSubtitles and returns info about found subtitles.
@@ -130,26 +122,26 @@ class OpenSubtitles(PluginBase.PluginBase):
         if bytesize:
             search['moviebytesize'] = str(bytesize)
         if languages:
-            search['sublanguageid'] = ",".join([self.getLanguage(l) for l in languages])
+            search['sublanguageid'] = ','.join([self.getLanguage(l) for l in languages])
         if not imdbID and not moviehash and not bytesize:
-            self.logger.debug(u"No search term, we'll use the filename")
+            self.logger.debug(u'No search term, using the filename')
             guess = guessit.guess_file_info(filepath, 'autodetect')
             if guess['type'] == 'episode' and 'series' in guess:
-                search['query'] = guess['series']
+                search['query'] = guess['series'].lower()
             elif guess['type'] == 'movie':
-                search['query'] = guess['title']
+                search['query'] = guess['title'].lower()
             else:  # we don't know what we have
                 return[]
         # login
         self.server = xmlrpclib.Server(self.server_url)
         socket.setdefaulttimeout(self.timeout)
         try:
-            log_result = self.server.LogIn("", "", "eng", self.user_agent)
-            if not log_result["status"] or log_result["status"] != '200 OK' or not log_result["token"]:
+            log_result = self.server.LogIn('', '', 'eng', self.user_agent)
+            if not log_result['status'] or log_result['status'] != '200 OK' or not log_result['token']:
                 raise Exception('OpenSubtitles login failed')
-            token = log_result["token"]
+            token = log_result['token']
         except Exception:
-            self.logger.error(u"Cannot login")
+            self.logger.error(u'Cannot login')
             token = None
             socket.setdefaulttimeout(None)
             return []
@@ -159,31 +151,25 @@ class OpenSubtitles(PluginBase.PluginBase):
         try:
             self.server.LogOut(token)
         except:
-            self.logger.error(u"Cannot logout")
+            self.logger.error(u'Cannot logout')
         socket.setdefaulttimeout(None)
         return sublinks
 
     def get_results(self, token, search, filepath):
-        self.logger.debug(u"Query uses token %s and search parameters %s" % (token, search))
+        self.logger.debug(u'Query uses token %s and search parameters %s' % (token, search))
         try:
             results = self.server.SearchSubtitles(token, [search])
-        except Exception, e:
-            self.logger.debug(u"Cannot query the server")
+        except Exception:
+            self.logger.debug(u'Cannot query the server')
             return []
         if not results['data']:  # no subtitle found
             return []
         sublinks = []
         self.filename = self.getFileName(filepath)
         for r in sorted(results['data'], self._cmpSubFileName):
-            result = {}
-            result["release"] = r['SubFileName']
-            result["link"] = r['SubDownloadLink']
-            result["page"] = r['SubDownloadLink']
-            result["lang"] = self.getRevertLanguage(r['SubLanguageID'])
-            result["filename"] = filepath
-            result["plugin"] = self.getClassName()
-            if 'query' in search and not r["MovieReleaseName"].replace('.', ' ').startswith(search['query']):  # query mode search, filter results
-                self.logger.debug(u"Skipping %s it does not start with %s" % (r["MovieReleaseName"].replace('.', ' '), search['query']))
+            result = Subtitle(filepath, self.getSubtitlePath(filepath, self.getRevertLanguage(r['SubLanguageID'])), self.__class__.__name__, self.getRevertLanguage(r['SubLanguageID']), r['SubDownloadLink'], r['SubFileName'])
+            if 'query' in search and not r['MovieReleaseName'].replace('.', ' ').lower().startswith(search['query']):  # query mode search, filter results
+                self.logger.debug(u'Skipping %s it does not start with %s' % (r['MovieReleaseName'].replace('.', ' ').lower(), search['query']))
                 continue
             sublinks.append(result)
         return sublinks
@@ -204,3 +190,4 @@ class OpenSubtitles(PluginBase.PluginBase):
         if not xmatch and ymatch:
             return 1
         return 0
+
