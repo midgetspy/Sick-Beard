@@ -96,13 +96,15 @@ class KICKASSProvider(generic.TorrentProvider):
         
             if search_params:
                 params.update(search_params)
-            
+
+            searchURL = ''
             if not 'episode' in params:
                 ep_number = "S%(seasonnumber)02d" % {'seasonnumber': params['season']}
-                searchURL = self.url +'search/'+params['show_name']+' '+ep_number+ '/?rss=1'
+                searchURL = self.url +'search/'+params['show_name'] + ' ' + ep_number
             else:
                 ep_number = "S%(seasonnumber)02dE%(episodenumber)02d" % {'seasonnumber': params['season'], 'episodenumber': params['episode']}
-                searchURL = self.url +'search/'+params['show_name']+ ' ' + ep_number + '/?rss=1'
+                searchURL = self.url +'search/'+params['show_name'] + ' ' + ep_number 
+            searchURL = searchURL + '/?rss=1&field=seeders&sorder=desc'
 
             logger.log(u"Search string: " + searchURL)
             #data = self.getURL(searchURL)
