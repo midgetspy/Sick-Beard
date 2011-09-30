@@ -76,7 +76,7 @@ def subtitlesLanguagesFromFiles(files):
     subtitlesLanguages = []
     single = False
     for f in files:
-        if f[-7:-4].startswith('.'):
+        if f[-7:-4].startswith('.') and isValidLanguage(f[-6:-4]) :
             subtitlesLanguages.append(f[-6:-4])
         else:
             single = True
