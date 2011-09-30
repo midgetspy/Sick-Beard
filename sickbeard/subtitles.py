@@ -163,7 +163,7 @@ class SubtitlesFinder():
         subtitles = subli.downloadSubtitles(locations)
         for subtitle in subtitles:
             helpers.chmodAsParent(subtitle.path)
-        if downloaded_subs:
+        if subtitles:
             logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
         else:
             logger.log('No subtitles found', logger.MESSAGE)
