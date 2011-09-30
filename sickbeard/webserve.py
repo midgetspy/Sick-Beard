@@ -1628,8 +1628,8 @@ class NewHomeAddShows:
 
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
-                   anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
-                   other_shows=None, skipShow=None):
+                   anyQualities=None, bestQualities=None, seasonFolders=None, subtitles=None,
+                   fullShowPath=None, other_shows=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
@@ -1694,6 +1694,11 @@ class NewHomeAddShows:
             seasonFolders = 1
         else:
             seasonFolders = 0
+
+        if subtitles == "on":
+            subtitles = 1
+        else:
+            subtitles = 0
         
         if not anyQualities:
             anyQualities = []
@@ -1706,7 +1711,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, subtitles, tvdbLang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -2150,7 +2155,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, subtitles=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, subtitles=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
