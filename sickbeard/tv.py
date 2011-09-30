@@ -769,7 +769,7 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + ": No subtitles downloaded", logger.DEBUG)
             
         # refresh episodes with new subtitles
-        for location in set([x.video_file for x in subtitles]):
+        for location in set([x.video_path for x in subtitles]):
             episode = self.getEpisodeFromLocation(location)
             if episode:
                 episode.refreshSubtitles()
