@@ -1059,6 +1059,7 @@ class ConfigProviders:
     def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+                      btjunkie_minimum_seeds=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
@@ -1129,6 +1130,7 @@ class ConfigProviders:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
+        sickbeard.BTJUNKIE_MINIMUM_SEEDS = int(btjunkie_minimum_seeds)
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()

@@ -195,6 +195,16 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div>
 
+<div class="providerDiv" id="btjunkieDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTJunkie Minimum Seeds:</span>
+                                <input class="component-desc" type="text" name="btjunkie_minimum_seeds" value="$sickbeard.BTJUNKIE_MINIMUM_SEEDS" size="8"
+																	onkeyup="this.value=this.value.replace(/[^\d]/g,'')" />
+                            </label>
+												</div>
+</div>
+
 <!-- end div for editing providers -->
 
                     <input type="submit" class="config_submitter" value="Save Changes" /><br/>

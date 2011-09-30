@@ -153,28 +153,27 @@ class BTJunkieProvider(generic.TorrentProvider):
         results = []
 
         for curItem in items:
-	    try:
-		rawTitle = curItem.findtext('title')
+            try:
+                rawTitle = curItem.findtext('title')
 
-		if not rawTitle:
-		    logger.log(u"The XML returned from the BTJunkie RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-		    continue
+                if not rawTitle:
+                    logger.log(u"The XML returned from the BTJunkie RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
+                    continue
 
-	        logger.log("Comparing seeds regex " + BTJunkieUtils.regex_seeds + " against " + rawTitle, logger.DEBUG)
-    
-    	        match = re.search(BTJunkieUtils.regex_seeds, rawTitle, re.I)
-	        if match:
-	 	    seeds = match.group(1)
-		    logger.log("Torrent had " + seeds + " seeds", logger.DEBUG)
-		    if int(seeds) >= 10:	# Minimum number of seeds
-		        results.append(curItem)
-	    except Exception, e:
-	        logger.log("Exception parsing XML item: " + ex(e), logger.ERROR)
-            
+                match = re.search(BTJunkieUtils.regex_seeds, rawTitle, re.I)
+
+                if match:
+                    seeds = match.group(1)
+                    logger.log(rawTitle + " had " + seeds + " seeds", logger.DEBUG)
+                    if int(seeds) >= sickbeard.BTJUNKIE_MINIMUM_SEEDS:	# Minimum number of seeds
+                        results.append(curItem)
+            except Exception, e:
+                logger.log("Exception parsing XML item: " + ex(e), logger.ERROR)
+                
         return results
 
     def _get_title_and_url(self, item):
-	return BTJunkieUtils.getTorrentTitleAndUrl(item)
+    	return BTJunkieUtils.getTorrentTitleAndUrl(item)
 
 class BTJunkieCache(tvcache.TVCache):
 
@@ -187,7 +186,7 @@ class BTJunkieCache(tvcache.TVCache):
     def _getRSSData(self):
         url = self.provider.url + 'rss.xml?c=4' # TV list
 
-	data = self.provider.getURL(url)
+    	data = self.provider.getURL(url)
 
         logger.log(u"BTJunkie cache update URL for latest TV shows: " + url, logger.DEBUG)
 
@@ -196,7 +195,7 @@ class BTJunkieCache(tvcache.TVCache):
         return data
 
     def _parseItem(self, item):
-	(title, url) = BTJunkieUtils.getTorrentTitleAndUrl(item)
+        (title, url) = BTJunkieUtils.getTorrentTitleAndUrl(item)
 
         if not title or not url:
             logger.log(u"The XML returned from the BTJunkie RSS feed is incomplete, this result is unusable", logger.ERROR)
