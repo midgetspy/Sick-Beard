@@ -759,7 +759,7 @@ class TVShow(object):
         try:
             subtitles = subli.downloadSubtitles([self._location])
         except Exception as e:
-            logger.log("Error occurred when downloading subtitles: " + e.message, logger.DEBUG)
+            logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
             return
         for subtitle in subtitles:
             helpers.chmodAsParent(subtitle.path)
@@ -1041,7 +1041,7 @@ class TVEpisode(object):
         try:
             subtitles = subli.downloadSubtitles([self._location])
         except Exception as e:
-            logger.log("Error occurred when downloading subtitles: " + e.message, logger.DEBUG)
+            logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
             return
         for subtitle in subtitles:
             helpers.chmodAsParent(subtitle.path)
