@@ -26,6 +26,7 @@ import os
 import socket
 import xmlrpclib
 import guessit
+import unicodedata
 from subliminal.classes import Subtitle
 
 
@@ -168,9 +169,13 @@ class OpenSubtitles(PluginBase.PluginBase):
         self.filename = self.getFileName(filepath)
         for r in sorted(results['data'], self._cmpSubFileName):
             result = Subtitle(filepath, self.getSubtitlePath(filepath, self.getRevertLanguage(r['SubLanguageID'])), self.__class__.__name__, self.getRevertLanguage(r['SubLanguageID']), r['SubDownloadLink'], r['SubFileName'])
-            if 'query' in search and not r['MovieReleaseName'].replace('.', ' ').lower().startswith(search['query']):  # query mode search, filter results
-                self.logger.debug(u'Skipping %s it does not start with %s' % (r['MovieReleaseName'].replace('.', ' ').lower(), search['query']))
-                continue
+            if 'query' in search:  # query mode search, filter results
+                query_encoded = search['query']
+                if isinstance(query_encoded, unicode):
+                    query_encoded = unicodedata.normalize('NFKD', query_encoded).encode('ascii', 'ignore')
+                if not r['MovieReleaseName'].replace('.', ' ').lower().startswith(query_encoded):
+                    self.logger.debug(u'Skipping %s it does not start with %s' % (r['MovieReleaseName'].replace('.', ' ').lower(), query_encoded))
+                    continue
             sublinks.append(result)
         return sublinks
 

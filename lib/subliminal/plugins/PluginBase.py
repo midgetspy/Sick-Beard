@@ -94,9 +94,9 @@ class PluginBase(object):
             dump.close()
             f.close()
             self.logger.debug(u'Download finished for file %s. Size: %s' % (filepath, os.path.getsize(filepath)))
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             self.logger.error(u'HTTP Error:', e.code, url)
-        except urllib2.URLError, e:
+        except urllib2.URLError as e:
             self.logger.error(u'URL Error:', e.reason, url)
 
     def adjustPermissions(self, filepath):

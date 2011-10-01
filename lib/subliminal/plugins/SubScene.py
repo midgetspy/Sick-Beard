@@ -25,7 +25,6 @@ import PluginBase
 import zipfile
 import os
 import urllib2
-import urllib
 
 
 class SubScene(PluginBase.PluginBase):
@@ -132,7 +131,7 @@ class SubScene(PluginBase.PluginBase):
                             os.rename(tmpsubtitlefilename, subtitlefilename)
                             # exit
                         return subtitlefilename
-            except OSError, e:
+            except OSError as e:
                 self.logger.error(u"Execution failed: %s" % e)
                 return None
         else:
@@ -142,12 +141,11 @@ class SubScene(PluginBase.PluginBase):
     def downloadFile(self, url, filename):
         """Downloads the given url to the given filename"""
         #FIXME: Not working
-        super(SubScene, self).downloadFile(url, filename, urllib.urlencode({'__EVENTTARGET': 's$lc$bcr$downloadLink', '__EVENTARGUMENT': '', '__VIEWSTATE': '/wEPDwUHNzUxOTkwNWRk4wau5efPqhlBJJlOkKKHN8FIS04='}))
 
     def query(self, token, filepath, langs=None):
         """Make a query on SubScene and returns info about found subtitles"""
         sublinks = []
-        searchurl = "%s%s" % (self.server_url, urllib.quote(token))
+        searchurl = "%s%s" % (self.server_url, urllib2.quote(token))
         self.logger.debug(u"Query: %s" % searchurl)
         page = urllib2.urlopen(searchurl)
         soup = BeautifulSoup(page.read())

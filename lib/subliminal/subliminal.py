@@ -125,7 +125,7 @@ class Subliminal(object):
             auto    -- automaticaly manage workers"""
         if auto:
             if self.state != IDLE:
-                raise BadStateError(self.state)
+                raise BadStateError(self.state, IDLE)
             self.startWorkers()
         # valid argument
         if isinstance(entries, basestring):
@@ -145,7 +145,7 @@ class Subliminal(object):
                 task_count += 1
         subtitles = []
         for _ in range(task_count):
-            subtitles.extend(self.listResultQueue.get(timeout=4))
+            subtitles.extend(self.listResultQueue.get())
         if auto:
             self.stopWorkers()
         return subtitles
@@ -160,7 +160,7 @@ class Subliminal(object):
             auto    -- automaticaly manage workers"""
         if auto:
             if self.state != IDLE:
-                raise BadStateError(self.state)
+                raise BadStateError(self.state, IDLE)
             self.startWorkers()
         subtitles = self.listSubtitles(entries, False)
         task_count = 0
@@ -174,7 +174,7 @@ class Subliminal(object):
                 task_count += 1
         paths = []
         for _ in range(task_count):
-            paths.append(self.downloadResultQueue.get(timeout=10))
+            paths.append(self.downloadResultQueue.get())
         if auto:
             self.stopWorkers()
         return paths

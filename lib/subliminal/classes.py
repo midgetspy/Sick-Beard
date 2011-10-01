@@ -20,17 +20,27 @@
 #
 
 
-class BadStateError(Exception):
+class Error(Exception):
+    """Base class for exceptions in subliminal"""
+    pass
+
+
+class BadStateError(Error):
     """Exception raised when an invalid action is asked
 
     Attributes:
-        state -- current state of Subliminal instance
+        current  -- current state of Subliminal instance
+        expected -- expected state of Subliminal instance
     """
-    def __init__(self, state):
-        self.state = state
+    def __init__(self, current, expected):
+        self.current = current
+        self.expected = expected
+
+    def __str__(self):
+        return 'Expected state %d but current state is %d' % (self.expected, self.current)
 
 
-class LanguageError(Exception):
+class LanguageError(Error):
     """Exception raised when invalid language is submitted
 
     Attributes:
@@ -39,8 +49,11 @@ class LanguageError(Exception):
     def __init__(self, language):
         self.language = language
 
+    def __str__(self):
+        return self.language
 
-class PluginError(Exception):
+
+class PluginError(Error):
     """"Exception raised when invalid plugin is submitted
 
     Attributes:
@@ -49,8 +62,11 @@ class PluginError(Exception):
     def __init__(self, plugin):
         self.plugin = plugin
 
+    def __str__(self):
+        return self.plugin
 
-class WrongTaskError(Exception):
+
+class WrongTaskError(Error):
     """"Exception raised when invalid task is submitted"""
     pass
 

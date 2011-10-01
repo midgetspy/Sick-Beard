@@ -26,9 +26,8 @@ import PluginBase
 import os
 try:
     import cPickle as pickle
-except:
+except ImportError:
     import pickle
-import urllib
 import urllib2
 from subliminal.classes import Subtitle
 
@@ -70,11 +69,12 @@ class BierDopje(PluginBase.PluginBase):
 
     def list(self, filepath, languages):
         if not self.config_dict['cache_dir']:
-            raise Exception('Cache directory is mandatory for this plugin')
+            raise Exception('Cache directory is required for this plugin')
         if not self.checkLanguages(languages):
             return []
         guess = guessit.guess_file_info(filepath, 'autodetect')
         if guess['type'] != 'episode':
+            self.logger.debug(u'Not an episode')
             return []
         # add multiple things to the release group set
         release_group = set()
@@ -86,6 +86,7 @@ class BierDopje(PluginBase.PluginBase):
             if 'screenSize' in guess:
                 release_group.add(guess['screenSize'].lower())
         if 'series' not in guess or len(release_group) == 0:
+            self.logger.debug(u'Not enough information to proceed')
             return []
         self.release_group = release_group  # used to sort results
         return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, languages)
@@ -107,7 +108,10 @@ class BierDopje(PluginBase.PluginBase):
         elif show_name in self.showids:  # get it from cache
             show_id = self.showids[show_name]
         else:  # retrieve it
-            show_id_url = '%sGetShowByName/%s' % (self.server_url, urllib.quote(show_name))
+            show_name_encoded = show_name
+            if isinstance(show_name_encoded, unicode):
+                show_name_encoded = show_name_encoded.encode('utf-8')
+            show_id_url = '%sGetShowByName/%s' % (self.server_url, urllib2.quote(show_name_encoded))
             self.logger.debug(u'Retrieving show id from web at %s' % show_id_url)
             page = urllib2.urlopen(show_id_url)
             dom = minidom.parse(page)

@@ -54,6 +54,7 @@ class SubsWiki(PluginBase.PluginBase):
             return []
         guess = guessit.guess_file_info(filepath, 'autodetect')
         if guess['type'] != 'episode':
+            self.logger.debug(u'Not an episode')
             return []
         # add multiple things to the release group set
         release_group = set()
@@ -65,6 +66,7 @@ class SubsWiki(PluginBase.PluginBase):
             if 'screenSize' in guess:
                 release_group.add(guess['screenSize'].lower())
         if 'series' not in guess or len(release_group) == 0:
+            self.logger.debug(u'Not enough information to proceed')
             return []
         self.release_group = release_group  # used to sort results
         return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, languages)
@@ -72,7 +74,9 @@ class SubsWiki(PluginBase.PluginBase):
     def query(self, name, season, episode, release_group, filepath, languages=None):
         sublinks = []
         searchname = name.lower().replace(' ', '_')
-        searchurl = '%s/serie/%s/%s/%s/' % (self.server_url, searchname, season, episode)
+        if isinstance(searchname, unicode):
+            searchname = searchname.encode('utf-8')
+        searchurl = '%s/serie/%s/%s/%s/' % (self.server_url, urllib2.quote(searchname), season, episode)
         self.logger.debug(u'Searching in %s' % searchurl)
         try:
             req = urllib2.Request(searchurl, headers={'User-Agent': self.user_agent})
