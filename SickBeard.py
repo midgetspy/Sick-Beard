@@ -126,7 +126,7 @@ def main():
         sickbeard.SYS_ENCODING = 'UTF-8'
 
     # need console logging for SickBeard.py and SickBeard-console.exe
-    consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
+    consoleLogging = (not hasattr(sys, "frozen")) or ('-console' in sickbeard.MY_NAME.lower())
 
     # rename the main thread
     threading.currentThread().name = "MAIN"
