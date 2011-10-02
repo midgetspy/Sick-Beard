@@ -1,10 +1,8 @@
-/* @override http://localhost:8081/css/iphone.css */
-
 @media screen and (max-width:480px) {
 	html { -webkit-text-size-adjust: none;}	
-
+		
 	body, #content, #MainMenu, #contentWrapper { min-width: 0!important; padding: 0; margin: 0; width: 100%; height: 100%; overflow-x: hidden; }
-
+	
 	body { font-family: "Kannada Sangam MN", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
 	
 	div#upgrade-notification { font: 110%/2 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; height: 100%; }
@@ -25,11 +23,10 @@
 
 /* @end */
 
-
 /* @group Tv Show List */
 
 	table#showListTable { width: 100%; margin: 0; padding: 0; }
-
+			
 	table#showListTable tr { position: relative; width: 100%; line-height: 1.5; display: block; padding: 0; }
 	
 	table#showListTable tr td { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
@@ -37,11 +34,16 @@
 	td.tvShowDate { position: absolute; width: 50%; display: block; left: -1px; bottom: -23px; text-align: left; margin: 0; padding: 3px; z-index: 5; font-style: italic; }	
 	th.tvShowDateHeader {  }
 
-	td.tvShowTitle { width: 100%; padding: 3px; margin-bottom: 51px; font: bold 200% "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; left: -1px; position: relative; }
+	td.tvShowTitle { width: 100%; padding: 3px; margin-bottom: 51px; font: bold 200% "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; left: -1px; position: relative; z-index: 0; }
 	td.tvShowTitle a:link, a:visited { text-decoration: none; }
-	th.tvShowTitleHeader {  }
+	th.tvShowTitleHeader { border-top-color: #984444; }
 	
-	td.tvShowQuality { display: none; }	
+	td.tvShowQuality { position: absolute; top: 0; right: 0; background: rgba(255,255,255,0); z-index: 0; width: 0; }
+	td.tvShowQuality span { background:rgba(255,255,255,0); color: rgba(255,255,255,0); }
+	td.tvShowQuality span.Custom:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #449; border-top-width: 0; }
+	td.tvShowQuality span.HD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #494; border-top-width: 0; }
+	td.tvShowQuality span.SD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #984444; border-top-width: 0; border-top-color: #444; }
+	td.tvShowQuality span.Any:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #444; border-top-width: 0; border-top-color: #494; }
 	th.tvShowQualityHeader { display: none; }
 	
 	td.tvShowStatus { display: none; }	
@@ -59,7 +61,6 @@
 	th.tvShowNetworkHeader {  }
 
 /* @end */
-	
-	
-	
+
 }
+
