@@ -1,4 +1,7 @@
+/* @override http://localhost:8081/css/iphone.css */
+
 @media screen and (max-width:480px) {
+
 	html { -webkit-text-size-adjust: none;}	
 		
 	body, #content, #MainMenu, #contentWrapper { min-width: 0!important; padding: 0; margin: 0; width: 100%; height: 100%; overflow-x: hidden; }
@@ -62,5 +65,29 @@
 
 /* @end */
 
-}
 
+/* @group Show Details Page */
+
+	div#content h1 { font: bold 200%/1.5 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; margin-left: 5px; display: block; margin-bottom: 38px; }
+
+	.align-left { display: block; text-align: center; margin: 0!important; padding: 0!important; }
+	
+	.float-left { margin: 15px 5px 5px; display: block; float: none; }
+
+	#summary { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; padding: 5px!important; margin: 5px!important; }
+	
+	table.infoTable { text-align: left; }
+	
+	select#pickShow { width: 60%; }
+	select#statusSelect { display: block; width: 100%; }
+	input#changeStatus { width: 50%; margin-left: 25%; }
+	
+	#checkboxControls.float-right { display: block; float: none; margin: 5px; position: relative; font: 120%/1.5 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
+	#checkboxControls.float-right span { display: block; }
+	#checkboxControls input { position: absolute; right: 5px; }
+
+
+/* @end */
+
+
+}
