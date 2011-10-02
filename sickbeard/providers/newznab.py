@@ -76,7 +76,7 @@ class NewznabProvider(generic.NZBProvider):
 		to_return = []
 
 		# add new query strings for exceptions
-		name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid)
+		name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid) + [show.name]
 		for cur_exception in name_exceptions:
 		
 			cur_params = {}

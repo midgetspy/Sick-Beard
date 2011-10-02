@@ -138,6 +138,9 @@ unicode_test_cases = [
                        ),
                       ]
 
+failure_cases = ['7sins-jfcs01e09-720p-bluray-x264']
+
+
 class UnicodeTests(unittest.TestCase):
     
     def _test_unicode(self, name, result):
@@ -149,6 +152,23 @@ class UnicodeTests(unittest.TestCase):
     def test_unicode(self):
         for (name, result) in unicode_test_cases:
             self._test_unicode(name, result)
+
+class FailureCaseTests(unittest.TestCase):
+    
+    def _test_name(self, name):
+        np = parser.NameParser(True)
+        try:
+            parse_result = np.parse(name)
+        except parser.InvalidNameException:
+            return True
+        
+        if VERBOSE:
+            print 'Actual: ', parse_result.which_regex, parse_result
+        return False
+    
+    def test_failures(self):
+        for name in failure_cases:
+            self.assertTrue(self._test_name(name))
 
 class ComboTests(unittest.TestCase):
     
@@ -307,4 +327,7 @@ if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(FailureCaseTests)
     unittest.TextTestRunner(verbosity=2).run(suite)

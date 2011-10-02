@@ -920,7 +920,7 @@ def save_config():
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
-    new_config['General']['web_ipv6'] = WEB_IPV6
+    new_config['General']['web_ipv6'] = int(WEB_IPV6)
     new_config['General']['web_log'] = int(WEB_LOG)
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME

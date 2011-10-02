@@ -78,7 +78,7 @@ class NZBMatrixProvider(generic.NZBProvider):
         if show and show.genre and 'documentary' in show.genre.lower():
             params['subcat'] = params['subcat'] + ',53,9' 
 
-        searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
+        searchURL = "https://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
@@ -150,7 +150,7 @@ class NZBMatrixCache(tvcache.TVCache):
 
     def _getRSSData(self):
         # get all records since the last timestamp
-        url = "http://rss.nzbmatrix.com/rss.php?"
+        url = "https://rss.nzbmatrix.com/rss.php?"
 
         urlArgs = {'page': 'download',
                    'username': sickbeard.NZBMATRIX_USERNAME,

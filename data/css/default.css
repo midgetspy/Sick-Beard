@@ -332,6 +332,8 @@ div#addShowPortal  button .buttontext { position: relative; display: block; padd
 
 #rootDirs, #rootDirsControls { width: 50%; min-width: 400px; }
 
+td.tvShow { font-weight: bold; }
+
 td.tvShow:hover { background-color: #cfcfcf !important; cursor: pointer; }
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
 
