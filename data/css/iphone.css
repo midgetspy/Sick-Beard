@@ -1,24 +1,65 @@
-body {
-width: 100%;
-padding: 0;
-margin: 0;
-font-size: 10px; 
-line-height:10px;
+/* @override http://localhost:8081/css/iphone.css */
+
+@media screen and (max-width:480px) {
+	html { -webkit-text-size-adjust: none;}	
+
+	body, #content, #MainMenu, #contentWrapper { min-width: 0!important; padding: 0; margin: 0; width: 100%; height: 100%; overflow-x: hidden; }
+
+	body { font-family: "Kannada Sangam MN", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
+	
+	div#upgrade-notification { font: 110%/2 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; height: 100%; }
+	
+	div#header-fix { height: 0; }
+
+	#content { width: auto!important; border: none; }	
+	
+	#contentWrapper { width: 100%; }
+	
+	div#topcontrol { display: none; }
+
+/* @group MainMenu */
+
+	ul#MainMenu {  }
+	ul#MainMenu li { margin: 0; border: none;}
+	ul#MainMenu a { border: none; }
+
+/* @end */
+
+
+/* @group Tv Show List */
+
+	table#showListTable { width: 100%; margin: 0; padding: 0; }
+
+	table#showListTable tr { position: relative; width: 100%; line-height: 1.5; display: block; padding: 0; }
+	
+	table#showListTable tr td { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
+
+	td.tvShowDate { position: absolute; width: 50%; display: block; left: -1px; bottom: -23px; text-align: left; margin: 0; padding: 3px; z-index: 5; font-style: italic; }	
+	th.tvShowDateHeader {  }
+
+	td.tvShowTitle { width: 100%; padding: 3px; margin-bottom: 51px; font: bold 200% "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; left: -1px; position: relative; }
+	td.tvShowTitle a:link, a:visited { text-decoration: none; }
+	th.tvShowTitleHeader {  }
+	
+	td.tvShowQuality { display: none; }	
+	th.tvShowQualityHeader { display: none; }
+	
+	td.tvShowStatus { display: none; }	
+	th.tvShowStatusHeader { display: none; }
+	
+	td.tvShowActive { display: none; }	
+	th.tvShowActiveHeader { display: none; }
+	
+	td.tvShowProgressBar { left: -4px; width: 100%; position: absolute; bottom: -50px; }	
+	td.tvShowProgressBar div.ui-progressbar-value { bottom: 0; position: absolute; }	
+	td.tvShowProgressBar div.progressbarText { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }	
+	th.tvShowProgressBarHeader {  }
+	
+	td.tvShowNetwork { position: absolute; right: -1px; bottom: -23px; text-align: right; width: 100%; margin: 0; padding: 3px; font-size: 120%; }
+	th.tvShowNetworkHeader {  }
+
+/* @end */
+	
+	
+	
 }
-
-.MainMenu a, .SubMenu a { padding: 2px; font-weight: normal;  }
-#btnExistingShow, #btnNewShow { min-height: 150px; }
-
-.sickbeardTable {
-margin-left:1%;
-margin-right:1%;
-width:98%;
-}
-
-table {
-margin:0;
-font-size: 10px;
-}
-
-#outerWrapper { width: 98%; padding-left: 1%; padding-right: 1%; }
-

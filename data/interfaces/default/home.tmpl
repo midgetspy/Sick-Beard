@@ -141,7 +141,7 @@
 
 <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+  <thead><tr><th class="nowrap tvShowDateHeader">Next Ep</th><th class="tvShowTitleHeader">Show</th><th class="tvShowNetworkHeader">Network</th><th class="tvShowQualityHeader">Quality</th><th class="tvShowProgressBarHeader">Downloads</th><th class="tvShowActiveHeader">Active</th><th class="tvShowStatusHeader">Status</th></tr></thead>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
@@ -197,15 +197,15 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end if
 
   <tr>
-    <td align="center">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
-    <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-    <td>$curShow.network</td>
+    <td class="tvShowDate" align="center">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
+    <td class="tvShowTitle"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+    <td class="tvShowNetwork">$curShow.network</td>
 #if $curShow.quality in $qualityPresets:
-    <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
+    <td class="tvShowQuality" align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
-    <td align="center"><span class="quality Custom">Custom</span></td>
+    <td class="tvShowQuality" align="center"><span class="quality Custom">Custom</span></td>
 #end if
-    <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
+    <td class="tvShowProgressBar" align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
         <script type="text/javascript">
         <!--
             \$(function() {
@@ -217,8 +217,8 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
         //-->
         </script>
     </td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center">$curShow.status</td>
+    <td class="tvShowActive" align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
+    <td class="tvShowStatus" align="center">$curShow.status</td>
   </tr>
 
 
