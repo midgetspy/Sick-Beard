@@ -31,10 +31,10 @@
 	
 	table#showListTable tr td { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
 
-	td.tvShowDate { position: absolute; width: 50%; display: block; left: -1px; bottom: -23px; text-align: left; margin: 0; padding: 3px; z-index: 5; font-style: italic; }	
+	td.tvShowDate { position: absolute; width: 50%; display: block; left: -1px; bottom: -23px; text-align: left; margin: 0; padding: 3px 3px 3px 5px; z-index: 5; font-style: italic; }	
 	th.tvShowDateHeader {  }
 
-	td.tvShowTitle { width: 100%; padding: 3px; margin-bottom: 51px; font: bold 200% "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; left: -1px; position: relative; z-index: 0; }
+	td.tvShowTitle { width: 100%; padding: 3px 3px 3px 5px; margin-bottom: 51px; font: bold 200% "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; left: -1px; position: relative; z-index: 0; }
 	td.tvShowTitle a:link, a:visited { text-decoration: none; }
 	th.tvShowTitleHeader { border-top-color: #984444; }
 	
@@ -57,7 +57,7 @@
 	td.tvShowProgressBar div.progressbarText { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }	
 	th.tvShowProgressBarHeader {  }
 	
-	td.tvShowNetwork { position: absolute; right: -1px; bottom: -23px; text-align: right; width: 100%; margin: 0; padding: 3px; font-size: 120%; }
+	td.tvShowNetwork { position: absolute; right: -1px; bottom: -23px; text-align: right; width: 100%; margin: 0; padding: 3px 5px 3px 3px; font-size: 120%; }
 	th.tvShowNetworkHeader {  }
 
 /* @end */
