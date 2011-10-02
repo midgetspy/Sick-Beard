@@ -490,7 +490,7 @@ def initialize(consoleLogging=True):
         if not EZRSS:
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
        
-        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTZ', 'tvtorrentz', 0))    
+        TVTORRENTZ = bool(check_setting_int(CFG, 'TVTORRENTZ', 'tvtorrentz', 0))    
         TVTORRENTZ_PASSKEY = check_setting_str(CFG, 'TVTORRENTZ', 'tvtorrentz_passkey', '')
 
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
