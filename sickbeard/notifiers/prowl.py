@@ -18,6 +18,7 @@
 
 from httplib import HTTPSConnection
 from urllib import urlencode
+from ssl import SSLError
 
 import sickbeard
 
