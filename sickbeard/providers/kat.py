@@ -59,7 +59,7 @@ class KATProvider(rssbacklogtorrent.RSSBacklogProvider):
 
 	 	seeds = item.findtext('seeds')
 		logger.log(rawTitle + " had " + seeds + " seeds", logger.DEBUG)
-		return int(seeds) >= 10	# Minimum number of seeds
+		return int(seeds) >= sickbeard.KAT_MINIMUM_SEEDS # Minimum number of seeds
 
 class KATRSSCache(rssbacklogtorrent.RSSCache):
     def __init__(self, provider):

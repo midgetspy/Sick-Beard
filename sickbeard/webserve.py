@@ -1090,6 +1090,7 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
+                      kat_minimum_seeds=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1160,6 +1161,7 @@ class ConfigProviders:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
+        sickbeard.KAT_MINIMUM_SEEDS = int(kat_minimum_seeds)
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()

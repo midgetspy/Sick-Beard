@@ -221,6 +221,15 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             </label>
                         </div>
 </div>
+<div class="providerDiv" id="katDiv">
+						<div class="field-pair">
+								<label class="clearfix">
+										<span class="component-title">KickassTorrents Minimum Seeds:</span>
+										<input class="component-desc" type="text" name="kat_minimum_seeds" value="$sickbeard.KAT_MINIMUM_SEEDS" size="8"
+											onkeyup="this.value=this.value.replace(/[^\d]/g,'')" />
+								</label>
+						</div>
+</div>
 
 <!-- end div for editing providers -->
 

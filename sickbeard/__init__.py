@@ -163,6 +163,7 @@ BTN_PASSKEY = None
 BTN_AUTHKEY = None
 
 KAT = False
+KAT_MINIMUM_SEEDS = 10
 
 TORRENT_DIR = None
 
@@ -396,7 +397,7 @@ def initialize(consoleLogging=True):
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_USER_ID, BTN_AUTH_TOKEN, BTN_PASSKEY, BTN_AUTHKEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
-                KAT, \
+                KAT, KAT_MINIMUM_SEEDS, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -553,7 +554,9 @@ def initialize(consoleLogging=True):
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
+
         KAT = bool(check_setting_int(CFG, 'KAT', 'kat', 0))
+        KAT_MINIMUM_SEEDS = check_setting_int(CFG, 'KAT', 'kat_minimum_seeds', 10)
 
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
         BTN_USER_ID = check_setting_str(CFG, 'BTN', 'btn_user_id', '')
@@ -1081,6 +1084,7 @@ def save_config():
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
     new_config['KAT'] = {}
     new_config['KAT']['kat'] = int(KAT)
+    new_config['KAT']['kat_minimum_seeds'] = KAT_MINIMUM_SEEDS
 
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
