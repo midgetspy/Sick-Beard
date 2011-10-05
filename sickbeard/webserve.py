@@ -1368,7 +1368,7 @@ class ConfigAnime:
         return _munge(t)
 
     @cherrypy.expose
-    def saveAnime(self, use_anidb=None, anidb_username=None, anidb_password=None, anidb_use_mylist=None):
+    def saveAnime(self, use_anidb=None, anidb_username=None, anidb_password=None, anidb_use_mylist=None, split_home=None):
 
         results = []
 
@@ -1376,17 +1376,22 @@ class ConfigAnime:
             use_anidb = 1
         else:
             use_anidb = 0
-        
+
         if anidb_use_mylist == "on":
             anidb_use_mylist = 1
         else:
             anidb_use_mylist = 0
-        
+
+        if split_home == "on":
+            split_home = 1
+        else:
+            split_home = 0
 
         sickbeard.USE_ANIDB = use_anidb
         sickbeard.ANIDB_USERNAME = anidb_username
         sickbeard.ANIDB_PASSWORD = anidb_password
         sickbeard.ANIDB_USE_MYLIST = anidb_use_mylist
+        sickbeard.ANIME_SPLIT_HOME = split_home
 
         sickbeard.save_config()
 
@@ -1891,6 +1896,18 @@ class Home:
     def index(self):
 
         t = PageTemplate(file="home.tmpl")
+        if sickbeard.ANIME_SPLIT_HOME:
+            shows = []
+            anime = []
+            for show in sickbeard.showList:
+                if show.is_anime:
+                    anime.append(show)
+                else:
+                    shows.append(show)
+            t.showlists = [["Shows",shows],
+                           ["Anime",anime]]
+        else:
+            t.showlists = [["Shows",sickbeard.showList]]
         t.submenu = HomeMenu()
         return _munge(t)
 
@@ -2134,7 +2151,19 @@ class Home:
             elif x.lower().startswith('the '):
                     x = x[4:]
             return x
-        t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
+
+        if sickbeard.ANIME_SPLIT_HOME:
+            shows = []
+            anime = []
+            for show in sickbeard.showList:
+                if show.is_anime:
+                    anime.append(show)
+                else:
+                    shows.append(show)
+            t.sortedShowLists = [["Shows",sorted(shows, lambda x, y: cmp(titler(x.name), titler(y.name)))],
+                           ["Anime",sorted(anime, lambda x, y: cmp(titler(x.name), titler(y.name)))]]
+        else:
+            t.sortedShowLists = [["Shows",sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))]]
 
 
         t.bwl = BlackAndWhiteList(showObj.tvdbid)

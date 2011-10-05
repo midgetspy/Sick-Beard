@@ -17,7 +17,6 @@
             <div id="config-components">
 
                 <div id="core-component-group1" class="component-group clearfix">
-
                     <div class="component-group-desc">
                         <h3><a href="http://anidb.info" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/providers/anidb.gif" alt="AniDB" title="AniDB" width="16" height="16" /> AniDB</a></h3>
                         <p>AniDB is non-profit database of anime information that is freely open to the public</p>
@@ -66,13 +65,25 @@
 	                        </div>
 						</div>
                         <input type="submit" class="config_submitter" value="Save Changes" />
-                        
-                        </div><!-- /content_use_notifo //-->
-
                     </fieldset>
 
                 </div><!-- /component-group //-->
+                <div id="core-component-group2" class="component-group clearfix">
 
+                    <div class="component-group-desc">
+                        <h3>Look and Feel</h3>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="split_home" id="split_home" #if $sickbeard.ANIME_SPLIT_HOME then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_notifo">
+                                <span class="component-title">Split show lists</span>
+                                <span class="component-desc">Separate anime and normal shows in groups</span>
+                            </label>
+                        </div>
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                   </fieldset>
+                </div><!-- /component-group //-->
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->

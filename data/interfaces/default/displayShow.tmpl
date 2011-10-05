@@ -49,8 +49,19 @@
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
 <select id="pickShow">
-#for $curShow in $sortedShowList:
-<option value="$curShow.tvdbid" #if $curShow == $show then "selected=\"selected\"" else ""#>$curShow.name</option>
+#for $curShowList in $sortedShowLists:
+#set $curShowType = $curShowList[0]
+#set $curShowList = $curShowList[1]
+
+#if len($sortedShowLists) > 1:
+    <optgroup label="$curShowType">
+#end if
+    #for $curShow in $curShowList:
+    <option value="$curShow.tvdbid" #if $curShow == $show then "selected=\"selected\"" else ""#>$curShow.name</option>
+    #end for
+#if len($sortedShowLists) > 1:
+    </optgroup>
+#end if
 #end for
 </select>
 <div class="navShow"><img id="nextShow" width="16" height="18" src="$sbRoot/images/next.gif" alt="&gt;&gt;" title="Next Show" /></div>

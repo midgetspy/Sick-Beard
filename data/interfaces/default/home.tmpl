@@ -103,7 +103,7 @@
   id: 'cookie',
   format: function(table) {
     var sortList = table.config.sortList;
-    var tablesorterCookieJar = \$.cookieJar('tablesorter');
+    var tablesorterCookieJar = \$.cookieJar('tablesorter_'+\$(table).attr('id'));
     if ( sortList.length > 0) {
       tablesorterCookieJar.set(\$(table).attr('id'), sortList);
     } else {
@@ -118,12 +118,13 @@
 \$(document).ready(function(){ 
 
     // workaround: the tablesorter cookie widget does not support a defaulted sortList set within the $.tablesorter() instantiation
-    var tablesorterCookieJar = \$.cookieJar('tablesorter');
-    var sortList = tablesorterCookieJar.get('showListTable');
+    var tablesorterCookieJar = \$.cookieJar('tablesorter_showListTableShows');
+    console.log(tablesorterCookieJar)
+    var sortList = tablesorterCookieJar.get('showListTableShows');
     if (!sortList || !sortList.length)
-        sortList = [[5,1],[1,0]];   
+        sortList = [[5,1],[1,0]];
 
-    \$("#showListTable").tablesorter({
+    \$("#showListTableShows").tablesorter({
         sortList: sortList,
         widgets: ['cookie','zebra'],
         headers: {
@@ -135,13 +136,39 @@
         }
     });
 
+
+    if(\$("#showListTableAnime").length > 0)
+
+        var tablesorterCookieJar = \$.cookieJar('tablesorter_showListTableAnime');
+        var sortList = tablesorterCookieJar.get('showListTableAnime');
+        if (!sortList || !sortList.length)
+            sortList = [[5,1],[1,0]];
+
+        \$("#showListTableAnime").tablesorter({
+            sortList: sortList,
+            widgets: ['cookie','zebra'],
+            headers: {
+                0: { sorter: 'nextAirDate' },
+                1: { sorter: 'loadingNames' },
+                3: { sorter: 'quality' },
+                4: { sorter: 'eps' },
+                5: { sorter: 'active' }
+            }
+        });
+
+
 });
 //-->
 </script>
+#for $curShowlist in $showlists:
+#set $curListType = $curShowlist[0]
+#set $myShowList = $list($curShowlist[1])
+#if $curListType == "Anime":
+<h1>Anime List</h1>
+#end if
+<table id="showListTable$curListType" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-<table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-
-  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+  <thead><tr><th class="nowrap">Next Ep</th><th>$curListType</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
@@ -173,7 +200,7 @@
   </tr>
 #end for
 
-#set $myShowList = $list($sickbeard.showList)
+
 $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #for $curShow in $myShowList:
 #set $curEp = $curShow.nextEpisode()
@@ -225,6 +252,6 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end for
 </tbody>
 </table>
-
+#end for
 <script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

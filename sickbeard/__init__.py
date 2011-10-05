@@ -248,6 +248,7 @@ ANIDB_USERNAME = None
 ANIDB_PASSWORD = None
 ANIDB_USE_MYLIST = 0
 ADBA_CONNECTION = None
+ANIME_SPLIT_HOME = False
 
 USE_SYNOINDEX = False
 
@@ -377,7 +378,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD,FANZUB, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, \
-                ANIMESUPPORT, USE_ANIDB, ANIDB_USERNAME, ANIDB_PASSWORD, ANIDB_USE_MYLIST
+                ANIMESUPPORT, USE_ANIDB, ANIDB_USERNAME, ANIDB_PASSWORD, ANIDB_USE_MYLIST, ANIME_SPLIT_HOME
 
         if __INITIALIZED__:
             return False
@@ -607,7 +608,9 @@ def initialize(consoleLogging=True):
         ANIDB_USERNAME = check_setting_str(CFG, 'ANIDB', 'anidb_username', '')
         ANIDB_PASSWORD = check_setting_str(CFG, 'ANIDB', 'anidb_password', '')
         ANIDB_USE_MYLIST = check_setting_str(CFG, 'ANIDB', 'anidb_use_mylist', '')
-        
+
+        ANIME_SPLIT_HOME = bool(check_setting_int(CFG, 'ANIME', 'anime_split_home', 0))
+
         # if this exists it's legacy, use the info to upgrade metadata to the new settings
         if METADATA_TYPE:
 
@@ -1116,6 +1119,9 @@ def save_config():
     new_config['ANIDB']['anidb_username'] = ANIDB_USERNAME
     new_config['ANIDB']['anidb_password'] = ANIDB_PASSWORD
     new_config['ANIDB']['anidb_use_mylist'] = ANIDB_USE_MYLIST
+
+    new_config['ANIME'] = {}
+    new_config['ANIME']['anime_split_home'] = int(ANIME_SPLIT_HOME)
 
     new_config['GUI'] = {}
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
