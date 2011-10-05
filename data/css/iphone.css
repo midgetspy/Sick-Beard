@@ -1,4 +1,10 @@
+/* @override 
+	http://cypress.local:8081/css/iphone.css
+	http://localhost:8081/css/iphone.css
+*/
+
 @media screen and (max-width:480px) {
+
 	html { -webkit-text-size-adjust: none;}	
 		
 	body, #content, #MainMenu, #contentWrapper { min-width: 0!important; padding: 0; margin: 0; width: 100%; height: 100%; overflow-x: hidden; }
@@ -9,12 +15,12 @@
 	
 	div#header-fix { height: 0; }
 
-	#content { width: auto!important; border: none; }	
+	#content { border: none; }	
 	
 	#contentWrapper { width: 100%; }
 	
 	div#topcontrol { display: none; }
-
+	
 	tr, td { margin: 0; padding: 0; }
 
 /* @group MainMenu */
@@ -22,6 +28,13 @@
 	ul#MainMenu {  }
 	ul#MainMenu li { margin: 0; border: none;}
 	ul#MainMenu a { border: none; }
+
+/* @end */
+
+/* @group SubMenu */
+
+	#SubMenu { color: rgba(255,254,254,0); display: block; height: 50px; font-size: 100%; line-height: 1.5; }
+	#SubMenu span { display: block; margin: 3px 0 0; padding: 0; width: 100%; color: #333; position: absolute; }
 
 /* @end */
 
@@ -64,9 +77,10 @@
 
 /* @end */
 
+
 /* @group Show Details Page */
 
-	div#content h1 { font: bold 200%/1.5 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; margin-left: 5px; display: block; margin-bottom: 38px; }
+	div#content h1 { font: bold 200%/1.5 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; margin-bottom: 38px; margin-left: 5px; }
 
 	.align-left { display: block; margin: 0 0 0 5px; padding: 0!important; }
 	
@@ -127,6 +141,30 @@
 	
 /* @end */
 
+/* @group coming episodes */
+
+	h1.day { display: block; margin-right: 5px; text-align: left; padding-left: 5px; }
+	
+	.ep_listing { margin-right: 5px; margin-left: 5px; }
+	
+	.tvshowDiv { overflow-x:hidden; position: relative; }
+	
+	.tvshowDiv table { display: block; }
+	
+	.tvshowDiv tbody { width: 100%; display: block; }
+	
+	.tvshowDiv tr { width: 100%; display: table; }
+	
+	.tvshowDiv th  { width: 100%; display: table; }
+	
+	th.nobg { display: block; width: 100%; text-align: center; }
+	
+	.banner_thumb { width: 100%!important; height: 0; }
+				
+	.ep_summaryTrigger { display: none; }
+	
+	.ep_summary { margin: 10px 0 0; padding: 0; display: block!important; }
+	
 /* @end */
 
 
