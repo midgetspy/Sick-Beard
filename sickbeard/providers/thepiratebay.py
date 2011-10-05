@@ -44,7 +44,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         #A proxy server for thepiratebay.org usefull for people living in countries blocking TPB
         #Countries blocking TPB access are Italy, Denmark, Germany, Ireland, Netherlands. 
         #http://en.wikipedia.org/wiki/The_Pirate_Bay#Blocking
-        self.url = 'http://proxy2bay.appspot.com/thepiratebay.org/' #'http://labaia.ws/'
+        self.url = 'http://proxy2bay.appspot.com/thepiratebay.org/'
         
         self.searchurl = 'http://proxy2bay.appspot.com/thepiratebay.org/search/%s/0/7/200'  # order by seed       
 
@@ -201,7 +201,7 @@ class ThePirateBayCache(tvcache.TVCache):
 
     def _getData(self):
        
-        url = 'http://labaia.ws/tv/latest/' #url for the last 50 tv-show
+        url = 'http://proxy2bay.appspot.com/thepiratebay.org/tv/latest/' #url for the last 50 tv-show
 
         logger.log(u"ThePirateBay cache update URL: "+ url, logger.DEBUG)
 
