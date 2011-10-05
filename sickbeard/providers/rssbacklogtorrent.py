@@ -143,20 +143,18 @@ class RSSBacklogProvider(generic.TorrentProvider):
         return results
 
 class RSSCache(tvcache.TVCache):
-
     def __init__(self, provider):
-
         tvcache.TVCache.__init__(self, provider)
 
         # only poll every 15 minutes max
         self.minTime = 15
 
+        self.url = provider.url
+
     def _getRSSData(self):
-        url = self.provider.url + 'feed/'
+        logger.log(u"cache update URL: " + self.url, logger.DEBUG)
 
-        logger.log(u"cache update URL: " + url, logger.DEBUG)
-
-        data = self.provider.getURL(url)
+        data = self.provider.getURL(self.url)
 
         return data
 

@@ -41,7 +41,7 @@ class KATProvider(rssbacklogtorrent.RSSBacklogProvider):
         return 'kat.gif'
        
     def _get_search_url(self, show_snippet):
-		return self.url + 'search/' + urllib.quote(show_snippet) + '/?rss=1'
+		return self.url + 'search/' + urllib.quote(show_snippet.strip()) + '/?rss=1'
        
     def _get_torrent_title_and_url(self, item):
 		title = item.findtext('title')
@@ -58,12 +58,13 @@ class KATProvider(rssbacklogtorrent.RSSBacklogProvider):
 		    return false
 
 	 	seeds = item.findtext('seeds')
-		logger.log("Torrent had " + seeds + " seeds", logger.DEBUG)
+		logger.log(rawTitle + " had " + seeds + " seeds", logger.DEBUG)
 		return int(seeds) >= 10	# Minimum number of seeds
 
 class KATRSSCache(rssbacklogtorrent.RSSCache):
+    def __init__(self, provider):
+        rssbacklogtorrent.RSSCache.__init__(self, provider)
 
-	def _get_rss_uri(self):
-	   return 'tv/?rss=1' #TV list
+        self.url += 'tv/?rss=1' #TV list
 
 provider = KATProvider()
