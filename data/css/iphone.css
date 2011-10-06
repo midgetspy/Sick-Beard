@@ -1,5 +1,3 @@
-/* @override http://localhost:8081/css/iphone.css */
-
 @media screen and (max-width:480px) {
 
 	html { -webkit-text-size-adjust: none; }	
