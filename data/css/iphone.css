@@ -1,23 +1,20 @@
-/* @override 
-	http://cypress.local:8081/css/iphone.css
-	http://localhost:8081/css/iphone.css
-*/
+/* @override http://localhost:8081/css/iphone.css */
 
 @media screen and (max-width:480px) {
 
-	html { -webkit-text-size-adjust: none;}	
+	html { -webkit-text-size-adjust: none; }	
 		
-	body, #content, #MainMenu, #contentWrapper { min-width: 0!important; padding: 0; margin: 0; width: 100%; height: 100%; overflow-x: hidden; }
+	body, #content, #MainMenu, #contentWrapper { min-width: 0!important; padding: 0; margin: 0; width: 100%; overflow-x: hidden; }
 	
 	body { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
 	
 	div#upgrade-notification { font: 110%/2 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; height: 100%; }
 	
-	div#header-fix { height: 0; }
-
-	#content { border: none; }	
+	/*div { padding: 0!important; }*/
 	
-	#contentWrapper { width: 100%; }
+	div#header-fix { height: 0; }
+	
+	#content { border: none; }	
 	
 	div#topcontrol { display: none; }
 	
@@ -25,16 +22,16 @@
 
 /* @group MainMenu */
 
-	ul#MainMenu {  }
-	ul#MainMenu li { margin: 0; border: none;}
-	ul#MainMenu a { border: none; }
+	#MainMenu {  }
+	#MainMenu li { margin: 0; border: none;}
+	#MainMenu a { border: none; }
 
 /* @end */
 
 /* @group SubMenu */
 
-	#SubMenu { color: rgba(255,254,254,0); display: block; height: 50px; font-size: 100%; line-height: 1.5; }
-	#SubMenu span { display: block; margin: 3px 0 0; padding: 0; width: 100%; color: #333; position: absolute; }
+	#SubMenu { color: rgba(255,254,254,0); display: block; height: 50px; font-size: 100%; line-height: 1.5; padding-left: 0!important; }
+	#SubMenu span { display: block; margin: 3px 0 0; padding: 0 5px; width: 90%; color: #333; position: absolute; }
 
 /* @end */
 
@@ -80,14 +77,11 @@
 
 /* @group Show Details Page */
 
-	div#content h1 { font: bold 200%/1.5 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; margin-bottom: 38px; margin-left: 5px; }
-
+	div#content h1 { font: bold 200%/1.5 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; margin-bottom:38px; margin-left: 5px; }
 	.align-left { display: block; margin: 0 0 0 5px; padding: 0!important; }
-	
 	.float-left { margin: 15px 5px 5px; display: block; float: none; position: relative; top: 170px; }
-
 	#summary { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; padding: 5px!important; margin: 5px!important; }
-	
+
 	table.infoTable { text-align: left; }
 	
 	select#pickShow { width: 55%; }
@@ -100,17 +94,12 @@
 	#checkboxControls span.selectAll { float: left; }
 	#checkboxControls span.clearAll { margin-left: 10px; float: left; }
 	
-	
-	table.sickbeardTable {  }
-	
-	table.sickbeardTable th {  }
+	.sickbeardTable {  }
+	.sickbeardTable th {  }
+	.sickbeardTable tr {  }
 		
-	table.sickbeardTable tr {  }
-	
 	tr.seasonheader {  }
-
 	tr.seasonheader td{  }
-	
 	tr.seasonheader td h2 {  }
 	
 	th.seasonCheckboxWrapper {  }
@@ -118,25 +107,15 @@
 	table.sickbeardTable input.seasonCheck {  }
 	
 	th.hideable {  }
-	
 	td.epCheckboxWrapper { }
-	
 	td.nfo { }
-	
 	td.tbn { }
-	
 	td.epNum {  }
-
 	td.epTitle {  }
-	
 	img.plotInfo { }
-	
 	td.epAirDate { }
-	
 	td.epFileLocation { }
-	
 	td.status_column { }
-	
 	td.epSearchButton { }
 	
 /* @end */
