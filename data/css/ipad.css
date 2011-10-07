@@ -1,0 +1,12 @@
+@media screen and (max-width:1024px) and (min-width: 480px) { 
+	td.tvShowDate { font-size: 100%; line-height: 3; }
+	td.tvShowTitle { font-size: 150%; line-height: 2; }
+	
+	th.tvShowActiveHeader {  }
+	td.tvShowActive {  }
+	
+	th.tvShowStatusHeader {  }
+	td.tvShowStatus { font-size: 80%; }
+		
+	table.sickbeardTable tr { position: relative; }
+}

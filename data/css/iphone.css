@@ -1,4 +1,4 @@
-@media screen and (max-width:480px) {
+@media screen and (max-width:1024px) {
 
 	html { -webkit-text-size-adjust: none; }	
 		
@@ -25,6 +25,9 @@
 	#MainMenu a { border: none; }
 
 /* @end */
+}
+
+@media screen and (max-width:480px) {
 
 /* @group SubMenu */
 
