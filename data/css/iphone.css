@@ -25,9 +25,6 @@
 	#MainMenu a { border: none; }
 
 /* @end */
-}
-
-@media screen and (max-width:480px) {
 
 /* @group SubMenu */
 
@@ -35,6 +32,10 @@
 	#SubMenu span { display: block; margin: 3px 0 0; padding: 0 5px; width: 90%; color: #333; position: absolute; }
 
 /* @end */
+
+}
+
+@media screen and (max-width:480px) {
 
 /* @group Tv Show List */
 

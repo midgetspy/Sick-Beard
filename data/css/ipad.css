@@ -19,9 +19,7 @@
 	
 	#summary { margin-left: 0!important; display: block; width: 100%; padding-left: 5px!important; }
 	
-	.align-right {  }
-	
-	.float-left { display: block; position: absolute; float: none; width: 100%; margin: 50px 0 0 270px; padding: 5px; }
+	.float-left { display: block; position: absolute; float: none; margin: 50px 0 0 270px; padding: 5px; }
 	#checkboxControls.float-right { display: block; width: 100%; float: none!important; margin-bottom: 60px; padding-left: 5px; position: relative; }
 	#checkboxControls.float-right label { width: 23%; display: block; float: left; font-size: 120%; line-height: 2; position: relative; padding-right: 15px; }
 	#checkboxControls.float-right span { display: block; width: 100%; padding-left: 5px; }
