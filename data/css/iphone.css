@@ -130,43 +130,33 @@
 	.ep_listing { margin-right: 5px; margin-left: 5px; }
 	
 	.tvshowDiv { overflow-x:hidden; position: relative; }
-	
 	.tvshowDiv table { display: block; }
-	
 	.tvshowDiv tbody { width: 100%; display: block; }
 	
 	.tvshowDiv tr { width: 100%; display: table; }
-	
 	.tvshowDiv th  { width: 100%; display: table; }
 	
 	th.nobg { display: block; width: 100%; text-align: center; }
-	
 	.banner_thumb { width: 100%!important; height: 0; }
 				
 	.ep_summaryTrigger { display: none; }
-	
 	.ep_summary { margin: 10px 0 0; padding: 0; display: block!important; }
 	
 	/* end of poster & banner layouts */
 	
 	
 	.plotInfo { display: none; }
-	
 	thead { display: none; }
 	
 	#showListTable tr { display: block!important; width: 100%; position: relative; margin-bottom: 6px; }
 	
 	.nextEpNum { bottom: 0; display: block; width: 10%; position: absolute; }
-	
 	.nextEpTitle { font-size: 130%; line-height: 1; display: block; font-weight: bold; position: absolute; top: 25px; }
-	
 	.nextEpAirdate { text-align: right; position: absolute; bottom: 0; left: 15%; width: 20%; }
-	
 	.nextEpShow { font-size: 130%; line-height: 1; display: block; margin-bottom: 25px; }
-	
 	.nextEpNetwork { position: absolute; bottom: 0; left: 40%; }
-	
-	.nextEpQuality { background: rgba(255,255,255,0); color: rgba(255,255,255,0); }
+
+	.nextEpQuality { background: rgba(255,255,255,0)!important; color: rgba(255,255,255,0)!important; }
 	.nextEpQuality.Custom:before { content: ""; position: absolute; top: 0; right: 0; border-width: 0 16px 16px 0; border-style: solid; border-color: rgba(255,255,255,0) #449; border-top-width: 0; }
 	.nextEpQuality.HD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #494; border-top-width: 0; }
 	.nextEpQuality.SD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #984444; border-top-width: 0; border-top-color: #444; }
