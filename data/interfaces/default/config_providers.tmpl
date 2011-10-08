@@ -197,6 +197,12 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Glype Proxy URL:</span>
+                                <input class="component-desc" type="text" name="thepiratebay_proxy" value="$sickbeard.THEPIRATEBAY_PROXY" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
                             <input type="checkbox" name="thepiratebay_trusted" id="thepiratebay_trusted" #if $sickbeard.THEPIRATEBAY_TRUSTED then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="thepiratebay_trusted">
                                 <span class="component-title">Trusted Download</span>

@@ -18,7 +18,7 @@
 
 import re
 import datetime
-import urllib
+import urllib, urllib2
 
 import sickbeard
 import generic
@@ -26,10 +26,10 @@ import generic
 from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
+from sickbeard import helpers
 from sickbeard import show_name_helpers
 from sickbeard import db
 from sickbeard.common import Overview
-
 
 class ThePirateBayProvider(generic.TorrentProvider):
 
@@ -41,15 +41,10 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         self.cache = ThePirateBayCache(self)
 
-        #A proxy server for thepiratebay.org usefull for people living in countries blocking TPB
-        #Countries blocking TPB access are Italy, Denmark, Germany, Ireland, Netherlands. 
-        #http://en.wikipedia.org/wiki/The_Pirate_Bay#Blocking
-        self.url = 'http://labaia.ws/'
-        
-        self.searchurl = 'http://labaia.ws/search/%s/0/7/200'  # order by seed       
+        self.url = 'http://thepiratebay.org/'
 
-        self.regex = '\t<td>.+?"/torrent/\d+/(?P<title>.*?)".+?<a href="(?P<url>.+?)".*?</td>' 
-        
+        self.searchurl = 'http://thepiratebay.org/search/%s/0/7/200'  # order by seed       
+
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
         
@@ -126,16 +121,23 @@ class ThePirateBayProvider(generic.TorrentProvider):
     def _doSearch(self, search_params, show=None):
     
         results = []
-    
+        proxy_url = sickbeard.THEPIRATEBAY_PROXY
+
         searchURL = self.searchurl %(urllib.quote(search_params))    
+        re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)".*?<a href="(?P<url>.*?)".*?</td>' 
+
+        if proxy_url != '':
+            searchURL = proxy_url + 'browse.php?u=' + searchURL + '&b=32'
+            re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)&amp;b=32".*?<a href="(?P<url>.*?)&amp;b=32".*?</td>' 
+    
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
                     
-        data = self.getURL(searchURL)
+        data = urllib.unquote(self.getURL(searchURL))
         if not data:
             return []
 
         #Extracting torrent information from searchURL                   
-        match = re.compile(self.regex, re.DOTALL ).finditer(data)
+        match = re.compile(re_title_url, re.DOTALL ).finditer(data)
         for torrent in match:
            
             #Accept Torrent only from Good People
@@ -156,6 +158,27 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         return (title, url)
 
+    def getURL(self, url, headers=None):
+
+        proxy_url = sickbeard.THEPIRATEBAY_PROXY
+
+        if not headers:
+            headers = []
+            
+        headers.append(('Referer', proxy_url))
+        for h in headers:
+            print h
+
+        result = None
+
+        try:
+            result = helpers.getURL(url, headers)
+        except (urllib2.HTTPError, IOError), e:
+            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+            return None
+
+        return result
+
 class ThePirateBayCache(tvcache.TVCache):
 
     def __init__(self, provider):
@@ -164,15 +187,19 @@ class ThePirateBayCache(tvcache.TVCache):
 
         # only poll ThePirateBay every 10 minutes max
         self.minTime = 10
-        
-        self.regex = '\t<td>.+?"/torrent/\d+/(?P<title>.*?)".+?<a href="(?P<url>.+?)".*?</td>' 
-        
+
     def updateCache(self):
-        
+
+        re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)".*?<a href="(?P<url>.*?)".*?</td>' 
+
+        proxy_url = sickbeard.THEPIRATEBAY_PROXY
+        if proxy_url != '':
+            re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)&amp;b=32".*?<a href="(?P<url>.*?)&amp;b=32".*?</td>' 
+                
         if not self.shouldUpdate():
             return
 
-        data = self._getData()
+        data = urllib.unquote(self._getData())
 
         # as long as the http request worked we count this as an update
         if data:
@@ -184,7 +211,7 @@ class ThePirateBayCache(tvcache.TVCache):
         logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
         self._clearCache()
 
-        match = re.compile(self.regex, re.DOTALL).finditer(data)
+        match = re.compile(re_title_url, re.DOTALL).finditer(data)
         if not match:
             logger.log(u"The Data returned from the ThePirateBay is incomplete, this result is unusable", logger.ERROR)
             return []
@@ -201,11 +228,15 @@ class ThePirateBayCache(tvcache.TVCache):
 
     def _getData(self):
        
-        url = 'http://labaia.ws/tv/latest/' #url for the last 50 tv-show
-
+        url = 'http://thepiratebay.org/tv/latest/' #url for the last 50 tv-show
+        proxy_url = sickbeard.THEPIRATEBAY_PROXY.strip()
+        
+        if proxy_url != '':
+            url = proxy_url + 'browse.php?u=' + url + '&b=32'
+        
         logger.log(u"ThePirateBay cache update URL: "+ url, logger.DEBUG)
 
-        data = self.provider.getURL(url)
+        data = self.provider.getURL(url,[('Referer', proxy_url)])
 
         return data
 

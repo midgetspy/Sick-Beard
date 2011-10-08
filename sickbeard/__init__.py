@@ -150,6 +150,7 @@ TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
 THEPIRATEBAY = False
 THEPIRATEBAY_TRUSTED = False
+THEPIRATEBAY_PROXY = None
 
 TORRENT_DIR = None
 
@@ -350,7 +351,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH,  THEPIRATEBAY, THEPIRATEBAY_TRUSTED, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH,  THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -496,7 +497,8 @@ def initialize(consoleLogging=True):
 
         THEPIRATEBAY =  bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay', 0)) 
         THEPIRATEBAY_TRUSTED =  bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_trusted', 0))         
-
+        THEPIRATEBAY_PROXY = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy', '')
+        
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
@@ -982,6 +984,7 @@ def save_config():
     new_config['THEPIRATEBAY'] = {}
     new_config['THEPIRATEBAY']['thepiratebay'] = int(THEPIRATEBAY)
     new_config['THEPIRATEBAY']['thepiratebay_trusted'] = int(THEPIRATEBAY_TRUSTED)    
+    new_config['THEPIRATEBAY']['thepiratebay_proxy'] = THEPIRATEBAY_PROXY
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)
