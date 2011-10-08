@@ -166,8 +166,6 @@ class ThePirateBayProvider(generic.TorrentProvider):
             headers = []
             
         headers.append(('Referer', proxy_url))
-        for h in headers:
-            print h
 
         result = None
 
