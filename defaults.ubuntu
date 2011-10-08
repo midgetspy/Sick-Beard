@@ -32,5 +32,5 @@ DATADIR=
 PORT=
 
 # [optional] full path for the pidfile
-# otherwise, the default location /var/run/sickbeard.pid is used:
+# otherwise, the default location /var/run/sickbeard/sickbeard.pid is used:
 PID_FILE=
