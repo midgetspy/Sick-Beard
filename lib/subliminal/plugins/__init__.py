@@ -20,7 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from Addic7ed import Addic7ed
+#from Addic7ed import Addic7ed
 from BierDopje import BierDopje
 from OpenSubtitles import OpenSubtitles
 #from Podnapisi import Podnapisi

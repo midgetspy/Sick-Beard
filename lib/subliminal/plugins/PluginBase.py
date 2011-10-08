@@ -25,6 +25,8 @@ import os
 import urllib2
 import struct
 import threading
+import socket
+from subliminal.classes import DownloadFailedError
 
 
 class PluginBase(object):
@@ -57,6 +59,12 @@ class PluginBase(object):
             filename = filename.rsplit('.', 1)[0]
         return filename
 
+    def possible_languages(self, languages):
+        possible_languages = languages & set(self.pluginLanguages.keys())
+        if not possible_languages:
+            self.logger.debug(u'The following requested languages are not available: %r' % languages - possible_languages)
+        return possible_languages
+
     def hashFile(self, filename):
         """Hash a file like OpenSubtitles"""
         longlongformat = 'q'  # long long
@@ -84,20 +92,23 @@ class PluginBase(object):
 
     def downloadFile(self, url, filepath, data=None):
         """Download a subtitle file"""
+        self.logger.info(u'Downloading %s' % url)
+        socket.setdefaulttimeout(self.timeout)
         try:
-            self.logger.info(u'Downloading %s' % url)
             req = urllib2.Request(url, headers={'Referer': url, 'User-Agent': self.user_agent})
-            f = urllib2.urlopen(req, data=data)
-            dump = open(filepath, 'wb')
-            dump.write(f.read())
-            self.adjustPermissions(filepath)
-            dump.close()
-            f.close()
-            self.logger.debug(u'Download finished for file %s. Size: %s' % (filepath, os.path.getsize(filepath)))
-        except urllib2.HTTPError as e:
-            self.logger.error(u'HTTP Error:', e.code, url)
-        except urllib2.URLError as e:
-            self.logger.error(u'URL Error:', e.reason, url)
+            with open(filepath, 'wb') as dump:
+                f = urllib2.urlopen(req, data=data)
+                dump.write(f.read())
+                self.adjustPermissions(filepath)
+                f.close()
+        except Exception as e:
+            self.logger.error(u'Download %s failed: %s' % (url, e))
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            raise DownloadFailedError(str(e))
+        finally:
+            socket.setdefaulttimeout(self.timeout)
+        self.logger.debug(u'Download finished for file %s. Size: %s' % (filepath, os.path.getsize(filepath)))
 
     def adjustPermissions(self, filepath):
         if self.config_dict and 'files_mode' in self.config_dict and self.config_dict['files_mode'] != -1:
@@ -118,12 +129,6 @@ class PluginBase(object):
         except KeyError:
             self.logger.warn(u'Ooops, you found a missing language in the configuration file of %s: %s. Send a bug report to have it added.' % (self.__class__.__name__, language))
 
-    def checkLanguages(self, languages):
-        if languages and not set(languages).intersection((self._plugin_languages.values())):
-            self.logger.debug(u'None of requested languages %s are available' % languages)
-            return False
-        return True
-
     def getLanguage(self, language):
         """Plugin language code from ISO-639-1 language code"""
         try:
@@ -132,6 +137,8 @@ class PluginBase(object):
             self.logger.warn(u'Ooops, you found a missing language in the configuration file of %s: %s. Send a bug report to have it added.' % (self.__class__.__name__, language))
     
     def getSubtitlePath(self, video_path, language):
+        if not os.path.exists(video_path):
+            video_path = os.path.split(video_path)[1]
         path = video_path.rsplit('.', 1)[0]
         if self.config_dict and self.config_dict['multi']:
             return path + '.%s.srt' % language

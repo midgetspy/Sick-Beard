@@ -50,8 +50,7 @@ class SubsWiki(PluginBase.PluginBase):
         self.release_pattern = re.compile('\nVersion (.+), ([0-9]+).([0-9])+ MBs')
 
     def list(self, filepath, languages):
-        if not self.checkLanguages(languages):
-            return []
+        possible_languages = self.possible_languages(languages)
         guess = guessit.guess_file_info(filepath, 'autodetect')
         if guess['type'] != 'episode':
             self.logger.debug(u'Not an episode')
@@ -69,9 +68,9 @@ class SubsWiki(PluginBase.PluginBase):
             self.logger.debug(u'Not enough information to proceed')
             return []
         self.release_group = release_group  # used to sort results
-        return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, languages)
+        return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, possible_languages)
 
-    def query(self, name, season, episode, release_group, filepath, languages=None):
+    def query(self, name, season, episode, release_group, filepath, languages):
         sublinks = []
         searchname = name.lower().replace(' ', '_')
         if isinstance(searchname, unicode):
@@ -97,7 +96,7 @@ class SubsWiki(PluginBase.PluginBase):
             for html_language in subs.parent.parent.findAll('td', {'class': 'language'}):
                 sub_language = self.getRevertLanguage(html_language.string.strip())
                 self.logger.debug(u'Subtitle reverted language: %s' % sub_language)
-                if languages and not sub_language in languages:  # On wrong language
+                if not sub_language in languages:  # On wrong language
                     continue
                 html_status = html_language.findNextSibling('td')
                 sub_status = html_status.find('strong').string.strip()

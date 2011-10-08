@@ -70,8 +70,7 @@ class BierDopje(PluginBase.PluginBase):
     def list(self, filepath, languages):
         if not self.config_dict['cache_dir']:
             raise Exception('Cache directory is required for this plugin')
-        if not self.checkLanguages(languages):
-            return []
+        possible_languages = self.possible_languages(languages)
         guess = guessit.guess_file_info(filepath, 'autodetect')
         if guess['type'] != 'episode':
             self.logger.debug(u'Not an episode')
@@ -89,17 +88,13 @@ class BierDopje(PluginBase.PluginBase):
             self.logger.debug(u'Not enough information to proceed')
             return []
         self.release_group = release_group  # used to sort results
-        return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, languages)
+        return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, possible_languages)
 
     def download(self, subtitle):
         self.downloadFile(subtitle.link, subtitle.path)
         return subtitle
 
-    def query(self, name, season, episode, release_group, filepath, languages=None):
-        if languages:
-            available_languages = list(set(languages).intersection((self._plugin_languages.values())))
-        else:
-            available_languages = self._plugin_languages.values()
+    def query(self, name, season, episode, release_group, filepath, languages):
         sublinks = []
         # get the show id
         show_name = name.lower()
@@ -128,7 +123,7 @@ class BierDopje(PluginBase.PluginBase):
             page.close()
 
         # get the subs for the show id we have
-        for language in available_languages:
+        for language in languages:
             subs_url = '%sGetAllSubsFor/%s/%s/%s/%s' % (self.server_url, show_id, season, episode, language)
             self.logger.debug(u'Getting subtitles at %s' % subs_url)
             page = urllib2.urlopen(subs_url)

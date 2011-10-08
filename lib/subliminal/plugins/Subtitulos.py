@@ -34,16 +34,8 @@ class Subtitulos(PluginBase.PluginBase):
     site_name = 'Subtitulos'
     server_url = 'http://www.subtitulos.es'
     api_based = False
-    _plugin_languages = {u'English (US)': 'en',
-            u'English (UK)': 'en',
-            u'English': 'en',
-            u'French': 'fr',
-            u'Brazilian': 'pt-br',
-            u'Portuguese': 'pt',
-            u'Español (Latinoamérica)': 'es',
-            u'Español (España)': 'es',
-            u'Español': 'es',
-            u'Italian': 'it',
+    _plugin_languages = {u'English (US)': 'en', u'English (UK)': 'en', u'English': 'en', u'French': 'fr', u'Brazilian': 'pt-br',
+            u'Portuguese': 'pt', u'Español (Latinoamérica)': 'es', u'Español (España)': 'es', u'Español': 'es', u'Italian': 'it',
             u'Català': 'ca'}
 
     def __init__(self, config_dict=None):
@@ -51,8 +43,7 @@ class Subtitulos(PluginBase.PluginBase):
         self.release_pattern = re.compile('Versi&oacute;n (.+) ([0-9]+).([0-9])+ megabytes')
 
     def list(self, filepath, languages):
-        if not self.checkLanguages(languages):
-            return []
+        possible_languages = self.possible_languages(languages)
         guess = guessit.guess_file_info(filepath, 'autodetect')
         if guess['type'] != 'episode':
             self.logger.debug(u'Not an episode')
@@ -70,9 +61,9 @@ class Subtitulos(PluginBase.PluginBase):
             self.logger.debug(u'Not enough information to proceed')
             return []
         self.release_group = release_group  # used to sort results
-        return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, languages)
+        return self.query(guess['series'], guess['season'], guess['episodeNumber'], release_group, filepath, possible_languages)
 
-    def query(self, name, season, episode, release_group, filepath, languages=None):
+    def query(self, name, season, episode, release_group, filepath, languages):
         sublinks = []
         searchname = name.lower().replace(' ', '-')
         if isinstance(searchname, unicode):
@@ -98,7 +89,7 @@ class Subtitulos(PluginBase.PluginBase):
                 continue
             for html_language in subs.findAllNext('ul', {'class': 'sslist'}):
                 sub_language = self.getRevertLanguage(html_language.findNext('li', {'class': 'li-idioma'}).find('strong').contents[0].string.strip())
-                if languages and not sub_language in languages:  # On wrong language
+                if not sub_language in languages:  # On wrong language
                     continue
                 html_status = html_language.findNext('li', {'class': 'li-estado green'})
                 sub_status = html_status.contents[0].string.strip()

@@ -21,13 +21,12 @@
 
 import threading
 from itertools import groupby
-from classes import DownloadTask, ListTask, StopTask, LanguageError, PluginError, BadStateError, WrongTaskError
+from classes import DownloadTask, ListTask, StopTask, LanguageError, PluginError, BadStateError, WrongTaskError, DownloadFailedError
 import Queue
 import logging
 import mimetypes
 import os
 import plugins
-import traceback
 
 
 # be nice
@@ -43,17 +42,19 @@ logger.addHandler(NullHandler())
 
 # const
 FORMATS = ['video/x-msvideo', 'video/quicktime', 'video/x-matroska', 'video/mp4']
-LANGUAGES = ['aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av', 'ay', 'az', 'ba', 'be', 'bg', 'bh', 'bi',
-    'bm', 'bn', 'bo', 'br', 'bs', 'ca', 'ce', 'ch', 'co', 'cr', 'cs', 'cu', 'cv', 'cy', 'da', 'de', 'dv', 'dz', 'ee',
-    'el', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'ff', 'fi', 'fj', 'fo', 'fr', 'fy', 'ga', 'gd', 'gl', 'gn', 'gu', 'gv',
-    'ha', 'he', 'hi', 'ho', 'hr', 'ht', 'hu', 'hy', 'hz', 'ia', 'id', 'ie', 'ig', 'ii', 'ik', 'io', 'is', 'it', 'iu',
-    'ja', 'jv', 'ka', 'kg', 'ki', 'kj', 'kk', 'kl', 'km', 'kn', 'ko', 'kr', 'ks', 'ku', 'kv', 'kw', 'ky', 'la', 'lb',
-    'lg', 'li', 'ln', 'lo', 'lt', 'lu', 'lv', 'mg', 'mh', 'mi', 'mk', 'ml', 'mn', 'mo', 'mr', 'ms', 'mt', 'my', 'na',
-    'nb', 'nd', 'ne', 'ng', 'nl', 'nn', 'no', 'nr', 'nv', 'ny', 'oc', 'oj', 'om', 'or', 'os', 'pa', 'pi', 'pl', 'ps',
-    'pt', 'qu', 'rm', 'rn', 'ro', 'ru', 'rw', 'sa', 'sc', 'sd', 'se', 'sg', 'si', 'sk', 'sl', 'sm', 'sn', 'so', 'sq',
-    'sr', 'ss', 'st', 'su', 'sv', 'sw', 'ta', 'te', 'tg', 'th', 'ti', 'tk', 'tl', 'tn', 'to', 'tr', 'ts', 'tt', 'tw',
-    'ty', 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'wo', 'xh', 'yi', 'yo', 'za', 'zh', 'zu']  # ISO 639-1
-PLUGINS = ['Addic7ed', 'BierDopje', 'OpenSubtitles', 'SubsWiki', 'Subtitulos', 'TheSubDB']
+EXTENSIONS = set(['srt', 'sub'])
+LANGUAGES = set(['aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av', 'ay', 'az', 'ba', 'be', 'bg', 'bh', 'bi',
+                 'bm', 'bn', 'bo', 'br', 'bs', 'ca', 'ce', 'ch', 'co', 'cr', 'cs', 'cu', 'cv', 'cy', 'da', 'de', 'dv',
+                 'dz', 'ee', 'el', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'ff', 'fi', 'fj', 'fo', 'fr', 'fy', 'ga', 'gd',
+                 'gl', 'gn', 'gu', 'gv', 'ha', 'he', 'hi', 'ho', 'hr', 'ht', 'hu', 'hy', 'hz', 'ia', 'id', 'ie', 'ig',
+                 'ii', 'ik', 'io', 'is', 'it', 'iu', 'ja', 'jv', 'ka', 'kg', 'ki', 'kj', 'kk', 'kl', 'km', 'kn', 'ko',
+                 'kr', 'ks', 'ku', 'kv', 'kw', 'ky', 'la', 'lb', 'lg', 'li', 'ln', 'lo', 'lt', 'lu', 'lv', 'mg', 'mh',
+                 'mi', 'mk', 'ml', 'mn', 'mo', 'mr', 'ms', 'mt', 'my', 'na', 'nb', 'nd', 'ne', 'ng', 'nl', 'nn', 'no',
+                 'nr', 'nv', 'ny', 'oc', 'oj', 'om', 'or', 'os', 'pa', 'pi', 'pl', 'ps', 'pt', 'qu', 'rm', 'rn', 'ro',
+                 'ru', 'rw', 'sa', 'sc', 'sd', 'se', 'sg', 'si', 'sk', 'sl', 'sm', 'sn', 'so', 'sq', 'sr', 'ss', 'st',
+                 'su', 'sv', 'sw', 'ta', 'te', 'tg', 'th', 'ti', 'tk', 'tl', 'tn', 'to', 'tr', 'ts', 'tt', 'tw', 'ty',
+                 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'wo', 'xh', 'yi', 'yo', 'za', 'zh', 'zu'])  # ISO 639-1
+PLUGINS = ['BierDopje', 'OpenSubtitles', 'SubsWiki', 'Subtitulos', 'TheSubDB']
 API_PLUGINS = filter(lambda p: getattr(plugins, p).api_based, PLUGINS)
 IDLE = 0
 RUNNING = 1
@@ -63,8 +64,7 @@ PAUSED = 2
 class Subliminal(object):
     """Main Subliminal class"""
 
-    def __init__(self, cache_dir=False, workers=4, multi=False, force=False, max_depth=3, files_mode=-1):
-        # set default values
+    def __init__(self, cache_dir=None, workers=4, multi=False, force=False, max_depth=3, files_mode=-1):
         self.multi = multi
         self.force = force
         self.max_depth = max_depth
@@ -72,49 +72,52 @@ class Subliminal(object):
         self.taskQueue = Queue.PriorityQueue()
         self.listResultQueue = Queue.Queue()
         self.downloadResultQueue = Queue.Queue()
-        self._languages = None
+        self._languages = []
         self._plugins = API_PLUGINS
         self.workers = workers
         self.files_mode = files_mode
         self.state = IDLE
-        # handle cache directory preferences
         try:
-            if cache_dir:  # custom configuration file
+            if cache_dir:
                 self.cache_dir = cache_dir
-                if not os.path.isdir(self.cache_dir):  # custom file doesn't exist, create it
+                if not os.path.isdir(self.cache_dir):
                     os.makedirs(self.cache_dir)
                     logger.debug(u'Creating cache directory: %r' % self.cache_dir)
         except:
             self.cache_dir = None
             logger.error(u'Failed to use the cache directory, continue without it')
 
-    def get_languages(self):
+    @property
+    def languages(self):
         """Getter for languages"""
         return self._languages
 
-    def set_languages(self, languages):
+    @languages.setter
+    def languages(self, languages):
         """Setter for languages"""
         logger.debug(u'Setting languages to %r' % languages)
+        self._languages = []
         for l in languages:
             if l not in LANGUAGES:
                 raise LanguageError(l)
-        self._languages = languages
+            if not l in self._languages:
+                self._languages.append(l)
 
-    def get_plugins(self):
+    @property
+    def plugins(self):
         """Getter for plugins"""
         return self._plugins
 
-    def set_plugins(self, plugins):
+    @plugins.setter
+    def plugins(self, plugins):
         """Setter for plugins"""
         logger.debug(u'Setting plugins to %r' % plugins)
+        self._plugins = []
         for p in plugins:
             if p not in PLUGINS:
                 raise PluginError(p)
-        self._plugins = plugins
-
-    # getters/setters for the property _languages and _plugins
-    languages = property(get_languages, set_languages)
-    plugins = property(get_plugins, set_plugins)
+            if not p in self._plugins:
+                self._plugins.append(p)
 
     def listSubtitles(self, entries, auto=True):
         """
@@ -127,21 +130,32 @@ class Subliminal(object):
             if self.state != IDLE:
                 raise BadStateError(self.state, IDLE)
             self.startWorkers()
-        # valid argument
         if isinstance(entries, basestring):
             entries = [entries]
-        # find files and languages
-        search_results = []
+        scan_result = []
         for e in entries:
             if not isinstance(e, unicode):
                 logger.warning(u'Entry %r is not unicode' % e)
-            search_results.extend(self.recursiveSearch(e))
-        # find subtitles
+            if not os.path.exists(e):
+                scan_result.append((e, set(), False))
+                continue
+            scan_result.extend(scan(e))
         task_count = 0
-        for (filepath, languages) in search_results:
-            logger.debug(u'Listing subtitles for %r with languages %r in plugins %r' % (filepath, languages, self._plugins))
+        for filepath, languages, has_single in scan_result:
+            wanted_languages = set(self._languages)
+            if not wanted_languages:
+                wanted_languages = LANGUAGES
+            if not self.force and self.multi:
+                wanted_languages = set(wanted_languages) - languages
+                if not wanted_languages:
+                    logger.debug(u'No need to list multi subtitles %r for %r because %r subtitles detected' % (self._languages, filepath, languages))
+                    continue
+            if not self.force and not self.multi and has_single:
+                logger.debug(u'No need to list single subtitles %r for %r because one detected' % (self._languages, filepath))
+                continue
+            logger.debug(u'Listing subtitles %r for %r with %r' % (wanted_languages, filepath, self._plugins))
             for plugin in self._plugins:
-                self.taskQueue.put((5, ListTask(filepath, languages, plugin, self.getConfigDict())))
+                self.taskQueue.put((5, ListTask(filepath, wanted_languages, plugin, self.getConfigDict())))
                 task_count += 1
         subtitles = []
         for _ in range(task_count):
@@ -164,20 +178,20 @@ class Subliminal(object):
             self.startWorkers()
         subtitles = self.listSubtitles(entries, False)
         task_count = 0
-        for (_, subsByVideoPath) in groupby(sorted(subtitles, key=lambda x: x.video_path), lambda x: x.video_path):
+        for _, subsByVideoPath in groupby(sorted(subtitles, key=lambda x: x.video_path), lambda x: x.video_path):
             if not self.multi:
                 self.taskQueue.put((5, DownloadTask(sorted(list(subsByVideoPath), cmp=self.cmpSubtitles))))
                 task_count += 1
                 continue
-            for (__, subsByVideoPathByLanguage) in groupby(sorted(subsByVideoPath, key=lambda x: x.language), lambda x: x.language):
+            for __, subsByVideoPathByLanguage in groupby(sorted(subsByVideoPath, key=lambda x: x.language), lambda x: x.language):
                 self.taskQueue.put((5, DownloadTask(sorted(list(subsByVideoPathByLanguage), cmp=self.cmpSubtitles))))
                 task_count += 1
-        paths = []
+        downloaded = []
         for _ in range(task_count):
-            paths.append(self.downloadResultQueue.get())
+            downloaded.extend(self.downloadResultQueue.get())
         if auto:
             self.stopWorkers()
-        return paths
+        return downloaded
 
     def cmpSubtitles(self, x, y):
         """Compares 2 subtitles elements x and y using video_path, languages and plugin"""
@@ -195,49 +209,6 @@ class Subliminal(object):
         if self._plugins.index(x.plugin) > self._plugins.index(y.plugin):
             return 1
         return 0
-
-    def recursiveSearch(self, entry, depth=0):
-        """Search files in the entry and return them as a list of tuples (filename, languages)"""
-        if depth > self.max_depth and self.max_depth != 0:  # we do not want to search the whole file system except if max_depth = 0
-            return []
-        if os.path.isfile(entry):  # a file? scan it
-            if depth != 0:  # trust the user: only check for valid format if recursing
-                mimetypes.add_type('video/x-matroska', '.mkv')
-                mimetype = mimetypes.guess_type(entry)[0]
-                if mimetype not in FORMATS:
-                    return []
-            basepath = os.path.splitext(entry)[0]
-            # check for .xx.srt if needed
-            if self.multi and self.languages:
-                if self.force:
-                    return [(os.path.normpath(entry), self.languages)]
-                needed_languages = self.languages[:]
-                for l in self.languages:
-                    if os.path.exists(basepath + '.%s.srt' % l):
-                        logger.info(u'Skipping language %s for file %r as it already exists. Use the --force option to force the download' % (l, entry))
-                        needed_languages.remove(l)
-                if needed_languages:
-                    return [(os.path.normpath(entry), needed_languages)]
-                return []
-            # single subtitle download: .srt
-            if self.force or not os.path.exists(basepath + '.srt'):
-                if self.languages:
-                    return [(os.path.normpath(entry), self.languages)]
-                else:
-                    return []
-        if os.path.isdir(entry):  # a dir? recurse
-            files = []
-            for e in os.listdir(entry):
-                files.extend(self.recursiveSearch(os.path.join(entry, e), depth + 1))
-            files.sort()
-            grouped_files = []
-            for languages, group in groupby(files, lambda t: t[0]):
-                filenames = []
-                for t in group:
-                    filenames.extend(t[1])
-                grouped_files.append((languages, filenames))
-            return grouped_files
-        return []  # anything else, nothing.
 
     def startWorkers(self):
         """Create a pool of workers and start them"""
@@ -306,14 +277,15 @@ class PluginWorker(threading.Thread):
                     for subtitle in task.subtitles:
                         plugin = getattr(plugins, subtitle.plugin)()
                         try:
-                            result = plugin.download(subtitle)
+                            result = [plugin.download(subtitle)]
                             break
-                        except:
-                            self.logger.error(u'Could not download subtitle %r, skipping' % subtitle)
+                        except DownloadFailedError as e:
+                            self.logger.warning(u'Could not download subtitle %r, trying next' % subtitle)
                             continue
+                    if not result:
+                        self.logger.error(u'No subtitles could be downloaded for file %r' % subtitle.video_path)
             except:
-                self.logger.error(u'Exception raised in worker %s' % self.name)
-                self.logger.debug(traceback.print_exc())
+                self.logger.error(u'Exception raised in worker %s' % self.name, exc_info=True)
             finally:
                 if isinstance(task, ListTask):
                     self.listResultQueue.put(result)
@@ -321,3 +293,33 @@ class PluginWorker(threading.Thread):
                     self.downloadResultQueue.put(result)
                 self.taskQueue.task_done()
         self.logger.debug(u'Thread %s terminated' % self.name)
+
+
+def scan(entry, depth=0, max_depth=3):
+    """Scan a path and return a list of tuples (filepath, set(languages), has single)"""
+    if depth > max_depth and max_depth != 0:  # we do not want to search the whole file system except if max_depth = 0
+        return []
+    if depth == 0:
+        entry = os.path.abspath(entry)
+    if os.path.isfile(entry):  # a file? scan it
+        if depth != 0:  # trust the user: only check for valid format if recursing
+            mimetypes.add_type('video/x-matroska', '.mkv')
+            if mimetypes.guess_type(entry)[0] not in FORMATS:
+                return []
+        # check for .lg.ext and .ext
+        available_languages = set()
+        has_single = False
+        basepath = os.path.splitext(entry)[0]
+        for l in LANGUAGES:
+            for e in EXTENSIONS:
+                if os.path.exists(basepath + '.%s.%s' % (l, e)):
+                    available_languages.add(l)
+                if os.path.exists(basepath + '.%s' % e):
+                    has_single = True
+        return [(os.path.normpath(entry), available_languages, has_single)]
+    if os.path.isdir(entry):  # a dir? recurse
+        result = []
+        for e in os.listdir(entry):
+            result.extend(scan(os.path.join(entry, e), depth + 1))
+        return result
+    return []  # anything else

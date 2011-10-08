@@ -27,7 +27,7 @@ import socket
 import xmlrpclib
 import guessit
 import unicodedata
-from subliminal.classes import Subtitle
+from subliminal.classes import Subtitle, DownloadFailedError
 
 
 class OpenSubtitles(PluginBase.PluginBase):
@@ -36,79 +36,51 @@ class OpenSubtitles(PluginBase.PluginBase):
     server_url = 'http://api.opensubtitles.org/xml-rpc'
     user_agent = 'Subliminal v1.0'
     api_based = True
-    _plugin_languages = {'en': 'eng',
-            'fr': 'fre',
-            'hu': 'hun',
-            'cs': 'cze',
-            'pl': 'pol',
-            'sk': 'slo',
-            'pt': 'por',
-            'pt-br': 'pob',
-            'es': 'spa',
-            'el': 'ell',
-            'ar': 'ara',
-            'sq': 'alb',
-            'hy': 'arm',
-            'ay': 'ass',
-            'bs': 'bos',
-            'bg': 'bul',
-            'ca': 'cat',
-            'zh': 'chi',
-            'hr': 'hrv',
-            'da': 'dan',
-            'nl': 'dut',
-            'eo': 'epo',
-            'et': 'est',
-            'fi': 'fin',
-            'gl': 'glg',
-            'ka': 'geo',
-            'de': 'ger',
-            'he': 'heb',
-            'hi': 'hin',
-            'is': 'ice',
-            'id': 'ind',
-            'it': 'ita',
-            'ja': 'jpn',
-            'kk': 'kaz',
-            'ko': 'kor',
-            'lv': 'lav',
-            'lt': 'lit',
-            'lb': 'ltz',
-            'mk': 'mac',
-            'ms': 'may',
-            'no': 'nor',
-            'oc': 'oci',
-            'fa': 'per',
-            'ro': 'rum',
-            'ru': 'rus',
-            'sr': 'scc',
-            'sl': 'slv',
-            'sv': 'swe',
-            'th': 'tha',
-            'tr': 'tur',
-            'uk': 'ukr',
-            'vi': 'vie'}
+    _plugin_languages = {'aa': 'aar', 'ab': 'abk', 'af': 'afr', 'ak': 'aka', 'sq': 'alb', 'am': 'amh', 'ar': 'ara', 'an': 'arg', 'hy': 'arm',
+            'as': 'asm', 'av': 'ava', 'ae': 'ave', 'ay': 'aym', 'az': 'aze', 'ba': 'bak', 'bm': 'bam', 'eu': 'baq', 'be': 'bel', 'bn': 'ben',
+            'bh': 'bih', 'bi': 'bis', 'bs': 'bos', 'br': 'bre', 'bg': 'bul', 'my': 'bur', 'ca': 'cat', 'ch': 'cha', 'ce': 'che', 'zh': 'chi',
+            'cu': 'chu', 'cv': 'chv', 'kw': 'cor', 'co': 'cos', 'cr': 'cre', 'cs': 'cze', 'da': 'dan', 'dv': 'div', 'nl': 'dut', 'dz': 'dzo',
+            'en': 'eng', 'eo': 'epo', 'et': 'est', 'ee': 'ewe', 'fo': 'fao', 'fj': 'fij', 'fi': 'fin', 'fr': 'fre', 'fy': 'fry', 'ff': 'ful',
+            'ka': 'geo', 'de': 'ger', 'gd': 'gla', 'ga': 'gle', 'gl': 'glg', 'gv': 'glv', 'el': 'ell', 'gn': 'grn', 'gu': 'guj', 'ht': 'hat',
+            'ha': 'hau', 'he': 'heb', 'hz': 'her', 'hi': 'hin', 'ho': 'hmo', 'hr': 'hrv', 'hu': 'hun', 'ig': 'ibo', 'is': 'ice', 'io': 'ido',
+            'ii': 'iii', 'iu': 'iku', 'ie': 'ile', 'ia': 'ina', 'id': 'ind', 'ik': 'ipk', 'it': 'ita', 'jv': 'jav', 'ja': 'jpn', 'kl': 'kal',
+            'kn': 'kan', 'ks': 'kas', 'kr': 'kau', 'kk': 'kaz', 'km': 'khm', 'ki': 'kik', 'rw': 'kin', 'ky': 'kir', 'kv': 'kom', 'kg': 'kon',
+            'ko': 'kor', 'kj': 'kua', 'ku': 'kur', 'lo': 'lao', 'la': 'lat', 'lv': 'lav', 'li': 'lim', 'ln': 'lin', 'lt': 'lit', 'lb': 'ltz',
+            'lu': 'lub', 'lg': 'lug', 'mk': 'mac', 'mh': 'mah', 'ml': 'mal', 'mi': 'mao', 'mr': 'mar', 'ms': 'may', 'mg': 'mlg', 'mt': 'mlt',
+            'mo': 'mol', 'mn': 'mon', 'na': 'nau', 'nv': 'nav', 'nr': 'nbl', 'nd': 'nde', 'ng': 'ndo', 'ne': 'nep', 'nn': 'nno', 'nb': 'nob',
+            'no': 'nor', 'ny': 'nya', 'oc': 'oci', 'oj': 'oji', 'or': 'ori', 'om': 'orm', 'os': 'oss', 'pa': 'pan', 'fa': 'per', 'pi': 'pli',
+            'pl': 'pol', 'pt': 'por', 'ps': 'pus', 'qu': 'que', 'rm': 'roh', 'rn': 'run', 'ru': 'rus', 'sg': 'sag', 'sa': 'san', 'sr': 'scc',
+            'si': 'sin', 'sk': 'slo', 'sl': 'slv', 'se': 'sme', 'sm': 'smo', 'sn': 'sna', 'sd': 'snd', 'so': 'som', 'st': 'sot', 'es': 'spa',
+            'sc': 'srd', 'ss': 'ssw', 'su': 'sun', 'sw': 'swa', 'sv': 'swe', 'ty': 'tah', 'ta': 'tam', 'tt': 'tat', 'te': 'tel', 'tg': 'tgk',
+            'tl': 'tgl', 'th': 'tha', 'bo': 'tib', 'ti': 'tir', 'to': 'ton', 'tn': 'tsn', 'ts': 'tso', 'tk': 'tuk', 'tr': 'tur', 'tw': 'twi',
+            'ug': 'uig', 'uk': 'ukr', 'ur': 'urd', 'uz': 'uzb', 've': 'ven', 'vi': 'vie', 'vo': 'vol', 'cy': 'wel', 'wa': 'wln', 'wo': 'wol',
+            'xh': 'xho', 'yi': 'yid', 'yo': 'yor', 'za': 'zha', 'zu': 'zul', 'ro': 'rum', 'pb': 'pob', 'un': 'unk', 'ay': 'ass'}
 
     def __init__(self, config_dict=None):
         super(OpenSubtitles, self).__init__(self._plugin_languages, config_dict)
 
     def list(self, filepath, languages):
+        possible_languages = self.possible_languages(languages)
         if os.path.isfile(filepath):
             filehash = self.hashFile(filepath)
             size = os.path.getsize(filepath)
-            return self.query(moviehash=filehash, languages=languages, bytesize=size, filepath=filepath)
+            return self.query(moviehash=filehash, languages=possible_languages, bytesize=size, filepath=filepath)
         else:
-            return self.query(languages=languages, filepath=filepath)
+            return self.query(languages=possible_languages, filepath=filepath)
 
     def download(self, subtitle):
-        self.downloadFile(subtitle.link, subtitle.path + '.gz')
-        gz = gzip.open(subtitle.path + '.gz')
-        srt = open(subtitle.path, 'wb')
-        srt.write(gz.read())
-        gz.close()
-        self.adjustPermissions(subtitle.path)
-        srt.close()
-        os.remove(subtitle.path + '.gz')
+        try:
+            self.downloadFile(subtitle.link, subtitle.path + '.gz')
+            with open(subtitle.path, 'wb') as dump:
+                gz = gzip.open(subtitle.path + '.gz')
+                dump.write(gz.read())
+                gz.close()
+                self.adjustPermissions(subtitle.path)
+            os.remove(subtitle.path + '.gz')
+        except Exception as e:
+            if os.path.exists(subtitle.path):
+                os.remove(subtitle.path)
+            raise DownloadFailedError(str(e))
         return subtitle
 
     def query(self, filepath, imdbID=None, moviehash=None, bytesize=None, languages=None):

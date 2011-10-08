@@ -33,35 +33,21 @@ class TheSubDB(PluginBase.PluginBase):
     server_url = 'http://api.thesubdb.com'  # for testing purpose, use http://sandbox.thesubdb.com instead
     api_based = True
     user_agent = 'SubDB/1.0 (Subliminal/1.0; https://github.com/Diaoul/subliminal)'  # defined by the API
-    _plugin_languages = {'cs': 'cs',  # the whole list is available with the API: http://sandbox.thesubdb.com/?action=languages
-            'da': 'da',
-            'de': 'de',
-            'en': 'en',
-            'fi': 'fi',
-            'fr': 'fr',
-            'hu': 'hu',
-            'id': 'id',
-            'it': 'it',
-            'nl': 'nl',
-            'no': 'no',
-            'pl': 'pl',
-            'pt': 'pt',
-            'ro': 'ro',
-            'ru': 'ru',
-            'sl': 'sl',
-            'sr': 'sr',
-            'sv': 'sv',
-            'tr': 'tr'}
+    _plugin_languages = {'af': 'af', 'cs': 'cs', 'da': 'da', 'de': 'de', 'en': 'en', 'es': 'es', 'fi': 'fi', 'fr': 'fr', 'hu': 'hu', 'id': 'id',
+             'it': 'it', 'la': 'la', 'nl': 'nl', 'no': 'no', 'oc': 'oc', 'pl': 'pl', 'pt': 'pt', 'ro': 'ro', 'ru': 'ru', 'sl': 'sl', 'sr': 'sr',
+             'sv': 'sv', 'tr': 'tr'} # list available with the API at http://sandbox.thesubdb.com/?action=languages
+
 
     def __init__(self, config_dict=None):
         super(TheSubDB, self).__init__(self._plugin_languages, config_dict)
 
     def list(self, filepath, languages):
+        possible_languages = self.possible_languages(languages)
         if not os.path.isfile(filepath):
             return []
-        return self.query(filepath, self.hashFile(filepath), languages)
+        return self.query(filepath, self.hashFile(filepath), possible_languages)
 
-    def query(self, filepath, moviehash, languages=None):
+    def query(self, filepath, moviehash, languages):
         searchurl = '%s/?action=%s&hash=%s' % (self.server_url, 'search', moviehash)
         self.logger.debug(u'Query URL: %s' % searchurl)
         try:
@@ -79,7 +65,7 @@ class TheSubDB(PluginBase.PluginBase):
         self.logger.debug(u'Available languages: %s' % available_languages)
         subs = []
         for l in available_languages:
-            if not languages or l in languages:
+            if l in languages:
                 result = Subtitle(filepath, self.getSubtitlePath(filepath, l), self.__class__.__name__, l, '%s/?action=download&hash=%s&language=%s' % (self.server_url, moviehash, l))
                 subs.append(result)
         return subs
