@@ -48,7 +48,7 @@
 	td.tvShowDate { position: absolute; width: 50%; display: block; left: -1px; bottom: -23px; text-align: left; margin: 0; padding: 3px 3px 3px 5px; z-index: 5; font-style: italic; }	
 	th.tvShowDateHeader {  }
 
-	td.tvShowTitle { width: 100%; padding: 3px 3px 3px 5px; margin-bottom: 51px; font: bold 200% "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; left: -1px; position: relative; z-index: 0; }
+	td.tvShowTitle { width: 100%; padding: 3px 3px 3px 5px; margin-bottom: 51px; font: bold 200% "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; left: -1px; position: relative; z-index: 0; display: block; }
 	td.tvShowTitle a:link, a:visited { text-decoration: none; }
 	th.tvShowTitleHeader { border-top-color: #984444; }
 	
@@ -143,12 +143,9 @@
 	.ep_summaryTrigger { display: none; }
 	.ep_summary { margin: 10px 0 0; padding: 0; display: block!important; }
 	
-	/* end of poster & banner layouts */
-	
+	 end of poster & banner layouts 
 	
 	.plotInfo { display: none; }
-	thead { display: none; }
-	
 	#showListTable tr { display: block!important; width: 100%; position: relative; margin-bottom: 6px; }
 	
 	.nextEpNum { bottom: 0; display: block; width: 10%; position: absolute; }
@@ -162,8 +159,11 @@
 	.nextEpQuality.HD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #494; border-top-width: 0; }
 	.nextEpQuality.SD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #984444; border-top-width: 0; border-top-color: #444; }
 	.nextEpQuality.Any:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #444; border-top-width: 0; border-top-color: #494; }
-	
+
+	.nextEpTVDBBadgeHeader { display: none; }	
 	.nextEpTVDBBadge { position: absolute; bottom: 0; right: 30px; }
+	
+	.nextEpSearchBadgeHeader { display: none; }
 	.nextEpSearchBadge { position: absolute; bottom: 0; right: 5px; }
 		
 /* @end */

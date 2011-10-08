@@ -1,4 +1,4 @@
-@media screen and (max-width:1024px) and (min-width: 480px) { 
+@media screen and (max-width:1024px) and (min-width: 481px) { 
 	td.tvShowDate { font-size: 100%; line-height: 3; }
 	td.tvShowTitle { font-size: 150%; line-height: 2; font-weight: bold; width: 40%; }
 	td.tvShowNetwork { text-align: center; }
