@@ -1,0 +1,33 @@
+# This file is sourced by /etc/init.d/sickbeard
+#
+# When sickbeard is started using the init script
+# is started under the account of $USER, as set below.
+#
+# Each setting is marked either "required" or "optional";
+# leaving any required setting unconfigured will cause
+# the service to not start.
+
+# [optional] change to 1 to enable daemon
+ENABLE_DAEMON=0
+
+# [required] user or uid of account to run the program as:
+RUN_AS=
+
+# [optional] change to 1 to enable updating from webinterface
+# this changes ownership of sickbeard's programfiles to user set @ RUN_AS
+WEB_UPDATE=0
+
+# [optional] full path to the configuration file of your choice;
+# otherwise, the default location (~/.sickbeard) is used:
+CONFIG=
+
+# [optional] full path to the folder to store data (databases/thumbs) in;
+# otherwise, the default location (~/.sickbeard) is used:
+DATADIR=
+
+# [optional] port number to listen on:
+PORT=8081
+
+# [optional] full path for the pidfile
+# otherwise, the default location /var/run/sickbeard.pid is used:
+PID_FILE=
