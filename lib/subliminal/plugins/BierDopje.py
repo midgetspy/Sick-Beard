@@ -71,6 +71,8 @@ class BierDopje(PluginBase.PluginBase):
         if not self.config_dict['cache_dir']:
             raise Exception('Cache directory is required for this plugin')
         possible_languages = self.possible_languages(languages)
+        if not possible_languages:
+            return []
         guess = guessit.guess_file_info(filepath, 'autodetect')
         if guess['type'] != 'episode':
             self.logger.debug(u'Not an episode')

@@ -51,6 +51,8 @@ class SubsWiki(PluginBase.PluginBase):
 
     def list(self, filepath, languages):
         possible_languages = self.possible_languages(languages)
+        if not possible_languages:
+            return []
         guess = guessit.guess_file_info(filepath, 'autodetect')
         if guess['type'] != 'episode':
             self.logger.debug(u'Not an episode')

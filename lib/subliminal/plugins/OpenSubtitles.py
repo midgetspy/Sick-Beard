@@ -61,6 +61,8 @@ class OpenSubtitles(PluginBase.PluginBase):
 
     def list(self, filepath, languages):
         possible_languages = self.possible_languages(languages)
+        if not possible_languages:
+            return []
         if os.path.isfile(filepath):
             filehash = self.hashFile(filepath)
             size = os.path.getsize(filepath)

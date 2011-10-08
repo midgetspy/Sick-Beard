@@ -43,6 +43,8 @@ class TheSubDB(PluginBase.PluginBase):
 
     def list(self, filepath, languages):
         possible_languages = self.possible_languages(languages)
+        if not possible_languages:
+            return []
         if not os.path.isfile(filepath):
             return []
         return self.query(filepath, self.hashFile(filepath), possible_languages)

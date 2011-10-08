@@ -62,7 +62,7 @@ class PluginBase(object):
     def possible_languages(self, languages):
         possible_languages = languages & set(self.pluginLanguages.keys())
         if not possible_languages:
-            self.logger.debug(u'The following requested languages are not available: %r' % languages - possible_languages)
+            self.logger.debug(u'Languages %r are not in supported languages' % languages)
         return possible_languages
 
     def hashFile(self, filename):
