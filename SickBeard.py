@@ -42,6 +42,8 @@ from sickbeard.webserveInit import initWebServer
 
 from lib.configobj import ConfigObj
 
+
+
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
