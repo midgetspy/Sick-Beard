@@ -7,11 +7,14 @@
 # leaving any required setting unconfigured will cause
 # the service to not start.
 
-# [optional] change to 1 to enable daemon
-ENABLE_DAEMON=0
+# [required] set path where sickbeard is installed:
+APP_PATH=/opt/sickbeard
 
 # [required] user or uid of account to run the program as:
 RUN_AS=
+
+# [optional] change to 1 to enable daemon
+ENABLE_DAEMON=0
 
 # [optional] change to 1 to enable updating from webinterface
 # this changes ownership of sickbeard's programfiles to user set @ RUN_AS
@@ -26,7 +29,7 @@ CONFIG=
 DATADIR=
 
 # [optional] port number to listen on:
-PORT=8081
+PORT=
 
 # [optional] full path for the pidfile
 # otherwise, the default location /var/run/sickbeard.pid is used:
