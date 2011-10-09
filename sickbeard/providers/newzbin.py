@@ -33,6 +33,7 @@ from sickbeard import classes, logger, helpers, exceptions, show_name_helpers
 from sickbeard import tvcache
 from sickbeard.common import Quality
 from sickbeard.exceptions import ex
+from lib.dateutil.parser import parse as parseDate
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -287,7 +288,11 @@ class NewzbinProvider(generic.NZBProvider):
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
             if sickbeard.USENET_RETENTION is not None:
                 try:
-                    post_date = datetime.strptime(cur_item.findtext('{http://www.newzbin.com/DTD/2007/feeds/report/}postdate'), self.NEWZBIN_DATE_FORMAT)
+                    dateString = cur_item.findtext('{http://www.newzbin.com/DTD/2007/feeds/report/}postdate')
+                    # use the parse (imported as parseDate) function from the dateutil lib
+                    # and we have to remove the timezone info from it because the retention_date will not have one
+                    # and a comparison of them is not possible
+                    post_date = parseDate(dateString).replace(tzinfo=None)
                     retention_date = datetime.now() - timedelta(days=sickbeard.USENET_RETENTION)
                     if post_date < retention_date:
                         continue

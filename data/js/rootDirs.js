@@ -96,7 +96,7 @@ $(document).ready(function(){
         // put an asterisk on the text
         if ($('#'+which).text().charAt(0) != '*')
             $('#'+which).text('*'+$('#'+which).text());
-        
+
         // if there's an existing one then take the asterisk off
         if ($('#whichDefaultRootDir').val() && force != true) {
             var old_default = $('#'+$('#whichDefaultRootDir').val());
@@ -126,18 +126,18 @@ $(document).ready(function(){
 
         // if nothing's selected then select the default
         if (!$("#rootDirs option:selected").length && $('#whichDefaultRootDir').val().length)
-            $('#'+$('#whichDefaultRootDir').val()).attr('selected', 'selected')
+            $('#'+$('#whichDefaultRootDir').val()).prop("selected", true)
 
         // if something's selected then we have some behavior to figure out
         if ($("#rootDirs option:selected").length) {
             do_disable = '';
         }
-        
+
         // update the elements
-        $('#deleteRootDir').attr('disabled', do_disable);
-        $('#defaultRootDir').attr('disabled', do_disable);
-        $('#editRootDir').attr('disabled', do_disable);
-        
+        $('#deleteRootDir').prop('disabled', do_disable);
+        $('#defaultRootDir').prop('disabled', do_disable);
+        $('#editRootDir').prop('disabled', do_disable);
+
         var log_str = '';
         var dir_text = '';
         if ($('#whichDefaultRootDir').val().length >= 4)
@@ -154,9 +154,9 @@ $(document).ready(function(){
         $('#rootDirText').change();
         logMsg('rootDirText: '+$('#rootDirText').val())
     }
-    
+
     $('#rootDirs').click(refreshRootDirs);
-    
+
     // set up buttons on page load
     syncOptionIDs();
     setDefault($('#whichDefaultRootDir').val(), true)

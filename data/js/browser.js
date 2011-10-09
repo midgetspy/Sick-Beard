@@ -103,9 +103,16 @@
         // text field used for the result
         options.field = $(this);
         
-        if(options.field.autocomplete && options.autocompleteURL)
-            options.field.autocomplete(options.autocompleteURL, { matchCase: true });
-        
+        if(options.field.autocomplete && options.autocompleteURL) {
+            options.field.autocomplete({ 
+                source: options.autocompleteURL,
+                open: function(event, ui) { 
+                    $(".ui-autocomplete li.ui-menu-item a").removeClass("ui-corner-all");
+                    $(".ui-autocomplete li.ui-menu-item:odd a").addClass("ui-menu-item-alternate");
+                }
+            });
+        }
+
         // if the text field is empty and we're given a key then populate it with the last browsed value from a cookie
         if(options.key && options.field.val().length == 0 && (path = $.cookie('fileBrowser-' + options.key)))
             options.field.val(path);

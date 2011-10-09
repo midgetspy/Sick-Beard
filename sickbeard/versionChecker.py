@@ -124,7 +124,7 @@ class WindowsUpdateManager(UpdateManager):
                     only the build number. default: False
         """
 
-        regex = "http://sickbeard.googlecode.com/files/SickBeard\-win32\-alpha\-build(\d+)(?:\.\d+)?\.zip"
+        regex = "//sickbeard\.googlecode\.com/files/SickBeard\-win32\-alpha\-build(\d+)(?:\.\d+)?\.zip"
 
         svnFile = urllib.urlopen(self.gc_url)
 

@@ -132,7 +132,7 @@ Change selected episodes to
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
-  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Status</th><th>Action</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Status</th><th>Search</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 

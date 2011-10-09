@@ -231,10 +231,16 @@ class TVShow(object):
 
         for curResult in sqlResults:
 
+            deleteEp = False
+                    
             curSeason = int(curResult["season"])
             curEpisode = int(curResult["episode"])
             if curSeason not in cachedSeasons:
-                cachedSeasons[curSeason] = cachedShow[curSeason]
+                try:
+                    cachedSeasons[curSeason] = cachedShow[curSeason]
+                except tvdb_exceptions.tvdb_seasonnotfound, e:
+                    logger.log(u"Error when trying to load the episode from TVDB: "+e.message, logger.WARNING)
+                    deleteEp = True
 
             if not curSeason in scannedEps:
                 scannedEps[curSeason] = {}
@@ -243,6 +249,11 @@ class TVShow(object):
 
             try:
                 curEp = self.getEpisode(curSeason, curEpisode)
+                
+                # if we found out that the ep is no longer on TVDB then delete it from our database too
+                if deleteEp:
+                    curEp.deleteEpisode()
+                
                 curEp.loadFromDB(curSeason, curEpisode)
                 curEp.loadFromTVDB(tvapi=t, cachedSeason=cachedSeasons[curSeason])
                 scannedEps[curSeason][curEpisode] = True

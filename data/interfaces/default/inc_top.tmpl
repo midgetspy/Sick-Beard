@@ -15,7 +15,6 @@
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.pnotify.default.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.autocomplete.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/smooth-grinder/jquery-ui-1.8.13.custom.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/superfish.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
@@ -25,14 +24,14 @@
 <!--
 #contentWrapper { background: url("$sbRoot/images/bg.gif") repeat scroll 0 0 transparent; }
 
-.ac_loading { background: white url("$sbRoot/images/loading16.gif") right center no-repeat; }
 .sf-sub-indicator { background: url("$sbRoot/images/arrows.png") no-repeat -10px -100px; }
 .sf-shadow ul { background: url("$sbRoot/images/shadow.png") no-repeat bottom right; }
 table.tablesorter thead tr .header { background-image: url("$sbRoot/images/tablesorter/bg.gif"); }
 table.tablesorter thead tr .headerSortUp { background-image: url("$sbRoot/images/tablesorter/asc.gif"); }
 table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/images/tablesorter/desc.gif"); }
-.browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat; }
 
+.ui-autocomplete-loading { background: white url("$sbRoot/images/loading16.gif") right center no-repeat; }
+.browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat !important; }
 .ui-dialog, .ui-dialog-buttonpane { background: #eceadf url("$sbRoot/css/smooth-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat !important; }
 .ui-accordion-content, .ui-tabs-panel { background: #ededed !important; background-image: none !important; }
 
@@ -64,7 +63,6 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <script type="text/javascript" src="$sbRoot/js/jquery-ui-1.8.13.custom.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/superfish-1.4.8.js"></script>
     <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/jquery.autocomplete.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.json-2.2.min.js"></script>
@@ -122,16 +120,14 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 
         \$("#NAV$topmenu").addClass("current");
 
-        \$("a.confirm").bind("click",function() {
+        \$("a.confirm").bind("click",function(e) {
+            e.preventDefault();
             var target = \$( this ).attr('href');
-            if ( confirm("Are you sure you want to " + \$(this).attr('text') + "?") )
+            if ( confirm("Are you sure you want to " + \$(this).prop('text') + "?") )
                 location.href = target;
+            \$('#MainMenu.sf-menu').hideSuperfishUl();
             return false;
         });
-
-    \$.pnotify.defaults.pnotify_width = "340px";
-    \$.pnotify.defaults.pnotify_history = false;
-    \$.pnotify.defaults.pnotify_delay = 4000;
 
     });
 //-->
