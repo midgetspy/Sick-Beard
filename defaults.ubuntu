@@ -10,11 +10,11 @@
 # [required] set path where sickbeard is installed:
 APP_PATH=/opt/sickbeard
 
-# [required] user or uid of account to run the program as:
-RUN_AS=
-
 # [optional] change to 1 to enable daemon
 ENABLE_DAEMON=0
+
+# [required] user or uid of account to run the program as:
+RUN_AS=
 
 # [optional] change to 1 to enable updating from webinterface
 # this changes ownership of sickbeard's programfiles to user set @ RUN_AS
