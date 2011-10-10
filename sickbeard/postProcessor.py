@@ -76,7 +76,20 @@ class PostProcessor(object):
     def _log(self, message, level=logger.MESSAGE):
         logger.log(message, level)
         self.log += message + '\n'
-    
+ 
+    def _checkForExistingDir(self, existing_dir):
+         if not existing_dir:
+            self._log(u"There is no existing directory so there's no worries about replacing it", logger.DEBUG)
+            return PostProcessor.DOESNT_EXIST
+
+         if ek.ek(os.path.isdir, existing_dir):
+            self._log(u"Directory "+existing_dir+" already exists", logger.DEBUG)
+            return PostProcessor.EXISTS_SAME
+
+         else:
+            self._log(u"There is no existing directory so there's no worries about replacing it", logger.DEBUG)
+            return PostProcessor.DOESNT_EXIST
+   
     def _checkForExistingFile(self, existing_file):
     
         if not existing_file:
@@ -619,11 +632,14 @@ class PostProcessor(object):
         for curEp in [ep_obj] + ep_obj.relatedEps:
             curEp.status = common.Quality.compositeStatus(common.SNATCHED, new_ep_quality)
         
-        # check for an existing file
-        existing_file_status = self._checkForExistingFile(ep_obj.location)
+        # check for an existing file/dir
+        if sickbeard.MOVE_ENTIRE_DIR:
+            existing_file_status = self._checkForExistingDir(ep_obj.location)
+        else:
+            existing_file_status = self._checkForExistingFile(ep_obj.location)
 
         # if it's not priority then we don't want to replace smaller files in case it was a mistake
-        if not priority_download:
+        if not priority_download or sickbeard.MOVE_ENTIRE_DIR:
         
             # if there's an existing file that we don't want to replace stop here
             if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
@@ -681,18 +697,27 @@ class PostProcessor(object):
             new_file_name = self.file_name 
                        
         try:
-            # move the episode and associated files to the show dir
-            if sickbeard.KEEP_PROCESSED_DIR:
-                self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+            if sickbeard.MOVE_ENTIRE_DIR:
+                if sickbeard.KEEP_PROCESSED_DIR:
+                   helpers.copyDir(os.path.dirname(self.file_path), os.path.join(dest_path, self.folder_name))
+                else:
+                   helpers.moveDir(os.path.dirname(self.file_path), dest_path)
             else:
-                self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+                # move the episode and associated files to the show dir
+                if sickbeard.KEEP_PROCESSED_DIR:
+                    self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+                else:
+                    self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
         except OSError, IOError:
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
+                if sickbeard.MOVE_ENTIRE_DIR:
+                    cur_ep.location = ek.ek(os.path.join, dest_path, self.folder_name)
+                else:
+                    cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
                 cur_ep.saveToDB()
         
         # log it to history
