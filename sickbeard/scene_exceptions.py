@@ -123,9 +123,13 @@ def _retrieve_anidb_mainnames():
     anidb_mainNames = {}
     for show in sickbeard.showList:
         if show.is_anime:
-            anime = adba.Anime(None, name=show.name, tvdbid=show.tvdbid, autoCorrectName=True)
-            if anime.name and anime.name != show.name:
-                anidb_mainNames[show.tvdbid] = [anime.name]
+            try:
+                anime = adba.Anime(None, name=show.name, tvdbid=show.tvdbid, autoCorrectName=True)
+            except:
+                continue
+            else:
+                if anime.name and anime.name != show.name:
+                    anidb_mainNames[show.tvdbid] = [anime.name]
 
     logger.log("anidb anime names: " + str(anidb_mainNames), logger.DEBUG)
     return anidb_mainNames
