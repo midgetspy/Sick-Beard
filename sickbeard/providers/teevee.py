@@ -45,8 +45,6 @@ class TeeVeeProvider(generic.NZBProvider):
         self.url = 'http://abTeeVee.allfilled.com/'
 
         self.searchurl = 'http://abTeeVee.allfilled.com/search.php?q=%s&Search=Search' 
-   
-        self.downloadurl = 'http://85.214.105.230/get_nzb.php?id=%s&section=teevee'
          
         self.regex = '<td class="cell_reqid">(?P<reqid>.*?)</td>.+?<td class="cell_request">(?P<title>.*?)</td>'
 
@@ -112,7 +110,6 @@ class TeeVeeProvider(generic.NZBProvider):
             return []
                 
         if ep_obj.show.air_by_date:
-
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate).replace('-', '.')
                 search_string.append(ep_string)
@@ -146,8 +143,7 @@ class TeeVeeProvider(generic.NZBProvider):
         #Extracting torrent information from searchURL 
         match = re.compile(self.regex, re.DOTALL ).finditer(data)
         for nzb in match:
-            downloadURL = self.downloadurl % (urllib.quote(nzb.group('reqid')))
-            item = (nzb.group('title').replace('_','.'), downloadURL)
+            item = (nzb.group('title').replace('_','.'),nzb.group('reqid'))
             results.append(item)
 
         return results

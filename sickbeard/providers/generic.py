@@ -139,11 +139,7 @@ class GenericProvider:
             return False
 
         # use the result name as the filename
-        # if the result is not an nzb, it comes packed as a rar
-        if "DOCTYPE nzb" not in data:
-            fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.rar')
-        else:
-            fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
+        fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
 
         logger.log(u"Saving to " + fileName, logger.DEBUG)
 
