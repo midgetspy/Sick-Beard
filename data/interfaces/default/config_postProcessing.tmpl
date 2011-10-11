@@ -72,6 +72,14 @@
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="move_entire_dir" id="move_entire_dir" #if $sickbeard.MOVE_ENTIRE_DIR == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="move_entire_dir">
+                                <span class="component-title">Move directory</span>
+                                <span class="component-desc">Move the entire directory?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="rename_episodes">
                                 <span class="component-title">Rename Episodes</span>

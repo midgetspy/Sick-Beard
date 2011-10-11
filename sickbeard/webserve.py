@@ -777,7 +777,7 @@ class ConfigPostProcessing:
                     naming_sep_type=None, naming_quality=None, naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None):
+                    move_associated_files=None, move_entire_dir=None, tv_download_dir=None):
 
         results = []
 
@@ -834,10 +834,17 @@ class ConfigPostProcessing:
         else:
             move_associated_files = 0
 
+        if move_entire_dir == "on":
+            move_entire_dir = 1
+        else:
+            move_entire_dir = 0
+
+
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
+        sickbeard.MOVE_ENTIRE_DIR = move_entire_dir
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
