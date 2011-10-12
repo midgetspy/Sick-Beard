@@ -193,8 +193,8 @@ class TeeVeeCache(tvcache.TVCache):
             return []
                 
         for nzb in match:
-                       
-            item = (nzb.group('title').replace('_','.'),nzb.group('reqid'))
+            downloadURL = self.downloadurl % (urllib.quote(nzb.group('reqid')))           
+            item = (nzb.group('title').replace('_','.'), downloadURL)
             self._parseItem(item)
 
     def _getData(self):
