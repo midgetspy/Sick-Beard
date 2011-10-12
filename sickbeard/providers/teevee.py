@@ -169,6 +169,7 @@ class TeeVeeCache(tvcache.TVCache):
         self.minTime = 3
         
         self.regex = '<td class="cell_reqid">(?P<reqid>.*?)</td>.+?<td class="cell_request">(?P<title>.*?)</td>'
+        self.downloadurl = 'http://85.214.105.230/get_nzb.php?id=%s&section=teevee'
         
     def updateCache(self):
         
