@@ -699,9 +699,9 @@ class PostProcessor(object):
         try:
             if sickbeard.MOVE_ENTIRE_DIR:
                 if sickbeard.KEEP_PROCESSED_DIR:
-                   helpers.copyDir(os.path.dirname(self.file_path), os.path.join(dest_path, self.folder_name))
+                    helpers.copyDir(os.path.dirname(self.file_path), os.path.join(dest_path, self.folder_name))
                 else:
-                   helpers.moveDir(os.path.dirname(self.file_path), dest_path)
+                    helpers.moveDir(os.path.dirname(self.file_path), dest_path)
             else:
                 # move the episode and associated files to the show dir
                 if sickbeard.KEEP_PROCESSED_DIR:
