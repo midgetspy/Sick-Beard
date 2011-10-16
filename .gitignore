@@ -20,6 +20,7 @@ autoProcessTV/autoProcessTV.cfg
 *.cproject
 *.tmproj
 *.tmproject
+*.pydevproject
 
 # OS generated files #
 ######################
