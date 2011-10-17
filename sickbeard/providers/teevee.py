@@ -48,7 +48,7 @@ class TeeVeeProvider(generic.NZBProvider):
    
         self.downloadurl = 'http://85.214.105.230/get_nzb.php?id=%s&section=teevee'
          
-        self.regex = '<td class="cell_reqid">(?P<reqid>.*?)</td>.+?<td class="cell_request">(?P<title>.*?)</td>'
+        self.regex = '<td class="cell_reqid">(?P<reqid>.*?)</td>.+?<td class="cell_request">(?P<title>.*?)</td>.+?<td class="cell_status"><img src="images/req_posted.png"'
 
     def isEnabled(self):
         return sickbeard.TEEVEE
@@ -168,7 +168,7 @@ class TeeVeeCache(tvcache.TVCache):
         # only poll TeeVee every 3 minutes max
         self.minTime = 3
         
-        self.regex = '<td class="cell_reqid">(?P<reqid>.*?)</td>.+?<td class="cell_request">(?P<title>.*?)</td>'
+        self.regex = '<td class="cell_reqid">(?P<reqid>.*?)</td>.+?<td class="cell_request">(?P<title>.*?)</td>.+?<td class="cell_status"><img src="images/req_posted.png"'
         self.downloadurl = 'http://85.214.105.230/get_nzb.php?id=%s&section=teevee'
         
     def updateCache(self):
