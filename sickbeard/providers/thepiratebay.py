@@ -176,11 +176,6 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
     def getURL(self, url, headers=None):
 
-        import socket
-        import socks
-        socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,"127.0.0.1",1080)
-        socket.socket = socks.socksocket
-
         if not headers:
             headers = []
 
