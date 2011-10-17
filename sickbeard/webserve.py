@@ -1023,7 +1023,7 @@ class ConfigProviders:
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
-                      thepiratebay_trusted=None, thepiratebay_proxy=None,
+                      thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1103,7 +1103,15 @@ class ConfigProviders:
             thepiratebay_trusted = 0
 
         sickbeard.THEPIRATEBAY_TRUSTED = thepiratebay_trusted
-        sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy.strip()
+        
+        if thepiratebay_proxy == "on": 
+            thepiratebay_proxy = 1
+            sickbeard.THEPIRATEBAY_PROXY_URL = thepiratebay_proxy_url.strip()
+        else:
+            thepiratebay_proxy = 0
+            sickbeard.THEPIRATEBAY_PROXY_URL = ""
+            
+        sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy    
 
         sickbeard.NZBS_UID = nzbs_org_uid.strip()
         sickbeard.NZBS_HASH = nzbs_org_hash.strip()

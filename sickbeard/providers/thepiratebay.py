@@ -19,6 +19,7 @@
 import re
 import datetime
 import urllib, urllib2
+import sys
 
 import sickbeard
 import generic
@@ -30,6 +31,21 @@ from sickbeard import helpers
 from sickbeard import show_name_helpers
 from sickbeard import db
 from sickbeard.common import Overview
+from sickbeard.exceptions import ex
+
+proxy_dict = {'15aa51.info (US)' : 'http://15aa51.info/', 
+#              'blewpass.com (US)' : 'http://www.blewpass.com/', #Not Working
+              'meganprx.info (FR)': 'http://www.meganprx.info/',
+              'theunblockproxy.com (US)' : 'http://theunblockproxy.com/', 
+              '5tunnel.com (US)' : 'http://www.5tunnel.com/',
+              'proxite.eu (DE)' :'http://proxite.eu/',
+              'shieldmagic.com (GB)' : 'http://www.shieldmagic.com/',
+              'alexandraprx.info (FR)' : 'http://www.alexandraprx.info/',
+              'skipadmin.com (GB)' : 'http://skipadmin.com/',
+              'webproxy.cz (CZ)' : 'http://webproxy.cz/',
+              'experthide.com (US, SSL)' : 'https://www.experthide.com/',
+              'proxy-hide.com (US, SSL)' : 'https://proxy-hide.com/',
+             }
 
 class ThePirateBayProvider(generic.TorrentProvider):
 
@@ -40,10 +56,14 @@ class ThePirateBayProvider(generic.TorrentProvider):
         self.supportsBacklog = True
 
         self.cache = ThePirateBayCache(self)
-
+        
+        self.proxy = ThePirateBayWebproxy() 
+        
         self.url = 'http://thepiratebay.org/'
 
-        self.searchurl = 'http://thepiratebay.org/search/%s/0/7/200'  # order by seed       
+        self.searchurl =  'http://thepiratebay.org/search/%s/0/7/200'  # order by seed       
+
+        self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a href="(?P<url>.*?)%s".*?</td>' 
 
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
@@ -121,23 +141,19 @@ class ThePirateBayProvider(generic.TorrentProvider):
     def _doSearch(self, search_params, show=None):
     
         results = []
-        proxy_url = sickbeard.THEPIRATEBAY_PROXY
 
-        searchURL = self.searchurl %(urllib.quote(search_params))    
-        re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)".*?<a href="(?P<url>.*?)".*?</td>' 
+        searchURL = self.proxy._buildURL(self.searchurl %(urllib.quote(search_params)))    
 
-        if proxy_url != '':
-            searchURL = proxy_url + 'browse.php?u=' + searchURL + '&b=32'
-            re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)&amp;b=32".*?<a href="(?P<url>.*?)&amp;b=32".*?</td>' 
-    
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
                     
-        data = urllib.unquote(self.getURL(searchURL))
+        data = self.getURL(searchURL)
         if not data:
             return []
 
+        re_title_url = self.proxy._buildRE(self.re_title_url)
+        
         #Extracting torrent information from searchURL                   
-        match = re.compile(re_title_url, re.DOTALL ).finditer(data)
+        match = re.compile(re_title_url, re.DOTALL ).finditer(urllib.unquote(data))
         for torrent in match:
            
             #Accept Torrent only from Good People
@@ -160,15 +176,19 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
     def getURL(self, url, headers=None):
 
-        proxy_url = sickbeard.THEPIRATEBAY_PROXY
+        import socket
+        import socks
+        socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5,"127.0.0.1",1080)
+        socket.socket = socks.socksocket
 
         if not headers:
             headers = []
-            
-        headers.append(('Referer', proxy_url))
-        for h in headers:
-            print h
 
+        # Glype Proxies does not support Direct Linking.
+        # We have to fake a search on the proxy site to get data
+        if self.proxy.isEnabled():
+            headers.append(('Referer', self.proxy.getProxyURL()))
+            
         result = None
 
         try:
@@ -190,16 +210,12 @@ class ThePirateBayCache(tvcache.TVCache):
 
     def updateCache(self):
 
-        re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)".*?<a href="(?P<url>.*?)".*?</td>' 
-
-        proxy_url = sickbeard.THEPIRATEBAY_PROXY
-        if proxy_url != '':
-            re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)&amp;b=32".*?<a href="(?P<url>.*?)&amp;b=32".*?</td>' 
+        re_title_url = self.provider.proxy._buildRE(self.provider.re_title_url)
                 
         if not self.shouldUpdate():
             return
 
-        data = urllib.unquote(self._getData())
+        data = self._getData()
 
         # as long as the http request worked we count this as an update
         if data:
@@ -211,7 +227,7 @@ class ThePirateBayCache(tvcache.TVCache):
         logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
         self._clearCache()
 
-        match = re.compile(re_title_url, re.DOTALL).finditer(data)
+        match = re.compile(re_title_url, re.DOTALL).finditer(urllib.unquote(data))
         if not match:
             logger.log(u"The Data returned from the ThePirateBay is incomplete, this result is unusable", logger.ERROR)
             return []
@@ -228,15 +244,11 @@ class ThePirateBayCache(tvcache.TVCache):
 
     def _getData(self):
        
-        url = 'http://thepiratebay.org/tv/latest/' #url for the last 50 tv-show
-        proxy_url = sickbeard.THEPIRATEBAY_PROXY.strip()
-        
-        if proxy_url != '':
-            url = proxy_url + 'browse.php?u=' + url + '&b=32'
-        
+        url = self.provider.proxy._buildURL('http://thepiratebay.org/tv/latest/') #url for the last 50 tv-show
+
         logger.log(u"ThePirateBay cache update URL: "+ url, logger.DEBUG)
 
-        data = self.provider.getURL(url,[('Referer', proxy_url)])
+        data = self.provider.getURL(url)
 
         return data
 
@@ -251,4 +263,35 @@ class ThePirateBayCache(tvcache.TVCache):
 
         self._addCacheEntry(title, url)
 
+class ThePirateBayWebproxy:
+    
+    def __init__(self):
+        self.Type   = 'GlypeProxy'
+        self.param  = 'browse.php?u='
+        self.option = '&b=32'
+        
+    def isEnabled(self):
+        """ Return True if we Choose to call TPB via Proxy """ 
+        return sickbeard.THEPIRATEBAY_PROXY
+    
+    def getProxyURL(self):
+        """ Return the Proxy URL Choosen via Provider Setting """
+        return str(sickbeard.THEPIRATEBAY_PROXY_URL)
+    
+    def _buildURL(self,url):
+        """ Return the Proxyfied URL of the page """ 
+        if self.isEnabled():
+            url = self.getProxyURL() + self.param + url + self.option
+        
+        return url      
+
+    def _buildRE(self,re):
+        """ Return the Proxyfied RE string """
+        if self.isEnabled():
+            re = re %('&amp;b=32','&amp;b=32')
+        else:
+            re = re %('','')   
+
+        return re    
+    
 provider = ThePirateBayProvider()

@@ -77,7 +77,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "thepiratebay"):
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay", "tvtorrents"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -197,11 +197,27 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Glype Proxy URL:</span>
-                                <input class="component-desc" type="text" name="thepiratebay_proxy" value="$sickbeard.THEPIRATEBAY_PROXY" size="40" />
+                            <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="thepiratebay_proxy">
+                                <span class="component-title">Acces TPB via Proxy</span>
+                                <span class="component-desc">Check it if you want to bypass Country Blocking Mechanism</span>
                             </label>
                         </div>
+
+                        <div class="field-pair" id="content_thepiratebay_proxy">
+							#from sickbeard.providers import thepiratebay                           		
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Proxy url:</span>
+                           		<span class="component-desc">
+	                           		<select name="thepiratebay_proxy_url" id="thepiratebay_proxy_url">
+										#for $i in $thepiratebay.proxy_dict.keys():
+										<option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
+	                                    #end for
+	                                </select>
+                                </span>
+                            </label>
+                        </div>
+
                         <div class="field-pair">
                             <input type="checkbox" name="thepiratebay_trusted" id="thepiratebay_trusted" #if $sickbeard.THEPIRATEBAY_TRUSTED then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="thepiratebay_trusted">
