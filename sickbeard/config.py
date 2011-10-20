@@ -35,8 +35,9 @@ naming_ep_type_text = ("1x02", "s01e02", "S01E02", "01x02")
 
 naming_multi_ep_type = {0: ["-%(episodenumber)02d"]*len(naming_ep_type),
                         1: [" - " + x for x in naming_ep_type],
-                        2: [x + "%(episodenumber)02d" for x in ("x", "e", "E", "x")]}
-naming_multi_ep_type_text = ("extend", "duplicate", "repeat")
+                        2: [x + "%(episodenumber)02d" for x in ("x", "e", "E", "x")],
+                        3: ["-" + e +"%(episodenumber)02d" for e in ("", "e", "E", "")]*len(naming_ep_type)}
+naming_multi_ep_type_text = ("extend", "duplicate", "repeat","extend-plex")
 
 naming_sep_type = (" - ", " ")
 naming_sep_type_text = (" - ", "space")
