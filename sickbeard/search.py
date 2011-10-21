@@ -357,7 +357,7 @@ def findSeason(show, season):
     highest_quality_overall = 0
     for cur_season in foundResults:
         for cur_result in foundResults[cur_season]:
-            if cur_result.quality != Quality.UNKNOWN and cur_result.quality > highest_quality_overall:
+            if cur_result.quality != Quality.UNKNOWN and cur_result.quality > highest_quality_overall and cur_result.quality in anyQualities+bestQualities:
                 highest_quality_overall = cur_result.quality
     logger.log(u"The highest quality of any match is "+Quality.qualityStrings[highest_quality_overall], logger.DEBUG)
 
