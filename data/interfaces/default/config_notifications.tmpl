@@ -617,12 +617,12 @@
                         <input type="submit" class="config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group //-->
-
-                 <div id="core-component-group10" class="component-group clearfix">
+                
+                <div id="core-component-group10" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3><a href="http://boxcar.io/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/boxcar.gif" alt="Boxcar" title="Boxcar" width="16" height="16" /> Boxcar</a></h3>
-                        <p>Read your messages where and when you want them! A subscription will be send if needed.</p>
+                        <p>Read your messages where and when you want them! A subscription will be sent if needed.</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -670,10 +670,8 @@
 
                     </fieldset>
 
-                </div>
-
-
-
+                </div><!-- /component-group 10 //-->
+                
                 <div id="core-component-group11" class="component-group clearfix">
 
                     <div class="component-group-desc">
@@ -731,7 +729,104 @@
                         </div><!-- /enabler_trakt //-->
 
                     </fieldset>
-                </div><!-- /component-group //-->
+                </div><!-- /component-group 11 //-->
+                
+                <div id="core-component-group12" class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://www.xmpp.org/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/xmpp.png" alt="XMPP" title="XMPP" width="16" height="16" /> XMPP</a></h3>
+                        <p>XMPP is an open technology for real-time communication</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_xmpp" id="use_xmpp" #if $sickbeard.USE_XMPP then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_xmpp">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Jabber/XMPP notifications?<br /><br />
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div id="content_use_xmpp">
+                        <div class="field-pair">
+                            <input type="checkbox" name="xmpp_notify_onsnatch" id="xmpp_notify_onsnatch" #if $sickbeard.XMPP_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="xmpp_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="xmpp_notify_ondownload" id="xmpp_notify_ondownload" #if $sickbeard.XMPP_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="xmpp_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+                        
+                         <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Username</span>
+                                <input type="text" name="xmpp_username" id="xmpp_username" value="$sickbeard.XMPP_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username (including @domain.com)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Password</span>
+                                <input type="password" name="xmpp_password" id="xmpp_password" value="$sickbeard.XMPP_PASSWORD" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">XMPP Password</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Server</span>
+                                <input type="text" name="xmpp_server" id="xmpp_server" value="$sickbeard.XMPP_SERVER" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">XMPP Server (ex: talk.google.com)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Port</span>
+                                <input type="text" name="xmpp_port" id="xmpp_port" value="$sickbeard.XMPP_PORT" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">XMPP Port (ex: 5222)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Recipient</span>
+                                <input type="text" name="xmpp_recipient" id="xmpp_recipient" value="$sickbeard.XMPP_RECIPIENT" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">XMPP Recipient</span>
+                            </label>
+                        </div>
+                        
+                        <div class="testNotification" id="testXMPP-result">Click below to test.</div>
+                        <input type="button" value="Test XMPP" id="testXMPP" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_xmpp //-->
+                        
+                    </fieldset>
+                </div><!-- /component-group 12//-->
 
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
