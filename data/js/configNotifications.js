@@ -117,4 +117,16 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testNMJ", {'host': nmj_host, 'database': nmj_database, 'mount': nmj_mount}, 
         function (data){ $('#testNMJ-result').html(data); });
     });
+
+    $('#testXMPP').click(function(){
+        $('#testXMPP-result').html(loading);
+        var xmpp_username = $("#xmpp_username").val();
+        var xmpp_password = $("#xmpp_password").val();
+        var xmpp_server = $("#xmpp_server").val();
+        var xmpp_port = $("#xmpp_port").val();
+        var xmpp_recipient = $("#xmpp_recipient").val();
+        
+        $.get(sbRoot+"/home/testXMPP", {'username': xmpp_username, 'password': xmpp_password, 'server': xmpp_server, 'port': xmpp_port, 'recipient': xmpp_recipient}, 
+        function (data){ $('#testXMPP-result').html(data); });
+    });
 });

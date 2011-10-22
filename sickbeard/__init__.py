@@ -250,6 +250,15 @@ NMJ_MOUNT = None
 
 USE_SYNOINDEX = False
 
+USE_XMPP = False
+XMPP_USERNAME = None
+XMPP_PASSWORD = None
+XMPP_SERVER = None
+XMPP_PORT = None
+XMPP_RECIPIENT = None
+XMPP_NOTIFY_ONSNATCH = False
+XMPP_NOTIFY_ONDOWNLOAD = False
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -374,6 +383,7 @@ def initialize(consoleLogging=True):
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
+                USE_XMPP, XMPP_NOTIFY_ONSNATCH, XMPP_NOTIFY_ONDOWNLOAD, XMPP_USERNAME, XMPP_PASSWORD, XMPP_SERVER, XMPP_PORT, XMPP_RECIPIENT, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS
@@ -395,6 +405,7 @@ def initialize(consoleLogging=True):
         CheckSection('Twitter')
         CheckSection('NMJ')
         CheckSection('Synology')
+        CheckSection('XMPP')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -592,6 +603,15 @@ def initialize(consoleLogging=True):
         NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
 
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
+                
+        USE_XMPP = bool(check_setting_int(CFG, 'XMPP', 'use_xmpp', 0))
+        XMPP_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XMPP', 'xmpp_notify_onsnatch', 0))
+        XMPP_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XMPP', 'xmpp_notify_ondownload', 0))
+        XMPP_USERNAME = check_setting_str(CFG, 'XMPP', 'xmpp_username', 'user@host.com')
+        XMPP_PASSWORD = check_setting_str(CFG, 'XMPP', 'xmpp_password', '')
+        XMPP_SERVER = check_setting_str(CFG, 'XMPP', 'xmpp_server', 'talk.google.com')
+        XMPP_PORT = check_setting_int(CFG, 'XMPP', 'xmpp_port', 5222)
+        XMPP_RECIPIENT = check_setting_str(CFG, 'XMPP', 'xmpp_recipient', '')
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -1098,6 +1118,16 @@ def save_config():
 
     new_config['Synology'] = {}
     new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
+    
+    new_config['XMPP'] = {}
+    new_config['XMPP']['use_xmpp'] = int(USE_XMPP)
+    new_config['XMPP']['xmpp_notify_onsnatch'] = int(XMPP_NOTIFY_ONSNATCH)
+    new_config['XMPP']['xmpp_notify_ondownload'] = int(XMPP_NOTIFY_ONDOWNLOAD)
+    new_config['XMPP']['xmpp_username'] = XMPP_USERNAME
+    new_config['XMPP']['xmpp_password'] = XMPP_PASSWORD
+    new_config['XMPP']['xmpp_server'] = XMPP_SERVER
+    new_config['XMPP']['xmpp_port'] = XMPP_PORT
+    new_config['XMPP']['xmpp_recipient'] = XMPP_RECIPIENT
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])

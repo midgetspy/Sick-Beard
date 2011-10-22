@@ -1172,7 +1172,9 @@ class ConfigNotifications:
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
-                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
+                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
+                          use_xmpp=None, xmpp_notify_onsnatch=None, xmpp_notify_ondownload=None, 
+                          xmpp_username=None, xmpp_password=None, xmpp_server=None, xmpp_port=None, xmpp_recipient=None):
 
         results = []
 
@@ -1301,6 +1303,21 @@ class ConfigNotifications:
             use_synoindex = 1
         else:
             use_synoindex = 0
+        
+        if use_xmpp == "on":
+            use_xmpp  = 1
+        else:
+            use_xmpp = 0
+        
+        if xmpp_notify_onsnatch == "on":
+            xmpp_notify_onsnatch = 1
+        else:
+            xmpp_notify_onsnatch = 0
+
+        if xmpp_notify_ondownload == "on":
+            xmpp_notify_ondownload = 1
+        else:
+            xmpp_notify_ondownload = 0
 
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
@@ -1357,6 +1374,15 @@ class ConfigNotifications:
         sickbeard.NMJ_MOUNT = nmj_mount
 
         sickbeard.USE_SYNOINDEX = use_synoindex
+        
+        sickbeard.USE_XMPP = use_xmpp
+        sickbeard.XMPP_NOTIFY_ONSNATCH = xmpp_notify_onsnatch
+        sickbeard.XMPP_NOTIFY_ONDOWNLOAD = xmpp_notify_ondownload
+        sickbeard.XMPP_USERNAME = xmpp_username
+        sickbeard.XMPP_PASSWORD = xmpp_password
+        sickbeard.XMPP_SERVER = xmpp_server
+        sickbeard.XMPP_PORT = xmpp_port
+        sickbeard.XMPP_RECIPIENT = xmpp_recipient
 
         sickbeard.save_config()
 
@@ -1995,6 +2021,11 @@ class Home:
         else:
             return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
 
+    @cherrypy.expose
+    def testXMPP(self, username=None, password=None, server=None, port=None, recipient=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        return notifiers.xmpp_notifier.test_notify(username, password, server, port, recipient)
 
     @cherrypy.expose
     def shutdown(self):
