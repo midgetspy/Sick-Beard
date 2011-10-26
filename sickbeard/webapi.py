@@ -80,7 +80,7 @@ class Api:
             logger.log(accessMsg, logger.DEBUG)
         else:
             logger.log(accessMsg, logger.WARNING)
-            return outputCallback(_responds(RESULT_DENIED, msg="Access Denied! Wrong Api Key"))
+            return outputCallback(_responds(RESULT_DENIED, msg=accessMsg))
 
         # set the original call_dispatcher as the local _call_dispatcher
         _call_dispatcher = call_dispatcher
@@ -160,16 +160,16 @@ class Api:
             del kwargs["apikey"]
 
         if sickbeard.USE_API != True:
-            msg = u"SB API Disabled '" + remoteIp + "'. ACCESS DENIED"
+            msg = u"API :: " + remoteIp + " - SB API Disabled. ACCESS DENIED"
             return False, msg, args, kwargs
         elif apiKey == realKey:
-            msg = u"API key accepted. ACCESS GRANTED"
+            msg = u"API :: " + remoteIp + " - gave correct API KEY. ACCESS GRANTED"
             return True, msg, args, kwargs
         elif not apiKey:
-            msg = u"NO API key given by '" + remoteIp + "'. ACCESS DENIED"
+            msg = u"API :: " + remoteIp + " - gave NO API KEY. ACCESS DENIED"
             return False, msg, args, kwargs
         else:
-            msg = u"API key '" + apiKey + "' given by '" + remoteIp + "' NOT accepted. ACCESS DENIED"
+            msg = u"API :: " + remoteIp + " - gave WRONG API KEY " + apiKey + ". ACCESS DENIED"
             return False, msg, args, kwargs
 
 
