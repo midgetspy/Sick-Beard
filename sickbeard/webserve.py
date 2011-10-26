@@ -629,10 +629,31 @@ class ConfigGeneral:
 
         sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
 
-    
+    @cherrypy.expose
+    def generateKey(self):
+        """ Return a new randomized API_KEY
+        """
+        import time
+        try:
+           from hashlib import md5
+        except ImportError:
+           from md5 import md5
+        import random
+        # Create some values to seed md5
+        t = str(time.time())
+        r = str(random.random())
+        # Create the md5 instance and give it the current time
+        m = md5(t)
+        # Update the md5 instance with the random variable
+        m.update(r)
+
+        # Return a hex digest of the md5, eg 49f68a5c8493ec2c0bf489821c21fc3b
+        logger.log(u"New API generated")
+        return m.hexdigest()
+
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
-                    launch_browser=None, web_username=None,
+                    launch_browser=None, web_username=None, use_api=None, api_key=None,
                     web_password=None, version_notify=None):
 
         results = []
@@ -667,6 +688,14 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        if use_api == "on":
+            use_api = 1
+        else:
+            use_api = 0
+
+        sickbeard.USE_API = use_api
+        sickbeard.API_KEY = api_key
 
         config.change_VERSION_NOTIFY(version_notify)
 

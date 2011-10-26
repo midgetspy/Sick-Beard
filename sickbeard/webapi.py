@@ -68,7 +68,7 @@ class Api:
     @cherrypy.expose
     def default(self, *args, **kwargs):
 
-        self.apiKey = "1234"
+        self.apiKey = sickbeard.API_KEY
         access, accessMsg, args, kwargs = self._grand_access(self.apiKey, args, kwargs)
 
         # set the output callback
@@ -159,7 +159,10 @@ class Api:
         else:
             del kwargs["apikey"]
 
-        if apiKey == realKey:
+        if sickbeard.USE_API != True:
+            msg = u"SB API Disabled '" + remoteIp + "'. ACCESS DENIED"
+            return False, msg, args, kwargs
+        elif apiKey == realKey:
             msg = u"API key accepted. ACCESS GRANTED"
             return True, msg, args, kwargs
         elif not apiKey:
