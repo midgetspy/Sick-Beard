@@ -24,7 +24,6 @@
 DAEMON=/usr/bin/python
 SETTINGS=/etc/default/sickbeard
 
-APP_PATH=/opt/sickbeard
 SETTINGS_LOADED=FALSE
 
 DESC=SickBeard
@@ -55,6 +54,10 @@ check_retval() {
 load_settings() {
     if [ $SETTINGS_LOADED != "TRUE" ]; then
         . $SETTINGS
+
+        [ -n "$APP_PATH" ] || {
+            log_warning_msg "$DESC: path to $DESC not set, aborting. See $SETTINGS";
+            return 1; }
 
         [ $ENABLE_DAEMON != 1 ] && {
             log_warning_msg "$DESC: daemon not enabled, aborting. See $SETTINGS";
