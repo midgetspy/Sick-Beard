@@ -20,12 +20,11 @@
 # Description:       starts instance of SickBeard using start-stop-daemon
 ### END INIT INFO
 
-set -e
-
 # main variables
 DAEMON=/usr/bin/python
 SETTINGS=/etc/default/sickbeard
 
+APP_PATH=/opt/sickbeard
 SETTINGS_LOADED=FALSE
 
 DESC=SickBeard
@@ -56,10 +55,6 @@ check_retval() {
 load_settings() {
     if [ $SETTINGS_LOADED != "TRUE" ]; then
         . $SETTINGS
-        
-        [ -n "$APP_PATH" ] || {
-            log_warning_msg "$DESC: path to $DESC not set, aborting. See $SETTINGS";
-            return 1; }
 
         [ $ENABLE_DAEMON != 1 ] && {
             log_warning_msg "$DESC: daemon not enabled, aborting. See $SETTINGS";
@@ -87,42 +82,60 @@ load_settings() {
 
 load_settings || exit 0
 
+is_running () {
+    # returns 1 when running, else 0.
+    PID=$(pgrep -f "$DAEMON_OPTS")
+    RET=$?
+    [ $RET -gt 1 ] && exit 1 || return $RET
+}
+
 handle_pid () {
-PID_PATH=`dirname $PID_FILE`
-[ -d $PID_PATH ] || mkdir -p $PID_PATH && chown -R $RUN_AS $PID_PATH > /dev/null || {
-    log_warning_msg "$DESC: Could not create $PID_FILE, aborting.";
-    return 1;}
+    PID_PATH=`dirname $PID_FILE`
+    [ -d $PID_PATH ] || mkdir -p $PID_PATH && chown -R $RUN_AS $PID_PATH > /dev/null || {
+        log_warning_msg "$DESC: Could not create $PID_FILE, aborting.";
+        return 1;}
 }
 
 enable_updates () {
-chown -R $RUN_AS $APP_PATH > /dev/null || {
-    log_warning_msg "$DESC: $APP_PATH not writable for web-updates, See $SETTINGS";
-    return 0; }
+    chown -R $RUN_AS $APP_PATH > /dev/null || {
+        log_warning_msg "$DESC: $APP_PATH not writable for web-updates, See $SETTINGS";
+        return 0; }
+}
+
+start_sickbeard () {
+    if ! is_running; then
+        log_daemon_msg "Starting $DESC"
+        [ "$WEB_UPDATE" = 1 ] && enable_updates
+        handle_pid
+        start-stop-daemon -o -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+        check_retval
+    else
+        log_success_msg "$DESC: already running (pid $PID)"
+    fi
+}
+
+stop_sickbeard () {
+    if is_running; then
+        log_daemon_msg "Stopping $DESC"
+        start-stop-daemon -o --stop --pidfile $PID_FILE --retry 15
+        check_retval
+    else
+        log_success_msg "$DESC: not running"
+    fi
 }
 
 case "$1" in
-  start)
-    echo "Starting $DESC"
-    [ "$WEB_UPDATE" = 1 ] && enable_updates
-    handle_pid
-    start-stop-daemon -o -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
-    check_retval
-    ;;
-  stop)
-        echo "Stopping $DESC"
-        start-stop-daemon -o --stop --pidfile $PID_FILE --retry 15
-        check_retval
+    start)
+        start_sickbeard
         ;;
-
-  restart|force-reload)
-        echo "Stopping $DESC"
-        start-stop-daemon -o --stop --pidfile $PID_FILE --retry 15
-        check_retval
-        [ "$WEB_UPDATE" = 1 ] && enable_updates
-        start-stop-daemon -o -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
-        check_retval
+    stop)
+        stop_sickbeard
         ;;
-  *)
+    restart|force-reload)
+        stop_sickbeard
+        start_sickbeard
+        ;;
+    *)
         N=/etc/init.d/$NAME
         echo "Usage: $N {start|stop|restart|force-reload}" >&2
         exit 1
