@@ -32,6 +32,7 @@ addOption("Command", "SickBeard.CheckScheduler", "?cmd=sb.checkscheduler", "", "
 addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "action");
 addOption("Command", "SickBeard.GetDefaults", "?cmd=sb.getdefaults", "", "", "action");
 addOption("Command", "SickBeard.GetMessages", "?cmd=sb.getmessages", "", "", "action");
+addOption("Command", "SickBeard.GetRootDirs", "?cmd=sb.getrootdirs", "", "", "action");
 addList("Command", "SickBeard.PauseBacklog", "?cmd=sb.pausebacklog", "sb.pausebacklog", "", "", "action");
 addOption("Command", "SickBeard.Ping", "?cmd=sb.ping", "", "", "action");
 addOption("Command", "SickBeard.Restart", "?cmd=sb.restart", "", "", "action");
@@ -54,7 +55,7 @@ addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action"
 addList("Command", "Show.GetQuality", "?cmd=show.getquality", "tvdbid", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.SearchTVDB", "?cmd=show.searchtvdb", "show.searchtvdb", "", "", "action");
-addList("Command", "Show.Season List", "?cmd=show.seasonlist", "season_list", "", "", "action");
+addList("Command", "Show.SeasonList", "?cmd=show.seasonlist", "season_list", "", "", "action");
 addList("Command", "Show.Seasons", "?cmd=show.seasons", "seasons", "", "", "action");
 addList("Command", "Show.SetQuality", "?cmd=show.setquality", "show.setquality", "", "", "action");
 addList("Command", "Show.Stats", "?cmd=show.stats", "tvdbid", "", "", "action");
@@ -280,7 +281,7 @@ addOption("sb.pausebacklog", "Unpause", "&amp;pause=0");
 <table align="center">
     <tr>
         <td>
-            <input type="text" size="40" id="apikey" name="apikey" value="_put_sickbeard_apikey_here">
+            <input type="text" size="40" id="apikey" name="apikey" value="$apikey">
             <input type="checkbox" id="debug" class="global"><label for="debug"> Debug?</label>
             <input type="checkbox" id="profile" class="global"><label for="profile"> Profiler?</label>
             <input type="checkbox" id="help" class="global"><label for="help"> Help?</label>

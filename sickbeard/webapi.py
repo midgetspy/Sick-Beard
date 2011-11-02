@@ -136,6 +136,11 @@ class Api:
         t.episodeSQLResults = episodeSQLResults
 
         myDB.connection.close()
+        if len(sickbeard.API_KEY) == 32:
+            t.apikey = sickbeard.API_KEY
+        else:
+            t.apikey = "api key not generated"
+
         return webserve._munge(t)
 
     def _out_as_json(self, dict):
@@ -1135,8 +1140,7 @@ class CMD_SickBeardForceSearch(ApiCall):
 
 
 class CMD_SickBeardGetDefaults(ApiCall):
-    _help = {"desc": "get sickbeard user defaults"
-             }
+    _help = {"desc": "get sickbeard user defaults"}
 
     def __init__(self, args, kwargs):
         # required
@@ -1169,6 +1173,49 @@ class CMD_SickBeardGetMessages(ApiCall):
                            'message': cur_notification.message,
                            'type': cur_notification.type})
         return _responds(RESULT_SUCCESS, messages)
+
+
+class CMD_SickBeardGetRootDirs(ApiCall):
+    _help = {"desc": "get sickbeard user parent directories"}
+
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ get the parent directories defined in sickbeard's config """
+
+        rootDir = {}
+        root_dirs = sickbeard.ROOT_DIRS.split('|')
+        default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
+
+        if len(root_dirs) < default_index:
+            return _responds(RESULT_FAILURE, "default_index value out of range")
+
+        rootDir["default_index"] = int(sickbeard.ROOT_DIRS.split('|')[0])
+        # remove default_index value from list (this fixes the offset)
+        root_dirs.pop(0)
+
+        # clean up the list - replace %xx escapes by their single-character equivalent
+        root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
+
+        rootDir["default_index_value"] = root_dirs[default_index]
+
+        rootDir["root_dirs"] = root_dirs
+
+        dir_list = []
+        for root_dir in root_dirs:
+            try:
+                file_list = ek.ek(os.listdir, root_dir)
+            except:
+                continue
+            dir_list.append(root_dir)
+
+        rootDir["root_dir_pruned"] = dir_list
+
+        return _responds(RESULT_SUCCESS, rootDir)
 
 
 class CMD_SickBeardPauseBacklog(ApiCall):
@@ -2055,6 +2102,7 @@ _functionMaper = {"help": CMD_Help,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
                   "sb.getdefaults": CMD_SickBeardGetDefaults,
                   "sb.getmessages": CMD_SickBeardGetMessages,
+                  "sb.getrootdirs": CMD_SickBeardGetRootDirs,
                   "sb.pausebacklog": CMD_SickBeardPauseBacklog,
                   "sb.ping": CMD_SickBeardPing,
                   "sb.restart": CMD_SickBeardRestart,
