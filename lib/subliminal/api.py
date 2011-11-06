@@ -18,19 +18,3 @@
 # You should have received a copy of the Lesser GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-
-__title__ = 'subliminal'
-__version__ = '1.1'
-__author__ = 'Antoine Bertin'
-__license__ = 'LGPLv3'
-__copyright__ = 'Copyright 2010-2011 Antoine Bertin'
-
-
-from exceptions import *
-from videos import *
-from tasks import *
-from subtitles import *
-from core import *
-from api import *
-from plugins import *

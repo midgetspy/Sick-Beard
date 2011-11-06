@@ -32,7 +32,7 @@ try:
 except ImportError:
     SUBLIMINAL_SUPPORT = False
 
-
+SINGLE = 'srt'
 def sortedPluginList():
     pluginsMapping = dict([(x.lower(), x) for x in subliminal.PLUGINS])
 
@@ -71,19 +71,13 @@ def wantedLanguages(sqlLike = False):
         return '%' + ','.join(wantedLanguages) + '%'
     return wantedLanguages
 
-def subtitlesLanguagesFromFiles(files):
-    """Return a list of languages on 2 characters from a list of subtitles files"""
-    subtitlesLanguages = []
-    single = False
-    for f in files:
-        if f[-7:-4].startswith('.') and isValidLanguage(f[-6:-4]) :
-            subtitlesLanguages.append(f[-6:-4])
-        else:
-            single = True
-    subtitlesLanguages.sort()
+def subtitlesLanguages(video_path):
+    """Return a list detected subtitles for the given video file"""
+    _, languages, single = subliminal.scan(video_path, max_depth=0)
+    languages = list(languages).sort()
     if single:
-        subtitlesLanguages.append(SINGLE)
-    return subtitlesLanguages
+        languages.append(SINGLE)
+    return languages
 
 
 class SubtitlesFinder():

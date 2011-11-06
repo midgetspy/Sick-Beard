@@ -20,17 +20,27 @@
 #
 
 
-__title__ = 'subliminal'
-__version__ = '1.1'
-__author__ = 'Antoine Bertin'
-__license__ = 'LGPLv3'
-__copyright__ = 'Copyright 2010-2011 Antoine Bertin'
+class Task(object):
+    """Base class for tasks to use in subliminal"""
+    pass
 
 
-from exceptions import *
-from videos import *
-from tasks import *
-from subtitles import *
-from core import *
-from api import *
-from plugins import *
+class ListTask(Task):
+    """List task to list subtitles"""
+    def __init__(self, video, languages, plugin, config):
+        self.video = video
+        self.plugin = plugin
+        self.languages = languages
+        self.config = config
+
+
+class DownloadTask(Task):
+    """Download task to download subtitles"""
+    def __init__(self, video, subtitles):
+        self.video = video
+        self.subtitles = subtitles
+
+
+class StopTask(Task):
+    """Stop task to stop workers"""
+    pass

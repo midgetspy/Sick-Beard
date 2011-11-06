@@ -20,17 +20,22 @@
 #
 
 
-__title__ = 'subliminal'
-__version__ = '1.1'
-__author__ = 'Antoine Bertin'
-__license__ = 'LGPLv3'
-__copyright__ = 'Copyright 2010-2011 Antoine Bertin'
+import re
+
+class PluginConfig(object):
+    def __init__(self, multi=None, cache_dir=None, filemode=None):
+        self.multi = multi
+        self.cache_dir = cache_dir
+        self.filemode = filemode
+
+def get_keywords(guess):
+    keywords = set()
+    for k in ['releaseGroup', 'screenSize', 'videoCodec', 'format']:
+        if k in guess:
+            keywords = keywords | split_keyword(guess[k].lower())
+    return keywords
 
 
-from exceptions import *
-from videos import *
-from tasks import *
-from subtitles import *
-from core import *
-from api import *
-from plugins import *
+def split_keyword(keyword):
+    split = set(re.findall(r'\w+', keyword))
+    return split
