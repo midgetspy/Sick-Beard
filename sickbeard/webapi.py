@@ -1187,16 +1187,19 @@ class CMD_SickBeardGetRootDirs(ApiCall):
     def run(self):
         """ get the parent directories defined in sickbeard's config """
 
+        if sickbeard.ROOT_DIRS == "":
+            return _responds(RESULT_FAILURE, "No Root Directories Set")
+
         rootDir = {}
         root_dirs = sickbeard.ROOT_DIRS.split('|')
         default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
 
-        if len(root_dirs) < default_index:
-            return _responds(RESULT_FAILURE, "default_index value out of range")
-
         rootDir["default_index"] = int(sickbeard.ROOT_DIRS.split('|')[0])
         # remove default_index value from list (this fixes the offset)
         root_dirs.pop(0)
+
+        if len(root_dirs) < default_index:
+            return _responds(RESULT_FAILURE, "default_index value out of range")
 
         # clean up the list - replace %xx escapes by their single-character equivalent
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
