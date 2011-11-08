@@ -1201,21 +1201,26 @@ class CMD_SickBeardGetRootDirs(ApiCall):
         # clean up the list - replace %xx escapes by their single-character equivalent
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
 
-        rootDir["default_index_value"] = root_dirs[default_index]
-
-        rootDir["root_dirs"] = root_dirs
+        default_dir = root_dirs[default_index]
 
         dir_list = []
         for root_dir in root_dirs:
+            valid = 1
             try:
                 file_list = ek.ek(os.listdir, root_dir)
             except:
-                continue
-            dir_list.append(root_dir)
+                valid = 0
+            default = 0
+            if root_dir is default_dir:
+                default = 1
 
-        rootDir["root_dir_pruned"] = dir_list
+            curDir = {}
+            curDir['valid'] = valid
+            curDir['location'] = root_dir
+            curDir['default'] = default
+            dir_list.append(curDir)
 
-        return _responds(RESULT_SUCCESS, rootDir)
+        return _responds(RESULT_SUCCESS, dir_list)
 
 
 class CMD_SickBeardPauseBacklog(ApiCall):
