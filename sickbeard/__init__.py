@@ -35,6 +35,7 @@ from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, nzbsrus, newznab, 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
+from version import SICKBEARD_VERSION
 
 from sickbeard.common import *
 
@@ -81,6 +82,10 @@ metadata_provider_dict = {}
 NEWEST_VERSION = None
 NEWEST_VERSION_STRING = None
 VERSION_NOTIFY = None
+
+AUTOUPDATER_OWNER = None
+AUTOUPDATER_REPOSITORY = None
+AUTOUPDATER_VERSION = None
 
 INIT_LOCK = Lock()
 __INITIALIZED__ = False
@@ -354,6 +359,7 @@ def initialize(consoleLogging=True):
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
+                AUTOUPDATER_OWNER, AUTOUPDATER_REPOSITORY, AUTOUPDATER_VERSION, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
@@ -373,6 +379,7 @@ def initialize(consoleLogging=True):
         socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
         CheckSection('General')
+        CheckSection('Autoupdater')
         CheckSection('Blackhole')
         CheckSection('Newzbin')
         CheckSection('SABnzbd')
@@ -446,6 +453,10 @@ def initialize(consoleLogging=True):
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         SEASON_FOLDERS_FORMAT = check_setting_str(CFG, 'General', 'season_folders_format', 'Season %02d')
         SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
+        
+        AUTOUPDATER_OWNER = check_setting_str(CFG, 'Autoupdater', 'owner', 'SickBeard-Team')
+        AUTOUPDATER_REPOSITORY = check_setting_str(CFG, 'Autoupdater', 'repository', 'SickBeard')
+        AUTOUPDATER_VERSION = check_setting_str(CFG, 'Autoupdater', 'version', SICKBEARD_VERSION)
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
