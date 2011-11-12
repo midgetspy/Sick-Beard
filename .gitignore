@@ -31,3 +31,7 @@ ehthumbs.db
 Thumbs.db
 .directory
 *~
+/cache
+/Logs
+/.settings
+/.pydevproject

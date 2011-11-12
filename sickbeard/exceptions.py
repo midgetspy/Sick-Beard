@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 from sickbeard.encodingKludge import fixStupidEncodings
+import traceback
 
 def ex(e):
 	"""
@@ -37,7 +38,15 @@ def ex(e):
 			e_message = ""
 	
 	return e_message
-	
+
+def log(logger, exc_info, level, message = None):
+	if message:
+		logger.log(message + " (" + str(exc_info[1]) + ")", level)
+	exc = traceback.format_exception(*exc_info);
+	tbStr = ""
+	for l in exc:
+		tbStr += l
+	logger.log(tbStr, level)
 
 class SickBeardException(Exception):
 	"Generic SickBeard Exception - should never be thrown, only subclassed"

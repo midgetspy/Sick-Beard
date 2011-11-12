@@ -2058,7 +2058,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, soundtrackLang=None, customSearchNames=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2104,9 +2104,14 @@ class Home:
             tvdb_lang = tvdbLang
         else:
             tvdb_lang = showObj.lang
+            
+        if soundtrackLang and soundtrackLang in tvdb_api.Tvdb().config['valid_languages']:
+            soundtrack_lang = soundtrackLang
+        else:
+            soundtrack_lang = showObj.soundtrack_lang
 
         # if we changed the language then kick off an update
-        if tvdb_lang == showObj.lang:
+        if tvdb_lang == showObj.lang and soundtrackLang == showObj.soundtrack_lang and customSearchNames == showObj.custom_search_names:
             do_update = False
         else:
             do_update = True
@@ -2132,6 +2137,8 @@ class Home:
             showObj.paused = paused
             showObj.air_by_date = air_by_date
             showObj.lang = tvdb_lang
+            showObj.soundtrack_lang = soundtrack_lang
+            showObj.custom_search_names = customSearchNames            
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):

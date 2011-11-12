@@ -126,7 +126,7 @@ NAMING_DATES = None
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
-TVDB_API_PARMS = {}
+TVDB_API_PARMS = {"search_all_languages": True} # Enable search in any language
 
 USE_NZBS = None
 USE_TORRENTS = None
@@ -248,7 +248,7 @@ EXTRA_SCRIPTS = []
 
 GIT_PATH = None
 
-IGNORE_WORDS = "german,french,core2hd,dutch,swedish"
+IGNORE_WORDS = "core2hd"
 
 __INITIALIZED__ = False
 
