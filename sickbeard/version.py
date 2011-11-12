@@ -1,3 +1,3 @@
 SICKBEARD_VERSION = "master"
-SICKBEARD_OWNER = "midgetspy"
+SICKBEARD_OWNER = "Toilal"
 SICKBEARD_PROJECT = "Sick-Beard"
