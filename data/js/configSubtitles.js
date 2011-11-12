@@ -15,9 +15,19 @@ $(document).ready(function(){
         if ($('#use_subtitles').attr('checked')) {
             $('#core-component-group2').show()
             $('#core-component-group3').show()
+            $('#core-component-group4').show()
         } else {
             $('#core-component-group2').hide()
             $('#core-component-group3').hide()
+            $('#core-component-group4').hide()
+        }
+    }
+
+    $.fn.showHideMkvmerge = function() {
+        if ($('#subtitles_mkvmerge').attr('checked')) {
+            $('#mkvmerge_path').show()
+        } else {
+            $('#mkvmerge_path').hide()
         }
     }
     
@@ -27,6 +37,10 @@ $(document).ready(function(){
 
     $('#use_subtitles').change(function(){
         $(this).showHideSubtitles();
+    });
+
+    $('#subtitles_mkvmerge').change(function(){
+        $(this).showHideMkvmerge();
     });
 
     // initialization stuff
@@ -40,5 +54,6 @@ $(document).ready(function(){
     $("#plugin_order_list").disableSelection();
 
     $(this).showHideSubtitles();
+    $(this).showHideMkvmerge();
 
 });

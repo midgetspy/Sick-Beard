@@ -93,6 +93,41 @@
                         <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group3 //-->
+
+                <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Merge Subtitles</h3>
+                        <p>Merge a video with its subtitles</p>
+                    </div>
+                    
+                    <fieldset class="component-group-list">
+
+			            <div class="field-pair">
+                            <input type="checkbox" #if $sickbeard.SUBTITLES_MKVMERGE then "checked=\"checked\"" else ""# id="subtitles_mkvmerge" name="subtitles_mkvmerge">
+                            <label for="subtitles_mkvmerge" class="clearfix">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Enable mkvmerge support</span>
+                            </label>
+                        </div>
+			            <div class="field-pair">
+                            <input type="checkbox" #if $sickbeard.SUBTITLES_MKVMERGE_DELETE then "checked=\"checked\"" else ""# id="subtitles_mkvmerge_delete" name="subtitles_mkvmerge_delete">
+                            <label for="subtitles_mkvmerge_delete" class="clearfix">
+                                <span class="component-title">Delete old file</span>
+                                <span class="component-desc">Delete the old video file after merge instead of adding .bak extension</span>
+                            </label>
+                        </div>
+			            <div class="field-pair" id="mkvmerge_path">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Path to mkvmerge</span>
+                                <input type="text" size="30" value="$sickbeard.SUBTITLES_MKVMERGE_PATH" id="subtitles_mkvmerge_path" name="subtitles_mkvmerge_path">
+                                <span class="component-desc">Path to the binary mkvmerge</span>
+                            </label>
+                        </div>
+
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                    </fieldset>
+                </div><!-- /component-group4 //-->
                 #end if
 
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>

@@ -27,6 +27,7 @@ __license__ = 'LGPLv3'
 __copyright__ = 'Copyright 2010-2011 Antoine Bertin'
 
 
+from utils import *
 from exceptions import *
 from videos import *
 from tasks import *

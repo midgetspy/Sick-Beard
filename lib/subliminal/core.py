@@ -48,17 +48,6 @@ logger = logging.getLogger('subliminal')
 logger.addHandler(NullHandler())
 
 # const
-LANGUAGES = set(['aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av', 'ay', 'az', 'ba', 'be', 'bg', 'bh', 'bi',
-                 'bm', 'bn', 'bo', 'br', 'bs', 'ca', 'ce', 'ch', 'co', 'cr', 'cs', 'cu', 'cv', 'cy', 'da', 'de', 'dv',
-                 'dz', 'ee', 'el', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'ff', 'fi', 'fj', 'fo', 'fr', 'fy', 'ga', 'gd',
-                 'gl', 'gn', 'gu', 'gv', 'ha', 'he', 'hi', 'ho', 'hr', 'ht', 'hu', 'hy', 'hz', 'ia', 'id', 'ie', 'ig',
-                 'ii', 'ik', 'io', 'is', 'it', 'iu', 'ja', 'jv', 'ka', 'kg', 'ki', 'kj', 'kk', 'kl', 'km', 'kn', 'ko',
-                 'kr', 'ks', 'ku', 'kv', 'kw', 'ky', 'la', 'lb', 'lg', 'li', 'ln', 'lo', 'lt', 'lu', 'lv', 'mg', 'mh',
-                 'mi', 'mk', 'ml', 'mn', 'mo', 'mr', 'ms', 'mt', 'my', 'na', 'nb', 'nd', 'ne', 'ng', 'nl', 'nn', 'no',
-                 'nr', 'nv', 'ny', 'oc', 'oj', 'om', 'or', 'os', 'pa', 'pi', 'pl', 'ps', 'pt', 'qu', 'rm', 'rn', 'ro',
-                 'ru', 'rw', 'sa', 'sc', 'sd', 'se', 'sg', 'si', 'sk', 'sl', 'sm', 'sn', 'so', 'sq', 'sr', 'ss', 'st',
-                 'su', 'sv', 'sw', 'ta', 'te', 'tg', 'th', 'ti', 'tk', 'tl', 'tn', 'to', 'tr', 'ts', 'tt', 'tw', 'ty',
-                 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'wo', 'xh', 'yi', 'yo', 'za', 'zh', 'zu', 'pt-br'])  # ISO 639-1 + pt-br
 PLUGINS = ['OpenSubtitles', 'BierDopje', 'TheSubDB', 'SubsWiki', 'Subtitulos']
 API_PLUGINS = filter(lambda p: getattr(plugins, p).api_based, PLUGINS)
 IDLE, RUNNING, PAUSED = range(3)
@@ -119,7 +108,7 @@ class Subliminal(object):
         logger.debug(u'Setting languages to %r' % languages)
         self._languages = []
         for l in languages:
-            if l not in LANGUAGES:
+            if l not in utils.LANGUAGES:
                 raise InvalidLanguageError(l)
             if not l in self._languages:
                 self._languages.append(l)
@@ -161,12 +150,12 @@ class Subliminal(object):
             if not os.path.exists(e):
                 scan_result.append((e, set(), False))
                 continue
-            scan_result.extend(scan(e))
+            scan_result.extend(videos.scan(e))
         task_count = 0
         for filepath, languages, has_single in scan_result:
             wanted_languages = set(self._languages)
             if not wanted_languages:
-                wanted_languages = LANGUAGES
+                wanted_languages = utils.LANGUAGES
             if not self.force and self.multi:
                 wanted_languages = set(wanted_languages) - languages
                 if not wanted_languages:
@@ -381,31 +370,3 @@ def matching_confidence(video, subtitle):
                 replacement['year'] = 1
     confidence = float(int(matching_format.format(**replacement), 2))/float(int(best, 2))
     return confidence
-
-def scan(entry, depth=0, max_depth=3):
-    """Scan a path and return a list of tuples (filepath, set(languages), has single)"""
-    if depth > max_depth and max_depth != 0:  # we do not want to search the whole file system except if max_depth = 0
-        return []
-    if depth == 0:
-        entry = os.path.abspath(entry)
-    if os.path.isfile(entry):  # a file? scan it
-        if depth != 0:  # trust the user: only check for valid format if recursing
-            if mimetypes.guess_type(entry)[0] not in videos.MIMETYPES and os.path.splitext(entry)[1] not in videos.EXTENSIONS:
-                return []
-        # check for .lg.ext and .ext
-        available_languages = set()
-        has_single = False
-        basepath = os.path.splitext(entry)[0]
-        for l in LANGUAGES:
-            for e in subtitles.EXTENSIONS:
-                if os.path.exists(basepath + '.%s%s' % (l, e)):
-                    available_languages.add(l)
-                if os.path.exists(basepath + '%s' % e):
-                    has_single = True
-        return [(os.path.normpath(entry), available_languages, has_single)]
-    if os.path.isdir(entry):  # a dir? recurse
-        result = []
-        for e in os.listdir(entry):
-            result.extend(scan(os.path.join(entry, e), depth + 1))
-        return result
-    return []  # anything else

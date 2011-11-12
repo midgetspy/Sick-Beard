@@ -178,6 +178,9 @@ $epLoc
     #if $sickbeard.USE_SUBTITLES and $show.subtitles and len(set($epResult["subtitles"].split(',')).intersection(set($subtitles.wantedLanguages()))) < len($subtitles.wantedLanguages()) and $epResult["location"]
       <a class="epSubtitlesSearch" href="searchEpisodeSubtitles?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/closed_captioning.png" height="16" alt="search subtitles" title="Search Subtitles" /></a>
     #end if
+    #if $sickbeard.USE_SUBTITLES and $sickbeard.SUBTITLES_MKVMERGE and $show.subtitles and len(set($epResult["subtitles"].split(',')).intersection(set($subtitles.wantedLanguages()))) > 1 and $epResult["location"]
+      <a class="epMergeSubtitles" href="mergeEpisodeSubtitles?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/merge16.png" height="16" alt="merge subtitles" title="Merge Subtitles" /></a>
+    #end if
     </td>
    </tr>
 

@@ -21,6 +21,8 @@
 
 
 import os.path
+from exceptions import InvalidLanguageError
+from utils import LANGUAGES
 
 
 EXTENSIONS = ['.srt', '.sub', '.txt']
@@ -38,13 +40,10 @@ class Subtitle(object):
         self.keywords = keywords
         self.confidence = confidence
 
-    def __eq__(self, other):
-        return self.path == other.path and self.plugin == other.plugin and self.language == other.language
-
     @property
     def exists(self):
-        if self._path:
-            return os.path.exists(self._path)
+        if self.path:
+            return os.path.exists(self.path)
         return False
 
     def __repr__(self):
@@ -61,5 +60,15 @@ def get_subtitle_path(video_path, language, multi):
         return path + '.%s%s' % (language, EXTENSIONS[0])
     return path + '%s' % EXTENSIONS[0]
 
-
-
+def factory(path):
+    extension = ''
+    for e in EXTENSIONS:
+        if path.endswith(e):
+            extension = e
+            break
+    if not extension:
+        raise ValueError('Not a supported subtitle extension')
+    language = os.path.splitext(path[:len(path) - len(extension)])[1][1:]
+    if not language in LANGUAGES:
+        language = None
+    return Subtitle(path, language=language)

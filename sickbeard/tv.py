@@ -1052,6 +1052,28 @@ class TVEpisode(object):
         self.subtitles_lastsearch = datetime.datetime.now()
         self.saveToDB()
 
+    def mergeSubtitles(self):
+        if not ek.ek(os.path.isfile, self._location):
+            logger.log(str(self.show.tvdbid) + ": Episode file doesn't exist, can't merge subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            return
+        logger.log(str(self.show.tvdbid) + ": Merging subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+        video = subliminal.videos.factory(self._location)
+        subtitles = video.scan()
+        if not subtitles:
+            logger.log(str(self.show.tvdbid) + ": No subtitles found, can't merge subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            return
+        try:
+            video.mkvmerge(subtitles, out=self._location + '.merged.mkv', mkvmerge_bin=sickbeard.SUBTITLES_MKVMERGE_PATH, title=self._name)
+        except:
+            if os.path.exists(self._location + '.merged.mkv'):
+                os.remove(self._location + '.merged.mkv')
+            raise
+        if sickbeard.SUBTITLES_MKVMERGE_DELETE:
+            os.remove(self._location)
+        else:
+            os.rename(self._location, self._location + '.bak')
+        os.rename(self._location + '.merged.mkv', self._location)
+
     def checkForMetaFiles(self):
 
         oldhasnfo = self.hasnfo

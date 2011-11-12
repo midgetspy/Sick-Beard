@@ -25,6 +25,8 @@ import os
 import hashlib
 import guessit
 import subprocess
+import subtitles
+import utils
 
 
 EXTENSIONS = ['.mkv', '.avi', '.mpg'] #TODO: Complete..
@@ -105,13 +107,41 @@ class Video(object):
         """Merge the video with subtitles"""
         if not out:
             out = self.path + '.merged.mkv'
-        args = [mkvmerge_bin, '-o', out]
+        args = [mkvmerge_bin, '-o', out, self.path]
         if title:
             args += ['--title', title]
         for subtitle in subtitles:
-            args += ['--language', '0:' + subtitle.language, subtitle.path]
+            if subtitle.language:
+                args += ['--language', '0:' + subtitle.language, subtitle.path]
+            continue
+            args += [subtitle.path]
         p = subprocess.Popen(args)
         p.wait()
+
+    def scan(self):
+        """Scan and return associated Subtitles"""
+        if not self.exists:
+            return []
+        scan_result = scan(self.path, max_depth=0)
+        if len(scan_result) != 1:
+            return []
+        _, languages, single = scan_result[0]
+        results = []
+        if single:
+            for ext in subtitles.EXTENSIONS:
+                filepath = os.path.splitext(self.path)[0] + ext
+                if os.path.exists(filepath):
+                    subtitle = subtitles.factory(filepath)
+                    results.append(subtitle)
+                    break
+        for language in languages:
+            for ext in subtitles.EXTENSIONS:
+                filepath = os.path.splitext(self.path)[0] + '.' + language + ext
+                if os.path.exists(filepath):
+                    subtitle = subtitles.factory(filepath)
+                    results.append(subtitle)
+                    break
+        return results
 
 
 class Episode(Video):
@@ -139,17 +169,45 @@ class UnknownVideo(Video):
         self.guess = guess
 
 
-def factory(release):
+def factory(entry):
     """Create a Video object guessing all informations from the given release/path"""
-    guess = guessit.guess_file_info(release, 'autodetect')
+    guess = guessit.guess_file_info(entry, 'autodetect')
     if guess['type'] == 'episode' and 'series' in guess and 'season' in guess and 'episodeNumber' in guess:
         title = None
         if 'title' in guess:
             title = guess['title']
-        return Episode(release, guess['series'], guess['season'], guess['episodeNumber'], title, guess)
+        return Episode(entry, guess['series'], guess['season'], guess['episodeNumber'], title, guess)
     if guess['type'] == 'movie' and 'title' in guess:
         year = None
         if 'year' in guess:
             year = guess['year']
-        return Movie(release, guess['title'], year, guess)
-    return UnknownVideo(release, guess)
+        return Movie(entry, guess['title'], year, guess)
+    return UnknownVideo(entry, guess)
+
+def scan(entry, max_depth=3, depth=0):
+    """Scan a path and return a list of tuples (filepath, set(languages), has single)"""
+    if depth > max_depth and max_depth != 0:  # we do not want to search the whole file system except if max_depth = 0
+        return []
+    if depth == 0:
+        entry = os.path.abspath(entry)
+    if os.path.isfile(entry):  # a file? scan it
+        if depth != 0:  # trust the user: only check for valid format if recursing
+            if mimetypes.guess_type(entry)[0] not in MIMETYPES and os.path.splitext(entry)[1] not in EXTENSIONS:
+                return []
+        # check for .lg.ext and .ext
+        available_languages = set()
+        has_single = False
+        basepath = os.path.splitext(entry)[0]
+        for l in utils.LANGUAGES:
+            for e in subtitles.EXTENSIONS:
+                if os.path.exists(basepath + '.%s%s' % (l, e)):
+                    available_languages.add(l)
+                if os.path.exists(basepath + '%s' % e):
+                    has_single = True
+        return [(os.path.normpath(entry), available_languages, has_single)]
+    if os.path.isdir(entry):  # a dir? recurse
+        result = []
+        for e in os.listdir(entry):
+            result.extend(scan(os.path.join(entry, e), maxdepth, depth + 1))
+        return result
+    return []  # anything else
