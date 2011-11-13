@@ -28,6 +28,7 @@ CHANGELOG.txt
 *.cproject
 *.tmproj
 *.tmproject
+*.sw?
 
 # OS generated files #
 ######################
