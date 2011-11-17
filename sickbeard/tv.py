@@ -1057,7 +1057,7 @@ class TVEpisode(object):
             logger.log(str(self.show.tvdbid) + ": Episode file doesn't exist, can't merge subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             return
         logger.log(str(self.show.tvdbid) + ": Merging subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
-        video = subliminal.videos.factory(self._location)
+        video = subliminal.videos.Video.fromPath(self._location)
         subtitles = video.scan()
         if not subtitles:
             logger.log(str(self.show.tvdbid) + ": No subtitles found, can't merge subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)

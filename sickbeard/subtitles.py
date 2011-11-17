@@ -60,7 +60,7 @@ def getEnabledPluginList():
     return [x['name'] for x in sortedPluginList() if x['enabled']]
     
 def isValidLanguage(language):
-    return language in subliminal.LANGUAGES
+    return language in subliminal.languages.list_languages(1)
 
 def wantedLanguages(sqlLike = False):
     if sickbeard.SUBTITLES_MULTI:
@@ -73,11 +73,15 @@ def wantedLanguages(sqlLike = False):
 
 def subtitlesLanguages(video_path):
     """Return a list detected subtitles for the given video file"""
-    _, languages, single = subliminal.scan(video_path, max_depth=0)
-    languages = list(languages).sort()
-    if single:
-        languages.append(SINGLE)
-    return languages
+    video = subliminal.videos.Video.fromPath(video_path)
+    subtitles = video.scan()
+    languages = set()
+    for subtitle in subtitles:
+        if subtitle.language:
+            languages.add(subtitle.language)
+        else:
+            languages.add(SINGLE)
+    return list(languages)
 
 
 class SubtitlesFinder():
@@ -95,9 +99,8 @@ class SubtitlesFinder():
             return
 
         logger.log(u'Checking for subtitles', logger.MESSAGE)
-        subli = subliminal.Subliminal(cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3)
-        subli.languages = sickbeard.SUBTITLES_LANGUAGES
-        subli.plugins = sickbeard.subtitles.getEnabledPluginList()
+        subli = subliminal.Subliminal(cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3,
+                                      languages=sickbeard.SUBTITLES_LANGUAGES, plugins=sickbeard.subtitles.getEnabledPluginList())
 
         # get episodes on which we want subtitles
         # criteria is: 

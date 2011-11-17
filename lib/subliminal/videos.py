@@ -125,21 +125,21 @@ class Video(object):
             data += f.read(readsize)
         return hashlib.md5(data).hexdigest()
 
-    def mkvmerge(self, subtitles, out=None, mkvmerge_bin='mkvmerge', title=None):
-        """Merge the video with subtitles"""
+    def mkvmerge(self, subs, out=None, mkvmerge_bin='mkvmerge', title=None):
+        """Merge the video with subs"""
         if not out:
             out = self.path + '.merged.mkv'
         args = [mkvmerge_bin, '-o', out, self.path]
         if title:
             args += ['--title', title]
-        for subtitle in subtitles:
-            if subtitle.language:
+        for sub in subs:
+            if sub.language:
                 track_id = 0
-                if isinstance(subtitle, subtitles.EmbeddedSubtitle):
-                    track_id = subtitle.track_id
-                args += ['--language', track_id + ':' + subtitle.language, subtitle.path]
+                if isinstance(sub, subtitles.EmbeddedSubtitle):
+                    track_id = sub.track_id
+                args += ['--language', str(track_id) + ':' + sub.language, sub.path]
             continue
-            args += [subtitle.path]
+            args += [sub.path]
         with open(os.devnull, 'w') as devnull:
             p = subprocess.Popen(args, stdout=devnull, stderr=devnull)
         p.wait()
