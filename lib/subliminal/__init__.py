@@ -20,18 +20,12 @@
 #
 
 
-__title__ = 'subliminal'
-__version__ = '1.1'
-__author__ = 'Antoine Bertin'
-__license__ = 'LGPLv3'
-__copyright__ = 'Copyright 2010-2011 Antoine Bertin'
-
-
+from infos import *
+from languages import *
 from utils import *
 from exceptions import *
 from videos import *
 from tasks import *
 from subtitles import *
 from core import *
-from api import *
 from plugins import *

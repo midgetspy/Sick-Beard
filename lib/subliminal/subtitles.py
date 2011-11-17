@@ -20,25 +20,22 @@
 #
 
 
+import abc
 import os.path
 from exceptions import InvalidLanguageError
-from utils import LANGUAGES
+from languages import *
 
 
 EXTENSIONS = ['.srt', '.sub', '.txt']
 
 
 class Subtitle(object):
-    """Subtitle class"""
+    __metaclass__ = abc.ABCMeta
+    """Base class for subtitles"""
 
-    def __init__(self, path, plugin=None, language=None, link=None, release=None, confidence=1, keywords=set()):
+    def __init__(self, path, language):
         self.path = path
-        self.plugin = plugin
         self.language = language
-        self.link = link
-        self.release = release
-        self.keywords = keywords
-        self.confidence = confidence
 
     @property
     def exists(self):
@@ -46,8 +43,60 @@ class Subtitle(object):
             return os.path.exists(self.path)
         return False
 
-    def __repr__(self):
-        return repr({'path': self.path, 'plugin': self.plugin, 'language': self.language, 'link': self.link, 'release': self.release, 'keywords': self.keywords, 'confidence': self.confidence})
+    @classmethod
+    def fromPath(cls, path):
+        extension = ''
+        for e in EXTENSIONS:
+            if path.endswith(e):
+                extension = e
+                break
+        if not extension:
+            raise ValueError('Not a supported subtitle extension')
+        language = os.path.splitext(path[:len(path) - len(extension)])[1][1:]
+        if not language in list_languages(1):
+            language = None
+        return cls(path, language)
+
+
+class EmbeddedSubtitle(Subtitle):
+    def __init__(self, path, language, track_id):
+        super(EmbeddedSubtitle, self).__init__(path, language)
+        self.track_id = track_id
+
+    @classmethod
+    def fromKaa(cls, path, subtitle):
+        language = convert_language(subtitle.langcode, 1, 2)
+        return cls(path, language, subtitle.trackno)
+
+
+class ExternalSubtitle(Subtitle):
+    pass
+
+
+class ResultSubtitle(ExternalSubtitle):
+    def __init__(self, path, language, plugin, link, release=None, confidence=1, keywords=set()):
+        super(ResultSubtitle, self).__init__(path, language)
+        self.plugin = plugin
+        self.link = link
+        self.release = release
+        self.confidence = confidence
+        self.keywords = keywords
+
+    @property
+    def single(self):
+        extension = os.path.splitext(self.path)[0] 
+        language = os.path.splitext(self.path[:len(self.path) - len(extension)])[1][1:]
+        if not language in list_languages(1):
+            return True
+        return False
+
+    def convert(self):
+        converted = {'path': self.path, 'plugin': self.plugin, 'language': self.language, 'link': self.link, 'release': self.release,
+                     'confidence': self.confidence, 'keywords': self.keywords}
+        return converted
+
+    def __str__(self):
+        return repr(self.convert())
 
 
 def get_subtitle_path(video_path, language, multi):
@@ -59,16 +108,3 @@ def get_subtitle_path(video_path, language, multi):
     if multi and language:
         return path + '.%s%s' % (language, EXTENSIONS[0])
     return path + '%s' % EXTENSIONS[0]
-
-def factory(path):
-    extension = ''
-    for e in EXTENSIONS:
-        if path.endswith(e):
-            extension = e
-            break
-    if not extension:
-        raise ValueError('Not a supported subtitle extension')
-    language = os.path.splitext(path[:len(path) - len(extension)])[1][1:]
-    if not language in LANGUAGES:
-        language = None
-    return Subtitle(path, language=language)

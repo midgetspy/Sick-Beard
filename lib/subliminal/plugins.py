@@ -36,17 +36,19 @@ except ImportError:
     import pickle
 import BeautifulSoup
 from utils import *
-from subtitles import Subtitle, get_subtitle_path
+from languages import *
+from subtitles import ResultSubtitle, get_subtitle_path
 from videos import *
 from exceptions import DownloadFailedError, MissingLanguageError, PluginError
 
 
+#TODO: use ISO-639-2 in plugins instead of ISO-639-1
 class PluginBase(object):
     __metaclass__ = abc.ABCMeta
     site_url = ''
     site_name = ''
     server_url = ''
-    user_agent = 'Subliminal v1.0'
+    user_agent = 'Subliminal v0.5'
     api_based = False
     timeout = 5
     lock = threading.Lock()
@@ -144,7 +146,7 @@ class OpenSubtitles(PluginBase):
     site_url = 'http://www.opensubtitles.org'
     site_name = 'OpenSubtitles'
     server_url = 'http://api.opensubtitles.org/xml-rpc'
-    user_agent = 'Subliminal v1.1'
+    user_agent = 'Subliminal v0.5'
     api_based = True
     languages = {'aa': 'aar', 'ab': 'abk', 'af': 'afr', 'ak': 'aka', 'sq': 'alb', 'am': 'amh', 'ar': 'ara',
                  'an': 'arg', 'hy': 'arm', 'as': 'asm', 'av': 'ava', 'ae': 'ave', 'ay': 'aym', 'az': 'aze',
@@ -172,7 +174,7 @@ class OpenSubtitles(PluginBase):
                  'bo': 'tib', 'ti': 'tir', 'to': 'ton', 'tn': 'tsn', 'ts': 'tso', 'tk': 'tuk', 'tr': 'tur',
                  'tw': 'twi', 'ug': 'uig', 'uk': 'ukr', 'ur': 'urd', 'uz': 'uzb', 've': 'ven', 'vi': 'vie',
                  'vo': 'vol', 'cy': 'wel', 'wa': 'wln', 'wo': 'wol', 'xh': 'xho', 'yi': 'yid', 'yo': 'yor',
-                 'za': 'zha', 'zu': 'zul', 'ro': 'rum', 'pt-br': 'pob', 'un': 'unk', 'ay': 'ass'}
+                 'za': 'zha', 'zu': 'zul', 'ro': 'rum', 'po': 'pob', 'un': 'unk', 'ay': 'ass'}
     reverted_languages = False
     videos = [Episode, Movie]
     require_video = False
@@ -225,7 +227,7 @@ class OpenSubtitles(PluginBase):
             language = self.getRevertLanguage(result['SubLanguageID'])
             path = get_subtitle_path(filepath, language, self.config.multi)
             confidence = 1 - float(self.confidence_order.index(result['MatchedBy'])) / float(len(self.confidence_order))
-            subtitle = Subtitle(path, self.__class__.__name__, language, result['SubDownloadLink'], result['SubFileName'], confidence)
+            subtitle = ResultSubtitle(path, language, self.__class__.__name__, result['SubDownloadLink'], result['SubFileName'], confidence)
             subtitles.append(subtitle)
         return subtitles
 
@@ -359,7 +361,7 @@ class BierDopje(PluginBase):
                 continue
             path = get_subtitle_path(filepath, language, self.config.multi)
             for result in soup.results('result'):
-                subtitle = Subtitle(path, self.__class__.__name__, language, result.downloadlink.contents[0], result.filename.contents[0])
+                subtitle = ResultSubtitle(path, language, self.__class__.__name__, result.downloadlink.contents[0], result.filename.contents[0])
                 subtitles.append(subtitle)
         return subtitles
 
@@ -383,7 +385,7 @@ class TheSubDB(PluginBase):
     site_name = 'SubDB'
     server_url = 'http://api.thesubdb.com/'  # for testing purpose, use http://sandbox.thesubdb.com/ instead
     api_based = True
-    user_agent = 'SubDB/1.0 (Subliminal/1.1; https://github.com/Diaoul/subliminal)'  # defined by the API
+    user_agent = 'SubDB/1.0 (Subliminal/0.5; https://github.com/Diaoul/subliminal)'  # defined by the API
     languages = {'af': 'af', 'cs': 'cs', 'da': 'da', 'de': 'de', 'en': 'en', 'es': 'es', 'fi': 'fi',
                  'fr': 'fr', 'hu': 'hu', 'id': 'id', 'it': 'it', 'la': 'la', 'nl': 'nl', 'no': 'no',
                  'oc': 'oc', 'pl': 'pl', 'pt': 'pt', 'ro': 'ro', 'ru': 'ru', 'sl': 'sl', 'sr': 'sr',
@@ -436,7 +438,7 @@ class TheSubDB(PluginBase):
         subtitles = []
         for language in filtered_languages:
             path = get_subtitle_path(filepath, language, self.config.multi)
-            subtitle = Subtitle(path, self.__class__.__name__, language, '%s?action=download&hash=%s&language=%s' % (self.server_url, moviehash, self.getLanguage(language)))
+            subtitle = ResultSubtitle(path, language, self.__class__.__name__, '%s?action=download&hash=%s&language=%s' % (self.server_url, moviehash, self.getLanguage(language)))
             subtitles.append(subtitle)
         return subtitles
 
@@ -450,7 +452,7 @@ class SubsWiki(PluginBase):
     site_name = 'SubsWiki'
     server_url = 'http://www.subswiki.com'
     api_based = False
-    languages = {u'English (US)': 'en', u'English (UK)': 'en', u'English': 'en', u'French': 'fr', u'Brazilian': 'pt-br',
+    languages = {u'English (US)': 'en', u'English (UK)': 'en', u'English': 'en', u'French': 'fr', u'Brazilian': 'po',
                  u'Portuguese': 'pt', u'Español (Latinoamérica)': 'es', u'Español (España)': 'es', u'Español': 'es',
                  u'Italian': 'it', u'Català': 'ca'}
     reverted_languages = True
@@ -532,7 +534,7 @@ class SubsWiki(PluginBase):
                     self.logger.debug(u'Wrong subtitle status %s' % status)
                     continue
                 path = get_subtitle_path(filepath, language, self.config.multi)
-                subtitle = Subtitle(path, self.__class__.__name__, language, '%s%s' % (self.server_url, html_status.findNext('td').find('a')['href']))
+                subtitle = ResultSubtitle(path, language, self.__class__.__name__, '%s%s' % (self.server_url, html_status.findNext('td').find('a')['href']))
                 subtitles.append(subtitle)
         return subtitles
 
@@ -546,7 +548,7 @@ class Subtitulos(PluginBase):
     site_name = 'Subtitulos'
     server_url = 'http://www.subtitulos.es'
     api_based = False
-    languages = {u'English (US)': 'en', u'English (UK)': 'en', u'English': 'en', u'French': 'fr', u'Brazilian': 'pt-br',
+    languages = {u'English (US)': 'en', u'English (UK)': 'en', u'English': 'en', u'French': 'fr', u'Brazilian': 'po',
                  u'Portuguese': 'pt', u'Español (Latinoamérica)': 'es', u'Español (España)': 'es', u'Español': 'es',
                  u'Italian': 'it', u'Català': 'ca'}
     reverted_languages = True
@@ -612,7 +614,7 @@ class Subtitulos(PluginBase):
                     self.logger.debug(u'Wrong subtitle status %s' % status)
                     continue
                 path = get_subtitle_path(filepath, language, self.config.multi)
-                subtitle = Subtitle(path, self.__class__.__name__, language, html_status.findNext('span', {'class': 'descargar green'}).find('a')['href'], keywords=sub_keywords)
+                subtitle = ResultSubtitle(path, language, self.__class__.__name__, html_status.findNext('span', {'class': 'descargar green'}).find('a')['href'], keywords=sub_keywords)
                 subtitles.append(subtitle)
         return subtitles
 
@@ -684,7 +686,7 @@ class Addic7ed(PluginBase.PluginBase):
             u'English (UK)': 'en',
             u'Italian': 'it',
             u'Portuguese': 'pt',
-            u'Portuguese (Brazilian)': 'pt-br',
+            u'Portuguese (Brazilian)': 'po',
             u'Romanian': 'ro',
             u'Español (Latinoamérica)': 'es',
             u'Español (España)': 'es',
@@ -824,7 +826,7 @@ class Podnapisi(PluginBase.PluginBase):
             "th": "44",
             "uk": "46",
             "sr": "47",
-            "pt-br": "48",
+            "po": "48",
             "ga": "49",
             "be": "50",
             "vi": "51",

@@ -26,6 +26,7 @@ from collections import defaultdict
 from tasks import DownloadTask, ListTask, StopTask
 from exceptions import InvalidLanguageError, PluginError, BadStateError, WrongTaskError, DownloadFailedError
 import utils
+from languages import *
 import guessit
 import videos
 import subtitles
@@ -108,7 +109,7 @@ class Subliminal(object):
         logger.debug(u'Setting languages to %r' % languages)
         self._languages = []
         for l in languages:
-            if l not in utils.LANGUAGES:
+            if l not in list_languages(1):
                 raise InvalidLanguageError(l)
             if not l in self._languages:
                 self._languages.append(l)
@@ -147,33 +148,30 @@ class Subliminal(object):
         for e in entries:
             if not isinstance(e, unicode):
                 logger.warning(u'Entry %r is not unicode' % e)
-            if not os.path.exists(e):
-                scan_result.append((e, set(), False))
-                continue
             scan_result.extend(videos.scan(e))
         task_count = 0
-        for filepath, languages, has_single in scan_result:
+        for video, subtitles in scan_result:
+            languages = set([s.language for s in subtitles if s.language])
             wanted_languages = set(self._languages)
             if not wanted_languages:
-                wanted_languages = utils.LANGUAGES
+                wanted_languages = list_languages(1)
             if not self.force and self.multi:
                 wanted_languages = set(wanted_languages) - languages
                 if not wanted_languages:
-                    logger.debug(u'No need to list multi subtitles %r for %r because %r subtitles detected' % (self._languages, filepath, languages))
+                    logger.debug(u'No need to list multi subtitles %r for %r because %r subtitles detected' % (self._languages, video.path, languages))
                     continue
-            if not self.force and not self.multi and has_single:
-                logger.debug(u'No need to list single subtitles %r for %r because one detected' % (self._languages, filepath))
+            if not self.force and not self.multi and None in [s.language for s in subtitles]:
+                logger.debug(u'No need to list single subtitles %r for %r because one detected' % (self._languages, video.path))
                 continue
-            logger.debug(u'Listing subtitles %r for %r with %r' % (wanted_languages, filepath, self._plugins))
-            video = videos.factory(filepath)
+            logger.debug(u'Listing subtitles %r for %r with %r' % (wanted_languages, video.path, self._plugins))
             for plugin_name in self._plugins:
                 plugin = getattr(plugins, plugin_name)
                 list_languages = wanted_languages & plugin.availableLanguages()
                 if not list_languages:
-                    logger.debug(u'Skipping %r: none of wanted languages %r available in %r for plugin %s' % (filepath, wanted_languages, plugin.availableLanguages(), plugin_name))
+                    logger.debug(u'Skipping %r: none of wanted languages %r available in %r for plugin %s' % (video.path, wanted_languages, plugin.availableLanguages(), plugin_name))
                     continue
                 if not plugin.isValidVideo(video):
-                    logger.debug(u'Skipping %r: video %r is not part of supported videos %r for plugin %s' % (filepath, video, plugin.videos, plugin_name))
+                    logger.debug(u'Skipping %r: video %r is not part of supported videos %r for plugin %s' % (video.path, video, plugin.videos, plugin_name))
                     continue
                 self.taskQueue.put((5, ListTask(video, list_languages, plugin_name, config)))
                 task_count += 1
