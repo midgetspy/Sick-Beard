@@ -18,14 +18,14 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-sys.path.append('lib')
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'lib')))
 
 # we only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:
     from multiprocessing import freeze_support
 
 import locale
-import os
 import threading
 import time
 import signal
