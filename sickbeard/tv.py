@@ -854,9 +854,9 @@ class TVShow(object):
         return toReturn
 
 
-    def wantEpisode(self, season, episode, quality, manualSearch=False):
+    def wantEpisode(self, season, episode, quality, curLanguages, manualSearch=False):
 
-        logger.log(u"Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
+        logger.log(u"Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality]+" with languages "+str(curLanguages), logger.DEBUG)
 
         # if the quality isn't one we want under any circumstances then just say no
         anyQualities, bestQualities = Quality.splitQuality(self.quality)
@@ -865,6 +865,11 @@ class TVShow(object):
         if quality not in anyQualities + bestQualities:
             logger.log(u"I know for sure I don't want this episode, saying no", logger.DEBUG)
             return False
+        
+        if curLanguages and self.soundtrack_lang and not self.soundtrack_lang in curLanguages:
+                logger.log(u"Episode is not in requested language", logger.DEBUG)
+                return False
+            
 
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])

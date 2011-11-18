@@ -23,7 +23,7 @@ import traceback
 
 import sickbeard
 
-from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
+from common import SNATCHED, Quality, Language, SEASON_RESULT, MULTI_EP_RESULT
 
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
@@ -368,6 +368,9 @@ def findSeason(show, season):
         seasonQual = Quality.nameQuality(bestSeasonNZB.name)
         seasonQual = bestSeasonNZB.quality
         logger.log(u"The quality of the season NZB is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
+        
+        seasonLangs = Language.nameLanguages(bestSeasonNZB.name)
+        logger.log(u"The languages of the season NZB are "+str(seasonLangs), logger.DEBUG)
 
         myDB = db.DBConnection()
         allEps = [int(x["episode"]) for x in myDB.select("SELECT episode FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])]
@@ -376,7 +379,7 @@ def findSeason(show, season):
         allWanted = True
         anyWanted = False
         for curEpNum in allEps:
-            if not show.wantEpisode(season, curEpNum, seasonQual):
+            if not show.wantEpisode(season, curEpNum, seasonQual, seasonLangs):
                 allWanted = False
             else:
                 anyWanted = True

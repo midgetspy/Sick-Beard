@@ -28,7 +28,7 @@ import sickbeard
 
 from sickbeard import helpers, classes, logger, db
 
-from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
+from sickbeard.common import Quality, Language, MULTI_EP_RESULT, SEASON_RESULT
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -183,6 +183,11 @@ class GenericProvider:
         title = item.findtext('title')
         quality = Quality.nameQuality(title)
         return quality
+    
+    def getLanguages(self, item):
+        title = item.findtext('title')
+        languages = Language.nameLanguages(title)
+        return languages
 
     def _doSearch(self):
         return []
@@ -243,8 +248,9 @@ class GenericProvider:
                 continue
 
             quality = self.getQuality(item)
+            languages = self.getLanguages(item)
 
-            if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
+            if not episode.show.wantEpisode(episode.season, episode.episode, quality, languages, manualSearch=manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
                 continue
 
@@ -254,6 +260,7 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
+            result.languages = languages
 
             results.append(result)
 
@@ -274,6 +281,7 @@ class GenericProvider:
             (title, url) = self._get_title_and_url(item)
 
             quality = self.getQuality(item)
+            languages = self.getLanguages(item)
 
             # parse the file name
             try:
@@ -311,7 +319,7 @@ class GenericProvider:
             # make sure we want the episode
             wantEp = True
             for epNo in actual_episodes:
-                if not show.wantEpisode(actual_season, epNo, quality):
+                if not show.wantEpisode(actual_season, epNo, quality, languages):
                     wantEp = False
                     break
             

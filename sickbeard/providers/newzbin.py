@@ -32,7 +32,7 @@ import generic
 import sickbeard.encodingKludge as ek
 from sickbeard import classes, logger, helpers, exceptions, show_name_helpers
 from sickbeard import tvcache
-from sickbeard.common import Quality
+from sickbeard.common import Quality, Language
 from sickbeard.exceptions import ex
 from lib.dateutil.parser import parse as parseDate
 
@@ -77,16 +77,33 @@ class NewzbinProvider(generic.NZBProvider):
 
         self.NEWZBIN_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
         
-        self.langs = {'el': None, 'en': 'English', 'zh': None,
-        'it': 'Italian', 'cs': None, 'es': 'Spanish', 'ru': 'Russian', 'nl': 'Dutch', 'pt': None, 'no': 'Norwegian',
-        'tr': 'Turkish', 'pl': 'Polish', 'fr': 'French', 'hr': None, 'de': 'German', 'da': 'Danish', 'fi': 'Finnish',
-        'hu': None, 'ja': 'Japanese', 'he': None, 'ko': 'Korean', 'sv': 'Swedish', 'sl': None}
+        self.langs = Language.languages
+        
+        self.langs_reverse = {}
+        for (k, v) in self.langs.iteritems():
+            self.langs_reverse[v] = k
+        
 
     def _report(self, name):
         return '{'+self.NEWZBIN_NS+'}'+name
 
     def isEnabled(self):
         return sickbeard.NEWZBIN
+    
+    def getLanguages(self, item):
+        attributes = item.find(self._report('attributes'))
+        ret = []
+        
+        for attribute in attributes.getiterator(self._report('attribute')):
+            cur_attr = attribute.attrib['type']
+            if cur_attr == 'Language':
+                try:
+                    lang = self.langs_reverse[attribute.text]
+                    ret.append(lang)
+                except KeyError:
+                    pass
+                
+        return ret
 
     def getQuality(self, item):
         attributes = item.find(self._report('attributes'))
@@ -255,6 +272,7 @@ class NewzbinProvider(generic.NZBProvider):
         langAtt = self.langs.get(show.soundtrack_lang)
         if langAtt:
             return "(" + searchStr + ") AND Attr:Language=" + langAtt
+        return searchStr
     
     def _get_season_search_strings(self, show, season):
 
@@ -386,12 +404,16 @@ class NewzbinCache(tvcache.TVCache):
             return
 
         quality = self.provider.getQuality(item)
+        
+        languages = self.provider.getLanguages(item)
 
         logger.log("Found quality "+str(quality), logger.DEBUG)
+        
+        logger.log("Found languages "+str(languages), logger.DEBUG)
 
         logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)
 
-        self._addCacheEntry(title, url, quality=quality)
+        self._addCacheEntry(title, url, quality=quality, languages=languages)
 
 
 provider = NewzbinProvider()

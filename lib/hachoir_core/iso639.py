@@ -554,5 +554,12 @@ ISO639_2 = {}
 for line in _ISO639:
     for key in line[1].split("/"):
         ISO639_2[key] = line[0]
+        
+        ISO639_2 = {}
+  
+ISO639_1 = {}
+for line in _ISO639:
+    if line[2]:
+        ISO639_1[line[2]] = line[0]
 del _ISO639
 
