@@ -2558,7 +2558,7 @@ class Home:
             return json.dumps({'result': 'failure', 'exception': str(e)})
 
         # return the correct json value
-        status = 'Subtitles merged successfully for ' + str(show) + ' ' + str(season) + 'x' + str(episode)
+        status = 'Subtitles merged successfully '
         ui.notifications.message('Merge Subtitles', status)
         return json.dumps({'result': 'ok'})
 

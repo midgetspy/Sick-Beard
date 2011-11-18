@@ -45,7 +45,7 @@
 <script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSubtitlesSearch.js"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSubtitles.js"></script>
 
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
@@ -178,7 +178,7 @@ $epLoc
     #if $sickbeard.USE_SUBTITLES and $show.subtitles and len(set($epResult["subtitles"].split(',')).intersection(set($subtitles.wantedLanguages()))) < len($subtitles.wantedLanguages()) and $epResult["location"]
       <a class="epSubtitlesSearch" href="searchEpisodeSubtitles?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/closed_captioning.png" height="16" alt="search subtitles" title="Search Subtitles" /></a>
     #end if
-    #if $sickbeard.USE_SUBTITLES and $sickbeard.SUBTITLES_MKVMERGE and $show.subtitles and len(set($epResult["subtitles"].split(',')).intersection(set($subtitles.wantedLanguages()))) > 1 and $epResult["location"]
+    #if $sickbeard.USE_SUBTITLES and $sickbeard.SUBTITLES_MKVMERGE and $show.subtitles and len(set($epResult["subtitles"].split(',')).intersection(set($subtitles.wantedLanguages()))) > 0 and $epResult["location"]
       <a class="epMergeSubtitles" href="mergeEpisodeSubtitles?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/merge16.png" height="16" alt="merge subtitles" title="Merge Subtitles" /></a>
     #end if
     </td>

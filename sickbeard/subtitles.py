@@ -25,7 +25,6 @@ from sickbeard import encodingKludge as ek
 from sickbeard import db
 
 
-SINGLE = u'srt'
 try:
     import subliminal
     SUBLIMINAL_SUPPORT = True
