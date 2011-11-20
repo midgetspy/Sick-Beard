@@ -740,7 +740,7 @@ def start():
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            subtitlesFinderScheduler, started
+            subtitlesFinderScheduler, started, USE_SUBTITLES
 
     with INIT_LOCK:
 
@@ -771,7 +771,8 @@ def start():
             autoPostProcesserScheduler.thread.start()
 
             # start the subtitles finder
-            subtitlesFinderScheduler.thread.start()
+            if USE_SUBTITLES:
+                subtitlesFinderScheduler.thread.start()
             
             started = True
 
