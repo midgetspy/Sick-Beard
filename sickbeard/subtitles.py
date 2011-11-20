@@ -98,8 +98,6 @@ class SubtitlesFinder():
             return
 
         logger.log(u'Checking for subtitles', logger.MESSAGE)
-        subli = subliminal.Subliminal(cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3,
-                                      languages=sickbeard.SUBTITLES_LANGUAGES, plugins=sickbeard.subtitles.getEnabledPluginList())
 
         # get episodes on which we want subtitles
         # criteria is: 
@@ -141,7 +139,15 @@ class SubtitlesFinder():
             return
 
         # download subtitles
-        self._downloadSubtitles(subli, locations)
+        with subliminal.Subliminal(cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, force=False, max_depth=3,
+                                   languages=sickbeard.SUBTITLES_LANGUAGES, plugins=sickbeard.subtitles.getEnabledPluginList()) as subli:
+            subtitles = subli.downloadSubtitles(locations)
+        for subtitle in subtitles:
+            helpers.chmodAsParent(subtitle.path)
+        if subtitles:
+            logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
+        else:
+            logger.log('No subtitles found', logger.MESSAGE)
 
         # refresh each show
         self._refreshShows(toRefresh, now)
@@ -153,16 +159,6 @@ class SubtitlesFinder():
         - the number of searches done so far (searchcount), represented by the index of the list
         """
         return {'old': [0, 24], 'new': [0, 4, 8, 16, 24, 24, 24]}
-
-    def _downloadSubtitles(self, subli, locations):
-        """Download subtitles from file locations using an initialized subliminal instance"""
-        subtitles = subli.downloadSubtitles(locations)
-        for subtitle in subtitles:
-            helpers.chmodAsParent(subtitle.path)
-        if subtitles:
-            logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
-        else:
-            logger.log('No subtitles found', logger.MESSAGE)
 
     def _refreshShows(self, toRefresh, now):
         """Refresh episodes with new subtitles"""
