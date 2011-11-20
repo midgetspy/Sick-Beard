@@ -111,7 +111,7 @@ combination_test_cases = [
                            parser.ParseResult(None, 'Show Name', 2, [3], 'Source.Quality.Etc', 'Group'),
                            ['stupid', 'season_only']),
 
-                          ('MythBusters.S08E16.720p.HDTV.x264-aAF\\aaf-mb.s08e16.720p.mkv',
+                          ('MythBusters.S08E16.720p.HDTV.x264-aAF/aaf-mb.s08e16.720p.mkv',
                            parser.ParseResult(None, 'MythBusters', 8, [16], '720p.HDTV.x264', 'aAF'),
                            ['standard']),
                            
@@ -119,11 +119,11 @@ combination_test_cases = [
                            parser.ParseResult(None, None, 2, [6], 'The Tower is Tall, But the Fall is Short'),
                            ['standard']),
                            
-                          (r'Q:\Test\TV\Jimmy Fallon\Season 2\Jimmy Fallon - 2010-12-15 - blah.avi',
+                          (r'/Test/TV/Jimmy Fallon/Season 2/Jimmy Fallon - 2010-12-15 - blah.avi',
                            parser.ParseResult(None, 'Jimmy Fallon', extra_info = 'blah', air_date = datetime.date(2010,12,15)),
                            ['scene_date_format']),
 
-                          (r'x:\30 Rock\Season 4\30 Rock - 4x22 -.avi',
+                          (r'/X/30 Rock/Season 4/30 Rock - 4x22 -.avi',
                            parser.ParseResult(None, '30 Rock', 4, [22]),
                            ['fov']),
                            
@@ -194,7 +194,9 @@ class ComboTests(unittest.TestCase):
     def test_combos(self):
         
         for (name, result, which_regexes) in combination_test_cases:
-            self._test_combo(name, result, which_regexes)
+            # Normalise the paths. Converts UNIX-style paths into Windows-style
+            # paths when test is run on Windows.
+            self._test_combo(os.path.normpath(name), result, which_regexes)
 
 class BasicTests(unittest.TestCase):
 
