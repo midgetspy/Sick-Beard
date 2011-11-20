@@ -996,7 +996,7 @@ class CMD_HistoryClear(ApiCall):
         myDB.action("DELETE FROM history WHERE 1=1")
 
         myDB.connection.close()
-        return _responds(RESULT_SUCCESS, msg="History Cleared")
+        return _responds(RESULT_SUCCESS, msg="History cleared")
 
 
 class CMD_HistoryTrim(ApiCall):
@@ -1100,7 +1100,7 @@ class CMD_SickBeardAddRootDir(ApiCall):
         # required
         self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
         # optional
-        self.default, args = self.check_params(args, kwargs, "default", None, False, "bool", [])
+        self.default, args = self.check_params(args, kwargs, "default", 0, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1110,11 +1110,12 @@ class CMD_SickBeardAddRootDir(ApiCall):
         self.location = urllib.unquote_plus(self.location)
         location_matched = 0
 
+        # dissallow adding/setting an invalid dir as the default
         if (self.default == 1):
-            # dissallow adding an invalid dir
             if not ek.ek(os.path.isdir, self.location):
-                return _responds(RESULT_FAILURE, msg='Location Invalid')
+                return _responds(RESULT_FAILURE, msg="Location is invalid")
 
+        root_dirs = []
         if sickbeard.ROOT_DIRS == "":
             self.default = 1
         else:
@@ -1127,7 +1128,9 @@ class CMD_SickBeardAddRootDir(ApiCall):
             for x in root_dirs:
                 if(x == self.location):
                     location_matched = 1
-                    index = root_dirs.index(self.location)
+                    if (self.default == 1):
+                        index = root_dirs.index(self.location)
+                    break
 
         if(location_matched == 0):
             if (self.default == 1):
@@ -1140,7 +1143,7 @@ class CMD_SickBeardAddRootDir(ApiCall):
         root_dirs_new = '|'.join(str(x) for x in root_dirs) 
         
         sickbeard.ROOT_DIRS = root_dirs_new
-        return _responds(RESULT_SUCCESS, root_dirs_new)
+        return _responds(RESULT_SUCCESS, root_dirs_new, msg="Root directories updated")
 
 
 class CMD_SickBeardCheckScheduler(ApiCall):
@@ -1226,7 +1229,12 @@ class CMD_SickBeardGetMessages(ApiCall):
 
 
 class CMD_SickBeardGetRootDirs(ApiCall):
-    _help = {"desc": "get sickbeard user parent directories"}
+    _help = {"desc": "get sickbeard user parent directories",
+             "requiredParameters": {"location": {"desc": "the full path to root (parent) directory"}
+                                    },
+             "optionalPramameters": {"default": {"desc": "make the location passed the default root (parent) directory"}
+                                    }
+             }
 
     def __init__(self, args, kwargs):
         # required
@@ -1238,7 +1246,7 @@ class CMD_SickBeardGetRootDirs(ApiCall):
         """ get the parent directories defined in sickbeard's config """
 
         if sickbeard.ROOT_DIRS == "":
-            return _responds(RESULT_FAILURE, "No Root Directories Set")
+            return _responds(RESULT_FAILURE, msg="No root directories set")
 
         rootDir = {}
         root_dirs = sickbeard.ROOT_DIRS.split('|')
@@ -1249,7 +1257,7 @@ class CMD_SickBeardGetRootDirs(ApiCall):
         root_dirs.pop(0)
 
         if len(root_dirs) < default_index:
-            return _responds(RESULT_FAILURE, "default_index value out of range")
+            return _responds(RESULT_FAILURE, msg="The index value is out of range")
 
         # clean up the list - replace %xx escapes by their single-character equivalent
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
@@ -1292,10 +1300,10 @@ class CMD_SickBeardPauseBacklog(ApiCall):
         """ pause the backlog search """
         if self.pause == True:
             sickbeard.searchQueueScheduler.action.pause_backlog() #@UndefinedVariable
-            return _responds(RESULT_SUCCESS, msg="Backlog Paused")
+            return _responds(RESULT_SUCCESS, msg="Backlog paused")
         else:
             sickbeard.searchQueueScheduler.action.unpause_backlog() #@UndefinedVariable
-            return _responds(RESULT_SUCCESS, msg="Backlog Unpaused")
+            return _responds(RESULT_SUCCESS, msg="Backlog unpaused")
 
 
 class CMD_SickBeardPing(ApiCall):
@@ -1392,7 +1400,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
         if self.season_folder != None:
             sickbeard.SEASON_FOLDERS_DEFAULT = int(self.season_folder)
 
-        return _responds(RESULT_SUCCESS, msg="Saved Defaults")
+        return _responds(RESULT_SUCCESS, msg="Saved defaults")
 
 
 class CMD_SickBeardShutdown(ApiCall):
@@ -1489,7 +1497,7 @@ class CMD_ShowAddExisting(ApiCall):
         """ add a show in sickbeard with an existing folder """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if showObj:
-            return _responds(RESULT_FAILURE, msg="An existing tvdbid already exists in database")
+            return _responds(RESULT_FAILURE, msg="An existing tvdbid already exists in the database")
 
         if not ek.ek(os.path.isdir, self.location):
             return _responds(RESULT_FAILURE, msg='Not a valid location')
@@ -1561,7 +1569,7 @@ class CMD_ShowAddNew(ApiCall):
             return _responds(RESULT_FAILURE, msg="An existing tvdbid already exists in database")
 
         if not ek.ek(os.path.isdir, self.location):
-            return _responds('failure', 'Not a valid location')
+            return _responds(RESULT_FAILURE, msg="Not a valid location")
 
         quality_map = {'sdtv': Quality.SDTV,
                        'sddvd': Quality.SDDVD,
@@ -1601,7 +1609,7 @@ class CMD_ShowAddNew(ApiCall):
                 raise ApiError("Invalid Status")
             # only allow the status options we want
             if int(self.status) not in (3, 5, 6, 7):
-                return _responds(RESULT_FAILURE, msg="Status Prohibited")
+                return _responds(RESULT_FAILURE, msg="Status prohibited")
             newStatus = self.status
 
         newLang = self.valid_languages[self.lang]
@@ -1729,7 +1737,7 @@ class CMD_ShowRefresh(ApiCall):
             return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has queued to be refreshed")
         except exceptions.CantRefreshException, e:
             # TODO: log the excption
-            return _responds(RESULT_FAILURE, "Unable to refresh " + str(showObj.name))
+            return _responds(RESULT_FAILURE, msg="Unable to refresh " + str(showObj.name))
 
 
 class CMD_ShowSearchTVDB(ApiCall):
