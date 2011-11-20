@@ -406,6 +406,18 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
+def copyDir(srcDir, destDir):
+    try:
+       ek.ek(shutil.copytree, srcDir, destDir)
+    except OSError:
+       logger.log(u"Failed copying " + srcDir + " to " + destDir)
+
+def moveDir(srcDir, destDir):
+    try:
+       ek.ek(shutil.move, srcDir, destDir)
+    except OSError:
+       logger.log(u"Failed moving " + srcDir + " to " + destDir)
+
 def rename_file(old_path, new_name):
 
     old_path_list = ek.ek(os.path.split, old_path)

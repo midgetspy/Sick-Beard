@@ -155,6 +155,7 @@ RENAME_EPISODES = False
 PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
+MOVE_ENTIRE_DIR = False
 TV_DOWNLOAD_DIR = None
 
 NZBS = False
@@ -364,7 +365,7 @@ def initialize(consoleLogging=True):
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, MOVE_ENTIRE_DIR, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS
 
         if __INITIALIZED__:
@@ -483,6 +484,7 @@ def initialize(consoleLogging=True):
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
+        MOVE_ENTIRE_DIR = check_setting_int(CFG, 'General', 'move_entire_dir', 0)
 
         EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         if not EZRSS:
@@ -955,6 +957,7 @@ def save_config():
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
+    new_config['General']['move_entire_dir'] = int(MOVE_ENTIRE_DIR)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
     
