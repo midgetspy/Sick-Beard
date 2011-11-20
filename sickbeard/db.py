@@ -48,7 +48,7 @@ class DBConnection:
     def __init__(self, filename="sickbeard.db", suffix=None):
 
         self.filename = filename
-        self.connection = sqlite3.connect(dbFilename(filename), 20)
+        self.connection = sqlite3.connect(dbFilename(filename), 20, detect_types=sqlite3.PARSE_DECLTYPES)
         self.connection.row_factory = sqlite3.Row
 
     def action(self, query, args=None):
