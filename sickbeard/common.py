@@ -22,6 +22,8 @@ import re
 
 from sickbeard import version
 
+from lib.hachoir_core.iso639 import ISO639_1
+
 USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION.replace(' ','-')+' ('+platform.system()+' '+platform.release()+')'
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
@@ -240,4 +242,29 @@ countryList = {'Australia': 'AU',
                'Canada': 'CA',
                'USA': 'US'
                }
+
+class Language:
+    languages = dict(ISO639_1)
+    
+    @staticmethod
+    def nameLanguages(name):
+        name = os.path.basename(name)
+                
+        ret = []
+        
+        # if we have our exact text then assume we put it there
+        for lang in Language.languages.itervalues():
+            regex = '\W'+lang.replace(' ','\W')+'\W'
+            regex_match = re.search(regex, name, re.I)
+            if regex_match:
+                ret.append(lang)
+                
+        if not ret:
+            # No language found. Assuming English.
+            ret.append(Language.languages["en"])
+                
+        return ret
+    
+    
+        
 

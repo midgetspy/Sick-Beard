@@ -84,6 +84,8 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 #end if
     </td></tr>
     <tr><td class="showLegend">Language:</td><td>$show.lang</td></tr>
+    <tr><td class="showLegend">Soundtrack:</td><td>$show.soundtrack_lang</td></tr>
+    <tr><td class="showLegend">Custom Search Names:</td><td>$show.custom_search_names</td></tr>
     <tr><td class="showLegend">Season Folders: </td><td><img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Active: </td><td><img src="$sbRoot/images/#if int($show.paused) == 0 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>

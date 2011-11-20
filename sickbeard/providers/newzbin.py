@@ -21,6 +21,7 @@ import re
 import sys
 import time
 import urllib
+import urllib2
 
 import xml.etree.cElementTree as etree
 from datetime import datetime, timedelta
@@ -31,25 +32,20 @@ import generic
 import sickbeard.encodingKludge as ek
 from sickbeard import classes, logger, helpers, exceptions, show_name_helpers
 from sickbeard import tvcache
-from sickbeard.common import Quality
+from sickbeard.common import Quality, Language
 from sickbeard.exceptions import ex
 from lib.dateutil.parser import parse as parseDate
 
-class NewzbinDownloader(urllib.FancyURLopener):
-
-    def __init__(self):
-        urllib.FancyURLopener.__init__(self)
-
-    def http_error_default(self, url, fp, errcode, errmsg, headers):
-
-        # if newzbin is throttling us, wait seconds and try again
-        if errcode == 400:
-
-            newzbinErrCode = int(headers.getheader('X-DNZB-RCode'))
-
+class NewzbinErrorHandler(urllib2.HTTPDefaultErrorHandler):
+    def http_error_default(self, req, fp, code, msg, hdrs):
+        # if newzbin is throttling us, wait seconds and try again        
+        if code == 400 and hdrs.getheader('X-DNZB-RCode'):
+            newzbinErrCode = int(hdrs.getheader('X-DNZB-RCode'))
+        
             if newzbinErrCode == 450:
-                rtext = str(headers.getheader('X-DNZB-RText'))
-                result = re.search("wait (\d+) seconds", rtext)
+                if hdrs.getheader('X-DNZB-RText'):
+                    rtext = str(hdrs.getheader('X-DNZB-RText'))
+                    result = re.search("wait (\d+) seconds", rtext)
 
             elif newzbinErrCode == 401:
                 raise exceptions.AuthException("Newzbin username or password incorrect")
@@ -62,6 +58,8 @@ class NewzbinDownloader(urllib.FancyURLopener):
             time.sleep(int(result.group(1)))
 
             raise exceptions.NewzbinAPIThrottled()
+        
+        urllib2.HTTPDefaultErrorHandler.http_error_default(self, req, fp, code, msg, hdrs)
 
 class NewzbinProvider(generic.NZBProvider):
 
@@ -78,12 +76,34 @@ class NewzbinProvider(generic.NZBProvider):
         self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
 
         self.NEWZBIN_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
+        
+        self.langs = Language.languages
+        
+        self.langs_reverse = {}
+        for (k, v) in self.langs.iteritems():
+            self.langs_reverse[v] = k
+        
 
     def _report(self, name):
         return '{'+self.NEWZBIN_NS+'}'+name
 
     def isEnabled(self):
         return sickbeard.NEWZBIN
+    
+    def getLanguages(self, item):
+        attributes = item.find(self._report('attributes'))
+        ret = []
+        
+        for attribute in attributes.getiterator(self._report('attribute')):
+            cur_attr = attribute.attrib['type']
+            if cur_attr == 'Language':
+                try:
+                    lang = self.langs_reverse[attribute.text]
+                    ret.append(lang)
+                except KeyError:
+                    pass
+                
+        return ret
 
     def getQuality(self, item):
         attributes = item.find(self._report('attributes'))
@@ -203,7 +223,6 @@ class NewzbinProvider(generic.NZBProvider):
             return id_match.group(1)
 
     def downloadResult(self, nzb):
-
         id = self.getIDFromURL(nzb.url)
         if not id:
             logger.log("Unable to get an ID from "+str(nzb.url)+", can't download from Newzbin's API", logger.ERROR)
@@ -214,18 +233,25 @@ class NewzbinProvider(generic.NZBProvider):
         fileName = ek.ek(os.path.join, sickbeard.NZB_DIR, helpers.sanitizeFileName(nzb.name)+'.nzb')
         logger.log("Saving to " + fileName)
 
-        urllib._urlopener = NewzbinDownloader()
-
+        opener = urllib2.build_opener(NewzbinErrorHandler)        
         params = urllib.urlencode({"username": sickbeard.NEWZBIN_USERNAME, "password": sickbeard.NEWZBIN_PASSWORD, "reportid": id})
+        
+        req = None
         try:
-            urllib.urlretrieve(self.url+"api/dnzb/", fileName, data=params)
+            req = opener.open(self.url + "api/dnzb/", params)
+            downloadedFile = open(fileName, "w")
+            downloadedFile.write(req.read())
+            downloadedFile.close()    
         except exceptions.NewzbinAPIThrottled:
             logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
             self.downloadResult(nzb)
-        except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+        except IOError:
+            exceptions.log(logger, sys.exc_info(), logger.ERROR, "Error downloading NZB")
             return False
-
+        finally:
+            if req:
+                req.close()
+            
         return True
 
     def getURL(self, url):
@@ -241,7 +267,13 @@ class NewzbinProvider(generic.NZBProvider):
         f.close()
 
         return data
-
+    
+    def _add_language_to_search_strings(self, searchStr, show):
+        langAtt = self.langs.get(show.soundtrack_lang)
+        if langAtt:
+            return "(" + searchStr + ") AND Attr:Language=" + langAtt
+        return searchStr
+    
     def _get_season_search_strings(self, show, season):
 
         nameList = set(show_name_helpers.allPossibleShowNames(show))
@@ -253,7 +285,8 @@ class NewzbinProvider(generic.NZBProvider):
         searchTerms = ['^"'+x+' - '+str(season)+suffix+'"' for x in nameList]
         #searchTerms += ['^"'+x+' - Season '+str(season)+'"' for x in nameList]
         searchStr = " OR ".join(searchTerms)
-
+        searchStr = self._add_language_to_search_strings(searchStr, show)
+        
         searchStr += " -subpack -extras"
 
         logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
@@ -267,6 +300,9 @@ class NewzbinProvider(generic.NZBProvider):
             searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(ep_obj.season, ep_obj.episode) for x in nameList])
         else:
             searchStr = " OR ".join(['^"'+x+' - '+str(ep_obj.airdate)+'"' for x in nameList])
+            
+        searchStr = self._add_language_to_search_strings(searchStr, ep_obj.show)
+        
         return [searchStr]
 
     def _doSearch(self, searchStr, show=None):
@@ -284,11 +320,11 @@ class NewzbinProvider(generic.NZBProvider):
 
         for cur_item in items:
             title = cur_item.findtext('title')
-            if title == 'Feed Error':
+            if title in ['Feed Error', 'Feeds Error']:
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
             if sickbeard.USENET_RETENTION is not None:
                 try:
-                    dateString = cur_item.findtext('{http://www.newzbin.com/DTD/2007/feeds/report/}postdate')
+                    dateString = cur_item.findtext('pubDate')
                     # use the parse (imported as parseDate) function from the dateutil lib
                     # and we have to remove the timezone info from it because the retention_date will not have one
                     # and a comparison of them is not possible
@@ -297,7 +333,7 @@ class NewzbinProvider(generic.NZBProvider):
                     if post_date < retention_date:
                         continue
                 except Exception, e:
-                    logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
+                    logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.WARNING)
                     continue
 
             item_list.append(cur_item)
@@ -317,7 +353,7 @@ class NewzbinProvider(generic.NZBProvider):
                 'u_show_passworded': 0,
                 'u_v3_retention': 0,
                 'ps_rb_video_format': 3082257,
-                'ps_rb_language': 4096,
+                #'ps_rb_language': 4096,
                 'sort': 'date',
                 'order': 'desc',
                 'u_post_results_amt': 50,
@@ -330,7 +366,7 @@ class NewzbinProvider(generic.NZBProvider):
         else:
             params['q'] = ''
 
-        params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
+        params['q'] += 'NOT Attr:VideoF=DVD'
 
         url = self.url + "search/?%s" % urllib.urlencode(params)
         logger.log("Newzbin search URL: " + url, logger.DEBUG)
@@ -368,12 +404,16 @@ class NewzbinCache(tvcache.TVCache):
             return
 
         quality = self.provider.getQuality(item)
+        
+        languages = self.provider.getLanguages(item)
 
         logger.log("Found quality "+str(quality), logger.DEBUG)
+        
+        logger.log("Found languages "+str(languages), logger.DEBUG)
 
         logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)
 
-        self._addCacheEntry(title, url, quality=quality)
+        self._addCacheEntry(title, url, quality=quality, languages=languages)
 
 
 provider = NewzbinProvider()

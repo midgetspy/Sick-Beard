@@ -26,6 +26,7 @@ from sickbeard import db
 
 import re
 import datetime
+import string
 
 from name_parser.parser import NameParser, InvalidNameException
 
@@ -231,6 +232,8 @@ def allPossibleShowNames(show):
     """
 
     showNames = [show.name]
+    if show.custom_search_names:
+        showNames += [name for name in string.split(show.custom_search_names, ",")]
     showNames += [name for name in get_scene_exceptions(show.tvdbid)]
 
     # if we have a tvrage name then use it

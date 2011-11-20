@@ -19,12 +19,13 @@
 import time
 import datetime
 import sqlite3
+import json
 
 import sickbeard
 
 from sickbeard import db
 from sickbeard import logger
-from sickbeard.common import Quality
+from sickbeard.common import Quality, Language
 
 from sickbeard import helpers, exceptions, show_name_helpers
 from sickbeard import name_cache
@@ -44,7 +45,7 @@ class CacheDBConnection(db.DBConnection):
 
         # Create the table if it's not already there
         try:
-            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
+            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT, languages TEXT);"
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
@@ -177,7 +178,7 @@ class TVCache():
 
         return True
 
-    def _addCacheEntry(self, name, url, season=None, episodes=None, tvdb_id=0, tvrage_id=0, quality=None, extraNames=[]):
+    def _addCacheEntry(self, name, url, season=None, episodes=None, tvdb_id=0, tvrage_id=0, quality=None, languages=None, extraNames=[]):
 
         myDB = self._getDB()
 
@@ -307,9 +308,14 @@ class TVCache():
 
         if not quality:
             quality = Quality.nameQuality(name)
+            
+        if not languages:
+            languages = Language.nameLanguages(name)
+            
+        languages_json = json.dumps(languages)
 
-        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
-                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
+        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality, languages) VALUES (?,?,?,?,?,?,?,?,?)",
+                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality, languages_json])
 
 
     def searchCache(self, episode, manualSearch=False):
@@ -362,9 +368,10 @@ class TVCache():
                 continue
             curEp = int(curEp)
             curQuality = int(curResult["quality"])
+            curLanguages = json.loads(curResult["languages"])
 
             # if the show says we want that episode then add it to the list
-            if not showObj.wantEpisode(curSeason, curEp, curQuality, manualSearch):
+            if not showObj.wantEpisode(curSeason, curEp, curQuality, curLanguages, manualSearch):
                 logger.log(u"Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
 
             else:

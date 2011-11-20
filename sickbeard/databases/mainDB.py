@@ -322,8 +322,22 @@ class AddLang (FixSabHostURL):
 
     def execute(self):
         self.addColumn("tv_shows", "lang", "TEXT", "en")
+        
+class AddSoundtrackLang (AddLang):
+    def test(self):
+        return self.hasColumn("tv_shows", "soundtrack_lang")
 
-class PopulateRootDirs (AddLang):
+    def execute(self):
+        self.addColumn("tv_shows", "soundtrack_lang", "TEXT", "")
+        
+class AddCustomSearchNames (AddSoundtrackLang):
+    def test(self):
+        return self.hasColumn("tv_shows", "custom_search_names")
+
+    def execute(self):
+        self.addColumn("tv_shows", "custom_search_names", "TEXT", "")
+
+class PopulateRootDirs (AddCustomSearchNames):
     def test(self):
         return self.checkDBVersion() >= 7
     

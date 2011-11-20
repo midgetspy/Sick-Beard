@@ -47,7 +47,7 @@ from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNA
 
 class TVShow(object):
 
-    def __init__ (self, tvdbid, lang=""):
+    def __init__ (self, tvdbid, lang="", soundtrack_lang=""):
 
         self.tvdbid = tvdbid
 
@@ -67,6 +67,8 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.soundtrack_lang = soundtrack_lang
+        self.custom_search_names = ""
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -536,6 +538,12 @@ class TVShow(object):
 
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
+                
+            if self.soundtrack_lang == "":
+                self.soundtrack_lang = sqlResults[0]["soundtrack_lang"]
+              
+            if self.custom_search_names == "":  
+                self.custom_search_names = sqlResults[0]["custom_search_names"]
 
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
@@ -820,7 +828,9 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "soundtrack_lang": self.soundtrack_lang,
+                        "custom_search_names": self.custom_search_names
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
@@ -844,9 +854,9 @@ class TVShow(object):
         return toReturn
 
 
-    def wantEpisode(self, season, episode, quality, manualSearch=False):
+    def wantEpisode(self, season, episode, quality, curLanguages, manualSearch=False):
 
-        logger.log(u"Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
+        logger.log(u"Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality]+" with languages "+str(curLanguages), logger.DEBUG)
 
         # if the quality isn't one we want under any circumstances then just say no
         anyQualities, bestQualities = Quality.splitQuality(self.quality)
@@ -855,6 +865,11 @@ class TVShow(object):
         if quality not in anyQualities + bestQualities:
             logger.log(u"I know for sure I don't want this episode, saying no", logger.DEBUG)
             return False
+        
+        if curLanguages and self.soundtrack_lang and not self.soundtrack_lang in curLanguages:
+                logger.log(u"Episode is not in requested language", logger.DEBUG)
+                return False
+            
 
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
