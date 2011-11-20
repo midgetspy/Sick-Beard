@@ -586,6 +586,44 @@ def _getQualityMap():
             Quality.UNKNOWN: 'unknown',
             ANY: 'any'}
 
+def _getRootDirs():
+    if sickbeard.ROOT_DIRS == "":
+        return {}
+
+    rootDir = {}
+    root_dirs = sickbeard.ROOT_DIRS.split('|')
+    default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
+
+    rootDir["default_index"] = int(sickbeard.ROOT_DIRS.split('|')[0])
+    # remove default_index value from list (this fixes the offset)
+    root_dirs.pop(0)
+
+    if len(root_dirs) < default_index:
+        return {}
+
+    # clean up the list - replace %xx escapes by their single-character equivalent
+    root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
+
+    default_dir = root_dirs[default_index]
+
+    dir_list = []
+    for root_dir in root_dirs:
+        valid = 1
+        try:
+            file_list = ek.ek(os.listdir, root_dir)
+        except:
+            valid = 0
+        default = 0
+        if root_dir is default_dir:
+            default = 1
+
+        curDir = {}
+        curDir['valid'] = valid
+        curDir['location'] = root_dir
+        curDir['default'] = default
+        dir_list.append(curDir)
+
+    return dir_list
 
 class ApiError(Exception):
     "Generic API error"
@@ -1094,7 +1132,12 @@ class CMD_SickBeard(ApiCall):
 
 
 class CMD_SickBeardAddRootDir(ApiCall):
-    _help = {"desc": "add a sickbeard user's parent directory"}
+    _help = {"desc": "add a sickbeard user's parent directory",
+             "requiredParameters": {"location": {"desc": "the full path to root (parent) directory"}
+                                    },
+             "optionalPramameters": {"default": {"desc": "make the location passed the default root (parent) directory"}
+                                    }
+             }
 
     def __init__(self, args, kwargs):
         # required
@@ -1110,10 +1153,9 @@ class CMD_SickBeardAddRootDir(ApiCall):
         self.location = urllib.unquote_plus(self.location)
         location_matched = 0
 
-        # dissallow adding/setting an invalid dir as the default
-        if (self.default == 1):
-            if not ek.ek(os.path.isdir, self.location):
-                return _responds(RESULT_FAILURE, msg="Location is invalid")
+        # dissallow adding/setting an invalid dir
+        if not ek.ek(os.path.isdir, self.location):
+            return _responds(RESULT_FAILURE, msg="Location is invalid")
 
         root_dirs = []
         if sickbeard.ROOT_DIRS == "":
@@ -1139,12 +1181,50 @@ class CMD_SickBeardAddRootDir(ApiCall):
             else:
                 root_dirs.append(self.location)
 
-        root_dirs.insert(0, index)
-        root_dirs_new = '|'.join(str(x) for x in root_dirs) 
-        
-        sickbeard.ROOT_DIRS = root_dirs_new
-        return _responds(RESULT_SUCCESS, root_dirs_new, msg="Root directories updated")
+        root_dirs_new = [urllib.quote(x) for x in root_dirs]
+        root_dirs_new.insert(0, index)
+        root_dirs_new = '|'.join(unicode(x) for x in root_dirs_new)
 
+        sickbeard.ROOT_DIRS = root_dirs_new
+        return _responds(RESULT_SUCCESS, _getRootDirs(), msg="Root directories updated")
+
+class CMD_SickBeardDeleteRootDir(ApiCall):
+    _help = {"desc": "add a sickbeard user's parent directory"}
+
+    def __init__(self, args, kwargs):
+        # required
+        self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ add a parent directory to sickbeard's config """
+        root_dirs_new = []
+        root_dirs = sickbeard.ROOT_DIRS.split('|')
+        index = int(root_dirs[0])
+        root_dirs.pop(0)
+        # clean up the list - replace %xx escapes by their single-character equivalent
+        root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
+        old_root_dir = root_dirs[index];
+        for curRootDir in root_dirs:
+            if not curRootDir == self.location:
+                root_dirs_new.append(curRootDir)
+            else: # 
+                newIndex = 0
+
+        for curIndex, curNewRootDir in enumerate(root_dirs_new):
+            if curNewRootDir is old_root_dir:
+                newIndex = curIndex
+                break
+
+        root_dirs_new = [urllib.quote(x) for x in root_dirs_new]
+        if len(root_dirs_new) > 0:
+            root_dirs_new.insert(0, newIndex)
+        root_dirs_new = "|".join(unicode(x) for x in root_dirs_new)
+
+        sickbeard.ROOT_DIRS = root_dirs_new
+        return _responds(RESULT_SUCCESS, _getRootDirs(), msg="Root dir deleted")
 
 class CMD_SickBeardCheckScheduler(ApiCall):
     _help = {"desc": "query the scheduler"}
@@ -1229,12 +1309,7 @@ class CMD_SickBeardGetMessages(ApiCall):
 
 
 class CMD_SickBeardGetRootDirs(ApiCall):
-    _help = {"desc": "get sickbeard user parent directories",
-             "requiredParameters": {"location": {"desc": "the full path to root (parent) directory"}
-                                    },
-             "optionalPramameters": {"default": {"desc": "make the location passed the default root (parent) directory"}
-                                    }
-             }
+    _help = {"desc": "get sickbeard user parent directories"}
 
     def __init__(self, args, kwargs):
         # required
@@ -1245,43 +1320,7 @@ class CMD_SickBeardGetRootDirs(ApiCall):
     def run(self):
         """ get the parent directories defined in sickbeard's config """
 
-        if sickbeard.ROOT_DIRS == "":
-            return _responds(RESULT_FAILURE, msg="No root directories set")
-
-        rootDir = {}
-        root_dirs = sickbeard.ROOT_DIRS.split('|')
-        default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
-
-        rootDir["default_index"] = int(sickbeard.ROOT_DIRS.split('|')[0])
-        # remove default_index value from list (this fixes the offset)
-        root_dirs.pop(0)
-
-        if len(root_dirs) < default_index:
-            return _responds(RESULT_FAILURE, msg="The index value is out of range")
-
-        # clean up the list - replace %xx escapes by their single-character equivalent
-        root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
-
-        default_dir = root_dirs[default_index]
-
-        dir_list = []
-        for root_dir in root_dirs:
-            valid = 1
-            try:
-                file_list = ek.ek(os.listdir, root_dir)
-            except:
-                valid = 0
-            default = 0
-            if root_dir is default_dir:
-                default = 1
-
-            curDir = {}
-            curDir['valid'] = valid
-            curDir['location'] = root_dir
-            curDir['default'] = default
-            dir_list.append(curDir)
-
-        return _responds(RESULT_SUCCESS, dir_list)
+        return _responds(RESULT_SUCCESS, _getRootDirs())
 
 
 class CMD_SickBeardPauseBacklog(ApiCall):
@@ -2084,7 +2123,7 @@ class CMD_ShowUpdate(ApiCall):
             sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
             return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has queued to be updated")
         except exceptions.CantUpdateException, e:
-            logger.log("API:: Unable to update " + str(showObj.name)+". " + str(ex(e)), logger.ERROR)
+            logger.log("API:: Unable to update " + str(showObj.name) + ". " + str(ex(e)), logger.ERROR)
             return _responds(RESULT_FAILURE, msg="Unable to update " + str(showObj.name))
 
 
@@ -2166,6 +2205,7 @@ _functionMaper = {"help": CMD_Help,
                   "logs": CMD_Logs,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
+                  "sb.deleterootdir":CMD_SickBeardDeleteRootDir,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
                   "sb.getdefaults": CMD_SickBeardGetDefaults,
