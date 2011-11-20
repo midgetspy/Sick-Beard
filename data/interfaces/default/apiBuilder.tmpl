@@ -28,6 +28,7 @@ var disable_empty_list=true;
 addListGroup("api", "Command");
 
 addOption("Command", "SickBeard", "?cmd=sb", 1); //make default
+addList("Command", "SickBeard.AddRootDir", "?cmd=sb.addrootdir", "sb.addrootdir", "", "", "action");
 addOption("Command", "SickBeard.CheckScheduler", "?cmd=sb.checkscheduler", "", "", "action");
 addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "action");
 addOption("Command", "SickBeard.GetDefaults", "?cmd=sb.getdefaults", "", "", "action");
@@ -46,7 +47,7 @@ addList("Command", "Scene Exceptions", "?cmd=exceptions", "exceptions");
 addList("Command", "History", "?cmd=history", "history");
 addOption("Command", "History.Clear", "?cmd=history.clear", "", "", "action");
 addOption("Command", "History.Trim", "?cmd=history.trim", "", "", "action");
-addList("Command", "Logs", "?cmd=logs", "viewlog");
+addList("Command", "Logs", "?cmd=logs", "logs");
 addList("Command", "Show", "?cmd=show", "tvdbid");
 addList("Command", "Show.AddExisting", "?cmd=show.addexisting", "show.addexisting", "", "", "action");
 addList("Command", "Show.AddNew", "?cmd=show.addnew", "show.addnew", "", "", "action disabled");
@@ -55,7 +56,7 @@ addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action"
 addList("Command", "Show.GetQuality", "?cmd=show.getquality", "tvdbid", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.SearchTVDB", "?cmd=show.searchtvdb", "show.searchtvdb", "", "", "action");
-addList("Command", "Show.SeasonList", "?cmd=show.seasonlist", "season_list", "", "", "action");
+addList("Command", "Show.SeasonList", "?cmd=show.seasonlist", "show.seasonlist", "", "", "action");
 addList("Command", "Show.Seasons", "?cmd=show.seasons", "seasons", "", "", "action");
 addList("Command", "Show.SetQuality", "?cmd=show.setquality", "show.setquality", "", "", "action");
 addList("Command", "Show.Stats", "?cmd=show.stats", "tvdbid", "", "", "action");
@@ -68,11 +69,11 @@ addOption("Command", "Shows.Stats", "?cmd=shows.stats", "", "", "action");
 addOption("tvdbid", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid");
 #end for
 
-addOption("viewlog", "Optional Param", "", 1);
-addOption("viewlog", "Debug", "&amp;min_level=debug");
-addOption("viewlog", "Info", "&amp;min_level=info");
-addOption("viewlog", "Warning", "&amp;min_level=warning");
-addOption("viewlog", "Error", "&amp;min_level=error");
+addOption("logs", "Optional Param", "", 1);
+addOption("logs", "Debug", "&amp;min_level=debug");
+addOption("logs", "Info", "&amp;min_level=info");
+addOption("logs", "Warning", "&amp;min_level=warning");
+addOption("logs", "Error", "&amp;min_level=error");
 
 addOption("sb.setdefaults", "Optional Param", "", 1);
 addList("sb.setdefaults", "Wanted", "&amp;status=wanted", "sb.setdefaults-opt");
@@ -138,11 +139,11 @@ addList("seasons", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "seasons-$cur
 #end for
 
 #for $curShow in $sortedShowList:
-addList("season_list", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "season_list-sort");
+addList("show.seasonlist", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "show.seasonlist-sort");
 #end for
 
-addOption("season_list-sort", "Optional Param", "", 1);
-addOption("season_list-sort", "Sort by Ascending", "&amp;sort=asc");
+addOption("show.seasonlist-sort", "Optional Param", "", 1);
+addOption("show.seasonlist-sort", "Sort by Ascending", "&amp;sort=asc");
 
 #for $curShow in $sortedShowList:
 addList("show.setquality", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "quality");
@@ -271,6 +272,13 @@ addOption("sb.pausebacklog", "Optional Param", "", 1);
 addOption("sb.pausebacklog", "Pause", "&amp;pause=1");
 addOption("sb.pausebacklog", "Unpause", "&amp;pause=0");
 
+addList("sb.addrootdir", "C:\\Temp", "&amp;location=C:\\Temp", "sb.addrootdir-opt");
+addList("sb.addrootdir", "/usr/bin", "&amp;location=/usr/bin/", "sb.addrootdir-opt");
+addList("sb.addrootdir", "S:\\Invalid_Location", "&amp;location=S:\\Invalid_Location", "sb.addrootdir-opt");
+
+addOption("sb.addrootdir-opt", "Optional Param", "", 1);
+addOption("sb.addrootdir-opt", "Default", "&amp;default=1");
+addOption("sb.addrootdir-opt", "Not Default", "&amp;default=0");
 
 </script>
 </head>

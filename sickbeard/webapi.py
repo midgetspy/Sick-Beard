@@ -1093,6 +1093,56 @@ class CMD_SickBeard(ApiCall):
         return _responds(RESULT_SUCCESS, data)
 
 
+class CMD_SickBeardAddRootDir(ApiCall):
+    _help = {"desc": "add a sickbeard user's parent directory"}
+
+    def __init__(self, args, kwargs):
+        # required
+        self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
+        # optional
+        self.default, args = self.check_params(args, kwargs, "default", None, False, "bool", [])
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ add a parent directory to sickbeard's config """
+
+        self.location = urllib.unquote_plus(self.location)
+        location_matched = 0
+
+        if (self.default == 1):
+            # dissallow adding an invalid dir
+            if not ek.ek(os.path.isdir, self.location):
+                return _responds(RESULT_FAILURE, msg='Location Invalid')
+
+        if sickbeard.ROOT_DIRS == "":
+            self.default = 1
+        else:
+            root_dirs_new = None
+            root_dirs = sickbeard.ROOT_DIRS.split('|')
+            index = int(sickbeard.ROOT_DIRS.split('|')[0])
+            root_dirs.pop(0)
+            # clean up the list - replace %xx escapes by their single-character equivalent
+            root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
+            for x in root_dirs:
+                if(x == self.location):
+                    location_matched = 1
+                    index = root_dirs.index(self.location)
+
+        if(location_matched == 0):
+            if (self.default == 1):
+                index = 0
+                root_dirs.insert(0, self.location)
+            else:
+                root_dirs.append(self.location)
+
+        root_dirs.insert(0, index)
+        root_dirs_new = '|'.join(str(x) for x in root_dirs) 
+        
+        sickbeard.ROOT_DIRS = root_dirs_new
+        return _responds(RESULT_SUCCESS, root_dirs_new)
+
+
 class CMD_SickBeardCheckScheduler(ApiCall):
     _help = {"desc": "query the scheduler"}
 
@@ -2106,6 +2156,7 @@ _functionMaper = {"help": CMD_Help,
                   "history.trim": CMD_HistoryTrim,
                   "logs": CMD_Logs,
                   "sb": CMD_SickBeard,
+                  "sb.addrootdir": CMD_SickBeardAddRootDir,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
                   "sb.getdefaults": CMD_SickBeardGetDefaults,
