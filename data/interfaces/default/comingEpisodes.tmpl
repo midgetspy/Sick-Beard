@@ -280,11 +280,10 @@
           <td style="vertical-align: top;">
             <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
 #if int($cur_result["quality"]) in $qualityPresets:
-[<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]
+ [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]<br />
 #else:
-[<span class="title">Custom</span>]
+ [<span class="title">Custom</span>]<br />
 #end if
-            <br />
             #if $cur_result["description"] == '':
                 <div class="ep_summary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
             #else:
