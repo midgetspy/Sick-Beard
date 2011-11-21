@@ -30,6 +30,7 @@ addListGroup("api", "Command");
 addOption("Command", "SickBeard", "?cmd=sb", 1); //make default
 addList("Command", "SickBeard.AddRootDir", "?cmd=sb.addrootdir", "sb.addrootdir", "", "", "action");
 addOption("Command", "SickBeard.CheckScheduler", "?cmd=sb.checkscheduler", "", "", "action");
+addList("Command", "SickBeard.DeleteRootDir", "?cmd=sb.deleterootdir", "sb.deleterootdir", "", "", "action");
 addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "action");
 addOption("Command", "SickBeard.GetDefaults", "?cmd=sb.getdefaults", "", "", "action");
 addOption("Command", "SickBeard.GetMessages", "?cmd=sb.getmessages", "", "", "action");
@@ -279,6 +280,10 @@ addList("sb.addrootdir", "S:\\Invalid_Location", "&amp;location=S:\\Invalid_Loca
 addOption("sb.addrootdir-opt", "Optional Param", "", 1);
 addOption("sb.addrootdir-opt", "Default", "&amp;default=1");
 addOption("sb.addrootdir-opt", "Not Default", "&amp;default=0");
+
+addOption("sb.deleterootdir", "C:\\Temp", "&amp;location=C:\\Temp", "", 1);
+addOption("sb.deleterootdir", "/usr/bin", "&amp;location=/usr/bin/");
+addOption("sb.deleterootdir", "S:\\Invalid_Location", "&amp;location=S:\\Invalid_Location");
 
 </script>
 </head>

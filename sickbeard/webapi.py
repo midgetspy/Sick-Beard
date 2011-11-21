@@ -1188,43 +1188,6 @@ class CMD_SickBeardAddRootDir(ApiCall):
         sickbeard.ROOT_DIRS = root_dirs_new
         return _responds(RESULT_SUCCESS, _getRootDirs(), msg="Root directories updated")
 
-class CMD_SickBeardDeleteRootDir(ApiCall):
-    _help = {"desc": "add a sickbeard user's parent directory"}
-
-    def __init__(self, args, kwargs):
-        # required
-        self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
-        # optional
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-        """ add a parent directory to sickbeard's config """
-        root_dirs_new = []
-        root_dirs = sickbeard.ROOT_DIRS.split('|')
-        index = int(root_dirs[0])
-        root_dirs.pop(0)
-        # clean up the list - replace %xx escapes by their single-character equivalent
-        root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
-        old_root_dir = root_dirs[index];
-        for curRootDir in root_dirs:
-            if not curRootDir == self.location:
-                root_dirs_new.append(curRootDir)
-            else: # 
-                newIndex = 0
-
-        for curIndex, curNewRootDir in enumerate(root_dirs_new):
-            if curNewRootDir is old_root_dir:
-                newIndex = curIndex
-                break
-
-        root_dirs_new = [urllib.quote(x) for x in root_dirs_new]
-        if len(root_dirs_new) > 0:
-            root_dirs_new.insert(0, newIndex)
-        root_dirs_new = "|".join(unicode(x) for x in root_dirs_new)
-
-        sickbeard.ROOT_DIRS = root_dirs_new
-        return _responds(RESULT_SUCCESS, _getRootDirs(), msg="Root dir deleted")
 
 class CMD_SickBeardCheckScheduler(ApiCall):
     _help = {"desc": "query the scheduler"}
@@ -1249,6 +1212,51 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         myDB.connection.close()
         data = {"backlog_is_paused": int(backlogPaused), "backlog_is_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_is_running": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
         return _responds(RESULT_SUCCESS, data)
+
+
+class CMD_SickBeardDeleteRootDir(ApiCall):
+    _help = {"desc": "delete a sickbeard user's parent directory",
+             "requiredParameters": {"location": {"desc": "the full path to root (parent) directory"} }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ delete a parent directory from sickbeard's config """
+        if sickbeard.ROOT_DIRS == "":
+            return _responds(RESULT_FAILURE, _getRootDirs(), msg="No root directories detected")
+
+        root_dirs_new = []
+        root_dirs = sickbeard.ROOT_DIRS.split('|')
+        index = int(root_dirs[0])
+        root_dirs.pop(0)
+        # clean up the list - replace %xx escapes by their single-character equivalent
+        root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
+        old_root_dir = root_dirs[index];
+        for curRootDir in root_dirs:
+            if not curRootDir == self.location:
+                root_dirs_new.append(curRootDir)
+            else: # 
+                newIndex = 0
+
+        for curIndex, curNewRootDir in enumerate(root_dirs_new):
+            if curNewRootDir is old_root_dir:
+                newIndex = curIndex
+                break
+
+        root_dirs_new = [urllib.quote(x) for x in root_dirs_new]
+        if len(root_dirs_new) > 0:
+            root_dirs_new.insert(0, newIndex)
+        root_dirs_new = "|".join(unicode(x) for x in root_dirs_new)
+
+        sickbeard.ROOT_DIRS = root_dirs_new
+        # what if the root dir was not found?
+        return _responds(RESULT_SUCCESS, _getRootDirs(), msg="Root directory deleted")
 
 
 class CMD_SickBeardForceSearch(ApiCall):
@@ -2205,8 +2213,8 @@ _functionMaper = {"help": CMD_Help,
                   "logs": CMD_Logs,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
-                  "sb.deleterootdir":CMD_SickBeardDeleteRootDir,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
+                  "sb.deleterootdir":CMD_SickBeardDeleteRootDir,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
                   "sb.getdefaults": CMD_SickBeardGetDefaults,
                   "sb.getmessages": CMD_SickBeardGetMessages,
