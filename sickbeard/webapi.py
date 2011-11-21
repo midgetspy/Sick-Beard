@@ -1181,7 +1181,7 @@ class CMD_SickBeardAddRootDir(ApiCall):
             else:
                 root_dirs.append(self.location)
 
-        root_dirs_new = [urllib.quote(x) for x in root_dirs]
+        root_dirs_new = [urllib.unquote_plus(x) for x in root_dirs]
         root_dirs_new.insert(0, index)
         root_dirs_new = '|'.join(unicode(x) for x in root_dirs_new)
 
@@ -1249,7 +1249,7 @@ class CMD_SickBeardDeleteRootDir(ApiCall):
                 newIndex = curIndex
                 break
 
-        root_dirs_new = [urllib.quote(x) for x in root_dirs_new]
+        root_dirs_new = [urllib.unquote_plus(x) for x in root_dirs_new]
         if len(root_dirs_new) > 0:
             root_dirs_new.insert(0, newIndex)
         root_dirs_new = "|".join(unicode(x) for x in root_dirs_new)
