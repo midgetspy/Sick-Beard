@@ -9,7 +9,7 @@
 *   http://en.wikipedia.org/wiki/MIT_License
 *   http://en.wikipedia.org/wiki/GNU_General_Public_License
 *
-* Date: Sun Jun 26 06:08:03 PDT 2011
+* Date: Thu Nov 17 12:01:03.0000000000 2011
 */
 
 /* Core qTip styles */
@@ -142,9 +142,6 @@
 .ui-tooltip .ui-tooltip-tip{
 	margin: 0 auto;
 	overflow: hidden;
-
-	background: transparent !important;
-	border: 0px dashed transparent !important;
 	z-index: 10;
 }
 
@@ -162,29 +159,6 @@
 	
 	.ui-tooltip .ui-tooltip-tip canvas{ top: 0; left: 0; }
 
-
-/* Modal plugin */
-#qtip-overlay{
-	position: fixed;
-	left: -10000em;
-	top: -10000em;
-}
-
-	/* Applied to modals with show.modal.blur set to true */
-	#qtip-overlay.blurs{ cursor: pointer; }
-
-	/* Change opacity of overlay here */
-	#qtip-overlay div{
-		position: absolute;
-		left: 0; top: 0;
-		width: 100%; height: 100%;
-
-		background-color: black;
-
-		opacity: 0.7;
-		filter:alpha(opacity=70);
-		-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
-	}
 
 /*! Light tooltip style */
 .ui-tooltip-light .ui-tooltip-titlebar,
