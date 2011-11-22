@@ -58,8 +58,8 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 .ui-widget-overlay { background: #aaaaaa url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat; opacity: .35;filter:Alpha(Opacity=35); }
 .ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -khtml-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
 
-#if not $sickbeard.NEWEST_VERSION_STRING:
-.ui-pnotify { top: 10px !important; }
+#if $sickbeard.NEWEST_VERSION_STRING:
+.ui-pnotify { top: 30px !important; }
 #end if
 //--> 
 </style>
