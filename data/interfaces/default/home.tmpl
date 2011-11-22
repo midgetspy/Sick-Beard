@@ -197,7 +197,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end if
 
   <tr>
-    <td align="center">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
+    <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td>$curShow.network</td>
 #if $curShow.quality in $qualityPresets:
