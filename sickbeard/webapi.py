@@ -659,7 +659,8 @@ class CMD_Help(ApiCall):
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc": "display the coming episodes",
              "optionalPramameters": {"sort": {"desc": "change the sort order"},
-                                     "type": {"desc": "one or more of allowedValues separated by |"}
+                                     "type": {"desc": "one or more of allowedValues separated by |"},
+                                     "show_plot": {"desc": "return the episode plot details"}
                                      }
              }
 
@@ -668,6 +669,7 @@ class CMD_ComingEpisodes(ApiCall):
         # optional
         self.sort, args = self.check_params(args, kwargs, "sort", "date", False, "string", ["date", "show", "network"])
         self.type, args = self.check_params(args, kwargs, "type", "today|missed|soon|later", False, "list", ["missed", "later", "today", "soon"])
+        self.show_plot, args = self.check_params(args, kwargs, "show_plot", 0, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -681,14 +683,14 @@ class CMD_ComingEpisodes(ApiCall):
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
 
         myDB = db.DBConnection(row_type="dict")
-        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
+        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["tvdbid"]))
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
         # sort by air date
@@ -697,8 +699,6 @@ class CMD_ComingEpisodes(ApiCall):
             'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
             'network': (lambda a, b: cmp(a["network"], b["network"])),
         }
-
-        #epList.sort(sorts[sort])
 
         sql_results.sort(sorts[self.sort])
         finalEpResults = {}
@@ -738,6 +738,9 @@ class CMD_ComingEpisodes(ApiCall):
             ep["airs"] = str(ep["airs"]).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
             # start day of the week on 1 (monday)
             ep["weekday"] = 1 + datetime.date.fromordinal(ordinalAirdate).weekday()
+            # remove the plot unless requested to be kept
+            if self.show_plot != 1:
+                del ep["ep_plot"]
 
             # TODO: check if this obsolete
             if not status in finalEpResults:
