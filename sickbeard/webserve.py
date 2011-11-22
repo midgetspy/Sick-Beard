@@ -633,7 +633,7 @@ class ConfigGeneral:
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
                     web_password=None, version_notify=None,
-                    web_default_page=None):
+                    web_default_page=None, github_user=None):
 
         results = []
 
@@ -668,6 +668,8 @@ class ConfigGeneral:
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
         sickbeard.WEB_DEFAULT_PAGE = web_default_page
+
+        sickbeard.GITHUB_USER = github_user
 
         config.change_VERSION_NOTIFY(version_notify)
 

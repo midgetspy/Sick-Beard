@@ -132,6 +132,21 @@
                             </label>
                         </div>
 
+#if sickbeard.versionCheckScheduler.action.install_type == 'source':
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">GitHub fork</span>
+                                <input type="text" name="github_user" value="$sickbeard.GITHUB_USER" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Which user's fork of Sick-Beard to use for updates (midgetspy is the default one)</span>
+                            </label>
+                        </div>
+#else:
+                        <input type="hidden" name="github_user" value="$sickbeard.GITHUB_USER" />
+#end if
+
                         <input type="submit" class="config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group3 //-->
