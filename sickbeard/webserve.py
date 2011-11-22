@@ -632,7 +632,8 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None,
-                    web_password=None, version_notify=None):
+                    web_password=None, version_notify=None,
+                    web_default_page=None):
 
         results = []
 
@@ -666,6 +667,7 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+        sickbeard.WEB_DEFAULT_PAGE = web_default_page
 
         config.change_VERSION_NOTIFY(version_notify)
 
@@ -2412,7 +2414,7 @@ class WebInterface:
     @cherrypy.expose
     def index(self):
 
-        redirect("/home")
+        redirect(sickbeard.WEB_DEFAULT_PAGE)
 
     @cherrypy.expose
     def showPoster(self, show=None, which=None):
