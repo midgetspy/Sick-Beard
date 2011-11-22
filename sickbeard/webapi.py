@@ -659,8 +659,7 @@ class CMD_Help(ApiCall):
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc": "display the coming episodes",
              "optionalPramameters": {"sort": {"desc": "change the sort order"},
-                                     "type": {"desc": "one or more of allowedValues separated by |"},
-                                     "show_plot": {"desc": "return the episode plot details"}
+                                     "type": {"desc": "one or more of allowedValues separated by |"}
                                      }
              }
 
@@ -669,7 +668,6 @@ class CMD_ComingEpisodes(ApiCall):
         # optional
         self.sort, args = self.check_params(args, kwargs, "sort", "date", False, "string", ["date", "show", "network"])
         self.type, args = self.check_params(args, kwargs, "type", "today|missed|soon|later", False, "list", ["missed", "later", "today", "soon"])
-        self.show_plot, args = self.check_params(args, kwargs, "show_plot", 0, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -738,9 +736,6 @@ class CMD_ComingEpisodes(ApiCall):
             ep["airs"] = str(ep["airs"]).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
             # start day of the week on 1 (monday)
             ep["weekday"] = 1 + datetime.date.fromordinal(ordinalAirdate).weekday()
-            # remove the plot unless requested to be kept
-            if self.show_plot != 1:
-                del ep["ep_plot"]
 
             # TODO: check if this obsolete
             if not status in finalEpResults:
