@@ -143,18 +143,19 @@
 
     <!-- start $cur_result["show_name"] //-->
       <tr class="$show_div">
-#if $cur_result["description"] != "" and $cur_result["description"] != None:
-        <td class="nowrap" align="center"><span class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>">$datetime.date.fromordinal(int($cur_result["airdate"]))</span></td>
-#else:
         <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
-#end if
         <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if
         </td>
         <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
-        <td>$cur_result["name"]</td>
+        <td>
+        #if $cur_result["description"] != "" and $cur_result["description"] != None:
+            <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
+        #end if
+            $cur_result["name"]
+        </td>
         <td align="center">$cur_result["network"]</td>
         <td align="center">
 #if int($cur_result["quality"]) in $qualityPresets:

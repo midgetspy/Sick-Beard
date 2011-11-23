@@ -150,6 +150,9 @@ clear:left;
 .plotInfo {
 cursor:help;
 font-weight: 700;
+float: right;
+position: relative;
+margin-left: 8px;
 }
 
 #tooltip {
