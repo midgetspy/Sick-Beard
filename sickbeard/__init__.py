@@ -512,7 +512,7 @@ def initialize(consoleLogging=True):
         if not EZRSS:
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
 
-	    BTJUNKIE = bool(check_setting_int(CFG, 'BTJUNKIE', 'btjunkie', 0))    
+        BTJUNKIE = bool(check_setting_int(CFG, 'BTJUNKIE', 'btjunkie', 0))    
         BTJUNKIE_MINIMUM_SEEDS = check_setting_int(CFG, 'BTJUNKIE', 'btjunkie_minimum_seeds', 100)
 
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    

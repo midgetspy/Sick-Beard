@@ -1122,8 +1122,8 @@ class ConfigProviders:
                 sickbeard.WOMBLE = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
-	    elif curProvider == 'btjunkie':
-		sickbeard.BTJUNKIE = curEnabled
+            elif curProvider == 'btjunkie':
+                sickbeard.BTJUNKIE = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider in newznabProviderDict:

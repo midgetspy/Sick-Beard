@@ -31,14 +31,14 @@ from sickbeard.helpers import sanitizeSceneName
 from sickbeard.exceptions import ex
 
 class BTJunkieUtils:
-	regex_seeds = '\[([0-9]+)/[0-9]+\]'
+    regex_seeds = '\[([0-9]+)/[0-9]+\]'
 
-	@staticmethod
-	def getTorrentTitleAndUrl(item):
-	    	title = re.sub(BTJunkieUtils.regex_seeds, '', item.findtext('title')) # Remove seeds portion of title (seems to confuse Quality.nameQuality method)
-	    	url = item.findtext('link').replace('&amp;','&') + '/download.torrent'
+    @staticmethod
+    def getTorrentTitleAndUrl(item):
+        title = re.sub(BTJunkieUtils.regex_seeds, '', item.findtext('title')) # Remove seeds portion of title (seems to confuse Quality.nameQuality method)
+        url = item.findtext('link').replace('&amp;','&') + '/download.torrent'
 
-		return (title, url)
+        return (title, url)
 
 class BTJunkieProvider(generic.TorrentProvider):
     def __init__(self):
@@ -54,7 +54,7 @@ class BTJunkieProvider(generic.TorrentProvider):
         return 'btjunkie.gif'
 
     def getQuality(self, item):
-	(title, url) = BTJunkieUtils.getTorrentTitleAndUrl(item)
+        (title, url) = BTJunkieUtils.getTorrentTitleAndUrl(item)
 
         quality = Quality.nameQuality(title)
 
@@ -90,21 +90,21 @@ class BTJunkieProvider(generic.TorrentProvider):
         return [params]
 
     def findSeasonResults(self, show, season):
-	result = {}
-	
-	if show.air_by_date:
-    	    logger.log(u"BTJunkie doesn't support air-by-date backlog searches", logger.ERROR)
-	    return results
+        result = {}
+        
+        if show.air_by_date:
+            logger.log(u"BTJunkie doesn't support air-by-date backlog searches", logger.ERROR)
+            return results
 
-	results = generic.TorrentProvider.findSeasonResults(self, show, season)
+        results = generic.TorrentProvider.findSeasonResults(self, show, season)
 
-	return results
+        return results
 
     def _getXmlItems(self, url):
         logger.log(u"Searching BTJunkie with URL: " + url, logger.DEBUG)
 
-	data = self.getURL(url)
-	
+        data = self.getURL(url)
+    
         if not data:
             return []
         
@@ -116,38 +116,39 @@ class BTJunkieProvider(generic.TorrentProvider):
             logger.log(u"RSS data: "+data, logger.DEBUG)
             return []
 
-	return items
+        return items
 
     def _doSearch(self, search_params, show=None):
-	showName = ''
-	season = ''
-	episode = ''
+        showName = ''
+        season = ''
+        episode = ''
 
-	if 'show_name' in search_params:
-	    showName = search_params['show_name']
+        if 'show_name' in search_params:
+            showName = search_params['show_name']
 
-	if 'season' in search_params:
-	    season = 'S' + '%(season)02d' % search_params
-	    if season is 'S00':
-		logger.log(u"BTJunkie does not usually have specials listed in the correct format (i.e. S00E01)", logger.WARNING)
+        if 'season' in search_params:
+            season = 'S' + '%(season)02d' % search_params
 
-	if 'episode' in search_params:
-	    epsiode = 'E' + '%(episode)02d' % search_params
+            if season is 'S00':
+                logger.log(u"BTJunkie does not usually have specials listed in the correct format (i.e. S00E01)", logger.WARNING)
 
-	params = {}
-	params['q'] = showName + ' ' + season + ' ' + episode # Search string
-	params['o'] = '52' # Sort by number of seeders
+        if 'episode' in search_params:
+            epsiode = 'E' + '%(episode)02d' % search_params
+
+        params = {}
+        params['q'] = showName + ' ' + season + ' ' + episode # Search string
+        params['o'] = '52' # Sort by number of seeders
 
         searchURL = self.url + 'rss.xml?'
 
-	# Execute search
+        # Execute search
         items = self._getXmlItems(searchURL + urllib.urlencode(params))
-	if items:
-		results = self._parseXmlItems(items)
-	else:
-		results = []
+        if items:
+            results = self._parseXmlItems(items)
+        else:
+            results = []
 
-	return results 
+        return results 
 
     def _parseXmlItems(self, items):
         results = []
@@ -165,7 +166,7 @@ class BTJunkieProvider(generic.TorrentProvider):
                 if match:
                     seeds = match.group(1)
                     logger.log(rawTitle + " had " + seeds + " seeds", logger.DEBUG)
-                    if int(seeds) >= sickbeard.BTJUNKIE_MINIMUM_SEEDS:	# Minimum number of seeds
+                    if int(seeds) >= sickbeard.BTJUNKIE_MINIMUM_SEEDS: # Minimum number of seeds
                         results.append(curItem)
             except Exception, e:
                 logger.log("Exception parsing XML item: " + ex(e), logger.ERROR)
@@ -173,20 +174,20 @@ class BTJunkieProvider(generic.TorrentProvider):
         return results
 
     def _get_title_and_url(self, item):
-    	return BTJunkieUtils.getTorrentTitleAndUrl(item)
+        return BTJunkieUtils.getTorrentTitleAndUrl(item)
 
 class BTJunkieCache(tvcache.TVCache):
 
     def __init__(self, provider):
         tvcache.TVCache.__init__(self, provider)
 
-	# Update BTJunkie latest releases as often as every 15 minutes
+        # Update BTJunkie latest releases as often as every 15 minutes
         self.minTime = 15
 
     def _getRSSData(self):
         url = self.provider.url + 'rss.xml?c=4' # TV list
 
-    	data = self.provider.getURL(url)
+        data = self.provider.getURL(url)
 
         logger.log(u"BTJunkie cache update URL for latest TV shows: " + url, logger.DEBUG)
 

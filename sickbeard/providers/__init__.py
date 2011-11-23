@@ -17,7 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = ['ezrss',
-	   'btjunkie',
+           'btjunkie',
            'tvtorrents',
            'nzbmatrix',
            'nzbs_org',
