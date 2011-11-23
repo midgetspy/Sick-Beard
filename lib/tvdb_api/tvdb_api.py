@@ -537,11 +537,11 @@ class Tvdb:
         """
         src = self._loadUrl(url)
         try:
-            return ElementTree.fromstring(src)
+            return ElementTree.fromstring(src.rstrip('\r'))
         except SyntaxError:
             src = self._loadUrl(url, recache=True)
             try:
-                return ElementTree.fromstring(src)
+                return ElementTree.fromstring(src.rstrip('\r'))
             except SyntaxError, exceptionmsg:
                 errormsg = "There was an error with the XML retrieved from thetvdb.com:\n%s" % (
                     exceptionmsg
