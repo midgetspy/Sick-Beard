@@ -41,25 +41,25 @@ class KATProvider(rssbacklogtorrent.RSSBacklogProvider):
         return 'kat.gif'
        
     def _get_search_url(self, show_snippet):
-		return self.url + 'search/' + urllib.quote(show_snippet.strip()) + '/?rss=1'
+        return self.url + 'search/' + urllib.quote(show_snippet.strip()) + '/?rss=1'
        
     def _get_torrent_title_and_url(self, item):
-		title = item.findtext('title')
-	   	url = item.findtext('torrentLink')
+        title = item.findtext('title')
+        url = item.findtext('torrentLink')
 
-		return (title, url)
+        return (title, url)
 
     def _is_valid_item(self, item):
         
-		rawTitle = item.findtext('title')
+        rawTitle = item.findtext('title')
 
-		if not rawTitle:
-		    logger.log(u"The XML returned from the KAT RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
-		    return false
+        if not rawTitle:
+            logger.log(u"The XML returned from the KAT RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
+            return false
 
-	 	seeds = item.findtext('seeds')
-		logger.log(rawTitle + " had " + seeds + " seeds", logger.DEBUG)
-		return int(seeds) >= sickbeard.KAT_MINIMUM_SEEDS # Minimum number of seeds
+        seeds = item.findtext('seeds')
+        logger.log(rawTitle + " had " + seeds + " seeds", logger.DEBUG)
+        return int(seeds) >= sickbeard.KAT_MINIMUM_SEEDS # Minimum number of seeds
 
 class KATRSSCache(rssbacklogtorrent.RSSCache):
     def __init__(self, provider):
