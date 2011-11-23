@@ -30,7 +30,7 @@ import subprocess
 import subtitles
 import utils
 from languages import *
-import kaa.metadata
+import kaa_metadata
 
 
 EXTENSIONS = ['.mkv', '.avi', '.mpg'] #TODO: Complete..
@@ -150,8 +150,8 @@ class Video(object):
             return []
         basepath = os.path.splitext(self.path)[0]
         results = []
-        kaa_infos = kaa.metadata.parse(self.path)
-        if isinstance(kaa_infos, kaa.metadata.video.core.AVContainer):
+        kaa_infos = kaa_metadata.parse(self.path)
+        if isinstance(kaa_infos, kaa_metadata.video.core.AVContainer):
             results.extend([subtitles.EmbeddedSubtitle.fromKaa(self.path, s) for s in kaa_infos.subtitles])
         for l in list_languages(1):
             for e in subtitles.EXTENSIONS:
