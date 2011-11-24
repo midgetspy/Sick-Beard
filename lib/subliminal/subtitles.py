@@ -65,7 +65,7 @@ class EmbeddedSubtitle(Subtitle):
 
     @classmethod
     def fromKaa(cls, path, subtitle):
-        language = convert_language(subtitle.langcode, 1, 2)
+        language = convert_language(subtitle.language, 1, 2)
         return cls(path, language, subtitle.trackno)
 
 
