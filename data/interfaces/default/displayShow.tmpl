@@ -193,12 +193,12 @@ Change selected episodes to
 #end if
     <td align="center">$epResult["episode"]</td>
     <td>
-        $epResult["name"]
-        #if $epResult["description"] != "" and $epResult["description"] != None:
-        <img src="$sbRoot/images/info32.png" height="16" class="plotInfo" alt="" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
-        #end if
+    $epResult["name"]
+    #if $epResult["description"] != "" and $epResult["description"] != None:
+    <img src="$sbRoot/images/info32.png" height="16" class="plotInfo" alt="" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
+    #end if
     </td>
-    <td align="center">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 $epLoc[len($show._location)+1:]
