@@ -259,7 +259,7 @@ class QueueItemAdd(ShowQueueItem):
 
             # set up initial values
             self.show.location = self.showDir
-            self.show.subtitles = self.subtitles
+            self.show.subtitles = self.subtitles if self.subtitles != None else sickbeard.SUBTITLES_DEFAULT
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.seasonfolders = self.season_folders if self.season_folders != None else sickbeard.SEASON_FOLDERS_DEFAULT
             self.show.paused = False

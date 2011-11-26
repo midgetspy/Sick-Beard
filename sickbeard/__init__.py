@@ -114,6 +114,7 @@ QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
 SEASON_FOLDERS_FORMAT = None
 SEASON_FOLDERS_DEFAULT = None
+SUBTITLES_DEFAULT = None
 PROVIDER_ORDER = []
 
 NAMING_SHOW_NAME = None
@@ -326,6 +327,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
     try:
         my_val = config[cfg_name][item_name]
     except:
+
         my_val = def_val
         try:
             config[cfg_name][item_name] = my_val
@@ -360,7 +362,7 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
+                QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
@@ -595,6 +597,7 @@ def initialize(consoleLogging=True):
         SUBTITLES_MKVMERGE_DELETE = bool(check_setting_int(CFG, 'Subtitles', 'subtitles_mkvmerge_delete', 0))
         SUBTITLES_PLUGINS_LIST = check_setting_str(CFG, 'Subtitles', 'subtitles_plugins_list', '').split(',')
         SUBTITLES_PLUGINS_ENABLED = [int(x) for x in check_setting_str(CFG, 'Subtitles', 'subtitles_plugins_enabled', '').split('|') if x]
+        SUBTITLES_DEFAULT = bool(check_setting_int(CFG, 'Subtitles', 'subtitles_default', 0))
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -1127,6 +1130,7 @@ def save_config():
     new_config['Subtitles']['subtitles_mkvmerge'] = int(SUBTITLES_MKVMERGE)
     new_config['Subtitles']['subtitles_mkvmerge_path'] = SUBTITLES_MKVMERGE_PATH
     new_config['Subtitles']['subtitles_mkvmerge_delete'] = int(SUBTITLES_MKVMERGE_DELETE)
+    new_config['Subtitles']['subtitles_default'] = int(SUBTITLES_DEFAULT)
 
     new_config.write()
 

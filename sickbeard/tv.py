@@ -72,7 +72,7 @@ class TVShow(object):
         self.startyear = 0
         self.paused = 0
         self.air_by_date = 0
-        self.subtitles = 0
+        self.subtitles = int(sickbeard.SUBTITLES_DEFAULT)
         self.lang = lang
 
         self.lock = threading.Lock()

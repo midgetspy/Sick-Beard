@@ -638,7 +638,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities, subtitles):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -660,7 +660,13 @@ class ConfigGeneral:
         else:
             defaultSeasonFolders = 0
 
+        if subtitles == "true":
+            subtitles = 1
+        else:
+            subtitles = 0
+
         sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+        sickbeard.SUBTITLES_DEFAULT = int(subtitles)
 
     
     @cherrypy.expose
@@ -1796,7 +1802,7 @@ class NewHomeAddShows:
             show_dir, tvdb_id, show_name = cur_show
 
             # add the show
-            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT) #@UndefinedVariable
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT, sickbeard.SUBTITLES_DEFAULT) #@UndefinedVariable
             num_added += 1
          
         if num_added:
