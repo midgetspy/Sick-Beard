@@ -23,6 +23,7 @@ import datetime
 import threading
 import re
 import glob
+import traceback
 
 import sickbeard
 
@@ -223,6 +224,7 @@ class TVShow(object):
                     curEpisode.refreshSubtitles()
                 except:
                     logger.log(str(self.tvdbid) + ": Could not refresh subtitles", logger.ERROR)
+                    logger.log(traceback.format_exc(), logger.DEBUG)
                 curEpisode.saveToDB()
 
 
