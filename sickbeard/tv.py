@@ -72,7 +72,7 @@ class TVShow(object):
         self.startyear = 0
         self.paused = 0
         self.air_by_date = 0
-        self.subtitles = 0
+        self.subtitles = int(sickbeard.SUBTITLES_DEFAULT)
         self.lang = lang
 
         self.lock = threading.Lock()
@@ -219,6 +219,10 @@ class TVShow(object):
 
             # store the reference in the show
             if curEpisode != None:
+                try:
+                	curEpisode.refreshSubtitles()
+                except:
+                    logger.log(str(self.tvdbid) + ": Could not refresh subtitles", logger.ERROR)
                 curEpisode.saveToDB()
 
 
@@ -742,10 +746,6 @@ class TVShow(object):
                     curEp.hastbn = False
                     curEp.saveToDB()
                 continue
-
-            # refresh subtitles files
-            curEp.refreshSubtitles()
-            curEp.saveToDB()
 
     def downloadSubtitles(self):
         #TODO: Add support for force option

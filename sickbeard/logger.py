@@ -64,6 +64,7 @@ class SBRotatingLogHandler(object):
         self.cur_handler = self._config_handler()
     
         logging.getLogger('sickbeard').addHandler(self.cur_handler)
+        logging.getLogger('subliminal').addHandler(self.cur_handler)
     
         # define a Handler which writes INFO messages or higher to the sys.stderr
         if consoleLogging:
@@ -76,8 +77,10 @@ class SBRotatingLogHandler(object):
     
             # add the handler to the root logger
             logging.getLogger('sickbeard').addHandler(console)
+            logging.getLogger('subliminal').addHandler(console)
     
         logging.getLogger('sickbeard').setLevel(logging.DEBUG)
+        logging.getLogger('subliminal').setLevel(logging.DEBUG)
 
     def _config_handler(self):
         """
@@ -112,12 +115,14 @@ class SBRotatingLogHandler(object):
     def _rotate_logs(self):
         
         sb_logger = logging.getLogger('sickbeard')
+        subli_logger = logging.getLogger('subliminal')
         
         # delete the old handler
         if self.cur_handler:
             self.cur_handler.flush()
             self.cur_handler.close()
             sb_logger.removeHandler(self.cur_handler)
+            subli_logger.removeHandler(self.cur_handler)
     
         # rename or delete all the old log files
         for i in range(self._num_logs(), -1, -1):
@@ -136,6 +141,7 @@ class SBRotatingLogHandler(object):
         self.cur_handler = new_file_handler
         
         sb_logger.addHandler(new_file_handler)
+        subli_logger.addHandler(new_file_handler)
 
     def log(self, toLog, logLevel=MESSAGE):
     

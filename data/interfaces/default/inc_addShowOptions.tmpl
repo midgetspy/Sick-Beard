@@ -24,7 +24,7 @@
 
         #if $subtitles.SUBLIMINAL_SUPPORT and $sickbeard.USE_SUBTITLES:
         <div class="field-pair">
-            <input type="checkbox" name="subtitles" id="subtitles" />
+            <input type="checkbox" name="subtitles" id="subtitles" #if $sickbeard.SUBTITLES_DEFAULT then "checked=\"checked\"" else ""# />
             <label for="subtitles" class="clearfix">
                 <span class="component-title">Subtitles</span>
                 <span class="component-desc">Download subtitles for this show?</span>
