@@ -219,6 +219,10 @@ class TVShow(object):
 
             # store the reference in the show
             if curEpisode != None:
+                try:
+                	curEpisode.refreshSubtitles()
+                except:
+                    logger.log(str(self.tvdbid) + ": Could not refresh subtitles", logger.ERROR)
                 curEpisode.saveToDB()
 
 
@@ -742,10 +746,6 @@ class TVShow(object):
                     curEp.hastbn = False
                     curEp.saveToDB()
                 continue
-
-            # refresh subtitles files
-            curEp.refreshSubtitles()
-            curEp.saveToDB()
 
     def downloadSubtitles(self):
         #TODO: Add support for force option
