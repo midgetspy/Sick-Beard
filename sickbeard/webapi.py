@@ -1512,6 +1512,10 @@ class CMD_Show(ApiCall):
         showDict["airs"] = str(showObj.airs).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
         showDict["tvrage_id"] = showObj.tvrid
         showDict["tvrage_name"] = showObj.tvrname
+        showDict["network"] = showObj.network
+        if not showDict["network"]:
+            showDict["network"] = ""
+        showDict["status"] = showObj.status
 
         return _responds(RESULT_SUCCESS, showDict)
 
@@ -2159,8 +2163,12 @@ class CMD_Shows(ApiCall):
                         "language": curShow.lang,
                         "air_by_date": curShow.air_by_date,
                         "tvrage_id": curShow.tvrid,
-                        "tvrage_name": curShow.tvrname}
+                        "tvrage_name": curShow.tvrname,
+                        "network": curShow.network,
+                        "status": curShow.status}
             showDict["cache"] = CMD_ShowCache((), {"tvdbid": curShow.tvdbid}).run()["data"]
+            if not showDict["network"]:
+                showDict["network"] = ""
             if self.sort == "name":
                 showDict["tvdbid"] = curShow.tvdbid
                 shows[curShow.name] = showDict
