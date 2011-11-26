@@ -31,7 +31,7 @@ try:
 except ImportError:
     SUBLIMINAL_SUPPORT = False
 
-SINGLE = 'srt'
+SINGLE = 'und'
 def sortedPluginList():
     pluginsMapping = dict([(x.lower(), x) for x in subliminal.PLUGINS])
 
