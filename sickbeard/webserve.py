@@ -31,7 +31,7 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config
+from sickbeard import config, sab
 from sickbeard import history, notifiers, processTV
 from sickbeard import tv, ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -1808,6 +1808,18 @@ class Home:
     addShows = NewHomeAddShows()
 
     postprocess = HomePostProcess()
+
+    @cherrypy.expose
+    def testSABnzbd(self, host=None, username=None, password=None, apikey=None):
+        connection, accesMsg = sab.getSabAccesMethod(host, username, password, apikey)
+        if connection:
+            authed, authMsg = sab.testAuthentication(host, username, password, apikey)
+            if authed:
+                return "Success. Connected and authenticated"
+            else:
+                return "Authentication failed. SABnzbd expects '"+accesMsg+"' as authentication method"
+        else:
+            return "Unable to connect to host"
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
