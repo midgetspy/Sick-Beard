@@ -8,7 +8,14 @@
 			subtitles_search_link.append($("<img/>").attr({"src": sbRoot+"/images/loading16_dddddd.gif", "alt": "", "title": "loading"}));
 			$.getJSON($(this).attr('href'), function(data){
 				// update the subtitles column with new informations
-				subtitles_td.html(data.subtitles);
+				var subtitles = data.subtitles.split(',');
+				subtitles_td.html("&nbsp;");
+				$.each(subtitles,function(index, language){
+					if (language != "") {
+						subtitles_td.append($("<img/>").attr({"src": sbRoot+"/images/flags/"+language+".png", "alt": language, "width": 16, "height": 11}));
+						subtitles_td.append("&nbsp;");
+					}
+				});
 				// don't allow other searches
 				subtitles_search_link.remove();
 			});

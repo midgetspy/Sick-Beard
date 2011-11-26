@@ -167,13 +167,13 @@ $epLoc
 #end if
 
     </td>
-#if $sickbeard.USE_SUBTITLES and $show.subtitles
-    <td class="subtitles_column" align="center">
-#for $sub_lang in $epResult["subtitles"].split(','):
-    #if $sub_lang
-        <img src="$sbRoot/images/flags/${sub_lang}.png" width="16" height="11" alt="${sub_lang}" />
-    #end if
-#end for
+#if $sickbeard.USE_SUBTITLES and $show.subtitles:
+    <td class="subtitles_column" align="center">&nbsp;
+    #for $sub_lang in $epResult["subtitles"].split(','):
+        #if $sub_lang:
+            <img src="$sbRoot/images/flags/${sub_lang}.png" width="16" height="11" alt="${sub_lang}" />&nbsp;
+        #end if
+    #end for
     </td>
 #end if
     <td class="status_column">$statusStrings[int($epResult["status"])]</td>
