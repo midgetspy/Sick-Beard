@@ -220,11 +220,12 @@ class TVShow(object):
 
             # store the reference in the show
             if curEpisode != None:
-                try:
-                    curEpisode.refreshSubtitles()
-                except:
-                    logger.log(str(self.tvdbid) + ": Could not refresh subtitles", logger.ERROR)
-                    logger.log(traceback.format_exc(), logger.DEBUG)
+                if self.subtitles:
+                    try:
+                        curEpisode.refreshSubtitles()
+                    except:
+                        logger.log(str(self.tvdbid) + ": Could not refresh subtitles", logger.ERROR)
+                        logger.log(traceback.format_exc(), logger.DEBUG)
                 curEpisode.saveToDB()
 
 
