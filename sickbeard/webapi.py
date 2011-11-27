@@ -1521,7 +1521,7 @@ class CMD_Show(ApiCall):
         nextEps = showObj.nextEpisode()
         if (len(nextEps) != 0):
             nextAirdate = _ordinal_to_dateForm(nextEps[0].airdate.toordinal())
-        showDict["next_episode_airdate"] = nextAirdate
+        showDict["next_ep_airdate"] = nextAirdate
 
         return _responds(RESULT_SUCCESS, showDict)
 
@@ -2180,7 +2180,7 @@ class CMD_Shows(ApiCall):
                         "tvrage_name": curShow.tvrname,
                         "network": curShow.network,
                         "status": curShow.status,
-                        "next_episode_airdate": nextAirdate}
+                        "next_ep_airdate": nextAirdate}
             showDict["cache"] = CMD_ShowCache((), {"tvdbid": curShow.tvdbid}).run()["data"]
             if not showDict["network"]:
                 showDict["network"] = ""
