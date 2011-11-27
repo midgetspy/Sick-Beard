@@ -1516,6 +1516,12 @@ class CMD_Show(ApiCall):
         if not showDict["network"]:
             showDict["network"] = ""
         showDict["status"] = showObj.status
+        
+        nextAirdate = ''
+        nextEps = showObj.nextEpisode()
+        if (len(nextEps) != 0):
+            nextAirdate = _ordinal_to_dateForm(nextEps[0].airdate.toordinal())
+        showDict["next_episode_airdate"] = nextAirdate
 
         return _responds(RESULT_SUCCESS, showDict)
 
@@ -2159,6 +2165,11 @@ class CMD_Shows(ApiCall):
         """ display_is_int_multi( self.tvdbid )shows in sickbeard """
         shows = {}
         for curShow in sickbeard.showList:
+            nextAirdate = ''
+            nextEps = curShow.nextEpisode()
+            if (len(nextEps) != 0):
+                nextAirdate = _ordinal_to_dateForm(nextEps[0].airdate.toordinal())
+                           
             if not bool(self.paused) == bool(curShow.paused):
                 continue
             showDict = {"paused": curShow.paused,
@@ -2168,7 +2179,8 @@ class CMD_Shows(ApiCall):
                         "tvrage_id": curShow.tvrid,
                         "tvrage_name": curShow.tvrname,
                         "network": curShow.network,
-                        "status": curShow.status}
+                        "status": curShow.status,
+                        "next_episode_airdate": nextAirdate}
             showDict["cache"] = CMD_ShowCache((), {"tvdbid": curShow.tvdbid}).run()["data"]
             if not showDict["network"]:
                 showDict["network"] = ""
