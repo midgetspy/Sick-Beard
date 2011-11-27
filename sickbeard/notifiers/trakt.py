@@ -29,6 +29,7 @@ from lib import simplejson as json
 
 import sickbeard
 
+from sickbeard import db
 from sickbeard import logger
 from sickbeard import common
 from sickbeard.exceptions import ex
@@ -43,9 +44,27 @@ class TraktNotifier:
 
     def notify_download(self, ep_name):
         if sickbeard.TRAKT_NOTIFY_ONDOWNLOAD:
+            
+            logger.log("Episode name: " + ep_name, logger.DEBUG)
+            myDB = db.DBConnection()
+            episodes = myDB.select("SELECT showid, season, episode FROM tv_episodes WHERE name = :ep_name ORDER BY airdate DESC LIMIT 1", {"ep_name": ep_name})
+            for episode in episodes:
+                shows = myDB.select("SELECT tvdb_id, show_name, startyear FROM tv_shows WHERE tvdb_id = ? LIMIT 1", [ episode["showid"]])
+                for show in shows:
+                    data = {
+                        'tvdb_id': show["tvdb_id"],
+                        'title': show["show_name"],
+                        'year': show["startyear"],
+                        'episodes': [ {
+                            'season': episode["season"],
+                            'episode': episode["episode"]
+                            } ]
+                        }
+            
             method = "show/episode/library/"
             method += "%API%"
-            self._notifyTrakt(method, None, ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
+            
+            self._notifyTrakt(method, None, None, None, data)
 
     def test_notify(self, api, username, password):
         method = "account/test/"
@@ -92,6 +111,7 @@ class TraktNotifier:
             resp = stream.read()
 
             resp = json.loads(resp)
+            
             if ("error" in resp):
                 raise Exception(resp["error"])
         except (IOError, json.JSONDecodeError):
