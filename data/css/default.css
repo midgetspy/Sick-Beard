@@ -272,6 +272,10 @@ padding:2px;
 background-color:#000;
 color:#fff;
 }
+.sf-menu li:hover, .sf-menu li.sfHover,
+.sf-menu a:focus, .sf-menu a:hover, .sf-menu a:active {
+color: #f5f5f5 !important;
+}
 #donate {
 line-height:1em;
 background: #57442B;
