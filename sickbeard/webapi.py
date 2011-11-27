@@ -1582,7 +1582,8 @@ class CMD_ShowAddExisting(ApiCall):
 class CMD_ShowAddNew(ApiCall):
     _help = {"desc": "add a new show to sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
-                                    "location": {"desc": "base path for where the show folder is to be created"}
+                                    "location": {"desc": "base path for where the show folder is to be created"},
+                                    "show_name": {"desc": "the name of the show to be added"}
                                 },
              "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
@@ -1602,6 +1603,7 @@ class CMD_ShowAddNew(ApiCall):
         # required
         self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        self.show_name, args = self.check_params(args, kwargs, "show_name", None, True, "string", [])
         # optional
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
@@ -1661,11 +1663,12 @@ class CMD_ShowAddNew(ApiCall):
                 return _responds(RESULT_FAILURE, msg="Status prohibited")
             newStatus = self.status
 
-        newLang = self.valid_languages[self.lang]
+        #newLang = self.valid_languages[self.lang]
 
         # moved the logic check to the end in an attempt to eliminate empty directory being created from previous errors
         #TODO: sanitizeFileName needs some work done (ex: strip . from leading or trailing)
-        showPath = ek.ek(os.path.join, self.location, helpers.sanitizeFileName(showObj.name))
+       
+        showPath = ek.ek(os.path.join, self.location, self.show_name)
         dir_exists = helpers.makeDir(showPath)
         if not dir_exists:
             logger.log(u"Unable to create the folder " + showPath + ", can't add the show", logger.ERROR)
@@ -1673,7 +1676,7 @@ class CMD_ShowAddNew(ApiCall):
         else:
             helpers.chmodAsParent(showPath)
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), newLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), self.lang) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, msg="Show has been queued to be added")
 
 
