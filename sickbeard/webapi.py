@@ -1676,7 +1676,6 @@ class CMD_ShowAddNew(ApiCall):
         else:
             helpers.chmodAsParent(showPath)
 
-        import pdb; pdb.set_trace()
         sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), self.lang) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, msg="Show has been queued to be added")
 
