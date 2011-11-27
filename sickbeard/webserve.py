@@ -1920,6 +1920,16 @@ class Home:
         else:
             return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
 
+    @cherrypy.expose
+    def testTrakt(self, api=None, username=None, password=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.trakt_notifier.test_notify(api, username, password)
+        if result:
+            return "Test notice sent successfully to Trakt"
+        else:
+            return "Test notice failed to Trakt"
+
 
     @cherrypy.expose
     def shutdown(self):
