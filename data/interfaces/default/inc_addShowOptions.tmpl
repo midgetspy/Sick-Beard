@@ -1,5 +1,6 @@
 #import sickbeard
 #from sickbeard.common import *
+#from sickbeard import subtitles
         <div class="field-pair">
             <label for="statusSelect" class="nocheck clearfix">
                 <span class="component-title">
@@ -20,6 +21,16 @@
                 <span class="component-desc">Store episodes in season folders?</span>
             </label>
         </div>
+
+        #if $subtitles.SUBLIMINAL_SUPPORT and $sickbeard.USE_SUBTITLES:
+        <div class="field-pair">
+            <input type="checkbox" name="subtitles" id="subtitles" #if $sickbeard.SUBTITLES_DEFAULT then "checked=\"checked\"" else ""# />
+            <label for="subtitles" class="clearfix">
+                <span class="component-title">Subtitles</span>
+                <span class="component-desc">Download subtitles for this show?</span>
+            </label>
+        </div>
+        #end if
 
         #set $qualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
         #set global $anyQualities = $qualities[0]

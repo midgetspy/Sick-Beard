@@ -38,6 +38,7 @@ from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
+from sickbeard import subtitles
 
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
@@ -355,6 +356,9 @@ class Manage:
         paused_all_same = True
         last_paused = None
 
+        subtitles_all_same = True
+        last_subtitles = None
+
         quality_all_same = True
         last_quality = None
 
@@ -386,16 +390,23 @@ class Manage:
                 else:
                     last_quality = curShow.quality
 
+            if subtitles_all_same:
+                if last_subtitles not in (None, curShow.subtitles):
+                    subtitles_all_same = False
+                else:
+                    last_subtitles = curShow.subtitles
+
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
         t.season_folders_value = last_season_folders if season_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
+        t.subtitles_value = last_subtitles if subtitles_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False,
+    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False, subtitles=None,
                        anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
 
         dir_map = {}
@@ -433,11 +444,18 @@ class Manage:
             else:
                 new_season_folders = True if season_folders == 'enable' else False
             new_season_folders = 'on' if new_season_folders else 'off'
+            
+            if subtitles == 'keep':
+                new_subtitles = showObj.subtitles
+            else:
+                new_subtitles = True if subtitles == 'enable' else False
+
+            new_subtitles = 'on' if new_subtitles else 'off'
 
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, subtitles=new_subtitles, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
@@ -450,7 +468,7 @@ class Manage:
         redirect("/manage")
 
     @cherrypy.expose
-    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None):
+    def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None, toSubtitle=None):
 
         if toUpdate != None:
             toUpdate = toUpdate.split('|')
@@ -467,6 +485,11 @@ class Manage:
         else:
             toRename = []
 
+        if toSubtitle != None:
+            toSubtitle = toSubtitle.split('|')
+        else:
+            toSubtitle = []
+
         if toDelete != None:
             toDelete = toDelete.split('|')
         else:
@@ -481,8 +504,9 @@ class Manage:
         refreshes = []
         updates = []
         renames = []
+        subtitles = []
 
-        for curShowID in set(toUpdate+toRefresh+toRename+toDelete+toMetadata):
+        for curShowID in set(toUpdate+toRefresh+toRename+toSubtitle+toDelete+toMetadata):
 
             if curShowID == '':
                 continue
@@ -516,6 +540,10 @@ class Manage:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj) #@UndefinedVariable
                 renames.append(showObj.name)
 
+            if curShowID in toSubtitle:
+                sickbeard.showQueueScheduler.action.downloadSubtitles(showObj) #@UndefinedVariable
+                subtitles.append(showObj.name)
+
         if len(errors) > 0:
             ui.notifications.error("Errors encountered",
                         '<br >\n'.join(errors))
@@ -537,7 +565,12 @@ class Manage:
             messageDetail += "</li><li>".join(renames)
             messageDetail += "</li></ul>"
 
-        if len(updates+refreshes+renames) > 0:
+        if len(subtitles) > 0:
+            messageDetail += "<br /><b>Subtitles</b><br /><ul><li>"
+            messageDetail += "</li><li>".join(subtitles)
+            messageDetail += "</li></ul>"
+
+        if len(updates+refreshes+renames+subtitles) > 0:
             ui.notifications.message("The following actions were queued:",
                           messageDetail)
 
@@ -588,6 +621,7 @@ ConfigMenu = [
     { 'title': 'Search Providers',  'path': 'config/providers/'        },
     { 'title': 'Post Processing',   'path': 'config/postProcessing/'   },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
+    { 'title': 'Subtitles',         'path': 'config/subtitles/'        },
 ]
 
 class ConfigGeneral:
@@ -604,7 +638,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities, subtitles):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -626,7 +660,13 @@ class ConfigGeneral:
         else:
             defaultSeasonFolders = 0
 
+        if subtitles == "true":
+            subtitles = 1
+        else:
+            subtitles = 0
+
         sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+        sickbeard.SUBTITLES_DEFAULT = int(subtitles)
 
     
     @cherrypy.expose
@@ -1317,6 +1357,67 @@ class ConfigNotifications:
 
         redirect("/config/notifications/")
 
+class ConfigSubtitles:
+
+    @cherrypy.expose
+    def index(self):
+        t = PageTemplate(file="config_subtitles.tmpl")
+        t.submenu = ConfigMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_multi=None, subtitles_mkvmerge=None,
+                      subtitles_mkvmerge_path=None, subtitles_mkvmerge_delete=None):
+        results = []
+
+        if use_subtitles == "on":
+            use_subtitles = 1
+        else:
+            use_subtitles = 0
+
+        if subtitles_multi == "on":
+            subtitles_multi = 1
+        else:
+            subtitles_multi = 0
+
+        if subtitles_mkvmerge == "on":
+            subtitles_mkvmerge = 1
+        else:
+            subtitles_mkvmerge = 0
+
+        if subtitles_mkvmerge_delete == "on":
+            subtitles_mkvmerge_delete = 1
+        else:
+            subtitles_mkvmerge_delete = 0
+
+        plugins_str_list = subtitles_plugins.split()
+        subtitles_plugins_list = []
+        subtitles_plugins_enabled = []
+        for curPluginStr in plugins_str_list:
+            curPlugin, curEnabled = curPluginStr.split(':')
+            subtitles_plugins_list.append(curPlugin)
+            subtitles_plugins_enabled.append(int(curEnabled))
+
+        sickbeard.USE_SUBTITLES = use_subtitles
+        sickbeard.SUBTITLES_LANGUAGES = filter(subtitles.isValidLanguage, subtitles_languages.replace(' ', '').split(','))
+        sickbeard.SUBTITLES_MULTI = subtitles_multi
+        sickbeard.SUBTITLES_PLUGINS_LIST = subtitles_plugins_list
+        sickbeard.SUBTITLES_PLUGINS_ENABLED = subtitles_plugins_enabled
+        sickbeard.SUBTITLES_MKVMERGE = subtitles_mkvmerge
+        sickbeard.SUBTITLES_MKVMERGE_PATH = subtitles_mkvmerge_path or ''
+        sickbeard.SUBTITLES_MKVMERGE_DELETE = subtitles_mkvmerge_delete
+
+        sickbeard.save_config()
+
+        if len(results) > 0:
+            for x in results:
+                logger.log(x, logger.ERROR)
+            ui.notifications.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
+        else:
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+
+        redirect("/config/subtitles/")
 
 class Config:
 
@@ -1337,11 +1438,14 @@ class Config:
 
     notifications = ConfigNotifications()
 
+    subtitles = ConfigSubtitles()
+
 def haveXBMC():
     return sickbeard.XBMC_HOST
 
 def havePLEX():
     return sickbeard.PLEX_SERVER_HOST
+
 
 def HomeMenu():
     return [
@@ -1544,8 +1648,8 @@ class NewHomeAddShows:
 
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
-                   anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
-                   other_shows=None, skipShow=None):
+                   anyQualities=None, bestQualities=None, seasonFolders=None, subtitles=None,
+                   fullShowPath=None, other_shows=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
@@ -1610,6 +1714,11 @@ class NewHomeAddShows:
             seasonFolders = 1
         else:
             seasonFolders = 0
+
+        if subtitles == "on":
+            subtitles = 1
+        else:
+            subtitles = 0
         
         if not anyQualities:
             anyQualities = []
@@ -1622,7 +1731,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, subtitles, tvdbLang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -1693,7 +1802,7 @@ class NewHomeAddShows:
             show_dir, tvdb_id, show_name = cur_show
 
             # add the show
-            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT) #@UndefinedVariable
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT, sickbeard.SUBTITLES_DEFAULT) #@UndefinedVariable
             num_added += 1
          
         if num_added:
@@ -2016,11 +2125,17 @@ class Home:
         elif sickbeard.showQueueScheduler.action.isBeingRefreshed(showObj): #@UndefinedVariable
             show_message = 'The episodes below are currently being refreshed from disk'
 
+        elif sickbeard.showQueueScheduler.action.isBeingSubtitled(showObj): #@UndefinedVariable
+            show_message = 'Currently downloading subtitles for this show'
+
         elif sickbeard.showQueueScheduler.action.isInRefreshQueue(showObj): #@UndefinedVariable
             show_message = 'This show is queued to be refreshed.'
 
         elif sickbeard.showQueueScheduler.action.isInUpdateQueue(showObj): #@UndefinedVariable
             show_message = 'This show is queued and awaiting an update.'
+
+        elif sickbeard.showQueueScheduler.action.isInSubtitleQueue(showObj): #@UndefinedVariable
+            show_message = 'This show is queued and awaiting subtitles download.'
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
@@ -2028,6 +2143,8 @@ class Home:
                 t.submenu.append({ 'title': 'Re-scan files',        'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
+                if sickbeard.USE_SUBTITLES and not sickbeard.showQueueScheduler.action.isBeingSubtitled(showObj) and showObj.subtitles:
+                    t.submenu.append({ 'title': 'Download subtitles', 'path': 'home/subtitleShow?show=%d'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Rename Episodes',      'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
 
         t.show = showObj
@@ -2070,7 +2187,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, subtitles=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2111,6 +2228,11 @@ class Home:
             air_by_date = 1
         else:
             air_by_date = 0
+            
+        if subtitles == "on":
+            subtitles = 1
+        else:
+            subtitles = 0
 
         if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
             tvdb_lang = tvdbLang
@@ -2143,6 +2265,7 @@ class Home:
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
+            showObj.subtitles = subtitles
             showObj.lang = tvdb_lang
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
@@ -2246,6 +2369,24 @@ class Home:
                         ex(e))
 
         # just give it some time
+        time.sleep(3)
+
+        redirect("/home/displayShow?show="+str(showObj.tvdbid))
+        
+    @cherrypy.expose
+    def subtitleShow(self, show=None, force=0):
+
+        if show == None:
+            return _genericMessage("Error", "Invalid show ID")
+
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+        if showObj == None:
+            return _genericMessage("Error", "Unable to find the specified show")
+
+        # search and download subtitles
+        sickbeard.showQueueScheduler.action.downloadSubtitles(showObj, bool(force)) #@UndefinedVariable
+
         time.sleep(3)
 
         redirect("/home/displayShow?show="+str(showObj.tvdbid))
@@ -2396,6 +2537,48 @@ class Home:
             return json.dumps({'result': statusStrings[ep_obj.status]})
 
         return json.dumps({'result': 'failure'})
+
+    @cherrypy.expose
+    def searchEpisodeSubtitles(self, show=None, season=None, episode=None):
+
+        # retrieve the episode object and fail if we can't get one 
+        ep_obj = _getEpisode(show, season, episode)
+        if isinstance(ep_obj, str):
+            return json.dumps({'result': 'failure'})
+
+        # try do download subtitles for that episode
+        previous_subtitles = ep_obj.subtitles
+        try:
+            ep_obj.downloadSubtitles()
+        except:
+            return json.dumps({'result': 'failure'})
+
+        # return the correct json value
+        if previous_subtitles != ep_obj.subtitles:
+            status = 'New subtitles downloaded: %s' % ','.join(sorted(list(set(ep_obj.subtitles).difference(previous_subtitles))))
+        else:
+            status = 'No subtitles downloaded'
+        ui.notifications.message('Subtitles Search', status)
+        return json.dumps({'result': status, 'subtitles': ','.join(ep_obj.subtitles)})
+
+    @cherrypy.expose
+    def mergeEpisodeSubtitles(self, show=None, season=None, episode=None):
+
+        # retrieve the episode object and fail if we can't get one 
+        ep_obj = _getEpisode(show, season, episode)
+        if isinstance(ep_obj, str):
+            return json.dumps({'result': 'failure'})
+
+        # try do merge subtitles for that episode
+        try:
+            ep_obj.mergeSubtitles()
+        except Exception as e:
+            return json.dumps({'result': 'failure', 'exception': str(e)})
+
+        # return the correct json value
+        status = 'Subtitles merged successfully '
+        ui.notifications.message('Merge Subtitles', status)
+        return json.dumps({'result': 'ok'})
 
 class UI:
     

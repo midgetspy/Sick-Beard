@@ -6,6 +6,8 @@ config.ini
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
+*.nzb
+*.torrent
 
 #  Compiled source   #
 ######################

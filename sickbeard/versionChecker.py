@@ -290,7 +290,7 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits.forBranch('midgetspy', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits.forBranch(sickbeard.AUTOUPDATER_OWNER, sickbeard.AUTOUPDATER_REPOSITORY, sickbeard.AUTOUPDATER_VERSION):
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit.id
                 if not self._cur_commit_hash:
@@ -316,9 +316,9 @@ class GitUpdateManager(UpdateManager):
             return
 
         if self._newest_commit_hash:
-            url = 'http://github.com/midgetspy/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
+            url = 'http://github.com/' + sickbeard.AUTOUPDATER_OWNER + '/' + sickbeard.AUTOUPDATER_REPOSITORY + '/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
         else:
-            url = 'http://github.com/midgetspy/Sick-Beard/commits/'
+            url = 'http://github.com/' + sickbeard.AUTOUPDATER_OWNER + '/' + sickbeard.AUTOUPDATER_REPOSITORY + '/commits/'
 
         new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
@@ -346,7 +346,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION) #@UnusedVariable
+        output, err = self._run_git('pull origin '+sickbeard.AUTOUPDATER_VERSION) #@UnusedVariable
 
         if not output:
             return self._git_error()
@@ -424,7 +424,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'http://github.com/midgetspy/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
+        tar_download_url = 'http://github.com/' + sickbeard.AUTOUPDATER_OWNER + ' /' + sickbeard.AUTOUPDATER_REPOSITORY + '/tarball/' + sickbeard.AUTOUPDATER_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 

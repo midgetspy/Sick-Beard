@@ -22,6 +22,7 @@ $(document).ready(function(){
     var updateArr = new Array()
     var refreshArr = new Array()
     var renameArr = new Array()
+    var subtitleArr = new Array()
     var deleteArr = new Array()
     var metadataArr = new Array()
 
@@ -43,6 +44,12 @@ $(document).ready(function(){
       }
     });
 
+    $('.subtitleCheck').each(function() {
+      if (this.checked == true) {
+        subtitleArr.push($(this).attr('id').split('-')[1])
+      }
+    });
+
     $('.deleteCheck').each(function() {
       if (this.checked == true) {
         deleteArr.push($(this).attr('id').split('-')[1])
@@ -56,10 +63,10 @@ $(document).ready(function(){
       }
     });
 */
-    if (updateArr.length+refreshArr.length+renameArr.length+deleteArr.length+metadataArr.length == 0)
+    if (updateArr.length+refreshArr.length+renameArr.length+subtitleArr.length+deleteArr.length+metadataArr.length == 0)
       return false
 
-    url = 'massUpdate?toUpdate='+updateArr.join('|')+'&toRefresh='+refreshArr.join('|')+'&toRename='+renameArr.join('|')+'&toDelete='+deleteArr.join('|')+'&toMetadata='+metadataArr.join('|')
+    url = 'massUpdate?toUpdate='+updateArr.join('|')+'&toRefresh='+refreshArr.join('|')+'&toRename='+renameArr.join('|')+'&toSubtitle='+subtitleArr.join('|')+'&toDelete='+deleteArr.join('|')+'&toMetadata='+metadataArr.join('|')
     
     window.location.href = url
 

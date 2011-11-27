@@ -288,7 +288,7 @@ class NewzbinProvider(generic.NZBProvider):
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
             if sickbeard.USENET_RETENTION is not None:
                 try:
-                    dateString = cur_item.findtext('{http://www.newzbin.com/DTD/2007/feeds/report/}postdate')
+                    dateString = cur_item.findtext('pubDate')
                     # use the parse (imported as parseDate) function from the dateutil lib
                     # and we have to remove the timezone info from it because the retention_date will not have one
                     # and a comparison of them is not possible
