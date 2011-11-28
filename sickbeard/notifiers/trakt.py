@@ -44,6 +44,9 @@ class TraktNotifier:
 
     def notify_download(self, ep_name):
         if sickbeard.TRAKT_NOTIFY_ONDOWNLOAD:
+            data = None
+            name_split = ep_name.split(" - ")
+            ep_name = name_split.pop()
             
             logger.log("Episode name: " + ep_name, logger.DEBUG)
             myDB = db.DBConnection()
@@ -64,7 +67,8 @@ class TraktNotifier:
             method = "show/episode/library/"
             method += "%API%"
             
-            self._notifyTrakt(method, None, None, None, data)
+            if data is not None:
+                self._notifyTrakt(method, None, None, None, data)
 
     def test_notify(self, api, username, password):
         method = "account/test/"
