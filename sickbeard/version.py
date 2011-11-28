@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "myAnime"
+SICKBEARD_VERSION = "anime"
