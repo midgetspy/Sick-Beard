@@ -43,17 +43,18 @@
 \$(document).ready(function() 
 { 
     \$("#massUpdateTable:has(tbody tr)").tablesorter({
-        sortList: [[1,0]],
+        sortList: [[2,0]],
         widgets: ['zebra'],
         headers: {
             0: { sorter: false},
-            1: { sorter: 'showNames'},
-            3: { sorter: 'images'},
+            1: { sorter: 'images'},
+            2: { sorter: 'showNames'},
             4: { sorter: 'images'},
-            6: { sorter: false},
+            5: { sorter: 'images'},
             7: { sorter: false},
             8: { sorter: false},
-            9: { sorter: false}
+            9: { sorter: false},
+            10: { sorter: false}
         }
     }); 
 });
@@ -67,6 +68,7 @@
   <thead>
     <tr>
       <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck" /></th>
+      <th class="nowrap">Lang</th>
       <th class="nowrap">Show Name</th>
       <th>Quality</th>
       <th>Season<br/>Folders</th>
@@ -81,8 +83,8 @@
   </thead>
 <tfoot>
   <tr>
-    <td rowspan="1" colspan="1" align="center"><input type="button" value="Edit Selected Shows" id="submitMassEdit" /></td>
-    <td rowspan="1" colspan="9" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
+    <td rowspan="1" colspan="1" align="center"><input type="button" value="Edit Selected" id="submitMassEdit" /></td>
+    <td rowspan="1" colspan="10" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>
@@ -114,6 +116,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
   <tr>
     <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
+    <td align="center"><img src="$sbRoot/images/flags/${curShow.lang}.png" width="16" height="11" alt="$curShow.lang" /></td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
 #if $curShow.quality in $qualityPresets:
     <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>

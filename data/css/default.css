@@ -3,6 +3,7 @@
 img { border: 0; vertical-align: middle;}
 
 body {
+text-rendering: optimizeLegibility;
 background-color:#F5F1E4;
 color:#000;
 font-family:'Verdana', 'Helvetica', 'Sans-serif', 'sans';
@@ -56,8 +57,8 @@ margin:0;
 
 h1 {
 text-align:left;
-font-size:19px;
-line-height:20px;
+font-size:21px;
+line-height:23px;
 font-weight:400;
 padding-bottom:4px;
 margin-bottom:12px;
@@ -148,9 +149,10 @@ clear:left;
 
 .plotInfo {
 cursor:help;
-margin-left: 8px;
-position: relative;
+font-weight: 700;
 float: right;
+position: relative;
+margin-left: 8px;
 }
 
 #tooltip {
@@ -270,6 +272,10 @@ padding:2px;
 background-color:#000;
 color:#fff;
 }
+.sf-menu li:hover, .sf-menu li.sfHover,
+.sf-menu a:focus, .sf-menu a:hover, .sf-menu a:active {
+color: #f5f5f5 !important;
+}
 #donate {
 line-height:1em;
 background: #57442B;
@@ -334,6 +340,7 @@ div#addShowPortal  button .buttontext { position: relative; display: block; padd
 
 td.tvShow { font-weight: bold; }
 
+td.tvShow a {text-decoration: none; font-size: 1.2em; }
 td.tvShow:hover { background-color: #cfcfcf !important; cursor: pointer; }
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
 
@@ -354,6 +361,17 @@ a.whitelink { color: white; }
     font-size: 1em;
 }
 div.ui-pnotify { min-width: 340px; max-width: 550px; width: auto !important;}
+
+/* override for qtip2 */
+.ui-tooltip-sb .ui-tooltip-titlebar a { color: #222222; text-decoration: none; }
+.ui-tooltip, .qtip { max-width: 500px !important; }
+
+option.flag {
+  padding-left: 35px; 
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-position: 10px 50%; 
+}
 
 span.quality {
     font: bold 1em/1.2em verdana, sans-serif;

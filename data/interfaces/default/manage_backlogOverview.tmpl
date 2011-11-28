@@ -52,7 +52,7 @@
   <tr class="$Overview.overviewStrings[$showCats[$curShow.tvdbid][$whichStr]]">
     <td align="center">$whichStr</td>
     <td>$curResult["name"]</td>
-    <td align="center">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
+    <td align="center" class="nowrap">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
   </tr>
 
 #end for
