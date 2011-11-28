@@ -154,30 +154,33 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
     <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
 </div>
 <ul id="MainMenu" class="sf-menu">
-            <li id="NAVsystem" class="first"><a href="#" class="navIcon"><img src="$sbRoot/images/menu/system18.png" alt="" width="18" height="18" /></a>
+            <li id="NAVsystem" class="first"><a href="#" class="navIcon" onclick="return false;"><img src="$sbRoot/images/menu/system18.png" alt="" width="18" height="18" /></a>
                 <ul>
                         <li><a href="$sbRoot/manage/manageSearches/forceVersionCheck"><img src="$sbRoot/images/menu/update16.png" alt="" width="16" height="16" />Force Version Check</a></li>
                         <li><a href="$sbRoot/home/restart/?pid=$sbPID" class="confirm"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
                         <li><a href="$sbRoot/home/shutdown/" class="confirm"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
                 </ul>
             </li>
-            <li id="NAVhome"><a href="$sbRoot/home">Home</a>
+            <li id="NAVhome"><a href="#" onclick="return false;">Home</a>
                 <ul>
+                        <li><a href="$sbRoot/home/"><img src="$sbRoot/images/menu/home16.png" alt="" width="16" height="16" />Home</a></li>
                         <li><a href="$sbRoot/home/addShows/"><img src="$sbRoot/images/menu/addshow16.png" alt="" width="16" height="16" />Add Shows</a></li>
                         <li><a href="$sbRoot/home/postprocess/"><img src="$sbRoot/images/menu/postprocess16.png" alt="" width="16" height="16" />Manual Post-Processing</a></li>
                 </ul>
             </li>
-            <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes">Coming Episodes</a></li>
-            <li id="NAVhistory"><a href="$sbRoot/history">History</a></li>
-            <li id="NAVmanage"><a href="$sbRoot/manage">Manage</a>
+            <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes/">Coming Episodes</a></li>
+            <li id="NAVhistory"><a href="$sbRoot/history/">History</a></li>
+            <li id="NAVmanage"><a href="#" onclick="return false;">Manage</a>
                 <ul>
-                        <li><a href="$sbRoot/manage/backlogOverview"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Backlog Overview</a></li>
-                        <li><a href="$sbRoot/manage/manageSearches"><img src="$sbRoot/images/menu/managesearches16.png" alt="" width="16" height="16" />Manage Searches</a></li>
-                        <li><a href="$sbRoot/manage/episodeStatuses"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Episode Status Management</a></li>
+                        <li><a href="$sbRoot/manage/"><img src="$sbRoot/images/menu/manage16.png" alt="" width="16" height="16" />Mass Update</a></li>
+                        <li><a href="$sbRoot/manage/backlogOverview/"><img src="$sbRoot/images/menu/backlog_view16.png" alt="" width="16" height="16" />Backlog Overview</a></li>
+                        <li><a href="$sbRoot/manage/manageSearches/"><img src="$sbRoot/images/menu/managesearches16.png" alt="" width="16" height="16" />Manage Searches</a></li>
+                        <li><a href="$sbRoot/manage/episodeStatuses/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Episode Status Management</a></li>
                 </ul>
             </li>
-            <li id="NAVconfig"><a href="$sbRoot/config">Config</a>
+            <li id="NAVconfig"><a href="#" onclick="return false;">Config</a>
                 <ul>
+                        <li><a href="$sbRoot/config/"><img src="$sbRoot/images/menu/config_index16.png" alt="" width="16" height="16" />Help &amp; Info</a></li>
                         <li><a href="$sbRoot/config/general/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />General</a></li>
                         <li><a href="$sbRoot/config/search/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Search Settings</a></li>
                         <li><a href="$sbRoot/config/providers/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Search Providers</a></li>
@@ -186,9 +189,10 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
                         <li><a href="$sbRoot/config/anime/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Anime</a></li>
                 </ul>
             </li>
-            <li id="NAVerrorlogs"><a href="$sbRoot/errorlogs">$logPageTitle</a>
+            <li id="NAVerrorlogs"><a href="#" onclick="return false;">$logPageTitle</a>
                 <ul>
-                        <li><a href="$sbRoot/errorlogs/viewlog"><img src="$sbRoot/images/menu/viewlog16.png" alt="" width="16" height="16" />View Log</a></li>
+                        <li><a href="$sbRoot/errorlogs/"><img src="$sbRoot/images/menu/viewlog_errors16.png" alt="" width="16" height="16" />View Log (Errors)</a></li>
+                        <li><a href="$sbRoot/errorlogs/viewlog/"><img src="$sbRoot/images/menu/viewlog16.png" alt="" width="16" height="16" />View Log</a></li>
                 </ul>
             </li>
             <li id="donate"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donate_LG.gif" alt="[donate]" /></a></li>
