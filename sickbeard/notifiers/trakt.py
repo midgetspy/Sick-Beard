@@ -42,31 +42,26 @@ except ImportError:
 
 class TraktNotifier:
 
+    def notify_snatch(self, ep_name):
+        pass
+
     def notify_download(self, ep_name):
-        if sickbeard.TRAKT_NOTIFY_ONDOWNLOAD:
-            data = None
-            name_split = ep_name.split(" - ", 2)
-            ep_name = name_split.pop()
-            location_wildcard = '%' + ep_name + '%'
-            
-            logger.log("Episode name: " + ep_name, logger.DEBUG)
-            myDB = db.DBConnection()
-            episodes = myDB.select("SELECT showid, season, episode FROM tv_episodes WHERE location LIKE :location_wildcard ORDER BY airdate DESC LIMIT 1", {"location_wildcard": location_wildcard})
-            for episode in episodes:
-                shows = myDB.select("SELECT tvdb_id, show_name, startyear FROM tv_shows WHERE tvdb_id = ? LIMIT 1", [ episode["showid"]])
-                for show in shows:
-                    data = {
-                        'tvdb_id': show["tvdb_id"],
-                        'title': show["show_name"],
-                        'year': show["startyear"],
-                        'episodes': [ {
-                            'season': episode["season"],
-                            'episode': episode["episode"]
-                            } ]
-                        }
-            
+        pass
+
+    def update_library(self, ep_obj):
+        if sickbeard.USE_TRAKT:
             method = "show/episode/library/"
             method += "%API%"
+            
+            data = {
+                'tvdb_id': ep_obj.show.tvdbid,
+                'title': ep_obj.show.name,
+                'year': ep_obj.show.startyear,
+                'episodes': [ {
+                    'season': ep_obj.season,
+                    'episode': ep_obj.episode
+                    } ]
+                }
             
             if data is not None:
                 self._notifyTrakt(method, None, None, None, data)
@@ -129,6 +124,7 @@ class TraktNotifier:
                 return False
 
         if (resp["status"] == "success"):
+            logger.log("Succeeded calling method", logger.ERROR)
             return True
 
         return False
