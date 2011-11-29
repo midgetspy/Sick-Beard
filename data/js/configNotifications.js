@@ -17,6 +17,14 @@ $(document).ready(function(){
         function (data){ $('#testProwl-result').html(data); });
     });
 
+    $('#testNMA').click(function(){
+        $('#testNMA-result').html(loading);
+        var nma_api = $("#nma_api").val();
+        var nma_priority = $("#nma_priority").val();
+        var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
+        function (data){ $('#testNMA-result').html(data); });
+    });
+    
     $('#testXBMC').click(function(){
         $('#testXBMC-result').html(loading);
         var xbmc_host = $("#xbmc_host").val();

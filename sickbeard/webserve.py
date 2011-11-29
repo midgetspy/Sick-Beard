@@ -1138,6 +1138,7 @@ class ConfigNotifications:
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
         results = []
@@ -1244,6 +1245,20 @@ class ConfigNotifications:
         else:
             use_notifo = 0
 
+        if nma_notify_onsnatch == "on":
+            nma_notify_onsnatch = 1
+        else:
+            nma_notify_onsnatch = 0
+
+        if nma_notify_ondownload == "on":
+            nma_notify_ondownload = 1
+        else:
+            nma_notify_ondownload = 0
+        if use_nma == "on":
+            use_nma = 1
+        else:
+            use_nma = 0
+
         if use_nmj == "on":
             use_nmj = 1
         else:
@@ -1297,6 +1312,12 @@ class ConfigNotifications:
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
+
+        sickbeard.USE_NMA = use_nma
+        sickbeard.NMA_NOTIFY_ONSNATCH = nma_notify_onsnatch
+        sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
+        sickbeard.NMA_API = nma_api
+        sickbeard.NMA_PRIORITY = nma_priority
 
         sickbeard.USE_NMJ = use_nmj
         sickbeard.NMJ_HOST = nmj_host
@@ -1845,6 +1866,16 @@ class Home:
             return "Test prowl notice sent successfully"
         else:
             return "Test prowl notice failed"
+
+    @cherrypy.expose
+    def testNMA(self, nma_api=None, nma_priority=0):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        result = notifiers.nma_notifier.test_notify(nma_api, nma_priority)
+        if result:
+            return "Test NMA notice sent successfully"
+        else:
+            return "Test NMA notice failed"
 
     @cherrypy.expose
     def testNotifo(self, username=None, apisecret=None):
