@@ -76,14 +76,3 @@ html > body .ui-pnotify {
 	display: block;
 	margin: 0 auto;
 }
-.ui-pnotify .picon {
-	background-color: transparent;
-	background-repeat: no-repeat;
-	background-position: center center;
-	width: 17px;
-	height: 17px;
-}
-.ui-pnotify .ui-widget {
-    font-family: verdana, sans-serif;
-    font-size: 95% !important;
-}

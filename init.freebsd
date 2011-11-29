@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # PROVIDE: sickbeard
-# REQUIRE: sabnzbd
+# REQUIRE: DAEMON sabnzbd
 # KEYWORD: shutdown
 #
 # Add the following lines to /etc/rc.conf.local or /etc/rc.conf
@@ -19,6 +19,7 @@
 #     Default is same as sickbeard_dir.
 # sickbeard_pid:  The name of the pidfile to create.
 #     Default is sickbeard.pid in sickbeard_dir.
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 . /etc/rc.subr
 

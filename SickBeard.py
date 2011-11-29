@@ -245,8 +245,6 @@ def main():
     else:
         startPort = sickbeard.WEB_PORT
 
-    logger.log(u"Starting Sick Beard on http://localhost:"+str(startPort))
-
     if sickbeard.WEB_LOG:
         log_dir = sickbeard.LOG_DIR
     else:
@@ -262,6 +260,8 @@ def main():
             webhost = '::'
         else:
             webhost = '0.0.0.0'
+
+    logger.log(u"Starting Sick Beard on http://"+str(webhost)+":"+str(startPort)+"/")
 
     try:
         initWebServer({
