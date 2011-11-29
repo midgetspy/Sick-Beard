@@ -47,10 +47,11 @@ class TraktNotifier:
             data = None
             name_split = ep_name.split(" - ", 2)
             ep_name = name_split.pop()
+            location_wildcard = '%' + ep_name + '%'
             
             logger.log("Episode name: " + ep_name, logger.DEBUG)
             myDB = db.DBConnection()
-            episodes = myDB.select("SELECT showid, season, episode FROM tv_episodes WHERE name = :ep_name ORDER BY airdate DESC LIMIT 1", {"ep_name": ep_name})
+            episodes = myDB.select("SELECT showid, season, episode FROM tv_episodes WHERE location LIKE :location_wildcard ORDER BY airdate DESC LIMIT 1", {"location_wildcard": location_wildcard})
             for episode in episodes:
                 shows = myDB.select("SELECT tvdb_id, show_name, startyear FROM tv_shows WHERE tvdb_id = ? LIMIT 1", [ episode["showid"]])
                 for show in shows:
