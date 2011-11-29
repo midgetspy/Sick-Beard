@@ -45,7 +45,7 @@ class TraktNotifier:
     def notify_download(self, ep_name):
         if sickbeard.TRAKT_NOTIFY_ONDOWNLOAD:
             data = None
-            name_split = ep_name.split(" - ")
+            name_split = ep_name.split(" - ", 2)
             ep_name = name_split.pop()
             
             logger.log("Episode name: " + ep_name, logger.DEBUG)
