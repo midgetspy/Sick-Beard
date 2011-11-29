@@ -1022,7 +1022,11 @@ class ConfigProviders:
     def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+<<<<<<< HEAD
                       tvtorrents_digest=None, tvtorrents_hash=None,
+=======
+                      tvtorrents_digest=None, tvtorrents_hash=None, 
+>>>>>>> ea0e5732b3ad34b9318d84f3296336f6d4d4f5ee
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
