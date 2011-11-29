@@ -575,7 +575,6 @@ def initialize(consoleLogging=True):
         BOXCAR_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_onsnatch', 0))
         BOXCAR_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_ondownload', 0))
         BOXCAR_USERNAME = check_setting_str(CFG, 'Boxcar', 'boxcar_username', '')
-        BOXCAR_PASSWORD = check_setting_str(CFG, 'Boxcar', 'boxcar_password', '')
 
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
         LIBNOTIFY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onsnatch', 0))
@@ -1077,7 +1076,6 @@ def save_config():
     new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
     new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
     new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
-    new_config['Boxcar']['boxcar_password'] = BOXCAR_PASSWORD
 
     new_config['Libnotify'] = {}
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)

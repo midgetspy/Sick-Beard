@@ -25,64 +25,81 @@ import json
 import sickbeard
 
 from sickbeard import logger
+from sickbeard.exceptions import ex
 
 try:
     import lib.simplejson as json #@UnusedImport
 except:
     import json #@Reimport
 
-API_URL = "https://boxcar.io/notifications"
+API_URL = "https://boxcar.io/devices/providers/fWc4sgSmpcN6JujtBmR6/notifications"
 
 class BoxcarNotifier:
 
-    def test_notify(self, username, password, title="Test:"):
-        return self._sendBoxcar("This is a test notification from SickBeard", title, username, password)
+    def test_notify(self, email, title="Test"):
+        return self._sendBoxcar("This is a test notification from SickBeard", title, email)
 
-    def _sendBoxcar(self, msg, title, username, password, label="SickBeard"):
+    def _sendBoxcar(self, msg, title, email, subscribe=False):
         msg = msg.strip()
+        curUrl = API_URL
         data = urllib.urlencode({
-                'notification[from_screen_name]': username,
+                'email': email,
+                'notification[from_screen_name]': title,
                 'notification[message]': msg.encode('utf-8'),
                 'notification[from_remote_service_id]': int(time.time())
                 })
+        if subscribe: # subscription notification
+            data = urllib.urlencode({'email': email})
+            curUrl = curUrl + "/subscribe"
 
-        req = urllib2.Request(API_URL)
-        base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-        req.add_header("Authorization", "Basic %s" % base64string)
-
+        req = urllib2.Request(curUrl)
         try:
             handle = urllib2.urlopen(req, data)
+            handle.close()
+        except urllib2.URLError, e:
+            logger.log("Boxcar notification failed. error code: " + str(e.code), logger.WARNING)
+            if e.code == 404: #HTTP status 404 if the provided email address isn't a Boxcar user.
+                logger.log("Username is wrong/not a boxcar email. Boxcar will send an email to it", logger.WARNING)
+                return False
+            elif e.code == 401: #For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added your service.
+                if subscribe: #If the user has already added your service, we'll return an HTTP status code of 401.
+                    logger.log("Already subscribed to service", logger.ERROR)
+                    # i dont know if this is true or false ... its neihter but i also dont know how we got here in the first place
+                    return False
+                else: #HTTP status 401 if the user doesn't have the service added
+                   subscribeNote = self._sendBoxcar(msg, title, email, True)
+                   if subscribeNote:
+                       logger.log("Subscription send", logger.DEBUG)
+                       return True
+                   else:
+                       logger.log("Subscription could not be send", logger.WARNING)
+                       return False
+            elif e.code == 400: #If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
+                logger.log("Wrong data send to boxcar", logger.ERROR)
+                return False
+        else:# 200
+            logger.log("Boxcar notification successful.", logger.DEBUG)
+            return True
 
-        except Exception, e:
-            logger.log(e, logger.DEBUG)
-            logger.log("Boxcar notification failed.", logger.DEBUG)
-            return False
-
-	logger.log("Boxcar notification successful.", logger.DEBUG)
-	handle.close()
-	return True
-
-    def notify_snatch(self, ep_name, title="Snatched:"):
+    def notify_snatch(self, ep_name, title="Snatched"):
         if sickbeard.BOXCAR_NOTIFY_ONSNATCH:
             self._notifyBoxcar(title, ep_name)
 
-    def notify_download(self, ep_name, title="Completed:"):
+    def notify_download(self, ep_name, title="Completed"):
         if sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD:
-            self._notifyBoxcar(title, ep_name)       
+            self._notifyBoxcar(title, ep_name)
 
-    def _notifyBoxcar(self, title, message=None, username=None, password=None, force=False):
+    def _notifyBoxcar(self, title, message=None, username=None, force=False):
         if not sickbeard.USE_BOXCAR and not force:
             logger.log("Notification for Boxcar not enabled, skipping this notification", logger.DEBUG)
             return False
 
         if not username:
             username = sickbeard.BOXCAR_USERNAME
-        if not password:
-            password = sickbeard.BOXCAR_PASSWORD
 
         logger.log("Sending notification for " + message, logger.DEBUG)
 
-        self._sendBoxcar(message, title, username, password)
+        self._sendBoxcar(message, title, username)
         return True
 
 notifier = BoxcarNotifier

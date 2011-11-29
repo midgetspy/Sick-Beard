@@ -48,8 +48,7 @@ $(document).ready(function(){
     $('#testBoxcar').click(function(){
         $('#testBoxcar-result').html(loading);
         var boxcar_username = $("#boxcar_username").val();
-        var boxcar_password = $("#boxcar_password").val();
-        $.get(sbRoot+"/home/testBoxcar", {'username': boxcar_username, 'password': boxcar_password},
+        $.get(sbRoot+"/home/testBoxcar", {'username': boxcar_username},
         function (data){ $('#testBoxcar-result').html(data); });
     });
 
