@@ -1,5 +1,6 @@
 #config{text-align:center;padding:0 30px 20px;}
 #config *{font-family:"Trebuchet MS", Verdana, sans-serif;margin:0;padding:0;}
+#config input[type=submit], #config input[type=button] { padding: 1px 5px; }
 #config h3 a {text-decoration: none;}
 #config h3 img {vertical-align: baseline; padding-right: 5px;}
 #config ul{list-style-type:none;padding-left: 20px;}

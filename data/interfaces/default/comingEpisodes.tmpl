@@ -87,7 +87,7 @@
 
 \$(document).ready(function(){ 
 
-#set $sort_codes = {'date': 2, 'show': 3, 'network': 4}
+#set $sort_codes = {'date': 0, 'show': 1, 'network': 4}
 #if $sort not in $sort_codes:
     $sort = 'date'
 #end if
@@ -96,10 +96,10 @@
     \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: sortList,
         headers: {
-            0: { sorter: false},
-            1: { sorter: false},
-            2: { sorter: 'nextAirDate' },
-            3: { sorter: 'loadingNames' },
+            0: { sorter: 'nextAirDate' },
+            1: { sorter: 'loadingNames' },
+            2: { sorter: false},
+            3: { sorter: false},
             4: { sorter: 'loadingNames' },
             5: { sorter: 'quality' },
             6: { sorter: false},
@@ -120,7 +120,9 @@
 
 <br/>
     <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th class="nowrap nextEpNumHeader">Next Ep</th><th class="nextEpTitleHeader">Next Ep Name</th><th class="nextEpAirdateHeader">Airdate</th><th class="nextEpShowHeader">Show</th><th class="nextEpNetworkHeader">Network</th><th class="nextEpQualityHeader">Quality</th><th class="nextEpTVDBBadgeHeader">tvDB</th><th class="nextEpSearchBadgeHeader">Search</th></tr></thead>
+
+    <thead><tr><th class="nextEpAirdateHeader">Airdate</th><th class="nextEpShowHeader">Show</th><th class="nowrap nextEpNumHeader">Next Ep</th><th class="nextEpTitleHeader">Next Ep Name</th><th class="nextEpNetworkHeader">Network</th><th class="nextEpQualityHeader">Quality</th><th class="nextEpTVDBBadgeHeader">tvDB</th><th class="nextEpSearchBadgeHeader">Search</th></tr></thead>
+
     <tbody>
 
     #for $cur_result in $sql_results:
@@ -148,22 +150,27 @@
 
     <!-- start $cur_result["show_name"] //-->
       <tr class="$show_div">
-        <td class="nowrap nextEpNum">
-        #if $cur_result["description"] != "" and $cur_result["description"] != None:
-            <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
-        #end if
-            <span><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></span>
-        </td>
-        <td class="nextEpTitle">$cur_result["name"]</td>
-        <td align="center" class="nowrap nextEpAirdate">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
+	<td align="center" class="nowrap nextEpAirdate">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
         <td class="nextEpShow tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if
         </td>
-        <td class="nextEpNetwork" align="center">$cur_result["network"]</td>
-        <td class="nextEpQuality $cur_ep_quality" align="center">
-            $cur_ep_quality
+
+        <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
+        <td class="nextEpTitle">
+        #if $cur_result["description"] != "" and $cur_result["description"] != None:
+            <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
+        #end if
+            $cur_result["name"]
+        </td>
+        <td align="nextEpNetwork center">$cur_result["network"]</td>
+        <td align="center">
+#if int($cur_result["quality"]) in $qualityPresets:
+    <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
+#else:
+    <span class="nextEpQuality quality Custom">Custom</span>
+#end if
         </td>
         <td class="nextEpTVDBBadge" align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
         <td class="nextEpSearchBadge" align="center">
@@ -282,11 +289,10 @@
           <td style="vertical-align: top;">
             <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
 #if int($cur_result["quality"]) in $qualityPresets:
-[<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]
+ [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]<br />
 #else:
-[<span class="title">Custom</span>]
+ [<span class="title">Custom</span>]<br />
 #end if
-            <br />
             #if $cur_result["description"] == '':
                 <div class="ep_summary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
             #else:
@@ -313,5 +319,5 @@ window.setInterval( "location.reload(true)", 600000); // Refresh every 10 minute
 //-->
 </script>
 
-<!--<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>-->
+<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

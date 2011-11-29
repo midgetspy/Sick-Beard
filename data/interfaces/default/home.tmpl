@@ -197,9 +197,11 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end if
 
   <tr>
-    <td class="tvShowDate" align="center">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
-    <td class="tvShowTitle"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+
+    <td class="tvShowDate nowrap" align="center">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
+    <td class="tvShowTitle tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td class="tvShowNetwork">$curShow.network</td>
+
 #if $curShow.quality in $qualityPresets:
     <td class="tvShowQuality" align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
