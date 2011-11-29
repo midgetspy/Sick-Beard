@@ -27,6 +27,7 @@ from . import libnotify
 import notifo
 import nmj
 import synoindex
+import supertoasty
 
 from sickbeard.common import *
 
@@ -39,6 +40,7 @@ notifo_notifier = notifo.NotifoNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
+supertoasty_notifier = supertoasty.SuperToastyNotifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
@@ -51,6 +53,7 @@ notifiers = [
     twitter_notifier,
     nmj_notifier,
     synoindex_notifier,
+    supertoasty_notifier,
 ]
 
 def notify_download(ep_name):

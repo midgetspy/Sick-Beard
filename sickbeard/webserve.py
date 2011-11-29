@@ -1137,11 +1137,12 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
+                          use_supertoasty=None, supertoasty_notify_onsnatch=None, supertoasty_notify_ondownload=None, supertoasty_deviceid=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
         results = []
-
+        logger.log("Saving Notifications", logger.DEBUG)
         if xbmc_notify_onsnatch == "on":
             xbmc_notify_onsnatch = 1
         else:
@@ -1243,6 +1244,20 @@ class ConfigNotifications:
             use_notifo = 1
         else:
             use_notifo = 0
+            
+        if supertoasty_notify_onsnatch == "on":
+            supertoasty_notify_onsnatch = 1
+        else:
+            supertoasty_notify_onsnatch = 0
+
+        if supertoasty_notify_ondownload == "on":
+            supertoasty_notify_ondownload = 1
+        else:
+            supertoasty_notify_ondownload = 0
+        if use_supertoasty == "on":
+            use_supertoasty = 1
+        else:
+            use_supertoasty = 0
 
         if use_nmj == "on":
             use_nmj = 1
@@ -1293,6 +1308,11 @@ class ConfigNotifications:
         sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
         sickbeard.NOTIFO_USERNAME = notifo_username
         sickbeard.NOTIFO_APISECRET = notifo_apisecret
+        
+        sickbeard.USE_SUPERTOASTY = use_supertoasty
+        sickbeard.SUPERTOASTY_NOTIFY_ONSNATCH = supertoasty_notify_onsnatch
+        sickbeard.SUPERTOASTY_NOTIFY_ONDOWNLOAD = supertoasty_notify_ondownload
+        sickbeard.SUPERTOASTY_DEVICEID = supertoasty_deviceid
 
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
@@ -1855,6 +1875,15 @@ class Home:
             return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
         else:
             return "Error sending Notifo notification"
+            
+    @cherrypy.expose
+    def testSuperToasty(self, deviceId=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        result = notifiers.supertoasty_notifier.test_notify(deviceId)
+        if result:
+            return "Super Toasty notification succeeded. Check your Super Toasty clients to make sure it worked"
+        else:
+            return "Error sending Super Toasty notification"
 
     @cherrypy.expose
     def twitterStep1(self):

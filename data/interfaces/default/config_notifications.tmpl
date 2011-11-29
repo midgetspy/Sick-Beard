@@ -483,9 +483,62 @@
                     </fieldset>
 
                 </div>
-
-
+                
                 <div id="core-component-group7" class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://supertoasty.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/supertoasty.gif" alt="Super Toasty" title="Super Toasty" width="16" height="16" /> Super Toasty</a></h3>
+                        <p>Push notifications for Windows Phone 7.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_supertoasty" id="use_supertoasty" #if $sickbeard.USE_SUPERTOASTY then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_supertoasty">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to the Super Toasty?<br /><br />
+                                </span>
+                            </label>
+                        </div>
+                    
+                        <div id="content_use_supertoasty">
+                            <div class="field-pair">
+                                <input type="checkbox" name="supertoasty_notify_onsnatch" id="supertoasty_notify_onsnatch" #if $sickbeard.SUPERTOASTY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="supertoasty_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <input type="checkbox" name="supertoasty_notify_ondownload" id="supertoasty_notify_ondownload" #if $sickbeard.SUPERTOASTY_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="supertoasty_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Super Toasty Device ID</span>
+                                    <input type="text" name="supertoasty_deviceid" id="supertoasty_deviceid" value="$sickbeard.SUPERTOASTY_DEVICEID" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Device Id of your Super Toasty Account</span>
+                                </label>
+                            </div>                       
+
+                            <div class="testNotification" id="testSuperToasty-result">Click below to test.</div>
+                            <input type="button" value="Test SuperToasty" id="testSuperToasty" />
+                            <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_supertoasty //-->
+
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+
+                <div id="core-component-group8" class="component-group clearfix">
                     <div class="component-group-desc">
                         <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/libnotify.gif" alt="Libnotify" title="Libnotify" width="16" height="16" /> Libnotify</a></h3>
                         <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
@@ -526,7 +579,7 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
-                <div id="core-component-group8" class="component-group clearfix">
+                <div id="core-component-group9" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nmj.gif" alt="Networked Media Jukebox" title="Networked Media Jukebox" width="16" height="16" /> NMJ</a></h3>
@@ -594,7 +647,7 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
-                <div id="core-component-group9" class="component-group clearfix">
+                <div id="core-component-group10" class="component-group clearfix">
                     <div class="component-group-desc">
                         <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synoindex.gif" alt="Synology Indexer" title="Synology Indexer" width="16" height="16" /> Synology Indexer</a></h3>
                         <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
@@ -620,6 +673,8 @@
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
+            
+            
 
 </form>
 
