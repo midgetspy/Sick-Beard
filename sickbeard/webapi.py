@@ -827,7 +827,7 @@ class CMD_EpisodeSearch(ApiCall):
             return _responds(RESULT_FAILURE, msg="Show not found")
 
         # retrieve the episode object and fail if we can't get one
-        epObj = webserve._getEpisode(self.tvdbid, self.s, self.e)
+        epObj = showObj.getEpisode(int(self.s), int(self.e))
         if isinstance(epObj, str):
             return _responds(RESULT_FAILURE, msg="Episode not found")
 
