@@ -1,4 +1,4 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
+# Author: Dieter Blomme <dieterblomme@gmail.com>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
