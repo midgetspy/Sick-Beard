@@ -65,6 +65,9 @@ def processDir (dirName, nzbName=None, recurse=False):
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
         returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked, skipping", logger.DEBUG)
         return returnStr
+    elif ek.ek(os.path.basename, dirName).startswith('.'):
+        returnStr += logHelper(u"The directory is hidden, skipping", logger.DEBUG)
+        return returnStr
 
     # make sure the dir isn't inside a show dir
     myDB = db.DBConnection()
