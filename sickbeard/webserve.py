@@ -1139,7 +1139,7 @@ class ConfigNotifications:
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
-                          use_trakt=None, trakt_notify_ondownload=None, trakt_username=None, trakt_password=None, trakt_api=None):
+                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None):
 
         results = []
 
@@ -1260,11 +1260,6 @@ class ConfigNotifications:
         else:
             use_trakt = 0
 
-        if trakt_notify_ondownload == "on":
-            trakt_notify_ondownload = 1
-        else:
-            trakt_notify_ondownload = 0
-
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1317,7 +1312,6 @@ class ConfigNotifications:
         sickbeard.USE_SYNOINDEX = use_synoindex
 
         sickbeard.USE_TRAKT = use_trakt
-        sickbeard.TRAKT_NOTIFY_ONDOWNLOAD = trakt_notify_ondownload
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api

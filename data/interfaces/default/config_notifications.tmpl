@@ -635,14 +635,6 @@
 
                         <div id="content_use_trakt">
                         <div class="field-pair">
-                            <input type="checkbox" name="trakt_notify_ondownload" id="trakt_notify_ondownload" #if $sickbeard.TRAKT_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="trakt_notify_ondownload">
-                                <span class="component-title">Notify on Download</span>
-                                <span class="component-desc">Send notification when we finish a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Trakt Username</span>
                                 <input type="text" name="trakt_username" id="trakt_username" value="$sickbeard.TRAKT_USERNAME" size="35" />
