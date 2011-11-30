@@ -124,7 +124,7 @@ class TraktNotifier:
                 return False
 
         if (resp["status"] == "success"):
-            logger.log("Succeeded calling method", logger.ERROR)
+            logger.log("trakt_notifier: Succeeded calling method. Result: " + resp["message"], logger.DEBUG)
             return True
 
         return False
