@@ -1588,10 +1588,10 @@ class CMD_ShowAddExisting(ApiCall):
 class CMD_ShowAddNew(ApiCall):
     _help = {"desc": "add a new show to sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
-                                    "location": {"desc": "base path for where the show folder is to be created"},
                                     "show_name": {"desc": "the name of the show to be added"}
                                 },
              "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+                                    "location": {"desc": "base path for where the show folder is to be created"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders for the show"},
                                     "status": {"desc": "status of missing episodes"},
