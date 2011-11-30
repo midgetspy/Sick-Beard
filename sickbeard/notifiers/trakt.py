@@ -84,10 +84,10 @@ class TraktNotifier:
         return sickbeard.USE_TRAKT
 
     def _notifyTrakt(self, method, api, username, password, data = {}, tries=3):
-        logger.log("Call method " + method, logger.DEBUG)
-        logger.log("tries " + repr(tries), logger.DEBUG)
+        logger.log("trakt_notifier: Call method " + method, logger.DEBUG)
+        logger.log("trakt_notifier: tries " + repr(tries), logger.DEBUG)
         if (tries <= 0):
-            logger.log("Failed to call method " + method, logger.ERROR)
+            logger.log("trakt_notifier: Failed to call method " + method + " completely", logger.ERROR)
             return
 
         if not api:
@@ -106,7 +106,7 @@ class TraktNotifier:
         encoded_data = json.dumps(data);
 
         try:
-            logger.log("Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
+            logger.log("trakt_notifier: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
             stream = urllib.urlopen("http://api.trakt.tv/" + method, encoded_data)
             resp = stream.read()
 
@@ -115,9 +115,9 @@ class TraktNotifier:
             if ("error" in resp):
                 raise Exception(resp["error"])
         except (IOError, json.JSONDecodeError):
-            logger.log("Failed calling method", logger.ERROR)
+            logger.log("trakt_notifier: Failed calling method", logger.ERROR)
             if (tries > 1):
-                logger.log("Retrying, attempts left: " + str(retry), logger.DEBUG)
+                logger.log("trakt_notifier: Retrying, attempts left: " + str(retry), logger.DEBUG)
                 time.sleep(5)
                 self._notifyTrakt(method, api, username, password, data, post, tries -  1)
             else:
