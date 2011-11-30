@@ -1607,10 +1607,10 @@ class CMD_ShowAddNew(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         self.show_name, args = self.check_params(args, kwargs, "show_name", None, True, "string", [])
         # optional
+        self.location, args = self.check_params(args, kwargs, "location", None, False, "string", [])
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.season_folder, args = self.check_params(args, kwargs, "season_folder", str(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
@@ -1625,8 +1625,17 @@ class CMD_ShowAddNew(ApiCall):
         if showObj:
             return _responds(RESULT_FAILURE, msg="An existing tvdbid already exists in database")
 
+        if not self.location:
+            if sickbeard.ROOT_DIRS != "":
+                root_dirs = sickbeard.ROOT_DIRS.split('|')
+                root_dirs.pop(0)
+                default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
+                self.location = root_dirs[default_index]
+            else:
+                return _responds(RESULT_FAILURE, msg="Root directory is not set, please provide a location")
+
         if not ek.ek(os.path.isdir, self.location):
-            return _responds(RESULT_FAILURE, msg="Not a valid location")
+            return _responds(RESULT_FAILURE, msg="'" + self.location + "' is not a valid location")
 
         quality_map = {'sdtv': Quality.SDTV,
                        'sddvd': Quality.SDDVD,
@@ -1661,7 +1670,6 @@ class CMD_ShowAddNew(ApiCall):
                     self.status = status
                     break
             #TODO: check if obsolete
-            # this should be obsolete bcause of the above
             if not self.status in statusStrings.statusStrings:
                 raise ApiError("Invalid Status")
             # only allow the status options we want
@@ -1669,12 +1677,9 @@ class CMD_ShowAddNew(ApiCall):
                 return _responds(RESULT_FAILURE, msg="Status prohibited")
             newStatus = self.status
 
-        #newLang = self.valid_languages[self.lang]
-
         # moved the logic check to the end in an attempt to eliminate empty directory being created from previous errors
-        #TODO: sanitizeFileName needs some work done (ex: strip . from leading or trailing)
-       
-        showPath = ek.ek(os.path.join, self.location, self.show_name)
+        # TODO: would like to just pull the show name from tvdb rather than rely on someone submitting it (show_name)
+        showPath = ek.ek(os.path.join, self.location, helpers.sanitizeFileName(self.show_name))
         dir_exists = helpers.makeDir(showPath)
         if not dir_exists:
             logger.log(u"Unable to create the folder " + showPath + ", can't add the show", logger.ERROR)

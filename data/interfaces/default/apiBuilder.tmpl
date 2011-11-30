@@ -51,7 +51,7 @@ addOption("Command", "History.Trim", "?cmd=history.trim", "", "", "action");
 addList("Command", "Logs", "?cmd=logs", "logs");
 addList("Command", "Show", "?cmd=show", "tvdbid");
 addList("Command", "Show.AddExisting", "?cmd=show.addexisting", "show.addexisting", "", "", "action");
-addList("Command", "Show.AddNew", "?cmd=show.addnew", "show.addnew", "", "", "action disabled");
+addList("Command", "Show.AddNew", "?cmd=show.addnew", "show.addnew", "", "", "action");
 addList("Command", "Show.Cache", "?cmd=show.cache", "tvdbid", "", "", "action");
 addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action");
 addList("Command", "Show.GetQuality", "?cmd=show.getquality", "tvdbid", "", "", "action");
@@ -103,6 +103,25 @@ addList("show.addexisting-tvdbid", "80348 (Chuck)", "&amp;tvdbid=80348", "show.a
 addOption("show.addexisting-opt", "Optional Param", "", 1);
 addList("show.addexisting-opt", "No Season Folder", "&amp;season_folder=0", "quality");
 addList("show.addexisting-opt", "Use Season Folder", "&amp;season_folder=1", "quality");
+
+addList("show.addnew", "101501 (Ancient Aliens)", "&amp;tvdbid=101501&amp;show_name=Ancient Aliens", "show.addnew-loc");
+addList("show.addnew", "80348 (Chuck)", "&amp;tvdbid=80348&amp;show_name=Chuck", "show.addnew-loc");
+
+addOption("show.addnew-loc", "Optional Param", "", 1);
+addList("show.addnew-loc", "C:\\Temp", "&amp;location=C:\\temp", "show.addnew-status");
+addList("show.addnew-loc", "D:\\Temp", "&amp;location=D:\\Temp", "show.addnew-status");
+addList("show.addnew-loc", "S:\\TV", "&amp;location=S:\\TV", "show.addnew-status");
+addList("show.addnew-loc", "S:\\TV", "&amp;location=S:\\TV", "show.addnew-status");
+
+addOption("show.addnew-status", "Optional Param", "", 1);
+addList("show.addnew-status", "Wanted", "&amp;status=wanted", "show.addnew-opt");
+addList("show.addnew-status", "Skipped", "&amp;status=skipped", "show.addnew-opt");
+addList("show.addnew-status", "Archived", "&amp;status=archived", "show.addnew-opt");
+addList("show.addnew-status", "Ignored", "&amp;status=ignored", "show.addnew-opt");
+
+addOption("show.addnew-opt", "Optional Param", "", 1);
+addList("show.addnew-opt", "No Season Folder", "&amp;season_folder=0", "quality");
+addList("show.addnew-opt", "Use Season Folder", "&amp;season_folder=1", "quality");
 
 addList("show.searchtvdb", "Lost", "&amp;name=Lost", "show.searchtvdb-lang");
 addList("show.searchtvdb", "office", "&amp;name=office", "show.searchtvdb-lang");
@@ -288,7 +307,7 @@ addOption("sb.deleterootdir", "S:\\Invalid_Location", "&amp;location=S:\\Invalid
 </script>
 </head>
 
-<body onload="initListGroup('api', document.apibuilder.firstlevel, document.apibuilder.secondlevel, document.apibuilder.thirdlevel, document.apibuilder.forthlevel, document.apibuilder.fifthlevel, document.apibuilder.sixthlevel)">
+<body onload="initListGroup('api', document.apibuilder.firstlevel, document.apibuilder.secondlevel, document.apibuilder.thirdlevel, document.apibuilder.forthlevel, document.apibuilder.fifthlevel, document.apibuilder.sixthlevel, document.apibuilder.seventhlevel)">
 
 <form name="apibuilder" id="apibuilder" action="">
 <table align="center">
@@ -308,9 +327,10 @@ addOption("sb.deleterootdir", "S:\\Invalid_Location", "&amp;location=S:\\Invalid
             <select name="forthlevel"><option></option></select>
             <select name="fifthlevel"><option></option></select>
             <select name="sixthlevel"><option></option></select>
+            <select name="seventhlevel"><option></option></select>
             <div style="float: left; ">
                 <input type="button" value="Reset" onclick="resetListGroup('api',1)" />
-                <input type="button" value="Go" onclick="goListGroup(this.form['apikey'].value, this.form['sixthlevel'].value, this.form['fifthlevel'].value, this.form['forthlevel'].value, this.form['thirdlevel'].value, this.form['secondlevel'].value, this.form['firstlevel'].value)" />
+                <input type="button" value="Go" onclick="goListGroup(this.form['apikey'].value, this.form['seventhlevel'].value, this.form['sixthlevel'].value, this.form['fifthlevel'].value, this.form['forthlevel'].value, this.form['thirdlevel'].value, this.form['secondlevel'].value, this.form['firstlevel'].value)" />
             </div>
         </td>
     </tr>
