@@ -64,7 +64,7 @@ class BoxcarNotifier:
             elif e.code == 401: #For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added your service.
                 if subscribe: #If the user has already added your service, we'll return an HTTP status code of 401.
                     logger.log("Already subscribed to service", logger.ERROR)
-                    # i dont know if this is true or false ... its neihter but i also dont know how we got here in the first place
+                    # i dont know if this is true or false ... its neither but i also dont know how we got here in the first place
                     return False
                 else: #HTTP status 401 if the user doesn't have the service added
                    subscribeNote = self._sendBoxcar(msg, title, email, True)
@@ -72,7 +72,7 @@ class BoxcarNotifier:
                        logger.log("Subscription send", logger.DEBUG)
                        return True
                    else:
-                       logger.log("Subscription could not be send", logger.WARNING)
+                       logger.log("Subscription could not be send", logger.ERROR)
                        return False
             elif e.code == 400: #If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
                 logger.log("Wrong data send to boxcar", logger.ERROR)
@@ -84,8 +84,9 @@ class BoxcarNotifier:
     def notify_snatch(self, ep_name, title="Snatched"):
         if sickbeard.BOXCAR_NOTIFY_ONSNATCH:
             self._notifyBoxcar(title, ep_name)
+            
 
-    def notify_download(self, ep_name, title="Completed"):
+    def notify_download(self, ep_name, title="Downloaded"):
         if sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD:
             self._notifyBoxcar(title, ep_name)
 
