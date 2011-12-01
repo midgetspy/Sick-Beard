@@ -98,7 +98,7 @@ class Api:
             try:
                 outDict = _call_dispatcher(args, kwargs)
             except Exception, e: # real internal error oohhh nooo :(
-                logger.log("API: " + ex(e), logger.ERROR)
+                logger.log(u"API :: " + ex(e), logger.ERROR)
                 errorData = {"error_msg": ex(e),
                              "args": args,
                              "kwargs": kwargs}
@@ -184,9 +184,9 @@ def call_dispatcher(args, kwargs):
         or calls the TVDBShorthandWrapper when the first args element is a number
         or returns an error that there is no such cmd
     """
-    logger.log("api: all args: '" + str(args) + "'", logger.DEBUG)
-    logger.log("api: all kwargs: '" + str(kwargs) + "'", logger.DEBUG)
-    #logger.log("api: dateFormat: '" + str(dateFormat) + "'", logger.DEBUG)
+    logger.log(u"API :: all args: '" + str(args) + "'", logger.DEBUG)
+    logger.log(u"API :: all kwargs: '" + str(kwargs) + "'", logger.DEBUG)
+    #logger.log(u"API :: dateFormat: '" + str(dateFormat) + "'", logger.DEBUG)
 
     cmds = None
     if args:
@@ -207,7 +207,7 @@ def call_dispatcher(args, kwargs):
             if len(cmd.split("_")) > 1: # was a index used for this cmd ?
                 cmd, cmdIndex = cmd.split("_") # this gives us the clear cmd and the index
 
-            logger.log(cmd + ": curKwargs " + str(curKwargs), logger.DEBUG)
+            logger.log(u"API :: " + cmd + ": curKwargs " + str(curKwargs), logger.DEBUG)
             try:
                 if cmd in _functionMaper:
                     curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run() # get the cmd class, init it and run()
@@ -414,7 +414,7 @@ class ApiCall(object):
         elif type == "ignore":
             pass
         else:
-            logger.log("Invalid param type set " + str(type) + " can not check or convert ignoring it", logger.ERROR)
+            logger.log(u"API :: Invalid param type set " + str(type) + " can not check or convert ignoring it", logger.ERROR)
 
         if error:
             # this is a real ApiError !!
@@ -915,7 +915,7 @@ class CMD_EpisodeSetStatus(ApiCall):
             for cur_segment in segment_list:
                 cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
                 sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
-                logger.log(u"Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
+                logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
                 return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
 
         return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
@@ -1418,7 +1418,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
             try:
                 seriesXML = etree.ElementTree(etree.XML(urlData))
             except Exception, e:
-                logger.log(u"Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
+                logger.log(u"API :: Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
                 return _responds(RESULT_FAILURE, msg="Unable to read result from tvdb")
 
             series = seriesXML.getiterator('Series')
@@ -1444,7 +1444,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
             try:
                 myShow = t[int(self.tvdbid)]
             except (tvdb_exceptions.tvdb_shownotfound, tvdb_exceptions.tvdb_error):
-                logger.log(u"Unable to find show with id " + str(self.tvdbid), logger.DEBUG)
+                logger.log(u"API :: Unable to find show with id " + str(self.tvdbid), logger.WARNING)
                 return _responds(RESULT_SUCCESS, {'results': [], 'langid': lang_id})
 
             showOut = [{'tvdbid': self.tvdbid,
@@ -1771,7 +1771,7 @@ class CMD_ShowAddNew(ApiCall):
         showPath = ek.ek(os.path.join, self.location, helpers.sanitizeFileName(tvdbName))
         dir_exists = helpers.makeDir(showPath)
         if not dir_exists:
-            logger.log(u"Unable to create the folder " + showPath + ", can't add the show", logger.ERROR)
+            logger.log(u"API :: Unable to create the folder " + showPath + ", can't add the show", logger.ERROR)
             return _responds(RESULT_FAILURE, {"path": showPath}, "Unable to create the folder " + showPath + ", can't add the show")
         else:
             helpers.chmodAsParent(showPath)
@@ -2191,7 +2191,7 @@ class CMD_ShowUpdate(ApiCall):
             sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
             return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has queued to be updated")
         except exceptions.CantUpdateException, e:
-            logger.log("API:: Unable to update " + str(showObj.name) + ". " + str(ex(e)), logger.ERROR)
+            logger.log(u"API:: Unable to update " + str(showObj.name) + ". " + str(ex(e)), logger.ERROR)
             return _responds(RESULT_FAILURE, msg="Unable to update " + str(showObj.name))
 
 
