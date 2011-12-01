@@ -53,17 +53,16 @@ notifiers = [
     twitter_notifier,
     nmj_notifier,
     synoindex_notifier,
+    boxcar_notifier
 ]
 
 def notify_download(ep_name):
     for n in notifiers:
         n.notify_download(ep_name)
     notifo_notifier.notify_download(ep_name)
-    boxcar_notifier.notify_download(ep_name)
 
 def notify_snatch(ep_name):
     for n in notifiers:
         n.notify_snatch(ep_name)
     notifo_notifier.notify_snatch(ep_name)
-    boxcar_notifier.notify_snatch(ep_name)
 
