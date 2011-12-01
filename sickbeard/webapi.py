@@ -32,7 +32,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from common import *
 from sickbeard import image_cache
-
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 try:
     import json
 except ImportError:
@@ -1516,7 +1516,7 @@ class CMD_Show(ApiCall):
         if not showDict["network"]:
             showDict["network"] = ""
         showDict["status"] = showObj.status
-        
+
         nextAirdate = ''
         nextEps = showObj.nextEpisode()
         if (len(nextEps) != 0):
@@ -1587,8 +1587,7 @@ class CMD_ShowAddExisting(ApiCall):
 
 class CMD_ShowAddNew(ApiCall):
     _help = {"desc": "add a new show to sickbeard",
-             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
-                                    "show_name": {"desc": "the name of the show to be added"}
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
              "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
                                     "location": {"desc": "base path for where the show folder is to be created"},
@@ -1608,7 +1607,6 @@ class CMD_ShowAddNew(ApiCall):
     def __init__(self, args, kwargs):
         # required
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
-        self.show_name, args = self.check_params(args, kwargs, "show_name", None, True, "string", [])
         # optional
         self.location, args = self.check_params(args, kwargs, "location", None, False, "string", [])
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
@@ -1677,9 +1675,18 @@ class CMD_ShowAddNew(ApiCall):
                 return _responds(RESULT_FAILURE, msg="Status prohibited")
             newStatus = self.status
 
+        tvdbName = None
+        tvdbResult = CMD_SickBeardSearchTVDB([], {'tvdbid': self.tvdbid}).run()
+        logger.log(repr(tvdbResult))
+        if tvdbResult['result'] == result_type_map[RESULT_SUCCESS]:
+            if 'name' in tvdbResult['data']['results'][0]:
+                tvdbName = tvdbResult['data']['results'][0]['name']
+
+        if not tvdbName:
+            return _responds(RESULT_FAILURE, msg="Can not determin name from tvdb")
+
         # moved the logic check to the end in an attempt to eliminate empty directory being created from previous errors
-        # TODO: would like to just pull the show name from tvdb rather than rely on someone submitting it (show_name)
-        showPath = ek.ek(os.path.join, self.location, helpers.sanitizeFileName(self.show_name))
+        showPath = ek.ek(os.path.join, self.location, helpers.sanitizeFileName(tvdbName))
         dir_exists = helpers.makeDir(showPath)
         if not dir_exists:
             logger.log(u"Unable to create the folder " + showPath + ", can't add the show", logger.ERROR)
@@ -1688,7 +1695,7 @@ class CMD_ShowAddNew(ApiCall):
             helpers.chmodAsParent(showPath)
 
         sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), self.lang) #@UndefinedVariable
-        return _responds(RESULT_SUCCESS, msg="Show has been queued to be added")
+        return _responds(RESULT_SUCCESS, {'name': tvdbName}, tvdbName + " has been queued to be added")
 
 
 class CMD_ShowCache(ApiCall):
@@ -1803,11 +1810,10 @@ class CMD_ShowRefresh(ApiCall):
             return _responds(RESULT_FAILURE, msg="Unable to refresh " + str(showObj.name))
 
 
-class CMD_ShowSearchTVDB(ApiCall):
+class CMD_SickBeardSearchTVDB(ApiCall):
     _help = {"desc": "search for show at tvdb with a given string and language",
-             "requiredParameters": {"name": {"desc": "name of the show you want to search for"}
-                                },
-             "optionalPramameters": {"lang": {"desc": "the 2 letter abbreviation lang id"}
+             "optionalPramameters": {"name": {"desc": "name of the show you want to search for"},
+                                     "lang": {"desc": "the 2 letter abbreviation lang id"}
                                      }
              }
 
@@ -1819,33 +1825,61 @@ class CMD_ShowSearchTVDB(ApiCall):
 
     def __init__(self, args, kwargs):
         # required
-        self.name, args = self.check_params(args, kwargs, "name", None, True, "string", [])
         # optional
+        self.name, args = self.check_params(args, kwargs, "name", None, False, "string", [])
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, False, "int", [])
         self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ search for show at tvdb with a given string and language """
+        if self.name and not self.tvdbid: # only name was given
+            baseURL = "http://thetvdb.com/api/GetSeries.php?"
+            params = {'seriesname': str(self.name).encode('utf-8'), 'language': self.lang}
+            finalURL = baseURL + urllib.urlencode(params)
+            urlData = sickbeard.helpers.getURL(finalURL)
 
-        baseURL = "http://thetvdb.com/api/GetSeries.php?"
-        params = {'seriesname': str(self.name).encode('utf-8'), 'language': self.lang}
-        finalURL = baseURL + urllib.urlencode(params)
-        urlData = sickbeard.helpers.getURL(finalURL)
+            try:
+                seriesXML = etree.ElementTree(etree.XML(urlData))
+            except Exception, e:
+                logger.log(u"Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
+                return _responds(RESULT_FAILURE, msg="Unable to read result from tvdb")
 
-        try:
-            seriesXML = etree.ElementTree(etree.XML(urlData))
-        except Exception, e:
-            logger.log(u"Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
-            return _responds(RESULT_FAILURE, msg="Unable to read result from tvdb")
+            series = seriesXML.getiterator('Series')
+            results = []
+            for curSeries in series:
+                results.append({'tvdbid': int(curSeries.findtext('seriesid')),
+                                'name': curSeries.findtext('SeriesName'),
+                                'first_aired': curSeries.findtext('FirstAired')})
 
-        series = seriesXML.getiterator('Series')
-        results = []
-        for curSeries in series:
-            results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
+            lang_id = self.valid_languages[self.lang]
+            return _responds(RESULT_SUCCESS, {'results': results, 'langid': lang_id})
+        elif self.tvdbid:
+            # There's gotta be a better way of doing this but we don't wanna
+            # change the language value elsewhere
+            ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-        lang_id = self.valid_languages[self.lang]
-        return _responds(RESULT_SUCCESS, {'results': results, 'langid': lang_id})
+            if self.lang and not self.lang == 'en':
+                ltvdb_api_parms['language'] = self.lang
+
+            t = tvdb_api.Tvdb(actors=False, **ltvdb_api_parms)
+
+            try:
+                myShow = t[int(self.tvdbid)]
+            except tvdb_exceptions.tvdb_shownotfound:
+                logger.log(u"Unable to find show with id " + str(self.tvdbid), logger.DEBUG)
+                return _responds(RESULT_SUCCESS, {'results': [], 'langid': lang_id})
+
+            showOut = [{'tvdbid': self.tvdbid,
+                       'name': unicode(myShow.data['seriesname']),
+                       'first_aired': myShow.data['firstaired']}]
+
+            lang_id = self.valid_languages[self.lang]
+            return _responds(RESULT_SUCCESS, {'results': showOut, 'langid': lang_id})
+        else:
+            return _responds(RESULT_FAILURE, msg="Not enough params set")
+
 
 
 class CMD_ShowSeasonList(ApiCall):
@@ -2174,7 +2208,7 @@ class CMD_Shows(ApiCall):
             nextEps = curShow.nextEpisode()
             if (len(nextEps) != 0):
                 nextAirdate = _ordinal_to_dateForm(nextEps[0].airdate.toordinal())
-                           
+
             if not bool(self.paused) == bool(curShow.paused):
                 continue
             showDict = {"paused": curShow.paused,
@@ -2250,6 +2284,7 @@ _functionMaper = {"help": CMD_Help,
                   "sb.restart": CMD_SickBeardRestart,
                   "sb.setdefaults": CMD_SickBeardSetDefaults,
                   "sb.shutdown": CMD_SickBeardShutdown,
+                  "sb.searchtvdb": CMD_SickBeardSearchTVDB,
                   "show": CMD_Show,
                   "show.addexisting": CMD_ShowAddExisting,
                   "show.addnew": CMD_ShowAddNew,
@@ -2257,7 +2292,6 @@ _functionMaper = {"help": CMD_Help,
                   "show.delete": CMD_ShowDelete,
                   "show.getquality": CMD_ShowGetQuality,
                   "show.refresh": CMD_ShowRefresh,
-                  "show.searchtvdb": CMD_ShowSearchTVDB,
                   "show.seasonlist": CMD_ShowSeasonList,
                   "show.seasons": CMD_ShowSeasons,
                   "show.setquality": CMD_ShowSetQuality,
