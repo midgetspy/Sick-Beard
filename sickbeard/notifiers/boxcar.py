@@ -1,4 +1,5 @@
 # Author: Marvin Pinto <me@marvinp.ca>
+# Author: Dennis Lutter <lad1337@gmail.com>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
