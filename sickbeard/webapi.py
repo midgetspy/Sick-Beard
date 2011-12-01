@@ -1440,7 +1440,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
                 ltvdb_api_parms['language'] = self.lang
 
             t = tvdb_api.Tvdb(actors=False, **ltvdb_api_parms)
-            logger.log(repr(t))
+
             try:
                 myShow = t[int(self.tvdbid)]
             except (tvdb_exceptions.tvdb_shownotfound, tvdb_exceptions.tvdb_error):
@@ -1631,13 +1631,13 @@ class CMD_ShowAddExisting(ApiCall):
 
         tvdbName = None
         tvdbResult = CMD_SickBeardSearchTVDB([], {'tvdbid': self.tvdbid}).run()
-        logger.log(repr(tvdbResult))
+
         if tvdbResult['result'] == result_type_map[RESULT_SUCCESS]:
-            if 'name' in tvdbResult['data']['results'][0]:
+            if len(tvdbResult['data']['results']) == 1 and 'name' in tvdbResult['data']['results'][0]:
                 tvdbName = tvdbResult['data']['results'][0]['name']
 
         if not tvdbName:
-            return _responds(RESULT_FAILURE, msg="Can not determin name from tvdb")
+            return _responds(RESULT_FAILURE, msg="Unable to retrieve information from tvdb")
 
         quality_map = {'sdtv': Quality.SDTV,
                        'sddvd': Quality.SDDVD,
@@ -1759,7 +1759,7 @@ class CMD_ShowAddNew(ApiCall):
 
         tvdbName = None
         tvdbResult = CMD_SickBeardSearchTVDB([], {'tvdbid': self.tvdbid}).run()
-        logger.log(repr(tvdbResult))
+
         if tvdbResult['result'] == result_type_map[RESULT_SUCCESS]:
             if len(tvdbResult['data']['results']) == 1 and 'name' in tvdbResult['data']['results'][0]:
                 tvdbName = tvdbResult['data']['results'][0]['name']
