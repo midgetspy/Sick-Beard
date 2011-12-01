@@ -1435,6 +1435,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
             # change the language value elsewhere
             ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
+            lang_id = self.valid_languages[self.lang]
             if self.lang and not self.lang == 'en':
                 ltvdb_api_parms['language'] = self.lang
 
@@ -1442,7 +1443,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
             logger.log(repr(t))
             try:
                 myShow = t[int(self.tvdbid)]
-            except tvdb_exceptions.tvdb_shownotfound:
+            except (tvdb_exceptions.tvdb_shownotfound, tvdb_exceptions.tvdb_error):
                 logger.log(u"Unable to find show with id " + str(self.tvdbid), logger.DEBUG)
                 return _responds(RESULT_SUCCESS, {'results': [], 'langid': lang_id})
 
@@ -1450,7 +1451,6 @@ class CMD_SickBeardSearchTVDB(ApiCall):
                        'name': unicode(myShow.data['seriesname']),
                        'first_aired': myShow.data['firstaired']}]
 
-            lang_id = self.valid_languages[self.lang]
             return _responds(RESULT_SUCCESS, {'results': showOut, 'langid': lang_id})
         else:
             return _responds(RESULT_FAILURE, msg="Either tvdbid or name is required")
@@ -1761,11 +1761,11 @@ class CMD_ShowAddNew(ApiCall):
         tvdbResult = CMD_SickBeardSearchTVDB([], {'tvdbid': self.tvdbid}).run()
         logger.log(repr(tvdbResult))
         if tvdbResult['result'] == result_type_map[RESULT_SUCCESS]:
-            if 'name' in tvdbResult['data']['results'][0]:
+            if len(tvdbResult['data']['results']) == 1 and 'name' in tvdbResult['data']['results'][0]:
                 tvdbName = tvdbResult['data']['results'][0]['name']
 
         if not tvdbName:
-            return _responds(RESULT_FAILURE, msg="Can not determin name from tvdb")
+            return _responds(RESULT_FAILURE, msg="Unable to retrieve information from tvdb")
 
         # moved the logic check to the end in an attempt to eliminate empty directory being created from previous errors
         showPath = ek.ek(os.path.join, self.location, helpers.sanitizeFileName(tvdbName))
