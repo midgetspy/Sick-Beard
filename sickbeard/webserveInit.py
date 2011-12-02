@@ -88,6 +88,11 @@ def initWebServer(options = {}):
                         },
                         '/api':{
                                 'tools.auth_basic.on':            False
+                        },
+                        '/api/builder':{
+                                'tools.auth_basic.on':            True,
+                                'tools.auth_basic.realm':         'SickBeard',
+                                'tools.auth_basic.checkpassword': checkpassword
                         }
                 })
 
