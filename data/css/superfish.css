@@ -64,10 +64,6 @@ ul.sf-menu li li li.sfHover ul {
     top:			0;
 }
 
-.sf-menu li.current {
-    background-color: #000;
-}
-
 .sf-menu {
     float:			left;
     /*margin-bottom:	1em;*/
