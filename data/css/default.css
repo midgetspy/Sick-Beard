@@ -47,6 +47,7 @@ font-size:20px;
 font-family:Arial, Helvetica, sans-serif;
 text-transform:lowercase;
 color:#57442B;
+/* font: 20px/22px hneue-medium-cn-i,Helvetica,Arial,sans-serif; */
 }
 
 /* --------------------------------------------- */
@@ -245,12 +246,13 @@ line-height: 17px;
 background-color:#57442B;
 color:#F5F5F5;
 width:100%;
+line-height: 1em;
+font-size: 13px;
 }
 #SubMenu {
 clear:both;
 background-color:#F5F1E4;
 color:#333;
-border-top: 1px solid #333;
 border-bottom: 1px solid #b3b3b3;
 padding-left:5px;
 }
