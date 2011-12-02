@@ -1458,7 +1458,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
 
 class CMD_SickBeardSetDefaults(ApiCall):
     _help = {"desc": "set sickbeard user defaults",
-             "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders within the show directory"},
                                     "status": {"desc": "status of missing episodes"}
@@ -1603,7 +1603,7 @@ class CMD_ShowAddExisting(ApiCall):
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                     "location": {"desc": "full path to the existing folder for the show"}
                                 },
-             "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders for the show"}
                                     }
@@ -1671,7 +1671,7 @@ class CMD_ShowAddNew(ApiCall):
     _help = {"desc": "add a new show to sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
-             "optionalPramameters": {"initial ": {"desc": "initial quality for the show"},
+             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
                                     "location": {"desc": "base path for where the show folder is to be created"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders for the show"},
