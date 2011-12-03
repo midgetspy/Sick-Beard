@@ -1308,9 +1308,9 @@ class CMD_SickBeardGetMessages(ApiCall):
     def run(self):
         messages = []
         for cur_notification in ui.notifications.get_notifications():
-            messages.append({'title': cur_notification.title,
-                           'message': cur_notification.message,
-                           'type': cur_notification.type})
+            messages.append({"title": cur_notification.title,
+                           "message": cur_notification.message,
+                           "type": cur_notification.type})
         return _responds(RESULT_SUCCESS, messages)
 
 
@@ -1411,7 +1411,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
         """ search for show at tvdb with a given string and language """
         if self.name and not self.tvdbid: # only name was given
             baseURL = "http://thetvdb.com/api/GetSeries.php?"
-            params = {'seriesname': str(self.name).encode('utf-8'), 'language': self.lang}
+            params = {"seriesname": str(self.name).encode('utf-8'), 'language': self.lang}
             finalURL = baseURL + urllib.urlencode(params)
             urlData = sickbeard.helpers.getURL(finalURL)
 
@@ -1424,12 +1424,12 @@ class CMD_SickBeardSearchTVDB(ApiCall):
             series = seriesXML.getiterator('Series')
             results = []
             for curSeries in series:
-                results.append({'tvdbid': int(curSeries.findtext('seriesid')),
-                                'name': curSeries.findtext('SeriesName'),
-                                'first_aired': curSeries.findtext('FirstAired')})
+                results.append({"tvdbid": int(curSeries.findtext('seriesid')),
+                                "name": curSeries.findtext('SeriesName'),
+                                "first_aired": curSeries.findtext('FirstAired')})
 
             lang_id = self.valid_languages[self.lang]
-            return _responds(RESULT_SUCCESS, {'results': results, 'langid': lang_id})
+            return _responds(RESULT_SUCCESS, {"results": results, "langid": lang_id})
         elif self.tvdbid:
             # There's gotta be a better way of doing this but we don't wanna
             # change the language value elsewhere
@@ -1445,13 +1445,13 @@ class CMD_SickBeardSearchTVDB(ApiCall):
                 myShow = t[int(self.tvdbid)]
             except (tvdb_exceptions.tvdb_shownotfound, tvdb_exceptions.tvdb_error):
                 logger.log(u"API :: Unable to find show with id " + str(self.tvdbid), logger.WARNING)
-                return _responds(RESULT_SUCCESS, {'results': [], 'langid': lang_id})
+                return _responds(RESULT_SUCCESS, {"results": [], "langid": lang_id})
 
-            showOut = [{'tvdbid': self.tvdbid,
-                       'name': unicode(myShow.data['seriesname']),
-                       'first_aired': myShow.data['firstaired']}]
+            showOut = [{"tvdbid": self.tvdbid,
+                       "name": unicode(myShow.data['seriesname']),
+                       "first_aired": myShow.data['firstaired']}]
 
-            return _responds(RESULT_SUCCESS, {'results': showOut, 'langid': lang_id})
+            return _responds(RESULT_SUCCESS, {"results": showOut, "langid": lang_id})
         else:
             return _responds(RESULT_FAILURE, msg="Either tvdbid or name is required")
 
@@ -1630,7 +1630,7 @@ class CMD_ShowAddExisting(ApiCall):
             return _responds(RESULT_FAILURE, msg='Not a valid location')
 
         tvdbName = None
-        tvdbResult = CMD_SickBeardSearchTVDB([], {'tvdbid': self.tvdbid}).run()
+        tvdbResult = CMD_SickBeardSearchTVDB([], {"tvdbid": self.tvdbid}).run()
 
         if tvdbResult['result'] == result_type_map[RESULT_SUCCESS]:
             if len(tvdbResult['data']['results']) == 1 and 'name' in tvdbResult['data']['results'][0]:
@@ -1664,7 +1664,7 @@ class CMD_ShowAddExisting(ApiCall):
             newQuality = Quality.combineQualities(iqualityID, aqualityID)
 
         sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.season_folder)) #@UndefinedVariable
-        return _responds(RESULT_SUCCESS, {'name': tvdbName}, tvdbName + " has been queued to be added")
+        return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 
 class CMD_ShowAddNew(ApiCall):
@@ -1758,7 +1758,7 @@ class CMD_ShowAddNew(ApiCall):
             newStatus = self.status
 
         tvdbName = None
-        tvdbResult = CMD_SickBeardSearchTVDB([], {'tvdbid': self.tvdbid}).run()
+        tvdbResult = CMD_SickBeardSearchTVDB([], {"tvdbid": self.tvdbid}).run()
 
         if tvdbResult['result'] == result_type_map[RESULT_SUCCESS]:
             if len(tvdbResult['data']['results']) == 1 and 'name' in tvdbResult['data']['results'][0]:
@@ -1777,7 +1777,7 @@ class CMD_ShowAddNew(ApiCall):
             helpers.chmodAsParent(showPath)
 
         sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), self.lang) #@UndefinedVariable
-        return _responds(RESULT_SUCCESS, {'name': tvdbName}, tvdbName + " has been queued to be added")
+        return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 
 class CMD_ShowCache(ApiCall):
