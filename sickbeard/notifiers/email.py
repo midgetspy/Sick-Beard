@@ -56,7 +56,7 @@ class EmailNotifier:
 		if sickbeard.EMAIL_NOTIFY_ONDOWNLOAD:
 			self._notifyEmail(title, ep_name)
 
-	def _notifyEmail(self, title, message, server, sender, recipient, force=False):
+	def _notifyEmail(self, title, message, server=None, sender=None, recipient=None, force=False):
 		if not sickbeard.USE_EMAIL and not force:
 			logger.log("Notification for Email not enabled, skipping this notification", logger.DEBUG)
 			return False
@@ -69,7 +69,7 @@ class EmailNotifier:
 
 		self._sendEmail(message, title, server, sender, recipient)
 		
-		logger.log(u"Sending notification for " + message, logger.DEBUG)
+		logger.log(u"Sending email notification for " + message, logger.DEBUG)
 		return True
 
 notifier = EmailNotifier
