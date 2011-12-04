@@ -1139,7 +1139,8 @@ class ConfigNotifications:
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
-                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
+                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
+                          use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_server=None, email_sender=None, email_recipient=None):
 
         results = []
 
@@ -1264,6 +1265,20 @@ class ConfigNotifications:
         else:
             use_nmj = 0
 
+        if email_notify_onsnatch == "on":
+            email_notify_onsnatch = 1
+        else:
+            email_notify_onsnatch = 0
+
+        if email_notify_ondownload == "on":
+            email_notify_ondownload = 1
+        else:
+            email_notify_ondownload = 0
+        if use_email == "on":
+            use_email = 1
+        else:
+            use_email = 0
+
         if use_synoindex == "on":
             use_synoindex = 1
         else:
@@ -1322,6 +1337,13 @@ class ConfigNotifications:
         sickbeard.NMJ_HOST = nmj_host
         sickbeard.NMJ_DATABASE = nmj_database
         sickbeard.NMJ_MOUNT = nmj_mount
+
+        sickbeard.USE_EMAIL = use_email
+        sickbeard.EMAIL_NOTIFY_ONSNATCH = email_notify_onsnatch
+        sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = email_notify_ondownload
+        sickbeard.EMAIL_SERVER = email_server
+        sickbeard.EMAIL_SENDER = email_sender
+        sickbeard.EMAIL_RECIPIENT = email_recipient
 
         sickbeard.USE_SYNOINDEX = use_synoindex
 
@@ -1962,6 +1984,15 @@ class Home:
         else:
             return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
 
+    @cherrypy.expose
+    def testEmail(self, server=None, sender=None, recipient=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.email_notifier.test_notify(server, sender, recipient)
+        if result:
+            return "Successfully sent email"
+        else:
+            return "Email sending failed"
 
     @cherrypy.expose
     def shutdown(self):
