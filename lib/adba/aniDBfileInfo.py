@@ -48,9 +48,7 @@ def get_file_hash(filePath):
         
         
 def get_file_size(path):
-    f = open(path)
-    size = len(f.read())
-    f.close()
+    size = os.path.getsize(path)
     return size
 
 
