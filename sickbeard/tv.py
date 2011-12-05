@@ -1481,7 +1481,52 @@ class TVEpisode(object):
 
         return finalName
 
+    def _ep_name(self):
+        """
+        Returns the name of the episode to use during renaming. Combines the names of related episodes.
+        Eg. "Ep Name (1)" and "Ep Name (2)" becomes "Ep Name"
+            "Ep Name" and "Other Ep Name" becomes "Ep Name & Other Ep Name"
+        """
+        
+        multiNameRegex = "(.*) \(\d\)"
+
+        self.relatedEps = sorted(self.relatedEps, key=lambda x: x.episode)
+
+        if len(self.relatedEps) == 0:
+            goodName = self.name
+
+        elif len(self.relatedEps) > 1:
+            goodName = ''
+
+        else:
+            singleName = True
+            curGoodName = None
+
+            for curName in [self.name]+[x.name for x in self.relatedEps]:
+                match = re.match(multiNameRegex, curName)
+                if not match:
+                    singleName = False
+                    break
+
+                if curGoodName == None:
+                    curGoodName = match.group(1)
+                elif curGoodName != match.group(1):
+                    singleName = False
+                    break
+
+            if singleName:
+                goodName = curGoodName
+            else:
+                goodName = self.name
+                for relEp in self.relatedEps:
+                    goodName += " & " + relEp.name
+
+        return goodName
+
     def _replace_map(self):
+        
+        ep_name = self._ep_name()
+        
         def dot(name):
             return name.replace(' ','.')
         
@@ -1496,22 +1541,22 @@ class TVEpisode(object):
         epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
         
         return {
-                       '%SN': self.show.name,
-                       '%S.N': dot(self.show.name),
-                       '%S_N': us(self.show.name),
-                       '%EN': self.name,
-                       '%E.N': dot(self.name),
-                       '%E_N': us(self.name),
-                       '%QN': Quality.qualityStrings[epQual],
-                       '%Q.N': dot(Quality.qualityStrings[epQual]),
-                       '%Q_N': us(Quality.qualityStrings[epQual]),
-                       '%S': str(self.season),
-                       '%0S': '%02d' % self.season,
-                       '%E': str(self.episode),
-                       '%0E': '%02d' % self.episode,
-                       '%RN': self.release_name,
-                       '%RG': release_group(self.release_name),
-                       }
+                   '%SN': self.show.name,
+                   '%S.N': dot(self.show.name),
+                   '%S_N': us(self.show.name),
+                   '%EN': ep_name,
+                   '%E.N': dot(ep_name),
+                   '%E_N': us(ep_name),
+                   '%QN': Quality.qualityStrings[epQual],
+                   '%Q.N': dot(Quality.qualityStrings[epQual]),
+                   '%Q_N': us(Quality.qualityStrings[epQual]),
+                   '%S': str(self.season),
+                   '%0S': '%02d' % self.season,
+                   '%E': str(self.episode),
+                   '%0E': '%02d' % self.episode,
+                   '%RN': self.release_name,
+                   '%RG': release_group(self.release_name),
+                   }
 
     def _formatted_string(self, pattern=None, multi=None):
         
@@ -1528,7 +1573,7 @@ class TVEpisode(object):
         
         result_name = pattern
         
-        # figure out the double-ep naming style for each group, if applicable
+        # figure out the double-ep numbering style for each group, if applicable
         for cur_name_group in name_groups:
         
             season_format = sep = ep_sep = ep_format = None
@@ -1585,6 +1630,11 @@ class TVEpisode(object):
             # fill out the template for this piece and then insert this piece into the actual pattern
             cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
+        
+        # if there's no release group then replace it with a reasonable facsimile
+        if not replace_map['%RN']:
+            logger.log(u"Episode has no release name, making up a fake one", logger.DEBUG)
+            result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N')
         
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):

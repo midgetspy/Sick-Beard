@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 from sickbeard import tv
+from sickbeard import common
 
 from common import Quality, DOWNLOADED
 
@@ -45,7 +46,8 @@ def test_name(pattern, multi=False):
             self._season = season
             self._episode = episode
             self.show = TVShow()
-            self._release_name = 'Show.Name.S01E02.HDTV.XviD-RLSGROUP'
+            self._status = Quality.compositeStatus(common.DOWNLOADED, common.Quality.SDTV)
+            self._release_name = ''#'Show.Name.S01E02.HDTV.XviD-RLSGROUP'
 
     # make a fake episode object
     ep = TVEpisode(1,2,"Ep Name")

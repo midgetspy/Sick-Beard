@@ -1,5 +1,14 @@
 $(document).ready(function(){
 
+	// http://stackoverflow.com/questions/2219924/idiomatic-jquery-delayed-event-only-after-a-short-pause-in-typing-e-g-timew
+	var typewatch = (function(){
+		var timer = 0;
+		return function(callback, ms){
+			clearTimeout (timer);
+			timer = setTimeout(callback, ms);
+			}  
+	})();
+	
 	function fill_examples() {
 
 		var dir_pattern = $('#naming_dir_pattern').val();
@@ -35,7 +44,7 @@ $(document).ready(function(){
 	}
 	
 	function do_preset(me) {
-		
+
 		var preset = $(me+' :selected').attr('id');
 
 		if (preset == 'none')
@@ -64,9 +73,11 @@ $(document).ready(function(){
 	});
 	
 	$('#naming_multi_ep').change(fill_examples);
-	$('.naming_pattern').change(fill_examples);
-
-	
+	$('.naming_pattern').keyup(function(){
+		typewatch(function () {
+			do_preset('#'+$(this).attr('id'));
+		}, 500);
+	});
 
     // -- start of metadata options div toggle code --
     $('#metadataType').change(function(){
