@@ -303,8 +303,10 @@ anime_ep_regexes = [
                
                ('anime_bare',
                # One Piece - 102
+               # [ACX]_Wolf's_Spirit_001.mkv
                '''
-               ^(?P<series_name>.+?)[ ._-]+                         # Show_Name and separator
+               ^(\[(?P<release_group>.+?)\][ ._-]*)?
+               (?P<series_name>.+?)[ ._-]+                         # Show_Name and separator
                (?P<ep_ab_num>\d{3})                                      # E01
                (-(?P<extra_ab_ep_num>\d{3}))?                            # E02
                (v(?P<version>[0-9]))?                                     # v2

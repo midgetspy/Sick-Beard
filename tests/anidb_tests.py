@@ -23,7 +23,7 @@ class AnidbBasicTests(test.SickbeardTestConfigCase):
         if set_up_anidb_connection():
             pass
         else:
-            self.fail("Can not setup a connection")
+            self.fail("Can not setup a connection. Check Username and password in config")
     
 if __name__ == '__main__':
     print "=================="

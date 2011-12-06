@@ -11,7 +11,7 @@ import sickbeard
 sickbeard.SYS_ENCODING = 'UTF-8'
 
 
-DEBUG = VERBOSE = True
+DEBUG = VERBOSE = False
 
 
 simple_test_cases = {
@@ -170,6 +170,7 @@ simple_test_cases = {
               'Naruto Shippuden - 314v2': parser.ParseResult(None, 'Naruto Shippuden', None, [], None, None, None, [314]),
               'Blue Submarine No. 6 104-105': parser.ParseResult(None, 'Blue Submarine No. 6', None, [], None, None, None, [104,105]),
               'Samurai X: Trust & Betrayal (OVA) 001-002': parser.ParseResult(None, 'Samurai X: Trust & Betrayal (OVA)', None, [], None, None, None, [1,2]),
+              "[ACX]_Wolf's_Spirit_001.mkv": parser.ParseResult(None, "Wolf's Spirit", None, [], None, 'ACX', None, [1])
               }
               
               }
@@ -371,7 +372,7 @@ class BasicTests(unittest.TestCase):
 
     def test_anime_bare(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_bare',verbose=False)
+        self._test_names(np, 'anime_bare',verbose=True)
     
     def test_standard_file_names(self):
         np = parser.NameParser()
