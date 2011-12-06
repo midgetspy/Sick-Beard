@@ -1086,7 +1086,7 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
-            elif curProvider == 'demonoid":
+            elif curProvider == 'demonoid':
                 sickbeard.DEMONOID = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
