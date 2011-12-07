@@ -14,20 +14,6 @@ release = name + '-' + version
 Win32ConsoleName = 'SickBeard-console.exe'
 Win32WindowName = 'SickBeard.exe'
 
-def findLatestBuild():
-
-    regex = "http\://sickbeard\.googlecode\.com/files/SickBeard\-win32\-alpha\-build(\d+)(?:\.\d+)?\.zip"
-    
-    svnFile = urllib.urlopen("http://code.google.com/p/sickbeard/downloads/list")
-    
-    for curLine in svnFile.readlines():
-        match = re.search(regex, curLine)
-        if match:
-            groups = match.groups()
-            return int(groups[0])
-
-    return None
-
 def recursive_find_data_files(root_dir, allowed_extensions=('*')):
     
     to_return = {}
@@ -90,18 +76,14 @@ if os.path.isdir('dist'):
 # root source dir
 compile_dir = os.path.dirname(os.path.normpath(os.path.abspath(sys.argv[0])))
 
+currentBuildNumber = oldArgs[0]
+oldArgs = oldArgs[1:]
+
 if not 'nopull' in oldArgs:
     # pull new source from git
     print 'Updating source from git'
     p = subprocess.Popen('git pull origin master', shell=True, cwd=compile_dir)
     o,e = p.communicate()
-
-# figure out what build this is going to be
-latestBuild = findLatestBuild()
-if 'test' in oldArgs:
-    currentBuildNumber = str(latestBuild)+'a'
-else:
-    currentBuildNumber = latestBuild+1
 
 # write the version file before we compile
 versionFile = open("sickbeard/version.py", "w")
