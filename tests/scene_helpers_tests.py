@@ -1,5 +1,6 @@
 import unittest
 
+import test_lib
 import sys, os.path
 sys.path.append(os.path.abspath('..'))
 

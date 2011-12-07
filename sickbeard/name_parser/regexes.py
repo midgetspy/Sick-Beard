@@ -175,19 +175,21 @@ ep_regexes = [
                ),
               ]
 anime_ep_regexes = [
+                    
+
                ('anime_ultimate',
                 """
                 ^(?:\[(?P<release_group>.+?)\][ ._-]*)
                 (?P<series_name>.+?)[ ._-]+
                 (?P<ep_ab_num>\d{1,3})
-                (-(?P<extra_ab_ep_num>\d{1,3}))?[ ._-]+
+                (-(?P<extra_ab_ep_num>\d{1,3}))?[ ._-]+?
                 (?:v(?P<version>[0-9]))?
+                (?:[\w\.]*)
                 (?:(?:(?:[\[\(])(?P<extra_info>\d{3,4}[xp]?\d{0,4}[\.\w\s-]*)(?:[\]\)]))|(?:\d{3,4}[xp]))
                 (?:[ ._]?\[(?P<crc>\w+)\])?
                 .*?
                 """
                 ),
-
                ('anime_standard',
                # [Group Name] Show Name.13-14
                # [Group Name] Show Name - 13-14
@@ -205,6 +207,7 @@ anime_ep_regexes = [
                (\[(?P<crc>\w{8})\])?                                        # CRC
                .*?                                                          # Separator and EOL
                '''),
+                    
                ('anime_standard_round',
                # TODO examples
                # [Stratos-Subs]_Infinite_Stratos_-_12_(1280x720_H.264_AAC)_[379759DB]
@@ -283,7 +286,6 @@ anime_ep_regexes = [
                (?P<extra_ep_num>\d+))*                      # additional E03/etc
                .*?
                '''
-
                ),
                
                ('anime_and_normal_front',
@@ -300,7 +302,19 @@ anime_ep_regexes = [
                .*?
                '''
                ),
-               
+                ('anime_ep_name',
+                 """
+                ^(?:\[(?P<release_group>.+?)\][ ._-]*)
+                (?P<series_name>.+?)[ ._-]+
+                (?P<ep_ab_num>\d{1,3})
+                (-(?P<extra_ab_ep_num>\d{1,3}))?[ ._-]+?
+                (?:v(?P<version>[0-9])[ ._-]+?)?
+                (?:.+?[ ._-]+?)?
+                \[(?P<extra_info>\w+)\][ ._-]?
+                (?:\[(?P<crc>\w{8})\])?
+                .*?
+                 """
+                ),
                ('anime_bare',
                # One Piece - 102
                # [ACX]_Wolf's_Spirit_001.mkv

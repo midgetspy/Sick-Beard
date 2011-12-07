@@ -120,6 +120,10 @@ simple_test_cases = {
               '[UTW]_Fractal_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractal', None, [], 'h264-720p', 'UTW', None, [1]),
               
                },
+               'anime_ep_name':{
+               '[TzaTziki]_One_Piece_279_Chopper_Man_1_[720p][8AE5F25D]': parser.ParseResult(None, 'One Piece', None, [], '720p', 'TzaTziki', None, [279]),
+               "[ACX]Wolf's_Rain_-_04_-_Scars_in_the_Wasteland_[octavarium]_[82B7E357]": parser.ParseResult(None, "Wolf's Rain", None, [], 'octavarium', 'ACX', None, [4])
+              },
               
               "anime_standard_round": {
               '[SGKK] Bleach - 312v2 (1280x720 h264 AAC) [F501C9BE]': parser.ParseResult(None, 'Bleach', None, [], '1280x720 h264 AAC', 'SGKK', None, [312]),
@@ -349,6 +353,10 @@ class BasicTests(unittest.TestCase):
     def test_anime_ultimate(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
         self._test_names(np, 'anime_ultimate',verbose=False)
+
+    def test_anime_ep_name(self):
+        np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
+        self._test_names(np, 'anime_ep_name',verbose=False)
         
     def test_anime_slash(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
