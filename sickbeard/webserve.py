@@ -25,6 +25,7 @@ import urllib
 import re
 import threading
 import datetime
+import random
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -633,16 +634,19 @@ class ConfigGeneral:
     def generateKey(self):
         """ Return a new randomized API_KEY
         """
+
         try:
             from hashlib import md5
         except ImportError:
             from md5 import md5
-        import random
+        
         # Create some values to seed md5
         t = str(time.time())
         r = str(random.random())
+        
         # Create the md5 instance and give it the current time
         m = md5(t)
+        
         # Update the md5 instance with the random variable
         m.update(r)
 
@@ -1862,7 +1866,7 @@ class Home:
     def testSABnzbd(self, host=None, username=None, password=None, apikey=None):
         connection, accesMsg = sab.getSabAccesMethod(host, username, password, apikey)
         if connection:
-            authed, authMsg = sab.testAuthentication(host, username, password, apikey)
+            authed, authMsg = sab.testAuthentication(host, username, password, apikey) #@UnusedVariable
             if authed:
                 return "Success. Connected and authenticated"
             else:
