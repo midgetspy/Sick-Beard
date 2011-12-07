@@ -177,19 +177,22 @@ class WDTVMetadata(generic.GenericMetadata):
                 episode = etree.SubElement(rootNode, "details")
             else:
                 episode = rootNode
-            logger.log(str(curEpToWrite), logger.ERROR)
             
             #To do get right EpisodeID
             episodeID = etree.SubElement(episode, "id")
             episodeID.text = str(curEpToWrite.tvdbid)
 
-            seriesName = etree.SubElement(episode, "series_name")
-            if curEpToWrite.show_name != None:
-                seriesName.text = curEpToWrite.show_name
+            title = etree.SubElement(episode, "title")
+            if myShow["seriesname"] != None or curEpToWrite.name != None : 
+                title.text = myShow["seriesname"] + " - S" + str(curEpToWrite.season).zfill(2) + "E" + str(curEpToWrite.episode).zfill(2) + " - " + curEpToWrite.name
 
-            title = etree.SubElement(episode, "episode_name")
+            seriesName = etree.SubElement(episode, "series_name")
+            if myShow["seriesname"] != None:
+                seriesName.text = myShow["seriesname"]
+
+            episodeName = etree.SubElement(episode, "episode_name")
             if curEpToWrite.name != None:
-                title.text = curEpToWrite.name
+                episodeName.text = curEpToWrite.name
 
             seasonNumber = etree.SubElement(episode, "season_number")
             seasonNumber.text = str(curEpToWrite.season)
@@ -197,20 +200,32 @@ class WDTVMetadata(generic.GenericMetadata):
             episodeNum = etree.SubElement(episode, "episode_number")
             episodeNum.text = str(curEpToWrite.episode)
             
-            FirstAired = etree.SubElement(episode, "firstaired")
+            firstAired = etree.SubElement(episode, "firstaired")
             if curEpToWrite.airdate != datetime.date.fromordinal(1):
-                FirstAired.text = str(curEpToWrite.airdate)
+                firstAired.text = str(curEpToWrite.airdate)
             else:
-                FirstAired.text = ''
+                firstAired.text = ''
 
-            Overview = etree.SubElement(episode, "overview")
-            if curEpToWrite.description != None:
-                Overview.text = curEpToWrite.description
+            genre = etree.SubElement(episode, "genre")
+            if myShow["genre"] != None:
+                genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
 
             director = etree.SubElement(episode, "director")
             director_text = myEp['director']
             if director_text != None:
                 director.text = director_text
+            else:
+                director.text = ''
+
+            actor = etree.SubElement(episode, "actor")
+            if myShow["actors"] != None:
+                actor.text = " / ".join([x for x in myShow["actors"].split('|') if x])
+            else:
+                actor.text = ''
+
+            overview = etree.SubElement(episode, "overview")
+            if curEpToWrite.description != None:
+                overview.text = curEpToWrite.description
 
             # Make it purdy
             helpers.indentXML(rootNode)
@@ -223,4 +238,3 @@ class WDTVMetadata(generic.GenericMetadata):
 
 # present a standard "interface"
 metadata_class = WDTVMetadata
-
