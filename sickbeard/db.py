@@ -45,11 +45,14 @@ def dbFilename(filename="sickbeard.db", suffix=None):
     return ek.ek(os.path.join, sickbeard.DATA_DIR, filename)
 
 class DBConnection:
-    def __init__(self, filename="sickbeard.db", suffix=None):
+    def __init__(self, filename="sickbeard.db", suffix=None, row_type=None):
 
         self.filename = filename
         self.connection = sqlite3.connect(dbFilename(filename), 20)
-        self.connection.row_factory = sqlite3.Row
+        if row_type == "dict":
+            self.connection.row_factory = self._dict_factory
+        else:
+            self.connection.row_factory = sqlite3.Row
 
     def action(self, query, args=None):
 
@@ -118,7 +121,14 @@ class DBConnection:
         for column in cursor:
             columns[column['name']] = { 'type': column['type'] }
         return columns
-
+    
+    # http://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
+    def _dict_factory(self, cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
+    
 def sanityCheckDatabase(connection, sanity_check):
     sanity_check(connection).check()
 
