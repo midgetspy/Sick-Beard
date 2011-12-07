@@ -275,6 +275,8 @@ class GitUpdateManager(UpdateManager):
             
         return True
 
+    def _get_gh_user(self):
+        return 'midgetspy'
 
     def _check_github_for_update(self):
         """
@@ -290,7 +292,10 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits.forBranch('midgetspy', 'Sick-Beard', version.SICKBEARD_VERSION):
+        # TODO: This should probably use git fetch and count the number of
+        # commits between master and origin/master, so it's more portable for
+        # use with other repositories.
+        for curCommit in gh.commits.forBranch(self._get_gh_user(), 'Sick-Beard', version.SICKBEARD_VERSION):
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit.id
                 if not self._cur_commit_hash:
@@ -316,9 +321,9 @@ class GitUpdateManager(UpdateManager):
             return
 
         if self._newest_commit_hash:
-            url = 'http://github.com/midgetspy/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
+            url = 'http://github.com/'+self._get_gh_user()+'/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
         else:
-            url = 'http://github.com/midgetspy/Sick-Beard/commits/'
+            url = 'http://github.com/'+self.get_gh_user()+'/Sick-Beard/commits/'
 
         new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
@@ -406,6 +411,8 @@ class SourceUpdateManager(GitUpdateManager):
         else:
             return parent_result
 
+    def _get_gh_user(self):
+        return sickbeard.GITHUB_USER
 
     def set_newest_text(self):
         if not self._cur_commit_hash:
@@ -424,7 +431,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'http://github.com/midgetspy/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
+        tar_download_url = 'http://github.com/'+self._get_gh_user()+'/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 
