@@ -633,11 +633,10 @@ class ConfigGeneral:
     def generateKey(self):
         """ Return a new randomized API_KEY
         """
-        import time
         try:
-           from hashlib import md5
+            from hashlib import md5
         except ImportError:
-           from md5 import md5
+            from md5 import md5
         import random
         # Create some values to seed md5
         t = str(time.time())

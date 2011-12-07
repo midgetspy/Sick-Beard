@@ -17,11 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import os.path
+from __future__ import with_statement
+
+import os
 import time
 import urllib
 import datetime
 import threading
+import re
 
 import cherrypy
 import sickbeard
@@ -30,7 +33,8 @@ from sickbeard import db, logger, exceptions, history, ui, helpers
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
-from common import *
+from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN
+from common import ANY, Quality, qualityPresetStrings, statusStrings
 from sickbeard import image_cache
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 try:
@@ -610,7 +614,7 @@ def _getRootDirs():
     for root_dir in root_dirs:
         valid = 1
         try:
-            file_list = ek.ek(os.listdir, root_dir)
+            ek.ek(os.listdir, root_dir)
         except:
             valid = 0
         default = 0
@@ -1156,10 +1160,10 @@ class CMD_SickBeardAddRootDir(ApiCall):
             return _responds(RESULT_FAILURE, msg="Location is invalid")
 
         root_dirs = []
+
         if sickbeard.ROOT_DIRS == "":
             self.default = 1
         else:
-            root_dirs_new = None
             root_dirs = sickbeard.ROOT_DIRS.split('|')
             index = int(sickbeard.ROOT_DIRS.split('|')[0])
             root_dirs.pop(0)
@@ -1887,7 +1891,7 @@ class CMD_ShowRefresh(ApiCall):
         try:
             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
             return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has queued to be refreshed")
-        except exceptions.CantRefreshException, e:
+        except exceptions.CantRefreshException:
             # TODO: log the excption
             return _responds(RESULT_FAILURE, msg="Unable to refresh " + str(showObj.name))
 
