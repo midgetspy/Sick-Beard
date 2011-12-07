@@ -31,7 +31,7 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config
+from sickbeard import config, sab
 from sickbeard import history, notifiers, processTV
 from sickbeard import tv, ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -1137,6 +1137,7 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
+                          use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
@@ -1244,6 +1245,20 @@ class ConfigNotifications:
         else:
             use_notifo = 0
 
+        if boxcar_notify_onsnatch == "on":
+            boxcar_notify_onsnatch = 1
+        else:
+            boxcar_notify_onsnatch = 0
+
+        if boxcar_notify_ondownload == "on":
+            boxcar_notify_ondownload = 1
+        else:
+            boxcar_notify_ondownload = 0
+        if use_boxcar == "on":
+            use_boxcar = 1
+        else:
+            use_boxcar = 0
+
         if use_nmj == "on":
             use_nmj = 1
         else:
@@ -1293,6 +1308,11 @@ class ConfigNotifications:
         sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
         sickbeard.NOTIFO_USERNAME = notifo_username
         sickbeard.NOTIFO_APISECRET = notifo_apisecret
+
+        sickbeard.USE_BOXCAR = use_boxcar
+        sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
+        sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
+        sickbeard.BOXCAR_USERNAME = boxcar_username
 
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
@@ -1810,6 +1830,18 @@ class Home:
     postprocess = HomePostProcess()
 
     @cherrypy.expose
+    def testSABnzbd(self, host=None, username=None, password=None, apikey=None):
+        connection, accesMsg = sab.getSabAccesMethod(host, username, password, apikey)
+        if connection:
+            authed, authMsg = sab.testAuthentication(host, username, password, apikey)
+            if authed:
+                return "Success. Connected and authenticated"
+            else:
+                return "Authentication failed. SABnzbd expects '"+accesMsg+"' as authentication method"
+        else:
+            return "Unable to connect to host"
+
+    @cherrypy.expose
     def testGrowl(self, host=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
@@ -1845,6 +1877,16 @@ class Home:
             return "Error sending Notifo notification"
 
     @cherrypy.expose
+    def testBoxcar(self, username=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.boxcar_notifier.test_notify(username)
+        if result:
+            return "Boxcar notification succeeded. Check your Boxcar clients to make sure it worked"
+        else:
+            return "Error sending Boxcar notification"
+
+    @cherrypy.expose
     def twitterStep1(self):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
@@ -1876,7 +1918,7 @@ class Home:
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
-        if result:
+        if len(result.split(":")) > 2 and 'OK' in result.split(":")[2]:
             return "Test notice sent successfully to "+urllib.unquote_plus(host)
         else:
             return "Test notice failed to "+urllib.unquote_plus(host)
