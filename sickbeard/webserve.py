@@ -25,6 +25,7 @@ import urllib
 import re
 import threading
 import datetime
+import random
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -44,6 +45,7 @@ from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
 from sickbeard.scene_exceptions import get_scene_exceptions
+from sickbeard.webapi import Api
 
 from lib.tvdb_api import tvdb_api
 from sickbeard.blackandwhitelist import *
@@ -639,10 +641,33 @@ class ConfigGeneral:
 
         sickbeard.ANIME_DEFAULT = int(anime)
 
-    
+    @cherrypy.expose
+    def generateKey(self):
+        """ Return a new randomized API_KEY
+        """
+
+        try:
+            from hashlib import md5
+        except ImportError:
+            from md5 import md5
+        
+        # Create some values to seed md5
+        t = str(time.time())
+        r = str(random.random())
+        
+        # Create the md5 instance and give it the current time
+        m = md5(t)
+        
+        # Update the md5 instance with the random variable
+        m.update(r)
+
+        # Return a hex digest of the md5, eg 49f68a5c8493ec2c0bf489821c21fc3b
+        logger.log(u"New API generated")
+        return m.hexdigest()
+
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
-                    launch_browser=None, web_username=None,
+                    launch_browser=None, web_username=None, use_api=None, api_key=None,
                     web_password=None, version_notify=None):
 
         results = []
@@ -677,6 +702,14 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        if use_api == "on":
+            use_api = 1
+        else:
+            use_api = 0
+
+        sickbeard.USE_API = use_api
+        sickbeard.API_KEY = api_key
 
         config.change_VERSION_NOTIFY(version_notify)
 
@@ -1939,7 +1972,7 @@ class Home:
     def testSABnzbd(self, host=None, username=None, password=None, apikey=None):
         connection, accesMsg = sab.getSabAccesMethod(host, username, password, apikey)
         if connection:
-            authed, authMsg = sab.testAuthentication(host, username, password, apikey)
+            authed, authMsg = sab.testAuthentication(host, username, password, apikey) #@UnusedVariable
             if authed:
                 return "Success. Connected and authenticated"
             else:
@@ -2024,7 +2057,7 @@ class Home:
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
-        if result:
+        if len(result.split(":")) > 2 and 'OK' in result.split(":")[2]:
             return "Test notice sent successfully to "+urllib.unquote_plus(host)
         else:
             return "Test notice failed to "+urllib.unquote_plus(host)
@@ -2655,6 +2688,7 @@ class UI:
 
         return json.dumps(messages)
 
+   
 class WebInterface:
 
     @cherrypy.expose
@@ -2805,6 +2839,8 @@ class WebInterface:
     config = Config()
 
     home = Home()
+    
+    api = Api()
 
     browser = browser.WebFileBrowser()
 

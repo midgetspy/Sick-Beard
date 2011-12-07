@@ -111,28 +111,31 @@ class WindowsUpdateManager(UpdateManager):
         self._newest_version = None
 
         self.gc_url = 'http://code.google.com/p/sickbeard/downloads/list'
+        self.version_url = 'https://raw.github.com/midgetspy/Sick-Beard/windows_binaries/updates.txt'
 
     def _find_installed_version(self):
         return int(sickbeard.version.SICKBEARD_VERSION[6:])
 
     def _find_newest_version(self, whole_link=False):
         """
-        Checks google code for the newest Windows binary build. Returns either the
+        Checks git for the newest Windows binary build. Returns either the
         build number or the entire build URL depending on whole_link's value.
 
         whole_link: If True, returns the entire URL to the release. If False, it returns
                     only the build number. default: False
         """
 
-        regex = "//sickbeard\.googlecode\.com/files/SickBeard\-win32\-alpha\-build(\d+)(?:\.\d+)?\.zip"
+        regex = ".*SickBeard\-win32\-alpha\-build(\d+)(?:\.\d+)?\.zip"
 
-        svnFile = urllib.urlopen(self.gc_url)
+        svnFile = urllib.urlopen(self.version_url)
 
         for curLine in svnFile.readlines():
-            match = re.search(regex, curLine)
+            logger.log(u"checking line "+curLine, logger.DEBUG)
+            match = re.match(regex, curLine)
             if match:
+                logger.log(u"found a match", logger.DEBUG)
                 if whole_link:
-                    return match.group(0)
+                    return curLine.strip()
                 else:
                     return int(match.group(1))
 
@@ -142,7 +145,9 @@ class WindowsUpdateManager(UpdateManager):
         self._cur_version = self._find_installed_version()
         self._newest_version = self._find_newest_version()
 
-        if self._newest_version > self._cur_version:
+        logger.log(u"newest version: "+repr(self._newest_version), logger.DEBUG)
+
+        if self._newest_version and self._newest_version > self._cur_version:
             return True
 
     def set_newest_text(self):
@@ -153,6 +158,8 @@ class WindowsUpdateManager(UpdateManager):
     def update(self):
 
         new_link = self._find_newest_version(True)
+
+        logger.log(u"new_link: " + repr(new_link), logger.DEBUG)
 
         if not new_link:
             logger.log(u"Unable to find a new version link on google code, not updating")
