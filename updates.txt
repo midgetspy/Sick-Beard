@@ -1,2 +1,2 @@
-http://sickbeard.googlecode.com/files/SickBeard-win32-alpha-build492.zip
+http://sickbeard.googlecode.com/files/SickBeard-win32-alpha-build491.zip
 http://sickbeard.googlecode.com/files/SickBeard-win32-alpha-build490.zip
