@@ -130,18 +130,18 @@
                     <div class="component-group-desc">
                         <h3>API</h3>
                         <p>Allow 3rd party programs to interact with Sick-Beard.</p>
-                        <p>You may use the api-builder tool to test or help you develop at <a href="$sbRoot/api/builder">API-Builder</a>.</p>
                     </div>
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" name="use_api" id="use_api" #if $sickbeard.USE_API then "checked=\"checked\"" else ""#/>
+                            <input type="checkbox" name="use_api" class="enabler" id="use_api" #if $sickbeard.USE_API then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="use_api">
                                 <span class="component-title">Enable API</span>
                                 <span class="component-desc">Allow the use of the Sick-Beard API.</span>
                             </label>
                         </div>
 
+                        <div id="content_use_api">
                         <div class="field-pair">
                             <label class="nocheck clearfix" for="api_key">
                                 <span class="component-title">API Key</span>
@@ -150,8 +150,9 @@
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">This key will give 3rd party programs limited access to Sick-Beard.</span>
+                                <span class="component-desc">Used to give 3rd party programs limited access to Sick-Beard.</span>
                             </label>
+                        </div>
                         </div>
 
                         <input type="submit" class="config_submitter" value="Save Changes" />
