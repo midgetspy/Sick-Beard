@@ -31,7 +31,7 @@ class DemonoidProvider(generic.TorrentProvider):
     def __init__(self):
         generic.TorrentProvider.__init__(self,"Demonoid")
         
-        self.supportsBacklog = True
+        self.supportsBacklog = False
         
         self.cache = DemonoidCache(self)
         
@@ -117,7 +117,10 @@ class DemonoidCache(tvcache.TVCache):
            
         link_regex = r'/files/download/\d+/\d+'
         data = self.provider.getURL(url)
-
+        
+        if not data:
+            return None
+        
         match = re.search(link_regex, data)
         if match:
             return self.provider.url + match.group()
