@@ -52,7 +52,7 @@ class BoxcarNotifier:
             handle.close()
         except urllib2.URLError, e:
             if not hasattr(e, 'code'):
-                logger.log("Boxcar notification failed." + str(e), logger.ERROR)
+                logger.log("Boxcar notification failed." + ex(e), logger.ERROR)
                 return False
             else:
                 logger.log("Boxcar notification failed. Error code: " + str(e.code), logger.WARNING)
