@@ -55,24 +55,23 @@ class DemonoidProvider(generic.TorrentProvider):
             return quality
         
         description = item.findtext('description')
+        quality_regex = r'Quality:\s(\w\w\w*)\s*'
         
-        quality_regex = r'Quality:\s(\w\w\w*)\squality'
-        
-        match = re.match(quality_regex, description)
+        match = re.search(quality_regex, description)
         if match:
             quality = match.group(1)
         else:
             logger.log(u"Cannot parse quality from item description", logger.DEBUG)
             return Quality.UNKNOWN
         
-        if quality == "TV":
+        if "TV" in quality:
             return Quality.SDTV
-        elif quality == "DVD":
+        elif "DVD" in quality:
             return Quality.SDDVD
-        elif quality == "HD":
+        elif "HD" in quality:
             return Quality.HDTV
         else:
-            logger.log(u"Unknown quality type in item description", logger.DEBUG)
+            logger.log(u"Unknown quality type in item description: " + quality, logger.DEBUG)
             return Quality.UNKNOWN
         
 class DemonoidCache(tvcache.TVCache):
@@ -108,8 +107,9 @@ class DemonoidCache(tvcache.TVCache):
             return
         
         logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
-
-        self._addCacheEntry(title, url)
+        
+        quality = self.provider.getQuality(item)
+        self._addCacheEntry(title, url, quality=quality)
     
     def _parseDetailsPage(self, url):
         """Needed to extract download link because Demonoid's RSS feed 
