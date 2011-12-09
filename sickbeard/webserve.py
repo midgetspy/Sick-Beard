@@ -1168,7 +1168,7 @@ class ConfigNotifications:
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_notify_onupdate=None,
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
@@ -1259,6 +1259,12 @@ class ConfigNotifications:
             twitter_notify_ondownload = 1
         else:
             twitter_notify_ondownload = 0
+            
+        if twitter_notify_onupdate == "on":
+            twitter_notify_onupdate = 1
+        else:
+            twitter_notify_onupdate = 0
+        		
         if use_twitter == "on":
             use_twitter = 1
         else:
@@ -1335,6 +1341,7 @@ class ConfigNotifications:
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+        sickbeard.TWITTER_NOTIFY_ONUPDATE = twitter_notify_onupdate
 
         sickbeard.USE_NOTIFO = use_notifo
         sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch

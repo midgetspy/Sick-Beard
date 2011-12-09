@@ -48,6 +48,10 @@ class TwitterNotifier:
         if sickbeard.TWITTER_NOTIFY_ONDOWNLOAD:
             self._notifyTwitter(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)
 
+    def notify_update(self, ep_name):
+        if sickbeard.TWITTER_NOTIFY_ONUPDATE:
+            self._notifyTwitter(common.notifyStrings[common.NOTIFY_UPDATE]+': '+ep_name)
+            
     def test_notify(self):
         return self._notifyTwitter("This is a test notification from Sick Beard", force=True)
 

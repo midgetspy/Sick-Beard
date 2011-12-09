@@ -310,7 +310,15 @@
                                 <span class="component-desc">Send notification when we finish a download?</span>
                             </label>
                         </div>
-
+                                                                        
+                        <div class="field-pair">
+                            <input type="checkbox" name="twitter_notify_onupdate" id="twitter_notify_onupdate" #if $sickbeard.TWITTER_NOTIFY_ONUPDATE then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="twitter_notify_onupdate">
+                                <span class="component-title">Notify on Update</span>
+                                <span class="component-desc">Send notification when SB update is available?</span>
+                            </label>
+                        </div>
+                        
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Step One</span>
