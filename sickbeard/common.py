@@ -37,10 +37,12 @@ SEASON_RESULT = -2
 ### Notification Types
 NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2
+NOTIFY_UPDATE = 3
 
 notifyStrings = {}
 notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
+notifyStrings[NOTIFY_UPDATE] = "Update Available"
 
 ### Episode statuses
 UNKNOWN = -1 # should never happen

@@ -20,6 +20,7 @@ import sickbeard
 from sickbeard import version, ui
 from sickbeard import logger
 from sickbeard import scene_exceptions
+from sickbeard import notifiers
 from sickbeard.exceptions import ex
 
 import os, platform, shutil
@@ -49,14 +50,14 @@ class CheckVersion():
 
     def run(self):
         self.check_for_new_version()
-        
+
         # refresh scene exceptions too
         scene_exceptions.retrieve_exceptions()
 
     def find_install_type(self):
         """
         Determines how this copy of SB was installed.
-        
+
         returns: type of installation. Possible values are:
             'win': any compiled windows build
             'git': running from source using git
@@ -76,9 +77,9 @@ class CheckVersion():
     def check_for_new_version(self, force=False):
         """
         Checks the internet for a newer version.
-        
+
         returns: bool, True for new version or False for no new version.
-        
+
         force: if true the VERSION_NOTIFY setting will be ignored and a check will be forced
         """
 
@@ -94,6 +95,7 @@ class CheckVersion():
             return False
 
         self.updater.set_newest_text()
+        notifiers.notify_update(self._newest_version)
         return True
 
     def update(self):
@@ -181,7 +183,7 @@ class WindowsUpdateManager(UpdateManager):
             update_zip = zipfile.ZipFile(filename, 'r')
             update_zip.extractall(sb_update_dir)
             update_zip.close()
-            
+
             # find update dir name
             update_dir_contents = os.listdir(sb_update_dir)
             if len(update_dir_contents) != 1:
@@ -216,16 +218,16 @@ class GitUpdateManager(UpdateManager):
     def _git_error(self):
         error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
         sickbeard.NEWEST_VERSION_STRING = error_message
-        
+
         return None
 
     def _run_git(self, args):
-        
+
         if sickbeard.GIT_PATH:
             git_locations = ['"'+sickbeard.GIT_PATH+'"']
         else:
             git_locations = ['git']
-        
+
         # osx people who start SB from launchd have a broken path, so try a hail-mary attempt for them
         if platform.system().lower() == 'darwin':
             git_locations.append('/usr/local/git/bin/git')
@@ -235,7 +237,7 @@ class GitUpdateManager(UpdateManager):
         for cur_git in git_locations:
 
             cmd = cur_git+' '+args
-        
+
             try:
                 logger.log(u"Executing "+cmd+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
@@ -244,7 +246,7 @@ class GitUpdateManager(UpdateManager):
             except OSError:
                 logger.log(u"Command "+cmd+" didn't work, couldn't find git.")
                 continue
-            
+
             if 'not found' in output or "not recognized as an internal or external command" in output:
                 logger.log(u"Unable to find git with command "+cmd, logger.DEBUG)
                 output = None
@@ -256,7 +258,7 @@ class GitUpdateManager(UpdateManager):
 
         return (output, err)
 
-    
+
     def _find_installed_version(self):
         """
         Attempts to find the currently installed version of Sick Beard.
@@ -277,9 +279,9 @@ class GitUpdateManager(UpdateManager):
         if not re.match('^[a-z0-9]+$', cur_commit_hash):
             logger.log(u"Output doesn't look like a hash, not using it", logger.ERROR)
             return self._git_error()
-        
+
         self._cur_commit_hash = cur_commit_hash
-            
+
         return True
 
 
@@ -318,6 +320,7 @@ class GitUpdateManager(UpdateManager):
 
         elif self._num_commits_behind > 0:
             message = "you're "+str(self._num_commits_behind)+' commits behind'
+            notifiers.twitter_notifier.notify_update(new_message)
 
         else:
             return
@@ -329,7 +332,7 @@ class GitUpdateManager(UpdateManager):
 
         new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
-
+        notifiers.twitter_notifier.notify_update(message)
         sickbeard.NEWEST_VERSION_STRING = new_str
 
     def need_update(self):
