@@ -320,7 +320,6 @@ class GitUpdateManager(UpdateManager):
 
         elif self._num_commits_behind > 0:
             message = "you're "+str(self._num_commits_behind)+' commits behind'
-            notifiers.twitter_notifier.notify_update(new_message)
 
         else:
             return
