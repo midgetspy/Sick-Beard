@@ -51,7 +51,12 @@ class BoxcarNotifier:
             handle = urllib2.urlopen(req, data)
             handle.close()
         except urllib2.URLError, e:
-            logger.log("Boxcar notification failed. error code: " + str(e.code), logger.WARNING)
+            if not hasattr(e, 'code'):
+                logger.log("Boxcar notification failed." + ex(e), logger.ERROR)
+                return False
+            else:
+                logger.log("Boxcar notification failed. Error code: " + str(e.code), logger.WARNING)
+
             if e.code == 404: #HTTP status 404 if the provided email address isn't a Boxcar user.
                 logger.log("Username is wrong/not a boxcar email. Boxcar will send an email to it", logger.WARNING)
                 return False
