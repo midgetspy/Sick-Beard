@@ -339,6 +339,10 @@ class NewzbinProvider(generic.NZBProvider):
 
         return data
 
+    def _checkAuth(self):
+        if sickbeard.NEWZBIN_USERNAME in (None, "") or sickbeard.NEWZBIN_PASSWORD in (None, ""):
+            raise exceptions.AuthException("Newzbin authentication details are empty, check your config")
+
 class NewzbinCache(tvcache.TVCache):
 
     def __init__(self, provider):
