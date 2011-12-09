@@ -95,7 +95,6 @@ class CheckVersion():
             return False
 
         self.updater.set_newest_text()
-        notifiers.notify_update(self._newest_version)
         return True
 
     def update(self):
