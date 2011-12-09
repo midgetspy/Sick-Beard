@@ -160,6 +160,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         if extraSearchType == "nzbmatrix":
             seasonStrings.append("%ix" % segment)
 
+    bwl = BlackAndWhiteList(show.tvdbid)
     showNames = set(makeSceneShowSearchStrings(show))
 
     toReturn = []
@@ -175,7 +176,11 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
             # for providers that don't allow multiple searches in one request we only search for Sxx style stuff
             else:
                 for cur_season in seasonStrings:
-                    toReturn.append(curShow + "." + cur_season)
+                    if len(bwl.whiteList) > 0:
+                        for keyword in bwl.whiteList:
+                            toReturn.append(keyword + '.' + curShow+ "." + cur_season)
+                    else:
+                        toReturn.append(curShow + "." + cur_season)
         
         # nzbmatrix is special, we build a search string just for them
         elif extraSearchType == "nzbmatrix":
