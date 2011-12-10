@@ -69,7 +69,7 @@ class TraktNotifier:
     def test_notify(self, api, username, password):
         method = "account/test/"
         method += "%API%"
-        return self._notifyTrakt(method, api, username, password, {}, 1)
+        return self._notifyTrakt(method, api, username, password, {})
 
     def _username(self):
         return sickbeard.TRAKT_USERNAME
@@ -83,12 +83,8 @@ class TraktNotifier:
     def _use_me(self):
         return sickbeard.USE_TRAKT
 
-    def _notifyTrakt(self, method, api, username, password, data = {}, tries=3):
+    def _notifyTrakt(self, method, api, username, password, data = {}):
         logger.log("trakt_notifier: Call method " + method, logger.DEBUG)
-        logger.log("trakt_notifier: tries " + repr(tries), logger.DEBUG)
-        if (tries <= 0):
-            logger.log("trakt_notifier: Failed to call method " + method + " completely", logger.ERROR)
-            return
 
         if not api:
             api = self._api()
@@ -116,17 +112,13 @@ class TraktNotifier:
                 raise Exception(resp["error"])
         except (IOError, json.JSONDecodeError):
             logger.log("trakt_notifier: Failed calling method", logger.ERROR)
-            if (tries > 1):
-                logger.log("trakt_notifier: Retrying, attempts left: " + str(retry), logger.DEBUG)
-                time.sleep(5)
-                self._notifyTrakt(method, api, username, password, data, post, tries -  1)
-            else:
-                return False
+            return False
 
         if (resp["status"] == "success"):
             logger.log("trakt_notifier: Succeeded calling method. Result: " + resp["message"], logger.DEBUG)
             return True
 
+        logger.log("trakt_notifier: Failed calling method", logger.ERROR)
         return False
 
 notifier = TraktNotifier
