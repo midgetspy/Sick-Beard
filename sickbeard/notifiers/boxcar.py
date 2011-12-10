@@ -23,7 +23,7 @@ import time
 import sickbeard
 
 from sickbeard import logger
-from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD
+from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD, NOTIFY_UPDATE
 from sickbeard.exceptions import ex
 
 API_URL = "https://boxcar.io/devices/providers/fWc4sgSmpcN6JujtBmR6/notifications"
@@ -89,6 +89,10 @@ class BoxcarNotifier:
         if sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD:
             self._notifyBoxcar(title, ep_name)
 
+    def notify_update(self, sb_update, title=notifyStrings[NOTIFY_UPDATE]):
+        if sickbeard.BOXCAR_NOTIFY_ONUPDATE:
+            self._notifyBoxcar(title, sb_update)
+            
     def _notifyBoxcar(self, title, message=None, username=None, force=False):
         if not sickbeard.USE_BOXCAR and not force:
             logger.log("Notification for Boxcar not enabled, skipping this notification", logger.DEBUG)

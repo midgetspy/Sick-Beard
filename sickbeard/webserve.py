@@ -1170,7 +1170,7 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_notify_onupdate=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_notify_onupdate=None,
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_notify_onupdate=None, notifo_username=None, notifo_apisecret=None,
-                          use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
+                          use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_notify_onupdate=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
 
@@ -1230,7 +1230,6 @@ class ConfigNotifications:
             growl_notify_ondownload = 1
         else:
             growl_notify_ondownload = 0
-
         if use_growl == "on":
             use_growl = 1
         else:
@@ -1250,7 +1249,6 @@ class ConfigNotifications:
             prowl_notify_onupdate = 1
         else:
             prowl_notify_onupdate = 0
-
         if use_prowl == "on":
             use_prowl = 1
         else:
@@ -1270,7 +1268,6 @@ class ConfigNotifications:
             twitter_notify_onupdate = 1
         else:
             twitter_notify_onupdate = 0
-
         if use_twitter == "on":
             use_twitter = 1
         else:
@@ -1304,6 +1301,11 @@ class ConfigNotifications:
             boxcar_notify_ondownload = 1
         else:
             boxcar_notify_ondownload = 0
+        
+        if boxcar_notify_onupdate == "on":
+            boxcar_notify_onupdate = 1
+        else:
+            boxcar_notify_onupdate = 0
         if use_boxcar == "on":
             use_boxcar = 1
         else:
@@ -1365,6 +1367,7 @@ class ConfigNotifications:
         sickbeard.USE_BOXCAR = use_boxcar
         sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
         sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
+        sickbeard.BOXCAR_NOTIFY_ONUPDATE = boxcar_notify_onupdate
         sickbeard.BOXCAR_USERNAME = boxcar_username
 
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
