@@ -36,7 +36,6 @@ from sickbeard import db
 from sickbeard import helpers, exceptions, logger
 from sickbeard.exceptions import ex
 from sickbeard import tvrage
-from sickbeard import config
 from sickbeard import image_cache
 from sickbeard import postProcessor
 
@@ -111,6 +110,21 @@ class TVShow(object):
                 myEp = self.episodes[curSeason][curEp]
                 self.episodes[curSeason][curEp] = None
                 del myEp
+
+
+    def getAllEpisodes(self):
+        
+        myDB = db.DBConnection()
+        results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+
+        ep_list = []
+
+        for cur_result in results:
+            cur_ep = self.getEpisode(int(cur_result["season"]), int(cur_result["episode"]))
+            if cur_ep:
+                ep_list.append(cur_ep)
+        
+        return ep_list
 
 
     def getEpisode(self, season, episode, file=None, noCreate=False):
@@ -1087,7 +1101,10 @@ class TVEpisode(object):
             # don't overwrite my location
             if sqlResults[0]["location"] != "" and sqlResults[0]["location"] != None:
                 self.location = os.path.normpath(sqlResults[0]["location"])
-            self.file_size = int(sqlResults[0]["file_size"])
+            if sqlResults[0]["file_size"]:
+                self.file_size = int(sqlResults[0]["file_size"])
+            else:
+                self.file_size = 0
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
 
@@ -1437,10 +1454,10 @@ class TVEpisode(object):
         ep_name = self._ep_name()
         
         def dot(name):
-            return name.replace(' ','.')
+            return re.sub('[_ -]','.', name)
         
         def us(name):
-            return name.replace(' ','_')
+            return re.sub('[ -]','_', name)
         
         def release_group(name):
             if not name or '-' not in name:
@@ -1543,7 +1560,8 @@ class TVEpisode(object):
         # if there's no release group then replace it with a reasonable facsimile
         if not replace_map['%RN']:
             logger.log(u"Episode has no release name, making up a fake one", logger.DEBUG)
-            result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N')
+            result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
+            result_name = result_name.replace('%RG', 'SiCKBEARD')
         
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
@@ -1558,7 +1576,7 @@ class TVEpisode(object):
         """
         
         if pattern == None:
-            pattern = sickbeard.NAME_FORMATTING
+            pattern = ek.ek(os.path.join, sickbeard.NAMING_DIR_PATTERN, sickbeard.NAMING_NAME_PATTERN)
         
         # split off the dirs only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
@@ -1574,8 +1592,8 @@ class TVEpisode(object):
         """
         
         if pattern == None:
-            pattern = sickbeard.NAME_FORMATTING
-        
+            pattern = sickbeard.NAMING_NAME_PATTERN
+            
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
 

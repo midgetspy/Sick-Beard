@@ -496,7 +496,7 @@ def initialize(consoleLogging=True):
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
         NAMING_DIR_PATTERN = check_setting_str(CFG, 'General', 'naming_dir_pattern', '')
-        NAMING_NAME_PATTERN = check_setting_str(CFG, 'General', 'naming_ep_name', '')
+        NAMING_NAME_PATTERN = check_setting_str(CFG, 'General', 'naming_name_pattern', '')
         NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
@@ -997,8 +997,8 @@ def save_config():
     new_config['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
-    new_config['General']['naming_ep_name'] = NAMING_DIR_PATTERN
-    new_config['General']['naming_show_name'] = NAMING_NAME_PATTERN
+    new_config['General']['naming_dir_pattern'] = NAMING_DIR_PATTERN
+    new_config['General']['naming_name_pattern'] = NAMING_NAME_PATTERN
     new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
