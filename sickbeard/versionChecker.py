@@ -335,6 +335,7 @@ class GitUpdateManager(UpdateManager):
         notifiers.prowl_notifier.notify_update(message)
         notifiers.notifo_notifier.notify_update(message)
         notifiers.boxcar_notifier.notify_update(message)
+        notifiers.growl_notifier.notify_update(message)
 
     def need_update(self):
         self._find_installed_version()

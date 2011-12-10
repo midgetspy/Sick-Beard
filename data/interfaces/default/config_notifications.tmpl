@@ -240,6 +240,14 @@
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="growl_notify_onupdate" id="growl_notify_onupdate" #if $sickbeard.GROWL_NOTIFY_ONUPDATE then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="growl_notify_onupdate">
+                                <span class="component-title">Notify on Update</span>
+                                <span class="component-desc">Send notification when SB update is available?</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Growl IP:Port</span>
                                 <input type="text" name="growl_host" id="growl_host" value="$sickbeard.GROWL_HOST" size="35" />

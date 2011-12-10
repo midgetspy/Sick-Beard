@@ -1166,7 +1166,7 @@ class ConfigNotifications:
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
-                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None,
+                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_notify_onupdate=None, growl_host=None, growl_password=None,
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_notify_onupdate=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_notify_onupdate=None,
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_notify_onupdate=None, notifo_username=None, notifo_apisecret=None,
@@ -1230,6 +1230,11 @@ class ConfigNotifications:
             growl_notify_ondownload = 1
         else:
             growl_notify_ondownload = 0
+        
+        if growl_notify_onupdate == "on":
+            growl_notify_onupdate = 1
+        else:
+            growl_notify_onupdate = 0
         if use_growl == "on":
             use_growl = 1
         else:
@@ -1342,6 +1347,7 @@ class ConfigNotifications:
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
         sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
+        sickbeard.GROWL_NOTIFY_ONUPDATE = growl_notify_onupdate
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
 
