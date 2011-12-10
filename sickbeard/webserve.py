@@ -1169,7 +1169,7 @@ class ConfigNotifications:
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None,
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_notify_onupdate=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_notify_onupdate=None,
-                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
+                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_notify_onupdate=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None):
@@ -1285,6 +1285,11 @@ class ConfigNotifications:
             notifo_notify_ondownload = 1
         else:
             notifo_notify_ondownload = 0
+        
+        if notifo_notify_onupdate == "on":
+            notifo_notify_onupdate = 1
+        else:
+            notifo_notify_onupdate = 0
         if use_notifo == "on":
             use_notifo = 1
         else:
@@ -1353,6 +1358,7 @@ class ConfigNotifications:
         sickbeard.USE_NOTIFO = use_notifo
         sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
         sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
+        sickbeard.NOTIFO_NOTIFY_ONUPDATE = notifo_notify_onupdate
         sickbeard.NOTIFO_USERNAME = notifo_username
         sickbeard.NOTIFO_APISECRET = notifo_apisecret
 

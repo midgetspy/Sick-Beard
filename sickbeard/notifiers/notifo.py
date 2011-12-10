@@ -64,7 +64,11 @@ class NotifoNotifier:
 
     def notify_download(self, ep_name, title="Completed:"):
         if sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD:
-            self._notifyNotifo(title, ep_name)       
+            self._notifyNotifo(title, ep_name)
+    
+    def notify_update(self, sb_update, title="Update"):
+        if sickbeard.NOTIFO_NOTIFY_ONUPDATE:
+            self._notifyNotifo(title, sb_update)        
 
     def _notifyNotifo(self, title, message=None, username=None, apisecret=None, force=False):
         if not sickbeard.USE_NOTIFO and not force:
