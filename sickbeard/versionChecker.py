@@ -331,11 +331,7 @@ class GitUpdateManager(UpdateManager):
         new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
         sickbeard.NEWEST_VERSION_STRING = new_str
-        notifiers.twitter_notifier.notify_update(message)
-        notifiers.prowl_notifier.notify_update(message)
-        notifiers.notifo_notifier.notify_update(message)
-        notifiers.boxcar_notifier.notify_update(message)
-        notifiers.growl_notifier.notify_update(message)
+        notifiers.notify_update(message)
 
     def need_update(self):
         self._find_installed_version()

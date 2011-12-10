@@ -66,3 +66,7 @@ def notify_snatch(ep_name):
         n.notify_snatch(ep_name)
     notifo_notifier.notify_snatch(ep_name)
 
+def notify_update(sb_update):
+    for n in notifiers:
+        n.notify_update(sb_update)
+    notifo_notifier.notify_update(sb_update)
