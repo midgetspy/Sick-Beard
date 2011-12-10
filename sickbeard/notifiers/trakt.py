@@ -17,11 +17,8 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import urllib, urllib2
-import socket
-import base64
-import time, struct
-import pprint
+import urllib
+import time
 
 from hashlib import sha1
 
@@ -29,16 +26,12 @@ from lib import simplejson as json
 
 import sickbeard
 
-from sickbeard import db
 from sickbeard import logger
-from sickbeard import common
-from sickbeard.exceptions import ex
-from sickbeard.encodingKludge import fixStupidEncodings
 
 try:
     import xml.etree.cElementTree as etree
 except ImportError:
-    import xml.etree.ElementTree as etree
+    import xml.etree.ElementTree as etree #@UnusedImport
 
 class TraktNotifier:
 
@@ -117,7 +110,7 @@ class TraktNotifier:
         except (IOError, json.JSONDecodeError):
             logger.log("trakt_notifier: Failed calling method", logger.ERROR)
             if (tries > 1):
-                logger.log("trakt_notifier: Retrying, attempts left: " + str(retry), logger.DEBUG)
+                logger.log("trakt_notifier: Retrying, attempts left: " + str(tries), logger.DEBUG)
                 time.sleep(5)
                 self._notifyTrakt(method, api, username, password, data, post, tries -  1)
             else:
