@@ -391,6 +391,14 @@
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="prowl_notify_onupdate" id="prowl_notify_onupdate" #if $sickbeard.PROWL_NOTIFY_ONUPDATE then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="prowl_notify_onupdate">
+                                <span class="component-title">Notify on Update</span>
+                                <span class="component-desc">Send notification when SB update is available?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Prowl API key:</span>
                                 <input type="text" name="prowl_api" id="prowl_api" value="$sickbeard.PROWL_API" size="35" />

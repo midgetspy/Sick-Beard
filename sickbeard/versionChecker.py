@@ -332,6 +332,7 @@ class GitUpdateManager(UpdateManager):
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
         sickbeard.NEWEST_VERSION_STRING = new_str
         notifiers.twitter_notifier.notify_update(message)
+        notifiers.prowl_notifier.notify_update(message)
 
     def need_update(self):
         self._find_installed_version()

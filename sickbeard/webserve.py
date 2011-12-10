@@ -192,19 +192,19 @@ class Manage:
         status_list = [int(whichStatus)]
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
-        
+
         cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season != 0 AND status IN ("+','.join(['?']*len(status_list))+")", [int(tvdb_id)] + status_list)
-        
+
         result = {}
         for cur_result in cur_show_results:
             cur_season = int(cur_result["season"])
             cur_episode = int(cur_result["episode"])
-            
+
             if cur_season not in result:
                 result[cur_season] = {}
-            
+
             result[cur_season][cur_episode] = cur_result["name"]
-        
+
         return json.dumps(result)
 
     @cherrypy.expose
@@ -217,7 +217,7 @@ class Manage:
                 status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
         else:
             status_list = []
-        
+
         t = PageTemplate(file="manage_episodeStatuses.tmpl")
         t.submenu = ManageMenu
         t.whichStatus = whichStatus
@@ -225,7 +225,7 @@ class Manage:
         # if we have no status then this is as far as we need to go
         if not status_list:
             return _munge(t)
-        
+
         myDB = db.DBConnection()
         status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
 
@@ -238,11 +238,11 @@ class Manage:
                 ep_counts[cur_tvdb_id] = 1
             else:
                 ep_counts[cur_tvdb_id] += 1
-        
+
             show_names[cur_tvdb_id] = cur_status_result["show_name"]
             if cur_tvdb_id not in sorted_show_ids:
                 sorted_show_ids.append(cur_tvdb_id)
-        
+
         t.show_names = show_names
         t.ep_counts = ep_counts
         t.sorted_show_ids = sorted_show_ids
@@ -250,26 +250,26 @@ class Manage:
 
     @cherrypy.expose
     def changeEpisodeStatuses(self, oldStatus, newStatus, *args, **kwargs):
-        
+
         status_list = [int(oldStatus)]
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
 
         to_change = {}
-        
+
         # make a list of all shows and their associated args
         for arg in kwargs:
             tvdb_id, what = arg.split('-')
-            
+
             # we don't care about unchecked checkboxes
             if kwargs[arg] != 'on':
                 continue
-            
+
             if tvdb_id not in to_change:
                 to_change[tvdb_id] = []
-            
+
             to_change[tvdb_id].append(what)
-        
+
         myDB = db.DBConnection()
 
         for cur_tvdb_id in to_change:
@@ -281,19 +281,19 @@ class Manage:
                 to_change[cur_tvdb_id] = all_eps
 
             Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
-            
+
         redirect('/manage/episodeStatuses')
 
     @cherrypy.expose
     def backlogShow(self, tvdb_id):
-        
+
         show_obj = helpers.findCertainShow(sickbeard.showList, int(tvdb_id))
-        
+
         if show_obj:
             sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj]) #@UndefinedVariable
-        
+
         redirect("/manage/backlogOverview")
-        
+
     @cherrypy.expose
     def backlogOverview(self):
 
@@ -363,11 +363,11 @@ class Manage:
         root_dir_list = []
 
         for curShow in showList:
-            
+
             cur_root_dir = ek.ek(os.path.dirname, curShow._location)
             if cur_root_dir not in root_dir_list:
-                root_dir_list.append(cur_root_dir) 
-            
+                root_dir_list.append(cur_root_dir)
+
             # if we know they're not all the same then no point even bothering
             if paused_all_same:
                 # if we had a value already and this value is different then they're not all the same
@@ -423,7 +423,7 @@ class Manage:
                 logger.log(u"For show "+showObj.name+" changing dir from "+showObj._location+" to "+new_show_dir)
             else:
                 new_show_dir = showObj._location
-            
+
             if paused == 'keep':
                 new_paused = showObj.paused
             else:
@@ -438,7 +438,7 @@ class Manage:
 
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
-            
+
             curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
 
             if curErrors:
@@ -604,7 +604,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveRootDirs(self, rootDirString=None):
         sickbeard.ROOT_DIRS = rootDirString
-    
+
     @cherrypy.expose
     def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
 
@@ -619,7 +619,7 @@ class ConfigGeneral:
             bestQualities = []
 
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
-        
+
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
 
@@ -639,14 +639,14 @@ class ConfigGeneral:
             from hashlib import md5
         except ImportError:
             from md5 import md5
-        
+
         # Create some values to seed md5
         t = str(time.time())
         r = str(random.random())
-        
+
         # Create the md5 instance and give it the current time
         m = md5(t)
-        
+
         # Update the md5 instance with the random variable
         m.update(r)
 
@@ -877,7 +877,7 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         sickbeard.metadata_provider_dict['TIVO'].set_config(tivo_data)
-        
+
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
@@ -1055,7 +1055,7 @@ class ConfigProviders:
     def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
-                      tvtorrents_digest=None, tvtorrents_hash=None, 
+                      tvtorrents_digest=None, tvtorrents_hash=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1166,8 +1166,8 @@ class ConfigNotifications:
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
-                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
-                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
+                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None,
+                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_notify_onupdate=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_notify_onupdate=None,
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
@@ -1235,7 +1235,7 @@ class ConfigNotifications:
             use_growl = 1
         else:
             use_growl = 0
-            
+
         if prowl_notify_onsnatch == "on":
             prowl_notify_onsnatch = 1
         else:
@@ -1245,6 +1245,12 @@ class ConfigNotifications:
             prowl_notify_ondownload = 1
         else:
             prowl_notify_ondownload = 0
+
+        if prowl_notify_onupdate == "on":
+            prowl_notify_onupdate = 1
+        else:
+            prowl_notify_onupdate = 0
+
         if use_prowl == "on":
             use_prowl = 1
         else:
@@ -1259,12 +1265,12 @@ class ConfigNotifications:
             twitter_notify_ondownload = 1
         else:
             twitter_notify_ondownload = 0
-            
+
         if twitter_notify_onupdate == "on":
             twitter_notify_onupdate = 1
         else:
             twitter_notify_onupdate = 0
-        		
+
         if use_twitter == "on":
             use_twitter = 1
         else:
@@ -1335,6 +1341,7 @@ class ConfigNotifications:
         sickbeard.USE_PROWL = use_prowl
         sickbeard.PROWL_NOTIFY_ONSNATCH = prowl_notify_onsnatch
         sickbeard.PROWL_NOTIFY_ONDOWNLOAD = prowl_notify_ondownload
+        sickbeard.PROWL_NOTIFY_ONUPDATE = prowl_notify_onupdate
         sickbeard.PROWL_API = prowl_api
         sickbeard.PROWL_PRIORITY = prowl_priority
 
@@ -1390,7 +1397,7 @@ class Config:
     general = ConfigGeneral()
 
     search = ConfigSearch()
-    
+
     postProcessing = ConfigPostProcessing()
 
     providers = ConfigProviders()
@@ -1496,16 +1503,16 @@ class NewHomeAddShows:
     def massAddTable(self, rootDir=None):
         t = PageTemplate(file="home_massAddTable.tmpl")
         t.submenu = HomeMenu()
-        
+
         myDB = db.DBConnection()
 
         if not rootDir:
-            return "No folders selected." 
+            return "No folders selected."
         elif type(rootDir) != list:
             root_dirs = [rootDir]
         else:
             root_dirs = rootDir
-        
+
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
 
         default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
@@ -1514,9 +1521,9 @@ class NewHomeAddShows:
             if tmp in root_dirs:
                 root_dirs.remove(tmp)
                 root_dirs = [tmp]+root_dirs
-        
+
         dir_list = []
-        
+
         for root_dir in root_dirs:
             try:
                 file_list = ek.ek(os.listdir, root_dir)
@@ -1528,36 +1535,36 @@ class NewHomeAddShows:
                 cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
                 if not ek.ek(os.path.isdir, cur_path):
                     continue
-                
+
                 cur_dir = {
                            'dir': cur_path,
                            'display_dir': '<b>'+ek.ek(os.path.dirname, cur_path)+os.sep+'</b>'+ek.ek(os.path.basename, cur_path),
                            }
-                
+
                 # see if the folder is in XBMC already
                 dirResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [cur_path])
-                
+
                 if dirResults:
                     cur_dir['added_already'] = True
                 else:
                     cur_dir['added_already'] = False
-                
+
                 dir_list.append(cur_dir)
-                
+
                 tvdb_id = ''
                 show_name = ''
                 for cur_provider in sickbeard.metadata_provider_dict.values():
                     (tvdb_id, show_name) = cur_provider.retrieveShowMetadata(cur_path)
                     if tvdb_id and show_name:
                         break
-                
+
                 cur_dir['existing_info'] = (tvdb_id, show_name)
-                
+
                 if tvdb_id and helpers.findCertainShow(sickbeard.showList, tvdb_id):
-                    cur_dir['added_already'] = True 
+                    cur_dir['added_already'] = True
 
         t.dirList = dir_list
-        
+
         return _munge(t)
 
     @cherrypy.expose
@@ -1568,38 +1575,38 @@ class NewHomeAddShows:
         """
         t = PageTemplate(file="home_newShow.tmpl")
         t.submenu = HomeMenu()
-        
+
         show_dir, tvdb_id, show_name = self.split_extra_show(show_to_add)
-        
+
         if tvdb_id and show_name:
             use_provided_info = True
         else:
             use_provided_info = False
-        
+
         # tell the template whether we're giving it show name & TVDB ID
         t.use_provided_info = use_provided_info
-        
-        # use the given show_dir for the tvdb search if available 
+
+        # use the given show_dir for the tvdb search if available
         if not show_dir:
             t.default_show_name = ''
         elif not show_name:
             t.default_show_name = ek.ek(os.path.basename, ek.ek(os.path.normpath, show_dir)).replace('.',' ')
         else:
             t.default_show_name = show_name
-        
+
         # carry a list of other dirs if given
         if not other_shows:
             other_shows = []
         elif type(other_shows) != list:
             other_shows = [other_shows]
-        
+
         if use_provided_info:
             t.provided_tvdb_id = tvdb_id
             t.provided_tvdb_name = show_name
-            
+
         t.provided_show_dir = show_dir
         t.other_shows = other_shows
-        
+
         return _munge(t)
 
     @cherrypy.expose
@@ -1610,52 +1617,52 @@ class NewHomeAddShows:
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
         """
-        
+
         # grab our list of other dirs if given
         if not other_shows:
             other_shows = []
         elif type(other_shows) != list:
             other_shows = [other_shows]
-            
-        def finishAddShow(): 
+
+        def finishAddShow():
             # if there are no extra shows then go home
             if not other_shows:
                 redirect('/home')
-            
+
             # peel off the next one
             next_show_dir = other_shows[0]
             rest_of_show_dirs = other_shows[1:]
-            
+
             # go to add the next show
             return self.newShow(next_show_dir, rest_of_show_dirs)
-        
+
         # if we're skipping then behave accordingly
         if skipShow:
             return finishAddShow()
-        
+
         # sanity check on our inputs
         if (not rootDir and not fullShowPath) or not whichSeries:
             return "Missing params, no tvdb id or folder:"+repr(whichSeries)+" and "+repr(rootDir)+"/"+repr(fullShowPath)
-        
+
         # figure out what show we're adding and where
         series_pieces = whichSeries.partition('|')
         if len(series_pieces) < 3:
             return "Error with show selection."
-        
+
         tvdb_id = int(series_pieces[0])
         show_name = series_pieces[2]
-        
+
         # use the whole path if it's given, or else append the show name to the root dir to get the full show path
         if fullShowPath:
             show_dir = ek.ek(os.path.normpath, fullShowPath)
         else:
             show_dir = ek.ek(os.path.join, rootDir, helpers.sanitizeFileName(show_name))
-        
+
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
             ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home')
-        
+
         # create the dir and make sure it worked
         dir_exists = helpers.makeDir(show_dir)
         if not dir_exists:
@@ -1670,7 +1677,7 @@ class NewHomeAddShows:
             seasonFolders = 1
         else:
             seasonFolders = 0
-        
+
         if not anyQualities:
             anyQualities = []
         if not bestQualities:
@@ -1680,22 +1687,22 @@ class NewHomeAddShows:
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
-        
+
         # add the show
         sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
-        
+
 
     @cherrypy.expose
     def existingShows(self):
         """
-        Prints out the page to add existing shows from a root dir 
+        Prints out the page to add existing shows from a root dir
         """
         t = PageTemplate(file="home_addExistingShow.tmpl")
         t.submenu = HomeMenu()
-        
+
         return _munge(t)
 
     def split_extra_show(self, extra_show):
@@ -1707,7 +1714,7 @@ class NewHomeAddShows:
         show_dir = split_vals[0]
         tvdb_id = split_vals[1]
         show_name = '|'.join(split_vals[2:])
-        
+
         return (show_dir, tvdb_id, show_name)
 
     @cherrypy.expose
@@ -1722,14 +1729,14 @@ class NewHomeAddShows:
             shows_to_add = []
         elif type(shows_to_add) != list:
             shows_to_add = [shows_to_add]
-        
+
         shows_to_add = [urllib.unquote_plus(x) for x in shows_to_add]
-        
+
         if promptForSettings == "on":
             promptForSettings = 1
         else:
             promptForSettings = 0
-        
+
         tvdb_id_given = []
         dirs_only = []
         # separate all the ones with TVDB IDs
@@ -1746,7 +1753,7 @@ class NewHomeAddShows:
         # if they want me to prompt for settings then I will just carry on to the newShow page
         if promptForSettings and shows_to_add:
             return self.newShow(shows_to_add[0], shows_to_add[1:])
-        
+
         # if they don't want me to prompt for settings then I can just add all the nfo shows now
         num_added = 0
         for cur_show in tvdb_id_given:
@@ -1755,7 +1762,7 @@ class NewHomeAddShows:
             # add the show
             sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT) #@UndefinedVariable
             num_added += 1
-         
+
         if num_added:
             ui.notifications.message("Shows Added", "Automatically added "+str(num_added)+" from their existing metadata files")
 
@@ -2409,7 +2416,7 @@ class Home:
                         ep_segment = str(epObj.airdate)[:7]
                     else:
                         ep_segment = epObj.season
-    
+
                     if ep_segment not in segment_list:
                         segment_list.append(ep_segment)
 
@@ -2448,7 +2455,7 @@ class Home:
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
 
-        # retrieve the episode object and fail if we can't get one 
+        # retrieve the episode object and fail if we can't get one
         ep_obj = _getEpisode(show, season, episode)
         if isinstance(ep_obj, str):
             return json.dumps({'result': 'failure'})
@@ -2468,13 +2475,13 @@ class Home:
         return json.dumps({'result': 'failure'})
 
 class UI:
-    
+
     @cherrypy.expose
     def add_message(self):
-        
+
         ui.notifications.message('Test 1', 'This is test number 1')
         ui.notifications.error('Test 2', 'This is test number 2')
-        
+
         return "ok"
 
     @cherrypy.expose
@@ -2489,7 +2496,7 @@ class UI:
 
         return json.dumps(messages)
 
-   
+
 class WebInterface:
 
     @cherrypy.expose
@@ -2515,7 +2522,7 @@ class WebInterface:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
 
         cache_obj = image_cache.ImageCache()
-        
+
         if which == 'poster':
             image_file_name = cache_obj.poster_path(showObj.tvdbid)
         # this is for 'banner' but also the default case
@@ -2550,32 +2557,32 @@ class WebInterface:
     def setComingEpsLayout(self, layout):
         if layout not in ('poster', 'banner', 'list'):
             layout = 'banner'
-        
+
         sickbeard.COMING_EPS_LAYOUT = layout
-        
+
         redirect("/comingEpisodes")
 
     @cherrypy.expose
     def toggleComingEpsDisplayPaused(self):
-        
+
         sickbeard.COMING_EPS_DISPLAY_PAUSED = not sickbeard.COMING_EPS_DISPLAY_PAUSED
-        
+
         redirect("/comingEpisodes")
 
     @cherrypy.expose
     def setComingEpsSort(self, sort):
         if sort not in ('date', 'network', 'show'):
             sort = 'date'
-        
+
         sickbeard.COMING_EPS_SORT = sort
-        
+
         redirect("/comingEpisodes")
 
     @cherrypy.expose
     def comingEpisodes(self, layout="None"):
 
         myDB = db.DBConnection()
-        
+
         today = datetime.date.today().toordinal()
         next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
@@ -2629,7 +2636,7 @@ class WebInterface:
             t.layout = layout
         else:
             t.layout = sickbeard.COMING_EPS_LAYOUT
-                
+
 
         return _munge(t)
 
@@ -2640,11 +2647,11 @@ class WebInterface:
     config = Config()
 
     home = Home()
-    
+
     api = Api()
 
     browser = browser.WebFileBrowser()
 
     errorlogs = ErrorLogs()
-    
+
     ui = UI()
