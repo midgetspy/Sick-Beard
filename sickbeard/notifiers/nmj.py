@@ -79,7 +79,7 @@ class NMJNotifier:
         self._notifyNMJ()
 
     def notify_update(self, sb_update):
-        self._notifyNMJ()
+        return False
     
     def test_notify(self, host, database, mount):
         return self._sendNMJ(host, database, mount)

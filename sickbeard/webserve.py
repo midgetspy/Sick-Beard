@@ -1162,9 +1162,9 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
+    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_notify_onupdate=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
+                          use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_notify_onupdate=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_notify_onupdate=None, growl_host=None, growl_password=None,
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_notify_onupdate=None, prowl_api=None, prowl_priority=0,
@@ -1186,6 +1186,11 @@ class ConfigNotifications:
         else:
             xbmc_notify_ondownload = 0
 
+        if xbmc_notify_onupdate == "on":
+            xbmc_notify_onupdate = 1
+        else:
+            xbmc_notify_onupdate = 0
+        
         if xbmc_update_library == "on":
             xbmc_update_library = 1
         else:
@@ -1216,6 +1221,11 @@ class ConfigNotifications:
         else:
             plex_notify_ondownload = 0
 
+        if plex_notify_onupdate == "on":
+            plex_notify_onupdate = 1
+        else:
+            plex_notify_onupdate = 0
+        
         if use_plex == "on":
             use_plex = 1
         else:
@@ -1329,6 +1339,7 @@ class ConfigNotifications:
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
+        sickbeard.XBMC_NOTIFY_ONUPDATE = xbmc_notify_onupdate
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
         sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
         sickbeard.XBMC_HOST = xbmc_host
@@ -1338,6 +1349,7 @@ class ConfigNotifications:
         sickbeard.USE_PLEX = use_plex
         sickbeard.PLEX_NOTIFY_ONSNATCH = plex_notify_onsnatch
         sickbeard.PLEX_NOTIFY_ONDOWNLOAD = plex_notify_ondownload
+        sickbeard.PLEX_NOTIFY_ONUPDATE = plex_notify_onupdate
         sickbeard.PLEX_UPDATE_LIBRARY = plex_update_library
         sickbeard.PLEX_HOST = plex_host
         sickbeard.PLEX_SERVER_HOST = plex_server_host
@@ -1379,7 +1391,7 @@ class ConfigNotifications:
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
-        sickbeard.LIBNOTIFY_NOTIFY_ONUPDATE = libnotify_notify_update == "on"
+        sickbeard.LIBNOTIFY_NOTIFY_ONUPDATE = libnotify_notify_onupdate == "on"
         
         sickbeard.USE_NMJ = use_nmj
         sickbeard.NMJ_HOST = nmj_host
