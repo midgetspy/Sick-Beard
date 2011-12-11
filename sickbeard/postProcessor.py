@@ -594,6 +594,9 @@ class PostProcessor(object):
         
         self._log(u"Processing "+self.file_path+" ("+str(self.nzb_name)+")")
         
+        if os.path.isdir( self.file_path ):
+            self._log(u"File "+self.file_path+" seems to be a directory")
+            return False
         # reset per-file stuff
         self.in_history = False
         
