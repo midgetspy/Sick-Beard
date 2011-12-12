@@ -23,6 +23,7 @@ import datetime
 import threading
 import re
 import glob
+import time
 
 import sickbeard
 
@@ -67,6 +68,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.updatetime = 0
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -537,6 +539,8 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
+            if self.updatetime == 0:
+                self.updatetime = sqlResults[0]["lang"]
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
@@ -579,6 +583,8 @@ class TVShow(object):
 
         if self.status == None:
             self.status = ""
+
+        self.updatetime = time.time()
 
         self.saveToDB()
 
@@ -820,7 +826,8 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "updatetime": self.updatetime
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
