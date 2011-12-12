@@ -402,7 +402,7 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
 class AddTvdbUpdateTime(FixAirByDateSetting):
 
     def test(self):
-        return self.checkDBVersion() >= 10
+        return self.hasColumn("tv_shows", "updatetime")
 
     def execute(self):
         self.addColumn("tv_shows", "updatetime", "NUMERIC")
