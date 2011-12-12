@@ -103,11 +103,17 @@ def sanitizeFileName (name):
     'abc'
     >>> sanitizeFileName('a"b')
     'ab'
+    >>> sanitizeFileName('.a.b..')
+    'a.b'
     '''
-    for x in "\\/*":
-        name = name.replace(x, "-")
-    for x in ":\"<>|?":
-        name = name.replace(x, "")
+    
+    # remove bad chars from the filename
+    name = re.sub(r'[\\/\*]', '-', name)
+    name = re.sub(r'[:"<>|?]', '', name)
+    
+    # remove leading/trailing periods
+    name = re.sub(r'(^\.+|\.+$)', '', name)
+    
     return name
 
 

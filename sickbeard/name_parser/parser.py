@@ -282,7 +282,10 @@ class ParseResult(object):
         return True
 
     def __str__(self):
-        to_return = str(self.series_name) + ' - '
+        if self.series_name != None:
+            to_return = self.series_name + u' - '
+        else:
+            to_return = u''
         if self.season_number != None:
             to_return += 'S'+str(self.season_number)
         if self.episode_numbers and len(self.episode_numbers):
