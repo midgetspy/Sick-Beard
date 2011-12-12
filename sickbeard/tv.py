@@ -539,9 +539,6 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
-            if self.updatetime == 0:
-                self.updatetime = sqlResults[0]["updatetime"]
-
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + ": Loading show info from theTVDB")
@@ -583,6 +580,8 @@ class TVShow(object):
 
         if self.status == None:
             self.status = ""
+
+        self.updatetime = time.time()
 
         self.saveToDB()
 
