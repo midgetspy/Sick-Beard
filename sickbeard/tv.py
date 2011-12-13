@@ -1484,7 +1484,7 @@ class TVEpisode(object):
                    '%RG': release_group(self.release_name),
                    }
 
-    def _formatted_string(self, pattern=None, multi=None):
+    def _format_string(self, pattern=None, multi=None):
         
         replace_map = self._replace_map()
         
@@ -1565,10 +1565,12 @@ class TVEpisode(object):
         
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
+            logger.log(cur_replacement+" -> "+replace_map[cur_replacement], logger.DEBUG)
             result_name = result_name.replace(cur_replacement, replace_map[cur_replacement])
             result_name = result_name.replace(cur_replacement.lower(), replace_map[cur_replacement].lower())
         
         return result_name
+
 
     def formatted_dir(self, pattern=None, multi=None):
         """
@@ -1576,7 +1578,7 @@ class TVEpisode(object):
         """
         
         if pattern == None:
-            pattern = ek.ek(os.path.join, sickbeard.NAMING_DIR_PATTERN, sickbeard.NAMING_NAME_PATTERN)
+            pattern = sickbeard.NAMING_PATTERN
         
         # split off the dirs only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
@@ -1584,7 +1586,8 @@ class TVEpisode(object):
         if len(name_groups) == 1:
             return ''
         else:
-            return self._formatted_string(os.sep.join(name_groups[:-1]), multi)
+            return self._format_string(os.sep.join(name_groups[:-1]), multi)
+
 
     def formatted_filename(self, pattern=None, multi=None):
         """
@@ -1592,9 +1595,9 @@ class TVEpisode(object):
         """
         
         if pattern == None:
-            pattern = sickbeard.NAMING_NAME_PATTERN
+            pattern = sickbeard.NAMING_PATTERN
             
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
-
-        return self._formatted_string(name_groups[-1], multi)
+        
+        return self._format_string(name_groups[-1], multi)

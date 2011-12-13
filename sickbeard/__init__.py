@@ -35,6 +35,7 @@ from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, nzbsrus, newznab, 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
+from sickbeard import naming
 
 from common import SD, SKIPPED, NAMING_REPEAT
 
@@ -127,8 +128,8 @@ SEASON_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = []
 
 NAMING_MULTI_EP = None
-NAMING_DIR_PATTERN = None
-NAMING_NAME_PATTERN = None
+NAMING_PATTERN = None
+NAMING_FORCE_FOLDERS = False
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
@@ -384,7 +385,7 @@ def initialize(consoleLogging=True):
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
-                NAMING_DIR_PATTERN, NAMING_NAME_PATTERN, NAMING_MULTI_EP, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
@@ -495,9 +496,9 @@ def initialize(consoleLogging=True):
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
-        NAMING_DIR_PATTERN = check_setting_str(CFG, 'General', 'naming_dir_pattern', '')
-        NAMING_NAME_PATTERN = check_setting_str(CFG, 'General', 'naming_name_pattern', '')
+        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '')
         NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
+        NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
@@ -997,8 +998,7 @@ def save_config():
     new_config['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
-    new_config['General']['naming_dir_pattern'] = NAMING_DIR_PATTERN
-    new_config['General']['naming_name_pattern'] = NAMING_NAME_PATTERN
+    new_config['General']['naming_pattern'] = NAMING_PATTERN
     new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 

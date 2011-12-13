@@ -824,7 +824,7 @@ class ConfigPostProcessing:
         return _munge(t)
 
     @cherrypy.expose
-    def savePostProcessing(self, season_folders_format=None, naming_dir_pattern=None, naming_name_pattern=None, naming_multi_ep=None,
+    def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None):
@@ -870,11 +870,9 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         sickbeard.metadata_provider_dict['TIVO'].set_config(tivo_data)
         
-        sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
-
-        sickbeard.NAMING_DIR_PATTERN = naming_dir_pattern
-        sickbeard.NAMING_NAME_PATTERN = naming_name_pattern
+        sickbeard.NAMING_PATTERN = naming_pattern
         sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
+        sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
 
         sickbeard.USE_BANNER = use_banner
 
@@ -891,19 +889,35 @@ class ConfigPostProcessing:
         redirect("/config/postProcessing/")
 
     @cherrypy.expose
-    def testNaming(self, pattern=None, multi=False):
+    def testNaming(self, pattern=None, multi=None):
 
-        if multi != False:
+        if multi != None:
             multi = int(multi)
 
         result = naming.test_name(pattern, multi)
 
-        naming.reverse_name(pattern, multi)
-        
         result = ek.ek(os.path.join, result['dir'], result['name']) 
 
         return result
+    
+    @cherrypy.expose
+    def isNamingValid(self, pattern=None, multi=None):
+        if pattern == None or multi == None:
+            return "0"
         
+        # check validity of single and multi ep cases for the whole path
+        is_valid = naming.check_valid_naming(pattern, multi)
+
+        # check validity of single and multi ep cases for only the file name
+        require_season_folders = naming.check_force_season_folders(pattern, multi)
+
+        if is_valid and not require_season_folders:
+            return "valid"
+        elif is_valid and require_season_folders:
+            return "seasonfolders"
+        else:
+            return "invalid"
+
         
 class ConfigProviders:
 
@@ -2107,7 +2121,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2125,7 +2139,7 @@ class Home:
             else:
                 return _genericMessage("Error", errString)
 
-        if not location and not anyQualities and not bestQualities and not seasonfolders:
+        if not location and not anyQualities and not bestQualities and not flatten_folders:
 
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu()
@@ -2134,10 +2148,10 @@ class Home:
 
             return _munge(t)
 
-        if seasonfolders == "on":
-            seasonfolders = 1
+        if flatten_folders == "on":
+            flatten_folders = 0
         else:
-            seasonfolders = 0
+            flatten_folders = 1
 
         if paused == "on":
             paused = 1
@@ -2171,8 +2185,8 @@ class Home:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
 
-            if bool(showObj.seasonfolders) != bool(seasonfolders):
-                showObj.seasonfolders = seasonfolders
+            if bool(showObj.seasonfolders) != bool(flatten_folders):
+                showObj.seasonfolders = flatten_folders
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                 except exceptions.CantRefreshException, e:

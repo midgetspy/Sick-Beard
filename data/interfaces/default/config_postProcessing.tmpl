@@ -33,7 +33,7 @@
 
                     <fieldset class="component-group-list">
 
-                        <div>
+                        <div id="temp_color_div">
 
                             <div class="clearfix">
                                 <span class="component-title">File Name</span>
@@ -42,10 +42,10 @@
                                     #set $is_custom = True
                                     #for $cur_preset in $naming.name_presets:
                                         #set $tmp = $naming.test_name($cur_preset)
-                                        #if $cur_preset == $sickbeard.NAMING_NAME_PATTERN:
+                                        #if $cur_preset == $sickbeard.NAMING_PATTERN:
                                             #set $is_custom = False
                                         #end if
-                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_NAME_PATTERN then "selected" else ""#>$tmp['name']</option>
+                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected" else ""#>$tmp['name']</option>
                                     #end for
                                     <option id="custom" #if $is_custom then "selected" else ""#>Custom...</option>
                                     </select><br />
@@ -54,8 +54,8 @@
                                 <div class="clearfix"></div>
                                 <span class="naming_custom_span">
                                     <span class="component-title">&nbsp;</span>
-                                    <span id="naming_name_custom" class="component-desc">
-                                        <input type="text" size="60" name="naming_name_pattern" id="naming_name_pattern" class="naming_pattern" value="$sickbeard.NAMING_NAME_PATTERN" /><br />
+                                    <span id="naming_custom" class="component-desc">
+                                        <input type="text" size="60" name="naming_pattern" id="naming_pattern" class="naming_pattern" value="$sickbeard.NAMING_PATTERN" /><br />
                                         <br />
                                     </span>
                                 </span>
@@ -63,37 +63,6 @@
 
                         </div>
                         
-                        <div>
-
-                            <div class="clearfix">
-                                <span class="component-title">Folder Name</span>
-                                <span class="component-desc">
-                                    <select id="dir_presets" class="naming_preset_select">
-                                    <option id="none" #if not $sickbeard.NAMING_DIR_PATTERN then "selected" else ""#>None</option>
-                                    #set $is_custom = True
-                                    #for $cur_preset in $naming.dir_presets:
-                                        #set $tmp = $naming.test_name($cur_preset)
-                                        #if $cur_preset == $sickbeard.NAMING_DIR_PATTERN:
-                                            #set $is_custom = False
-                                        #end if
-                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_DIR_PATTERN then "selected" else ""#>$tmp['name']</option>
-                                    #end for
-                                    <option id="custom" #if $is_custom and $sickbeard.NAMING_DIR_PATTERN then "selected" else ""#>Custom...</option>
-                                    </select><br />
-                                    <br />
-                                </span>
-                                <div class="clearfix"></div>
-                                <span class="naming_custom_span">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span id="naming_dir_custom" class="component-desc">
-                                        <input type="text" size="60" name="naming_dir_pattern" id="naming_dir_pattern" class="naming_pattern" value="$sickbeard.NAMING_DIR_PATTERN" /><br />
-                                        <br />
-                                    </span>
-                                </span>
-                            </div>
-                            
-                        </div>
-
                         <div style="padding:10px; background: #efefef;">
                             <label class="clearfix">
                                 <span class="component-title jumbo" style="padding-bottom: 5px;"><b>Example:</b></span>

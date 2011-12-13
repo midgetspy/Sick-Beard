@@ -18,6 +18,7 @@
 
 import os
 
+import sickbeard
 from sickbeard import encodingKludge as ek
 from sickbeard import tv
 from sickbeard import common
@@ -49,42 +50,80 @@ class TVEpisode(tv.TVEpisode):
         self._episode = episode
         self.show = TVShow()
         self._status = Quality.compositeStatus(common.DOWNLOADED, common.Quality.SDTV)
-        self._release_name = 'Show.Name.S01E02.HDTV.XviD-RLSGROUP'
+        self._release_name = 'Show.Name.S02E03.HDTV.XviD-RLSGROUP'
+
+def check_force_season_folders(pattern=None, multi=None):
+    """
+    Checks if the name can still be parsed if you strip off the folders to determine if we need to force season folders
+    to be enabled or not.
+    
+    Returns true if season folders need to be forced on or false otherwise.
+    """
+    if pattern == None:
+        pattern = sickbeard.NAMING_PATTERN
+    if multi == None:
+        multi = sickbeard.NAMING_MULTI_EP
+
+    # if either of these are false then we need to force season folders
+    to_return = not validate_name(pattern, None, file_only=True) or not validate_name(pattern, multi, file_only=True)
+    
+    return to_return
+
+def check_valid_naming(pattern=None, multi=None):
+    """
+    Checks if the name is can be parsed back to its original form for both single and multi episodes.
+    
+    Returns true if the naming is valid, false if not.
+    """
+    if pattern == None:
+        pattern = sickbeard.NAMING_PATTERN
+    if multi == None:
+        multi = sickbeard.NAMING_MULTI_EP
+
+    return validate_name(pattern, None) and validate_name(pattern, multi)
 
 
-def reverse_name(pattern, multi=None):
-    # make a fake episode object
-    ep = TVEpisode(1,2,"Ep Name")
-    ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
+def validate_name(pattern, multi=None, file_only=False):
+    ep = _generate_sample_ep(multi)
 
     parser = NameParser(True)
 
-    ep._name = "Ep Name (1)"
-    secondEp = TVEpisode(1,3,"Ep Name (2)")
-    secondEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
-    ep.relatedEps.append(secondEp)
+    new_name = ep.formatted_filename(pattern, multi) + '.ext'
+    new_path = ep.formatted_dir(pattern, multi)
+    if not file_only:
+        new_name = ek.ek(os.path.join, new_path, new_name)
+
+    try:
+        result = parser.parse(new_name)
+    except InvalidNameException:
+        return False
     
-    new_name = ek.ek(os.path.join, ep.formatted_dir(pattern, multi), ep.formatted_filename(pattern, multi)) + '.ext'
-    logger.log("new name: "+new_name)
-    
-    result = parser.parse(new_name)
-    
-    logger.log(u"Parse result: "+str(result))
-    if result.season_number != 1:
-        logger.log(u"Bad season number")
-    if len(result.episode_numbers) != 1 and result.episode_numbers[0] != 2:
-        logger.log(u"Bad episode number")
+    logger.log(new_name + " vs " + str(result), logger.DEBUG)
+
+    if result.season_number != ep.season:
+        return False
+    if result.episode_numbers != [x.episode for x in [ep] + ep.relatedEps]:
+        return False
+
+    return True
+
+def _generate_sample_ep(multi=None):
+    # make a fake episode object
+    ep = TVEpisode(2,3,"Ep Name")
+    ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
+
+    if multi != None:
+        ep._name = "Ep Name (1)"
+        secondEp = TVEpisode(2,4,"Ep Name (2)")
+        secondEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
+        ep.relatedEps.append(secondEp)
+        ep._release_name = 'Show.Name.S02E03E04.HDTV.XviD-RLSGROUP'
+        secondEp._release_name = ep._release_name
+
+    return ep
 
 def test_name(pattern, multi=None):
 
-    # make a fake episode object
-    ep = TVEpisode(1,2,"Ep Name")
-    ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
-
-    if multi:
-        ep._name = "Ep Name (1)"
-        secondEp = TVEpisode(1,3,"Ep Name (2)")
-        secondEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
-        ep.relatedEps.append(secondEp)
+    ep = _generate_sample_ep(multi)
 
     return {'name': ep.formatted_filename(pattern, multi), 'dir': ep.formatted_dir(pattern, multi)}
