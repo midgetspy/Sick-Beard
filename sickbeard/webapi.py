@@ -1896,6 +1896,24 @@ class CMD_ShowGetPoster(ApiCall):
         return {'outputType': 'image', 'image': webserve.WebInterface().showPoster(self.tvdbid, 'poster')}
 
 
+class CMD_ShowGetBanner(ApiCall):
+    _help = {"desc": "get the banner stored for a show in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
+                                }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ get the banner for a show in sickbeard """
+        return {'outputType': 'image', 'image': webserve.WebInterface().showPoster(self.tvdbid, 'banner')}
+
+
 class CMD_ShowRefresh(ApiCall):
     _help = {"desc": "refresh a show in sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
@@ -2334,6 +2352,7 @@ _functionMaper = {"help": CMD_Help,
                   "show.delete": CMD_ShowDelete,
                   "show.getquality": CMD_ShowGetQuality,
                   "show.getposter": CMD_ShowGetPoster,
+                  "show.getbanner": CMD_ShowGetBanner,
                   "show.refresh": CMD_ShowRefresh,
                   "show.seasonlist": CMD_ShowSeasonList,
                   "show.seasons": CMD_ShowSeasons,
