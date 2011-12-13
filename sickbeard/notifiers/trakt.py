@@ -103,7 +103,7 @@ class TraktNotifier:
 
         try:
             logger.log("trakt_notifier: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
-            stream = urllib.urlopen("http://api.trakt.tv/" + method, encoded_data)
+            stream = urllib2.urlopen("http://api.trakt.tv/" + method, encoded_data)
             resp = stream.read()
 
             resp = json.loads(resp)
