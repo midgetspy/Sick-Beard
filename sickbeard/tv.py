@@ -1561,9 +1561,15 @@ class TVEpisode(object):
                 ep_string += ep_sep
                 ep_string += other_eps._replace_map()[ep_format.upper()]
 
+            if season_ep_match:
+                regex_replacement = r'\g<pre_sep>\g<2>\g<3>' + ep_string + r'\g<post_sep>'
+            elif ep_only_match:
+                regex_replacement = ep_string
+
             # fill out the template for this piece and then insert this piece into the actual pattern
-            cur_name_group_result = re.sub(regex_used, ep_string, cur_name_group)
+            cur_name_group_result = re.sub('(?i)(?x)'+regex_used, regex_replacement, cur_name_group)
             #cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
+            logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
         
         # if there's no release group then replace it with a reasonable facsimile
@@ -1576,7 +1582,6 @@ class TVEpisode(object):
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
             result_name = result_name.replace(cur_replacement, replace_map[cur_replacement])
             result_name = result_name.replace(cur_replacement.lower(), replace_map[cur_replacement].lower())
-            logger.log(cur_replacement+" -> "+replace_map[cur_replacement]+' = '+result_name, logger.DEBUG)
         
         return result_name
 
