@@ -117,4 +117,12 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testNMJ", {'host': nmj_host, 'database': nmj_database, 'mount': nmj_mount}, 
         function (data){ $('#testNMJ-result').html(data); });
     });
+
+    $('#testNMA').click(function(){
+        $('#testNMA-result').html(loading);
+        var nma_api = $("#nma_api").val();
+        var nma_priority = $("#nma_priority").val();
+        var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
+        function (data){ $('#testNMA-result').html(data); });
+    });
 });
