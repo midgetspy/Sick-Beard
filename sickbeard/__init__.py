@@ -250,6 +250,13 @@ NMJ_MOUNT = None
 
 USE_SYNOINDEX = False
 
+USE_EMAIL = False
+EMAIL_NOTIFY_ONSNATCH = False
+EMAIL_NOTIFY_ONDOWNLOAD = False
+EMAIL_SERVER = None
+EMAIL_SENDER = None
+EMAIL_RECIPIENT = None
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -373,6 +380,7 @@ def initialize(consoleLogging=True):
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
+                USE_EMAIL, EMAIL_SERVER, EMAIL_SENDER, EMAIL_RECIPIENT, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
@@ -590,6 +598,13 @@ def initialize(consoleLogging=True):
         NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
         NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
         NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
+
+        USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
+        EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
+        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0))
+        EMAIL_SERVER = check_setting_str(CFG, 'Email', 'email_server', '')
+        EMAIL_SENDER = check_setting_str(CFG, 'Email', 'email_sender', '')
+        EMAIL_RECIPIENT = check_setting_str(CFG, 'Email', 'email_recipient', '')
 
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
 
@@ -1095,6 +1110,14 @@ def save_config():
     new_config['NMJ']['nmj_host'] = NMJ_HOST
     new_config['NMJ']['nmj_database'] = NMJ_DATABASE
     new_config['NMJ']['nmj_mount'] = NMJ_MOUNT
+
+    new_config['Email'] = {}
+    new_config['Email']['use_email'] = int(USE_EMAIL)
+    new_config['Email']['email_notify_onsnatch'] = int(EMAIL_NOTIFY_ONSNATCH)
+    new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
+    new_config['Email']['email_server'] = EMAIL_SERVER
+    new_config['Email']['email_sender'] = EMAIL_SENDER
+    new_config['Email']['email_recipient'] = EMAIL_RECIPIENT
 
     new_config['Synology'] = {}
     new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)

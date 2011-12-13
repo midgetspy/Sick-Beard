@@ -117,4 +117,13 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testNMJ", {'host': nmj_host, 'database': nmj_database, 'mount': nmj_mount}, 
         function (data){ $('#testNMJ-result').html(data); });
     });
+
+    $('#testEmail').click(function(){
+        $('#testEmail-result').html(loading);
+        var email_server = $("#email_server").val();
+        var email_sender = $("#email_sender").val();
+        var email_recipient = $("#email_recipient").val();
+        $.get(sbRoot+"/home/testEmail", {'server': email_server, 'sender': email_sender, 'recipient': email_recipient},
+        function (data){ $('#testEmail-result').html(data); });
+    });
 });

@@ -672,6 +672,77 @@
 
                 </div>
 
+                <div id="core-component-group11" class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><img src="$sbRoot/images/notifiers/email.gif" alt="Email" title="Email" width="16" height="16" />Email</h3>
+                        <p>Send a simple email to an address of your choice.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_email" id="use_email" #if $sickbeard.USE_EMAIL then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_email">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to an email address?<br /><br />
+                                </span>
+                            </label>
+                        </div>
+                    <div id="content_use_email">
+                        <div class="field-pair">
+                            <input type="checkbox" name="email_notify_onsnatch" id="email_notify_onsnatch" #if $sickbeard.EMAIL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="email_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="email_notify_ondownload" id="email_notify_ondownload" #if $sickbeard.EMAIL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="email_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">SMTP Server Address</span>
+                                <input type="text" name="email_server" id="email_server" value="$sickbeard.EMAIL_SERVER" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">SMTP Server IP Address or Hostname</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Sender Email Address</span>
+                                <input type="text" name="email_sender" id="email_sender" value="$sickbeard.EMAIL_SENDER" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">&nbsp;</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Recipient Email Address</span>
+                                <input type="text" name="email_recipient" id="email_recipient" value="$sickbeard.EMAIL_RECIPIENT" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">&nbsp;</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testEmail-result">Click below to test.</div>
+                        <input type="button" value="Test Email" id="testEmail" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_email //-->
+                    </fieldset>
+                </div><!-- /component-group //-->
+
 
 
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
