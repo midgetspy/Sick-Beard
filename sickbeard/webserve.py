@@ -870,9 +870,12 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         sickbeard.metadata_provider_dict['TIVO'].set_config(tivo_data)
         
-        sickbeard.NAMING_PATTERN = naming_pattern
-        sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
-        sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
+        if self.isNamingValid(naming_pattern, naming_multi_ep) != "invalid":
+            sickbeard.NAMING_PATTERN = naming_pattern
+            sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
+            sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
+        else:
+            results.append("You tried saving an invalid naming config, didn't change your naming config")
 
         sickbeard.USE_BANNER = use_banner
 
@@ -2448,7 +2451,7 @@ class Home:
             cur_path = cur_ep_obj.location[len(showObj.location)+1:]
             cur_ext = cur_path.rsplit('.')[-1]
             
-            name_list.append((cur_path, ek.ek(os.path.join, cur_ep_obj.formatted_dir(), cur_ep_obj.formatted_filename()) + '.' +cur_ext, cur_ep_obj))
+            name_list.append((cur_path, cur_ep_obj.proper_path() + '.' + cur_ext, cur_ep_obj))
                 
         t = PageTemplate(file="testRename.tmpl")
         t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]

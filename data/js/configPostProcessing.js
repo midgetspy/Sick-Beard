@@ -26,13 +26,16 @@ $(document).ready(function(){
 
 		$.get(sbRoot+'/config/postProcessing/isNamingValid', {pattern: pattern, multi: multi},
 				function(data){
-					if (data == "invalid")
+					if (data == "invalid") {
+						//$('input[type=submit]').attr('disabled', true);
 						$('#temp_color_div').css('background-color', 'red');
-					else if (data == "seasonfolders")
+					} else if (data == "seasonfolders") {
+						$('input[type=submit]').attr('disabled', false);
 						$('#temp_color_div').css('background-color', 'yellow');
-					else
+					} else {
+						$('input[type=submit]').attr('disabled', false);
 						$('#temp_color_div').css('background-color', 'white');
-						
+					}						
 		});
 	}
 	
@@ -81,7 +84,7 @@ $(document).ready(function(){
 	});
 	
 	$('#naming_multi_ep').change(fill_examples);
-	$('.naming_pattern').keyup(function(){
+	$('#naming_pattern').keyup(function(){
 		typewatch(function () {
 			do_preset('#'+$(this).attr('id'));
 		}, 500);

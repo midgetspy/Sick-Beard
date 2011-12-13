@@ -1486,6 +1486,8 @@ class TVEpisode(object):
 
     def _format_string(self, pattern=None, multi=None):
         
+        logger.log(u"pattern: "+pattern, logger.DEBUG)
+        
         replace_map = self._replace_map()
         
         if pattern == None:
@@ -1531,6 +1533,8 @@ class TVEpisode(object):
                 # force 2-3-4 format if they chose to extend
                 if multi == NAMING_EXTEND:
                     ep_sep = '-'
+                
+                regex_used = season_ep_regex
 
             # if there's no season then there's not much choice so we'll just force them to use 03-04-05 style
             elif ep_only_match:
@@ -1538,6 +1542,10 @@ class TVEpisode(object):
                 ep_sep = '-'
                 ep_format = ep_only_match.group(1)
                 sep = ''
+                regex_used = ep_only_regex
+
+            else:
+                continue
 
             # we need at least this much info to continue
             if not ep_sep or not ep_format:
@@ -1554,7 +1562,8 @@ class TVEpisode(object):
                 ep_string += other_eps._replace_map()[ep_format.upper()]
 
             # fill out the template for this piece and then insert this piece into the actual pattern
-            cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
+            cur_name_group_result = re.sub(regex_used, ep_string, cur_name_group)
+            #cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
         
         # if there's no release group then replace it with a reasonable facsimile
@@ -1565,12 +1574,25 @@ class TVEpisode(object):
         
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
-            logger.log(cur_replacement+" -> "+replace_map[cur_replacement], logger.DEBUG)
             result_name = result_name.replace(cur_replacement, replace_map[cur_replacement])
             result_name = result_name.replace(cur_replacement.lower(), replace_map[cur_replacement].lower())
+            logger.log(cur_replacement+" -> "+replace_map[cur_replacement]+' = '+result_name, logger.DEBUG)
         
         return result_name
 
+    def proper_path(self):
+        """
+        Figures out where this episode SHOULD live according to the renaming rules
+        """
+        
+        result = self.formatted_filename()
+        
+        # as long as they don't want us to flatten it and we're not FORCED to flatten it then append the dir
+        if self.show.seasonfolders or sickbeard.NAMING_FORCE_FOLDERS:
+            result = ek.ek(os.path.join, self.formatted_dir(), result)
+        
+        return result
+        
 
     def formatted_dir(self, pattern=None, multi=None):
         """
