@@ -172,6 +172,49 @@
                                     <span class="component-desc">Category for downloads to go into (eg. TV)</span>
                                 </label>
                             </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SABnzbd New Priority</span>
+                                    <select name="sab_prioritynew" id="sab_prioritynew">
+                                    #set $sab_prioritynew_text = {'-100': "Default Priority", '-2': "Paused", '-1': "Low Priority", '0': "Normal Priority", '1':"High Priority", '2':"Force" }
+                                    #for $curAction in ('-100', '-2', '-1', '0', '1'):
+                                      #if $sickbeard.SAB_PRIORITYNEW == $curAction:
+                                        #set $sab_prioritynew = "selected=\"selected\""
+                                      #else
+                                        #set $sab_prioritynew = ""
+                                      #end if
+                                    <option value="$curAction" $sab_prioritynew>$sab_prioritynew_text[$curAction]</option>
+                                    #end for
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Priority of new episodes for SABnzbd</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SABnzbd Old Priority</span>
+                                    <select name="sab_priorityold" id="sab_priorityold">
+                                    #set $sab_priorityold_text = {'-100': "Default Priority", '-2': "Paused", '-1': "Low Priority", '0': "Normal Priority", '1':"High Priority", '2':"Force" }
+                                    #for $curAction in ('-100', '-2', '-1', '0', '1'):
+                                      #if $sickbeard.SAB_PRIORITYOLD == $curAction:
+                                        #set $sab_priorityold = "selected=\"selected\""
+                                      #else
+                                        #set $sab_priorityold = ""
+                                      #end if
+                                    <option value="$curAction" $sab_priorityold>$sab_priorityold_text[$curAction]</option>
+                                    #end for
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Priority of old episodes for SABnzbd</span>
+                                </label>
+                            </div>
+
                         </div>
 
                         <div id="nzbget_settings">
