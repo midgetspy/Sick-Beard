@@ -2223,8 +2223,9 @@ class CMD_Shows(ApiCall):
             if (len(nextEps) != 0):
                 nextAirdate = _ordinal_to_dateForm(nextEps[0].airdate.toordinal())
 
-            if not bool(self.paused) == bool(curShow.paused):
+            if self.paused != None and bool(self.paused) != bool(curShow.paused):
                 continue
+
             showDict = {"paused": curShow.paused,
                         "quality": _get_quality_string(curShow.quality),
                         "language": curShow.lang,
