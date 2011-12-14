@@ -674,6 +674,65 @@
 
 
 
+                <div id="core-component-group11" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3><a href="http://trakt.tv/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/trakt.gif" alt="Trakt" title="Trakt" width="16" height="16" /> Trakt</a></h3>
+                        <p>trakt helps keep a record of what TV shows and movies you are watching. Based on your favorites, trakt recommends additional shows and movies you'll enjoy!</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_trakt" id="use_trakt" #if $sickbeard.USE_TRAKT then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_trakt">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Trakt.tv notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_trakt">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Trakt Username</span>
+                                <input type="text" name="trakt_username" id="trakt_username" value="$sickbeard.TRAKT_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your Trakt account.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Trakt Password</span>
+                                <input type="password" name="trakt_password" id="trakt_password" value="$sickbeard.TRAKT_PASSWORD" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Password of your Trakt account.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Trakt API key:</span>
+                                <input type="text" name="trakt_api" id="trakt_api" value="$sickbeard.TRAKT_API" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Get your key at: <a href="http://trakt.tv/settings/api" onclick="window.open(this.href, '_blank'); return false;">http://trakt.tv/settings/api</a></span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testTrakt-result">Click below to test.</div>
+                        <input type="button" value="Test Trakt" id="testTrakt" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+
+                        </div><!-- /enabler_trakt //-->
+
+                    </fieldset>
+                </div><!-- /component-group //-->
+
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
