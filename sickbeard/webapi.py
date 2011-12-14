@@ -25,6 +25,7 @@ import urllib
 import datetime
 import threading
 import re
+import traceback
 
 import cherrypy
 import sickbeard
@@ -77,14 +78,16 @@ class Api:
 
         # set the output callback
         # default json
-        outputCallback = self._out_as_json
+        outputCallbackDict = {'default': self._out_as_json,
+                              'image': lambda x: x['image'],
+                              }
 
         # do we have acces ?
         if access:
             logger.log(accessMsg, logger.DEBUG)
         else:
             logger.log(accessMsg, logger.WARNING)
-            return outputCallback(_responds(RESULT_DENIED, msg=accessMsg))
+            return outputCallbackDict['default'](_responds(RESULT_DENIED, msg=accessMsg))
 
         # set the original call_dispatcher as the local _call_dispatcher
         _call_dispatcher = call_dispatcher
@@ -108,6 +111,11 @@ class Api:
                              "kwargs": kwargs}
                 outDict = _responds(RESULT_FATAL, errorData, "SickBeard encountered an internal error! Please report to the Devs")
 
+        if 'outputType' in outDict:
+            outputCallback = outputCallbackDict[outDict['outputType']]
+        else:
+            outputCallback = outputCallbackDict['default']
+        
         return outputCallback(outDict)
 
     @cherrypy.expose
@@ -154,6 +162,7 @@ class Api:
         try:
             out = json.dumps(dict, indent=self.intent, sort_keys=True)
         except Exception, e: # if we fail to generate the output fake a error
+            logger.log(u"API :: " + traceback.format_exc(), logger.DEBUG)
             out = '{"result":"' + result_type_map[RESULT_ERROR] + '", "message": "error while composing output: "' + ex(e) + '"}'
         return out
 
@@ -1869,6 +1878,42 @@ class CMD_ShowGetQuality(ApiCall):
         return _responds(RESULT_SUCCESS, {"initial": anyQualities, "archive": bestQualities})
 
 
+class CMD_ShowGetPoster(ApiCall):
+    _help = {"desc": "get the poster stored for a show in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
+                                }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ get the poster for a show in sickbeard """
+        return {'outputType': 'image', 'image': webserve.WebInterface().showPoster(self.tvdbid, 'poster')}
+
+
+class CMD_ShowGetBanner(ApiCall):
+    _help = {"desc": "get the banner stored for a show in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
+                                }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ get the banner for a show in sickbeard """
+        return {'outputType': 'image', 'image': webserve.WebInterface().showPoster(self.tvdbid, 'banner')}
+
+
 class CMD_ShowRefresh(ApiCall):
     _help = {"desc": "refresh a show in sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
@@ -2223,8 +2268,9 @@ class CMD_Shows(ApiCall):
             if (len(nextEps) != 0):
                 nextAirdate = _ordinal_to_dateForm(nextEps[0].airdate.toordinal())
 
-            if not bool(self.paused) == bool(curShow.paused):
+            if self.paused != None and bool(self.paused) != bool(curShow.paused):
                 continue
+
             showDict = {"paused": curShow.paused,
                         "quality": _get_quality_string(curShow.quality),
                         "language": curShow.lang,
@@ -2305,6 +2351,8 @@ _functionMaper = {"help": CMD_Help,
                   "show.cache": CMD_ShowCache,
                   "show.delete": CMD_ShowDelete,
                   "show.getquality": CMD_ShowGetQuality,
+                  "show.getposter": CMD_ShowGetPoster,
+                  "show.getbanner": CMD_ShowGetBanner,
                   "show.refresh": CMD_ShowRefresh,
                   "show.seasonlist": CMD_ShowSeasonList,
                   "show.seasons": CMD_ShowSeasons,

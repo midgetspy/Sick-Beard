@@ -28,6 +28,7 @@ import notifo
 import boxcar
 import nmj
 import synoindex
+import trakt
 
 from sickbeard.common import *
 
@@ -41,6 +42,7 @@ boxcar_notifier = boxcar.BoxcarNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
+trakt_notifier = trakt.TraktNotifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
@@ -53,7 +55,8 @@ notifiers = [
     twitter_notifier,
     nmj_notifier,
     synoindex_notifier,
-    boxcar_notifier
+    boxcar_notifier,
+    trakt_notifier,
 ]
 
 def notify_download(ep_name):
