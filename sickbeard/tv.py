@@ -693,8 +693,8 @@ class TVShow(object):
 
     def refreshDir(self):
 
-        # make sure the show dir is where we think it is
-        if not ek.ek(os.path.isdir, self._location):
+        # make sure the show dir is where we think it is unless dirs are created on the fly
+        if not ek.ek(os.path.isdir, self._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
             return False
 
         # load from dir
