@@ -78,6 +78,8 @@ class TraktNotifier:
     def _notifyTrakt(self, method, api, username, password, data = {}):
         logger.log("trakt_notifier: Call method " + method, logger.DEBUG)
 
+        json._toggle_speedups(False)
+
         if not api:
             api = self._api()
         if not username:
