@@ -21,7 +21,10 @@ import urllib2
 
 from hashlib import sha1
 
-import json
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
 
 import sickbeard
 
