@@ -221,15 +221,18 @@ def call_dispatcher(args, kwargs):
                 cmd, cmdIndex = cmd.split("_") # this gives us the clear cmd and the index
 
             logger.log(u"API :: " + cmd + ": curKwargs " + str(curKwargs), logger.DEBUG)
-            try:
-                if cmd in _functionMaper:
-                    curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run() # get the cmd class, init it and run()
-                elif _is_int(cmd):
-                    curOutDict = TVDBShorthandWrapper(curArgs, curKwargs, cmd).run()
-                else:
-                    curOutDict = _responds(RESULT_ERROR, "No such cmd: '" + cmd + "'")
-            except ApiError, e: # Api errors that we raised, they are harmless
-                curOutDict = _responds(RESULT_ERROR, msg=ex(e))
+            if not (multiCmds and cmd in ('show.getposter','show.getbanner')): # skip these cmd while chaining
+                try:
+                    if cmd in _functionMaper:
+                        curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run() # get the cmd class, init it and run()
+                    elif _is_int(cmd):
+                        curOutDict = TVDBShorthandWrapper(curArgs, curKwargs, cmd).run()
+                    else:
+                        curOutDict = _responds(RESULT_ERROR, "No such cmd: '" + cmd + "'")
+                except ApiError, e: # Api errors that we raised, they are harmless
+                    curOutDict = _responds(RESULT_ERROR, msg=ex(e))
+            else: # if someone chained one of the forbiden cmds they will get an error for this one cmd
+                curOutDict = _responds(RESULT_ERROR, msg="The cmd '"+cmd+"' is not supported while chaining")
 
             if multiCmds:
                 # note: if multiple same cmds are issued but one has not an index defined it will override all others
