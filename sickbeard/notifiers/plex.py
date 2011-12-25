@@ -36,8 +36,38 @@ class PLEXNotifier(XBMCNotifier):
             self._notifyXBMC(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
 
     def test_notify(self, host, username, password):
-        return self._notifyXBMC("Testing Plex notifications from Sick Beard", "Test Notification", host, username, password, force=True)
+        if not sickbeard.USE_PLEX:
+            logger.log(u"Notifications for Plex Media Server not enabled, skipping library update", logger.DEBUG)
+            return False
 
+        logger.log(u"Updating Plex Media Server library", logger.DEBUG)
+
+        if not sickbeard.PLEX_SERVER_HOST:
+            logger.log(u"No host specified, no updates done", logger.DEBUG)
+            return False
+
+        logger.log(u"Plex Media Server updating " + sickbeard.PLEX_SERVER_HOST, logger.DEBUG)
+
+        url = "http://%s/library/sections" % sickbeard.PLEX_SERVER_HOST
+        try:
+            xml_sections = minidom.parse(urllib.urlopen(url))
+        except IOError, e:
+            logger.log(u"Error while trying to contact your plex server: "+ex(e), logger.ERROR)
+            return False
+
+        sections = xml_sections.getElementsByTagName('Directory')
+
+        for s in sections:
+            if s.getAttribute('type') == "show":
+                url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, s.getAttribute('key'))
+
+                try:
+                    urllib.urlopen(url)
+                except Exception, e:
+                    logger.log(u"Error updating library section: "+ex(e), logger.ERROR)
+                    return False
+
+        return True
     def update_library(self):
         if sickbeard.PLEX_UPDATE_LIBRARY:
             self._update_library()
