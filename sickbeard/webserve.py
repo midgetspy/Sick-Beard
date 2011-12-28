@@ -352,8 +352,8 @@ class Manage:
             if showObj:
                 showList.append(showObj)
 
-        season_folders_all_same = True
-        last_season_folders = None
+        flatten_folders_all_same = True
+        last_flatten_folders = None
 
         paused_all_same = True
         last_paused = None
@@ -377,11 +377,11 @@ class Manage:
                 else:
                     last_paused = curShow.paused
 
-            if season_folders_all_same:
-                if last_season_folders not in (None, curShow.seasonfolders):
-                    season_folders_all_same = False
+            if flatten_folders_all_same:
+                if last_flatten_folders not in (None, curShow.flatten_folders):
+                    flatten_folders_all_same = False
                 else:
-                    last_season_folders = curShow.seasonfolders
+                    last_flatten_folders = curShow.flatten_folders
 
             if quality_all_same:
                 if last_quality not in (None, curShow.quality):
@@ -391,14 +391,14 @@ class Manage:
 
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
-        t.season_folders_value = last_season_folders if season_folders_all_same else None
+        t.flatten_folders_value = last_flatten_folders if flatten_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False,
+    def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False,
                        anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
 
         dir_map = {}
@@ -431,16 +431,16 @@ class Manage:
                 new_paused = True if paused == 'enable' else False
             new_paused = 'on' if new_paused else 'off'
 
-            if season_folders == 'keep':
-                new_season_folders = showObj.seasonfolders
+            if flatten_folders == 'keep':
+                new_flatten_folders = showObj.flatten_folders
             else:
-                new_season_folders = True if season_folders == 'enable' else False
-            new_season_folders = 'on' if new_season_folders else 'off'
+                new_flatten_folders = True if flatten_folders == 'enable' else False
+            new_flatten_folders = 'on' if new_flatten_folders else 'off'
 
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_flatten_folders, new_paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
@@ -611,7 +611,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -628,12 +628,12 @@ class ConfigGeneral:
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
 
-        if defaultSeasonFolders == "true":
-            defaultSeasonFolders = 1
+        if defaultFlattenFolders == "true":
+            defaultFlattenFolders = 1
         else:
-            defaultSeasonFolders = 0
+            defaultFlattenFolders = 0
 
-        sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+        sickbeard.FLATTEN_FOLDERS_DEFAULT = int(defaultFlattenFolders)
 
     @cherrypy.expose
     def generateKey(self):
@@ -1576,7 +1576,7 @@ class NewHomeAddShows:
 
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
-                   anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
+                   anyQualities=None, bestQualities=None, flatten_folders=None, fullShowPath=None,
                    other_shows=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
@@ -1638,10 +1638,10 @@ class NewHomeAddShows:
             helpers.chmodAsParent(show_dir)
 
         # prepare the inputs for passing along
-        if seasonFolders == "on":
-            seasonFolders = 1
+        if flatten_folders == "on":
+            flatten_folders = 1
         else:
-            seasonFolders = 0
+            flatten_folders = 0
         
         if not anyQualities:
             anyQualities = []
@@ -1654,7 +1654,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -1725,7 +1725,7 @@ class NewHomeAddShows:
             show_dir, tvdb_id, show_name = cur_show
 
             # add the show
-            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT) #@UndefinedVariable
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.FLATTEN_FOLDERS_DEFAULT) #@UndefinedVariable
             num_added += 1
          
         if num_added:
@@ -2152,9 +2152,11 @@ class Home:
             return _munge(t)
 
         if flatten_folders == "on":
-            flatten_folders = 0
-        else:
             flatten_folders = 1
+        else:
+            flatten_folders = 0
+
+        logger.log(u"flatten folders: "+str(flatten_folders))
 
         if paused == "on":
             paused = 1
@@ -2188,8 +2190,9 @@ class Home:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
 
-            if bool(showObj.seasonfolders) != bool(flatten_folders):
-                showObj.seasonfolders = flatten_folders
+            # reversed for now
+            if bool(showObj.flatten_folders) != bool(flatten_folders):
+                showObj.flatten_folders = flatten_folders
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                 except exceptions.CantRefreshException, e:
@@ -2327,25 +2330,6 @@ class Home:
             logger.log(u"Plex library update failed for host " + sickbeard.PLEX_HOST, logger.ERROR)
         redirect('/home')
 
-
-    @cherrypy.expose
-    def fixEpisodeNames(self, show=None):
-
-        if show == None:
-            return _genericMessage("Error", "Invalid show ID")
-
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
-
-        if showObj == None:
-            return _genericMessage("Error", "Unable to find the specified show")
-
-        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
-            return _genericMessage("Error", "Show is still being added, wait until it is finished before you rename files")
-
-        showObj.fixEpisodeNames()
-
-        redirect("/home/displayShow?show=" + show)
-
     @cherrypy.expose
     def setStatus(self, show=None, eps=None, status=None, direct=False):
 
@@ -2444,10 +2428,15 @@ class Home:
 
         ep_obj_list = []
 
-        for cur_ep_obj in showObj.getAllEpisodes():
-            if not cur_ep_obj.location:
-                continue
+        myDB = db.DBConnection()
+        ep_list = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != '' GROUP BY location ORDER BY season*1000+episode", [show])
+
+        for cur_ep in ep_list:
+
+            # get the episode object
+            cur_ep_obj = showObj.makeEpFromFile(cur_ep["location"])
             
+            # figure out the path vars
             cur_path = cur_ep_obj.location[len(showObj.location)+1:]
             cur_ext = cur_path.rsplit('.')[-1]
             
@@ -2459,6 +2448,45 @@ class Home:
         t.show = showObj
 
         return _munge(t)
+
+    @cherrypy.expose
+    def doRename(self, show=None, eps=None):
+
+        if show == None or eps == None:
+            errMsg = "You must specify a show and at least one episode"
+            return _genericMessage("Error", errMsg)
+
+        show_obj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+        if show_obj == None:
+            errMsg = "Error", "Show not in show list"
+            return _genericMessage("Error", errMsg)
+
+        myDB = db.DBConnection()
+
+        if eps == None:
+            redirect("/home/displayShow?show=" + show)
+            
+        for curEp in eps.split('|'):
+
+            epInfo = curEp.split('x')
+            
+            # this is probably the worst possible way to deal with double eps but I've kinda painted myself into a corner here with this stupid database
+            ep_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND 5=5", [show, epInfo[0], epInfo[1]])
+            if not ep_result:
+                logger.log(u"Unable to find an episode for "+curEp+", skipping", logger.WARNING)
+                continue
+            related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE location = ? AND episode != ?", [ep_result[0]["location"], epInfo[1]])
+            
+            root_ep_obj = show_obj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+            for cur_related_ep in related_eps_result:
+                related_ep_obj = show_obj.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
+                if related_ep_obj not in root_ep_obj.relatedEps:
+                    root_ep_obj.relatedEps.append(related_ep_obj)
+
+            root_ep_obj.rename()
+
+        redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):

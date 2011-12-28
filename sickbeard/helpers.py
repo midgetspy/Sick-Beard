@@ -406,22 +406,72 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
-def rename_file(old_path, new_name):
+def make_dirs(path):
+    """
+    Creates any folders that are missing and assigns them the permissions of their
+    parents
+    """
 
-    old_path_list = ek.ek(os.path.split, old_path)
-    old_file_ext = os.path.splitext(old_path_list[1])[1]
+    # strip off the file name if there is one
+    path = os.path.dirname(path)
 
-    new_path = ek.ek(os.path.join, old_path_list[0], sanitizeFileName(new_name) + old_file_ext)
+    sofar = ''
+    folder_list = path.split(os.path.sep)
 
-    logger.log(u"Renaming from " + old_path + " to " + new_path)
+    # look through each subfolder and make sure they all exist
+    for cur_folder in folder_list:
+        sofar += cur_folder + os.path.sep;
 
+        # if it exists then just keep walking down the line
+        if ek.ek(os.path.isdir, sofar):
+            continue
+
+        try:
+            ek.ek(os.mkdir, sofar)
+            chmodAsParent(sofar)
+        except OSError, IOError:
+            return False
+    
+    return True
+
+def rename_ep_file(cur_path, new_path):
+    """
+    Creates all folders needed to move a file to its new location, renames it, then cleans up any folders
+    left that are now empty.
+    
+    cur_path: The absolute path to the file you want to move/rename
+    new_path: The absolute path to the destination for the file WITHOUT THE EXTENSION
+    """
+    
+    logger.log(u"Renaming file from "+cur_path+" to "+new_path)
+    
+    new_dest_dir, new_dest_name = os.path.split(new_path) #@UnusedVariable
+    cur_file_name, cur_file_ext = os.path.splitext(cur_path) #@UnusedVariable
+    
+    # put the extension on the incoming file
+    new_path += cur_file_ext
+    
+    make_dirs(new_path)
+    
+    # move the file
     try:
-        ek.ek(os.rename, old_path, new_path)
+        ek.ek(os.rename, cur_path, new_path)
     except (OSError, IOError), e:
-        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + ex(e), logger.ERROR)
+        logger.log(u"Failed renaming " + cur_path + " to " + new_path + ": " + ex(e), logger.ERROR)
         return False
-
-    return new_path
+    
+    # clean up any old folders that are empty
+    check_empty_dir = ek.ek(os.path.dirname, cur_path)
+    while not os.listdir(check_empty_dir):
+        logger.log(u"Deleting empty folder: "+check_empty_dir)
+        try:
+            os.remove(check_empty_dir)
+        except (WindowsError, OSError):
+            logger.log(u"Unable to delete "+check_empty_dir, logger.WARNING)
+            break
+        check_empty_dir = os.path.basename(check_empty_dir)
+    
+    return True
 
 def chmodAsParent(childPath):
     if os.name == 'nt' or os.name == 'ce':

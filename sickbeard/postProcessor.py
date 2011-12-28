@@ -112,6 +112,9 @@ class PostProcessor(object):
             return PostProcessor.DOESNT_EXIST
 
     def _list_associated_files(self, file_path):
+        """
+        Returns the absolute path to all files that share the same name but different extension with the given file
+        """
     
         if not file_path:
             return []
@@ -119,6 +122,10 @@ class PostProcessor(object):
         file_path_list = []
     
         base_name = file_path.rpartition('.')[0]+'.'
+        
+        # don't strip it all and use cwd by accident
+        if not base_name:
+            return []
         
         # don't confuse glob with chars we didn't mean to use
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
@@ -234,41 +241,6 @@ class PostProcessor(object):
                 raise e
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
-
-    def _find_ep_destination_folder(self, ep_obj):
-        
-        # if we're supposed to put it in a season folder then figure out what folder to use
-        season_folder = ''
-        if ep_obj.show.seasonfolders:
-    
-            # search the show dir for season folders
-            for curDir in ek.ek(os.listdir, ep_obj.show.location):
-    
-                if not ek.ek(os.path.isdir, ek.ek(os.path.join, ep_obj.show.location, curDir)):
-                    continue
-    
-                # if it's a season folder, check if it's the one we want
-                match = re.match(".*season\s*(\d+)", curDir, re.IGNORECASE)
-                if match:
-                    # if it's the correct season folder then stop looking
-                    if int(match.group(1)) == int(ep_obj.season):
-                        season_folder = curDir
-                        break
-    
-            # if we couldn't find the right one then just use the season folder defaut format
-            if season_folder == '':
-                # for air-by-date shows use the year as the season folder
-                if ep_obj.show.air_by_date:
-                    season_folder = str(ep_obj.airdate.year)
-                else:
-                    try:
-                        season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
-                    except TypeError:
-                        logger.log(u"Error: Your season folder format is incorrect, try setting it back to the default")
-        
-        dest_folder = ek.ek(os.path.join, ep_obj.show.location, season_folder)
-        
-        return dest_folder
 
     def _history_lookup(self):
         """
@@ -670,20 +642,17 @@ class PostProcessor(object):
         
         # find the destination folder
         try:
-            dest_path = self._find_ep_destination_folder(ep_obj)
+            proper_path = ep_obj.proper_path()
+            proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
+            
+            dest_path = ek.ek(os.path.dirname, proper_absolute_path)
         except exceptions.ShowDirNotFoundException:
             raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
             
         self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
-        
-        # if the dir doesn't exist (new season folder) then make it
-        if not ek.ek(os.path.isdir, dest_path):
-            self._log(u"Season folder didn't exist, creating it", logger.DEBUG)
-            try:
-                ek.ek(os.mkdir, dest_path)
-                helpers.chmodAsParent(dest_path)
-            except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
+
+        # create any folders we need
+        helpers.make_dirs(dest_path)
 
         # update the statuses before we rename so the quality goes into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
@@ -694,7 +663,7 @@ class PostProcessor(object):
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
-            new_base_name = helpers.sanitizeFileName(ep_obj.prettyName())
+            new_base_name = ek.ek(os.path.basename, ep_obj.proper_path)
             new_file_name = new_base_name + '.' + orig_extension
 
         else:

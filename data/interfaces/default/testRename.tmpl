@@ -40,7 +40,7 @@
     <td width="1%">
       <input type="checkbox" class="epCheck" id="<%=str(cur_ep_obj.season)+'x'+str(cur_ep_obj.episode)%>" name="<%=str(cur_ep_obj.season) +"x"+str(cur_ep_obj.episode) %>" />
     </td>
-    <td align="center">$cur_ep_obj.episode</td>
+    <td align="center"><%= " / ".join([str(cur_ep_obj.episode)] + [str(x.episode) for x in cur_ep_obj.relatedEps]) %></td>
     <td width="50%">$curLoc</td>
     <td width="50%">$cur_ep_obj.proper_path().$curExt</td>
     </td>

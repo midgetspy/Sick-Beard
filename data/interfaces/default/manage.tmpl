@@ -123,7 +123,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if 
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.seasonfolders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.flatten_folders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>

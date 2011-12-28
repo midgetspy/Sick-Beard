@@ -43,7 +43,7 @@ from sickbeard import encodingKludge as ek
 
 from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
-from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_REPEAT
+from common import NAMING_DUPLICATE, NAMING_EXTEND
 
 class TVShow(object):
 
@@ -59,7 +59,7 @@ class TVShow(object):
         self.genre = ""
         self.runtime = 0
         self.quality = int(sickbeard.QUALITY_DEFAULT)
-        self.seasonfolders = int(sickbeard.SEASON_FOLDERS_DEFAULT)
+        self.flatten_folders = int(sickbeard.FLATTEN_FOLDERS_DEFAULT)
 
         self.status = ""
         self.airs = ""
@@ -463,7 +463,8 @@ class TVShow(object):
             if rootEp == None:
                 rootEp = curEp
             else:
-                rootEp.relatedEps.append(curEp)
+                if curEp not in rootEp.relatedEps:
+                    rootEp.relatedEps.append(curEp)
 
             # if it's a new file then 
             if not same_file:
@@ -555,7 +556,7 @@ class TVShow(object):
                 self.air_by_date = 0
 
             self.quality = int(sqlResults[0]["quality"])
-            self.seasonfolders = int(sqlResults[0]["seasonfolders"])
+            self.flatten_folders = int(sqlResults[0]["flatten_folders"])
             self.paused = int(sqlResults[0]["paused"])
 
             self._location = sqlResults[0]["location"]
@@ -754,80 +755,6 @@ class TVShow(object):
                     curEp.hastbn = False
                     curEp.saveToDB()
 
-
-
-    def fixEpisodeNames(self):
-
-        if not os.path.isdir(self._location):
-            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't rename episodes")
-            return
-
-        # load episodes from my folder
-        self.loadEpisodesFromDir()
-
-        logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
-
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
-
-        # build list of locations
-        fileLocations = {}
-        for epResult in sqlResults:
-            goodLoc = os.path.normpath(epResult["location"])
-            goodSeason = int(epResult["season"])
-            goodEpisode = int(epResult["episode"])
-            if fileLocations.has_key(goodLoc):
-                fileLocations[goodLoc].append((goodSeason, goodEpisode))
-            else:
-                fileLocations[goodLoc] = [(goodSeason, goodEpisode)]
-
-        logger.log(u"File results: " + str(fileLocations), logger.DEBUG)
-
-        for curLocation in fileLocations:
-
-            epList = fileLocations[curLocation]
-
-            # get the root episode and add all related episodes to it
-            rootEp = None
-            for myEp in epList:
-                curEp = self.getEpisode(myEp[0], myEp[1])
-                if rootEp == None:
-                    rootEp = curEp
-                    rootEp.relatedEps = []
-                else:
-                    rootEp.relatedEps.append(curEp)
-
-            goodName = rootEp.prettyName()
-            actualName = os.path.splitext(os.path.basename(curLocation))
-
-            if goodName == actualName[0]:
-                logger.log(str(self.tvdbid) + ": File " + rootEp.location + " is already named correctly, skipping", logger.DEBUG)
-                continue
-
-            with rootEp.lock:
-                result = helpers.rename_file(rootEp.location, rootEp.prettyName())
-                if result != False:
-                    rootEp.location = result
-                    for relEp in rootEp.relatedEps:
-                        relEp.location = result
-
-            fileList = postProcessor.PostProcessor(curLocation)._list_associated_files(curLocation)
-            logger.log(u"Files associated to "+curLocation+": "+str(fileList), logger.DEBUG)
-
-            for file in fileList:
-                result = helpers.rename_file(file, rootEp.prettyName())
-                if result == False:
-                    logger.log(str(self.tvdbid) + ": Unable to rename file "+file, logger.ERROR)
-
-            for curEp in [rootEp]+rootEp.relatedEps:
-                curEp.checkForMetaFiles()
-
-            with rootEp.lock:
-                rootEp.saveToDB()
-                for relEp in rootEp.relatedEps:
-                    relEp.saveToDB()
-
-
     def saveToDB(self):
 
         logger.log(str(self.tvdbid) + ": Saving show info to database", logger.DEBUG)
@@ -844,7 +771,7 @@ class TVShow(object):
                         "quality": self.quality,
                         "airs": self.airs,
                         "status": self.status,
-                        "seasonfolders": self.seasonfolders,
+                        "flatten_folders": self.flatten_folders,
                         "paused": self.paused,
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
@@ -1405,7 +1332,7 @@ class TVEpisode(object):
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
                     naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):
 
-        return self._formatted_string('%SN - %Sx%0E - %EN')
+        return self._format_string('%SN - %Sx%0E - %EN')
 
     def _ep_name(self):
         """
@@ -1454,7 +1381,7 @@ class TVEpisode(object):
         ep_name = self._ep_name()
         
         def dot(name):
-            return re.sub('[_ -]','.', name)
+            return helpers.sanitizeSceneName(name)
         
         def us(name):
             return re.sub('[ -]','_', name)
@@ -1580,20 +1507,20 @@ class TVEpisode(object):
         
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
-            result_name = result_name.replace(cur_replacement, replace_map[cur_replacement])
-            result_name = result_name.replace(cur_replacement.lower(), replace_map[cur_replacement].lower())
+            result_name = result_name.replace(cur_replacement, helpers.sanitizeFileName(replace_map[cur_replacement]))
+            result_name = result_name.replace(cur_replacement.lower(), helpers.sanitizeFileName(replace_map[cur_replacement].lower()))
         
         return result_name
 
     def proper_path(self):
         """
-        Figures out where this episode SHOULD live according to the renaming rules
+        Figures out the path where this episode SHOULD live according to the renaming rules, relative from the show dir
         """
         
         result = self.formatted_filename()
         
         # as long as they don't want us to flatten it and we're not FORCED to flatten it then append the dir
-        if self.show.seasonfolders or sickbeard.NAMING_FORCE_FOLDERS:
+        if not self.show.flatten_folders or sickbeard.NAMING_FORCE_FOLDERS:
             result = ek.ek(os.path.join, self.formatted_dir(), result)
         
         return result
@@ -1628,3 +1555,50 @@ class TVEpisode(object):
         name_groups = re.split(r'[\\/]', pattern)
         
         return self._format_string(name_groups[-1], multi)
+
+    def rename(self):
+        
+        proper_path = self.proper_path()
+        absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
+        absolute_current_path_no_ext, file_ext = os.path.splitext(self.location)
+
+        current_path = absolute_current_path_no_ext
+
+        if absolute_current_path_no_ext.startswith(self.show.location):
+            current_path = absolute_current_path_no_ext[len(self.show.location):]
+
+        logger.log(u"Renaming/moving episode from the base path "+self.location+" to "+absolute_proper_path, logger.DEBUG)
+
+        # if it's already named correctly then don't do anything
+        if proper_path == current_path:
+            logger.log(str(self.tvdbid) + ": File " + self.location + " is already named correctly, skipping", logger.DEBUG)
+            return
+
+        related_files = postProcessor.PostProcessor(self.location)._list_associated_files(self.location)
+        logger.log(u"Files associated to "+self.location+": "+str(related_files), logger.DEBUG)
+
+        # move the ep file
+        result = helpers.rename_ep_file(self.location, absolute_proper_path)
+        
+        # move related files
+        for cur_related_file in related_files:
+            cur_result = helpers.rename_ep_file(cur_related_file, absolute_proper_path)
+            if cur_result == False:
+                logger.log(str(self.tvdbid) + ": Unable to rename file "+cur_related_file, logger.ERROR)
+
+        # save the ep
+        with self.lock:
+            if result != False:
+                self.location = absolute_proper_path + file_ext
+                for relEp in self.relatedEps:
+                    relEp.location = absolute_proper_path + file_ext
+
+        # in case something changed with the metadata just do a quick check
+        for curEp in [self]+self.relatedEps:
+            curEp.checkForMetaFiles()
+
+        # save any changes to the database
+        with self.lock:
+            self.saveToDB()
+            for relEp in self.relatedEps:
+                relEp.saveToDB()

@@ -25,8 +25,7 @@ $(document).ready(function(){
             return false
 
         url = sbRoot+'/home/doRename?show='+$('#showID').attr('value')+'&eps='+epArr.join('|')
-        //window.location.href = url
-        alert(url)
+        window.location.href = url
     });
     
 });
