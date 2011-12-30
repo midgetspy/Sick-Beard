@@ -68,7 +68,7 @@ load_settings() {
             return 1; }
         [ -z "${RUN_AS%:*}" ] && exit 1
 
-        DAEMON_OPTS="SickBeard.py --quiet --daemon"
+        DAEMON_OPTS="SickBeard.py --quiet --daemon --nolaunch"
         [ -n "$CONFIG" ] && DAEMON_OPTS="$DAEMON_OPTS --config=$CONFIG"
         [ -z "$CONFIG" ] && DAEMON_OPTS="$DAEMON_OPTS --config=/home/$RUN_AS/.sickbeard/config.ini"
         [ -n "$DATADIR" ] && DAEMON_OPTS="$DAEMON_OPTS --datadir=$DATADIR"
