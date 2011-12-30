@@ -67,7 +67,7 @@ result_type_map = {RESULT_SUCCESS: "success",
 
 class Api:
     """ api class that returns json results """
-    version = 0.1
+    version = 0.2
     intent = 4
 
     @cherrypy.expose
@@ -1917,6 +1917,38 @@ class CMD_ShowGetBanner(ApiCall):
         return {'outputType': 'image', 'image': webserve.WebInterface().showPoster(self.tvdbid, 'banner')}
 
 
+class CMD_ShowPause(ApiCall):
+    _help = {"desc": "set a show's paused state in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                  },
+             "optionalPramameters": {"pause": {"desc": "set the pause state of the show"}
+                                  }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        self.pause, args = self.check_params(args, kwargs, "pause", 0, False, "bool", [])
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ set a show's paused state in sickbeard """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            return _responds(RESULT_FAILURE, msg="Show not found")
+
+        if self.pause == True:
+            showObj.paused = 1
+            return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has been paused")
+        else:
+            showObj.paused = 0
+            return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has been unpaused")
+
+        return _responds(RESULT_FAILURE, msg=str(showObj.name) + " was unable to be paused")
+
+
 class CMD_ShowRefresh(ApiCall):
     _help = {"desc": "refresh a show in sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
@@ -2356,6 +2388,7 @@ _functionMaper = {"help": CMD_Help,
                   "show.getquality": CMD_ShowGetQuality,
                   "show.getposter": CMD_ShowGetPoster,
                   "show.getbanner": CMD_ShowGetBanner,
+                  "show.pause": CMD_ShowPause,
                   "show.refresh": CMD_ShowRefresh,
                   "show.seasonlist": CMD_ShowSeasonList,
                   "show.seasons": CMD_ShowSeasons,
