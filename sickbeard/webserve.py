@@ -1173,7 +1173,9 @@ class ConfigNotifications:
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
-                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None):
+                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
+                          use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
+                          pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None ):
 
         results = []
 
@@ -1274,6 +1276,7 @@ class ConfigNotifications:
             notifo_notify_ondownload = 1
         else:
             notifo_notify_ondownload = 0
+            
         if use_notifo == "on":
             use_notifo = 1
         else:
@@ -1307,6 +1310,26 @@ class ConfigNotifications:
             use_trakt = 1
         else:
             use_trakt = 0
+
+        if use_pytivo == "on":
+            use_pytivo = 1
+        else:
+            use_pytivo = 0
+            
+        if pytivo_notify_onsnatch == "on":
+            pytivo_notify_onsnatch = 1
+        else:
+            pytivo_notify_onsnatch = 0
+
+        if pytivo_notify_ondownload == "on":
+            pytivo_notify_ondownload = 1
+        else:
+            pytivo_notify_ondownload = 0
+
+        if pytivo_update_library == "on":
+            pytivo_update_library = 1
+        else:
+            pytivo_update_library = 0
 
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
@@ -1369,6 +1392,14 @@ class ConfigNotifications:
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
 
+        sickbeard.USE_PYTIVO = use_pytivo
+        sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
+        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload ==  "off"
+        sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
+        sickbeard.PYTIVO_HOST = pytivo_host
+        sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
+        sickbeard.PYTIVO_TIVO_NAME = pytivo_tivo_name
+        
         sickbeard.save_config()
 
         if len(results) > 0:
