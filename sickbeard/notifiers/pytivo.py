@@ -49,20 +49,24 @@ class pyTivoNotifier:
         
         
         # Calculated values
-
         showPath = ep_obj.show.location
         showName = ep_obj.show.name
         rootShowAndSeason = ek.ek(os.path.dirname, ep_obj.location)      
         absPath = ep_obj.location
+        
+        # Some show names have colons in them which are illegal in a path location, so strip them out.
+        # (Are there other characters?)
+        showName = showName.replace(":","")
+        
+        root = showPath.replace(showName, "")
         
         
         #logger.log(u"showPath:          " + showPath )
         #logger.log(u"showName:          " + showName )
         #logger.log(u"rootShowAndSeason: " + rootShowAndSeason )
         #logger.log(u"absPath:           " + absPath )
-
-                
-        root = showPath.replace(showName, "")
+        #logger.log(u"root:              " + root )
+        
   
         showAndSeason = rootShowAndSeason.replace(root, "")
         container = shareName + "/" + showAndSeason
