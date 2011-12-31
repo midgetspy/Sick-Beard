@@ -41,14 +41,27 @@ class pyTivoNotifier:
 
     def update_library(self, ep_obj):
 
-		# Values from config
+        # Values from config
         
         host = sickbeard.PYTIVO_HOST
         shareName = sickbeard.PYTIVO_SHARE_NAME
         tsn = sickbeard.PYTIVO_TIVO_NAME
         
+        # There are two more values required, the container and file.
+        # 
+        # container: The share name, show name and season
+        #
+        # file: The file name
+        # 
+        # Some slicing and dicing of variables is required to get at these values.
+        #
+        # There might be better ways to arrive at the values, but this is the best I have been able to 
+        # come up with.
+        #
+        
         
         # Calculated values
+        
         showPath = ep_obj.show.location
         showName = ep_obj.show.name
         rootShowAndSeason = ek.ek(os.path.dirname, ep_obj.location)      
@@ -59,6 +72,7 @@ class pyTivoNotifier:
         showName = showName.replace(":","")
         
         root = showPath.replace(showName, "")
+        showAndSeason = rootShowAndSeason.replace(root, "")
         
         
         #logger.log(u"showPath:          " + showPath )
@@ -66,11 +80,9 @@ class pyTivoNotifier:
         #logger.log(u"rootShowAndSeason: " + rootShowAndSeason )
         #logger.log(u"absPath:           " + absPath )
         #logger.log(u"root:              " + root )
-        
-  
-        showAndSeason = rootShowAndSeason.replace(root, "")
-        container = shareName + "/" + showAndSeason
 
+
+        container = shareName + "/" + showAndSeason
         file = "/" + absPath.replace(root, "")
         
         
