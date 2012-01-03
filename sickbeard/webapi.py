@@ -115,7 +115,7 @@ class Api:
             outputCallback = outputCallbackDict[outDict['outputType']]
         else:
             outputCallback = outputCallbackDict['default']
-        
+
         return outputCallback(outDict)
 
     @cherrypy.expose
@@ -221,7 +221,7 @@ def call_dispatcher(args, kwargs):
                 cmd, cmdIndex = cmd.split("_") # this gives us the clear cmd and the index
 
             logger.log(u"API :: " + cmd + ": curKwargs " + str(curKwargs), logger.DEBUG)
-            if not (multiCmds and cmd in ('show.getposter','show.getbanner')): # skip these cmd while chaining
+            if not (multiCmds and cmd in ('show.getposter', 'show.getbanner')): # skip these cmd while chaining
                 try:
                     if cmd in _functionMaper:
                         curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run() # get the cmd class, init it and run()
@@ -232,7 +232,7 @@ def call_dispatcher(args, kwargs):
                 except ApiError, e: # Api errors that we raised, they are harmless
                     curOutDict = _responds(RESULT_ERROR, msg=ex(e))
             else: # if someone chained one of the forbiden cmds they will get an error for this one cmd
-                curOutDict = _responds(RESULT_ERROR, msg="The cmd '"+cmd+"' is not supported while chaining")
+                curOutDict = _responds(RESULT_ERROR, msg="The cmd '" + cmd + "' is not supported while chaining")
 
             if multiCmds:
                 # note: if multiple same cmds are issued but one has not an index defined it will override all others
@@ -602,6 +602,7 @@ def _getQualityMap():
             Quality.UNKNOWN: 'unknown',
             ANY: 'any'}
 
+
 def _getRootDirs():
     if sickbeard.ROOT_DIRS == "":
         return {}
@@ -640,6 +641,7 @@ def _getRootDirs():
         dir_list.append(curDir)
 
     return dir_list
+
 
 class ApiError(Exception):
     "Generic API error"
@@ -1251,11 +1253,11 @@ class CMD_SickBeardDeleteRootDir(ApiCall):
         root_dirs.pop(0)
         # clean up the list - replace %xx escapes by their single-character equivalent
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
-        old_root_dir = root_dirs[index];
+        old_root_dir = root_dirs[index]
         for curRootDir in root_dirs:
             if not curRootDir == self.location:
                 root_dirs_new.append(curRootDir)
-            else: # 
+            else:
                 newIndex = 0
 
         for curIndex, curNewRootDir in enumerate(root_dirs_new):
@@ -2369,7 +2371,7 @@ _functionMaper = {"help": CMD_Help,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
-                  "sb.deleterootdir":CMD_SickBeardDeleteRootDir,
+                  "sb.deleterootdir": CMD_SickBeardDeleteRootDir,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
                   "sb.getdefaults": CMD_SickBeardGetDefaults,
                   "sb.getmessages": CMD_SickBeardGetMessages,
