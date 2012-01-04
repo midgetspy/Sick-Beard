@@ -80,10 +80,14 @@ addOption("logs", "Warning", "&amp;min_level=warning");
 addOption("logs", "Error", "&amp;min_level=error");
 
 addOption("sb.setdefaults", "Optional Param", "", 1);
-addList("sb.setdefaults", "Wanted", "&amp;status=wanted", "sb.setdefaults-opt");
-addList("sb.setdefaults", "Skipped", "&amp;status=skipped", "sb.setdefaults-opt");
-addList("sb.setdefaults", "Archived", "&amp;status=archived", "sb.setdefaults-opt");
-addList("sb.setdefaults", "Ignored", "&amp;status=ignored", "sb.setdefaults-opt");
+addList("sb.setdefaults", "Exclude Paused Shows on ComingEps", "&amp;future_show_paused=0", "sb.setdefaults-status");
+addList("sb.setdefaults", "Include Paused Shows on ComingEps", "&amp;future_show_paused=1", "sb.setdefaults-status");
+
+addOption("sb.setdefaults-status", "Optional Param", "", 1);
+addList("sb.setdefaults-status", "Wanted", "&amp;status=wanted", "sb.setdefaults-opt");
+addList("sb.setdefaults-status", "Skipped", "&amp;status=skipped", "sb.setdefaults-opt");
+addList("sb.setdefaults-status", "Archived", "&amp;status=archived", "sb.setdefaults-opt");
+addList("sb.setdefaults-status", "Ignored", "&amp;status=ignored", "sb.setdefaults-opt");
 
 addOption("sb.setdefaults-opt", "Optional Param", "", 1);
 addList("sb.setdefaults-opt", "No Season Folder", "&amp;season_folder=0", "quality");
