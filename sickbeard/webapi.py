@@ -320,7 +320,7 @@ class ApiCall(object):
             self._optionalParams = []
 
         for paramDict, type in [(self._requiredParams, "requiredParameters"),
-                          (self._optionalParams, "optionalPramameters")]:
+                          (self._optionalParams, "optionalParameters")]:
 
             if type in self._help:
                 for paramName in paramDict:
@@ -655,7 +655,7 @@ class IntParseError(Exception):
 
 class CMD_Help(ApiCall):
     _help = {"desc": "display help information for a given subject/command",
-             "optionalPramameters": {"subject": {"desc": "command - the top level command"},
+             "optionalParameters": {"subject": {"desc": "command - the top level command"},
                                   }
              }
 
@@ -676,7 +676,7 @@ class CMD_Help(ApiCall):
 
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc": "display the coming episodes",
-             "optionalPramameters": {"sort": {"desc": "change the sort order"},
+             "optionalParameters": {"sort": {"desc": "change the sort order"},
                                      "type": {"desc": "one or more of allowedValues separated by |"}
                                      }
              }
@@ -770,7 +770,7 @@ class CMD_Episode(ApiCall):
                                    "season": {"desc": "the season number"},
                                    "episode": {"desc": "the episode number"}
                                   },
-             "optionalPramameters": {"full_path": {"desc": "show the full absolute path (if valid) instead of a relative path for the episode location"}
+             "optionalParameters": {"full_path": {"desc": "show the full absolute path (if valid) instead of a relative path for the episode location"}
                                      }
              }
 
@@ -941,7 +941,7 @@ class CMD_EpisodeSetStatus(ApiCall):
 
 class CMD_Exceptions(ApiCall):
     _help = {"desc": "display scene exceptions for all or a given show",
-             "optionalPramameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+             "optionalParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   }
              }
 
@@ -981,7 +981,7 @@ class CMD_Exceptions(ApiCall):
 
 class CMD_History(ApiCall):
     _help = {"desc": "display sickbeard downloaded/snatched history",
-             "optionalPramameters": {"limit": {"desc": "limit returned results"},
+             "optionalParameters": {"limit": {"desc": "limit returned results"},
                                     "type": {"desc": "only show a specific type of results"},
                                    }
              }
@@ -1074,7 +1074,7 @@ class CMD_HistoryTrim(ApiCall):
 
 class CMD_Logs(ApiCall):
     _help = {"desc": "view sickbeard's log",
-             "optionalPramameters": {"min_level ": {"desc": "the minimum level classification of log entries to show, with each level inherting its above level"} }
+             "optionalParameters": {"min_level ": {"desc": "the minimum level classification of log entries to show, with each level inherting its above level"} }
              }
 
     def __init__(self, args, kwargs):
@@ -1151,7 +1151,7 @@ class CMD_SickBeardAddRootDir(ApiCall):
     _help = {"desc": "add a sickbeard user's parent directory",
              "requiredParameters": {"location": {"desc": "the full path to root (parent) directory"}
                                     },
-             "optionalPramameters": {"default": {"desc": "make the location passed the default root (parent) directory"}
+             "optionalParameters": {"default": {"desc": "make the location passed the default root (parent) directory"}
                                     }
              }
 
@@ -1349,7 +1349,7 @@ class CMD_SickBeardGetRootDirs(ApiCall):
 
 class CMD_SickBeardPauseBacklog(ApiCall):
     _help = {"desc": "pause the backlog search",
-             "optionalPramameters": {"pause ": {"desc": "pause or unpause the global backlog"} }
+             "optionalParameters": {"pause ": {"desc": "pause or unpause the global backlog"} }
              }
 
     def __init__(self, args, kwargs):
@@ -1404,7 +1404,7 @@ class CMD_SickBeardRestart(ApiCall):
 
 class CMD_SickBeardSearchTVDB(ApiCall):
     _help = {"desc": "search for show at tvdb with a given string and language",
-             "optionalPramameters": {"name": {"desc": "name of the show you want to search for"},
+             "optionalParameters": {"name": {"desc": "name of the show you want to search for"},
                                    "tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                      "lang": {"desc": "the 2 letter abbreviation lang id"}
                                      }
@@ -1476,7 +1476,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
 
 class CMD_SickBeardSetDefaults(ApiCall):
     _help = {"desc": "set sickbeard user defaults",
-             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
+             "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders within the show directory"},
                                     "status": {"desc": "status of missing episodes"}
@@ -1621,7 +1621,7 @@ class CMD_ShowAddExisting(ApiCall):
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                     "location": {"desc": "full path to the existing folder for the show"}
                                 },
-             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
+             "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders for the show"}
                                     }
@@ -1689,7 +1689,7 @@ class CMD_ShowAddNew(ApiCall):
     _help = {"desc": "add a new show to sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
-             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
+             "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "location": {"desc": "base path for where the show folder is to be created"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders for the show"},
@@ -1923,7 +1923,7 @@ class CMD_ShowPause(ApiCall):
     _help = {"desc": "set a show's paused state in sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   },
-             "optionalPramameters": {"pause": {"desc": "set the pause state of the show"}
+             "optionalParameters": {"pause": {"desc": "set the pause state of the show"}
                                   }
              }
 
@@ -1982,7 +1982,7 @@ class CMD_ShowSeasonList(ApiCall):
     _help = {"desc": "display the season list for a given show",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                     },
-             "optionalPramameters": {"sort": {"desc": "change the sort order from descending to ascending"}
+             "optionalParameters": {"sort": {"desc": "change the sort order from descending to ascending"}
                                      }
              }
 
@@ -2017,7 +2017,7 @@ class CMD_ShowSeasons(ApiCall):
     _help = {"desc": "display a listing of episodes for all or a given season",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   },
-             "optionalPramameters": {"season": {"desc": "the season number"},
+             "optionalParameters": {"season": {"desc": "the season number"},
                                   }
              }
 
@@ -2077,7 +2077,7 @@ class CMD_ShowSetQuality(ApiCall):
     _help = {"desc": "set desired quality of a show in sickbeard. if neither initial or archive are provided then the config default quality will be used",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
-             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
+             "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"}
                                     }
              }
@@ -2283,7 +2283,7 @@ class CMD_ShowUpdate(ApiCall):
 
 class CMD_Shows(ApiCall):
     _help = {"desc": "display all shows in sickbeard",
-             "optionalPramameters": {"sort": {"desc": "sort the list of shows by show name instead of tvdbid"},
+             "optionalParameters": {"sort": {"desc": "sort the list of shows by show name instead of tvdbid"},
                                     "paused": {"desc": "only show the shows that are set to paused"},
                                   },
              }
