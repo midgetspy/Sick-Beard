@@ -268,12 +268,17 @@ addList("future", "Sort by Network", "&amp;sort=network", "future-type");
 addList("future", "Sort by Show Name", "&amp;sort=show", "future-type");
 
 addOption("future-type", "Optional Param", "", 1);
-addOption("future-type", "Show All Types", "&amp;type=today|missed|soon|later");
-addOption("future-type", "Show Today", "&amp;type=today");
-addOption("future-type", "Show Missed", "&amp;type=missed");
-addOption("future-type", "Show Soon", "&amp;type=soon");
-addOption("future-type", "Show Later", "&amp;type=later");
-addOption("future-type", "Show Today & Missed", "&amp;type=today|missed");
+addList("future-type", "Show All Types", "&amp;type=today|missed|soon|later", "future-paused");
+addList("future-type", "Show Today", "&amp;type=today", "future-paused");
+addList("future-type", "Show Missed", "&amp;type=missed", "future-paused");
+addList("future-type", "Show Soon", "&amp;type=soon", "future-paused");
+addList("future-type", "Show Later", "&amp;type=later", "future-paused");
+addList("future-type", "Show Today & Missed", "&amp;type=today|missed", "future-paused");
+
+addOption("future-paused", "Optional Param", "", 1);
+addOption("future-paused", "Use default paused display setting", "");
+addOption("future-paused", "Show all paused shows", "&amp;paused=1");
+addOption("future-paused", "Show no paused shows", "&amp;paused=0");
 
 addOption("history", "Optional Param", "", 1);
 addList("history", "Show Only Downloaded", "&amp;type=downloaded", "history-type");
