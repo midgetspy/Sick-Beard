@@ -677,9 +677,9 @@ class CMD_Help(ApiCall):
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc": "display the coming episodes",
              "optionalParameters": {"sort": {"desc": "change the sort order"},
-                                     "type": {"desc": "one or more of allowedValues separated by |"},
-                                     "paused": {"desc": "0 to omit paused shows, 1 to show them, or omitted to use the SB default"},
-                                     }
+                                   "type": {"desc": "one or more of allowedValues separated by |"},
+                                   "paused": {"desc": "0 to exclude paused shows, 1 to include them, or omitted to use the SB default"},
+                                   }
              }
 
     def __init__(self, args, kwargs):
@@ -687,7 +687,7 @@ class CMD_ComingEpisodes(ApiCall):
         # optional
         self.sort, args = self.check_params(args, kwargs, "sort", "date", False, "string", ["date", "show", "network"])
         self.type, args = self.check_params(args, kwargs, "type", "today|missed|soon|later", False, "list", ["missed", "later", "today", "soon"])
-        self.paused, args = self.check_params(args, kwargs, "pause", int(sickbeard.COMING_EPS_DISPLAY_PAUSED), False, "bool", [])
+        self.paused, args = self.check_params(args, kwargs, "paused", sickbeard.COMING_EPS_DISPLAY_PAUSED, False, "int", [0, 1])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -701,14 +701,14 @@ class CMD_ComingEpisodes(ApiCall):
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
 
         myDB = db.DBConnection(row_type="dict")
-        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status, tv_shows.paused as paused FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
+        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["tvdbid"]))
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status, tv_shows.paused as paused FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status, tv_shows.paused as paused FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
         # sort by air date
