@@ -42,6 +42,8 @@ from sickbeard.webserveInit import initWebServer
 
 from lib.configobj import ConfigObj
 
+
+
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
@@ -106,7 +108,7 @@ def main():
     """
 
     # do some preliminary stuff
-    sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(__file__))
+    sickbeard.MY_FULLNAME = os.path.normpath(os.path.abspath(sys.argv[0]))
     sickbeard.MY_NAME = os.path.basename(sickbeard.MY_FULLNAME)
     sickbeard.PROG_DIR = os.path.dirname(sickbeard.MY_FULLNAME)
     sickbeard.DATA_DIR = sickbeard.PROG_DIR

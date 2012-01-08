@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "master"
+SICKBEARD_VERSION = "build Nonea"
