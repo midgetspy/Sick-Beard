@@ -38,8 +38,8 @@ naming_multi_ep_type = {0: ["-%(episodenumber)02d"]*len(naming_ep_type),
                         2: [x + "%(episodenumber)02d" for x in ("x", "e", "E", "x")]}
 naming_multi_ep_type_text = ("extend", "duplicate", "repeat")
 
-naming_sep_type = (" - ", " ")
-naming_sep_type_text = (" - ", "space")
+naming_sep_type = (" - ", " ", ".")
+naming_sep_type_text = (" - ", "space", "period")
 
 def change_LOG_DIR(log_dir):
 
