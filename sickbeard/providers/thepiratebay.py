@@ -63,7 +63,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         self.searchurl =  'http://thepiratebay.org/search/%s/0/7/200'  # order by seed       
 
-        self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a href="(?P<url>.*?)%s".*?</td>' 
+        self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a.*?>.*?<a href="(?P<url>.*?)%s".*?</td>' 
 
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
