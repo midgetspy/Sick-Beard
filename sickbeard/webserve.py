@@ -359,6 +359,9 @@ class Manage:
 
         paused_all_same = True
         last_paused = None
+        
+        anime_all_same = True
+        last_anime = None
 
         quality_all_same = True
         last_quality = None
@@ -379,6 +382,13 @@ class Manage:
                 else:
                     last_paused = curShow.paused
 
+            if anime_all_same:
+                # if we had a value already and this value is different then they're not all the same
+                if last_anime not in (curShow.is_anime, None):
+                    anime_all_same = False
+                else:
+                    last_anime = curShow.is_anime
+
             if season_folders_all_same:
                 if last_season_folders not in (None, curShow.seasonfolders):
                     season_folders_all_same = False
@@ -393,6 +403,7 @@ class Manage:
 
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
+        t.anime_value = last_anime if anime_all_same else None
         t.season_folders_value = last_season_folders if season_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
         t.root_dir_list = root_dir_list
@@ -400,7 +411,7 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False,
+    def massEditSubmit(self, paused=None, anime=None, season_folders=None, quality_preset=False,
                        anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
 
         dir_map = {}
@@ -432,6 +443,12 @@ class Manage:
             else:
                 new_paused = True if paused == 'enable' else False
             new_paused = 'on' if new_paused else 'off'
+            
+            if anime == 'keep':
+                new_anime = showObj.is_anime
+            else:
+                new_anime = True if anime == 'enable' else False
+            new_anime = 'on' if new_anime else 'off'
 
             if season_folders == 'keep':
                 new_season_folders = showObj.seasonfolders
@@ -442,7 +459,7 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, new_anime, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)

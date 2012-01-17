@@ -94,6 +94,17 @@
 </div>
 
 <div class="optionWrapper">
+    <span class="selectTitle">Anime</span>
+    <div class="selectChoices">
+        <select id="edit_anime" name="anime">
+            <option value="keep">&lt; keep &gt;</option>
+            <option value="enable" #if $anime_value then "selected=\"selected\"" else ""#>enable</option>
+            <option value="disable" #if $anime_value == False then "selected=\"selected\"" else ""#>disable</option>
+        </select>
+    </div><br />
+</div>
+
+<div class="optionWrapper">
     <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
 </div>
