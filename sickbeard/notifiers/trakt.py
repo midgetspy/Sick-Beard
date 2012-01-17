@@ -21,7 +21,10 @@ import urllib2
 
 from hashlib import sha1
 
-from lib import simplejson as json
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
 
 import sickbeard
 
@@ -102,7 +105,7 @@ class TraktNotifier:
             
             if ("error" in resp):
                 raise Exception(resp["error"])
-        except (IOError, json.JSONDecodeError):
+        except (IOError):
             logger.log("trakt_notifier: Failed calling method", logger.ERROR)
             return False
 

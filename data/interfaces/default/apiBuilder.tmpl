@@ -58,6 +58,7 @@ addList("Command", "Show.Delete", "?cmd=show.delete", "tvdbid", "", "", "action"
 addList("Command", "Show.GetBanner", "?cmd=show.getbanner", "tvdbid", "", "", "action");
 addList("Command", "Show.GetPoster", "?cmd=show.getposter", "tvdbid", "", "", "action");
 addList("Command", "Show.GetQuality", "?cmd=show.getquality", "tvdbid", "", "", "action");
+addList("Command", "Show.Pause", "?cmd=show.pause", "show.pause", "", "", "action");
 addList("Command", "Show.Refresh", "?cmd=show.refresh", "tvdbid", "", "", "action");
 addList("Command", "Show.SeasonList", "?cmd=show.seasonlist", "show.seasonlist", "", "", "action");
 addList("Command", "Show.Seasons", "?cmd=show.seasons", "seasons", "", "", "action");
@@ -268,12 +269,16 @@ addList("future", "Sort by Network", "&amp;sort=network", "future-type");
 addList("future", "Sort by Show Name", "&amp;sort=show", "future-type");
 
 addOption("future-type", "Optional Param", "", 1);
-addOption("future-type", "Show All Types", "&amp;type=today|missed|soon|later");
-addOption("future-type", "Show Today", "&amp;type=today");
-addOption("future-type", "Show Missed", "&amp;type=missed");
-addOption("future-type", "Show Soon", "&amp;type=soon");
-addOption("future-type", "Show Later", "&amp;type=later");
-addOption("future-type", "Show Today & Missed", "&amp;type=today|missed");
+addList("future-type", "Show All Types", "&amp;type=today|missed|soon|later", "future-paused");
+addList("future-type", "Show Today", "&amp;type=today", "future-paused");
+addList("future-type", "Show Missed", "&amp;type=missed", "future-paused");
+addList("future-type", "Show Soon", "&amp;type=soon", "future-paused");
+addList("future-type", "Show Later", "&amp;type=later", "future-paused");
+addList("future-type", "Show Today & Missed", "&amp;type=today|missed", "future-paused");
+
+addOption("future-paused", "Optional Param", "", 1);
+addOption("future-paused", "Include Paused Shows", "&amp;paused=1");
+addOption("future-paused", "Exclude Paused Shows", "&amp;paused=0");
 
 addOption("history", "Optional Param", "", 1);
 addList("history", "Show Only Downloaded", "&amp;type=downloaded", "history-type");
@@ -313,6 +318,13 @@ addOption("sb.addrootdir-opt", "Not Default", "&amp;default=0");
 addOption("sb.deleterootdir", "C:\\Temp", "&amp;location=C:\\Temp", "", 1);
 addOption("sb.deleterootdir", "/usr/bin", "&amp;location=/usr/bin/");
 addOption("sb.deleterootdir", "S:\\Invalid_Location", "&amp;location=S:\\Invalid_Location");
+
+#for $curShow in $sortedShowList:
+addList("show.pause", "$curShow.name", "&amp;tvdbid=$curShow.tvdbid", "show.pause-opt");
+#end for
+addOption("show.pause-opt", "Optional Param", "", 1);
+addOption("show.pause-opt", "Unpause", "&amp;pause=0");
+addOption("show.pause-opt", "Pause", "&amp;pause=1");
 
 </script>
 </head>
