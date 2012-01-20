@@ -28,6 +28,7 @@ import notifo
 import boxcar
 import nmj
 import synoindex
+import trakt
 import xmpp
 
 from sickbeard.common import *
@@ -42,6 +43,7 @@ boxcar_notifier = boxcar.BoxcarNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
+trakt_notifier = trakt.TraktNotifier()
 xmpp_notifier = xmpp.XMPPNotifier()
 
 notifiers = [
@@ -56,6 +58,7 @@ notifiers = [
     nmj_notifier,
     synoindex_notifier,
     boxcar_notifier,
+    trakt_notifier,    
     xmpp_notifier,
 ]
 

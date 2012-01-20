@@ -66,13 +66,13 @@ class BoxcarNotifier:
                     # i dont know if this is true or false ... its neither but i also dont know how we got here in the first place
                     return False
                 else: #HTTP status 401 if the user doesn't have the service added
-                   subscribeNote = self._sendBoxcar(msg, title, email, True)
-                   if subscribeNote:
-                       logger.log("Subscription send", logger.DEBUG)
-                       return True
-                   else:
-                       logger.log("Subscription could not be send", logger.ERROR)
-                       return False
+                    subscribeNote = self._sendBoxcar(msg, title, email, True)
+                    if subscribeNote:
+                        logger.log("Subscription send", logger.DEBUG)
+                        return True
+                    else:
+                        logger.log("Subscription could not be send", logger.ERROR)
+                        return False
             elif e.code == 400: #If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
                 logger.log("Wrong data send to boxcar", logger.ERROR)
                 return False

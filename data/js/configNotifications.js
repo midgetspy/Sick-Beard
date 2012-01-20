@@ -118,6 +118,17 @@ $(document).ready(function(){
         function (data){ $('#testNMJ-result').html(data); });
     });
 
+    $('#testTrakt').click(function(){
+        $('#testTrakt-result').html(loading);
+        var trakt_api = $("#trakt_api").val();
+        var trakt_username = $("#trakt_username").val();
+        var trakt_password = $("#trakt_password").val();
+
+        $.get(sbRoot+"/home/testTrakt", {'api': trakt_api, 'username': trakt_username, 'password': trakt_password},
+        function (data){ $('#testTrakt-result').html(data); });
+
+    });
+    
     $('#testXMPP').click(function(){
         $('#testXMPP-result').html(loading);
         var xmpp_username = $("#xmpp_username").val();
@@ -128,5 +139,4 @@ $(document).ready(function(){
         
         $.get(sbRoot+"/home/testXMPP", {'username': xmpp_username, 'password': xmpp_password, 'server': xmpp_server, 'port': xmpp_port, 'recipient': xmpp_recipient}, 
         function (data){ $('#testXMPP-result').html(data); });
-    });
 });

@@ -250,6 +250,11 @@ NMJ_MOUNT = None
 
 USE_SYNOINDEX = False
 
+USE_TRAKT = False
+TRAKT_USERNAME = None
+TRAKT_PASSWORD = None
+TRAKT_API = ''
+
 USE_XMPP = False
 XMPP_USERNAME = None
 XMPP_PASSWORD = None
@@ -364,6 +369,7 @@ def initialize(consoleLogging=True):
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
+                USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
@@ -603,6 +609,11 @@ def initialize(consoleLogging=True):
         NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
 
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
+
+        USE_TRAKT = bool(check_setting_int(CFG, 'Trakt', 'use_trakt', 0))
+        TRAKT_USERNAME = check_setting_str(CFG, 'Trakt', 'trakt_username', '')
+        TRAKT_PASSWORD = check_setting_str(CFG, 'Trakt', 'trakt_password', '')
+        TRAKT_API = check_setting_str(CFG, 'Trakt', 'trakt_api', '')
                 
         USE_XMPP = bool(check_setting_int(CFG, 'XMPP', 'use_xmpp', 0))
         XMPP_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XMPP', 'xmpp_notify_onsnatch', 0))
@@ -1118,6 +1129,12 @@ def save_config():
 
     new_config['Synology'] = {}
     new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
+
+    new_config['Trakt'] = {}
+    new_config['Trakt']['use_trakt'] = int(USE_TRAKT)
+    new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
+    new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
+    new_config['Trakt']['trakt_api'] = TRAKT_API
     
     new_config['XMPP'] = {}
     new_config['XMPP']['use_xmpp'] = int(USE_XMPP)
