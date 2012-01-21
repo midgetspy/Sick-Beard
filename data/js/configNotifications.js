@@ -126,8 +126,8 @@ $(document).ready(function(){
 
         $.get(sbRoot+"/home/testTrakt", {'api': trakt_api, 'username': trakt_username, 'password': trakt_password},
         function (data){ $('#testTrakt-result').html(data); });
-	});
-	
+    });
+
     $('#testXMPP').click(function(){
         $('#testXMPP-result').html(loading);
         var xmpp_username = $("#xmpp_username").val();

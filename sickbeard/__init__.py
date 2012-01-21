@@ -409,8 +409,12 @@ def initialize(consoleLogging=True):
         CheckSection('Growl')
         CheckSection('Prowl')
         CheckSection('Twitter')
+        CheckSection('Notifio')
+        CheckSection('Libnotify')
         CheckSection('NMJ')
         CheckSection('Synology')
+        CheckSection('Boxcar')
+        CheckSection('Trakt')
         CheckSection('XMPP')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')

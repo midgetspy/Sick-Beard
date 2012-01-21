@@ -1309,6 +1309,11 @@ class ConfigNotifications:
         else:
             use_synoindex = 0
         
+        if use_trakt == "on":
+            use_trakt = 1
+        else:
+            use_trakt = 0
+            
         if use_xmpp == "on":
             use_xmpp  = 1
         else:
