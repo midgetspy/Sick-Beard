@@ -18,6 +18,7 @@
 
 from __future__ import with_statement
 
+import datetime
 import os
 import traceback
 import re
@@ -182,7 +183,10 @@ def searchForNeededEpisodes():
                 if not bestResult or bestResult.quality < curResult.quality:
                     bestResult = curResult
 
-            bestResult = pickBestResult(curFoundResults[curEp], curEp.show)
+            bestResult = pickBestResult(curFoundResults[curEp], curEp.show, curEp)
+
+            if not bestResult:
+                continue
 
             # if all results were rejected move on to the next episode
             if not bestResult:
@@ -222,9 +226,18 @@ def filter_release_name(name, filter_words):
     return False
 
 
-def pickBestResult(results, show, quality_list=None):
+def pickBestResult(results, show, episode=None, quality_list=None):
 
     logger.log(u"Picking the best result out of " + str([x.name for x in results]), logger.DEBUG)
+
+    if episode:
+        grace_period = datetime.timedelta(days=sickbeard.ARCHIVAL_DELAY)
+        episode.show.loadEpisodesFromDB()
+        downloadedQualities = set([Quality.qualityDownloaded(e.status) for s in episode.show.episodes.values() for e in s.values()])
+        anyQualities, bestQualities = Quality.splitQuality(episode.show.quality)
+        # Are we still inside the air date grace period?
+        # Have we downloaded any other episodes in archival quality?
+        skip_initial = datetime.date.today() < episode.airdate + grace_period and downloadedQualities.intersection(bestQualities)
 
     # find the best result for the current episode
     bestResult = None
@@ -233,6 +246,15 @@ def pickBestResult(results, show, quality_list=None):
 
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name + " is a quality we know we don't want, rejecting it", logger.DEBUG)
+            continue
+        
+        # Should we skip non-archival quality results?
+        if episode and skip_initial and cur_result.quality not in bestQualities:
+            logger.log(
+                "%s is not archival quality, rejecting until %s to prevent multiple downloads." % (
+                    cur_result.name,
+                    episode.airdate + grace_period,
+                ), logger.DEBUG)
             continue
 
         if show.rls_ignore_words and filter_release_name(cur_result.name, show.rls_ignore_words):
@@ -343,7 +365,7 @@ def findEpisode(episode, manualSearch=False):
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
 
-    bestResult = pickBestResult(foundResults, episode.show)
+    bestResult = pickBestResult(foundResults, episode.show, episode)
 
     return bestResult
 
@@ -395,7 +417,7 @@ def findSeason(show, season):
     # pick the best season NZB
     bestSeasonNZB = None
     if SEASON_RESULT in foundResults:
-        bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], show, anyQualities + bestQualities)
+        bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], show, quality_list=anyQualities + bestQualities)
 
     highest_quality_overall = 0
     for cur_season in foundResults:
@@ -534,6 +556,8 @@ def findSeason(show, season):
         if len(foundResults[curEp]) == 0:
             continue
 
-        finalResults.append(pickBestResult(foundResults[curEp], show))
+        bestResult = pickBestResult(foundResults[curEp], show, show.getEpisode(season, curEp))
+        if bestResult:
+            finalResults.append(bestResult)
 
     return finalResults
