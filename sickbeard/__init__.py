@@ -143,6 +143,7 @@ USE_TORRENTS = None
 NZB_METHOD = None
 NZB_DIR = None
 USENET_RETENTION = None
+ARCHIVAL_DELAY = None
 DOWNLOAD_PROPERS = None
 
 SEARCH_FREQUENCY = None
@@ -314,7 +315,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, ARCHIVAL_DELAY, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -446,6 +447,7 @@ def initialize(consoleLogging=True):
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
 
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
+        ARCHIVAL_DELAY = check_setting_int(CFG, 'General', 'archival_delay', 0)
 
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
         if SEARCH_FREQUENCY < MIN_SEARCH_FREQUENCY:
@@ -945,6 +947,7 @@ def save_config():
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
+    new_config['General']['archival_delay'] = int(ARCHIVAL_DELAY)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)

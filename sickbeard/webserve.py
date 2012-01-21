@@ -764,7 +764,7 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
+                       torrent_dir=None, nzb_method=None, archival_delay=None, usenet_retention=None, search_frequency=None, download_propers=None):
 
         results = []
 
@@ -794,11 +794,15 @@ class ConfigSearch:
         if usenet_retention == None:
             usenet_retention = 200
 
+        if archival_delay == None:
+            archival_delay = 0
+
         sickbeard.USE_NZBS = use_nzbs
         sickbeard.USE_TORRENTS = use_torrents
 
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
+        sickbeard.ARCHIVAL_DELAY = int(archival_delay)
 
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
