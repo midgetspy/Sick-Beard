@@ -1316,7 +1316,7 @@ class CMD_SickBeardGetDefaults(ApiCall):
 
         anyQualities, bestQualities = _mapQuality(sickbeard.QUALITY_DEFAULT)
 
-        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT], "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities, "future_show_paused": int(sickbeard.COMING_EPS_DISPLAY_PAUSED) }
+        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT].lower(), "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities, "future_show_paused": int(sickbeard.COMING_EPS_DISPLAY_PAUSED) }
         return _responds(RESULT_SUCCESS, data)
 
 
