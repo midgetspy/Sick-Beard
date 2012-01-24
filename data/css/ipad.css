@@ -1,0 +1,36 @@
+@media screen and (max-width:1024px) and (min-width: 481px) { 
+	td.tvShowDate { font-size: 100%; line-height: 3; }
+	td.tvShowTitle { font-size: 150%; line-height: 2; font-weight: bold; width: 40%; }
+	td.tvShowNetwork { text-align: center; }
+	
+	th.tvShowActiveHeader {  }
+	td.tvShowActive {  }
+	
+	th.tvShowStatusHeader {  }
+	td.tvShowStatus { font-size: 80%; }
+		
+	table.sickbeardTable tr { position: relative; }
+	
+	#content h1 { padding-left: 5px; }
+	
+	.align-left { padding-left: 5px; }
+	.align-left select { width: 80%; }
+	.align-left .navShow img { position: relative; bottom: 2px; }
+	
+	#summary { margin-left: 0!important; display: block; width: 100%; padding-left: 5px!important; }
+	
+	.float-left { display: block; position: absolute; float: none; margin: 50px 0 0 270px; padding: 5px; }
+	#checkboxControls.float-right { display: block; width: 100%; float: none!important; margin-bottom: 60px; padding-left: 5px; position: relative; }
+	#checkboxControls.float-right label { width: 23%; display: block; float: left; font-size: 120%; line-height: 2; position: relative; padding-right: 15px; }
+	#checkboxControls.float-right span { display: block; width: 100%; padding-left: 5px; }
+	#checkboxControls.float-right input { position: absolute; right: 15px; top: 5px; }
+	
+	#checkboxControls span.selectAll { display: block; padding: 5px; float: none; position: absolute; top: 46px; left: 0; }
+	#checkboxControls span.clearAll { padding: 5px; display: block; position: absolute; float: none; top: 46px; left: 170px; }
+	
+	tr.seasonheader { text-align: left; }
+	tr.seasonheader h2 { line-height: 1.5; font-size: 230%; }
+	
+	.sickbeardTable td.nextEpTitle { font-size: 120%; }
+	.sickbeardTable td.nextEpShow { line-height: 2; font-size: 130%; }
+}

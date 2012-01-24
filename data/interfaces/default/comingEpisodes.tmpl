@@ -114,12 +114,15 @@
 </script>
 
     #set $show_div = "listing_default"
+    #set $cur_ep_quality = "Custom"
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
 <br/>
     <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th>Airdate</th><th>Show</th><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Search</th></tr></thead>
+
+    <thead><tr><th class="nextEpAirdateHeader">Airdate</th><th class="nextEpShowHeader">Show</th><th class="nowrap nextEpNumHeader">Next Ep</th><th class="nextEpTitleHeader">Next Ep Name</th><th class="nextEpNetworkHeader">Network</th><th class="nextEpQualityHeader">Quality</th><th class="nextEpTVDBBadgeHeader">tvDB</th><th class="nextEpSearchBadgeHeader">Search</th></tr></thead>
+
     <tbody>
 
     #for $cur_result in $sql_results:
@@ -141,31 +144,36 @@
                 #end if
             #end if
 
+            #if int($cur_result["quality"]) in $qualityPresets:
+            #set $cur_ep_quality = $qualityPresetStrings[int($cur_result["quality"])]
+            #end if
+
     <!-- start $cur_result["show_name"] //-->
       <tr class="$show_div">
-        <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
-        <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
+	<td align="center" class="nowrap nextEpAirdate">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
+        <td class="nextEpShow tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if
         </td>
+
         <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
-        <td>
+        <td class="nextEpTitle">
         #if $cur_result["description"] != "" and $cur_result["description"] != None:
             <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
         #end if
             $cur_result["name"]
         </td>
-        <td align="center">$cur_result["network"]</td>
+        <td align="nextEpNetwork center">$cur_result["network"]</td>
         <td align="center">
 #if int($cur_result["quality"]) in $qualityPresets:
     <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
 #else:
-    <span class="quality Custom">Custom</span>
+    <span class="nextEpQuality quality Custom">Custom</span>
 #end if
         </td>
-        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
-        <td align="center">
+        <td class="nextEpTVDBBadge" align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
+        <td class="nextEpSearchBadge" align="center">
         <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
         </td>
       </tr>
@@ -251,7 +259,7 @@
 
     <div class="$show_div" id="listing_${cur_result["showid"]}">
       <div class="tvshowDiv">
-      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+      <table border="0" cellpadding="0" cellspacing="0">
         <tr>
           <th #if $layout == 'banner' then "" else "colspan=\"2\""#>
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]

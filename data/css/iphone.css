@@ -1,24 +1,172 @@
-body {
-width: 100%;
-padding: 0;
-margin: 0;
-font-size: 10px; 
-line-height:10px;
+@media screen and (max-width:1024px) {
+
+	html { -webkit-text-size-adjust: none; }	
+		
+	body, #content, #MainMenu, #contentWrapper { min-width: 0!important; padding: 0; margin: 0; width: 100%; overflow-x: hidden; }
+	
+	body { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
+	
+	div#upgrade-notification { font: 110%/2 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; height: 100%; }
+	
+	/*div { padding: 0!important; }*/
+	
+	div#header-fix { height: 0; }
+	
+	#content { border: none; }	
+	
+	div#topcontrol { display: none; }
+	
+	tr, td { margin: 0; padding: 0; }
+
+/* @group MainMenu */
+
+	#MainMenu {  }
+	#MainMenu li { margin: 0; border: none;}
+	#MainMenu a { border: none; }
+
+/* @end */
+
+/* @group SubMenu */
+
+	#SubMenu { color: rgba(255,254,254,0); display: block; height: 50px; font-size: 100%; line-height: 1.5; padding-left: 0!important; }
+	#SubMenu span { display: block; margin: 3px 0 0; padding: 0 5px; width: 90%; color: #333; position: absolute; }
+
+/* @end */
+
 }
 
-.MainMenu a, .SubMenu a { padding: 2px; font-weight: normal;  }
-#btnExistingShow, #btnNewShow { min-height: 150px; }
+@media screen and (max-width:480px) {
 
-.sickbeardTable {
-margin-left:1%;
-margin-right:1%;
-width:98%;
+/* @group Tv Show List */
+
+	table#showListTable { width: 100%; margin: 0; padding: 0; }
+			
+	table#showListTable tr { position: relative; width: 100%; line-height: 1.5; display: block; padding: 0; }
+	
+	table#showListTable tr td { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }
+
+	td.tvShowDate { position: absolute; width: 50%; display: block; left: -1px; bottom: -23px; text-align: left; margin: 0; padding: 3px 3px 3px 5px; z-index: 5; font-style: italic; }	
+	th.tvShowDateHeader {  }
+
+	td.tvShowTitle { width: 100%; padding: 3px 3px 3px 5px; margin-bottom: 51px; font: bold 200% "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; left: -1px; position: relative; z-index: 0; display: block; }
+	td.tvShowTitle a:link, a:visited { text-decoration: none; }
+	th.tvShowTitleHeader { border-top-color: #984444; }
+	
+	td.tvShowQuality { position: absolute; top: 0; right: 0; background: rgba(255,255,255,0); z-index: 0; width: 0; }
+	td.tvShowQuality span { background:rgba(255,255,255,0); color: rgba(255,255,255,0); }
+	td.tvShowQuality span.Custom:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #449; border-top-width: 0; }
+	td.tvShowQuality span.HD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #494; border-top-width: 0; }
+	td.tvShowQuality span.SD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #984444; border-top-width: 0; border-top-color: #444; }
+	td.tvShowQuality span.Any:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #444; border-top-width: 0; border-top-color: #494; }
+	th.tvShowQualityHeader { display: none; }
+	
+	td.tvShowStatus { display: none; }	
+	th.tvShowStatusHeader { display: none; }
+	
+	td.tvShowActive { display: none; }	
+	th.tvShowActiveHeader { display: none; }
+	
+	td.tvShowProgressBar { left: -4px; width: 100%; position: absolute; bottom: -50px; }	
+	td.tvShowProgressBar div.ui-progressbar-value { bottom: 0; position: absolute; }	
+	td.tvShowProgressBar div.progressbarText { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; }	
+	th.tvShowProgressBarHeader {  }
+	
+	td.tvShowNetwork { position: absolute; right: -1px; bottom: -23px; text-align: right; width: 100%; margin: 0; padding: 3px 5px 3px 3px; font-size: 120%; }
+	th.tvShowNetworkHeader {  }
+
+/* @end */
+
+
+/* @group Show Details Page */
+
+	div#content h1 { font: bold 200%/1.5 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; margin-bottom:38px; margin-left: 5px; }
+	.align-left { display: block; margin: 0 0 0 5px; padding: 0!important; }
+	.float-left { margin: 15px 5px 5px; display: block; float: none; position: relative; top: 170px; }
+	#summary { font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; display: block; padding: 5px!important; margin: 5px!important; }
+
+	table.infoTable { text-align: left; }
+	
+	select#pickShow { width: 55%; }
+	select#statusSelect { display: block; width: 100%; }
+	input#changeStatus { width: 50%; margin-left: 25%; }
+	
+	#checkboxControls.float-right { display: block; float: none; position: relative; font: 120%/1.5 "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif; margin: 5px 5px 35px; top: -90px; }
+	#checkboxControls.float-right span { display: block; position: relative; }
+	#checkboxControls input { position: absolute; right: 5px; top: 4px; }
+	#checkboxControls span.selectAll { float: left; }
+	#checkboxControls span.clearAll { margin-left: 10px; float: left; }
+	
+	.sickbeardTable {  }
+	.sickbeardTable th {  }
+	.sickbeardTable tr {  }
+		
+	tr.seasonheader {  }
+	tr.seasonheader td{  }
+	tr.seasonheader td h2 {  }
+	
+	th.seasonCheckboxWrapper {  }
+	
+	table.sickbeardTable input.seasonCheck {  }
+	
+	th.hideable {  }
+	td.epCheckboxWrapper { }
+	td.nfo { }
+	td.tbn { }
+	td.epNum {  }
+	td.epTitle {  }
+	img.plotInfo { }
+	td.epAirDate { }
+	td.epFileLocation { }
+	td.status_column { }
+	td.epSearchButton { }
+	
+/* @end */
+
+/* @group coming episodes */
+
+	/* poster & banner layouts */
+
+	h1.day { display: block; margin-right: 5px; text-align: left; padding-left: 5px; }
+	
+	.ep_listing { margin-right: 5px; margin-left: 5px; }
+	
+	.tvshowDiv { overflow-x:hidden; position: relative; }
+	.tvshowDiv table { display: block; }
+	.tvshowDiv tbody { width: 100%; display: block; }
+	
+	.tvshowDiv tr { width: 100%; display: table; }
+	.tvshowDiv th  { width: 100%; display: table; }
+	
+	th.nobg { display: block; width: 100%; text-align: center; }
+	.banner_thumb { width: 100%!important; height: 0; }
+				
+	.ep_summaryTrigger { display: none; }
+	.ep_summary { margin: 10px 0 0; padding: 0; display: block!important; }
+	
+	 end of poster & banner layouts 
+	
+	.plotInfo { display: none; }
+	#showListTable tr { display: block!important; width: 100%; position: relative; margin-bottom: 6px; }
+	
+	.nextEpNum { bottom: 0; display: block; width: 10%; position: absolute; }
+	.nextEpTitle { font-size: 130%; line-height: 1; display: block; font-weight: bold; position: absolute; top: 25px; }
+	.nextEpAirdate { text-align: right; position: absolute; bottom: 0; left: 15%; width: 20%; }
+	.nextEpShow { font-size: 130%; line-height: 1; display: block; margin-bottom: 25px; }
+	.nextEpNetwork { position: absolute; bottom: 0; left: 40%; }
+
+	.nextEpQuality { background: rgba(255,255,255,0)!important; color: rgba(255,255,255,0)!important; }
+	.nextEpQuality.Custom:before { content: ""; position: absolute; top: 0; right: 0; border-width: 0 16px 16px 0; border-style: solid; border-color: rgba(255,255,255,0) #449; border-top-width: 0; }
+	.nextEpQuality.HD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #494; border-top-width: 0; }
+	.nextEpQuality.SD:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #984444; border-top-width: 0; border-top-color: #444; }
+	.nextEpQuality.Any:before { content:""; position:absolute; top:0; right:0; border-width:0 16px 16px 0; border-style:solid; border-color:rgba(255,255,255,0) #444; border-top-width: 0; border-top-color: #494; }
+
+	.nextEpTVDBBadgeHeader { display: none; }	
+	.nextEpTVDBBadge { position: absolute; bottom: 0; right: 30px; }
+	
+	.nextEpSearchBadgeHeader { display: none; }
+	.nextEpSearchBadge { position: absolute; bottom: 0; right: 5px; }
+		
+/* @end */
+
+
 }
-
-table {
-margin:0;
-font-size: 10px;
-}
-
-#outerWrapper { width: 98%; padding-left: 1%; padding-right: 1%; }
-
