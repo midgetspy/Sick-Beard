@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os.path
-import re
 
 import sickbeard
 
@@ -65,7 +64,5 @@ class SabPoller():
 
 def checkSuccessfulPP(path):
     myDB = db.DBConnection()
-    sql_results = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [path+'%'])
+    sql_results = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [path + '%'])
     return bool(len(sql_results))
-
-
