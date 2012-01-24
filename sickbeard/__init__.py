@@ -32,7 +32,7 @@ from threading import Lock
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin
 
-from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
+from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, sabPoller
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 
@@ -70,6 +70,7 @@ showQueueScheduler = None
 searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
+sabPollScheduler = None
 
 showList = None
 loadingShowList = None
@@ -373,7 +374,7 @@ def initialize(consoleLogging=True):
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
-                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
+                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, sabPollScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
@@ -724,6 +725,11 @@ def initialize(consoleLogging=True):
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="POSTPROCESSER",
                                                      runImmediately=True)
+        
+        sabPollScheduler = scheduler.Scheduler(sabPoller.SabPoller(),
+                                                     cycleTime=datetime.timedelta(seconds=30),
+                                                     threadName="SABPOLLER",
+                                                     runImmediately=True)
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
@@ -742,7 +748,7 @@ def start():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
-            properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            properFinderScheduler, autoPostProcesserScheduler, sabPollScheduler, searchQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -772,13 +778,16 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
+
+            # start the sab poller
+            sabPollScheduler.thread.start()            
             
             started = True
 
 def halt ():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
-            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, sabPollScheduler, searchQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -835,6 +844,13 @@ def halt ():
             logger.log(u"Waiting for the POSTPROCESSER thread to exit")
             try:
                 autoPostProcesserScheduler.thread.join(10)
+            except:
+                pass
+
+            sabPollScheduler.abort = True
+            logger.log(u"Waiting for the SABPOLL thread to exit")
+            try:
+                sabPollScheduler.thread.join(10)
             except:
                 pass
 
