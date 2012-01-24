@@ -30,7 +30,7 @@ from sickbeard import sab
 class SabPoller():
 
     def run(self):
-        if not sickbeard.NZB_METHOD == "sabnzbd":
+        if not sickbeard.NZB_METHOD == "sabnzbd" or not sickbeard.SAB_POLL:
             return False
 
         history = sab.getHistory()
