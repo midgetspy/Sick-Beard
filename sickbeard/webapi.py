@@ -1316,7 +1316,7 @@ class CMD_SickBeardGetDefaults(ApiCall):
 
         anyQualities, bestQualities = _mapQuality(sickbeard.QUALITY_DEFAULT)
 
-        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT], "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities}
+        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT].lower(), "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities, "future_show_paused": int(sickbeard.COMING_EPS_DISPLAY_PAUSED) }
         return _responds(RESULT_SUCCESS, data)
 
 
@@ -1494,6 +1494,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
         # optional
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.future_show_paused, args = self.check_params(args, kwargs, "future_show_paused", None, False, "bool", [])
         self.season_folder, args = self.check_params(args, kwargs, "season_folder", None, False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         # super, missing, help
@@ -1540,6 +1541,9 @@ class CMD_SickBeardSetDefaults(ApiCall):
 
         if self.season_folder != None:
             sickbeard.SEASON_FOLDERS_DEFAULT = int(self.season_folder)
+
+        if self.future_show_paused != None:
+            sickbeard.COMING_EPS_DISPLAY_PAUSED = int(self.future_show_paused)
 
         return _responds(RESULT_SUCCESS, msg="Saved defaults")
 
