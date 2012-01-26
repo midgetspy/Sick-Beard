@@ -34,7 +34,7 @@ RUN_AS=SICKBEARD_USER
 DATA_DIR=~/.sickbeard
 
 # startup args
-DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
+DAEMON_OPTS=" SickBeard.py -q --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
 
 ############### END EDIT ME ##################
 
