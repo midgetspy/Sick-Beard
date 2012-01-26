@@ -52,6 +52,13 @@ if [ ! -d $DATA_DIR ]; then
     chown $RUN_AS $DATA_DIR
 fi
 
+if [ -e $PID_FILE ]; then
+  PID=`cat $PID_FILE`
+  if ! kill -0 $PID > /dev/null 2>&1; then
+    echo "Removing stale $PID_FILE"
+    rm $PID_FILE
+  fi
+fi
 
 case "$1" in
   start)
