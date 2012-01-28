@@ -35,29 +35,33 @@ class ProwlNotifier:
     def notify_download(self, ep_name):
         if sickbeard.PROWL_NOTIFY_ONDOWNLOAD:
             self._sendProwl(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
-        
+
+    def notify_update(self, sb_update):
+        if sickbeard.PROWL_NOTIFY_ONUPDATE:
+            self._sendProwl(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_UPDATE], message=sb_update)
+
     def _sendProwl(self, prowl_api=None, prowl_priority=None, event=None, message=None, force=False):
-        
+
         if not sickbeard.USE_PROWL and not force:
                 return False
-        
+
         if prowl_api == None:
             prowl_api = sickbeard.PROWL_API
-            
+
         if prowl_priority == None:
             prowl_priority = sickbeard.PROWL_PRIORITY
-        
-            
+
+
         title = "Sick Beard"
-        
+
         logger.log(u"Prowl title: " + title, logger.DEBUG)
         logger.log(u"Prowl event: " + event, logger.DEBUG)
         logger.log(u"Prowl message: " + message, logger.DEBUG)
         logger.log(u"Prowl api: " + prowl_api, logger.DEBUG)
         logger.log(u"Prowl priority: " + prowl_priority, logger.DEBUG)
-        
+
         http_handler = HTTPSConnection("api.prowlapp.com")
-                                                
+
         data = {'apikey': prowl_api,
                 'application': title,
                 'event': event,
@@ -74,11 +78,11 @@ class ProwlNotifier:
         if request_status == 200:
                 logger.log(u"Prowl notifications sent.", logger.DEBUG)
                 return True
-        elif request_status == 401: 
+        elif request_status == 401:
                 logger.log(u"Prowl auth failed: %s" % response.reason, logger.ERROR)
                 return False
         else:
                 logger.log(u"Prowl notification failed.", logger.ERROR)
                 return False
-                
+
 notifier = ProwlNotifier

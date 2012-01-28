@@ -88,6 +88,10 @@ class LibnotifyNotifier:
         if sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD:
             self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
+    def notify_update(self, sb_update):
+        if sickbeard.LIBNOTIFY_NOTIFY_ONUPDATE:
+            self._notify(common.notifyStrings[common.NOTIFY_UPDATE], sb_update)
+    
     def test_notify(self):
         return self._notify('Test notification', "This is a test notification from Sick Beard", force=True)
 

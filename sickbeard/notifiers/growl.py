@@ -39,6 +39,10 @@ class GrowlNotifier:
         if sickbeard.GROWL_NOTIFY_ONDOWNLOAD:
             self._sendGrowl(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
+    def notify_update(self, sb_update):
+        if sickbeard.GROWL_NOTIFY_ONUPDATE:
+            self._sendGrowl(common.notifyStrings[common.NOTIFY_UPDATE], sb_update)
+            
     def _send_growl(self, options,message=None):
                 
         #Send Notification
@@ -162,6 +166,7 @@ class GrowlNotifier:
         register.add_notification('Test', True)
         register.add_notification(common.notifyStrings[common.NOTIFY_SNATCH], True)
         register.add_notification(common.notifyStrings[common.NOTIFY_DOWNLOAD], True)
+        register.add_notification(common.notifyStrings[common.NOTIFY_UPDATE], True)
 
         if opts['password']:
             register.set_password(opts['password'])

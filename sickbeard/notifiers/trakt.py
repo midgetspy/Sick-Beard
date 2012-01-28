@@ -42,6 +42,9 @@ class TraktNotifier:
 
     def notify_download(self, ep_name):
         pass
+    
+    def notify_update(self, sb_update):
+        pass
 
     def update_library(self, ep_obj):
         if sickbeard.USE_TRAKT:

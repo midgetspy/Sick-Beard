@@ -191,6 +191,7 @@ NZBGET_HOST = None
 USE_XBMC = False
 XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
+XBMC_NOTIFY_ONUPDATE = False
 XBMC_UPDATE_LIBRARY = False
 XBMC_UPDATE_FULL = False
 XBMC_HOST = ''
@@ -200,6 +201,7 @@ XBMC_PASSWORD = None
 USE_PLEX = False
 PLEX_NOTIFY_ONSNATCH = False
 PLEX_NOTIFY_ONDOWNLOAD = False
+PLEX_NOTIFY_ONUPDATE = False
 PLEX_UPDATE_LIBRARY = False
 PLEX_SERVER_HOST = None
 PLEX_HOST = None
@@ -209,18 +211,21 @@ PLEX_PASSWORD = None
 USE_GROWL = False
 GROWL_NOTIFY_ONSNATCH = False
 GROWL_NOTIFY_ONDOWNLOAD = False
+GROWL_NOTIFY_ONUPDATE = False
 GROWL_HOST = ''
 GROWL_PASSWORD = None
 
 USE_PROWL = False
 PROWL_NOTIFY_ONSNATCH = False
 PROWL_NOTIFY_ONDOWNLOAD = False
+PROWL_NOTIFY_ONUPDATE = False
 PROWL_API = None
 PROWL_PRIORITY = 0
 
 USE_TWITTER = False
 TWITTER_NOTIFY_ONSNATCH = False
 TWITTER_NOTIFY_ONDOWNLOAD = False
+TWITTER_NOTIFY_ONUPDATE = False
 TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
@@ -228,6 +233,7 @@ TWITTER_PREFIX = None
 USE_NOTIFO = False
 NOTIFO_NOTIFY_ONSNATCH = False
 NOTIFO_NOTIFY_ONDOWNLOAD = False
+NOTIFO_NOTIFY_ONUPDATE = False
 NOTIFO_USERNAME = None
 NOTIFO_APISECRET = None
 NOTIFO_PREFIX = None
@@ -235,6 +241,7 @@ NOTIFO_PREFIX = None
 USE_BOXCAR = False
 BOXCAR_NOTIFY_ONSNATCH = False
 BOXCAR_NOTIFY_ONDOWNLOAD = False
+BOXCAR_NOTIFY_ONUPDATE = False
 BOXCAR_USERNAME = None
 BOXCAR_PASSWORD = None
 BOXCAR_PREFIX = None
@@ -242,6 +249,7 @@ BOXCAR_PREFIX = None
 USE_LIBNOTIFY = False
 LIBNOTIFY_NOTIFY_ONSNATCH = False
 LIBNOTIFY_NOTIFY_ONDOWNLOAD = False
+LIBNOTIFY_NOTIFY_ONUPDATE = False
 
 USE_NMJ = False
 NMJ_HOST = None
@@ -358,17 +366,17 @@ def initialize(consoleLogging=True):
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
-                USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
+                USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_NOTIFY_ONUPDATE, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
+                USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_NOTIFY_ONUPDATE, PLEX_UPDATE_LIBRARY, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
-                USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
-                GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
+                GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, GROWL_NOTIFY_ONUPDATE, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONUPDATE, \
+                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_NOTIFY_ONUPDATE, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
@@ -377,9 +385,9 @@ def initialize(consoleLogging=True):
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
-                USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
+                USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, NOTIFO_NOTIFY_ONUPDATE, \
+                USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, BOXCAR_NOTIFY_ONUPDATE,\
+                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, LIBNOTIFY_NOTIFY_ONUPDATE, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS
@@ -422,28 +430,28 @@ def initialize(consoleLogging=True):
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
 
-        USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0)) 
+        USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
 
         ACTUAL_CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         # fix bad configs due to buggy code
         if ACTUAL_CACHE_DIR == 'None':
             ACTUAL_CACHE_DIR = 'cache'
-        
+
         # unless they specify, put the cache dir inside the data dir
         if not os.path.isabs(ACTUAL_CACHE_DIR):
             CACHE_DIR = os.path.join(DATA_DIR, ACTUAL_CACHE_DIR)
         else:
             CACHE_DIR = ACTUAL_CACHE_DIR
-        
+
         if not helpers.makeDir(CACHE_DIR):
             logger.log(u"!!! Creating local cache dir failed, using system default", logger.ERROR)
             CACHE_DIR = None
-        
+
         ROOT_DIRS = check_setting_str(CFG, 'General', 'root_dirs', '')
         if not re.match(r'\d+\|[^|]+(?:\|[^|]+)*', ROOT_DIRS):
             ROOT_DIRS = ''
-        
+
         proxies = urllib.getproxies()
         proxy_url = None
         if 'http' in proxies:
@@ -457,7 +465,7 @@ def initialize(consoleLogging=True):
                           'language': 'en',
                           'cache_dir': False,
                           'http_proxy': proxy_url}
-        
+
         if CACHE_DIR:
             TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
 
@@ -507,8 +515,8 @@ def initialize(consoleLogging=True):
         EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         if not EZRSS:
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
-            
-        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
+
+        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
@@ -540,9 +548,10 @@ def initialize(consoleLogging=True):
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 
-        USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0)) 
+        USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0))
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
         XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
+        XBMC_NOTIFY_ONUPDATE = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onupdate', 0))
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
         XBMC_UPDATE_FULL = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_full', 0))
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
@@ -552,6 +561,7 @@ def initialize(consoleLogging=True):
         USE_PLEX = bool(check_setting_int(CFG, 'Plex', 'use_plex', 0))
         PLEX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Plex', 'plex_notify_onsnatch', 0))
         PLEX_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Plex', 'plex_notify_ondownload', 0))
+        PLEX_NOTIFY_ONUPDATE = bool(check_setting_int(CFG, 'Plex', 'plex_notify_onupdate', 0))
         PLEX_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'Plex', 'plex_update_library', 0))
         PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
         PLEX_HOST = check_setting_str(CFG, 'Plex', 'plex_host', '')
@@ -561,18 +571,21 @@ def initialize(consoleLogging=True):
         USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
         GROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onsnatch', 0))
         GROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Growl', 'growl_notify_ondownload', 0))
+        GROWL_NOTIFY_ONUPDATE = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onupdate', 0))
         GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
         GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
 
         USE_PROWL = bool(check_setting_int(CFG, 'Prowl', 'use_prowl', 0))
         PROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_onsnatch', 0))
         PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
+        PROWL_NOTIFY_ONUPDATE = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_onupdate', 0))
         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
         PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
 
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
-        TWITTER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_ondownload', 0))        
+        TWITTER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_ondownload', 0))
+        TWITTER_NOTIFY_ONUPDATE = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onupdate', 0))
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
@@ -580,17 +593,20 @@ def initialize(consoleLogging=True):
         USE_NOTIFO = bool(check_setting_int(CFG, 'Notifo', 'use_notifo', 0))
         NOTIFO_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_onsnatch', 0))
         NOTIFO_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_ondownload', 0))
+        NOTIFO_NOTIFY_ONUPDATE = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_onupdate', 0))
         NOTIFO_USERNAME = check_setting_str(CFG, 'Notifo', 'notifo_username', '')
         NOTIFO_APISECRET = check_setting_str(CFG, 'Notifo', 'notifo_apisecret', '')
 
         USE_BOXCAR = bool(check_setting_int(CFG, 'Boxcar', 'use_boxcar', 0))
         BOXCAR_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_onsnatch', 0))
         BOXCAR_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_ondownload', 0))
+        BOXCAR_NOTIFY_ONUPDATE = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_onupdate', 0))
         BOXCAR_USERNAME = check_setting_str(CFG, 'Boxcar', 'boxcar_username', '')
 
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
         LIBNOTIFY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onsnatch', 0))
         LIBNOTIFY_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_ondownload', 0))
+        LIBNOTIFY_NOTIFY_ONUPDATE = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onupdate', 0))
 
         USE_NMJ = bool(check_setting_int(CFG, 'NMJ', 'use_nmj', 0))
         NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
@@ -615,7 +631,7 @@ def initialize(consoleLogging=True):
         METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
 
         metadata_provider_dict = metadata.get_metadata_generator_dict()
-        
+
         # if this exists it's legacy, use the info to upgrade metadata to the new settings
         if METADATA_TYPE:
 
@@ -627,12 +643,12 @@ def initialize(consoleLogging=True):
                 old_metadata_class = metadata.mediabrowser.metadata_class
             elif METADATA_TYPE == 'ps3':
                 old_metadata_class = metadata.ps3.metadata_class
-        
+
             if old_metadata_class:
-                
+
                 METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
                 METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
-            
+
                 ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
                 ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
                 ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
@@ -644,7 +660,7 @@ def initialize(consoleLogging=True):
                                                         ART_FANART,
                                                         ART_THUMBNAILS,
                                                         ART_SEASON_THUMBNAILS)
-                
+
                 metadata_provider_dict[new_metadata_class.name] = new_metadata_class
 
         # this is the normal codepath for metadata config
@@ -654,7 +670,7 @@ def initialize(consoleLogging=True):
             METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
             METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
             METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0')
-            
+
             for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
                                        (METADATA_MEDIABROWSER, metadata.mediabrowser),
                                        (METADATA_PS3, metadata.ps3),
@@ -675,15 +691,15 @@ def initialize(consoleLogging=True):
         newznabProviderList = providers.getNewznabProviderList(newznabData)
 
         providerList = providers.makeProviderList()
-        
+
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
         db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
-        
+
         # initialize the cache database
         db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
-        
+
         # fix up any db problems
         db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
 
@@ -772,7 +788,7 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
-            
+
             started = True
 
 def halt ():
@@ -989,7 +1005,7 @@ def save_config():
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
-    
+
     new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
     new_config['General']['git_path'] = GIT_PATH
     new_config['General']['ignore_words'] = IGNORE_WORDS
@@ -1000,7 +1016,7 @@ def save_config():
 
     new_config['EZRSS'] = {}
     new_config['EZRSS']['ezrss'] = int(EZRSS)
-    
+
     new_config['TVTORRENTS'] = {}
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
@@ -1045,6 +1061,7 @@ def save_config():
     new_config['XBMC']['use_xbmc'] = int(USE_XBMC)
     new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
     new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
+    new_config['XBMC']['xbmc_notify_onupdate'] = int(XBMC_NOTIFY_ONUPDATE)
     new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
     new_config['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
     new_config['XBMC']['xbmc_host'] = XBMC_HOST
@@ -1055,6 +1072,7 @@ def save_config():
     new_config['Plex']['use_plex'] = int(USE_PLEX)
     new_config['Plex']['plex_notify_onsnatch'] = int(PLEX_NOTIFY_ONSNATCH)
     new_config['Plex']['plex_notify_ondownload'] = int(PLEX_NOTIFY_ONDOWNLOAD)
+    new_config['Plex']['plex_notify_onupdate'] = int(PLEX_NOTIFY_ONUPDATE)
     new_config['Plex']['plex_update_library'] = int(PLEX_UPDATE_LIBRARY)
     new_config['Plex']['plex_server_host'] = PLEX_SERVER_HOST
     new_config['Plex']['plex_host'] = PLEX_HOST
@@ -1064,14 +1082,16 @@ def save_config():
     new_config['Growl'] = {}
     new_config['Growl']['use_growl'] = int(USE_GROWL)
     new_config['Growl']['growl_notify_onsnatch'] = int(GROWL_NOTIFY_ONSNATCH)
-    new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD) 
+    new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD)
+    new_config['Growl']['growl_notify_onupdate'] = int(GROWL_NOTIFY_ONUPDATE)
     new_config['Growl']['growl_host'] = GROWL_HOST
     new_config['Growl']['growl_password'] = GROWL_PASSWORD
-    
+
     new_config['Prowl'] = {}
     new_config['Prowl']['use_prowl'] = int(USE_PROWL)
     new_config['Prowl']['prowl_notify_onsnatch'] = int(PROWL_NOTIFY_ONSNATCH)
-    new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD) 
+    new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD)
+    new_config['Prowl']['prowl_notify_onupdate'] = int(PROWL_NOTIFY_ONUPDATE)
     new_config['Prowl']['prowl_api'] = PROWL_API
     new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
 
@@ -1079,6 +1099,7 @@ def save_config():
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
     new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)
     new_config['Twitter']['twitter_notify_ondownload'] = int(TWITTER_NOTIFY_ONDOWNLOAD)
+    new_config['Twitter']['twitter_notify_onupdate'] = int(TWITTER_NOTIFY_ONUPDATE)
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
@@ -1087,6 +1108,7 @@ def save_config():
     new_config['Notifo']['use_notifo'] = int(USE_NOTIFO)
     new_config['Notifo']['notifo_notify_onsnatch'] = int(NOTIFO_NOTIFY_ONSNATCH)
     new_config['Notifo']['notifo_notify_ondownload'] = int(NOTIFO_NOTIFY_ONDOWNLOAD)
+    new_config['Notifo']['notifo_notify_onupdate'] = int(NOTIFO_NOTIFY_ONUPDATE)
     new_config['Notifo']['notifo_username'] = NOTIFO_USERNAME
     new_config['Notifo']['notifo_apisecret'] = NOTIFO_APISECRET
 
@@ -1094,12 +1116,14 @@ def save_config():
     new_config['Boxcar']['use_boxcar'] = int(USE_BOXCAR)
     new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
     new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
+    new_config['Boxcar']['boxcar_notify_onupdate'] = int(BOXCAR_NOTIFY_ONUPDATE)
     new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
 
     new_config['Libnotify'] = {}
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
     new_config['Libnotify']['libnotify_notify_onsnatch'] = int(LIBNOTIFY_NOTIFY_ONSNATCH)
     new_config['Libnotify']['libnotify_notify_ondownload'] = int(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
+    new_config['Libnotify']['libnotify_notify_onupdate'] = int(LIBNOTIFY_NOTIFY_ONUPDATE)
 
     new_config['NMJ'] = {}
     new_config['NMJ']['use_nmj'] = int(USE_NMJ)
