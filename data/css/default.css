@@ -387,7 +387,7 @@ span.quality {
 span.Custom {
     background: none repeat scroll 0 0 #444499; /* blue */
 }
-span.HD {
+span.HD,span.WEB-DL,span.BluRay {
     background: none repeat scroll 0 0 #449944; /* green */
 }
 span.SD {
