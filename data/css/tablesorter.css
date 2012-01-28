@@ -1,4 +1,7 @@
 /* tables */
+table.tablesorter {
+    width: 100%;
+}
 table.tablesorter thead tr .header {
 /*  background-image: url(../images/tablesorter/bg.gif); */
     cursor: pointer; 
@@ -29,4 +32,12 @@ table.tablesorter tbody tr.even td {
 table.tablesorter tbody tr.odd td {
     background-color:#dfdacf;
     color: #000000;
+}
+/* filter widget, added to style.css themes */ 
+table.tablesorter thead input.filter { 
+    width: 95%; 
+} 
+table.tablesorter thead tr.filters, table.tablesorter thead tr.filters td { 
+    text-align: center; 
+    background: #eee; 
 }
