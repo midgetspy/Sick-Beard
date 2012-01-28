@@ -811,7 +811,7 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
-                    naming_sep_type=None, naming_quality=None, naming_dates=None,
+                    naming_sep_type=None, naming_quality=None, naming_dates=None, naming_strip_year=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None):
@@ -825,6 +825,11 @@ class ConfigPostProcessing:
             naming_show_name = 1
         else:
             naming_show_name = 0
+
+        if naming_strip_year == "on":
+            naming_strip_year = 1
+        else:
+            naming_strip_year = 0
 
         if naming_ep_name == "on":
             naming_ep_name = 1
@@ -885,6 +890,7 @@ class ConfigPostProcessing:
         sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
+        sickbeard.NAMING_STRIP_YEAR = naming_strip_year
         sickbeard.NAMING_EP_NAME = naming_ep_name
         sickbeard.NAMING_USE_PERIODS = naming_use_periods
         sickbeard.NAMING_QUALITY = naming_quality
