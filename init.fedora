@@ -29,7 +29,7 @@ nice=${SB_NICE-}
 ##
 
 pidpath=`dirname ${pidfile}`
-options=" --daemon --pidfile=${pidfile} --datadir=${datadir}"
+options=" --daemon --nolaunch --pidfile=${pidfile} --datadir=${datadir}"
 
 # create PID directory if not exist and ensure the SickBeard user can write to it
 if [ ! -d $pidpath ]; then
