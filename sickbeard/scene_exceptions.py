@@ -75,7 +75,10 @@ def retrieve_exceptions(localOnly=False):
     if not localOnly:
         exception_dict = _retrieve_exceptions_fetcher(url)
         exception_dict.update(_retrieve_exceptions_fetcher(url2)) # server anime exceptions
-    exception_dict.update(_retrieve_anidb_mainnames()) # anidb xml anime exceptions
+    local_exceptions = _retrieve_anidb_mainnames()
+    for local_ex in local_exceptions: # anidb xml anime exceptions
+        if local_ex in exception_dict:
+            exception_dict[local_ex] = exception_dict[local_ex] + local_exceptions[local_ex]
 
     myDB = db.DBConnection("cache.db")
 
