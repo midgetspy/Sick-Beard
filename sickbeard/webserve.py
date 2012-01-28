@@ -1879,6 +1879,8 @@ class Home:
 
     @cherrypy.expose
     def testSABnzbd(self, host=None, username=None, password=None, apikey=None):
+        if not host.endswith("/"):
+            host = host + "/"
         connection, accesMsg = sab.getSabAccesMethod(host, username, password, apikey)
         if connection:
             authed, authMsg = sab.testAuthentication(host, username, password, apikey) #@UnusedVariable
