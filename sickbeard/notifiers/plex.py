@@ -36,8 +36,8 @@ class PLEXNotifier(XBMCNotifier):
             self._notifyXBMC(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
 
     def test_notify(self, host, username, password):
-        return self._notifyXBMC("Testing Plex notifications from Sick Beard", "Test Notification", host, username, password, force=True)
-
+        return self._update_library() 
+        
     def update_library(self):
         if sickbeard.PLEX_UPDATE_LIBRARY:
             self._update_library()
