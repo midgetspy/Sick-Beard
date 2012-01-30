@@ -18,6 +18,9 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+if sys.version_info < (2, 5):
+    print "Sorry, requires Python 2.5 or higher."
+    sys.exit(1)
 
 # we only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:
@@ -47,6 +50,7 @@ from lib.configobj import ConfigObj
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
+
 def loadShowsFromDB():
     """
     Populates the showList with shows from the database
@@ -60,10 +64,11 @@ def loadShowsFromDB():
             curShow = TVShow(int(sqlShow["tvdb_id"]))
             sickbeard.showList.append(curShow)
         except Exception, e:
-            logger.log(u"There was an error creating the show in "+sqlShow["location"]+": "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"There was an error creating the show in " + sqlShow["location"] + ": " + str(e).decode('utf-8'), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         #TODO: make it update the existing shows if the showlist has something in it
+
 
 def daemonize():
     """
@@ -91,7 +96,7 @@ def daemonize():
         if pid != 0:
             sys.exit(0)
     except OSError, e:
-        raise RuntimeError("2st fork failed: %s [%d]" %
+        raise RuntimeError("2nd fork failed: %s [%d]" %
                    (e.strerror, e.errno))
 
     dev_null = file('/dev/null', 'r')
@@ -101,6 +106,7 @@ def daemonize():
         pid = str(os.getpid())
         logger.log(u"Writing PID " + pid + " to " + str(sickbeard.PIDFILE))
         file(sickbeard.PIDFILE, 'w').write("%s\n" % pid)
+
 
 def main():
     """
@@ -194,7 +200,7 @@ def main():
                     raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
             else:
                 logger.log(u"Not running in daemon mode. PID file creation disabled.")
-    
+
     # if they don't specify a config file then put it in the data dir
     if not sickbeard.CONFIG_FILE:
         sickbeard.CONFIG_FILE = os.path.join(sickbeard.DATA_DIR, "config.ini")
@@ -215,12 +221,12 @@ def main():
         if os.path.isfile(sickbeard.CONFIG_FILE):
             raise SystemExit("Config file '" + sickbeard.CONFIG_FILE + "' must be writeable")
         elif not os.access(os.path.dirname(sickbeard.CONFIG_FILE), os.W_OK):
-            raise SystemExit("Config file root dir '" + os.path.dirname(sickbeard.CONFIG_FILE) + "' must be writeable") 
-        
+            raise SystemExit("Config file root dir '" + os.path.dirname(sickbeard.CONFIG_FILE) + "' must be writeable")
+
     os.chdir(sickbeard.DATA_DIR)
-    
+
     if consoleLogging:
-        print "Starting up Sick Beard "+SICKBEARD_VERSION+" from " + sickbeard.CONFIG_FILE
+        print "Starting up Sick Beard " + SICKBEARD_VERSION + " from " + sickbeard.CONFIG_FILE
 
     # load the config and publish it to the sickbeard package
     if not os.path.isfile(sickbeard.CONFIG_FILE):
@@ -235,12 +241,12 @@ def main():
 
     if sickbeard.DAEMON:
         daemonize()
-    
+
     # use this pid for everything
     sickbeard.PID = os.getpid()
 
     if forcedPort:
-        logger.log(u"Forcing web server to port "+str(forcedPort))
+        logger.log(u"Forcing web server to port " + str(forcedPort))
         startPort = forcedPort
     else:
         startPort = sickbeard.WEB_PORT
@@ -261,17 +267,17 @@ def main():
         else:
             webhost = '0.0.0.0'
 
-    logger.log(u"Starting Sick Beard on http://"+str(webhost)+":"+str(startPort)+"/")
+    logger.log(u"Starting Sick Beard on http://" + str(webhost) + ":" + str(startPort) + "/")
 
     try:
         initWebServer({
-                'port':      startPort,
-                'host':      webhost,
+                'port': startPort,
+                'host': webhost,
                 'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
-                'web_root':  sickbeard.WEB_ROOT,
-                'log_dir':   log_dir,
-                'username':  sickbeard.WEB_USERNAME,
-                'password':  sickbeard.WEB_PASSWORD,
+                'web_root': sickbeard.WEB_ROOT,
+                'log_dir': log_dir,
+                'username': sickbeard.WEB_USERNAME,
+                'password': sickbeard.WEB_PASSWORD,
         })
     except IOError:
         logger.log(u"Unable to start web server, is something else running on port %d?" % startPort, logger.ERROR)
@@ -299,7 +305,7 @@ def main():
     while (True):
 
         if sickbeard.invoked_command:
-            logger.log(u"Executing invoked command: "+repr(sickbeard.invoked_command))
+            logger.log(u"Executing invoked command: " + repr(sickbeard.invoked_command))
             sickbeard.invoked_command()
             sickbeard.invoked_command = None
 

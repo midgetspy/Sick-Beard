@@ -44,7 +44,7 @@ status_cmd="${name}_status"
 stop_cmd="${name}_stop"
 
 command="/usr/sbin/daemon"
-command_args="-f -p ${sickbeard_pid} python ${sickbeard_dir}/SickBeard.py ${sickbeard_flags} --quiet"
+command_args="-f -p ${sickbeard_pid} python ${sickbeard_dir}/SickBeard.py ${sickbeard_flags} --quiet --nolaunch"
 
 # Check for wget and refuse to start without it.
 if [ ! -x "${WGET}" ]; then
