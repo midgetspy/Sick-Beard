@@ -31,7 +31,7 @@ DESC=SickBeard
 RUN_AS=SICKBEARD_USER
 
 # data directory
-DATA_DIR=/home/${RUN_AS}/.sickbeard
+DATA_DIR=~${RUN_AS}/.sickbeard
 
 # startup args
 DAEMON_OPTS=" SickBeard.py -q --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
