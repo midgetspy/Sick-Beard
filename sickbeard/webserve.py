@@ -1059,7 +1059,8 @@ class ConfigProviders:
     def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
-                      tvtorrents_digest=None, tvtorrents_hash=None, 
+                      tvtorrents_digest=None, tvtorrents_hash=None,
+ 					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1123,6 +1124,8 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
+            elif curProvider == 'btn':
+                sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1130,6 +1133,11 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+
+        sickbeard.BTN_USER_ID = btn_user_id.strip()
+        sickbeard.BTN_AUTH_TOKEN = btn_auth_token.strip()
+        sickbeard.BTN_PASSKEY = btn_passkey.strip()
+        sickbeard.BTN_AUTHKEY = btn_authkey.strip()
 
         sickbeard.NZBS_UID = nzbs_org_uid.strip()
         sickbeard.NZBS_HASH = nzbs_org_hash.strip()
