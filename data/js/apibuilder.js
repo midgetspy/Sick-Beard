@@ -18,16 +18,33 @@ function goListGroup(apikey, L7, L6, L5, L4, L3, L2, L1){
             GlobalOptions = GlobalOptions + "&" + $(this).attr('id') + "=1";
         }
     });
-        
-    var html = "/api/"+ apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + L7 + GlobalOptions + "<br/><pre>";
-    html += $.ajax({
-      url: "/api/" + apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + L7 + GlobalOptions,
-      async: false,
-      dataType: "html",
-    }).responseText;
 
-    html += '</pre>';
-    $('#apiResponse').html(html);
+    // handle the show.getposter / show.getbanner differently as they return an image and not json
+    if (L1 == "?cmd=show.getposter" || L1 == "?cmd=show.getbanner") {
+        var imgcache = sbRoot + "/api/" + apikey + "/" + L1 + L2 + GlobalOptions;
+        var html = imgcache + '<br/><br/><img src="' + sbRoot + '/images/loading16.gif" id="imgcache">';
+        $('#apiResponse').html(html);
+        $.ajax({
+          url: sbRoot + "/api/" + apikey + "/" + L1 + L2 + GlobalOptions,
+          async: false,
+          cache: false,
+          dataType: "html",
+          success: function (img) {
+            $('#imgcache').attr('src', imgcache);
+          }
+        })
+    }
+    else {
+        var html = sbRoot + "/api/" + apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + L7 + GlobalOptions + "<br/><pre>";
+        html += $.ajax({
+          url: sbRoot + "/api/" + apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + L7 + GlobalOptions,
+          async: false,
+          dataType: "html",
+        }).responseText;
+
+        html += '</pre>';
+        $('#apiResponse').html(html);
+    }
 }
 
 // ------

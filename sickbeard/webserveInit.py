@@ -33,23 +33,49 @@ def initWebServer(options = {}):
         assert isinstance(options['port'], int)
         assert 'data_root' in options
 
+        def http_error_401_hander(status, message, traceback, version):
+            """ Custom handler for 401 error """
+            if status != "401 Unauthorized":
+                logger.log(u"CherryPy caught an error: %s %s" % (status, message), logger.ERROR)
+                logger.log(traceback, logger.DEBUG)
+            return r'''
+<html>
+    <head>
+        <title>%s</title>
+    </head>
+    <body>
+        <br/>
+        <font color="#0000FF">Error %s: You need to provide a valid username and password.</font>
+    </body>
+</html>
+''' % ('Access denied', status)
+
+        def http_error_404_hander(status, message, traceback, version):
+            """ Custom handler for 404 error, redirect back to main page """
+            return r'''
+<html>
+    <head>
+        <title>404</title>
+        <script type="text/javascript" charset="utf-8">
+          <!--
+          location.href = "%s"
+          //-->
+        </script>
+    </head>
+    <body>
+        <br/>
+    </body>
+</html>
+''' % '/'
+
         # cherrypy setup
         cherrypy.config.update({
                 'server.socket_port': options['port'],
                 'server.socket_host': options['host'],
                 'log.screen':         False,
+                'error_page.401':     http_error_401_hander,
+                'error_page.404':     http_error_404_hander,
         })
-
-        #HTTP Errors
-        def http_error_401_hander(status, message, traceback, version):
-            args = [status, message, traceback, version]
-            if int(status) == 401:
-                logger.log(u"Authentication error, check cherrypy log for more details", logger.WARNING)
-            else:
-                logger.log(u"CherryPy caught an error: %s %s" % (status, message), logger.ERROR)
-                logger.log(traceback, logger.DEBUG)
-            return "<html><body><h1>Error %s</h1>Something unexpected has happened. Please check the log.</body></html>" % args[0]
-        cherrypy.config.update({'error_page.401' : http_error_401_hander})
 
         # setup cherrypy logging
         if options['log_dir'] and os.path.isdir(options['log_dir']):

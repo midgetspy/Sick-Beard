@@ -25,6 +25,7 @@ import urllib
 import datetime
 import threading
 import re
+import traceback
 
 import cherrypy
 import sickbeard
@@ -66,7 +67,7 @@ result_type_map = {RESULT_SUCCESS: "success",
 
 class Api:
     """ api class that returns json results """
-    version = 0.1
+    version = 0.2
     intent = 4
 
     @cherrypy.expose
@@ -77,14 +78,16 @@ class Api:
 
         # set the output callback
         # default json
-        outputCallback = self._out_as_json
+        outputCallbackDict = {'default': self._out_as_json,
+                              'image': lambda x: x['image'],
+                              }
 
         # do we have acces ?
         if access:
             logger.log(accessMsg, logger.DEBUG)
         else:
             logger.log(accessMsg, logger.WARNING)
-            return outputCallback(_responds(RESULT_DENIED, msg=accessMsg))
+            return outputCallbackDict['default'](_responds(RESULT_DENIED, msg=accessMsg))
 
         # set the original call_dispatcher as the local _call_dispatcher
         _call_dispatcher = call_dispatcher
@@ -107,6 +110,11 @@ class Api:
                              "args": args,
                              "kwargs": kwargs}
                 outDict = _responds(RESULT_FATAL, errorData, "SickBeard encountered an internal error! Please report to the Devs")
+
+        if 'outputType' in outDict:
+            outputCallback = outputCallbackDict[outDict['outputType']]
+        else:
+            outputCallback = outputCallbackDict['default']
 
         return outputCallback(outDict)
 
@@ -154,6 +162,7 @@ class Api:
         try:
             out = json.dumps(dict, indent=self.intent, sort_keys=True)
         except Exception, e: # if we fail to generate the output fake a error
+            logger.log(u"API :: " + traceback.format_exc(), logger.DEBUG)
             out = '{"result":"' + result_type_map[RESULT_ERROR] + '", "message": "error while composing output: "' + ex(e) + '"}'
         return out
 
@@ -212,15 +221,18 @@ def call_dispatcher(args, kwargs):
                 cmd, cmdIndex = cmd.split("_") # this gives us the clear cmd and the index
 
             logger.log(u"API :: " + cmd + ": curKwargs " + str(curKwargs), logger.DEBUG)
-            try:
-                if cmd in _functionMaper:
-                    curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run() # get the cmd class, init it and run()
-                elif _is_int(cmd):
-                    curOutDict = TVDBShorthandWrapper(curArgs, curKwargs, cmd).run()
-                else:
-                    curOutDict = _responds(RESULT_ERROR, "No such cmd: '" + cmd + "'")
-            except ApiError, e: # Api errors that we raised, they are harmless
-                curOutDict = _responds(RESULT_ERROR, msg=ex(e))
+            if not (multiCmds and cmd in ('show.getposter', 'show.getbanner')): # skip these cmd while chaining
+                try:
+                    if cmd in _functionMaper:
+                        curOutDict = _functionMaper.get(cmd)(curArgs, curKwargs).run() # get the cmd class, init it and run()
+                    elif _is_int(cmd):
+                        curOutDict = TVDBShorthandWrapper(curArgs, curKwargs, cmd).run()
+                    else:
+                        curOutDict = _responds(RESULT_ERROR, "No such cmd: '" + cmd + "'")
+                except ApiError, e: # Api errors that we raised, they are harmless
+                    curOutDict = _responds(RESULT_ERROR, msg=ex(e))
+            else: # if someone chained one of the forbiden cmds they will get an error for this one cmd
+                curOutDict = _responds(RESULT_ERROR, msg="The cmd '" + cmd + "' is not supported while chaining")
 
             if multiCmds:
                 # note: if multiple same cmds are issued but one has not an index defined it will override all others
@@ -308,7 +320,7 @@ class ApiCall(object):
             self._optionalParams = []
 
         for paramDict, type in [(self._requiredParams, "requiredParameters"),
-                          (self._optionalParams, "optionalPramameters")]:
+                          (self._optionalParams, "optionalParameters")]:
 
             if type in self._help:
                 for paramName in paramDict:
@@ -590,6 +602,7 @@ def _getQualityMap():
             Quality.UNKNOWN: 'unknown',
             ANY: 'any'}
 
+
 def _getRootDirs():
     if sickbeard.ROOT_DIRS == "":
         return {}
@@ -629,6 +642,7 @@ def _getRootDirs():
 
     return dir_list
 
+
 class ApiError(Exception):
     "Generic API error"
 
@@ -641,7 +655,7 @@ class IntParseError(Exception):
 
 class CMD_Help(ApiCall):
     _help = {"desc": "display help information for a given subject/command",
-             "optionalPramameters": {"subject": {"desc": "command - the top level command"},
+             "optionalParameters": {"subject": {"desc": "command - the top level command"},
                                   }
              }
 
@@ -662,9 +676,10 @@ class CMD_Help(ApiCall):
 
 class CMD_ComingEpisodes(ApiCall):
     _help = {"desc": "display the coming episodes",
-             "optionalPramameters": {"sort": {"desc": "change the sort order"},
-                                     "type": {"desc": "one or more of allowedValues separated by |"}
-                                     }
+             "optionalParameters": {"sort": {"desc": "change the sort order"},
+                                   "type": {"desc": "one or more of allowedValues separated by |"},
+                                   "paused": {"desc": "0 to exclude paused shows, 1 to include them, or omitted to use the SB default"},
+                                   }
              }
 
     def __init__(self, args, kwargs):
@@ -672,6 +687,7 @@ class CMD_ComingEpisodes(ApiCall):
         # optional
         self.sort, args = self.check_params(args, kwargs, "sort", "date", False, "string", ["date", "show", "network"])
         self.type, args = self.check_params(args, kwargs, "type", "today|missed|soon|later", False, "list", ["missed", "later", "today", "soon"])
+        self.paused, args = self.check_params(args, kwargs, "paused", sickbeard.COMING_EPS_DISPLAY_PAUSED, False, "int", [0, 1])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -685,14 +701,14 @@ class CMD_ComingEpisodes(ApiCall):
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
 
         myDB = db.DBConnection(row_type="dict")
-        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
+        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["tvdbid"]))
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
         # sort by air date
@@ -716,6 +732,10 @@ class CMD_ComingEpisodes(ApiCall):
                 Soon:     tomorrow till next week
                 Later:    later than next week
             """
+
+            if ep["paused"] and not self.paused:
+                continue
+
             status = "soon"
             if ep["airdate"] < today:
                 status = "missed"
@@ -756,7 +776,7 @@ class CMD_Episode(ApiCall):
                                    "season": {"desc": "the season number"},
                                    "episode": {"desc": "the episode number"}
                                   },
-             "optionalPramameters": {"full_path": {"desc": "show the full absolute path (if valid) instead of a relative path for the episode location"}
+             "optionalParameters": {"full_path": {"desc": "show the full absolute path (if valid) instead of a relative path for the episode location"}
                                      }
              }
 
@@ -927,7 +947,7 @@ class CMD_EpisodeSetStatus(ApiCall):
 
 class CMD_Exceptions(ApiCall):
     _help = {"desc": "display scene exceptions for all or a given show",
-             "optionalPramameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+             "optionalParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   }
              }
 
@@ -967,7 +987,7 @@ class CMD_Exceptions(ApiCall):
 
 class CMD_History(ApiCall):
     _help = {"desc": "display sickbeard downloaded/snatched history",
-             "optionalPramameters": {"limit": {"desc": "limit returned results"},
+             "optionalParameters": {"limit": {"desc": "limit returned results"},
                                     "type": {"desc": "only show a specific type of results"},
                                    }
              }
@@ -1060,7 +1080,7 @@ class CMD_HistoryTrim(ApiCall):
 
 class CMD_Logs(ApiCall):
     _help = {"desc": "view sickbeard's log",
-             "optionalPramameters": {"min_level ": {"desc": "the minimum level classification of log entries to show, with each level inherting its above level"} }
+             "optionalParameters": {"min_level ": {"desc": "the minimum level classification of log entries to show, with each level inherting its above level"} }
              }
 
     def __init__(self, args, kwargs):
@@ -1137,7 +1157,7 @@ class CMD_SickBeardAddRootDir(ApiCall):
     _help = {"desc": "add a sickbeard user's parent directory",
              "requiredParameters": {"location": {"desc": "the full path to root (parent) directory"}
                                     },
-             "optionalPramameters": {"default": {"desc": "make the location passed the default root (parent) directory"}
+             "optionalParameters": {"default": {"desc": "make the location passed the default root (parent) directory"}
                                     }
              }
 
@@ -1239,11 +1259,11 @@ class CMD_SickBeardDeleteRootDir(ApiCall):
         root_dirs.pop(0)
         # clean up the list - replace %xx escapes by their single-character equivalent
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
-        old_root_dir = root_dirs[index];
+        old_root_dir = root_dirs[index]
         for curRootDir in root_dirs:
             if not curRootDir == self.location:
                 root_dirs_new.append(curRootDir)
-            else: # 
+            else:
                 newIndex = 0
 
         for curIndex, curNewRootDir in enumerate(root_dirs_new):
@@ -1296,7 +1316,7 @@ class CMD_SickBeardGetDefaults(ApiCall):
 
         anyQualities, bestQualities = _mapQuality(sickbeard.QUALITY_DEFAULT)
 
-        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT], "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities}
+        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT].lower(), "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities, "future_show_paused": int(sickbeard.COMING_EPS_DISPLAY_PAUSED) }
         return _responds(RESULT_SUCCESS, data)
 
 
@@ -1335,7 +1355,7 @@ class CMD_SickBeardGetRootDirs(ApiCall):
 
 class CMD_SickBeardPauseBacklog(ApiCall):
     _help = {"desc": "pause the backlog search",
-             "optionalPramameters": {"pause ": {"desc": "pause or unpause the global backlog"} }
+             "optionalParameters": {"pause ": {"desc": "pause or unpause the global backlog"} }
              }
 
     def __init__(self, args, kwargs):
@@ -1390,7 +1410,7 @@ class CMD_SickBeardRestart(ApiCall):
 
 class CMD_SickBeardSearchTVDB(ApiCall):
     _help = {"desc": "search for show at tvdb with a given string and language",
-             "optionalPramameters": {"name": {"desc": "name of the show you want to search for"},
+             "optionalParameters": {"name": {"desc": "name of the show you want to search for"},
                                    "tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                      "lang": {"desc": "the 2 letter abbreviation lang id"}
                                      }
@@ -1462,7 +1482,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
 
 class CMD_SickBeardSetDefaults(ApiCall):
     _help = {"desc": "set sickbeard user defaults",
-             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
+             "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders within the show directory"},
                                     "status": {"desc": "status of missing episodes"}
@@ -1474,6 +1494,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
         # optional
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
+        self.future_show_paused, args = self.check_params(args, kwargs, "future_show_paused", None, False, "bool", [])
         self.season_folder, args = self.check_params(args, kwargs, "season_folder", None, False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         # super, missing, help
@@ -1520,6 +1541,9 @@ class CMD_SickBeardSetDefaults(ApiCall):
 
         if self.season_folder != None:
             sickbeard.SEASON_FOLDERS_DEFAULT = int(self.season_folder)
+
+        if self.future_show_paused != None:
+            sickbeard.COMING_EPS_DISPLAY_PAUSED = int(self.future_show_paused)
 
         return _responds(RESULT_SUCCESS, msg="Saved defaults")
 
@@ -1607,7 +1631,7 @@ class CMD_ShowAddExisting(ApiCall):
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                     "location": {"desc": "full path to the existing folder for the show"}
                                 },
-             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
+             "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders for the show"}
                                     }
@@ -1675,7 +1699,7 @@ class CMD_ShowAddNew(ApiCall):
     _help = {"desc": "add a new show to sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
-             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
+             "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "location": {"desc": "base path for where the show folder is to be created"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "season_folder": {"desc": "use season subfolders for the show"},
@@ -1869,6 +1893,74 @@ class CMD_ShowGetQuality(ApiCall):
         return _responds(RESULT_SUCCESS, {"initial": anyQualities, "archive": bestQualities})
 
 
+class CMD_ShowGetPoster(ApiCall):
+    _help = {"desc": "get the poster stored for a show in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
+                                }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ get the poster for a show in sickbeard """
+        return {'outputType': 'image', 'image': webserve.WebInterface().showPoster(self.tvdbid, 'poster')}
+
+
+class CMD_ShowGetBanner(ApiCall):
+    _help = {"desc": "get the banner stored for a show in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
+                                }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ get the banner for a show in sickbeard """
+        return {'outputType': 'image', 'image': webserve.WebInterface().showPoster(self.tvdbid, 'banner')}
+
+
+class CMD_ShowPause(ApiCall):
+    _help = {"desc": "set a show's paused state in sickbeard",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                  },
+             "optionalParameters": {"pause": {"desc": "set the pause state of the show"}
+                                  }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        # optional
+        self.pause, args = self.check_params(args, kwargs, "pause", 0, False, "bool", [])
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ set a show's paused state in sickbeard """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            return _responds(RESULT_FAILURE, msg="Show not found")
+
+        if self.pause == True:
+            showObj.paused = 1
+            return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has been paused")
+        else:
+            showObj.paused = 0
+            return _responds(RESULT_SUCCESS, msg=str(showObj.name) + " has been unpaused")
+
+        return _responds(RESULT_FAILURE, msg=str(showObj.name) + " was unable to be paused")
+
+
 class CMD_ShowRefresh(ApiCall):
     _help = {"desc": "refresh a show in sickbeard",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
@@ -1900,7 +1992,7 @@ class CMD_ShowSeasonList(ApiCall):
     _help = {"desc": "display the season list for a given show",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                     },
-             "optionalPramameters": {"sort": {"desc": "change the sort order from descending to ascending"}
+             "optionalParameters": {"sort": {"desc": "change the sort order from descending to ascending"}
                                      }
              }
 
@@ -1935,7 +2027,7 @@ class CMD_ShowSeasons(ApiCall):
     _help = {"desc": "display a listing of episodes for all or a given season",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   },
-             "optionalPramameters": {"season": {"desc": "the season number"},
+             "optionalParameters": {"season": {"desc": "the season number"},
                                   }
              }
 
@@ -1995,7 +2087,7 @@ class CMD_ShowSetQuality(ApiCall):
     _help = {"desc": "set desired quality of a show in sickbeard. if neither initial or archive are provided then the config default quality will be used",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"}
                                 },
-             "optionalPramameters": {"initial": {"desc": "initial quality for the show"},
+             "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"}
                                     }
              }
@@ -2201,7 +2293,7 @@ class CMD_ShowUpdate(ApiCall):
 
 class CMD_Shows(ApiCall):
     _help = {"desc": "display all shows in sickbeard",
-             "optionalPramameters": {"sort": {"desc": "sort the list of shows by show name instead of tvdbid"},
+             "optionalParameters": {"sort": {"desc": "sort the list of shows by show name instead of tvdbid"},
                                     "paused": {"desc": "only show the shows that are set to paused"},
                                   },
              }
@@ -2223,8 +2315,9 @@ class CMD_Shows(ApiCall):
             if (len(nextEps) != 0):
                 nextAirdate = _ordinal_to_dateForm(nextEps[0].airdate.toordinal())
 
-            if not bool(self.paused) == bool(curShow.paused):
+            if self.paused != None and bool(self.paused) != bool(curShow.paused):
                 continue
+
             showDict = {"paused": curShow.paused,
                         "quality": _get_quality_string(curShow.quality),
                         "language": curShow.lang,
@@ -2288,7 +2381,7 @@ _functionMaper = {"help": CMD_Help,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
-                  "sb.deleterootdir":CMD_SickBeardDeleteRootDir,
+                  "sb.deleterootdir": CMD_SickBeardDeleteRootDir,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
                   "sb.getdefaults": CMD_SickBeardGetDefaults,
                   "sb.getmessages": CMD_SickBeardGetMessages,
@@ -2305,6 +2398,9 @@ _functionMaper = {"help": CMD_Help,
                   "show.cache": CMD_ShowCache,
                   "show.delete": CMD_ShowDelete,
                   "show.getquality": CMD_ShowGetQuality,
+                  "show.getposter": CMD_ShowGetPoster,
+                  "show.getbanner": CMD_ShowGetBanner,
+                  "show.pause": CMD_ShowPause,
                   "show.refresh": CMD_ShowRefresh,
                   "show.seasonlist": CMD_ShowSeasonList,
                   "show.seasons": CMD_ShowSeasons,

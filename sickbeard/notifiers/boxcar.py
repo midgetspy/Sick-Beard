@@ -51,7 +51,12 @@ class BoxcarNotifier:
             handle = urllib2.urlopen(req, data)
             handle.close()
         except urllib2.URLError, e:
-            logger.log("Boxcar notification failed. error code: " + str(e.code), logger.WARNING)
+            if not hasattr(e, 'code'):
+                logger.log("Boxcar notification failed." + ex(e), logger.ERROR)
+                return False
+            else:
+                logger.log("Boxcar notification failed. Error code: " + str(e.code), logger.WARNING)
+
             if e.code == 404: #HTTP status 404 if the provided email address isn't a Boxcar user.
                 logger.log("Username is wrong/not a boxcar email. Boxcar will send an email to it", logger.WARNING)
                 return False
@@ -61,13 +66,13 @@ class BoxcarNotifier:
                     # i dont know if this is true or false ... its neither but i also dont know how we got here in the first place
                     return False
                 else: #HTTP status 401 if the user doesn't have the service added
-                   subscribeNote = self._sendBoxcar(msg, title, email, True)
-                   if subscribeNote:
-                       logger.log("Subscription send", logger.DEBUG)
-                       return True
-                   else:
-                       logger.log("Subscription could not be send", logger.ERROR)
-                       return False
+                    subscribeNote = self._sendBoxcar(msg, title, email, True)
+                    if subscribeNote:
+                        logger.log("Subscription send", logger.DEBUG)
+                        return True
+                    else:
+                        logger.log("Subscription could not be send", logger.ERROR)
+                        return False
             elif e.code == 400: #If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
                 logger.log("Wrong data send to boxcar", logger.ERROR)
                 return False
