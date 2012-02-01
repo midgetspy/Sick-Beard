@@ -25,6 +25,10 @@ import sickbeard
 
 from lib import MultipartPostHandler
 import urllib2, cookielib
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
 
 from sickbeard.common import USER_AGENT
 from sickbeard import logger
@@ -123,3 +127,79 @@ def sendNZB(nzb):
     else:
         logger.log(u"Unknown failure sending NZB to sab. Return text is: " + sabText, logger.ERROR)
         return False
+
+def _checkSabResponse(f):
+    try:
+        result = f.readlines()
+    except Exception, e:
+        logger.log(u"Error trying to get result from SAB" + ex(e), logger.ERROR)
+        return False,"Error from SAB"
+
+    if len(result) == 0:
+        logger.log(u"No data returned from SABnzbd, NZB not sent", logger.ERROR)
+        return False,"No data from SAB"
+
+    sabText = result[0].strip()
+    sabJson = {}
+    try:
+        sabJson = json.loads(sabText)
+    except ValueError, e:
+        pass
+
+    if sabText == "Missing authentication":
+        logger.log(u"Incorrect username/password sent to SAB", logger.ERROR)
+        return False,"Incorrect username/password sent to SAB"
+    elif 'error' in sabJson:
+        logger.log(sabJson['error'], logger.ERROR)
+        return False,sabJson['error']
+    else:
+        return True,sabText
+
+def _sabURLOpenSimple(url):
+    try:
+        f = urllib.urlopen(url)
+    except (EOFError, IOError), e:
+        logger.log(u"Unable to connect to SAB: "+ex(e), logger.ERROR)
+        return False,"Unable to connect"
+    except httplib.InvalidURL, e:
+        logger.log(u"Invalid SAB host, check your config: "+ex(e), logger.ERROR)
+        return False,"Invalid SAB host"
+    if f == None:
+        logger.log(u"No data returned from SABnzbd", logger.ERROR)
+        return False, "No data returned from SABnzbd"
+    else:
+        return True, f
+
+def getSabAccesMethod(host=None, username=None, password=None, apikey=None):
+    url = host + "api?mode=auth"
+    
+    result, f = _sabURLOpenSimple(url)
+    if not result:
+        return False,f
+
+    result, sabText = _checkSabResponse(f)
+    if not result:
+        return False,sabText
+
+    return True,sabText
+
+def testAuthentication(host=None, username=None, password=None, apikey=None):
+    params = {}
+    params['mode'] = 'queue'
+    params['output'] ='json'
+    params['ma_username'] = username
+    params['ma_password'] = password
+    params['apikey'] = apikey
+    url = host + "api?" + urllib.urlencode(params)
+    
+    logger.log(u"SABnzbd test URL: " + url, logger.DEBUG)
+    result, f = _sabURLOpenSimple(url)
+    if not result:
+        return False,f
+
+    result, sabText = _checkSabResponse(f)
+    if not result:
+        return False,sabText
+    
+    return True,"Success"
+    
