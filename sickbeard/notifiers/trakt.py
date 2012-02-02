@@ -43,10 +43,10 @@ class TraktNotifier:
     def notify_download(self, ep_name):
         pass
 
-    def update_library(self, ep_obj):
-        if sickbeard.USE_TRAKT:
-            method = "show/episode/library/"
-            method += "%API%"
+    def update_library(self, ep_obj, delete=False):
+		if sickbeard.USE_TRAKT:
+			method = "show/episode/unlibrary/" if delete else "show/episode/library/"
+			method += "%API%"
             
             data = {
                 'tvdb_id': ep_obj.show.tvdbid,
