@@ -24,6 +24,45 @@ from sickbeard import logger
 from sickbeard import common
 
 class XMPPNotifier:
+    
+    def __init__(self):
+        self.connected = False
+        
+    def _connect(self, username=None, password=None, server=None, port=None):
+        if not sickbeard.USE_XMPP:
+            return None
+        
+        if username is None:
+            username = sickbeard.XMPP_USERNAME
+        if password is None:
+            password = sickbeard.XMPP_PASSWORD
+        if server is None:
+            server = sickbeard.XMPP_SERVER
+        if port is None:
+            port = int(sickbeard.XMPP_PORT)
+        
+        #Get the username and domain
+        (user, domain) = username.split("@")
+        
+        self.cnx = xmpp.Client(domain, debug=[])
+        
+        #Connect to the server
+        serverport=(server, port)
+        logger.log("[XMPP] Connecting to " + server + ":" + str(port), logger.DEBUG)
+        if not self.cnx.connect(serverport):
+            logger.log("[XMPP] Error during XMPP connection, make sure the server is correct", logger.ERROR)
+            return "Error during XMPP connection, make sure the server is correct."
+        
+        logger.log("[XMPP] Connected successfully", logger.DEBUG)
+        #Authenticate user
+        logger.log("[XMPP] Authenticating as " + user + "@" + domain, logger.DEBUG)
+
+        if self.cnx.auth(user, password, 'SickBeard Notifier'):
+            logger.log("[XMPP] Authenticated successfully", logger.DEBUG)
+            self.connected = True
+        else:
+            logger.log("[XMPP] Authentication Failed", logger.ERROR)
+            return "Failed to authenticate. Please make sure the username & password are correct."
 
     def notify_download(self, ep_name):
         if sickbeard.USE_XMPP and sickbeard.XMPP_NOTIFY_ONDOWNLOAD:
@@ -36,46 +75,17 @@ class XMPPNotifier:
     def test_notify(self, username, password, server, port, recipient):
         return self._sendMessage(username, password, server, port, recipient, message='Test message from Sick Beard')
         
-    def _sendMessage(self, username=None, password=None, server=None,
-                     port=None, recipient=None, message='Test message from Sick Beard'):
-        
-        if username is None:
-            username = sickbeard.XMPP_USERNAME
-        if password is None:
-            password = sickbeard.XMPP_PASSWORD
-        if server is None:
-            server = sickbeard.XMPP_SERVER
-        if port is None:
-            port = int(sickbeard.XMPP_PORT)
+    def _sendMessage(self, recipient=None, message='Test message from Sick Beard'):
+        if not self.connected:
+            self._connect()
         if recipient is None:
             recipient = sickbeard.XMPP_RECIPIENT
-        
-        #Get the username and domain
-        (user, domain) = username.split("@")
-        
-        cnx = xmpp.Client(domain, debug=[])
-        
-        #Connect to the server
-        serverport=(server, port)
-        logger.log("[XMPP] Connecting to " + server + ":" + str(port), logger.DEBUG)
-        if not cnx.connect(serverport):
-            logger.log("[XMPP] Error during XMPP connection, make sure the server is correct", logger.ERROR)
-            return "Error during XMPP connection, make sure the server is correct."
-        
-        logger.log("[XMPP] Connected successfully", logger.DEBUG)
-        #Authenticate user
-        logger.log("[XMPP] Authenticating as " + user + "@" + domain, logger.DEBUG)
-
-        if cnx.auth(user, password, 'SickBeard Notifier'):
-            logger.log("[XMPP] Authenticated successfully", logger.DEBUG)
-            #Send Message
-            logger.log("[XMPP] Sending message '" + message + "' to recipient " + recipient, logger.DEBUG)
-            try:
-                cnx.send(xmpp.Message(recipient, message))
-            except Exception, e:
-                logger.log(e, logger.ERROR)
-            else:
-                return "Message sent successfully"
+            
+        #Send Message
+        logger.log("[XMPP] Sending message '" + message + "' to recipient " + recipient, logger.DEBUG)
+        try:
+            self.cnx.send(xmpp.Message(recipient, message))
+        except Exception, e:
+            logger.log(e, logger.ERROR)
         else:
-            logger.log("[XMPP] Authentication Failed", logger.ERROR)
-            return "Failed to authenticate. Please make sure the username & password are correct."
+            return "Message sent successfully"

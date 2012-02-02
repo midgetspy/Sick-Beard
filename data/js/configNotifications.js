@@ -139,4 +139,6 @@ $(document).ready(function(){
         
         $.get(sbRoot+"/home/testXMPP", {'username': xmpp_username, 'password': xmpp_password, 'server': xmpp_server, 'port': xmpp_port, 'recipient': xmpp_recipient}, 
         function (data){ $('#testXMPP-result').html(data); });
+    
+    });
 });
