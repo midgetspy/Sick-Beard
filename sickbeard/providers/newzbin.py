@@ -73,9 +73,9 @@ class NewzbinProvider(generic.NZBProvider):
 
         self.cache = NewzbinCache(self)
 
-        self.url = 'https://www.newzbin.com/'
+        self.url = 'https://www.newzbin2.es/'
 
-        self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
+        self.NEWZBIN_NS = 'http://www.newzbin2.es/DTD/2007/feeds/report/'
 
         self.NEWZBIN_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
 
@@ -288,7 +288,7 @@ class NewzbinProvider(generic.NZBProvider):
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
             if sickbeard.USENET_RETENTION is not None:
                 try:
-                    dateString = cur_item.findtext('{http://www.newzbin.com/DTD/2007/feeds/report/}postdate')
+                    dateString = cur_item.findtext('{http://www.newzbin2.es/DTD/2007/feeds/report/}postdate')
                     # use the parse (imported as parseDate) function from the dateutil lib
                     # and we have to remove the timezone info from it because the retention_date will not have one
                     # and a comparison of them is not possible
@@ -338,6 +338,10 @@ class NewzbinProvider(generic.NZBProvider):
         data = self.getURL(url)
 
         return data
+
+    def _checkAuth(self):
+        if sickbeard.NEWZBIN_USERNAME in (None, "") or sickbeard.NEWZBIN_PASSWORD in (None, ""):
+            raise exceptions.AuthException("Newzbin authentication details are empty, check your config")
 
 class NewzbinCache(tvcache.TVCache):
 

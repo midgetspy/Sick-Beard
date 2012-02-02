@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # PROVIDE: sickbeard
-# REQUIRE: sabnzbd
+# REQUIRE: DAEMON sabnzbd
 # KEYWORD: shutdown
 #
 # Add the following lines to /etc/rc.conf.local or /etc/rc.conf
@@ -19,6 +19,7 @@
 #     Default is same as sickbeard_dir.
 # sickbeard_pid:  The name of the pidfile to create.
 #     Default is sickbeard.pid in sickbeard_dir.
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 . /etc/rc.subr
 
@@ -43,7 +44,7 @@ status_cmd="${name}_status"
 stop_cmd="${name}_stop"
 
 command="/usr/sbin/daemon"
-command_args="-f -p ${sickbeard_pid} python ${sickbeard_dir}/SickBeard.py ${sickbeard_flags} --quiet"
+command_args="-f -p ${sickbeard_pid} python ${sickbeard_dir}/SickBeard.py ${sickbeard_flags} --quiet --nolaunch"
 
 # Check for wget and refuse to start without it.
 if [ ! -x "${WGET}" ]; then
