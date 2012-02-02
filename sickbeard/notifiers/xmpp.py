@@ -27,11 +27,15 @@ class XMPPNotifier:
     
     def __init__(self):
         self.connected = False
+        self.username = ''
+        self.password = ''
+        self.server = ''
+        self.port = ''
         
     def _connect(self, username=None, password=None, server=None, port=None):
+        self.connected = False
         if not sickbeard.USE_XMPP:
             return None
-        
         if username is None:
             username = sickbeard.XMPP_USERNAME
         if password is None:
@@ -60,6 +64,10 @@ class XMPPNotifier:
         if self.cnx.auth(user, password, 'SickBeard Notifier'):
             logger.log("[XMPP] Authenticated successfully", logger.DEBUG)
             self.connected = True
+            self.username = username
+            self.password = password
+            self.server = server
+            self.port = port
         else:
             logger.log("[XMPP] Authentication Failed", logger.ERROR)
             return "Failed to authenticate. Please make sure the username & password are correct."
@@ -75,11 +83,27 @@ class XMPPNotifier:
     def test_notify(self, username, password, server, port, recipient):
         return self._sendMessage(username, password, server, port, recipient, message='Test message from Sick Beard')
         
-    def _sendMessage(self, recipient=None, message='Test message from Sick Beard'):
-        if not self.connected:
-            self._connect()
-        if recipient is None:
+    def _sendMessage(self, username, password, server, port, recipient, message='Test message from Sick Beard'):
+        if not username:
+            return "Please enter a username."
+        if not password:
+            return "Please enter a password."
+        if not server:
+            return "Please enter a server."
+        if not port:
+            return "Please enter a port."
+        
+        if not recipient and not sickbeard.XMPP_RECIPIENT:
+            logger.log("[XMPP] Recipient is blank", logger.DEBUG)
+            return "Please enter a recipient."
+        elif not recipient:
             recipient = sickbeard.XMPP_RECIPIENT
+
+        if ( not self.connected or self.username != username or 
+                 self.password != password or self.server != server or
+                 self.port != port):
+            result = self._connect(username, password, server, port)
+            if result: return result
             
         #Send Message
         logger.log("[XMPP] Sending message '" + message + "' to recipient " + recipient, logger.DEBUG)

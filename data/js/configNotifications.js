@@ -126,7 +126,6 @@ $(document).ready(function(){
 
         $.get(sbRoot+"/home/testTrakt", {'api': trakt_api, 'username': trakt_username, 'password': trakt_password},
         function (data){ $('#testTrakt-result').html(data); });
-
     });
     
     $('#testXMPP').click(function(){
@@ -139,6 +138,5 @@ $(document).ready(function(){
         
         $.get(sbRoot+"/home/testXMPP", {'username': xmpp_username, 'password': xmpp_password, 'server': xmpp_server, 'port': xmpp_port, 'recipient': xmpp_recipient}, 
         function (data){ $('#testXMPP-result').html(data); });
-    
     });
 });
