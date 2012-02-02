@@ -44,9 +44,9 @@ class TraktNotifier:
         pass
 
     def update_library(self, ep_obj, delete=False):
-		if sickbeard.USE_TRAKT:
-			method = "show/episode/unlibrary/" if delete else "show/episode/library/"
-			method += "%API%"
+        if sickbeard.USE_TRAKT:
+            method = "show/episode/unlibrary/" if delete else "show/episode/library/"
+            method += "%API%"
             
             data = {
                 'tvdb_id': ep_obj.show.tvdbid,
@@ -78,7 +78,7 @@ class TraktNotifier:
     def _use_me(self):
         return sickbeard.USE_TRAKT
 
-    def _notifyTrakt(self, method, api, username, password, data = {}):
+    def _notifyTrakt(self, method, api, username, password, data={}):
         logger.log("trakt_notifier: Call method " + method, logger.DEBUG)
 
         if not api:
