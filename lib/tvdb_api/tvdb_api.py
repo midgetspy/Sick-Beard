@@ -29,6 +29,7 @@ import logging
 import datetime
 import time
 import traceback
+import socket
 
 try:
     import xml.etree.cElementTree as ElementTree
@@ -519,7 +520,7 @@ class Tvdb:
         try:
             log().debug("Retrieving URL %s" % url)
             header, resp = h.request(url, headers=h_header)
-        except (IOError, httplib2.HttpLib2Error), errormsg:
+        except (socket.error, IOError, httplib2.HttpLib2Error), errormsg:
             if not str(errormsg).startswith('HTTP Error'):
                 lastTimeout = datetime.datetime.now()
             raise tvdb_error("Could not connect to server %s: %s" % (url, errormsg))
@@ -536,11 +537,11 @@ class Tvdb:
         """
         src = self._loadUrl(url)
         try:
-            return ElementTree.fromstring(src)
+            return ElementTree.fromstring(src.rstrip('\r'))
         except SyntaxError:
             src = self._loadUrl(url, recache=True)
             try:
-                return ElementTree.fromstring(src)
+                return ElementTree.fromstring(src.rstrip('\r'))
             except SyntaxError, exceptionmsg:
                 errormsg = "There was an error with the XML retrieved from thetvdb.com:\n%s" % (
                     exceptionmsg

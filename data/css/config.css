@@ -1,5 +1,6 @@
 #config{text-align:center;padding:0 30px 20px;}
 #config *{font-family:"Trebuchet MS", Verdana, sans-serif;margin:0;padding:0;}
+#config input[type=submit], #config input[type=button] { padding: 1px 5px; }
 #config h3 a {text-decoration: none;}
 #config h3 img {vertical-align: baseline; padding-right: 5px;}
 #config ul{list-style-type:none;padding-left: 20px;}
@@ -12,6 +13,7 @@
 #config-content{display:block;width:835px;text-align:left;clear:both;background:#fff;margin:0 auto;padding:0 0 40px;}
 #config-components{float:left;width:auto;}
 #config-components-border{float:left;width:auto;border-top:1px solid #999;padding:5px 0;}
+#config .title-group{border-bottom:1px dotted #666;position:relative;padding:25px 15px 25px;}
 #config .component-group{border-bottom:1px dotted #666;position:relative;padding:15px 15px 25px;}
 #config .component-group-desc{float:left;width:235px;}
 #config .component-group-desc h3{font-size:1.5em;}
@@ -50,11 +52,16 @@
 #config div.metadataDiv .disabled{color:#ccc;}
 #config div #metadataLegend{font-size:14px;font-family:Verdana;font-weight:900;display:block;width:auto;text-align:center;padding-bottom:3px;}
 
-#upgrade-notification{line-height:1;color:#57442b;font-size:130%;font-weight:700;height:0;left:0;text-align:center;top:0;width:100%;z-index:100;margin:0;padding:0;}
-#upgrade-notification div{background-color:#c6b695;border-bottom:1px solid #af986b;padding:7px 0;}
-#header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;}
 .infoTable {border-collapse: collapse;}
 .infoTableHeader, .infoTableCell {padding: 5px;}
 .infoTableHeader{font-weight:700;}
+.infoTableSeperator { border-top: 1px dotted #666666; }
 
 #config div.testNotification {border: 1px dotted #CCCCCC; padding: 5px; margin-bottom: 10px; line-height:20px;}
+
+.config_message {
+    width: 100%;
+    text-align: center;
+    font-size: 1.3em;
+    background: #ffecac;
+}

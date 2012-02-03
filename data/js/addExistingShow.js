@@ -24,7 +24,7 @@ $(document).ready(function() {
         if (dirArr.length == 0)
             return false;
 
-        url = sbRoot+'/home/addShows/addExistingShows?promptForSettings='+ ($('#promptForSettings').attr('checked') ? 'on' : 'off');
+        url = sbRoot+'/home/addShows/addExistingShows?promptForSettings='+ ($('#promptForSettings').prop('checked') ? 'on' : 'off');
 
         url += '&shows_to_add='+dirArr.join('&shows_to_add=');
 

@@ -13,7 +13,7 @@
 <div id="config">
 <div id="config-content">
 
-<form id="form" action="saveNotifications" method="post">
+<form id="configForm" action="saveNotifications" method="post">
 
             <div id="config-components">
 
@@ -105,7 +105,7 @@
 
                         <div class="testNotification" id="testXBMC-result">Click below to test.</div>
                         <input type="button" value="Test XBMC" id="testXBMC" />
-                        <input type="submit" value="Save Changes" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
 
                         </div><!-- /enabler_xbmc //-->
 
@@ -199,7 +199,7 @@
 
                         <div class="testNotification" id="testPLEX-result">Click below to test.</div>
                         <input type="button" value="Test Plex Media Server" id="testPLEX" />
-                        <input type="submit" value="Save Changes" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
 
                         </div><!-- /enabler_plex -->
 
@@ -265,9 +265,9 @@
                             </label>
                         </div>
 
-                        <div class="testNotification" id="testGrowl-result">Click below to test.</div>
-                        <input type="button" value="Test Growl" id="testGrowl" />
-                        <input type="submit" value="Save Changes" />
+                        <div class="testNotification" id="testGrowl-result">Click below to register and test Growl, this is required for Growl notifications to work.</div>
+                        <input type="button" value="Register Growl" id="testGrowl" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
                         
                         </div><!-- /content_use_growl //-->
 
@@ -342,7 +342,7 @@
 
                         <div class="testNotification" id="testTwitter-result">Click below to test.</div>
                         <input type="button" value="Test Twitter" id="testTwitter" />
-                        <input type="submit" value="Save Changes" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
                         
                         </div><!-- /content_use_twitter //-->
 
@@ -412,12 +412,13 @@
 
                         <div class="testNotification" id="testProwl-result">Click below to test.</div>
                         <input type="button" value="Test Prowl" id="testProwl" />
-                        <input type="submit" value="Save Changes" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
                         
                         </div><!-- /content_use_prowl //-->
 
                     </fieldset>
                 </div><!-- /component-group //-->
+
 
                  <div id="core-component-group6" class="component-group clearfix">
 
@@ -476,7 +477,7 @@
 
                         <div class="testNotification" id="testNotifo-result">Click below to test.</div>
                         <input type="button" value="Test Notifo" id="testNotifo" />
-                        <input type="submit" value="Save Changes" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
                         
                         </div><!-- /content_use_notifo //-->
 
@@ -519,7 +520,7 @@
 
                         <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
                         <input type="button" value="Test Libnotify" id="testLibnotify" />
-                        <input type="submit" value="Save Changes" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
 
                         </div><!-- /content_use_libnotify //-->
 
@@ -589,14 +590,155 @@
 
                         <div class="testNotification" id="testNMJ-result">Click below to test.</div>
                         <input type="button" value="Test NMJ" id="testNMJ" />
-                        <input type="submit" value="Save Changes" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
                         </div><!-- /content_use_nmj //-->
                     </fieldset>
                 </div><!-- /component-group //-->
 
-            <br/><input type="submit" value="Save Changes" /><br/>
+                <div id="core-component-group9" class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synoindex.gif" alt="Synology Indexer" title="Synology Indexer" width="16" height="16" /> Synology Indexer</a></h3>
+                        <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_synoindex">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?<br /><br />
+                                </span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_synoindex">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Note: Requires SB to be running on your Synology NAS.</span>
+                            </label>
+                        </div>
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+                 <div id="core-component-group10" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3><a href="http://boxcar.io/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/boxcar.gif" alt="Boxcar" title="Boxcar" width="16" height="16" /> Boxcar</a></h3>
+                        <p>Read your messages where and when you want them! A subscription will be send if needed.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_boxcar" id="use_boxcar" #if $sickbeard.USE_BOXCAR then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_boxcar">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Boxcar?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_boxcar">
+                        <div class="field-pair">
+                            <input type="checkbox" name="boxcar_notify_onsnatch" id="boxcar_notify_onsnatch" #if $sickbeard.BOXCAR_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="boxcar_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="boxcar_notify_ondownload" id="boxcar_notify_ondownload" #if $sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="boxcar_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Boxcar Username</span>
+                                <input type="text" name="boxcar_username" id="boxcar_username" value="$sickbeard.BOXCAR_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your Boxcar account</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testBoxcar-result">Click below to test.</div>
+                        <input type="button" value="Test Boxcar" id="testBoxcar" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_boxcar //-->
+
+                    </fieldset>
+
+                </div>
+
+
+
+                <div id="core-component-group11" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3><a href="http://trakt.tv/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/trakt.gif" alt="Trakt" title="Trakt" width="16" height="16" /> Trakt</a></h3>
+                        <p>trakt helps keep a record of what TV shows and movies you are watching. Based on your favorites, trakt recommends additional shows and movies you'll enjoy!</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_trakt" id="use_trakt" #if $sickbeard.USE_TRAKT then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_trakt">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Trakt.tv notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_trakt">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Trakt Username</span>
+                                <input type="text" name="trakt_username" id="trakt_username" value="$sickbeard.TRAKT_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your Trakt account.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Trakt Password</span>
+                                <input type="password" name="trakt_password" id="trakt_password" value="$sickbeard.TRAKT_PASSWORD" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Password of your Trakt account.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Trakt API key:</span>
+                                <input type="text" name="trakt_api" id="trakt_api" value="$sickbeard.TRAKT_API" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Get your key at: <a href="http://trakt.tv/settings/api" onclick="window.open(this.href, '_blank'); return false;">http://trakt.tv/settings/api</a></span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testTrakt-result">Click below to test.</div>
+                        <input type="button" value="Test Trakt" id="testTrakt" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+
+                        </div><!-- /enabler_trakt //-->
+
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
+
+
+
 
 </form>
 

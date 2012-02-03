@@ -21,6 +21,7 @@
 import urllib
 import datetime
 import re
+import os
 
 import xml.etree.cElementTree as etree
 
@@ -29,11 +30,13 @@ import generic
 
 from sickbeard import classes
 from sickbeard.helpers import sanitizeSceneName
+from sickbeard import scene_exceptions
+from sickbeard import encodingKludge as ek
 
 from sickbeard import exceptions
-from sickbeard.common import *
 from sickbeard import logger
 from sickbeard import tvcache
+from sickbeard.exceptions import ex
 
 class NewznabProvider(generic.NZBProvider):
 
@@ -45,6 +48,9 @@ class NewznabProvider(generic.NZBProvider):
 
 		self.url = url
 		self.key = key
+		
+		# if a provider doesn't need an api key then this can be false
+		self.needs_auth = True
 
 		self.enabled = True
 		self.supportsBacklog = True
@@ -55,6 +61,8 @@ class NewznabProvider(generic.NZBProvider):
 		return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
 
 	def imageName(self):
+		if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID()+'.gif')):
+			return self.getID()+'.gif'
 		return 'newznab.gif'
 
 	def isEnabled(self):
@@ -62,37 +70,47 @@ class NewznabProvider(generic.NZBProvider):
 
 	def _get_season_search_strings(self, show, season=None):
 
-		params = {}
-
 		if not show:
-			return params
+			return [{}]
 		
-		# search directly by tvrage id
-		if show.tvrid:
-			params['rid'] = show.tvrid
-		# if we can't then fall back on a very basic name search
-		else:
-			params['q'] = sanitizeSceneName(show.name)
+		to_return = []
 
-		if season != None:
-			# air-by-date means &season=2010&q=2010.03, no other way to do it atm
-			if show.air_by_date:
-				params['season'] = season.split('-')[0]
-				if 'q' in params:
-					params['q'] += '.' + season.replace('-', '.')
-				else:
-					params['q'] = season.replace('-', '.')
+		# add new query strings for exceptions
+		name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid) + [show.name]
+		for cur_exception in name_exceptions:
+		
+			cur_params = {}
+	
+			# search directly by tvrage id
+			if show.tvrid:
+				cur_params['rid'] = show.tvrid
+			# if we can't then fall back on a very basic name search
 			else:
-				params['season'] = season
+				cur_params['q'] = sanitizeSceneName(cur_exception)
+	
+			if season != None:
+				# air-by-date means &season=2010&q=2010.03, no other way to do it atm
+				if show.air_by_date:
+					cur_params['season'] = season.split('-')[0]
+					if 'q' in cur_params:
+						cur_params['q'] += '.' + season.replace('-', '.')
+					else:
+						cur_params['q'] = season.replace('-', '.')
+				else:
+					cur_params['season'] = season
 
-		return [params]
+			# hack to only add a single result if it's a rageid search
+			if not ('rid' in cur_params and to_return):
+				to_return.append(cur_params) 
+
+		return to_return
 
 	def _get_episode_search_strings(self, ep_obj):
 		
 		params = {}
 
 		if not ep_obj:
-			return params
+			return [params]
 		
 		# search directly by tvrage id
 		if ep_obj.show.tvrid:
@@ -110,8 +128,24 @@ class NewznabProvider(generic.NZBProvider):
 			params['season'] = ep_obj.season
 			params['ep'] = ep_obj.episode
 
-		return [params]
+		to_return = [params]
 
+		# only do exceptions if we are searching by name
+		if 'q' in params:
+
+			# add new query strings for exceptions
+			name_exceptions = scene_exceptions.get_scene_exceptions(ep_obj.show.tvdbid)
+			for cur_exception in name_exceptions:
+				
+				# don't add duplicates 
+				if cur_exception == ep_obj.show.name:
+					continue
+
+				cur_return = params.copy()
+				cur_return['q'] = sanitizeSceneName(cur_exception)
+				to_return.append(cur_return)
+
+		return to_return
 
 	def _doGeneralSearch(self, search_string):
 		return self._doSearch({'q': search_string})
@@ -147,7 +181,7 @@ class NewznabProvider(generic.NZBProvider):
 			responseSoup = etree.ElementTree(etree.XML(data))
 			items = responseSoup.getiterator('item')
 		except Exception, e:
-			logger.log(u"Error trying to load "+self.name+" RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+			logger.log(u"Error trying to load "+self.name+" RSS feed: "+ex(e), logger.ERROR)
 			logger.log(u"RSS data: "+data, logger.DEBUG)
 			return []
 
@@ -236,7 +270,7 @@ class NewznabCache(tvcache.TVCache):
 
 		try:
 			responseSoup = etree.ElementTree(etree.XML(data))
-		except Exception, e:
+		except Exception:
 			return True
 
 		if responseSoup.getroot().tag == 'error':

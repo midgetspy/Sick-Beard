@@ -24,7 +24,6 @@ import sickbeard
 
 from sickbeard import exceptions, logger
 
-from sickbeard.common import *
 from sickbeard import tvcache
 
 import generic

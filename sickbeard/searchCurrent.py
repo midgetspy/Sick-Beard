@@ -18,15 +18,11 @@
 
 from __future__ import with_statement
 
-from sickbeard import common, db, exceptions, helpers, search
-from sickbeard import search_queue
-from sickbeard import logger
-from sickbeard import ui
-from sickbeard.common import *
+import sickbeard
 
-import datetime
+from sickbeard import search_queue
+
 import threading
-import time
 
 class CurrentSearcher():
 
@@ -37,4 +33,4 @@ class CurrentSearcher():
 
     def run(self):
         search_queue_item = search_queue.RSSSearchQueueItem()
-        sickbeard.searchQueueScheduler.action.add_item(search_queue_item)
+        sickbeard.searchQueueScheduler.action.add_item(search_queue_item) #@UndefinedVariable

@@ -16,20 +16,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import re
+import sys
 import time
 import urllib
-import sys
 
 import xml.etree.cElementTree as etree
+from datetime import datetime, timedelta
 
 import sickbeard
 import generic
 
 import sickbeard.encodingKludge as ek
-from sickbeard import classes, logger, helpers, exceptions, db, show_name_helpers
+from sickbeard import classes, logger, helpers, exceptions, show_name_helpers
 from sickbeard import tvcache
-from sickbeard.common import *
+from sickbeard.common import Quality
+from sickbeard.exceptions import ex
+from lib.dateutil.parser import parse as parseDate
 
 class NewzbinDownloader(urllib.FancyURLopener):
 
@@ -69,9 +73,11 @@ class NewzbinProvider(generic.NZBProvider):
 
         self.cache = NewzbinCache(self)
 
-        self.url = 'https://www.newzbin.com/'
+        self.url = 'https://www.newzbin2.es/'
 
-        self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
+        self.NEWZBIN_NS = 'http://www.newzbin2.es/DTD/2007/feeds/report/'
+
+        self.NEWZBIN_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
 
     def _report(self, name):
         return '{'+self.NEWZBIN_NS+'}'+name
@@ -217,7 +223,7 @@ class NewzbinProvider(generic.NZBProvider):
             logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
             self.downloadResult(nzb)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
+            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return False
 
         return True
@@ -228,7 +234,7 @@ class NewzbinProvider(generic.NZBProvider):
         try:
             f = myOpener.openit(url)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + str(e), logger.ERROR)
+            logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
 
         data = f.read()
@@ -273,13 +279,26 @@ class NewzbinProvider(generic.NZBProvider):
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log("Error trying to load Newzbin RSS feed: "+str(e), logger.ERROR)
+            logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
             return []
 
         for cur_item in items:
             title = cur_item.findtext('title')
             if title == 'Feed Error':
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
+            if sickbeard.USENET_RETENTION is not None:
+                try:
+                    dateString = cur_item.findtext('{http://www.newzbin2.es/DTD/2007/feeds/report/}postdate')
+                    # use the parse (imported as parseDate) function from the dateutil lib
+                    # and we have to remove the timezone info from it because the retention_date will not have one
+                    # and a comparison of them is not possible
+                    post_date = parseDate(dateString).replace(tzinfo=None)
+                    retention_date = datetime.now() - timedelta(days=sickbeard.USENET_RETENTION)
+                    if post_date < retention_date:
+                        continue
+                except Exception, e:
+                    logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
+                    continue
 
             item_list.append(cur_item)
 
@@ -297,7 +316,6 @@ class NewzbinProvider(generic.NZBProvider):
                 'u_comment_posts_only': 0,
                 'u_show_passworded': 0,
                 'u_v3_retention': 0,
-                'ps_rb_source': 3008,
                 'ps_rb_video_format': 3082257,
                 'ps_rb_language': 4096,
                 'sort': 'date',
@@ -320,6 +338,10 @@ class NewzbinProvider(generic.NZBProvider):
         data = self.getURL(url)
 
         return data
+
+    def _checkAuth(self):
+        if sickbeard.NEWZBIN_USERNAME in (None, "") or sickbeard.NEWZBIN_PASSWORD in (None, ""):
+            raise exceptions.AuthException("Newzbin authentication details are empty, check your config")
 
 class NewzbinCache(tvcache.TVCache):
 

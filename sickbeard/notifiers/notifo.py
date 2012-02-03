@@ -1,4 +1,5 @@
 # Author: Nic Wolfe <nic@wolfeden.ca>
+# Revised by: Shawn Conroyd - 4/12/2011
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -17,32 +18,34 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib
+
 import sickbeard
 
-from sickbeard import logger, common
+from sickbeard import logger
 
 try:
-    import lib.simplejson as json
+    import lib.simplejson as json #@UnusedImport
 except:
-    import json
-
+    import json #@Reimport
 
 API_URL = "https://%(username)s:%(secret)s@api.notifo.com/v1/send_notification"
 
 class NotifoNotifier:
 
-    def test_notify(self, username, apisecret):
-        return self._sendNotifo("This is a test notification from Sick Beard", username, apisecret)
+    def test_notify(self, username, apisecret, title="Test:"):
+        return self._sendNotifo("This is a test notification from SickBeard", title, username, apisecret)
 
-    def _sendNotifo(self, msg, username, apisecret):
+    def _sendNotifo(self, msg, title, username, apisecret, label="SickBeard"):
         msg = msg.strip()
         apiurl = API_URL % {"username": username, "secret": apisecret}
         data = urllib.urlencode({
-            "msg": msg,
+            "title": title,
+            "label": label,
+            "msg": msg
         })
 
         try:
-	    data = urllib.urlopen(apiurl, data)	
+            data = urllib.urlopen(apiurl, data)    
             result = json.load(data)
         except IOError:
             return False
@@ -55,15 +58,15 @@ class NotifoNotifier:
             return True
 
 
-    def notify_snatch(self, ep_name):
+    def notify_snatch(self, ep_name, title="Snatched:"):
         if sickbeard.NOTIFO_NOTIFY_ONSNATCH:
-            self._notifyNotifo(common.notifyStrings[common.NOTIFY_SNATCH]+': '+ep_name)
+            self._notifyNotifo(title, ep_name)
 
-    def notify_download(self, ep_name):
+    def notify_download(self, ep_name, title="Completed:"):
         if sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD:
-            self._notifyNotifo(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)       
+            self._notifyNotifo(title, ep_name)       
 
-    def _notifyNotifo(self, message=None, username=None, apisecret=None, force=False):
+    def _notifyNotifo(self, title, message=None, username=None, apisecret=None, force=False):
         if not sickbeard.USE_NOTIFO and not force:
             logger.log("Notification for Notifo not enabled, skipping this notification", logger.DEBUG)
             return False
@@ -75,7 +78,7 @@ class NotifoNotifier:
 
         logger.log(u"Sending notification for " + message, logger.DEBUG)
 
-        self._sendNotifo(message, username, apisecret)
+        self._sendNotifo(message, title, username, apisecret)
         return True
 
 notifier = NotifoNotifier

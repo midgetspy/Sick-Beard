@@ -31,8 +31,8 @@
 #end if
 
   <tr class="seasonheader">
-    <td colspan="3">
-        <br/><h2 style="display: inline; position:absolute;"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></h2>
+    <td colspan="3" class="align-left">
+        <br/><h2><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></h2>
         <div class="float-right">
             <span class="wanted nowrap">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
             <span class="qual nowrap">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
@@ -52,7 +52,7 @@
   <tr class="$Overview.overviewStrings[$showCats[$curShow.tvdbid][$whichStr]]">
     <td align="center">$whichStr</td>
     <td>$curResult["name"]</td>
-    <td align="center">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
+    <td align="center" class="nowrap">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
   </tr>
 
 #end for

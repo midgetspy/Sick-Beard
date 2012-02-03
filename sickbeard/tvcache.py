@@ -24,11 +24,11 @@ import sickbeard
 
 from sickbeard import db
 from sickbeard import logger
-from sickbeard.common import *
+from sickbeard.common import Quality
 
-from sickbeard import helpers, classes, exceptions, show_name_helpers
-from sickbeard import providers
+from sickbeard import helpers, exceptions, show_name_helpers
 from sickbeard import name_cache
+from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
@@ -114,7 +114,7 @@ class TVCache():
             responseSoup = etree.ElementTree(etree.XML(data))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
             return []
 
@@ -199,6 +199,8 @@ class TVCache():
         if not parse_result.series_name:
             logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
             return False
+
+        tvdb_lang = None
 
         # if we need tvdb_id or tvrage_id then search the DB for them
         if not tvdb_id or not tvrage_id:
@@ -291,8 +293,11 @@ class TVCache():
                 epObj = t[tvdb_id].airedOn(parse_result.air_date)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
-            except tvdb_exceptions.tvdb_episodenotfound, e:
+            except tvdb_exceptions.tvdb_episodenotfound:
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
+                return False
+            except tvdb_exceptions.tvdb_error, e:
+                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return False
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"

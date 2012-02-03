@@ -18,10 +18,10 @@
 .tvshowTitle a {
     color: #FFFFFF;
     float: left; 
-    padding-top: 5px; 
+    padding-top: 3px; 
     padding-left: 8px; 
-    line-height: 17px;
-    font-size: 16px;
+    line-height: 1.2em;
+    font-size: 1.1em;
     text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 

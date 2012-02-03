@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import glob
 import string
 import cherrypy
 
@@ -35,10 +34,11 @@ if os.name == 'nt':
 
 # adapted from http://stackoverflow.com/questions/827371/is-there-a-way-to-list-all-the-available-drive-letters-in-python/827490
 def getWinDrives():
+    """ Return list of detected drives """
     assert os.name == 'nt'
 
     drives = []
-    bitmask = windll.kernel32.GetLogicalDrives()
+    bitmask = windll.kernel32.GetLogicalDrives() #@UndefinedVariable
     for letter in string.uppercase:
         if bitmask & 1:
             drives.append(letter)
@@ -46,10 +46,12 @@ def getWinDrives():
 
     return drives
 
-# Returns a list of dictionaries with the folders contained at the given path
-# Give the empty string as the path to list the contents of the root path
-# (under Unix this means "/", on Windows this will be a list of drive letters)
+
 def foldersAtPath(path, includeParent = False):
+    """ Returns a list of dictionaries with the folders contained at the given path
+        Give the empty string as the path to list the contents of the root path
+        under Unix this means "/", on Windows this will be a list of drive letters)
+    """
     assert os.path.isabs(path) or path == ""
 
     # walk up the tree until we find a valid path
@@ -97,7 +99,7 @@ class WebFileBrowser:
         return json.dumps(foldersAtPath(path, True))
 
     @cherrypy.expose
-    def complete(self, q, limit=30, timestamp=None):
-        cherrypy.response.headers['Content-Type'] = "text/plain"
-        paths = [entry['path'] for entry in foldersAtPath(os.path.dirname(q)) if 'path' in entry]
-        return "\n".join(paths[0:int(limit)])
+    def complete(self, term):
+        cherrypy.response.headers['Content-Type'] = "application/json"
+        paths = [entry['path'] for entry in foldersAtPath(os.path.dirname(term)) if 'path' in entry]
+        return json.dumps( paths )

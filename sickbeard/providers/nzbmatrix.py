@@ -26,9 +26,9 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
-from sickbeard import classes, logger, show_name_helpers, db
+from sickbeard import classes, logger, show_name_helpers
 from sickbeard import tvcache
-from sickbeard.common import *
+from sickbeard.exceptions import ex
 
 class NZBMatrixProvider(generic.NZBProvider):
 
@@ -78,7 +78,7 @@ class NZBMatrixProvider(generic.NZBProvider):
         if show and show.genre and 'documentary' in show.genre.lower():
             params['subcat'] = params['subcat'] + ',53,9' 
 
-        searchURL = "http://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
+        searchURL = "https://rss.nzbmatrix.com/rss.php?" + urllib.urlencode(params)
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
@@ -94,7 +94,7 @@ class NZBMatrixProvider(generic.NZBProvider):
             responseSoup = etree.ElementTree(etree.XML(searchResult))
             items = responseSoup.getiterator('item')
         except Exception, e:
-            logger.log(u"Error trying to load NZBMatrix RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load NZBMatrix RSS feed: "+ex(e), logger.ERROR)
             return []
 
         results = []
@@ -150,7 +150,7 @@ class NZBMatrixCache(tvcache.TVCache):
 
     def _getRSSData(self):
         # get all records since the last timestamp
-        url = "http://rss.nzbmatrix.com/rss.php?"
+        url = "https://rss.nzbmatrix.com/rss.php?"
 
         urlArgs = {'page': 'download',
                    'username': sickbeard.NZBMATRIX_USERNAME,
