@@ -72,9 +72,9 @@ def initWebServer(options = {}):
         cherrypy.config.update({
                 'server.socket_port': options['port'],
                 'server.socket_host': options['host'],
+                'server.ssl_certificate': '',
+                'server.ssl_private_key': '',
                 'log.screen':         False,
-                'error_page.401':     http_error_401_hander,
-                'error_page.404':     http_error_404_hander,
         })
 
         # setup cherrypy logging
@@ -122,6 +122,15 @@ def initWebServer(options = {}):
                         }
                 })
 
+        # https config
+        
+        
+        if options['web_ssl'] == 1 and options['server_certificate'] != "" and options['server_key'] != "":
+               cherrypy.config.update({
+                'server.ssl_certificate': options['server_certificate'],
+                'server.ssl_private_key': options['server_key'],
+                })
+            
         cherrypy.server.start()
         cherrypy.server.wait()
 
