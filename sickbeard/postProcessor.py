@@ -207,6 +207,25 @@ class PostProcessor(object):
                 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
                 
+    def _symlink(self, file_path, new_path, new_base_name, associated_files=False):
+        """
+        file_path: The full path of the media file to symlink
+        new_path: Destination path where we want to symlink the file to 
+        new_base_name: The base filename (no extension) to use during the symlink. Use None to keep the same name.
+        associated_files: Boolean, whether we should symlink similarly-named files too
+        """
+
+        def _int_symlink (cur_file_path, new_file_path):
+
+            self._log(u"Symlink file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
+            try:
+                helpers.symlinkFile(cur_file_path, new_file_path)
+            except (IOError, OSError), e:
+                logger.log("Unable to symlink file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
+                raise e
+
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_symlink)
+                
     def _copy(self, file_path, new_path, new_base_name, associated_files=False):
         """
         file_path: The full path of the media file to copy
@@ -687,6 +706,8 @@ class PostProcessor(object):
             # move the episode and associated files to the show dir
             if sickbeard.KEEP_PROCESSED_DIR:
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+            elif sickbeard.SYMLINK_PROCESSED_DIR:
+                self._symlink(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
         except OSError, IOError:

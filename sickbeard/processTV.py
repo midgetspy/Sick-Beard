@@ -105,7 +105,8 @@ def processDir (dirName, nzbName=None, recurse=False):
         # as long as the postprocessing was successful delete the old folder unless the config wants us not to
         if process_result:
 
-            if len(videoFiles) == 1 and not sickbeard.KEEP_PROCESSED_DIR and \
+            if len(videoFiles) == 1 and not sickbeard.KEEP_PROCESSED_DIR \
+                and not sickbeard.SYMLINK_PROCESSED_DIR and \
                 ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR) and \
                 len(remainingFolders) == 0:
 

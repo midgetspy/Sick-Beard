@@ -814,7 +814,7 @@ class ConfigPostProcessing:
                     naming_sep_type=None, naming_quality=None, naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None):
+                    symlink_processed_dir=None, move_associated_files=None, tv_download_dir=None):
 
         results = []
 
@@ -865,6 +865,11 @@ class ConfigPostProcessing:
             keep_processed_dir = 1
         else:
             keep_processed_dir = 0
+            
+        if symlink_processed_dir == "on":
+            symlink_processed_dir = 1
+        else:
+            symlink_processed_dir = 0
 
         if move_associated_files == "on":
             move_associated_files = 1
@@ -873,6 +878,7 @@ class ConfigPostProcessing:
 
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
+        sickbeard.SYMLINK_PROCESSED_DIR = symlink_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
 

@@ -391,6 +391,9 @@ def listMediaFiles(dir):
 
     return files
 
+def symlinkFile(srcFile, destFile):
+    ek.ek(os.symlink, srcFile, destFile)
+    
 def copyFile(srcFile, destFile):
     ek.ek(shutil.copyfile, srcFile, destFile)
     try:
