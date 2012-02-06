@@ -29,6 +29,7 @@ import boxcar
 import nmj
 import synoindex
 import trakt
+import xmpp
 
 from sickbeard.common import *
 
@@ -43,6 +44,7 @@ libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
 trakt_notifier = trakt.TraktNotifier()
+xmpp_notifier = xmpp.XMPPNotifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
@@ -57,6 +59,7 @@ notifiers = [
     synoindex_notifier,
     boxcar_notifier,
     trakt_notifier,
+    xmpp_notifier,
 ]
 
 def notify_download(ep_name):

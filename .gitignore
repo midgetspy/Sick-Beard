@@ -21,6 +21,7 @@ autoProcessTV/autoProcessTV.cfg
 *.tmproj
 *.tmproject
 *.sw?
+*.pydevproject
 
 # OS generated files #
 ######################
