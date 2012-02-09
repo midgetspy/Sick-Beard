@@ -263,6 +263,12 @@ PYTIVO_HOST = ''
 PYTIVO_SHARE_NAME = ''
 PYTIVO_TIVO_NAME = ''
 
+USE_NMA = False
+NMA_NOTIFY_ONSNATCH = False
+NMA_NOTIFY_ONDOWNLOAD = False
+NMA_API = None
+NMA_PRIORITY = 0
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -378,6 +384,7 @@ def initialize(consoleLogging=True):
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
+                NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
@@ -411,6 +418,7 @@ def initialize(consoleLogging=True):
         CheckSection('NMJ')
         CheckSection('Synology')
         CheckSection('pyTivo')
+        CheckSection('NMA')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -621,6 +629,12 @@ def initialize(consoleLogging=True):
         PYTIVO_HOST = check_setting_str(CFG, 'pyTivo', 'pytivo_host', '')
         PYTIVO_SHARE_NAME = check_setting_str(CFG, 'pyTivo', 'pytivo_share_name', '')
         PYTIVO_TIVO_NAME = check_setting_str(CFG, 'pyTivo', 'pytivo_tivo_name', '')
+
+        USE_NMA = bool(check_setting_int(CFG, 'NMA', 'use_nma', 0))
+        NMA_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_notify_onsnatch', 0))
+        NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
+        NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
+        NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -1142,6 +1156,13 @@ def save_config():
     new_config['pyTivo']['pytivo_host'] = PYTIVO_HOST
     new_config['pyTivo']['pytivo_share_name'] = PYTIVO_SHARE_NAME
     new_config['pyTivo']['pytivo_tivo_name'] = PYTIVO_TIVO_NAME
+
+    new_config['NMA'] = {}
+    new_config['NMA']['use_nma'] = int(USE_NMA)
+    new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
+    new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
+    new_config['NMA']['nma_api'] = NMA_API
+    new_config['NMA']['nma_priority'] = NMA_PRIORITY
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
