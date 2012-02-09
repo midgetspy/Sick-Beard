@@ -300,7 +300,30 @@ class TVCache():
                 logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return False
 
-        episodeText = "|"+"|".join(map(str, episodes))+"|"
+        # declare episodeText so we can use it
+        episodeText = None
+        # make sure we know the tvdb_id, found no episodes but a season
+        if season and not episodes and tvdb_id <> 0:
+            logger.log(u"Found no episodes, but a season and a tvdb_id, assuming it's a full season", logger.DEBUG)
+            sickbeardDB = db.DBConnection('sickbeard.db')
+            # pull number of episodes for that season
+            number_of_episodes = sickbeardDB.select("SELECT COUNT(*) cnt FROM tv_episodes WHERE showid = ? AND season = ?", [tvdb_id, season])
+            # make sure we actually found episodes
+            if number_of_episodes:
+                logger.log(u"Found " + str(number_of_episodes[0]["cnt"]) + " episodes for that season.", logger.DEBUG)
+                # build the episodeText with every episode from that season in it
+                for i in range(number_of_episodes[0]["cnt"]):
+                    episodeText = episodeText + "|" + str(i + 1) if episodeText else "|" + str(i + 1)
+                # append a | at the end
+                episodeText = episodeText + "|"
+                logger.log(u"Build episodeText from tv_episodes: " + episodeText, logger.DEBUG)
+            else:
+                logger.log(u"Couldn't find episodes for season " + str(season) + " on show: " + name + " with tvdb_id " + str(tvdb_id), logger.DEBUG)
+        # if episodeText is empty cause we found episodes or even if we tried to get all episodes from the DB but failed, we build the string "the old way"
+        if not episodeText:
+            logger.log(u"Found episodes from the parser, no season, no tvdb_id or couldn't find any episodes, using the old way", logger.DEBUG)
+            episodeText = "|"+"|".join(map(str, episodes))+"|"
+        
 
         # get the current timestamp
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
