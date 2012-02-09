@@ -733,6 +733,71 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
+
+                <div id="core-component-group10" class="component-group clearfix">
+                
+                    <div class="component-group-desc">
+                        <h3><a href="http://pytivo.sourceforge.net/wiki/index.php/PyTivo" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/pytivo.gif" alt="pyTivo" title="pyTivo" width="16" height="16" />pyTivo</a></h3>
+                        <p>pyTivo is both an HMO and GoBack server.  This notifier will load the completed downloads to your Tivo.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_pytivo" id="use_pytivo" #if $sickbeard.USE_PYTIVO then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_pytivo">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to pyTivo?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_pytivo">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Note: Requires the downloaded files to be accessible to pyTivo, eg on same server.</span>
+                            </label>
+                        </div>
+						
+                        <div id="content_use_pytivo">
+                        
+							<div class="field-pair">
+								<label class="nocheck clearfix">
+									<span class="component-title">pyTivo IP:Port</span>
+									<input type="text" name="pytivo_host" id="pytivo_host" value="$sickbeard.PYTIVO_HOST" size="35" />
+								</label>
+								<label class="nocheck clearfix">
+									<span class="component-title">&nbsp;</span>
+									<span class="component-desc">Host running pyTivo (eg. 192.168.1.1:9032)</span>
+								</label>
+							</div>
+
+							<div class="field-pair">
+								<label class="nocheck clearfix">
+									<span class="component-title">pyTivo Share name</span>
+									<input type="text" name="pytivo_share_name" id="pytivo_share_name" value="$sickbeard.PYTIVO_SHARE_NAME" size="35" />
+								</label>
+								<label class="nocheck clearfix">
+									<span class="component-title">&nbsp;</span>
+									<span class="component-desc">Value used in pyTivo Web Configuration to name the share.</span>
+								</label>
+							</div>
+
+
+							<div class="field-pair">
+								<label class="nocheck clearfix">
+									<span class="component-title">Tivo Name</span>
+									<input type="text" name="pytivo_tivo_name" id="pytivo_tivo_name" value="$sickbeard.PYTIVO_TIVO_NAME" size="35" />
+								</label>
+								<label class="nocheck clearfix">
+									<span class="component-title">&nbsp;</span>
+									<span class="component-desc">Messages & Settings > Account & System Information > System Information > DVR name</span>
+								</label>
+							</div>
+							
+							<input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /enabler_pytivo //-->
+                        
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+
+
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
