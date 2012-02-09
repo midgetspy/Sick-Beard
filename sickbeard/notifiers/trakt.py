@@ -28,7 +28,7 @@ except ImportError:
 
 import sickbeard
 
-from sickbeard import logger
+from sickbeard import logger, exceptions, helpers
 
 try:
     import xml.etree.cElementTree as etree
@@ -42,6 +42,31 @@ class TraktNotifier:
 
     def notify_download(self, ep_name):
         pass
+    
+    def notify_delete(self, tvdb_id, season, episode):
+        logger.log(u"Starting Trakt removal", logger.DEBUG)
+        
+        show_obj = None
+        
+        logger.log(u"Loading show object for tvdb_id " + str(tvdb_id), logger.DEBUG)
+        # find the show in the showlist
+        try:
+            show_obj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+        except exceptions.MultipleShowObjectsException:
+            raise #TODO: later I'll just log this, for now I want to know about it ASAP
+        
+        ep_obj = None
+        logger.log(u"Retrieving episode object for " + str(season) + "x" + str(episode), logger.DEBUG)
+        try:
+            ep_obj = show_obj.getEpisode(season, episode)
+        except exceptions.EpisodeNotFoundException, e:
+            logger.log(u"Unable to find episode: " + ex(e), logger.WARNING)
+            
+        if ep_obj != None:
+            logger.log(u"Removing " + ep_obj.show.name + " " + str(ep_obj.season) + "x" + str(ep_obj.episode) + " from Trakt collection", logger.DEBUG)
+            self.update_library(ep_obj, True)
+        else:
+            logger.log(u"No episode could be found to be removed from your Trakt collection", logger.WARNING)
 
     def update_library(self, ep_obj, delete=False):
         if sickbeard.USE_TRAKT:

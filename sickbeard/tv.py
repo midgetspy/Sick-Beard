@@ -722,36 +722,11 @@ class TVShow(object):
                         logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to IGNORED", logger.DEBUG)
                         curEp.status = IGNORED
                         # notify Trakt the episode is no longer in our collection
-                        self._removeFromTraktCollection(self.tvdbid, season, episode)
+                        notifiers.notify_delete(self.tvdbid, season, episode)
                     curEp.location = ''
                     curEp.hasnfo = False
                     curEp.hastbn = False
                     curEp.saveToDB()
-
-	def _removeFromTraktCollection(self, tvdb_id, season, episode):
-        logger.log(u"Starting Trakt Removal", logger.DEBUG)
-        
-        show_obj = None
-        
-        logger.log(u"Loading show object for tvdb_id " + str(tvdb_id), logger.DEBUG)
-        # find the show in the showlist
-        try:
-            show_obj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-        except exceptions.MultipleShowObjectsException:
-            raise #TODO: later I'll just log this, for now I want to know about it ASAP
-        
-        ep_obj = None
-        logger.log(u"Retrieving episode object for " + str(season) + "x" + str(episode), logger.DEBUG)
-        try:
-            ep_obj = show_obj.getEpisode(season, episode)
-        except exceptions.EpisodeNotFoundException, e:
-            logger.log(u"Unable to find episode: " + ex(e), logger.WARNING)
-            
-        if ep_obj != None:
-            logger.log(u"Removing " + ep_obj.show.name + " " + str(ep_obj.season) + "x" + str(ep_obj.episode) + " from Trakt collection", logger.DEBUG)
-            notifiers.trakt_notifier.update_library(ep_obj, True)
-        else:
-            logger.log(u"No episode could be found to be removed from your Trakt collection", logger.WARNING)
     
     def fixEpisodeNames(self):
 
