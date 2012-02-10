@@ -2073,6 +2073,15 @@ class Home:
         else:
             return "Test notice failed to Trakt"
 
+    @cherrypy.expose
+    def testNMA(self, nma_api=None, nma_priority=0):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        result = notifiers.nma_notifier.test_notify(nma_api, nma_priority)
+        if result:
+            return "Test NMA notice sent successfully"
+        else:
+            return "Test NMA notice failed"
 
     @cherrypy.expose
     def shutdown(self):
