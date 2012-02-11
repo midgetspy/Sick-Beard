@@ -398,3 +398,26 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
                 self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
         self.incDBVersion()
+        
+class Add1080iQuality(FixAirByDateSetting):
+    
+    def test(self):
+        return self.checkDBVersion() >= 10
+        
+    def _update_quality(self, old_quality):
+        mask = (common.Quality.HDTV1080I - 1)
+        unknown = old_quality & common.Quality.UNKNOWN
+        known = old_quality & ~common.Quality.UNKNOWN
+        return unknown + ((known & ~mask) << 1) + (known & mask)
+        
+    def execute(self):
+        sickbeard.QUALITY_DEFAULT = self._update_quality(sickbeard.QUALITY_DEFAULT)
+        
+        sickbeard.save_config()
+        
+        shows = self.connection.select("SELECT * FROM tv_shows")
+        
+        for cur_show in shows:
+            self.connection.action("UPDATE tv_shows SET quality = ? WHERE tvdb_id = ?", [self._update_quality(cur_show["quality"]), cur_show["tvdb_id"]])
+        
+        self.incDBVersion()
