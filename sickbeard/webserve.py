@@ -1335,6 +1335,11 @@ class ConfigNotifications:
         else:
             pytivo_update_library = 0
 
+        if use_nma == "on":
+            use_nma = 1
+        else:
+            use_nma = 0
+
         if nma_notify_onsnatch == "on":
             nma_notify_onsnatch = 1
         else:
@@ -1344,10 +1349,6 @@ class ConfigNotifications:
             nma_notify_ondownload = 1
         else:
             nma_notify_ondownload = 0
-        if use_nma == "on":
-            use_nma = 1
-        else:
-            use_nma = 0
 
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
