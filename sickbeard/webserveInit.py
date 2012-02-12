@@ -23,6 +23,10 @@ import os.path
 from sickbeard import logger
 from sickbeard.webserve import WebInterface
 
+from sickbeard.helpers import create_https_certificates
+from cherrypy import _cpserver
+from cherrypy import _cpwsgi_server
+
 def initWebServer(options = {}):
         options.setdefault('port',      8081)
         options.setdefault('host',      '0.0.0.0')
@@ -69,13 +73,60 @@ def initWebServer(options = {}):
 ''' % '/'
 
         # cherrypy setup
-        cherrypy.config.update({
-                'server.socket_port': options['port'],
-                'server.socket_host': options['host'],
-                'log.screen':         False,
-                'error_page.401':     http_error_401_hander,
-                'error_page.404':     http_error_404_hander,
-        })
+        enable_https = options['enable_https']
+        https_port = options['https_port']
+        https_cert = options['https_cert']
+        https_key = options['https_key']
+        if enable_https:
+            # If either the HTTPS certificate or key do not exist, make some self-signed ones.
+            if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
+                create_https_certificates(https_cert, https_key)
+
+            if not (os.path.exists(https_cert) and os.path.exists(https_key)):
+                logger.log(u"Disabled HTTPS because of missing CERT and KEY files", logger.WARNING)
+                enable_https = False
+
+            if enable_https:
+                if https_port:
+                    logger.log(u"Starting Sick Beard on http://" + str(options['host']) + ":" + str(options['port']) + "/")
+                    # Prepare an extra server for the HTTP port
+                    http_server = _cpwsgi_server.CPWSGIServer()
+                    http_server.bind_addr = (options['host'], options['port'])
+                    #secure_server.ssl_certificate = https_cert
+                    #secure_server.ssl_private_key = https_key
+                    adapter = _cpserver.ServerAdapter(cherrypy.engine, http_server, http_server.bind_addr)
+                    adapter.subscribe()
+                    
+                    logger.log(u"Starting Sick Beard on https://" + str(options['host']) + ":" + str(https_port) + "/")
+                    cherrypy.config.update({
+                            'server.socket_port': int(https_port),
+                            'server.socket_host': options['host'],
+                            'log.screen':         False,
+                            'error_page.401':     http_error_401_hander,
+                            'error_page.404':     http_error_404_hander,
+                            'server.ssl_certificate' : https_cert,
+                            'server.ssl_private_key' : https_key,
+                    })
+                else:
+                    logger.log(u"Starting Sick Beard on https://" + str(options['host']) + ":" + str(options['port']) + "/")
+                    cherrypy.config.update({
+                            'server.socket_port': options['port'],
+                            'server.socket_host': options['host'],
+                            'log.screen':         False,
+                            'error_page.401':     http_error_401_hander,
+                            'error_page.404':     http_error_404_hander,
+                            'server.ssl_certificate' : https_cert,
+                            'server.ssl_private_key' : https_key,
+                    })
+        else:
+            logger.log(u"Starting Sick Beard on http://" + str(options['host']) + ":" + str(options['port']) + "/")
+            cherrypy.config.update({
+                    'server.socket_port': options['port'],
+                    'server.socket_host': options['host'],
+                    'log.screen':         False,
+                    'error_page.401':     http_error_401_hander,
+                    'error_page.404':     http_error_404_hander,
+            })
 
         # setup cherrypy logging
         if options['log_dir'] and os.path.isdir(options['log_dir']):
@@ -122,6 +173,7 @@ def initWebServer(options = {}):
                         }
                 })
 
-        cherrypy.server.start()
+
+        cherrypy.engine.start()
         cherrypy.server.wait()
 

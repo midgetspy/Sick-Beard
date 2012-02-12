@@ -57,6 +57,7 @@ def processEpisode(dirName, nzbName=None):
     port = config.get("SickBeard", "port")
     username = config.get("SickBeard", "username")
     password = config.get("SickBeard", "password")
+    ssl = config.get("SickBeard", "ssl")
     
     try:
         web_root = config.get("SickBeard", "web_root")
@@ -73,7 +74,12 @@ def processEpisode(dirName, nzbName=None):
         
     myOpener = AuthURLOpener(username, password)
     
-    url = "http://" + host + ":" + port + web_root + "/home/postprocess/processEpisode?" + urllib.urlencode(params)
+    if ssl:
+        protocol = "https://"
+    else:
+        protocol = "http://"
+
+    url = protocol + host + ":" + port + web_root + "/home/postprocess/processEpisode?" + urllib.urlencode(params)
     
     print "Opening URL:", url
     
