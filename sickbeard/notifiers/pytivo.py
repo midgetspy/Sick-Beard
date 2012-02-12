@@ -16,10 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import os
-import subprocess
 import sickbeard
 
 from urllib import urlencode
@@ -27,9 +24,6 @@ from urllib2 import Request, urlopen, URLError
 
 from sickbeard import logger
 from sickbeard import encodingKludge as ek
-from sickbeard.exceptions import ex
-
-from httplib import HTTPSConnection
 
 class pyTivoNotifier:
 
@@ -42,6 +36,9 @@ class pyTivoNotifier:
     def update_library(self, ep_obj):
 
         # Values from config
+        
+        if not sickbeard.USE_PYTIVO:
+            return False
         
         host = sickbeard.PYTIVO_HOST
         shareName = sickbeard.PYTIVO_SHARE_NAME
@@ -74,20 +71,10 @@ class pyTivoNotifier:
         root = showPath.replace(showName, "")
         showAndSeason = rootShowAndSeason.replace(root, "")
         
-        
-        #logger.log(u"showPath:          " + showPath )
-        #logger.log(u"showName:          " + showName )
-        #logger.log(u"rootShowAndSeason: " + rootShowAndSeason )
-        #logger.log(u"absPath:           " + absPath )
-        #logger.log(u"root:              " + root )
-
-
         container = shareName + "/" + showAndSeason
         file = "/" + absPath.replace(root, "")
         
-        
         # Finally create the url and make request
-        
         requestUrl = "http://" + host + "/TiVoConnect?" + urlencode( {'Command':'Push', 'Container':container, 'File':file, 'tsn':tsn} )
                
         logger.log(u"pyTivo notification: Requesting " + requestUrl)
@@ -95,7 +82,7 @@ class pyTivoNotifier:
         request = Request( requestUrl )
 
         try:
-            response = urlopen(request)      
+            response = urlopen(request) #@UnusedVariable   
         except URLError, e:
             if hasattr(e, 'reason'):
                 logger.log(u"pyTivo notification: Error, failed to reach a server")
