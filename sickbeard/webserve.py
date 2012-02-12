@@ -1060,6 +1060,7 @@ class ConfigProviders:
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
+                      thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1123,6 +1124,8 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
+            elif curProvider == 'thepiratebay':
+                sickbeard.THEPIRATEBAY = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1130,6 +1133,22 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+
+        if thepiratebay_trusted == "on":
+            thepiratebay_trusted = 1
+        else:
+            thepiratebay_trusted = 0
+
+        sickbeard.THEPIRATEBAY_TRUSTED = thepiratebay_trusted
+
+        if thepiratebay_proxy == "on":
+            thepiratebay_proxy = 1
+            sickbeard.THEPIRATEBAY_PROXY_URL = thepiratebay_proxy_url.strip()
+        else:
+            thepiratebay_proxy = 0
+            sickbeard.THEPIRATEBAY_PROXY_URL = ""
+
+        sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy
 
         sickbeard.NZBS_UID = nzbs_org_uid.strip()
         sickbeard.NZBS_HASH = nzbs_org_hash.strip()
