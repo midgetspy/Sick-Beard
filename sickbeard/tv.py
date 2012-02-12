@@ -722,7 +722,7 @@ class TVShow(object):
                         logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to IGNORED", logger.DEBUG)
                         curEp.status = IGNORED
                         # notify Trakt the episode is no longer in our collection
-                        notifiers.notify_delete(self.tvdbid, season, episode)
+                        notifiers.notify_delete(curEp)
                     curEp.location = ''
                     curEp.hasnfo = False
                     curEp.hastbn = False
