@@ -28,7 +28,7 @@ except ImportError:
 
 import sickbeard
 
-from sickbeard import logger, exceptions, helpers
+from sickbeard import logger
 
 try:
     import xml.etree.cElementTree as etree
