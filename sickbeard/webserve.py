@@ -549,15 +549,19 @@ class Manage:
 class History:
 
     @cherrypy.expose
-    def index(self):
+    def index(self, limit=100):
 
         myDB = db.DBConnection()
 
 #        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC LIMIT "+str(numPerPage*(p-1))+", "+str(numPerPage))
-        sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+        if limit == "0":
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+        else:
+            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC LIMIT ?", [limit])
 
         t = PageTemplate(file="history.tmpl")
         t.historyResults = sqlResults
+        t.limit = limit
         t.submenu = [
             { 'title': 'Clear History', 'path': 'history/clearHistory' },
             { 'title': 'Trim History',  'path': 'history/trimHistory'  },
@@ -1175,7 +1179,9 @@ class ConfigNotifications:
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
-                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None):
+                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
+                          use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
+                          pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None ):
 
         results = []
 
@@ -1310,6 +1316,26 @@ class ConfigNotifications:
         else:
             use_trakt = 0
 
+        if use_pytivo == "on":
+            use_pytivo = 1
+        else:
+            use_pytivo = 0
+            
+        if pytivo_notify_onsnatch == "on":
+            pytivo_notify_onsnatch = 1
+        else:
+            pytivo_notify_onsnatch = 0
+
+        if pytivo_notify_ondownload == "on":
+            pytivo_notify_ondownload = 1
+        else:
+            pytivo_notify_ondownload = 0
+
+        if pytivo_update_library == "on":
+            pytivo_update_library = 1
+        else:
+            pytivo_update_library = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1371,6 +1397,14 @@ class ConfigNotifications:
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
 
+        sickbeard.USE_PYTIVO = use_pytivo
+        sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
+        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload ==  "off"
+        sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
+        sickbeard.PYTIVO_HOST = pytivo_host
+        sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
+        sickbeard.PYTIVO_TIVO_NAME = pytivo_tivo_name
+        
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -1877,6 +1911,8 @@ class Home:
 
     @cherrypy.expose
     def testSABnzbd(self, host=None, username=None, password=None, apikey=None):
+        if not host.endswith("/"):
+            host = host + "/"
         connection, accesMsg = sab.getSabAccesMethod(host, username, password, apikey)
         if connection:
             authed, authMsg = sab.testAuthentication(host, username, password, apikey) #@UnusedVariable
