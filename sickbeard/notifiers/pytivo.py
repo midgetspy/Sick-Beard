@@ -41,72 +41,73 @@ class pyTivoNotifier:
 
     def update_library(self, ep_obj):
 
+        # only execute if configured
+        if sickbeard.USE_PYTIVO:
         # Values from config
-        
-        host = sickbeard.PYTIVO_HOST
-        shareName = sickbeard.PYTIVO_SHARE_NAME
-        tsn = sickbeard.PYTIVO_TIVO_NAME
-        
-        # There are two more values required, the container and file.
-        # 
-        # container: The share name, show name and season
-        #
-        # file: The file name
-        # 
-        # Some slicing and dicing of variables is required to get at these values.
-        #
-        # There might be better ways to arrive at the values, but this is the best I have been able to 
-        # come up with.
-        #
-        
-        
-        # Calculated values
-        
-        showPath = ep_obj.show.location
-        showName = ep_obj.show.name
-        rootShowAndSeason = ek.ek(os.path.dirname, ep_obj.location)      
-        absPath = ep_obj.location
-        
-        # Some show names have colons in them which are illegal in a path location, so strip them out.
-        # (Are there other characters?)
-        showName = showName.replace(":","")
-        
-        root = showPath.replace(showName, "")
-        showAndSeason = rootShowAndSeason.replace(root, "")
-        
-        
-        #logger.log(u"showPath:          " + showPath )
-        #logger.log(u"showName:          " + showName )
-        #logger.log(u"rootShowAndSeason: " + rootShowAndSeason )
-        #logger.log(u"absPath:           " + absPath )
-        #logger.log(u"root:              " + root )
+            host = sickbeard.PYTIVO_HOST
+            shareName = sickbeard.PYTIVO_SHARE_NAME
+            tsn = sickbeard.PYTIVO_TIVO_NAME
+            
+            # There are two more values required, the container and file.
+            # 
+            # container: The share name, show name and season
+            #
+            # file: The file name
+            # 
+            # Some slicing and dicing of variables is required to get at these values.
+            #
+            # There might be better ways to arrive at the values, but this is the best I have been able to 
+            # come up with.
+            #
+            
+            
+            # Calculated values
+            
+            showPath = ep_obj.show.location
+            showName = ep_obj.show.name
+            rootShowAndSeason = ek.ek(os.path.dirname, ep_obj.location)      
+            absPath = ep_obj.location
+            
+            # Some show names have colons in them which are illegal in a path location, so strip them out.
+            # (Are there other characters?)
+            showName = showName.replace(":","")
+            
+            root = showPath.replace(showName, "")
+            showAndSeason = rootShowAndSeason.replace(root, "")
+            
+            
+            #logger.log(u"showPath:          " + showPath )
+            #logger.log(u"showName:          " + showName )
+            #logger.log(u"rootShowAndSeason: " + rootShowAndSeason )
+            #logger.log(u"absPath:           " + absPath )
+            #logger.log(u"root:              " + root )
 
 
-        container = shareName + "/" + showAndSeason
-        file = "/" + absPath.replace(root, "")
+            container = shareName + "/" + showAndSeason
+            file = "/" + absPath.replace(root, "")
+            
+            
+            # Finally create the url and make request
+            
+            requestUrl = "http://" + host + "/TiVoConnect?" + urlencode( {'Command':'Push', 'Container':container, 'File':file, 'tsn':tsn} )
+            
+            logger.log(u"pyTivo notification: Requesting " + requestUrl)
         
-        
-        # Finally create the url and make request
-        
-        requestUrl = "http://" + host + "/TiVoConnect?" + urlencode( {'Command':'Push', 'Container':container, 'File':file, 'tsn':tsn} )
-               
-        logger.log(u"pyTivo notification: Requesting " + requestUrl)
-        
-        request = Request( requestUrl )
+            request = Request( requestUrl )
 
-        try:
-            response = urlopen(request)      
-        except URLError, e:
-            if hasattr(e, 'reason'):
-                logger.log(u"pyTivo notification: Error, failed to reach a server")
-                logger.log(u"'Error reason: " + e.reason)
-                return False
-            elif hasattr(e, 'code'):
-                logger.log(u"pyTivo notification: Error, the server couldn't fulfill the request")
-                logger.log(u"Error code: " + e.code)
-                return False
-        else:
-            logger.log(u"pyTivo notification: Successfully requested transfer of file")
-            return True
+            try:
+                response = urlopen(request)      
+            except URLError, e:
+                if hasattr(e, 'reason'):
+                    logger.log(u"pyTivo notification: Error, failed to reach a server")
+                    logger.log(u"'Error reason: " + e.reason)
+                    return False
+                elif hasattr(e, 'code'):
+                    logger.log(u"pyTivo notification: Error, the server couldn't fulfill the request")
+                    logger.log(u"Error code: " + e.code)
+                    return False
+            else:
+                logger.log(u"pyTivo notification: Successfully requested transfer of file")
+                return True
 
 notifier = pyTivoNotifier
