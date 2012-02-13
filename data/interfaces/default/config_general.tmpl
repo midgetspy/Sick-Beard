@@ -128,6 +128,60 @@
                 <div id="core-component-group3" class="component-group clearfix">
 
                     <div class="component-group-desc">
+                        <h3>HTTPS Support</h3>
+                        <p><b>Some options may require a manual restart to take effect.</b></p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <input type="checkbox" name="enable_https" class="enabler" id="enable_https" #if $sickbeard.ENABLE_HTTPS then "checked=\"checked\"" else ""#/>
+                                <span class="component-title">Enable HTTPS</span>
+                                <span class="component-desc">Enable accessing the interface from a HTTPS address.</span>
+                            </label>
+                        </div>
+                        <div id="content_enable_https">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">HTTPS Port</span>
+                                <input type="text" name="https_port" value="$sickbeard.HTTPS_PORT" size="10" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">If empty, the standard port will only listen to HTTPS.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">HTTPS Certificate</span>
+                                <input type="text" name="https_cert" value="$sickbeard.HTTPS_CERT" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">File name or path to HTTPS Certificate.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">HTTPS Key</span>
+                                <input type="text" name="https_key" value="$sickbeard.HTTPS_KEY" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">File name or path to HTTPS Key.</span>
+                            </label>
+                        </div>
+                        </div>
+
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group3 -->
+
+                <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
                         <h3>API</h3>
                         <p>Allow 3rd party programs to interact with Sick-Beard.</p>
                     </div>
@@ -157,7 +211,7 @@
 
                         <input type="submit" class="config_submitter" value="Save Changes" />
                     </fieldset>
-                </div><!-- /component-group3 //-->
+                </div><!-- /component-group4 //-->
 
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components -->
