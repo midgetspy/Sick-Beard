@@ -7,7 +7,7 @@ if (sbHttpsEnabled != "False" && sbHttpsEnabled != 0) {
     var sb_base_url = 'http://'+sbHost+':'+sbHttpPort+sbRoot;
 
 var base_url = window.location.protocol+'//'+window.location.host+sbRoot;
-var is_alive_url = '/home/is_alive';
+var is_alive_url = sbRoot+'/home/is_alive';
 var timeout_id;
 var current_pid = '';
 var num_restart_waits = 0;
