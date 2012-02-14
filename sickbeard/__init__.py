@@ -276,6 +276,9 @@ EXTRA_SCRIPTS = []
 
 GIT_PATH = None
 
+UPDATE_ON_START = False
+TV_SHOW_UPDATE_TIME = 3
+
 IGNORE_WORDS = "german,french,core2hd,dutch,swedish"
 
 __INITIALIZED__ = False
@@ -396,7 +399,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, UPDATE_ON_START, TV_SHOW_UPDATE_TIME
 
         if __INITIALIZED__:
             return False
@@ -441,6 +444,9 @@ def initialize(consoleLogging=True):
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
         
         ENABLE_HTTPS = bool(check_setting_int(CFG, 'General', 'enable_https', 0))
+        
+        UPDATE_ON_START = bool(check_setting_int(CFG, 'General', 'update_on_start', 0))
+        TV_SHOW_UPDATE_TIME = check_setting_int(CFG, 'General', 'tv_show_update_time', 3)
         
         try:
             HTTPS_PORT = check_setting_str(CFG, 'General', 'https_port', '9091')
@@ -1015,6 +1021,9 @@ def save_config():
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
+    new_config['General']['update_on_start'] = int(UPDATE_ON_START)
+    new_config['General']['tv_show_update_time'] = int(TV_SHOW_UPDATE_TIME)
+
     new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
@@ -1022,7 +1031,9 @@ def save_config():
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
     new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
     new_config['General']['metadata_tivo'] = metadata_provider_dict['TIVO'].get_config()
-
+    
+    
+    
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
