@@ -26,6 +26,7 @@ import re
 import threading
 import datetime
 import random
+import json
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -63,6 +64,10 @@ class PageTemplate (Template):
         KWs['file'] = os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
+        self.sbHttpPort = sickbeard.WEB_PORT
+        self.sbHttpsPort = sickbeard.HTTPS_PORT
+        self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
+        self.sbHost = re.match("(.*)(?=:)", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
         logPageTitle = 'Logs &amp; Errors'
@@ -1902,13 +1907,18 @@ class ErrorLogs:
 class Home:
 
     @cherrypy.expose
-    def is_alive(self):
+    def is_alive(self, *args, **kwargs):
+        if 'callback' in kwargs and '_' in kwargs:
+            callback, _ = kwargs['callback'], kwargs['_']
+        else:
+            return "Error: Unsupported Request. Send jsonp request with 'callback' variable in the query stiring."
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        cherrypy.response.headers['Content-Type'] = 'text/javascript'
 
         if sickbeard.started:
-            return str(sickbeard.PID)
+            return callback+'('+json.dumps({"msg": str(sickbeard.PID)})+');'
         else:
-            return "nope"
+            return callback+'('+json.dumps({"msg": "nope"})+');'
 
     @cherrypy.expose
     def index(self):
