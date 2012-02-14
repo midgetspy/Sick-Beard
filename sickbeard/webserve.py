@@ -67,7 +67,7 @@ class PageTemplate (Template):
         self.sbHttpPort = sickbeard.WEB_PORT
         self.sbHttpsPort = sickbeard.HTTPS_PORT
         self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
-        self.sbHost = re.match("(.*)(?=:)", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
+        self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
         logPageTitle = 'Logs &amp; Errors'
