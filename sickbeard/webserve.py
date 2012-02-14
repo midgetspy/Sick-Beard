@@ -719,8 +719,8 @@ class ConfigGeneral:
         
         sickbeard.UPDATE_ON_START = update_on_start
         
-        if(tv_show_update_time >= 0 and tv_show_update_time <= 23):
-            sickbeard.TV_SHOW_UPDATE_TIME = tv_show_update_time
+        if(int(tv_show_update_time) >= 0 and int(tv_show_update_time) <= 23):
+            sickbeard.TV_SHOW_UPDATE_TIME = int(tv_show_update_time)
         
         if not config.change_HTTPS_CERT(https_cert):
             results += ["Unable to create directory " + os.path.normpath(https_cert) + ", https cert dir not changed."]
