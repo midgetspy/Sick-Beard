@@ -33,7 +33,7 @@ class ShowUpdater():
     def run(self, force=False):
 
         # update at 3 AM
-        updateTime = datetime.time(hour=3)
+        updateTime = datetime.time(hour=sickbeard.TV_SHOW_UPDATE_TIME)
 
         logger.log(u"Checking update interval", logger.DEBUG)
 
