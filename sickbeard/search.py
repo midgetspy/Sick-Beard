@@ -181,7 +181,16 @@ def searchForNeededEpisodes():
             # if it's already in the list (from another provider) and the newly found quality is no better then skip it
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
                 continue
-
+            
+            logger.log(u"Checking if the episode we found has already been deleted", logger.ERROR)
+            curLoc = os.path.normpath(curEp["location"])
+            logger.log(u"Path for episode we found is: " + curLoc, logger.ERROR)
+            # if user chose to check episode's existence, verify its existence on disk. If it has been deleted, skip it
+            if sickbeard.CHECK_EXISTENCE and not ek.ek(os.path.isfile, curLoc):
+                logger.log(u"The episode we found has already been deleted, not downloading it again", logger.ERROR)
+                continue
+            logger.log(u"The episode we found has not yet been deleted, downloading higher quality version", logger.ERROR)
+            
             foundResults[curEp] = bestResult
 
     if not didSearch:
