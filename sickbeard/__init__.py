@@ -143,6 +143,7 @@ NZB_METHOD = None
 NZB_DIR = None
 USENET_RETENTION = None
 DOWNLOAD_PROPERS = None
+CHECK_EXISTENCE = None
 
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 21
@@ -359,7 +360,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
 
 
 def get_backlog_cycle_time():
-    cycletime = SEARCH_FREQUENCY*2+7
+    cycletime = SEARCH_FREQUENCY * 2 + 7
     return max([cycletime, 720])
 
 
@@ -949,7 +950,7 @@ def invoke_command(to_call, *args, **kwargs):
     def delegate():
         to_call(*args, **kwargs)
     invoked_command = delegate
-    logger.log(u"Placed invoked command: "+repr(invoked_command)+" for "+repr(to_call)+" with "+repr(args)+" and "+repr(kwargs), logger.DEBUG)
+    logger.log(u"Placed invoked command: " + repr(invoked_command) + " for " + repr(to_call) + " with " + repr(args) + " and " + repr(kwargs), logger.DEBUG)
 
 def invoke_restart(soft=True):
     invoke_command(restart, soft=soft)
@@ -1200,7 +1201,7 @@ def getEpList(epIDs, showid=None):
     if epIDs == None or len(epIDs) == 0:
         return []
 
-    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(['?']*len(epIDs)),)
+    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(['?'] * len(epIDs)),)
     params = epIDs
 
     if showid != None:
