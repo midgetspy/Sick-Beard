@@ -54,8 +54,15 @@ $(document).ready(function()
 
         // if https is newly enabled or the port changed just wait 5 seconds then redirect. This is because the ajax will fail if the cert is untrusted.
         if (sbHttpsEnabled != "False" && sbHttpsEnabled != 0) {
-            if (base_url != sb_base_url)
+            if (base_url != sb_base_url) {
+                timeout_id = 1;
+                setTimeout(function(){
+                    $('#restart_loading').hide();
+                    $('#restart_success').show();
+                    $('#refresh_message').show();
+                }, 3000);
                 setTimeout("window.location = sb_base_url+'/home'", 5000);
+            }
         }
 
         // if it is taking forever just give up
