@@ -59,7 +59,7 @@ def processEpisode(dirName, nzbName=None):
     password = config.get("SickBeard", "password")
     try:
         ssl = int(config.get("SickBeard", "ssl"))
-    except ConfigParser.NoOptionError, ValueError:
+    except (ConfigParser.NoOptionError, ValueError):
         ssl = 0
     
     try:

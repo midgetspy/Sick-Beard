@@ -42,7 +42,7 @@ class NotifoNotifier:
         data = urllib.urlencode({
             "title": title,
             "label": label,
-            "msg": msg
+            "msg": msg.encode(sickbeard.SYS_ENCODING)
         })
 
         try:
