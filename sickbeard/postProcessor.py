@@ -691,7 +691,7 @@ class PostProcessor(object):
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
-            new_base_name = ek.ek(os.path.basename, ep_obj.proper_path())
+            new_base_name = ek.ek(os.path.basename, proper_path)
             new_file_name = new_base_name + '.' + orig_extension
 
         else:
