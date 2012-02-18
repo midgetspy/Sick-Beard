@@ -180,9 +180,6 @@ class PostProcessor(object):
             self._log(u"There were no files associated with "+file_path+", not moving anything", logger.DEBUG)
             return
         
-        # make any missing folders
-        helpers.make_dirs(new_path)
-        
         # deal with all files
         for cur_file_path in file_list:
 
@@ -281,6 +278,14 @@ class PostProcessor(object):
             self.in_history = True
             to_return = (tvdb_id, season, [])
             self._log("Found result in history: "+str(to_return), logger.DEBUG)
+
+            if curName == self.nzb_name:
+                self.good_results[self.NZB_NAME] = True
+            elif curName == self.folder_name:
+                self.good_results[self.FOLDER_NAME] = True
+            elif curName == self.file_name:
+                self.good_results[self.FILE_NAME] = True
+
             return to_return
         
         self.in_history = False
@@ -336,6 +341,8 @@ class PostProcessor(object):
                     self.good_results[self.FOLDER_NAME] = True
                 elif name == self.file_name:
                     self.good_results[self.FILE_NAME] = True
+                else:
+                    logger.log(u"Nothing was good, found "+repr(name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
         
         # for each possible interpretation of that scene name
         for cur_name in name_list:
@@ -399,6 +406,9 @@ class PostProcessor(object):
         
                         # try to look up the nzb in history
         attempt_list = [self._history_lookup,
+
+                        # try to analyze the nzb name
+                        lambda: self._analyze_name(self.nzb_name),
     
                         # try to analyze the episode name
                         lambda: self._analyze_name(self.file_path),
@@ -411,9 +421,6 @@ class PostProcessor(object):
 
                         # try to analyze the file+dir names together
                         lambda: self._analyze_name(self.file_path),
-
-                        # try to analyze the nzb name
-                        lambda: self._analyze_name(self.nzb_name),
                         ]
     
         # attempt every possible method to get our info
@@ -644,6 +651,29 @@ class PostProcessor(object):
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
+        # update the ep info before we rename so the quality & release name go into the name properly
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            with cur_ep.lock:
+                cur_release_name = None
+                
+                # use the best possible representation of the release name
+                if self.good_results[self.NZB_NAME]:
+                    cur_release_name = self.nzb_name
+                elif self.good_results[self.FOLDER_NAME]:
+                    cur_release_name = self.folder_name
+                elif self.good_results[self.FILE_NAME]:
+                    cur_release_name = self.file_name
+
+                if cur_release_name:
+                    self._log("Found release name "+cur_release_name, logger.DEBUG)
+                    cur_ep.release_name = cur_release_name
+                else:
+                    logger.log("good results: "+repr(self.good_results), logger.DEBUG)
+
+                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
+                
+                cur_ep.saveToDB()
+
         # find the destination folder
         try:
             proper_path = ep_obj.proper_path()
@@ -658,16 +688,10 @@ class PostProcessor(object):
         # create any folders we need
         helpers.make_dirs(dest_path)
 
-        # update the statuses before we rename so the quality goes into the name properly
-        for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            with cur_ep.lock:
-                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
-                cur_ep.saveToDB()
-
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
-            new_base_name = ek.ek(os.path.basename, proper_path)
+            new_base_name = ek.ek(os.path.basename, ep_obj.proper_path())
             new_file_name = new_base_name + '.' + orig_extension
 
         else:
@@ -687,13 +711,6 @@ class PostProcessor(object):
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                # use the best possible representation of the release name
-                if self.good_results[self.NZB_NAME]:
-                    cur_ep.release_name = self.nzb_name
-                elif self.good_results[self.FOLDER_NAME]:
-                    cur_ep.release_name = self.folder_name
-                elif self.good_results[self.FILE_NAME]:
-                    cur_ep.release_name = self.file_name
                 cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
                 cur_ep.saveToDB()
         

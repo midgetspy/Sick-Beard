@@ -1034,6 +1034,9 @@ class TVEpisode(object):
                 self.file_size = 0
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
+            
+            if sqlResults[0]["release_name"] != None:
+                self.release_name = sqlResults[0]["release_name"]
 
             self.dirty = False
             return True
@@ -1311,7 +1314,8 @@ class TVEpisode(object):
                         "hastbn": self.hastbn,
                         "status": self.status,
                         "location": self.location,
-                        "file_size": self.file_size}
+                        "file_size": self.file_size,
+                        "release_name": self.release_name}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}
@@ -1513,7 +1517,7 @@ class TVEpisode(object):
         return result_name
 
     def proper_path(self):
-        """
+        """    
         Figures out the path where this episode SHOULD live according to the renaming rules, relative from the show dir
         """
         
