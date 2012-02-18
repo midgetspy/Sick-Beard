@@ -180,6 +180,10 @@ class PostProcessor(object):
             self._log(u"There were no files associated with "+file_path+", not moving anything", logger.DEBUG)
             return
         
+        # make any missing folders
+        helpers.make_dirs(new_path)
+        
+        # deal with all files
         for cur_file_path in file_list:
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
@@ -663,7 +667,7 @@ class PostProcessor(object):
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
-            new_base_name = ek.ek(os.path.basename, ep_obj.proper_path)
+            new_base_name = ek.ek(os.path.basename, proper_path)
             new_file_name = new_base_name + '.' + orig_extension
 
         else:

@@ -412,8 +412,7 @@ def make_dirs(path):
     parents
     """
 
-    # strip off the file name if there is one
-    path = os.path.dirname(path)
+    logger.log(u"Checking if the path "+path+" already exists", logger.DEBUG)
 
     sofar = ''
     folder_list = path.split(os.path.sep)
@@ -427,6 +426,7 @@ def make_dirs(path):
             continue
 
         try:
+            logger.log(u"Folder "+sofar+" didn't exist, creating it", logger.DEBUG)
             ek.ek(os.mkdir, sofar)
             chmodAsParent(sofar)
         except OSError, IOError:
@@ -451,7 +451,7 @@ def rename_ep_file(cur_path, new_path):
     # put the extension on the incoming file
     new_path += cur_file_ext
     
-    make_dirs(new_path)
+    make_dirs(os.path.dirname(new_path))
     
     # move the file
     try:
