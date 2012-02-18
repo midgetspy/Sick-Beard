@@ -103,7 +103,7 @@ class XBMCNotifier:
     
             logger.log(u"Contacting XBMC via url: " + url, logger.DEBUG)
             handle = urllib2.urlopen(req)
-            response = handle.read()
+            response = handle.read().decode(sickbeard.SYS_ENCODING)
             logger.log(u"response: " + response, logger.DEBUG)
         except IOError, e:
             logger.log(u"Warning: Couldn't contact XBMC HTTP server at " + fixStupidEncodings(host) + ": " + ex(e))
@@ -191,7 +191,7 @@ class XBMCNotifier:
     
             for path in paths:
                 # Don't need it double-encoded, gawd this is dumb
-                unEncPath = urllib.unquote(path.text)
+                unEncPath = urllib.unquote(path.text).decode(sickbeard.SYS_ENCODING)
                 logger.log(u"XBMC Updating " + showName + " on " + host + " at " + unEncPath, logger.DEBUG)
                 updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (unEncPath)}
                 request = self._sendToXBMC(updateCommand, host)
