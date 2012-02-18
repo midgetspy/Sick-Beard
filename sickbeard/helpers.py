@@ -26,13 +26,12 @@ import shutil
 
 import sickbeard
 
-from sickbeard.exceptions import MultipleShowObjectsException
+from sickbeard.exceptions import MultipleShowObjectsException, ex
 from sickbeard import logger, classes
 from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
-from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -461,17 +460,28 @@ def rename_ep_file(cur_path, new_path):
         return False
     
     # clean up any old folders that are empty
-    check_empty_dir = ek.ek(os.path.dirname, cur_path)
-    while not os.listdir(check_empty_dir):
-        logger.log(u"Deleting empty folder: "+check_empty_dir)
-        try:
-            os.remove(check_empty_dir)
-        except (WindowsError, OSError):
-            logger.log(u"Unable to delete "+check_empty_dir, logger.WARNING)
-            break
-        check_empty_dir = os.path.basename(check_empty_dir)
+    delete_empty_folders(ek.ek(os.path.dirname, cur_path))
     
     return True
+    
+def delete_empty_folders(check_empty_dir):
+    """
+    Walks backwards up the path and deletes any empty folders found.
+    
+    check_empty_dir: The path to clean (absolute path to a folder)
+    """
+    
+    logger.log(u"Trying to clean any empty folders under "+check_empty_dir)
+    
+    # as long as the folder exists and doesn't contain any files, delete it
+    while os.path.isdir(check_empty_dir) and not os.listdir(check_empty_dir):
+        logger.log(u"Deleting empty folder: "+check_empty_dir)
+        try:
+            os.rmdir(check_empty_dir)
+        except (WindowsError, OSError), e:
+            logger.log(u"Unable to delete "+check_empty_dir+": "+repr(e)+" / "+str(e), logger.WARNING)
+            break
+        check_empty_dir = os.path.basename(check_empty_dir)
 
 def chmodAsParent(childPath):
     if os.name == 'nt' or os.name == 'ce':

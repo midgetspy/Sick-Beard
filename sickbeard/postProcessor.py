@@ -140,10 +140,17 @@ class PostProcessor(object):
         return file_path_list
 
     def _delete(self, file_path, associated_files=False):
+        """
+        Deletes the given file and any associated files
+        
+        file_path: The full path to the file to delete
+        associated_files: True to delete any files with the same base name and a different extension
+        """
         
         if not file_path:
             return
         
+        # figure out what files we want to delete
         if associated_files:
             file_list = self._list_associated_files(file_path)
         else:
@@ -153,11 +160,15 @@ class PostProcessor(object):
             self._log(u"There were no files associated with "+file_path+", not deleting anything", logger.DEBUG)
             return
         
+        # delete all the files in our list
         for cur_file in file_list:
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 ek.ek(os.remove, cur_file)
-                
+        
+        # clean up any left over folders
+        helpers.delete_empty_folders(ek.ek(os.path.dirname, file_path))
+        
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
         file_path: The full path of the media file to copy
