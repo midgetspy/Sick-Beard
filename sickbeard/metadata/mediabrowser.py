@@ -129,7 +129,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         season_dir = None
         
         for cur_dir in dir_list:
-            if season == 0 and cur_dir == 'Specials':
+            if season == 0 and ( cur_dir == 'Specials' or cur_dir == 'misc' ):
                 season_dir = cur_dir
                 break
             
@@ -142,6 +142,13 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             if cur_season == season:
                 season_dir = cur_dir
                 break
+
+        if not season_dir:
+            my_str = sickbeard.SEASON_FOLDERS_FORMAT % season
+            for cur_dir in dir_list:
+              if my_str == cur_dir:
+                  season_dir = cur_dir
+                  break
 
         if not season_dir:
             logger.log(u"Unable to find a season dir for season "+str(season), logger.DEBUG)
