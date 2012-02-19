@@ -1,94 +1,61 @@
 $(document).ready(function(){
 
-	// http://stackoverflow.com/questions/2219924/idiomatic-jquery-delayed-event-only-after-a-short-pause-in-typing-e-g-timew
-	var typewatch = (function(){
-		var timer = 0;
-		return function(callback, ms){
-			clearTimeout (timer);
-			timer = setTimeout(callback, ms);
-			}  
-	})();
-	
-	function fill_examples() {
+    // http://stackoverflow.com/questions/2219924/idiomatic-jquery-delayed-event-only-after-a-short-pause-in-typing-e-g-timew
+    var typewatch = (function(){
+        var timer = 0;
+        return function(callback, ms){
+            clearTimeout (timer);
+            timer = setTimeout(callback, ms);
+            }  
+    })();
 
-		var pattern = $('#naming_pattern').val();
-		var multi = $('#naming_multi_ep :selected').val();
-		
-		$.get(sbRoot+'/config/postProcessing/testNaming', {pattern: pattern},
-			function(data){
-				$('#naming_example').text(data+'.ext');
-		});
+    function fill_examples() {
 
-		$.get(sbRoot+'/config/postProcessing/testNaming', {pattern: pattern, multi: multi},
-				function(data){
-					$('#naming_example_multi').text(data+'.ext');
-		});
+        var pattern = $('#naming_pattern').val();
+        var multi = $('#naming_multi_ep :selected').val();
+        
+        $.get(sbRoot+'/config/postProcessing/testNaming', {pattern: pattern},
+            function(data){
+                $('#naming_example').text(data+'.ext');
+        });
 
-		$.get(sbRoot+'/config/postProcessing/isNamingValid', {pattern: pattern, multi: multi},
-				function(data){
-					if (data == "invalid") {
-						//$('input[type=submit]').attr('disabled', true);
-						$('#temp_color_div').css('background-color', 'red');
-					} else if (data == "seasonfolders") {
-						$('input[type=submit]').attr('disabled', false);
-						$('#temp_color_div').css('background-color', 'yellow');
-					} else {
-						$('input[type=submit]').attr('disabled', false);
-						$('#temp_color_div').css('background-color', 'white');
-					}						
-		});
-	}
-	
-	function do_custom_help() {
-		var show_help = false;
-		$('.naming_custom_span').each(function(){
-			if ($(this).is(':visible')) {
-				show_help = true;
-				return false;
-			}
-		});
+        $.get(sbRoot+'/config/postProcessing/testNaming', {pattern: pattern, multi: multi},
+            function(data){
+                $('#naming_example_multi').text(data+'.ext');
+        });
 
-		if (show_help)
-			$('#naming_custom_help').show();
-		else
-			$('#naming_custom_help').hide();
-	}
-	
-	function do_preset(me) {
+        $.get(sbRoot+'/config/postProcessing/isNamingValid', {pattern: pattern, multi: multi},
+            function(data){
+                if (data == "invalid")
+                    $('#naming_pattern').css('background-color', '#FFDDDD');
+                else if (data == "seasonfolders")
+                    $('#naming_pattern').css('background-color', '#FFFFDD');
+                else
+                    $('#naming_pattern').css('background-color', '#FFFFFF');
+        });
 
-		var preset = $(me+' :selected').attr('id');
+    }
 
-		if (preset == 'none')
-			preset = '';
-		
-		if (preset == 'custom')
-			$(me).parent().siblings('.naming_custom_span').show();
-		else
-			$(me).parent().siblings('.naming_custom_span').hide();
-
-		if (preset != 'custom')
-			$(me).parent().siblings('.naming_custom_span').children('.component-desc').children('.naming_pattern').val(preset);
-
-		fill_examples();
-		
-		do_custom_help();
-	}
-
-	// initialize the presets
-	do_preset('#dir_presets');
-	do_preset('#name_presets');
-	
-	$('.naming_preset_select').change(function(){
-		var me = '#'+$(this).attr('id');
-		do_preset(me);
-	});
-	
-	$('#naming_multi_ep').change(fill_examples);
-	$('#naming_pattern').keyup(function(){
-		typewatch(function () {
-			do_preset('#'+$(this).attr('id'));
-		}, 500);
-	});
+    $('#name_presets').change(function(){
+        $('#naming_pattern').val( $('#name_presets :selected').attr('id') );
+        fill_examples();
+    });
+    $('#naming_multi_ep').change(fill_examples);
+    $('#naming_pattern').focusout(fill_examples);
+    $('#naming_pattern').keyup(function(){
+        typewatch(function () {
+            fill_examples();
+        }, 500);
+    });
+    $('#show_naming_key').click(function(){
+        $('#naming_key').toggle();
+    });
+    $('#do_custom').click(function(){
+        $('#naming_pattern').val( $('#name_presets :selected').attr('id') );
+        $('#naming_custom').show();
+        $('#naming_pattern').focus();
+    });
+    fill_examples();
 
     // -- start of metadata options div toggle code --
     $('#metadataType').change(function(){
@@ -165,5 +132,23 @@ $(document).ready(function(){
     }
 
     $(this).refreshMetadataConfig(true);
+    $('img[title]').qtip(
+    {
+        position: {
+            viewport: $(window),
+            my: 'left center',
+            adjust: {
+                y: -6,
+                x: 3
+            }
+        },
+        style: {
+            tip: {
+                corner: true,
+                method: 'polygon'
+            },
+            classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-sb'
+        }
+    });
 
 });

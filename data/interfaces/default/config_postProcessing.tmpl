@@ -24,202 +24,8 @@
 <form id="configForms" action="savePostProcessing" method="post">
 
             <div id="config-components">
-                
-                <div id="core-component-group3" class="component-group clearfix">
-                    <div class="component-group-desc">
-                        <h3>Naming</h3>
-                        <p>How Sick Beard will name and sort your episodes.</p>
-                    </div>
 
-                    <fieldset class="component-group-list">
-
-                        <div id="temp_color_div">
-
-                            <div class="clearfix">
-                                <span class="component-title">File Name</span>
-                                <span class="component-desc">
-                                    <select id="name_presets" class="naming_preset_select">
-                                    #set $is_custom = True
-                                    #for $cur_preset in $naming.name_presets:
-                                        #set $tmp = $naming.test_name($cur_preset)
-                                        #if $cur_preset == $sickbeard.NAMING_PATTERN:
-                                            #set $is_custom = False
-                                        #end if
-                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected" else ""#>$tmp['name']</option>
-                                    #end for
-                                    <option id="custom" #if $is_custom then "selected" else ""#>Custom...</option>
-                                    </select><br />
-                                    <br />
-                                </span>
-                                <div class="clearfix"></div>
-                                <span class="naming_custom_span">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span id="naming_custom" class="component-desc">
-                                        <input type="text" size="60" name="naming_pattern" id="naming_pattern" class="naming_pattern" value="$sickbeard.NAMING_PATTERN" /><br />
-                                        <br />
-                                    </span>
-                                </span>
-                            </div>
-
-                        </div>
-                        
-                        <div style="padding:10px; background: #efefef;">
-                            <label class="clearfix">
-                                <span class="component-title jumbo" style="padding-bottom: 5px;"><b>Example:</b></span>
-                                <span class="component-desc jumbo" id="naming_example"></span>
-                            </label>
-                        </div>
-                    
-                        <div class="field-pair">
-                            <label class="nocheck clearfix" for="naming_multi_ep">
-                                <span class="component-title">Multi-episode Style</span>
-                                <span class="component-desc">
-                                    <select id="naming_multi_ep" name="naming_multi_ep">
-                                    #for $cur_multi_ep in $multiEpStrings:
-                                        <option value="$cur_multi_ep">$multiEpStrings[$cur_multi_ep]</option>
-                                    #end for
-                                    </select>
-                                </span>
-                            </label>
-                        </div>
-
-                        <div style="padding:10px; background: #efefef;">
-                            <label class="clearfix">
-                                <span class="component-title jumbo" style="padding-bottom: 5px;"><b>Multi-Ep Example:</b></span>
-                                <span class="component-desc jumbo" id="naming_example_multi"></span>
-                            </label>
-                        </div>
-                        
-                        <br />
-                        
-                        <div id="naming_custom_help">
-<b>Help</b><br />
-<br />
-<table width="100%" cellpadding="3" cellspacing="0">
- <tr style="background: #efefef;">
-  <td><b>Show Name</b></td>
-  <td>%SN</td>
-  <td>Show Name</td>
- </tr>
- <tr style="background: #efefef;">
-  <td>&nbsp;</td>
-  <td>%S.N</td>
-  <td>Show.Name</td>
- </tr>
- <tr style="background: #efefef;">
-  <td>&nbsp;</td>
-  <td>%S_N</td>
-  <td>Show_Name</td>
- </tr>
- <tr>
-  <td>Episode Name</td>
-  <td>%EN</td>
-  <td>Episode Name</td>
- </tr>
- <tr>
-  <td>&nbsp;</td>
-  <td>%E.N</td>
-  <td>Episode.Name</td>
- </tr>
- <tr>
-  <td>&nbsp;</td>
-  <td>%E_N</td>
-  <td>Episode_Name</td>
- </tr>
- <tr style="background: #efefef;">
-  <td><b>Season Number</b></td>
-  <td>%S</td>
-  <td>1</td>
- </tr>
- <tr style="background: #efefef;">
-  <td>&nbsp;</td>
-  <td>%0S</td>
-  <td>01</td>
- </tr>
- <tr>
-  <td><b>Episode Number</b></td>
-  <td>%E</td>
-  <td>5</td>
- </tr>
- <tr>
-  <td>&nbsp;</td>
-  <td>%0E</td>
-  <td>05</td>
- </tr>
- <tr style="background: #efefef;">
-  <td><b>Quality</b></td>
-  <td>%QN</td>
-  <td>720p BluRay</td>
- </tr>
- <tr style="background: #efefef;">
-  <td>&nbsp;</td>
-  <td>%Q.N</td>
-  <td>720p.BluRay</td>
- </tr>
- <tr style="background: #efefef;">
-  <td>&nbsp;</td>
-  <td>%Q_N</td>
-  <td>720p_BluRay</td>
- </tr>
- <tr>
-  <td><b>Date</b></td>
-  <td>%AD</td>
-  <td>2010 03 22</td>
- </tr>
- <tr>
-  <td>&nbsp;</td>
-  <td>%A_D</td>
-  <td>2010_03_22</td>
- </tr>
- <tr>
-  <td>&nbsp;</td>
-  <td>%A.D</td>
-  <td>2010.03.22</td>
- </tr>
- <tr>
-  <td>&nbsp;</td>
-  <td>%A-D</td>
-  <td>2010-03-22</td>
- </tr>
- <tr style="background: #efefef;">
-  <td><b>Year</b></td>
-  <td>%Y</td>
-  <td>2010</td>
- </tr>
- <tr>
-  <td><b>Month</b></td>
-  <td>%M</td>
-  <td>03</td>
- </tr>
- <tr style="background: #efefef;">
-  <td><b>Day</b></td>
-  <td>%D</td>
-  <td>22</td>
- </tr>
- <tr>
-  <td><b>Release Name</b></td>
-  <td>%RN</td>
-  <td>Show.Name.S02E03.HDTV.XviD-GROUP</td>
- </tr>
- <tr style="background: #efefef;">
-  <td><b>Release Group</b></td>
-  <td>%RG</td>
-  <td>GROUP</td>
- </tr>
-</table>
-
-<br />
-Use lower case if you want lower case names (eg. %sn, %e.n, %q etc)<br />
-<br />
-                        </div>                        
-
-                        <div class="clearfix"></div>
-                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
-
-                    </fieldset>
-                </div><!-- /component-group3 //-->
-
-                <div id="core-component-group3" class="component-group clearfix">
+                <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Post-Processing</h3>
@@ -246,7 +52,6 @@ Use lower case if you want lower case names (eg. %sn, %e.n, %q etc)<br />
                             </label>
                         </div>
 
-                        
                         <div class="field-pair">
                             <input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="keep_processed_dir">
@@ -291,9 +96,218 @@ Use lower case if you want lower case names (eg. %sn, %e.n, %q etc)<br />
                         <input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>
-                </div><!-- /component-group3 //-->
+                </div><!-- /component-group1 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3>Naming</h3>
+                        <p>How Sick Beard will name and sort your episodes.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+
+                        <div class="field-pair">
+                            <div class="nocheck clearfix" for="name_presets">
+                                <span class="component-title">File Name</span>
+                                <select id="name_presets" style="float: left; margin-right: 15px;">
+                                    #set $is_custom = True
+                                    #for $cur_preset in $naming.name_presets:
+                                        #set $tmp = $naming.test_name($cur_preset)
+                                        #if $cur_preset == $sickbeard.NAMING_PATTERN:
+                                            #set $is_custom = False
+                                        #end if
+                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected=\"selected\" class=\"selected\"" else ""#>$tmp['name']</option>
+                                    #end for
+                                    #if $is_custom:
+                                        <option id="$sickbeard.NAMING_PATTERN" selected="selected" class="selected">Custom...</option>
+                                    #end if
+                                </select>
+                                #if not $is_custom:
+                                <input type="button" value="Customize" id="do_custom" />
+                                #end if
+                                <br />
+                            </div>
+                        </div>
+
+                        <div id="naming_custom" style="#if $is_custom then "display: block;" else "display: none;"#">
+                            <div class="field-pair clearfix">
+                                <div class="nocheck clearfix">
+                                    <span class="component-title">
+                                        &nbsp;
+                                    </span>
+                                    <span class="component-desc">
+                                        <input type="text" size="50" name="naming_pattern" id="naming_pattern" value="$sickbeard.NAMING_PATTERN" />
+                                        <img src="$sbRoot/images/legend16.png" width="16" height="16" alt="[Toggle Key]" id="show_naming_key" title="Toggle Naming Legend" style="padding-left: 5px;">
+                                    </span>
+                                </div>
+                            </div>
+                            <div id="naming_key" class="nocheck clearfix" style="display: none;">
+                                  <table id="Key" class="Key">
+                                    <thead>
+                                        <tr>
+                                          <th class="align-right">Meaning</th>
+                                          <th>Pattern</th>
+                                          <th width="60%">Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                          <th colspan="3">Use lower case if you want lower case names (eg. %sn, %e.n, %q etc)</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        <tr>
+                                          <td class="align-right"><b>Show Name:</b></td>
+                                          <td>%SN</td>
+                                          <td>Show Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%S.N</td>
+                                          <td>Show.Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%S_N</td>
+                                          <td>Show_Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Episode Name:</b></td>
+                                          <td>%EN</td>
+                                          <td>Episode Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%E.N</td>
+                                          <td>Episode.Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%E_N</td>
+                                          <td>Episode_Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Season Number:</b></td>
+                                          <td>%S</td>
+                                          <td>2</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%0S</td>
+                                          <td>02</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Episode Number:</b></td>
+                                          <td>%E</td>
+                                          <td>3</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%0E</td>
+                                          <td>03</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Quality:</b></td>
+                                          <td>%QN</td>
+                                          <td>720p BluRay</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%Q.N</td>
+                                          <td>720p.BluRay</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%Q_N</td>
+                                          <td>720p_BluRay</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Air-By-Date:</b></td>
+                                          <td>%AD</td>
+                                          <td>2010 03 22</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%A.D</td>
+                                          <td>2010.03.22</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%A_D</td>
+                                          <td>2010_03_22</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%A-D</td>
+                                          <td>2010-03-22</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Year:</b></td>
+                                          <td>%Y</td>
+                                          <td>2010</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Month:</b></td>
+                                          <td>%M</td>
+                                          <td>03</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Day:</b></td>
+                                          <td>%D</td>
+                                          <td>22</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Release Name:</b></td>
+                                          <td>%RN</td>
+                                          <td>Show.Name.S02E03.HDTV.XviD-RLSGROUP</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Release Group:</b></td>
+                                          <td>%RG</td>
+                                          <td>RLSGROUP</td>
+                                        </tr>
+                                    </tbody>
+                                  </table>
+                                  <br/>
+                            </div>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="naming_multi_ep">
+                                <span class="component-title">Multi-episode Style</span>
+                                <span class="component-desc">
+                                    <select id="naming_multi_ep" name="naming_multi_ep">
+                                    #for $cur_multi_ep in $multiEpStrings:
+                                        <option value="$cur_multi_ep" #if $cur_multi_ep == $sickbeard.NAMING_MULTI_EP then "selected=\"selected\" class=\"selected\"" else ""#>$multiEpStrings[$cur_multi_ep]</option>
+                                    #end for
+                                    </select>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div id="naming_example_div">
+                            <h2>Result:</h2>
+                            <div class="example">
+                                <span class="jumbo" id="naming_example">&nbsp;</span>
+                            </div>
+                        </div>
+                        <br/>
+
+                        <div id="naming_example_multi_div">
+                            <h2>Multi-Ep Result:</h2>
+                            <div class="example">
+                                <span class="jumbo" id="naming_example_multi">&nbsp;</span>
+                            </div>
+                        </div>
+                        <br/>
+
+                        <div class="clearfix"></div>
+                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+
+                    </fieldset>
+                </div><!-- /component-group2 //-->
+
+                <div id="core-component-group3" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Metadata</h3>
@@ -308,7 +322,7 @@ Use lower case if you want lower case names (eg. %sn, %e.n, %q etc)<br />
                                     #set $m_dict = $metadata.get_metadata_generator_dict()
                                     <select id="metadataType">
                                     #for ($cur_name, $cur_generator) in $m_dict.items():
-                                    <option value="$GenericMetadata.makeID($cur_name)">$cur_name</option>
+                                        <option value="$GenericMetadata.makeID($cur_name)">$cur_name</option>
                                     #end for
                                     </select>
                                 </span>
@@ -359,7 +373,7 @@ Use lower case if you want lower case names (eg. %sn, %e.n, %q etc)<br />
                         <input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>
-                </div><!-- /component-group2 //-->
+                </div><!-- /component-group3 //-->
 
 
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>

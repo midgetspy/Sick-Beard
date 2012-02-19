@@ -9,7 +9,7 @@
 #config h5{font-size:1em;color:#000;margin:0 0 .2em;}
 #config p,#config li{font-size:1.2em;line-height:1.3;}
 #config .path{font-size:1em;color:#333;font-family:Verdana;}
-#config .jumbo{font-size:16px !important;}
+#config .jumbo{font-size:1.3em !important;}
 #config-content{display:block;width:835px;text-align:left;clear:both;background:#fff;margin:0 auto;padding:0 0 40px;}
 #config-components{float:left;width:auto;}
 #config-components-border{float:left;width:auto;border-top:1px solid #999;padding:5px 0;}
@@ -23,7 +23,7 @@
 #config fieldset{border:0;outline:0;}
 #config div.field-pair{margin:.9em 0 1.4em;}
 #config div.field-pair input{float:left;margin-right:6px;}
-#config label.nocheck,#config div.providerDiv,#config div #customQuality{padding-left:20px;}
+#config .nocheck,#config div.providerDiv,#config div #customQuality{padding-left:20px;}
 #config span.component-title{font-size:1.2em;font-weight:700;float:left;width:160px;margin-right:10px;}
 #config span.component-desc{font-size:1.1em;}
 #config div.field-pair select{font-size:1.1em;border:1px solid #d4d0c8;}
@@ -52,6 +52,8 @@
 #config div.metadataDiv .disabled{color:#ccc;}
 #config div #metadataLegend{font-size:14px;font-family:Verdana;font-weight:900;display:block;width:auto;text-align:center;padding-bottom:3px;}
 
+#config div.example { padding: 10px; background-color: #efefef; }
+
 .infoTable {border-collapse: collapse;}
 .infoTableHeader, .infoTableCell {padding: 5px;}
 .infoTableHeader{font-weight:700;}
@@ -64,4 +66,36 @@
     text-align: center;
     font-size: 1.3em;
     background: #ffecac;
+}
+
+.even {
+    background-color: #DFDEDE;
+}
+html { font-size: 100%; }
+.Key {
+/*    display: none; */
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-family: sans-serif;
+    border: 1px solid #CCC;
+    width: 100%;
+    font-size: 13px;
+    background-color: #F4F4F4;
+    padding: 6px;
+}
+.Key th, .tableHeader {
+    background: none repeat scroll 0 0 #666;
+    color: #FFF;
+    margin: 0;
+    padding: 3px 9px;
+    text-align: center;
+}
+.Key td {
+    padding: 1px 5px !important;
+}
+.Key tr {
+    border-bottom: 1px solid #CCC;
+}
+select .selected {
+    font-weight: 700;
 }
