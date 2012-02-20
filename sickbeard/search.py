@@ -182,22 +182,8 @@ def searchForNeededEpisodes():
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
                 continue
             
-            # did the user choose to check for existing files prior to downloading higher qualities?
-            if sickbeard.CHECK_EXISTENCE:
-                logger.log(u"========================================================================")
-                logger.log(u"Checking if the episode we found has already been deleted")
-                
-                curLoc = os.path.normpath(curEp.fullPath())
-                logger.log(u"Checking if " + curLoc + " is still present.")
-                
-                # if the path doesn't exist or if it's not in our show dir
-                if not ek.ek(os.path.isfile, curLoc) or not os.path.normpath(curLoc).startswith(os.path.normpath(curEp.show.location)):
-                    logger.log(u"The episode we found has already been deleted, not downloading it again")
-                    logger.log(u"========================================================================")
-                    continue
-                
-                logger.log(u"The episode we found has not yet been deleted, downloading higher quality version")
-                logger.log(u"========================================================================")            
+            if fileWasDeleted(curEp):
+                continue
             
             foundResults[curEp] = bestResult
 
@@ -272,6 +258,27 @@ def isFinalResult(result):
     else:
         return False
 
+def fileWasDeleted(epObj):
+    '''
+    Checks if the user has deleted file corresponding to epObj. This functionality is turned off by default. 
+    It will only perform this check if the user has explicitly requested it via the Search Settings configuration page.
+    
+    If the file is still present on disk, this function returns False. If it has been deleted, it returns True.
+    '''
+    deleted = False
+    
+    if sickbeard.CHECK_EXISTENCE:        
+        epLoc = os.path.normpath(epObj.fullPath())
+        logger.log(u"Making sure " + epObj.prettyName() + " is still present at " + epLoc, logger.DEBUG)
+        
+        # if the path doesn't exist or if it's not in our show dir, consider it deleted
+        if not ek.ek(os.path.isfile, epLoc) or not os.path.normpath(epLoc).startswith(os.path.normpath(epObj.show.location)):
+            logger.log(u"Episode " + str(epObj.episode) + " has already been deleted, not downloading it again")
+            deleted = True
+        else: 
+            logger.log(u"Episode " + str(epObj.episode) + " has not yet been deleted, downloading higher quality version")
+    
+    return deleted 
 
 def findEpisode(episode, manualSearch=False):
 
@@ -343,7 +350,12 @@ def findSeason(show, season):
 
                 # skip non-tv crap
                 curResults[curEp] = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), curResults[curEp])
-
+                
+                # get a TV Episode object for episode number 'curEp' of this backlog's season, but don't create anything new
+                curEpObj = show.getEpisode(season, curEp, None, True)
+                if fileWasDeleted(curEpObj):
+                    continue
+                
                 if curEp in foundResults:
                     foundResults[curEp] += curResults[curEp]
                 else:
