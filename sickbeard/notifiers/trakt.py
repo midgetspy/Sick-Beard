@@ -42,19 +42,10 @@ class TraktNotifier:
 
     def notify_download(self, ep_name):
         pass
-    
-    def notify_delete(self, ep_obj):
-        logger.log(u"Starting Trakt removal", logger.DEBUG)
-                    
-        if ep_obj != None:
-            logger.log(u"Removing " + ep_obj.show.name + " " + str(ep_obj.season) + "x" + str(ep_obj.episode) + " from Trakt collection", logger.DEBUG)
-            self.update_library(ep_obj, True)
-        else:
-            logger.log(u"No episode could be found to be removed from your Trakt collection", logger.WARNING)
 
-    def update_library(self, ep_obj, delete=False):
+    def update_library(self, ep_obj):
         if sickbeard.USE_TRAKT:
-            method = "show/episode/unlibrary/" if delete else "show/episode/library/"
+            method = "show/episode/library/"
             method += "%API%"
             
             data = {
