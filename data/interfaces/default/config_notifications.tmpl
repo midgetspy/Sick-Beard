@@ -17,7 +17,11 @@
 
             <div id="config-components">
 
-                <div id="core-component-group1" class="component-group clearfix">
+            <br />
+            <h1>Home Theater</h1>
+            <br />
+
+                <div class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3><a href="http://xbmc.org/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/xbmc.gif" alt="XBMC" title="XBMC" width="16" height="16" /> XBMC</a></h3>
@@ -112,7 +116,7 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
-                <div id="core-component-group2" class="component-group clearfix">
+                <div class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3><a href="http://www.plexapp.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/plex.gif" alt="Plex Media Server" title="Plex Media Server" width="16" height="16" /> Plex Media Server</a></h3>
@@ -206,7 +210,163 @@
                     </fieldset>
                 </div><!-- /component-group -->
 
-                <div id="core-component-group3" class="component-group clearfix">
+                <div class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nmj.gif" alt="Networked Media Jukebox" title="Networked Media Jukebox" width="16" height="16" /> NMJ</a></h3>
+                        <p>The Networked Media Jukebox, or NMJ, is the official media jukebox interface made available for the Popcorn Hour 200-series.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_nmj" id="use_nmj" #if $sickbeard.USE_NMJ then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_nmj">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send update commands to NMJ?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_nmj">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Popcorn IP address</span>
+                                <input type="text" name="nmj_host" id="nmj_host" value="$sickbeard.NMJ_HOST" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">IP of Popcorn 200-series (eg. 192.168.1.100)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Get Settings</span>
+                                <input type="button" value="Get Settings" id="settingsNMJ" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">The Popcorn Hour device must be powered on and NMJ running.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">NMJ Database</span>
+                                <input type="text" name="nmj_database" id="nmj_database" value="$sickbeard.NMJ_DATABASE" size="35" #if $sickbeard.NMJ_DATABASE then "readonly=\"readonly\"" else ""# />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Automatically filled via the 'Get Settings' button.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">NMJ Mount URL</span>
+                                <input type="text" name="nmj_mount" id="nmj_mount" value="$sickbeard.NMJ_MOUNT" size="35" #if $sickbeard.NMJ_MOUNT then "readonly=\"readonly\"" else ""# />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Automatically filled via the 'Get Settings' button.</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testNMJ-result">Click below to test.</div>
+                        <input type="button" value="Test NMJ" id="testNMJ" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_nmj //-->
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synoindex.gif" alt="Synology Indexer" title="Synology Indexer" width="16" height="16" /> Synology Indexer</a></h3>
+                        <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_synoindex">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?<br /><br />
+                                </span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_synoindex">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Note: Requires SB to be running on your Synology NAS.</span>
+                            </label>
+                        </div>
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+                <div class="component-group clearfix">
+                
+                    <div class="component-group-desc">
+                        <h3><a href="http://pytivo.sourceforge.net/wiki/index.php/PyTivo" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/pytivo.gif" alt="pyTivo" title="pyTivo" width="16" height="16" />pyTivo</a></h3>
+                        <p>pyTivo is both an HMO and GoBack server.  This notifier will load the completed downloads to your Tivo.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_pytivo" id="use_pytivo" #if $sickbeard.USE_PYTIVO then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_pytivo">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to pyTivo?<br /><br /></span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_pytivo">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Requires the downloaded files to be accessible to pyTivo.</span>
+                            </label>
+                        </div>
+                        
+                        <div id="content_use_pytivo">
+                        
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">pyTivo IP:Port</span>
+                                    <input type="text" name="pytivo_host" id="pytivo_host" value="$sickbeard.PYTIVO_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Host running pyTivo (eg. 192.168.1.1:9032)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">pyTivo Share name</span>
+                                    <input type="text" name="pytivo_share_name" id="pytivo_share_name" value="$sickbeard.PYTIVO_SHARE_NAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Value used in pyTivo Web Configuration to name the share.</span>
+                                </label>
+                            </div>
+
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Tivo Name</span>
+                                    <input type="text" name="pytivo_tivo_name" id="pytivo_tivo_name" value="$sickbeard.PYTIVO_TIVO_NAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Messages & Settings > Account & System Information > System Information > DVR name</span>
+                                </label>
+                            </div>
+                            
+                            <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /enabler_pytivo //-->
+                        
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+                <br /><br /><br />
+                <h1>Devices</h1>
+                <br />
+
+                <div class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3><a href="http://growl.info/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/growl.gif" alt="Growl" title="Growl" width="16" height="16" /> Growl</a></h3>
@@ -274,7 +434,314 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
-                <div id="core-component-group4" class="component-group clearfix">
+                <div class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3><a href="http://www.prowlapp.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/prowl.gif" alt="Prowl" title="Prowl" width="16" height="16" /> Prowl</a></h3>
+                        <p>A Growl client for iOS.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_prowl">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Prowl notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_prowl">
+                        <div class="field-pair">
+                            <input type="checkbox" name="prowl_notify_onsnatch" id="prowl_notify_onsnatch" #if $sickbeard.PROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="prowl_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="prowl_notify_ondownload" id="prowl_notify_ondownload" #if $sickbeard.PROWL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="prowl_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Prowl API key:</span>
+                                <input type="text" name="prowl_api" id="prowl_api" value="$sickbeard.PROWL_API" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Get your key at: <a href="https://www.prowlapp.com/api_settings.php" onclick="window.open(this.href, '_blank'); return false;">https://www.prowlapp.com/api_settings.php</a></span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Prowl priority:</span>
+                               <select id="prowl_priority" name="prowl_priority">
+                                    <option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then 'selected="selected"' else ""#>Very Low</option>
+                                    <option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then 'selected="selected"' else ""#>Moderate</option>
+                                    <option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then 'selected="selected"' else ""#>Normal</option>
+                                    <option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then 'selected="selected"' else ""#>High</option>
+                                    <option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then 'selected="selected"' else ""#>Emergency</option>
+                                </select>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Priority of Prowl messages from Sick-Beard.</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testProwl-result">Click below to test.</div>
+                        <input type="button" value="Test Prowl" id="testProwl" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_prowl //-->
+
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+
+                <div class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3><a href="http://notifo.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/notifo.gif" alt="Notifo" title="Notifo" width="16" height="16" /> Notifo</a></h3>
+                        <p>A platform for push-notifications to either mobile or desktop clients</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_notifo" id="use_notifo" #if $sickbeard.USE_NOTIFO then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_notifo">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Notifo?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_notifo">
+                        <div class="field-pair">
+                            <input type="checkbox" name="notifo_notify_onsnatch" id="notifo_notify_onsnatch" #if $sickbeard.NOTIFO_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="notifo_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="notifo_notify_ondownload" id="notifo_notify_ondownload" #if $sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="notifo_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Notifo Username</span>
+                                <input type="text" name="notifo_username" id="notifo_username" value="$sickbeard.NOTIFO_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your Notifo account</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Notifo API secret</span>
+                                <input type="password" name="notifo_apisecret" id="notifo_apisecret" value="$sickbeard.NOTIFO_APISECRET" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Get your API key at:  <a href="http://notifo.com/user/settings" onclick="window.open(this.href, '_blank'); return false;">http://notifo.com/user/settings</a></span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testNotifo-result">Click below to test.</div>
+                        <input type="button" value="Test Notifo" id="testNotifo" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_notifo //-->
+
+                    </fieldset>
+
+                </div>
+
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/libnotify.gif" alt="Libnotify" title="Libnotify" width="16" height="16" /> Libnotify</a></h3>
+                        <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_libnotify" id="use_libnotify" #if $sickbeard.USE_LIBNOTIFY then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_libnotify">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Libnotify notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_libnotify">
+                        <div class="field-pair">
+                            <input type="checkbox" name="libnotify_notify_onsnatch" id="libnotify_notify_onsnatch" #if $sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="libnotify_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="libnotify_notify_ondownload" id="libnotify_notify_ondownload" #if $sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="libnotify_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
+                        <input type="button" value="Test Libnotify" id="testLibnotify" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+
+                        </div><!-- /content_use_libnotify //-->
+
+                    </fieldset>
+                </div><!-- /component-group //-->
+
+                <div class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3><a href="http://boxcar.io/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/boxcar.gif" alt="Boxcar" title="Boxcar" width="16" height="16" /> Boxcar</a></h3>
+                        <p>Read your messages where and when you want them! A subscription will be send if needed.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_boxcar" id="use_boxcar" #if $sickbeard.USE_BOXCAR then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_boxcar">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Boxcar?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_boxcar">
+                        <div class="field-pair">
+                            <input type="checkbox" name="boxcar_notify_onsnatch" id="boxcar_notify_onsnatch" #if $sickbeard.BOXCAR_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="boxcar_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="boxcar_notify_ondownload" id="boxcar_notify_ondownload" #if $sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="boxcar_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Boxcar Username</span>
+                                <input type="text" name="boxcar_username" id="boxcar_username" value="$sickbeard.BOXCAR_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username of your Boxcar account</span>
+                            </label>
+                        </div>
+
+                        <div class="testNotification" id="testBoxcar-result">Click below to test.</div>
+                        <input type="button" value="Test Boxcar" id="testBoxcar" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_boxcar //-->
+
+                    </fieldset>
+
+                </div>
+
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://nma.usk.bz" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nma.jpg" alt="NMA" title="NMA" width="16" height="16" /> Notify My Android</a></h3>
+                        <p>Notify My Android is a Prowl-like Android App and API that offers an easy way to send notifications from your application directly to your Android device.</p>
+                    </div>
+                    
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_nma" id="use_nma" #if $sickbeard.USE_NMA then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_nma">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send NMA notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_nma">
+                            <div class="field-pair">
+                                <input type="checkbox" name="nma_notify_onsnatch" id="nma_notify_onsnatch" #if $sickbeard.NMA_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="nma_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <input type="checkbox" name="nma_notify_ondownload" id="nma_notify_ondownload" #if $sickbeard.NMA_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="nma_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                        
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                       <span class="component-title">NMA API key:</span>
+                                    <input type="text" name="nma_api" id="nma_api" value="$sickbeard.NMA_API" size="55" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Multiple keys must be seperated by a , (comma). Up to a maximum of 5</span>
+                                </label>
+                            </div>
+                        
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NMA priority:</span>
+                                       <select id="nma_priority" name="nma_priority">
+                                        <option value="-2" #if $sickbeard.NMA_PRIORITY == "-2" then 'selected="selected"' else ""#>Very Low</option>
+                                        <option value="-1" #if $sickbeard.NMA_PRIORITY == "-1" then 'selected="selected"' else ""#>Moderate</option>
+                                        <option value="0" #if $sickbeard.NMA_PRIORITY == "0" then 'selected="selected"' else ""#>Normal</option>
+                                        <option value="1" #if $sickbeard.NMA_PRIORITY == "1" then 'selected="selected"' else ""#>High</option>
+                                        <option value="2" #if $sickbeard.NMA_PRIORITY == "2" then 'selected="selected"' else ""#>Emergency</option>
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Priority of NMA messages from Sick-Beard.</span>
+                                </label>
+                            </div>
+
+                            <div class="testNotification" id="testNMA-result">Click below to test.</div>
+                            <input type="button" value="Test NMA" id="testNMA" />
+                            <input type="submit" class="config_submitter" value="Save Changes" />
+
+                        </div><!-- /content_use_nma //-->
+
+                    </fieldset>
+                    
+                </div><!-- /component-group //-->
+
+                <br /><br /><br />
+                <h1>Online</h1>
+                <br />
+
+                <div class="component-group clearfix">
                 
                     <div class="component-group-desc">
                         <h3><a href="http://www.twitter.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/twitter.gif" alt="Twitter" title="Twitter" width="16" height="16" /> Twitter</a></h3>
@@ -349,332 +816,8 @@
                     </fieldset>
                 </div><!-- /component-group //-->
                 
-            <div id="core-component-group5" class="component-group clearfix">
 
-                    <div class="component-group-desc">
-                        <h3><a href="http://www.prowlapp.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/prowl.gif" alt="Prowl" title="Prowl" width="16" height="16" /> Prowl</a></h3>
-                        <p>A Growl client for iOS.</p>
-                    </div>
-
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "checked=\"checked\"" else ""# /> 
-                            <label class="clearfix" for="use_prowl">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send Prowl notifications?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_prowl">
-                        <div class="field-pair">
-                            <input type="checkbox" name="prowl_notify_onsnatch" id="prowl_notify_onsnatch" #if $sickbeard.PROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
-                            <label class="clearfix" for="prowl_notify_onsnatch">
-                                <span class="component-title">Notify on Snatch</span>
-                                <span class="component-desc">Send notification when we start a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <input type="checkbox" name="prowl_notify_ondownload" id="prowl_notify_ondownload" #if $sickbeard.PROWL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="prowl_notify_ondownload">
-                                <span class="component-title">Notify on Download</span>
-                                <span class="component-desc">Send notification when we finish a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Prowl API key:</span>
-                                <input type="text" name="prowl_api" id="prowl_api" value="$sickbeard.PROWL_API" size="35" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Get your key at: <a href="https://www.prowlapp.com/api_settings.php" onclick="window.open(this.href, '_blank'); return false;">https://www.prowlapp.com/api_settings.php</a></span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Prowl priority:</span>
-                               <select id="prowl_priority" name="prowl_priority">
-                                    <option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then 'selected="selected"' else ""#>Very Low</option>
-                                    <option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then 'selected="selected"' else ""#>Moderate</option>
-                                    <option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then 'selected="selected"' else ""#>Normal</option>
-                                    <option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then 'selected="selected"' else ""#>High</option>
-                                    <option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then 'selected="selected"' else ""#>Emergency</option>
-                                </select>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Priority of Prowl messages from Sick-Beard.</span>
-                            </label>
-                        </div>
-
-                        <div class="testNotification" id="testProwl-result">Click below to test.</div>
-                        <input type="button" value="Test Prowl" id="testProwl" />
-                        <input type="submit" class="config_submitter" value="Save Changes" />
-                        
-                        </div><!-- /content_use_prowl //-->
-
-                    </fieldset>
-                </div><!-- /component-group //-->
-
-
-                 <div id="core-component-group6" class="component-group clearfix">
-
-                    <div class="component-group-desc">
-                        <h3><a href="http://notifo.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/notifo.gif" alt="Notifo" title="Notifo" width="16" height="16" /> Notifo</a></h3>
-                        <p>A platform for push-notifications to either mobile or desktop clients</p>
-                    </div>
-
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_notifo" id="use_notifo" #if $sickbeard.USE_NOTIFO then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="use_notifo">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications through Notifo?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_notifo">
-                        <div class="field-pair">
-                            <input type="checkbox" name="notifo_notify_onsnatch" id="notifo_notify_onsnatch" #if $sickbeard.NOTIFO_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="notifo_notify_onsnatch">
-                                <span class="component-title">Notify on Snatch</span>
-                                <span class="component-desc">Send notification when we start a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <input type="checkbox" name="notifo_notify_ondownload" id="notifo_notify_ondownload" #if $sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="notifo_notify_ondownload">
-                                <span class="component-title">Notify on Download</span>
-                                <span class="component-desc">Send notification when we finish a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Notifo Username</span>
-                                <input type="text" name="notifo_username" id="notifo_username" value="$sickbeard.NOTIFO_USERNAME" size="35" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Username of your Notifo account</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Notifo API secret</span>
-                                <input type="password" name="notifo_apisecret" id="notifo_apisecret" value="$sickbeard.NOTIFO_APISECRET" size="35" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Get your API key at:  <a href="http://notifo.com/user/settings" onclick="window.open(this.href, '_blank'); return false;">http://notifo.com/user/settings</a></span>
-                            </label>
-                        </div>
-
-                        <div class="testNotification" id="testNotifo-result">Click below to test.</div>
-                        <input type="button" value="Test Notifo" id="testNotifo" />
-                        <input type="submit" class="config_submitter" value="Save Changes" />
-                        
-                        </div><!-- /content_use_notifo //-->
-
-                    </fieldset>
-
-                </div>
-
-
-                <div id="core-component-group7" class="component-group clearfix">
-                    <div class="component-group-desc">
-                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/libnotify.gif" alt="Libnotify" title="Libnotify" width="16" height="16" /> Libnotify</a></h3>
-                        <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
-                    </div>
-
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_libnotify" id="use_libnotify" #if $sickbeard.USE_LIBNOTIFY then "checked=\"checked\"" else ""# /> 
-                            <label class="clearfix" for="use_libnotify">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send Libnotify notifications?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_libnotify">
-                        <div class="field-pair">
-                            <input type="checkbox" name="libnotify_notify_onsnatch" id="libnotify_notify_onsnatch" #if $sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
-                            <label class="clearfix" for="libnotify_notify_onsnatch">
-                                <span class="component-title">Notify on Snatch</span>
-                                <span class="component-desc">Send notification when we start a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <input type="checkbox" name="libnotify_notify_ondownload" id="libnotify_notify_ondownload" #if $sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="libnotify_notify_ondownload">
-                                <span class="component-title">Notify on Download</span>
-                                <span class="component-desc">Send notification when we finish a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
-                        <input type="button" value="Test Libnotify" id="testLibnotify" />
-                        <input type="submit" class="config_submitter" value="Save Changes" />
-
-                        </div><!-- /content_use_libnotify //-->
-
-                    </fieldset>
-                </div><!-- /component-group //-->
-
-                <div id="core-component-group8" class="component-group clearfix">
-
-                    <div class="component-group-desc">
-                        <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nmj.gif" alt="Networked Media Jukebox" title="Networked Media Jukebox" width="16" height="16" /> NMJ</a></h3>
-                        <p>The Networked Media Jukebox, or NMJ, is the official media jukebox interface made available for the Popcorn Hour 200-series.</p>
-                    </div>
-
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_nmj" id="use_nmj" #if $sickbeard.USE_NMJ then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="use_nmj">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send update commands to NMJ?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_nmj">
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Popcorn IP address</span>
-                                <input type="text" name="nmj_host" id="nmj_host" value="$sickbeard.NMJ_HOST" size="35" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">IP of Popcorn 200-series (eg. 192.168.1.100)</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Get Settings</span>
-                                <input type="button" value="Get Settings" id="settingsNMJ" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">The Popcorn Hour device must be powered on and NMJ running.</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">NMJ Database</span>
-                                <input type="text" name="nmj_database" id="nmj_database" value="$sickbeard.NMJ_DATABASE" size="35" #if $sickbeard.NMJ_DATABASE then "readonly=\"readonly\"" else ""# />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Automatically filled via the 'Get Settings' button.</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">NMJ Mount URL</span>
-                                <input type="text" name="nmj_mount" id="nmj_mount" value="$sickbeard.NMJ_MOUNT" size="35" #if $sickbeard.NMJ_MOUNT then "readonly=\"readonly\"" else ""# />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Automatically filled via the 'Get Settings' button.</span>
-                            </label>
-                        </div>
-
-                        <div class="testNotification" id="testNMJ-result">Click below to test.</div>
-                        <input type="button" value="Test NMJ" id="testNMJ" />
-                        <input type="submit" class="config_submitter" value="Save Changes" />
-                        </div><!-- /content_use_nmj //-->
-                    </fieldset>
-                </div><!-- /component-group //-->
-
-                <div id="core-component-group9" class="component-group clearfix">
-                    <div class="component-group-desc">
-                        <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synoindex.gif" alt="Synology Indexer" title="Synology Indexer" width="16" height="16" /> Synology Indexer</a></h3>
-                        <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
-                    </div>
-
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
-                            <label class="clearfix" for="use_synoindex">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?<br /><br />
-                                </span>
-                            </label>
-                            <label class="nocheck clearfix" for="use_synoindex">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Note: Requires SB to be running on your Synology NAS.</span>
-                            </label>
-                        </div>
-                        <input type="submit" class="config_submitter" value="Save Changes" />
-                    </fieldset>
-                </div><!-- /component-group //-->
-
-                 <div id="core-component-group10" class="component-group clearfix">
-
-                    <div class="component-group-desc">
-                        <h3><a href="http://boxcar.io/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/boxcar.gif" alt="Boxcar" title="Boxcar" width="16" height="16" /> Boxcar</a></h3>
-                        <p>Read your messages where and when you want them! A subscription will be send if needed.</p>
-                    </div>
-
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_boxcar" id="use_boxcar" #if $sickbeard.USE_BOXCAR then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="use_boxcar">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications through Boxcar?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_boxcar">
-                        <div class="field-pair">
-                            <input type="checkbox" name="boxcar_notify_onsnatch" id="boxcar_notify_onsnatch" #if $sickbeard.BOXCAR_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="boxcar_notify_onsnatch">
-                                <span class="component-title">Notify on Snatch</span>
-                                <span class="component-desc">Send notification when we start a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <input type="checkbox" name="boxcar_notify_ondownload" id="boxcar_notify_ondownload" #if $sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="boxcar_notify_ondownload">
-                                <span class="component-title">Notify on Download</span>
-                                <span class="component-desc">Send notification when we finish a download?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Boxcar Username</span>
-                                <input type="text" name="boxcar_username" id="boxcar_username" value="$sickbeard.BOXCAR_USERNAME" size="35" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Username of your Boxcar account</span>
-                            </label>
-                        </div>
-
-                        <div class="testNotification" id="testBoxcar-result">Click below to test.</div>
-                        <input type="button" value="Test Boxcar" id="testBoxcar" />
-                        <input type="submit" class="config_submitter" value="Save Changes" />
-                        
-                        </div><!-- /content_use_boxcar //-->
-
-                    </fieldset>
-
-                </div>
-
-
-
-                <div id="core-component-group11" class="component-group clearfix">
+                <div class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3><a href="http://trakt.tv/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/trakt.gif" alt="Trakt" title="Trakt" width="16" height="16" /> Trakt</a></h3>
@@ -733,11 +876,10 @@
                     </fieldset>
                 </div><!-- /component-group //-->
 
+
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
-
-
 
 
 </form>

@@ -29,6 +29,8 @@ import boxcar
 import nmj
 import synoindex
 import trakt
+import pytivo
+import nma
 
 from sickbeard.common import *
 
@@ -43,6 +45,8 @@ libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
 trakt_notifier = trakt.TraktNotifier()
+pytivo_notifier = pytivo.pyTivoNotifier()
+nma_notifier = nma.NMA_Notifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
@@ -57,6 +61,8 @@ notifiers = [
     synoindex_notifier,
     boxcar_notifier,
     trakt_notifier,
+    pytivo_notifier,
+    nma_notifier,
 ]
 
 def notify_download(ep_name):

@@ -14,7 +14,7 @@
 #config-components{float:left;width:auto;}
 #config-components-border{float:left;width:auto;border-top:1px solid #999;padding:5px 0;}
 #config .title-group{border-bottom:1px dotted #666;position:relative;padding:25px 15px 25px;}
-#config .component-group{border-bottom:1px dotted #666;position:relative;padding:15px 15px 25px;}
+#config .component-group{border-top:1px dotted #666;position:relative;padding:15px 15px 25px;}
 #config .component-group-desc{float:left;width:235px;}
 #config .component-group-desc h3{font-size:1.5em;}
 #config .component-group-desc p{width:85%;font-size:1.2em;color:#666;margin:.8em 0;}
