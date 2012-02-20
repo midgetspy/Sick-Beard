@@ -67,16 +67,16 @@ class PageTemplate (Template):
 
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
-            logPageTitle += ' (' + str(len(classes.ErrorViewer.errors)) + ')'
+            logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
         self.logPageTitle = logPageTitle
         self.sbPID = str(sickbeard.PID)
         self.menu = [
-            { 'title': 'Home', 'key': 'home'           },
+            { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
-            { 'title': 'History', 'key': 'history'        },
-            { 'title': 'Manage', 'key': 'manage'         },
-            { 'title': 'Config', 'key': 'config'         },
-            { 'title': logPageTitle, 'key': 'errorlogs'      },
+            { 'title': 'History',         'key': 'history'        },
+            { 'title': 'Manage',          'key': 'manage'         },
+            { 'title': 'Config',          'key': 'config'         },
+            { 'title': logPageTitle,      'key': 'errorlogs'      },
         ]
 
 def redirect(abspath, *args, **KWs):
@@ -93,7 +93,7 @@ class TVDBWebUI:
         searchList = ",".join([x['id'] for x in allSeries])
         showDirList = ""
         for curShowDir in self.config['_showDir']:
-            showDirList += "showDir=" + curShowDir + "&"
+            showDirList += "showDir="+curShowDir+"&"
         redirect("/home/addShows/addShow?" + showDirList + "seriesList=" + searchList)
 
 def _munge(string):
@@ -124,8 +124,8 @@ def _getEpisode(show, season, episode):
     return epObj
 
 ManageMenu = [
-    { 'title': 'Backlog Overview', 'path': 'manage/backlogOverview' },
-    { 'title': 'Manage Searches', 'path': 'manage/manageSearches'  },
+    { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview' },
+    { 'title': 'Manage Searches',           'path': 'manage/manageSearches'  },
     { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
 ]
 
@@ -193,7 +193,7 @@ class Manage:
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
         
-        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season != 0 AND status IN (" + ','.join(['?'] * len(status_list)) + ")", [int(tvdb_id)] + status_list)
+        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season != 0 AND status IN ("+','.join(['?']*len(status_list))+")", [int(tvdb_id)] + status_list)
         
         result = {}
         for cur_result in cur_show_results:
@@ -227,7 +227,7 @@ class Manage:
             return _munge(t)
         
         myDB = db.DBConnection()
-        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN (" + ','.join(['?'] * len(status_list)) + ") AND season != 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
+        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
 
         ep_counts = {}
         show_names = {}
@@ -276,8 +276,8 @@ class Manage:
 
             # get a list of all the eps we want to change if they just said "all"
             if 'all' in to_change[cur_tvdb_id]:
-                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN (" + ','.join(['?'] * len(status_list)) + ") AND season != 0 AND showid = ?", status_list + [cur_tvdb_id])
-                all_eps = [str(x["season"]) + 'x' + str(x["episode"]) for x in all_eps_results]
+                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND showid = ?", status_list + [cur_tvdb_id])
+                all_eps = [str(x["season"])+'x'+str(x["episode"]) for x in all_eps_results]
                 to_change[cur_tvdb_id] = all_eps
 
             Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
@@ -321,7 +321,7 @@ class Manage:
             for curResult in sqlResults:
 
                 curEpCat = curShow.getOverview(int(curResult["status"]))
-                epCats[str(curResult["season"]) + "x" + str(curResult["episode"])] = curEpCat
+                epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
                 epCounts[curEpCat] += 1
 
             showCounts[curShow.tvdbid] = epCounts
@@ -405,7 +405,7 @@ class Manage:
             if not cur_arg.startswith('orig_root_dir_'):
                 continue
             which_index = cur_arg.replace('orig_root_dir_', '')
-            end_dir = kwargs['new_root_dir_' + which_index]
+            end_dir = kwargs['new_root_dir_'+which_index]
             dir_map[kwargs[cur_arg]] = end_dir
 
         showIDs = toEdit.split("|")
@@ -420,7 +420,7 @@ class Manage:
             cur_show_dir = ek.ek(os.path.basename, showObj._location)
             if cur_root_dir in dir_map and cur_root_dir != dir_map[cur_root_dir]:
                 new_show_dir = ek.ek(os.path.join, dir_map[cur_root_dir], cur_show_dir)
-                logger.log(u"For show " + showObj.name + " changing dir from " + showObj._location + " to " + new_show_dir)
+                logger.log(u"For show "+showObj.name+" changing dir from "+showObj._location+" to "+new_show_dir)
             else:
                 new_show_dir = showObj._location
             
@@ -442,7 +442,7 @@ class Manage:
             curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
 
             if curErrors:
-                logger.log(u"Errors: " + str(curErrors), logger.ERROR)
+                logger.log(u"Errors: "+str(curErrors), logger.ERROR)
                 errors.append('<b>%s:</b><br />\n<ul>' % showObj.name + '\n'.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
 
         if len(errors) > 0:
@@ -484,7 +484,7 @@ class Manage:
         updates = []
         renames = []
 
-        for curShowID in set(toUpdate + toRefresh + toRename + toDelete + toMetadata):
+        for curShowID in set(toUpdate+toRefresh+toRename+toDelete+toMetadata):
 
             if curShowID == '':
                 continue
@@ -504,7 +504,7 @@ class Manage:
                     sickbeard.showQueueScheduler.action.updateShow(showObj, True) #@UndefinedVariable
                     updates.append(showObj.name)
                 except exceptions.CantUpdateException, e:
-                    errors.append("Unable to update show " + showObj.name + ": " + ex(e))
+                    errors.append("Unable to update show "+showObj.name+": "+ex(e))
 
             # don't bother refreshing shows that were updated anyway
             if curShowID in toRefresh and curShowID not in toUpdate:
@@ -512,7 +512,7 @@ class Manage:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                     refreshes.append(showObj.name)
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh show " + showObj.name + ": " + ex(e))
+                    errors.append("Unable to refresh show "+showObj.name+": "+ex(e))
 
             if curShowID in toRename:
                 sickbeard.showQueueScheduler.action.renameShowEpisodes(showObj) #@UndefinedVariable
@@ -539,7 +539,7 @@ class Manage:
             messageDetail += "</li><li>".join(renames)
             messageDetail += "</li></ul>"
 
-        if len(updates + refreshes + renames) > 0:
+        if len(updates+refreshes+renames) > 0:
             ui.notifications.message("The following actions were queued:",
                           messageDetail)
 
@@ -564,7 +564,7 @@ class History:
         t.limit = limit
         t.submenu = [
             { 'title': 'Clear History', 'path': 'history/clearHistory' },
-            { 'title': 'Trim History', 'path': 'history/trimHistory'  },
+            { 'title': 'Trim History',  'path': 'history/trimHistory'  },
         ]
 
         return _munge(t)
@@ -583,17 +583,17 @@ class History:
     def trimHistory(self):
 
         myDB = db.DBConnection()
-        myDB.action("DELETE FROM history WHERE date < " + str((datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)))
+        myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
         ui.notifications.message('Removed history entries greater than 30 days old')
         redirect("/history")
 
 
 ConfigMenu = [
-    { 'title': 'General', 'path': 'config/general/'          },
-    { 'title': 'Search Settings', 'path': 'config/search/'           },
-    { 'title': 'Search Providers', 'path': 'config/providers/'        },
-    { 'title': 'Post Processing', 'path': 'config/postProcessing/'   },
-    { 'title': 'Notifications', 'path': 'config/notifications/'    },
+    { 'title': 'General',           'path': 'config/general/'          },
+    { 'title': 'Search Settings',   'path': 'config/search/'           },
+    { 'title': 'Search Providers',  'path': 'config/providers/'        },
+    { 'title': 'Post Processing',   'path': 'config/postProcessing/'   },
+    { 'title': 'Notifications',     'path': 'config/notifications/'    },
 ]
 
 class ConfigGeneral:
@@ -728,7 +728,7 @@ class ConfigGeneral:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/general/")
 
@@ -815,7 +815,7 @@ class ConfigSearch:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/search/")
 
@@ -923,7 +923,7 @@ class ConfigPostProcessing:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/postProcessing/")
 
@@ -995,12 +995,12 @@ class ConfigPostProcessing:
 
 
         # make a fake episode object
-        ep = TVEpisode(1, 2, "Ep Name")
+        ep = TVEpisode(1,2,"Ep Name")
         ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
 
         if whichTest == "multi":
             ep._name = "Ep Name (1)"
-            secondEp = TVEpisode(1, 3, "Ep Name (2)")
+            secondEp = TVEpisode(1,3,"Ep Name (2)")
             ep.relatedEps.append(secondEp)
 
         # get the name
@@ -1027,7 +1027,7 @@ class ConfigProviders:
         tempProvider = newznab.NewznabProvider(name, '')
 
         if tempProvider.getID() in providerDict:
-            return json.dumps({'error': 'Exists as ' + providerDict[tempProvider.getID()].name})
+            return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
         else:
             return json.dumps({'success': tempProvider.getID()})
 
@@ -1079,7 +1079,7 @@ class ConfigProviders:
     def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
-                      tvtorrents_digest=None, tvtorrents_hash=None,
+                      tvtorrents_digest=None, tvtorrents_hash=None, 
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1146,7 +1146,7 @@ class ConfigProviders:
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
-                logger.log(u"don't know what " + curProvider + " is, skipping")
+                logger.log(u"don't know what "+curProvider+" is, skipping")
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
@@ -1173,7 +1173,7 @@ class ConfigProviders:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/providers/")
 
@@ -1190,16 +1190,17 @@ class ConfigNotifications:
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
-                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None,
-                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
+                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
+                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
-                          use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
-                          pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None):
+                          use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
+                          pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
 
         results = []
 
@@ -1354,6 +1355,21 @@ class ConfigNotifications:
         else:
             pytivo_update_library = 0
 
+        if use_nma == "on":
+            use_nma = 1
+        else:
+            use_nma = 0
+
+        if nma_notify_onsnatch == "on":
+            nma_notify_onsnatch = 1
+        else:
+            nma_notify_onsnatch = 0
+
+        if nma_notify_ondownload == "on":
+            nma_notify_ondownload = 1
+        else:
+            nma_notify_ondownload = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1417,11 +1433,17 @@ class ConfigNotifications:
 
         sickbeard.USE_PYTIVO = use_pytivo
         sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
-        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload == "off"
+        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload ==  "off"
         sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
         sickbeard.PYTIVO_HOST = pytivo_host
         sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
         sickbeard.PYTIVO_TIVO_NAME = pytivo_tivo_name
+
+        sickbeard.USE_NMA = use_nma
+        sickbeard.NMA_NOTIFY_ONSNATCH = nma_notify_onsnatch
+        sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
+        sickbeard.NMA_API = nma_api
+        sickbeard.NMA_PRIORITY = nma_priority
         
         sickbeard.save_config()
 
@@ -1431,7 +1453,7 @@ class ConfigNotifications:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
 
         redirect("/config/notifications/")
 
@@ -1463,12 +1485,12 @@ def havePLEX():
 
 def HomeMenu():
     return [
-        { 'title': 'Add Shows', 'path': 'home/addShows/', },
+        { 'title': 'Add Shows',              'path': 'home/addShows/',                                          },
         { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                                        },
-        { 'title': 'Update XBMC', 'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
-        { 'title': 'Update Plex', 'path': 'home/updatePLEX/', 'requires': havePLEX                   },
-        { 'title': 'Restart', 'path': 'home/restart/?pid=' + str(sickbeard.PID), 'confirm': True   },
-        { 'title': 'Shutdown', 'path': 'home/shutdown/', 'confirm': True                          },
+        { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
+        { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX                   },
+        { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID), 'confirm': True   },
+        { 'title': 'Shutdown',               'path': 'home/shutdown/', 'confirm': True                          },
     ]
 
 class HomePostProcess:
@@ -1490,7 +1512,7 @@ class HomePostProcess:
             if quiet != None and int(quiet) == 1:
                 return result
 
-            result = result.replace("\n", "<br />\n")
+            result = result.replace("\n","<br />\n")
             return _genericMessage("Postprocessing results", result)
 
 
@@ -1511,7 +1533,7 @@ class NewHomeAddShows:
         if 'en' in result:
             del result[result.index('en')]
         result.sort()
-        result.insert(0, 'en')
+        result.insert(0,'en')
 
         return json.dumps({'results': result})
 
@@ -1536,7 +1558,7 @@ class NewHomeAddShows:
         try:
             seriesXML = etree.ElementTree(etree.XML(urlData))
         except Exception, e:
-            logger.log(u"Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
+            logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+urlData, logger.ERROR)
             return ''
 
         series = seriesXML.getiterator('Series')
@@ -1571,7 +1593,7 @@ class NewHomeAddShows:
             tmp = root_dirs[default_index]
             if tmp in root_dirs:
                 root_dirs.remove(tmp)
-                root_dirs = [tmp] + root_dirs
+                root_dirs = [tmp]+root_dirs
         
         dir_list = []
         
@@ -1589,7 +1611,7 @@ class NewHomeAddShows:
                 
                 cur_dir = {
                            'dir': cur_path,
-                           'display_dir': '<b>' + ek.ek(os.path.dirname, cur_path) + os.sep + '</b>' + ek.ek(os.path.basename, cur_path),
+                           'display_dir': '<b>'+ek.ek(os.path.dirname, cur_path)+os.sep+'</b>'+ek.ek(os.path.basename, cur_path),
                            }
                 
                 # see if the folder is in XBMC already
@@ -1641,7 +1663,7 @@ class NewHomeAddShows:
         if not show_dir:
             t.default_show_name = ''
         elif not show_name:
-            t.default_show_name = ek.ek(os.path.basename, ek.ek(os.path.normpath, show_dir)).replace('.', ' ')
+            t.default_show_name = ek.ek(os.path.basename, ek.ek(os.path.normpath, show_dir)).replace('.',' ')
         else:
             t.default_show_name = show_name
         
@@ -1693,7 +1715,7 @@ class NewHomeAddShows:
         
         # sanity check on our inputs
         if (not rootDir and not fullShowPath) or not whichSeries:
-            return "Missing params, no tvdb id or folder:" + repr(whichSeries) + " and " + repr(rootDir) + "/" + repr(fullShowPath)
+            return "Missing params, no tvdb id or folder:"+repr(whichSeries)+" and "+repr(rootDir)+"/"+repr(fullShowPath)
         
         # figure out what show we're adding and where
         series_pieces = whichSeries.partition('|')
@@ -1711,14 +1733,14 @@ class NewHomeAddShows:
         
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
-            ui.notifications.error("Unable to add show", "Folder " + show_dir + " exists already")
+            ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home')
         
         # create the dir and make sure it worked
         dir_exists = helpers.makeDir(show_dir)
         if not dir_exists:
-            logger.log(u"Unable to create the folder " + show_dir + ", can't add the show", logger.ERROR)
-            ui.notifications.error("Unable to add show", "Unable to create the folder " + show_dir + ", can't add the show")
+            logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
+            ui.notifications.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
             redirect("/home")
         else:
             helpers.chmodAsParent(show_dir)
@@ -1741,7 +1763,7 @@ class NewHomeAddShows:
         
         # add the show
         sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang) #@UndefinedVariable
-        ui.notifications.message('Show added', 'Adding the specified show into ' + show_dir)
+        ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
         
@@ -1815,7 +1837,7 @@ class NewHomeAddShows:
             num_added += 1
          
         if num_added:
-            ui.notifications.message("Shows Added", "Automatically added " + str(num_added) + " from their existing metadata files")
+            ui.notifications.message("Shows Added", "Automatically added "+str(num_added)+" from their existing metadata files")
 
         # if we're done then go home
         if not dirs_only:
@@ -1863,7 +1885,7 @@ class ErrorLogs:
             data = f.readlines()
             f.close()
 
-        regex = "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
+        regex =  "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
 
         finalData = []
 
@@ -1890,7 +1912,7 @@ class ErrorLogs:
                     continue
 
             elif lastLine:
-                finalData.append("AA" + x)
+                finalData.append("AA"+x)
 
             numLines += 1
 
@@ -1937,7 +1959,7 @@ class Home:
             if authed:
                 return "Success. Connected and authenticated"
             else:
-                return "Authentication failed. SABnzbd expects '" + accesMsg + "' as authentication method"
+                return "Authentication failed. SABnzbd expects '"+accesMsg+"' as authentication method"
         else:
             return "Unable to connect to host"
 
@@ -1946,15 +1968,15 @@ class Home:
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         result = notifiers.growl_notifier.test_notify(host, password)
-        if password == None or password == '':
+        if password==None or password=='':
             pw_append = ''
         else:
             pw_append = " with password: " + password
 
         if result:
-            return "Registered and Tested growl successfully " + urllib.unquote_plus(host) + pw_append
+            return "Registered and Tested growl successfully "+urllib.unquote_plus(host)+pw_append
         else:
-            return "Registration and Testing of growl failed " + urllib.unquote_plus(host) + pw_append
+            return "Registration and Testing of growl failed "+urllib.unquote_plus(host)+pw_append
 
     @cherrypy.expose
     def testProwl(self, prowl_api=None, prowl_priority=0):
@@ -1997,7 +2019,7 @@ class Home:
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         result = notifiers.twitter_notifier._get_credentials(key)
-        logger.log(u"result: " + str(result))
+        logger.log(u"result: "+str(result))
         if result:
             return "Key verification successful"
         else:
@@ -2019,9 +2041,9 @@ class Home:
 
         result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
         if len(result.split(":")) > 2 and 'OK' in result.split(":")[2]:
-            return "Test notice sent successfully to " + urllib.unquote_plus(host)
+            return "Test notice sent successfully to "+urllib.unquote_plus(host)
         else:
-            return "Test notice failed to " + urllib.unquote_plus(host)
+            return "Test notice failed to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
     def testPLEX(self, host=None, username=None, password=None):
@@ -2029,9 +2051,9 @@ class Home:
 
         result = notifiers.plex_notifier.test_notify(urllib.unquote_plus(host), username, password)
         if result:
-            return "Test notice sent successfully to " + urllib.unquote_plus(host)
+            return "Test notice sent successfully to "+urllib.unquote_plus(host)
         else:
-            return "Test notice failed to " + urllib.unquote_plus(host)
+            return "Test notice failed to "+urllib.unquote_plus(host)
 
     @cherrypy.expose
     def testLibnotify(self):
@@ -2072,6 +2094,15 @@ class Home:
         else:
             return "Test notice failed to Trakt"
 
+    @cherrypy.expose
+    def testNMA(self, nma_api=None, nma_priority=0):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        result = notifiers.nma_notifier.test_notify(nma_api, nma_priority)
+        if result:
+            return "Test NMA notice sent successfully"
+        else:
+            return "Test NMA notice failed"
 
     @cherrypy.expose
     def shutdown(self):
@@ -2111,7 +2142,7 @@ class Home:
             t = PageTemplate(file="restart_bare.tmpl")
             return _munge(t)
         else:
-            return _genericMessage("Update Failed", "Update wasn't successful, not restarting. Check your log for more information.")
+            return _genericMessage("Update Failed","Update wasn't successful, not restarting. Check your log for more information.")
 
     @cherrypy.expose
     def displayShow(self, show=None):
@@ -2138,7 +2169,7 @@ class Home:
         )
 
         t = PageTemplate(file="displayShow.tmpl")
-        t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d' % showObj.tvdbid } ]
+        t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
 
         try:
             t.showLoc = (showObj.location, True)
@@ -2164,11 +2195,11 @@ class Home:
 
         if not sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
             if not sickbeard.showQueueScheduler.action.isBeingUpdated(showObj): #@UndefinedVariable
-                t.submenu.append({ 'title': 'Delete', 'path': 'home/deleteShow?show=%d' % showObj.tvdbid, 'confirm': True })
-                t.submenu.append({ 'title': 'Re-scan files', 'path': 'home/refreshShow?show=%d' % showObj.tvdbid })
-                t.submenu.append({ 'title': 'Force Full Update', 'path': 'home/updateShow?show=%d&amp;force=1' % showObj.tvdbid })
-                t.submenu.append({ 'title': 'Update show in XBMC', 'path': 'home/updateXBMC?showName=%s' % urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
-                t.submenu.append({ 'title': 'Rename Episodes', 'path': 'home/fixEpisodeNames?show=%d' % showObj.tvdbid, 'confirm': True })
+                t.submenu.append({ 'title': 'Delete',               'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
+                t.submenu.append({ 'title': 'Re-scan files',        'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
+                t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
+                t.submenu.append({ 'title': 'Rename Episodes',      'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
 
         t.show = showObj
         t.sqlResults = sqlResults
@@ -2186,7 +2217,7 @@ class Home:
         for curResult in sqlResults:
 
             curEpCat = showObj.getOverview(int(curResult["status"]))
-            epCats[str(curResult["season"]) + "x" + str(curResult["episode"])] = curEpCat
+            epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
             epCounts[curEpCat] += 1
 
         def titler(x):
@@ -2213,7 +2244,7 @@ class Home:
     def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
-            errString = "Invalid show ID: " + str(show)
+            errString = "Invalid show ID: "+str(show)
             if directCall:
                 return [errString]
             else:
@@ -2222,7 +2253,7 @@ class Home:
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
         if showObj == None:
-            errString = "Unable to find the specified show: " + str(show)
+            errString = "Unable to find the specified show: "+str(show)
             if directCall:
                 return [errString]
             else:
@@ -2279,7 +2310,7 @@ class Home:
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                 except exceptions.CantRefreshException, e:
-                    errors.append("Unable to refresh this show: " + ex(e))
+                    errors.append("Unable to refresh this show: "+ex(e))
 
             showObj.paused = paused
             showObj.air_by_date = air_by_date
@@ -2287,7 +2318,7 @@ class Home:
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
-                logger.log(os.path.normpath(showObj._location) + " != " + os.path.normpath(location))
+                logger.log(os.path.normpath(showObj._location)+" != "+os.path.normpath(location), logger.DEBUG)
                 if not ek.ek(os.path.isdir, location):
                     errors.append("New location <tt>%s</tt> does not exist" % location)
 
@@ -2299,7 +2330,7 @@ class Home:
                         try:
                             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                         except exceptions.CantRefreshException, e:
-                            errors.append("Unable to refresh this show:" + ex(e))
+                            errors.append("Unable to refresh this show:"+ex(e))
                         # grab updated info from TVDB
                         #showObj.loadEpisodesFromTVDB()
                         # rescan the episodes in the new folder
@@ -2365,7 +2396,7 @@ class Home:
 
         time.sleep(3)
 
-        redirect("/home/displayShow?show=" + str(showObj.tvdbid))
+        redirect("/home/displayShow?show="+str(showObj.tvdbid))
 
     @cherrypy.expose
     def updateShow(self, show=None, force=0):
@@ -2388,7 +2419,7 @@ class Home:
         # just give it some time
         time.sleep(3)
 
-        redirect("/home/displayShow?show=" + str(showObj.tvdbid))
+        redirect("/home/displayShow?show="+str(showObj.tvdbid))
 
 
     @cherrypy.expose
@@ -2467,7 +2498,7 @@ class Home:
 
             for curEp in eps.split('|'):
 
-                logger.log(u"Attempting to set status on episode " + curEp + " to " + status, logger.DEBUG)
+                logger.log(u"Attempting to set status on episode "+curEp+" to "+status, logger.DEBUG)
 
                 epInfo = curEp.split('x')
 
@@ -2489,20 +2520,20 @@ class Home:
                 with epObj.lock:
                     # don't let them mess up UNAIRED episodes
                     if epObj.status == UNAIRED:
-                        logger.log(u"Refusing to change status of " + curEp + " because it is UNAIRED", logger.ERROR)
+                        logger.log(u"Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
 
                     if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
-                        logger.log(u"Refusing to change status of " + curEp + " to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
+                        logger.log(u"Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
                         continue
 
                     epObj.status = int(status)
                     epObj.saveToDB()
 
-        msg = "Backlog was automatically started for the following seasons of <b>" + showObj.name + "</b>:<br />"
+        msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
         for cur_segment in segment_list:
-            msg += "<li>Season " + str(cur_segment) + "</li>"
-            logger.log(u"Sending backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
+            msg += "<li>Season "+str(cur_segment)+"</li>"
+            logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
             cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
             sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
         msg += "</ul>"
@@ -2552,7 +2583,7 @@ class UI:
         messages = {}
         cur_notification_num = 1
         for cur_notification in ui.notifications.get_notifications():
-            messages['notification-' + str(cur_notification_num)] = {'title': cur_notification.title,
+            messages['notification-'+str(cur_notification_num)] = {'title': cur_notification.title,
                                                                    'message': cur_notification.message,
                                                                    'type': cur_notification.type}
             cur_notification_num += 1
@@ -2652,14 +2683,14 @@ class WebInterface:
 
         done_show_list = []
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
-        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["showid"]))
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
         #epList = sickbeard.comingList

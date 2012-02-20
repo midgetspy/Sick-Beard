@@ -218,7 +218,7 @@ def pickBestResult(results, quality_list=None):
         logger.log(u"Picked "+bestResult.name+" as the best", logger.DEBUG)
     else:
         logger.log(u"No result picked.", logger.DEBUG)
-        
+
     return bestResult
 
 def isFinalResult(result):

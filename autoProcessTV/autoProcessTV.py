@@ -57,7 +57,10 @@ def processEpisode(dirName, nzbName=None):
     port = config.get("SickBeard", "port")
     username = config.get("SickBeard", "username")
     password = config.get("SickBeard", "password")
-    ssl = config.get("SickBeard", "ssl")
+    try:
+        ssl = int(config.get("SickBeard", "ssl"))
+    except (ConfigParser.NoOptionError, ValueError):
+        ssl = 0
     
     try:
         web_root = config.get("SickBeard", "web_root")

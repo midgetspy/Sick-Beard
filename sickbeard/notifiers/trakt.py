@@ -87,7 +87,7 @@ class TraktNotifier:
     def _use_me(self):
         return sickbeard.USE_TRAKT
 
-    def _notifyTrakt(self, method, api, username, password, data={}):
+    def _notifyTrakt(self, method, api, username, password, data = {}):
         logger.log("trakt_notifier: Call method " + method, logger.DEBUG)
 
         if not api:
