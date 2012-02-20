@@ -35,9 +35,9 @@ class synoIndexNotifier:
     def notify_download(self, ep_name):
         pass
 
-    def insert_library(self, dest_path):
+    def moveFolder(self, old_path, new_path):
         if sickbeard.USE_SYNOINDEX:
-            synoindex_cmd = ['/usr/syno/bin/synoindex', '-A', ek.ek(os.path.abspath, dest_path)]
+            synoindex_cmd = ['/usr/syno/bin/synoindex', '-N', ek.ek(os.path.abspath, new_path), ek.ek(os.path.abspath, old_path)]
             logger.log(u"Executing command "+str(synoindex_cmd))
             logger.log(u"Absolute path to command: "+ek.ek(os.path.abspath, synoindex_cmd[0]), logger.DEBUG)
             try:
@@ -47,7 +47,31 @@ class synoIndexNotifier:
             except OSError, e:
                 logger.log(u"Unable to run synoindex: "+ex(e))           
 
-    def remove_library(self, cur_file):
+    def deleteFolder(self, cur_path):
+        if sickbeard.USE_SYNOINDEX:
+            synoindex_cmd = ['/usr/syno/bin/synoindex', '-D', ek.ek(os.path.abspath, cur_path)]
+            logger.log(u"Executing command "+str(synoindex_cmd))
+            logger.log(u"Absolute path to command: "+ek.ek(os.path.abspath, synoindex_cmd[0]), logger.DEBUG)
+            try:
+                p = subprocess.Popen(synoindex_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
+                out, err = p.communicate() #@UnusedVariable
+                logger.log(u"Script result: "+str(out), logger.DEBUG)
+            except OSError, e:
+                logger.log(u"Unable to run synoindex: "+ex(e))           
+
+    def addFolder(self, cur_path):
+        if sickbeard.USE_SYNOINDEX:
+            synoindex_cmd = ['/usr/syno/bin/synoindex', '-A', ek.ek(os.path.abspath, cur_path)]
+            logger.log(u"Executing command "+str(synoindex_cmd))
+            logger.log(u"Absolute path to command: "+ek.ek(os.path.abspath, synoindex_cmd[0]), logger.DEBUG)
+            try:
+                p = subprocess.Popen(synoindex_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
+                out, err = p.communicate() #@UnusedVariable
+                logger.log(u"Script result: "+str(out), logger.DEBUG)
+            except OSError, e:
+                logger.log(u"Unable to run synoindex: "+ex(e))           
+
+    def deleteFile(self, cur_file):
         if sickbeard.USE_SYNOINDEX:
             synoindex_cmd = ['/usr/syno/bin/synoindex', '-d', ek.ek(os.path.abspath, cur_file)]
             logger.log(u"Executing command "+str(synoindex_cmd))
@@ -59,9 +83,9 @@ class synoIndexNotifier:
             except OSError, e:
                 logger.log(u"Unable to run synoindex: "+ex(e))           
 
-    def update_library(self, ep_obj):
+    def addFile(self, cur_file):
         if sickbeard.USE_SYNOINDEX:
-            synoindex_cmd = ['/usr/syno/bin/synoindex', '-a', ek.ek(os.path.abspath, ep_obj.location)]
+            synoindex_cmd = ['/usr/syno/bin/synoindex', '-a', ek.ek(os.path.abspath, cur_file)]
             logger.log(u"Executing command "+str(synoindex_cmd))
             logger.log(u"Absolute path to command: "+ek.ek(os.path.abspath, synoindex_cmd[0]), logger.DEBUG)
             try:
