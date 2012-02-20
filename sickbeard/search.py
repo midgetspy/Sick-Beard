@@ -182,14 +182,22 @@ def searchForNeededEpisodes():
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
                 continue
             
-            logger.log(u"Checking if the episode we found has already been deleted", logger.ERROR)
-            curLoc = os.path.normpath(curEp["location"])
-            logger.log(u"Path for episode we found is: " + curLoc, logger.ERROR)
-            # if user chose to check episode's existence, verify its existence on disk. If it has been deleted, skip it
-            if sickbeard.CHECK_EXISTENCE and not ek.ek(os.path.isfile, curLoc):
-                logger.log(u"The episode we found has already been deleted, not downloading it again", logger.ERROR)
-                continue
-            logger.log(u"The episode we found has not yet been deleted, downloading higher quality version", logger.ERROR)
+            # did the user choose to check for existing files prior to downloading higher qualities?
+            if sickbeard.CHECK_EXISTENCE:
+                logger.log(u"========================================================================")
+                logger.log(u"Checking if the episode we found has already been deleted")
+                
+                curLoc = os.path.normpath(curEp.fullPath())
+                logger.log(u"Checking if " + curLoc + " is still present.")
+                
+                # if the path doesn't exist or if it's not in our show dir
+                if not ek.ek(os.path.isfile, curLoc) or not os.path.normpath(curLoc).startswith(os.path.normpath(curEp.show.location)):
+                    logger.log(u"The episode we found has already been deleted, not downloading it again")
+                    logger.log(u"========================================================================")
+                    continue
+                
+                logger.log(u"The episode we found has not yet been deleted, downloading higher quality version")
+                logger.log(u"========================================================================")            
             
             foundResults[curEp] = bestResult
 
@@ -224,7 +232,7 @@ def pickBestResult(results, quality_list=None):
         logger.log(u"Picked "+bestResult.name+" as the best", logger.DEBUG)
     else:
         logger.log(u"No result picked.", logger.DEBUG)
-
+        
     return bestResult
 
 def isFinalResult(result):
