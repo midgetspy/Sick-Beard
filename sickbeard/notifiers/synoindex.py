@@ -35,7 +35,7 @@ class synoIndexNotifier:
     def notify_download(self, ep_name):
         pass
 
-    def moveFolder(self, old_path, new_path):
+    def moveObject(self, old_path, new_path):
         if sickbeard.USE_SYNOINDEX:
             synoindex_cmd = ['/usr/syno/bin/synoindex', '-N', ek.ek(os.path.abspath, new_path), ek.ek(os.path.abspath, old_path)]
             logger.log(u"Executing command "+str(synoindex_cmd))
