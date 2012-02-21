@@ -124,7 +124,7 @@ class Quality:
 
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
-        if checkName(["pdtv.xvid", "hdtv.xvid", "dsr.xvid"], any) and not checkName(["720p"], all):
+        if checkName(["pdtv.xvid", "hdtv.xvid", "hdtvrip.xvid", "dsr.xvid"], any) and not checkName(["720p"], all):
             return Quality.SDTV
         elif checkName(["dvdrip.xvid", "bdrip.xvid", "dvdrip.divx", "dvdrip.ws.xvid"], any) and not checkName(["720p"], all):
             return Quality.SDDVD
