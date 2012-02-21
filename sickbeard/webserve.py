@@ -1129,6 +1129,10 @@ class ConfigProviders:
                 sickbeard.NZBMATRIX = curEnabled
             elif curProvider == 'newzbin':
                 sickbeard.NEWZBIN = curEnabled
+            elif curProvider == 'nzbindex':
+                sickbeard.NZBINDEX = curEnabled
+            elif curProvider == 'nzbserien':
+                sickbeard.NZBSERIEN = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
@@ -1524,10 +1528,10 @@ class NewHomeAddShows:
         result = tvdb_api.Tvdb().config['valid_languages']
 
         # Make sure list is sorted alphabetically but 'en' is in front
-        if 'en' in result:
-            del result[result.index('en')]
+        if 'de' in result:
+            del result[result.index('de')]
         result.sort()
-        result.insert(0,'en')
+        result.insert(0,'de')
 
         return json.dumps({'results': result})
 
@@ -1536,9 +1540,9 @@ class NewHomeAddShows:
         return helpers.sanitizeFileName(name)
 
     @cherrypy.expose
-    def searchTVDBForShowName(self, name, lang="en"):
+    def searchTVDBForShowName(self, name, lang="de"):
         if not lang or lang == 'null':
-                lang = "en"
+                lang = "de"
 
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
 
