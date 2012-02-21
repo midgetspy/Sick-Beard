@@ -67,7 +67,7 @@ def retrieve_exceptions():
     exception_dict = {}
 
     # exceptions are stored on github pages
-    url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
+    url = 'http://cytec.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
     open_url = urllib.urlopen(url)
     
     # each exception is on one line with the format tvdb_id: 'show name 1', 'show name 2', etc
