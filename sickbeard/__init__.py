@@ -526,8 +526,7 @@ def initialize(consoleLogging=True):
             NZB_METHOD = 'blackhole'
 
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
-        CHECK_EXISTENCE = bool(check_setting_int(CFG, 'General', 'check_existence', 1))
-        # For now we use 'checked' as the default setting, because of some config saving problems. 
+        CHECK_EXISTENCE = bool(check_setting_int(CFG, 'General', 'check_existence', 0)) 
 
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
 
