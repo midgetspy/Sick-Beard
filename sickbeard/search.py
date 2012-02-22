@@ -265,7 +265,7 @@ def fileWasDeleted(epObj):
     
     If the file is still present on disk, this function returns False. If it has been deleted, it returns True.
     '''
-    logger.log(u"epObj is\n" + str(epObj)) # change logging level to DEBUG
+    logger.log(u"epObj is\n" + str(epObj), logger.DEBUG)
     deleted = False
     
     # if epObj is None, we do not have this episode in the database yet, so it was not deleted
@@ -273,7 +273,6 @@ def fileWasDeleted(epObj):
         if sickbeard.CHECK_EXISTENCE:
             logger.log(u"The path to the episode is " + str(epObj.fullPath()) + ", storing it in epLoc", logger.DEBUG)
             epLoc = epObj.fullPath()
-            logger.log(u"epLoc is " + str(epLoc), logger.DEBUG)
             logger.log(u"Checking file existence for episode " + epObj.prettyName())
             
             # if the episode object has no location data, it means that there is no location in the database 
@@ -287,9 +286,9 @@ def fileWasDeleted(epObj):
                 else:
                     logger.log(u"Episode " + str(epObj.episode) + " has not yet been deleted, downloading higher quality version")
             else:
-                logger.log(u"We don't have this episode's location in our database, it probably hasn't aired yet") # change logging level to DEBUG
+                logger.log(u"We don't have this episode's location in our database, it probably hasn't aired yet", logger.DEBUG)
             
-    logger.log("Returning " + str(deleted)) # change logging level to DEBUG
+    logger.log(u"Returning " + str(deleted), logger.DEBUG)
     return deleted
 
 def findEpisode(episode, manualSearch=False):
