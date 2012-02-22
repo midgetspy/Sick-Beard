@@ -265,20 +265,32 @@ def fileWasDeleted(epObj):
     
     If the file is still present on disk, this function returns False. If it has been deleted, it returns True.
     '''
+    logger.log(u"epObj is\n" + str(epObj)) # change logging level to DEBUG
     deleted = False
     
-    if sickbeard.CHECK_EXISTENCE:        
-        epLoc = os.path.normpath(epObj.fullPath())
-        logger.log(u"Making sure " + epObj.prettyName() + " is still present at " + epLoc, logger.DEBUG)
-        
-        # if the path doesn't exist or if it's not in our show dir, consider it deleted
-        if not ek.ek(os.path.isfile, epLoc) or not os.path.normpath(epLoc).startswith(os.path.normpath(epObj.show.location)):
-            logger.log(u"Episode " + str(epObj.episode) + " has already been deleted, not downloading it again")
-            deleted = True
-        else: 
-            logger.log(u"Episode " + str(epObj.episode) + " has not yet been deleted, downloading higher quality version")
-    
-    return deleted 
+    # if epObj is None, we do not have this episode in the database yet, so it was not deleted
+    if epObj is not None:
+        if sickbeard.CHECK_EXISTENCE:
+            logger.log(u"The path to the episode is " + str(epObj.fullPath()) + ", storing it in epLoc", logger.DEBUG)
+            epLoc = epObj.fullPath()
+            logger.log(u"epLoc is " + str(epLoc), logger.DEBUG)
+            logger.log(u"Checking file existence for episode " + epObj.prettyName())
+            
+            # if the episode object has no location data, it means that there is no location in the database 
+            if epLoc is not None:
+                logger.log(u"Making sure " + epObj.prettyName() + " is still present at '" + str(epLoc) + "'")
+                
+                # if the path doesn't exist or if it's not in our show dir, consider it deleted
+                if not ek.ek(os.path.isfile, epLoc) or not epLoc.startswith(os.path.normpath(epObj.show.location)):
+                    logger.log(u"Episode " + str(epObj.episode) + " has already been deleted, not downloading it again")
+                    deleted = True
+                else:
+                    logger.log(u"Episode " + str(epObj.episode) + " has not yet been deleted, downloading higher quality version")
+            else:
+                logger.log(u"We don't have this episode's location in our database, it probably hasn't aired yet") # change logging level to DEBUG
+            
+    logger.log("Returning " + str(deleted)) # change logging level to DEBUG
+    return deleted
 
 def findEpisode(episode, manualSearch=False):
 
