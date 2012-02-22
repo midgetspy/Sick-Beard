@@ -37,7 +37,7 @@ class synoIndexNotifier:
 
     def moveFolder(self, old_path, new_path):
         self.moveObject(old_path, new_path)
-    
+
     def moveFile(self, old_path, new_path):
         self.moveObject(old_path, new_path)
 
@@ -51,20 +51,20 @@ class synoIndexNotifier:
                 out, err = p.communicate() #@UnusedVariable
                 logger.log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
-                logger.log(u"Unable to run synoindex: "+ex(e))           
+                logger.log(u"Unable to run synoindex: "+ex(e))
 
     def deleteFolder(self, cur_path):
         self.makeObject('-D', cur_path)
-        
+
     def addFolder(self, cur_path):
         self.makeObject('-A', cur_path)
-        
+
     def deleteFile(self, cur_file):
         self.makeObject('-d', cur_file)
-        
+
     def addFile(self, cur_file):
         self.makeObject('-a', cur_file)
-        
+
     def makeObject(self, cmd_arg, cur_path):
         if sickbeard.USE_SYNOINDEX:
             synoindex_cmd = ['/usr/syno/bin/synoindex', cmd_arg, ek.ek(os.path.abspath, cur_path)]
@@ -75,6 +75,6 @@ class synoIndexNotifier:
                 out, err = p.communicate() #@UnusedVariable
                 logger.log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
-                logger.log(u"Unable to run synoindex: "+ex(e))           
+                logger.log(u"Unable to run synoindex: "+ex(e))
 
 notifier = synoIndexNotifier
