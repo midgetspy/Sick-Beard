@@ -38,8 +38,8 @@ class synoIndexNotifier:
     def moveFolder(self, old_path, new_path):
         self.moveObject(old_path, new_path)
 
-    def moveFile(self, old_path, new_path):
-        self.moveObject(old_path, new_path)
+    def moveFile(self, old_file, new_file):
+        self.moveObject(old_file, new_file)
 
     def moveObject(self, old_path, new_path):
         if sickbeard.USE_SYNOINDEX:
