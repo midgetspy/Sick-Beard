@@ -38,6 +38,7 @@ from sickbeard.exceptions import ex
 from sickbeard import tvrage
 from sickbeard import config
 from sickbeard import image_cache
+from sickbeard import notifiers
 from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek

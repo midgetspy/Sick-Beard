@@ -36,6 +36,18 @@
                         </div>
                         
                         <div class="field-pair">
+                            <input type="checkbox" name="check_existence" id="check_existence" #if $sickbeard.CHECK_EXISTENCE == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="check_existence">
+                                <span class="component-title">Check Files' Existence</span>
+                                <span class="component-desc">Check files' existence before downloading higher qualities?</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Useful when you delete episodes right after watching them.</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Search Frequency</span>
                                 <input type="text" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="5" />
