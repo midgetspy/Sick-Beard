@@ -299,7 +299,7 @@ def main():
         sickbeard.launchBrowser(startPort)
 
     # start an update if we're supposed to
-    if forceUpdate:
+    if forceUpdate or sickbeard.UPDATE_ON_START:
         sickbeard.showUpdateScheduler.action.run(force=True) #@UndefinedVariable
 
     # stay alive while my threads do the work

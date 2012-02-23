@@ -62,6 +62,36 @@
                     </fieldset>
                 </div><!-- /component-group1 //-->
 
+				<div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>TV Shows</h3>
+                        <p>Gives you the ability to modify the TV Show update behavoir of Sickbeard</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="update_on_start" id="update_on_start" #if $sickbeard.UPDATE_ON_START then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="update_on_start">
+                                <span class="component-title">Update on Start</span>
+                                <span class="component-desc">Should Sick Beard update the show information when started?</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Update time</span>
+                                <input type="text" name="tv_show_update_time" value="$sickbeard.TV_SHOW_UPDATE_TIME" size="10" maxlength="2" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Time that Sick Beard should update TV Shows (between 0 and 23)</span>
+                            </label>
+                        </div>
+
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group4 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
 
