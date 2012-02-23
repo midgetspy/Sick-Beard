@@ -52,8 +52,9 @@ $(document).ready(function()
         $('#restart_message').show();
         is_alive_url = sb_base_url+'/home/is_alive';
 
-        // if https is newly enabled or the port changed just wait 5 seconds then redirect. This is because the ajax will fail if the cert is untrusted.
-        if (sbHttpsEnabled != "False" && sbHttpsEnabled != 0) {
+        // if https is enabled or you are currently on https and the port or protocol changed just wait 5 seconds then redirect. 
+        // This is because the ajax will fail if the cert is untrusted or the the http ajax requst from https will fail because of mixed content error.
+        if ((sbHttpsEnabled != "False" && sbHttpsEnabled != 0) || window.location.protocol == "https:") {
             if (base_url != sb_base_url) {
                 timeout_id = 1;
                 setTimeout(function(){
