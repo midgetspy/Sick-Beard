@@ -34,7 +34,7 @@ class BTNProvider(generic.TorrentProvider):
 
         self.cache = BTNCache(self)
 
-        self.url = 'http://www.broadcasthe.net/'
+        self.url = 'http://broadcasthe.net/'
 
     def isEnabled(self):
         return True
@@ -50,27 +50,12 @@ class BTNCache(tvcache.TVCache):
 
         # only poll BTN every 15 minutes max
         self.minTime = 15
-		
 
     def _getRSSData(self):
-        # These will be ignored on the serverside.
-        ignore_regex = "all.month|month.of|season[\s\d]*complete"
-    
-        
         url = 'https://broadcasthe.net/feeds.php?feed=torrents_all&user='+ sickbeard.BTN_USER_ID +'&auth='+ sickbeard.BTN_AUTH_TOKEN +'&passkey='+ sickbeard.BTN_PASSKEY +'&authkey='+ sickbeard.BTN_AUTHKEY
         logger.log(u"BTN cache update URL: "+ url, logger.DEBUG)
 
         data = self.provider.getURL(url)
-        
-        xml_content = etree.fromstring(data)
-        description = xml_content.findtext('channel/description')
-
-		# [TODO] Error handling
-        # if "User can't be found" in description:
-        #     logger.log(u"TvTorrents invalid digest, check your config", logger.ERROR)
-        # 
-        # if "Invalid Hash" in description:
-        #     logger.log(u"TvTorrents invalid hash, check your config", logger.ERROR)
 
         return data
 
