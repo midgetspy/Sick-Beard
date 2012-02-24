@@ -719,8 +719,10 @@ class PostProcessor(object):
 
         # do the library update for trakt
         notifiers.trakt_notifier.update_library(ep_obj)
-
-        # run extra_scripts
+        
+        # do the library update for pyTivo
+        notifiers.pytivo_notifier.update_library(ep_obj)
+        
         self._run_extra_scripts(ep_obj)
 
         return True

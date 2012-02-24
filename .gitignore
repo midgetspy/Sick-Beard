@@ -6,6 +6,8 @@ config.ini
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
+server.crt
+server.key
 
 #  Compiled source   #
 ######################

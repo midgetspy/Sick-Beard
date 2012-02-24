@@ -63,6 +63,10 @@ class PageTemplate (Template):
         KWs['file'] = os.path.join(sickbeard.PROG_DIR, "data/interfaces/default/", KWs['file'])
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
+        self.sbHttpPort = sickbeard.WEB_PORT
+        self.sbHttpsPort = sickbeard.WEB_PORT
+        self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
+        self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
         logPageTitle = 'Logs &amp; Errors'
@@ -661,7 +665,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
 
@@ -703,6 +707,19 @@ class ConfigGeneral:
 
         sickbeard.USE_API = use_api
         sickbeard.API_KEY = api_key
+        
+        if enable_https == "on":
+            enable_https = 1
+        else:
+            enable_https = 0
+        
+        sickbeard.ENABLE_HTTPS = enable_https
+        
+        if not config.change_HTTPS_CERT(https_cert):
+            results += ["Unable to create directory " + os.path.normpath(https_cert) + ", https cert dir not changed."]
+
+        if not config.change_HTTPS_KEY(https_key):
+            results += ["Unable to create directory " + os.path.normpath(https_key) + ", https key dir not changed."]
 
         config.change_VERSION_NOTIFY(version_notify)
 
@@ -812,7 +829,7 @@ class ConfigPostProcessing:
     def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
                     naming_sep_type=None, naming_quality=None, naming_dates=None,
-                    xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
+                    xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None):
 
@@ -878,6 +895,7 @@ class ConfigPostProcessing:
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
+        sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         sickbeard.metadata_provider_dict['TIVO'].set_config(tivo_data)
@@ -1059,7 +1077,8 @@ class ConfigProviders:
     def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
                       nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
-                      tvtorrents_digest=None, tvtorrents_hash=None, 
+                      tvtorrents_digest=None, tvtorrents_hash=None,
+ 					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1123,6 +1142,8 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
+            elif curProvider == 'btn':
+                sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1130,6 +1151,11 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+
+        sickbeard.BTN_USER_ID = btn_user_id.strip()
+        sickbeard.BTN_AUTH_TOKEN = btn_auth_token.strip()
+        sickbeard.BTN_PASSKEY = btn_passkey.strip()
+        sickbeard.BTN_AUTHKEY = btn_authkey.strip()
 
         sickbeard.NZBS_UID = nzbs_org_uid.strip()
         sickbeard.NZBS_HASH = nzbs_org_hash.strip()
@@ -1177,7 +1203,10 @@ class ConfigNotifications:
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
-                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None):
+                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
+                          use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
+                          pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
 
         results = []
 
@@ -1312,6 +1341,41 @@ class ConfigNotifications:
         else:
             use_trakt = 0
 
+        if use_pytivo == "on":
+            use_pytivo = 1
+        else:
+            use_pytivo = 0
+            
+        if pytivo_notify_onsnatch == "on":
+            pytivo_notify_onsnatch = 1
+        else:
+            pytivo_notify_onsnatch = 0
+
+        if pytivo_notify_ondownload == "on":
+            pytivo_notify_ondownload = 1
+        else:
+            pytivo_notify_ondownload = 0
+
+        if pytivo_update_library == "on":
+            pytivo_update_library = 1
+        else:
+            pytivo_update_library = 0
+
+        if use_nma == "on":
+            use_nma = 1
+        else:
+            use_nma = 0
+
+        if nma_notify_onsnatch == "on":
+            nma_notify_onsnatch = 1
+        else:
+            nma_notify_onsnatch = 0
+
+        if nma_notify_ondownload == "on":
+            nma_notify_ondownload = 1
+        else:
+            nma_notify_ondownload = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1373,6 +1437,20 @@ class ConfigNotifications:
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
 
+        sickbeard.USE_PYTIVO = use_pytivo
+        sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
+        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload ==  "off"
+        sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
+        sickbeard.PYTIVO_HOST = pytivo_host
+        sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
+        sickbeard.PYTIVO_TIVO_NAME = pytivo_tivo_name
+
+        sickbeard.USE_NMA = use_nma
+        sickbeard.NMA_NOTIFY_ONSNATCH = nma_notify_onsnatch
+        sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
+        sickbeard.NMA_API = nma_api
+        sickbeard.NMA_PRIORITY = nma_priority
+        
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -1858,13 +1936,18 @@ class ErrorLogs:
 class Home:
 
     @cherrypy.expose
-    def is_alive(self):
+    def is_alive(self, *args, **kwargs):
+        if 'callback' in kwargs and '_' in kwargs:
+            callback, _ = kwargs['callback'], kwargs['_']
+        else:
+            return "Error: Unsupported Request. Send jsonp request with 'callback' variable in the query stiring."
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        cherrypy.response.headers['Content-Type'] = 'text/javascript'
 
         if sickbeard.started:
-            return str(sickbeard.PID)
+            return callback+'('+json.dumps({"msg": str(sickbeard.PID)})+');'
         else:
-            return "nope"
+            return callback+'('+json.dumps({"msg": "nope"})+');'
 
     @cherrypy.expose
     def index(self):
@@ -2022,6 +2105,15 @@ class Home:
         else:
             return "Test notice failed to Trakt"
 
+    @cherrypy.expose
+    def testNMA(self, nma_api=None, nma_priority=0):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        result = notifiers.nma_notifier.test_notify(nma_api, nma_priority)
+        if result:
+            return "Test NMA notice sent successfully"
+        else:
+            return "Test NMA notice failed"
 
     @cherrypy.expose
     def shutdown(self):
@@ -2237,7 +2329,7 @@ class Home:
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
-                logger.log(os.path.normpath(showObj._location)+" != "+os.path.normpath(location))
+                logger.log(os.path.normpath(showObj._location)+" != "+os.path.normpath(location), logger.DEBUG)
                 if not ek.ek(os.path.isdir, location):
                     errors.append("New location <tt>%s</tt> does not exist" % location)
 
