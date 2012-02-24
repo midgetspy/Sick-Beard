@@ -341,70 +341,8 @@
 
 
                 <br />
-                <h1>Devices</h1>
+                <h1>Mobile</h1>
                 <br />
-
-
-                <div class="component-group clearfix">
-                    <div class="component-group-desc">
-                        <h3><a href="http://growl.info/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/growl.gif" alt="" title="Growl" width="16" height="16" /> Growl </a></h3>
-                        <p>A cross-platform unobtrusive global notification system.</p>
-                    </div>
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "checked=\"checked\"" else ""# /> 
-                            <label class="clearfix" for="use_growl">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send Growl notifications?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_growl">
-                            <div class="field-pair">
-                                <input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
-                                <label class="clearfix" for="growl_notify_onsnatch">
-                                    <span class="component-title">Notify on Snatch</span>
-                                    <span class="component-desc">Send notification when we start a download?</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <input type="checkbox" name="growl_notify_ondownload" id="growl_notify_ondownload" #if $sickbeard.GROWL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                                <label class="clearfix" for="growl_notify_ondownload">
-                                    <span class="component-title">Notify on Download</span>
-                                    <span class="component-desc">Send notification when we finish a download?</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">Growl IP:Port</span>
-                                    <input type="text" name="growl_host" id="growl_host" value="$sickbeard.GROWL_HOST" size="35" />
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Host running Growl (eg. 192.168.1.100:23053)</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">Growl Password</span>
-                                    <input type="password" name="growl_password" id="growl_password" value="$sickbeard.GROWL_PASSWORD" size="35" />
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">May leave blank if Sick Beard is on the same host.</span>
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Otherwise Growl <b>requires</b> a password to be used.</span>
-                                </label>
-                            </div>
-                            <div class="testNotification" id="testGrowl-result">Click below to register and test Growl, this is required for Growl notifications to work.</div>
-                            <input type="button" value="Register Growl" id="testGrowl" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
-                        </div><!-- /content_use_growl //-->
-
-                    </fieldset>
-                </div><!-- /growl component-group //-->
 
 
                 <div class="component-group clearfix">
@@ -527,44 +465,6 @@
 
                     </fieldset>
                 </div><!-- /notifo component-group //-->
-
-
-                <div class="component-group clearfix">
-                    <div class="component-group-desc">
-                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/libnotify.gif" alt="" title="Libnotify" width="16" height="16" /> Libnotify </a></h3>
-                        <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
-                    </div>
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_libnotify" id="use_libnotify" #if $sickbeard.USE_LIBNOTIFY then "checked=\"checked\"" else ""# /> 
-                            <label class="clearfix" for="use_libnotify">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send Libnotify notifications?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_libnotify">
-                            <div class="field-pair">
-                                <input type="checkbox" name="libnotify_notify_onsnatch" id="libnotify_notify_onsnatch" #if $sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
-                                <label class="clearfix" for="libnotify_notify_onsnatch">
-                                    <span class="component-title">Notify on Snatch</span>
-                                    <span class="component-desc">Send notification when we start a download?</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <input type="checkbox" name="libnotify_notify_ondownload" id="libnotify_notify_ondownload" #if $sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                                <label class="clearfix" for="libnotify_notify_ondownload">
-                                    <span class="component-title">Notify on Download</span>
-                                    <span class="component-desc">Send notification when we finish a download?</span>
-                                </label>
-                            </div>
-                            <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
-                            <input type="button" value="Test Libnotify" id="testLibnotify" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
-                        </div><!-- /content_use_libnotify //-->
-
-                    </fieldset>
-                </div><!-- /libnotify component-group //-->
 
 
                 <div class="component-group clearfix">
@@ -805,6 +705,207 @@
                     </fieldset>
                 </div><!-- /trakt component-group //-->
 
+                <br />
+                <h1>General</h1>
+                <br />
+
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://growl.info/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/growl.gif" alt="" title="Growl" width="16" height="16" /> Growl </a></h3>
+                        <p>A cross-platform unobtrusive global notification system.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_growl">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Growl notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_growl">
+                            <div class="field-pair">
+                                <input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="growl_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="growl_notify_ondownload" id="growl_notify_ondownload" #if $sickbeard.GROWL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="growl_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Growl IP:Port</span>
+                                    <input type="text" name="growl_host" id="growl_host" value="$sickbeard.GROWL_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Host running Growl (eg. 192.168.1.100:23053)</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Growl Password</span>
+                                    <input type="password" name="growl_password" id="growl_password" value="$sickbeard.GROWL_PASSWORD" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">May leave blank if Sick Beard is on the same host.</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Otherwise Growl <b>requires</b> a password to be used.</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testGrowl-result">Click below to register and test Growl, this is required for Growl notifications to work.</div>
+                            <input type="button" value="Register Growl" id="testGrowl" />
+                            <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_growl //-->
+
+                    </fieldset>
+                </div><!-- /growl component-group //-->
+
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/libnotify.gif" alt="" title="Libnotify" width="16" height="16" /> Libnotify </a></h3>
+                        <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_libnotify" id="use_libnotify" #if $sickbeard.USE_LIBNOTIFY then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_libnotify">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Libnotify notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_libnotify">
+                            <div class="field-pair">
+                                <input type="checkbox" name="libnotify_notify_onsnatch" id="libnotify_notify_onsnatch" #if $sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="libnotify_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="libnotify_notify_ondownload" id="libnotify_notify_ondownload" #if $sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="libnotify_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
+                            <input type="button" value="Test Libnotify" id="testLibnotify" />
+                            <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_libnotify //-->
+
+                    </fieldset>
+                </div><!-- /libnotify component-group //-->
+
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://www.xmpp.org/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/xmpp.png" alt="XMPP" title="XMPP" width="16" height="16" /> Jabber/XMPP</a></h3>
+                        <p>XMPP is an open technology for real-time communication</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_xmpp" id="use_xmpp" #if $sickbeard.USE_XMPP then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_xmpp">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Jabber/XMPP notifications?<br /><br />
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div id="content_use_xmpp">
+                        <div class="field-pair">
+                            <input type="checkbox" name="xmpp_notify_onsnatch" id="xmpp_notify_onsnatch" #if $sickbeard.XMPP_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="xmpp_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="xmpp_notify_ondownload" id="xmpp_notify_ondownload" #if $sickbeard.XMPP_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="xmpp_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+                        
+                         <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Username</span>
+                                <input type="text" name="xmpp_username" id="xmpp_username" value="$sickbeard.XMPP_USERNAME" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Username (including @domain.com)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Password</span>
+                                <input type="password" name="xmpp_password" id="xmpp_password" value="$sickbeard.XMPP_PASSWORD" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">XMPP Password</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Server</span>
+                                <input type="text" name="xmpp_server" id="xmpp_server" value="$sickbeard.XMPP_SERVER" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">XMPP Server (ex: talk.google.com)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Port</span>
+                                <input type="text" name="xmpp_port" id="xmpp_port" value="$sickbeard.XMPP_PORT" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">XMPP Port (ex: 5222)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">XMPP Recipient</span>
+                                <input type="text" name="xmpp_recipient" id="xmpp_recipient" value="$sickbeard.XMPP_RECIPIENT" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">XMPP Recipient</span>
+                            </label>
+                        </div>
+                        
+                        <div class="testNotification" id="testXMPP-result">Click below to test.</div>
+                        <input type="button" value="Test XMPP" id="testXMPP" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        
+                        </div><!-- /content_use_xmpp //-->
+                        
+                    </fieldset>
+                </div><!-- /xmpp component-group //-->
 
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components //-->
