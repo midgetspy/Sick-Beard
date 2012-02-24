@@ -58,6 +58,18 @@
                                 <span class="component-desc">Keep original files after they've been processed?</span>
                             </label>
                         </div>
+                        
+                        <div class="field-pair">
+                            <input type="checkbox" name="symlink_processed_dir" id="symlink_processed_dir" #if $sickbeard.SYMLINK_PROCESSED_DIR == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="symlink_processed_dir">
+                                <span class="component-title">Symlink Original Files</span>
+                                <span class="component-desc">Symlink from the Original files after they've been processed?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="symlink_processed_di">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> should not be enabled with <b>Keep Original Files</b></span>
+                            </label>
+                        </div>
 
                         <div class="field-pair">
                             <input type="checkbox" name="move_associated_files" id="move_associated_files" #if $sickbeard.MOVE_ASSOCIATED_FILES == True then "checked=\"checked\"" else ""# />
