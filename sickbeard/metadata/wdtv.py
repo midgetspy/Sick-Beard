@@ -24,7 +24,6 @@ import sickbeard
 
 import generic
 
-from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -183,8 +182,7 @@ class WDTVMetadata(generic.GenericMetadata):
             episodeID.text = str(curEpToWrite.tvdbid)
 
             title = etree.SubElement(episode, "title")
-            if myShow["seriesname"] != None or curEpToWrite.name != None : 
-                title.text = ep_obj.prettyName()
+            title.text = ep_obj.prettyName()
 
             seriesName = etree.SubElement(episode, "series_name")
             if myShow["seriesname"] != None:
