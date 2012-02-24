@@ -64,6 +64,7 @@ class PageTemplate (Template):
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
         self.sbHttpPort = sickbeard.WEB_PORT
+        self.sbHttpsPort = sickbeard.WEB_PORT
         self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
         self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
