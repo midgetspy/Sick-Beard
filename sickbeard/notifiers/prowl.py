@@ -16,8 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from httplib import HTTPSConnection
+from httplib import HTTPSConnection, HTTPException
 from urllib import urlencode
+
+try:
+    # this only exists in 2.6
+    from ssl import SSLError
+except ImportError:
+    # make a fake one since I don't know what it is supposed to be in 2.5
+    class SSLError(Exception):
+        pass
 
 import sickbeard
 
@@ -64,10 +72,14 @@ class ProwlNotifier:
                 'description': message.encode('utf-8'),
                 'priority': prowl_priority }
 
-        http_handler.request("POST",
-                                "/publicapi/add",
-                                headers = {'Content-type': "application/x-www-form-urlencoded"},
-                                body = urlencode(data))
+        try:
+            http_handler.request("POST",
+                                    "/publicapi/add",
+                                    headers = {'Content-type': "application/x-www-form-urlencoded"},
+                                    body = urlencode(data))
+        except (SSLError, HTTPException):
+            logger.log(u"Prowl notification failed.", logger.ERROR)
+            return False
         response = http_handler.getresponse()
         request_status = response.status
 

@@ -25,6 +25,7 @@ __all__ = ['ezrss',
            'newzbin',
            'nzbindex',
            'nzbserien',
+           'btn',
            ]
 
 import sickbeard
