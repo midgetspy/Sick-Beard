@@ -104,6 +104,8 @@ class NewzbinProvider(generic.NZBProvider):
             quality = Quality.SDDVD
         elif self._is_HDTV(attr_dict):
             quality = Quality.HDTV
+        elif self._is_HDTV_1080i(attr_dict):
+            quality = Quality.HDTV1080I
         elif self._is_WEBDL(attr_dict):
             quality = Quality.HDWEBDL
         elif self._is_720pBluRay(attr_dict):
@@ -151,6 +153,18 @@ class NewzbinProvider(generic.NZBProvider):
         # Video Fmt: x264, 720p
         video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
+
+        # Source: TV Cap or HDTV or (None)
+        source = 'Source' not in attrs or 'TV Cap' in attrs['Source'] or 'HDTV' in attrs['Source']
+
+        # Subtitles: (None)
+        subs = 'Subtitles' not in attrs
+
+        return video_fmt and source and subs
+
+    def _is_HDTV_1080i(self, attrs):
+        # Video Fmt: 1080i
+        video_fmt = 'Video Fmt' in attrs and '1080i' in attrs['Video Fmt']
 
         # Source: TV Cap or HDTV or (None)
         source = 'Source' not in attrs or 'TV Cap' in attrs['Source'] or 'HDTV' in attrs['Source']
