@@ -64,7 +64,6 @@ class PageTemplate (Template):
         super(PageTemplate, self).__init__(*args, **KWs)
         self.sbRoot = sickbeard.WEB_ROOT
         self.sbHttpPort = sickbeard.WEB_PORT
-        self.sbHttpsPort = sickbeard.HTTPS_PORT
         self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
         self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
@@ -665,7 +664,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_port=None, https_cert=None, https_key=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
 
@@ -714,7 +713,6 @@ class ConfigGeneral:
             enable_https = 0
         
         sickbeard.ENABLE_HTTPS = enable_https
-        sickbeard.HTTPS_PORT = https_port
         
         if not config.change_HTTPS_CERT(https_cert):
             results += ["Unable to create directory " + os.path.normpath(https_cert) + ", https cert dir not changed."]

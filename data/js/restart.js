@@ -1,9 +1,6 @@
-if (sbHttpsEnabled != "False" && sbHttpsEnabled != 0) {
-    if (sbHttpsPort != "False" && sbHttpsPort != "")
-        var sb_base_url = 'https://'+sbHost+':'+sbHttpsPort+sbRoot;
-    else
-        var sb_base_url = 'https://'+sbHost+':'+sbHttpPort+sbRoot;
-} else
+if (sbHttpsEnabled != "False" && sbHttpsEnabled != 0) 
+	var sb_base_url = 'https://'+sbHost+':'+sbHttpPort+sbRoot;
+else
     var sb_base_url = 'http://'+sbHost+':'+sbHttpPort+sbRoot;
 
 var base_url = window.location.protocol+'//'+window.location.host+sbRoot;
