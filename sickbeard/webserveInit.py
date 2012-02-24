@@ -20,12 +20,12 @@
 import cherrypy.lib.auth_basic
 import os.path
 
+import sickbeard
+
 from sickbeard import logger
 from sickbeard.webserve import WebInterface
 
 from sickbeard.helpers import create_https_certificates
-from cherrypy import _cpserver
-from cherrypy import _cpwsgi_server
 
 def initWebServer(options = {}):
         options.setdefault('port',      8081)
@@ -80,10 +80,14 @@ def initWebServer(options = {}):
         if enable_https:
             # If either the HTTPS certificate or key do not exist, make some self-signed ones.
             if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
-                create_https_certificates(https_cert, https_key)
+                if not create_https_certificates(https_cert, https_key):
+                    logger.log(u"Unable to create cert/key files, disabling HTTPS")
+                    sickbeard.ENABLE_HTTPS = False
+                    enable_https = False
 
             if not (os.path.exists(https_cert) and os.path.exists(https_key)):
                 logger.log(u"Disabled HTTPS because of missing CERT and KEY files", logger.WARNING)
+                sickbeard.ENABLE_HTTPS = False
                 enable_https = False
 
         options_dict = {
@@ -92,13 +96,16 @@ def initWebServer(options = {}):
                         'log.screen':         False,
                         'error_page.401':     http_error_401_hander,
                         'error_page.404':     http_error_404_hander,
-            }
+        }
 
         if enable_https:
             options_dict['server.ssl_certificate'] = https_cert
             options_dict['server.ssl_private_key'] = https_key
+            protocol = "https"
+        else:
+            protocol = "http"
 
-        logger.log(u"Starting Sick Beard on http://" + str(options['host']) + ":" + str(options['port']) + "/")
+        logger.log(u"Starting Sick Beard on "+protocol+"://" + str(options['host']) + ":" + str(options['port']) + "/")
         cherrypy.config.update(options_dict)
 
         # setup cherrypy logging
