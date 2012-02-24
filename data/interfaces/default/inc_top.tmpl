@@ -6,7 +6,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
-    <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
+    <title>Sick Beard - alpha (
+    #if $sickbeard.version.SICKBEARD_ACCOUNT != "midgetspy":
+        $sickbeard.version.SICKBEARD_ACCOUNT/$sickbeard.version.SICKBEARD_REPOSITORY/
+    #end if
+        $sickbeard.version.SICKBEARD_VERSION) - $title</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="shortcut icon" href="$sbRoot/images/favicon.ico" />
     <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png" />
