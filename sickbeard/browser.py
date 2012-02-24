@@ -52,7 +52,6 @@ def foldersAtPath(path, includeParent = False):
         Give the empty string as the path to list the contents of the root path
         under Unix this means "/", on Windows this will be a list of drive letters)
     """
-    assert os.path.isabs(path) or path == ""
 
     # walk up the tree until we find a valid path
     while path and not os.path.isdir(path):
