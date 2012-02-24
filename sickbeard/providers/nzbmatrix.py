@@ -77,7 +77,11 @@ class NZBMatrixProvider(generic.NZBProvider):
         # don't allow it to be missing
         if not params['maxage']:
             params['maxage'] = '0'
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> upstream/master
         # if the show is a documentary use those cats on nzbmatrix
         if show and show.genre and 'documentary' in show.genre.lower():
             params['subcat'] = params['subcat'] + ',53,9' 
