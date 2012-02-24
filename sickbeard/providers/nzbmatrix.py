@@ -69,7 +69,7 @@ class NZBMatrixProvider(generic.NZBProvider):
             term = "\""+term+"\""
 
         params = {"term": term,
-                  "age": sickbeard.USENET_RETENTION,
+                  "maxage": sickbeard.USENET_RETENTION,
                   "page": "download",
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
@@ -81,6 +81,10 @@ class NZBMatrixProvider(generic.NZBProvider):
         else:
             params["english"] = 1
             
+
+        # don't allow it to be missing
+        if not params['maxage']:
+            params['maxage'] = '0'
 
         # if the show is a documentary use those cats on nzbmatrix
         if show and show.genre and 'documentary' in show.genre.lower():

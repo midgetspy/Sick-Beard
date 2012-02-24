@@ -311,7 +311,7 @@ class NewzbinProvider(generic.NZBProvider):
         
         for cur_item in items:
             title = cur_item.findtext('title')
-            if title == 'Feed Error':
+            if title == 'Feeds Error':
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
             if sickbeard.USENET_RETENTION is not None:
                 try:

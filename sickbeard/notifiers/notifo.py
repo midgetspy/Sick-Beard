@@ -22,6 +22,7 @@ import urllib
 import sickbeard
 
 from sickbeard import logger
+from sickbeard.exceptions import ex
 
 try:
     import lib.simplejson as json #@UnusedImport
@@ -41,13 +42,17 @@ class NotifoNotifier:
         data = urllib.urlencode({
             "title": title,
             "label": label,
-            "msg": msg
+            "msg": msg.encode(sickbeard.SYS_ENCODING)
         })
 
         try:
             data = urllib.urlopen(apiurl, data)    
             result = json.load(data)
-        except IOError:
+        except ValueError, e:
+            logger.log(u"Unable to decode JSON: "+data, logger.ERROR)
+            return False
+        except IOError, e:
+            logger.log(u"Error trying to communicate with notifo: "+ex(e), logger.ERROR)
             return False
         
         data.close()

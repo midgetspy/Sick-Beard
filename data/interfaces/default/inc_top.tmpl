@@ -226,5 +226,5 @@ table.tablesorter thead tr .headerSortDown { background-image: url("$sbRoot/imag
 #if $varExists('show.tvdbid')
 <h1 class="showTitle" id="scene_exception_$show.tvdbid" >#if $varExists('header') then $header else $title#</h1>
 #else
-<h1>#if $varExists('header') then $header else $title#</h1>
+<h1 class="title">#if $varExists('header') then $header else $title#</h1>
 #end if

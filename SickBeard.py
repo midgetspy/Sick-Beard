@@ -118,6 +118,7 @@ def main():
     sickbeard.DATA_DIR = sickbeard.PROG_DIR
     sickbeard.MY_ARGS = sys.argv[1:]
     sickbeard.CREATEPID = False
+    sickbeard.DAEMON = False
 
     sickbeard.SYS_ENCODING = None
 
@@ -265,8 +266,6 @@ def main():
         else:
             webhost = '0.0.0.0'
 
-    logger.log(u"Starting Sick Beard on http://" + str(webhost) + ":" + str(startPort) + "/")
-
     try:
         initWebServer({
                 'port': startPort,
@@ -276,10 +275,13 @@ def main():
                 'log_dir': log_dir,
                 'username': sickbeard.WEB_USERNAME,
                 'password': sickbeard.WEB_PASSWORD,
+                'enable_https': sickbeard.ENABLE_HTTPS,
+                'https_cert': sickbeard.HTTPS_CERT,
+                'https_key': sickbeard.HTTPS_KEY,
         })
     except IOError:
         logger.log(u"Unable to start web server, is something else running on port %d?" % startPort, logger.ERROR)
-        if sickbeard.LAUNCH_BROWSER:
+        if sickbeard.LAUNCH_BROWSER and not sickbeard.DAEMON:
             logger.log(u"Launching browser and exiting", logger.ERROR)
             sickbeard.launchBrowser(startPort)
         sys.exit()
@@ -291,7 +293,7 @@ def main():
     sickbeard.start()
 
     # launch browser if we're supposed to
-    if sickbeard.LAUNCH_BROWSER and not noLaunch:
+    if sickbeard.LAUNCH_BROWSER and not noLaunch and not sickbeard.DAEMON:
         sickbeard.launchBrowser(startPort)
 
     # start an update if we're supposed to
@@ -302,7 +304,6 @@ def main():
     while (True):
 
         if sickbeard.invoked_command:
-            logger.log(u"Executing invoked command: " + repr(sickbeard.invoked_command))
             sickbeard.invoked_command()
             sickbeard.invoked_command = None
 
