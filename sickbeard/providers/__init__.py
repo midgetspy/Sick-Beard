@@ -23,11 +23,8 @@ __all__ = ['ezrss',
            'nzbsrus',
            'womble',
            'newzbin',
-<<<<<<< HEAD
            'thepiratebay',
-=======
            'btn',
->>>>>>> fe53316e078aef4d1b3c6afc7c7bba3fabd95238
            ]
 
 import sickbeard
