@@ -77,7 +77,11 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
+<<<<<<< HEAD
                                     #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay", "tvtorrents"):
+=======
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn"):
+>>>>>>> fe53316e078aef4d1b3c6afc7c7bba3fabd95238
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -195,6 +199,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div>
 
+<<<<<<< HEAD
 <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
@@ -223,6 +228,31 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix" for="thepiratebay_trusted">
                                 <span class="component-title">Trusted Download</span>
                                 <span class="component-desc">Do you want download torrent only from trusted uploaders?</span>
+=======
+<div class="providerDiv" id="btnDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN User ID:</span>
+                                <input class="component-desc" type="text" name="btn_user_id" value="$sickbeard.BTN_USER_ID" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN Auth Token:</span>
+                                <input class="component-desc" type="text" name="btn_auth_token" value="$sickbeard.BTN_AUTH_TOKEN" size="32" />
+                            </label>
+                        </div>
+						<div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN Passkey:</span>
+                                <input class="component-desc" type="text" name="btn_passkey" value="$sickbeard.BTN_PASSKEY" size="32" />
+                            </label>
+                        </div>
+						<div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN Authkey:</span>
+                                <input class="component-desc" type="text" name="btn_authkey" value="$sickbeard.BTN_AUTHKEY" size="32" />
+>>>>>>> fe53316e078aef4d1b3c6afc7c7bba3fabd95238
                             </label>
                         </div>
 </div>

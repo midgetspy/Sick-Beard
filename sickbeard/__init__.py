@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, thepiratebay, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin
+from providers import ezrss, tvtorrents, thepiratebay, btn, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
@@ -100,7 +100,6 @@ USE_API = False
 API_KEY = None
 
 ENABLE_HTTPS = False
-HTTPS_PORT = None
 HTTPS_CERT = None
 HTTPS_KEY = None
 
@@ -159,6 +158,12 @@ THEPIRATEBAY = False
 THEPIRATEBAY_TRUSTED = False
 THEPIRATEBAY_PROXY = False
 THEPIRATEBAY_PROXY_URL = None
+
+BTN = False
+BTN_USER_ID = None
+BTN_AUTH_TOKEN = None
+BTN_PASSKEY = None
+BTN_AUTHKEY = None
 
 TORRENT_DIR = None
 
@@ -271,6 +276,12 @@ PYTIVO_HOST = ''
 PYTIVO_SHARE_NAME = ''
 PYTIVO_TIVO_NAME = ''
 
+USE_NMA = False
+NMA_NOTIFY_ONSNATCH = False
+NMA_NOTIFY_ONDOWNLOAD = False
+NMA_API = None
+NMA_PRIORITY = 0
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -370,7 +381,7 @@ def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_PORT, HTTPS_CERT, HTTPS_KEY, \
+        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
@@ -380,12 +391,13 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH,  THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH,  THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, BTN, BTN_USER_ID, BTN_AUTH_TOKEN, BTN_PASSKEY, BTN_AUTHKEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
+                USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
@@ -419,6 +431,7 @@ def initialize(consoleLogging=True):
         CheckSection('NMJ')
         CheckSection('Synology')
         CheckSection('pyTivo')
+        CheckSection('NMA')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -445,15 +458,6 @@ def initialize(consoleLogging=True):
         
         ENABLE_HTTPS = bool(check_setting_int(CFG, 'General', 'enable_https', 0))
         
-        try:
-            HTTPS_PORT = check_setting_str(CFG, 'General', 'https_port', '9091')
-        except:
-            HTTPS_PORT = '9091'
-
-        if HTTPS_PORT:
-            if int(HTTPS_PORT) < 21 or int(HTTPS_PORT) > 65535:
-                HTTPS_PORT = '9091'
-
         HTTPS_CERT = check_setting_str(CFG, 'General', 'https_cert', 'server.crt')
         HTTPS_KEY = check_setting_str(CFG, 'General', 'https_key', 'server.key')
 
@@ -549,6 +553,12 @@ def initialize(consoleLogging=True):
         THEPIRATEBAY_PROXY =  bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy', 0))
         THEPIRATEBAY_PROXY_URL = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy_url', '')
         
+        BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
+        BTN_USER_ID = check_setting_str(CFG, 'BTN', 'btn_user_id', '')
+        BTN_AUTH_TOKEN = check_setting_str(CFG, 'BTN', 'btn_auth_token', '')    
+        BTN_AUTHKEY = check_setting_str(CFG, 'BTN', 'btn_authkey', '')
+        BTN_PASSKEY = check_setting_str(CFG, 'BTN', 'btn_passkey', '')
+
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
@@ -648,6 +658,12 @@ def initialize(consoleLogging=True):
         PYTIVO_HOST = check_setting_str(CFG, 'pyTivo', 'pytivo_host', '')
         PYTIVO_SHARE_NAME = check_setting_str(CFG, 'pyTivo', 'pytivo_share_name', '')
         PYTIVO_TIVO_NAME = check_setting_str(CFG, 'pyTivo', 'pytivo_tivo_name', '')
+
+        USE_NMA = bool(check_setting_int(CFG, 'NMA', 'use_nma', 0))
+        NMA_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_notify_onsnatch', 0))
+        NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
+        NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
+        NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -998,7 +1014,6 @@ def save_config():
     new_config['General']['use_api'] = int(USE_API)
     new_config['General']['api_key'] = API_KEY
     new_config['General']['enable_https'] = int(ENABLE_HTTPS)
-    new_config['General']['https_port'] = HTTPS_PORT
     new_config['General']['https_cert'] = HTTPS_CERT
     new_config['General']['https_key'] = HTTPS_KEY
     new_config['General']['use_nzbs'] = int(USE_NZBS)
@@ -1060,6 +1075,13 @@ def save_config():
     new_config['THEPIRATEBAY']['thepiratebay_trusted'] = int(THEPIRATEBAY_TRUSTED)    
     new_config['THEPIRATEBAY']['thepiratebay_proxy'] = int(THEPIRATEBAY_PROXY)
     new_config['THEPIRATEBAY']['thepiratebay_proxy_url'] = THEPIRATEBAY_PROXY_URL
+
+    new_config['BTN'] = {}
+    new_config['BTN']['btn'] = int(BTN)
+    new_config['BTN']['btn_user_id'] = BTN_USER_ID
+    new_config['BTN']['btn_auth_token'] = BTN_AUTH_TOKEN
+    new_config['BTN']['btn_authkey'] = BTN_AUTHKEY
+    new_config['BTN']['btn_passkey'] = BTN_PASSKEY
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)
@@ -1180,6 +1202,13 @@ def save_config():
     new_config['pyTivo']['pytivo_share_name'] = PYTIVO_SHARE_NAME
     new_config['pyTivo']['pytivo_tivo_name'] = PYTIVO_TIVO_NAME
 
+    new_config['NMA'] = {}
+    new_config['NMA']['use_nma'] = int(USE_NMA)
+    new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
+    new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
+    new_config['NMA']['nma_api'] = NMA_API
+    new_config['NMA']['nma_priority'] = NMA_PRIORITY
+
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
 
@@ -1195,10 +1224,7 @@ def launchBrowser(startPort=None):
     if not startPort:
         startPort = WEB_PORT
     if ENABLE_HTTPS:
-        if HTTPS_PORT:
-            browserURL = 'https://localhost:%d%s' % (int(HTTPS_PORT), WEB_ROOT)
-        else:
-            browserURL = 'https://localhost:%d%s' % (startPort, WEB_ROOT)
+        browserURL = 'https://localhost:%d%s' % (startPort, WEB_ROOT)
     else:
         browserURL = 'http://localhost:%d%s' % (startPort, WEB_ROOT)
     try:
