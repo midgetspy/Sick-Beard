@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "build Nonea"
+SICKBEARD_VERSION = "ThePirateBay"
