@@ -98,7 +98,8 @@ class TVShow(object):
 
     def _setLocation(self, newLocation):
         logger.log(u"Setter sets location to " + newLocation, logger.DEBUG)
-        if ek.ek(os.path.isdir, newLocation):
+        # Don't validate dir if user wants to add shows without creating a dir
+        if sickbeard.ADD_SHOWS_WO_DIR or ek.ek(os.path.isdir, newLocation):
             self._location = newLocation
             self._isDirGood = True
         else:
