@@ -1,5 +1,6 @@
 #import sickbeard
 #from sickbeard.providers.generic import GenericProvider
+#from sickbeard.providers import thepiratebay   
 #set global $title="Config - Providers"
 #set global $header="Search Providers"
 
@@ -206,14 +207,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 
                         <div class="field-pair" id="content_thepiratebay_proxy">
-							#from sickbeard.providers import thepiratebay                           		
                             <label class="nocheck clearfix">
                                 <span class="component-title">Proxy url:</span>
-                           		<span class="component-desc">
-	                           		<select name="thepiratebay_proxy_url" id="thepiratebay_proxy_url">
-										#for $i in $thepiratebay.proxy_dict.keys():
-										<option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
-	                                    #end for
+                                <span class="component-desc">
+	                              <select name="thepiratebay_proxy_url" id="thepiratebay_proxy_url">
+                                #for $i in $thepiratebay.proxy_dict.keys():
+                                  <option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
+	                              #end for
 	                                </select>
                                 </span>
                             </label>
@@ -224,6 +224,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix" for="thepiratebay_trusted">
                                 <span class="component-title">Trusted Download</span>
                                 <span class="component-desc">Do you want download torrent only from trusted uploaders?</span>
+                            </label>
+                        </div>
+</div>
 
 <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">
@@ -248,7 +251,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix">
                                 <span class="component-title">BTN Authkey:</span>
                                 <input class="component-desc" type="text" name="btn_authkey" value="$sickbeard.BTN_AUTHKEY" size="32" />
->>>>>>> fe53316e078aef4d1b3c6afc7c7bba3fabd95238
                             </label>
                         </div>
 </div>
