@@ -110,26 +110,21 @@
                             <div class="nocheck clearfix" for="name_presets">
                                 <span class="component-title">File Name</span>
                                 <select id="name_presets" style="float: left; margin-right: 15px;">
-                                    #set $is_custom = True
+                                    #set is_custom = True
                                     #for $cur_preset in $naming.name_presets:
                                         #set $tmp = $naming.test_name($cur_preset)
                                         #if $cur_preset == $sickbeard.NAMING_PATTERN:
-                                            #set $is_custom = False
+                                            #set is_custom = False
                                         #end if
-                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected=\"selected\" class=\"selected\"" else ""#>$tmp['name']</option>
+                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected=\"selected\"" else ""#>$tmp['name']</option>
                                     #end for
-                                    #if $is_custom:
-                                        <option id="$sickbeard.NAMING_PATTERN" selected="selected" class="selected">Custom...</option>
-                                    #end if
+                                    <option id="$sickbeard.NAMING_PATTERN" #if $is_custom then "selected=\"selected\"" else ""#>Custom...</option>
                                 </select>
-                                #if not $is_custom:
-                                <input type="button" value="Customize" id="do_custom" />
-                                #end if
                                 <br />
                             </div>
                         </div>
 
-                        <div id="naming_custom" style="#if $is_custom then "display: block;" else "display: none;"#">
+                        <div id="naming_custom">
                             <div class="field-pair clearfix">
                                 <div class="nocheck clearfix">
                                     <span class="component-title">

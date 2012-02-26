@@ -36,10 +36,23 @@ $(document).ready(function(){
 
     }
 
-    $('#name_presets').change(function(){
-        $('#naming_pattern').val( $('#name_presets :selected').attr('id') );
+    function setup_naming() {
+    	// if it is a custom selection then show the text box
+    	if ($('#name_presets :selected').val() == "Custom...")
+    		$('#naming_custom').show();
+    	else
+    	{
+    		$('#naming_custom').hide();
+    		$('#naming_pattern').val( $('#name_presets :selected').attr('id') );
+    	}
         fill_examples();
+    }
+    
+    $('#name_presets').change(function(){
+    	setup_naming();
     });
+
+    
     $('#naming_multi_ep').change(fill_examples);
     $('#naming_pattern').focusout(fill_examples);
     $('#naming_pattern').keyup(function(){
@@ -55,7 +68,7 @@ $(document).ready(function(){
         $('#naming_custom').show();
         $('#naming_pattern').focus();
     });
-    fill_examples();
+    setup_naming();
 
     // -- start of metadata options div toggle code --
     $('#metadataType').change(function(){
