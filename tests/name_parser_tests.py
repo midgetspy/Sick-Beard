@@ -127,6 +127,9 @@ combination_test_cases = [
                            parser.ParseResult(None, '30 Rock', 4, [22]),
                            ['fov']),
                            
+                          ('Season 2\\Show Name - 03-04 - Ep Name.ext',
+                           parser.ParseResult(None, 'Show Name', 2, [3,4], extra_info = 'Ep Name'),
+                           ['no_season', 'season_only']),
                           ]
 
 unicode_test_cases = [

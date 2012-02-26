@@ -1336,7 +1336,7 @@ class TVEpisode(object):
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
                     naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):
 
-        return self._format_string('%SN - %Sx%0E - %EN')
+        return self._format_pattern('%SN - %Sx%0E - %EN')
 
     def _ep_name(self):
         """
@@ -1415,11 +1415,34 @@ class TVEpisode(object):
                    '%RG': release_group(self.release_name),
                    }
 
-    def _format_string(self, pattern=None, multi=None):
+    def _format_string(self, pattern=None):
+        """
+        Replaces all template strings with the correct value
+        """
+
+        replace_map = self._replace_map()
+
+        result_name = pattern
+
+        # if there's no release group then replace it with a reasonable facsimile
+        if not replace_map['%RN']:
+            logger.log(u"Episode has no release name, making up a fake one", logger.DEBUG)
+            result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
+            result_name = result_name.replace('%RG', 'SiCKBEARD')
+        
+        # do the replacements
+        for cur_replacement in sorted(replace_map.keys(), reverse=True):
+            result_name = result_name.replace(cur_replacement, helpers.sanitizeFileName(replace_map[cur_replacement]))
+            result_name = result_name.replace(cur_replacement.lower(), helpers.sanitizeFileName(replace_map[cur_replacement].lower()))
+
+        return result_name
+        
+    def _format_pattern(self, pattern=None, multi=None):
+        """
+        Manipulates an episode naming pattern and then fills the template in
+        """
         
         logger.log(u"pattern: "+pattern, logger.DEBUG)
-        
-        replace_map = self._replace_map()
         
         if pattern == None:
             pattern = sickbeard.NAME_FORMATTING
@@ -1444,7 +1467,7 @@ class TVEpisode(object):
                                 (%0?E(?![._]?N))
                                 (?P<post_sep>[ _.-]*)
                               '''
-            ep_only_regex = '(%0?E(?![._]?N))'
+            ep_only_regex = '(E?%0?E(?![._]?N))'
         
             # try the normal way
             season_ep_match = re.search(season_ep_regex, cur_name_group, re.I|re.X)
@@ -1483,14 +1506,14 @@ class TVEpisode(object):
                 continue
             
             # start with the ep string, eg. E03
-            ep_string = replace_map[ep_format.upper()]
-            for other_eps in self.relatedEps:
+            ep_string = self._format_string(ep_format.upper())#replace_map[ep_format.upper()]
+            for other_ep in self.relatedEps:
                 if multi == NAMING_DUPLICATE:
                     # add " - S01"
                     ep_string += sep + season_format
                 # add "E04"
                 ep_string += ep_sep
-                ep_string += other_eps._replace_map()[ep_format.upper()]
+                ep_string += other_ep._format_string(ep_format.upper())#._replace_map()[ep_format.upper()]
 
             if season_ep_match:
                 regex_replacement = r'\g<pre_sep>\g<2>\g<3>' + ep_string + r'\g<post_sep>'
@@ -1502,17 +1525,8 @@ class TVEpisode(object):
             #cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
             logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
-        
-        # if there's no release group then replace it with a reasonable facsimile
-        if not replace_map['%RN']:
-            logger.log(u"Episode has no release name, making up a fake one", logger.DEBUG)
-            result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
-            result_name = result_name.replace('%RG', 'SiCKBEARD')
-        
-        # do the replacements
-        for cur_replacement in sorted(replace_map.keys(), reverse=True):
-            result_name = result_name.replace(cur_replacement, helpers.sanitizeFileName(replace_map[cur_replacement]))
-            result_name = result_name.replace(cur_replacement.lower(), helpers.sanitizeFileName(replace_map[cur_replacement].lower()))
+
+        result_name = self._format_string(result_name)
         
         return result_name
 
@@ -1544,7 +1558,7 @@ class TVEpisode(object):
         if len(name_groups) == 1:
             return ''
         else:
-            return self._format_string(os.sep.join(name_groups[:-1]), multi)
+            return self._format_pattern(os.sep.join(name_groups[:-1]), multi)
 
 
     def formatted_filename(self, pattern=None, multi=None):
@@ -1558,7 +1572,7 @@ class TVEpisode(object):
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
         
-        return self._format_string(name_groups[-1], multi)
+        return self._format_pattern(name_groups[-1], multi)
 
     def rename(self):
         

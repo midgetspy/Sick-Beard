@@ -93,9 +93,12 @@ def validate_name(pattern, multi=None, file_only=False):
     if not file_only:
         new_name = ek.ek(os.path.join, new_path, new_name)
 
+    logger.log(u"Trying to parse "+new_name, logger.DEBUG)
+
     try:
         result = parser.parse(new_name)
     except InvalidNameException:
+        logger.log(u"Unable to parse "+new_name+", not valid", logger.DEBUG)
         return False
     
     logger.log(new_name + " vs " + str(result), logger.DEBUG)
