@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
 import os
 
 import sickbeard
@@ -34,7 +35,12 @@ dir_presets = ('Season %0S',
 name_presets = ('%SN - %Sx%0E - %EN',
                 '%S.N.S%0SE%0E.%E.N',
                 '%Sx%0E - %EN',
-                'S%0SE%0E - %EN')
+                'S%0SE%0E - %EN',
+                )
+
+name_abd_presets = ('%SN - %A-D - %EN',
+                '%S.N.%A.D.%E.N',
+                )
 
 class TVShow():
     def __init__(self):
@@ -48,6 +54,7 @@ class TVEpisode(tv.TVEpisode):
         self._name = name
         self._season = season
         self._episode = episode
+        self._airdate = datetime.date(2010, 3, 9)
         self.show = TVShow()
         self._status = Quality.compositeStatus(common.DOWNLOADED, common.Quality.SDTV)
         self._release_name = 'Show.Name.S02E03.HDTV.XviD-RLSGROUP'
@@ -61,13 +68,13 @@ def check_force_season_folders(pattern=None, multi=None):
     """
     if pattern == None:
         pattern = sickbeard.NAMING_PATTERN
-    if multi == None:
-        multi = sickbeard.NAMING_MULTI_EP
-
-    # if either of these are false then we need to force season folders
-    to_return = not validate_name(pattern, None, file_only=True) or not validate_name(pattern, multi, file_only=True)
     
-    return to_return
+    valid = not validate_name(pattern, None, file_only=True) 
+    
+    if multi != None:
+        valid = valid or not validate_name(pattern, multi, file_only=True)
+
+    return valid
 
 def check_valid_naming(pattern=None, multi=None):
     """
@@ -77,13 +84,29 @@ def check_valid_naming(pattern=None, multi=None):
     """
     if pattern == None:
         pattern = sickbeard.NAMING_PATTERN
-    if multi == None:
-        multi = sickbeard.NAMING_MULTI_EP
+        
+    valid = validate_name(pattern, None)
 
-    return validate_name(pattern, None) and validate_name(pattern, multi)
+    if multi != None:
+        valid = valid and validate_name(pattern, multi)
+
+    return valid
+
+def check_valid_abd_naming(pattern=None):
+    """
+    Checks if the name is can be parsed back to its original form for an air-by-date format.
+    
+    Returns true if the naming is valid, false if not.
+    """
+    if pattern == None:
+        pattern = sickbeard.NAMING_PATTERN
+        
+    valid = validate_name(pattern, abd=True)
+
+    return valid
 
 
-def validate_name(pattern, multi=None, file_only=False):
+def validate_name(pattern, multi=None, file_only=False, abd=False):
     ep = _generate_sample_ep(multi)
 
     parser = NameParser(True)
@@ -103,10 +126,14 @@ def validate_name(pattern, multi=None, file_only=False):
     
     logger.log(new_name + " vs " + str(result), logger.DEBUG)
 
-    if result.season_number != ep.season:
-        return False
-    if result.episode_numbers != [x.episode for x in [ep] + ep.relatedEps]:
-        return False
+    if abd:
+        if result.air_date != ep.airdate:
+            return False
+    else:
+        if result.season_number != ep.season:
+            return False
+        if result.episode_numbers != [x.episode for x in [ep] + ep.relatedEps]:
+            return False
 
     return True
 
@@ -114,6 +141,7 @@ def _generate_sample_ep(multi=None):
     # make a fake episode object
     ep = TVEpisode(2,3,"Ep Name")
     ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
+    ep._airdate = datetime.date(2011, 3, 9)
 
     if multi != None:
         ep._name = "Ep Name (1)"

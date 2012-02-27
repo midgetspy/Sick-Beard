@@ -50,6 +50,41 @@ $(document).ready(function(){
 
     }
 
+    function fill_abd_examples() {
+
+        var pattern = $('#naming_abd_pattern').val();
+        
+        $.get(sbRoot+'/config/postProcessing/testNaming', {pattern: pattern},
+            function(data){
+                $('#naming_abd_example').text(data+'.ext');
+        });
+
+        $.get(sbRoot+'/config/postProcessing/isNamingValid', {pattern: pattern, abd: 'True'},
+            function(data){
+                if (data == "invalid")
+                {
+                    $('#naming_abd_pattern').css('background-color', '#FFDDDD');
+                    $('#custom_abd_naming_warning_text').css('background-color', '#FFDDDD');
+                    $('#custom_abd_naming_warning_text').html('This pattern is invalid.')
+                    $('#custom_abd_naming_warning').show();
+                }
+                else if (data == "seasonfolders")
+                {
+                	$('#naming_abd_pattern').css('background-color', '#FFFFDD');
+                    $('#custom_abd_naming_warning_text').css('background-color', '#FFFFDD');
+                    $('#custom_abd_naming_warning_text').html('This pattern would be invalid without the folders, using it will force "Flatten" off for all shows.')
+                    $('#custom_abd_naming_warning').show();
+                }
+                else
+                {
+                	$('#naming_abd_pattern').css('background-color', '#FFFFFF');
+                    $('#custom_abd_naming_warning_text').css('background-color', '#FFFFFF');
+                    $('#custom_abd_naming_warning').hide();
+                }
+        });
+
+    }
+
     function setup_naming() {
     	// if it is a custom selection then show the text box
     	if ($('#name_presets :selected').val() == "Custom...")
@@ -62,10 +97,36 @@ $(document).ready(function(){
         fill_examples();
     }
     
+    function setup_abd_naming() {
+    	if ($('#naming_custom_abd').prop("checked"))
+    		$('#naming_abd_different').show();
+    	else
+    	{
+    		$('#naming_abd_different').hide();
+    	}
+    	
+    	// if it is a custom selection then show the text box
+    	if ($('#name_abd_presets :selected').val() == "Custom...")
+    		$('#naming_abd_custom').show();
+    	else
+    	{
+    		$('#naming_abd_custom').hide();
+    		$('#naming_abd_pattern').val( $('#name_abd_presets :selected').attr('id') );
+    	}
+    	fill_abd_examples();
+    }
+    
     $('#name_presets').change(function(){
     	setup_naming();
     });
 
+    $('#name_abd_presets').change(function(){
+    	setup_abd_naming();
+    });
+    
+    $('#naming_custom_abd').change(function(){
+    	setup_abd_naming();
+    });
     
     $('#naming_multi_ep').change(fill_examples);
     $('#naming_pattern').focusout(fill_examples);
@@ -74,8 +135,19 @@ $(document).ready(function(){
             fill_examples();
         }, 500);
     });
+
+    $('#naming_abd_pattern').focusout(fill_examples);
+    $('#naming_abd_pattern').keyup(function(){
+        typewatch(function () {
+            fill_abd_examples();
+        }, 500);
+    });
+    
     $('#show_naming_key').click(function(){
         $('#naming_key').toggle();
+    });
+    $('#show_naming_abd_key').click(function(){
+        $('#naming_abd_key').toggle();
     });
     $('#do_custom').click(function(){
         $('#naming_pattern').val( $('#name_presets :selected').attr('id') );
@@ -83,6 +155,7 @@ $(document).ready(function(){
         $('#naming_pattern').focus();
     });
     setup_naming();
+    setup_abd_naming();
 
     // -- start of metadata options div toggle code --
     $('#metadataType').change(function(){

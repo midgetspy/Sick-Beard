@@ -108,7 +108,7 @@
 
                         <div class="field-pair">
                             <div class="nocheck clearfix" for="name_presets">
-                                <span class="component-title">File Name</span>
+                                <span class="component-title">Name Pattern</span>
                                 <select id="name_presets" style="float: left; margin-right: 15px;">
                                     #set is_custom = True
                                     #for $cur_preset in $naming.name_presets:
@@ -228,46 +228,11 @@
                                           <td>720p_BluRay</td>
                                         </tr>
                                         <tr class="even">
-                                          <td class="align-right"><b>Air-By-Date:</b></td>
-                                          <td>%AD</td>
-                                          <td>2010 03 22</td>
-                                        </tr>
-                                        <tr>
-                                          <td>&nbsp;</td>
-                                          <td>%A.D</td>
-                                          <td>2010.03.22</td>
-                                        </tr>
-                                        <tr class="even">
-                                          <td>&nbsp;</td>
-                                          <td>%A_D</td>
-                                          <td>2010_03_22</td>
-                                        </tr>
-                                        <tr>
-                                          <td>&nbsp;</td>
-                                          <td>%A-D</td>
-                                          <td>2010-03-22</td>
-                                        </tr>
-                                        <tr class="even">
-                                          <td class="align-right"><b>Year:</b></td>
-                                          <td>%Y</td>
-                                          <td>2010</td>
-                                        </tr>
-                                        <tr>
-                                          <td class="align-right"><b>Month:</b></td>
-                                          <td>%M</td>
-                                          <td>03</td>
-                                        </tr>
-                                        <tr class="even">
-                                          <td class="align-right"><b>Day:</b></td>
-                                          <td>%D</td>
-                                          <td>22</td>
-                                        </tr>
-                                        <tr>
                                           <td class="align-right"><b>Release Name:</b></td>
                                           <td>%RN</td>
                                           <td>Show.Name.S02E03.HDTV.XviD-RLSGROUP</td>
                                         </tr>
-                                        <tr class="even">
+                                        <tr>
                                           <td class="align-right"><b>Release Group:</b></td>
                                           <td>%RG</td>
                                           <td>RLSGROUP</td>
@@ -292,7 +257,7 @@
                         </div>
 
                         <div id="naming_example_div">
-                            <h2>Result:</h2>
+                            <h2>Sample:</h2>
                             <div class="example">
                                 <span class="jumbo" id="naming_example">&nbsp;</span>
                             </div>
@@ -300,12 +265,194 @@
                         <br/>
 
                         <div id="naming_example_multi_div">
-                            <h2>Multi-Ep Result:</h2>
+                            <h2>Multi-ep sample:</h2>
                             <div class="example">
                                 <span class="jumbo" id="naming_example_multi">&nbsp;</span>
                             </div>
                         </div>
                         <br/>
+                        <br />
+
+                        <div class="field-pair clearfix">
+                            <input type="checkbox" id="naming_custom_abd" name="naming_custom_abd" #if $sickbeard.NAMING_CUSTOM_ABD then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="naming_custom_abd">
+                                <span class="component-title">Custom air-by-date</span>
+                                <span class="component-desc">Name air-by-date shows differently than regular shows?</span>
+                            </label>
+                        </div>
+
+                        <div id="naming_abd_different">
+                        <div class="field-pair">
+                            <div class="nocheck clearfix" for="name_presets">
+                                <span class="component-title">Name Pattern</span>
+                                <select id="name_abd_presets" style="float: left; margin-right: 15px;">
+                                    #set is_abd_custom = True
+                                    #for $cur_preset in $naming.name_abd_presets:
+                                        #set $tmp = $naming.test_name($cur_preset)
+                                        #if $cur_preset == $sickbeard.NAMING_ABD_PATTERN:
+                                            #set is_abd_custom = False
+                                        #end if
+                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_ABD_PATTERN then "selected=\"selected\"" else ""#>$tmp['name']</option>
+                                    #end for
+                                    <option id="$sickbeard.NAMING_ABD_PATTERN" #if $is_abd_custom then "selected=\"selected\"" else ""#>Custom...</option>
+                                </select>
+                                <br />
+                            </div>
+                        </div>
+
+                        <div id="naming_abd_custom">
+                            <div class="field-pair clearfix">
+                                <div class="nocheck clearfix">
+                                    <span class="component-title">
+                                        &nbsp;
+                                    </span>
+                                    <span class="component-desc">
+                                        <input type="text" size="50" name="naming_abd_pattern" id="naming_abd_pattern" value="$sickbeard.NAMING_ABD_PATTERN" />
+                                        <img src="$sbRoot/images/legend16.png" width="16" height="16" alt="[Toggle Key]" id="show_naming_abd_key" title="Toggle Naming Legend" style="padding-left: 5px;">
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="field-pair clearfix" id="custom_abd_naming_warning">
+                                <div class="nocheck clearfix">
+                                    <span class="component-title">
+                                        &nbsp;<br /><br />
+                                    </span>
+                                    <span class="component-desc" id="custom_abd_naming_warning_text">
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div id="naming_abd_key" class="nocheck clearfix" style="display: none;">
+                                  <table id="Key" class="Key">
+                                    <thead>
+                                        <tr>
+                                          <th class="align-right">Meaning</th>
+                                          <th>Pattern</th>
+                                          <th width="60%">Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                          <th colspan="3">Use lower case if you want lower case names (eg. %sn, %e.n, %q etc)</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        <tr>
+                                          <td class="align-right"><b>Show Name:</b></td>
+                                          <td>%SN</td>
+                                          <td>Show Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%S.N</td>
+                                          <td>Show.Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%S_N</td>
+                                          <td>Show_Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Episode Name:</b></td>
+                                          <td>%EN</td>
+                                          <td>Episode Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%E.N</td>
+                                          <td>Episode.Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%E_N</td>
+                                          <td>Episode_Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Quality:</b></td>
+                                          <td>%QN</td>
+                                          <td>720p BluRay</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%Q.N</td>
+                                          <td>720p.BluRay</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%Q_N</td>
+                                          <td>720p_BluRay</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Air-By-Date:</b></td>
+                                          <td>%AD</td>
+                                          <td>2010 03 09</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%A.D</td>
+                                          <td>2010.03.09</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%A_D</td>
+                                          <td>2010_03_09</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%A-D</td>
+                                          <td>2010-03-09</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Year:</b></td>
+                                          <td>%Y</td>
+                                          <td>2010</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Month:</b></td>
+                                          <td>%M</td>
+                                          <td>3</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right">&nbsp;</td>
+                                          <td>%M</td>
+                                          <td>03</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Day:</b></td>
+                                          <td>%D</td>
+                                          <td>9</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right">&nbsp;</td>
+                                          <td>%0D</td>
+                                          <td>09</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Release Name:</b></td>
+                                          <td>%RN</td>
+                                          <td>Show.Name.S02E03.HDTV.XviD-RLSGROUP</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Release Group:</b></td>
+                                          <td>%RG</td>
+                                          <td>RLSGROUP</td>
+                                        </tr>
+                                    </tbody>
+                                  </table>
+                                  <br/>
+                            </div>
+
+                            <div id="naming_abd_example_div">
+                                <h2>Sample:</h2>
+                                <div class="example">
+                                    <span class="jumbo" id="naming_abd_example">&nbsp;</span>
+                                </div>
+                            </div>
+                            <br/>
+
+                        </div>
+                        </div><!-- /naming_abd_different -->
 
                         <div class="clearfix"></div>
                         <input type="submit" class="config_submitter" value="Save Changes" /><br/>

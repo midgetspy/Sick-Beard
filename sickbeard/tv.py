@@ -1413,6 +1413,15 @@ class TVEpisode(object):
                    '%0E': '%02d' % self.episode,
                    '%RN': self.release_name,
                    '%RG': release_group(self.release_name),
+                   '%AD': str(self.airdate).replace('-', ' '),
+                   '%A.D': str(self.airdate).replace('-', '.'),
+                   '%A_D': us(str(self.airdate)),
+                   '%A-D': str(self.airdate),
+                   '%Y': str(self.airdate.year),
+                   '%M': str(self.airdate.month),
+                   '%D': str(self.airdate.day),
+                   '%0M': '%02d' % self.airdate.month,
+                   '%0D': '%02d' % self.airdate.day,
                    }
 
     def _format_string(self, pattern=None):
@@ -1536,9 +1545,13 @@ class TVEpisode(object):
         """
         
         result = self.formatted_filename()
+
+        # if they want us to flatten it and we're allowed to flatten it then we will
+        if self.show.flatten_folders and not sickbeard.NAMING_FORCE_FOLDERS:
+            return result
         
-        # as long as they don't want us to flatten it and we're not FORCED to flatten it then append the dir
-        if not self.show.flatten_folders or sickbeard.NAMING_FORCE_FOLDERS:
+        # if not we append the folder on and use that
+        else:
             result = ek.ek(os.path.join, self.formatted_dir(), result)
         
         return result
@@ -1548,9 +1561,13 @@ class TVEpisode(object):
         """
         Just the folder name of the episode
         """
-        
+
         if pattern == None:
-            pattern = sickbeard.NAMING_PATTERN
+            # we only use ABD if it's enabled, this is an ABD show, AND this is not a multi-ep
+            if self.show.air_by_date and sickbeard.NAMING_CUSTOM_ABD and not self.relatedEps:
+                pattern = sickbeard.NAMING_ABD_PATTERN
+            else:
+                pattern = sickbeard.NAMING_PATTERN
         
         # split off the dirs only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
@@ -1567,7 +1584,11 @@ class TVEpisode(object):
         """
         
         if pattern == None:
-            pattern = sickbeard.NAMING_PATTERN
+            # we only use ABD if it's enabled, this is an ABD show, AND this is not a multi-ep
+            if self.show.air_by_date and sickbeard.NAMING_CUSTOM_ABD and not self.relatedEps:
+                pattern = sickbeard.NAMING_ABD_PATTERN
+            else:
+                pattern = sickbeard.NAMING_PATTERN
             
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)

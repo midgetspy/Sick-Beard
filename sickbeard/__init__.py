@@ -31,6 +31,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin
+from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
@@ -51,6 +52,9 @@ PID = None
 
 CFG = None
 CONFIG_FILE = None
+
+# this is the version of the config we EXPECT to find
+CONFIG_VERSION = 0
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -128,6 +132,8 @@ PROVIDER_ORDER = []
 
 NAMING_MULTI_EP = None
 NAMING_PATTERN = None
+NAMING_ABD_PATTERN = None
+NAMING_CUSTOM_ABD = None
 NAMING_FORCE_FOLDERS = False
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
@@ -278,88 +284,9 @@ IGNORE_WORDS = "german,french,core2hd,dutch,swedish"
 
 __INITIALIZED__ = False
 
-def CheckSection(sec):
-    """ Check if INI section exists, if not create it """
-    try:
-        CFG[sec]
-        return True
-    except:
-        CFG[sec] = {}
-        return False
-
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
-def minimax(val, low, high):
-    """ Return value forced within range """
-    try:
-        val = int(val)
-    except:
-        val = 0
-    if val < low:
-        return low
-    if val > high:
-        return high
-    return val
-
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
-def check_setting_int(config, cfg_name, item_name, def_val):
-    try:
-        my_val = int(config[cfg_name][item_name])
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-    logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
-    return my_val
-
-################################################################################
-# Check_setting_float                                                          #
-################################################################################
-def check_setting_float(config, cfg_name, item_name, def_val):
-    try:
-        my_val = float(config[cfg_name][item_name])
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-
-    logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
-    return my_val
-
-################################################################################
-# Check_setting_str                                                            #
-################################################################################
-def check_setting_str(config, cfg_name, item_name, def_val, log=True):
-    try:
-        my_val = config[cfg_name][item_name]
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-
-    if log:
-        logger.log(item_name + " -> " + my_val, logger.DEBUG)
-    else:
-        logger.log(item_name + " -> ******", logger.DEBUG)
-    return my_val
-
-
 def get_backlog_cycle_time():
     cycletime = SEARCH_FREQUENCY*2+7
     return max([cycletime, 720])
-
 
 def initialize(consoleLogging=True):
 
@@ -383,8 +310,8 @@ def initialize(consoleLogging=True):
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
-                NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
@@ -400,19 +327,19 @@ def initialize(consoleLogging=True):
 
         socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
-        CheckSection('General')
-        CheckSection('Blackhole')
-        CheckSection('Newzbin')
-        CheckSection('SABnzbd')
-        CheckSection('NZBget')
-        CheckSection('XBMC')
-        CheckSection('PLEX')
-        CheckSection('Growl')
-        CheckSection('Prowl')
-        CheckSection('Twitter')
-        CheckSection('NMJ')
-        CheckSection('Synology')
-        CheckSection('pyTivo')
+        CheckSection(CFG, 'General')
+        CheckSection(CFG, 'Blackhole')
+        CheckSection(CFG, 'Newzbin')
+        CheckSection(CFG, 'SABnzbd')
+        CheckSection(CFG, 'NZBget')
+        CheckSection(CFG, 'XBMC')
+        CheckSection(CFG, 'PLEX')
+        CheckSection(CFG, 'Growl')
+        CheckSection(CFG, 'Prowl')
+        CheckSection(CFG, 'Twitter')
+        CheckSection(CFG, 'NMJ')
+        CheckSection(CFG, 'Synology')
+        CheckSection(CFG, 'pyTivo')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -495,6 +422,8 @@ def initialize(consoleLogging=True):
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
         NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '')
+        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '')
+        NAMING_CUSTOM_ABD = check_setting_int(CFG, 'General', 'naming_custom_abd', 0)
         NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
         NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
 
@@ -701,9 +630,13 @@ def initialize(consoleLogging=True):
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
-
         providerList = providers.makeProviderList()
-        
+
+        # migrate the config if it needs it
+        migrator = ConfigMigrator(CFG)
+        migrator.migrate_config()
+
+        # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
@@ -996,6 +929,8 @@ def save_config():
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
     new_config['General']['naming_pattern'] = NAMING_PATTERN
+    new_config['General']['naming_custom_abd'] = int(NAMING_CUSTOM_ABD)
+    new_config['General']['naming_abd_pattern'] = NAMING_ABD_PATTERN
     new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
@@ -1157,6 +1092,8 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+
+    new_config['General']['config_version'] = CONFIG_VERSION
 
     new_config.write()
 

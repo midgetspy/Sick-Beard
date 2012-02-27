@@ -24,6 +24,7 @@ import datetime
 
 from sickbeard import helpers
 from sickbeard import logger
+from sickbeard import naming
 
 import sickbeard
 
@@ -163,4 +164,177 @@ def change_VERSION_NOTIFY(version_notify):
         
     if oldSetting == False and version_notify == True:
         sickbeard.versionCheckScheduler.action.run() #@UndefinedVariable
+
+def CheckSection(CFG, sec):
+    """ Check if INI section exists, if not create it """
+    try:
+        CFG[sec]
+        return True
+    except:
+        CFG[sec] = {}
+        return False
+
+################################################################################
+# Check_setting_int                                                            #
+################################################################################
+def minimax(val, low, high):
+    """ Return value forced within range """
+    try:
+        val = int(val)
+    except:
+        val = 0
+    if val < low:
+        return low
+    if val > high:
+        return high
+    return val
+
+################################################################################
+# Check_setting_int                                                            #
+################################################################################
+def check_setting_int(config, cfg_name, item_name, def_val):
+    try:
+        my_val = int(config[cfg_name][item_name])
+    except:
+        my_val = def_val
+        try:
+            config[cfg_name][item_name] = my_val
+        except:
+            config[cfg_name] = {}
+            config[cfg_name][item_name] = my_val
+    logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
+    return my_val
+
+################################################################################
+# Check_setting_float                                                          #
+################################################################################
+def check_setting_float(config, cfg_name, item_name, def_val):
+    try:
+        my_val = float(config[cfg_name][item_name])
+    except:
+        my_val = def_val
+        try:
+            config[cfg_name][item_name] = my_val
+        except:
+            config[cfg_name] = {}
+            config[cfg_name][item_name] = my_val
+
+    logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
+    return my_val
+
+################################################################################
+# Check_setting_str                                                            #
+################################################################################
+def check_setting_str(config, cfg_name, item_name, def_val, log=True):
+    try:
+        my_val = config[cfg_name][item_name]
+    except:
+        my_val = def_val
+        try:
+            config[cfg_name][item_name] = my_val
+        except:
+            config[cfg_name] = {}
+            config[cfg_name][item_name] = my_val
+
+    if log:
+        logger.log(item_name + " -> " + my_val, logger.DEBUG)
+    else:
+        logger.log(item_name + " -> ******", logger.DEBUG)
+    return my_val
+
+
+class ConfigMigrator():
+
+    def __init__(self, config_obj):
+        """
+        Initializes a config migrator that can take the config from the version indicated in the config
+        file up to the version required by SB
+        """
+        
+        self.config_obj = config_obj
+
+        # check the version of the config
+        self.config_version = check_setting_int(config_obj, 'General', 'config_version', 0)
+
+    def migrate_config(self):
+        """
+        Calls each successive migration until the config is the same version as SB expects
+        """
+        
+        while self.config_version < sickbeard.CONFIG_VERSION:
+            next_version = self.config_version + 1
+            
+            # do the migration, expect a method named _migrate_v<num>
+            logger.log(u"Migrating config up to version "+str(next_version))
+            getattr(self, '_migrate_v'+str(next_version))()
+            self.config_version = next_version
+
+    def _migrate_v1(self):
+        """
+        Reads in the old naming settings from your config and generates a new config template from them.
+        """
+        
+        sickbeard.NAMING_PATTERN = self._name_to_pattern()
+        
+        sickbeard.NAMING_CUSTOM_ABD = bool(check_setting_int(self.config_obj, 'General', 'naming_dates', 0))
+        
+        if sickbeard.NAMING_CUSTOM_ABD:
+            sickbeard.NAMING_ABD_PATTERN = self._name_to_pattern(True)
+        else:
+            sickbeard.NAMING_ABD_PATTERN = naming.name_abd_presets[0]
+        
+    def _name_to_pattern(self, abd=False):
+
+        # get the old settings from the file
+        use_periods = bool(check_setting_int(self.config_obj, 'General', 'naming_use_periods', 0))
+        ep_type = bool(check_setting_int(self.config_obj, 'General', 'naming_ep_type', 0))
+        sep_type = bool(check_setting_int(self.config_obj, 'General', 'naming_sep_type', 0))
+        use_quality = bool(check_setting_int(self.config_obj, 'General', 'naming_quality', 0))
+
+        use_show_name = bool(check_setting_int(self.config_obj, 'General', 'naming_show_name', 1))
+        use_ep_name = bool(check_setting_int(self.config_obj, 'General', 'naming_ep_name', 1))
+
+        # make the presets into templates
+        naming_ep_type = ("%Sx%0E",
+                          "s%0Se%0E",
+                           "S%0SE%0E",
+                           "%0Sx%0E")
+        naming_sep_type = (" - ", " ")
+
+        # set up our data to use
+        if use_periods:
+            show_name = '%S.N'
+            ep_name = '%E.N'
+            ep_quality = '%Q.N'
+            abd = '%A.D'
+        else:
+            show_name = '%SN'
+            ep_name = '%EN'
+            ep_quality = '%QN'
+            abd = '%A-D'
+
+        if abd:
+            ep_string = abd
+        else:
+            ep_string = naming_ep_type[ep_type]
+
+        finalName = ""
+
+        # start with the show name
+        if use_show_name:
+            finalName += show_name + naming_sep_type[sep_type]
+
+        # add the season/ep stuff
+        finalName += ep_string
+
+        # add the episode name
+        if use_ep_name:
+            finalName += naming_sep_type[sep_type] + ep_name
+
+        # add the quality
+        if use_quality:
+            finalName += naming_sep_type[sep_type] + ep_quality
+
+        return finalName
+
 

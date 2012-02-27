@@ -827,7 +827,7 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None):
+                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
         results = []
 
@@ -859,10 +859,16 @@ class ConfigPostProcessing:
         else:
             move_associated_files = 0
 
+        if naming_custom_abd == "on":
+            naming_custom_abd = 1
+        else:
+            naming_custom_abd = 0
+
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
+        sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
@@ -875,7 +881,12 @@ class ConfigPostProcessing:
             sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
             sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
         else:
-            results.append("You tried saving an invalid naming config, didn't change your naming config")
+            results.append("You tried saving an invalid naming config, not saving your naming settings")
+
+        if self.isNamingValid(naming_abd_pattern, None, True) != "invalid":
+            sickbeard.NAMING_ABD_PATTERN = naming_abd_pattern
+        else:
+            results.append("You tried saving an invalid air-by-date naming config, not saving your air-by-date settings")
 
         sickbeard.USE_BANNER = use_banner
 
@@ -904,15 +915,21 @@ class ConfigPostProcessing:
         return result
     
     @cherrypy.expose
-    def isNamingValid(self, pattern=None, multi=None):
-        if pattern == None or multi == None:
+    def isNamingValid(self, pattern=None, multi=None, abd=False):
+        if pattern == None:
             return "invalid"
         
-        # check validity of single and multi ep cases for the whole path
-        is_valid = naming.check_valid_naming(pattern, multi)
+        # air by date shows just need one check, we don't need to worry about season folders 
+        if abd:
+            is_valid = naming.check_valid_abd_naming(pattern)
+            require_season_folders = False
 
-        # check validity of single and multi ep cases for only the file name
-        require_season_folders = naming.check_force_season_folders(pattern, multi)
+        else:
+            # check validity of single and multi ep cases for the whole path
+            is_valid = naming.check_valid_naming(pattern, multi)
+    
+            # check validity of single and multi ep cases for only the file name
+            require_season_folders = naming.check_force_season_folders(pattern, multi)
 
         if is_valid and not require_season_folders:
             return "valid"
