@@ -41,6 +41,36 @@ naming_multi_ep_type_text = ("extend", "duplicate", "repeat")
 naming_sep_type = (" - ", " ")
 naming_sep_type_text = (" - ", "space")
 
+def change_HTTPS_CERT(https_cert):
+
+    if https_cert == '':
+        sickbeard.HTTPS_CERT = ''
+        return True
+
+    if os.path.normpath(sickbeard.HTTPS_CERT) != os.path.normpath(https_cert):
+        if helpers.makeDir(os.path.dirname(os.path.abspath(https_cert))):
+            sickbeard.HTTPS_CERT = os.path.normpath(https_cert)
+            logger.log(u"Changed https cert path to " + https_cert)
+        else:
+            return False
+
+    return True
+
+def change_HTTPS_KEY(https_key):
+
+    if https_key == '':
+        sickbeard.HTTPS_KEY = ''
+        return True
+
+    if os.path.normpath(sickbeard.HTTPS_KEY) != os.path.normpath(https_key):
+        if helpers.makeDir(os.path.dirname(os.path.abspath(https_key))):
+            sickbeard.HTTPS_KEY = os.path.normpath(https_key)
+            logger.log(u"Changed https key path to " + https_key)
+        else:
+            return False
+
+    return True
+
 def change_LOG_DIR(log_dir):
 
     if os.path.normpath(sickbeard.LOG_DIR) != os.path.normpath(log_dir):

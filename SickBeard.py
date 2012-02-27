@@ -266,8 +266,6 @@ def main():
         else:
             webhost = '0.0.0.0'
 
-    logger.log(u"Starting Sick Beard on http://" + str(webhost) + ":" + str(startPort) + "/")
-
     try:
         initWebServer({
                 'port': startPort,
@@ -277,6 +275,9 @@ def main():
                 'log_dir': log_dir,
                 'username': sickbeard.WEB_USERNAME,
                 'password': sickbeard.WEB_PASSWORD,
+                'enable_https': sickbeard.ENABLE_HTTPS,
+                'https_cert': sickbeard.HTTPS_CERT,
+                'https_key': sickbeard.HTTPS_KEY,
         })
     except IOError:
         logger.log(u"Unable to start web server, is something else running on port %d?" % startPort, logger.ERROR)
