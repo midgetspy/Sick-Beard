@@ -276,7 +276,6 @@ def main():
                 'username': sickbeard.WEB_USERNAME,
                 'password': sickbeard.WEB_PASSWORD,
                 'enable_https': sickbeard.ENABLE_HTTPS,
-                'https_port': sickbeard.HTTPS_PORT,
                 'https_cert': sickbeard.HTTPS_CERT,
                 'https_key': sickbeard.HTTPS_KEY,
         })

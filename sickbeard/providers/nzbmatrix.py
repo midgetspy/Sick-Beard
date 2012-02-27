@@ -21,12 +21,12 @@ import time
 import urllib
 import datetime
 
-import xml.etree.cElementTree as etree
+from xml.dom.minidom import parseString
 
 import sickbeard
 import generic
 
-from sickbeard import classes, logger, show_name_helpers
+from sickbeard import classes, logger, show_name_helpers, helpers
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
 
@@ -65,7 +65,7 @@ class NZBMatrixProvider(generic.NZBProvider):
             term = "\""+term+"\""
 
         params = {"term": term,
-                  "age": sickbeard.USENET_RETENTION,
+                  "maxage": sickbeard.USENET_RETENTION,
                   "page": "download",
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
@@ -73,6 +73,10 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "english": 1,
                   "ssl": 1,
                   "scenename": 1}
+
+        # don't allow it to be missing
+        if not params['maxage']:
+            params['maxage'] = '0'
 
         # if the show is a documentary use those cats on nzbmatrix
         if show and show.genre and 'documentary' in show.genre.lower():
@@ -91,8 +95,8 @@ class NZBMatrixProvider(generic.NZBProvider):
             return []
 
         try:
-            responseSoup = etree.ElementTree(etree.XML(searchResult))
-            items = responseSoup.getiterator('item')
+            parsedXML = parseString(searchResult)
+            items = parsedXML.getElementsByTagName('item')
         except Exception, e:
             logger.log(u"Error trying to load NZBMatrix RSS feed: "+ex(e), logger.ERROR)
             return []
@@ -100,8 +104,7 @@ class NZBMatrixProvider(generic.NZBProvider):
         results = []
 
         for curItem in items:
-            title = curItem.findtext('title')
-            url = curItem.findtext('link')
+            (title, url) = self._get_title_and_url(curItem)
 
             if title == 'Error: No Results Found For Your Search':
                 continue
@@ -121,10 +124,11 @@ class NZBMatrixProvider(generic.NZBProvider):
 
         for curResult in self._doSearch("(PROPER,REPACK)"):
 
-            title = curResult.findtext('title')
-            url = curResult.findtext('link').replace('&amp;','&')
+            (title, url) = self._get_title_and_url(curResult)
 
-            descriptionStr = curResult.findtext('description')
+            description_node = curResult.getElementsByTagName('description')[0]
+            descriptionStr = helpers.get_xml_text(description_node)
+
             dateStr = re.search('<b>Added:</b> (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)', descriptionStr).group(1)
             if not dateStr:
                 logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
