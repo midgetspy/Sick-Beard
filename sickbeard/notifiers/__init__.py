@@ -75,3 +75,6 @@ def notify_snatch(ep_name):
         n.notify_snatch(ep_name)
     notifo_notifier.notify_snatch(ep_name)
 
+def notify_delete(ep_obj):
+    # for now we only have one notifier (Trakt) for deletions
+    trakt_notifier.notify_delete(ep_obj)
