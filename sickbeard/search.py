@@ -265,7 +265,7 @@ def fileWasDeleted(epObj):
     
     If the file is still present on disk, this function returns False. If it has been deleted, it returns True.
     '''
-    logger.log(u"epObj is\n" + str(epObj), logger.DEBUG)
+    logger.log(u"Starting check for files' existence", logger.DEBUG)
     deleted = False
     
     # if epObj is None, we do not have this episode in the database yet, so it was not deleted
@@ -277,7 +277,7 @@ def fileWasDeleted(epObj):
             
             # if the episode object has no location data, it means that there is no location in the database 
             if epLoc is not None:
-                logger.log(u"Making sure " + epObj.prettyName() + " is still present at '" + str(epLoc) + "'")
+                logger.log(u"Making sure " + epObj.prettyName() + " is still present at '" + str(epLoc) + "'", logger.DEBUG)
                 
                 # if the path doesn't exist or if it's not in our show dir, consider it deleted
                 if not ek.ek(os.path.isfile, epLoc) or not epLoc.startswith(os.path.normpath(epObj.show.location)):
