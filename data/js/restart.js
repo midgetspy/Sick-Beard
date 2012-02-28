@@ -1,7 +1,7 @@
 if (sbHttpsEnabled != "False" && sbHttpsEnabled != 0) 
-	var sb_base_url = 'https://'+sbHost+':'+sbHttpPort+sbRoot;
+	var sb_base_url = 'https://'+window.location.host+sbRoot;
 else
-    var sb_base_url = 'http://'+sbHost+':'+sbHttpPort+sbRoot;
+    var sb_base_url = 'http://'+window.location.host+sbRoot;
 
 var base_url = window.location.protocol+'//'+window.location.host+sbRoot;
 var is_alive_url = sbRoot+'/home/is_alive';
