@@ -19,10 +19,14 @@
 import re
 import datetime
 import urllib, urllib2
+import os
 import sys
 
 import sickbeard
 import generic
+
+import datetime
+import time
 
 from sickbeard.common import Quality
 from sickbeard import logger
@@ -32,6 +36,8 @@ from sickbeard import show_name_helpers
 from sickbeard import db
 from sickbeard.common import Overview
 from sickbeard.exceptions import ex
+from sickbeard import encodingKludge as ek
+
 
 proxy_dict = {'15aa51.info (US)' : 'http://15aa51.info/', 
 #              'blewpass.com (US)' : 'http://www.blewpass.com/', #Not Working
@@ -59,12 +65,12 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         self.proxy = ThePirateBayWebproxy() 
         
-        self.url = 'http://thepiratebay.org/'
+        self.url = 'http://thepiratebay.se/'
 
-        self.searchurl =  'http://thepiratebay.org/search/%s/0/7/200'  # order by seed       
+        self.searchurl =  'http://thepiratebay.se/search/%s/0/7/200'  # order by seed       
 
-        self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a.*?>.*?<a href="(?P<url>.*?)%s".*?</td>' 
-
+        self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a href=".*?(?P<url>magnet.*?)%s".*?</td>'
+ 
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
         
@@ -193,6 +199,65 @@ class ThePirateBayProvider(generic.TorrentProvider):
             return None
 
         return result
+
+    def downloadResult(self, result):
+        """
+        Magnet Handling with rebuilding .torrent file and Save the result to disk.
+        """
+        try:
+            import libtorrent
+        except:
+            logger.log(u"You need to install python-libtorrent 0.15.9 to handle TPB magnet link", logger.ERROR )
+            return False
+
+        torrent_session = libtorrent.session()
+        
+        logger.log(u"Downloading metadata for " + result.name )
+        
+        torrent_handle  = libtorrent.add_magnet_uri( torrent_session, urllib.unquote_plus(result.url), { 'save_path': sickbeard.TORRENT_DIR } )
+
+        stop_time = datetime.datetime.now() + datetime.timedelta(minutes = 5)            
+        while True:
+            if stop_time < datetime.datetime.now():    
+                logger.log(u"Too much time to download metadata for " + self.name+ " Retring next time")
+                torrent_session.remove_torrent(torrent_handle, 1)
+                return False
+            elif torrent_handle.has_metadata():
+                torrent_info  = torrent_handle.get_torrent_info()
+                logger.log(u"Got metadata, starting torrent rebuilding...")
+                break
+            time.sleep(1)
+
+        torrent_session.remove_torrent(torrent_handle, 1)
+        
+        torrent_dict = {'announce' : 'http://tracker.thepiratebay.org/announce',
+				                'announce-list' : [[urllib.unquote_plus(tracker)] for tracker in re.split('&tr=',result.url)[1:]],
+				                'created by': 'Sickbeard_TPB',
+				                'creation date': '',
+				                'info': libtorrent.bdecode(torrent_info.metadata())} 
+
+        torrent_file = libtorrent.bencode(torrent_dict)
+
+        # use the appropriate watch folder
+        saveDir = sickbeard.TORRENT_DIR
+
+        # use the result name as the filename
+        fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
+
+        logger.log(u"Saving to " + fileName, logger.DEBUG)
+
+        try:
+            fileOut = open(fileName, 'wb')
+            fileOut.write(torrent_file)
+            fileOut.close()
+            helpers.chmodAsParent(fileName)
+        except IOError, e:
+            logger.log("Unable to save the file: "+ex(e), logger.ERROR)
+            return False
+
+        # as long as it's a valid download then consider it a successful snatch
+        return self._verify_download(fileName)
+
 
 class ThePirateBayCache(tvcache.TVCache):
 
