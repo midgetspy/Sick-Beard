@@ -39,6 +39,7 @@ from sickbeard import tvrage
 from sickbeard import config
 from sickbeard import image_cache
 from sickbeard import postProcessor
+from sickbeard import notifiers
 
 from sickbeard import encodingKludge as ek
 
@@ -720,6 +721,7 @@ class TVShow(object):
                     if curEp.location and curEp.status in Quality.DOWNLOADED:
                         logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to IGNORED", logger.DEBUG)
                         curEp.status = IGNORED
+                        notifiers.notify_delete(curEp)
                     curEp.location = ''
                     curEp.hasnfo = False
                     curEp.hastbn = False
