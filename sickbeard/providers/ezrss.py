@@ -138,7 +138,7 @@ class EZRSSProvider(generic.TorrentProvider):
         return results
 
     def _get_title_and_url(self, item):
-        (title, url) = generic.TorrentProvider._get_title_and_url(item)
+        (title, url) = generic.TorrentProvider._get_title_and_url(self, item)
         
         torrent_node = item.getElementsByTagName('torrent')[0]
         filename_node = torrent_node.getElementsByTagName('fileName')[0]
