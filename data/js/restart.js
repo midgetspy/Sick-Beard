@@ -1,7 +1,10 @@
-if (sbHttpsEnabled != "False" && sbHttpsEnabled != 0) 
-	var sb_base_url = 'https://'+sbHost+':'+sbHttpPort+sbRoot;
-else
-    var sb_base_url = 'http://'+sbHost+':'+sbHttpPort+sbRoot;
+if (window.location.hostname.toLowerCase() == "localhost") {
+    if (sbHttpsEnabled != "False" && sbHttpsEnabled != 0) 
+	    var sb_base_url = 'https://'+sbHost+':'+sbHttpPort+sbRoot;
+    else
+        var sb_base_url = 'http://'+sbHost+':'+sbHttpPort+sbRoot;
+} else 
+    var sb_base_url = window.location.protocol+'//'+window.location.host+sbRoot;
 
 var base_url = window.location.protocol+'//'+window.location.host+sbRoot;
 var is_alive_url = sbRoot+'/home/is_alive';
