@@ -66,14 +66,13 @@ class KICKASSProvider(generic.TorrentProvider):
         if not show:
             return params
 
-        showName = re.sub(r'\([^)]*\)', '', show.name)
-        params['show_name'] = sanitizeSceneName(showName, ezrss=True).replace('.',' ').replace('-',' ').encode('utf-8')
+        params['show_name'] = self._sanitizeNameToSearch(show.name)
           
         if season != None:
             params['season'] = season
     
         return [params]    
-
+    
     def _get_episode_search_strings(self, ep_obj):
     
         params = {}
@@ -81,7 +80,7 @@ class KICKASSProvider(generic.TorrentProvider):
         if not ep_obj:
             return params
                    
-        params['show_name'] = sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
+        params['show_name'] = self._sanitizeNameToSearch(ep_obj.show.name)
         
         if ep_obj.show.air_by_date:
             params['date'] = str(ep_obj.airdate)
@@ -90,7 +89,10 @@ class KICKASSProvider(generic.TorrentProvider):
             params['episode'] = ep_obj.episode
     
         return [params]
-    
+    def _sanitizeNameToSearch(self, text):
+        text = re.sub(r'\([^)]*\)', '', text)
+        return sanitizeSceneName(text, ezrss=True).replace('.',' ').replace('-',' ').encode('utf-8')
+                  
     def _doSearch(self, search_params, show=None):
         try:
             params = {"rss": "1"}
