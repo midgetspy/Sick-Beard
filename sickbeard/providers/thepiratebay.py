@@ -27,6 +27,7 @@ import generic
 
 import datetime
 import time
+import libtorrent
 
 from sickbeard.common import Quality
 from sickbeard import logger
@@ -204,11 +205,6 @@ class ThePirateBayProvider(generic.TorrentProvider):
         """
         Magnet Handling with rebuilding .torrent file and Save the result to disk.
         """
-        try:
-            import libtorrent
-        except:
-            logger.log(u"You need to install python-libtorrent 0.15.9 to handle TPB magnet link", logger.ERROR )
-            return False
 
         torrent_session = libtorrent.session()
         
