@@ -130,12 +130,15 @@ class KICKASSProvider(generic.TorrentProvider):
            
             results = []
             for curItem in items:
-                (title, url) = self._get_title_and_url(curItem)
-                if not title or not url:
-                    logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-                    continue
-        
-                results.append(curItem)
+                try:
+                    (title, url) = self._get_title_and_url(curItem)
+                    if not title or not url:
+                        logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+                        continue
+                    results.append(curItem)
+                except Exception, e:
+                    logger.log(u"Error trying to load KICKASS RSS feed item: "+str(e).decode('utf-8'), logger.ERROR)
+               
             logger.log("KICKASS total torrents: %(count)d" % { 'count' : len(results) })
             return results
         except Exception, e:
