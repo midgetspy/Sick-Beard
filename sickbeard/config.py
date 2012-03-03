@@ -21,6 +21,7 @@
 import cherrypy
 import os.path
 import datetime
+import re
 
 from sickbeard import helpers
 from sickbeard import logger
@@ -283,12 +284,18 @@ class ConfigMigrator():
         else:
             sickbeard.NAMING_ABD_PATTERN = naming.name_abd_presets[0]
         
+        # see if any of their shows used season folders
+        
+        # if any shows had season folders on then prepend season folder to the pattern
+        
+            # flatten any shows that didn't have it on
+        
     def _name_to_pattern(self, abd=False):
 
         # get the old settings from the file
         use_periods = bool(check_setting_int(self.config_obj, 'General', 'naming_use_periods', 0))
-        ep_type = bool(check_setting_int(self.config_obj, 'General', 'naming_ep_type', 0))
-        sep_type = bool(check_setting_int(self.config_obj, 'General', 'naming_sep_type', 0))
+        ep_type = check_setting_int(self.config_obj, 'General', 'naming_ep_type', 0)
+        sep_type = check_setting_int(self.config_obj, 'General', 'naming_sep_type', 0)
         use_quality = bool(check_setting_int(self.config_obj, 'General', 'naming_quality', 0))
 
         use_show_name = bool(check_setting_int(self.config_obj, 'General', 'naming_show_name', 1))
@@ -297,8 +304,8 @@ class ConfigMigrator():
         # make the presets into templates
         naming_ep_type = ("%Sx%0E",
                           "s%0Se%0E",
-                           "S%0SE%0E",
-                           "%0Sx%0E")
+                          "S%0SE%0E",
+                          "%0Sx%0E")
         naming_sep_type = (" - ", " ")
 
         # set up our data to use
@@ -306,15 +313,15 @@ class ConfigMigrator():
             show_name = '%S.N'
             ep_name = '%E.N'
             ep_quality = '%Q.N'
-            abd = '%A.D'
+            abd_string = '%A.D'
         else:
             show_name = '%SN'
             ep_name = '%EN'
             ep_quality = '%QN'
-            abd = '%A-D'
+            abd_string = '%A-D'
 
         if abd:
-            ep_string = abd
+            ep_string = abd_string
         else:
             ep_string = naming_ep_type[ep_type]
 
@@ -334,6 +341,9 @@ class ConfigMigrator():
         # add the quality
         if use_quality:
             finalName += naming_sep_type[sep_type] + ep_quality
+
+        if use_periods:
+            finalName = re.sub("\s+", ".", finalName)
 
         return finalName
 

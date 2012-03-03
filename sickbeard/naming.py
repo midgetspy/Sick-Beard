@@ -39,8 +39,8 @@ name_presets = ('%SN - %Sx%0E - %EN',
                 )
 
 name_abd_presets = ('%SN - %A-D - %EN',
-                '%S.N.%A.D.%E.N',
-                )
+                    '%S.N.%A.D.%E.N',
+                    )
 
 class TVShow():
     def __init__(self):
