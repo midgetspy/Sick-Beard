@@ -16,11 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import xml.etree.cElementTree as etree
+from xml.dom.minidom import parseString
 
 import sickbeard
 import generic
 
+from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import tvcache
 
@@ -61,21 +62,23 @@ class TvTorrentsCache(tvcache.TVCache):
 
         data = self.provider.getURL(url)
         
-        xml_content = etree.fromstring(data)
-        description = xml_content.findtext('channel/description')
+        parsedXML = parseString(data)
+        channel = parsedXML.getElementsByTagName('channel')[0]
+        description = channel.getElementsByTagName('description')[0]
 
-        if "User can't be found" in description:
+        description_text = helpers.get_xml_text(description)
+
+        if "User can't be found" in description_text:
             logger.log(u"TvTorrents invalid digest, check your config", logger.ERROR)
 
-        if "Invalid Hash" in description:
+        if "Invalid Hash" in description_text:
             logger.log(u"TvTorrents invalid hash, check your config", logger.ERROR)
 
         return data
 
     def _parseItem(self, item):
 
-        title = item.findtext('title')
-        url = item.findtext('link')
+        (title, url) = self.provider._get_title_and_url(item)
 
         if not title or not url:
             logger.log(u"The XML returned from the TvTorrents RSS feed is incomplete, this result is unusable", logger.ERROR)
