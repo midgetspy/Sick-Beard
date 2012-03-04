@@ -30,16 +30,18 @@ import sickbeard
 naming_ep_type = ("%(seasonnumber)dx%(episodenumber)02d",
                   "s%(seasonnumber)02de%(episodenumber)02d",
                    "S%(seasonnumber)02dE%(episodenumber)02d",
-                   "%(seasonnumber)02dx%(episodenumber)02d")
-naming_ep_type_text = ("1x02", "s01e02", "S01E02", "01x02")
+                   "%(seasonnumber)02dx%(episodenumber)02d",
+                   "%(episodenumber)02d")
+naming_ep_type_text = ("1x02", "s01e02", "S01E02", "01x02", "02")
 
 naming_multi_ep_type = {0: ["-%(episodenumber)02d"]*len(naming_ep_type),
                         1: [" - " + x for x in naming_ep_type],
-                        2: [x + "%(episodenumber)02d" for x in ("x", "e", "E", "x")]}
-naming_multi_ep_type_text = ("extend", "duplicate", "repeat")
+                        2: [x + "%(episodenumber)02d" for x in ("x", "e", "E", "x")],
+                        3: [""]*len(naming_ep_type)}
+naming_multi_ep_type_text = ("extend", "duplicate", "repeat", "first")
 
-naming_sep_type = (" - ", " ")
-naming_sep_type_text = (" - ", "space")
+naming_sep_type = (" - ", " . ", " ")
+naming_sep_type_text = (" - ", " . ", "space")
 
 def change_HTTPS_CERT(https_cert):
 
