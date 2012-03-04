@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import datetime
 import urllib, urllib2
 import sys
 
@@ -32,6 +31,7 @@ from sickbeard import show_name_helpers
 from sickbeard import db
 from sickbeard.common import Overview
 from sickbeard.exceptions import ex
+
 
 proxy_dict = {'15aa51.info (US)' : 'http://15aa51.info/', 
 #              'blewpass.com (US)' : 'http://www.blewpass.com/', #Not Working
@@ -59,12 +59,12 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         self.proxy = ThePirateBayWebproxy() 
         
-        self.url = 'http://thepiratebay.org/'
+        self.url = 'http://thepiratebay.se/'
 
-        self.searchurl =  'http://thepiratebay.org/search/%s/0/7/200'  # order by seed       
+        self.searchurl =  'http://thepiratebay.se/search/%s/0/7/200'  # order by seed       
 
-        self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a.*?>.*?<a href="(?P<url>.*?)%s".*?</td>' 
-
+        self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a href=".*?(?P<url>magnet.*?)%s".*?</td>'
+ 
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
         
@@ -193,6 +193,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
             return None
 
         return result
+
 
 class ThePirateBayCache(tvcache.TVCache):
 
