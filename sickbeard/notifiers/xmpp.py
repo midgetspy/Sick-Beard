@@ -35,8 +35,6 @@ class XMPPNotifier:
         
     def _connect(self, username=None, password=None, server=None, port=None):
         self.connected = False
-        if not sickbeard.USE_XMPP:
-            return None
         if username is None:
             username = sickbeard.XMPP_USERNAME
         if password is None:
@@ -75,11 +73,15 @@ class XMPPNotifier:
 
     def notify_download(self, ep_name):
         if sickbeard.USE_XMPP and sickbeard.XMPP_NOTIFY_ONDOWNLOAD:
-            return self._sendMessage(message=' '.join(['Sick Beard', common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name]))
+            recipient = sickbeard.XMPP_RECIPIENT
+            return self._sendMessage(recipient, message=' '.join(
+                ['Sick Beard', common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name]))
     
     def notify_snatch(self, ep_name):
         if sickbeard.USE_XMPP and sickbeard.XMPP_NOTIFY_ONSNATCH:
-            return self._sendMessage(message=' '.join(['Sick Beard', common.notifyStrings[common.NOTIFY_SNATCH], ep_name]))
+            recipient = sickbeard.XMPP_RECIPIENT
+            return self._sendMessage(recipient, message=' '.join(
+                ['Sick Beard', common.notifyStrings[common.NOTIFY_SNATCH], ep_name]))
    
     def test_notify(self, username, password, server, port, recipient):
         if not username:
@@ -104,10 +106,13 @@ class XMPPNotifier:
         return self._sendMessage(recipient, message='Test message from Sick Beard')
         
     def _sendMessage(self, recipient, message='Test message from Sick Beard'):
-        result = self._connect()
-        if result: return result
+        if not self.connected:
+            result = self._connect()
+            if result: return result
+        
         #Send Message
-        logger.log("[XMPP] Sending message '" + message + "' to recipient " + recipient, logger.DEBUG)
+        logger.log("[XMPP] Sending message '" + message +
+                   "' to recipient " + recipient, logger.DEBUG)
         try:
             self.cnx.send(xmpp.Message(recipient, message))
         except Exception, e:

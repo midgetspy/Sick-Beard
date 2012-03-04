@@ -23,6 +23,7 @@ server.key
 *.tmproj
 *.tmproject
 *.sw?
+*.pydevproject
 
 # OS generated files #
 ######################
