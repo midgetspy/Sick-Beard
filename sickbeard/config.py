@@ -43,6 +43,9 @@ naming_multi_ep_type_text = ("extend", "duplicate", "repeat", "first")
 naming_sep_type = (" - ", " . ", " ")
 naming_sep_type_text = (" - ", " . ", "space")
 
+naming_word_sep_type = (" ", ".", "_")
+naming_word_sep_text = ("space", ".", "_")
+
 def change_HTTPS_CERT(https_cert):
 
     if https_cert == '':

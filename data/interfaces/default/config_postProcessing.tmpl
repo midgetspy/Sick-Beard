@@ -193,14 +193,6 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="naming_use_periods" id="naming_use_periods" #if $sickbeard.NAMING_USE_PERIODS then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="naming_use_periods">
-                                <span class="component-title">Use Periods</span>
-                                <span class="component-desc">Replace the spaces with periods in the filename instead?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
                             <input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_quality">
                                 <span class="component-title">Quality</span>
@@ -217,6 +209,19 @@
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
                                 <span class="component-desc">Only applies to air-by-date shows. (eg. 2010-02-15 vs S12E23)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="naming_word_sep_type">
+                                <span class="component-title">Word Separator Style</span>
+                                <span class="component-desc">
+                                    <select name="naming_word_sep_type" id="naming_word_sep_type">
+                                    #for ($i, $ex) in enumerate($config.naming_word_sep_text):
+                                    <option value="$i" #if $i == int($sickbeard.NAMING_WORD_SEP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
+                                    #end for
+                                    </select>
+                                </span>
                             </label>
                         </div>
 

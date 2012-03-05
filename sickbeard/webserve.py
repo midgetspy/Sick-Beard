@@ -827,7 +827,7 @@ class ConfigPostProcessing:
 
     @cherrypy.expose
     def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
+                    naming_multi_ep_type=None, naming_ep_name=None, naming_word_sep_type=None,
                     naming_sep_type=None, naming_quality=None, naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
@@ -847,11 +847,6 @@ class ConfigPostProcessing:
             naming_ep_name = 1
         else:
             naming_ep_name = 0
-
-        if naming_use_periods == "on":
-            naming_use_periods = 1
-        else:
-            naming_use_periods = 0
 
         if naming_quality == "on":
             naming_quality = 1
@@ -904,7 +899,7 @@ class ConfigPostProcessing:
 
         sickbeard.NAMING_SHOW_NAME = naming_show_name
         sickbeard.NAMING_EP_NAME = naming_ep_name
-        sickbeard.NAMING_USE_PERIODS = naming_use_periods
+        sickbeard.NAMING_WORD_SEP_TYPE = int(naming_word_sep_type)
         sickbeard.NAMING_QUALITY = naming_quality
         sickbeard.NAMING_DATES = naming_dates
         sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
@@ -927,7 +922,7 @@ class ConfigPostProcessing:
 
     @cherrypy.expose
     def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
-                   sep_type=None, use_periods=None, quality=None, whichTest="single"):
+                   sep_type=None, word_sep_type=None, quality=None, whichTest="single"):
 
         if show_name == None:
             show_name = sickbeard.NAMING_SHOW_NAME
@@ -945,13 +940,10 @@ class ConfigPostProcessing:
             else:
                 ep_name = True
 
-        if use_periods == None:
-            use_periods = sickbeard.NAMING_USE_PERIODS
+        if word_sep_type == None:
+            word_sep_type = sickbeard.NAMING_WORD_SEP_TYPE
         else:
-            if use_periods == "0":
-                use_periods = False
-            else:
-                use_periods = True
+            word_sep_type = int(word_sep_type)
 
         if quality == None:
             quality = sickbeard.NAMING_QUALITY
@@ -1002,7 +994,7 @@ class ConfigPostProcessing:
             ep.relatedEps.append(secondEp)
 
         # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality)
+        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, word_sep_type, quality)
 
         return name
 

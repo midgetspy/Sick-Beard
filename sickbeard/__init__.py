@@ -127,7 +127,7 @@ NAMING_EP_NAME = None
 NAMING_EP_TYPE = None
 NAMING_MULTI_EP_TYPE = None
 NAMING_SEP_TYPE = None
-NAMING_USE_PERIODS = None
+NAMING_WORD_SEP_TYPE = None
 NAMING_QUALITY = None
 NAMING_DATES = None
 
@@ -399,7 +399,7 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
+                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_WORD_SEP_TYPE, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
@@ -506,7 +506,7 @@ def initialize(consoleLogging=True):
         NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
         NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
         NAMING_SEP_TYPE = check_setting_int(CFG, 'General', 'naming_sep_type', 0)
-        NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
+        NAMING_WORD_SEP_TYPE = check_setting_int(CFG, 'General', 'naming_word_sep', 0)
         NAMING_QUALITY = bool(check_setting_int(CFG, 'General', 'naming_quality', 0))
         NAMING_DATES = bool(check_setting_int(CFG, 'General', 'naming_dates', 1))
 
@@ -1024,7 +1024,7 @@ def save_config():
     new_config['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
     new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
     new_config['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
-    new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
+    new_config['General']['naming_word_sep_type'] = int(NAMING_WORD_SEP_TYPE)
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
