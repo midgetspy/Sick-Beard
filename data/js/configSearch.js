@@ -40,12 +40,21 @@ $(document).ready(function(){
 
         if (selectedProvider == "blackhole") {
             $('#t_blackhole_settings').show();
-            $('#utorrent_settings').hide();
-        } else if (selectedProvider == "utorrent") {
+            $('#torrent_settings').hide();
+        } else if (selectedProvider == "utorrent"){
             $('#t_blackhole_settings').hide();
-            $('#utorrent_settings').show();
-        } 
+            $('#torrent_settings').show();
+            $('#host_desc').text('uTorrent Host');
+            $('#username_desc').text('uTorrent Username');
+            $('#password_desc').text('uTorrent Password');
+        } else if (selectedProvider == "transmission"){
+            $('#t_blackhole_settings').hide();
+            $('#torrent_settings').show();
+            $('#host_desc').html('Transmission Host');
+            $('#username_desc').text('Transmission Username');
+            $('#password_desc').text('Transmission Password');
 
+        }
     }
 
     $('#nzb_method').change($(this).nzb_method_handler);

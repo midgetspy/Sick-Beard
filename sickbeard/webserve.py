@@ -808,6 +808,13 @@ class ConfigSearch:
 
         sickbeard.TORRENT_USERNAME = torrent_username
         sickbeard.TORRENT_PASSWORD = torrent_password
+        
+        if torrent_host and not re.match('https?://.*', torrent_host):
+            torrent_host = 'http://' + torrent_host
+
+        if not torrent_host.endswith('/'):
+            torrent_host = torrent_host + '/'        
+        
         sickbeard.TORRENT_HOST = torrent_host
 
         sickbeard.save_config()

@@ -251,8 +251,8 @@
                                 <span class="component-title jumbo">TORRENT Method</span>
                                 <span class="component-desc">
                                 <select name="torrent_method" id="torrent_method">
-                                #set $torrent_method_text = {'blackhole': "Black hole", 'utorrent': "uTorrent"}
-                                #for $curAction in ('utorrent', 'blackhole'):
+                                #set $torrent_method_text = {'blackhole': "Black hole", 'utorrent': "uTorrent", 'transmission': "Transmission"}
+                                #for $curAction in ('utorrent', 'transmission', 'blackhole'):
                                   #if $sickbeard.TORRENT_METHOD == $curAction:
                                     #set $torrent_method = "selected=\"selected\""
                                   #else
@@ -277,15 +277,15 @@
                         	</div>
                         </div>
                         
-                        <div id="utorrent_settings">
+                        <div id="torrent_settings">
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">uTorrent URL</span>
+                                    <span class="component-title" id="host_desc">Torrent HOST</span>
                                     <input type="text" name="torrent_host" id="torrent_host" value="$sickbeard.TORRENT_HOST" size="45" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">URL to your uTorrent install</span>
+                                    <span class="component-desc">URL to your Torrent Client</span>
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
@@ -295,23 +295,23 @@
                             
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">uTorrent Username</span>
+                                    <span class="component-title" id="username_desc">Torrent Username</span>
                                     <input type="text" name="torrent_username" id="torrent_username" value="$sickbeard.TORRENT_USERNAME" size="20" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Username of your uTorrent server (blank for none)</span>
+                                    <span class="component-desc">Username of your Torrent Client (blank for none)</span>
                                 </label>
                             </div>
 
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">uTorrent Password</span>
+                                    <span class="component-title" id="password_desc">Torrent Password</span>
                                     <input type="password" name="torrent_password" id="torrent_password" value="$sickbeard.TORRENT_PASSWORD" size="20" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Password of your uTorrent server (blank for none)</span>
+                                    <span class="component-desc">Password of your Torrent Client (blank for none)</span>
                                 </label>
                             </div>
 						</div>
