@@ -55,11 +55,7 @@ def processDir (dirName, nzbName=None, recurse=False):
         returnStr += logHelper(u"Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
         return returnStr
 
-    # TODO: check if it's failed and deal with it if it is
-    if ek.ek(os.path.basename, dirName).startswith('_FAILED_'):
-        returnStr += logHelper(u"The directory name indicates it failed to extract, cancelling", logger.DEBUG)
-        return returnStr
-    elif ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
+    if ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper(u"The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
         return returnStr
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
