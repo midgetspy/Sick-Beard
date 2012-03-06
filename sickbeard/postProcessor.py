@@ -338,8 +338,10 @@ class PostProcessor(object):
             to_return = int(sql_results[0]["history_id"])
 
             self._log("Found history_id in history: "+str(to_return), logger.DEBUG)
+            self.in_history = True
             return to_return
-        
+       
+        self.in_history = False
         return to_return
 
     def _analyze_name(self, name, file=True):
@@ -640,13 +642,6 @@ class PostProcessor(object):
         # reset per-file stuff
         self.in_history = False
         
-        # try to find the file info
-        (tvdb_id, season, episodes) = self._find_info()
-        
-        # if we don't have it then give up
-        if not tvdb_id or season == None or not episodes:
-            return False
-        
         # if the download failed, mark it as bad in the history DB, optionally delete it, and give up
         if self.folder_name.startswith("_FAILED_"):
             history_id = self._history_lookup_id()
@@ -655,13 +650,20 @@ class PostProcessor(object):
                 self._log(u"Marking nzb as failed: " + self.nzb_name + "(" + history_id + ")", logger.DEBUG)
                 sql_results = myDB.select("UPDATE history SET failed = 1 WHERE history_id = ?", [history_id])
 
-#            if sickbeard.DELETE_FAILED_DIR
-#                self._log(u"Deleting folder of failed download" + folder_path, logger.DEBUG)
-#                try:
-#                    #shutil.rmtree(folder_path)
-#                except (OSError, IOError), e:
-#                    self._log(u"Warning: unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
+            if sickbeard.DELETE_FAILED:
+                self._log(u"Deleting folder of failed download " + self.folder_path, logger.DEBUG)
+                try:
+                    shutil.rmtree(self.folder_path)
+                except (OSError, IOError), e:
+                    self._log(u"Warning: unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
 
+            return False
+
+        # try to find the file info
+        (tvdb_id, season, episodes) = self._find_info()
+        
+        # if we don't have it then give up
+        if not tvdb_id or season == None or not episodes:
             return False
 
         # retrieve/create the corresponding TVEpisode objects
@@ -703,7 +705,7 @@ class PostProcessor(object):
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             try:
                 self._delete(cur_ep.location, associated_files=True)
-            except OSError, IOError:
+            except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
@@ -720,7 +722,7 @@ class PostProcessor(object):
             try:
                 ek.ek(os.mkdir, dest_path)
                 helpers.chmodAsParent(dest_path)
-            except OSError, IOError:
+            except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
         # update the statuses before we rename so the quality goes into the name properly
@@ -746,7 +748,7 @@ class PostProcessor(object):
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
-        except OSError, IOError:
+        except (OSError, IOError):
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         
         # put the new location in the database
