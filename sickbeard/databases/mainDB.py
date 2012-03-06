@@ -422,9 +422,15 @@ class Add1080iQuality(FixAirByDateSetting):
         sickbeard.save_config()
         
         shows = self.connection.select("SELECT * FROM tv_shows")
+        old_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.HDWEBDL >> 1, common.Quality.HDBLURAY >> 1, common.Quality.UNKNOWN], [])
+        new_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.HDTV1080I, common.Quality.HDWEBDL, common.Quality.HDBLURAY, common.Quality.UNKNOWN], [])
         
         for cur_show in shows:
-            self.connection.action("UPDATE tv_shows SET quality = ? WHERE tvdb_id = ?", [self._update_quality(cur_show["quality"]), cur_show["tvdb_id"]])
+            if cur_show["quality"] == old_any:
+                new_quality = new_any
+            else:
+                new_quality = self._update_quality(cur_show["quality"])    
+            self.connection.action("UPDATE tv_shows SET quality = ? WHERE tvdb_id = ?", [new_quality, cur_show["tvdb_id"]])
         
         episodes = self.connection.select("SELECT * FROM tv_episodes")
         
