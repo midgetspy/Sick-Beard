@@ -18,8 +18,7 @@
 
 import urllib
 import re
-
-import xml.etree.cElementTree as etree
+from xml.dom.minidom import parseString
 
 import sickbeard
 import generic
@@ -27,7 +26,7 @@ import generic
 from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard.helpers import sanitizeSceneName
+from sickbeard.helpers import sanitizeSceneName, get_xml_text
 from sickbeard.exceptions import ex
 
 class EZRSSProvider(generic.TorrentProvider):
@@ -41,8 +40,6 @@ class EZRSSProvider(generic.TorrentProvider):
         self.cache = EZRSSCache(self)
 
         self.url = 'https://www.ezrss.it/'
-        
-        self.ezrss_ns = 'http://xmlns.ezrss.it/0.1/'
 
     def isEnabled(self):
         return sickbeard.EZRSS
@@ -52,8 +49,12 @@ class EZRSSProvider(generic.TorrentProvider):
       
     def getQuality(self, item):
         
-        filename = item.findtext('{%s}torrent/{%s}fileName' %(self.ezrss_ns,self.ezrss_ns))
+        torrent_node = item.getElementsByTagName('torrent')[0]
+        filename_node = torrent_node.getElementsByTagName('fileName')[0]
+        filename = get_xml_text(filename_node)
+
         quality = Quality.nameQuality(filename)
+        
         return quality
 
     def findSeasonResults(self, show, season):
@@ -115,8 +116,8 @@ class EZRSSProvider(generic.TorrentProvider):
             return []
         
         try:
-            responseSoup = etree.ElementTree(etree.XML(data))
-            items = responseSoup.getiterator('item')
+            parsedXML = parseString(data)
+            items = parsedXML.getElementsByTagName('item')
         except Exception, e:
             logger.log(u"Error trying to load EZRSS RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"RSS data: "+data, logger.DEBUG)
@@ -137,9 +138,11 @@ class EZRSSProvider(generic.TorrentProvider):
         return results
 
     def _get_title_and_url(self, item):
-        title = item.findtext('title')
-        url = item.findtext('link').replace('&amp;','&')
-        filename = item.findtext('{%s}torrent/{%s}fileName' %(self.ezrss_ns,self.ezrss_ns))
+        (title, url) = generic.TorrentProvider._get_title_and_url(self, item)
+        
+        torrent_node = item.getElementsByTagName('torrent')[0]
+        filename_node = torrent_node.getElementsByTagName('fileName')[0]
+        filename = get_xml_text(filename_node)
         
         new_title = self._extract_name_from_filename(filename)
         if new_title:
@@ -178,14 +181,7 @@ class EZRSSCache(tvcache.TVCache):
 
     def _parseItem(self, item):
 
-        title = item.findtext('title')
-        url = item.findtext('link')
-        filename = item.findtext('{%s}torrent/{%s}fileName' %(self.provider.ezrss_ns,self.provider.ezrss_ns))
-
-        new_title = self.provider._extract_name_from_filename(filename)
-        if new_title:
-            title = new_title
-            logger.log(u"Extracted the name "+title+" from the torrent link", logger.DEBUG)
+        (title, url) = self.provider._get_title_and_url(item)
 
         if not title or not url:
             logger.log(u"The XML returned from the EZRSS RSS feed is incomplete, this result is unusable", logger.ERROR)

@@ -141,7 +141,7 @@ class XBMCNotifier:
 
     def _update_library(self, host, showName=None):
     
-        if not sickbeard.USE_XBMC:
+        if not self._use_me():
             logger.log("Notifications for XBMC not enabled, skipping library update", logger.DEBUG)
             return False
     
