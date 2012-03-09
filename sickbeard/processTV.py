@@ -41,10 +41,15 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
     if failed:
-        # Assume we're being passed an nzb name
-        # Will break on files w/o extensions but w/ periods in their name
-        if '.' in nzbName:
-            nzbName = nzbName.rpartition(".")[0]
+        if nzbName != None:
+            # Assume we're being passed an nzb name
+            # Will break on files w/o extensions but w/ periods in their name
+            if '.' in nzbName:
+                nzbName = nzbName.rpartition(".")[0]
+        else:
+            # Assume folder name = resource name
+            nzbName = ek.ek(os.path.basename, dirName)
+            returnStr += logHelper(u"nzb name not provided. Guessing from dir name: " + nzbName)
 
         returnStr += logHelper(u"Failed download detected: " + nzbName)
 
