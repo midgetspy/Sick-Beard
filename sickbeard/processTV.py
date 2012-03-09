@@ -34,11 +34,31 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
 
-def processDir (dirName, nzbName=None, recurse=False):
+def processDir (dirName, nzbName=None, recurse=False, failed=False):
 
     returnStr = ''
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
+
+    if failed:
+        # Assume we're being passed an nzb name
+        # Will break on files w/o extensions but w/ periods in their name
+        if '.' in nzbName:
+            nzbName = nzbName.rpartition(".")[0]
+
+        returnStr += logHelper(u"Failed download detected: " + nzbName)
+
+        myDB = db.DBConnection()
+        sql_results = myDB.select("UPDATE history SET failed=1 WHERE resource=?", [nzbName])
+
+        if sickbeard.DELETE_FAILED:
+            returnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
+            try:
+                shutil.rmtree(dirName)
+            except (OSError, IOError), e:
+                returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
+
+        return returnStr
 
     # if they passed us a real dir then assume it's the one we want
     if ek.ek(os.path.isdir, dirName):
@@ -55,9 +75,7 @@ def processDir (dirName, nzbName=None, recurse=False):
         returnStr += logHelper(u"Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
         return returnStr
 
-    if ek.ek(os.path.basename, dirName).startswith('_FAILED_'):
-        returnStr += logHelper(u"The directory name indicates that it failed", logger.DEBUG)
-    elif ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
+    if ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper(u"The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
         return returnStr
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):

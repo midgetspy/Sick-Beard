@@ -23,7 +23,6 @@ import os
 import re
 import shlex
 import subprocess
-import shutil
 
 import sickbeard
 
@@ -303,47 +302,6 @@ class PostProcessor(object):
         self.in_history = False
         return to_return
     
-    def _history_lookup_id(self):
-        """
-        Look up the NZB name in the history and see if it contains a record for self.nzb_name
-        
-        Returns the history_id of the record if found
-        """
-
-        to_return = None
-
-        if self.in_history == False:
-            return to_return
-        
-        if not self.nzb_name and not self.folder_name:
-            self.in_history = False
-            return to_return
-
-        names = []
-        if self.nzb_name:
-            names.append(self.nzb_name)
-            if '.' in self.nzb_name:
-                names.append(self.nzb_name.rpartition(".")[0])
-        if self.folder_name:
-            names.append(self.folder_name)
-
-        myDB = db.DBConnection()
-    
-        for curName in names:
-            sql_results = myDB.select("SELECT history_id FROM history WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", curName)])
-    
-            if len(sql_results) == 0:
-                continue
-    
-            to_return = int(sql_results[0]["history_id"])
-
-            self._log("Found history_id in history: "+str(to_return), logger.DEBUG)
-            self.in_history = True
-            return to_return
-       
-        self.in_history = False
-        return to_return
-
     def _analyze_name(self, name, file=True):
         """
         Takes a name and tries to figure out a show, season, and episode from it.
@@ -642,23 +600,6 @@ class PostProcessor(object):
         # reset per-file stuff
         self.in_history = False
         
-        # if the download failed, mark it as bad in the history DB, optionally delete it, and give up
-        if self.folder_name.startswith("_FAILED_"):
-            history_id = self._history_lookup_id()
-            if history_id:
-                myDB = db.DBConnection()
-                self._log(u"Marking nzb as failed: " + self.nzb_name + "(" + history_id + ")", logger.DEBUG)
-                sql_results = myDB.select("UPDATE history SET failed = 1 WHERE history_id = ?", [history_id])
-
-            if sickbeard.DELETE_FAILED:
-                self._log(u"Deleting folder of failed download " + self.folder_path, logger.DEBUG)
-                try:
-                    shutil.rmtree(self.folder_path)
-                except (OSError, IOError), e:
-                    self._log(u"Warning: unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
-
-            return False
-
         # try to find the file info
         (tvdb_id, season, episodes) = self._find_info()
         
