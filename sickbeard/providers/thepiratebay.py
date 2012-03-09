@@ -1,4 +1,4 @@
-# Author: Mr_Orange <l.dimarino@gmail.com>
+# Author: Mr_Orange <mr_orange@hotmail.it>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
