@@ -26,7 +26,7 @@ if len(sys.argv) < 8:
     print "Not enough arguments received from SABnzbd. Please update it."
     sys.exit()
 else:
-    autoProcessTV.processEpisode(sys.argv[1], sys.argv[2], False if sys.argv[7] == 0 else True)
+    autoProcessTV.processEpisode(sys.argv[1], sys.argv[2], False if sys.argv[7] == "0" else True)
 
 # SABnzbd argv:
 # 1	The final directory of the job (full path)
