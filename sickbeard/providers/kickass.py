@@ -39,7 +39,7 @@ class KICKASSProvider(generic.TorrentProvider):
 
         generic.TorrentProvider.__init__(self, "KICKASS")
         
-        self.supportsBacklog = False
+        self.supportsBacklog = True
 
         self.cache = KICKASSCache(self)
 
@@ -115,7 +115,7 @@ class KICKASSProvider(generic.TorrentProvider):
             #data = self.getURL(searchURL)
 
             items = []
-            for index in [1,2,3,4]:
+            for index in [1,2,3,4,5]:
                 try:
                     data = self.getURL(searchURL + "&page=%(page)d" % {'page': index })
                     if data and data.startswith("<?xml"):
@@ -169,33 +169,30 @@ class KICKASSCache(tvcache.TVCache):
         # only poll KICKASS every 15 minutes max
         self.minTime = 15
 
-
     def _getRSSData(self):
-    
-        url = 'http://www.kickasstorrents.com/new/?rss=1'
+        url = self.provider.url + 'tv/?rss=1'
+
         logger.log(u"KICKASS cache update URL: "+ url, logger.DEBUG)
 
         data = self.provider.getURL(url)
-        
-        xml_content = etree.fromstring(data)
-        description = xml_content.findtext('channel/description')
-
-        if "Invalid Hash" in description:
-            logger.log(u"KICKASS invalid hash, check your config", logger.ERROR)
 
         return data
 
     def _parseItem(self, item):
+        
+        try:
+            (title, url) = self.provider._get_title_and_url(item)
 
-        title = item.findtext('title')
-        url = item.findtext('torrentLink')
+            if not title or not url:
+                logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable", logger.ERROR)
+                return
 
-        if not title or not url:
-            logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable", logger.ERROR)
-            return
+            logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
 
-        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
-
-        self._addCacheEntry(title, url)
+            self._addCacheEntry(title, url)
+        except Exception, e:
+            logger.log(u"Error trying to parse KICKASS cache: "+str(e).decode('utf-8') + str(item).decode('utf-8'), logger.ERROR)
+            traceback.print_exc()
+            raise 
 
 provider = KICKASSProvider()
