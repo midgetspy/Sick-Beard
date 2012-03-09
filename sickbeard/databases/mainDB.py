@@ -398,3 +398,21 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
                 self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
         self.incDBVersion()
+
+class TrackFailedInHistory(FixAirByDateSetting):
+
+    def test(self):
+        return self.checkDBVersion() >= 10
+
+    def execute(self):
+        self.connection.action("ALTER TABLE history RENAME TO history_old")
+        self.connection.action("CREATE TABLE history (history_id INTEGER PRIMARY KEY, action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider TEXT, failed NUMERIC);")
+
+        oldHistory = self.connection.action("SELECT * FROM history_old").fetchall()
+        for curResult in oldHistory:
+            sql = "INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) VALUES (?,?,?,?,?,?,?,?)"
+            args = [curResult["action"], curResult["date"], curResult["showid"], curResult["season"], curResult["episode"], curResult["quality"], curResult["resource"], curResult["provider"]]
+            self.connection.action(sql, args)
+
+        self.connection.action("DROP TABLE history_old")
+        self.incDBVersion()

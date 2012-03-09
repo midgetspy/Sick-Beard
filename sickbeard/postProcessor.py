@@ -606,7 +606,7 @@ class PostProcessor(object):
         # if we don't have it then give up
         if not tvdb_id or season == None or not episodes:
             return False
-        
+
         # retrieve/create the corresponding TVEpisode objects
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
         
@@ -646,7 +646,7 @@ class PostProcessor(object):
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             try:
                 self._delete(cur_ep.location, associated_files=True)
-            except OSError, IOError:
+            except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # find the destination folder
@@ -663,7 +663,7 @@ class PostProcessor(object):
             try:
                 ek.ek(os.mkdir, dest_path)
                 helpers.chmodAsParent(dest_path)
-            except OSError, IOError:
+            except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
         # update the statuses before we rename so the quality goes into the name properly
@@ -689,7 +689,7 @@ class PostProcessor(object):
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
-        except OSError, IOError:
+        except (OSError, IOError):
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         
         # put the new location in the database

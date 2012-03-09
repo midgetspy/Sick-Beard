@@ -831,7 +831,7 @@ class ConfigPostProcessing:
                     naming_sep_type=None, naming_quality=None, naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None):
+                    move_associated_files=None, tv_download_dir=None, delete_failed=None):
 
         results = []
 
@@ -888,10 +888,16 @@ class ConfigPostProcessing:
         else:
             move_associated_files = 0
 
+        if delete_failed == "on":
+            delete_failed = 1
+        else:
+            delete_failed = 0
+
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
+        sickbeard.DELETE_FAILED = delete_failed
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
@@ -1509,12 +1515,12 @@ class HomePostProcess:
         return _munge(t)
 
     @cherrypy.expose
-    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None):
+    def processEpisode(self, dirName=None, nzbName=None, jobName=None, quiet=None, failed=False):
 
-        if dir == None:
+        if dirName == None:
             redirect("/home/postprocess")
         else:
-            result = processTV.processDir(dir, nzbName)
+            result = processTV.processDir(dirName, nzbName, failed=failed)
             if quiet != None and int(quiet) == 1:
                 return result
 
