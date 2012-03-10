@@ -31,9 +31,10 @@ from Cheetah.Template import Template
 import cherrypy.lib
 
 import sickbeard
+import sickbeard.processTV
 
 from sickbeard import config, sab
-from sickbeard import history, notifiers, processTV
+from sickbeard import history, notifiers
 from sickbeard import tv, ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
@@ -1525,7 +1526,7 @@ class HomePostProcess:
         if dirName == None:
             redirect("/home/postprocess")
         else:
-            result = processTV.processDir(dirName, nzbName, failed=failed)
+            result = sickbeard.processTV.processDir(dirName, nzbName, failed=failed)
             if quiet != None and int(quiet) == 1:
                 return result
 
@@ -2487,6 +2488,9 @@ class Home:
 
     @cherrypy.expose
     def setStatus(self, show=None, eps=None, status=None, direct=False):
+        show = str(show)
+        eps = str(eps)
+        status = str(status)
 
         if show == None or eps == None or status == None:
             errMsg = "You must specify a show and at least one episode"

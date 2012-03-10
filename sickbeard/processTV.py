@@ -30,6 +30,10 @@ from sickbeard.exceptions import ex
 
 from sickbeard import logger
 
+from sickbeard.common import WANTED
+import sickbeard.webserve
+
+
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
@@ -54,7 +58,7 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
         returnStr += logHelper(u"Failed download detected: " + nzbName)
 
         myDB = db.DBConnection()
-        sql_results = myDB.select("UPDATE history SET failed=1 WHERE resource=?", [nzbName])
+        myDB.select("UPDATE history SET failed=1 WHERE resource=?", [nzbName])
 
         if sickbeard.DELETE_FAILED:
             returnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
@@ -62,6 +66,14 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
                 shutil.rmtree(dirName)
             except (OSError, IOError), e:
                 returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
+
+        sql_results = myDB.select("SELECT showid, season, episode FROM history WHERE resource=?", [nzbName])
+        if len(sql_results) > 0:
+            returnStr += logHelper("Setting episode back to Wanted")
+            episodeString = str(sql_results[0]["season"]) + "x" + str(sql_results[0]["episode"])
+            sickbeard.webserve.Home().setStatus(sql_results[0]["showid"], episodeString, WANTED, direct=True)
+        else:
+            returnStr += logHelper("Not found in history: " + nzbName)
 
         return returnStr
 
