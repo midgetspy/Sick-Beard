@@ -35,7 +35,7 @@ class BTNProvider(generic.TorrentProvider):
         self.url = 'http://broadcasthe.net/'
 
     def isEnabled(self):
-        return True
+        return sickbeard.BTN
         
     def imageName(self):
         return 'btn.gif'
