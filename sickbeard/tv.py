@@ -1352,7 +1352,7 @@ class TVEpisode(object):
         return self.show.getOverview(self.status)
 
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
-                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):
+                    naming_ep_name=None, naming_sep_type=None, naming_word_sep_type=None, naming_quality=None):
 
         regex = "(.*) \(\d\)"
 
@@ -1405,8 +1405,8 @@ class TVEpisode(object):
         if naming_sep_type == None:
             naming_sep_type = sickbeard.NAMING_SEP_TYPE
 
-        if naming_use_periods == None:
-            naming_use_periods = sickbeard.NAMING_USE_PERIODS
+        if naming_word_sep_type == None:
+            naming_word_sep_type = sickbeard.NAMING_WORD_SEP_TYPE
 
         if naming_quality == None:
             naming_quality = sickbeard.NAMING_QUALITY
@@ -1424,13 +1424,17 @@ class TVEpisode(object):
         for relEp in self.relatedEps:
             goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
 
+        naming_sep = config.naming_sep_type[naming_sep_type]
+        if naming_word_sep_type != 0: # Not the space character
+            naming_sep = re.sub("\s+", '', naming_sep)
+
         if goodName != '':
-            goodName = config.naming_sep_type[naming_sep_type] + goodName
+            goodName = naming_sep + goodName
 
         finalName = ""
 
         if naming_show_name:
-            finalName += self.show.name + config.naming_sep_type[naming_sep_type]
+            finalName += self.show.name + naming_sep
 
         finalName += goodEpString
 
@@ -1440,10 +1444,10 @@ class TVEpisode(object):
         if naming_quality:
             epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
             if epQual != Quality.NONE:
-                finalName += config.naming_sep_type[naming_sep_type] + Quality.qualityStrings[epQual]
+                finalName += naming_sep + Quality.qualityStrings[epQual]
 
-        if naming_use_periods:
-            finalName = re.sub("\s+", ".", finalName)
+        if naming_word_sep_type != 0:
+            finalName = re.sub("\s+", config.naming_word_sep_type[naming_word_sep_type], finalName)
 
         return finalName
 

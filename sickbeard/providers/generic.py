@@ -209,9 +209,12 @@ class GenericProvider:
         Returns: A tuple containing two strings representing title and URL respectively
         """
         title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
-        url = helpers.get_xml_text(item.getElementsByTagName('link')[0])
-        if url:
+        urlEl = item.getElementsByTagName('link')[0]
+        if urlEl:
+            url = helpers.get_xml_text(urlEl)
             url = url.replace('&amp;','&')
+        else:
+            url = None
         
         return (title, url)
     
