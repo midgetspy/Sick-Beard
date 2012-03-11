@@ -2488,9 +2488,9 @@ class Home:
 
     @cherrypy.expose
     def setStatus(self, show=None, eps=None, status=None, direct=False):
-        show = str(show)
-        eps = str(eps)
-        status = str(status)
+        show = ek.ek(str, show)
+        eps = ek.ek(str, eps)
+        status = ek.ek(str, status)
 
         if show == None or eps == None or status == None:
             errMsg = "You must specify a show and at least one episode"
