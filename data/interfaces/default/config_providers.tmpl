@@ -201,14 +201,14 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="thepiratebay_proxy">
-                                <span class="component-title">Acces TPB via Proxy</span>
-                                <span class="component-desc">Check it if you want to bypass Country Blocking Mechanism</span>
+                                <span class="component-title">Access TPB via Proxy</span>
+                                <span class="component-desc">To bypass Country Blocking Mechanism</span>
                             </label>
                         </div>
 
                         <div class="field-pair" id="content_thepiratebay_proxy">
                             <label class="nocheck clearfix">
-                                <span class="component-title">Proxy url:</span>
+                                <span class="component-title">Proxy URL:</span>
                                 <span class="component-desc">
 	                              <select name="thepiratebay_proxy_url" id="thepiratebay_proxy_url">
                                 #for $i in $thepiratebay.proxy_dict.keys():
@@ -223,7 +223,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <input type="checkbox" name="thepiratebay_trusted" id="thepiratebay_trusted" #if $sickbeard.THEPIRATEBAY_TRUSTED then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="thepiratebay_trusted">
                                 <span class="component-title">Trusted Download</span>
-                                <span class="component-desc">Do you want download torrent only from trusted uploaders?</span>
+                                <span class="component-desc">Download torrent only from trusted uploaders?</span>
                             </label>
                         </div>
 </div>

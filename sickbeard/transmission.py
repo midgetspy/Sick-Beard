@@ -98,3 +98,37 @@ def sendTORRENT(result):
     else:
         logger.log("Unknown failure sending Torrent to Transmission. Return text is: " + response['result'], logger.ERROR)
         return False
+    
+def testAuthentication(host, username, password):
+
+    host = host+'transmission/rpc'
+
+    cj = cookielib.CookieJar()
+
+    #password manager
+    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    passman.add_password(None, host, username, password)
+        
+    # create the AuthHandler
+    authhandler = urllib2.HTTPBasicAuthHandler(passman)
+        
+    opener = urllib2.build_opener(authhandler)
+    opener.add_handler(urllib2.HTTPCookieProcessor(cj))
+            
+    # All calls to urllib2.urlopen will now use our handler
+    urllib2.install_opener(opener)  
+
+    #Finding the Session id required for connection    
+    try:
+        open_request = urllib2.urlopen(host)    
+    except (EOFError, IOError), e:
+        return False,"Error: Unable to connect to Transmission"
+    except httplib.InvalidURL, e:
+        return False,"Error: Invalid Transmission host"
+    except urllib2.HTTPError, e:
+        if e.code == 401:
+            return False,"Error: Invalid Transmission Username or Password"
+    except urllib2.URLError, e:
+        return False,"Error: Invalid Transmission Username or Password"
+         
+    return True,"Success"    

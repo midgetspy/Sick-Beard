@@ -79,4 +79,38 @@ def sendTORRENT(result):
         open_request = urllib2.urlopen(add_url)
         return open_request.read()
     except:
-        return False   
+        return False 
+    
+def testAuthentication(host, username, password):
+    
+    host = host+'gui/'
+    
+    # this creates a password manager
+    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    passman.add_password(None, host, username, password)
+    
+    # create the AuthHandler
+    authhandler = urllib2.HTTPBasicAuthHandler(passman)
+      
+    opener = urllib2.build_opener(authhandler)
+    
+    cj = cookielib.CookieJar()
+    opener.add_handler(urllib2.HTTPCookieProcessor(cj))
+
+    # All calls to urllib2.urlopen will now use our handler    
+    f = urllib2.install_opener(opener)
+    
+    # authentication is now handled automatically for us
+    try:
+        open_request = urllib2.urlopen(host)
+    except (EOFError, IOError), e:
+        return False,"Error: Unable to connect to uTorrent" 
+    except httplib.InvalidURL, e:
+        return False,"Error: Invalid uTorrent host"
+    except urllib2.HTTPError, e:
+        if e.code == 401:
+            return False,"Error: Invalid uTorrent Username or Password"    
+    except:    
+        return False,"Error: Unable to connect to uTorrent"    
+         
+    return True,"Success: Connected and Authenticated" 

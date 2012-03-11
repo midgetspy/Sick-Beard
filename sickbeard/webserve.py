@@ -32,7 +32,7 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config, sab
+from sickbeard import config, sab, utorrent, transmission
 from sickbeard import history, notifiers, processTV
 from sickbeard import tv, ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -2005,6 +2005,18 @@ class Home:
                 return "Authentication failed. SABnzbd expects '"+accesMsg+"' as authentication method"
         else:
             return "Unable to connect to host"
+
+    @cherrypy.expose
+    def testTorrent(self, torrent_method=None, host=None, username=None, password=None):
+        if not host.endswith("/"):
+            host = host + "/"
+        
+        if torrent_method == 'utorrent':
+            connection, accesMsg = utorrent.testAuthentication(host, username, password)
+        elif torrent_method == 'transmission':
+            connection, accesMsg = transmission.testAuthentication(host, username, password)
+
+        return accesMsg     
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):

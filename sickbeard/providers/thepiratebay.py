@@ -34,18 +34,15 @@ from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 
 
-proxy_dict = {'15aa51.info (US)' : 'http://15aa51.info/', 
-#              'blewpass.com (US)' : 'http://www.blewpass.com/', #Not Working
+proxy_dict = {'proxyfofree.com (US)' : 'http://proxyfofree.com/',
               'meganprx.info (FR)': 'http://www.meganprx.info/',
-              'theunblockproxy.com (US)' : 'http://theunblockproxy.com/', 
-              '5tunnel.com (US)' : 'http://www.5tunnel.com/',
+              'alexandraprx.info (FR)' : 'http://www.alexandraprx.info/',
+              'imspecial.me (DE)' : 'http://imspecial.me/',
               'proxite.eu (DE)' :'http://proxite.eu/',
               'shieldmagic.com (GB)' : 'http://www.shieldmagic.com/',
-              'alexandraprx.info (FR)' : 'http://www.alexandraprx.info/',
-              'skipadmin.com (GB)' : 'http://skipadmin.com/',
+              'wowspeed.co.uk (GB)' : 'http://wowspeed.co.uk/' ,             
               'webproxy.cz (CZ)' : 'http://webproxy.cz/',
-              'experthide.com (US, SSL)' : 'https://www.experthide.com/',
-              'proxy-hide.com (US, SSL)' : 'https://proxy-hide.com/',
+              'freeproxy.cz (CZ)' : 'http://www.freeproxy.cz/',
              }
 
 class ThePirateBayProvider(generic.TorrentProvider):
@@ -195,6 +192,16 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         return result
 
+    def downloadResult(self, result):
+        """
+        Save the result to disk.
+        """
+        print result.url
+        if sickbeard.TORRENT_METHOD == "blackhole" and result.url.startswith('magnet'): 
+            logger.log(u"Can't Download a magnet link in blackhole "+self.providerType+" mode, Please use other torrent method", logger.ERROR)
+            return False
+
+        return generic.TorrentProvider.downloadResult(result)
 
 class ThePirateBayCache(tvcache.TVCache):
 
