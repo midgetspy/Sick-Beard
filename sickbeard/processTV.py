@@ -30,13 +30,64 @@ from sickbeard.exceptions import ex
 
 from sickbeard import logger
 
-from sickbeard.common import WANTED
-import sickbeard.webserve
+from sickbeard import ui, search_queue
+from sickbeard.common import WANTED, statusStrings
+
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
 
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
+
+def setWanted(show, season, episode):
+    returnStr = ""
+    if show == None or season == None or episode == None:
+        errMsg = "Programming error: invalid setWanted paramaters"
+        ui.notifications.error('Error', errMsg)
+        returnStr += logHelper(json.dumps({'result': 'error'}), logger.ERROR)
+
+    showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, show)
+
+    if showObj == None:
+        errMsg = "Error", "Show not in show list"
+        ui.notifications.error('Error', errMsg)
+        returnStr += logHelper(u"Error: show not in show list", logger.ERROR)
+        returnStr += logHelper(json.dumps({'result': 'error'}), logger.ERROR)
+        return returnStr
+
+    returnStr += logHelper(u"Attempting to set status on episode "+str(episode)+" to "+statusStrings[WANTED], logger.DEBUG)
+
+    epObj = showObj.getEpisode(season, episode)
+
+    if epObj == None:
+        returnStr += logHelper(u"Error: Episode couldn't be retrieved", logger.ERROR)
+        return returnStr
+
+    # figure out what segment the episode is in and remember it so we can backlog it
+    if epObj.show.air_by_date:
+        ep_segment = str(epObj.airdate)[:7]
+    else:
+        ep_segment = epObj.season
+
+
+    with epObj.lock:
+        epObj.status = int(WANTED)
+        epObj.saveToDB()
+
+    msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
+    msg += "<li>Season "+str(ep_segment)+"</li>"
+    logger.log(u"Sending backlog for "+showObj.name+" season "+str(ep_segment)+" because some eps were set to wanted")
+    cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, ep_segment)
+    sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
+    msg += "</ul>"
+
+    ui.notifications.message("Backlog started", msg)
+
+    returnStr += logHelper(json.dumps({'result': 'success'}))
 
 def processDir (dirName, nzbName=None, recurse=False, failed=False):
 
@@ -67,13 +118,19 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
             except (OSError, IOError), e:
                 returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
 
+        returnStr += logHelper(u"Setting episode back to Wanted")
+
         sql_results = myDB.select("SELECT showid, season, episode FROM history WHERE resource=?", [nzbName])
-        if len(sql_results) > 0:
-            returnStr += logHelper("Setting episode back to Wanted")
-            episodeString = str(sql_results[0]["season"]) + "x" + str(sql_results[0]["episode"])
-            sickbeard.webserve.Home().setStatus(sql_results[0]["showid"], episodeString, WANTED, direct=True)
-        else:
-            returnStr += logHelper("Not found in history: " + nzbName)
+
+        if len(sql_results) == 0:
+            returnStr += logHelper(u"Not found in history, still considered Snatched: " + nzbName, logger.ERROR)
+            return returnStr
+
+        show = sql_results[0]["showid"]
+        season = sql_results[0]["season"]
+        episode = sql_results[0]["episode"]
+
+        setWanted(show, season, episode)
 
         return returnStr
 
