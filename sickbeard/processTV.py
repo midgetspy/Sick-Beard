@@ -44,7 +44,7 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     return logMessage + u"\n"
 
 def setWanted(show, season, episode):
-    returnStr = ""
+    returnStr = ''
     if show == None or season == None or episode == None:
         errMsg = "Programming error: invalid setWanted paramaters"
         ui.notifications.error('Error', errMsg)
@@ -89,6 +89,8 @@ def setWanted(show, season, episode):
 
     returnStr += logHelper(json.dumps({'result': 'success'}))
 
+    return returnStr
+
 def processDir (dirName, nzbName=None, recurse=False, failed=False):
 
     returnStr = ''
@@ -130,7 +132,7 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
         season = sql_results[0]["season"]
         episode = sql_results[0]["episode"]
 
-        setWanted(show, season, episode)
+        returnStr += setWanted(show, season, episode)
 
         return returnStr
 
