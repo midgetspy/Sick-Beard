@@ -159,10 +159,15 @@ class NZBMatrixCache(tvcache.TVCache):
         urlArgs = {'page': 'download',
                    'username': sickbeard.NZBMATRIX_USERNAME,
                    'apikey': sickbeard.NZBMATRIX_APIKEY,
+                   'maxage': sickbeard.USENET_RETENTION,
                    'english': 1,
                    'ssl': 1,
                    'scenename': 1,
                    'subcat': '6,41'}
+
+        # don't allow it to be missing
+        if not urlArgs['maxage']:
+            urlArgs['maxage'] = '0'
 
         url += urllib.urlencode(urlArgs)
 
