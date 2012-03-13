@@ -23,12 +23,9 @@ __all__ = ['ezrss',
            'nzbsrus',
            'womble',
            'newzbin',
-<<<<<<< HEAD
            'nzbindex',
            'nzbserien',
-=======
            'btn',
->>>>>>> upstream/master
            ]
 
 import sickbeard

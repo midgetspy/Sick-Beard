@@ -125,12 +125,18 @@ class Quality:
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         if checkName(["pdtv.xvid", "hdtv.xvid", "hdtvrip.xvid", "dsr.xvid"], any) and not checkName(["720p"], all):
 =======
         if checkName(["(pdtv|hdtv|dsr)\.(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
 >>>>>>> upstream/master
             return Quality.SDTV
         elif checkName(["(dvdrip|bdrip)(\.ws)?\.(xvid|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
+=======
+        if checkName(["(pdtv|hdtv|dsr).(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
+            return Quality.SDTV
+        elif checkName(["(dvdrip|bdrip)(.ws)?.(xvid|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
+>>>>>>> upstream/master
             return Quality.SDDVD
         elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
             return Quality.HDTV

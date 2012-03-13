@@ -1,6 +1,3 @@
-from httplib import HTTPSConnection
-from urllib import urlencode
-
 import sickbeard
 
 from sickbeard import logger, common
