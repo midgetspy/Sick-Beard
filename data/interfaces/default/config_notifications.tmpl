@@ -805,7 +805,41 @@
                     </fieldset>
                 </div><!-- /trakt component-group //-->
 
+				<br />
+                <h1>Other</h1>
+                <br />
+				              <div id="core-component-group11" class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3>Execute Command</h3>
+                        <p>Execute a command when the download finishes.  Useful for rsync of .torrent files to a remote seedbox</p>
+                    </div>
 
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_commandnotify" id="use_commandnotify" #if $sickbeard.USE_COMMANDNOTIFY then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_commandnotify">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard execute a command notification?<br /><br />
+                                </span>
+                            </label>
+                        </div>
+                    <div id="content_use_commandnotify">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Command to execute on download complete</span>
+                                <input type="text" name="notify_command" id="notify_command" value="$sickbeard.NOTIFY_COMMAND" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Ex. rysnc or a custom script</span>
+                            </label>
+                        </div>
+                        <div class="testNotification" id="testCommandNotify-result">Click below to test.</div>
+                        <input type="button" value="Test Command Notify" id="testCommandNotify" />
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_email //-->
+                    </fieldset>
+                </div><!-- /component-group //-->
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components //-->
         </form>

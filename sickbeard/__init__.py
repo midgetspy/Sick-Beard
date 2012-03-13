@@ -248,6 +248,9 @@ BOXCAR_USERNAME = None
 BOXCAR_PASSWORD = None
 BOXCAR_PREFIX = None
 
+USE_COMMANDNOTIFY = False
+NOTIFY_COMMAND = None
+
 USE_LIBNOTIFY = False
 LIBNOTIFY_NOTIFY_ONSNATCH = False
 LIBNOTIFY_NOTIFY_ONDOWNLOAD = False
@@ -407,6 +410,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                USE_COMMANDNOTIFY, NOTIFY_COMMAND, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS
 
         if __INITIALIZED__:
@@ -634,6 +638,9 @@ def initialize(consoleLogging=True):
         NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
         NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
         NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
+
+        USE_COMMANDNOTIFY = bool(check_setting_int(CFG, 'ExecuteCommand', 'use_commandnotify', 0))
+        NOTIFY_COMMAND = check_setting_str(CFG, 'ExecuteCommand', 'notify_command', '')
 
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
 
@@ -1201,6 +1208,10 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+
+    new_config['ExecuteCommand'] = {}
+    new_config['ExecuteCommand']['use_commandnotify'] = int(USE_COMMANDNOTIFY)
+    new_config['ExecuteCommand']['notify_command'] = NOTIFY_COMMAND
 
     new_config.write()
 
