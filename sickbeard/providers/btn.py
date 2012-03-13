@@ -18,7 +18,10 @@
 
 import xml.etree.cElementTree as etree
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> testing
 =======
 >>>>>>> testing
 import sickbeard
@@ -41,7 +44,11 @@ class BTNProvider(generic.TorrentProvider):
 
     def isEnabled(self):
 <<<<<<< HEAD
+<<<<<<< HEAD
         return True
+=======
+        return sickbeard.BTN
+>>>>>>> testing
 =======
         return sickbeard.BTN
 >>>>>>> testing
@@ -69,8 +76,12 @@ class BTNCache(tvcache.TVCache):
     def _parseItem(self, item):
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         title = item.findtext('title')
         url = item.findtext('link')
+=======
+        (title, url) = self.provider._get_title_and_url(item)
+>>>>>>> testing
 =======
         (title, url) = self.provider._get_title_and_url(item)
 >>>>>>> testing
