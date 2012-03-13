@@ -16,11 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>. 
 
-<<<<<<< HEAD
 import xml.etree.cElementTree as etree
-
-=======
->>>>>>> upstream/master
 import sickbeard
 import generic
 
