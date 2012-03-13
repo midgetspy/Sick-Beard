@@ -26,7 +26,6 @@ import re
 import threading
 import datetime
 import random
-from sets import Set
 
 from Cheetah.Template import Template
 import cherrypy.lib
