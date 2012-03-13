@@ -135,4 +135,11 @@ $(document).ready(function(){
         var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
         function (data){ $('#testNMA-result').html(data); });
     });
+
+    $('#testCommandNotify').click(function(){
+        $('#testCommandNotify-result').html(loading);
+        var notify_command = $("#notify_command").val();
+        $.get(sbRoot+"/home/testCommandNotify", {'command': notify_command},
+        function (data){ $('#testCommandNotify-result').html(data); });
+    });
 });
