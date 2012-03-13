@@ -40,11 +40,7 @@ class BTNProvider(generic.TorrentProvider):
         self.url = 'http://broadcasthe.net/'
 
     def isEnabled(self):
-<<<<<<< HEAD
-        return True
-=======
         return sickbeard.BTN
->>>>>>> upstream/master
         
     def imageName(self):
         return 'btn.gif'
@@ -68,12 +64,7 @@ class BTNCache(tvcache.TVCache):
 
     def _parseItem(self, item):
 
-<<<<<<< HEAD
-        title = item.findtext('title')
-        url = item.findtext('link')
-=======
         (title, url) = self.provider._get_title_and_url(item)
->>>>>>> upstream/master
 
         if not title or not url:
             logger.log(u"The XML returned from the BTN RSS feed is incomplete, this result is unusable", logger.ERROR)
