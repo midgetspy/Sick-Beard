@@ -17,7 +17,10 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>. 
 
 import xml.etree.cElementTree as etree
+<<<<<<< HEAD
 
+=======
+>>>>>>> testing
 import sickbeard
 import generic
 
@@ -37,7 +40,11 @@ class BTNProvider(generic.TorrentProvider):
         self.url = 'http://broadcasthe.net/'
 
     def isEnabled(self):
+<<<<<<< HEAD
         return True
+=======
+        return sickbeard.BTN
+>>>>>>> testing
         
     def imageName(self):
         return 'btn.gif'
@@ -61,8 +68,12 @@ class BTNCache(tvcache.TVCache):
 
     def _parseItem(self, item):
 
+<<<<<<< HEAD
         title = item.findtext('title')
         url = item.findtext('link')
+=======
+        (title, url) = self.provider._get_title_and_url(item)
+>>>>>>> testing
 
         if not title or not url:
             logger.log(u"The XML returned from the BTN RSS feed is incomplete, this result is unusable", logger.ERROR)
