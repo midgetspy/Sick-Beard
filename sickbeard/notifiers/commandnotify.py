@@ -15,7 +15,7 @@ class CommandNotifier:
         logger.log("Executing command notification: " + command, logger.DEBUG)
         os.system(command)
         return True
-    def notify_download(self, command):
+    def notify_snatch(self, command):
         self._executeCommand(command)
         
 notifier = CommandNotifier
