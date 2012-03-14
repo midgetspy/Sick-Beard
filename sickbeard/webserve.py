@@ -1206,7 +1206,8 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_commandnotify=None, notify_command=None):
 
         results = []
 
@@ -1376,6 +1377,11 @@ class ConfigNotifications:
         else:
             nma_notify_ondownload = 0
 
+        if use_commandnotify == "on":
+            use_commandnotify = 1
+        else:
+            use_commandnotify = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1429,6 +1435,9 @@ class ConfigNotifications:
         sickbeard.NMJ_HOST = nmj_host
         sickbeard.NMJ_DATABASE = nmj_database
         sickbeard.NMJ_MOUNT = nmj_mount
+
+        sickbeard.USE_COMMANDNOTIFY = use_commandnotify
+        sickbeard.NOTIFY_COMMAND = notify_command
 
         sickbeard.USE_SYNOINDEX = use_synoindex
 
@@ -2114,6 +2123,15 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testCommandNotify(self, command=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        result = notifiers.command_notifier.test_notify(command)
+        if result:
+            return "Successfully executed"
+        else:
+            return "Test failed"
 
     @cherrypy.expose
     def shutdown(self):
