@@ -25,26 +25,13 @@
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
-\$.tablesorter.addParser({ 
-    id: 'nextAirDate',
-    is: function(s) {
-        return false;
-    },
-    format: function(s) {
-        if (s == '')
-            return '9999-99-99';
-        else
-            return s; 
-    },
-    type: 'text'
-});
 
 \$.tablesorter.addParser({
     id: 'loadingNames',
     is: function(s) {
         return false;
     }, 
-    format: function(s) { 
+    format: function(s) {
         if (s.indexOf('Loading...') == 0)
             return s.replace('Loading...','!!!');
         else if (s.indexOf('The ') == 0)
@@ -62,48 +49,36 @@
     is: function(s) {
         return false;
     },
-    format: function(s) { 
-        return s.toLowerCase().replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4); 
+    format: function(s) {
+        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4); 
     },
     type: 'numeric'
 });
 
-//http://web.archive.org/web/20080801073104/http://www.jdempster.com/category/code/jquery/tablesortercookiewidget/
-\$.tablesorter.addWidget({
-  id: 'cookie',
-  format: function(table) {
-    var sortList = table.config.sortList;
-    var tablesorterCookieJar = \$.cookieJar('tablesorter');
-    if ( sortList.length > 0) {
-      tablesorterCookieJar.set(\$(table).attr('id'), sortList);
-    } else {
-      var sortList = tablesorterCookieJar.get(\$(table).attr('id'));
-      if (sortList && sortList.length > 0) {
-        jQuery(table).trigger('sorton', [sortList]);
-      }
-    }
-  }
-});
 
-\$(document).ready(function(){ 
+\$(document).ready(function(){
 
 #set $sort_codes = {'date': 0, 'show': 1, 'network': 4}
 #if $sort not in $sort_codes:
     $sort = 'date'
 #end if
-        sortList = [[$sort_codes[$sort],0]]; 
+        sortList = [[$sort_codes[$sort],0]];
 
     \$("#showListTable:has(tbody tr)").tablesorter({
+        widgets: ['filter'],
         sortList: sortList,
+        textExtraction: {
+            5: function(node) { return \$(node).find("span").text().toLowerCase(); }
+        },
         headers: {
-            0: { sorter: 'nextAirDate' },
+            0: { sorter: 'isoDate' },
             1: { sorter: 'loadingNames' },
-            2: { sorter: false},
-            3: { sorter: false},
+            2: { sorter: false, filter: false },
+            3: { sorter: false },
             4: { sorter: 'loadingNames' },
-            5: { sorter: 'quality' },
-            6: { sorter: false},
-            7: { sorter: false}
+            5: { sorter: 'quality', filter: false },
+            6: { sorter: false, filter: false },
+            7: { sorter: false, filter: false }
         }
     });
 
