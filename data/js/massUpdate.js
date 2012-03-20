@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-  $('#submitMassEdit').click(function(){
+  $('.submitMassEdit').click(function(){
     var editArr = new Array()
   
     $('.editCheck').each(function() {
@@ -17,7 +17,7 @@ $(document).ready(function(){
   });
 
 
-  $('#submitMassUpdate').click(function(){
+  $('.submitMassUpdate').click(function(){
   
     var updateArr = new Array()
     var refreshArr = new Array()
