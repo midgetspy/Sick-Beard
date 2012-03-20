@@ -1,15 +1,31 @@
 /* tables */
-table.tablesorter thead tr .header {
-/*  background-image: url(../images/tablesorter/bg.gif); */
-    cursor: pointer; 
-    background-repeat: no-repeat; 
-    background-position: center right; 
-    padding-right: 18px; 
+table.tablesorter {
+    width: 100%;
+    margin-left:auto;
+    margin-right:auto;
 }
-table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+table.tablesorter th {
     border: 1px solid #241109;
     padding: 3px;
-    font-weight:700;
+    border-collapse: collapse;
+    background-color: #333;
+    color: #fff;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+}
+table.tablesorter .header {
+/*  background-image: url(../images/tablesorter/bg.gif); */
+    background-repeat: no-repeat;
+    background-position: center right;
+    cursor: pointer;
+    padding-right: 18px;
+}
+table.tablesorter td {
+    color: #000;
+    padding: 4px;
+}
+table.sickbeardTable tfoot a {
+    color:#FFF;
+    text-decoration: none;
 }
 /*
 table.tablesorter thead tr .headerSortUp {
@@ -22,11 +38,32 @@ table.tablesorter thead tr .headerSortDown {
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
     background-color: #57442B;
 }
-table.tablesorter tbody tr.even td {
-    background-color:#f5f1e4;
-    color: #000000;
+/* stickyheader widget */
+tr.tablesorter-stickyheader {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    background-color: #fff;
+    padding: 2px 0;
 }
-table.tablesorter tbody tr.odd td {
+
+/* Zebra Widget - row alternating colors */
+tr.even {
     background-color:#dfdacf;
-    color: #000000;
+}
+tr.odd {
+    background-color:#f5f1e4;
+}
+/* filter widget */
+tr.tablesorter-filter {
+    background-color: #eee; 
+}
+input.tablesorter-filter {
+    width: 100%; 
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+} 
+.tablesorter-filter .disabled {
+    display: none;
 }
