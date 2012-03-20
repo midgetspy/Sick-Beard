@@ -54,6 +54,30 @@ $(document).ready(function(){
         });
     });
 
+    var lastCheck = null;
+    $('.epCheck').click(function(event) {
+
+      if(!lastCheck || !event.shiftKey) {
+        lastCheck = this;
+        return;
+      }
+
+      var check = this;
+      var found = 0;
+
+      $('.epCheck').each(function() {
+        switch (found) {
+          case 2: return false;
+          case 1: this.checked = lastCheck.checked;
+        }
+
+        if (this == check || this == lastCheck)
+          found++;
+      });
+
+      lastClick = this;
+    });
+
     // selects all visible episode checkboxes.
     $('.seriesCheck').click(function(){
         $('.epCheck:visible').each(function(){
