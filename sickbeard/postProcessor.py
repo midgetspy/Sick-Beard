@@ -600,7 +600,7 @@ class PostProcessor(object):
             return False
         for ignore_file in self.IGNORED_FILESTRINGS:
             if ignore_file in self.file_path:
-                self._log(u"File {0} is ignored type, skipping".format( self.file_path ) )
+                self._log(u"File "+self.file_path+" is ignored type, skipping" )
                 return False
         # reset per-file stuff
         self.in_history = False
