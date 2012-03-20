@@ -32,7 +32,7 @@ from threading import Lock
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, btn, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin
 
-from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
+from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, sabPoller
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 
@@ -70,6 +70,7 @@ showQueueScheduler = None
 searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
+sabPollScheduler = None
 
 showList = None
 loadingShowList = None
@@ -192,6 +193,7 @@ SAB_PASSWORD = None
 SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = ''
+SAB_POLL = True
 
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
@@ -379,7 +381,7 @@ def initialize(consoleLogging=True):
 
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
-                SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
+                SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, SAB_POLL, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
@@ -398,7 +400,7 @@ def initialize(consoleLogging=True):
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
                 NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
-                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
+                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, sabPollScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
@@ -573,6 +575,7 @@ def initialize(consoleLogging=True):
         SAB_APIKEY = check_setting_str(CFG, 'SABnzbd', 'sab_apikey', '')
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', 'tv')
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
+        SAB_POLL = bool(check_setting_int(CFG, 'SABnzbd', 'sab_poll', 1))
 
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
@@ -776,6 +779,11 @@ def initialize(consoleLogging=True):
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="POSTPROCESSER",
                                                      runImmediately=True)
+        
+        sabPollScheduler = scheduler.Scheduler(sabPoller.SabPoller(),
+                                                     cycleTime=datetime.timedelta(seconds=30),
+                                                     threadName="SABPOLLER",
+                                                     runImmediately=True)
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
@@ -794,7 +802,7 @@ def start():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
-            properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            properFinderScheduler, autoPostProcesserScheduler, sabPollScheduler, searchQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -824,13 +832,16 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
+
+            # start the sab poller
+            sabPollScheduler.thread.start()            
             
             started = True
 
 def halt ():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
-            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, sabPollScheduler, searchQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -887,6 +898,13 @@ def halt ():
             logger.log(u"Waiting for the POSTPROCESSER thread to exit")
             try:
                 autoPostProcesserScheduler.thread.join(10)
+            except:
+                pass
+
+            sabPollScheduler.abort = True
+            logger.log(u"Waiting for the SABPOLL thread to exit")
+            try:
+                sabPollScheduler.thread.join(10)
             except:
                 pass
 
@@ -1097,6 +1115,7 @@ def save_config():
     new_config['SABnzbd']['sab_apikey'] = SAB_APIKEY
     new_config['SABnzbd']['sab_category'] = SAB_CATEGORY
     new_config['SABnzbd']['sab_host'] = SAB_HOST
+    new_config['SABnzbd']['sab_poll'] = int(SAB_POLL)
 
     new_config['NZBget'] = {}
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD

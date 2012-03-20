@@ -202,4 +202,38 @@ def testAuthentication(host=None, username=None, password=None, apikey=None):
         return False,sabText
     
     return True,"Success"
-    
+
+def getHistory():
+    # sample history url
+    # http://localhost:8080/sabnzbd/api?mode=history&limit=2&apikey=xxx&output=json
+
+    params = {}
+    if sickbeard.SAB_USERNAME != None:
+        params['ma_username'] = sickbeard.SAB_USERNAME
+    if sickbeard.SAB_PASSWORD != None:
+        params['ma_password'] = sickbeard.SAB_PASSWORD
+    if sickbeard.SAB_APIKEY != None:
+        params['apikey'] = sickbeard.SAB_APIKEY
+
+    params['mode'] = 'history'
+    params['limit'] = 10
+    params['output'] = 'json'
+
+    url = sickbeard.SAB_HOST + "api?" + urllib.urlencode(params)
+
+    logger.log(u"SABnzbd poll URL: " + url, logger.DEBUG)
+    success, f = _sabURLOpenSimple(url)
+    if not success:
+        logger.log(u"SABnzbd poll error: " + f, logger.WARNING)
+        return False
+
+    success, sabText = _checkSabResponse(f)
+    if not success:
+        return False
+    else:
+        sabJson = {}
+        try:
+            sabJson = json.loads(sabText)
+        except ValueError, e:
+            pass
+        return sabJson
