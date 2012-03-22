@@ -26,15 +26,20 @@ from sickbeard import db
 import sickbeard
 from lib import adba
 
+excpetionCache = {}
+
 def get_scene_exceptions(tvdb_id):
     """
     Given a tvdb_id, return a list of all the scene exceptions.
     """
-
-    myDB = db.DBConnection("cache.db")
-    exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
-    exceptionsList = [cur_exception["show_name"] for cur_exception in exceptions]
-
+    global excpetionCache
+    if tvdb_id not in excpetionCache:
+        myDB = db.DBConnection("cache.db")
+        exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+        exceptionsList = [cur_exception["show_name"] for cur_exception in exceptions]
+        excpetionCache[tvdb_id] = exceptionsList
+    else:
+        exceptionsList = excpetionCache[tvdb_id]
     return exceptionsList
 
 def get_scene_exception_by_name(show_name):
@@ -67,6 +72,9 @@ def retrieve_exceptions(localOnly=False):
     Looks up the exceptions on github, parses them into a dict, and inserts them into the
     scene_exceptions table in cache.db. Also clears the scene name cache.
     """
+
+    global excpetionCache
+    excpetionCache = {}
 
     # exceptions are stored on github pages
     url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
