@@ -40,7 +40,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 
-from sickbeard.providers import newznab
+from sickbeard.providers import newznab, getProviderClass
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
@@ -68,6 +68,10 @@ class PageTemplate (Template):
         self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
         self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
+
+        if sickbeard.NZBS_UID and sickbeard.NZBS_HASH and not getProviderClass('nzbs_org').key:
+            logger.log(u"NZBs.org has been replaced, please check the config to configure the new provider!", logger.ERROR)
+            ui.notifications.error("NZBs.org Config Update", "Please check the config to configure the new NZBs.org provider!")
 
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
