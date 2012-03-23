@@ -69,9 +69,9 @@ class PageTemplate (Template):
         self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
-        if sickbeard.NZBS_UID and sickbeard.NZBS_HASH and not getProviderClass('nzbs_org').key:
+        if sickbeard.NZBS and sickbeard.NZBS_UID and sickbeard.NZBS_HASH and not getProviderClass('nzbs_org').key:
             logger.log(u"NZBs.org has been replaced, please check the config to configure the new provider!", logger.ERROR)
-            ui.notifications.error("NZBs.org Config Update", "Please check the config to configure the new NZBs.org provider!")
+            ui.notifications.error("NZBs.org Config Update", "NZBs.org must use the new API key from http://beta.nzbs.org. Please update your config.")
 
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
@@ -1078,8 +1078,7 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
-                      nzbmatrix_username=None, nzbmatrix_apikey=None,
+    def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
@@ -1117,7 +1116,6 @@ class ConfigProviders:
 
             finishedNames.append(curID)
 
-
         # delete anything that is missing
         for curProvider in sickbeard.newznabProviderList:
             if curProvider.getID() not in finishedNames:
@@ -1130,9 +1128,7 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'nzbs_org':
-                sickbeard.NZBS = curEnabled
-            elif curProvider == 'nzbs_r_us':
+            if curProvider == 'nzbs_r_us':
                 sickbeard.NZBSRUS = curEnabled
             elif curProvider == 'nzbmatrix':
                 sickbeard.NZBMATRIX = curEnabled
@@ -1160,9 +1156,6 @@ class ConfigProviders:
         sickbeard.BTN_AUTH_TOKEN = btn_auth_token.strip()
         sickbeard.BTN_PASSKEY = btn_passkey.strip()
         sickbeard.BTN_AUTHKEY = btn_authkey.strip()
-
-        sickbeard.NZBS_UID = nzbs_org_uid.strip()
-        sickbeard.NZBS_HASH = nzbs_org_hash.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
