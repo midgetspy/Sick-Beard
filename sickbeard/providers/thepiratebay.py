@@ -20,10 +20,10 @@ import re
 import urllib, urllib2
 import sys
 import datetime
+import os
 
 import sickbeard
 import generic
-
 from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
@@ -32,7 +32,7 @@ from sickbeard import show_name_helpers
 from sickbeard import db
 from sickbeard.common import Overview
 from sickbeard.exceptions import ex
-
+from sickbeard import encodingKludge as ek
 
 proxy_dict = {'proxyfofree.com (US)' : 'http://proxyfofree.com/',
               'meganprx.info (FR)': 'http://www.meganprx.info/',
@@ -196,12 +196,22 @@ class ThePirateBayProvider(generic.TorrentProvider):
         """
         Save the result to disk.
         """
-        print result.url
+        
+        #Hack for rtorrent user (it will not work for other torrent client)
         if sickbeard.TORRENT_METHOD == "blackhole" and result.url.startswith('magnet'): 
-            logger.log(u"Can't Download a magnet link in blackhole "+self.providerType+" mode, Please use other torrent method", logger.ERROR)
-            return False
+            magnetFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
+            magnetFileContent = 'd10:magnet-uri' + `len(result.url)` + ':' + result.url + 'e'
 
-        return generic.TorrentProvider.downloadResult(result)
+            try:
+                fileOut = open(magnetFileName, 'wb')
+                fileOut.write(magnetFileContent)
+                fileOut.close()
+                helpers.chmodAsParent(magnetFileName)
+            except IOError, e:
+                logger.log("Unable to save the file: "+ex(e), logger.ERROR)
+                return False
+            logger.log(u"Saved magnet link to "+magnetFileName+" ", logger.MESSAGE)
+            return True
 
 class ThePirateBayCache(tvcache.TVCache):
 

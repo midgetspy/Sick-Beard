@@ -54,9 +54,6 @@ def sendTORRENT(result):
     #Finding the Session id required for connection    
     try:
         open_request = urllib2.urlopen(host)    
-    except (EOFError, IOError), e:
-        logger.log(u"Unable to connect to Transmission "+ex(e), logger.ERROR)
-        return False
     except httplib.InvalidURL, e:
         logger.log(u"Invalid Transmission host, check your config "+ex(e), logger.ERROR)
         return False
@@ -100,7 +97,7 @@ def sendTORRENT(result):
         return False
     
 def testAuthentication(host, username, password):
-
+        
     host = host+'transmission/rpc'
 
     cj = cookielib.CookieJar()
@@ -121,14 +118,18 @@ def testAuthentication(host, username, password):
     #Finding the Session id required for connection    
     try:
         open_request = urllib2.urlopen(host)    
-    except (EOFError, IOError), e:
-        return False,"Error: Unable to connect to Transmission"
     except httplib.InvalidURL, e:
         return False,"Error: Invalid Transmission host"
     except urllib2.HTTPError, e:
         if e.code == 401:
             return False,"Error: Invalid Transmission Username or Password"
+        else:
+            msg = str(e.read())
     except urllib2.URLError, e:
         return False,"Error: Invalid Transmission Username or Password"
-         
-    return True,"Success"    
+
+    try:
+        session_id = re.search('X-Transmission-Session-Id:\s*(\w+)', msg).group(1)         
+        return True,"Success: Connected and Authenticated"
+    except:    
+        return False,"Error: Unable to get Transmission Session-Id" 
