@@ -26,6 +26,7 @@ import re
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import naming
+from sickbeard import db
 
 import sickbeard
 
@@ -246,6 +247,8 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
 
 class ConfigMigrator():
 
+    migration_names = {1: 'Custom naming'}
+
     def __init__(self, config_obj):
         """
         Initializes a config migrator that can take the config from the version indicated in the config
@@ -265,8 +268,13 @@ class ConfigMigrator():
         while self.config_version < sickbeard.CONFIG_VERSION:
             next_version = self.config_version + 1
             
+            if next_version in self.migration_names:
+                migration_name = ': ' + self.migrate_names[next_version]
+            else:
+                migration_name = ''
+            
             # do the migration, expect a method named _migrate_v<num>
-            logger.log(u"Migrating config up to version "+str(next_version))
+            logger.log(u"Migrating config up to version "+str(next_version)+migration_name)
             getattr(self, '_migrate_v'+str(next_version))()
             self.config_version = next_version
 
@@ -276,19 +284,43 @@ class ConfigMigrator():
         """
         
         sickbeard.NAMING_PATTERN = self._name_to_pattern()
+        logger.log("Based on your old settings I'm setting your new naming pattern to: "+sickbeard.NAMING_PATTERN)
         
         sickbeard.NAMING_CUSTOM_ABD = bool(check_setting_int(self.config_obj, 'General', 'naming_dates', 0))
         
         if sickbeard.NAMING_CUSTOM_ABD:
             sickbeard.NAMING_ABD_PATTERN = self._name_to_pattern(True)
+            logger.log("Adding a custom air-by-date naming pattern to your config: "+sickbeard.NAMING_ABD_PATTERN)
         else:
             sickbeard.NAMING_ABD_PATTERN = naming.name_abd_presets[0]
         
+        sickbeard.NAMING_MULTI_EP = int(check_setting_int(self.config_obj, 'General', 'naming_multi_ep_type', 1))
+        
         # see if any of their shows used season folders
+        myDB = db.DBConnection()
+        season_folder_shows = myDB.select("SELECT * FROM tv_shows WHERE flatten_folders = 0")
         
         # if any shows had season folders on then prepend season folder to the pattern
+        if season_folder_shows:
         
-            # flatten any shows that didn't have it on
+            old_season_format = check_setting_str(self.config_obj, 'General', 'season_folders_format', 'Season %02d')
+            
+            new_season_format = old_season_format % 9
+            new_season_format = new_season_format.replace('09', '%0S')
+            new_season_format = new_season_format.replace('9', '%S')
+            logger.log(u"Changed season folder format from "+old_season_format+" to "+new_season_format+", prepending it to your naming config")
+        
+            sickbeard.NAMING_PATTERN = new_season_format + os.sep + sickbeard.NAMING_PATTERN
+        
+        # if no shows had it on then don't flatten any shows and don't put season folders in the config
+        else:
+        
+            logger.log(u"No shows were using season folders before so I'm disabling flattening on all shows")
+        
+            # don't flatten any shows at all
+            myDB.action("UPDATE tv_shows SET flatten_folders = 0")
+
+        sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
         
     def _name_to_pattern(self, abd=False):
 

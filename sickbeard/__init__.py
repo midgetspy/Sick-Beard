@@ -54,7 +54,7 @@ CFG = None
 CONFIG_FILE = None
 
 # this is the version of the config we EXPECT to find
-CONFIG_VERSION = 0
+CONFIG_VERSION = 1
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -632,10 +632,6 @@ def initialize(consoleLogging=True):
         newznabProviderList = providers.getNewznabProviderList(newznabData)
         providerList = providers.makeProviderList()
 
-        # migrate the config if it needs it
-        migrator = ConfigMigrator(CFG)
-        migrator.migrate_config()
-
         # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
@@ -647,6 +643,10 @@ def initialize(consoleLogging=True):
         
         # fix up any db problems
         db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
+
+        # migrate the config if it needs it
+        migrator = ConfigMigrator(CFG)
+        migrator.migrate_config()
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
