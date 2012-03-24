@@ -65,7 +65,7 @@
         sortList = [[$sort_codes[$sort],0]];
 
     \$("#showListTable:has(tbody tr)").tablesorter({
-        widgets: ['filter'],
+        widgets: ['stickyHeaders'],
         sortList: sortList,
         textExtraction: {
             5: function(node) { return \$(node).find("span").text().toLowerCase(); }
@@ -73,12 +73,12 @@
         headers: {
             0: { sorter: 'isoDate' },
             1: { sorter: 'loadingNames' },
-            2: { sorter: false, filter: false },
+            2: { sorter: false },
             3: { sorter: false },
             4: { sorter: 'loadingNames' },
-            5: { sorter: 'quality', filter: false },
-            6: { sorter: false, filter: false },
-            7: { sorter: false, filter: false }
+            5: { sorter: 'quality' },
+            6: { sorter: false },
+            7: { sorter: false }
         }
     });
 
