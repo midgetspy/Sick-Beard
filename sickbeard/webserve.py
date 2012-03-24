@@ -1580,8 +1580,15 @@ class NewHomeAddShows:
 
             series = seriesXML.getiterator('Series')
 
+            # add each result to our list
             for curSeries in series:
-                results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
+                tvdb_id = int(curSeries.findtext('seriesid'))
+                
+                # don't add duplicates
+                if tvdb_id in [x[0] for x in results]:
+                    continue
+                
+                results.append((tvdb_id, curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
 
         lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
 
