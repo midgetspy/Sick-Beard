@@ -69,9 +69,9 @@ class PageTemplate (Template):
         self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
-        if sickbeard.NZBS and sickbeard.NZBS_UID and sickbeard.NZBS_HASH and not getProviderClass('nzbs_org').key:
+        if sickbeard.NZBS and sickbeard.NZBS_UID and sickbeard.NZBS_HASH:
             logger.log(u"NZBs.org has been replaced, please check the config to configure the new provider!", logger.ERROR)
-            ui.notifications.error("NZBs.org Config Update", "NZBs.org must use the new API key from http://beta.nzbs.org. Please update your config.")
+            ui.notifications.error("NZBs.org Config Update", "NZBs.org has a new site. Please <a href=\""+sickbeard.WEB_ROOT+"/config/providers\">update your config</a> with the api key from <a href=\"http://beta.nzbs.org\">http://beta.nzbs.org</a> and then disable the old NZBs.org provider.")
 
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
@@ -1130,6 +1130,8 @@ class ConfigProviders:
 
             if curProvider == 'nzbs_r_us':
                 sickbeard.NZBSRUS = curEnabled
+            elif curProvider == 'nzbs_org_old':
+                sickbeard.NZBS = curEnabled
             elif curProvider == 'nzbmatrix':
                 sickbeard.NZBMATRIX = curEnabled
             elif curProvider == 'newzbin':
