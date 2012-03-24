@@ -3,6 +3,7 @@ table.tablesorter {
     width: 100%;
     margin-left:auto;
     margin-right:auto;
+    text-align:left;
 }
 table.tablesorter th {
     border: 1px solid #241109;
@@ -11,6 +12,7 @@ table.tablesorter th {
     background-color: #333;
     color: #fff;
     text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align:center;
 }
 table.tablesorter .header {
 /*  background-image: url(../images/tablesorter/bg.gif); */
@@ -18,13 +20,16 @@ table.tablesorter .header {
     background-position: center right;
     cursor: pointer;
     padding-right: 18px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 table.tablesorter td {
     color: #000;
     padding: 4px;
 }
 table.sickbeardTable tfoot a {
-    color:#FFF;
+    color:#fff;
     text-decoration: none;
 }
 /*
@@ -40,13 +45,9 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 }
 /* stickyheader widget */
 tr.tablesorter-stickyheader {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
     background-color: #fff;
     padding: 2px 0;
 }
-
 /* Zebra Widget - row alternating colors */
 tr.even {
     background-color:#dfdacf;
@@ -56,7 +57,8 @@ tr.odd {
 }
 /* filter widget */
 tr.tablesorter-filter {
-    background-color: #eee; 
+    background-color: #eee;
+    text-align: center;
 }
 input.tablesorter-filter {
     width: 100%; 
