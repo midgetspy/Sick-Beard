@@ -1206,7 +1206,9 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_xmpp=None, xmpp_notify_onsnatch=None, xmpp_notify_ondownload=None, 
+                          xmpp_username=None, xmpp_password=None, xmpp_server=None, xmpp_port=None, xmpp_recipient=None):
 
         results = []
 
@@ -1335,11 +1337,21 @@ class ConfigNotifications:
             use_synoindex = 1
         else:
             use_synoindex = 0
-
+        
         if use_trakt == "on":
             use_trakt = 1
         else:
             use_trakt = 0
+            
+        if use_xmpp == "on":
+            use_xmpp  = 1
+        else:
+            use_xmpp = 0
+        
+        if xmpp_notify_onsnatch == "on":
+            xmpp_notify_onsnatch = 1
+        else:
+            xmpp_notify_onsnatch = 0
 
         if use_pytivo == "on":
             use_pytivo = 1
@@ -1375,6 +1387,11 @@ class ConfigNotifications:
             nma_notify_ondownload = 1
         else:
             nma_notify_ondownload = 0
+
+        if xmpp_notify_ondownload == "on":
+            xmpp_notify_ondownload = 1
+        else:
+            xmpp_notify_ondownload = 0
 
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
@@ -1436,6 +1453,15 @@ class ConfigNotifications:
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
+        
+        sickbeard.USE_XMPP = use_xmpp
+        sickbeard.XMPP_NOTIFY_ONSNATCH = xmpp_notify_onsnatch
+        sickbeard.XMPP_NOTIFY_ONDOWNLOAD = xmpp_notify_ondownload
+        sickbeard.XMPP_USERNAME = xmpp_username
+        sickbeard.XMPP_PASSWORD = xmpp_password
+        sickbeard.XMPP_SERVER = xmpp_server
+        sickbeard.XMPP_PORT = xmpp_port
+        sickbeard.XMPP_RECIPIENT = xmpp_recipient
 
         sickbeard.USE_PYTIVO = use_pytivo
         sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
@@ -2130,6 +2156,12 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testXMPP(self, username=None, password=None, server=None, port=None, recipient=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        return notifiers.xmpp_notifier.test_notify(username, password, server, port, recipient)
 
     @cherrypy.expose
     def shutdown(self):
