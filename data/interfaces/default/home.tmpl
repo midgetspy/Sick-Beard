@@ -19,19 +19,6 @@
 
 <script type="text/javascript" charset="utf-8">
 <!--
-\$.tablesorter.addParser({ 
-    id: 'nextAirDate',
-    is: function(s) {
-        return false;
-    },
-    format: function(s) {
-        if (s == '')
-            return '9999-99-99';
-        else
-            return s;
-    },
-    type: 'text'
-});
 
 \$.tablesorter.addParser({
     id: 'loadingNames',
@@ -57,7 +44,7 @@
         return false;
     },
     format: function(s) { 
-        return s.toLowerCase().replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4);
+        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4);
     },
     type: 'numeric'
 });
@@ -68,7 +55,7 @@
         return false; 
     },
     format: function(s) {
-        match = s.match(/^\<\!\-\-(.*)\-\-\>/)
+        match = s.match(/^(.*)/);
 
         if (match == null || match[1] == "?")
             return -10;
@@ -84,54 +71,21 @@
     type: 'numeric'
 });
 
-\$.tablesorter.addParser({
-    id: 'active',
-    is: function(s) {
-        return false;
-    }, 
-    format: function(s) {
-        if (s == '')
-            return '~~';
-        else
-            return s;
-    },
-    type: 'text'
-});
-
-//http://web.archive.org/web/20080801073104/http://www.jdempster.com/category/code/jquery/tablesortercookiewidget/
-\$.tablesorter.addWidget({
-  id: 'cookie',
-  format: function(table) {
-    var sortList = table.config.sortList;
-    var tablesorterCookieJar = \$.cookieJar('tablesorter');
-    if ( sortList.length > 0) {
-      tablesorterCookieJar.set(\$(table).attr('id'), sortList);
-    } else {
-      var sortList = tablesorterCookieJar.get(\$(table).attr('id'));
-      if (sortList && sortList.length > 0) {
-        jQuery(table).trigger('sorton', [sortList]);
-      }
-    }
-  }
-});
- 
 \$(document).ready(function(){ 
 
-    // workaround: the tablesorter cookie widget does not support a defaulted sortList set within the $.tablesorter() instantiation
-    var tablesorterCookieJar = \$.cookieJar('tablesorter');
-    var sortList = tablesorterCookieJar.get('showListTable');
-    if (!sortList || !sortList.length)
-        sortList = [[5,1],[1,0]];   
-
     \$("#showListTable").tablesorter({
-        sortList: sortList,
-        widgets: ['cookie','zebra'],
+        sortList: [[5,1],[1,0]],
+        textExtraction: {
+            3: function(node) { return \$(node).find("span").text().toLowerCase(); },
+            4: function(node) { return \$(node).find("span").text(); },
+            5: function(node) { return \$(node).find("img").attr("alt"); }
+        },
+        widgets: ['saveSort', 'zebra', 'stickyHeaders'],
         headers: {
-            0: { sorter: 'nextAirDate' },
+            0: { sorter: 'isoDate' },
             1: { sorter: 'loadingNames' },
             3: { sorter: 'quality' },
-            4: { sorter: 'eps' },
-            5: { sorter: 'active' }
+            4: { sorter: 'eps' }
         }
     });
 
@@ -196,6 +150,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $den = 1
 #end if
 
+
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
@@ -205,7 +160,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if
-    <td align="center"><!--$dlStat--><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
+    <td align="center"><span style="display: none;">$dlStat</span><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
         <script type="text/javascript">
         <!--
             \$(function() {

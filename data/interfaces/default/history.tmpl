@@ -18,8 +18,11 @@
 \$(document).ready(function() 
 { 
     \$("#historyTable:has(tbody tr)").tablesorter({
-        widgets: ['zebra'],
-        sortList: [[0,1]]
+        widgets: ['zebra', 'stickyHeaders', 'filter'],
+        sortList: [[0,1]],
+        textExtraction: {
+            4: function(node) { return \$(node).find("span").text().toLowerCase(); }
+        },
     });
     \$('#limit').change(function(){
         url = '$sbRoot/history/?limit='+\$(this).val()
@@ -44,7 +47,7 @@
 #for $hItem in $historyResults:
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
   <tr>
-    <td>$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
+    <td class="nowrap">$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
     <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
     <td align="center">$statusStrings[$curStatus]</td>
     <td align="center">

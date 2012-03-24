@@ -23,12 +23,12 @@ import re
 import time
 import urllib
 
-import xml.etree.cElementTree as etree
+from xml.dom.minidom import parseString
 
 import sickbeard
 import generic
 
-from sickbeard import classes, show_name_helpers
+from sickbeard import classes, show_name_helpers, helpers
 
 from sickbeard import exceptions, logger
 from sickbeard import tvcache
@@ -85,8 +85,8 @@ class NZBsProvider(generic.NZBProvider):
 			return []
 
 		try:
-			responseSoup = etree.ElementTree(etree.XML(data))
-			items = responseSoup.getiterator('item')
+			parsedXML = parseString(data)
+			items = parsedXML.getElementsByTagName('item')
 		except Exception, e:
 			logger.log(u"Error trying to load NZBs.org RSS feed: "+ex(e), logger.ERROR)
 			return []
@@ -94,14 +94,11 @@ class NZBsProvider(generic.NZBProvider):
 		results = []
 
 		for curItem in items:
-			title = curItem.findtext('title')
-			url = curItem.findtext('link')
+			(title, url) = self._get_title_and_url(curItem)
 
 			if not title or not url:
 				logger.log(u"The XML returned from the NZBs.org RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 				continue
-
-			url = url.replace('&amp;','&')
 
 			if "&i=" not in url and "&h=" not in url:
 				raise exceptions.AuthException("The NZBs.org result URL has no auth info which means your UID/hash are incorrect, check your config")
@@ -118,14 +115,19 @@ class NZBsProvider(generic.NZBProvider):
 
 			for curResult in self._doSearch(curString):
 
-				match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
+				(title, url) = self._get_title_and_url(curResult)
+
+				pubDate_node = curResult.getElementsByTagName('pubDate')[0]
+				pubDate = helpers.get_xml_text(pubDate_node)
+
+				match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', pubDate)
 				if not match:
 					continue
 
 				resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
 
 				if date == None or resultDate > date:
-					results.append(classes.Proper(curResult.findtext('title'), curResult.findtext('link'), resultDate))
+					results.append(classes.Proper(title, url, resultDate))
 
 		return results
 

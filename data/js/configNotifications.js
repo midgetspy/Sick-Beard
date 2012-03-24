@@ -127,4 +127,12 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testTrakt", {'api': trakt_api, 'username': trakt_username, 'password': trakt_password},
         function (data){ $('#testTrakt-result').html(data); });
     });
+
+    $('#testNMA').click(function(){
+        $('#testNMA-result').html(loading);
+        var nma_api = $("#nma_api").val();
+        var nma_priority = $("#nma_priority").val();
+        var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
+        function (data){ $('#testNMA-result').html(data); });
+    });
 });

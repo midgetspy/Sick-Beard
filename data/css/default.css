@@ -60,11 +60,12 @@ text-align:left;
 font-size:21px;
 line-height:23px;
 font-weight:400;
+}
+h1.title {
 padding-bottom:4px;
 margin-bottom:12px;
 border-bottom:1px solid #4e4e4e;
 }
-
 h1 a {
 text-decoration:none;
 }

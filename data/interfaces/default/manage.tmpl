@@ -27,30 +27,31 @@
 });
 
 \$.tablesorter.addParser({
-    id: 'images',
+    id: 'quality',
     is: function(s) {
         return false;
-    }, 
-    format: function(s) {
-        if (s == '')
-            return '~~';
-        else
-            return s;
     },
-    type: 'text'
+    format: function(s) { 
+        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4); 
+    },
+    type: 'numeric'
 });
 
 \$(document).ready(function() 
 { 
     \$("#massUpdateTable:has(tbody tr)").tablesorter({
         sortList: [[2,0]],
-        widgets: ['zebra'],
+        textExtraction: {
+            1: function(node) { return \$(node).find("img").attr("alt"); },
+            3: function(node) { return \$(node).find("span").text().toLowerCase(); },
+            4: function(node) { return \$(node).find("img").attr("alt"); },
+            5: function(node) { return \$(node).find("img").attr("alt"); }
+        },
+        widgets: ['zebra', 'stickyHeaders'],
         headers: {
             0: { sorter: false},
-            1: { sorter: 'images'},
             2: { sorter: 'showNames'},
-            4: { sorter: 'images'},
-            5: { sorter: 'images'},
+            3: { sorter: 'quality'},
             7: { sorter: false},
             8: { sorter: false},
             9: { sorter: false},
@@ -83,8 +84,8 @@
   </thead>
 <tfoot>
   <tr>
-    <td rowspan="1" colspan="1" align="center"><input type="button" value="Edit Selected" id="submitMassEdit" /></td>
-    <td rowspan="1" colspan="10" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
+    <td rowspan="1" colspan="1" class="align-center alt"><input type="button" value="Edit Selected" id="submitMassEdit" /></td>
+    <td rowspan="1" colspan="10" class="align-right alt"><input type="button" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>

@@ -77,7 +77,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents"):
+                                    #for $cur_provider in ("nzbs_org", "nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -191,6 +191,33 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix">
                                 <span class="component-title">TvTorrents Hash:</span>
                                 <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
+                            </label>
+                        </div>
+</div>
+
+<div class="providerDiv" id="btnDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN User ID:</span>
+                                <input class="component-desc" type="text" name="btn_user_id" value="$sickbeard.BTN_USER_ID" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN Auth Token:</span>
+                                <input class="component-desc" type="text" name="btn_auth_token" value="$sickbeard.BTN_AUTH_TOKEN" size="32" />
+                            </label>
+                        </div>
+						<div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN Passkey:</span>
+                                <input class="component-desc" type="text" name="btn_passkey" value="$sickbeard.BTN_PASSKEY" size="32" />
+                            </label>
+                        </div>
+						<div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN Authkey:</span>
+                                <input class="component-desc" type="text" name="btn_authkey" value="$sickbeard.BTN_AUTHKEY" size="32" />
                             </label>
                         </div>
 </div>
