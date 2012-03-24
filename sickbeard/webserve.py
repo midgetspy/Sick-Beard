@@ -1553,26 +1553,35 @@ class NewHomeAddShows:
                 lang = "en"
 
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
+        nameUTF8 = name.encode('utf-8')
 
-        params = {'seriesname': name.encode('utf-8'),
+        # Use each word in the show's name as a possible search term
+        keywords = nameUTF8.split(' ')
+
+        # Insert the whole show's name as the first search term so best results are first
+        # ex: keywords = ['Some Show Name', 'Some', 'Show', 'Name']
+        keywords.insert(0, nameUTF8)
+
+        # Query the TVDB for each search term and build the list of results
+        results = []
+        for searchTerm in keywords:
+            params = {'seriesname': searchTerm,
                   'language': lang}
 
-        finalURL = baseURL + urllib.urlencode(params)
+            finalURL = baseURL + urllib.urlencode(params)
 
-        urlData = helpers.getURL(finalURL)
+            urlData = helpers.getURL(finalURL)
 
-        try:
-            seriesXML = etree.ElementTree(etree.XML(urlData))
-        except Exception, e:
-            logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+urlData, logger.ERROR)
-            return ''
+            try:
+                seriesXML = etree.ElementTree(etree.XML(urlData))
+            except Exception, e:
+                logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+urlData, logger.ERROR)
+                return ''
 
-        series = seriesXML.getiterator('Series')
+            series = seriesXML.getiterator('Series')
 
-        results = []
-
-        for curSeries in series:
-            results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
+            for curSeries in series:
+                results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
 
         lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
 
