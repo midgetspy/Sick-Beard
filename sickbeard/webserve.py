@@ -69,6 +69,14 @@ class PageTemplate (Template):
         self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
+        if "X-Forwarded-Host" in cherrypy.request.headers:
+            self.sbHost = cherrypy.request.headers['X-Forwarded-Host']
+        if "X-Forwarded-Port" in cherrypy.request.headers:
+            self.sbHttpPort = cherrypy.request.headers['X-Forwarded-Port']
+            self.sbHttpsPort = self.sbHttpPort
+        if "X-Forwarded-Proto" in cherrypy.request.headers:
+            self.sbHttpsEnabled = True if cherrypy.request.headers['X-Forwarded-Proto'] == 'https' else False
+
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
             logPageTitle += ' ('+str(len(classes.ErrorViewer.errors))+')'
