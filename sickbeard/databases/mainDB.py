@@ -430,6 +430,7 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
             download_results = self.connection.select("SELECT resource FROM history WHERE provider = -1 AND showid = ? AND season = ? AND episode = ? AND date > ?",
                                                     [cur_result["showid"], cur_result["season"], cur_result["episode"], cur_result["date"]])
             if not download_results:
+                logger.log(u"Found a snatch in the history for "+cur_result["resource"]+" but couldn't find the associated download, skipping it", logger.DEBUG)
                 continue
 
             nzb_name = cur_result["resource"]
@@ -443,6 +444,7 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
             ep_results = self.connection.select("SELECT episode_id, status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND location != ''",
                                                 [cur_result["showid"], cur_result["season"], cur_result["episode"]])
             if not ep_results:
+                logger.log(u"The episode "+nzb_name+" was found in history but doesn't exist on disk anymore, skipping", logger.DEBUG)
                 continue
 
             # get the status/quality of the existing ep and make sure it's what we expect 

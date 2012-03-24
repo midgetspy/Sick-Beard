@@ -352,7 +352,7 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'NMJ')
         CheckSection(CFG, 'Synology')
         CheckSection(CFG, 'pyTivo')
-        CheckSection('NMA')
+        CheckSection(CFG, 'NMA')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):

@@ -247,8 +247,6 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
 
 class ConfigMigrator():
 
-    migration_names = {1: 'Custom naming'}
-
     def __init__(self, config_obj):
         """
         Initializes a config migrator that can take the config from the version indicated in the config
@@ -259,6 +257,9 @@ class ConfigMigrator():
 
         # check the version of the config
         self.config_version = check_setting_int(config_obj, 'General', 'config_version', 0)
+
+        self.migration_names = {1: 'Custom naming'}
+
 
     def migrate_config(self):
         """
