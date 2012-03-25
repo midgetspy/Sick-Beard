@@ -246,6 +246,7 @@ class PostProcessor(object):
             try:
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
+                if sickbeard.UPDATE_DIRECTORY_TIMESTAMP: helpers.touchPath(helpers.getParentDirectory(new_file_path))
             except (IOError, OSError), e:
                 self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
                 raise e
@@ -266,6 +267,7 @@ class PostProcessor(object):
             try:
                 helpers.copyFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
+                if sickbeard.UPDATE_DIRECTORY_TIMESTAMP: helpers.touchPath(helpers.getParentDirectory(new_file_path))
             except (IOError, OSError), e:
                 logger.log("Unable to copy file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
                 raise e

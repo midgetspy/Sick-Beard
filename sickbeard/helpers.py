@@ -408,6 +408,17 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
+def getParentDirectory(pathWithFileName):
+	return ek.ek(os.path.abspath, ek.ek(os.path.join, pathWithFileName, os.path.pardir))
+	
+def touchPath(path):
+	try:
+		ek.ek(os.utime, path, None)
+		logger.log(u"Touched path " + path, logger.DEBUG)
+	except (OSError), e:
+		logger.log(u"Failed touching path " + path + ": " + ex(e), logger.ERROR)
+        return False
+
 def rename_file(old_path, new_name):
 
     old_path_list = ek.ek(os.path.split, old_path)
