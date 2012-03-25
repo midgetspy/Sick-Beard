@@ -40,7 +40,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 
-from sickbeard.providers import newznab
+from sickbeard.providers import newznab, getProviderClass
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
@@ -68,6 +68,10 @@ class PageTemplate (Template):
         self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
         self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
+
+        if sickbeard.NZBS and sickbeard.NZBS_UID and sickbeard.NZBS_HASH:
+            logger.log(u"NZBs.org has been replaced, please check the config to configure the new provider!", logger.ERROR)
+            ui.notifications.error("NZBs.org Config Update", "NZBs.org has a new site. Please <a href=\""+sickbeard.WEB_ROOT+"/config/providers\">update your config</a> with the api key from <a href=\"http://beta.nzbs.org\">http://beta.nzbs.org</a> and then disable the old NZBs.org provider.")
 
         if "X-Forwarded-Host" in cherrypy.request.headers:
             self.sbHost = cherrypy.request.headers['X-Forwarded-Host']
@@ -1082,8 +1086,7 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
-                      nzbmatrix_username=None, nzbmatrix_apikey=None,
+    def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
@@ -1121,7 +1124,6 @@ class ConfigProviders:
 
             finishedNames.append(curID)
 
-
         # delete anything that is missing
         for curProvider in sickbeard.newznabProviderList:
             if curProvider.getID() not in finishedNames:
@@ -1134,10 +1136,10 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'nzbs_org':
-                sickbeard.NZBS = curEnabled
-            elif curProvider == 'nzbs_r_us':
+            if curProvider == 'nzbs_r_us':
                 sickbeard.NZBSRUS = curEnabled
+            elif curProvider == 'nzbs_org_old':
+                sickbeard.NZBS = curEnabled
             elif curProvider == 'nzbmatrix':
                 sickbeard.NZBMATRIX = curEnabled
             elif curProvider == 'newzbin':
@@ -1164,9 +1166,6 @@ class ConfigProviders:
         sickbeard.BTN_AUTH_TOKEN = btn_auth_token.strip()
         sickbeard.BTN_PASSKEY = btn_passkey.strip()
         sickbeard.BTN_AUTHKEY = btn_authkey.strip()
-
-        sickbeard.NZBS_UID = nzbs_org_uid.strip()
-        sickbeard.NZBS_HASH = nzbs_org_hash.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
