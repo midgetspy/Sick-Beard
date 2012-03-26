@@ -185,11 +185,14 @@ class GenericProvider:
         return self.cache.findNeededEpisodes()
 
     def getQuality(self, item, anime=False):
-        title = item.findtext('title').replace("/"," ")
-        """we are here in the search provider it is ok to delete the /.
-        i am doing this because some show get posted with a / in the name
-        and during qulaity check it is reduced to the base name
         """
+        Figures out the quality of the given RSS item node
+        
+        item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
+        
+        Returns a Quality value obtained from the node's data 
+        """
+        (title, url) = self._get_title_and_url(item) #@UnusedVariable
         logger.log(u"geting quality for:" + title+ " anime: "+str(anime),logger.DEBUG)
         quality = Quality.nameQuality(title, anime)
         return quality
@@ -204,10 +207,25 @@ class GenericProvider:
         return []
     
     def _get_title_and_url(self, item):
-        title = item.findtext('title')
-        url = item.findtext('link')
-        if url:
-            url = url.replace('&amp;','&')
+        """
+        Retrieves the title and URL data from the item XML node
+
+        item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
+
+        Returns: A tuple containing two strings representing title and URL respectively
+        """
+
+        """we are here in the search provider it is ok to delete the /.
+        i am doing this because some show get posted with a / in the name
+        and during qulaity check it is reduced to the base name
+        """
+        title = helpers.get_xml_text(item.getElementsByTagName('title')[0]).replace("/"," ")
+        try:
+            url = helpers.get_xml_text(item.getElementsByTagName('link')[0])
+            if url:
+                url = url.replace('&amp;','&')
+        except IndexError:
+            url = None
         
         return (title, url)
     

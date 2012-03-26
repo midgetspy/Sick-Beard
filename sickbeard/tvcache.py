@@ -30,7 +30,8 @@ from sickbeard import helpers, exceptions, show_name_helpers
 from sickbeard import name_cache
 from sickbeard.exceptions import ex
 
-import xml.etree.cElementTree as etree
+#import xml.etree.cElementTree as etree
+import xml.dom.minidom
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -112,14 +113,14 @@ class TVCache():
             raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
 
         try:
-            responseSoup = etree.ElementTree(etree.XML(data))
-            items = responseSoup.getiterator('item')
+            parsedXML = xml.dom.minidom.parseString(data)
+            items = parsedXML.getElementsByTagName('item')
         except Exception, e:
             logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
             return []
 
-        if responseSoup.getroot().tag != 'rss':
+        if parsedXML.documentElement.tagName != 'rss':
             logger.log(u"Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
             return []
 
@@ -136,8 +137,8 @@ class TVCache():
         parse a single rss feed item and add its info to the chache
         will check for needed infos
         """
-        title = item.findtext('title')
-        url = item.findtext('link')
+        title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
+        url = helpers.get_xml_text(item.getElementsByTagName('link')[0])
 
         self._checkItemAuth(title, url)
 

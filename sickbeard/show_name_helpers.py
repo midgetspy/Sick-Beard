@@ -250,6 +250,8 @@ def isGoodResult(name, show, log=True):
     for curName in set(showNames):
         if not show.is_anime:
             escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
+            if show.startyear:
+                escaped_name += "(?:\W+"+str(show.startyear)+")?"
             curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         else:
             escaped_name = re.sub('\\\\[\\s.-]', '[\W_]+', re.escape(curName))

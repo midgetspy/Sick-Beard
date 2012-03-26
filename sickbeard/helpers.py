@@ -25,6 +25,8 @@ import re, socket
 import shutil
 import locale
 
+from xml.dom.minidom import Node
+
 import sickbeard
 
 from sickbeard.exceptions import MultipleShowObjectsException, EpisodeNotFoundByAbsoluteNumerException
@@ -742,3 +744,10 @@ def create_https_certificates(ssl_cert, ssl_key):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+def get_xml_text(node):
+    text = ""
+    for child_node in node.childNodes:
+        if child_node.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
+            text += child_node.data
+    return text.strip()

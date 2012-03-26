@@ -1348,7 +1348,7 @@ class TVEpisode(object):
 
     def createMetaFiles(self, force=False):
 
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(str(self.show.tvdbid) + ": The show dir is missing, not bothering to try to create metadata")
             return
 
