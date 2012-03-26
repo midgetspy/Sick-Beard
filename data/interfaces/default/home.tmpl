@@ -90,26 +90,23 @@
     });
 
 
-    if(\$("#showListTableAnime").length > 0)
-
-        var tablesorterCookieJar = \$.cookieJar('tablesorter_showListTableAnime');
-        var sortList = tablesorterCookieJar.get('showListTableAnime');
-        if (!sortList || !sortList.length)
-            sortList = [[5,1],[1,0]];
-
+    if(\$("#showListTableAnime").length > 0){
         \$("#showListTableAnime").tablesorter({
-            sortList: sortList,
-            widgets: ['cookie','zebra'],
+            sortList: [[5,1],[1,0]],
+            textExtraction: {
+                3: function(node) { return \$(node).find("span").text().toLowerCase(); },
+                4: function(node) { return \$(node).find("span").text(); },
+                5: function(node) { return \$(node).find("img").attr("alt"); }
+            },
+            widgets: ['saveSort', 'zebra', 'stickyHeaders'],
             headers: {
-                0: { sorter: 'nextAirDate' },
+                0: { sorter: 'isoDate' },
                 1: { sorter: 'loadingNames' },
                 3: { sorter: 'quality' },
-                4: { sorter: 'eps' },
-                5: { sorter: 'active' }
+                4: { sorter: 'eps' }
             }
         });
-
-
+    };
 });
 //-->
 </script>
