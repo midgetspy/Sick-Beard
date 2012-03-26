@@ -20,9 +20,6 @@ table.tablesorter .header {
     background-position: center right;
     cursor: pointer;
     padding-right: 18px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
 }
 table.tablesorter td {
     color: #000;
