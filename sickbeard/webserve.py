@@ -71,7 +71,7 @@ class PageTemplate (Template):
 
         if sickbeard.NZBS and sickbeard.NZBS_UID and sickbeard.NZBS_HASH:
             logger.log(u"NZBs.org has been replaced, please check the config to configure the new provider!", logger.ERROR)
-            ui.notifications.error("NZBs.org Config Update", "NZBs.org has a new site. Please <a href=\""+sickbeard.WEB_ROOT+"/config/providers\">update your config</a> with the api key from <a href=\"http://beta.nzbs.org\">http://beta.nzbs.org</a> and then disable the old NZBs.org provider.")
+            ui.notifications.error("NZBs.org Config Update", "NZBs.org has a new site. Please <a href=\""+sickbeard.WEB_ROOT+"/config/providers\">update your config</a> with the api key from <a href=\"http://beta.nzbs.org/login\">http://beta.nzbs.org</a> and then disable the old NZBs.org provider.")
 
         if "X-Forwarded-Host" in cherrypy.request.headers:
             self.sbHost = cherrypy.request.headers['X-Forwarded-Host']
