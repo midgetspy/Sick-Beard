@@ -1152,10 +1152,7 @@ class CMD_SickBeard(ApiCall):
         """ display misc sickbeard related information """
         data = {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version": Api.version, "api_commands": sorted(_functionMaper.keys())}
         return _responds(RESULT_SUCCESS, data)
-# this is for the drive letter code, it only works on windows
-if os.name == 'nt':
-    from ctypes import windll
-    
+	
 class CMD_SickBeardRemoteDirs(ApiCall):
     _help = {"desc": "add a sickbeard user's parent directory",
              "optionalParameters": {"location": {"desc": "the full path to the directory you would like a directory list of."}
@@ -2409,7 +2406,7 @@ _functionMaper = {"help": CMD_Help,
                   "logs": CMD_Logs,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
-				  "sb.remotedirs": CMD_SickBeardRemoteDirs,
+                  "sb.remotedirs": CMD_SickBeardRemoteDirs,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
                   "sb.deleterootdir": CMD_SickBeardDeleteRootDir,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
