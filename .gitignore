@@ -34,3 +34,4 @@ ehthumbs.db
 Thumbs.db
 .directory
 *~
+*.pid
