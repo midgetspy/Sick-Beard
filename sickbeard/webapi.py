@@ -1154,7 +1154,7 @@ class CMD_SickBeard(ApiCall):
         return _responds(RESULT_SUCCESS, data)
 	
 class CMD_SickBeardRemoteDirs(ApiCall):
-    _help = {"desc": "add a sickbeard user's parent directory",
+    _help = {"desc": "view the sick beard servers file system",
              "optionalParameters": {"location": {"desc": "the full path to the directory you would like a directory list of."}
                                     }
              }
