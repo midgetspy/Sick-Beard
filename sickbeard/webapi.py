@@ -26,10 +26,11 @@ import datetime
 import threading
 import re
 import traceback
-
+import string
 import cherrypy
 import sickbeard
 import webserve
+from sickbeard import browser as b
 from sickbeard import db, logger, exceptions, history, ui, helpers
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
@@ -1151,6 +1152,34 @@ class CMD_SickBeard(ApiCall):
         """ display misc sickbeard related information """
         data = {"sb_version": sickbeard.version.SICKBEARD_VERSION, "api_version": Api.version, "api_commands": sorted(_functionMaper.keys())}
         return _responds(RESULT_SUCCESS, data)
+# this is for the drive letter code, it only works on windows
+if os.name == 'nt':
+    from ctypes import windll
+    
+class CMD_SickBeardRemoteDirs(ApiCall):
+    _help = {"desc": "add a sickbeard user's parent directory",
+             "optionalParameters": {"location": {"desc": "the full path to the directory you would like a directory list of."}
+                                    }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        self.location, args = self.check_params(args, kwargs, "location", "", False, "string", [])
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+		
+    def run(self):
+        """ get the parent directories defined in sickbeard's config """
+        
+        self.location = urllib.unquote_plus(self.location)
+		
+        if self.location != "":
+            if not ek.ek(os.path.isdir, self.location):
+                return _responds(RESULT_FAILURE, msg="Location is invalid")
+				
+        return _responds(RESULT_SUCCESS, b.foldersAtPath(self.location))
+		
 
 
 class CMD_SickBeardAddRootDir(ApiCall):
@@ -2380,6 +2409,7 @@ _functionMaper = {"help": CMD_Help,
                   "logs": CMD_Logs,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
+				  "sb.remotedirs": CMD_SickBeardRemoteDirs,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
                   "sb.deleterootdir": CMD_SickBeardDeleteRootDir,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
