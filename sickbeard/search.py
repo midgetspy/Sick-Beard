@@ -28,6 +28,7 @@ from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
 from sickbeard import nzbget
+from sickbeard import strm
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
@@ -108,6 +109,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = sab.sendNZB(result)
         elif sickbeard.NZB_METHOD == "nzbget":
             dlResult = nzbget.sendNZB(result)
+        elif sickbeard.NZB_METHOD == "strm":
+            dlResult = strm.saveSTRM(result)
         else:
             logger.log(u"Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
             dlResult = False

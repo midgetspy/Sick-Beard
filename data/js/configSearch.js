@@ -24,6 +24,12 @@ $(document).ready(function(){
             $('#testSABnzbd').hide();
             $('#testSABnzbd-result').hide();
             $('#nzbget_settings').show();
+        } else if (selectedProvider == "strm") {
+            $('#blackhole_settings').hide();
+            $('#sabnzbd_settings').hide();
+            $('#testSABnzbd').hide();
+            $('#testSABnzbd-result').hide();
+            $('#nzbget_settings').hide();
         } else {
             $('#blackhole_settings').hide();
             $('#sabnzbd_settings').show();

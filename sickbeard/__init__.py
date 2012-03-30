@@ -517,7 +517,7 @@ def initialize(consoleLogging=True):
         USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
-        if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
+        if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget', 'strm'):
             NZB_METHOD = 'blackhole'
 
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
@@ -827,7 +827,7 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
-            
+
             started = True
 
 def halt ():
