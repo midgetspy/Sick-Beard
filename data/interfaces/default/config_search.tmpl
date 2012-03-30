@@ -86,8 +86,8 @@
                                 <span class="component-title jumbo">NZB Method:</span>
                                 <span class="component-desc">
                                     <select name="nzb_method" id="nzb_method" class="input-medium" >
-                                    #set $nzb_method_text = {'blackhole': "Black Hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
-                                    #for $curAction in ('sabnzbd', 'blackhole', 'nzbget'):
+                                    #set $nzb_method_text = {'blackhole': "Black Hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget", 'strm': "XBMC STRM"}
+                                    #for $curAction in ('sabnzbd', 'blackhole', 'nzbget', 'strm': "XBMC STRM"):
                                       #if $sickbeard.NZB_METHOD == $curAction:
                                         #set $nzb_method = "selected=\"selected\""
                                       #else
