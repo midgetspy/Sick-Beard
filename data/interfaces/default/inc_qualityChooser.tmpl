@@ -25,11 +25,11 @@
 <div id="customQuality">
 
 <div class="component-group-desc">
-    <p>One of the <b>Inital</b> quality selections must be obtained before Sick Beard will attempt to process the <b>Archive</b> selections.</p>
+    <p>One of the <b>Initial</b> quality selections must be obtained before Sick Beard will attempt to process the <b>Archive</b> selections.</p>
 </div>
 
 <div class="float-left" style="margin-left: 50px;">
-<h3 style="text-align: center;">Inital</h3>
+<h3 style="text-align: center;">Initial</h3>
 #set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
 <select id="anyQualities" name="anyQualities" multiple="multiple" size="$len($anyQualityList)">
 #for $curQuality in sorted($anyQualityList):

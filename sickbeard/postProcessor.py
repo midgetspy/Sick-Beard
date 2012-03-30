@@ -45,6 +45,9 @@ from sickbeard.name_parser.parser import NameParser, InvalidNameException
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class PostProcessor(object):
+    """
+    A class which will process a media file according to the post processing settings in the config.
+    """
 
     EXISTS_LARGER = 1
     EXISTS_SAME = 2
@@ -52,6 +55,12 @@ class PostProcessor(object):
     DOESNT_EXIST = 4
 
     def __init__(self, file_path, nzb_name = None):
+        """
+        Creates a new post processor with the given file path and optionally an NZB name.
+        
+        file_path: The path to the file to be processed
+        nzb_name: The name of the NZB which resulted in this file being downloaded (optional)
+        """
         # absolute path to the folder that is being processed
         self.folder_path = ek.ek(os.path.dirname, ek.ek(os.path.abspath, file_path))
         
@@ -74,10 +83,28 @@ class PostProcessor(object):
         self.log = ''
     
     def _log(self, message, level=logger.MESSAGE):
+        """
+        A wrapper for the internal logger which also keeps track of messages and saves them to a string for later.
+        
+        message: The string to log (unicode)
+        level: The log level to use (optional)
+        """
         logger.log(message, level)
         self.log += message + '\n'
     
     def _checkForExistingFile(self, existing_file):
+        """
+        Checks if a file exists already and if it does whether it's bigger or smaller than
+        the file we are post processing
+        
+        existing_file: The file to compare to
+        
+        Returns:
+            DOESNT_EXIST if the file doesn't exist
+            EXISTS_LARGER if the file exists and is larger than the file we are post processing
+            EXISTS_SMALLER if the file exists and is smaller than the file we are post processing
+            EXISTS_SAME if the file exists and is the same size as the file we are post processing
+        """
     
         if not existing_file:
             self._log(u"There is no existing file so there's no worries about replacing it", logger.DEBUG)
@@ -104,6 +131,13 @@ class PostProcessor(object):
             return PostProcessor.DOESNT_EXIST
 
     def _list_associated_files(self, file_path):
+        """
+        For a given file path searches for files with the same name but different extension and returns them.
+        
+        file_path: The file to check for associated files
+        
+        Returns: A list containing all files which are associated to the given file
+        """
     
         if not file_path:
             return []
@@ -125,10 +159,17 @@ class PostProcessor(object):
         return file_path_list
 
     def _delete(self, file_path, associated_files=False):
+        """
+        Deletes the file and optionall all associated files.
+        
+        file_path: The file to delete
+        associated_files: True to delete all files which differ only by extension, False to leave them
+        """
         
         if not file_path:
             return
         
+        # figure out which files we want to delete
         if associated_files:
             file_list = self._list_associated_files(file_path)
         else:
@@ -138,6 +179,7 @@ class PostProcessor(object):
             self._log(u"There were no files associated with "+file_path+", not deleting anything", logger.DEBUG)
             return
         
+        # delete the file and any other files which we want to delete
         for cur_file in file_list:
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
@@ -145,8 +187,11 @@ class PostProcessor(object):
                 
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
-        file_path: The full path of the media file to copy
-        new_path: Destination path where we want to copy the file to 
+        Performs a generic operation (move or copy) on a file. Can rename the file as well as change its location,
+        and optionally move associated files too.
+        
+        file_path: The full path of the media file to act on
+        new_path: Destination path where we want to move/copy the file to 
         new_base_name: The base filename (no extension) to use during the copy. Use None to keep the same name.
         associated_files: Boolean, whether we should copy similarly-named files too
         action: function that takes an old path and new path and does an operation with them (move/copy)
@@ -228,6 +273,14 @@ class PostProcessor(object):
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
 
     def _find_ep_destination_folder(self, ep_obj):
+        """
+        Finds the final folder where the episode should go. If season folders are enabled
+        and an existing season folder can be found then it is used, otherwise a new one
+        is created in accordance with the config settings. If season folders aren't enabled
+        then this function should simply return the show dir.
+        
+        ep_obj: The TVEpisode object to figure out the location for 
+        """
         
         # if we're supposed to put it in a season folder then figure out what folder to use
         season_folder = ''
@@ -271,10 +324,12 @@ class PostProcessor(object):
         
         to_return = (None, None, [])
         
+        # if we don't have either of these then there's nothing to use to search the history for anyway
         if not self.nzb_name and not self.folder_name:
             self.in_history = False
             return to_return
 
+        # make a list of possible names to use in the search
         names = []
         if self.nzb_name:
             names.append(self.nzb_name)
@@ -285,6 +340,7 @@ class PostProcessor(object):
 
         myDB = db.DBConnection()
     
+        # search the database for a possible match and return immediately if we find one
         for curName in names:
             sql_results = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", curName)])
     
@@ -305,6 +361,8 @@ class PostProcessor(object):
     def _analyze_name(self, name, file=True):
         """
         Takes a name and tries to figure out a show, season, and episode from it.
+        
+        name: A string which we want to analyze to determine show info from (unicode)
         
         Returns a (tvdb_id, season, [episodes]) tuple. The first two may be None and episodes may be []
         if none were found.
@@ -486,6 +544,16 @@ class PostProcessor(object):
         return (tvdb_id, season, episodes)
     
     def _get_ep_obj(self, tvdb_id, season, episodes):
+        """
+        Retrieve the TVEpisode object requested.
+        
+        tvdb_id: The TVDBID of the show (int)
+        season: The season of the episode (int)
+        episodes: A list of episodes to find (list of ints)
+        
+        If the episode(s) can be found then a TVEpisode object with the correct related eps will
+        be instantiated and returned. If the episode can't be found then None will be returned. 
+        """
 
         show_obj = None
 
@@ -496,6 +564,7 @@ class PostProcessor(object):
         except exceptions.MultipleShowObjectsException:
             raise #TODO: later I'll just log this, for now I want to know about it ASAP
 
+        # if we can't find the show then there's nothing we can really do
         if not show_obj:
             self._log(u"This show isn't in your list, you need to add it to SB before post-processing an episode", logger.ERROR)
             raise exceptions.PostProcessingFailed()
@@ -513,6 +582,7 @@ class PostProcessor(object):
                 self._log(u"Unable to create episode: "+ex(e), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()
     
+            # associate all the episodes together under a single root episode
             if root_ep == None:
                 root_ep = curEp
                 root_ep.relatedEps = []
@@ -522,22 +592,34 @@ class PostProcessor(object):
         return root_ep
     
     def _get_quality(self, ep_obj):
+        """
+        Determines the quality of the file that is being post processed, first by checking if it is directly
+        available in the TVEpisode's status or otherwise by parsing through the data available.
+        
+        ep_obj: The TVEpisode object related to the file we are post processing
+        
+        Returns: A quality value found in common.Quality
+        """
         
         ep_quality = common.Quality.UNKNOWN
 
-        # make sure the quality is set right before we continue
+        # if there is a quality available in the status then we don't need to bother guessing from the filename
         if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
             oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
             if ep_quality != common.Quality.UNKNOWN:
                 self._log(u"The old status had a quality in it, using that: "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
                 return ep_quality
 
+        # nzb name is the most reliable if it exists, followed by folder name and lastly file name
         name_list = [self.nzb_name, self.folder_name, self.file_name]
     
         # search all possible names for our new quality, in case the file or dir doesn't have it
         for cur_name in name_list:
+            
+            # some stuff might be None at this point still
             if not cur_name:
                 continue
+
             ep_quality = common.Quality.nameQuality(cur_name)
             self._log(u"Looking up quality for name "+cur_name+u", got "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
             
@@ -556,8 +638,17 @@ class PostProcessor(object):
         return ep_quality
     
     def _run_extra_scripts(self, ep_obj):
+        """
+        Executes any extra scripts defined in the config.
+        
+        ep_obj: The object to use when calling the extra script
+        """
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
+            
+            # generate a safe command line string to execute the script and provide all the parameters
             script_cmd = shlex.split(curScriptName) + [ep_obj.location, self.file_path, str(ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate)]
+            
+            # use subprocess to run the command and capture output
             self._log(u"Executing command "+str(script_cmd))
             self._log(u"Absolute path to script: "+ek.ek(os.path.abspath, script_cmd[0]), logger.DEBUG)
             try:
@@ -568,6 +659,15 @@ class PostProcessor(object):
                 self._log(u"Unable to run extra_script: "+ex(e))
     
     def _is_priority(self, ep_obj, new_ep_quality):
+        """
+        Determines if the episode is a priority download or not (if it is expected). Episodes which are expected
+        (snatched) or larger than the existing episode are priority, others are not.
+        
+        ep_obj: The TVEpisode object in question
+        new_ep_quality: The quality of the episode that is being processed
+        
+        Returns: True if the episode is priority, False otherwise.
+        """
         
         # if SB downloaded this on purpose then this is a priority download
         if self.in_history or ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
@@ -726,5 +826,3 @@ class PostProcessor(object):
         self._run_extra_scripts(ep_obj)
 
         return True
-        
-        # e

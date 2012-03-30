@@ -92,6 +92,14 @@ def setWanted(show, season, episode):
     return returnStr
 
 def processDir (dirName, nzbName=None, recurse=False, failed=False):
+    """
+    Scans through the files in dirName and processes whatever media files it finds
+    
+    dirName: The folder name to look in
+    nzbName: The NZB name which resulted in this folder being downloaded
+    recurse: Boolean for whether we should descend into subfolders or not
+    failed: Boolean for whether or not the download failed
+    """
 
     returnStr = ''
 

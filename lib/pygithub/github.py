@@ -244,7 +244,7 @@ for __t in (t for t in globals().values() if hasattr(t, 'parses')):
 
 class BaseEndpoint(object):
 
-    BASE_URL = 'http://github.com/api/v2/xml/'
+    BASE_URL = 'https://github.com/api/v2/xml/'
 
     def __init__(self, user, token, fetcher):
         self.user = user
