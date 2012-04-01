@@ -24,16 +24,11 @@
     id: 'loadingNames',
     is: function(s) {
         return false;
-    }, 
-    format: function(s) { 
+    },
+    format: function(s) {
         if (s.indexOf('Loading...') == 0)
-            return s.replace('Loading...','!!!');
-        else if (s.indexOf('The ') == 0)
-            return s.replace('The ', '')
-        else if (s.indexOf('A ') == 0)
-            return s.replace('A ', '')
-        else
-            return s;
+            return s.replace('Loading...','000');
+        return (s || '').replace(/^(The|A)\s/i,'');
     },
     type: 'text'
 });
@@ -73,7 +68,7 @@
 
 \$(document).ready(function(){ 
 
-    \$("#showListTable").tablesorter({
+    \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: [[5,1],[1,0]],
         textExtraction: {
             3: function(node) { return \$(node).find("span").text().toLowerCase(); },
