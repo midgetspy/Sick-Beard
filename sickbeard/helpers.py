@@ -436,11 +436,15 @@ def chmodAsParent(childPath):
         return
     
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
+    childPath_mode = stat.S_IMODE(os.stat(childPath)[stat.ST_MODE])
 
     if ek.ek(os.path.isfile, childPath):
         childMode = fileBitFilter(parentMode)
     else:
         childMode = parentMode
+
+    if childPath_mode == childMode:
+        return
 
     try:
         ek.ek(os.chmod, childPath, childMode)
