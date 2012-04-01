@@ -446,6 +446,13 @@ def chmodAsParent(childPath):
     if childPath_mode == childMode:
         return
 
+    childPath_owner = os.stat(childPath).st_uid
+    user_id = os.geteuid()
+
+    if user_id !=0 and user_id != childPath_owner:
+        logger.log(u"Not running as root or owner of "+childPath+", not trying to set permissions", logger.DEBUG)
+        return
+
     try:
         ek.ek(os.chmod, childPath, childMode)
         logger.log(u"Setting permissions for %s to %o as parent directory has %o" % (childPath, childMode, parentMode), logger.DEBUG)
@@ -472,6 +479,13 @@ def fixSetGroupID(childPath):
         childGID = os.stat(childPath)[stat.ST_GID]
 
         if childGID == parentGID:
+            return
+
+        childPath_owner = os.stat(childPath).st_uid
+        user_id = os.geteuid()
+
+        if user_id !=0 and user_id != childPath_owner:
+            logger.log(u"Not running as root or owner of "+childPath+", not trying to set the set-group-ID", logger.DEBUG)
             return
 
         try:
