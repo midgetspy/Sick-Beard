@@ -17,21 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-REMOTE_DBG = True
-
-if REMOTE_DBG:
-        # Make pydev debugger works for auto reload.
-        # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
-    try:
-        import pysrc.pydevd as pydevd
-        # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
-        pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
-    except ImportError:
-        sys.stderr.write("Error: " +
-                "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
-        sys.exit(1) 
-
-
 import sys
 if sys.version_info < (2, 5):
     print "Sorry, requires Python 2.5 or higher."
