@@ -26,14 +26,14 @@ from sickbeard import common
 class XMPPNotifier:
     
     def __init__(self):
-        self.connected = False
+        #self.connected = False
         self.username = ''
         self.password = ''
         self.server = ''
         self.port = ''
         
     def _connect(self, username=None, password=None, server=None, port=None):
-        self.connected = False
+        #self.connected = False
         if not sickbeard.USE_XMPP:
             return None
         if username is None:
@@ -63,7 +63,7 @@ class XMPPNotifier:
 
         if self.cnx.auth(user, password, 'SickBeard Notifier'):
             logger.log("[XMPP] Authenticated successfully", logger.DEBUG)
-            self.connected = True
+            #self.connected = True
             self.username = username
             self.password = password
             self.server = server
@@ -99,11 +99,8 @@ class XMPPNotifier:
         elif not recipient:
             recipient = sickbeard.XMPP_RECIPIENT
 
-        if ( not self.connected or self.username != username or 
-                 self.password != password or self.server != server or
-                 self.port != port):
-            result = self._connect(username, password, server, port)
-            if result: return result
+        result = self._connect(username, password, server, port)
+        if result: return result
             
         #Send Message
         logger.log("[XMPP] Sending message '" + message + "' to recipient " + recipient, logger.DEBUG)
