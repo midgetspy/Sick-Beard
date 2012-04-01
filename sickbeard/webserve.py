@@ -1160,6 +1160,8 @@ class ConfigProviders:
                 sickbeard.THEPIRATEBAY = curEnabled                    
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
+            elif curProvider == 'dtt':
+                sickbeard.DTT = curEnabled                
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
