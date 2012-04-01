@@ -1170,7 +1170,7 @@ class ConfigProviders:
                 sickbeard.THEPIRATEBAY = curEnabled                    
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
-            elif curProvider == 'dtt':
+            elif curProvider == 'dailytvtorrents':
                 sickbeard.DTT = curEnabled                
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
