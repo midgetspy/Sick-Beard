@@ -125,12 +125,12 @@ class NZBiProvider(generic.NZBProvider):
 		showName = self.searchString
 		title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
 		try:
-			if title.count(showName) == 1:
-				titleStart = title.index(showName)
+			if title.lower().count(showName.lower()) == 1:
+				titleStart = title.lower().index(showName.lower())
 				titleEnd = title.index(" ",titleStart)
 				title = title[titleStart:titleEnd]
-			elif title.count(showName) > 1:
-				titleStart = title.rindex(showName)
+			elif title.lower().count(showName.lower()) > 1:
+				titleStart = title.lower().rindex(showName.lower())
 				titleEnd = title.index(" ",titleStart)
 				title = title[titleStart:titleEnd]
 			else:
