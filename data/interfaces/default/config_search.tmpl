@@ -318,7 +318,18 @@
                                     <span class="component-desc">Password of your Torrent Client (blank for none)</span>
                                 </label>
                             </div>
-                        	
+
+                        	<div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title" id="password_desc">Torrent Directory</span>
+                                    <input type="text" name="torrent_path" id="torrent_path" value="$sickbeard.TORRENT_PATH" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Where should it save the downloaded files?(blank for default)</span>
+                                </label>
+                            </div>
+
                         	<div class="testNotification" id="testTorrent-result">Click below to test.</div>
                         	<input type="button" value="Test Connection" id="testTorrent" class="test-button"/>
                         	<input type="submit" class="config_submitter" value="Save Changes" /><br/>

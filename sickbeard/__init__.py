@@ -209,6 +209,7 @@ NZBGET_HOST = None
 TORRENT_USERNAME = None
 TORRENT_PASSWORD = None
 TORRENT_HOST = ''
+TORRENT_PATH = ''
 
 USE_XBMC = False
 XBMC_NOTIFY_ONSNATCH = False
@@ -1149,6 +1150,7 @@ def save_config():
     new_config['TORRENT']['torrent_username'] = TORRENT_USERNAME
     new_config['TORRENT']['torrent_password'] = TORRENT_PASSWORD
     new_config['TORRENT']['torrent_host'] = TORRENT_HOST
+    new_config['TORRENT']['torrent_path'] = TORRENT_PATH
 
     new_config['XBMC'] = {}
     new_config['XBMC']['use_xbmc'] = int(USE_XBMC)
