@@ -16,123 +16,67 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib, urllib2
-import httplib
-import cookielib
-import re
-
-try:
-    import json
-except ImportError:
-    from lib import simplejson as json
 
 import sickbeard
 from sickbeard import logger
-from sickbeard.exceptions import ex
+from urlparse import urlparse
+import lib.transmissionrpc as transmissionrpc
 
-def sendTORRENT(result):
 
-    host = sickbeard.TORRENT_HOST+'transmission/rpc'
-    username = sickbeard.TORRENT_USERNAME
-    password = sickbeard.TORRENT_PASSWORD
+def sendTORRENT(torrent):
 
-    cj = cookielib.CookieJar()
-
-    #password manager
-    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-    passman.add_password(None, host, username, password)
-        
-    # create the AuthHandler
-    authhandler = urllib2.HTTPBasicAuthHandler(passman)
-        
-    opener = urllib2.build_opener(authhandler)
-    opener.add_handler(urllib2.HTTPCookieProcessor(cj))
-            
-    # All calls to urllib2.urlopen will now use our handler
-    urllib2.install_opener(opener)  
-
-    #Finding the Session id required for connection    
+    path = sickbeard.TORRENT_PATH
+    ratio = sickbeard.TORRENT_RATIO
+    paused = sickbeard.TORRENT_PAUSED
     try:
-        open_request = urllib2.urlopen(host)    
-    except httplib.InvalidURL, e:
-        logger.log(u"Invalid Transmission host, check your config "+ex(e), logger.ERROR)
+        host = urlparse(sickbeard.TORRENT_HOST)
+    except Exception, e:
+        logger.log(u"Host properties are not filled in correctly, port is missing.", logger.ERROR)
         return False
-    except urllib2.HTTPError, e:
-        if e.code == 401:
-            logger.log(u"Invalid Transmission Username or Password, check your config", logger.ERROR)
-            return False
-        else:
-             msg = str(e.read())
-    except urllib2.URLError, e:
-        logger.log(u"Unable to connect to Transmission "+ex(e), logger.ERROR)
-        return False
-    
-    try:
-        session_id = re.search('X-Transmission-Session-Id:\s*(\w+)', msg).group(1)
-    except:
-        logger.log(u"Unable to get Transmission Session-Id "+ex(e), logger.ERROR)
-        return False             
-        
-    post_data = { 'arguments': { 'filename': result.url,
-                                            'pause' : 0, 
-                                          }, 
-                              'method': 'torrent-add',      
-                            }
-    if not (sickbeard.TORRENT_PATH == ''):
-        post_data['arguments']['download_dir'] = sickbeard.TORRENT_PATH
 
-    post_data = json.dumps(post_data)
-        
-    request = urllib2.Request(url=host, data=post_data.encode('utf-8'))
-    request.add_header('X-Transmission-Session-Id', session_id)
+    # Set parameters for Transmission
+    params = {}
+    change_params = {}
+
+    if not (ratio == ''):
+        change_params['seedRatioLimit'] = ratio
+        change_params['seedRatioMode'] = 1
+
+    if not (paused == ''):
+        params['paused'] = paused
+
+    if not (path == ''):
+        params['download_dir'] = path
 
     try:
-        open_request = urllib2.urlopen(request)
-        response = json.loads(open_request.read())
-    except:
-        return False
-    
-    if response['result'] == 'success':
-        logger.log(u"Torrent sent to Transmission successfully", logger.DEBUG)
+        tc = transmissionrpc.Client(host.hostname, port=host.port, user=sickbeard.TORRENT_USERNAME, password=sickbeard.TORRENT_PASSWORD)
+        tr_id = tc.add_uri(torrent.url, **params)
+
+        # Change settings of added torrents
+        for item in tr_id:
+            try:
+                tc.change(item, timeout=None, **change_params)
+            except transmissionrpc.TransmissionError, e:
+                logger.log(u"Failed to change settings for transfer in transmission: " + str(e), logger.ERROR)
+
         return True
-    else:
-        logger.log("Unknown failure sending Torrent to Transmission. Return text is: " + response['result'], logger.ERROR)
+
+    except transmissionrpc.TransmissionError, e:
+        logger.log("Unknown failure sending Torrent to Transmission. Return text is: " + str(e), logger.ERROR)
         return False
-    
+
+
 def testAuthentication(host, username, password):
-        
-    host = host+'transmission/rpc'
-
-    cj = cookielib.CookieJar()
-
-    #password manager
-    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-    passman.add_password(None, host, username, password)
-        
-    # create the AuthHandler
-    authhandler = urllib2.HTTPBasicAuthHandler(passman)
-        
-    opener = urllib2.build_opener(authhandler)
-    opener.add_handler(urllib2.HTTPCookieProcessor(cj))
-            
-    # All calls to urllib2.urlopen will now use our handler
-    urllib2.install_opener(opener)  
-
-    #Finding the Session id required for connection    
-    try:
-        open_request = urllib2.urlopen(host)    
-    except httplib.InvalidURL, e:
-        return False,"Error: Invalid Transmission host"
-    except urllib2.HTTPError, e:
-        if e.code == 401:
-            return False,"Error: Invalid Transmission Username or Password"
-        else:
-            msg = str(e.read())
-    except urllib2.URLError, e:
-        return False,"Error: Invalid Transmission Username or Password"
 
     try:
-        session_id = re.search('X-Transmission-Session-Id:\s*(\w+)', msg).group(1)         
-        return True,"Success: Connected and Authenticated"
-    except:    
-        return False,"Error: Unable to get Transmission Session-Id" 
+        host = urlparse(sickbeard.TORRENT_HOST)
+    except Exception, e:
+        return False, u"Host properties are not filled in correctly, port is missing."
+
+    try:
+        tc = transmissionrpc.Client(host.hostname, port=host.port, user=username, password=password)
+        tc.list()
+        return True, u"Success: Connected and Authenticated. RPC version: " + str(tc.rpc_version)
+
+    except transmissionrpc.TransmissionError, e:
+        return False, u"Transmission return text is: " + str(e)

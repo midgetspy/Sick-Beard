@@ -55,7 +55,7 @@ $(document).ready(function(){
             $('#host_desc').html('Transmission Host');
             $('#username_desc').text('Transmission Username');
             $('#password_desc').text('Transmission Password');
-            $('#directory_desc').text('Transmission Directory')
+            $('#directory_desc').text('Transmission Directory');
         }
     }
 

@@ -330,6 +330,28 @@
                                 </label>
                             </div>
 
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title" id="torrent_ratio_desc">Torrent Ratio</span>
+                                    <input type="text" name="torrent_ratio" id="torrent_ratio" value="$sickbeard.TORRENT_RATIO" size="2" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Stop transfer when reaching ratio(blank for default)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title" id="torrent_paused_desc">Start Torrent Paused</span>
+                                    <input type="checkbox" name="torrent_paused" class="enabler" id="torrent_paused" #if $sickbeard.TORRENT_PAUSED == True then "checked=\"checked\"" else ""# />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Don't start downloading when torrent is added?</span>
+                                </label>
+                            </div>
+
                         	<div class="testNotification" id="testTorrent-result">Click below to test.</div>
                         	<input type="button" value="Test Connection" id="testTorrent" class="test-button"/>
                         	<input type="submit" class="config_submitter" value="Save Changes" /><br/>
