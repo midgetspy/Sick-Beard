@@ -73,12 +73,15 @@ def sendTORRENT(result):
         logger.log(u"Unable to get Transmission Session-Id "+ex(e), logger.ERROR)
         return False             
         
-       
-    post_data = json.dumps({ 'arguments': { 'filename': result.url,
-                                            'pause' : 0    
+    post_data = { 'arguments': { 'filename': result.url,
+                                            'pause' : 0, 
                                           }, 
                               'method': 'torrent-add',      
-                            })
+                            }
+    if not (sickbeard.TORRENT_PATH == ''):
+        post_data['arguments']['download_dir'] = sickbeard.TORRENT_PATH
+
+    post_data = json.dumps(post_data)
         
     request = urllib2.Request(url=host, data=post_data.encode('utf-8'))
     request.add_header('X-Transmission-Session-Id', session_id)
