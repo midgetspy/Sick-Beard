@@ -1,5 +1,5 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
-# URL: http://code.google.com/p/sickbeard/
+# Author: Harm van Tilborg <harm@zeroxcool.net>
+# URL: https://github.com/hvt/Sick-Beard/tree/dtt
 #
 # This file is part of Sick Beard.
 #
@@ -19,7 +19,7 @@
 import urllib
 import re
 
-import xml.etree.cElementTree as etree
+from xml.dom.minidom import parseString
 
 import sickbeard
 import generic
@@ -27,19 +27,15 @@ import generic
 from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard.helpers import sanitizeSceneName
+from sickbeard.helpers import sanitizeSceneName, get_xml_text
 from sickbeard.exceptions import ex
 
 class DTTProvider(generic.TorrentProvider):
 
     def __init__(self):
-
         generic.TorrentProvider.__init__(self, "DailyTvTorrents")
-        
         self.supportsBacklog = True
-
         self.cache = DTTCache(self)
-
         self.url = 'http://www.dailytvtorrents.org/rss/'
 
     def isEnabled(self):
@@ -49,7 +45,7 @@ class DTTProvider(generic.TorrentProvider):
         return 'dtt.gif'
       
     def getQuality(self, item):
-        url = item.find('enclosure').get('url')
+        url = item.getElementsByTagName('enclosure')[0].getAttribute('url')
         quality = Quality.nameQuality(url)
         return quality
 
@@ -74,9 +70,6 @@ class DTTProvider(generic.TorrentProvider):
         return [{}]
 
     def _doSearch(self, params, show=None):
-        if show == None:
-            raise exceptions.ShowNotFoundException("Tried to search for a show with no name")
-
         show_id = self._dtt_show_id(show.name)
 
         search_params = {"single": "yes"}
@@ -94,43 +87,46 @@ class DTTProvider(generic.TorrentProvider):
             return []
         
         try:
-            response = etree.ElementTree(etree.XML(data))
-            return response.getiterator('item')
+            parsedXML = parseString(data)
+            items = parsedXML.getElementsByTagName('item')
         except Exception, e:
             logger.log(u"Error trying to load DTT RSS feed: "+ex(e), logger.ERROR)
             logger.log(u"RSS data: "+data, logger.DEBUG)
             return []
 
+        results = []
+
+        for curItem in items:
+            (title, url) = self._get_title_and_url(curItem)
+            results.append(curItem)
+
+        return results
+
     def _get_title_and_url(self, item):
-        title = item.findtext('description').replace("_", ".").split(" (")[0]
-        url = item.find('enclosure').get('url')
+        description_node = item.getElementsByTagName('description')[0]
+
+        title = get_xml_text(description_node).replace('_', '.').split(' (')[0]
+        url = item.getElementsByTagName('enclosure')[0].getAttribute('url')
 
         return (title, url)
 
 class DTTCache(tvcache.TVCache):
 
     def __init__(self, provider):
-
         tvcache.TVCache.__init__(self, provider)
 
         # only poll DTT every 30 minutes max
         self.minTime = 30
 
-
     def _getRSSData(self):
         url = self.provider.url + 'allshows?single=yes'
-
         logger.log(u"DTT cache update URL: "+ url, logger.DEBUG)
-
         data = self.provider.getURL(url)
-
         return data
 
     def _parseItem(self, item):
         title, url = self.provider._get_title_and_url(item)
-
         logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
-
         self._addCacheEntry(title, url)
 
 provider = DTTProvider()

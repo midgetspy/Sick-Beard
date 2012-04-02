@@ -44,16 +44,18 @@ $(document).ready(function(){
         } else if (selectedProvider == "utorrent"){
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
+            $('#torrent_directory').hide();
             $('#host_desc').text('uTorrent Host');
             $('#username_desc').text('uTorrent Username');
             $('#password_desc').text('uTorrent Password');
         } else if (selectedProvider == "transmission"){
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
+            $('#torrent_directory').show();
             $('#host_desc').html('Transmission Host');
             $('#username_desc').text('Transmission Username');
             $('#password_desc').text('Transmission Password');
-
+            $('#directory_desc').text('Transmission Directory')
         }
     }
 
