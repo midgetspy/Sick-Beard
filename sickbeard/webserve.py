@@ -2704,7 +2704,7 @@ class WebInterface:
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
                 if which == 'banner':
-                    size = 600, 112
+                    size = 606, 112
                 elif which == 'poster':
                     size = 136, 200
                 else:
