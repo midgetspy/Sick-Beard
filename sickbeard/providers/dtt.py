@@ -42,7 +42,7 @@ class DTTProvider(generic.TorrentProvider):
         return sickbeard.DTT
         
     def imageName(self):
-        return 'dailytvtorrents.png'
+        return 'dailytvtorrents.gif'
       
     def getQuality(self, item):
         url = item.getElementsByTagName('enclosure')[0].getAttribute('url')
