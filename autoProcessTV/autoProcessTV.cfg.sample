@@ -5,3 +5,10 @@ username=
 password=
 web_root=
 ssl=0
+
+[Transmission]
+host=localhost
+port=9091
+username=
+password=
+download_dir=
