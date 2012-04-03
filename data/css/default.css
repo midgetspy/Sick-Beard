@@ -234,6 +234,11 @@ background-color:#FFB0B0;
 padding:2px;
 }
 
+tr.snatched,span.snatched {
+background-color:#C2E8BC;
+padding:2px;
+}
+
 a,a.remove {
 color:#000;
 }
