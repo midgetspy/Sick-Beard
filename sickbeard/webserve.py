@@ -1105,7 +1105,7 @@ class ConfigProviders:
                       tvtorrents_digest=None, tvtorrents_hash=None, 
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
-                      newzbin_username=None, newzbin_password=None,
+                      dtt_norar = None, dtt_single = None,newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
         results = []
@@ -1196,6 +1196,20 @@ class ConfigProviders:
             sickbeard.THEPIRATEBAY_PROXY_URL = ""
             
         sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy    
+
+        if dtt_norar == "on":
+            dtt_norar = 1
+        else:
+            dtt_norar = 0
+
+        sickbeard.DTT_NORAR = dtt_norar
+            
+        if dtt_single == "on":
+            dtt_single = 1
+        else:
+            dtt_single = 0
+
+        sickbeard.DTT_SINGLE = dtt_single    
 
         sickbeard.BTN_USER_ID = btn_user_id.strip()
         sickbeard.BTN_AUTH_TOKEN = btn_auth_token.strip()

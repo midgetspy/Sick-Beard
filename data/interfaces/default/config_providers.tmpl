@@ -78,7 +78,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay", "tvtorrents", "btn", "dailytvtorrents"):
+                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay", "dailytvtorrents", "tvtorrents", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -224,6 +224,23 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix" for="thepiratebay_trusted">
                                 <span class="component-title">Trusted Download</span>
                                 <span class="component-desc">Download torrent only from trusted uploaders?</span>
+                            </label>
+                        </div>
+</div>
+
+<div class="providerDiv" id="dailytvtorrentsDiv">
+                        <div class="field-pair">
+                            <input type="checkbox" name="dtt_norar" id="dtt_norar" #if $sickbeard.DTT_NORAR then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="dtt_norar">
+                                <span class="component-title">No Rar</span>
+                                <span class="component-desc">Download only uncompressed release?</span>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="dtt_single" id="dtt_single" #if $sickbeard.DTT_SINGLE then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="dtt_single">
+                                <span class="component-title">Single File</span>
+                                <span class="component-desc">Download only single file release?</span>
                             </label>
                         </div>
 </div>
