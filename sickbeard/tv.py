@@ -913,7 +913,7 @@ class TVShow(object):
 
         epStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
-        if epStatus in (SNATCHED, SNATCHED_PROPER) and curQuality == 0;
+        if epStatus in (SNATCHED, SNATCHED_PROPER) and curQuality == 0:
             return Overview.SNATCHED_PROPER
         # if they don't want re-downloads then we call it good if they have anything
         elif maxBestQuality == None:
