@@ -27,6 +27,7 @@ import xml.etree.cElementTree as etree
 
 import sickbeard
 import generic
+import sys
 
 from sickbeard.common import *
 from sickbeard import logger
