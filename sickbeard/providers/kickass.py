@@ -125,8 +125,8 @@ class KICKASSProvider(generic.TorrentProvider):
                         if len(newItems) < 25:
                             break
                 except Exception, e:
-                    logger.log(u"Error trying to load KICKASS RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
-                    logger.log(u"RSS data: "+data, logger.DEBUG)
+                    exc_type, exc_value, exc_tb = sys.exc_info()
+                    logger.log(u"Error trying to load KICKASS RSS feed: "+str(e).decode('utf-8') + exc_tb, logger.ERROR)
            
             results = []
             for curItem in items:
