@@ -23,6 +23,7 @@ import stat
 import urllib, urllib2
 import re, socket
 import shutil
+import traceback
 
 from xml.dom.minidom import Node
 
@@ -147,6 +148,12 @@ def getURL (url, headers=[]):
             usock.close()
     except socket.timeout:
         logger.log(u"Timed out while loading URL "+url, logger.WARNING)
+        return None
+    except ValueError:
+        logger.log(u"Unknown error while loading URL "+url, logger.WARNING)
+        return None
+    except Exception:
+        logger.log(u"Unknown exception while loading URL "+url+": "+traceback.format_exc(), logger.WARNING)
         return None
 
     return result
