@@ -36,13 +36,13 @@ class DTTProvider(generic.TorrentProvider):
         generic.TorrentProvider.__init__(self, "DailyTvTorrents")
         self.supportsBacklog = True
         self.cache = DTTCache(self)
-        self.url = 'http://www.dailytvtorrents.org/rss/'
+        self.url = 'http://www.dailytvtorrents.org/'
 
     def isEnabled(self):
         return sickbeard.DTT
         
     def imageName(self):
-        return 'dtt.gif'
+        return 'dailytvtorrents.gif'
       
     def getQuality(self, item):
         url = item.getElementsByTagName('enclosure')[0].getAttribute('url')
@@ -62,22 +62,28 @@ class DTTProvider(generic.TorrentProvider):
     def _get_episode_search_strings(self, episode):
         return self._get_season_search_strings(episode.show, episode.season)
 
-    def _get_season_search_strings(self, show, season):
-        seasons = show.episodes.keys()
-        if len(seasons) and season < max(seasons):
-            return [{'items': 'all'}]
-    
-        return [{}]
+    def _get_season_search_strings(self, show=None, season=None):
+        params = {}
 
-    def _doSearch(self, params, show=None):
+        params['items'] = 'all'
+            
+        if sickbeard.DTT_NORAR:
+            params['norar'] = 'yes'
+         
+        if sickbeard.DTT_SINGLE:    
+            params['single'] = 'yes'
+    
+        return [params]
+
+    def _doSearch(self, search_params, show=None):
         show_id = self._dtt_show_id(show.name)
 
-        search_params = {"single": "yes"}
+        params = {}
 
-        if params:
-            search_params.update(params)
+        if search_params:
+            params.update(search_params)
 
-        searchURL = self.url + "show/" + show_id + "?" + urllib.urlencode(search_params)
+        searchURL = self.url + "rss/show/" + show_id + "?" + urllib.urlencode(params)
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
@@ -119,7 +125,12 @@ class DTTCache(tvcache.TVCache):
         self.minTime = 30
 
     def _getRSSData(self):
-        url = self.provider.url + 'allshows?single=yes'
+ 
+        params = {}
+        search_params = self.provider._get_season_search_strings()
+        params.update(search_params)        
+
+        url = self.provider.url + 'rss/allshows?' + urllib.urlencode(params)
         logger.log(u"DTT cache update URL: "+ url, logger.DEBUG)
         data = self.provider.getURL(url)
         return data
