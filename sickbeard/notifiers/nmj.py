@@ -31,6 +31,15 @@ except ImportError:
 
 class NMJNotifier:
     def notify_settings(self, host):
+        """
+        Retrieves the settings from a NMJ/Popcorn hour
+        
+        host: The hostname/IP of the Popcorn Hour server
+        
+        Returns: True if the settings were retrieved successfully, False otherwise
+        """
+        
+        # establish a terminal session to the PC
         terminal = False
         try:
             terminal = telnetlib.Telnet(host)
@@ -38,6 +47,7 @@ class NMJNotifier:
             logger.log(u"Warning: unable to get a telnet session to %s" % (host), logger.ERROR)
             return False
 
+        # tell the terminal to output the necessary info to the screen so we can search it later
         logger.log(u"Connected to %s via telnet" % (host), logger.DEBUG)
         terminal.read_until("sh-3.00# ")
         terminal.write("cat /tmp/source\n")
@@ -49,6 +59,7 @@ class NMJNotifier:
         device = ""
         match = re.search(r"(.+\.db)\r\n?(.+)(?=sh-3.00# cat /tmp/netshare)", tnoutput)
 
+        # if we found the database in the terminal output then save that database to the config
         if match:
             database = match.group(1)
             device = match.group(2)
@@ -57,7 +68,8 @@ class NMJNotifier:
         else:
             logger.log(u"Could not get current NMJ database on %s, NMJ is probably not running!" % (host), logger.ERROR)
             return False
-            
+        
+        # if the device is a remote host then try to parse the mounting URL and save it to the config
         if device.startswith("NETWORK_SHARE/"):
             match = re.search(".*(?=\r\n?%s)" % (re.escape(device[14:])), tnoutput)
 
@@ -82,6 +94,17 @@ class NMJNotifier:
         return self._sendNMJ(host, database, mount)
 
     def _sendNMJ(self, host, database, mount=None):
+        """
+        Sends a NMJ update command to the specified machine
+        
+        host: The hostname/IP to send the request to (no port)
+        database: The database to send the requst to
+        mount: The mount URL to use (optional)
+        
+        Returns: True if the request succeeded, False otherwise
+        """
+        
+        # if a mount URL is provided then attempt to open a handle to that URL
         if mount:
             try:
                 req = urllib2.Request(mount)
@@ -91,6 +114,7 @@ class NMJNotifier:
                 logger.log(u"Warning: Couldn't contact popcorn hour on host %s: %s" % (host, e))
                 return False
 
+        # build up the request URL and parameters
         UPDATE_URL = "http://%(host)s:8008/metadata_database?%(params)s"
         params = {
             "arg0": "scanner_start",
@@ -100,6 +124,7 @@ class NMJNotifier:
         params = urllib.urlencode(params)
         updateUrl = UPDATE_URL % {"host": host, "params": params}
 
+        # send the request to the server
         try:
             req = urllib2.Request(updateUrl)
             logger.log(u"Sending NMJ scan update command via url: %s" % (updateUrl), logger.DEBUG)
@@ -109,6 +134,7 @@ class NMJNotifier:
             logger.log(u"Warning: Couldn't contact Popcorn Hour on host %s: %s" % (host, e))
             return False
 
+        # try to parse the resulting XML
         try:
             et = etree.fromstring(response)
             result = et.findtext("returnValue")
@@ -116,6 +142,7 @@ class NMJNotifier:
             logger.log(u"Unable to parse XML returned from the Popcorn Hour: %s" % (e), logger.ERROR)
             return False
         
+        # if the result was a number then consider that an error
         if int(result) > 0:
             logger.log(u"Popcorn Hour returned an errorcode: %s" % (result))
             return False
@@ -124,10 +151,19 @@ class NMJNotifier:
             return True
 
     def _notifyNMJ(self, host=None, database=None, mount=None, force=False):
+        """
+        Sends a NMJ update command based on the SB config settings
+        
+        host: The host to send the command to (optional, defaults to the host in the config)
+        database: The database to use (optional, defaults to the database in the config)
+        mount: The mount URL (optional, defaults to the mount URL in the config)
+        force: If True then the notification will be sent even if NMJ is disabled in the config
+        """
         if not sickbeard.USE_NMJ and not force:
             logger.log("Notification for NMJ scan update not enabled, skipping this notification", logger.DEBUG)
             return False
 
+        # fill in omitted parameters
         if not host:
             host = sickbeard.NMJ_HOST
         if not database:
