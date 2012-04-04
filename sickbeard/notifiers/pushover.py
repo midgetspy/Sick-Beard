@@ -33,30 +33,31 @@ API_KEY = "OKCXmkvHN1syU2e8xvpefTnyvVWGv5"
 class PushoverNotifier:
 
     def test_notify(self, title="Test"):
-        return self._sendPushover("This is a test notification from SickBeard", title, userKey )
+        return self._sendPushover("This is a test notification from SickBeard", title )
 
-    def _sendPushover(self, msg, title, userKey ):
+    def _sendPushover(self, msg, title ):
         """
         Sends a pushover notification to the address provided
         
         msg: The message to send (unicode)
         title: The title of the message
-        email: The email address to send the message to (or to subscribe with)
-        subscribe: If true then instead of sending a message this function will send a subscription notification (optional, default is False)
+        userKey: The pushover user id to send the message to (or to subscribe with)
         
         returns: True if the message succeeded, False otherwise
         """
+
+        userKey = sickbeard.PUSHOVER_USERKEY
         
         # build up the URL and parameters
         msg = msg.strip()
         curUrl = API_URL
 
-		data = urllib.urlencode({
-			'token': API_KEY,
-			'title': title,
-			'user': userKey,
-			'message': msg.encode('utf-8'),
-			'timestamp': int(time.time())
+        data = urllib.urlencode({
+            'token': API_KEY,
+            'title': title,
+            'user': userKey,
+            'message': msg.encode('utf-8'),
+            'timestamp': int(time.time())
 			})
 
 
@@ -115,21 +116,20 @@ class PushoverNotifier:
         if sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD:
             self._notifyPushover(title, ep_name)
 
-    def _notifyPushover(self, title, message, username=None ):
+    def _notifyPushover(self, title, message, userKey=None ):
         """
         Sends a pushover notification based on the provided info or SB config
 
         title: The title of the notification to send
         message: The message string to send
-        username: The username to send the notification to (optional, defaults to the username in the config)
-        force: If True then the notification will be sent even if Pushover is disabled in the config
+        userKey: The userKey to send the notification to 
         """
 
         if not sickbeard.USE_PUSHOVER and not force:
             logger.log("Notification for Pushover not enabled, skipping this notification", logger.DEBUG)
             return False
 
-        # if no username was given then use the one from the config
+        # if no userKey was given then use the one from the config
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
 
