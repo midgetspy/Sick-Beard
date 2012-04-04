@@ -28,6 +28,7 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 import sys
+import traceback
 
 from sickbeard.common import *
 from sickbeard import logger
@@ -127,7 +128,7 @@ class KICKASSProvider(generic.TorrentProvider):
                             break
                 except Exception, e:
                     exc_type, exc_value, exc_tb = sys.exc_info()
-                    logger.log(u"Error trying to load KICKASS RSS feed: "+str(e).decode('utf-8') + exc_tb, logger.ERROR)
+                    logger.log(u"Error trying to load KICKASS RSS feed: "+str(e).decode('utf-8') + traceback.format_tb(exc_tb), logger.ERROR)
            
             results = []
             for curItem in items:
