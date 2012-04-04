@@ -32,10 +32,10 @@ API_KEY = "OKCXmkvHN1syU2e8xvpefTnyvVWGv5"
 
 class PushoverNotifier:
 
-    def test_notify(self, title="Test"):
-        return self._sendPushover("This is a test notification from SickBeard", title )
+    def test_notify(self, userKey=None):
+        return self._sendPushover("This is a test notification from SickBeard", 'Test', userKey )
 
-    def _sendPushover(self, msg, title ):
+    def _sendPushover(self, msg, title, userKey ):
         """
         Sends a pushover notification to the address provided
         
@@ -46,7 +46,8 @@ class PushoverNotifier:
         returns: True if the message succeeded, False otherwise
         """
 
-        userKey = sickbeard.PUSHOVER_USERKEY
+        if not userKey:
+            userKey = sickbeard.PUSHOVER_USERKEY
         
         # build up the URL and parameters
         msg = msg.strip()
@@ -135,7 +136,8 @@ class PushoverNotifier:
 
         logger.log("Sending notification for " + message, logger.DEBUG)
 
-        self._sendPushover(message, title, userKey)
+        # self._sendPushover(message, title, userKey)
+        self._sendPushover(message, title)
         return True
 
 notifier = PushoverNotifier

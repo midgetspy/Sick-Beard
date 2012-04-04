@@ -2066,7 +2066,7 @@ class Home:
     def testPushover(self, userKey=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        result = notifiers.pushover_notifier.test_notify(userKey)
+        result = notifiers.pushover_notifier.test_notify()
         if result:
             return "Pushover notification succeeded. Check your Pushover clients to make sure it worked"
         else:
