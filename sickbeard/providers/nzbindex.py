@@ -21,7 +21,7 @@ import time
 import urllib
 import datetime
 
-import xml.etree.cElementTree as etree
+from xml.dom.minidom import parseString     
 
 import sickbeard
 import generic
@@ -40,7 +40,8 @@ class NZBIndexProvider(generic.NZBProvider):
 
         self.cache = NZBIndexCache(self)
 
-        self.url = 'http://www.NZBIndex.nl/'
+        self.url = 'http://www.nzbindex.nl/'
+        self.searchString = ''
 
     def isEnabled(self):
         return sickbeard.NZBINDEX
@@ -66,7 +67,7 @@ class NZBIndexProvider(generic.NZBProvider):
             term = "\""+term+"\""
 
         params = {"q": term,
-                  "max": 50,
+                  "max": 25,
                   "hidespam": 1,
                   "minsize":100,
                   "nzblink":1}
@@ -84,8 +85,8 @@ class NZBIndexProvider(generic.NZBProvider):
             return []
 
         try:
-            responseSoup = etree.ElementTree(etree.XML(searchResult))
-            items = responseSoup.getiterator('item')
+            parsedXML = parseString(searchResult)
+            items = parsedXML.getElementsByTagName('item')
         except Exception, e:
             logger.log(u"Error trying to load NZBIndex RSS feed: "+ex(e), logger.ERROR)
             return []
@@ -93,14 +94,13 @@ class NZBIndexProvider(generic.NZBProvider):
         results = []
 
         for curItem in items:
-            title = curItem.findtext('title')
-            url = curItem.findtext('link')
+            (title, url) = self._get_title_and_url(curItem)
 
             if not title or not url:
                 logger.log(u"The XML returned from the NZBIndex RSS feed is incomplete, this result is unusable", logger.ERROR)
                 continue
-
-            results.append(curItem)
+            if not title == 'Not_Valid':
+                results.append(curItem)
 
         return results
 
@@ -111,16 +111,16 @@ class NZBIndexProvider(generic.NZBProvider):
 
         for curResult in self._doSearch("(PROPER,REPACK)"):
 
-            title = curResult.findtext('title')
-            url = curResult.findtext('link').replace('&amp;','&')
+            (title, url) = self._get_title_and_url(curResult)
 
-            descriptionStr = curResult.findtext('description')
-            dateStr = re.search('<b>Added:</b> (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)', descriptionStr).group(1)
+            pubDate_node = curResult.getElementsByTagName('pubDate')[0]
+            pubDate = helpers.get_xml_text(pubDate_node)
+            dateStr = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', pubDate)
             if not dateStr:
                 logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
                 continue
             else:
-                resultDate = datetime.datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S")
+                resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
 
             if date == None or resultDate > date:
                 results.append(classes.Proper(title, url, resultDate))
