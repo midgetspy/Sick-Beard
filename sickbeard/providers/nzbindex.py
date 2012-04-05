@@ -67,7 +67,7 @@ class NZBIndexProvider(generic.NZBProvider):
             term = "\""+term+"\""
 
         params = {"q": term,
-                  "max": 25,
+                  "max": 50,
                   "hidespam": 1,
                   "minsize":100,
                   "nzblink":1}
