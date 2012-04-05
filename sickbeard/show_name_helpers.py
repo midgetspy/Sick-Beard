@@ -57,16 +57,17 @@ def filterBadReleases(name, show):
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
 
+    #if language not english, search for mandatory, else add german to ignore list
     if show.lang != "en":
         mandatory = [(langCodes[show.lang])]
         if langCodes[show.lang] in resultFilters:
             resultFilters.remove(langCodes[show.lang])
-        logger.log(u"Language for \""+show.name+"\" is "+show.lang+" so im looking for \""+langCodes[show.lang]+"\" in release names", logger.ERROR)
+        logger.log(u"Language for \""+show.name+"\" is "+show.lang+" so im looking for \""+langCodes[show.lang]+"\" in release names", logger.DEBUG)
     elif show.lang == "en":
-        resultFilters.append("german")
-        #resultFilters.append("french")
+        if not "german" in resultFilters:
+            resultFilters.append("german")
         mandatory = []
-        logger.log(u"Language for \""+show.name+"\" is "+show.lang, logger.ERROR)
+        logger.log(u"Language for \""+show.name+"\" is "+show.lang, logger.DEBUG)
 
 
     # use the extra info and the scene group to filter against
