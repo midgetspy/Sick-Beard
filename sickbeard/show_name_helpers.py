@@ -32,9 +32,15 @@ from name_parser.parser import NameParser, InvalidNameException
 resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras"]
 
-mandatory = ["german"]
+mandatory = []
 
-def filterBadReleases(name):
+langCodes = {
+    'de': 'german',
+    'fr': 'french',
+    'es': 'spanish'
+}
+
+def filterBadReleases(name, show):
     """
     Filters out non-english and just all-around stupid releases by comparing them
     to the resultFilters contents.
@@ -50,6 +56,18 @@ def filterBadReleases(name):
     except InvalidNameException:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
+
+    if show.lang != "en":
+        mandatory = [(langCodes[show.lang])]
+        if langCodes[show.lang] in resultFilters:
+            resultFilters.remove(langCodes[show.lang])
+        logger.log(u"Language for \""+show.name+"\" is "+show.lang+" so im looking for \""+langCodes[show.lang]+"\" in release names", logger.ERROR)
+    elif show.lang == "en":
+        resultFilters.append("german")
+        #resultFilters.append("french")
+        mandatory = []
+        logger.log(u"Language for \""+show.name+"\" is "+show.lang, logger.ERROR)
+
 
     # use the extra info and the scene group to filter against
     check_string = ''
@@ -70,11 +88,12 @@ def filterBadReleases(name):
         if re.search('(^|[\W_])'+x+'($|[\W_])', check_string, re.I):
             logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
-     # if every of the mandatory words are in there, say yes
-    for x in mandatory:
-        if not re.search('(^|[\W_])'+x+'($|[\W_])', check_string, re.I):
-            logger.log(u"Mandatory string not found: "+name+" doesnt contains "+x+", ignoring it", logger.DEBUG)
-            return False
+    # if every of the mandatory words are in there, say yes
+    if mandatory:
+        for x in mandatory:
+            if not re.search('(^|[\W_])'+x+'($|[\W_])', check_string, re.I):
+                logger.log(u"Mandatory string not found: "+name+" doesnt contains "+x+", ignoring it", logger.DEBUG)
+                return False
 
     return True
 
