@@ -341,55 +341,70 @@ class TVCache():
             sqlResults = myDB.select("SELECT * FROM "+self.providerID)
         else:
             sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "|"+str(episode.episode)+"|"])
+            #print episode.show + " aaaa"
 
+        sbDB = db.DBConnection()
         # for each cache entry
         for curResult in sqlResults:
 
-            # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
-            if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult["name"]):
-                continue
+            curID = str(curResult["tvdbid"])
+            if str(curResult["tvdbid"]) != "0":
+                #logger.log(u"tvdb id: "+str(curResult["tvdbid"]), logger.ERROR)
+                #logger.log("hahaha1", logger.ERROR)
+                sqlResults2 = sbDB.select("SELECT * FROM tv_shows WHERE tvdb_id = "+ curID + "")
+                for show in sqlResults2:
+                    #logger.log(u"SHOWNAME: "+str(show["show_name"]), logger.ERROR)
+                    #logger.log(u"LANGUAGE: "+str(show["lang"]), logger.ERROR)
+                    class myShow( object ):
+                        pass
+                    setattr(myShow, "lang", show["lang"])
+                    setattr(myShow, "name", show["show_name"])
+                      				
+                    # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
+                    if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult["name"], myShow):
+                        continue
 
-            # get the show object, or if it's not one of our shows then ignore it
-            showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
-            if not showObj:
-                continue
-
-            # get season and ep data (ignoring multi-eps for now)
-            curSeason = int(curResult["season"])
-            if curSeason == -1:
-                continue
-            curEp = curResult["episodes"].split("|")[1]
-            if not curEp:
-                continue
-            curEp = int(curEp)
-            curQuality = int(curResult["quality"])
-
-            # if the show says we want that episode then add it to the list
-            if not showObj.wantEpisode(curSeason, curEp, curQuality, manualSearch):
-                logger.log(u"Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
-
-            else:
-
-                if episode:
-                    epObj = episode
-                else:
-                    epObj = showObj.getEpisode(curSeason, curEp)
-
-                # build a result object
-                title = curResult["name"]
-                url = curResult["url"]
-
-                logger.log(u"Found result " + title + " at " + url)
-
-                result = self.provider.getResult([epObj])
-                result.url = url
-                result.name = title
-                result.quality = curQuality
-
-                # add it to the list
-                if epObj not in neededEps:
-                    neededEps[epObj] = [result]
-                else:
-                    neededEps[epObj].append(result)
-
-        return neededEps
+                    # get the show object, or if it's not one of our shows then ignore it
+                    showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
+                    if not showObj:
+                        continue
+        
+                    # get season and ep data (ignoring multi-eps for now)
+                    curSeason = int(curResult["season"])
+                    if curSeason == -1:
+                        continue
+                    curEp = curResult["episodes"].split("|")[1]
+                    if not curEp:
+                        continue
+                    curEp = int(curEp)
+                    curQuality = int(curResult["quality"])
+        
+                    # if the show says we want that episode then add it to the list
+                    if not showObj.wantEpisode(curSeason, curEp, curQuality, manualSearch):
+                        logger.log(u"Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
+        
+                    else:
+        
+                        if episode:
+                            epObj = episode
+                        else:
+                            epObj = showObj.getEpisode(curSeason, curEp)
+        
+                        # build a result object
+                        title = curResult["name"]
+                        url = curResult["url"]
+        
+                        logger.log(u"Found result " + title + " at " + url)
+        
+                        result = self.provider.getResult([epObj])
+                        result.url = url
+                        result.name = title
+                        result.quality = curQuality
+        
+                        # add it to the list
+                        if epObj not in neededEps:
+                            neededEps[epObj] = [result]
+                        else:
+                            neededEps[epObj].append(result)
+        
+                return neededEps
