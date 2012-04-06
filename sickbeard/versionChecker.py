@@ -28,7 +28,7 @@ import urllib, urllib2
 import zipfile, tarfile
 
 from urllib2 import URLError
-from lib.pygithub import github
+import gh_api as github
 
 class CheckVersion():
     """
@@ -297,13 +297,13 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits.forBranch('lad1337', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits('lad1337', 'Sick-Beard', version.SICKBEARD_VERSION):
             if not self._newest_commit_hash:
-                self._newest_commit_hash = curCommit.id
+                self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
                     break
 
-            if curCommit.id == self._cur_commit_hash:
+            if curCommit['sha'] == self._cur_commit_hash:
                 break
 
             self._num_commits_behind += 1
