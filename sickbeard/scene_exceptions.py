@@ -87,6 +87,8 @@ def retrieve_exceptions(localOnly=False):
     for local_ex in local_exceptions: # anidb xml anime exceptions
         if local_ex in exception_dict:
             exception_dict[local_ex] = exception_dict[local_ex] + local_exceptions[local_ex]
+        else:
+            exception_dict[local_ex] = local_exceptions[local_ex]
 
     myDB = db.DBConnection("cache.db")
 
