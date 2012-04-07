@@ -110,7 +110,10 @@ def snatchEpisode(result, endStatus=SNATCHED):
         elif sickbeard.NZB_METHOD == "nzbget":
             dlResult = nzbget.sendNZB(result)
         elif sickbeard.NZB_METHOD == "strm":
-            dlResult = strm.saveSTRM(result)
+            dlResultSTRM = strm.saveSTRM(result)
+            dlResultNZB = _downloadResult(result)
+            if (dlResultSTRM and dlResultNZB) == True:
+                dlResult = True
         else:
             logger.log(u"Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
             dlResult = False
