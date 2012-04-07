@@ -25,7 +25,7 @@ $(document).ready(function(){
             $('#testSABnzbd-result').hide();
             $('#nzbget_settings').show();
         } else if (selectedProvider == "strm") {
-            $('#blackhole_settings').hide();
+            $('#blackhole_settings').show();
             $('#sabnzbd_settings').hide();
             $('#testSABnzbd').hide();
             $('#testSABnzbd-result').hide();
