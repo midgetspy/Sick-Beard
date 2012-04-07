@@ -17,14 +17,19 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import urllib
-
+import urllib, httplib
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard import name_cache, helpers
 from sickbeard import logger
 from sickbeard import db
 import sickbeard
 from lib import adba
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
+import urllib2
+from sickbeard.exceptions import ex
 
 excpetionCache = {}
 
@@ -73,9 +78,6 @@ def retrieve_exceptions(localOnly=False):
     scene_exceptions table in cache.db. Also clears the scene name cache.
     """
 
-    global excpetionCache
-    excpetionCache = {}
-
     # exceptions are stored on github pages
     url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
     url2 = 'http://lad1337.github.com/sb_tvdb_scene_exceptions/anime_exceptions.txt'
@@ -89,6 +91,14 @@ def retrieve_exceptions(localOnly=False):
             exception_dict[local_ex] = exception_dict[local_ex] + local_exceptions[local_ex]
         else:
             exception_dict[local_ex] = local_exceptions[local_ex]
+
+    if not localOnly:
+        xem_exceptions = _xem_excpetions_festcher(seasonOnly='all') # saesonOnly='all' means that only names that fit for all season are added and not season specific names
+        for xem_ex_id in xem_exceptions: # xem json exceptions
+            if xem_ex_id in exception_dict:
+                exception_dict[xem_ex_id] = exception_dict[xem_ex_id] + xem_exceptions[xem_ex_id]
+            else:
+                exception_dict[xem_ex_id] = xem_exceptions[xem_ex_id]
 
     myDB = db.DBConnection("cache.db")
 
@@ -109,6 +119,8 @@ def retrieve_exceptions(localOnly=False):
     # since this could invalidate the results of the cache we clear it out after updating
     if changed_exceptions:
         name_cache.clearCache()
+        global excpetionCache
+        excpetionCache = {}
 
 def _retrieve_exceptions_fetcher(url):
 
@@ -130,6 +142,47 @@ def _retrieve_exceptions_fetcher(url):
         exception_dict[tvdb_id] = alias_list
     return exception_dict
 
+def _xem_excpetions_festcher(animeOnly=False, languageOnly=None, seasonOnly=None):
+    exception_dict = {}
+    opener = urllib2.build_opener()
+
+    for show in sickbeard.showList:
+        if show.is_anime or animeOnly == False:
+            try:
+                url = "http://thexem.de/map/names?origin=tvdb&id=%s" % str(show.tvdbid)
+                f = opener.open(url)
+            except (EOFError, IOError), e:
+                logger.log(u"Unable to connect to SAB. Is thexem.de down ?" + ex(e), logger.ERROR)
+                continue
+            except httplib.InvalidURL, e:
+                logger.log(u"Invalid XEM host. Is thexem.de down ?: " + ex(e), logger.ERROR)
+                continue
+            if not f:
+                logger.log(u"Empty response from " + url + ": " + ex(e), logger.ERROR)
+                continue
+            try:
+                xemJson = json.loads(f.read())
+            except ValueError, e:
+                pass
+
+            if xemJson['result'] == 'failure':
+                continue
+            else:
+                for season, languages in xemJson['data'].items():
+                    if not (season == seasonOnly or seasonOnly == None):
+                        continue
+
+                    for language, names in languages.items():
+                        if not (language == languageOnly or languageOnly == None):
+                            continue
+
+                        if show.tvdbid in exception_dict:
+                            exception_dict[show.tvdbid] += names
+                        else:
+                            exception_dict[show.tvdbid] = names
+
+    logger.log(u"xem exception dict: " + str(exception_dict), logger.DEBUG)
+    return exception_dict
 
 def _retrieve_anidb_mainnames():
 
