@@ -24,42 +24,51 @@ import sickbeard
 
 import urllib
 
-from sickbeard import logger, helpers, ui
+from sickbeard import logger, helpers, ui, nzbSplitter
 
 from sickbeard.exceptions import ex
 
 from sickbeard import encodingKludge as ek
 
-def saveSTRM(nzb):
-
-    newResult = False
-
-    nzbProvider = nzb.provider
-
-    if sickbeard.TV_DOWNLOAD_DIR == None:
-        logger.log(u"No TV downloader directory found in configuration. Please configure it.", logger.ERROR)
-        return False
-
-    fileContents = "plugin://plugin.program.pneumatic/?mode=strm&nzb=" + urllib.quote_plus(nzb.url) + "&nzbname=" + nzb.name
-
+def _commitSTRM(strmName, strmContents):
     # get the final file path to the strm file
-    destinationPath = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, nzb.name)
+    destinationPath = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, strmName)
     helpers.makeDir(destinationPath)
-    fileName = ek.ek(os.path.join, destinationPath, nzb.name + ".strm")
+    fileName = ek.ek(os.path.join, destinationPath, strmName + ".strm")
 
     logger.log(u"Saving STRM to " + fileName)
-
-    newResult = True
 
     # save the data to disk
     try:
         fileOut = open(fileName, "w")
-        fileOut.write(fileContents)
+        fileOut.write(strmContents)
         fileOut.close()
         helpers.chmodAsParent(fileName)
+        return True
     except IOError, e:
         logger.log(u"Error trying to save STRM to TV downloader directory: "+ex(e), logger.ERROR)
-        newResult = False
+        return False
+
+def saveSTRM(nzb):
+
+    if sickbeard.TV_DOWNLOAD_DIR is None:
+        logger.log(u"No TV downloader directory found in configuration. Please configure it.", logger.ERROR)
+        return False
+
+    newResult = False
+
+    episodeList = nzbSplitter.splitResult(nzb)
+    if len(episodeList) > 0:
+        for episode in episodeList:
+            sickbeard.search._downloadResult(episode)
+            fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_local&nzb=" + urllib.quote_plus(nzb.url) + "&nzbname=" + episode.name
+            newResult = _commitSTRM(episode.name, fileContents)
+    else:
+        fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_local&nzb=" + urllib.quote_plus(nzb.url) + "&nzbname=" + nzb.name
+        sickbeard.search._downloadResult(nzb)
+        newResult = _commitSTRM(nzb.name, fileContents)
+
+    nzbProvider = nzb.provider
 
     if newResult:
         ui.notifications.message('Episode snatched','<b>%s</b> snatched from <b>%s</b>' % (nzb.name, nzbProvider.name))
