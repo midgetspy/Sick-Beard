@@ -61,10 +61,10 @@ def saveSTRM(nzb):
     if len(episodeList) > 0:
         for episode in episodeList:
             sickbeard.search._downloadResult(episode)
-            fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_local&nzb=" + urllib.quote_plus(nzb.url) + "&nzbname=" + episode.name
+            fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_file&nzb=" + sickbeard.PNEU_NZB_DIR + episode.name + ".nzb" + "&nzbname=" + episode.name
             newResult = _commitSTRM(episode.name, fileContents)
     else:
-        fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_local&nzb=" + urllib.quote_plus(nzb.url) + "&nzbname=" + nzb.name
+        fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_file&nzb=" + sickbeard.PNEU_NZB_DIR + nzb.name + ".nzb" + "&nzbname=" + nzb.name
         sickbeard.search._downloadResult(nzb)
         newResult = _commitSTRM(nzb.name, fileContents)
 

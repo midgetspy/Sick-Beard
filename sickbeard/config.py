@@ -104,6 +104,11 @@ def change_NZB_DIR(nzb_dir):
 
     return True
 
+def change_PNEU_NZB_DIR(nzb_dir):
+
+    sickbeard.PNEU_NZB_DIR = nzb_dir
+
+    return True
 
 def change_TORRENT_DIR(torrent_dir):
 

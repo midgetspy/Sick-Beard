@@ -141,6 +141,7 @@ USE_TORRENTS = None
 
 NZB_METHOD = None
 NZB_DIR = None
+PNEU_NZB_DIR = None
 USENET_RETENTION = None
 DOWNLOAD_PROPERS = None
 
@@ -379,7 +380,7 @@ def initialize(consoleLogging=True):
     with INIT_LOCK:
 
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
+                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, PNEU_NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
@@ -529,6 +530,7 @@ def initialize(consoleLogging=True):
             SEARCH_FREQUENCY = MIN_SEARCH_FREQUENCY
 
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
+        PNEU_NZB_DIR = check_setting_str(CFG, 'Blackhole', 'pneu_nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
 
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
@@ -1055,6 +1057,7 @@ def save_config():
 
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
+    new_config['Blackhole']['pneu_nzb_dir'] = PNEU_NZB_DIR
     new_config['Blackhole']['torrent_dir'] = TORRENT_DIR
 
     new_config['EZRSS'] = {}
