@@ -66,26 +66,27 @@ class PLEXNotifier(XBMCNotifier):
             logger.log(u"No host specified, no updates done", logger.DEBUG)
             return False
 
-        logger.log(u"Plex Media Server updating " + sickbeard.PLEX_SERVER_HOST, logger.DEBUG)
+        for curHost in [x.strip() for x in sickbeard.PLEX_SERVER_HOST.split(",")]:
+            logger.log(u"Plex Media Server updating " + curHost, logger.DEBUG)
 
-        url = "http://%s/library/sections" % sickbeard.PLEX_SERVER_HOST
-        try:
-            xml_sections = minidom.parse(urllib.urlopen(url))
-        except IOError, e:
-            logger.log(u"Error while trying to contact your plex server: "+ex(e), logger.ERROR)
-            return False
+            url = "http://%s/library/sections" % curHost
+            try:
+                xml_sections = minidom.parse(urllib.urlopen(url))
+            except IOError, e:
+                logger.log(u"Error while trying to contact your plex server: "+ex(e), logger.ERROR)
+                return False
 
-        sections = xml_sections.getElementsByTagName('Directory')
+            sections = xml_sections.getElementsByTagName('Directory')
 
-        for s in sections:
-            if s.getAttribute('type') == "show":
-                url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, s.getAttribute('key'))
+            for s in sections:
+                if s.getAttribute('type') == "show":
+                    url = "http://%s/library/sections/%s/refresh" % (curHost, s.getAttribute('key'))
 
-                try:
-                    urllib.urlopen(url)
-                except Exception, e:
-                    logger.log(u"Error updating library section: "+ex(e), logger.ERROR)
-                    return False
+                    try:
+                        urllib.urlopen(url)
+                    except Exception, e:
+                        logger.log(u"Error updating library section: "+ex(e), logger.ERROR)
+                        return False
 
         return True
 
