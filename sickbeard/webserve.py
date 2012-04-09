@@ -2856,6 +2856,9 @@ class WebInterface:
 
         for cur_result in sql_results:
             
+            if not sickbeard.COMING_EPS_DISPLAY_PAUSED and bool(int(cur_result["paused"])):
+                continue
+            
             cur_json_obj = {}
             
             # make a string out of the quality

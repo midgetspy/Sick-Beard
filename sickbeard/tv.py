@@ -84,7 +84,7 @@ class TVShow(object):
 
     def createCRC(self):
         
-        obj_string = ":".join([str(x) for x in [self.name, self.location, self.quality, self.paused, self.network, self.status, self.genre]])
+        obj_string = ":".join([str(x) for x in [self.name.encode(sickbeard.SYS_ENCODING), self.location.encode(sickbeard.SYS_ENCODING), self.quality, self.paused, self.network, self.status, self.genre]])
         return "%08x" % (binascii.crc32(obj_string) & 0xffffffff)
 
     def _getLocation(self):

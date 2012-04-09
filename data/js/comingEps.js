@@ -75,6 +75,7 @@ $(document).ready(function(){
             {
 				"sType": "titles",
 				"sClass": "tvShow",
+				"bUseRendered": false,
 				
 				// render the show name as a link
                 "fnRender": function ( oObj, sVal ) {

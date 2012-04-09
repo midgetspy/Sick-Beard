@@ -57,7 +57,10 @@ $(document).ready(function(){
 		},
 
         "aoColumnDefs": [
-        	{ "sClass": "center", "aTargets": [0, 2, 3, 4, 5, 6] },
+        	{
+        		"sClass": "center",
+        		"aTargets": [0, 2, 3, 4, 5, 6]
+             },
 
 			// Date
 			{
@@ -70,6 +73,7 @@ $(document).ready(function(){
             {
 				"sType": "titles",
 				"sClass": "tvShow",
+				"bUseRendered": false,
 				
 				// render the show name as a link
                 "fnRender": function ( oObj, sVal ) {
@@ -109,6 +113,7 @@ $(document).ready(function(){
             	// sort the name column with the active column
             	"aDataSort": [5, 1],
             	"sType": "alt-string",
+            	"bUseRendered": false,
             	
             	// render the Active column as an image
                 "fnRender": function ( oObj, sVal ) {
