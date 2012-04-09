@@ -11,11 +11,12 @@
     <link rel="shortcut icon" href="$sbRoot/images/favicon.ico" />
     <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/dataTables/jquery.dataTables_themeroller.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.pnotify.default.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/smooth-grinder/jquery-ui-1.8.17.custom.css" />
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/sickbeard-jquery/jquery-ui-1.8.18.custom.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/superfish.css" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/jquery.qtip2.css"/>
@@ -24,15 +25,16 @@
 <style type="text/css">
 <!--
 #contentWrapper { background: url("$sbRoot/images/bg.gif") repeat scroll 0 0 transparent; }
-
 .sf-sub-indicator { background: url("$sbRoot/images/arrows.png") no-repeat -10px -100px; }
 .sf-shadow ul { background: url("$sbRoot/images/shadow.png") no-repeat bottom right; }
 th.tablesorter-header { background-image: url("$sbRoot/images/tablesorter/bg.gif"); }
 th.tablesorter-headerSortUp { background-image: url("$sbRoot/images/tablesorter/asc.gif"); }
 th.tablesorter-headerSortDown { background-image: url("$sbRoot/images/tablesorter/desc.gif"); }
 
-.ui-autocomplete-loading { background: white url("$sbRoot/images/loading16.gif") right center no-repeat; }
 .browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat !important; }
+
+/*
+.ui-autocomplete-loading { background: white url("$sbRoot/images/loading16.gif") right center no-repeat; }
 .ui-dialog, .ui-dialog-buttonpane { background: #eceadf url("$sbRoot/css/smooth-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat !important; }
 .ui-accordion-content, .ui-tabs-panel { background: #ededed !important; background-image: none !important; }
 
@@ -57,7 +59,7 @@ th.tablesorter-headerSortDown { background-image: url("$sbRoot/images/tablesorte
 
 .ui-widget-overlay { background: #aaaaaa url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat; opacity: .35;filter:Alpha(Opacity=35); }
 .ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url("$sbRoot/css/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -khtml-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
-
+*/
 #if $sickbeard.NEWEST_VERSION_STRING:
 .ui-pnotify { top: 30px !important; }
 #end if
@@ -70,6 +72,8 @@ th.tablesorter-headerSortDown { background-image: url("$sbRoot/images/tablesorte
     <script type="text/javascript" src="$sbRoot/js/supersubs-0.2b.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookie.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.cookiejar.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/jquery.dataTables.reloadAjax.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.json-2.2.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.selectboxes.min.js"></script>
     <script type="text/javascript" src="$sbRoot/js/jquery.tablesorter-2.1.9.min.js"></script>
