@@ -12,14 +12,9 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-#set $myDB = $db.DBConnection()
-#set $today = str($datetime.date.today().toordinal())
-#set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
-#set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
-
 <script type="text/javascript" charset="utf-8">
 <!--
-
+/*
 \$.tablesorter.addParser({
     id: 'loadingNames',
     is: function(s) {
@@ -65,9 +60,12 @@
     },
     type: 'numeric'
 });
+*/
+
+var homeTable;
 
 \$(document).ready(function(){ 
-
+/*
     \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: [[5,1],[1,0]],
         textExtraction: {
@@ -83,98 +81,43 @@
             4: { sorter: 'eps' }
         }
     });
+*/
+
+    homeTable = \$("#showListTable").dataTable({
+        "bJQueryUI": true,
+        "bPaginate": false,
+        "bStateSave": true,
+        "bInfo": false,
+        "bFilter": false,
+        "bProcessing": true,
+        "sAjaxSource": "/home/json_show_list",
+        "aoColumns": [
+            { "mDataProp": "next_airdate" },
+            { "mDataProp": "name" },
+            { "mDataProp": "network" },
+            { "mDataProp": "quality_string" },
+            { "mDataProp": "percent_downloaded" },
+            { "mDataProp": "active" },
+            { "mDataProp": "status" }
+        ]
+    });
 
 });
 //-->
 </script>
 
-<table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
+<table id="showListTable" cellspacing="1" border="0" cellpadding="0">
 
   <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+  <tbody>
+  </tbody>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
       <th rowspan="1" colspan="6"></th>
     </tr>
   </tfoot>
-  <tbody>
-
-#for $curLoadingShow in $sickbeard.showQueueScheduler.action.loadingShowList:
-
-  #if $curLoadingShow.show != None and $curLoadingShow.show in $sickbeard.showList:
-    #continue
-  #end if
-
-  <tr>
-    <td align="center">(loading)</td>
-    <td>
-    #if $curLoadingShow.show == None:
-    Loading... ($curLoadingShow.show_name)
-    #else:
-    <a href="displayShow?show=$curLoadingShow.show.tvdbid">$curLoadingShow.show.name</a>
-    #end if
-    </td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-#end for
-
-#set $myShowList = $list($sickbeard.showList)
-$myShowList.sort(lambda x, y: cmp(x.name, y.name))
-#for $curShow in $myShowList:
-#set $curEp = $curShow.nextEpisode()
-
-#set $curShowDownloads = [x[1] for x in $downloadedEps if int(x[0]) == $curShow.tvdbid]
-#set $curShowAll = [x[1] for x in $allEps if int(x[0]) == $curShow.tvdbid]
-#if len($curShowAll) != 0:
-  #if len($curShowDownloads) != 0:
-    #set $dlStat = str($curShowDownloads[0])+" / "+str($curShowAll[0])
-    #set $nom = $curShowDownloads[0]
-    #set $den = $curShowAll[0]
-  #else
-    #set $dlStat = "0 / "+str($curShowAll[0])
-    #set $nom = 0
-    #set $den = $curShowAll[0]
-  #end if
-#else
-  #set $dlStat = "?"
-  #set $nom = 0
-  #set $den = 1
-#end if
-
-
-  <tr>
-    <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
-    <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-    <td>$curShow.network</td>
-#if $curShow.quality in $qualityPresets:
-    <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
-#else:
-    <td align="center"><span class="quality Custom">Custom</span></td>
-#end if
-    <td align="center"><span style="display: none;">$dlStat</span><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
-        <script type="text/javascript">
-        <!--
-            \$(function() {
-               \$("\#progressbar$curShow.tvdbid").progressbar({
-                   value: parseInt($nom) * 100 / parseInt($den)
-               });
-               \$("\#progressbar$curShow.tvdbid").append( "<div class='progressbarText'>$dlStat</div>" )
-            });
-        //-->
-        </script>
-    </td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center">$curShow.status</td>
-  </tr>
-
-
-#end for
-</tbody>
 </table>
 
-<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
+<!--<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>-->
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

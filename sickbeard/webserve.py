@@ -40,8 +40,8 @@ from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 
-from sickbeard.providers import newznab, getProviderClass
-from sickbeard.common import Quality, Overview, statusStrings
+from sickbeard.providers import newznab
+from sickbeard.common import Quality, Overview, statusStrings, qualityPresets, qualityPresetStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
 from sickbeard.webapi import Api
@@ -1953,6 +1953,57 @@ class ErrorLogs:
 
 
 class Home:
+
+    @cherrypy.expose
+    def json_show_list(self, _=None):
+        
+        result = []
+        
+        myDB = db.DBConnection()
+        today = str(datetime.date.today().toordinal())
+        downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]])+")) AND airdate <= "+today+" AND status != "+str(IGNORED)+" GROUP BY showid")
+
+        for cur_show in sickbeard.showList:
+            cur_show_json = {}
+            
+            # figure out the next airdate
+            next_eps = cur_show.nextEpisode()
+            if next_eps and next_eps[0].airdate:
+                next_airdate = str(next_eps[0].airdate)
+            else:
+                next_airdate = ""
+            
+            # make a string out of the quality
+            if cur_show.quality in qualityPresets:
+                quality_string = qualityPresetStrings[cur_show.quality]
+            else:
+                quality_string = "Custom"
+            
+            curShowDownloads = [x[1] for x in downloadedEps if int(x[0]) == cur_show.tvdbid]
+            curShowAll = [x[1] for x in allEps if int(x[0]) == cur_show.tvdbid]
+
+            num_eps = len(curShowAll)
+            num_downloaded = len(curShowDownloads)
+            if num_downloaded == 0:
+                percent_downloaded = 0
+            else:
+                percent_downloaded = float(num_downloaded) / float(num_eps)
+
+            cur_show_json['next_airdate'] = next_airdate
+            #cur_show_json['tvdb_id'] = cur_show.tvdbid
+            cur_show_json['name'] = cur_show.name
+            cur_show_json['network'] = cur_show.network
+            cur_show_json['quality_string'] = quality_string
+            cur_show_json['active'] = not cur_show.paused and cur_show.status != "Ended"
+            cur_show_json['status'] = cur_show.status
+            #cur_show_json['num_eps'] = num_eps
+            #cur_show_json['num_downloaded'] = num_downloaded
+            cur_show_json['percent_downloaded'] = percent_downloaded
+        
+            result.append(cur_show_json)
+        
+        return json.dumps({'aaData': result})
 
     @cherrypy.expose
     def is_alive(self, *args, **kwargs):
