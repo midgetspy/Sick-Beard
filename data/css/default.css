@@ -176,15 +176,30 @@ padding:5px;
 margin-right:10px;
 }
 
-.progressbarText {
-text-shadow: 0 0 0.1em #fff;
-position:absolute;
-top:0;
-width:100%;
-height:100%;
-overflow:visible;
-text-align:center;
-vertical-align: middle;
+.downloadbar {
+    border: 1px solid #777;
+    height: 15px;
+    margin: 3px 0 3px;
+    position: relative;
+    background-color: #cccccc;
+
+    .border-radius(3px);
+}
+
+.downloadbar .inner {
+	background-color: #fff;
+	height: 15px;
+}
+  
+.downloadbar .downloadbarText {
+	text-shadow: 0 0 0.1em #fff;
+	position:absolute;
+	top:0;
+	width:100%;
+	height:100%;
+	overflow:visible;
+	text-align:center;
+	vertical-align: middle;
 }
 
 tr.seasonheader {

@@ -26,6 +26,7 @@ import re
 import threading
 import datetime
 import random
+import binascii
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -1955,15 +1956,75 @@ class ErrorLogs:
 class Home:
 
     @cherrypy.expose
+    def json_show_list_crc(self):
+        
+        crc_list = []
+        
+        for cur_show in sickbeard.showList:
+            crc_list.append(cur_show.createCRC())
+        
+        crc_list += [x.createCRC() for x in sickbeard.showQueueScheduler.action.loadingShowList] #@UndefinedVariable
+
+        # get a list of episodes grouped by show so we can get stats from them
+        myDB = db.DBConnection()
+        today = str(datetime.date.today().toordinal())
+        downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
+        allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]])+")) AND airdate <= "+today+" AND status != "+str(IGNORED)+" GROUP BY showid")
+
+        crc_list += [str(x[0])+":"+str(x[1]) for x in downloadedEps + allEps]
+    
+        return json.dumps({'crc': "%08x" % (binascii.crc32(":".join(crc_list)) & 0xffffffff)})
+
+    @cherrypy.expose
     def json_show_list(self, _=None):
         
         result = []
         
         myDB = db.DBConnection()
         today = str(datetime.date.today().toordinal())
+
+        # get a list of episodes grouped by show so we can get stats from them
         downloadedEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+today+" GROUP BY showid")
         allEps = myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]])+")) AND airdate <= "+today+" AND status != "+str(IGNORED)+" GROUP BY showid")
 
+        # add any shows which are still loading
+        for cur_loading_show in sickbeard.showQueueScheduler.action.loadingShowList: #@UndefinedVariable
+
+            # if a show's in this state we don't know enough about it to do anything useful
+            if cur_loading_show.show != None and cur_loading_show.show in sickbeard.showList:
+                continue
+
+            cur_show_json = {}
+
+            # if there's no TVShow object then we don't have much info
+            if cur_loading_show.show == None:
+                show_name = "Loading... ("+cur_loading_show.show_name+")"
+                tvdb_id = 0
+                quality_string = ''
+            else:
+                show_name = cur_loading_show.show.name
+                tvdb_id = cur_loading_show.show.tvdbid
+    
+                # make a string out of the quality
+                if cur_loading_show.quality in qualityPresets:
+                    quality_string = qualityPresetStrings[cur_loading_show.quality]
+                else:
+                    quality_string = "Custom"
+    
+            # put together the json object
+            cur_show_json['next_airdate'] = '(loading)'
+            cur_show_json['tvdb_id'] = tvdb_id
+            cur_show_json['name'] = show_name
+            cur_show_json['network'] = ''
+            cur_show_json['quality_string'] = quality_string
+            cur_show_json['active'] = True
+            cur_show_json['status'] = ''
+            cur_show_json['num_eps'] = 0
+            cur_show_json['num_downloaded'] = 0
+            cur_show_json['percent_downloaded'] = 0
+        
+            result.append(cur_show_json)
+    
         for cur_show in sickbeard.showList:
             cur_show_json = {}
             
@@ -1979,31 +2040,40 @@ class Home:
                 quality_string = qualityPresetStrings[cur_show.quality]
             else:
                 quality_string = "Custom"
-            
+                
+            # get the episode counts for this show            
             curShowDownloads = [x[1] for x in downloadedEps if int(x[0]) == cur_show.tvdbid]
             curShowAll = [x[1] for x in allEps if int(x[0]) == cur_show.tvdbid]
 
-            num_eps = len(curShowAll)
-            num_downloaded = len(curShowDownloads)
+            if not curShowAll:
+                curShowAll = [0]
+            if not curShowDownloads:
+                curShowDownloads = [0]
+            
+            num_eps = curShowAll[0]
+            num_downloaded = curShowDownloads[0]
+
+            # get the percent downloaded
             if num_downloaded == 0:
                 percent_downloaded = 0
             else:
-                percent_downloaded = float(num_downloaded) / float(num_eps)
+                percent_downloaded = int(100.0 * float(num_downloaded) / float(num_eps))
 
+            # put together the json onject
             cur_show_json['next_airdate'] = next_airdate
-            #cur_show_json['tvdb_id'] = cur_show.tvdbid
+            cur_show_json['tvdb_id'] = cur_show.tvdbid
             cur_show_json['name'] = cur_show.name
             cur_show_json['network'] = cur_show.network
             cur_show_json['quality_string'] = quality_string
             cur_show_json['active'] = not cur_show.paused and cur_show.status != "Ended"
             cur_show_json['status'] = cur_show.status
-            #cur_show_json['num_eps'] = num_eps
-            #cur_show_json['num_downloaded'] = num_downloaded
+            cur_show_json['num_eps'] = num_eps
+            cur_show_json['num_downloaded'] = num_downloaded
             cur_show_json['percent_downloaded'] = percent_downloaded
         
             result.append(cur_show_json)
         
-        return json.dumps({'aaData': result})
+        return json.dumps({'shows': result})
 
     @cherrypy.expose
     def is_alive(self, *args, **kwargs):
@@ -2752,6 +2822,73 @@ class WebInterface:
         sickbeard.COMING_EPS_SORT = sort
         
         redirect("/comingEpisodes")
+
+    @cherrypy.expose
+    def json_coming_eps_list(self, _=None):
+
+        results = []
+
+        myDB = db.DBConnection()
+
+        today = datetime.date.today().toordinal()
+        next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
+        recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
+
+        done_show_list = []
+        qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
+        for cur_result in sql_results:
+            done_show_list.append(int(cur_result["showid"]))
+
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results += more_sql_results
+
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
+        sql_results += more_sql_results
+
+        sorts = {
+            'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
+            'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
+            'network': (lambda a, b: cmp(a["network"], b["network"])),
+        }
+
+        sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
+
+        for cur_result in sql_results:
+            
+            cur_json_obj = {}
+            
+            # make a string out of the quality
+            if int(cur_result["quality"]) in qualityPresets:
+                quality_string = qualityPresetStrings[(cur_result["quality"])]
+            else:
+                quality_string = "Custom"
+
+            if int(cur_result["airdate"]) < today:
+                status = "past"
+            elif int(cur_result["airdate"]) == today:
+                status = "current"
+            elif int(cur_result["airdate"]) < next_week:
+                status = "future"
+            else:
+                status = "distant"
+
+            cur_json_obj['show_name'] = cur_result["show_name"]
+            cur_json_obj['air_date'] = str(datetime.date.fromordinal(int(cur_result["airdate"])))
+            cur_json_obj['tvdb_id'] = cur_result["showid"]
+            cur_json_obj['paused'] = cur_result["paused"]
+            cur_json_obj['ep_string'] = "%2ix%02i" % (int(cur_result["season"]), int(cur_result["episode"]))
+            cur_json_obj['season'] = cur_result["season"]
+            cur_json_obj['episode'] = cur_result["episode"]
+            cur_json_obj['ep_name'] = cur_result["name"]
+            cur_json_obj['ep_description'] = cur_result["description"]
+            cur_json_obj['network'] = cur_result["network"]
+            cur_json_obj['quality_string'] = quality_string
+            cur_json_obj['status'] = status
+
+            results.append(cur_json_obj)
+
+        return json.dumps({"episodes": results})
 
     @cherrypy.expose
     def comingEpisodes(self, layout="None"):

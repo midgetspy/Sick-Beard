@@ -13,20 +13,16 @@
 #set global $topmenu="history"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.reloadAjax.js"></script>
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.sorting.js"></script>
+<script type="text/javascript" src="$sbRoot/js/home.js"></script>
+
 <script type="text/javascript">
 <!--
 \$(document).ready(function() 
 { 
-/*
-    \$("#historyTable:has(tbody tr)").tablesorter({
-        widgets: ['zebra', 'stickyHeaders', 'filter'],
-        sortList: [[0,1]],
-        textExtraction: {
-            4: function(node) { return \$(node).find("span").text().toLowerCase(); }
-        }
-    });
-*/
-    \$("#historyTable:has(tbody tr)").dataTable({
+    \$("#historyTable").dataTable({
         "bJQueryUI": true,
         "sPaginationType": "full_numbers",
         "bStateSave": true,
@@ -35,10 +31,6 @@
         ]
     });
 
-    \$('#limit').change(function(){
-        url = '$sbRoot/history/?limit='+\$(this).val()
-        window.location.href = url
-    });
 });
 //-->
 </script>

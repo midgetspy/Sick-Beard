@@ -9,6 +9,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
+
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
 
 <div class="h2footer align-right">
@@ -22,123 +23,48 @@
 
 #if $layout == 'list':
 <!-- start list view //-->
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.reloadAjax.js"></script>
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.sorting.js"></script>
+<script type="text/javascript" src="$sbRoot/js/comingEps.js"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+
 <script type="text/javascript" charset="utf-8">
 <!--
-\$.tablesorter.addParser({
-    id: 'loadingNames',
-    is: function(s) {
-        return false;
-    },
-    format: function(s) {
-        if (s.indexOf('Loading...') == 0)
-            return s.replace('Loading...','000');
-        return (s || '').replace(/^(The|A)\s/i,'');
-    },
-    type: 'text'
-});
-\$.tablesorter.addParser({
-    id: 'quality',
-    is: function(s) {
-        return false;
-    },
-    format: function(s) {
-        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4); 
-    },
-    type: 'numeric'
-});
-
-
-\$(document).ready(function(){
-
-#set $sort_codes = {'date': 0, 'show': 1, 'network': 4}
-#if $sort not in $sort_codes:
-    $sort = 'date'
+#if sickbeard.COMING_EPS_SORT == "date":
+	#set $sort_column = '0'
+#elif sickbeard.COMING_EPS_SORT == "network":
+	#set $sort_column = '4'
+#elif sickbeard.COMING_EPS_SORT == "show":
+	#set $sort_column = '1'
 #end if
-        sortList = [[$sort_codes[$sort],0]];
-
-    \$("#showListTable:has(tbody tr)").tablesorter({
-        widgets: ['stickyHeaders'],
-        sortList: sortList,
-        textExtraction: {
-            5: function(node) { return \$(node).find("span").text().toLowerCase(); }
-        },
-        headers: {
-            0: { sorter: 'isoDate' },
-            1: { sorter: 'loadingNames' },
-            2: { sorter: false },
-            3: { sorter: false },
-            4: { sorter: 'loadingNames' },
-            5: { sorter: 'quality' },
-            6: { sorter: false },
-            7: { sorter: false }
-        }
-    });
-
-    \$('#sbRoot').ajaxEpSearch();
-
-});
-//-->
+\$(document).ready(function() {
+  // Sort immediately as specified in the options
+  comingEpsTableObj.fnSort( [ [$sort_column,'asc'], [1,'asc'] ] );
+} );
+-->
 </script>
 
-    #set $show_div = "listing_default"
+#set $show_div = "listing_default"
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
 <br/>
-    <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th>Airdate</th><th>Show</th><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Search</th></tr></thead>
+    <table id="comingEpsTable" class="sbTable" cellspacing="1" border="0" cellpadding="0">
+    <thead>
+    	<tr>
+    		<th>Airdate</th>
+			<th>Show</th>
+			<th class="nowrap">Next Ep</th>
+			<th>Next Ep Name</th>
+			<th>Network</th>
+			<th>Quality</th>
+			<th>tvDB</th>
+			<th>Search</th>
+		</tr>
+	</thead>
     <tbody>
 
-    #for $cur_result in $sql_results:
-
-        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
-            #continue
-        #end if
-
-        #set $cur_ep_airdate = int($cur_result["airdate"])
-            #if $cur_ep_airdate < $today:
-                #set $show_div = "listing_overdue"
-            #elif $cur_ep_airdate >= $next_week:
-                #set $show_div = "listing_toofar"
-            #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                #if $cur_ep_airdate == $today:
-                    #set $show_div = "listing_current"
-                #else:
-                    #set $show_div = "listing_default"
-                #end if
-            #end if
-
-    <!-- start $cur_result["show_name"] //-->
-      <tr class="$show_div">
-        <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
-        <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
-            #if int($cur_result["paused"]):
-            <span class="pause">[paused]</span>
-            #end if
-        </td>
-        <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
-        <td>
-        #if $cur_result["description"] != "" and $cur_result["description"] != None:
-            <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
-        #end if
-            $cur_result["name"]
-        </td>
-        <td align="center">$cur_result["network"]</td>
-        <td align="center">
-#if int($cur_result["quality"]) in $qualityPresets:
-    <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
-#else:
-    <span class="quality Custom">Custom</span>
-#end if
-        </td>
-        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
-        <td align="center">
-        <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
-        </td>
-      </tr>
-    <!-- end $cur_result["show_name"] //-->
-    #end for
     </tbody>
     </table>
 <!-- end list view //-->

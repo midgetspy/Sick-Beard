@@ -38,6 +38,10 @@ table.dataTable tr.even td.sorting_1 { background-color: #E0D7C1; }
 table.dataTable tr.even td.sorting_2 { background-color: #E0D7C1; }
 table.dataTable tr.even td.sorting_3 { background-color: #E0D7C1; }
 
+table.dataTable th.sortedHeader {
+	background: none;
+	background-color: #57442B;
+}
 
 /*
  * Table wrapper

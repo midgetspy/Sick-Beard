@@ -23,6 +23,7 @@ import datetime
 import threading
 import re
 import glob
+import binascii
 
 import sickbeard
 
@@ -80,6 +81,11 @@ class TVShow(object):
         self.loadFromDB()
 
         self.saveToDB()
+
+    def createCRC(self):
+        
+        obj_string = ":".join([str(x) for x in [self.name, self.location, self.quality, self.paused, self.network, self.status, self.genre]])
+        return "%08x" % (binascii.crc32(obj_string) & 0xffffffff)
 
     def _getLocation(self):
         if ek.ek(os.path.isdir, self._location):

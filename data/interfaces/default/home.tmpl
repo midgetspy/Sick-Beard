@@ -12,101 +12,12 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" charset="utf-8">
-<!--
-/*
-\$.tablesorter.addParser({
-    id: 'loadingNames',
-    is: function(s) {
-        return false;
-    },
-    format: function(s) {
-        if (s.indexOf('Loading...') == 0)
-            return s.replace('Loading...','000');
-        return (s || '').replace(/^(The|A)\s/i,'');
-    },
-    type: 'text'
-});
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.reloadAjax.js"></script>
+<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.sorting.js"></script>
+<script type="text/javascript" src="$sbRoot/js/home.js"></script>
 
-\$.tablesorter.addParser({
-    id: 'quality',
-    is: function(s) {
-        return false;
-    },
-    format: function(s) { 
-        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4);
-    },
-    type: 'numeric'
-});
-
-\$.tablesorter.addParser({ 
-    id: 'eps',
-    is: function(s) {
-        return false; 
-    },
-    format: function(s) {
-        match = s.match(/^(.*)/);
-
-        if (match == null || match[1] == "?")
-            return -10;
-
-        var nums = match[1].split(" / ");
-
-        var finalNum = parseInt((nums[0]/nums[1])*1000)*100;
-        if (finalNum > 0)
-            finalNum += parseInt(nums[0]);
-
-        return finalNum
-    },
-    type: 'numeric'
-});
-*/
-
-var homeTable;
-
-\$(document).ready(function(){ 
-/*
-    \$("#showListTable:has(tbody tr)").tablesorter({
-        sortList: [[5,1],[1,0]],
-        textExtraction: {
-            3: function(node) { return \$(node).find("span").text().toLowerCase(); },
-            4: function(node) { return \$(node).find("span").text(); },
-            5: function(node) { return \$(node).find("img").attr("alt"); }
-        },
-        widgets: ['saveSort', 'zebra', 'stickyHeaders'],
-        headers: {
-            0: { sorter: 'isoDate' },
-            1: { sorter: 'loadingNames' },
-            3: { sorter: 'quality' },
-            4: { sorter: 'eps' }
-        }
-    });
-*/
-
-    homeTable = \$("#showListTable").dataTable({
-        "bJQueryUI": true,
-        "bPaginate": false,
-        "bStateSave": true,
-        "bInfo": false,
-        "bFilter": false,
-        "bProcessing": true,
-        "sAjaxSource": "/home/json_show_list",
-        "aoColumns": [
-            { "mDataProp": "next_airdate" },
-            { "mDataProp": "name" },
-            { "mDataProp": "network" },
-            { "mDataProp": "quality_string" },
-            { "mDataProp": "percent_downloaded" },
-            { "mDataProp": "active" },
-            { "mDataProp": "status" }
-        ]
-    });
-
-});
-//-->
-</script>
-
-<table id="showListTable" cellspacing="1" border="0" cellpadding="0">
+<table id="showListTable" class="sbTable" cellspacing="1" border="0" cellpadding="0">
 
   <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
   <tbody>
@@ -119,5 +30,5 @@ var homeTable;
   </tfoot>
 </table>
 
-<!--<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>-->
+<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
