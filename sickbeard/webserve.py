@@ -1581,11 +1581,12 @@ class NewHomeAddShows:
 
             try:
                 seriesXML = etree.ElementTree(etree.XML(urlData))
-            except Exception, e:
-                logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+urlData, logger.ERROR)
-                return ''
+                series = seriesXML.getiterator('Series')
 
-            series = seriesXML.getiterator('Series')
+            except Exception, e:
+                # use finalURL in log, because urlData can be too much information
+                logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+finalURL, logger.ERROR)
+                series = ''
 
             # add each result to our list
             for curSeries in series:
