@@ -1,25 +1,93 @@
-### New configuration for fedora 15+ using systemd
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides:          sickbeard
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts Sick Beard
+# Description:       starts Sick Beard
+### END INIT INFO
 
-# File need to be copied in /lib/systemd/system/sickbeard.service
+# Source function library.
+. /etc/init.d/functions
 
-# To enable sickbeard at startup : systemctl enable sickbeard.service
-# To start sickbeard : systemctl start sickbeard.service
-# To stop sickbeard : systemctl stop sickbeard.service
-# To restart sickbeard : systemctl restart sickbeard.service
+# Source SickBeard configuration
+if [ -f /etc/sysconfig/sickbeard ]; then
+        . /etc/sysconfig/sickbeard
+fi
 
-# To get the status sickbeard : systemctl status sickbeard.service
+prog=sickbeard
+lockfile=/var/lock/subsys/$prog
 
+## Edit user configuation in /etc/sysconfig/sickbeard to change
+## the defaults
+username=${SB_USER-sickbeard}
+homedir=${SB_HOME-/opt/sickbeard}
+datadir=${SB_DATA-/opt/sickbeard}
+pidfile=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
+nice=${SB_NICE-}
+##
 
-[Unit]
-Description=Sick Beard
+pidpath=`dirname ${pidfile}`
+options=" --daemon --nolaunch --pidfile=${pidfile} --datadir=${datadir}"
 
-[Service]
-ExecStart=/home/movies/sickbeard/SickBeard.py 
-Type=simple
-User=YOUR-USER  #need to be change with the user that is supposed to run Sick Beard
-Group=YOUR-GROUP #need to be change with the group that is supposed to run Sick Beard
+# create PID directory if not exist and ensure the SickBeard user can write to it
+if [ ! -d $pidpath ]; then
+        mkdir -p $pidpath
+        chown $username $pidpath
+fi
 
-[Install]
-WantedBy=multi-user.target
+if [ ! -d $datadir ]; then
+        mkdir -p $datadir
+        chown $username $datadir
+fi
 
+start() {
+        # Start daemon.
+        echo -n $"Starting $prog: "
+        daemon --user=${username} --pidfile=${pidfile} ${nice} python ${homedir}/SickBeard.py ${options}
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch $lockfile
+        return $RETVAL
+}
 
+stop() {
+        echo -n $"Shutting down $prog: "
+        killproc -p ${pidfile} python
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f $lockfile
+        return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status $prog
+        ;;
+  restart|force-reload)
+        stop
+        start
+        ;;
+  try-restart|condrestart)
+        if status $prog > /dev/null; then
+            stop
+            start
+        fi
+        ;;
+  reload)
+        exit 3
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
+        exit 2
+esac
