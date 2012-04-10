@@ -38,17 +38,17 @@ $(document).ready(function(){
 	    return ((x < y) ? 1 : ((x > y) ? -1 : 0));
 	};
 	
-	$.fn.dataTableExt.oSort['quality-asc']  = function(a,b) {
-		var x = sortize_quality(a);
-		var y = sortize_quality(b);
-        
-	    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-	};
-	$.fn.dataTableExt.oSort['quality-desc'] = function(a,b) {
+	$.fn.dataTableExt.oSort['quality-asc'] = function(a,b) {
 		var x = sortize_quality(a);
 		var y = sortize_quality(b);
         
 	    return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+	};
+	$.fn.dataTableExt.oSort['quality-desc']  = function(a,b) {
+		var x = sortize_quality(a);
+		var y = sortize_quality(b);
+        
+	    return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 	};
 	
 	$.fn.dataTableExt.oSort['alt-string-asc']  = function(a,b) {
