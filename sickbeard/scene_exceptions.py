@@ -92,13 +92,12 @@ def retrieve_exceptions(localOnly=False):
         else:
             exception_dict[local_ex] = local_exceptions[local_ex]
 
-    if not localOnly:
-        xem_exceptions = _xem_excpetions_festcher(seasonOnly='all') # saesonOnly='all' means that only names that fit for all season are added and not season specific names
-        for xem_ex_id in xem_exceptions: # xem json exceptions
-            if xem_ex_id in exception_dict:
-                exception_dict[xem_ex_id] = exception_dict[xem_ex_id] + xem_exceptions[xem_ex_id]
-            else:
-                exception_dict[xem_ex_id] = xem_exceptions[xem_ex_id]
+    xem_exceptions = _xem_excpetions_festcher(seasonOnly='all') # saesonOnly='all' means that only names that fit for all season are added and not season specific names
+    for xem_ex_id in xem_exceptions: # xem json exceptions
+        if xem_ex_id in exception_dict:
+            exception_dict[xem_ex_id] = exception_dict[xem_ex_id] + xem_exceptions[xem_ex_id]
+        else:
+            exception_dict[xem_ex_id] = xem_exceptions[xem_ex_id]
 
     myDB = db.DBConnection("cache.db")
 
