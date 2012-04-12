@@ -34,6 +34,8 @@ class KATProvider(rssbacklogtorrent.RSSBacklogProvider):
     def __init__(self):
         rssbacklogtorrent.RSSBacklogProvider.__init__(self, "KAT", "http://www.kat.ph/")
 
+        self.cache = KATRSSCache(self)
+
     def isEnabled(self):
         return sickbeard.KAT
         
@@ -43,6 +45,9 @@ class KATProvider(rssbacklogtorrent.RSSBacklogProvider):
     def _get_search_url(self, show_snippet):
         return self.url + 'search/' + urllib.quote(show_snippet.strip()) + '/?rss=1'
        
+    def _get_title_and_url(self, item):
+        return self._get_torrent_title_and_url(item)
+
     def _get_torrent_title_and_url(self, item):
         title = item.findtext('title')
         url = item.findtext('torrentLink')
@@ -50,7 +55,6 @@ class KATProvider(rssbacklogtorrent.RSSBacklogProvider):
         return (title, url)
 
     def _is_valid_item(self, item):
-        
         rawTitle = item.findtext('title')
 
         if not rawTitle:
