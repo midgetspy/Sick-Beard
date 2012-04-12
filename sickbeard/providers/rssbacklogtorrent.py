@@ -23,7 +23,7 @@ import xml.etree.cElementTree as etree
 
 import sickbeard
 import generic
-
+import sickbeard.helpers as helpers
 from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
@@ -158,13 +158,3 @@ class RSSCache(tvcache.TVCache):
 
         return data
 
-    def _parseItem(self, item):
-        (title, url) = self.provider._get_torrent_title_and_url(item)
-
-        if not title or not url:
-            logger.log(u"The XML returned from the KAT RSS feed is incomplete, this result is unusable", logger.ERROR)
-            return
-
-        logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
-
-        self._addCacheEntry(title, url)

@@ -92,4 +92,18 @@ class KATRSSCache(rssbacklogtorrent.RSSCache):
 
         self.url += 'tv/?rss=1' #TV list
 
+    def _parseItem(self, item):
+        title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
+        url = helpers.get_xml_text(item.getElementsByTagName('torrentLink')[0])
+
+        if not title or not url:
+            logger.log(u"The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
+            return
+
+        url = self._translateLinkURL(url)
+
+        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
+
+        self._addCacheEntry(title, url)
+
 provider = KATProvider()
