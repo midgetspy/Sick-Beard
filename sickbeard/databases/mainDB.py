@@ -50,7 +50,29 @@ class MainSanityCheck(db.DBSanityCheck):
         
         else:
             logger.log(u"No duplicate episode, check passed")
-        
+    
+def backupDatabase(ver):    
+    suffix = 'v'+str(ver)
+    numTries = 0
+    while not ek.ek(os.path.isfile, db.dbFilename(suffix=suffix)):
+        if not ek.ek(os.path.isfile, db.dbFilename()):
+            break
+
+        try:
+            logger.log(u"Attempting to back up your sickbeard.db file before migration...")
+            shutil.copy(db.dbFilename(), db.dbFilename(suffix=suffix))
+            logger.log(u"Done backup, proceeding with migration.")
+            break
+        except Exception, e:
+            logger.log(u"Error while trying to back up your sickbeard.db: "+ex(e))
+            numTries += 1
+            time.sleep(1)
+            logger.log(u"Trying again.")
+
+        if numTries >= 10:
+            logger.log(u"Unable to back up your sickbeard.db file, please do it manually.")
+            sys.exit(1)
+
 # ======================
 # = Main DB Migrations =
 # ======================
@@ -129,25 +151,7 @@ class NewQualitySettings (NumericProviders):
 
     def execute(self):
 
-        numTries = 0
-        while not ek.ek(os.path.isfile, db.dbFilename(suffix='v0')):
-            if not ek.ek(os.path.isfile, db.dbFilename()):
-                break
-
-            try:
-                logger.log(u"Attempting to back up your sickbeard.db file before migration...")
-                shutil.copy(db.dbFilename(), db.dbFilename(suffix='v0'))
-                logger.log(u"Done backup, proceeding with migration.")
-                break
-            except Exception, e:
-                logger.log(u"Error while trying to back up your sickbeard.db: "+ex(e))
-                numTries += 1
-                time.sleep(1)
-                logger.log(u"Trying again.")
-
-            if numTries >= 10:
-                logger.log(u"Unable to back up your sickbeard.db file, please do it manually.")
-                sys.exit(1)
+        backupDatabase(0)
 
         # old stuff that's been removed from common but we need it to upgrade
         HD = 1
@@ -431,6 +435,8 @@ class Add1080iQuality(FixAirByDateSetting):
         sickbeard.QUALITY_DEFAULT = self._update_composite_qualities(sickbeard.QUALITY_DEFAULT)
         
         sickbeard.save_config()
+        
+        backupDatabase(9)
         
         shows = self.connection.select("SELECT * FROM tv_shows")
         old_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.HDWEBDL >> 1, common.Quality.HDBLURAY >> 1, common.Quality.UNKNOWN], [])
