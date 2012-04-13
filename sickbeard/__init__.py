@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbs_org_old, kat
+from providers import ezrss, tvtorrents, btn, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbs_org_old, kat, torrentreactor
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
@@ -164,6 +164,9 @@ BTN_AUTHKEY = None
 
 KAT = False
 KAT_MINIMUM_SEEDS = 10
+
+TORRENTREACTOR = False
+TORRENTREACTOR_MINIMUM_SEEDS = 10
 
 TORRENT_DIR = None
 
@@ -398,6 +401,7 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_USER_ID, BTN_AUTH_TOKEN, BTN_PASSKEY, BTN_AUTHKEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 KAT, KAT_MINIMUM_SEEDS, \
+                TORRENTREACTOR, TORRENTREACTOR_MINIMUM_SEEDS, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -557,6 +561,9 @@ def initialize(consoleLogging=True):
 
         KAT = bool(check_setting_int(CFG, 'KAT', 'kat', 0))
         KAT_MINIMUM_SEEDS = check_setting_int(CFG, 'KAT', 'kat_minimum_seeds', 10)
+
+        TORRENTREACTOR = bool(check_setting_int(CFG, 'TORRENTREACTOR', 'torrentreactor', 0))
+        TORRENTREACTOR_MINIMUM_SEEDS = check_setting_int(CFG, 'TORRENTREACTOR_MINIMUM_SEEDS', 'torrentreactor_minimum_seeds', 10)
 
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
         BTN_USER_ID = check_setting_str(CFG, 'BTN', 'btn_user_id', '')
@@ -1085,6 +1092,10 @@ def save_config():
     new_config['KAT'] = {}
     new_config['KAT']['kat'] = int(KAT)
     new_config['KAT']['kat_minimum_seeds'] = KAT_MINIMUM_SEEDS
+
+    new_config['TORRENTREACTOR'] = {}
+    new_config['TORRENTREACTOR']['torrentreactor'] = int(TORRENTREACTOR)
+    new_config['TORRENTREACTOR']['torrentreactor_minimum_seeds'] = TORRENTREACTOR_MINIMUM_SEEDS
 
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)

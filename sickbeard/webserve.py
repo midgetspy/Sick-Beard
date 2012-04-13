@@ -1091,6 +1091,7 @@ class ConfigProviders:
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
                       kat_minimum_seeds=None,
+                      torrentreactor_minimum_seeds=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1153,6 +1154,8 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'kat':
                 sickbeard.KAT = curEnabled
+            elif curProvider == 'torrentreactor':
+                sickbeard.TORRENTREACTOR = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider == 'btn':
@@ -1162,6 +1165,7 @@ class ConfigProviders:
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
         sickbeard.KAT_MINIMUM_SEEDS = int(kat_minimum_seeds)
+        sickbeard.TORRENTREACTOR_MINIMUM_SEEDS = int(torrentreactor_minimum_seeds)
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()

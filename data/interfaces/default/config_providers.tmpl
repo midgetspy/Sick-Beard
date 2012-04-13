@@ -77,7 +77,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn", "kat"):
+                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn", "kat", "torrentreactor"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -220,6 +220,15 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <input class="component-desc" type="text" name="btn_authkey" value="$sickbeard.BTN_AUTHKEY" size="32" />
                             </label>
                         </div>
+</div>
+<div class="providerDiv" id="torrentreactorDiv">
+						<div class="field-pair">
+								<label class="clearfix">
+										<span class="component-title">TorrentReactor Minimum Seeds:</span>
+										<input class="component-desc" type="text" name="torrentreactor_minimum_seeds" value="$sickbeard.TORRENTREACTOR_MINIMUM_SEEDS" size="8"
+											onkeyup="this.value=this.value.replace(/[^\d]/g,'')" />
+								</label>
+						</div>
 </div>
 <div class="providerDiv" id="katDiv">
 						<div class="field-pair">
