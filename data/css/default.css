@@ -24,6 +24,16 @@ padding:0;
 #upgrade-notification div{background-color:#c6b695;border-bottom:1px solid #af986b;padding:7px 0;}
 #header-fix{*margin-bottom: -31px; /* IE fix */height:21px;padding:0;} 
 
+.mainheader{
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+}
+#contentWrapper{
+	position: relative;
+	top: 140px;
+}
+
 #header {
 background-color:#fff;
 padding: 5px 0;
