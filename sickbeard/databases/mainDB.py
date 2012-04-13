@@ -432,7 +432,7 @@ class Add1080iQuality(FixAirByDateSetting):
                 new_quality = self._update_quality(cur_show["quality"])    
             self.connection.action("UPDATE tv_shows SET quality = ? WHERE tvdb_id = ?", [new_quality, cur_show["tvdb_id"]])
         
-        episodes = self.connection.select("SELECT * FROM tv_episodes")
+        episodes = self.connection.select("SELECT * FROM tv_episodes WHERE status/100 >= 8")
         
         for cur_episode in episodes:
             self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [self._update_status(cur_episode["status"]), cur_episode["episode_id"]])
