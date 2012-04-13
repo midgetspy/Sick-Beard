@@ -92,7 +92,7 @@ def retrieve_exceptions(localOnly=False):
         else:
             exception_dict[local_ex] = local_exceptions[local_ex]
 
-    xem_exceptions = _xem_excpetions_festcher(seasonOnly='all') # saesonOnly='all' means that only names that fit for all season are added and not season specific names
+    xem_exceptions = _xem_excpetions_fetcher(seasonOnly='all') # saesonOnly='all' means that only names that fit for all season are added and not season specific names
     for xem_ex_id in xem_exceptions: # xem json exceptions
         if xem_ex_id in exception_dict:
             exception_dict[xem_ex_id] = exception_dict[xem_ex_id] + xem_exceptions[xem_ex_id]
@@ -141,7 +141,7 @@ def _retrieve_exceptions_fetcher(url):
         exception_dict[tvdb_id] = alias_list
     return exception_dict
 
-def _xem_excpetions_festcher(animeOnly=False, languageOnly=None, seasonOnly=None):
+def _xem_excpetions_fetcher(animeOnly=False, languageOnly=None, seasonOnly=None):
     exception_dict = {}
     opener = urllib2.build_opener()
 
@@ -151,7 +151,7 @@ def _xem_excpetions_festcher(animeOnly=False, languageOnly=None, seasonOnly=None
                 url = "http://thexem.de/map/names?origin=tvdb&id=%s" % str(show.tvdbid)
                 f = opener.open(url)
             except (EOFError, IOError), e:
-                logger.log(u"Unable to connect to SAB. Is thexem.de down ?" + ex(e), logger.ERROR)
+                logger.log(u"Unable to connect to XEM. Is thexem.de down ?" + ex(e), logger.ERROR)
                 continue
             except httplib.InvalidURL, e:
                 logger.log(u"Invalid XEM host. Is thexem.de down ?: " + ex(e), logger.ERROR)
