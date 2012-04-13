@@ -29,11 +29,14 @@ NAME=sickbeard
 # app name
 DESC=SickBeard
 
-# user
+# username to run SickBeard as
 RUN_AS=SICKBEARD_USER
 
+# homedir of the user running sickbeard (field 6 is the homedir spec)
+USER_HOME=$(grep ${RUN_AS} /etc/passwd | cut -d ":" -f6)
+
 # data directory
-DATA_DIR=~/.sickbeard
+DATA_DIR=$USER_HOME/.sickbeard
 
 # startup args
 DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
