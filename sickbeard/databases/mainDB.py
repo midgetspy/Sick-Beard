@@ -409,7 +409,18 @@ class Add1080iQuality(FixAirByDateSetting):
         unknown = old_quality & common.Quality.UNKNOWN
         known = old_quality & ~common.Quality.UNKNOWN
         return unknown + ((known & ~mask) << 1) + (known & mask)
+    
+    def _update_composite_qualities(self, status):
+        best = (status & (0xffff << 16)) >> 16
+        initial = status & (0xffff)
         
+        best = self._update_quality(best)
+        initial = self._update_quality(initial)
+        
+        result = ((best << 16) | initial)
+        
+        return result
+
     def _update_status(self, old_status):
         (status, quality) = common.Quality.splitCompositeStatus(old_status)
         if quality >= common.Quality.HDTV1080I:
@@ -417,7 +428,7 @@ class Add1080iQuality(FixAirByDateSetting):
         return common.Quality.compositeStatus(status, quality)
 
     def execute(self):
-        sickbeard.QUALITY_DEFAULT = self._update_quality(sickbeard.QUALITY_DEFAULT)
+        sickbeard.QUALITY_DEFAULT = self._update_composite_qualities(sickbeard.QUALITY_DEFAULT)
         
         sickbeard.save_config()
         
@@ -429,7 +440,7 @@ class Add1080iQuality(FixAirByDateSetting):
             if cur_show["quality"] == old_any:
                 new_quality = new_any
             else:
-                new_quality = self._update_quality(cur_show["quality"])    
+                new_quality = self._update_composite_qualities(cur_show["quality"])    
             self.connection.action("UPDATE tv_shows SET quality = ? WHERE tvdb_id = ?", [new_quality, cur_show["tvdb_id"]])
         
         episodes = self.connection.select("SELECT * FROM tv_episodes WHERE status/100 >= 8")
