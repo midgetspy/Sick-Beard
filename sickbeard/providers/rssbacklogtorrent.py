@@ -99,7 +99,7 @@ class RSSBacklogProvider(generic.TorrentProvider):
         showName = ''
         season = ''
         episode = ''
-    
+
         if 'show_name' in search_params:
             showName = search_params['show_name']
     
@@ -107,9 +107,9 @@ class RSSBacklogProvider(generic.TorrentProvider):
             season = 'S' + '%(season)02d' % search_params
             
         if 'episode' in search_params:
-            epsiode = 'E' + '%(episode)02d' % search_params
+            episode = 'E' + '%(episode)02d' % search_params
     
-        showText = showName.replace('-', ' ') + ' ' + season + ' ' + episode
+        showText = showName.replace('-', ' ') + ' ' + season + episode
         
         searchURL = self._get_search_url(showText)
 
@@ -134,7 +134,7 @@ class RSSBacklogProvider(generic.TorrentProvider):
             (title, url) = self._get_title_and_url(curItem)
             
             if not title or not url:
-                logger.log(u"The XML returned from the EZRSS RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
+                logger.log(u"The XML returned from the " + self.provider.name + "RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
                 continue
             
             if self._is_valid_item(curItem):
