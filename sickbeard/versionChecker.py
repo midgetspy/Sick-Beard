@@ -313,7 +313,7 @@ class GitUpdateManager(UpdateManager):
     def set_newest_text(self):
 
         # if we're up to date then don't set this
-        if self._num_commits_behind == 35:
+        if self._num_commits_behind == 100:
             message = "or else you're ahead of master"
 
         elif self._num_commits_behind > 0:
