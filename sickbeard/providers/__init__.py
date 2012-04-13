@@ -17,6 +17,8 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = ['ezrss',
+           'kat',
+           'torrentreactor',
            'tvtorrents',
            'nzbmatrix',
            'nzbs_org_old',
