@@ -210,6 +210,9 @@ def pickBestResult(results, quality_list=None):
                 bestResult = cur_result
             elif "internal" in bestResult.name.lower() and "internal" not in cur_result.name.lower():
                 bestResult = cur_result
+            elif "xvid" in bestResult.name.lower() and "x264" in cur_result.name.lower():
+                logger.log(u"Preferring " + cur_result.name + " (x264 over xvid)")
+                bestResult = cur_result
 
     if bestResult:
         logger.log(u"Picked "+bestResult.name+" as the best", logger.DEBUG)
