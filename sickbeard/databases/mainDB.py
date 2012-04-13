@@ -398,3 +398,43 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
                 self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
         self.incDBVersion()
+        
+class Add1080iQuality(FixAirByDateSetting):
+    
+    def test(self):
+        return self.checkDBVersion() >= 10
+        
+    def _update_quality(self, old_quality):
+        mask = (common.Quality.HDTV1080I - 1)
+        unknown = old_quality & common.Quality.UNKNOWN
+        known = old_quality & ~common.Quality.UNKNOWN
+        return unknown + ((known & ~mask) << 1) + (known & mask)
+        
+    def _update_status(self, old_status):
+        (status, quality) = common.Quality.splitCompositeStatus(old_status)
+        if quality >= common.Quality.HDTV1080I:
+            quality *= 2
+        return common.Quality.compositeStatus(status, quality)
+
+    def execute(self):
+        sickbeard.QUALITY_DEFAULT = self._update_quality(sickbeard.QUALITY_DEFAULT)
+        
+        sickbeard.save_config()
+        
+        shows = self.connection.select("SELECT * FROM tv_shows")
+        old_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.HDWEBDL >> 1, common.Quality.HDBLURAY >> 1, common.Quality.UNKNOWN], [])
+        new_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.HDTV1080I, common.Quality.HDWEBDL, common.Quality.HDBLURAY, common.Quality.UNKNOWN], [])
+        
+        for cur_show in shows:
+            if cur_show["quality"] == old_any:
+                new_quality = new_any
+            else:
+                new_quality = self._update_quality(cur_show["quality"])    
+            self.connection.action("UPDATE tv_shows SET quality = ? WHERE tvdb_id = ?", [new_quality, cur_show["tvdb_id"]])
+        
+        episodes = self.connection.select("SELECT * FROM tv_episodes")
+        
+        for cur_episode in episodes:
+            self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [self._update_status(cur_episode["status"]), cur_episode["episode_id"]])
+        
+        self.incDBVersion()
