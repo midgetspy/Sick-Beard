@@ -443,11 +443,22 @@ def chmodAsParent(childPath):
         return
     
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
+    childPath_mode = stat.S_IMODE(os.stat(childPath)[stat.ST_MODE])
 
     if ek.ek(os.path.isfile, childPath):
         childMode = fileBitFilter(parentMode)
     else:
         childMode = parentMode
+
+    if childPath_mode == childMode:
+        return
+
+    childPath_owner = os.stat(childPath).st_uid
+    user_id = os.geteuid()
+
+    if user_id !=0 and user_id != childPath_owner:
+        logger.log(u"Not running as root or owner of "+childPath+", not trying to set permissions", logger.DEBUG)
+        return
 
     try:
         ek.ek(os.chmod, childPath, childMode)
@@ -475,6 +486,13 @@ def fixSetGroupID(childPath):
         childGID = os.stat(childPath)[stat.ST_GID]
 
         if childGID == parentGID:
+            return
+
+        childPath_owner = os.stat(childPath).st_uid
+        user_id = os.geteuid()
+
+        if user_id !=0 and user_id != childPath_owner:
+            logger.log(u"Not running as root or owner of "+childPath+", not trying to set the set-group-ID", logger.DEBUG)
             return
 
         try:
