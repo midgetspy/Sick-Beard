@@ -248,6 +248,10 @@ background-color:#efefef;
 padding:10px;
 border:1px solid #DFDEDE;
 margin:10px;
+overflow: auto;
+}
+div#summary img.posterThumb {
+float: right;
 }
 div#summary tr {
 line-height: 17px;

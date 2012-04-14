@@ -2677,13 +2677,13 @@ class WebInterface:
             default_image_name = 'banner.png'
 
         default_image_path = ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', default_image_name)
-        if show == None:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
+        if show is None:
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
         else:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
+        if showObj is None:
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
         cache_obj = image_cache.ImageCache()
         
@@ -2704,7 +2704,7 @@ class WebInterface:
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
                 if which == 'banner':
-                    size = 600, 112
+                    size = 606, 112
                 elif which == 'poster':
                     size = 136, 200
                 else:
@@ -2715,7 +2715,7 @@ class WebInterface:
                 cherrypy.response.headers['Content-Type'] = 'image/jpeg'
                 return buffer.getvalue()
         else:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
     @cherrypy.expose
     def setComingEpsLayout(self, layout):
