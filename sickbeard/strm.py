@@ -73,8 +73,12 @@ def _getSeasonNZBs(name, urlData, season):
         tempFile = tempFile.replace(' ', '.')
         match = re.search(regex, tempFile, re.I)
         if not match:
-            #print curFile.get("subject"), "doesn't match", regex
-            continue
+            regex = '(' + re.escape(showName) + '\.%dx(?:[0-9]+)\.[\w\._]+\-\w+' % season + ')'
+            regex = regex.replace(' ', '.')
+            match = re.search(regex, tempFile, re.I)
+            if not match:
+                #print curFile.get("subject"), "doesn't match", regex
+                continue
         curEp = match.group(1)
         if curEp not in epFiles:
             epFiles[curEp] = [curFile]
