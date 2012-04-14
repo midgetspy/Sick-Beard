@@ -57,9 +57,6 @@ def _getSeasonNZBs(name, urlData, season):
         logger.log(u"Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
         return ({},'')
 
-    regex = '(' + re.escape(showName) + '\.S%02d(?:[E0-9]+)\.[\w\._]+\-\w+' % season + ')'
-    regex = regex.replace(' ', '.')
-
     epFiles = {}
     xmlns = None
 
@@ -69,6 +66,8 @@ def _getSeasonNZBs(name, urlData, season):
             continue
         else:
             xmlns = xmlnsMatch.group(1)
+        regex = '(' + re.escape(showName) + '\.S%02d(?:[E0-9]+)\.[\w\._]+\-\w+' % season + ')'
+        regex = regex.replace(' ', '.')
         tempFile = curFile.get("subject")
         tempFile = tempFile.replace(' ', '.')
         match = re.search(regex, tempFile, re.I)
