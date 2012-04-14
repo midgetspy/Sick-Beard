@@ -24,7 +24,7 @@ import sickbeard
 
 import urllib2
 
-import re, time
+import re
 
 import xml.etree.cElementTree as etree
 
@@ -77,8 +77,11 @@ def _getSeasonNZBs(name, urlData, season):
             regex = regex.replace(' ', '.')
             match = re.search(regex, tempFile, re.I)
             if not match:
-                #print curFile.get("subject"), "doesn't match", regex
-                continue
+                regex = '(' + re.escape(showName) + '\.%d(?:[0-9]+)' % season + ')'
+                regex = regex.replace(' ', '.')
+                if not match:
+                    #print curFile.get("subject"), "doesn't match", regex
+                    continue
         curEp = match.group(1)
         if curEp not in epFiles:
             epFiles[curEp] = [curFile]
@@ -183,7 +186,6 @@ def saveSTRM(nzb):
     newResult = False
 
     if len(nzb.episodes) > 1:
-        time.sleep(10)
         episodeList = _splitResult(nzb)
         for episode in episodeList:
             sickbeard.search._downloadResult(episode)
