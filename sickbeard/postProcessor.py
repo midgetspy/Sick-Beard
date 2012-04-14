@@ -720,6 +720,10 @@ class PostProcessor(object):
         
         # set the status of the episodes
         for curEp in [ep_obj] + ep_obj.relatedEps:
+            splitStatus =  common.Quality.splitCompositeStatus( curEp.status )
+            if splitStatus[0] == common.DOWNLOADED:
+                self._log(u"Skipped setting status to SNATCHED. Episode already DOWNLOADED", logger.DEBUG )
+                continue
             curEp.status = common.Quality.compositeStatus(common.SNATCHED, new_ep_quality)
         
         # check for an existing file
