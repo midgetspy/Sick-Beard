@@ -33,11 +33,6 @@ from sickbeard import logger
 from sickbeard import ui, search_queue
 from sickbeard.common import WANTED, statusStrings
 
-try:
-    import json
-except ImportError:
-    from lib import simplejson as json
-
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
@@ -48,15 +43,15 @@ def setWanted(show, season, episode):
     if show == None or season == None or episode == None:
         errMsg = "Programming error: invalid setWanted paramaters"
         ui.notifications.error('Error', errMsg)
-        returnStr += logHelper(json.dumps({'result': 'error'}), logger.ERROR)
+        returnStr += logHelper(u"Programming error: invalid setWanted paramaters")
+        return returnStr
 
     showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, show)
 
     if showObj == None:
-        errMsg = "Error", "Show not in show list"
+        errMsg = "Show not in show list"
         ui.notifications.error('Error', errMsg)
         returnStr += logHelper(u"Error: show not in show list", logger.ERROR)
-        returnStr += logHelper(json.dumps({'result': 'error'}), logger.ERROR)
         return returnStr
 
     returnStr += logHelper(u"Attempting to set status on episode "+str(episode)+" to "+statusStrings[WANTED], logger.DEBUG)
@@ -80,14 +75,14 @@ def setWanted(show, season, episode):
 
     msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
     msg += "<li>Season "+str(ep_segment)+"</li>"
-    logger.log(u"Sending backlog for "+showObj.name+" season "+str(ep_segment)+" because some eps were set to wanted")
+    returnStr += logHelper(u"Sending backlog for "+showObj.name+" season "+str(ep_segment)+" because some eps were set to wanted")
     cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, ep_segment)
     sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
     msg += "</ul>"
 
     ui.notifications.message("Backlog started", msg)
 
-    returnStr += logHelper(json.dumps({'result': 'success'}))
+    returnStr += logHelper(u"Successfully set to wanted", logger.DEBUG)
 
     return returnStr
 
