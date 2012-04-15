@@ -36,7 +36,7 @@ from sickbeard.exceptions import ex
 
 from sickbeard import encodingKludge as ek
 
-def _getSeasonNZBs(name, urlData, season):
+def _getSeasonNZBs(name, urlData, season, showName):
 
     try:
         showXML = etree.ElementTree(etree.XML(urlData))
@@ -48,17 +48,24 @@ def _getSeasonNZBs(name, urlData, season):
 
     nzbElement = showXML.getroot()
 
-    regex = '([\w\._\ ]+)[\. ]S%02d[\. ]([\w\._\-\ ]+)[\- ]([\w_\-\ ]+?)' % season
+    #regex = '([\w\._\ ]+)[\. ]S%02d[\. ]([\w\._\-\ ]+)[\- ]([\w_\-\ ]+?)' % season
 
-    sceneNameMatch = re.search(regex, filename, re.I)
-    if sceneNameMatch:
-        showName, qualitySection, groupName = sceneNameMatch.groups() #@UnusedVariable
-    else:
-        logger.log(u"Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
-        return ({},'')
+    #sceneNameMatch = re.search(regex, filename, re.I)
+    #if sceneNameMatch:
+    #    showName, qualitySection, groupName = sceneNameMatch.groups() #@UnusedVariable
+    #else:
+    #    logger.log(u"Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
+    #    return ({},'')
 
     epFiles = {}
     xmlns = None
+
+    regex1 = '(' + re.escape(showName) + '\.S%02d(?:[E0-9]+)\.[\w\._]+\-\w+' % season + ')'
+    regex2 = '(' + re.escape(showName) + '\.%dx(?:[0-9]+)\.[\w\._]+\-\w+' % season + ')'
+    regex3 = '(' + re.escape(showName) + '\.%d(?:[0-9]+)' % season + ')'
+    regex1 = regex1.replace(' ', '.')
+    regex2 = regex2.replace(' ', '.')
+    regex3 = regex3.replace(' ', '.')
 
     for curFile in nzbElement.getchildren():
         xmlnsMatch = re.match("\{(http:\/\/[A-Za-z0-9_\.\/]+\/nzb)\}file", curFile.tag)
@@ -66,18 +73,13 @@ def _getSeasonNZBs(name, urlData, season):
             continue
         else:
             xmlns = xmlnsMatch.group(1)
-        regex = '(' + re.escape(showName) + '\.S%02d(?:[E0-9]+)\.[\w\._]+\-\w+' % season + ')'
-        regex = regex.replace(' ', '.')
         tempFile = curFile.get("subject")
         tempFile = tempFile.replace(' ', '.')
-        match = re.search(regex, tempFile, re.I)
+        match = re.search(regex1, tempFile, re.I)
         if not match:
-            regex = '(' + re.escape(showName) + '\.%dx(?:[0-9]+)\.[\w\._]+\-\w+' % season + ')'
-            regex = regex.replace(' ', '.')
-            match = re.search(regex, tempFile, re.I)
+            match = re.search(regex2, tempFile, re.I)
             if not match:
-                regex = '(' + re.escape(showName) + '\.%d(?:[0-9]+)' % season + ')'
-                regex = regex.replace(' ', '.')
+                match = re.search(regex3, tempFile, re.I)
                 if not match:
                     #print curFile.get("subject"), "doesn't match", regex
                     continue
@@ -108,52 +110,53 @@ def _splitResult(result):
     # bust it up
     season = parse_result.season_number if parse_result.season_number != None else 1
 
-    separateNZBs, xmlns = _getSeasonNZBs(result.name, urlData, season)
+    separateNZBs, xmlns = _getSeasonNZBs(result.name, urlData, season, parse_result.series_name)
 
     resultList = []
 
-    for newNZB in separateNZBs:
+    if len(separateNZBs) > 1:
+        for newNZB in separateNZBs:
 
-        logger.log(u"Split out "+newNZB+" from "+result.name, logger.DEBUG)
+            logger.log(u"Split out "+newNZB+" from "+result.name, logger.DEBUG)
 
-        # parse the name
-        try:
-            np = NameParser(False)
-            parse_result = np.parse(newNZB)
-        except InvalidNameException:
-            logger.log(u"Unable to parse the filename "+newNZB+" into a valid episode", logger.WARNING)
-            return False
+            # parse the name
+            try:
+                np = NameParser(False)
+                parse_result = np.parse(newNZB)
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename "+newNZB+" into a valid episode", logger.WARNING)
+                return False
 
-        # make sure the result is sane
-        if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
-            logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
-            continue
-        elif len(parse_result.episode_numbers) == 0:
-            logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to be a valid episode NZB, ignoring it", logger.WARNING)
-            continue
+            # make sure the result is sane
+            if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
+                logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
+                continue
+            elif len(parse_result.episode_numbers) == 0:
+                logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to be a valid episode NZB, ignoring it", logger.WARNING)
+                continue
 
-        wantEp = True
-        for epNo in parse_result.episode_numbers:
-            if not result.extraInfo[0].wantEpisode(season, epNo, result.quality):
-                logger.log(u"Ignoring result "+newNZB+" because we don't want an episode that is "+Quality.qualityStrings[result.quality], logger.DEBUG)
-                wantEp = False
-                break
-        if not wantEp:
-            continue
+            wantEp = True
+            for epNo in parse_result.episode_numbers:
+                if not result.extraInfo[0].wantEpisode(season, epNo, result.quality):
+                    logger.log(u"Ignoring result "+newNZB+" because we don't want an episode that is "+Quality.qualityStrings[result.quality], logger.DEBUG)
+                    wantEp = False
+                    break
+            if not wantEp:
+                continue
 
-        # get all the associated episode objects
-        epObjList = []
-        for curEp in parse_result.episode_numbers:
-            epObjList.append(result.extraInfo[0].getEpisode(season, curEp))
+            # get all the associated episode objects
+            epObjList = []
+            for curEp in parse_result.episode_numbers:
+                epObjList.append(result.extraInfo[0].getEpisode(season, curEp))
 
-        # make a result
-        curResult = classes.NZBDataSearchResult(epObjList)
-        curResult.name = newNZB
-        curResult.provider = result.provider
-        curResult.quality = result.quality
-        curResult.extraInfo = [nzbSplitter.createNZBString(separateNZBs[newNZB], xmlns)]
+            # make a result
+            curResult = classes.NZBDataSearchResult(epObjList)
+            curResult.name = newNZB
+            curResult.provider = result.provider
+            curResult.quality = result.quality
+            curResult.extraInfo = [nzbSplitter.createNZBString(separateNZBs[newNZB], xmlns)]
 
-        resultList.append(curResult)
+            resultList.append(curResult)
 
     return resultList
 
@@ -184,8 +187,8 @@ def saveSTRM(nzb):
 
     newResult = False
 
-    if len(nzb.episodes) > 1:
-        episodeList = _splitResult(nzb)
+    episodeList = _splitResult(nzb)
+    if len(episodeList) > 1:
         for episode in episodeList:
             sickbeard.search._downloadResult(episode)
             fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_file&nzb=" + sickbeard.PNEU_NZB_DIR + episode.name + ".nzb" + "&nzbname=" + episode.name
