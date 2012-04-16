@@ -417,6 +417,16 @@ class PostProcessor(object):
             scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
             if scene_id:
                 self._log(u"Scene exception lookup got tvdb id "+str(scene_id)+u", using that", logger.DEBUG)
+                if(parse_result.is_anime):
+                    show = helpers.findCertainShow(sickbeard.showList, scene_id)
+                    try:
+                        (actual_season, actual_episodes) = helpers.get_all_episodes_from_absolute_number(show, None, parse_result.ab_episode_numbers)
+                    except exceptions.EpisodeNotFoundByAbsoluteNumerException:
+                        logger.log(str(scene_id) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, cant determin season and episode numbers")
+                    else:
+                        season = actual_season
+                        episodes = actual_episodes
+
                 _finalize(parse_result)
                 return (scene_id, season, episodes)
 
