@@ -145,40 +145,28 @@ def _xem_excpetions_fetcher(animeOnly=False, languageOnly=None, seasonOnly=None)
     exception_dict = {}
     opener = urllib2.build_opener()
 
-    for show in sickbeard.showList:
-        if show.is_anime or animeOnly == False:
-            try:
-                url = "http://thexem.de/map/names?origin=tvdb&id=%s" % str(show.tvdbid)
-                f = opener.open(url)
-            except (EOFError, IOError), e:
-                logger.log(u"Unable to connect to XEM. Is thexem.de down ?" + ex(e), logger.ERROR)
-                continue
-            except httplib.InvalidURL, e:
-                logger.log(u"Invalid XEM host. Is thexem.de down ?: " + ex(e), logger.ERROR)
-                continue
-            if not f:
-                logger.log(u"Empty response from " + url + ": " + ex(e), logger.ERROR)
-                continue
-            try:
-                xemJson = json.loads(f.read())
-            except ValueError, e:
-                pass
+    url = "http://thexem.de/map/allNames?origin=tvdb&season=le1"
+    try:
+        f = opener.open(url)
+    except (EOFError, IOError), e:
+        logger.log(u"Unable to connect to XEM. Is thexem.de down ?" + ex(e), logger.ERROR)
+        return exception_dict
+    except httplib.InvalidURL, e:
+        logger.log(u"Invalid XEM host. Is thexem.de down ?: " + ex(e), logger.ERROR)
+        return exception_dict
+    if not f:
+        logger.log(u"Empty response from " + url + ": " + ex(e), logger.ERROR)
+        return exception_dict
+    try:
+        xemJson = json.loads(f.read())
+    except ValueError, e:
+        pass
 
-            if xemJson['result'] == 'failure':
-                continue
-            else:
-                for season, languages in xemJson['data'].items():
-                    if not (season == seasonOnly or seasonOnly == None):
-                        continue
+    if xemJson['result'] == 'failure':
+        return exception_dict
 
-                    for language, names in languages.items():
-                        if not (language == languageOnly or languageOnly == None):
-                            continue
-
-                        if show.tvdbid in exception_dict:
-                            exception_dict[show.tvdbid] += names
-                        else:
-                            exception_dict[show.tvdbid] = names
+    for tvdbid, names in xemJson['data'].items():
+        exception_dict[int(tvdbid)] = names
 
     logger.log(u"xem exception dict: " + str(exception_dict), logger.DEBUG)
     return exception_dict
