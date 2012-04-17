@@ -158,14 +158,17 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_WEBDL(self, attrs):
 
-        # Video Fmt: H.264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('H.264' in attrs['Video Fmt']) \
+        # Video Fmt: x264, H.264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt'] or 'H.264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
+
+        # Source: Web-DL
+        source = 'Source' in attrs and 'Web-dl' in attrs['Source']
 
         # Subtitles: (None)
         subs = 'Subtitles' not in attrs
 
-        return video_fmt and subs
+        return video_fmt and source and subs
 
     def _is_720pBluRay(self, attrs):
 
