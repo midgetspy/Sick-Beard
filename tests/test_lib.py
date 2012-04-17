@@ -27,11 +27,28 @@ sys.path.append(os.path.abspath('../lib'))
 
 import sickbeard
 import shutil, time
-from sickbeard import encodingKludge as ek
+from sickbeard import encodingKludge as ek, providers, tvcache
 from sickbeard import db
 from sickbeard.databases import mainDB
+from sickbeard.databases import cache_db
+
+#=================
+# test globals
+#=================
+TESTDIR = os.path.abspath('.')
+TESTDBNAME = "sickbeard.db"
+TESTCACHEDBNAME = "cache.db"
 
 
+SHOWNAME = u"show name"
+SEASON = 4
+EPISODE = 2
+FILENAME = u"show name - s0" + str(SEASON) + "e0" + str(EPISODE) + ".mkv"
+FILEDIR = os.path.join(TESTDIR, SHOWNAME)
+FILEPATH = os.path.join(FILEDIR, FILENAME)
+
+#sickbeard.logger.sb_log_instance = sickbeard.logger.SBRotatingLogHandler(os.path.join(TESTDIR, 'sickbeard.log'), sickbeard.logger.NUM_LOGS, sickbeard.logger.LOG_SIZE)
+sickbeard.logger.SBRotatingLogHandler.log_file = os.path.join(os.path.join(TESTDIR, 'Logs'), 'test_sickbeard.log')
 
 
 #=================
@@ -43,22 +60,23 @@ sickbeard.QUALITY_DEFAULT = 4
 sickbeard.SEASON_FOLDERS_DEFAULT = 1
 sickbeard.SEASON_FOLDERS_FORMAT = 'Season %02d'
 
+sickbeard.NAMING_SHOW_NAME = 1
+sickbeard.NAMING_EP_NAME = 1
+sickbeard.NAMING_EP_TYPE = 0
+sickbeard.NAMING_MULTI_EP_TYPE = 1
+sickbeard.NAMING_SEP_TYPE = 0
+sickbeard.NAMING_USE_PERIODS = 0
+sickbeard.NAMING_QUALITY = 0
+sickbeard.NAMING_DATES = 1
+
+sickbeard.PROVIDER_ORDER = ["sick_beard_index"]
+sickbeard.newznabProviderList = providers.getNewznabProviderList("Sick Beard Index|http://momo.sickbeard.com/||1!!!NZBs.org|http://beta.nzbs.org/||0")
+sickbeard.providerList = providers.makeProviderList()
 
 sickbeard.PROG_DIR = os.path.abspath('..')
 sickbeard.DATA_DIR = sickbeard.PROG_DIR
-
-#=================
-# test globals
-#=================
-TESTDIR = os.path.abspath('.')
-TESTDBNAME = "test_sickbeard.db"
-
-SHOWNAME = u"show name"
-SEASON = 4
-EPISODE = 2
-FILENAME = u"show name - s0" + str(SEASON) + "e0" + str(EPISODE) + ".mkv"
-FILEDIR = os.path.join(TESTDIR, SHOWNAME)
-FILEPATH = os.path.join(FILEDIR, FILENAME)
+sickbeard.LOG_DIR = os.path.join(TESTDIR, 'Logs')
+sickbeard.logger.sb_log_instance.initLogging(False)
 
 #=================
 # dummy functions
@@ -84,13 +102,40 @@ class SickbeardTestDBCase(unittest.TestCase):
         tearDown_test_db()
         tearDown_test_episode_file()
 
+
 class TestDBConnection(db.DBConnection, object):
+
     def __init__(self, dbFileName=TESTDBNAME):
         dbFileName = os.path.join(TESTDIR, dbFileName)
         super(TestDBConnection, self).__init__(dbFileName)
 
+
+class TestCacheDBConnection(TestDBConnection, object):
+
+    def __init__(self, providerName):
+        db.DBConnection.__init__(self, os.path.join(TESTDIR, TESTCACHEDBNAME))
+
+        # Create the table if it's not already there
+        try:
+            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
+            self.connection.execute(sql)
+            self.connection.commit()
+        except sqlite3.OperationalError, e:
+            if str(e) != "table "+providerName+" already exists":
+                raise
+
+        # Create the table if it's not already there
+        try:
+            sql = "CREATE TABLE lastUpdate (provider TEXT, time NUMERIC);"
+            self.connection.execute(sql)
+            self.connection.commit()
+        except sqlite3.OperationalError, e:
+            if str(e) != "table lastUpdate already exists":
+                raise
+
 # this will override the normal db connection
 sickbeard.db.DBConnection = TestDBConnection
+sickbeard.tvcache.CacheDBConnection = TestCacheDBConnection
 
 
 #=================
@@ -103,13 +148,20 @@ def setUp_test_db():
     db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
     # fix up any db problems
     db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
+    
+    #and for cache.b too
+    db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
 
 
 def tearDown_test_db():
     """Deletes the test db
         although this seams not to work on my system it leaves me with an zero kb file
     """
-    os.remove(ek.ek(os.path.join, TESTDIR, TESTDBNAME))
+    #return False
+    if os.path.exists(os.path.join(TESTDIR, TESTDBNAME)):
+        os.remove(os.path.join(TESTDIR, TESTDBNAME))
+    if os.path.exists(os.path.join(TESTDIR, TESTCACHEDBNAME)):
+        os.remove(os.path.join(TESTDIR, TESTCACHEDBNAME))
 
 def setUp_test_episode_file():
     if not os.path.exists(FILEDIR):
@@ -119,8 +171,11 @@ def setUp_test_episode_file():
     f.write("foo bar")
     f.close()
 
+
 def tearDown_test_episode_file():
     shutil.rmtree(FILEDIR)
+
+tearDown_test_db()
 
 if __name__ == '__main__':
     print "=================="

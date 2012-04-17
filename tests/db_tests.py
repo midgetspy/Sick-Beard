@@ -20,11 +20,6 @@
 import unittest
 import test_lib as test
 
-import sys, os.path
-sys.path.append(os.path.abspath('..'))
-sys.path.append(os.path.abspath('../lib'))
-
-
 
 class DBBasicTests(test.SickbeardTestDBCase):
 

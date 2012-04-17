@@ -23,13 +23,11 @@ import unittest
 import test_lib as test
 
 import sys, os.path
-sys.path.append(os.path.abspath('..'))
-sys.path.append(os.path.abspath('../lib'))
-
 
 from sickbeard.postProcessor import PostProcessor
 import sickbeard
 from sickbeard.tv import TVEpisode, TVShow
+
 
 class PPInitTests(unittest.TestCase):
 
@@ -41,6 +39,7 @@ class PPInitTests(unittest.TestCase):
 
     def test_init_folder_name(self):
         self.assertEqual(self.pp.folder_name, test.SHOWNAME)
+
 
 class PPPrivateTests(test.SickbeardTestDBCase):
 

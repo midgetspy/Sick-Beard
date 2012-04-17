@@ -19,12 +19,7 @@
 
 import random
 import unittest
-
 import test_lib as test
-
-import sys, os.path
-sys.path.append(os.path.abspath('..'))
-sys.path.append(os.path.abspath('../lib'))
 
 import sickbeard
 from sickbeard.tv import TVEpisode, TVShow
@@ -69,7 +64,6 @@ class TVShowTests(test.SickbeardTestDBCase):
         self.assertEqual(show.name, "newName")
 
 
-
 class TVEpisodeTests(test.SickbeardTestDBCase):
 
     def setUp(self):
@@ -78,7 +72,12 @@ class TVEpisodeTests(test.SickbeardTestDBCase):
 
     def test_init_empty_db(self):
         show = TVShow(0001, "en")
-        self.assertRaises(exceptions.EpisodeNotFoundException, TVEpisode, show, test.SEASON, test.EPISODE)
+        ep = TVEpisode(show, 1, 1)
+        ep.name = "asdasdasdajkaj"
+        ep.saveToDB()
+        ep.loadFromDB(1, 1)
+        self.assertEqual(ep.name, "asdasdasdajkaj")
+
 
 class TVTests(test.SickbeardTestDBCase):
 
@@ -99,8 +98,6 @@ class TVTests(test.SickbeardTestDBCase):
         show.saveToDB()
         sickbeard.showList = [show]
         #TODO: implement
-
-
 
 
 if __name__ == '__main__':
