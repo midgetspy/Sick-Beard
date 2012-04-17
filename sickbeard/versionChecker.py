@@ -297,7 +297,7 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits('midgetspy', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits('midgetspy', 'Sick-Beard', version.SICKBEARD_VERSION, sickbeard.GITHUB_BRANCH):
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
