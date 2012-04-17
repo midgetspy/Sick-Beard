@@ -45,6 +45,20 @@ $(document).ready(function(){
         function (data){ $('#testNotifo-result').html(data); });
     });
 
+    $('#testBoxcar').click(function(){
+        $('#testBoxcar-result').html(loading);
+        var boxcar_username = $("#boxcar_username").val();
+        $.get(sbRoot+"/home/testBoxcar", {'username': boxcar_username},
+        function (data){ $('#testBoxcar-result').html(data); });
+    });
+
+    $('#testPushover').click(function(){
+        $('#testPushover-result').html(loading);
+        var pushover_userkey = $("#pushover_userkey").val();
+        $.get(sbRoot+"/home/testPushover", {'userKey': pushover_userkey},
+        function (data){ $('#testPushover-result').html(data); });
+    });
+
     $('#testLibnotify').click(function(){
         $('#testLibnotify-result').html(loading);
         $.get(sbRoot+"/home/testLibnotify",
@@ -109,5 +123,23 @@ $(document).ready(function(){
         
         $.get(sbRoot+"/home/testNMJ", {'host': nmj_host, 'database': nmj_database, 'mount': nmj_mount}, 
         function (data){ $('#testNMJ-result').html(data); });
+    });
+
+    $('#testTrakt').click(function(){
+        $('#testTrakt-result').html(loading);
+        var trakt_api = $("#trakt_api").val();
+        var trakt_username = $("#trakt_username").val();
+        var trakt_password = $("#trakt_password").val();
+
+        $.get(sbRoot+"/home/testTrakt", {'api': trakt_api, 'username': trakt_username, 'password': trakt_password},
+        function (data){ $('#testTrakt-result').html(data); });
+    });
+
+    $('#testNMA').click(function(){
+        $('#testNMA-result').html(loading);
+        var nma_api = $("#nma_api").val();
+        var nma_priority = $("#nma_priority").val();
+        var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
+        function (data){ $('#testNMA-result').html(data); });
     });
 });

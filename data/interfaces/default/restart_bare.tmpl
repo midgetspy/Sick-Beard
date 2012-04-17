@@ -1,11 +1,22 @@
-<script type="text/javascript" src="$sbRoot/js/jquery-1.6.1.min.js"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
+#try:
+    #set curSBHost = $sbHost
+    #set curSBHttpPort = $sbHttpPort
+    #set curSBHttpsEnabled = $sbHttpsEnabled
+#except NameMapper.NotFound:
+    #set curSBHost = "localhost"
+    #set curSBHttpPort = $sickbeard.WEB_PORT
+    #set curSBHttpsEnabled = "False"
+#end try
 sbRoot = "$sbRoot";
+sbHttpPort = "$curSBHttpPort";
+sbHttpsEnabled = "$curSBHttpsEnabled";
+sbHost = "$curSBHost";
 //-->
 </script>
 
-<script type="text/javascript" src="$sbRoot/js/jquery-1.5.1.min.js"></script>
+<script type="text/javascript" src="$sbRoot/js/jquery-1.7.1.min.js"></script>
 <script type="text/javascript" src="$sbRoot/js/restart.js"></script>
 
 <h2>Performing Restart</h2>
@@ -31,4 +42,3 @@ Loading the home page:
 <div id="restart_fail_message" style="display: none;">
 Error: The restart has timed out, perhaps something prevented Sick Beard from starting again?
 </div>
-

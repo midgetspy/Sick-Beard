@@ -23,6 +23,9 @@ import stat
 import urllib, urllib2
 import re, socket
 import shutil
+import traceback
+
+from xml.dom.minidom import Node
 
 import sickbeard
 
@@ -103,11 +106,17 @@ def sanitizeFileName (name):
     'abc'
     >>> sanitizeFileName('a"b')
     'ab'
+    >>> sanitizeFileName('.a.b..')
+    'a.b'
     '''
-    for x in "\\/*":
-        name = name.replace(x, "-")
-    for x in ":\"<>|?":
-        name = name.replace(x, "")
+    
+    # remove bad chars from the filename
+    name = re.sub(r'[\\/\*]', '-', name)
+    name = re.sub(r'[:"<>|?]', '', name)
+    
+    # remove leading/trailing periods
+    name = re.sub(r'(^\.+|\.+$)', '', name)
+    
     return name
 
 
@@ -139,6 +148,12 @@ def getURL (url, headers=[]):
             usock.close()
     except socket.timeout:
         logger.log(u"Timed out while loading URL "+url, logger.WARNING)
+        return None
+    except ValueError:
+        logger.log(u"Unknown error while loading URL "+url, logger.WARNING)
+        return None
+    except Exception:
+        logger.log(u"Unknown exception while loading URL "+url+": "+traceback.format_exc(), logger.WARNING)
         return None
 
     return result
@@ -428,11 +443,22 @@ def chmodAsParent(childPath):
         return
     
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
+    childPath_mode = stat.S_IMODE(os.stat(childPath)[stat.ST_MODE])
 
     if ek.ek(os.path.isfile, childPath):
         childMode = fileBitFilter(parentMode)
     else:
         childMode = parentMode
+
+    if childPath_mode == childMode:
+        return
+
+    childPath_owner = os.stat(childPath).st_uid
+    user_id = os.geteuid()
+
+    if user_id !=0 and user_id != childPath_owner:
+        logger.log(u"Not running as root or owner of "+childPath+", not trying to set permissions", logger.DEBUG)
+        return
 
     try:
         ek.ek(os.chmod, childPath, childMode)
@@ -460,6 +486,13 @@ def fixSetGroupID(childPath):
         childGID = os.stat(childPath)[stat.ST_GID]
 
         if childGID == parentGID:
+            return
+
+        childPath_owner = os.stat(childPath).st_uid
+        user_id = os.geteuid()
+
+        if user_id !=0 and user_id != childPath_owner:
+            logger.log(u"Not running as root or owner of "+childPath+", not trying to set the set-group-ID", logger.DEBUG)
             return
 
         try:
@@ -496,7 +529,44 @@ def sanitizeSceneName (name, ezrss=False):
 
     return name
 
+def create_https_certificates(ssl_cert, ssl_key):
+    """
+    Create self-signed HTTPS certificares and store in paths 'ssl_cert' and 'ssl_key'
+    """
+    try:
+        from OpenSSL import crypto #@UnresolvedImport
+        from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial #@UnresolvedImport
+    except:
+        logger.log(u"pyopenssl module missing, please install for https access", logger.WARNING)
+        return False
+
+    # Create the CA Certificate
+    cakey = createKeyPair(TYPE_RSA, 1024)
+    careq = createCertRequest(cakey, CN='Certificate Authority')
+    cacert = createCertificate(careq, (careq, cakey), serial, (0, 60*60*24*365*10)) # ten years
+
+    cname = 'SickBeard'
+    pkey = createKeyPair(TYPE_RSA, 1024)
+    req = createCertRequest(pkey, CN=cname)
+    cert = createCertificate(req, (cacert, cakey), serial, (0, 60*60*24*365*10)) # ten years
+
+    # Save the key and certificate to disk
+    try:
+        open(ssl_key, 'w').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey))
+        open(ssl_cert, 'w').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+    except:
+        logger.log(u"Error creating SSL key and certificate", logger.ERROR)
+        return False
+
+    return True
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+def get_xml_text(node):
+    text = ""
+    for child_node in node.childNodes:
+        if child_node.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
+            text += child_node.data
+    return text.strip()

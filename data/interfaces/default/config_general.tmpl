@@ -21,7 +21,7 @@
 <form id="configForm" action="saveGeneral" method="post">
 
             <div id="config-components">
-                
+
                 <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
@@ -63,15 +63,16 @@
                 </div><!-- /component-group1 //-->
 
 
-                <div id="core-component-group3" class="component-group clearfix">
+                <div id="core-component-group2" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Web Interface</h3>
                         <p>It is recommended that you enable a username and password to secure Sick Beard from being tampered with remotely.</p>
-                        <p><b>Some options may require a manual restart to take effect.</b></p>
+                        <p><b>These options require a manual restart to take effect.</b></p>
                     </div>
 
                     <fieldset class="component-group-list">
+                        
                         <div class="field-pair">
                             <input type="checkbox" name="web_ipv6" id="web_ipv6" #if $sickbeard.WEB_IPV6 then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="web_ipv6">
@@ -121,9 +122,75 @@
                             </label>
                         </div>
 
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <input type="checkbox" name="enable_https" class="enabler" id="enable_https" #if $sickbeard.ENABLE_HTTPS then "checked=\"checked\"" else ""#/>
+                                <span class="component-title">Enable HTTPS</span>
+                                <span class="component-desc">Enable accessing the interface from a HTTPS address.</span>
+                            </label>
+                        </div>
+                        
+                        <div id="content_enable_https">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">HTTPS Certificate</span>
+                                    <input type="text" name="https_cert" value="$sickbeard.HTTPS_CERT" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">File name or path to HTTPS Certificate.</span>
+                                </label>
+                            </div>
+    
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">HTTPS Key</span>
+                                    <input type="text" name="https_key" value="$sickbeard.HTTPS_KEY" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">File name or path to HTTPS Key.</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <input type="submit" class="config_submitter" value="Save Changes" />
                     </fieldset>
-                </div><!-- /component-group3 //-->
+                </div><!-- /component-group2 //-->
+
+                <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>API</h3>
+                        <p>Allow 3rd party programs to interact with Sick-Beard.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_api" class="enabler" id="use_api" #if $sickbeard.USE_API then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="use_api">
+                                <span class="component-title">Enable API</span>
+                                <span class="component-desc">Allow the use of the Sick-Beard API.</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_api">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="api_key">
+                                <span class="component-title">API Key</span>
+                                <input type="text" name="api_key" id="api_key" value="$sickbeard.API_KEY" size="40" readonly="readonly" />
+                                <input type="button" id="generate_new_apikey" value="Generate">
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Used to give 3rd party programs limited access to Sick-Beard.</span>
+                            </label>
+                        </div>
+                        </div>
+
+                        <input type="submit" class="config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group4 //-->
 
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components -->

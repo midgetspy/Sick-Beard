@@ -1,9 +1,36 @@
-*.pyc
+#  SB User Related   #
+######################
 cache/*
 cache.db*
 config.ini
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
+server.crt
+server.key
+
+#  Compiled source   #
+######################
+*.py[co]
+
+#  IDE specific      #
+######################
 *.bak
+*.tmp
+*.wpr
+*.project
+*.cproject
+*.tmproj
+*.tmproject
+*.sw?
+
+# OS generated files #
+######################
+.Spotlight-V100
+.Trashes
 .DS_Store
+desktop.ini
+ehthumbs.db
+Thumbs.db
+.directory
+*~

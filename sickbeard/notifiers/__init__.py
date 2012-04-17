@@ -25,8 +25,13 @@ import prowl
 import tweet
 from . import libnotify
 import notifo
+import boxcar
+import pushover
 import nmj
 import synoindex
+import trakt
+import pytivo
+import nma
 
 from sickbeard.common import *
 
@@ -36,9 +41,14 @@ growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
 notifo_notifier = notifo.NotifoNotifier()
+boxcar_notifier = boxcar.BoxcarNotifier()
+pushover_notifier = pushover.PushoverNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
+trakt_notifier = trakt.TraktNotifier()
+pytivo_notifier = pytivo.pyTivoNotifier()
+nma_notifier = nma.NMA_Notifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
@@ -51,6 +61,11 @@ notifiers = [
     twitter_notifier,
     nmj_notifier,
     synoindex_notifier,
+    boxcar_notifier,
+    pushover_notifier,
+    trakt_notifier,
+    pytivo_notifier,
+    nma_notifier,
 ]
 
 def notify_download(ep_name):
@@ -62,3 +77,4 @@ def notify_snatch(ep_name):
     for n in notifiers:
         n.notify_snatch(ep_name)
     notifo_notifier.notify_snatch(ep_name)
+
