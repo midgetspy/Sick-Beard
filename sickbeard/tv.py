@@ -1391,9 +1391,16 @@ class TVEpisode(object):
             return re.sub('[ -]','_', name)
         
         def release_group(name):
-            if not name or '-' not in name:
+            np = NameParser(name)
+            try:
+                parse_result = np.parse(name)
+            except InvalidNameException, e:
+                logger.log(u"Unable to get parse release_group: "+ex(e), logger.DEBUG)
                 return ''
-            return name.split('-')[-1]
+
+            if not parse_result.release_group:
+                return ''
+            return parse_result.release_group
 
         epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
         
