@@ -270,7 +270,7 @@ class ConfigMigrator():
             next_version = self.config_version + 1
             
             if next_version in self.migration_names:
-                migration_name = ': ' + self.migrate_names[next_version]
+                migration_name = ': ' + self.migration_names[next_version]
             else:
                 migration_name = ''
             
