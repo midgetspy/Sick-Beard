@@ -753,6 +753,7 @@ class TVShow(object):
                     curEp.location = ''
                     curEp.hasnfo = False
                     curEp.hastbn = False
+                    curEp.release_name = ''
                     curEp.saveToDB()
 
     def saveToDB(self):
