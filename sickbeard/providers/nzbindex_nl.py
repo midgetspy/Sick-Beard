@@ -49,12 +49,12 @@ class NZBiProvider(generic.NZBProvider):
 	def _get_season_search_strings(self, show, season):
 		self.searchShow = show.name
 		self.searchShow = self.searchShow.replace(" ",".")
-		return ['^'+x for x in show_name_helpers.makeSceneSeasonSearchString(show, season)]
+		return ['^'+x for x in show_name_helpers.makeSceneSeasonSearchString(show, season, None, 1)]
 
 	def _get_episode_search_strings(self, ep_obj):
 		self.searchShow = ep_obj.show.name
 		self.searchShow = self.searchShow.replace(" ",".")
-		return ['^'+x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
+		return ['^'+x for x in show_name_helpers.makeSceneSearchString(ep_obj,1)]
 
 	def _doSearch(self, curString, show=None):
 
@@ -83,6 +83,7 @@ class NZBiProvider(generic.NZBProvider):
 		try:
 			parsedXML = parseString(data)
 			items = parsedXML.getElementsByTagName('item')
+			logger.log(u"Items: "+str(len(items)), logger.DEBUG)
 		except Exception, e:
 			logger.log(u"Error trying to load NZBindex.nl RSS feed: "+ex(e), logger.ERROR)
 			return []
@@ -91,9 +92,8 @@ class NZBiProvider(generic.NZBProvider):
 
 		for curItem in items:
 			(title, url) = self._get_title_and_url(curItem)
-
 			if not title or not url:
-				logger.log(u"The XML returned from the NZBindex.nl RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+				logger.log(u"A result from the NZBindex.nl RSS feed is unusable: "+helpers.get_xml_text(curItem.getElementsByTagName('title')[0]), logger.ERROR)
 				continue
 			if title != 'Not_Valid':
 				results.append(curItem)
@@ -125,7 +125,13 @@ class NZBiProvider(generic.NZBProvider):
 		return results
 	def _get_title_and_url(self, item):
 		showName = self.searchShow
+		#Done to search for showname with and without dots, gives more usable search results
+		showName2 = showName.replace("."," ")
 		title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
+		#Lots of nzb names have 'sample' in the filename, as we're already searching for eps bigger than 200mb there's no need to exclude results with sample in it.
+		#To avoid changing the scene release checker it's removed from the title.
+		title = title.replace("sample","")
+		
 		try:
 			if title.lower().count(showName.lower()) == 1:
 				titleStart = title.lower().index(showName.lower())
@@ -134,6 +140,14 @@ class NZBiProvider(generic.NZBProvider):
 			elif title.lower().count(showName.lower()) > 1:
 				titleStart = title.lower().rindex(showName.lower())
 				titleEnd = title.index(" ",titleStart)
+				title = title[titleStart:titleEnd]
+			elif title.lower().count(showName2.lower()) == 1:
+				titleStart = title.lower().index(showName2.lower())
+				titleEnd = title.rindex(" ",titleStart)
+				title = title[titleStart:titleEnd]
+			elif title.lower().count(showName2.lower()) > 1:
+				titleStart = title.lower().rindex(showName2.lower())
+				titleEnd = title.rindex(" ",titleStart)
 				title = title[titleStart:titleEnd]
 			else:
 				title = None

@@ -113,7 +113,7 @@ def makeSceneShowSearchStrings(show):
     return map(sanitizeSceneName, showNames)
 
 
-def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
+def makeSceneSeasonSearchString (show, segment, extraSearchType=None, rawSearch=1):
 
     myDB = db.DBConnection()
 
@@ -142,7 +142,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         # most providers all work the same way
         if not extraSearchType:
             # if there's only one season then we can just use the show name straight up
-            if numseasons == 1:
+            if numseasons == 1 and rawSearch == 0:
                 toReturn.append(curShow)
             # for providers that don't allow multiple searches in one request we only search for Sxx style stuff
             else:
@@ -169,7 +169,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
     return toReturn
 
 
-def makeSceneSearchString (episode):
+def makeSceneSearchString (episode,rawSearch=0):
 
     myDB = db.DBConnection()
     numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
@@ -183,7 +183,7 @@ def makeSceneSearchString (episode):
                     "%ix%02i" % (int(episode.season), int(episode.episode))]
 
     # for single-season shows just search for the show name
-    if numseasons == 1:
+    if numseasons == 1 and rawSearch == 0:
         epStrings = ['']
 
     showNames = set(makeSceneShowSearchStrings(episode.show))
