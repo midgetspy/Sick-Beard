@@ -93,7 +93,7 @@ class NZBiProvider(generic.NZBProvider):
 			if not title or not url:
 				logger.log(u"The XML returned from the NZBindex.nl RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
 				continue
-			if not title == 'Not_Valid':
+			if title != 'Not_Valid':
 				results.append(curItem)
 
 		return results
@@ -134,7 +134,7 @@ class NZBiProvider(generic.NZBProvider):
 				titleEnd = title.index(" ",titleStart)
 				title = title[titleStart:titleEnd]
 			else:
-				title = "Not_Valid"
+				title = None
 		except ValueError:
 			title = "Not_Valid"
 		try:
