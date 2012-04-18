@@ -35,6 +35,9 @@ RUN_AS=SICKBEARD_USER
 # data directory
 DATA_DIR=~/.sickbeard
 
+# use values from /etc/default if the file exists
+test -f /etc/default/sickbeard && . /etc/default/sickbeard
+
 # startup args
 DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
 
