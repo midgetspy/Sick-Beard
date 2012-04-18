@@ -157,6 +157,7 @@ def tearDown_test_db():
     """Deletes the test db
         although this seams not to work on my system it leaves me with an zero kb file
     """
+    # uncomment next line so leave the db intact beween test and at the end
     #return False
     if os.path.exists(os.path.join(TESTDIR, TESTDBNAME)):
         os.remove(os.path.join(TESTDIR, TESTDBNAME))
