@@ -41,26 +41,28 @@ class NZBiProvider(generic.NZBProvider):
 		self.supportsBacklog = True
 
 		self.url = 'http://www.nzbindex.nl'
-		self.searchString = ''
+		self.searchShow = ''
 
 	def isEnabled(self):
 		return sickbeard.NZBI
 
 	def _get_season_search_strings(self, show, season):
+		self.searchShow = show.name
+		self.searchShow = self.searchShow.replace(" ",".")
 		return ['^'+x for x in show_name_helpers.makeSceneSeasonSearchString(show, season)]
 
 	def _get_episode_search_strings(self, ep_obj):
+		self.searchShow = ep_obj.show.name
+		self.searchShow = self.searchShow.replace(" ",".")
 		return ['^'+x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
 	def _doSearch(self, curString, show=None):
 
 		curString = curString.replace('.', ' ')
 		curString = curString.replace('^', '')
-		showName = curString
-		self.searchString = showName.replace(" ",".")
 		curString = curString + " -sub"
 		logger.log(u"Search string: " + curString, logger.DEBUG)
-		#http://www.nzbindex.nl/rss/?q=person+of+interest+s01e02&sort=agedesc&max=25
+
 		params = { "q": curString.encode('utf-8'),
 				   "sort": "agedesc",
 				   "minsize": "200",
@@ -122,7 +124,7 @@ class NZBiProvider(generic.NZBProvider):
 
 		return results
 	def _get_title_and_url(self, item):
-		showName = self.searchString
+		showName = self.searchShow
 		title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
 		try:
 			if title.lower().count(showName.lower()) == 1:
