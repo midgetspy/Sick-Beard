@@ -29,10 +29,10 @@ import sickbeard
 from sickbeard.tv import TVEpisode, TVShow
 import sickbeard.common as c
 
-tests = {"Dexter": {"q": c.HD, "s": 5, "e": 7, "b": 'Dexter.S05E07.720p.BluRay.X264-REWARD', "i": ['Dexter.S05E07.720p.BluRay.X264-REWARD', 'Dexter.S05E07.720p.X264-REWARD']},
-         "House": {"q": c.HD, "s": 4, "e": 5, "b": 'House.4x5.720p.BluRay.X264-REWARD', "i": ['Dexter.S05E04.720p.X264-REWARD', 'House.4x5.720p.BluRay.X264-REWARD']}
+tests = {"Dexter": {"a": 1, "q": c.HD, "s": 5, "e": [7], "b": 'Dexter.S05E07.720p.BluRay.X264-REWARD', "i": ['Dexter.S05E07.720p.BluRay.X264-REWARD', 'Dexter.S05E07.720p.X264-REWARD']},
+         "House": {"a": 1, "q": c.HD, "s": 4, "e": [5], "b": 'House.4x5.720p.BluRay.X264-REWARD', "i": ['Dexter.S05E04.720p.X264-REWARD', 'House.4x5.720p.BluRay.X264-REWARD']},
+         "Hells Kitchen": {"a": 1, "q": c.SD, "s": 6, "e": [14, 15], "b": 'Hells.Kitchen.s6e14e15.HDTV.XviD-ASAP', "i": ['Hells.Kitchen.S06E14.HDTV.XviD-ASAP', 'Hells.Kitchen.6x14.HDTV.XviD-ASAP', 'Hells.Kitchen.s6e14e15.HDTV.XviD-ASAP']}
        }
-
 
 
 def _create_fake_xml(items):
@@ -43,6 +43,7 @@ def _create_fake_xml(items):
     xml += '</channel></rss>'
     return xml
 
+
 # the real one tries to contact tvdb just stop it from getting more info on the ep
 def _fake_specifyEP(self, season, episode):
     pass
@@ -50,6 +51,7 @@ def _fake_specifyEP(self, season, episode):
 TVEpisode.specifyEpisode = _fake_specifyEP
 
 searchItems = []
+
 
 class SearchTest(test.SickbeardTestDBCase):
 
@@ -67,6 +69,7 @@ class SearchTest(test.SickbeardTestDBCase):
 
         super(SearchTest, self).__init__(something)
 
+
 def test_generator(tvdbdid, show_name, curData, forceSearch):
 
     def test(self):
@@ -78,14 +81,15 @@ def test_generator(tvdbdid, show_name, curData, forceSearch):
         show.saveToDB()
         sickbeard.showList.append(show)
 
-        episode = TVEpisode(show, curData["s"], curData["e"])
-        episode.status = c.WANTED
-        episode.saveToDB()
+        for epNumber in curData["e"]:
+            episode = TVEpisode(show, curData["s"], epNumber)
+            episode.status = c.WANTED
+            episode.saveToDB()
 
         bestResult = search.findEpisode(episode, forceSearch)
         if not bestResult:
             self.assertEqual(curData["b"], bestResult)
-        self.assertEqual(curData["b"], bestResult.name)
+        self.assertEqual(curData["b"], bestResult.name) #first is expected, second is choosen one
     return test
 
 if __name__ == '__main__':
@@ -97,10 +101,13 @@ if __name__ == '__main__':
     tvdbdid = 1
     for forceSearch in (True, False):
         for name, curData in tests.items():
+            if not curData["a"]:
+                continue
+            fname = name.replace(' ', '_')
             if forceSearch:
-                test_name = 'test_manual_%s_%s' % (name, tvdbdid)
+                test_name = 'test_manual_%s_%s' % (fname, tvdbdid)
             else:
-                test_name = 'test_%s_%s' % (name, tvdbdid)
+                test_name = 'test_%s_%s' % (fname, tvdbdid)
 
             test = test_generator(tvdbdid, name, curData, forceSearch)
             setattr(SearchTest, test_name, test)
