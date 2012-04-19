@@ -128,7 +128,9 @@ class DTTCache(tvcache.TVCache):
  
         params = {}
         search_params = self.provider._get_season_search_strings()
-        params.update(search_params)        
+        
+        if search_params:
+            params.update(search_params)        
 
         url = self.provider.url + 'rss/allshows?' + urllib.urlencode(params)
         logger.log(u"DTT cache update URL: "+ url, logger.DEBUG)

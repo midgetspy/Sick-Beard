@@ -28,7 +28,7 @@ import urllib, urllib2
 import zipfile, tarfile
 
 from urllib2 import URLError
-from lib.pygithub import github
+import gh_api as github
 
 class CheckVersion():
     """
@@ -299,11 +299,11 @@ class GitUpdateManager(UpdateManager):
         # find newest commit
         for curCommit in gh.commits.forBranch('mr-orange', 'Sick-Beard', version.SICKBEARD_VERSION):
             if not self._newest_commit_hash:
-                self._newest_commit_hash = curCommit.id
+                self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
                     break
 
-            if curCommit.id == self._cur_commit_hash:
+            if curCommit['sha'] == self._cur_commit_hash:
                 break
 
             self._num_commits_behind += 1
@@ -313,7 +313,7 @@ class GitUpdateManager(UpdateManager):
     def set_newest_text(self):
 
         # if we're up to date then don't set this
-        if self._num_commits_behind == 35:
+        if self._num_commits_behind == 100:
             message = "or else you're ahead of master"
 
         elif self._num_commits_behind > 0:
