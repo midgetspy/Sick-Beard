@@ -285,17 +285,8 @@ class GitUpdateManager(UpdateManager):
         return True
 
     def _find_git_branch(self):
-        
-        output, err = self._run_git('branch --no-color') #@UnusedVariable
-        
-        if not output:
-            return 'master'
-        
-        for cur_line in output.splitlines():
-            if cur_line.startswith('*'):
-                return cur_line[2:]
-        
-        return 'master'
+
+        return self._run_git('symbolic-ref -q HEAD')[0].strip().replace('refs/heads/', '', 1) or 'master'
 
 
     def _check_github_for_update(self):
