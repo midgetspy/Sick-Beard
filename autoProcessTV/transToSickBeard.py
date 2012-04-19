@@ -28,37 +28,24 @@ import sys
 import autoProcessTV
 import os
 import ConfigParser
-
-if not os.getenv("TR_TORRENT_DIR", False):
-    print "No folder supplied - is this being called from Transmission?"
-    sys.exit(-1)
-
-try:
-    os.sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), "lib"))
-    import transmissionrpc
-except Exception, e:
-    print "Bundled lib failed to load, trying system transmissionrpc"
-else:
-    import transmissionrpc
+import transmissionrpc
 
 config = ConfigParser.ConfigParser()
 configFilename = os.path.join(os.path.dirname(sys.argv[0]), "autoProcessTV.cfg")
 print "Loading config from", configFilename
-
 if not os.path.isfile(configFilename):
     print "ERROR: You need an autoProcessTV.cfg file - did you rename and edit the .sample?"
     sys.exit(-1)
-
 config.read(configFilename)
-
-
-
 
 host = config.get("Transmission", "host")
 port = config.get("Transmission", "port")
 username = config.get("Transmission", "username")
 password = config.get("Transmission", "password")
 
+if not os.getenv("TR_TORRENT_DIR", False):
+    print "No folder supplied - is this being called from Transmission?"
+    sys.exit(-1)
 try:
     download_dir = config.get("Transmission", "download_dir")
 except (ConfigParser.NoOptionError, ValueError):
