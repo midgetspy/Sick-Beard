@@ -7,6 +7,7 @@ python:
 # whitelist
 branches:
   only:
+    - development
     - unittest
 
 before_script: cd ./tests
