@@ -50,6 +50,14 @@ FILEPATH = os.path.join(FILEDIR, FILENAME)
 #sickbeard.logger.sb_log_instance = sickbeard.logger.SBRotatingLogHandler(os.path.join(TESTDIR, 'sickbeard.log'), sickbeard.logger.NUM_LOGS, sickbeard.logger.LOG_SIZE)
 sickbeard.logger.SBRotatingLogHandler.log_file = os.path.join(os.path.join(TESTDIR, 'Logs'), 'test_sickbeard.log')
 
+#=================
+# prepare env functions
+#=================
+def createTestLogFolder():
+    if not os.path.isdir(sickbeard.LOG_DIR):
+        os.mkdir(sickbeard.LOG_DIR)
+
+# call env functions at apropriate time durin sickbeard var setup
 
 #=================
 # sickbeard globals
@@ -76,6 +84,7 @@ sickbeard.providerList = providers.makeProviderList()
 sickbeard.PROG_DIR = os.path.abspath('..')
 sickbeard.DATA_DIR = sickbeard.PROG_DIR
 sickbeard.LOG_DIR = os.path.join(TESTDIR, 'Logs')
+createTestLogFolder()
 sickbeard.logger.sb_log_instance.initLogging(False)
 
 #=================
