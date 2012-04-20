@@ -512,9 +512,7 @@ class Tvdb:
             zipdata = StringIO.StringIO()
             zipdata.write(resp.read())
             myzipfile = zipfile.ZipFile(zipdata)
-            foofile = myzipfile.open('%s.xml' % language)
-
-            return foofile.read()
+            return myzipfile.read('%s.xml' % language)
 
         return resp.read()
 
