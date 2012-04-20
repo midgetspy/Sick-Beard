@@ -537,13 +537,29 @@ class PostProcessor(object):
                 if int(numseasonsSQlResult[0][0]) == 1 and season == None:
                     self._log(u"Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
                     season = 1
-            
+
             if tvdb_id and season != None and episodes:
+                season, episodes = self._sceneToTVDBNumbers(tvdb_id, season, episodes)
                 return (tvdb_id, season, episodes)
-    
+
+        season, episodes = self._sceneToTVDBNumbers(tvdb_id, season, episodes)
         return (tvdb_id, season, episodes)
-    
-    def _get_ep_obj(self, tvdb_id, season, episodes):
+
+    def _sceneToTVDBNumbers(self, tvdb_id, season, episodes):
+        if not self.release_group:
+            self._log(u"This does NOT look like a scene release. assuming these are tvdb numbers", logger.DEBUG)
+            return (season, episodes)
+
+        self._log(u"This looks like a scene release converting scene numbers to tvdb numbers", logger.DEBUG)
+        ep_obj = self._get_ep_obj(tvdb_id, season, episodes, scene=True)
+        if ep_obj:
+            newEpisodeNumbers = []
+            for curEp in [ep_obj] + ep_obj.relatedEps:
+                newEpisodeNumbers.append(curEp.episode)
+            return (ep_obj.season, newEpisodeNumbers)
+        return (season, episodes)
+
+    def _get_ep_obj(self, tvdb_id, season, episodes, scene=False):
         """
         Retrieve the TVEpisode object requested.
         
@@ -556,6 +572,9 @@ class PostProcessor(object):
         """
 
         show_obj = None
+        sceneMsg = ""
+        if scene:
+            sceneMsg = "(scene numbers) "
 
         self._log(u"Loading show object for tvdb_id "+str(tvdb_id), logger.DEBUG)
         # find the show in the showlist
@@ -573,11 +592,11 @@ class PostProcessor(object):
         for cur_episode in episodes:
             episode = int(cur_episode)
     
-            self._log(u"Retrieving episode object for " + str(season) + "x" + str(episode), logger.DEBUG)
+            self._log(u"Retrieving episode object for " + sceneMsg + str(season) + "x" + str(episode), logger.DEBUG)
     
             # now that we've figured out which episode this file is just load it manually
             try:
-                curEp = show_obj.getEpisode(season, episode)
+                curEp = show_obj.getEpisode(season, episode, scene=scene)
             except exceptions.EpisodeNotFoundException, e:
                 self._log(u"Unable to create episode: "+ex(e), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()

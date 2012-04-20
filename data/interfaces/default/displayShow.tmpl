@@ -128,11 +128,11 @@ Change selected episodes to
     #if int($epResult["season"]) != $curSeason:
   <tr><td colspan="9"><a name="season-$epResult["season"]"></a></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
-    <td colspan="9">
+    <td colspan="10">
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
-  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Status</th><th>Search</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>SCN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Status</th><th>Search</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -146,6 +146,13 @@ Change selected episodes to
     </td>
     <td align="center"><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "nfo.gif\" alt=\"Y" else "nfo-no.gif\" alt=\"N"#" width="23" height="11" /></td>
     <td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "tbn.gif\" alt=\"Y" else "tbn-no.gif\" alt=\"N"#" width="23" height="11" /></td>
+    <td align="center">
+    #if isinstance($epResult["scene_season"], int) and isinstance($epResult["scene_episode"], int)
+    <img src="$sbRoot/images/tbn.gif" alt="Y" width="23" height="11" title="$epResult["scene_season"] x $epResult["scene_episode"]"/>
+    #else
+    <img src="$sbRoot/images/tbn-no.gif" alt="N" width="23" height="11" />
+    #end if
+    </td>
     <td align="center">$epResult["episode"]</td>
     <td>
     $epResult["name"]

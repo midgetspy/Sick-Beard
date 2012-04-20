@@ -403,6 +403,14 @@ class QueueItemUpdate(ShowQueueItem):
                     except exceptions.EpisodeDeletedException:
                         pass
 
+        logger.log(u"Attempting to load scene numbers", logger.DEBUG)
+        if self.show.loadEpisodeSceneNumbers():
+            logger.log(u"loading scene numbers successfull", logger.DEBUG)
+        else:
+            logger.log(u"loading scene numbers NOT successfull or no scene numbers available", logger.DEBUG)
+            
+
+
         # now that we've updated the DB from TVDB see if there's anything we can add from TVRage
         with self.show.lock:
             logger.log(u"Attempting to supplement show info with info from TVRage", logger.DEBUG)
