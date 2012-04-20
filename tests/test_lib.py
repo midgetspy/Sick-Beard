@@ -47,6 +47,8 @@ FILENAME = u"show name - s0" + str(SEASON) + "e0" + str(EPISODE) + ".mkv"
 FILEDIR = os.path.join(TESTDIR, SHOWNAME)
 FILEPATH = os.path.join(FILEDIR, FILENAME)
 
+SHOWDIR = os.path.join(TESTDIR, SHOWNAME+" final")
+
 #sickbeard.logger.sb_log_instance = sickbeard.logger.SBRotatingLogHandler(os.path.join(TESTDIR, 'sickbeard.log'), sickbeard.logger.NUM_LOGS, sickbeard.logger.LOG_SIZE)
 sickbeard.logger.SBRotatingLogHandler.log_file = os.path.join(os.path.join(TESTDIR, 'Logs'), 'test_sickbeard.log')
 
@@ -96,6 +98,12 @@ def _dummy_saveConfig():
 # this might be considered a hack
 mainDB.sickbeard.save_config = _dummy_saveConfig
 
+# the real one tries to contact tvdb just stop it from getting more info on the ep
+def _fake_specifyEP(self, season, episode):
+    pass
+
+sickbeard.tv.TVEpisode.specifyEpisode = _fake_specifyEP
+
 
 #=================
 # test classes
@@ -105,11 +113,13 @@ class SickbeardTestDBCase(unittest.TestCase):
         sickbeard.showList = []
         setUp_test_db()
         setUp_test_episode_file()
+        setUp_test_show_dir()
 
     def tearDown(self):
         sickbeard.showList = []
         tearDown_test_db()
         tearDown_test_episode_file()
+        tearDown_test_show_dir()
 
 
 class TestDBConnection(db.DBConnection, object):
@@ -184,6 +194,15 @@ def setUp_test_episode_file():
 
 def tearDown_test_episode_file():
     shutil.rmtree(FILEDIR)
+
+
+def setUp_test_show_dir():
+    if not os.path.exists(SHOWDIR):
+        os.makedirs(SHOWDIR)
+
+
+def tearDown_test_show_dir():
+    shutil.rmtree(SHOWDIR)
 
 tearDown_test_db()
 
