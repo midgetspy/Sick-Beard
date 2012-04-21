@@ -1,0 +1,9 @@
+/* hack until config css rewrite */
+.notifier-icon {
+    float: left;
+    margin: 6px 10px 0 0 !important;
+}
+.notifier .component-group-desc > h3 {
+    line-height: 36px;
+    font-size: 22px;
+}
