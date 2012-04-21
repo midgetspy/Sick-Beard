@@ -38,7 +38,7 @@ class BTNProvider(generic.TorrentProvider):
         return sickbeard.BTN
         
     def imageName(self):
-        return 'btn.gif'
+        return 'btn.png'
 
 class BTNCache(tvcache.TVCache):
 

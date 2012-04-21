@@ -41,7 +41,7 @@ class TvTorrentsProvider(generic.TorrentProvider):
         return sickbeard.TVTORRENTS
         
     def imageName(self):
-        return 'tvtorrents.gif'
+        return 'tvtorrents.png'
 
 class TvTorrentsCache(tvcache.TVCache):
 

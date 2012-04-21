@@ -7,3 +7,6 @@
     line-height: 36px;
     font-size: 22px;
 }
+.imgLink img {
+    padding: 0 2px 4px;
+}
