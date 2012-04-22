@@ -31,9 +31,9 @@ from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
-class WDTVMetadata(generic.GenericMetadata):
+class NeoTVMetadata(generic.GenericMetadata):
     """
-    Metadata generation class for WDTV
+    Metadata generation class for NeoTV
 
     The following file structure is used:
     
@@ -61,7 +61,7 @@ class WDTVMetadata(generic.GenericMetadata):
         
         self._ep_nfo_extension = 'xml'
 
-        self.name = 'WDTV'
+        self.name = 'NeoTV'
 
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
@@ -93,7 +93,7 @@ class WDTVMetadata(generic.GenericMetadata):
     
     def get_season_thumb_path(self, show_obj, season):
         """
-        Season thumbs for WDTV go in Show Dir/Season X/folder.jpg
+        Season thumbs for NeoTV go in Show Dir/Season X/folder.jpg
         
         If no season folder exists, None is returned
         """
@@ -129,7 +129,7 @@ class WDTVMetadata(generic.GenericMetadata):
 
     def _ep_data(self, ep_obj):
         """
-        Creates an elementTree XML structure for a WDTV style episode.xml
+        Creates an elementTree XML structure for a NeoTV style episode.xml
         and returns the resulting data object.
         
         ep_obj: a TVShow instance to create the NFO for
@@ -157,7 +157,7 @@ class WDTVMetadata(generic.GenericMetadata):
 
         rootNode = etree.Element("details")
 
-        # write an WDTV XML containing info for all matching episodes
+        # write an NeoTV XML containing info for all matching episodes
         for curEpToWrite in eps_to_write:
         
             try:
@@ -229,4 +229,4 @@ class WDTVMetadata(generic.GenericMetadata):
         return (None, None)
 
 # present a standard "interface"
-metadata_class = WDTVMetadata
+metadata_class = NeoTVMetadata
