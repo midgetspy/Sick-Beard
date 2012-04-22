@@ -13,11 +13,15 @@
 #navDonate { 
     padding: 5px 10px 4px;
 }
-.fileBrowser {
-margin-left:5px !important;
+input.cb {
+    float: left;
+    margin: 2px 5px 3px 4px;
 }
 
 /* bootstrap overrides ---------------------- */
+a {
+    color: #333;
+}
 img {
     max-width: none; /* fixes IE8 */
 }
@@ -31,7 +35,11 @@ select:focus, .btn:focus {
 button.btn, input.btn[type="submit"] {
     line-height: 18px;
 }
-.btn:focus {
+/* apply border to the default .btn but not .btn-* -- no IE */
+.btn:not([class*=" btn-"]) {
+    border-color: #aaa;
+}
+.btn:focus, .btn:active {
     border: 1px solid #4D90FE;
     outline: none;
     -moz-box-shadow: none;
@@ -41,6 +49,9 @@ button.btn, input.btn[type="submit"] {
     border: 1px solid #000;
 }
 
+.navbar, label, legend, form, input, textarea, select, .uneditable-input {
+    margin-bottom: 0;
+}
 .navbar .nav .active > a, .navbar .nav .active > a:hover {
     background-color: transparent;
 }
@@ -49,15 +60,15 @@ button.btn, input.btn[type="submit"] {
     padding: 7px 10px 9px;
 }
 .navbar-inner {
-  background-color: #614e35;
-  background-image: -moz-linear-gradient(top, #67543b, #57442b);
-  background-image: -ms-linear-gradient(top, #67543b, #57442b);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#67543b), to(#57442b));
-  background-image: -webkit-linear-gradient(top, #67543b, #57442b);
-  background-image: -o-linear-gradient(top, #67543b, #57442b);
-  background-image: linear-gradient(top, #67543b, #57442b);
-  background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#67543b', endColorstr='#57442b', GradientType=0);
+    background-color: #614e35;
+    background-image: -moz-linear-gradient(top, #67543b, #57442b);
+    background-image: -ms-linear-gradient(top, #67543b, #57442b);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#67543b), to(#57442b));
+    background-image: -webkit-linear-gradient(top, #67543b, #57442b);
+    background-image: -o-linear-gradient(top, #67543b, #57442b);
+    background-image: linear-gradient(top, #67543b, #57442b);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#67543b', endColorstr='#57442b', GradientType=0);
     min-height: 36px;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
@@ -89,17 +100,10 @@ button.btn, input.btn[type="submit"] {
 .dropdown-menu li > a:hover > [class*=" icon-"] {
   background-image: url("../images/glyphicons-halflings-white.png");
 }
-.navbar, form, input, textarea, select, .uneditable-input {
-    margin-bottom: 0;
-}
 
 /* ------------------------------------------ */
 
-/* css for flyout menu */
-.sidebar-nav {
-    padding: 9px 0;
-}
-
+/* bootstrap mod to show menu on hover instead of click */
 .dropdown-menu .sub-menu {
     left: 100%;
     position: absolute;
@@ -107,19 +111,15 @@ button.btn, input.btn[type="submit"] {
     visibility: hidden;
     margin-top: -1px;
 }
-
 .dropdown-menu li:hover .sub-menu {
     visibility: visible;
 }
-
 .dropdown:hover .dropdown-menu {
     display: block;
 }
-
 .nav-tabs .dropdown-menu, .nav-pills .dropdown-menu, .navbar .dropdown-menu {
     margin-top: 0;
 }
-
 .navbar .sub-menu:before {
     border-bottom: 7px solid transparent;
     border-left: none;

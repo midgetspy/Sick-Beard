@@ -44,24 +44,17 @@ color:#57442B;
 
 /* --------------------------------------------- */
 
-h1 {
+h1.title {
 text-align:left;
 font-size:21px;
 line-height:23px;
 font-weight:400;
-}
-h1.title {
 padding-bottom:4px;
 margin-bottom:12px;
 border-bottom:1px solid #4e4e4e;
 }
-h1 a {
+h1.title a {
 text-decoration:none;
-}
-
-h2 {
-font-size:18px;
-font-weight:700;
 }
 
 .h2footer {
@@ -143,10 +136,7 @@ font-size: 1em;
     color:#fff;
     text-decoration: none;
 }
-
-.row {
-clear:left;
-}
+.sickbeardTable tr:hover { background-color: #cfcfcf !important; }
 
 .plotInfo {
 cursor:help;
@@ -223,13 +213,10 @@ background-color:#FFB0B0;
 padding:2px;
 }
 
-a,a.remove {
-color:#000;
-}
-
-h1 a:hover, h2 a:hover, span a:hover, div.h2footer a:hover {
+h1 a:hover, h2 a:hover, span a:hover, div.h2footer a:hover, .notify-text a:hover {
 background-color:#000;
-color:#FFF;
+color:#fff;
+text-decoration: none;
 }
 
 div#summary {
@@ -297,6 +284,9 @@ padding-bottom:1px;
 #tabs label span.component-desc, .stepDiv label span.component-desc{font-size:.9em; float:left;}
 #tabs div.field-pair select, .stepDiv div.field-pair select{font-size:1em;border:1px solid #d4d0c8;}
 #tabs div.field-pair select option, .stepDiv div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
+.step p { margin: 12px 0;}
+#customQuality { overflow: hidden; padding: 10px 0; }
+#customQualityWrapper { width: 500px; }
 
 ul#rootDirStaticList { width: 90%; text-align: left; margin-left: auto; margin-right: auto; padding-left: 0; }
 ul#rootDirStaticList li{ list-style: none outside none; margin: 2px; padding: 4px 5px 4px 5px; cursor: pointer; }
@@ -323,8 +313,10 @@ div#addShowPortal  button .buttontext { position: relative; display: block; padd
 
 td.tvShow { font-weight: bold; }
 
-td.tvShow a {text-decoration: none; font-size: 1.2em; }
+td.tvShow a {color: #333; text-decoration: none; font-size: 1.2em; }
+td.tvShow:hover a { color:#000;}
 td.tvShow:hover { background-color: #cfcfcf !important; cursor: pointer; }
+
 .navShow { display: inline; cursor: pointer; vertical-align: top; }
 
 /* for manage_massEdit */

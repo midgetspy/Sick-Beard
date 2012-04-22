@@ -62,24 +62,33 @@
 <table id="massUpdateTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
   <thead>
     <tr>
-      <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck" /></th>
+      <th width="1%">Edit<br/>
+        <input type="checkbox" class="bulkCheck" id="editCheck" />
+      </th>
       <th class="nowrap">Lang</th>
       <th class="nowrap">Show Name</th>
       <th>Quality</th>
       <th>Season<br/>Folders</th>
       <th>Paused</th>
       <th>Status</th>
-      <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck" /></th>
-      <th width="1%">Rescan&nbsp;<input type="checkbox" class="bulkCheck" id="refreshCheck" /></th>
-      <th width="1%">Rename&nbsp;<input type="checkbox" class="bulkCheck" id="renameCheck" /></th>
-<!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>//-->
-      <th width="1%">Delete&nbsp;<input type="checkbox" class="bulkCheck" id="deleteCheck" /></th>
+      <th width="1%">Update<br/>
+        <input type="checkbox" class="bulkCheck" id="updateCheck" />
+      </th>
+      <th width="1%">Rescan<br/>
+        <input type="checkbox" class="bulkCheck" id="refreshCheck" />
+      </th>
+      <th width="1%">Rename<br/>
+        <input type="checkbox" class="bulkCheck" id="renameCheck" />
+      </th>
+      <th width="1%">Delete<br/>
+        <input type="checkbox" class="bulkCheck" id="deleteCheck" />
+      </th>
     </tr>
   </thead>
 <tfoot>
   <tr>
-    <td rowspan="1" colspan="1" class="align-center alt"><input type="button" value="Edit Selected" id="submitMassEdit" /></td>
-    <td rowspan="1" colspan="10" class="align-right alt"><input type="button" value="Submit" id="submitMassUpdate" /></td>
+    <td rowspan="1" colspan="1" class="align-center"><input type="button" class="btn" value="Edit Selected" id="submitMassEdit" /></td>
+    <td rowspan="1" colspan="10" class="align-right"><input type="button" class="btn btn-primary" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>

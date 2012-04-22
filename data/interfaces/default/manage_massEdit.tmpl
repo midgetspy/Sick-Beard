@@ -26,7 +26,7 @@
         #for $cur_dir in $root_dir_list:
         #set $cur_index = $root_dir_list.index($cur_dir)
         <div style="padding: 6px 0 3px 25px;">
-            <input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit" />
+            <input class="btn edit_root_dir" type="button" id="edit_root_dir_$cur_index" value="Edit" />
             $cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
         </div>
         <input type="hidden" name="orig_root_dir_$cur_index" value="$cur_dir" />
@@ -35,7 +35,7 @@
 
 </div>
 
-<div class="optionWrapper alt">
+<div class="optionWrapper alt container">
 <span class="selectTitle">Quality</span>
     <div class="selectChoices">
         <select id="qualityPreset" name="quality_preset">
@@ -50,7 +50,7 @@
 
     <div id="customQuality">
         <div style="width: 50%; text-align: center;" class="float-left">
-        <h3>Inital</h3>
+        <h4>Inital</h4>
             #set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
             <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
             #for $curQuality in sorted($anyQualityList):
@@ -59,7 +59,7 @@
             </select>
         </div>
         <div style="width: 50%; text-align: center;" class="float-left">
-        <h3>Archive</h3>
+        <h4>Archive</h4>
             #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
             <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
             #for $curQuality in sorted($bestQualityList):
@@ -67,7 +67,6 @@
             #end for
             </select>
         </div>
-    <br />
     </div>
 </div>
 
@@ -99,16 +98,10 @@
 </div>
 
 <div class="optionWrapper" style="text-align: center;">
-    <input type="submit" value="Submit" /><br />
+    <input class="btn btn-primary" type="submit" value="Submit" /><br />
 </div>
 
 </form>
 <br />
-
-<script type="text/javascript" charset="utf-8">
-<!--
-    jQuery('#location').fileBrowser({ title: 'Select Show Location' });
-//-->
-</script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

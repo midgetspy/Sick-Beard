@@ -66,4 +66,3 @@ cursor:pointer;
 #customQualityWrapper { height: 175px; overflow: auto; }
 #customQualityWrapper div.component-group-desc{float:left;width:165px;}
 #customQualityWrapper div.component-group-desc p{width:85%;font-size:1.2em;color:#666;margin:.8em 0;}
-#customQualityWrapper div.component-group-desc p.note{width:90%;font-size:1.2em;color:#333;margin:.8em 0;}

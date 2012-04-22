@@ -64,7 +64,7 @@ $(document).ready(function() {
             last_txt = $('#rootDirText').val();
         $('#rootDirStaticList').html('');           
         $('#rootDirs option').each(function(i, w) {
-            $('#rootDirStaticList').append('<li class="ui-state-default ui-corner-all"><input type="checkbox" class="dir_check" id="'+$(w).val()+'" checked=checked> <label for="'+$(w).val()+'">'+$(w).val()+'</label></li>')
+            $('#rootDirStaticList').append('<li class="ui-state-default ui-corner-all"><input type="checkbox" class="cb dir_check" id="'+$(w).val()+'" checked=checked> <label for="'+$(w).val()+'"><b>'+$(w).val()+'</b></label></li>')
         });
         loadContent();
     });
