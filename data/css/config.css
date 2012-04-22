@@ -34,11 +34,7 @@
 #config-settings .config-settings-group p{font-size:1.1em;color:#666;margin:.6em 0 1em;}
 #config-settings .config-settings-group div.field-pair{margin:1.2em 0 .6em;}
 #config-settings .config-settings-group input{float:left;}
-.clearfix:after{content:".";display:block;height:0;clear:both;visibility:hidden;}
-.clearfix{display:block;}
-/* Hides from IE-mac \*/
-* html .clearfix{height:1%;}
-/* End hide from IE-mac */
+
 #provider_order_list{list-style-type:none;width:250px;margin:0;padding:0;}
 #provider_order_list li{font-size:1.3em;height:1.3em;font-family:Verdana;margin:0 5px 5px;padding:6px;}
 #provider_order_list input{margin:0px 2px;}

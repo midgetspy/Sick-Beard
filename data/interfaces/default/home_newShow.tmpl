@@ -36,7 +36,7 @@
             <select name="tvdbLang" id="tvdbLangSelect">
                 <option value="en" selected="selected">en</option>
             </select><b>*</b>
-            <input type="button" id="searchName" value="Search" /><br /><br />
+            <input type="button" id="searchName" value="Search" class="btn" /><br /><br />
     
             <b>*</b> This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
             This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
@@ -76,9 +76,9 @@
 <br />
 
 <div style="width: 800px; text-align: center;">
-<input type="button" id="addShowButton" value="Add Show" disabled="disabled" />
+<input class="btn" type="button" id="addShowButton" value="Add Show" disabled="disabled" />
 #if $provided_show_dir:
-<input type="button" id="skipShowButton" value="Skip Show" />
+<input class="btn" type="button" id="skipShowButton" value="Skip Show" />
 #end if
 </div>
 

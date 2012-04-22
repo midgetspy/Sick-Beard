@@ -33,7 +33,7 @@
             data = $.grep(data, function (value) {
                 return i++ != 0;
             });
-            $('<h1>').text(first_val.current_path).appendTo(fileBrowserDialog);
+            $('<h2>').text(first_val.current_path).appendTo(fileBrowserDialog);
             list = $('<ul>').appendTo(fileBrowserDialog);
             $.each(data, function (i, entry) {
                 link = $("<a href='javascript:void(0)' />").click(function () { browse(entry.path, endpoint); }).text(entry.name);
@@ -62,8 +62,9 @@
                 title:       options.title,
                 position:    ['center', 40],
                 minWidth:    Math.min($(document).width() - 80, 650),
-                minHeight:   320,
-                height:      $(document).height() - 80,
+                height:      Math.min($(document).height() - 80, $(window).height() - 80),
+                maxHeight:   Math.min($(document).height() - 80, $(window).height() - 80),
+                maxWidth:    $(document).width() - 80,
                 modal:       true,
                 autoOpen:    false,
                 buttons: [

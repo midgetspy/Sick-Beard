@@ -86,7 +86,7 @@
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
 <br/>
-    <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
+    <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
     <thead><tr><th>Airdate</th><th>Show</th><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Search</th></tr></thead>
     <tbody>
 
@@ -178,7 +178,7 @@
 
         #if $sort == "network":
             #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
-                <br /><h1 class="network">$cur_result["network"]</h1>
+                <br /><h2 class="network">$cur_result["network"]</h2>
                 #set $cur_ep_airdate = int($cur_result["airdate"])
                 #if $cur_ep_airdate < $today:
                     #set $show_div = "ep_listing listing_overdue"
@@ -197,19 +197,19 @@
             #set $cur_ep_airdate = int($cur_result["airdate"])
             #if $cur_segment != $cur_ep_airdate:
                 #if $cur_ep_airdate < $today and not $missed_header:
-                    <br /><h1 class="day">Missed</h1>
+                    <br /><h2 class="day">Missed</h2>
                     #set $missed_header = True
                     #set $show_div = "ep_listing listing_overdue"
                 #elif $cur_ep_airdate >= $next_week and not $too_late_header:
-                    <br /><h1 class="day">Later</h1>
+                    <br /><h2 class="day">Later</h2>
                     #set $show_div = "ep_listing listing_toofar"
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
                     #if $cur_ep_airdate == $today:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h1>
+                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h2>
                         #set $show_div = "ep_listing listing_current"
                     #else:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
+                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h2>
                         #set $show_div = "ep_listing listing_default"
                     #end if
                 #end if

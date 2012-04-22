@@ -55,6 +55,7 @@ table.tablesorter input.tablesorter-filter {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+    height: inherit;
 }
 table.tablesorter tr.tablesorter-filter,
 table.tablesorter tr.tablesorter-filter td {
@@ -76,7 +77,13 @@ tr.tablesorter-stickyHeader {
     background-color: #fff;
     padding: 2px 0;
 }
-
+table.tablesorter tfoot tr {
+    border-collapse: collapse;
+    background-color: #333;
+    color: #fff;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align: center;
+}
 table.tablesorter tfoot a {
     color:#fff;
     text-decoration: none;

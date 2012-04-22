@@ -17,11 +17,9 @@
 
 .tvshowTitle a {
     color: #FFFFFF;
-    float: left; 
-    padding-top: 3px; 
-    padding-left: 8px; 
-    line-height: 1.2em;
-    font-size: 1.1em;
+    padding-left: 8px;
+    line-height: 23px;
+    font-size: 13px;
     text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
 }
 
@@ -39,16 +37,13 @@
     -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
     height: 200px;
-    width: 136px;
-    border-top: 1px solid #ccc; 
-    border-right: 1px solid #ccc;
 }
 .bannerThumb {
     -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
     height: 112px;
-    width: 606px;
     /* margin-bottom: 1px; */
+    border-bottom: 1px solid #d2ebe8;
 }
 
 .tvshowDiv th {
@@ -65,7 +60,6 @@
 }
 
 .tvshowDiv td {
-    border-top: 1px solid #d2ebe8;
     background: #fff;
     padding: 10px;
     color: #000;
@@ -73,27 +67,25 @@
 
 .tvshowDiv td.next_episode {
     width: 100%;
-    border-top: 1px solid #ccc;
     background: #F5FAFA;
     color: #000;
+    border-bottom: 1px solid #d2ebe8;
 }
 
-h1.day {
-    font-weight: bold;
-    padding: 4px;
+h2.day {
     letter-spacing: 1px;
     background-color: #9CB5CF;
     color: #000;
     text-align: center;
+    margin: 10px 0;
 }
 
-h1.network {
-    font-weight: bold;
-    padding: 4px;
+h2.network {
     letter-spacing: 1px;
     background-color: #8FBFAF;
     color: #000;
     text-align: center;
+    margin: 10px 0;
 }
 
 .ep_listing {

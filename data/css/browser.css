@@ -1,5 +1,4 @@
 #fileBrowserDialog {
-  max-height: 480px;
   overflow-y: auto;
 }
 #fileBrowserDialog ul {
@@ -28,6 +27,9 @@
   background: url("/images/loading.gif") 10px 50% no-repeat;
 }
 */
+.fileBrowser {
+margin-left:5px !important;
+}
 
 /* jquery ui autocomplete overrides to make it look more like the old autocomplete */
 .ui-autocomplete {
