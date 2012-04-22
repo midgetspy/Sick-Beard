@@ -479,14 +479,13 @@ def fixSetGroupID(childPath):
     if os.name == 'nt' or os.name == 'ce':
         return
 
-    childStat = ek.ek(os.stat, childPath)
-
     parentPath = ek.ek(os.path.dirname, childPath)
     parentStat = os.stat(parentPath)
     parentMode = stat.S_IMODE(parentStat[stat.ST_MODE])
 
     if parentMode & stat.S_ISGID:
         parentGID = parentStat[stat.ST_GID]
+        childStat = ek.ek(os.stat, childPath)
         childGID = childStat[stat.ST_GID]
 
         if childGID == parentGID:
