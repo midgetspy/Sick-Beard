@@ -213,6 +213,8 @@ class GitUpdateManager(UpdateManager):
 
         self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
 
+        self.branch = self._find_git_branch()
+
     def _git_error(self):
         error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
         sickbeard.NEWEST_VERSION_STRING = error_message
@@ -282,6 +284,10 @@ class GitUpdateManager(UpdateManager):
             
         return True
 
+    def _find_git_branch(self):
+
+        return self._run_git('symbolic-ref -q HEAD')[0].strip().replace('refs/heads/', '', 1) or 'master'
+
 
     def _check_github_for_update(self):
         """
@@ -297,7 +303,7 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits('midgetspy', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits('midgetspy', 'Sick-Beard', self.branch):
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
@@ -336,8 +342,8 @@ class GitUpdateManager(UpdateManager):
         self._find_installed_version()
         try:
             self._check_github_for_update()
-        except Exception:
-            logger.log(u"Unable to contact github, can't check for update", logger.ERROR)
+        except Exception, e:
+            logger.log(u"Unable to contact github, can't check for update: "+repr(e), logger.ERROR)
             return False
 
         logger.log(u"After checking, cur_commit = "+str(self._cur_commit_hash)+", newest_commit = "+str(self._newest_commit_hash)+", num_commits_behind = "+str(self._num_commits_behind), logger.DEBUG)
@@ -353,7 +359,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION) #@UnusedVariable
+        output, err = self._run_git('pull origin '+self.branch) #@UnusedVariable
 
         if not output:
             return self._git_error()

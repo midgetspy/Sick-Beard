@@ -184,6 +184,8 @@ class PostProcessor(object):
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 ek.ek(os.remove, cur_file)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.deleteFile(cur_file)
                 
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
@@ -782,6 +784,8 @@ class PostProcessor(object):
             try:
                 ek.ek(os.mkdir, dest_path)
                 helpers.chmodAsParent(dest_path)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.addFolder(dest_path)
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
@@ -834,7 +838,7 @@ class PostProcessor(object):
         notifiers.plex_notifier.update_library()
 
         # do the library update for synoindex
-        notifiers.synoindex_notifier.update_library(ep_obj)
+        notifiers.synoindex_notifier.addFile(ep_obj.location)
 
         # do the library update for trakt
         notifiers.trakt_notifier.update_library(ep_obj)

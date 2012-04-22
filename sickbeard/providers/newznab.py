@@ -86,7 +86,7 @@ class NewznabProvider(generic.NZBProvider):
 				cur_params['rid'] = show.tvrid
 			# if we can't then fall back on a very basic name search
 			else:
-				cur_params['q'] = sanitizeSceneName(cur_exception)
+				cur_params['q'] = sanitizeSceneName(cur_exception).replace('.', '_')
 	
 			if season != None:
 				# air-by-date means &season=2010&q=2010.03, no other way to do it atm
@@ -117,7 +117,7 @@ class NewznabProvider(generic.NZBProvider):
 			params['rid'] = ep_obj.show.tvrid
 		# if we can't then fall back on a very basic name search
 		else:
-			params['q'] = sanitizeSceneName(ep_obj.show.name)
+			params['q'] = sanitizeSceneName(ep_obj.show.name).replace('.', '_')
 
 		if ep_obj.show.air_by_date:
 			date_str = str(ep_obj.airdate)
@@ -142,7 +142,7 @@ class NewznabProvider(generic.NZBProvider):
 					continue
 
 				cur_return = params.copy()
-				cur_return['q'] = sanitizeSceneName(cur_exception)
+				cur_return['q'] = sanitizeSceneName(cur_exception).replace('.', '_')
 				to_return.append(cur_return)
 
 		return to_return

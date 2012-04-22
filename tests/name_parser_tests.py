@@ -10,7 +10,7 @@ from sickbeard.name_parser import parser
 import sickbeard
 sickbeard.SYS_ENCODING = 'UTF-8'
 
-DEBUG = VERBOSE = True
+DEBUG = VERBOSE = False
 
 simple_test_cases = {
               'standard': {
