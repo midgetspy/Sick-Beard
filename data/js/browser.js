@@ -1,4 +1,5 @@
-(function () {
+;(function($) {
+"use strict";
 
     $.Browser = {
         defaults: {
@@ -64,23 +65,27 @@
                 minHeight:   320,
                 height:      $(document).height() - 80,
                 modal:       true,
-                autoOpen:    false
+                autoOpen:    false,
+                buttons: [
+                    {
+                        text: "Ok",
+                        "class": "btn btn-large",
+                        click: function() {
+                            // store the browsed path to the associated text field
+                            callback(currentBrowserPath, options);
+                            fileBrowserDialog.dialog("close");
+                        }
+                    },
+                    {
+                        text: "Cancel",
+                        "class": "btn btn-large",
+                        click: function() {
+                            fileBrowserDialog.dialog("close");
+                        }
+                    }
+                ]
             });
         }
-
-        // add the OK/Close buttons to the dialog
-        fileBrowserDialog.dialog('option', 'buttons', {
-            "Ok": function () {
-                // store the browsed path to the associated text field
-                //options.field.val(currentBrowserPath);
-                //alert(currentBrowserPath);
-                callback(currentBrowserPath, options);
-                fileBrowserDialog.dialog("close");
-            },
-            "Cancel": function () {
-                fileBrowserDialog.dialog("close");
-            }
-        });
 
         // set up the browser and launch the dialog
         var initialDir = '';
@@ -163,9 +168,10 @@
         options = $.extend(options, {initialDir: initialDir});
 
         // append the browse button and give it a click behavior
-        return options.field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function () {
+        return options.field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="btn fileBrowser" />').click(function () {
             $(this).nFileBrowser(callback, options);
             return false;
         }));
     };
-})();
+
+})(jQuery);
