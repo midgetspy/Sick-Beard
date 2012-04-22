@@ -404,7 +404,7 @@ class TVShow(object):
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound:
-                epNum = str(episodes[0]) if len(episodes) > 0
+                epNum = len(episodes) if str(episodes[0])  else ''
                 logger.log(u"Unable to find episode with date "+epNum+" for show "+self.name+", skipping", logger.WARNING)
                 return None
             except tvdb_exceptions.tvdb_error, e:
