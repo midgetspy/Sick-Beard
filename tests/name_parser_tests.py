@@ -118,7 +118,7 @@ simple_test_cases = {
               '[ShinBunBu-Subs] Bleach - 02-03 (CX 1280x720 x264 AAC)': parser.ParseResult(None, 'Bleach', None, [], 'CX 1280x720 x264 AAC', 'ShinBunBu-Subs', None, [02,03]),
               '[Doki] Hanasaku Iroha - 03 (848x480 h264 AAC) [CB1AA73B]': parser.ParseResult(None, 'Hanasaku Iroha', None, [], '848x480 h264 AAC', 'Doki', None, [03]),
               '[UTW]_Fractal_-_01_[h264-720p][96D3F1BF]': parser.ParseResult(None, 'Fractal', None, [], 'h264-720p', 'UTW', None, [1]),
-              
+              '[a-s]_inuyasha_-_028_rs2_[BFDDF9F2]': parser.ParseResult(None, 'inuyasha', None, [], 'BFDDF9F2', 'a-s', None, [28]),
                },
                'anime_ep_name':{
                '[TzaTziki]_One_Piece_279_Chopper_Man_1_[720p][8AE5F25D]': parser.ParseResult(None, 'One Piece', None, [], '720p', 'TzaTziki', None, [279]),
