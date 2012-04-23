@@ -26,7 +26,7 @@ from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import Quality
 
-from sickbeard import helpers, exceptions, show_name_helpers
+from sickbeard import helpers, exceptions, show_name_helpers, scene_exceptions
 from sickbeard import name_cache
 from sickbeard.exceptions import ex
 
@@ -268,17 +268,31 @@ class TVCache():
                         logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
                         tvdb_id = showResult[0]
 
+                def regexSearch(season=-1):
+                    if show_name_helpers.isGoodResult(name, curShow, False, season=season):
+                        logger.log(u"Successfully matched " + name + " to " + curShow.name + " with regex", logger.DEBUG)
+                        tvdb_id = curShow.tvdbid
+                        tvdb_lang = curShow.lang
+                        return True
+                    return False
+
                 # if the DB lookup fails then do a comprehensive regex search
                 if tvdb_id == None:
                     logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
                     for curShow in sickbeard.showList:
-                        if show_name_helpers.isGoodResult(name, curShow, False):
-                            logger.log(u"Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
-                            tvdb_id = curShow.tvdbid
-                            tvdb_lang = curShow.lang
+                        if regexSearch():
                             break
 
-                # if tvdb_id was anything but None (0 or a number) then 
+                # if the DB lookup fails then do a comprehensive regex search on saason exceptions
+                if tvdb_id == None:
+                    logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search on season exceptions", logger.DEBUG)
+                    for curShow in sickbeard.showList:
+                        scene_seasons = scene_exceptions.getSceneSeasons(curShow.tvdbid)
+                        for cur_scene_season in scene_seasons:
+                            if regexSearch(cur_scene_season):
+                                break
+
+                # if tvdb_id was anything but None (0 or a number) then
                 if not from_cache:
                     name_cache.addNameToCache(parse_result.series_name, tvdb_id)
 
@@ -375,7 +389,7 @@ class TVCache():
         if not episode:
             sqlResults = myDB.select("SELECT * FROM "+self.providerID)
         else:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "|"+str(episode.episode)+"|"])
+            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.scene_season, "%|"+str(episode.scene_episode)+"|%"])
 
         # for each cache entry
         for curResult in sqlResults:

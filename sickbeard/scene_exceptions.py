@@ -17,7 +17,8 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import urllib, httplib
+import urllib, urllib2, httplib
+
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard import name_cache, helpers
 from sickbeard import logger
@@ -33,19 +34,23 @@ from sickbeard.exceptions import ex
 
 excpetionCache = {}
 
-def get_scene_exceptions(tvdb_id):
+def get_scene_exceptions(tvdb_id, season=-1):
     """
     Given a tvdb_id, return a list of all the scene exceptions.
+    If no season is given it will only return scene_exceptions that are valid for all seasons
     """
     global excpetionCache
-    if tvdb_id not in excpetionCache:
+    if tvdb_id not in excpetionCache or season not in excpetionCache[tvdb_id]:
         myDB = db.DBConnection("cache.db")
-        exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+        exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ? and season = ?", [tvdb_id, season])
         exceptionsList = [cur_exception["show_name"] for cur_exception in exceptions]
-        excpetionCache[tvdb_id] = exceptionsList
+        if not tvdb_id in excpetionCache:
+            excpetionCache[tvdb_id] = {}
+        excpetionCache[tvdb_id][season] = exceptionsList
     else:
-        exceptionsList = excpetionCache[tvdb_id]
+        exceptionsList = excpetionCache[tvdb_id][season]
     return exceptionsList
+
 
 def get_scene_exception_by_name(show_name):
     """
@@ -92,32 +97,25 @@ def retrieve_exceptions(localOnly=False):
         else:
             exception_dict[local_ex] = local_exceptions[local_ex]
 
-    xem_exceptions = _xem_excpetions_fetcher(seasonOnly='all') # saesonOnly='all' means that only names that fit for all season are added and not season specific names
-    for xem_ex_id in xem_exceptions: # xem json exceptions
-        if xem_ex_id in exception_dict:
-            exception_dict[xem_ex_id] = exception_dict[xem_ex_id] + xem_exceptions[xem_ex_id]
-        else:
-            exception_dict[xem_ex_id] = xem_exceptions[xem_ex_id]
+
+    xem_exceptions = _xem_excpetions_fetcher()
+    exception_dict = dict(xem_exceptions.items() + exception_dict.items())
+
+    if not len(exception_dict):
+        logger.log("retrived exception list is totally empty. Assuming remote server error not flushing local and stoping now")
+        return False
 
     myDB = db.DBConnection("cache.db")
-
-    changed_exceptions = False
+    myDB.action("DELETE FROM scene_exceptions") # flush current list
 
     # write all the exceptions we got off the net into the database
     for cur_tvdb_id in exception_dict:
 
-        # get a list of the existing exceptions for this ID
-        existing_exceptions = [x["show_name"] for x in myDB.select("SELECT * FROM scene_exceptions WHERE tvdb_id = ?", [cur_tvdb_id])]
+        for cur_exception_dict in exception_dict[cur_tvdb_id]:
+            cur_exception, curSeason = cur_exception_dict.items()[0]
+            myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name, season) VALUES (?,?,?)", [cur_tvdb_id, cur_exception, curSeason])
 
-        for cur_exception in exception_dict[cur_tvdb_id]:
-            # if this exception isn't already in the DB then add it
-            if cur_exception not in existing_exceptions:
-                myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
-                changed_exceptions = True
-
-    # since this could invalidate the results of the cache we clear it out after updating
-    if changed_exceptions:
-        name_cache.clearCache()
+    name_cache.clearCache()
         global excpetionCache
         excpetionCache = {}
 
@@ -141,11 +139,28 @@ def _retrieve_exceptions_fetcher(url):
         exception_dict[tvdb_id] = alias_list
     return exception_dict
 
-def _xem_excpetions_fetcher(animeOnly=False, languageOnly=None, seasonOnly=None):
+def _retrieve_anidb_mainnames():
+
+    anidb_mainNames = {}
+    for show in sickbeard.showList:
+        if show.is_anime:
+            try:
+                anime = adba.Anime(None, name=show.name, tvdbid=show.tvdbid, autoCorrectName=True)
+            except:
+                continue
+            else:
+                if anime.name and anime.name != show.name:
+                    anidb_mainNames[show.tvdbid] = [anime.name]
+
+    logger.log("anidb anime names: " + str(anidb_mainNames), logger.DEBUG)
+    return anidb_mainNames
+
+
+def _xem_excpetions_fetcher():
     exception_dict = {}
     opener = urllib2.build_opener()
 
-    url = "http://thexem.de/map/allNames?origin=tvdb&season=le1"
+    url = "http://thexem.de/map/allNames?origin=tvdb&seasonNumbers=1"
     try:
         f = opener.open(url)
     except (EOFError, IOError), e:
@@ -171,20 +186,10 @@ def _xem_excpetions_fetcher(animeOnly=False, languageOnly=None, seasonOnly=None)
     logger.log(u"xem exception dict: " + str(exception_dict), logger.DEBUG)
     return exception_dict
 
-def _retrieve_anidb_mainnames():
-
-    anidb_mainNames = {}
-    for show in sickbeard.showList:
-        if show.is_anime:
-            try:
-                anime = adba.Anime(None, name=show.name, tvdbid=show.tvdbid, autoCorrectName=True)
-            except:
-                continue
-            else:
-                if anime.name and anime.name != show.name:
-                    anidb_mainNames[show.tvdbid] = [anime.name]
-
-    logger.log("anidb anime names: " + str(anidb_mainNames), logger.DEBUG)
-    return anidb_mainNames
-
+def getSceneSeasons(tvdb_id):
+    """get a list of season numbers that have scene excpetions
+    """
+    myDB = db.DBConnection("cache.db")
+    seasons = myDB.select("SELECT DISTINCT season FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+    return [cur_exception["season"] for cur_exception in seasons]
 

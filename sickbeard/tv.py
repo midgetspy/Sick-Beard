@@ -23,6 +23,11 @@ import datetime
 import threading
 import re
 import glob
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
+import urllib2, httplib
 
 import sickbeard
 
@@ -121,7 +126,7 @@ class TVShow(object):
                 del myEp
 
 
-    def getEpisode(self, season, episode, file=None, noCreate=False, absolute_number=None):
+    def getEpisode(self, season, episode, file=None, noCreate=False, absolute_number=None, scene=False):
         """Return TVEpisode(self, season, episode) | None
         """
         # if we get an anime get the real season and episode
@@ -148,23 +153,29 @@ class TVShow(object):
                 season = 1
                 episode = absolute_number
             """
-        if not season in self.episodes:
-            self.episodes[season] = {}
+        def createCurSeasonDict():
+            if not season in self.episodes:
+                self.episodes[season] = {}
 
+        createCurSeasonDict()
         ep = None
         
-        if not episode in self.episodes[season] or self.episodes[season][episode] == None:
+        if (not episode in self.episodes[season] or self.episodes[season][episode] == None) or scene:
             if noCreate:
                 return None
 
             logger.log(str(self.tvdbid) + ": An object for episode " + str(season) + "x" + str(episode) + " didn't exist in the cache, trying to create it", logger.DEBUG)
 
             if file != None:
-                ep = TVEpisode(self, season, episode, file)
+                ep = TVEpisode(self, season, episode, file, scene)
             else:
-                ep = TVEpisode(self, season, episode)
+                ep = TVEpisode(self, season, episode, scene=scene)
 
             if ep != None:
+                if scene: # if scene mode was active we need to use the new ep season episode numbers
+                    season = ep.season
+                    episode = ep.episode
+                    createCurSeasonDict() # recheck current "real" season dict
                 self.episodes[season][episode] = ep
         
         return self.episodes[season][episode]
@@ -347,6 +358,50 @@ class TVShow(object):
                 scannedEps[season][episode] = True
 
         return scannedEps
+
+    def loadEpisodeSceneNumbers(self):
+        url = "http://thexem.de/map/all?id=%s&origin=tvdb&destination=scene" % self.tvdbid
+        logger.log("xem url: " + url, logger.DEBUG)
+        opener = urllib2.build_opener()
+        try:
+            f = opener.open(url)
+        except (EOFError, IOError), e:
+            logger.log(u"Unable to connect to XEM. Is thexem.de down ?" + ex(e), logger.ERROR)
+            return False
+        except httplib.InvalidURL, e:
+            logger.log(u"Invalid XEM host. Is thexem.de down ?: " + ex(e), logger.ERROR)
+            return False
+        if not f:
+            logger.log(u"Empty response from " + url + ": " + ex(e), logger.ERROR)
+            return False
+        try:
+            xemJson = json.loads(f.read())
+        except ValueError, e:
+            pass
+        
+        epList = self.loadEpisodesFromDB()
+        for curSeason in epList:
+            for curEp in epList[curSeason]:
+                epObj = self.getEpisode(curSeason, curEp)
+                epObj.scene_season = None
+                epObj.scene_episode = None
+                epObj.saveToDB()
+        
+        if xemJson['result'] == 'failure':
+            return False
+
+        for epNumbers in xemJson['data']:
+            tvdb = epNumbers['tvdb']
+            scene = epNumbers['scene']
+            if not tvdb['season'] in epList or not tvdb['episode'] in epList[tvdb['season']]:
+                logger.log(str(self.tvdbid) + ": NOT adding scene number. tvdb: " + str(tvdb) + "| scene: " + str(scene) + " we dont have a ep with this (tvdb) sxxexx", logger.WARNING)
+
+            logger.log(str(self.tvdbid) + ": adding scene number. tvdb: " + str(tvdb) + "| scene: " + str(scene), logger.DEBUG)
+            curEp = self.getEpisode(tvdb['season'], tvdb['episode'])
+            curEp.scene_season = scene['season']
+            curEp.scene_episode = scene['episode']
+            curEp.saveToDB()
+        return True
 
     def setTVRID(self, force=False):
 
@@ -992,7 +1047,7 @@ def dirty_setter(attr_name):
 
 class TVEpisode(object):
 
-    def __init__(self, show, season, episode, file=""):
+    def __init__(self, show, season, episode, file="", scene=False):
 
         self._name = ""
         self._season = season
@@ -1004,6 +1059,13 @@ class TVEpisode(object):
         self._hastbn = False
         self._status = UNKNOWN
         self._tvdbid = 0
+
+        self.scene = scene
+        self._scene_season = None
+        self._scene_episode = None
+        if self.scene:
+            self._scene_season = self._season
+            self._scene_episode = self._episode
 
         # setting any of the above sets the dirty flag
         self.dirty = True
@@ -1030,6 +1092,21 @@ class TVEpisode(object):
     status = property(lambda self: self._status, dirty_setter("_status"))
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
     location = property(lambda self: self._location, dirty_setter("_location"))
+    
+    scene_season = property(lambda self: self._getSceneOrTVDBSeason(), dirty_setter("_scene_season"))
+    scene_episode = property(lambda self: self._getSceneOrTVDBEpisode(), dirty_setter("_scene_episode"))
+
+    def _getSceneOrTVDBSeason(self):
+        if self._scene_season is None:
+            return self.season
+        else:
+            return self._scene_season
+
+    def _getSceneOrTVDBEpisode(self):
+        if self._scene_episode is None:
+            return self.episode
+        else:
+            return self._scene_episode
 
     def checkForMetaFiles(self):
 
@@ -1063,7 +1140,12 @@ class TVEpisode(object):
     def specifyEpisode(self, season, episode):
 
         sqlResult = self.loadFromDB(season, episode)
-
+        # we need this because if the db loading is done with scene we change the acctuay ep ans season number
+        # and these numbers are not valid any more and have been replaced with tvdb numbers
+        if sqlResult:
+            season = self.season
+            episode = self.episode
+        
         # only load from NFO if we didn't load from DB
         if ek.ek(os.path.isfile, self.location) and self.name == "":
             try:
@@ -1089,33 +1171,40 @@ class TVEpisode(object):
 
 
     def loadFromDB(self, season, episode):
-
+        
+        msg = ''
+        if self.scene:
+            msg = "(mode: scene numbers)"
+        logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + msg + " " + str(season) + "x" + str(episode), logger.DEBUG)
         myDB = db.DBConnection()
-        logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
         sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, season, episode])
 
-        """this might be malicious code ! dont use
-        # only search for absolute numbering if we havent already found something and the show is flagged as such
-        useInfoFromDB = False
-        if self.show.is_anime and len(sqlResults) == 0 :
-            logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for absolute number " + str(episode), logger.DEBUG)
-            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season != 0 AND absolute_number = ?", [self.show.tvdbid, episode])
-            useInfoFromDB = True
-        """
+        myDB = db.DBConnection()
+        if not self.scene:
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, season, episode])
+        else:
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND scene_season = ? AND scene_episode = ?", [self.show.tvdbid, season, episode])
+            
 
         if len(sqlResults) > 1:
-            raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
+            raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow."+msg)
         elif len(sqlResults) == 0:
-            logger.log(str(self.show.tvdbid) + ": Episode " + str(self.season) + "x" + str(self.episode) + " not found in the database", logger.DEBUG)
+            logger.log(str(self.show.tvdbid) + ": Episode " + msg + str(self.season) + "x" + str(self.episode) + " not found in the database", logger.DEBUG)
             return False
         else:
             #NAMEIT logger.log(u"AAAAA from" + str(self.season)+"x"+str(self.episode) + " -" + self.name + " to " + str(sqlResults[0]["name"]))
             if sqlResults[0]["name"] != None:
                 self.name = sqlResults[0]["name"]
-            self.season = season
-            self.episode = episode
-            # TODO: refactor db
-            self.absolute_number = sqlResults[0]["absolute_number"]    
+
+            if not self.scene:
+                self.season = season
+                self.episode = episode
+            else:
+                self.season = int(sqlResults[0]["season"])
+                self.episode = int(sqlResults[0]["episode"])
+                
+            self.absolute_number = sqlResults[0]["absolute_number"]
+
             self.description = sqlResults[0]["description"]
             if self.description == None:
                 self.description = ""
@@ -1128,7 +1217,17 @@ class TVEpisode(object):
                 self.location = os.path.normpath(sqlResults[0]["location"])
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
+            
+            # does one now a better way to test for NULL in the db field ?
+            if isinstance(sqlResults[0]["scene_season"], int):
+                self.scene_season = int(sqlResults[0]["scene_season"])
 
+            if isinstance(sqlResults[0]["scene_episode"], int):
+                self.scene_episode = int(sqlResults[0]["scene_episode"])
+
+            logger.log("Episode loading done " + msg + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            
+            self.scene = False
             self.dirty = False
             return True
 
@@ -1413,7 +1512,9 @@ class TVEpisode(object):
                         "hastbn": self.hastbn,
                         "status": self.status,
                         "location": self.location,
-                        "absolute_number": self.absolute_number}
+                        "absolute_number": self.absolute_number,
+                        "scene_season": self._scene_season,
+                        "scene_episode": self._scene_episode}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}

@@ -94,8 +94,8 @@ class EZRSSProvider(generic.TorrentProvider):
         if ep_obj.show.air_by_date:
             params['date'] = str(ep_obj.airdate)
         else:
-            params['season'] = ep_obj.season
-            params['episode'] = ep_obj.episode
+            params['season'] = ep_obj.scene_season
+            params['episode'] = ep_obj.scene_episode
     
         return [params]
 

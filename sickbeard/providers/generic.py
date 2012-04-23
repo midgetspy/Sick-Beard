@@ -276,8 +276,8 @@ class GenericProvider:
                 if episode.absolute_number not in parse_result.ab_episode_numbers:
                     logger.log("Episode "+title+" isn't "+str(episode.absolute_number)+", skipping it. episode numbers:"+ str(parse_result.ab_episode_numbers), logger.DEBUG)
                     continue
-            elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
-                logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
+            elif parse_result.season_number != episode.scene_season or episode.scene_episode not in parse_result.episode_numbers:
+                logger.log("Episode "+title+" isn't "+str(episode.scene_season)+"x"+str(episode.scene_episode)+", skipping it", logger.DEBUG)
                 continue
 
             quality = self.getQuality(item,anime=episode.show.is_anime)

@@ -115,10 +115,11 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_SDTV(self, attrs, anime=False):
 
-        # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
-        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
+        # Video Fmt: (XviD, DivX, x264 or H.264), NOT 720p, NOT 1080p, NOT 1080i
+        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'x264' in attrs['Video Fmt'] or 'H.264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
-                            and ('1080p' not in attrs['Video Fmt'])
+                            and ('1080p' not in attrs['Video Fmt']) \
+                            and ('1080i' not in attrs['Video Fmt'])
 
 
         
@@ -138,11 +139,12 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_SDDVD(self, attrs, anime=False):
 
-        # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
-        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
+        # Video Fmt: (XviD, DivX, x264 or H.264), NOT 720p, NOT 1080p, NOT 1080i
+        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'x264' in attrs['Video Fmt'] or 'H.264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
-                            and ('1080p' not in attrs['Video Fmt'])
-
+                            and ('1080p' not in attrs['Video Fmt']) \
+                            and ('1080i' not in attrs['Video Fmt'])
+    						
         # Source: DVD
         source = 'Source' in attrs and 'DVD' in attrs['Source']
 
@@ -176,9 +178,12 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_WEBDL(self, attrs, anime=False):
 
-        # Video Fmt: H.264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('H.264' in attrs['Video Fmt']) \
+        # Video Fmt: x264, H.264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt'] or 'H.264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
+
+        # Source: Web-DL
+        source = 'Source' in attrs and 'Web-dl' in attrs['Source']
 
         # Subtitles: (None)
         if not anime:
@@ -187,8 +192,7 @@ class NewzbinProvider(generic.NZBProvider):
             subs = 'Subtitles' in attrs
             
 
-        logger.log("webdl: "+str(video_fmt)+" and "+str(subs), logger.DEBUG)
-        return video_fmt and subs
+        return video_fmt and source and subs
 
     def _is_720pBluRay(self, attrs, anime=False):
 
@@ -285,7 +289,7 @@ class NewzbinProvider(generic.NZBProvider):
 
         nameList = set(show_name_helpers.allPossibleShowNames(ep_obj.show))
         if not ep_obj.show.air_by_date and not ep_obj.show.is_anime:
-            searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(ep_obj.season, ep_obj.episode) for x in nameList])
+            searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(ep_obj.scene_season, ep_obj.scene_episode) for x in nameList])
         elif ep_obj.show.is_anime:
             searchStr = " OR ".join(['^"'+x+' - %02d"'%ep_obj.absolute_number for x in nameList])
         else:

@@ -435,3 +435,15 @@ class Whitelist(Blacklist):
         query = "CREATE TABLE whitelist (show_id INTEGER, range TEXT, keyword TEXT);"
         self.connection.action(query)
         #self.incDBVersion()
+
+class AddSceneNumbers(Whitelist):
+
+    def test(self):
+        return self.checkDBVersion() >= 10
+
+    def execute(self):
+
+        self.addColumn("tv_episodes", "scene_episode", "NUMERIC", "NULL")
+        self.addColumn("tv_episodes", "scene_season", "NUMERIC", "NULL")
+
+        self.incDBVersion()
