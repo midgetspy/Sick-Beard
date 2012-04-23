@@ -60,7 +60,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         #end for
                         </ul>
                         <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
-                        <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                        <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group1 //-->
 
@@ -224,7 +224,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 <!-- end div for editing providers -->
 
-                    <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                    <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
             
                     </fieldset>
                 </div><!-- /component-group2 //-->
@@ -285,7 +285,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                 </div><!-- /component-group3 //-->
 
                     
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+            <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                 
             </div><!-- /config-components //-->
 

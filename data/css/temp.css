@@ -18,6 +18,32 @@ input.cb {
     margin: 2px 5px 3px 4px;
 }
 
+[class^="icon16-"], [class*=" icon16-"] {
+    background-image: url("../images/glyphicons-config.png");
+    background-position: -40px 0px;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 16px;
+    line-height: 16px;
+    vertical-align: text-top;
+    width: 16px;
+}
+.icon16-github {
+    background-position: 0px 0px;
+}
+.icon16-mirc {
+    background-position: -20px 0px;
+}
+.icon16-sb {
+    background-position: -40px 0px;
+}
+.icon16-web {
+    background-position: -60px 0px;
+}
+.icon16-win {
+    background-position: -80px 0px;
+}
+
 /* bootstrap overrides ---------------------- */
 a {
     color: #333;
@@ -35,10 +61,7 @@ select:focus, .btn:focus {
 button.btn, input.btn[type="submit"] {
     line-height: 18px;
 }
-/* apply border to the default .btn but not .btn-* -- no IE */
-.btn:not([class*=" btn-"]) {
-    border-color: #aaa;
-}
+
 .btn:focus, .btn:active {
     border: 1px solid #4D90FE;
     outline: none;

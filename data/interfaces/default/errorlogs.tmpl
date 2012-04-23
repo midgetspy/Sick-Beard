@@ -9,10 +9,11 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<div class="align-left">
+<div class="align-left"><pre>
 #for $curError in $classes.ErrorViewer.errors[:30]:
-    $curError.time $curError.message<br />
+$curError.time $curError.message
 #end for
+</pre>
 </div>
 
 <script type="text/javascript" charset="utf-8">
