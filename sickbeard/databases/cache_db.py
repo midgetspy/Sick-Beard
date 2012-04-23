@@ -49,3 +49,10 @@ class AddSceneNameCache(AddSceneExceptions):
 
     def execute(self):
         self.connection.action("CREATE TABLE scene_names (tvdb_id INTEGER, name TEXT)")
+
+class AddSceneExceptionsSeasons(AddSceneNameCache):
+    def test(self):
+        return self.hasColumn("scene_exceptions", "season")
+
+    def execute(self):
+        self.addColumn("scene_exceptions", "season", "NUMERIC", -1)
