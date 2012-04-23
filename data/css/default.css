@@ -58,7 +58,8 @@ text-decoration:none;
 }
 
 .h2footer {
-margin: -33px 5px 6px 0px;
+line-height: 23px;
+margin: -45px 5px 22px 0;
 }
 .h2footer select {
 margin-top: -6px;
@@ -92,7 +93,9 @@ border-bottom: 1px dotted #D7D7D7;
 .align-right { text-align:right; }
 .nowrap { white-space: nowrap; }
 /* --------------------------------------------- */
-
+.padding {
+    padding: 5px;
+}
 .footer {
 clear:both;
 width: 100%;
@@ -224,9 +227,6 @@ background-color:#efefef;
 padding:10px;
 border:1px solid #DFDEDE;
 margin:10px;
-}
-div#summary tr {
-line-height: 17px;
 }
 
 #SubMenu {

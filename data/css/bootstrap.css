@@ -800,6 +800,7 @@ input[type="radio"] {
 
   line-height: normal;
   cursor: pointer;
+  background-color: transparent;
   border: 0 \9;
   /* IE9 and down */
 
@@ -1059,6 +1060,13 @@ textarea[readonly] {
   cursor: not-allowed;
   background-color: #eeeeee;
   border-color: #ddd;
+}
+
+input[type="radio"][disabled],
+input[type="checkbox"][disabled],
+input[type="radio"][readonly],
+input[type="checkbox"][readonly] {
+  background-color: transparent;
 }
 
 .control-group.warning > label,
@@ -1736,7 +1744,7 @@ table .span24 {
   *margin-right: .3em;
   line-height: 14px;
   vertical-align: text-top;
-  background-image: url("../images/glyphicons-halflings.png");
+  background-image: url("../img/glyphicons-halflings.png");
   background-position: 14px 14px;
   background-repeat: no-repeat;
 }
@@ -1747,7 +1755,7 @@ table .span24 {
 }
 
 .icon-white {
-  background-image: url("../images/glyphicons-halflings-white.png");
+  background-image: url("../img/glyphicons-halflings-white.png");
 }
 
 .icon-glass {
@@ -2684,6 +2692,10 @@ button.close {
 .btn-info.active,
 .btn-inverse.active {
   color: rgba(255, 255, 255, 0.75);
+}
+
+.btn {
+  border-color: #ccc;
 }
 
 .btn-primary {
