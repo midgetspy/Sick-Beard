@@ -105,9 +105,9 @@ def sceneToNormalShowNames(name):
 
     return list(set(results))
 
-def makeSceneShowSearchStrings(show):
+def makeSceneShowSearchStrings(show, season=-1):
 
-    showNames = allPossibleShowNames(show)
+    showNames = allPossibleShowNames(show, season=season)
 
     # scenify the names
     return map(sanitizeSceneName, showNames)
@@ -186,7 +186,7 @@ def makeSceneSearchString (episode):
     if numseasons == 1:
         epStrings = ['']
 
-    showNames = set(makeSceneShowSearchStrings(episode.show))
+    showNames = set(makeSceneShowSearchStrings(episode.show, episode.scene_season))
 
     toReturn = []
 
@@ -196,12 +196,12 @@ def makeSceneSearchString (episode):
 
     return toReturn
 
-def isGoodResult(name, show, log=True):
+def isGoodResult(name, show, log=True, season=-1):
     """
     Use an automatically-created regex to make sure the result actually is the show it claims to be
     """
 
-    all_show_names = allPossibleShowNames(show)
+    all_show_names = allPossibleShowNames(show, season=season)
     showNames = map(sanitizeSceneName, all_show_names) + all_show_names
 
     for curName in set(showNames):
@@ -222,7 +222,7 @@ def isGoodResult(name, show, log=True):
         logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
     return False
 
-def allPossibleShowNames(show):
+def allPossibleShowNames(show, season=-1):
     """
     Figures out every possible variation of the name for a particular show. Includes TVDB name, TVRage name,
     country codes on the end, eg. "Show Name (AU)", and any scene exception names.
@@ -231,9 +231,10 @@ def allPossibleShowNames(show):
     
     Returns: a list of all the possible show names
     """
-
-    showNames = [show.name]
-    showNames += [name for name in get_scene_exceptions(show.tvdbid)]
+    showNames = []
+    if season is -1:
+        showNames = [show.name]
+    showNames += [name for name in get_scene_exceptions(show.tvdbid, season=season)]
 
     # if we have a tvrage name then use it
     if show.tvrname != "" and show.tvrname != None:

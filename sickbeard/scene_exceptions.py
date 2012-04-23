@@ -143,3 +143,11 @@ def _xem_excpetions_fetcher():
 
     logger.log(u"xem exception dict: " + str(exception_dict), logger.DEBUG)
     return exception_dict
+
+def getSceneSeasons(tvdb_id):
+    """get a list of season numbers that have scene excpetions
+    """
+    myDB = db.DBConnection("cache.db")
+    seasons = myDB.select("SELECT DISTINCT season FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+    return [cur_exception["season"] for cur_exception in seasons]
+
