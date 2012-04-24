@@ -31,6 +31,7 @@ from sickbeard import encodingKludge as ek, providers, tvcache
 from sickbeard import db
 from sickbeard.databases import mainDB
 from sickbeard.databases import cache_db
+from lib.configobj import ConfigObj
 
 #=================
 # test globals
@@ -121,6 +122,12 @@ class SickbeardTestDBCase(unittest.TestCase):
         tearDown_test_episode_file()
         tearDown_test_show_dir()
 
+class SickbeardTestConfigCase(unittest.TestCase):
+    
+    def setUp(self):
+        sickbeard.CONFIG_FILE = "../config.ini"
+        sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
+        sickbeard.initialize(consoleLogging=False)
 
 class TestDBConnection(db.DBConnection, object):
 
