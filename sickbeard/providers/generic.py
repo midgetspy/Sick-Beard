@@ -273,8 +273,8 @@ class GenericProvider:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
                     continue
             elif episode.show.is_anime:
-                if episode.absolute_number not in parse_result.ab_episode_numbers:
-                    logger.log("Episode "+title+" isn't "+str(episode.absolute_number)+", skipping it. episode numbers:"+ str(parse_result.ab_episode_numbers), logger.DEBUG)
+                if episode.scene_absolute_number not in parse_result.ab_episode_numbers:
+                    logger.log("Episode "+title+" isn't "+str(episode.scene_absolute_number)+", skipping it. episode numbers:"+ str(parse_result.ab_episode_numbers), logger.DEBUG)
                     continue
             elif parse_result.season_number != episode.scene_season or episode.scene_episode not in parse_result.episode_numbers:
                 logger.log("Episode "+title+" isn't "+str(episode.scene_season)+"x"+str(episode.scene_episode)+", skipping it", logger.DEBUG)

@@ -216,7 +216,7 @@ def makeSceneSearchString (episode):
     if episode.show.air_by_date and episode.airdate != datetime.date.fromordinal(1):
         epStrings = [str(episode.airdate)]
     elif episode.show.is_anime:
-        epStrings = ["%i" % int(episode.absolute_number)]
+        epStrings = ["%i" % int(episode.scene_absolute_number)]
     else:
         epStrings = ["S%02iE%02i" % (int(episode.scene_season), int(episode.scene_episode)),
                     "%ix%02i" % (int(episode.scene_season), int(episode.scene_episode))]
@@ -286,7 +286,7 @@ def allPossibleShowNames(show, season=-1):
     showNames += [name for name in get_scene_exceptions(show.tvdbid, season=season)]
 
     # if we have a tvrage name then use it
-    if show.tvrname != "" and show.tvrname != None:
+    if show.tvrname != "" and show.tvrname != None and season is -1:
         showNames.append(show.tvrname)
 
     newShowNames = []

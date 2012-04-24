@@ -90,6 +90,7 @@ def retrieve_exceptions(localOnly=False):
     if not localOnly:
         exception_dict = _retrieve_exceptions_fetcher(url)
         exception_dict.update(_retrieve_exceptions_fetcher(url2)) # server anime exceptions
+
     local_exceptions = _retrieve_anidb_mainnames()
     for local_ex in local_exceptions: # anidb xml anime exceptions
         if local_ex in exception_dict:
@@ -116,8 +117,8 @@ def retrieve_exceptions(localOnly=False):
             myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name, season) VALUES (?,?,?)", [cur_tvdb_id, cur_exception, curSeason])
 
     name_cache.clearCache()
-        global excpetionCache
-        excpetionCache = {}
+    global excpetionCache
+    excpetionCache = {}
 
 def _retrieve_exceptions_fetcher(url):
 
@@ -134,7 +135,8 @@ def _retrieve_exceptions_fetcher(url):
         tvdb_id = int(tvdb_id)
 
         # regex out the list of shows, taking \' into account
-        alias_list = [re.sub(r'\\(.)', r'\1', x) for x in re.findall(r"'(.*?)(?<!\\)',?", aliases)]
+        # all simple sb scene exceptions are for all seasons -> season = -1
+        alias_list = [{re.sub(r'\\(.)', r'\1', x):-1} for x in re.findall(r"'(.*?)(?<!\\)',?", aliases)]
 
         exception_dict[tvdb_id] = alias_list
     return exception_dict
@@ -150,7 +152,7 @@ def _retrieve_anidb_mainnames():
                 continue
             else:
                 if anime.name and anime.name != show.name:
-                    anidb_mainNames[show.tvdbid] = [anime.name]
+                    anidb_mainNames[show.tvdbid] = [{anime.name:-1}]
 
     logger.log("anidb anime names: " + str(anidb_mainNames), logger.DEBUG)
     return anidb_mainNames
@@ -185,6 +187,7 @@ def _xem_excpetions_fetcher():
 
     logger.log(u"xem exception dict: " + str(exception_dict), logger.DEBUG)
     return exception_dict
+
 
 def getSceneSeasons(tvdb_id):
     """get a list of season numbers that have scene excpetions

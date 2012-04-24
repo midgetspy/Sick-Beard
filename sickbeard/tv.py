@@ -385,6 +385,7 @@ class TVShow(object):
                 epObj = self.getEpisode(curSeason, curEp)
                 epObj.scene_season = None
                 epObj.scene_episode = None
+                epObj.scene_absolute_number = None
                 epObj.saveToDB()
         
         if xemJson['result'] == 'failure':
@@ -400,6 +401,7 @@ class TVShow(object):
             curEp = self.getEpisode(tvdb['season'], tvdb['episode'])
             curEp.scene_season = scene['season']
             curEp.scene_episode = scene['episode']
+            curEp.scene_absolute_number = scene['absolute']
             curEp.saveToDB()
         return True
 
@@ -1063,6 +1065,7 @@ class TVEpisode(object):
         self.scene = scene
         self._scene_season = None
         self._scene_episode = None
+        self._scene_absolute_number = None
         if self.scene:
             self._scene_season = self._season
             self._scene_episode = self._episode
@@ -1095,6 +1098,7 @@ class TVEpisode(object):
     
     scene_season = property(lambda self: self._getSceneOrTVDBSeason(), dirty_setter("_scene_season"))
     scene_episode = property(lambda self: self._getSceneOrTVDBEpisode(), dirty_setter("_scene_episode"))
+    scene_absolute_number = property(lambda self: self._getSceneOrTVDBEpisode(), dirty_setter("_scene_absolute_number"))
 
     def _getSceneOrTVDBSeason(self):
         if self._scene_season is None:
@@ -1202,7 +1206,6 @@ class TVEpisode(object):
             else:
                 self.season = int(sqlResults[0]["season"])
                 self.episode = int(sqlResults[0]["episode"])
-                
             self.absolute_number = sqlResults[0]["absolute_number"]
 
             self.description = sqlResults[0]["description"]
@@ -1224,6 +1227,9 @@ class TVEpisode(object):
 
             if isinstance(sqlResults[0]["scene_episode"], int):
                 self.scene_episode = int(sqlResults[0]["scene_episode"])
+                
+            if isinstance(sqlResults[0]["scene_absolute_number"], int):
+                self.scene_episode = int(sqlResults[0]["scene_absolute_number"])
 
             logger.log("Episode loading done " + msg + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             
@@ -1514,7 +1520,8 @@ class TVEpisode(object):
                         "location": self.location,
                         "absolute_number": self.absolute_number,
                         "scene_season": self._scene_season,
-                        "scene_episode": self._scene_episode}
+                        "scene_episode": self._scene_episode,
+                        "scene_absolute_number": self._scene_absolute_number}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}

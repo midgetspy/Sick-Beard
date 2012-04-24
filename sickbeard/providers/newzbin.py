@@ -291,7 +291,7 @@ class NewzbinProvider(generic.NZBProvider):
         if not ep_obj.show.air_by_date and not ep_obj.show.is_anime:
             searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(ep_obj.scene_season, ep_obj.scene_episode) for x in nameList])
         elif ep_obj.show.is_anime:
-            searchStr = " OR ".join(['^"'+x+' - %02d"'%ep_obj.absolute_number for x in nameList])
+            searchStr = " OR ".join(['^"'+x+' - %02d"'%ep_obj.scene_absolute_number for x in nameList])
         else:
             searchStr = " OR ".join(['^"'+x+' - '+str(ep_obj.airdate)+'"' for x in nameList])
         return [searchStr]

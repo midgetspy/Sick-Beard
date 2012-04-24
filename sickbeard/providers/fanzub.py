@@ -55,7 +55,9 @@ class Fanzub(generic.NZBProvider):
         return True
 
     def _get_season_search_strings(self, show, season):
-        names = [show.name.encode('utf-8')]
+        names = []
+        if season is -1:
+            names = [show.name.encode('utf-8')]
         names.extend(show_name_helpers.makeSceneSeasonSearchString(show, season))
         return names
 

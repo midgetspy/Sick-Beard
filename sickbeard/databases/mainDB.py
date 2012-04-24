@@ -447,3 +447,14 @@ class AddSceneNumbers(Whitelist):
         self.addColumn("tv_episodes", "scene_season", "NUMERIC", "NULL")
 
         self.incDBVersion()
+
+class AddSceneNumbersAbsolute(AddSceneNumbers):
+
+    def test(self):
+        return self.checkDBVersion() >= 11
+
+    def execute(self):
+
+        self.addColumn("tv_episodes", "scene_absolute_number", "NUMERIC", "NULL")
+
+        self.incDBVersion()

@@ -183,11 +183,11 @@ Change selected episodes to
     <td align="center"><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "nfo.gif\" alt=\"Y" else "nfo-no.gif\" alt=\"N"#" width="23" height="11" /></td>
     <td align="center"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "tbn.gif\" alt=\"Y" else "tbn-no.gif\" alt=\"N"#" width="23" height="11" /></td>
     <td align="center">
-    #if isinstance($epResult["scene_season"], int) and isinstance($epResult["scene_episode"], int)
-    <img src="$sbRoot/images/tbn.gif" alt="Y" width="23" height="11" title="$epResult["scene_season"] x $epResult["scene_episode"]"/>
-    #else
+#if isinstance($epResult["scene_season"], int) and isinstance($epResult["scene_episode"], int)
+    <img src="$sbRoot/images/tbn.gif" alt="Y" width="23" height="11" title="$epResult["scene_season"] x $epResult["scene_episode"] a $epResult["scene_absolute_number"]"/>
+#else
     <img src="$sbRoot/images/tbn-no.gif" alt="N" width="23" height="11" />
-    #end if
+#end if
     </td>
 #if $show.is_anime
 	<td align="center">
