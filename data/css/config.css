@@ -7,21 +7,21 @@
 #config p,#config li{font-size:1.2em;line-height:1.3;}
 #config .path{font-size:1em;color:#333;font-family:Verdana;}
 #config .jumbo{font-size:16px !important;}
-#config-content{display:block;width:835px;text-align:left;clear:both;background:#fff;margin:0 auto;padding:0 0 40px;}
-#config-components{float:left;width:auto;}
+#config-content{display:block;width:850px;text-align:left;clear:both;background:#fff;margin:0 auto;padding:0 0 40px;}
+
 #config-components-border{float:left;width:auto;border-top:1px solid #999;padding:5px 0;}
 #config .title-group{border-bottom:1px dotted #666;position:relative;padding:25px 15px 25px;}
 #config .component-group{border-top:1px dotted #666;position:relative;padding:15px 15px 25px;}
-#config .component-group-desc{float:left;width:235px;}
+#config .component-group-desc{float:left;width:242px;}
 #config .component-group-desc h3{font-size:1.5em;}
 #config .component-group-desc p{width:85%;color:#666;margin:.8em 0;}
 #config .component-group-desc p.note{width:90%;color:#333;margin:.8em 0;}
-#config .component-group-list{float:left;width:565px;}
+#config .component-group-list{float:left;width:572px;}
 #config fieldset{border:0;outline:0;}
-#config div.field-pair{margin:5px 0 15px;}
+#config div.field-pair{padding:10px 5px;}
 #config div.field-pair input{float:left;margin-right:6px;}
 #config label.nocheck,#config div.providerDiv,#config div #customQuality{padding-left:20px;}
-#config label span.component-title{font-size:13px;font-weight:700;float:left;width:160px;margin-right:10px;}
+#config label span.component-title{font-size:13px;font-weight:700;float:left;width:172px;margin-right:10px;}
 #config label span.component-desc{font-size:12px;overflow:hidden;display:block;padding-bottom: 2px;}
 #config div.field-pair select{font-size:1.1em;border:1px solid #d4d0c8;}
 #config div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}

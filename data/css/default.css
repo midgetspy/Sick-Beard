@@ -46,20 +46,20 @@ color:#57442B;
 
 h1.title {
 text-align:left;
-font-size:21px;
-line-height:23px;
+font-size:24px;
+line-height:30px;
 font-weight:400;
 padding-bottom:4px;
-margin-bottom:12px;
-border-bottom:1px solid #4e4e4e;
+margin-bottom:15px;
+border-bottom:1px solid #888;
 }
 h1.title a {
 text-decoration:none;
 }
 
 .h2footer {
-line-height: 23px;
-margin: -45px 5px 22px 0;
+line-height: 18px;
+margin: -45px 5px 8px 0;
 }
 .h2footer select {
 margin-top: -6px;

@@ -34,7 +34,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix" for="tv_download_dir">
                                 <span class="component-title">TV Download Dir</span>
-                                <input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="45" />
+                                <input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="35" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -296,5 +296,10 @@
 </div></div>
 <div class="clearfix"></div>
 
+<script type="text/javascript" charset="utf-8">
+<!--
+    jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
+//-->
+</script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
