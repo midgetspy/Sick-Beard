@@ -436,7 +436,7 @@ class PostProcessor(object):
             db_result = helpers.searchDBForShow(cur_name)
             if db_result:
                 tvdb_id = int(db_result[0])
-                self._log(u"Lookup successful, using tvdb id "+str(tvdb_id)+" season: "+str(season)+" episode: "+str(episodes), logger.DEBUG)  
+                self._log(u"Lookup successful(1), using tvdb id "+str(tvdb_id)+" season: "+str(season)+" episode: "+str(episodes), logger.DEBUG)  
                 show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
                 if show.is_anime and len(parse_result.ab_episode_numbers) > 0:
                     try:
@@ -447,7 +447,10 @@ class PostProcessor(object):
                     
                     _finalize(parse_result)
                     return (tvdb_id, actual_season, actual_episodes)
-                
+                else:
+                    _finalize(parse_result)
+                    return (tvdb_id, season, episodes)
+                    
         # see if we can find the name with a TVDB lookup
         for cur_name in name_list:
             try:
@@ -473,7 +476,7 @@ class PostProcessor(object):
             except (IOError):
                 continue
             tvdb_id = int(showObj["id"])
-            self._log(u"Lookup successful, using tvdb id "+str(tvdb_id), logger.DEBUG)
+            self._log(u"Lookup successful(2), using tvdb id "+str(tvdb_id), logger.DEBUG)
             show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
             if show.is_anime and len(parse_result.ab_episode_numbers) > 0:
                 try:
