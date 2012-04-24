@@ -256,7 +256,7 @@ def isGoodResult(name, show, log=True):
         else:
             escaped_name = re.sub('\\\\[\\s.-]', '[\W_]+', re.escape(curName))
             # FIXME: find a "automatically-created" regex for anime releases # test at http://regexr.com?2uon3
-            curRegex = '^(\[.*?\])?[ _.]*' + escaped_name + '(([ _.]*-)|([ ._-]+\d+)|([ ._-]+OVA)|([ ._-]+s\d{2})).*'
+            curRegex = '^(\[.*?\])|(\d+[\.-])*[ _\.]*' + escaped_name + '(([ _.]*-)|([ ._-]+\d+)|([ ._-]+OVA)|([ ._-]+s\d{2})).*'
 
         if log:
             logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
