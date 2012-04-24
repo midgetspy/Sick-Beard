@@ -22,18 +22,26 @@ if __name__ == "__main__":
     import glob
     import unittest
 
-    test_file_strings = [ x for x in glob.glob('*_tests.py') if not x in __file__]
-    module_strings = [file_string[0:len(file_string) - 3] for file_string in test_file_strings]
+    exclude = ['anidb']
+
+    test_file_strings = [ x for x in glob.glob('*_test*.py') if not x in __file__]
+    
+    test_file_strings_filtered = []
+    module_strings = []
+    for file in test_file_strings:
+        for ex in exclude:
+            if not ex in file:
+                module_strings.append(file[0:len(file) - 3])
+                test_file_strings_filtered.append(file)
+    
     suites = [unittest.defaultTestLoader.loadTestsFromName(file_string) for file_string in module_strings]
     testSuite = unittest.TestSuite(suites)
-
 
     print "=================="
     print "STARTING - ALL TESTS"
     print "=================="
     print "this will include"
-    for includedfiles in test_file_strings:
-        print "- " + includedfiles
+    for includedfile in test_file_strings_filtered:
+        print "- " + includedfile
 
-
-    text_runner = unittest.TextTestRunner().run(testSuite)
+    text_runner = unittest.TextTestRunner(descriptions=False).run(testSuite)

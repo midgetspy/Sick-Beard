@@ -17,9 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
 import unittest
-
 import test_lib as test
 
 import sys, os.path

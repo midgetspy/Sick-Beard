@@ -1,7 +1,9 @@
 import datetime
 import unittest
+import test_lib as test
 
 import sys, os.path
+from sickbeard.tv import TVShow
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../lib'))
 
@@ -15,55 +17,35 @@ sickbeard.QUALITY_DEFAULT = 4
 sickbeard.SEASON_FOLDERS_DEFAULT = 0
 
 
-class DumyTVShow(object):
-    name = ""
-    tvdbid = 0
-    
-    def __init__(self, id, name, anime):
-        self.name = name
-        self.tvdbid = id
-        self.anime = anime
-    
-    def is_anime(self):
-        return self.anime
-
-
-showDict = {1:["Dance in the Vampire Bund",True,"Dance in the Vampire Bund"],
-            2:["Infinite Stratos",True,"IS",True],
-            3:["Blue Exorcist",True,"Ao no Exorcist"],
-            4:["Dexter",True,"Dexter"],
-            
-            
+# warning: uses real data !!
+testCases = {1:["Dance in the Vampire Bund",True,"Dance in the Vampire Bund"],
+            248035:["Blue Exorcist",True,"Ao no Exorcist"],
+            4:["Dexter",False,"Dexter"],
             }
 
-showExceptions = {2:["IS"],
-                  3:["Ao no Exorcist"]
-                  }
-
-showList =[DumyTVShow(x,y[0],y[1]) for x,y in showDict.items()]
-
-def dummy_get_scene_exceptions(id):
-    try:
-        return showExceptions[id]
-    except:
-        return []
+class HelperTests(test.SickbeardTestDBCase):
     
-scene_exceptions.get_scene_exceptions = dummy_get_scene_exceptions
+    def setUp(self):
+        super(HelperTests, self).setUp()
+        sickbeard.scene_exceptions.retrieve_exceptions()
 
-def generator_get_tvdbid(show,sceneName,list):
+def _generator_get_tvdbid(tvdb_id, data):
     def test(self):
-        result = helpers.get_tvdbid(sceneName,list, False)
+        show = TVShow(tvdb_id)
+        show.name = data[0]
+        if data[1]:
+            show.anime = 1
+        show.saveToDB()
+        showList = [show]
+        sceneName = data[2]
+        result = helpers.get_tvdbid(sceneName, showList, False)
         self.assertEqual(result, show.tvdbid)
     return test
 
-class HelperTests(unittest.TestCase):
-    def setUP(self):
-        pass
-      
-for show in showList:
-    sceneName = showDict[show.tvdbid][2]
-    test_name = 'test_get_tvdbid_%s' % show.tvdbid
-    test = generator_get_tvdbid(show, sceneName, showList)
+for tvdb_id, data in testCases.items():
+    
+    test_name = 'test_get_tvdbid_%s' % tvdb_id
+    test = _generator_get_tvdbid(tvdb_id, data)
     setattr(HelperTests, test_name, test)
 
 if __name__ == '__main__':

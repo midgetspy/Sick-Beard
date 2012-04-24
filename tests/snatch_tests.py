@@ -20,7 +20,7 @@
 import random
 import unittest
 
-import test_lib as test
+import test_lib
 
 import sys, os.path
 
@@ -47,7 +47,12 @@ def _create_fake_xml(items):
 searchItems = []
 
 
-class SearchTest(test.SickbeardTestDBCase):
+class SearchTest(test_lib.SickbeardTestDBCase):
+
+    def setUp(self):
+        test_lib.SickbeardTestDBCase.setUp(self)
+        for provider in sickbeard.providers.sortedProviderList():
+            provider.getURL = self._fake_getURL
 
     def _fake_getURL(self, url, headers=None):
         global searchItems
@@ -55,14 +60,6 @@ class SearchTest(test.SickbeardTestDBCase):
 
     def _fake_isActive(self):
         return True
-
-    def __init__(self, something):
-        for provider in sickbeard.providers.sortedProviderList():
-            provider.getURL = self._fake_getURL
-            #provider.isActive = self._fake_isActive
-
-        super(SearchTest, self).__init__(something)
-
 
 def test_generator(tvdbdid, show_name, curData, forceSearch):
 
@@ -86,26 +83,28 @@ def test_generator(tvdbdid, show_name, curData, forceSearch):
         self.assertEqual(curData["b"], bestResult.name) #first is expected, second is choosen one
     return test
 
+
+# create the test methods
+tvdbdid = 1
+for forceSearch in (True, False):
+    for name, curData in tests.items():
+        if not curData["a"]:
+            continue
+        fname = name.replace(' ', '_')
+        if forceSearch:
+            test_name = 'test_manual_%s_%s' % (fname, tvdbdid)
+        else:
+            test_name = 'test_%s_%s' % (fname, tvdbdid)
+
+        test = test_generator(tvdbdid, name, curData, forceSearch)
+        setattr(SearchTest, test_name, test)
+        tvdbdid += 1
+
 if __name__ == '__main__':
     print "=================="
     print "STARTING - Snatch TESTS"
     print "=================="
     print "######################################################################"
-    # create the test methods
-    tvdbdid = 1
-    for forceSearch in (True, False):
-        for name, curData in tests.items():
-            if not curData["a"]:
-                continue
-            fname = name.replace(' ', '_')
-            if forceSearch:
-                test_name = 'test_manual_%s_%s' % (fname, tvdbdid)
-            else:
-                test_name = 'test_%s_%s' % (fname, tvdbdid)
-
-            test = test_generator(tvdbdid, name, curData, forceSearch)
-            setattr(SearchTest, test_name, test)
-            tvdbdid += 1
 
     suite = unittest.TestLoader().loadTestsFromTestCase(SearchTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
