@@ -61,7 +61,10 @@ select:focus, .btn:focus {
 button.btn, input.btn[type="submit"] {
     line-height: 18px;
 }
-
+input[disabled], select[disabled], textarea[disabled], input[readonly], select[readonly], textarea[readonly] {
+    background-color: #efefef;
+    border-color: #ccc;
+}
 .btn:focus, .btn:active {
     border: 1px solid #4D90FE;
     outline: none;
