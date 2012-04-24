@@ -139,7 +139,6 @@ font-size: 1em;
     color:#fff;
     text-decoration: none;
 }
-.sickbeardTable tr:hover { background-color: #cfcfcf !important; }
 
 .plotInfo {
 cursor:help;
@@ -190,7 +189,10 @@ background-color: #fff;
 color:#000;
 }
 
-#checkboxControls label { white-space:nowrap; }
+#checkboxControls label { white-space:nowrap; display: inline; }
+#checkboxControls label span { padding: 3px 5px; }
+#checkboxControls span input { display: inline-block; }
+
 tr.unaired,span.unaired {
 background-color:#F5F1E4;
 padding:2px;
@@ -317,7 +319,7 @@ td.tvShow a {color: #333; text-decoration: none; font-size: 1.2em; }
 td.tvShow:hover a { color:#000;}
 td.tvShow:hover { background-color: #cfcfcf !important; cursor: pointer; }
 
-.navShow { display: inline; cursor: pointer; vertical-align: top; }
+.navShow { display: inline; cursor: pointer; }
 
 /* for manage_massEdit */
 .optionWrapper { width: 450px; margin-left: auto; margin-right: auto; padding: 6px 12px; }

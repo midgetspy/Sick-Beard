@@ -462,11 +462,11 @@ class Manage:
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
-                errors.append('<b>%s:</b><br />\n<ul>' % showObj.name + '\n'.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
+                errors.append('<b>%s:</b>\n<ul>' % showObj.name + ' '.join(['<li>%s</li>' % error for error in curErrors]) + "</ul>")
 
         if len(errors) > 0:
             ui.notifications.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
-                        "<br />\n".join(errors))
+                        " ".join(errors))
 
         redirect("/manage")
 
