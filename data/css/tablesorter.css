@@ -1,11 +1,11 @@
 /* SB Theme */
 table.tablesorter {
-    width: 100%;
-    margin-left:auto;
-    margin-right:auto;
-    text-align:left;
     color: #000;
     background-color: #fff;
+    margin-left:auto;
+    margin-right:auto;
+    width: 100%;
+    text-align:left;
     border-spacing: 0;
 }
 table.tablesorter th,
@@ -28,6 +28,7 @@ table.tablesorter th {
 }
 table.tablesorter .tablesorter-header {
 /*    background-image: url(../images/tablesorter/bg.gif); */
+    background-image: url(data:image/gif;base64,R0lGODlhFQAJAIAAAP///////yH5BAEAAAEALAAAAAAVAAkAAAIXjI+AywnaYnhUMoqt3gZXPmVg94yJVQAAOw==);
     background-repeat: no-repeat;
     background-position: center right;
     padding: 4px 18px 4px 4px;
@@ -35,10 +36,12 @@ table.tablesorter .tablesorter-header {
 }
 table.tablesorter th.tablesorter-headerSortUp {
     background-color: #57442B;
+    background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);
 /*    background-image: url(../images/tablesorter/asc.gif); */
 }
 table.tablesorter th.tablesorter-headerSortDown {
     background-color: #57442B;
+    background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);
 /*    background-image: url(../images/tablesorter/desc.gif); */
 }
 
