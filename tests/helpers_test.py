@@ -29,7 +29,7 @@ class HelperTests(test.SickbeardTestDBCase):
         super(HelperTests, self).setUp()
         sickbeard.scene_exceptions.retrieve_exceptions()
 
-def _generator_get_tvdbid(tvdb_id, data):
+def _generator_get_show_by_name(tvdb_id, data):
     def test(self):
         show = TVShow(tvdb_id)
         show.name = data[0]
@@ -38,14 +38,14 @@ def _generator_get_tvdbid(tvdb_id, data):
         show.saveToDB()
         showList = [show]
         sceneName = data[2]
-        result = helpers.get_tvdbid(sceneName, showList, False)
-        self.assertEqual(result, show.tvdbid)
+        result = helpers.get_show_by_name(sceneName, showList, False)
+        self.assertEqual(result.tvdbid, show.tvdbid)
     return test
 
 for tvdb_id, data in testCases.items():
     
-    test_name = 'test_get_tvdbid_%s' % tvdb_id
-    test = _generator_get_tvdbid(tvdb_id, data)
+    test_name = 'test_get_show_by_name_%s' % tvdb_id
+    test = _generator_get_show_by_name(tvdb_id, data)
     setattr(HelperTests, test_name, test)
 
 if __name__ == '__main__':

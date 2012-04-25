@@ -510,7 +510,12 @@ class PostProcessor(object):
             
             tvdb_id = name_cache.retrieveNameFromCache(name)
             if not tvdb_id:
-                tvdb_id = helpers.get_tvdbid(name, sickbeard.showList, True)
+                show = helpers.get_show_by_name(name, sickbeard.showList, True)
+                if show:
+                    tvdb_id = show.tvdbid
+                else:
+                    tvdb_id = 0
+
                 if tvdb_id:
                     name_cache.addNameToCache(name, tvdb_id)
             if tvdb_id:
