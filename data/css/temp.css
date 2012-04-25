@@ -17,6 +17,9 @@ input.cb {
     float: left;
     margin: 2px 5px 3px 4px;
 }
+.ui-progressbar {
+    line-height: 18px;
+}
 
 [class^="icon16-"], [class*=" icon16-"] {
     background-image: url("../images/glyphicons-config.png");
@@ -163,3 +166,29 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
     top: 11px;
     left: -6px;
 }
+
+/* bootstrap-progressbar -- unused currently
+.progress {
+    border: 1px solid #aaa;
+    background-color: #fcfcfc;
+    background-image: -moz-linear-gradient(top, #f9f9f9, #ffffff);
+    background-image: -ms-linear-gradient(top, #f9f9f9, #ffffff);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f9f9f9), to(#ffffff));
+    background-image: -webkit-linear-gradient(top, #f9f9f9, #ffffff);
+    background-image: -o-linear-gradient(top, #f9f9f9, #ffffff);
+    background-image: linear-gradient(top, #f9f9f9, #ffffff);
+    filter: progid:dximagetransform.microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#ffffff', GradientType=0);
+    margin-bottom: 0;
+}
+.progress-sb .bar {
+  background-color: #419ab5;
+  background-image: -moz-linear-gradient(top, #51a9c4, #2d88a1);
+  background-image: -ms-linear-gradient(top, #51a9c4, #2d88a1);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#51a9c4), to(#2d88a1));
+  background-image: -webkit-linear-gradient(top, #51a9c4, #2d88a1);
+  background-image: -o-linear-gradient(top, #51a9c4, #2d88a1);
+  background-image: linear-gradient(top, #51a9c4, #2d88a1);
+  background-repeat: repeat-x;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr='#51a9c4', endColorstr='#2d88a1', GradientType=0);
+}
+*/
