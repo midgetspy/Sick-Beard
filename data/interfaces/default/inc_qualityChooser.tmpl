@@ -27,7 +27,7 @@
         <p>One of the <b>Initial</b> quality selections must be obtained before Sick Beard will attempt to process the <b>Archive</b> selections.</p>
     </div>
 
-        <div style="width: 50%; text-align: center;" class="float-left">
+        <div style="padding-right: 40px; text-align: center;" class="float-left">
             <h4>Initial</h4>
             #set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
             <select id="anyQualities" name="anyQualities" multiple="multiple" size="$len($anyQualityList)">
@@ -37,7 +37,7 @@
             </select>
         </div>
 
-        <div style="width: 50%; text-align: center;" class="float-left">
+        <div style="text-align: center;" class="float-left">
             <h4>Archive</h4>
             #set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
             <select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
