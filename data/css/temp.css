@@ -1,29 +1,707 @@
-/* hack until config css rewrite */
-.notifier-icon {
+/* =======================================================================
+browser.css
+========================================================================== */
+#fileBrowserDialog {
+    overflow-y: auto;
+}
+#fileBrowserDialog ul {
+    margin: 0;
+    padding: 0;
+}
+#fileBrowserDialog ul li {
+    margin: 2px;
+    padding: 4px 0;
+    cursor: pointer;
+    list-style-type: none;
+}
+#fileBrowserDialog ul li a {
+    display: block;
+}
+#fileBrowserDialog ul li a:hover {
+    color: #0000ff;
+    background: none;
+}
+#fileBrowserDialog ul li a span.ui-icon {
+    margin: 0 4px;
     float: left;
-    margin: 6px 10px 0 0 !important;
 }
-.notifier .component-group-desc > h3 {
-    line-height: 36px;
-    font-size: 22px;
+/*
+.browserDialog.busy .ui-dialog-buttonpane {
+  background: url("/images/loading.gif") 10px 50% no-repeat;
 }
-.imgLink img {
-    padding: 0 2px 4px;
+*/
+/* jquery ui autocomplete overrides to make it look more like the old autocomplete */
+.ui-autocomplete {
+    max-height: 180px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+    /* add padding to account for vertical scrollbar */
+    padding-right: 20px;
 }
-#navDonate { 
+* html .ui-autocomplete {
+    height: 180px;
+}
+.ui-menu .ui-menu-item {
+    background-color: #eee;
+}
+.ui-menu .ui-menu-item-alternate{
+    background-color: #fff;
+}
+.ui-menu a.ui-state-hover{
+    background: none;
+    background-color: #0a246a;
+    color: #fff;
+}
+
+/* =======================================================================
+formWizard.css
+========================================================================== */
+/* TODO: cleanup the fixed height issue with custom quality */
+fieldset.sectionwrap{
+    text-align: left;
+    overflow: auto;
+    width: 800px;
+    border-width: 0;
+    padding: 5px;
+}
+legend.legendStep{
+    font: bold 16px Arial;
+    color: #57442b;
+}
+div.stepsguide{
+    text-align: left;
+    overflow: hidden;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+div.stepsguide .step{
+    width: 260px;
+    font: bold 24px Arial;
+    float: left;
+}
+div.stepsguide .step p {
+    border-bottom: 4px solid #57442b;
+    margin: 12px 0;
+}
+div.stepsguide .disabledstep{
+    color: #c4c4c4;
+}
+div.stepsguide .disabledstep p {
+    border-bottom: 4px solid #8a775e;
+}
+div.stepsguide .step .smalltext{
+    font-size: 13px;
+    font-weight: normal;
+}
+div.formpaginate{
+    width: 800px;
+    overflow: auto;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 1em;
+}
+div.formpaginate .prev, div.formpaginate .next{
+    padding: 3px 6px;
+    background: #57442b;
+    color: #fff;
+    cursor: hand;
+    cursor: pointer;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+}
+.stepDiv {
+    padding: 15px;
+}
+/* step 3 related */
+#customQuality { overflow: hidden; padding: 10px 0; }
+#customQualityWrapper { height: 190px; overflow: auto; }
+#customQualityWrapper div.component-group-desc{float:left;width:165px;}
+#customQualityWrapper div.component-group-desc p{width:85%;font-size:1.2em;color:#666;margin:.8em 0;}
+
+/* =======================================================================
+tablesorter.css -- custom
+========================================================================== */
+table.tablesorter {
+    color: #000;
+    background-color: #fff;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    text-align: left;
+    border-spacing: 0;
+}
+table.tablesorter th,
+table.tablesorter td {
+    padding: 4px;
+    border-left: #fff 1px solid;
+    border-top: #fff 1px solid;
+}
+/* remove extra border from left edge */
+table.tablesorter th:first-child,
+table.tablesorter td:first-child {
+    border-left: none;
+}
+table.tablesorter th {
+    border-collapse: collapse;
+    background-color: #333;
+    color: #fff;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align: center;
+}
+table.tablesorter .tablesorter-header {
+/*    background-image: url(../images/tablesorter/bg.gif); */
+    background-image: url(data:image/gif;base64,R0lGODlhFQAJAIAAAP///////yH5BAEAAAEALAAAAAAVAAkAAAIXjI+AywnaYnhUMoqt3gZXPmVg94yJVQAAOw==);
+    background-repeat: no-repeat;
+    background-position: center right;
+    padding: 4px 18px 4px 4px;
+    cursor: pointer;
+}
+table.tablesorter th.tablesorter-headerSortUp {
+/*    background-image: url(../images/tablesorter/asc.gif); */
+    background-color: #57442b;
+    background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);
+}
+table.tablesorter th.tablesorter-headerSortDown {
+/*    background-image: url(../images/tablesorter/desc.gif); */
+    background-color: #57442b;
+    background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);
+}
+/* Zebra Widget - row alternating colors */
+table.tablesorter tr.odd td {
+    background-color: #f5f1e4;
+}
+table.tablesorter tr.even td {
+    background-color: #dfdacf;
+}
+/* filter widget */
+table.tablesorter input.tablesorter-filter {
+    width: 98%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    height: inherit;
+}
+table.tablesorter tr.tablesorter-filter,
+table.tablesorter tr.tablesorter-filter td {
+    text-align: center;
+    background: #eee;
+}
+/* optional disabled input styling */ 
+table.tablesorter input.tablesorter-filter.disabled {
+    display: none;
+}
+.tablesorter-header-inner {
+    text-align: center;
+    padding: 0 2px;
+}
+tr.tablesorter-stickyHeader {
+    background-color: #fff;
+    padding: 2px 0;
+}
+table.tablesorter tfoot tr {
+    border-collapse: collapse;
+    background-color: #333;
+    color: #fff;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align: center;
+}
+table.tablesorter tfoot a {
+    color:#fff;
+    text-decoration: none;
+}
+
+/* =======================================================================
+inc_top.tmpl
+========================================================================== */
+body {
+    background-color: #f5f1e4;
+    color: #000;
+    font-family: 'Verdana', 'Helvetica', 'Sans-serif', 'sans';
+    font-size: 12px;
+}
+#upgrade-notification {
+    line-height: 6px;
+    color: #57442b;
+    font-size: 12px;
+    font-weight: bold;
+    height: 0;
+    text-align: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+#upgrade-notification div {
+    background-color: #c6b695;
+    border-bottom: 1px solid #af986b;
+    padding: 7px 0;
+}
+#header-fix{
+    *margin-bottom: -31px; /* IE fix */
+    height: 21px;
+    padding: 0;
+}
+#header {
+    background-color: #fff;
+    padding: 5px 0;
+}
+#header a:hover {
+    background: none;
+}
+#logo {
+    font-size: 33px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 0 5px 0 15px;
+}
+#versiontext {
+    font-size: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    text-transform: lowercase;
+    color: #57442b;
+    text-rendering: optimizelegibility;
+}
+#versiontext a {
+    color: #57442b;
+    font-weight: bold;
+}
+#navDonate {
     padding: 5px 10px 4px;
 }
-input.cb {
-    float: left;
-    margin: 2px 5px 3px 4px;
+/* submenu related */
+#SubMenu {
+    clear: both;
+    background-color: #f5f1e4;
+    color: #333;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #b3b3b3;
+    padding-left: 20px;
+    font-size: 12px;
 }
+#SubMenu span {
+    padding: 2px 6px 2px 8px;
+}
+#SubMenu span a {
+    line-height: 24px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    padding: 2px 6px 2px;
+}
+#SubMenu span a:hover {
+    background-color: #000;
+    color: #fff;
+}
+/* for comingEpisode submenu */
+#SubMenu span a.inner {
+    font-weight: normal;
+    padding: 2px;
+}
+#content {
+    min-height: 200px;
+    min-width: 875px;
+    background: #fff;
+    margin-left: auto;
+    margin-right: auto;
+    border-left: 1px solid #b3b3b3;
+    border-right: 1px solid #b3b3b3;
+    width: 88%;
+    clear: both;
+    padding: 10px 15px 15px;
+}
+
+/* =======================================================================
+inc_bottom.tmpl
+========================================================================== */
+.footer {
+    clear: both;
+    width: 100%;
+    text-align: center;
+    padding: 5px 0;
+    background-color: #f5f1e4;
+    border-top: 1px solid #b3b3b3;
+    color: #4e4e4e;
+}
+
+/* =======================================================================
+home.tmpl
+========================================================================== */
 .ui-progressbar {
     line-height: 18px;
 }
+.progressbarText {
+    text-shadow: 0 0 0.1em #fff;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    text-align: center;
+    vertical-align: middle;
+}
 
+/* =======================================================================
+home_postprocess.tmpl
+========================================================================== */
+#episodeDir {
+    margin-right: 6px;
+}
+
+/* =======================================================================
+editShow.tmpl
+========================================================================== */
+/* only works on FF :( */
+option.flag {
+  padding-left: 35px; 
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-position: 10px 50%; 
+}
+
+/* =======================================================================
+manage_massEdit.tmpl
+========================================================================== */
+.optionWrapper {
+    width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 6px 12px;
+}
+.optionWrapper span.selectTitle {
+    float: left;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 22px;
+    text-align: left;
+    width: 225px;
+}
+.optionWrapper div.selectChoices {
+    float: left;
+    width: 175px;
+    margin-left: 25px;
+}
+
+/* =======================================================================
+manage_episodeStatuses.tmpl
+========================================================================== */
+a.whitelink {
+    color: #fff;
+}
+
+/* =======================================================================
+home_addShows.tmpl
+========================================================================== */
+#addShowPortal {
+    margin-left: auto; 
+    margin-right: auto;
+    width: 480px;
+    padding: 10px 0;
+}
+#addShowPortal  a {
+    padding: 10px;
+}
+div.button img {
+    display: block;
+    float: left;
+    padding: 25px 5px;
+}
+div.buttontext {
+    display: block;
+    margin-left: 55px;
+    text-align: left;
+}
+
+/* =======================================================================
+home_addExistingShow.tmpl + inc_addShowOptions.tmpl
+========================================================================== */
+input.cb {
+    float: left;
+    margin: 3px 5px 3px 4px;
+}
+/* hack for home_addExistingShow.tmpl -- hardcoded in backend */
+.showManage {
+    float: left;
+}
+ul#rootDirStaticList {
+    width: 90%;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+ul#rootDirStaticList li {
+    list-style: none outside none;
+    margin: 2px;
+    padding: 4px 5px 4px 5px;
+    cursor: pointer;
+}
+/* for tabs: manage directories */
+#rootDirs, #rootDirsControls { 
+    width: 50%;
+    min-width: 400px;
+}
+/* for tabs: customize options */
+#tabs div.field-pair, .stepDiv div.field-pair{padding:0.75em 0;}
+#tabs div.field-pair input, .stepDiv div.field-pair input{float:left;}
+#tabs label.nocheck,   #tabs div.providerDiv,  #tabs  div #customQuality, .stepDiv label.nocheck,.stepDiv div.providerDiv,.stepDiv div #customQuality{padding-left:23px;}
+#tabs  label span.component-title, .stepDiv label span.component-title{font-size:1.1em;font-weight:bold;float:left;width:165px; padding-left: 6px; margin-right:10px;}
+#tabs label span.component-desc, .stepDiv label span.component-desc{font-size:.9em; float:left;}
+#tabs div.field-pair select, .stepDiv div.field-pair select{font-size:1em;border:1px solid #d4d0c8;}
+#tabs div.field-pair select option, .stepDiv div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
+
+/* =======================================================================
+home_newShow.tmpl
+========================================================================== */
+#displayText {
+    background-color: #efefef;
+    padding: 8px;
+    border: 1px solid #dfdede;
+    font-size: 13px;
+    overflow: hidden;
+}
+
+/* =======================================================================
+displayShow.tmpl + manage_backlogOverview.tmpl
+========================================================================== */
+.navShow {
+    display: inline;
+    cursor: pointer;
+}
+.showLegend{
+    font-weight: bold;
+    padding-right: 10px;
+    padding-bottom: 1px;
+}
+/* displayShow status message -- very similar to .config_message */
+#show_message {
+    padding: 5px 8px;
+    background: #ffd575;
+    color: #333;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+    font-size: 12px;
+}
+.checkbox.inline {
+    padding: 0 5px;
+}
+.checkbox.inline > input {
+    margin-left: 0;
+    margin-right: 5px;
+}
+.unaired {
+    background-color: #f5f1e4;
+}
+.skipped {
+    background-color: #bedeed;
+}
+.good {
+    background-color: #c3e3c8;
+}
+.qual {
+    background-color: #ffda8a;
+}
+.wanted {
+    background-color: #ffb0b0;
+}
+
+/* =======================================================================
+config*.tmpl
+========================================================================== */
+#config-content {
+    display: block;
+    width: 875px;
+    text-align: left;
+    clear: both;
+    background: #fff;
+    margin: 0 auto;
+    padding: 0 0 40px;
+}
+.component-group {
+    border-bottom: 1px dotted #666;
+    padding: 15px 15px 25px;
+}
+/* .component-group-desc :width
+ + .component-group-list :width
+ + .component-group :padding
+ -------------------------------
+ must be less than config-content
+*/
+.component-group-desc{
+    float: left;
+    width: 250px;
+}
+.component-group-desc p {
+    width: 90%;
+    color: #666;
+    margin: 10px 0;
+}
+.component-group-list {
+    float: left;
+    width: 590px;
+}
+#config div.field-pair {
+    padding: 8px 4px;
+}
+#config div.field-pair input {
+    float: left;
+    margin-right: 6px;
+}
+#config label.nocheck, #config div #customQuality, .metadataDiv, .providerDiv {
+    padding-left: 20px;
+}
+#config label span.component-title {
+    width: 172px;
+    font-size: 13px;
+    font-weight: bold;
+    float: left;
+    margin-right: 10px;
+}
+#config label span.component-desc {
+    font-size: 12px;
+    overflow: hidden;
+    display: block;
+    padding-bottom: 2px;
+}
+.component-group-save {
+    float: right;
+    padding-top: 10px;
+}
+
+/* =======================================================================
+comingEpisodes.tmpl
+========================================================================== */
+.tvshowDiv {
+    display: block;
+    clear: both;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    margin: auto;
+    padding: 0;
+    text-align: left;
+    width: 606px;
+}
+.tvshowDiv a, .tvshowDiv a:link, .tvshowDiv a:visited, .tvshowDiv a:hover  {
+    text-decoration: none;
+    background: none;
+}
+.tvshowTitle a {
+    color: #fff;
+    padding-left: 8px;
+    line-height: 23px;
+    font-size: 13px;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+}
+.tvshowTitleIcons {
+    float: right;
+    padding: 3px 5px;
+}
+.tvshowDiv .title { 
+    font-weight: 900;
+    color: #333;
+}
+.posterThumb {
+    -ms-interpolation-mode: bicubic;
+    vertical-align: top;
+    height: 200px;
+}
+.bannerThumb {
+    -ms-interpolation-mode: bicubic;
+    vertical-align: top;
+    height: 112px;
+    /* margin-bottom: 1px; */
+    border-bottom: 1px solid #d2ebe8;
+}
+.tvshowDiv th {
+    color: #000;
+    letter-spacing: 1px;
+    text-align: left;
+    background-color: #333;
+}
+.tvshowDiv th.nobg {
+    background: #efefef;
+    border-top: 1px solid #666;
+    text-align: center;
+}
+.tvshowDiv td {
+    background: #fff;
+    padding: 10px;
+    color: #000;
+}
+.tvshowDiv td.next_episode {
+    width: 100%;
+    background: #f5fafa;
+    color: #000;
+    border-bottom: 1px solid #d2ebe8;
+}
+h2.day {
+    letter-spacing: 1px;
+    background-color: #9cb5cf;
+    color: #000;
+    text-align: center;
+    margin: 10px 0;
+}
+h2.network {
+    letter-spacing: 1px;
+    background-color: #8fbfaf;
+    color: #000;
+    text-align: center;
+    margin: 10px 0;
+}
+.ep_listing {
+    width: auto;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    /* margin: 10px; */
+    /* overflow: hidden; */
+    padding: 10px;
+}
+.listing_default {
+    background-color: #f5f1e4;
+}
+.listing_current {
+    background-color: #dfd;
+}
+.listing_waiting {
+    background-color: #9f9;
+}
+.listing_overdue {
+    background-color: #fdd;
+}
+.listing_toofar {
+      background-color: #ddf;
+}
+.listing_unknown {
+    background-color: #ffdc89;
+}
+span.pause {
+    color: #f00;
+    font-size: 12px;
+}
+.ep_summaryTrigger {
+    float: left;
+    padding-top: 5px;
+}
+.ep_summary {
+    margin-left: 25px;
+    padding-top: 5px;
+}
+
+/* =======================================================================
+config.tmpl
+========================================================================== */
+.infoTable td {
+    padding: 5px;
+}
+.infoTableHeader {
+    font-weight: bold;
+}
+.infoTableSeperator { 
+    border-top: 1px dotted #666;
+}
 [class^="icon16-"], [class*=" icon16-"] {
     background-image: url("../images/glyphicons-config.png");
-    background-position: -40px 0px;
+    background-position: -40px 0;
     background-repeat: no-repeat;
     display: inline-block;
     height: 16px;
@@ -32,22 +710,303 @@ input.cb {
     width: 16px;
 }
 .icon16-github {
-    background-position: 0px 0px;
+    background-position: 0 0;
 }
 .icon16-mirc {
-    background-position: -20px 0px;
+    background-position: -20px 0;
 }
 .icon16-sb {
-    background-position: -40px 0px;
+    background-position: -40px 0;
 }
 .icon16-web {
-    background-position: -60px 0px;
+    background-position: -60px 0;
 }
 .icon16-win {
-    background-position: -80px 0px;
+    background-position: -80px 0;
 }
 
-/* bootstrap overrides ---------------------- */
+/* =======================================================================
+config_notifications.tmpl
+========================================================================== */
+.notifier-icon {
+    float: left;
+    margin: 2px 10px 0 0;
+}
+.testNotification {
+    border: 1px dotted #ccc;
+    padding: 5px;
+    margin-bottom: 10px;
+    line-height: 20px;
+}
+
+/* =======================================================================
+config_providers.tmpl
+========================================================================== */
+#config-components > h2 {
+    border-bottom: 4px solid #ddd;
+}
+#provider_order_list {
+    list-style-type: none;
+    width: 250px;
+    padding-left: 20px;
+}
+#provider_order_list li {
+    font-size: 14px;
+    margin: 5px 0;
+    padding: 5px;
+}
+#provider_order_list input {
+    margin: 0 2px;
+}
+.imgLink img {
+    padding: 0 2px 2px;
+}
+.component-title.jumbo {
+    line-height: 24px;
+    font-size: 15px !important;
+}
+
+/* =======================================================================
+config_search.tmpl
+========================================================================== */
+.config_message {
+    width: 100%;
+    text-align: center;
+    font-size: 15px;
+    background: #ffecac;
+    padding: 3px 5px;
+}
+.title-group {
+    border-bottom: 1px dotted #666;
+    position: relative;
+    padding: 15px;
+}
+
+/* =======================================================================
+config_notifications.tmpl
+========================================================================== */
+div.metadata-options {
+    width: 190px;
+    float: left;
+}
+div.metadata-example {
+    width: 325px;
+    float: right;
+}
+div.metadata_options {
+    background: #f5f1e4;
+    overflow: auto;
+    border: 1px solid #ccc;
+    padding: 7px;
+}
+div.metadata_options label {
+    display: block;
+    color: #036;
+    line-height: 20px;
+    padding-left: 7px;
+}
+div.metadata_options label:hover {
+    background-color: #57442b;
+    color: #fff;
+}
+div.metadata_example {
+    padding: 7px;
+}
+div.metadata_example label {
+    display: block;
+    color: #000;
+    line-height: 21px;
+}
+div.metadataDiv .disabled {
+    color: #ccc;
+}
+
+/* =======================================================================
+used all over
+========================================================================== */
+.sickbeardTable {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+    color: #000;
+    background-color: #fff;
+    border-spacing: 0;
+}
+.sickbeardTable th,
+.sickbeardTable td {
+    padding: 4px;
+    border-left: #fff 1px solid;
+    border-top: #fff 1px solid;
+}
+.sickbeardTable th:first-child,
+.sickbeardTable td:first-child {
+    border-left: none;
+}
+.sickbeardTable th{
+    border-collapse: collapse;
+    background-color: #333;
+    color: #fff;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align: center;
+}
+.sickbeardTable tfoot a {
+    color: #fff;
+    text-decoration: none;
+}
+tr.seasonheader {
+    text-align: center;
+    background-color: #fff;
+    padding: 0;
+}
+tr.seasonheader h2 {
+    display: inline;
+    font-size: 22px;
+    line-height: 20px;
+    letter-spacing: 1px;
+    margin: 0;
+    color: #000;
+}
+tr.seasonheader a {
+    text-decoration:none;
+}
+td.tvShow {
+    font-weight: bold;
+}
+td.tvShow a {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+}
+td.tvShow:hover a {
+    color:#000;
+}
+td.tvShow:hover {
+    background-color: #cfcfcf !important;
+    cursor: pointer;
+}
+/* TODO: convert float-* to pull-* */
+.float-left {
+    float: left;
+}
+.float-right {
+    float: right;
+}
+.align-left {
+    text-align: left;
+}
+.align-right {
+    text-align: right;
+}
+.nowrap {
+    white-space: nowrap;
+}
+.padding {
+    padding: 5px;
+}
+.alt {
+    background-color: #efefef;
+}
+div#summary {
+    background-color: #efefef;
+    padding: 10px;
+    border: 1px solid #dfdede;
+    margin: 10px;
+}
+h1 a:hover, h2 a:hover, span a:hover, div.h2footer a:hover, .notify-text a:hover {
+    background-color: #000;
+    color: #fff;
+    text-decoration: none;
+}
+/* used on displayShow and comingEp list */
+.plotInfo {
+    cursor: help;
+    font-weight: bold;
+    float: right;
+    position: relative;
+    margin-left: 8px;
+}
+div select option {
+    padding: 2px 10px;
+}
+span.path {
+    color: #8b0000;
+    background-color: #f5f1e4;
+    padding: 3px 6px;
+}
+h1.title {
+    text-align: left;
+    font-size: 24px;
+    line-height: 30px;
+    font-weight: 400;
+    padding-bottom: 4px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #888;
+}
+.h2footer {
+    line-height: 18px;
+    margin: -45px 5px 8px 0;
+}
+.h2footer select {
+    margin-top: -6px;
+    margin-bottom: -6px;
+}
+.h2footer span {
+    padding: 3px 5px;
+}
+/* quality tags */
+span.quality {
+    font: bold 1em/1.2em verdana, sans-serif;
+    background: none repeat scroll 0 0 #999;
+    color: #fff;
+    display: inline-block;
+    padding: 2px 4px;
+    text-align: center;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+span.Custom {
+    background: none repeat scroll 0 0 #449; /* blue */
+}
+span.HD,span.WEB-DL,span.BluRay {
+    background: none repeat scroll 0 0 #494; /* green */
+}
+span.SD {
+    background: none repeat scroll 0 0 #944; /* red */
+}
+span.Any {
+    background: none repeat scroll 0 0 #444; /* black */
+}
+/* unused boolean tags */
+span.false {
+    color: #933; /* red */
+}
+span.true {
+    color: #696; /* green */
+}
+
+/* =======================================================================
+Lib overrides -- global (except jui/bootstrap)
+========================================================================== */
+/* pines notify related */
+div.ui-pnotify {
+    min-width: 340px;
+    max-width: 550px;
+    width: auto !important;
+}
+/* qTip2 related */
+.ui-tooltip-sb .ui-tooltip-titlebar a {
+    color: #222;
+    text-decoration: none;
+}
+.ui-tooltip, .qtip {
+    max-width: 500px !important;
+}
+
+/* =======================================================================
+bootstrap overrides
+========================================================================== */
 a {
     color: #333;
 }
@@ -60,9 +1019,6 @@ input, textarea, select, .uneditable-input {
 }
 select:focus, .btn:focus {
     outline: none;
-}
-button.btn, input.btn[type="submit"] {
-    line-height: 18px;
 }
 input[disabled], select[disabled], textarea[disabled], input[readonly], select[readonly], textarea[readonly] {
     background-color: #efefef;
@@ -129,7 +1085,6 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
 .dropdown-menu li > a:hover > [class*=" icon-"] {
   background-image: url("../images/glyphicons-halflings-white.png");
 }
-
 /* ------------------------------------------ */
 
 /* bootstrap mod to show menu on hover instead of click */

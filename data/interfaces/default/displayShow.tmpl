@@ -56,7 +56,7 @@
 </div>
 
 <div id="summary" class="align-left">
-<table class="infoTable" cellspacing="1" border="0" cellpadding="0">
+<table>
 #if $show.network and $show.airs:
     <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
 #else if $show.network:
@@ -109,20 +109,18 @@ Change selected episodes to
 #set $curSeason = -1
 #set $odd = 0
 
-<div class="float-right" id="checkboxControls">
-    <div class="clearfix" style="padding-bottom: 5px;">
-        <label for="wanted"><span class="wanted"><input type="checkbox" id="wanted" checked="checked" /> Wanted: <b>$epCounts[$Overview.WANTED]</b></span></label>
-        <label for="qual"><span class="qual"><input type="checkbox" id="qual" checked="checked" /> Low Quality: <b>$epCounts[$Overview.QUAL]</b></span></label>
-        <label for="good"><span class="good"><input type="checkbox" id="good" checked="checked" /> Downloaded: <b>$epCounts[$Overview.GOOD]</b></span></label>
-        <label for="skipped"><span class="skipped"><input type="checkbox" id="skipped" checked="checked" /> Skipped: <b>$epCounts[$Overview.SKIPPED]</b></span></label>
+<div class="float-right clearfix" id="checkboxControls">
+    <div style="padding-bottom: 5px;">
+        <label for="wanted" class="checkbox inline wanted"><input type="checkbox" id="wanted" checked="checked" /> Wanted: <b>$epCounts[$Overview.WANTED]</b></label>
+        <label for="qual" class="checkbox inline qual"><input type="checkbox" id="qual" checked="checked" /> Low Quality: <b>$epCounts[$Overview.QUAL]</b></label>
+        <label for="good" class="checkbox inline good"><input type="checkbox" id="good" checked="checked" /> Downloaded: <b>$epCounts[$Overview.GOOD]</b></label>
+        <label for="skipped" class="checkbox inline skipped"><input type="checkbox" id="skipped" checked="checked" /> Skipped: <b>$epCounts[$Overview.SKIPPED]</b></label>
     </div>
-    <div class="clearfix">
-        <button class="btn btn-mini selectAll"><a href="#" onclick="return false;" class="seriesCheck">Select Filtered Episodes</a></button> 
-        <button class="btn btn-mini clearAll"><a href="#" onclick="return false;" class="clearAll">Clear All</a></button>
+    <div class="pull-right">
+        <button class="btn btn-mini seriesCheck"><a href="#" onclick="return false;">Select Filtered Episodes</a></button> 
+        <button class="btn btn-mini clearAll"><a href="#" onclick="return false;">Clear All</a></button>
     </div>
 </div>
-
-<div style="clear:both;" class="clearfix"></div>
 
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
     
