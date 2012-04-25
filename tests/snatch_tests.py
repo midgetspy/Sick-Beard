@@ -29,9 +29,11 @@ import sickbeard
 from sickbeard.tv import TVEpisode, TVShow
 import sickbeard.common as c
 
-tests = {"Dexter": {"a": 1, "q": c.HD, "s": 5, "e": [7], "b": 'Dexter.S05E07.720p.BluRay.X264-REWARD', "i": ['Dexter.S05E07.720p.BluRay.X264-REWARD', 'Dexter.S05E07.720p.X264-REWARD']},
-         "House": {"a": 1, "q": c.HD, "s": 4, "e": [5], "b": 'House.4x5.720p.BluRay.X264-REWARD', "i": ['Dexter.S05E04.720p.X264-REWARD', 'House.4x5.720p.BluRay.X264-REWARD']},
-         "Hells Kitchen": {"a": 1, "q": c.SD, "s": 6, "e": [14, 15], "b": 'Hells.Kitchen.s6e14e15.HDTV.XviD-ASAP', "i": ['Hells.Kitchen.S06E14.HDTV.XviD-ASAP', 'Hells.Kitchen.6x14.HDTV.XviD-ASAP', 'Hells.Kitchen.s6e14e15.HDTV.XviD-ASAP']}
+tests = {"Dexter":           {"a": 1, "q": c.HD, "anime": 0, "s": 5, "e": [7], "b": 'Dexter.S05E07.720p.BluRay.X264-REWARD', "i": ['Dexter.S05E07.720p.BluRay.X264-REWARD', 'Dexter.S05E07.720p.X264-REWARD']},
+         "House":            {"a": 1, "q": c.HD, "anime": 0, "s": 4, "e": [5], "b": 'House.4x5.720p.BluRay.X264-REWARD', "i": ['Dexter.S05E04.720p.X264-REWARD', 'House.4x5.720p.BluRay.X264-REWARD']},
+         "Hells Kitchen":    {"a": 1, "q": c.SD, "anime": 0, "s": 6, "e": [14,15], "b": 'Hells.Kitchen.s6e14e15.HDTV.XviD-ASAP', "i": ['Hells.Kitchen.S06E14.HDTV.XviD-ASAP', 'Hells.Kitchen.6x14.HDTV.XviD-ASAP', 'Hells.Kitchen.s6e14e15.HDTV.XviD-ASAP']},
+         "Naruto":           {"a": 1, "q": c.HD, "anime": 1,  "s": 4, "e": [18], "ab": 7, "b": '[Narutoverse]_NARUTO_7_720p', "i": ['[Narutoverse]_NARUTO_7_720p', '[Doki]_NARUTO_7']},
+         "Naruto Shippuden": {"a": 1, "q": c.HD, "anime": 1,  "s": 4, "e": [18], "ab": 259, "b": '[Narutoverse]_NARUTO_Shippuden_259_[720p]', "i": ['[Narutoverse]_NARUTO_Shippuden_259', '[Narutoverse]_NARUTO_Shippuden_259_[720p]']},
        }
 
 
@@ -69,12 +71,16 @@ def test_generator(tvdbdid, show_name, curData, forceSearch):
         show = TVShow(tvdbdid)
         show.name = show_name
         show.quality = curData["q"]
+        if curData["anime"]:
+            show.anime = 1
         show.saveToDB()
         sickbeard.showList.append(show)
 
         for epNumber in curData["e"]:
             episode = TVEpisode(show, curData["s"], epNumber)
             episode.status = c.WANTED
+            if "ab" in curData:
+                episode.absolute_number = curData["ab"]
             episode.saveToDB()
 
         bestResult = search.findEpisode(episode, forceSearch)

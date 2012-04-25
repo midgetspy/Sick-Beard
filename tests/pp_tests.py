@@ -104,22 +104,26 @@ def test_generator(tvdbdid, show_name, curData):
         show.name = show_name
         show.quality = curData["q"]
         show.location = self.showDir
+        if curData["anime"]:
+            show.anime = 1
         show.saveToDB()
         sickbeard.showList.append(show)
 
         for epNumber in curData["e"]:
             episode = TVEpisode(show, curData["s"], epNumber)
             episode.status = c.WANTED
+            if "ab" in curData:
+                episode.absolute_number = curData["ab"]
             episode.saveToDB()
 
         pp = PostProcessor(self.filePath)
-        self.assertTrue(pp.process()) #first is expected, second is choosen one
+        self.assertTrue(pp.process())
     return test
 
 
 # create the test methods
 tvdbdid = 1
-for name, curData in tests.items(): # we use the test from snatch_tests.py
+for name, curData in tests.items(): # we use the tests from snatch_tests.py
     if not curData["a"]:
         continue
     fname = name.replace(' ', '_')
