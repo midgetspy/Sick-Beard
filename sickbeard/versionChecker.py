@@ -28,7 +28,7 @@ import urllib, urllib2
 import zipfile, tarfile
 
 from urllib2 import URLError
-from lib.pygithub import github
+import gh_api as github
 
 class CheckVersion():
     """
@@ -297,13 +297,13 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits.forBranch('cytec', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits('cytec', 'Sick-Beard', version.SICKBEARD_VERSION):
             if not self._newest_commit_hash:
-                self._newest_commit_hash = curCommit.id
+                self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
                     break
 
-            if curCommit.id == self._cur_commit_hash:
+            if curCommit['sha'] == self._cur_commit_hash:
                 break
 
             self._num_commits_behind += 1
@@ -313,7 +313,7 @@ class GitUpdateManager(UpdateManager):
     def set_newest_text(self):
 
         # if we're up to date then don't set this
-        if self._num_commits_behind == 35:
+        if self._num_commits_behind == 100:
             message = "or else you're ahead of master"
 
         elif self._num_commits_behind > 0:
@@ -431,7 +431,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'http://github.com/cytec/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
+        tar_download_url = 'https://github.com/cytec/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 
