@@ -119,9 +119,12 @@ class SickbeardTestDBCase(unittest.TestCase):
         setUp_test_episode_file()
         setUp_test_show_dir()
         
-        logger.log("##############################", logger.DEBUG)
+        logger.log("############################################################", logger.DEBUG)
         logger.log("     SET UP DONE", logger.DEBUG)
-        logger.log("##############################", logger.DEBUG)
+        logger.log("############################################################", logger.DEBUG)
+        logger.log("     Running test " + self.id(), logger.DEBUG)
+        logger.log("############################################################", logger.DEBUG)
+        
 
     def tearDown(self):
         tearDown_test_db()
@@ -181,9 +184,9 @@ sickbeard.tvcache.CacheDBConnection = TestCacheDBConnection
 def setUp_test_db():
     """upgrades the db to the latest version
     """
-    logger.log("##############################", logger.DEBUG)
+    logger.log("############################################################", logger.DEBUG)
     logger.log("     SETINGUP DB", logger.DEBUG)
-    logger.log("##############################", logger.DEBUG)
+    logger.log("############################################################", logger.DEBUG)
 
     # upgrading the db
     db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
@@ -200,9 +203,9 @@ def tearDown_test_db():
     """
     # uncomment next line so leave the db intact beween test and at the end
     #return False
-    logger.log("##############################", logger.DEBUG)
+    logger.log("############################################################", logger.DEBUG)
     logger.log("     REMOVING DB", logger.DEBUG)
-    logger.log("##############################", logger.DEBUG)
+    logger.log("############################################################", logger.DEBUG)
 
     if os.path.exists(os.path.join(TESTDIR, TESTDBNAME)):
         os.remove(os.path.join(TESTDIR, TESTDBNAME))
