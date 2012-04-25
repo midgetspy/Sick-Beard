@@ -350,9 +350,12 @@ def searchDBForShow(regShowName):
         if len(sqlResults) == 1:
             return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
         else:
-            tvdbid = get_tvdbid(showName,sickbeard.showList)
-       
-       
+            show = get_show_by_name(showName,sickbeard.showList)
+            if show:
+                tvdbid = show.tvdbid
+            else:
+                tvdbid = 0
+            
         #TODO: this is bad taking the other function and doing a lookup in the db. REFACTORE! this whole thing
         if tvdbid:
             sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = ?", [tvdbid])
@@ -575,8 +578,9 @@ def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False):
             pass
         else:
             if mode == NameParser.ANIME_REGEX and not (show and show.is_anime):
-                tvdbid = get_tvdbid(parse_result.series_name, showList, tvdbActiveLookUp)
-                if not tvdbid or not check_for_anime(tvdbid,showList): # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
+                show = get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
+                if not show or not show.is_anime: # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
+                    logger.log("found a show but the show is not an anime", logger.DEBUG)
                     continue
                 else: # this means it was an anime
                     break
@@ -594,31 +598,6 @@ def _check_against_names(name, show):
 
     for showName in showNames:
         nameFromList = full_sanitizeSceneName(showName)
-        # i'll leave this here for historical resons but i changed the find() into a "==" which resolves this problem
-        # FIXME: this is ok for most shows but will give false positives on:
-        """nameFromList = "show name: special version"
-           nameInQuestion = "show name"
-           ->will match
-
-           but the otherway around:
-
-           nameFromList = "show name"
-           nameInQuestion = "show name: special version"
-           ->will not work
-
-           athough the first example will only occur during pp
-           and the second example is good that it wont match
-
-        """
-        """
-        regex = "^."+ ".*"
-        match = re.match(regex, curName)
-        
-        if not match:
-            singleName = False
-            break
-        """
-        
         #logger.log(u"Comparing names: '"+nameFromList+"' vs '"+nameInQuestion+"'", logger.DEBUG)
         if nameFromList == nameInQuestion:
             return True
@@ -626,13 +605,13 @@ def _check_against_names(name, show):
     return False
 
 
-def get_tvdbid(name, showList, useTvdb=False):
+def get_show_by_name(name, showList, useTvdb=False):
     logger.log(u"Trying to get the tvdbid for "+name, logger.DEBUG)
             
     for show in showList:
         if _check_against_names(name, show):
             logger.log(u"Matched "+name+" in the showlist to the show "+show.name, logger.DEBUG)
-            return show.tvdbid
+            return show
 
     if useTvdb:
         try:
@@ -651,32 +630,16 @@ def get_tvdbid(name, showList, useTvdb=False):
             except (tvdb_exceptions.tvdb_exception, IOError):
                 pass
     
-            return 0
+            return None
         except (IOError):
-            return 0
+            return None
         else:
-            return int(showObj["id"])
+            show = findCertainShow(sickbeard.showList, int(showObj["id"]))
+            if show:
+                return show
             
-    return 0 
-    
- 
-def check_for_anime(tvdb_id,showList=[],forceDB=False):
-    """
-    Check if the show is a anime
-    """
-    if not forceDB and len(showList):
-        for show in showList:
-            if show.tvdbid == tvdb_id and show.is_anime:
-                return True
-    
-    
-    elif tvdb_id:
-        myDB = db.DBConnection()
-        isAbsoluteNumberSQlResult = myDB.select("SELECT anime,show_name FROM tv_shows WHERE tvdb_id = ?", [tvdb_id])
-        if isAbsoluteNumberSQlResult and int(isAbsoluteNumberSQlResult[0][0]) > 0:
-            logger.log(u"This show (tvdbid:"+str(tvdb_id)+") is flaged as an anime", logger.DEBUG)
-            return True
-    return False 
+    return None
+
 
 def set_up_anidb_connection():
         if not sickbeard.USE_ANIDB:

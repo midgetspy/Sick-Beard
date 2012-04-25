@@ -9,6 +9,7 @@ branches:
   only:
     - development
     - unittest
+    - anime
 
 before_script: cd ./tests
 script: ./all_tests.py

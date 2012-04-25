@@ -1,16 +1,12 @@
 import unittest
 import test_lib as test
 
-import test_lib
 import sys, os.path
-sys.path.append(os.path.abspath('..'))
-
-from sickbeard import show_name_helpers, scene_exceptions, common, name_cache
 
 import sickbeard
-from sickbeard import db
 from sickbeard.databases import cache_db
 from sickbeard.tv import TVShow as Show
+from sickbeard import show_name_helpers, scene_exceptions, common, name_cache, db
 
 
 class SceneTests(test.SickbeardTestDBCase):
@@ -27,9 +23,13 @@ class SceneTests(test.SickbeardTestDBCase):
         s = Show(tvdbid)
         s.name = name
         s.tvrname = tvrname
-
         result = show_name_helpers.allPossibleShowNames(s)
-        self.assertTrue(len(set(expected).intersection(set(result))) == len(expected))
+        
+        result = [unicode(x) for x in sorted(result)]
+        expected = [unicode(x) for x in sorted(expected)]
+
+        #self.assertEqual(len(set(expected).intersection(set(result))), len(expected))
+        self.assertEqual(result, expected)
 
     def _test_filterBadReleases(self, name, expected):
         result = show_name_helpers.filterBadReleases(name)
@@ -71,7 +71,7 @@ class SceneTests(test.SickbeardTestDBCase):
     def test_allPossibleShowNames(self):
         #common.sceneExceptions[-1] = ['Exception Test']
         myDB = db.DBConnection("cache.db")
-        myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [-1, 'Exception Test'])
+        myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name, season) VALUES (?,?,?)", [-1, 'Exception Test', -1])
         common.countryList['Full Country Name'] = 'FCN'
 
         self._test_allPossibleShowNames('Show Name', expected=['Show Name'])

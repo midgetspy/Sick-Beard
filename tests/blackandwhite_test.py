@@ -11,12 +11,6 @@ from sickbeard.name_parser.parser import ParseResult
 
 
 class BlackAndWhiteListTests(test.SickbeardTestDBCase):
-
-    def setUp(self):
-        super(BlackAndWhiteListTests, self).setUp()
-    
-    def tearDown(self):
-        super(BlackAndWhiteListTests, self).tearDown()
         
     def test_insert(self):
         bwl = BlackAndWhiteList(1337)
