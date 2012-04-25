@@ -137,13 +137,9 @@
                 };
         }
 
-        var initialDir, path, callback, ls = false;
-        // if the text field is empty and we're given a key then populate it with the last browsed value from localStorage
-        try { ls = !!(localStorage.getItem); } catch (e) {}
-        if (ls && options.key) {
-            path = localStorage['fileBrowser-' + options.key];
-        }
-        if (options.key && options.field.val().length === 0 && (path)) {
+        var initialDir, path, callback = null;
+        // if the text field is empty and we're given a key then populate it with the last browsed value from a cookie
+        if (options.key && options.field.val().length === 0 && (path = $.cookie('fileBrowser-' + options.key))) {
             options.field.val(path);
         }
 
@@ -151,14 +147,13 @@
             // store the browsed path to the associated text field
             options.field.val(path);
 
-            // use a localStorage to remember for next time -- no ie6/7
-            if (ls && options.key) {
-                localStorage['fileBrowser-' + options.key] = path;
+            // use a cookie to remember for next time
+            if (options.key) {
+                $.cookie('fileBrowser-' + options.key, path);
             }
-
         };
 
-        initialDir = options.field.val() || (options.key && path) || '';
+        initialDir = options.field.val() || (options.key && $.cookie('fileBrowser-' + options.key)) || '';
 
         options = $.extend(options, {initialDir: initialDir});
 

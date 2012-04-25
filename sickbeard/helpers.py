@@ -27,6 +27,8 @@ import traceback
 
 from xml.dom.minidom import Node
 
+from xml.dom.minidom import Node
+
 import sickbeard
 
 from sickbeard.exceptions import MultipleShowObjectsException

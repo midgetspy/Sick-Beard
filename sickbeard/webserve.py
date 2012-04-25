@@ -40,7 +40,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 
-from sickbeard.providers import newznab, getProviderClass
+from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
@@ -66,23 +66,8 @@ class PageTemplate (Template):
         self.sbHttpPort = sickbeard.WEB_PORT
         self.sbHttpsPort = sickbeard.WEB_PORT
         self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
-        if cherrypy.request.headers['Host'][0] == '[':
-            self.sbHost = re.match("^\[.*\]", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
-        else:
-            self.sbHost = re.match("^[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
+        self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
-
-        if sickbeard.NZBS and sickbeard.NZBS_UID and sickbeard.NZBS_HASH:
-            logger.log(u"NZBs.org has been replaced, please check the config to configure the new provider!", logger.ERROR)
-            ui.notifications.error("NZBs.org Config Update", "NZBs.org has a new site. Please <a href=\""+sickbeard.WEB_ROOT+"/config/providers\">update your config</a> with the api key from <a href=\"http://beta.nzbs.org/login\">http://beta.nzbs.org</a> and then disable the old NZBs.org provider.")
-
-        if "X-Forwarded-Host" in cherrypy.request.headers:
-            self.sbHost = cherrypy.request.headers['X-Forwarded-Host']
-        if "X-Forwarded-Port" in cherrypy.request.headers:
-            self.sbHttpPort = cherrypy.request.headers['X-Forwarded-Port']
-            self.sbHttpsPort = self.sbHttpPort
-        if "X-Forwarded-Proto" in cherrypy.request.headers:
-            self.sbHttpsEnabled = True if cherrypy.request.headers['X-Forwarded-Proto'] == 'https' else False
 
         logPageTitle = 'Logs &amp; Errors'
         if len(classes.ErrorViewer.errors):
@@ -1089,7 +1074,8 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
+    def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
+                      nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
@@ -1127,6 +1113,7 @@ class ConfigProviders:
 
             finishedNames.append(curID)
 
+
         # delete anything that is missing
         for curProvider in sickbeard.newznabProviderList:
             if curProvider.getID() not in finishedNames:
@@ -1139,10 +1126,10 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'nzbs_r_us':
-                sickbeard.NZBSRUS = curEnabled
-            elif curProvider == 'nzbs_org_old':
+            if curProvider == 'nzbs_org':
                 sickbeard.NZBS = curEnabled
+            elif curProvider == 'nzbs_r_us':
+                sickbeard.NZBSRUS = curEnabled
             elif curProvider == 'nzbmatrix':
                 sickbeard.NZBMATRIX = curEnabled
             elif curProvider == 'newzbin':
@@ -1173,6 +1160,9 @@ class ConfigProviders:
         sickbeard.BTN_AUTH_TOKEN = btn_auth_token.strip()
         sickbeard.BTN_PASSKEY = btn_passkey.strip()
         sickbeard.BTN_AUTHKEY = btn_authkey.strip()
+
+        sickbeard.NZBS_UID = nzbs_org_uid.strip()
+        sickbeard.NZBS_HASH = nzbs_org_hash.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
@@ -1215,7 +1205,6 @@ class ConfigNotifications:
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
-                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
@@ -1341,20 +1330,6 @@ class ConfigNotifications:
         else:
             use_boxcar = 0
 
-        if pushover_notify_onsnatch == "on":
-            pushover_notify_onsnatch = 1
-        else:
-            pushover_notify_onsnatch = 0
-
-        if pushover_notify_ondownload == "on":
-            pushover_notify_ondownload = 1
-        else:
-            pushover_notify_ondownload = 0
-        if use_pushover == "on":
-            use_pushover = 1
-        else:
-            use_pushover = 0
-
         if use_nmj == "on":
             use_nmj = 1
         else:
@@ -1449,11 +1424,6 @@ class ConfigNotifications:
         sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
         sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
         sickbeard.BOXCAR_USERNAME = boxcar_username
-
-        sickbeard.USE_PUSHOVER = use_pushover
-        sickbeard.PUSHOVER_NOTIFY_ONSNATCH = pushover_notify_onsnatch
-        sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = pushover_notify_ondownload
-        sickbeard.PUSHOVER_USERKEY = pushover_userkey
 
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
@@ -1587,43 +1557,26 @@ class NewHomeAddShows:
                 lang = "de"
 
         baseURL = "http://thetvdb.com/api/GetSeries.php?"
-        nameUTF8 = name.encode('utf-8')
 
-        # Use each word in the show's name as a possible search term
-        keywords = nameUTF8.split(' ')
-
-        # Insert the whole show's name as the first search term so best results are first
-        # ex: keywords = ['Some Show Name', 'Some', 'Show', 'Name']
-        keywords.insert(0, nameUTF8)
-
-        # Query the TVDB for each search term and build the list of results
-        results = []
-        for searchTerm in keywords:
-            params = {'seriesname': searchTerm,
+        params = {'seriesname': name.encode('utf-8'),
                   'language': lang}
 
-            finalURL = baseURL + urllib.urlencode(params)
+        finalURL = baseURL + urllib.urlencode(params)
 
-            urlData = helpers.getURL(finalURL)
+        urlData = helpers.getURL(finalURL)
 
-            try:
-                seriesXML = etree.ElementTree(etree.XML(urlData))
-                series = seriesXML.getiterator('Series')
+        try:
+            seriesXML = etree.ElementTree(etree.XML(urlData))
+        except Exception, e:
+            logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+urlData, logger.ERROR)
+            return ''
 
-            except Exception, e:
-                # use finalURL in log, because urlData can be too much information
-                logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+finalURL, logger.ERROR)
-                series = ''
+        series = seriesXML.getiterator('Series')
 
-            # add each result to our list
-            for curSeries in series:
-                tvdb_id = int(curSeries.findtext('seriesid'))
-                
-                # don't add duplicates
-                if tvdb_id in [x[0] for x in results]:
-                    continue
-                
-                results.append((tvdb_id, curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
+        results = []
+
+        for curSeries in series:
+            results.append((int(curSeries.findtext('seriesid')), curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
 
         lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
 
@@ -1994,8 +1947,6 @@ class Home:
             return "Error: Unsupported Request. Send jsonp request with 'callback' variable in the query stiring."
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         cherrypy.response.headers['Content-Type'] = 'text/javascript'
-        cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
-        cherrypy.response.headers['Access-Control-Allow-Headers'] = 'x-requested-with'
 
         if sickbeard.started:
             return callback+'('+json.dumps({"msg": str(sickbeard.PID)})+');'
@@ -2071,16 +2022,6 @@ class Home:
             return "Boxcar notification succeeded. Check your Boxcar clients to make sure it worked"
         else:
             return "Error sending Boxcar notification"
-
-    @cherrypy.expose
-    def testPushover(self, userKey=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.pushover_notifier.test_notify(userKey)
-        if result:
-            return "Pushover notification succeeded. Check your Pushover clients to make sure it worked"
-        else:
-            return "Error sending Pushover notification"
 
     @cherrypy.expose
     def twitterStep1(self):
