@@ -900,6 +900,7 @@ class TVShow(object):
         toReturn += "genre: " + self.genre + "\n"
         toReturn += "runtime: " + str(self.runtime) + "\n"
         toReturn += "quality: " + str(self.quality) + "\n"
+        toReturn += "anime: " + str(self.is_anime) + "\n"
         return toReturn
 
 
