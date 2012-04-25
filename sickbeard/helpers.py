@@ -579,7 +579,6 @@ def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False):
         else:
             if mode == NameParser.ANIME_REGEX and not (show and show.is_anime):
                 show = get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
-                logger.log(str(show))
                 if not show or not show.is_anime: # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
                     logger.log("found a show but the show is not an anime", logger.DEBUG)
                     continue
