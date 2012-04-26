@@ -302,6 +302,14 @@ class QueueItemAdd(ShowQueueItem):
             myDB = db.DBConnection();
             myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
 
+
+        logger.log(u"Attempting to load scene numbers", logger.DEBUG)
+        if self.show.loadEpisodeSceneNumbers():
+            logger.log(u"loading scene numbers successfull", logger.DEBUG)
+        else:
+            logger.log(u"loading scene numbers NOT successfull or no scene numbers available", logger.DEBUG)
+
+
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
             logger.log(u"Launching backlog for this show since its episodes are WANTED")
