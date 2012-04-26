@@ -1014,9 +1014,9 @@ class TVEpisode(object):
 
         self.lock = threading.Lock()
 
-        self.specifyEpisode(self.season, self.episode)
-
         self.relatedEps = []
+
+        self.specifyEpisode(self.season, self.episode)
 
         self.checkForMetaFiles()
 
@@ -1122,8 +1122,19 @@ class TVEpisode(object):
             sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND scene_season = ? AND scene_episode = ?", [self.show.tvdbid, season, episode])
             
 
-        if len(sqlResults) > 1:
-            raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow."+msg)
+        if len(sqlResults) > 1 and not self.scene:
+            raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same episode somehow."+msg)
+        elif len(sqlResults) > 1 and self.scene:
+            first = True
+            for relatedEP in sqlResults:
+                if first: # first shal be root ep
+                    first = False
+                    continue
+                logger.log(str(self.show.tvdbid) + ": Adding a related episode because of a scene mapping with tvdb numbers " + str(relatedEP["season"]) + "x" + str(relatedEP["episode"]), logger.DEBUG)
+
+                rel_ep_obj = TVEpisode(self.show, int(relatedEP["season"]), int(relatedEP["episode"]))
+                self.relatedEps.append(rel_ep_obj)
+
         elif len(sqlResults) == 0:
             logger.log(str(self.show.tvdbid) + ": Episode " + msg + str(self.season) + "x" + str(self.episode) + " not found in the database", logger.DEBUG)
             return False
