@@ -2284,11 +2284,15 @@ class Home:
         epCounts[Overview.GOOD] = 0
         epCounts[Overview.UNAIRED] = 0
 
+        showSceneNumberColum = False
         for curResult in sqlResults:
+            if not showSceneNumberColum and (isinstance(curResult["scene_season"], int) and isinstance(curResult["scene_episode"], int)):
+                showSceneNumberColum = True
 
             curEpCat = showObj.getOverview(int(curResult["status"]))
             epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
             epCounts[curEpCat] += 1
+        t.showSceneNumberColum = showSceneNumberColum
 
         def titler(x):
             if not x:
