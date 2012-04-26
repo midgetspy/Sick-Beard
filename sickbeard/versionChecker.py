@@ -286,23 +286,14 @@ class GitUpdateManager(UpdateManager):
 
     def _find_git_branch(self):
 
-        return self._run_git('symbolic-ref -q HEAD')[0].strip().replace('refs/heads/', '', 1) or 'master'
+        branch_info = self._run_git('symbolic-ref -q HEAD')
 
+        if not branch_info or not branch_info[0]:
+            return 'master'
 
-    def _check_github_for_update(self):
-        """
-        Uses pygithub to ask github if there is a newer version that the provided
-        commit hash. If there is a newer version it sets Sick Beard's version text.
+        branch = branch_info[0].strip().replace('refs/heads/', '', 1)
 
-        commit_hash: hash that we're checking against
-        """
-
-        self._num_commits_behind = 0
-        self._newest_commit_hash = None
-
-        gh = github.GitHub()
-
-        # find newest commit
+        return branch or 'master'
         for curCommit in gh.commits('lad1337', 'Sick-Beard', self.branch):
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit['sha']
