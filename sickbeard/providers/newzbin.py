@@ -115,10 +115,11 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_SDTV(self, attrs, anime=False):
 
-        # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
-        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
+        # Video Fmt: (XviD, DivX, x264 or H.264), NOT 720p, NOT 1080p, NOT 1080i
+        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'x264' in attrs['Video Fmt'] or 'H.264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
-                            and ('1080p' not in attrs['Video Fmt'])
+                            and ('1080p' not in attrs['Video Fmt']) \
+                            and ('1080i' not in attrs['Video Fmt'])
 
 
         
@@ -138,11 +139,12 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_SDDVD(self, attrs, anime=False):
 
-        # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
-        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
+        # Video Fmt: (XviD, DivX, x264 or H.264), NOT 720p, NOT 1080p, NOT 1080i
+        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'x264' in attrs['Video Fmt'] or 'H.264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
-                            and ('1080p' not in attrs['Video Fmt'])
-
+                            and ('1080p' not in attrs['Video Fmt']) \
+                            and ('1080i' not in attrs['Video Fmt'])
+    						
         # Source: DVD
         source = 'Source' in attrs and 'DVD' in attrs['Source']
 
@@ -176,9 +178,12 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_WEBDL(self, attrs, anime=False):
 
-        # Video Fmt: H.264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('H.264' in attrs['Video Fmt']) \
+        # Video Fmt: x264, H.264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt'] or 'H.264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
+
+        # Source: Web-DL
+        source = 'Source' in attrs and 'Web-dl' in attrs['Source']
 
         # Subtitles: (None)
         if not anime:
