@@ -288,7 +288,7 @@ class GitUpdateManager(UpdateManager):
 
         branch_info = self._run_git('symbolic-ref -q HEAD')
 
-        if not branch_info:
+        if not branch_info or not branch_info[0]:
             return 'master'
 
         branch = branch_info[0].strip().replace('refs/heads/', '', 1)
