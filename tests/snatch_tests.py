@@ -44,12 +44,6 @@ def _create_fake_xml(items):
     return xml
 
 
-# the real one tries to contact tvdb just stop it from getting more info on the ep
-def _fake_specifyEP(self, season, episode):
-    pass
-
-TVEpisode.specifyEpisode = _fake_specifyEP
-
 searchItems = []
 
 
