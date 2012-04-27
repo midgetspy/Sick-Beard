@@ -1501,6 +1501,27 @@ class Config:
 
         t = PageTemplate(file="config.tmpl")
         t.submenu = ConfigMenu
+
+        # read changelog file, if present, and format it to be used for tooltip
+        t.hasChangeLog = False
+        data = []
+        if os.path.isfile('CHANGELOG.txt'):
+            t.hasChangeLog = True
+            f = ek.ek(open, 'CHANGELOG.txt')
+            data = f.readlines()
+            f.close()
+
+            numLines = 0
+            finalData = []
+            for x in data:
+                x = x.decode('utf-8').replace('\n', '<br/>')
+                # why 3? we want to skip to the acutal changelog details
+                if numLines > 3:
+                    finalData.append(x)
+                numLines += 1
+            result = "".join(finalData)
+            t.logLines = re.escape(result)
+
         return _munge(t)
 
     general = ConfigGeneral()
