@@ -195,6 +195,11 @@ th.tablesorter-headerSortDown { background-image: url("$sbRoot/images/tablesorte
                         <li><a href="$sbRoot/errorlogs/viewlog/"><img src="$sbRoot/images/menu/viewlog16.png" alt="" width="16" height="16" />View Log</a></li>
                 </ul>
             </li>
+            #if $sickbeard.NZB_METHOD == "sabnzbd":
+            <li id="NAVsabnzbd"><a href="$sickbeard.SAB_HOST" class="navIcon">
+                <span id="sablogo"><img alt="SABnzbd" src="$sbRoot/images/sabnzbd_small.png" width="16" height="16" /></span>
+                <span id="sabtext">SABnzbd</span></a></li>
+            #end if
             <li id="donate"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donate_LG.gif" alt="[donate]" /></a></li>
 </ul>
 #if $varExists('submenu'):
