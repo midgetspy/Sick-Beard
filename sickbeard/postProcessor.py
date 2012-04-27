@@ -710,12 +710,14 @@ class PostProcessor(object):
             except exceptions.EpisodeNotFoundException, e:
                 self._log(u"Unable to create episode: "+ex(e), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()
-    
+
             # associate all the episodes together under a single root episode
             if root_ep == None:
                 root_ep = curEp
-                root_ep.relatedEps = []
+                if not scene:
+                    root_ep.relatedEps = []
             else:
+                self._log("Adding a related episode: " + str(curEp.season) + "x" + str(curEp.episode))
                 root_ep.relatedEps.append(curEp)
         
         return root_ep

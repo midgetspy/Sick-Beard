@@ -309,6 +309,13 @@ class QueueItemAdd(ShowQueueItem):
         if self.show.is_anime:
             scene_exceptions.retrieve_exceptions(localOnly=True)
 
+        logger.log(u"Attempting to load scene numbers", logger.DEBUG)
+        if self.show.loadEpisodeSceneNumbers():
+            logger.log(u"loading scene numbers successfull", logger.DEBUG)
+        else:
+            logger.log(u"loading scene numbers NOT successfull or no scene numbers available", logger.DEBUG)
+
+
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
             logger.log(u"Launching backlog for this show since its episodes are WANTED")
