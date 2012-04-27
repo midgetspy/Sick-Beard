@@ -2804,6 +2804,117 @@ class WebInterface:
 
         return _munge(t)
 
+    # Provides a URL to generate an .ics/iCalendar subscribable URL to have an upcoming episode schedule
+    @cherrypy.expose
+    def ical(self):
+	from lib.icalendar import Calendar, Event
+	import random
+
+	logger.log(u"Receiving iCal request from " + str(cherrypy.request.remote.ip))
+	
+	try:
+		from PIL import Image
+		pil_import = True
+	except ImportError:
+		pil_import = False
+
+        # Get the current instance URL to set up banner image links later on
+        poster_url = cherrypy.url().replace('ical', '')
+        
+        # Separate out the hours/minutes/AMPM
+        time_re = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})')
+        
+        # Create an iCalendar object with FixedOffset as air times are in EST
+        cal = Calendar()
+        from lib.icalendar import FixedOffset, UTC
+	# Create the EST tzinfo object
+        EST = FixedOffset(-240, "EST")
+        cal.add('version', '2.0')
+        cal.add('prodid', '//Sick-Beard Upcoming Episodes//')
+        
+        myDB = db.DBConnection()
+        
+        today = datetime.date.today().toordinal()
+        next_month = (datetime.date.today() + datetime.timedelta(days=30)).toordinal()
+        
+        # Get all the shows that are not paused and are currently on air
+        calendar_shows = myDB.select("SELECT show_name, tvdb_id, network, airs, runtime FROM tv_shows WHERE status = 'Continuing' AND paused != '1'");
+        
+        # Loop through the shows, get all episodes airing today or after and earlier than next_month
+        for show in calendar_shows:
+            episode_list = myDB.select("SELECT tvdbid, name, season, episode, description, airdate FROM tv_episodes WHERE airdate >= ? AND airdate < ? AND showid = ?", (today, next_month, int(show["tvdb_id"])))
+            
+            # Loop through the found episodes
+            for episode in episode_list:
+                # Create an iCalendar event
+            	event = Event()
+            	# Add the show summary (usually just title)
+            	event.add('summary', show["show_name"] + ": " + episode["name"])
+            	# Get the air date
+            	air_date = datetime.datetime.fromordinal(int(episode["airdate"]))
+            	# Get the air time
+            	air_time = time_re.search(show["airs"])
+            	
+            	# Parse out the air time
+            	if(air_time.group(4).lower() == 'pm'):
+            	    t = datetime.time((int(air_time.group(1)) + 12), int(air_time.group(2)), 0, tzinfo=EST)
+            	else:
+            	    t = datetime.time(int(air_time.group(1)), int(air_time.group(2)), 0, tzinfo=EST)
+            	
+            	# Combine air time and air date into one datetime object
+            	at = datetime.datetime.combine(air_date, t)
+
+            	# Add start time
+            	event.add('dtstart', at.astimezone(UTC))
+            	
+            	# If the runtime is defined, we can set an end time.  Otherwise it'll just show up as the start time.
+            	# Sick-Beard in its current incarnation doesn't populate this value for some reason, so for now this doesn't work.
+            	# I'm also assuming if/when it does start getting set it will be getting set in minutes.  I've opened an issue
+            	# at http://code.google.com/p/sickbeard/issues/detail?id=1573 to get more info on why runtime is never set
+            	# even though it's available from TVRage/TVDB
+            	if(int(show["runtime"]) > 0):
+			# Create a new datetime object to represent the end time which is just the air time plus
+			# a timedelta of the runtime
+			et = at + datetime.timedelta(minutes = int(show["runtime"]))
+            		event.add('dtend', et.astimezone(UTC))
+		else:
+			# No runtime info available, just set the end time to the start time
+			event.add('dtend', at.astimezone(UTC))
+            	
+            	# Add Google Calendar stuff, I'm not sure if this works yet because Google Calendar only updates every 24 hours.
+            	# This should add a Sick-Beard icon and show poster.
+		event.add('X-GOOGLE-CALENDAR-CONTENT-TITLE', show["show_name"] + ": " + episode["name"])
+            	event.add('X-GOOGLE-CALENDAR-CONTENT-TYPE', 'image/*')
+            	event.add('X-GOOGLE-CALENDAR-CONTENT-URL', poster_url + "showPoster/?show=" + str(show["tvdb_id"]) + "&which=banner")
+		if(pil_import):
+			# We can get an accurate height/width
+			try:
+				image_path = ek.ek(os.path.join, sickbeard.PROG_DIR, 'cache', 'images', str(show["tvdb_id"]) + ".banner.jpg")
+				b = Image.open(image_path)
+			except IOError:
+				logger.log(u"Couldn't get image info for " + str(show["show_name"]) + " / " + str(image_path))
+			else:
+				w,h = b.size
+				event.add('X-GOOGLE-CALENDAR-CONTENT-WIDTH', str(w))
+				event.add('X-GOOGLE-CALENDAR-CONTENT-HEIGHT', str(h))			
+		else:
+			# Just guessing height, it seems to be what all the banners are.
+			event.add('X-GOOGLE-CALENDAR-CONTENT-WIDTH', '758')
+			event.add('X-GOOGLE-CALENDAR-CONTENT-HEIGHT', '140')
+            	event.add('X-GOOGLE-CALENDAR-CONTENT-ICON', poster_url + "images/favicon.ico")
+            	
+            	# Generate a random UID to refer to this date
+            	event['uid'] = datetime.date.today().isoformat() + "-" + str(random.randint(10000,99999)) + "@Sick-Beard"
+            	
+            	# Add the event to the Calendar object
+            	cal.add_component(event)
+        
+        # Pass the calendar string to the tmpl file
+        t = PageTemplate(file="ical.tmpl")
+        t.calendarString = cal.as_string()
+        
+        return _munge(t)
+
     manage = Manage()
 
     history = History()
