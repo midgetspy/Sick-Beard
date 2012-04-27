@@ -904,25 +904,26 @@ class TVShow(object):
             return Overview.SKIPPED
         elif epStatus == ARCHIVED:
             return Overview.GOOD
-        elif epStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
 
-            anyQualities, bestQualities = Quality.splitQuality(self.quality) #@UnusedVariable
-            if bestQualities:
-                maxBestQuality = max(bestQualities)
-            else:
-                maxBestQuality = None
+        anyQualities, bestQualities = Quality.splitQuality(self.quality) #@UnusedVariable
+        if bestQualities:
+            maxBestQuality = max(bestQualities)
+        else:
+            maxBestQuality = None
 
-            epStatus, curQuality = Quality.splitCompositeStatus(epStatus)
+        epStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
-            # if they don't want re-downloads then we call it good if they have anything
-            if maxBestQuality == None:
-                return Overview.GOOD
-            # if they have one but it's not the best they want then mark it as qual
-            elif curQuality < maxBestQuality:
-                return Overview.QUAL
-            # if it's >= maxBestQuality then it's good
-            else:
-                return Overview.GOOD
+        if epStatus in (SNATCHED, SNATCHED_PROPER) and curQuality == 0:
+            return Overview.SNATCHED_PROPER
+        # if they don't want re-downloads then we call it good if they have anything
+        elif maxBestQuality == None:
+            return Overview.GOOD
+        # if they have one but it's not the best they want then mark it as qual
+        elif curQuality < maxBestQuality:
+            return Overview.QUAL
+        # if it's >= maxBestQuality then it's good
+        else:
+            return Overview.GOOD
 
 def dirty_setter(attr_name):
     def wrapper(self, val):
