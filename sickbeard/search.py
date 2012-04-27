@@ -349,69 +349,86 @@ def findSeason(show, season):
 
     anyQualities, bestQualities = Quality.splitQuality(show.quality)
 
-    # pick the best season NZB
-    bestSeasonNZB = None
-    if SEASON_RESULT in foundResults:
-        bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities)
-
     highest_quality_overall = 0
     for cur_season in foundResults:
         for cur_result in foundResults[cur_season]:
-            if cur_result.quality != Quality.UNKNOWN and cur_result.quality > highest_quality_overall:
+            if cur_result.quality != Quality.UNKNOWN and cur_result.quality > highest_quality_overall and cur_result.quality in anyQualities+bestQualities:
                 highest_quality_overall = cur_result.quality
     logger.log(u"The highest quality of any match is "+Quality.qualityStrings[highest_quality_overall], logger.DEBUG)
 
-    # see if every episode is wanted
-    if bestSeasonNZB:
+    needSplitting = True
 
-        # get the quality of the season nzb
-        seasonQual = Quality.nameQuality(bestSeasonNZB.name)
-        seasonQual = bestSeasonNZB.quality
-        logger.log(u"The quality of the season NZB is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
+    # Keep searching for the best season NZB until we find one which we can use entirely
+    # or one that is splittable into individual episodes
+    while needSplitting:
 
-        myDB = db.DBConnection()
-        allEps = [int(x["episode"]) for x in myDB.select("SELECT episode FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])]
-        logger.log(u"Episode list: "+str(allEps), logger.DEBUG)
+        # pick the best season NZB
+        bestSeasonNZB = None
+        if SEASON_RESULT in foundResults:
+            bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities)
 
-        allWanted = True
-        anyWanted = False
-        for curEpNum in allEps:
-            if not show.wantEpisode(season, curEpNum, seasonQual):
-                allWanted = False
-            else:
-                anyWanted = True
-
-        # if we need every ep in the season and there's nothing better then just download this and be done with it
-        if allWanted and bestSeasonNZB.quality == highest_quality_overall:
-            logger.log(u"Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.name)
-            epObjs = []
-            for curEpNum in allEps:
-                epObjs.append(show.getEpisode(season, curEpNum))
-            bestSeasonNZB.episodes = epObjs
-            return [bestSeasonNZB]
-
-        elif not anyWanted:
-            logger.log(u"No eps from this season are wanted at this quality, ignoring the result of "+bestSeasonNZB.name, logger.DEBUG)
-
+        # see if every episode is wanted
+        if not bestSeasonNZB:
+            needSplitting = False
         else:
+            # get the quality of the season nzb
+            seasonQual = Quality.nameQuality(bestSeasonNZB.name)
+            seasonQual = bestSeasonNZB.quality
+            logger.log(u"The quality of the season NZB is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
 
-            logger.log(u"Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
+            myDB = db.DBConnection()
+            allEps = [int(x["episode"]) for x in myDB.select("SELECT episode FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])]
+            logger.log(u"Episode list: "+str(allEps), logger.DEBUG)
 
-            # if not, break it apart and add them as the lowest priority results
-            individualResults = nzbSplitter.splitResult(bestSeasonNZB)
-
-            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
-
-            for curResult in individualResults:
-                if len(curResult.episodes) == 1:
-                    epNum = curResult.episodes[0].episode
-                elif len(curResult.episodes) > 1:
-                    epNum = MULTI_EP_RESULT
-
-                if epNum in foundResults:
-                    foundResults[epNum].append(curResult)
+            allWanted = True
+            anyWanted = False
+            for curEpNum in allEps:
+                if not show.wantEpisode(season, curEpNum, seasonQual):
+                    allWanted = False
                 else:
-                    foundResults[epNum] = [curResult]
+                    anyWanted = True
+
+            # if we need every ep in the season and there's nothing better then just download this and be done with it
+            if allWanted and bestSeasonNZB.quality == highest_quality_overall:
+                logger.log(u"Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.name)
+                epObjs = []
+                for curEpNum in allEps:
+                    epObjs.append(show.getEpisode(season, curEpNum))
+                bestSeasonNZB.episodes = epObjs
+                needSplitting = False
+                return [bestSeasonNZB]
+
+            elif not anyWanted:
+                needSplitting = False
+                logger.log(u"No eps from this season are wanted at this quality, ignoring the result of "+bestSeasonNZB.name, logger.DEBUG)
+
+            else:
+
+                logger.log(u"Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
+
+                # if not, break it apart and add them as the lowest priority results
+                individualResults = nzbSplitter.splitResult(bestSeasonNZB)
+
+                individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
+
+                if len(individualResults) > 0:
+                    needSplitting = False
+                else:
+                    logger.log(u"Unable to break apart the NZB.  Need to pick another one", logger.DEBUG)
+                    foundResults[SEASON_RESULT].remove(bestSeasonNZB)
+                    if len(foundResults[SEASON_RESULT]) == 0:
+                        foundResults.remove(SEASON_RESULT)
+
+                for curResult in individualResults:
+                    if len(curResult.episodes) == 1:
+                        epNum = curResult.episodes[0].episode
+                    elif len(curResult.episodes) > 1:
+                        epNum = MULTI_EP_RESULT
+
+                    if epNum in foundResults:
+                        foundResults[epNum].append(curResult)
+                    else:
+                        foundResults[epNum] = [curResult]
 
 
     # go through multi-ep results and see if we really want them or not, get rid of the rest
