@@ -1092,7 +1092,7 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
- 					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
+                      btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1149,6 +1149,8 @@ class ConfigProviders:
                 sickbeard.NEWZBIN = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
+            elif curProvider == 'nzbindex_nl':
+                sickbeard.NZBI = curEnabled
             elif curProvider == 'womble_s_index':
                 sickbeard.WOMBLE = curEnabled
             elif curProvider == 'ezrss':

@@ -22,6 +22,7 @@ __all__ = ['ezrss',
            'nzbs_org_old',
            'nzbsrus',
            'womble',
+		   'nzbindex_nl',
            'newzbin',
            'btn',
            ]
