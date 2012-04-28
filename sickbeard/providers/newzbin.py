@@ -164,8 +164,8 @@ class NewzbinProvider(generic.NZBProvider):
         video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt'] or 'H.264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
 
-        # Source: Web-DL
-        source = 'Source' in attrs and 'Web-dl' in attrs['Source']
+        # Source: WEB-DL
+        source = 'Source' in attrs and 'WEB-DL' in attrs['Source']
 
         # Subtitles: (None)
         subs = 'Subtitles' not in attrs
