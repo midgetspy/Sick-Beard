@@ -30,13 +30,16 @@
 #continue
 #end if
 
-  <tr class="seasonheader">
+  <tr>
     <td colspan="3" class="align-left">
-        <br/><h2><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></h2>
+        <br/>
+        <h2 class="backlogShow">
+            <a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a>
+        </h2>
         <div class="float-right clearfix">
             <label for="wanted" class="checkbox inline wanted">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></label>
             <label for="qual" class="checkbox inline qual">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></label>
-            <a class="btn btn-mini" href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid"><i class="icon-play-circle"></i> Force Backlog</a>
+            <a class="btn btn-mini btn-inverse forceBacklog" href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid"><i class="icon-play-circle icon-white"></i> Force Backlog</a>
         </div>
     </td>
   </tr>

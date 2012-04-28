@@ -505,6 +505,21 @@ displayShow.tmpl + manage_backlogOverview.tmpl
 }
 
 /* =======================================================================
+manage_backlogOverview.tmpl
+========================================================================== */
+.forceBacklog {
+    margin-left: 10px;
+}
+h2.backlogShow {
+    display: inline;
+    font-size: 18px;
+    line-height: 18px;
+    letter-spacing: 1px;
+    margin: 0;
+    color: #000;
+}
+
+/* =======================================================================
 config*.tmpl
 ========================================================================== */
 #config-content {
