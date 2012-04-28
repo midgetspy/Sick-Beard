@@ -2507,11 +2507,11 @@ class Home:
     def updatePLEX(self):
 
         if notifiers.plex_notifier._update_library():
-            ui.notifications.message("Command sent to Plex Media Server host " + sickbeard.PLEX_HOST + " to update library")
-            logger.log(u"Plex library update initiated for host " + sickbeard.PLEX_HOST, logger.DEBUG)
+            ui.notifications.message("Command sent to Plex Media Server host " + sickbeard.PLEX_SERVER_HOST + " to update library")
+            logger.log(u"Plex library update initiated for host " + sickbeard.PLEX_SERVER_HOST, logger.DEBUG)
         else:
-            ui.notifications.error("Unable to contact Plex Media Server host " + sickbeard.PLEX_HOST)
-            logger.log(u"Plex library update failed for host " + sickbeard.PLEX_HOST, logger.ERROR)
+            ui.notifications.error("Unable to contact Plex Media Server host " + sickbeard.PLEX_SERVER_HOST)
+            logger.log(u"Plex library update failed for host " + sickbeard.PLEX_SERVER_HOST, logger.ERROR)
         redirect('/home')
 
 
