@@ -124,9 +124,9 @@
 #set $cur_metadata_inst = $sickbeard.metadata_provider_dict[$cur_generator.name]
 #set $cur_id = $GenericMetadata.makeID($cur_name)
 <div class="metadataDiv clearfix" id="$cur_id">
-    <div class="metadata-options">
+    <div class="metadata-options-wrapper">
         <h4>Create:</h4>
-        <div class="metadata_options">
+        <div class="metadata-options">
             <label for="${cur_id}_show_metadata" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_show_metadata" #if $cur_metadata_inst.show_metadata then "checked=\"checked\"" else ""#/>&nbsp;Show Metadata</label>
             <label for="${cur_id}_episode_metadata" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_episode_metadata" #if $cur_metadata_inst.episode_metadata then "checked=\"checked\"" else ""#/>&nbsp;Episode Metadata</label>
             <label for="${cur_id}_fanart" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_fanart" #if $cur_metadata_inst.fanart then "checked=\"checked\"" else ""#/>&nbsp;Show Fanart Image</label>
@@ -135,9 +135,9 @@
             <label for="${cur_id}_season_thumbnails" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_season_thumbnails" #if $cur_metadata_inst.season_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Season Thumbnail</label>
         </div>
     </div>
-    <div class="metadata-example">
+    <div class="metadata-example-wrapper">
         <h4>Results:</h4>
-        <div class="metadata_example">
+        <div class="metadata-example">
             <label for="${cur_id}_show_metadata"><span id="${cur_id}_eg_show_metadata">$cur_metadata_inst.eg_show_metadata</span></label>
             <label for="${cur_id}_episode_metadata"><span id="${cur_id}_eg_episode_metadata">$cur_metadata_inst.eg_episode_metadata</span></label>
             <label for="${cur_id}_fanart"><span id="${cur_id}_eg_fanart">$cur_metadata_inst.eg_fanart</span></label>

@@ -27,11 +27,11 @@ $(document).ready(function(){
             $(this).populateNewznabSection();
         }
 
-        if ($('#provider_order_list > #'+id).length == 0 && showProvider != false) {
+        if ($('#providerOrderList > #'+id).length == 0 && showProvider != false) {
             var toAdd = '<li class="ui-state-default" id="'+id+'"> <input type="checkbox" id="enable_'+id+'" class="provider_enabler" CHECKED> <a href="'+url+'" class="imgLink" target="_new"><img src="'+sbRoot+'/images/providers/newznab.gif" alt="'+name+'" width="16" height="16"></a> '+name+'</li>'
 
-            $('#provider_order_list').append(toAdd);
-            $('#provider_order_list').sortable("refresh");
+            $('#providerOrderList').append(toAdd);
+            $('#providerOrderList').sortable("refresh");
         }
 
         $(this).makeNewznabProviderString();
@@ -55,7 +55,7 @@ $(document).ready(function(){
         delete newznabProviders[id];
         $(this).populateNewznabSection();
 
-        $('#provider_order_list > #'+id).remove();
+        $('#providerOrderList > #'+id).remove();
 
         $(this).makeNewznabProviderString();
 
@@ -112,7 +112,7 @@ $(document).ready(function(){
     }
     
     $.fn.refreshProviderList = function() {
-            var idArr = $("#provider_order_list").sortable('toArray');
+            var idArr = $("#providerOrderList").sortable('toArray');
             var finalArr = new Array();
             $.each(idArr, function(key, val) {
                     var checked = + $('#enable_'+val).prop('checked') ? '1' : '0';
@@ -196,13 +196,13 @@ $(document).ready(function(){
 
     $(this).showHideProviders();
 
-    $("#provider_order_list").sortable({
+    $("#providerOrderList").sortable({
         placeholder: 'ui-state-highlight',
         update: function (event, ui) {
             $(this).refreshProviderList();
         }
     });
 
-    $("#provider_order_list").disableSelection();
+    $("#providerOrderList").disableSelection();
 
 });
