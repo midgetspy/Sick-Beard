@@ -72,6 +72,14 @@
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="update_directory_timestamp" id="update_directory_timestamp" #if $sickbeard.UPDATE_DIRECTORY_TIMESTAMP == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="update_directory_timestamp">
+                                <span class="component-title">Update Directory Timestamp</span>
+                                <span class="component-desc">Update timestamp of the directory files are being moved to? This is useful for some media players that determine changes in a directory by looking at its timestamp.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="rename_episodes">
                                 <span class="component-title">Rename Episodes</span>
