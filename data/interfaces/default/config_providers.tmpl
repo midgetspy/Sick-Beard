@@ -41,7 +41,7 @@
                     </div>
 
                     <fieldset class="component-group-list">
-                        <ul id="provider_order_list">
+                        <ul id="providerOrderList">
                         #for $curProvider in $sickbeard.providers.sortedProviderList():
                             #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                 #continue

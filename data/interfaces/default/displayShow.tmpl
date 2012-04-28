@@ -36,7 +36,9 @@
 </div><br/>
 
 #if $show_message:
-    <div id="show_message" class="ui-corner-all">$show_message</div><br />
+    <div class="alert alert-info">
+        $show_message
+    </div>
 #end if
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
