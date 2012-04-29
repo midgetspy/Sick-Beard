@@ -9,7 +9,7 @@
 #set global $topmenu="manageShows"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
+<script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js?$sbPID"></script>
 
 
 <div class="h2footer align-right">
@@ -43,9 +43,9 @@
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
-<script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
+<script type="text/javascript" src="$sbRoot/js/displayShow.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>

@@ -11,10 +11,10 @@
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/formwizard.js"></script>
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
-<script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
-<script type="text/javascript" src="$sbRoot/js/addShowOptions.js"></script> 
+<script type="text/javascript" src="$sbRoot/js/formwizard.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/newShow.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/addShowOptions.js?$sbPID"></script> 
    
 <div id="displayText">aoeu</div>
 <br />
@@ -81,6 +81,6 @@
 #end if
 </div>
 
-<script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
+<script type="text/javascript" src="$sbRoot/js/rootDirs.js?$sbPID"></script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

@@ -433,10 +433,6 @@ input.cb {
   float: left;
   margin: 3px 5px 3px 4px;
 }
-/* hack for home_addExistingShow.tmpl -- hardcoded in backend */
-.showManage {
-  float: left;
-}
 ul#rootDirStaticList {
   width: 90%;
   margin-right: auto;
