@@ -3,7 +3,6 @@ import urllib, ConfigParser
 from distutils.core import setup
 import py2exe, sys, os, shutil, datetime, zipfile, subprocess, fnmatch
 import googlecode_upload
-from lib.pygithub import github
 
 # mostly stolen from the SABnzbd package.py file
 name = 'SickBeard'
@@ -163,45 +162,6 @@ setup(
       zipfile = None,
       console = ['updater.py'],
 )
-
-if 'test' in oldArgs:
-    print "Ignoring changelog for test build"
-else:
-    # start building the CHANGELOG.txt
-    print 'Creating changelog'
-    gh = github.GitHub()
-    
-    # read the old changelog and find the last commit from that build
-    lastCommit = ""
-    try:
-        cl = open("CHANGELOG.txt", "r")
-        lastCommit = cl.readlines()[0].strip()
-        cl.close()
-    except:
-        print "I guess there's no changelog"
-    
-    newestCommit = ""
-    changeString = ""
-
-    # cycle through all the git commits and save their commit messages
-    for curCommit in gh.commits.forBranch('midgetspy', 'Sick-Beard'):
-        if curCommit.id == lastCommit:
-            break
-    
-        if newestCommit == "":
-            newestCommit = curCommit.id
-        
-        changeString += curCommit.message + "\n\n"
-    
-    # if we didn't find any changes don't make a changelog file
-    if newestCommit != "":
-        newChangelog = open("CHANGELOG.txt", "w")
-        newChangelog.write(newestCommit+"\n\n")
-        newChangelog.write("Changelog for build "+str(currentBuildNumber)+"\n\n")
-        newChangelog.write(changeString)
-        newChangelog.close()
-    else:
-        print "No changes found, keeping old changelog"
 
 # put the changelog in the compile dir
 if os.path.exists("CHANGELOG.txt"):

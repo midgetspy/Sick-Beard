@@ -29,7 +29,6 @@ autoProcessTV/build/*
 SickBeard-win32-*.zip
 *.exe
 gc.ini
-CHANGELOG.txt
 *.tmp
 *.wpr
 *.project
