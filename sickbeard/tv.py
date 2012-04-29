@@ -270,9 +270,6 @@ class TVShow(object):
         # change the cache value elsewhere
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-        if not cache:
-            ltvdb_api_parms['cache'] = 'recache'
-
         if self.lang:
             ltvdb_api_parms['language'] = self.lang
 
@@ -547,9 +544,6 @@ class TVShow(object):
         if tvapi is None:
             ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-            if not cache:
-                ltvdb_api_parms['cache'] = 'recache'
-            
             if self.lang:
                 ltvdb_api_parms['language'] = self.lang
 
@@ -1079,9 +1073,6 @@ class TVEpisode(object):
                     # There's gotta be a better way of doing this but we don't wanna
                     # change the cache value elsewhere
                     ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-
-                    if not cache:
-                        ltvdb_api_parms['cache'] = 'recache'
 
                     if tvdb_lang:
                             ltvdb_api_parms['language'] = tvdb_lang

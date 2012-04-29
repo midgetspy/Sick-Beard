@@ -1,12 +1,12 @@
 from setuptools import setup
 setup(
-name='tvdb_api',
-version='1.0',
+name = 'tvdb_api',
+version='1.6.4',
 
 author='dbr/Ben',
 description='Interface to thetvdb.com',
 url='http://github.com/dbr/tvdb_api/tree/master',
-license='GPLv2',
+license='unlicense',
 
 long_description="""\
 An easy to use API interface to TheTVDB.com
@@ -21,11 +21,10 @@ Basic usage is:
 u'Stole a Badge'
 """,
 
-py_modules=['tvdb_api', 'tvdb_ui', 'tvdb_exceptions', 'cache'],
+py_modules = ['tvdb_api', 'tvdb_ui', 'tvdb_exceptions', 'tvdb_cache'],
 
 classifiers=[
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License (GPL)",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
