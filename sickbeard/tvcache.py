@@ -340,7 +340,7 @@ class TVCache():
         if not episode:
             sqlResults = myDB.select("SELECT * FROM "+self.providerID)
         else:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "|"+str(episode.episode)+"|"])
+            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "%|"+str(episode.episode)+"|%"])
 
         # for each cache entry
         for curResult in sqlResults:

@@ -26,6 +26,7 @@ import tweet
 from . import libnotify
 import notifo
 import boxcar
+import pushover
 import nmj
 import synoindex
 import trakt
@@ -41,6 +42,7 @@ prowl_notifier = prowl.ProwlNotifier()
 twitter_notifier = tweet.TwitterNotifier()
 notifo_notifier = notifo.NotifoNotifier()
 boxcar_notifier = boxcar.BoxcarNotifier()
+pushover_notifier = pushover.PushoverNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
@@ -60,6 +62,7 @@ notifiers = [
     nmj_notifier,
     synoindex_notifier,
     boxcar_notifier,
+    pushover_notifier,
     trakt_notifier,
     pytivo_notifier,
     nma_notifier,

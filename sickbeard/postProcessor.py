@@ -54,6 +54,7 @@ class PostProcessor(object):
     EXISTS_SMALLER = 3
     DOESNT_EXIST = 4
 
+    IGNORED_FILESTRINGS = [ "/.AppleDouble/", ".DS_Store" ]
     def __init__(self, file_path, nzb_name = None):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
@@ -112,7 +113,7 @@ class PostProcessor(object):
     
         # if the new file exists, return the appropriate code depending on the size
         if ek.ek(os.path.isfile, existing_file):
-    
+            
             # see if it's bigger than our old file
             if ek.ek(os.path.getsize, existing_file) > ek.ek(os.path.getsize, self.file_path):
                 self._log(u"File "+existing_file+" is larger than "+self.file_path, logger.DEBUG)
@@ -184,6 +185,8 @@ class PostProcessor(object):
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 ek.ek(os.remove, cur_file)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.deleteFile(cur_file)
                 
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
@@ -697,6 +700,10 @@ class PostProcessor(object):
         if os.path.isdir( self.file_path ):
             self._log(u"File "+self.file_path+" seems to be a directory")
             return False
+        for ignore_file in self.IGNORED_FILESTRINGS:
+            if ignore_file in self.file_path:
+                self._log(u"File "+self.file_path+" is ignored type, skipping" )
+                return False
         # reset per-file stuff
         self.in_history = False
         
@@ -763,6 +770,8 @@ class PostProcessor(object):
             try:
                 ek.ek(os.mkdir, dest_path)
                 helpers.chmodAsParent(dest_path)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.addFolder(dest_path)
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
@@ -815,7 +824,7 @@ class PostProcessor(object):
         notifiers.plex_notifier.update_library()
 
         # do the library update for synoindex
-        notifiers.synoindex_notifier.update_library(ep_obj)
+        notifiers.synoindex_notifier.addFile(ep_obj.location)
 
         # do the library update for trakt
         notifiers.trakt_notifier.update_library(ep_obj)
