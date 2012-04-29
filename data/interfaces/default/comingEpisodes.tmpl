@@ -9,7 +9,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 
 <div class="h2footer align-right">
     <b>Key:</b> 
@@ -22,7 +22,7 @@
 
 #if $layout == 'list':
 <!-- start list view //-->
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
 \$.tablesorter.addParser({
@@ -279,5 +279,5 @@ window.setInterval( "location.reload(true)", 600000); // Refresh every 10 minute
 //-->
 </script>
 
-<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
+<script type="text/javascript" src="$sbRoot/js/tableClick.js?$sbPID"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
