@@ -44,6 +44,7 @@ $(document).ready(function(){
         } else if (selectedProvider == "utorrent") {
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
+            $('#Torrent_username').show()
             $('#Torrent_Path').hide();
             $('#Torrent_Ratio').hide();
             $('#Torrent_Paused').hide();
@@ -53,6 +54,7 @@ $(document).ready(function(){
         } else if (selectedProvider == "transmission"){
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
+            $('#Torrent_username').show()
             $('#Torrent_Path').show();
             $('#Torrent_Ratio').show();
             $('#Torrent_Paused').show();
