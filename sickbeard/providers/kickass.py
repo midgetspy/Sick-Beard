@@ -30,6 +30,7 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
+from sickbeard import encodingKludge as ek
 from sickbeard.common import *
 from sickbeard import logger, helpers
 from sickbeard import tvcache
@@ -160,8 +161,27 @@ class KICKASSProvider(generic.TorrentProvider):
         match = re.match(name_regex, filename, re.I)
         if match:
             return match.group(1)
-        return None    
-
+        return None
+    
+    def downloadResult(self, result):
+        try:
+            logger.log(u"Downloading a result from " + self.name + " at " + result.url)
+            
+            torrentFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
+            #add self referer to get application/x-bittorrent from torcache.net
+            data = self.getURL(result.url, [("Referer", result.url)])
+            if data == None:
+                return False
+            fileOut = open(torrentFileName, 'wb')
+            logger.log(u"Saving to " + torrentFileName, logger.DEBUG)
+            fileOut.write(data)
+            fileOut.close()
+            helpers.chmodAsParent(torrentFileName)
+            return self._verify_download(torrentFileName)
+        except Exception, e:
+            logger.log("Unable to save the file: "+str(e).decode('utf-8'), logger.ERROR)
+            return False
+        
 class KICKASSCache(tvcache.TVCache):
 
     def __init__(self, provider):
