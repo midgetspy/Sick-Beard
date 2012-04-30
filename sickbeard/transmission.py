@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import urllib2
 import httplib
 import re
@@ -30,7 +29,6 @@ import sickbeard
 from sickbeard import logger
 from sickbeard.exceptions import ex
 from urlparse import urlparse
-
 
 class TransmissionRPC(object):
     """TransmissionRPC lite library"""
@@ -59,10 +57,10 @@ class TransmissionRPC(object):
             response = json.loads(open_request.read())
             logger.log('response: ' + str(json.dumps(response).encode('utf-8')), logger.DEBUG)
             if response['result'] == 'success':
-                logger.log(u"Transmission action successfull", logger.DEBUG)
+                logger.log(u"Torrent sent to Transmission successfully", logger.DEBUG)
                 return response["arguments"]
             else:
-                logger.log("Unknown failure sending command to Transmission. Return text is: " + response['result'], logger.ERROR)
+                logger.log("Unknown failure sending Torrent to Transmission. Return text is: " + response['result'], logger.ERROR)
                 return False
         except httplib.InvalidURL, e:
             logger.log(u"Invalid Transmission host, check your config " + ex(e), logger.ERROR)
@@ -145,7 +143,6 @@ def sendTORRENT(torrent):
         logger.log("Unknown failure sending Torrent to Transmission. Return text is: " + str(e), logger.ERROR)
         return False
 
-
 def testAuthentication(host, username, password):
 
     try:
@@ -156,6 +153,5 @@ def testAuthentication(host, username, password):
     try:
         tc = TransmissionRPC(host.hostname, host.port, username, password)
         return True, u"Success: Connected and Authenticated. RPC version: " + str(tc.session["rpc-version"])
-
     except Exception, e:
-        return False, u"Transmission return text is: " + str(e)
+       return False, u"Error: Unable to connect to Transmission" 

@@ -251,8 +251,8 @@
                                 <span class="component-title jumbo">TORRENT Method</span>
                                 <span class="component-desc">
                                 <select name="torrent_method" id="torrent_method">
-                                #set $torrent_method_text = {'blackhole': "Black hole", 'utorrent': "uTorrent", 'transmission': "Transmission"}
-                                #for $curAction in ('utorrent', 'transmission', 'blackhole'):
+                                #set $torrent_method_text = {'blackhole': "Black hole", 'utorrent': "uTorrent", 'transmission': "Transmission", 'deluge': "Deluge"}
+                                #for $curAction in ('utorrent', 'transmission', 'deluge', 'blackhole'):
                                   #if $sickbeard.TORRENT_METHOD == $curAction:
                                     #set $torrent_method = "selected=\"selected\""
                                   #else
@@ -297,7 +297,7 @@
                                 </label>
                             </div>
                             
-                            <div class="field-pair">
+                            <div class="field-pair" id="Torrent_username">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="username_desc">Torrent Username</span>
                                     <input type="text" name="torrent_username" id="torrent_username" value="$sickbeard.TORRENT_USERNAME" size="20" />
@@ -319,7 +319,7 @@
                                 </label>
                             </div>
 
-                        	<div class="field-pair" id="torrent_directory">
+                        	<div class="field-pair" id="Torrent_Path">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="directory_desc">Torrent Directory</span>
                                     <input type="text" name="torrent_path" id="torrent_path" value="$sickbeard.TORRENT_PATH" size="45" />
@@ -330,7 +330,7 @@
                                 </label>
                             </div>
 
-                            <div class="field-pair">
+                            <div class="field-pair" id="Torrent_Ratio">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="torrent_ratio_desc">Torrent Ratio</span>
                                     <input type="text" name="torrent_ratio" id="torrent_ratio" value="$sickbeard.TORRENT_RATIO" size="2" />
@@ -341,7 +341,7 @@
                                 </label>
                             </div>
 
-                            <div class="field-pair">
+                            <div class="field-pair" id="Torrent_Paused">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="torrent_paused_desc">Start Torrent Paused</span>
                                     <input type="checkbox" name="torrent_paused" class="enabler" id="torrent_paused" #if $sickbeard.TORRENT_PAUSED == True then "checked=\"checked\"" else ""# />

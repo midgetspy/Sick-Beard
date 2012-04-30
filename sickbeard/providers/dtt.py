@@ -28,6 +28,7 @@ from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard.helpers import sanitizeSceneName, get_xml_text
+from sickbeard import show_name_helpers
 from sickbeard.exceptions import ex
 
 class DTTProvider(generic.TorrentProvider):
@@ -59,31 +60,31 @@ class DTTProvider(generic.TorrentProvider):
     def _dtt_show_id(self, show_name):
         return sanitizeSceneName(show_name).replace('.','-').lower()
 
+    def _get_season_search_strings(self, show, season=None):
+        search_string = []
+
+        for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+            show_string = sanitizeSceneName(show_name).replace('.','-').lower()
+            search_string.append(show_string)
+
+        return search_string
+    
     def _get_episode_search_strings(self, episode):
         return self._get_season_search_strings(episode.show, episode.season)
-
-    def _get_season_search_strings(self, show=None, season=None):
-        params = {}
-
-        params['items'] = 'all'
-            
-        if sickbeard.DTT_NORAR:
-            params['norar'] = 'yes'
-         
-        if sickbeard.DTT_SINGLE:    
-            params['single'] = 'yes'
-    
-        return [params]
-
+  
     def _doSearch(self, search_params, show=None):
-        show_id = self._dtt_show_id(show.name)
+        
+#        show_id = self._dtt_show_id(show.name)
 
-        params = {}
+        params = {"items" : "all"}
 
-        if search_params:
-            params.update(search_params)
+        if sickbeard.DTT_NORAR:
+            params.update({"norar" : "yes"})
 
-        searchURL = self.url + "rss/show/" + show_id + "?" + urllib.urlencode(params)
+        if sickbeard.DTT_SINGLE:
+            params.update({"single" : "yes"})
+
+        searchURL = self.url + "rss/show/" + search_params + "?" + urllib.urlencode(params)
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
@@ -122,15 +123,17 @@ class DTTCache(tvcache.TVCache):
         tvcache.TVCache.__init__(self, provider)
 
         # only poll DTT every 30 minutes max
-        self.minTime = 30
+        self.minTime = 0 #30
 
     def _getRSSData(self):
  
-        params = {}
-        search_params = self.provider._get_season_search_strings()
-        
-        if search_params:
-            params.update(search_params)        
+        params = {"items" : "all"}
+
+        if sickbeard.DTT_NORAR:
+            params.update({"norar" : "yes"})
+
+        if sickbeard.DTT_SINGLE:
+            params.update({"single" : "yes"})
 
         url = self.provider.url + 'rss/allshows?' + urllib.urlencode(params)
         logger.log(u"DTT cache update URL: "+ url, logger.DEBUG)

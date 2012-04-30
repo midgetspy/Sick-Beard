@@ -77,8 +77,10 @@ def sendTORRENT(result):
 
     try:
         open_request = urllib2.urlopen(add_url)
-        return open_request.read()
+        logger.log(u"Torrent sent to uTorrent successfully", logger.DEBUG)
+        return True
     except:
+        logger.log(u"Unknown failure sending Torrent to uTorrent", logger.ERROR)
         return False 
     
 def testAuthentication(host, username, password):

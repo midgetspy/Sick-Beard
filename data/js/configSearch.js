@@ -41,21 +41,35 @@ $(document).ready(function(){
         if (selectedProvider == "blackhole") {
             $('#t_blackhole_settings').show();
             $('#torrent_settings').hide();
-        } else if (selectedProvider == "utorrent"){
+        } else if (selectedProvider == "utorrent") {
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
-            $('#torrent_directory').hide();
+            $('#Torrent_Path').hide();
+            $('#Torrent_Ratio').hide();
+            $('#Torrent_Paused').hide();
             $('#host_desc').text('uTorrent Host');
             $('#username_desc').text('uTorrent Username');
             $('#password_desc').text('uTorrent Password');
         } else if (selectedProvider == "transmission"){
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
-            $('#torrent_directory').show();
+            $('#Torrent_Path').show();
+            $('#Torrent_Ratio').show();
+            $('#Torrent_Paused').show();
             $('#host_desc').html('Transmission Host');
             $('#username_desc').text('Transmission Username');
             $('#password_desc').text('Transmission Password');
             $('#directory_desc').text('Transmission Directory');
+        } else if (selectedProvider == "deluge"){
+            $('#t_blackhole_settings').hide();
+            $('#torrent_settings').show();
+            $('#Torrent_username').hide();
+            $('#Torrent_Path').hide();
+            $('#Torrent_Ratio').hide();
+            $('#Torrent_Paused').hide();
+            $('#host_desc').text('Deluge Host');
+            $('#username_desc').text('Deluge Username');
+            $('#password_desc').text('Deluge Password');
         }
     }
 
