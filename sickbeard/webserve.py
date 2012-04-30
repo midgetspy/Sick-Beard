@@ -66,7 +66,10 @@ class PageTemplate (Template):
         self.sbHttpPort = sickbeard.WEB_PORT
         self.sbHttpsPort = sickbeard.WEB_PORT
         self.sbHttpsEnabled = sickbeard.ENABLE_HTTPS
-        self.sbHost = re.match("[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
+        if cherrypy.request.headers['Host'][0] == '[':
+            self.sbHost = re.match("^\[.*\]", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
+        else:
+            self.sbHost = re.match("^[^:]+", cherrypy.request.headers['Host'], re.X|re.M|re.S).group(0)
         self.projectHomePage = "http://code.google.com/p/sickbeard/"
 
         if sickbeard.NZBS and sickbeard.NZBS_UID and sickbeard.NZBS_HASH:
@@ -1210,6 +1213,7 @@ class ConfigNotifications:
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
+                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
@@ -1335,6 +1339,20 @@ class ConfigNotifications:
         else:
             use_boxcar = 0
 
+        if pushover_notify_onsnatch == "on":
+            pushover_notify_onsnatch = 1
+        else:
+            pushover_notify_onsnatch = 0
+
+        if pushover_notify_ondownload == "on":
+            pushover_notify_ondownload = 1
+        else:
+            pushover_notify_ondownload = 0
+        if use_pushover == "on":
+            use_pushover = 1
+        else:
+            use_pushover = 0
+
         if use_nmj == "on":
             use_nmj = 1
         else:
@@ -1429,6 +1447,11 @@ class ConfigNotifications:
         sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
         sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
         sickbeard.BOXCAR_USERNAME = boxcar_username
+
+        sickbeard.USE_PUSHOVER = use_pushover
+        sickbeard.PUSHOVER_NOTIFY_ONSNATCH = pushover_notify_onsnatch
+        sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = pushover_notify_ondownload
+        sickbeard.PUSHOVER_USERKEY = pushover_userkey
 
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
@@ -1583,11 +1606,12 @@ class NewHomeAddShows:
 
             try:
                 seriesXML = etree.ElementTree(etree.XML(urlData))
-            except Exception, e:
-                logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+urlData, logger.ERROR)
-                return ''
+                series = seriesXML.getiterator('Series')
 
-            series = seriesXML.getiterator('Series')
+            except Exception, e:
+                # use finalURL in log, because urlData can be too much information
+                logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+finalURL, logger.ERROR)
+                series = ''
 
             # add each result to our list
             for curSeries in series:
@@ -1968,6 +1992,8 @@ class Home:
             return "Error: Unsupported Request. Send jsonp request with 'callback' variable in the query stiring."
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         cherrypy.response.headers['Content-Type'] = 'text/javascript'
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
+        cherrypy.response.headers['Access-Control-Allow-Headers'] = 'x-requested-with'
 
         if sickbeard.started:
             return callback+'('+json.dumps({"msg": str(sickbeard.PID)})+');'
@@ -2043,6 +2069,16 @@ class Home:
             return "Boxcar notification succeeded. Check your Boxcar clients to make sure it worked"
         else:
             return "Error sending Boxcar notification"
+
+    @cherrypy.expose
+    def testPushover(self, userKey=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushover_notifier.test_notify(userKey)
+        if result:
+            return "Pushover notification succeeded. Check your Pushover clients to make sure it worked"
+        else:
+            return "Error sending Pushover notification"
 
     @cherrypy.expose
     def twitterStep1(self):
@@ -2643,13 +2679,13 @@ class WebInterface:
             default_image_name = 'banner.png'
 
         default_image_path = ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', default_image_name)
-        if show == None:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
+        if show is None:
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
         else:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
+        if showObj is None:
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
         cache_obj = image_cache.ImageCache()
         
@@ -2670,7 +2706,7 @@ class WebInterface:
                 if im.mode == 'P': # Convert GIFs to RGB
                     im = im.convert('RGB')
                 if which == 'banner':
-                    size = 600, 112
+                    size = 606, 112
                 elif which == 'poster':
                     size = 136, 200
                 else:
@@ -2681,7 +2717,7 @@ class WebInterface:
                 cherrypy.response.headers['Content-Type'] = 'image/jpeg'
                 return buffer.getvalue()
         else:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/jpeg")
+            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
     @cherrypy.expose
     def setComingEpsLayout(self, layout):

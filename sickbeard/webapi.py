@@ -474,11 +474,7 @@ class TVDBShorthandWrapper(ApiCall):
 
     def run(self):
         """ internal function wrapper """
-        # how to add a var to a tuple
-        # http://stackoverflow.com/questions/1380860/add-variables-to-tuple
-        argstmp = (0, self.sid) # make a new tuple
-        args = argstmp + self.origArgs # add both
-        args = args[1:] # remove first fake element
+        args = (self.sid,) + self.origArgs
         if self.e:
             return CMD_Episode(args, self.kwargs).run()
         elif self.s:
