@@ -25,6 +25,9 @@ browser.css
   float: left;
   margin: 0 4px;
 }
+#fileBrowserDialog h2 {
+  font-size: 20px;
+}
 /*
 .browserDialog.busy .ui-dialog-buttonpane {
   background: url("/images/loading.gif") 10px 50% no-repeat;
@@ -32,13 +35,13 @@ browser.css
 */
 .ui-autocomplete {
   max-height: 180px;
-  padding-right: 20px;
   overflow-x: hidden;
   overflow-y: auto;
 }
 /* IE6 hack since it doesn't support max-height */
 * html .ui-autocomplete {
   height: 180px;
+  padding-right: 20px;
 }
 .ui-menu .ui-menu-item {
   background-color: #eee;
@@ -114,10 +117,12 @@ div.formpaginate .prev, div.formpaginate .next {
 }
 /* step 3 related */
 #customQuality {
+  display: block;
   padding: 10px 0;
   overflow: hidden;
+  clear: both;
 }
-#customQualityWrapper {
+.stepDiv > #customQualityWrapper {
   height: 190px;
   overflow: auto;
 }
@@ -342,6 +347,7 @@ inc_bottom.tmpl
 home.tmpl
 ========================================================================== */
 .ui-progressbar {
+  height: 20px;
   line-height: 18px;
 }
 .progressbarText {
@@ -812,6 +818,10 @@ config_providers.tmpl
   font-size: 15px !important;
   line-height: 24px;
 }
+.ui-state-highlight {
+  height: 20px;
+  line-height: 18px;
+}
 
 /* =======================================================================
 config_search.tmpl
@@ -1127,6 +1137,12 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
 .dropdown-menu a {
   padding: 6px 15px;
   color: #333;
+}
+.dropdown-menu li {
+  border-top: 1px solid #ccc;
+}
+.dropdown-menu li:first-child {
+  border-top: none;
 }
 .dropdown-menu li > a:hover,
 .dropdown-menu .active > a,
