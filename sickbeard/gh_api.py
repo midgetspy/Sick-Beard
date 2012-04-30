@@ -56,4 +56,4 @@ class GitHub(object):
         
         Returns a deserialized json object containing the commit info. See http://developer.github.com/v3/repos/commits/
         """
-        return self._access_API(['repos', user, repo, 'commits'], {'per_page': 100, 'branch': branch})
+        return self._access_API(['repos', user, repo, 'commits'], {'per_page': 100, 'sha': branch})
