@@ -3,7 +3,8 @@
 #author:dbr/Ben
 #project:tvdb_api
 #repository:http://github.com/dbr/tvdb_api
-#license:unlicense (http://unlicense.org/)
+#license:Creative Commons GNU GPL v2
+# (http://creativecommons.org/licenses/GPL/2.0/)
 
 """
 urllib2 caching handler
@@ -12,7 +13,7 @@ Modified from http://code.activestate.com/recipes/491261/
 from __future__ import with_statement
 
 __author__ = "dbr/Ben"
-__version__ = "1.6.4"
+__version__ = "1.5"
 
 import os
 import time

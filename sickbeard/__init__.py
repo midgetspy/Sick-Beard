@@ -494,10 +494,11 @@ def initialize(consoleLogging=True):
         TVDB_API_PARMS = {'cache': True,
                           'apikey': TVDB_API_KEY,
                           'language': 'en',
-                          'useZip': True}
+                          'cache_dir': False,
+                          'http_proxy': proxy_url}
         
         if CACHE_DIR:
-            TVDB_API_PARMS['cache'] = os.path.join(CACHE_DIR, 'tvdb')
+            TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)

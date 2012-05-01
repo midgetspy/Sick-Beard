@@ -3,13 +3,14 @@
 #author:dbr/Ben
 #project:tvdb_api
 #repository:http://github.com/dbr/tvdb_api
-#license:unlicense (http://unlicense.org/)
+#license:Creative Commons GNU GPL v2
+# (http://creativecommons.org/licenses/GPL/2.0/)
 
 """Custom exceptions used or raised by tvdb_api
 """
 
 __author__ = "dbr/Ben"
-__version__ = "1.6.4"
+__version__ = "1.5"
 
 __all__ = ["tvdb_error", "tvdb_userabort", "tvdb_shownotfound",
 "tvdb_seasonnotfound", "tvdb_episodenotfound", "tvdb_attributenotfound"]
