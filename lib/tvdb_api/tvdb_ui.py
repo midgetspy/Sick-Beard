@@ -3,8 +3,7 @@
 #author:dbr/Ben
 #project:tvdb_api
 #repository:http://github.com/dbr/tvdb_api
-#license:Creative Commons GNU GPL v2
-# (http://creativecommons.org/licenses/GPL/2.0/)
+#license:unlicense (http://unlicense.org/)
 
 """Contains included user interfaces for Tvdb show selection.
 
@@ -44,7 +43,7 @@ Then to use it..
 """
 
 __author__ = "dbr/Ben"
-__version__ = "1.5"
+__version__ = "1.6.4"
 
 import logging
 import warnings
