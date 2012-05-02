@@ -51,6 +51,17 @@ def get_scene_exceptions(tvdb_id, season=-1):
         exceptionsList = excpetionCache[tvdb_id][season]
     return exceptionsList
 
+def get_all_scene_exceptions(tvdb_id):
+    myDB = db.DBConnection("cache.db")
+    exceptions = myDB.select("SELECT show_name,season FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+    exceptionsList = {}
+    [cur_exception["show_name"] for cur_exception in exceptions]
+    for cur_exception in exceptions:
+        if not cur_exception["season"] in exceptionsList:
+            exceptionsList[cur_exception["season"]] = []
+        exceptionsList[cur_exception["season"]].append(cur_exception["show_name"])
+        
+    return exceptionsList
 
 def get_scene_exception_by_name(show_name):
     """

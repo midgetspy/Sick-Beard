@@ -44,7 +44,7 @@ from sickbeard.providers import newznab, getProviderClass
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
-from sickbeard.scene_exceptions import get_scene_exceptions
+from sickbeard.scene_exceptions import get_scene_exceptions, get_all_scene_exceptions
 from sickbeard.webapi import Api
 
 from lib.tvdb_api import tvdb_api
@@ -2454,8 +2454,16 @@ class Home:
 
     @cherrypy.expose
     def sceneExceptions(self, show):
-        exceptionsList = get_scene_exceptions(show)
-        return ",".join(exceptionsList) if exceptionsList else "No scene exceptions"
+        exceptionsList = get_all_scene_exceptions(show)
+        if not exceptionsList:
+            return "No scene exceptions"
+
+        out = ""
+        for season, names in exceptionsList.items():
+            if season == -1:
+                season = "*"
+            out += " S" + str(season) + ": " + ", ".join(names)
+        return out
 
     @cherrypy.expose
     def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, anime=None, blackWords=None, whiteWords=None, blacklist=None, whitelist=None, directCall=False, air_by_date=None, tvdbLang=None):
