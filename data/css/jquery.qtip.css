@@ -9,7 +9,7 @@
 *   http://en.wikipedia.org/wiki/MIT_License
 *   http://en.wikipedia.org/wiki/GNU_General_Public_License
 *
-* Date: Thu Nov 17 12:01:03.0000000000 2011
+* Date: Thu Apr 26 12:17:04.0000000000 2012
 */
 
 /* Core qTip styles */
@@ -24,8 +24,6 @@
 	
 	font-size: 10.5px;
 	line-height: 12px;
-
-	z-index: 15000;
 }
 
 	/* Fluid class for determining actual width in IE */
@@ -40,10 +38,9 @@
 		position: relative;
 		padding: 5px 9px;
 		overflow: hidden;
-		
-		border-width: 1px;
-		border-style: solid;
-		
+
+		border: 1px solid #000001;
+
 		text-align: left;
 		word-wrap: break-word;
 		overflow: hidden;
@@ -54,9 +51,9 @@
 		min-height: 14px;
 		padding: 5px 35px 5px 10px;
 		overflow: hidden;
-		
+
+		border: 1px solid #000001;
 		border-width: 1px 1px 0;
-		border-style: solid;
 
 		font-weight: bold;
 	}
@@ -159,6 +156,29 @@
 	
 	.ui-tooltip .ui-tooltip-tip canvas{ top: 0; left: 0; }
 
+
+/* Modal plugin */
+#qtip-overlay{
+	position: fixed;
+	left: -10000em;
+	top: -10000em;
+}
+
+	/* Applied to modals with show.modal.blur set to true */
+	#qtip-overlay.blurs{ cursor: pointer; }
+
+	/* Change opacity of overlay here */
+	#qtip-overlay div{
+		position: absolute;
+		left: 0; top: 0;
+		width: 100%; height: 100%;
+
+		background-color: black;
+
+		opacity: 0.7;
+		filter:alpha(opacity=70);
+		-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+	}
 
 /*! Light tooltip style */
 .ui-tooltip-light .ui-tooltip-titlebar,
@@ -534,3 +554,4 @@
 	filter: none;
 	-ms-filter: none;
 }
+
