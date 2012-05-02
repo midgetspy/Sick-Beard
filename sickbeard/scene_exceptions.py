@@ -98,9 +98,12 @@ def retrieve_exceptions(localOnly=False):
         else:
             exception_dict[local_ex] = local_exceptions[local_ex]
 
-
     xem_exceptions = _xem_excpetions_fetcher()
-    exception_dict = dict(xem_exceptions.items() + exception_dict.items())
+    for xem_ex in xem_exceptions: # anidb xml anime exceptions
+        if xem_ex in exception_dict:
+            exception_dict[xem_ex] = exception_dict[xem_ex] + xem_exceptions[xem_ex]
+        else:
+            exception_dict[xem_ex] = xem_exceptions[xem_ex]
 
     if not len(exception_dict):
         logger.log("retrived exception list is totally empty. Assuming remote server error not flushing local and stoping now")
