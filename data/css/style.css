@@ -1108,6 +1108,16 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
   padding: 7px 10px 9px;
   color: #ddd;
 }
+.nav > li.active > a {
+  padding: 3px 10px 6px;
+  margin-top: 4px;
+  margin-bottom: 3px;
+  color: #fff;
+  background-color: #4E3D27 !important;
+  -webkit-border-radius: 5px;
+     -moz-border-radius: 5px;
+          border-radius: 5px;
+}
 .navbar-inner {
   min-height: 36px;
   background-color: #614e35;
@@ -1149,7 +1159,6 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
 .dropdown-menu .active > a:hover {
   color: #fff;
   text-decoration: none;
-  background-color: #333;
 }
 /*
 .dropdown-menu li > a:hover > [class^="icon-"],
