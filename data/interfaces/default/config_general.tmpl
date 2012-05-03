@@ -40,6 +40,14 @@
                         </div>
                         
                         <div class="field-pair">
+                            <input type="checkbox" name="updatetv_on_start" id="updatetv_on_start" #if $sickbeard.UPDATETV_ON_START then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="updatetv_on_start">
+                                <span class="component-title">Update Shows on Start</span>
+                                <span class="component-desc">Should Sick Beard update shows info when started?</span>
+                            </label>
+                        </div>                        
+                        
+                        <div class="field-pair">
                             <input type="checkbox" name="version_notify" id="version_notify" #if $sickbeard.VERSION_NOTIFY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="version_notify">
                                 <span class="component-title">Check for Update</span>

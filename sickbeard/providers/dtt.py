@@ -51,9 +51,6 @@ class DTTProvider(generic.TorrentProvider):
         return quality
 
     def findSeasonResults(self, show, season):
-        if show.air_by_date:
-            logger.log(u"DTT doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
-            return {}
         
         return generic.TorrentProvider.findSeasonResults(self, show, season)
     

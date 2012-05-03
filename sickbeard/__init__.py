@@ -102,6 +102,7 @@ ENABLE_HTTPS = False
 HTTPS_CERT = None
 HTTPS_KEY = None
 
+UPDATETV_ON_START = None
 LAUNCH_BROWSER = None
 CACHE_DIR = None
 ACTUAL_CACHE_DIR = None
@@ -411,7 +412,7 @@ def initialize(consoleLogging=True):
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
-                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
+                showUpdateScheduler, __INITIALIZED__, UPDATETV_ON_START, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH,  THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, BTN, BTN_USER_ID, BTN_AUTH_TOKEN, BTN_PASSKEY, BTN_AUTHKEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -474,6 +475,8 @@ def initialize(consoleLogging=True):
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
+        
+        UPDATETV_ON_START = bool(check_setting_int(CFG, 'General', 'updatetv_on_start', 0))
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0)) 
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -1083,6 +1086,7 @@ def save_config():
     new_config['General']['naming_quality'] = int(NAMING_QUALITY)
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    new_config['General']['updatetv_on_start'] = int(UPDATETV_ON_START)
 
     new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
