@@ -1789,14 +1789,17 @@ class NewHomeAddShows:
             ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home')
         
-        # create the dir and make sure it worked
-        dir_exists = helpers.makeDir(show_dir)
-        if not dir_exists:
-            logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
-            ui.notifications.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
-            redirect("/home")
+        # don't create show dir if config says not to
+        if sickbeard.ADD_SHOWS_WO_DIR:
+            logger.log(u"Skipping initial creation of "+show_dir+" due to config.ini setting")
         else:
-            helpers.chmodAsParent(show_dir)
+            dir_exists = helpers.makeDir(show_dir)
+            if not dir_exists:
+                logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
+                ui.notifications.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
+                redirect("/home")
+            else:
+                helpers.chmodAsParent(show_dir)
 
         # prepare the inputs for passing along
         if seasonFolders == "on":
