@@ -377,8 +377,8 @@ class TVShow(object):
         try:
             xemJson = json.loads(f.read())
         except ValueError, e:
-            pass
-        
+            return False
+
         epList = self.loadEpisodesFromDB()
         for curSeason in epList:
             for curEp in epList[curSeason]:
@@ -387,8 +387,9 @@ class TVShow(object):
                 epObj.scene_episode = None
                 epObj.scene_absolute_number = None
                 epObj.saveToDB()
-        
+
         if xemJson['result'] == 'failure':
+            logger.log(u"XEM said failure. message: " + xemJson['message'], logger.DEBUG)
             return False
 
         for epNumbers in xemJson['data']:
