@@ -385,15 +385,22 @@ class PostProcessor(object):
             
             # if the result is complete then remember that for later
             if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
-                if name == self.nzb_name:
+                test_name = os.path.basename(name)
+                if test_name == self.nzb_name:
                     self.good_results[self.NZB_NAME] = True
-                elif name == self.folder_name:
+                elif test_name == self.folder_name:
                     self.good_results[self.FOLDER_NAME] = True
-                elif name == self.file_name:
+                elif test_name == self.file_name:
                     self.good_results[self.FILE_NAME] = True
                 else:
-                    logger.log(u"Nothing was good, found "+repr(name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
-        
+                    logger.log(u"Nothing was good, found "+repr(test_name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
+            else:
+                logger.log("Parse result not suficent(all folowing have to be set). will not save release name", logger.DEBUG)
+                logger.log("Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
+                logger.log("Parse result(season_number): " + str(parse_result.season_number), logger.DEBUG)
+                logger.log("Parse result(episode_numbers): " + str(parse_result.episode_numbers), logger.DEBUG)
+                logger.log("Parse result(release_group): " + str(parse_result.release_group), logger.DEBUG)
+                
         # for each possible interpretation of that scene name
         for cur_name in name_list:
             self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
@@ -755,6 +762,9 @@ class PostProcessor(object):
                     cur_release_name = self.folder_name
                 elif self.good_results[self.FILE_NAME]:
                     cur_release_name = self.file_name
+                    # take the extension off the filename, it's not needed
+                    if '.' in self.file_name:
+                        cur_release_name = self.file_name.rpartition('.')[0]
 
                 if cur_release_name:
                     self._log("Found release name "+cur_release_name, logger.DEBUG)
