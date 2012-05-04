@@ -1,8 +1,5 @@
-# Modified by: Marcos Almeida Jr. <junalmeida@gmail.com>
+# Author: Marcos Almeida Jr. <junalmeida@gmail.com>
 # URL: https://github.com/junalmeida/Sick-Beard
-#
-# Author: Nic Wolfe <nic@wolfeden.ca>
-# URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
 #
@@ -36,32 +33,24 @@ from sickbeard import logger, helpers
 from sickbeard import tvcache
 from sickbeard.helpers import sanitizeSceneName
 
-class KICKASSProvider(generic.TorrentProvider):
+class TORRENTZProvider(generic.TorrentProvider):
 
     def __init__(self):
 
-        generic.TorrentProvider.__init__(self, "Kickass")
+        generic.TorrentProvider.__init__(self, "Torrentz")
         
         self.supportsBacklog = True
 
-        self.cache = KICKASSCache(self)
+        self.cache = TORRENTZCache(self)
 
-        self.url = 'http://www.kat.ph/'
+        self.url = 'http://torrentz.eu/'
 
     def isEnabled(self):
-        return sickbeard.KICKASS
+        return sickbeard.TORRENTZ
         
     def imageName(self):
-        return 'kickass.png'
-    
-    def findSeasonResults(self, show, season):
-        
-        results = {}
-       
-        results = generic.TorrentProvider.findSeasonResults(self, show, season)
-        
-        return results
-        
+        return 'torrentz.png'
+                      
     def _get_season_search_strings(self, show, season=None):
     
         params = {}
@@ -92,66 +81,62 @@ class KICKASSProvider(generic.TorrentProvider):
             params['episode'] = ep_obj.episode
     
         return [params]
+
     def _sanitizeNameToSearch(self, text):
-        text = re.sub(r'\([^)]*\)', '', text)
+        #text = re.sub(r'\([^)]*\)', '', text)
         return sanitizeSceneName(text, ezrss=True).replace('.',' ').replace('-',' ').encode('utf-8')
-                  
+        
     def _doSearch(self, search_params, show=None):
         try:
-            params = {"rss": "1"}
+            params = { }
         
             if search_params:
                 params.update(search_params)
 
-            searchURL = ''
-            
             if not 'episode' in params:
-                ep_number = "S%(seasonnumber)02d" % {'seasonnumber': params['season']}
-                searchURL = self.url +'search/' + params['show_name'] + ' ' + ep_number
+                searchURL = self.url + "feed?q=%(show_name)s S%(season)02d" % params
             else:
-                ep_number = "S%(seasonnumber)02dE%(episodenumber)02d" % {'seasonnumber': params['season'], 'episodenumber': params['episode']}
-                searchURL = self.url +'search/' + params['show_name'] + ' ' + ep_number 
-            searchURL = searchURL + '/?rss=1&field=seeders&sorder=desc'
-            searchURL = searchURL.lower()
+                searchURL = self.url + "feed?q=%(show_name)s S%(season)02dE%(episode)02d" % params
+                
+            searchURL = searchURL.lower().replace(" ", "+")
             
             logger.log(u"Search string: " + searchURL)
-            #data = self.getURL(searchURL)
 
             items = []
-            for index in [1,2,3,4,5]:
+            for index in [0,1,2,3,4,5]:
                 try:
-                    data = self.getURL(searchURL + "&page=%(page)d" % {'page': index })
+                    data = self.getURL(searchURL + "&p=%(page)d" % {'page': index })
+
                     if data and data.startswith("<?xml"):
                         responseSoup = etree.ElementTree(etree.XML(data))
                         newItems = responseSoup.getiterator('item')
                         items.extend(newItems)
-                        if len(newItems) < 25:
+                        if len(newItems) < 49:
                             break
                 except Exception, e:
-                    logger.log(u"Error trying to load " + self.name + " RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
-                    traceback.print_exc()
+                    logger.log((u"Error trying to load " + self.name + " RSS feed for %(show_name)s page %(page)d: " % {'page': index, 'show_name': params['show_name']})+str(e).decode('utf-8'), logger.ERROR)
            
             results = []
             for curItem in items:
                 try:
                     (title, url) = self._get_title_and_url(curItem)
                     if not title or not url:
-                        logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+                        logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete.", logger.ERROR)
                         continue
                     results.append(curItem)
                 except Exception, e:
-                    logger.log(u"Error trying to load KICKASS RSS feed item: "+str(e).decode('utf-8'), logger.ERROR)
+                    logger.log(u"Error trying to load " + self.name + " RSS feed item: "+str(e).decode('utf-8'), logger.ERROR)
                
-            logger.log("KICKASS total torrents: %(count)d" % { 'count' : len(results) })
+            logger.log(self.name + " total torrents: %(count)d" % { 'count' : len(results) })
             return results
         except Exception, e:
-            logger.log(u"Error trying to load KICKASS: "+str(e).decode('utf-8'), logger.ERROR)
+            logger.log(u"Error trying to load " + self.name + ": "+str(e).decode('utf-8'), logger.ERROR)
             traceback.print_exc()
             raise 
         
     def _get_title_and_url(self, item):
         title = item.findtext('title')
-        url = item.findtext('torrentLink').replace('&amp;','&')
+        url = item.findtext('guid')
 
         return (title, url)
 
@@ -165,10 +150,11 @@ class KICKASSProvider(generic.TorrentProvider):
     
     def downloadResult(self, result):
         try:
+            result.url = "http://torrage.com/torrent/" + result.url.replace('http://torrentz.eu/','').upper() + '.' + self.providerType
             logger.log(u"Downloading a result from " + self.name + " at " + result.url)
             
             torrentFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
-            #add self referer to get application/x-bittorrent from torcache.net
+            #add self referer to get application/x-bittorrent from torrage.com
             data = self.getURL(result.url, [("Referer", result.url)])
             if data == None:
                 return False
@@ -182,19 +168,19 @@ class KICKASSProvider(generic.TorrentProvider):
             logger.log("Unable to save the file: "+str(e).decode('utf-8'), logger.ERROR)
             return False
         
-class KICKASSCache(tvcache.TVCache):
+class TORRENTZCache(tvcache.TVCache):
 
     def __init__(self, provider):
 
         tvcache.TVCache.__init__(self, provider)
 
-        # only poll KICKASS every 15 minutes max
+        # only poll every 15 minutes max
         self.minTime = 15
 
     def _getRSSData(self):
-        url = self.provider.url + 'tv/?rss=1'
+        url = self.provider.url + 'feedA?q='
 
-        logger.log(u"KICKASS cache update URL: " + url)
+        logger.log(self.provider.name + u" cache update URL: " + url)
 
         data = self.provider.getURL(url)
         return data
@@ -202,19 +188,18 @@ class KICKASSCache(tvcache.TVCache):
     def _parseItem(self, item):
         try:      
             title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
-            url = helpers.get_xml_text(item.getElementsByTagName('torrentLink')[0]).replace('&amp;','&')
+            url = helpers.get_xml_text(item.getElementsByTagName('guid')[0])
 
             if not title or not url:
-                logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable", logger.ERROR)
+                logger.log(u"The XML returned from the " + self.provider.name + " RSS feed is incomplete, this result is unusable", logger.ERROR)
                 return
 
-            logger.log(u"Adding item from KICKASS RSS to cache: "+title, logger.DEBUG)
+            logger.log(u"Adding item from " + self.provider.name + " RSS to cache: "+title, logger.DEBUG)
             
             self._addCacheEntry(title, url)
         
         except Exception, e:
-            logger.log(u"Error trying to parse KICKASS cache: "+str(e).decode('utf-8'), logger.ERROR)
-            traceback.print_exc()
+            logger.log(u"Error trying to parse " + self.provider.name + " cache: "+str(e).decode('utf-8'), logger.ERROR)
             raise 
 
-provider = KICKASSProvider()
+provider = TORRENTZProvider()
