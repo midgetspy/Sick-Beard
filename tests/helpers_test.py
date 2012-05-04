@@ -39,6 +39,9 @@ def _generator_get_show_by_name(tvdb_id, data):
         showList = [show]
         sceneName = data[2]
         result = helpers.get_show_by_name(sceneName, showList, False)
+        if not result:
+            self.assertEqual(False, show.tvdbid)
+            return False
         self.assertEqual(result.tvdbid, show.tvdbid)
     return test
 

@@ -2458,12 +2458,12 @@ class Home:
         if not exceptionsList:
             return "No scene exceptions"
 
-        out = ""
-        for season, names in exceptionsList.items():
+        out = []
+        for season, names in iter(sorted(exceptionsList.iteritems())):
             if season == -1:
                 season = "*"
-            out += " S" + str(season) + ": " + ", ".join(names)
-        return out
+            out.append("S" + str(season) + ": " + ", ".join(names))
+        return "<br/>".join(out)
 
     @cherrypy.expose
     def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, anime=None, blackWords=None, whiteWords=None, blacklist=None, whitelist=None, directCall=False, air_by_date=None, tvdbLang=None):

@@ -217,6 +217,7 @@ def makeSceneSearchString (episode):
         epStrings = [str(episode.airdate)]
     elif episode.show.is_anime:
         epStrings = ["%i" % int(episode.scene_absolute_number)]
+        print "makeSceneSearchString epStrings:", str(epStrings)
     else:
         epStrings = ["S%02iE%02i" % (int(episode.scene_season), int(episode.scene_episode)),
                     "%ix%02i" % (int(episode.scene_season), int(episode.scene_episode))]
@@ -256,7 +257,7 @@ def isGoodResult(name, show, log=True, season=-1):
         else:
             escaped_name = re.sub('\\\\[\\s.-]', '[\W_]+', re.escape(curName))
             # FIXME: find a "automatically-created" regex for anime releases # test at http://regexr.com?2uon3
-            curRegex = '^(\[.*?\])|(\d+[\.-])*[ _\.]*' + escaped_name + '(([ _.]*-)|([ ._-]+\d+)|([ ._-]+OVA)|([ ._-]+s\d{2})).*'
+            curRegex = '^((\[.*?\])|(\d+[\.-]))*[ _\.]*' + escaped_name + '(([ ._-]+\d+)|([ ._-]+s\d{2})).*'
 
         if log:
             logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
@@ -280,13 +281,16 @@ def allPossibleShowNames(show, season=-1):
     
     Returns: a list of all the possible show names
     """
-    showNames = []
-    if season is -1:
-        showNames = [show.name]
-    showNames += [name for name in get_scene_exceptions(show.tvdbid, season=season)]
 
+    showNames = get_scene_exceptions(show.tvdbid, season=season)
+    if not showNames: # if we dont have any season specific exceptions fallback to generic exceptions
+        season = -1
+        showNames = get_scene_exceptions(show.tvdbid, season=season)
+
+    if season in [-1, 1]:
+        showNames.append(show.name)
     # if we have a tvrage name then use it
-    if show.tvrname != "" and show.tvrname != None and season is -1:
+    if show.tvrname != "" and show.tvrname != None and season in [-1, 1]:
         showNames.append(show.tvrname)
 
     newShowNames = []

@@ -37,6 +37,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from name_parser.parser import NameParser, InvalidNameException
 from sickbeard.helpers import parse_result_wrapper
+from sickbeard.scene_exceptions import get_scene_seasons
 
 
 class CacheDBConnection(db.DBConnection):
@@ -206,7 +207,7 @@ class TVCache():
                     myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
                 parse_result = myParser.parse(curName)
                 """
-                parse_result = parse_result_wrapper(None,curName)
+                parse_result, parseWrapperShow = parse_result_wrapper(None, curName, returnShow=True)
             except InvalidNameException:
                 logger.log(u"tvcache: Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
                 continue
@@ -221,6 +222,10 @@ class TVCache():
 
         tvdb_lang = None
 
+        if parseWrapperShow:
+            tvdb_id = parseWrapperShow.tvdbid
+            tvdb_lang = parseWrapperShow.lang
+        
         # if we need tvdb_id or tvrage_id then search the DB for them
         # if this is called from the a generic provider none of this will be present
         if not tvdb_id or not tvrage_id:
@@ -268,29 +273,33 @@ class TVCache():
                         logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
                         tvdb_id = showResult[0]
 
-                def regexSearch(season=-1):
-                    if show_name_helpers.isGoodResult(name, curShow, False, season=season):
-                        logger.log(u"Successfully matched " + name + " to " + curShow.name + " with regex", logger.DEBUG)
-                        tvdb_id = curShow.tvdbid
-                        tvdb_lang = curShow.lang
-                        return True
-                    return False
 
                 # if the DB lookup fails then do a comprehensive regex search
                 if tvdb_id == None:
                     logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
                     for curShow in sickbeard.showList:
-                        if regexSearch():
-                            break
+                        if show_name_helpers.isGoodResult(name, curShow, False):
+                            logger.log(u"Successfully matched " + name + " to " + curShow.name + " with regex", logger.DEBUG)
+                            tvdb_id = curShow.tvdbid
+                            tvdb_lang = curShow.lang
 
                 # if the DB lookup fails then do a comprehensive regex search on saason exceptions
                 if tvdb_id == None:
                     logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search on season exceptions", logger.DEBUG)
+                    curShow = helpers.get_show_by_name(name, sickbeard.showList)
+                    if curShow:
+                        logger.log(u"Successfully matched " + name + " to " + curShow.name + " with regex", logger.DEBUG)
+                        tvdb_id = curShow.tvdbid
+                        tvdb_lang = curShow.lang
+                    """
                     for curShow in sickbeard.showList:
-                        scene_seasons = scene_exceptions.getSceneSeasons(curShow.tvdbid)
-                        for cur_scene_season in scene_seasons:
-                            if regexSearch(cur_scene_season):
-                                break
+                        for cur_scene_season in get_scene_seasons(curShow.tvdbid):
+                            if show_name_helpers.isGoodResult(name, curShow, False, season=cur_scene_season):
+                                logger.log(u"Successfully matched " + name + " to " + curShow.name + " with regex", logger.DEBUG)
+                                tvdb_id = curShow.tvdbid
+                                tvdb_lang = curShow.lang
+                    """
+
 
                 # if tvdb_id was anything but None (0 or a number) then
                 if not from_cache:
@@ -337,7 +346,7 @@ class TVCache():
         if parse_result.is_anime and len(parse_result.ab_episode_numbers) >= 1 and tvdb_id:
             # look it up
             curShow = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-            if curShow.is_anime  and len(parse_result.ab_episode_numbers) > 0:
+            if curShow.is_anime:
                 try:
                     (season, episodes) = helpers.get_all_episodes_from_absolute_number(curShow, None, parse_result.ab_episode_numbers)
                 except exceptions.EpisodeNotFoundByAbsoluteNumerException:

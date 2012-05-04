@@ -87,6 +87,8 @@ class TVShow(object):
         self.loadFromDB()
         
         self.saveToDB()
+        
+        self.seasonNumberCache = []
     
     def _is_anime(self):
         if(self.anime > 0):
@@ -308,7 +310,9 @@ class TVShow(object):
 
 
     def loadEpisodesFromTVDB(self, cache=True):
-
+        
+        self.clearSeasonNumbersCache()
+        
         # There's gotta be a better way of doing this but we don't wanna
         # change the cache value elsewhere
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
@@ -1042,6 +1046,17 @@ class TVShow(object):
             else:
                 return Overview.GOOD
 
+    def getAllSeasonNumbers(self):
+        if not self.seasonNumberCache:
+            myDB = db.DBConnection()
+            sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0", [self.tvdbid])
+            self.seasonNumberCache = [int(x["season"]) for x in sqlResults]
+
+        return self.seasonNumberCache
+
+    def clearSeasonNumbersCache(self):
+        self.seasonNumberCache = []
+
 def dirty_setter(attr_name):
     def wrapper(self, val):
         if getattr(self, attr_name) != val:
@@ -1100,19 +1115,25 @@ class TVEpisode(object):
     
     scene_season = property(lambda self: self._getSceneOrTVDBSeason(), dirty_setter("_scene_season"))
     scene_episode = property(lambda self: self._getSceneOrTVDBEpisode(), dirty_setter("_scene_episode"))
-    scene_absolute_number = property(lambda self: self._getSceneOrTVDBEpisode(), dirty_setter("_scene_absolute_number"))
+    scene_absolute_number = property(lambda self: self._getSceneOrTVDBAbsolute(), dirty_setter("_scene_absolute_number"))
 
     def _getSceneOrTVDBSeason(self):
-        if self._scene_season is None:
+        if self._scene_season == None:
             return self.season
         else:
             return self._scene_season
 
     def _getSceneOrTVDBEpisode(self):
-        if self._scene_episode is None:
+        if self._scene_episode == None:
             return self.episode
         else:
             return self._scene_episode
+
+    def _getSceneOrTVDBAbsolute(self):
+        if self._scene_absolute_number == None:
+            return self.absolute_number
+        else:
+            return self._scene_absolute_number
 
     def checkForMetaFiles(self):
 
@@ -1242,9 +1263,10 @@ class TVEpisode(object):
                 self.scene_episode = int(sqlResults[0]["scene_episode"])
                 
             if isinstance(sqlResults[0]["scene_absolute_number"], int):
-                self.scene_episode = int(sqlResults[0]["scene_absolute_number"])
+                self.scene_absolute_number = int(sqlResults[0]["scene_absolute_number"])
 
-            logger.log("Episode loading done " + msg + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            logger.log("Episode loading done " + msg + str(self.season) + "x" + str(self.episode) + "a" + str(self.absolute_number), logger.DEBUG)
+            logger.log("Episode loading done " + msg + str(self.scene_season) + "x" + str(self.scene_episode) + "a" + str(self.scene_absolute_number), logger.DEBUG)
             
             self.scene = False
             self.dirty = False

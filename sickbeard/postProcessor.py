@@ -481,6 +481,8 @@ class PostProcessor(object):
             tvdb_id = int(showObj["id"])
             self._log(u"Lookup successful(2), using tvdb id "+str(tvdb_id), logger.DEBUG)
             show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+            if not show:
+                continue
             if show.is_anime and len(parse_result.ab_episode_numbers) > 0:
                 try:
                     (season, episodes) = helpers.get_all_episodes_from_absolute_number(show, None, parse_result.ab_episode_numbers)

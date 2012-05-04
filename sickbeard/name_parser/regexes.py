@@ -307,7 +307,7 @@ anime_ep_regexes = [
                 ^(?:\[(?P<release_group>.+?)\][ ._-]*)
                 (?P<series_name>.+?)[ ._-]+
                 (?P<ep_ab_num>\d{1,3})
-                (-(?P<extra_ab_ep_num>\d{1,3}))?[ ._-]+?
+                (-(?P<extra_ab_ep_num>\d{1,3}))?[ ._-]*?
                 (?:v(?P<version>[0-9])[ ._-]+?)?
                 (?:.+?[ ._-]+?)?
                 \[(?P<extra_info>\w+)\][ ._-]?

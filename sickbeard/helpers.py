@@ -335,51 +335,10 @@ def buildNFOXML(myShow):
 def searchDBForShow(regShowName):
     """Return False|(tvdb_id,show_name)
     Sanitize given show name into multiple versions and see if we have a record of that show name in the DB
-    """
-    showNames = [re.sub('[. -]', ' ', regShowName),regShowName]
-
-    myDB = db.DBConnection()
-
-    yearRegex = "([^()]+?)\s*(\()?(\d{4})(?(2)\))$"
-
-    for showName in showNames:
-
-        sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
-
-        # if we find exactly one show return its name and tvdb_id
-        if len(sqlResults) == 1:
-            return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
-        else:
-            show = get_show_by_name(showName,sickbeard.showList)
-            if show:
-                tvdbid = show.tvdbid
-            else:
-                tvdbid = 0
-            
-        #TODO: this is bad taking the other function and doing a lookup in the db. REFACTORE! this whole thing
-        if tvdbid:
-            sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = ?", [tvdbid])
-            # if we find exactly one show return its name and tvdb_id
-            if len(sqlResults) == 1:
-                return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
-
-        else:
-            # if we didn't get exactly one result then try again with the year stripped off if possible
-            match = re.match(yearRegex, showName)
-            if match and match.group(1):
-                logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
-                sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
-
-            if len(sqlResults) == 0:
-                logger.log(u"Unable to match a record in the DB for "+showName, logger.DEBUG)
-                continue
-            elif len(sqlResults) > 1:
-                logger.log(u"Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
-                continue
-            else:
-                return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
-
-
+    """    
+    show = get_show_by_name(regShowName, sickbeard.showList)
+    if show:
+        return (show.tvdbid, show.name)
     return None
 
 def sizeof_fmt(num):
@@ -554,7 +513,7 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
     
     return (season, episodes)
 
-def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False):
+def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False, returnShow=False, activateAnimeRegEx=True):
     """Retruns a parse result or a InvalidNameException
         it will try to take the correct regex for the show if given
         if not given it will try Anime first then Normal
@@ -566,12 +525,12 @@ def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False):
     if len(showList) == 0:
         showList = sickbeard.showList
 
-    if show and show.is_anime:
-        modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
-    elif show and not show.is_anime:
-        modeList = [NameParser.NORMAL_REGEX]
-    else: # this will be chosen if no show is given so in cache-,rss-,pp search
-        modeList = [NameParser.ANIME_REGEX,NameParser.NORMAL_REGEX]    
+    if show and show.is_anime and activateAnimeRegEx:
+        modeList = [NameParser.ANIME_REGEX, NameParser.NORMAL_REGEX]    
+    elif show and not show.is_anime or not activateAnimeRegEx:
+        modeList = [NameParser.NORMAL_REGEX] 
+    else: # just try both ... time consuming
+        modeList = [NameParser.ANIME_REGEX, NameParser.NORMAL_REGEX]    
         
     for mode in modeList:
         try:
@@ -582,39 +541,55 @@ def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False):
         else:
             if mode == NameParser.ANIME_REGEX and not (show and show.is_anime):
                 show = get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
-                if not show or not show.is_anime: # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
-                    logger.log("found a show but the show is not an anime", logger.DEBUG)
+                if not show: # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
+                    logger.log("no show found", logger.DEBUG)
+                    continue
+                elif not show.is_anime:
+                    logger.log("found a show but the show is not an anime " + str(show.tvdbid), logger.DEBUG)
                     continue
                 else: # this means it was an anime
                     break
             break
     else:
         raise InvalidNameException("Unable to parse "+toParse)
-    return parse_result
+    if not returnShow:
+        return parse_result
+    else:
+        return (parse_result, show)
 
+def _check_against_names(nameInQuestion, show, season=-1):
 
-def _check_against_names(name, show):
-    nameInQuestion = full_sanitizeSceneName(name)
-
-    showNames = [show.name]
-    showNames.extend(sickbeard.scene_exceptions.get_scene_exceptions(show.tvdbid))
+    showNames = []
+    if season in [-1, 1]:
+        #print "adding normal show name"
+        showNames = [show.name]
+    
+    showNames.extend(sickbeard.scene_exceptions.get_scene_exceptions(show.tvdbid, season=season))
 
     for showName in showNames:
         nameFromList = full_sanitizeSceneName(showName)
         #logger.log(u"Comparing names: '"+nameFromList+"' vs '"+nameInQuestion+"'", logger.DEBUG)
+
         if nameFromList == nameInQuestion:
             return True
 
     return False
 
-
 def get_show_by_name(name, showList, useTvdb=False):
     logger.log(u"Trying to get the tvdbid for "+name, logger.DEBUG)
-            
+    
+    name = full_sanitizeSceneName(name)
+    
+    cacheResult = sickbeard.name_cache.retrieveNameFromCache(name)
+    if cacheResult:
+        return findCertainShow(sickbeard.showList, cacheResult)
+    
     for show in showList:
-        if _check_against_names(name, show):
-            logger.log(u"Matched "+name+" in the showlist to the show "+show.name, logger.DEBUG)
-            return show
+        for curSeason in [-1]+sickbeard.scene_exceptions.get_scene_seasons(show.tvdbid):
+            if _check_against_names(name, show, season=curSeason):
+                logger.log(u"Matched "+name+" in the showlist to the show "+show.name+" season "+str(curSeason), logger.DEBUG)
+                sickbeard.name_cache.addNameToCache(name, show.tvdbid)
+                return show
 
     if useTvdb:
         try:
@@ -683,7 +658,7 @@ def sanitizeSceneName (name, ezrss=False):
     """
 
     if not ezrss:
-        bad_chars = ",:()'!?"
+        bad_chars = ",:()!?"
     # ezrss leaves : and ! in their show names as far as I can tell
     else:
         bad_chars = ",()'?"

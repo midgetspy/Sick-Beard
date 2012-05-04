@@ -33,6 +33,7 @@ import urllib2
 from sickbeard.exceptions import ex
 
 excpetionCache = {}
+seasonExcpetionCache = {}
 
 def get_scene_exceptions(tvdb_id, season=-1):
     """
@@ -49,6 +50,12 @@ def get_scene_exceptions(tvdb_id, season=-1):
         excpetionCache[tvdb_id][season] = exceptionsList
     else:
         exceptionsList = excpetionCache[tvdb_id][season]
+
+    if season == 1: # if we where looking for season 1 we can add generic names
+        exceptionsList += get_scene_exceptions(tvdb_id, season=-1)
+    
+    #print "scene excpetions for: ", tvdb_id, "season: ", season, str(exceptionsList)
+    
     return exceptionsList
 
 def get_all_scene_exceptions(tvdb_id):
@@ -62,6 +69,19 @@ def get_all_scene_exceptions(tvdb_id):
         exceptionsList[cur_exception["season"]].append(cur_exception["show_name"])
         
     return exceptionsList
+
+def get_scene_seasons(tvdb_id):
+    """
+    return a list of season numbers that have scene exceptions
+    """
+    global seasonExcpetionCache
+    if tvdb_id not in seasonExcpetionCache:
+        myDB = db.DBConnection("cache.db")
+        sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
+        seasonExcpetionCache[tvdb_id] = [int(x["season"]) for x in sqlResults]
+    
+    return seasonExcpetionCache[tvdb_id]
+
 
 def get_scene_exception_by_name(show_name):
     """
@@ -132,7 +152,9 @@ def retrieve_exceptions(localOnly=False):
 
     name_cache.clearCache()
     global excpetionCache
+    global seasonExcpetionCache
     excpetionCache = {}
+    seasonExcpetionCache = {}
 
 def _retrieve_exceptions_fetcher(url):
 

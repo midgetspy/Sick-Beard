@@ -298,7 +298,7 @@ def findEpisode(episode, manualSearch=False):
         # we use the method from the curProvider to accommodate for the internal join functions
         # this way we do not break the special abilities of the providers e.g. nzbmatrix
         searchStrings = curProvider.get_episode_search_strings(episode)
-        logger.log("All searchstring permutations :"+str(searchStrings), logger.DEBUG)
+        logger.log("All search string permutations :" + str(searchStrings))
         done_searching = False
         for searchString in searchStrings:
             try:
@@ -314,7 +314,7 @@ def findEpisode(episode, manualSearch=False):
             didSearch = True
 
             # skip non-tv crap
-            curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
+            curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show, season=episode.season), curFoundResults)
 
             # loop all results and see if any of them are good enough that we can stop searching
             for cur_result in curFoundResults:

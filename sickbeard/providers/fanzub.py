@@ -74,7 +74,7 @@ class Fanzub(generic.NZBProvider):
         params = {
             "cat": "anime",
             "q": search_string.encode('utf-8'),
-            "max": "50"
+            "max": "100"
         }
 
         searchURL = self.url + "rss?" + urllib.urlencode(params)
