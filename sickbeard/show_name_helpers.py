@@ -217,7 +217,6 @@ def makeSceneSearchString (episode):
         epStrings = [str(episode.airdate)]
     elif episode.show.is_anime:
         epStrings = ["%i" % int(episode.scene_absolute_number)]
-        print "makeSceneSearchString epStrings:", str(epStrings)
     else:
         epStrings = ["S%02iE%02i" % (int(episode.scene_season), int(episode.scene_episode)),
                     "%ix%02i" % (int(episode.scene_season), int(episode.scene_episode))]
