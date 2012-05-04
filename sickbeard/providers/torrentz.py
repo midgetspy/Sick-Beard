@@ -103,7 +103,7 @@ class TORRENTZProvider(generic.TorrentProvider):
             logger.log(u"Search string: " + searchURL)
 
             items = []
-            for index in [0,1,2,3,4,5]:
+            for index in [0,1,2,3,4]:
                 try:
                     data = self.getURL(searchURL + "&p=%(page)d" % {'page': index })
 
@@ -111,7 +111,7 @@ class TORRENTZProvider(generic.TorrentProvider):
                         responseSoup = etree.ElementTree(etree.XML(data))
                         newItems = responseSoup.getiterator('item')
                         items.extend(newItems)
-                        if len(newItems) < 49:
+                        if len(newItems) < 50:
                             break
                 except Exception, e:
                     logger.log((u"Error trying to load " + self.name + " RSS feed for %(show_name)s page %(page)d: " % {'page': index, 'show_name': params['show_name']})+str(e).decode('utf-8'), logger.ERROR)
