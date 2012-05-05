@@ -18,7 +18,7 @@ browser.css
   display: block;
 }
 #fileBrowserDialog ul li a:hover {
-  color: #0000ff;
+  color: #00f;
   background: none;
 }
 #fileBrowserDialog ul li a span.ui-icon {
@@ -818,7 +818,8 @@ config_providers.tmpl
   font-size: 15px !important;
   line-height: 24px;
 }
-.ui-state-highlight {
+/* fix drop target height */
+#providerOrderList .ui-state-highlight {
   height: 20px;
   line-height: 18px;
 }
@@ -1078,21 +1079,29 @@ input, textarea, select, .uneditable-input {
   width: auto;
   color: #000;
 }
-select:focus, .btn:focus {
+select:focus,
+.btn:focus {
   outline: none;
 }
 input[disabled], select[disabled], textarea[disabled], input[readonly], select[readonly], textarea[readonly] {
   background-color: #efefef;
   border-color: #ccc;
 }
-.btn:focus, .btn:active {
+.btn:focus,
+.btn:active {
   border: 1px solid #4d90fe;
   outline: none;
   -moz-box-shadow: none;
        box-shadow: none;
 }
-.btn-primary:focus, .btn-success:focus, .btn-danger:focus {
-  border: 1px solid #000;
+.btn-primary:focus,
+.btn-warning:focus,
+.btn-danger:focus,
+.btn-success:focus,
+.btn-info:focus,
+.btn-inverse:focus {
+  border: 1px solid transparent;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.75) inset;
 }
 .alert {
   font-size: 15px;
@@ -1101,7 +1110,8 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
 .navbar, label, legend, form, input, textarea, select, .uneditable-input {
   margin-bottom: 0;
 }
-.navbar .nav .active > a, .navbar .nav .active > a:hover {
+.navbar .nav .active > a,
+.navbar .nav .active > a:hover {
   background-color: transparent;
 }
 .navbar .nav > li > a {
