@@ -110,7 +110,7 @@
                                 <span class="component-title jumbo">Metadata Type:</span>
                                 <span class="component-desc">
                                     #set $m_dict = $metadata.get_metadata_generator_dict()
-                                    <select id="metadataType">
+                                    <select id="metadataType" class="input-medium" >
                                     #for ($cur_name, $cur_generator) in $m_dict.items():
                                     <option value="$GenericMetadata.makeID($cur_name)">$cur_name</option>
                                     #end for
@@ -223,7 +223,7 @@
                             <label class="nocheck clearfix" for="naming_sep_type">
                                 <span class="component-title">Separator Style</span>
                                 <span class="component-desc">
-                                    <select name="naming_sep_type" id="naming_sep_type">
+                                    <select name="naming_sep_type" id="naming_sep_type" class="input-small" >
                                     #for ($i, $ex) in enumerate($config.naming_sep_type_text):
                                     <option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
@@ -236,7 +236,7 @@
                             <label class="nocheck clearfix" for="naming_ep_type">
                                 <span class="component-title">Number Style</span>
                                 <span class="component-desc">
-                                    <select name="naming_ep_type" id="naming_ep_type">
+                                    <select name="naming_ep_type" id="naming_ep_type" class="input-small" >
                                     #for ($i, $ex) in enumerate($config.naming_ep_type_text):
                                     <option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
@@ -256,7 +256,7 @@
                             <label class="nocheck clearfix" for="naming_multi_ep_type">
                                 <span class="component-title">Multi-episode Style</span>
                                 <span class="component-desc">
-                                    <select name="naming_multi_ep_type" id="naming_multi_ep_type">
+                                    <select name="naming_multi_ep_type" id="naming_multi_ep_type" class="input-small" >
                                     #for ($i, $ex) in enumerate($config.naming_multi_ep_type_text):
                                     <option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for

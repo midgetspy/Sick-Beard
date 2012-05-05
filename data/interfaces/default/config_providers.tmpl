@@ -88,7 +88,7 @@
                                     #end for
 
                                     #if $provider_config_list:                                        
-                                    <select id="editAProvider">
+                                    <select id="editAProvider" class="input-medium" >
                                         #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
                                             <option value="$cur_provider.getID()">$cur_provider.name</option>
                                         #end for
