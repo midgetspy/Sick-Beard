@@ -1352,7 +1352,7 @@ class TVEpisode(object):
         return self.show.getOverview(self.status)
 
     def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
-                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):
+                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None, naming_strip_year=None):
 
         regex = "(.*) \(\d\)"
 
@@ -1392,6 +1392,9 @@ class TVEpisode(object):
 
         if naming_show_name == None:
             naming_show_name = sickbeard.NAMING_SHOW_NAME
+            
+        if naming_strip_year == None:
+            naming_strip_year = sickbeard.NAMING_STRIP_YEAR     
 
         if naming_ep_name == None:
             naming_ep_name = sickbeard.NAMING_EP_NAME
@@ -1429,8 +1432,13 @@ class TVEpisode(object):
 
         finalName = ""
 
+        if naming_strip_year:                                               
+            showName = re.sub("\(\w+\)$", "", self.show.name).rstrip() 
+        else:                                                               
+            showName = self.show.name                                  
+            
         if naming_show_name:
-            finalName += self.show.name + config.naming_sep_type[naming_sep_type]
+            finalName += showName + config.naming_sep_type[naming_sep_type]
 
         finalName += goodEpString
 

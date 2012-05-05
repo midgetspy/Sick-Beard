@@ -124,6 +124,7 @@ SEASON_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = []
 
 NAMING_SHOW_NAME = None
+NAMING_STRIP_YEAR = None
 NAMING_EP_NAME = None
 NAMING_EP_TYPE = None
 NAMING_MULTI_EP_TYPE = None
@@ -423,7 +424,7 @@ def initialize(consoleLogging=True):
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
-                NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                NAMING_SHOW_NAME, NAMING_STRIP_YEAR, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
@@ -532,6 +533,7 @@ def initialize(consoleLogging=True):
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
         NAMING_SHOW_NAME = bool(check_setting_int(CFG, 'General', 'naming_show_name', 1))
+        NAMING_STRIP_YEAR = bool(check_setting_int(CFG, 'General', 'naming_strip_year', 0))
         NAMING_EP_NAME = bool(check_setting_int(CFG, 'General', 'naming_ep_name', 1))
         NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
         NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
@@ -1078,6 +1080,7 @@ def save_config():
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
     new_config['General']['naming_ep_name'] = int(NAMING_EP_NAME)
+    new_config['General']['naming_strip_year'] = int(NAMING_STRIP_YEAR)
     new_config['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
     new_config['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
     new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)

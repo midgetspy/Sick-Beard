@@ -184,6 +184,18 @@
                             </label>
                         </div>
 
+                        <div class="field-pair">                                                                                                                          
+                            <input type="checkbox" name="naming_strip_year" id="naming_strip_year" #if $sickbeard.NAMING_STRIP_YEAR then "checked=\"checked\"" else ""#/> 
+                            <label class="clearfix" for="naming_strip_year">                                                                                              
+                                <span class="component-title">Strip Show Year</span>                                                                                      
+                                <span class="component-desc">Remove the TV show's year when renaming the file?</span>                                                     
+                            </label>                                                                                                                                      
+                            <label class="nocheck clearfix">                                                                                                              
+                                <span class="component-title">&nbsp;</span>                                                                                               
+                                <span class="component-desc">Only applies to shows that have year inside parentheses</span>                                         
+                            </label>                                                                                                                                      
+                        </div>
+
                         <div class="field-pair">
                             <input type="checkbox" name="naming_ep_name" id="naming_ep_name" #if $sickbeard.NAMING_EP_NAME then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_ep_name">
