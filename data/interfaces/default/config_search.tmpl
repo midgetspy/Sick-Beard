@@ -38,7 +38,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Search Frequency</span>
-                                <input type="text" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="5" />
+                                <input type="number" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="5" min="10" class="input-small" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -49,7 +49,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Usenet Retention</span>
-                                <input type="text" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="5" />
+                                <input type="number" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="5" min="0" class="input-small" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -85,8 +85,8 @@
                             <label class="clearfix" for="nzb_method">
                                 <span class="component-title jumbo">NZB Method:</span>
                                 <span class="component-desc">
-                                    <select name="nzb_method" id="nzb_method">
-                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
+                                    <select name="nzb_method" id="nzb_method" class="input-medium" >
+                                    #set $nzb_method_text = {'blackhole': "Black Hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
                                     #for $curAction in ('sabnzbd', 'blackhole', 'nzbget'):
                                       #if $sickbeard.NZB_METHOD == $curAction:
                                         #set $nzb_method = "selected=\"selected\""
