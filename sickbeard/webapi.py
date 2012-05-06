@@ -104,6 +104,8 @@ class Api:
         else:# if debug was not set we wrap the "call_dispatcher" in a try block to assure a json output
             try:
                 outDict = _call_dispatcher(args, kwargs)
+            except cherrypy.HTTPRedirect: # seams like cherrypy uses exceptions for redirecting apparently this can happen when requesting images but it is ok so lets re raise it
+                raise
             except Exception, e: # real internal error oohhh nooo :(
                 logger.log(u"API :: " + ex(e), logger.ERROR)
                 errorData = {"error_msg": ex(e),
