@@ -1795,10 +1795,10 @@ class CMD_ShowAddNew(ApiCall):
 
         # moved the logic check to the end in an attempt to eliminate empty directory being created from previous errors
         showPath = ek.ek(os.path.join, self.location, helpers.sanitizeFileName(tvdbName))
-        
+
         # don't create show dir if config says not to
         if sickbeard.ADD_SHOWS_WO_DIR:
-            logger.log(u"Skipping initial creation of "+showPath+" due to config.ini setting")
+            logger.log(u"Skipping initial creation of " + showPath + " due to config.ini setting")
         else:
             dir_exists = helpers.makeDir(showPath)
             if not dir_exists:
