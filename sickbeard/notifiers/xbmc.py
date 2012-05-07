@@ -67,6 +67,9 @@ class XBMCNotifier:
 
     def _hostname(self):
         return sickbeard.XBMC_HOST
+        
+    def _notehostname(self):
+        return sickbeard.XBMC_NOTE_HOST
 
     def _sendToXBMC(self, command, host, username=None, password=None):
         '''
@@ -118,12 +121,12 @@ class XBMCNotifier:
             return False
     
         if not host:
-            host = self._hostname()
+            host = self._notehostname()
         if not username:
             username = self._username()
         if not password:
             password = self._password()
-    
+
         logger.log(u"Sending notification for " + input, logger.DEBUG)
     
         fileString = title + "," + input
@@ -140,7 +143,7 @@ class XBMCNotifier:
         return result
 
     def _update_library(self, host, showName=None):
-    
+        
         if not self._use_me():
             logger.log("Notifications for XBMC not enabled, skipping library update", logger.DEBUG)
             return False

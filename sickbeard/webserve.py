@@ -1203,7 +1203,7 @@ class ConfigNotifications:
 
     @cherrypy.expose
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
-                          xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+                          xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_note_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
@@ -1407,6 +1407,7 @@ class ConfigNotifications:
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
         sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
         sickbeard.XBMC_HOST = xbmc_host
+        sickbeard.XBMC_NOTE_HOST = xbmc_note_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
 

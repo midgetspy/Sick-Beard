@@ -19,7 +19,7 @@ $(document).ready(function(){
 
     $('#testXBMC').click(function(){
         $('#testXBMC-result').html(loading);
-        var xbmc_host = $("#xbmc_host").val();
+        var xbmc_host = $("#xbmc_note_host").val();
         var xbmc_username = $("#xbmc_username").val();
         var xbmc_password = $("#xbmc_password").val();
         
