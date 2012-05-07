@@ -823,6 +823,14 @@ config_providers.tmpl
   height: 20px;
   line-height: 18px;
 }
+h4.note {
+  float: left;
+  padding-right: 5px;
+  color: #000;
+}
+p.note {
+  color: #333;
+}
 
 /* =======================================================================
 config_search.tmpl

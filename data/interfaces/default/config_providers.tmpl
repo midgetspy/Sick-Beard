@@ -34,10 +34,18 @@
                     <div class="component-group-desc">
                         <h3>Provider Priorities</h3>
                         <p>Check off and drag the providers into the order you want them to be used.</p>
-                        <p class="note">At least one provider is required but two are recommended.</p>
-                        <p>NZB/Torrent providers can be toggled in <a href="$sbRoot/config/search">Search Settings</a></p>
-                        <p class="note"><span style="color: #654B24; font-size: 16px;">*</span> Provider does not support backlog searches at this time.</p>
-                        <p class="note"><span style="color: #654B24; font-size: 16px;">**</span> Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
+                        <p>At least one provider is required but two are recommended.</p>
+
+                        #if not $sickbeard.USE_NZBS or not $sickbeard.USE_TORRENTS:
+                        <blockquote style="margin: 20px 0;">NZB/Torrent providers can be toggled in <b><a href="$sbRoot/config/search">Search Settings</a></b></blockquote>
+                        #else:
+                        <br/>
+                        #end if
+
+                        <div>
+                            <h4 class="note">*</h4><p class="note">Provider does not support backlog searches at this time.</p>
+                            <h4 class="note">**</h4><p class="note">Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
+                        </div>
                     </div>
 
                     <fieldset class="component-group-list">
