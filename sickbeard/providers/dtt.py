@@ -120,7 +120,7 @@ class DTTCache(tvcache.TVCache):
         tvcache.TVCache.__init__(self, provider)
 
         # only poll DTT every 30 minutes max
-        self.minTime = 0 #30
+        self.minTime = 30
 
     def _getRSSData(self):
  
