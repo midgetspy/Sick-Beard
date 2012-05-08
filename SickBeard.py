@@ -208,8 +208,6 @@ def main():
     if not os.access(sickbeard.DATA_DIR, os.F_OK):
         try:
             os.makedirs(sickbeard.DATA_DIR, 0744)
-            # do the library update for synoindex
-            notifiers.synoindex_notifier.addFolder(sickbeard.DATA_DIR)
         except os.error, e:
             raise SystemExit("Unable to create datadir '" + sickbeard.DATA_DIR + "'")
 
