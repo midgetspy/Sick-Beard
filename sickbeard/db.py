@@ -20,7 +20,14 @@ from __future__ import with_statement
 
 import os.path
 import re
-import sqlite3
+try:
+    import sqlite3
+except:
+    try:
+        import pysqlite2.dbapi2 as sqlite3
+    except:
+        pass
+
 import time
 import threading
 

@@ -1079,7 +1079,7 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
-                      newzbin_username=None, newzbin_password=None,
+                      newzbin_username=None, newzbin_password=None, kerews_url=None, kerews_apikey=None,
                       provider_order=None):
 
         results = []
@@ -1138,6 +1138,8 @@ class ConfigProviders:
                 sickbeard.NZBINDEX = curEnabled
             elif curProvider == 'nzbserien':
                 sickbeard.NZBSERIEN = curEnabled
+            elif curProvider == 'kerews':
+                sickbeard.KEREWS = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
@@ -1172,6 +1174,9 @@ class ConfigProviders:
 
         sickbeard.NEWZBIN_USERNAME = newzbin_username
         sickbeard.NEWZBIN_PASSWORD = newzbin_password
+
+        sickbeard.KEREWS_URL = kerews_url
+        sickbeard.KEREWS_APIKEY = kerews_apikey
 
         sickbeard.PROVIDER_ORDER = provider_list
 
@@ -1539,7 +1544,7 @@ class NewHomeAddShows:
     def getTVDBLanguages(self):
         result = tvdb_api.Tvdb().config['valid_languages']
 
-        # Make sure list is sorted alphabetically but 'en' is in front
+        # Make sure list is sorted alphabetically but 'de' is in front
         if 'de' in result:
             del result[result.index('de')]
         result.sort()

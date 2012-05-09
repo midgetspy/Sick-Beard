@@ -173,10 +173,11 @@ class NewznabProvider(generic.NZBProvider):
 
 	def _doSearch(self, search_params, show=None):
 
+		# Use category 5020 -> TV/Foreign
 		params = {"t": "tvsearch",
 				  "maxage": sickbeard.USENET_RETENTION,
 				  "limit": 100,
-				  "cat": '2000'}
+				  "cat": '5020'}
 
 		if search_params:
 			params.update(search_params)
@@ -255,9 +256,10 @@ class NewznabCache(tvcache.TVCache):
 
 	def _getRSSData(self):
 
+		# Use category 5020 -> TV/Foreign
 		params = {"t": "tvsearch",
 				  "age": sickbeard.USENET_RETENTION,
-				  "cat": '2000'}
+				  "cat": '5020'}
 
 		if self.provider.key:
 			params['apikey'] = self.provider.key

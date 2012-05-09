@@ -25,6 +25,7 @@ __all__ = ['ezrss',
            'newzbin',
            'nzbindex',
            'nzbserien',
+		   'kere_ws',
            'btn',
            ]
 

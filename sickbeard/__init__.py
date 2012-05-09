@@ -20,7 +20,13 @@ from __future__ import with_statement
 
 import cherrypy
 import webbrowser
-import sqlite3
+try:
+    import sqlite3
+except:
+    try:
+        import pysqlite2.dbapi2 as sqlite3
+    except:
+        pass
 import datetime
 import socket
 import os, sys, subprocess, re
@@ -30,7 +36,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbindex, nzbserien
+from providers import ezrss, tvtorrents, btn, nzbs_org, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbindex, nzbserien, kere_ws
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
@@ -189,6 +195,10 @@ NEWZBIN_PASSWORD = None
 NZBINDEX = False
 
 NZBSERIEN = False
+
+KEREWS = False
+KEREWS_URL = 'http://kere.ws/'
+KEREWS_APIKEY = None
 
 SAB_USERNAME = None
 SAB_PASSWORD = None
@@ -409,7 +419,7 @@ def initialize(consoleLogging=True):
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, KEREWS, KEREWS_URL, KEREWS_APIKEY, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS
 
         if __INITIALIZED__:
@@ -420,6 +430,7 @@ def initialize(consoleLogging=True):
         CheckSection('General')
         CheckSection('Blackhole')
         CheckSection('Newzbin')
+        CheckSection('KereWS')
         CheckSection('SABnzbd')
         CheckSection('NZBget')
         CheckSection('XBMC')
@@ -571,6 +582,10 @@ def initialize(consoleLogging=True):
 
         NZBINDEX = bool(check_setting_int(CFG, 'NZBIndex', 'nzbindex', 1))
         NZBSERIEN = bool(check_setting_int(CFG, 'NZBSerien', 'nzbserien', 1))
+
+        KEREWS = bool(check_setting_int(CFG, 'KereWS', 'kerews', 0))
+        KEREWS_URL = check_setting_str(CFG, 'KereWS', 'kerews_url', 'http://kere.ws/')
+        KEREWS_APIKEY = check_setting_str(CFG, 'KereWS', 'kerews_apikey', '')
 
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 0))
 
@@ -1099,6 +1114,15 @@ def save_config():
 
     new_config['NZBSerien'] = {}
     new_config['NZBSerien']['nzbserien'] = int(NZBSERIEN)
+
+    # Add category for http://kere.ws
+    new_config['KereWS'] = {}
+    # kere.ws enabled?
+    new_config['KereWS']['kerews'] = int(KEREWS)
+    # URL of kere.ws (in case it should change in the future)
+    new_config['KereWS']['kerews_url'] = KEREWS_URL
+    # API key of kere.ws
+    new_config['KereWS']['kerews_apikey'] = KEREWS_APIKEY
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
