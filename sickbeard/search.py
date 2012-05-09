@@ -170,6 +170,14 @@ def searchForNeededEpisodes():
                 logger.log(u"Show "+curEp.show.name+" is paused, ignoring all RSS items for "+curEp.prettyName(True), logger.DEBUG)
                 continue
 
+            #filter out some bad releases
+            for curResult in curFoundResults[curEp]:
+                logger.log("Quality of "+curEp.name+" is "+Quality.qualityStrings[curResult.quality], logger.DEBUG)
+                logger.log("Name: "+curResult.name+" SHOW: "+curEp.show.name+ "LANGUAGE: "+curEp.show.lang, logger.DEBUG)
+                if not show_name_helpers.filterBadReleases(curResult.name, curEp.show):
+                    logger.log("Ignoring release: "+curResult.name, logger.DEBUG)
+                    curFoundResults[curEp].remove(curResult)
+
             # find the best result for the current episode
             bestResult = None
             for curResult in curFoundResults[curEp]:
@@ -182,7 +190,8 @@ def searchForNeededEpisodes():
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
                 continue
 
-            foundResults[curEp] = bestResult
+            if bestResult != None:
+                foundResults[curEp] = bestResult
 
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
