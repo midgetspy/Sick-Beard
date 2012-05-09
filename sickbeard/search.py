@@ -170,14 +170,6 @@ def searchForNeededEpisodes():
                 logger.log(u"Show "+curEp.show.name+" is paused, ignoring all RSS items for "+curEp.prettyName(True), logger.DEBUG)
                 continue
 
-            #filter out some bad releases
-            for curResult in curFoundResults[curEp]:
-                logger.log("Quality of "+curEp.name+" is "+Quality.qualityStrings[curResult.quality], logger.DEBUG)
-                logger.log("Name: "+curResult.name+" SHOW: "+curEp.show.name+ "LANGUAGE: "+curEp.show.lang, logger.DEBUG)
-                if not show_name_helpers.filterBadReleases(curResult.name, curEp.show):
-                    logger.log("Ignoring release: "+curResult.name, logger.DEBUG)
-                    curFoundResults[curEp].remove(curResult)
-
             # find the best result for the current episode
             bestResult = None
             for curResult in curFoundResults[curEp]:
@@ -190,8 +182,7 @@ def searchForNeededEpisodes():
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
                 continue
 
-            if bestResult != None:
-                foundResults[curEp] = bestResult
+            foundResults[curEp] = bestResult
 
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
@@ -291,7 +282,7 @@ def findEpisode(episode, manualSearch=False):
         didSearch = True
 
         # skip non-tv crap
-        curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name, episode.show) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
+        curFoundResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, episode.show), curFoundResults)
 
         # loop all results and see if any of them are good enough that we can stop searching
         done_searching = False
@@ -334,7 +325,7 @@ def findSeason(show, season):
             for curEp in curResults:
 
                 # skip non-tv crap
-                curResults[curEp] = filter(lambda x:  show_name_helpers.filterBadReleases(x.name, show) and show_name_helpers.isGoodResult(x.name, show), curResults[curEp])
+                curResults[curEp] = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), curResults[curEp])
 
                 if curEp in foundResults:
                     foundResults[curEp] += curResults[curEp]
@@ -409,7 +400,7 @@ def findSeason(show, season):
             # if not, break it apart and add them as the lowest priority results
             individualResults = nzbSplitter.splitResult(bestSeasonNZB)
 
-            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name, show) and show_name_helpers.isGoodResult(x.name, show), individualResults)
+            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
 
             for curResult in individualResults:
                 if len(curResult.episodes) == 1:

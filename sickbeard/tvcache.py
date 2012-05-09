@@ -360,9 +360,9 @@ class TVCache():
                         pass
                     setattr(myShow, "lang", show["lang"])
                     setattr(myShow, "name", show["show_name"])
-                      				
+                                    
                     # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
-                    if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult["name"], myShow):
+                    if self.providerID != 'newzbin':
                         continue
             # get the show object, or if it's not one of our shows then ignore it
             showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
@@ -383,6 +383,9 @@ class TVCache():
             if not showObj.wantEpisode(curSeason, curEp, curQuality, manualSearch):
                 logger.log(u"Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
 
+            elif not show_name_helpers.filterBadReleases(curResult["name"], myShow):
+                #logger.log(u"Skipping it because of bad release name", logger.ERROR)
+                continue
             else:
 
                 if episode:
