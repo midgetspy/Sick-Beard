@@ -23,6 +23,9 @@ import stat
 import urllib, urllib2
 import re, socket
 import shutil
+import traceback
+
+from xml.dom.minidom import Node
 
 from xml.dom.minidom import Node
 
@@ -147,6 +150,12 @@ def getURL (url, headers=[]):
             usock.close()
     except socket.timeout:
         logger.log(u"Timed out while loading URL "+url, logger.WARNING)
+        return None
+    except ValueError:
+        logger.log(u"Unknown error while loading URL "+url, logger.WARNING)
+        return None
+    except Exception:
+        logger.log(u"Unknown exception while loading URL "+url+": "+traceback.format_exc(), logger.WARNING)
         return None
 
     return result
@@ -436,11 +445,24 @@ def chmodAsParent(childPath):
         return
     
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
+    
+    childPathStat = ek.ek(os.stat, childPath)
+    childPath_mode = stat.S_IMODE(childPathStat[stat.ST_MODE])
 
     if ek.ek(os.path.isfile, childPath):
         childMode = fileBitFilter(parentMode)
     else:
         childMode = parentMode
+
+    if childPath_mode == childMode:
+        return
+
+    childPath_owner = childPathStat.st_uid
+    user_id = os.geteuid()
+
+    if user_id !=0 and user_id != childPath_owner:
+        logger.log(u"Not running as root or owner of "+childPath+", not trying to set permissions", logger.DEBUG)
+        return
 
     try:
         ek.ek(os.chmod, childPath, childMode)
@@ -465,9 +487,17 @@ def fixSetGroupID(childPath):
 
     if parentMode & stat.S_ISGID:
         parentGID = parentStat[stat.ST_GID]
-        childGID = os.stat(childPath)[stat.ST_GID]
+        childStat = ek.ek(os.stat, childPath)
+        childGID = childStat[stat.ST_GID]
 
         if childGID == parentGID:
+            return
+
+        childPath_owner = childStat.st_uid
+        user_id = os.geteuid()
+
+        if user_id !=0 and user_id != childPath_owner:
+            logger.log(u"Not running as root or owner of "+childPath+", not trying to set the set-group-ID", logger.DEBUG)
             return
 
         try:
