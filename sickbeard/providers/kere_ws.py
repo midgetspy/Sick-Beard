@@ -42,36 +42,20 @@ from sickbeard.exceptions import ex
 class KereWSProvider(newznab.NewznabProvider):
 
 	def __init__(self):
-		# use the newznab constructor, URL and APIKEY will be replaced below in the code
-		newznab.NewznabProvider.__init__(self, "kerews", None, None)
+		# use the newznab constructor, URL and APIKEY will be replaced in the code below
+		newznab.NewznabProvider.__init__(self, "kerews", None, None, None)
 
 		self.cache = KereWSCache(self)
-
-	def configStr(self):
-		configStr = self.name + '|' + sickbeard.KEREWS_URL + '|' + sickbeard.KEREWS_APIKEY + '|' + str(int(self.enabled))
-		#logger.log(u"Returning ConfigString for kere.ws: " , logger.DEBUG)
-		return configStr
 
 	def isEnabled(self):
 		return sickbeard.KEREWS
 
 	def _doSearch(self, search_params, show=None):
-
-		# cat 2010,2020,2030,2040 -> TV/Serien-XviD, TV/Serien-DVD, TV/Serien-720p, TV/Serien-1080p
-                params = {"t": "tvsearch",
-                                  "maxage": sickbeard.USENET_RETENTION,
-                                  "limit": 100,
-                                  "cat": '2010,2020,2030,2040'}
-
-		# cat 5030 -> TV/SD, 5040 -> TV/HD
-		# params = {"t": "tvsearch",
-		#		  "maxage": sickbeard.USENET_RETENTION,
-		#		  "limit": 100,
-		#		  "cat": '5030,5040'}
-
-		# hack this in for now
-		if self.getID() == 'nzbs_org':
-			params['cat'] += ',5070,5090'
+		
+		params = {"t": "tvsearch",
+				"maxage": sickbeard.USENET_RETENTION,
+				"limit": 100,
+				"cat": sickbeard.KEREWS_CATIDS}
 
 		if search_params:
 			params.update(search_params)
@@ -124,19 +108,9 @@ class KereWSCache(newznab.NewznabCache):
 
 	def _getRSSData(self):
 
-		# cat 2010,2020,2030,2040 -> TV/Serien-XviD, TV/Serien-DVD, TV/Serien-720p, TV/Serien-1080p
 		params = {"t": "tvsearch",
 				"age": sickbeard.USENET_RETENTION,
-				"cat": '2010,2020,2030,2040'}
-
-		# cat 5030 -> TV/SD, 5040 -> TV/HD
-		#params = {"t": "tvsearch",
-		#                  "age": sickbeard.USENET_RETENTION,
-		#                  "cat": '5040,5030'}
-
-		# hack this in for now
-		if self.provider.getID() == 'nzbs_org':
-			params['cat'] += ',5070,5090'
+				"cat": sickbeard.KEREWS_CATIDS}
 
 		if sickbeard.KEREWS_APIKEY:
 			params['apikey'] = sickbeard.KEREWS_APIKEY

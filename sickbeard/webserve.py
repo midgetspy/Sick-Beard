@@ -1031,7 +1031,8 @@ class ConfigProviders:
 
     @cherrypy.expose
     def canAddNewznabProvider(self, name):
-
+        print "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
+             
         if not name:
             return json.dumps({'error': 'Invalid name specified'})
 
@@ -1094,7 +1095,7 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
-                      newzbin_username=None, newzbin_password=None, kerews_url=None, kerews_apikey=None,
+                      newzbin_username=None, newzbin_password=None, kerews_url=None, kerews_apikey=None, kerews_catIDs=None,
                       provider_order=None):
 
         results = []
@@ -1189,6 +1190,7 @@ class ConfigProviders:
 
         sickbeard.KEREWS_URL = kerews_url
         sickbeard.KEREWS_APIKEY = kerews_apikey
+        sickbeard.KEREWS_CATIDS = kerews_catIDs
 
         sickbeard.PROVIDER_ORDER = provider_list
 

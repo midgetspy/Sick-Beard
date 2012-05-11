@@ -201,6 +201,7 @@ NZBSERIEN = False
 KEREWS = False
 KEREWS_URL = 'http://kere.ws/'
 KEREWS_APIKEY = None
+KEREWS_CATIDS = None
 
 SAB_USERNAME = None
 SAB_PASSWORD = None
@@ -427,7 +428,7 @@ def initialize(consoleLogging=True):
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, KEREWS, KEREWS_URL, KEREWS_APIKEY, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, KEREWS, KEREWS_URL, KEREWS_APIKEY, KEREWS_CATIDS, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS
 
         if __INITIALIZED__:
@@ -595,6 +596,7 @@ def initialize(consoleLogging=True):
         KEREWS = bool(check_setting_int(CFG, 'KereWS', 'kerews', 0))
         KEREWS_URL = check_setting_str(CFG, 'KereWS', 'kerews_url', 'http://kere.ws/')
         KEREWS_APIKEY = check_setting_str(CFG, 'KereWS', 'kerews_apikey', '')
+        KEREWS_CATIDS = check_setting_str(CFG, 'KereWS', 'kerews_catIDs', '2000')
 
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
 
@@ -1140,6 +1142,8 @@ def save_config():
     new_config['KereWS']['kerews_url'] = KEREWS_URL
     # API key of kere.ws
     new_config['KereWS']['kerews_apikey'] = KEREWS_APIKEY
+    # CategoryIDs of kere.ws to be searched
+    new_config['KereWS']['kerews_catIDs'] = KEREWS_CATIDS
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
