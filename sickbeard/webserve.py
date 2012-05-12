@@ -1031,14 +1031,13 @@ class ConfigProviders:
 
     @cherrypy.expose
     def canAddNewznabProvider(self, name):
-        print "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
              
         if not name:
             return json.dumps({'error': 'Invalid name specified'})
 
         providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
 
-        tempProvider = newznab.NewznabProvider(name, '')
+        tempProvider = newznab.NewznabProvider(name, '', '')
 
         if tempProvider.getID() in providerDict:
             return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
@@ -1113,9 +1112,9 @@ class ConfigProviders:
             if not curNewznabProviderStr:
                 continue
 
-            curName, curURL, curKey = curNewznabProviderStr.split('|')
+            curName, curURL, curKey, curCatIDs = curNewznabProviderStr.split('|')
 
-            newProvider = newznab.NewznabProvider(curName, curURL, curKey)
+            newProvider = newznab.NewznabProvider(curName, curURL, curCatIDs, curKey)
 
             curID = newProvider.getID()
 
@@ -1124,6 +1123,7 @@ class ConfigProviders:
                 newznabProviderDict[curID].name = curName
                 newznabProviderDict[curID].url = curURL
                 newznabProviderDict[curID].key = curKey
+                newznabProviderDict[curID].catIDs = curCatIDs
             else:
                 sickbeard.newznabProviderList.append(newProvider)
 
@@ -1177,7 +1177,6 @@ class ConfigProviders:
         sickbeard.BTN_AUTH_TOKEN = btn_auth_token.strip()
         sickbeard.BTN_PASSKEY = btn_passkey.strip()
         sickbeard.BTN_AUTHKEY = btn_authkey.strip()
-
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
