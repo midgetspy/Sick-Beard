@@ -157,10 +157,7 @@ TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
 
 BTN = False
-BTN_USER_ID = None
-BTN_AUTH_TOKEN = None
-BTN_PASSKEY = None
-BTN_AUTHKEY = None
+BTN_API_KEY = None
 
 TORRENT_DIR = None
 
@@ -393,7 +390,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_USER_ID, BTN_AUTH_TOKEN, BTN_PASSKEY, BTN_AUTHKEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -553,10 +550,7 @@ def initialize(consoleLogging=True):
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
-        BTN_USER_ID = check_setting_str(CFG, 'BTN', 'btn_user_id', '')
-        BTN_AUTH_TOKEN = check_setting_str(CFG, 'BTN', 'btn_auth_token', '')    
-        BTN_AUTHKEY = check_setting_str(CFG, 'BTN', 'btn_authkey', '')
-        BTN_PASSKEY = check_setting_str(CFG, 'BTN', 'btn_passkey', '')
+        BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
 
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -1079,10 +1073,7 @@ def save_config():
 
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
-    new_config['BTN']['btn_user_id'] = BTN_USER_ID
-    new_config['BTN']['btn_auth_token'] = BTN_AUTH_TOKEN
-    new_config['BTN']['btn_authkey'] = BTN_AUTHKEY
-    new_config['BTN']['btn_passkey'] = BTN_PASSKEY
+    new_config['BTN']['btn_api_key'] = BTN_API_KEY
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)

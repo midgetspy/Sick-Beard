@@ -394,25 +394,39 @@ def findSeason(show, season):
             logger.log(u"No eps from this season are wanted at this quality, ignoring the result of "+bestSeasonNZB.name, logger.DEBUG)
 
         else:
+            
+            # Check if the provider of this NZB is BTN, if so it's not a NZB but a torrent so all we can do is leach the entire torrent, user will have to select which eps not do download in his torrent client
+            if not 'BTN' in bestSeasonNZB.provider.name:
+                logger.log(u"Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
+                
+                # if not, break it apart and add them as the lowest priority results
+                individualResults = nzbSplitter.splitResult(bestSeasonNZB)
 
-            logger.log(u"Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
+                individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
 
-            # if not, break it apart and add them as the lowest priority results
-            individualResults = nzbSplitter.splitResult(bestSeasonNZB)
+                for curResult in individualResults:
+                    if len(curResult.episodes) == 1:
+                        epNum = curResult.episodes[0].episode
+                    elif len(curResult.episodes) > 1:
+                        epNum = MULTI_EP_RESULT
 
-            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
+                    if epNum in foundResults:
+                        foundResults[epNum].append(curResult)
+                    else:
+                        foundResults[epNum] = [curResult]
+            else:
+                # Season result from BTN must be a full-season torrent, creating multi-ep result for it.
+                logger.log(u"Adding multi-ep result for full-season torrent. Set the episodes you don't want to 'don't download' in your torrent client if desired!")
+                epObjs = []
+                for curEpNum in allEps:
+                    epObjs.append(show.getEpisode(season, curEpNum))
+                bestSeasonNZB.episodes = epObjs
 
-            for curResult in individualResults:
-                if len(curResult.episodes) == 1:
-                    epNum = curResult.episodes[0].episode
-                elif len(curResult.episodes) > 1:
-                    epNum = MULTI_EP_RESULT
-
+                epNum = MULTI_EP_RESULT
                 if epNum in foundResults:
-                    foundResults[epNum].append(curResult)
+                    foundResults[epNum].append(bestSeasonNZB)
                 else:
-                    foundResults[epNum] = [curResult]
-
+                    foundResults[epNum] = [bestSeasonNZB]
 
     # go through multi-ep results and see if we really want them or not, get rid of the rest
     multiResults = {}
