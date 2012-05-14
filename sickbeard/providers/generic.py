@@ -233,7 +233,7 @@ class GenericProvider:
 
         self._checkAuth()
         if searchString:
-            logger.log(u"Searching "+self.name+" for '" +str(searchString)+"'")
+            logger.log(u"Searching "+self.name+" for '" + ek.ek(str, searchString) + "'")
         else:
             logger.log(u"Searching "+self.name+" for episode " + episode.prettyName(True))
 
