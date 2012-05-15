@@ -55,6 +55,7 @@ class PostProcessor(object):
     DOESNT_EXIST = 4
 
     IGNORED_FILESTRINGS = [ "/.AppleDouble/", ".DS_Store" ]
+
     def __init__(self, file_path, nzb_name = None):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
@@ -151,10 +152,6 @@ class PostProcessor(object):
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
     
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
-            # only list it if the only non-shared part is the extension
-            if '.' in associated_file_path[len(base_name):]:
-                continue
-
             file_path_list.append(associated_file_path)
         
         return file_path_list
@@ -213,12 +210,16 @@ class PostProcessor(object):
             self._log(u"There were no files associated with "+file_path+", not moving anything", logger.DEBUG)
             return
         
+        # create base name with file_path (media_file without .extension)
+        old_base_name = file_path.rpartition('.')[0]
+        old_base_name_length = len(old_base_name)
+
         for cur_file_path in file_list:
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
-            # get the extension
-            cur_extension = cur_file_path.rpartition('.')[-1]
+            # get the extension without .
+            cur_extension = cur_file_path[old_base_name_length + 1:]
         
             # replace .nfo with .nfo-orig to avoid conflicts
             if cur_extension == 'nfo':
@@ -226,7 +227,7 @@ class PostProcessor(object):
 
             # If new base name then convert name
             if new_base_name:
-                new_file_name = new_base_name +'.' + cur_extension
+                new_file_name = new_base_name + '.' + cur_extension
             # if we're not renaming we still want to change extensions sometimes
             else:
                 new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
