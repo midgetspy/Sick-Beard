@@ -175,17 +175,20 @@ $(document).ready(function(){
         
         var params = { name: name }
         
-        // send to the form with ajax, get a return value
-        $.getJSON(sbRoot + '/config/providers/canAddNewznabProvider', params,
-            function(data){
-                if (data.error != undefined) {
-                    alert(data.error);
-                    return;
-                }
+        if (catIDs == "") {
+        	alert("Categorie IDs is a mandatory field. Can't save provider [" + name + "]");
+    	} else {
+	        // send to the form with ajax, get a return value
+    	    $.getJSON(sbRoot + '/config/providers/canAddNewznabProvider', params,
+        	    function(data){
+            	    if (data.error != undefined) {
+                	    alert(data.error);
+                    	return;
+                	}
 
-                $(this).addProvider(data.success, name, url, key, catIDs, 0);
-        });
-
+	                $(this).addProvider(data.success, name, url, key, catIDs, 0);
+    	    });
+		}
 
     });
 
