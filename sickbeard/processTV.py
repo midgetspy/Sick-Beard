@@ -95,7 +95,8 @@ def processDir (dirName, nzbName=None, recurse=False):
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
     # process any files in the dir
-    for cur_video_file_path in videoFiles:
+    process_everything_result = True
+    for cur_index, cur_video_file_path in enumerate(videoFiles):
 
         cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file_path)
 
@@ -103,16 +104,19 @@ def processDir (dirName, nzbName=None, recurse=False):
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
             process_result = processor.process()
             process_fail_message = ""
+            if process_result == False:
+                process_everything_result = False
         except exceptions.PostProcessingFailed, e:
             process_result = False
             process_fail_message = ex(e)
+            process_everything_result = False
 
         returnStr += processor.log 
 
         # as long as the postprocessing was successful delete the old folder unless the config wants us not to
         if process_result:
 
-            if len(videoFiles) == 1 and not sickbeard.KEEP_PROCESSED_DIR and \
+            if cur_index == len(videoFiles)-1 and process_everything_result and not sickbeard.KEEP_PROCESSED_DIR and \
                 ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR) and \
                 len(remainingFolders) == 0:
 
@@ -127,5 +131,14 @@ def processDir (dirName, nzbName=None, recurse=False):
             
         else:
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
+
+    # display dir result if more than one file
+    if len(videoFiles) > 1:
+
+        if process_everything_result:
+            returnStr += logHelper(u"Processing succeeded for directory "+dirName)
+
+        else:
+            returnStr += logHelper(u"Processing failed for directory "+dirName+": See earlier messages for additional info")
 
     return returnStr
