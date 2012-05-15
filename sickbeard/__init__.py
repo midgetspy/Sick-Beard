@@ -590,15 +590,15 @@ def initialize(consoleLogging=True):
         NEWZBIN_USERNAME = check_setting_str(CFG, 'Newzbin', 'newzbin_username', '')
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
 
-        NZBINDEX = bool(check_setting_int(CFG, 'NZBIndex', 'nzbindex', 1))
-        NZBSERIEN = bool(check_setting_int(CFG, 'NZBSerien', 'nzbserien', 1))
+        NZBINDEX = bool(check_setting_int(CFG, 'NZBIndex', 'nzbindex', 0))
+        NZBSERIEN = bool(check_setting_int(CFG, 'NZBSerien', 'nzbserien', 0))
 
         KEREWS = bool(check_setting_int(CFG, 'KereWS', 'kerews', 0))
         KEREWS_URL = check_setting_str(CFG, 'KereWS', 'kerews_url', 'http://kere.ws/')
         KEREWS_APIKEY = check_setting_str(CFG, 'KereWS', 'kerews_apikey', '')
         KEREWS_CATIDS = check_setting_str(CFG, 'KereWS', 'kerews_catIDs', '2000')
 
-        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
+        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 0))
 
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')

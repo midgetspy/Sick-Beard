@@ -48,12 +48,16 @@ class NewznabProvider(generic.NZBProvider):
 
 		self.url = url
 		self.key = key
-		self.catIDs = catIDs
+		if not catIDs:
+			self.catIDs = '5000'
+			logger.log(u"Using fallback catID: 5000, please select a cat id to search in for provider [" + name + "]", logger.ERROR)
+		else:		
+			self.catIDs = catIDs
 		
 		# if a provider doesn't need an api key then this can be false
 		self.needs_auth = True
 
-		self.enabled = True
+		self.enabled = False
 		self.supportsBacklog = True
 
 		self.default = False

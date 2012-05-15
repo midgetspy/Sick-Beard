@@ -42,8 +42,8 @@ from sickbeard.exceptions import ex
 class KereWSProvider(newznab.NewznabProvider):
 
 	def __init__(self):
-		# use the newznab constructor, URL and APIKEY will be replaced in the code below
-		newznab.NewznabProvider.__init__(self, "kerews", None, None, None)
+		# use the newznab constructor, the parameters used here are only default values because at startup the config file isn't read
+		newznab.NewznabProvider.__init__(self, "kerews", "http://kere.ws/", 2000, None)
 
 		self.cache = KereWSCache(self)
 
