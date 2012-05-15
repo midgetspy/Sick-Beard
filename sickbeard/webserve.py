@@ -1801,6 +1801,9 @@ class NewHomeAddShows:
             redirect("/home")
         else:
             helpers.chmodAsParent(show_dir)
+            #adds show dir to synoindexer...
+            notifiers.synoindex_notifier.addFolder(show_dir)
+            logger.log("Added " +show_dir+" to the synoindexer", logger.DEBUG)
 
         # prepare the inputs for passing along
         if seasonFolders == "on":
