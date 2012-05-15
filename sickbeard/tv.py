@@ -781,6 +781,10 @@ class TVShow(object):
                 logger.log(str(self.tvdbid) + ": File " + rootEp.location + " is already named correctly, skipping", logger.DEBUG)
                 continue
 
+            # create base name from rootEp.location (media_file without .extension)
+            old_base_name = ek.ek(os.path.basename, rootEp.location.rpartition('.')[0])
+            old_base_name_length = len(old_base_name)
+
             with rootEp.lock:
                 result = helpers.rename_file(rootEp.location, rootEp.prettyName())
                 if result != False:
@@ -792,7 +796,7 @@ class TVShow(object):
             logger.log(u"Files associated to "+curLocation+": "+str(fileList), logger.DEBUG)
 
             for file in fileList:
-                result = helpers.rename_file(file, rootEp.prettyName())
+                result = helpers.rename_file(file, rootEp.prettyName(), old_base_name_length)
                 if result == False:
                     logger.log(str(self.tvdbid) + ": Unable to rename file "+file, logger.ERROR)
 
