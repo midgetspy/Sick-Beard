@@ -415,10 +415,16 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
-def rename_file(old_path, new_name):
+def rename_file(old_path, new_name, old_base_name_length = 0):
 
     old_path_list = ek.ek(os.path.split, old_path)
-    old_file_ext = os.path.splitext(old_path_list[1])[1]
+
+    if old_base_name_length > 0 and old_base_name_length < len(old_path_list[1]):
+        # approach from the left
+        old_file_ext = old_path_list[1][old_base_name_length:]
+    else:
+        # approach from the right
+        old_file_ext = os.path.splitext(old_path_list[1])[1]
 
     new_path = ek.ek(os.path.join, old_path_list[0], sanitizeFileName(new_name) + old_file_ext)
 
