@@ -30,6 +30,8 @@ __all__ = ['ezrss',
            ]
 
 import sickbeard
+from sickbeard import logger
+
 
 from os import sys
 
