@@ -97,8 +97,8 @@ def makeNewznabProvider(configString):
         name, url, key, catIDs, enabled = configString.split('|')
     except:
         # that did not work, try the old format without catIDs
-        logger.log(u"newznab provider list does not contain catIDs. Using fallback catID: 5000 for provider [" + name + "]", logger.WARNING)
         name, url, key, enabled = configString.split('|')
+        logger.log(u"newznab provider list does not contain catIDs. Using fallback catID: 5000 for provider [" + name + "]", logger.WARNING)
         catIDs = 5000
 
     newznab = sys.modules['sickbeard.providers.newznab']
