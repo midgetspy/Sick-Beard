@@ -18,7 +18,13 @@
 
 import time
 import datetime
-import sqlite3
+try:
+    import sqlite3
+except:
+    try:
+        import pysqlite2.dbapi2 as sqlite3
+    except:
+        pass
 
 import sickbeard
 
