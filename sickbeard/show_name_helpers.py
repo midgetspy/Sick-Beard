@@ -237,15 +237,14 @@ def isGoodResult(name, show, log=True):
         if show.startyear:
             escaped_name += "(?:\W+"+str(show.startyear)+")?"
 
-        logger.log(u"Releasename: "+name, logger.DEBUG)
-
-        #releasetrim = '^<?.* \d{9,} ?-? '
-        #use regex and sub to replace common spam
-        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\.']
+        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\.','^(.*) >','^\[\d{5,}.*\[ ']
+        realname = name
         for regex in releasetrim:
             name = re.sub(regex, "", name)
         
-        logger.log(u"Cleaned Releasename: "+name, logger.DEBUG)
+        if realname != name:
+            logger.log(u"REGEX - Releasename: "+realname, logger.DEBUG)
+            logger.log(u"REGEX - Cleaned Releasename: "+name, logger.DEBUG)
 
         curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:
