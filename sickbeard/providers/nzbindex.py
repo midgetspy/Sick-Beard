@@ -143,7 +143,7 @@ class NZBIndexCache(tvcache.TVCache):
         url = "http://nzbindex.nl/rss/?"
 
         urlArgs = {'q': '',
-                   'max': 500,
+                   'max': 50,
                    'sort': 'agedesc',
                    'hidespam': 1,
                    'minsize':100,

@@ -239,7 +239,7 @@ def isGoodResult(name, show, log=True):
 
         #releasetrim = '^<?.* \d{9,} ?-? '
         #use regex and sub to replace common spam
-        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\.','(.*) >']
+        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\.','^(.*) >','^\[\d{5,}.*\[ ']
         realname = name
         for regex in releasetrim:
             name = re.sub(regex, "", name)
