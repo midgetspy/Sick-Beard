@@ -377,6 +377,10 @@ class PostProcessor(object):
     
         if not name:
             return to_return
+            
+        trimprefix = ['^sof-']
+        for regex in trimprefix:
+            name = re.sub(regex, "", name)
     
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
