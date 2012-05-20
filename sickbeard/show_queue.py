@@ -305,9 +305,8 @@ class QueueItemAdd(ShowQueueItem):
             myDB = db.DBConnection();
             myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
 
-        # before we run the backlog lets update the local aliases if the new show is an anime
-        if self.show.is_anime:
-            scene_exceptions.retrieve_exceptions(localOnly=True)
+        # before we run the backlog lets update exceptions
+        scene_exceptions.retrieve_exceptions()
 
         logger.log(u"Attempting to load scene numbers", logger.DEBUG)
         if self.show.loadEpisodeSceneNumbers():

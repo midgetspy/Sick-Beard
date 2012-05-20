@@ -584,13 +584,20 @@ def get_show_by_name(name, showList, useTvdb=False):
     if cacheResult:
         return findCertainShow(sickbeard.showList, cacheResult)
     
+    if name in sickbeard.scene_exceptions.name_set:
+        logger.log(u"################################### found "+name+" in the name_set")
+        return findCertainShow(showList, sickbeard.scene_exceptions.exception_tvdb[name])
+    """
+    else:
+        logger.log(u"did not find "+name+" in the name_set")
+    
     for show in showList:
         for curSeason in [-1]+sickbeard.scene_exceptions.get_scene_seasons(show.tvdbid):
             if _check_against_names(name, show, season=curSeason):
                 logger.log(u"Matched "+name+" in the showlist to the show "+show.name+" season "+str(curSeason), logger.DEBUG)
                 sickbeard.name_cache.addNameToCache(name, show.tvdbid)
                 return show
-
+    """
     if useTvdb:
         try:
             t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)

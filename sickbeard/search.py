@@ -298,6 +298,7 @@ def findEpisode(episode, manualSearch=False):
         # we use the method from the curProvider to accommodate for the internal join functions
         # this way we do not break the special abilities of the providers e.g. nzbmatrix
         searchStrings = curProvider.get_episode_search_strings(episode)
+        searchStrings = set(searchStrings)
         logger.log("All search string permutations :" + str(searchStrings))
         done_searching = False
         for searchString in searchStrings:

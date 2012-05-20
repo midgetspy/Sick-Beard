@@ -35,6 +35,9 @@ from sickbeard.exceptions import ex
 excpetionCache = {}
 seasonExcpetionCache = {}
 
+name_set = set()
+exception_tvdb = {}
+
 def get_scene_exceptions(tvdb_id, season=-1):
     """
     Given a tvdb_id, return a list of all the scene exceptions.
@@ -155,6 +158,7 @@ def retrieve_exceptions(localOnly=False):
     global seasonExcpetionCache
     excpetionCache = {}
     seasonExcpetionCache = {}
+    buil_name_set()
 
 def _retrieve_exceptions_fetcher(url):
 
@@ -231,4 +235,23 @@ def getSceneSeasons(tvdb_id):
     myDB = db.DBConnection("cache.db")
     seasons = myDB.select("SELECT DISTINCT season FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
     return [cur_exception["season"] for cur_exception in seasons]
+
+def buil_name_set():
+    global name_set
+    name_list = []
+    name_list_temp = []
+    
+    global exception_tvdb
+    exception_tvdb = {}
+    
+    for show in sickbeard.showList:
+        for curSeason in [-1]+sickbeard.scene_exceptions.get_scene_seasons(show.tvdbid):
+            name_list_temp.append(show.name)
+            for name in get_scene_exceptions(show.tvdbid, season=curSeason):
+                name_list_temp.append(name)
+                exception_tvdb[name] = show.tvdbid
+
+    for showName in name_list_temp:
+        name_list += helpers.full_sanitizeSceneName(showName)
+    name_set = set(name_list)
 
