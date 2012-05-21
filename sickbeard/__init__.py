@@ -593,7 +593,7 @@ def initialize(consoleLogging=True):
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
         XBMC_UPDATE_FULL = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_full', 0))
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
-        XBMC_NOTE_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_note_host', '')
+        XBMC_NOTE_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_note_host', XBMC_HOST)
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
 
