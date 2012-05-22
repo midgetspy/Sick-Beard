@@ -299,9 +299,11 @@ def findEpisode(episode, manualSearch=False):
         # this way we do not break the special abilities of the providers e.g. nzbmatrix
         searchStrings = curProvider.get_episode_search_strings(episode)
         logger.log("All search string permutations (" + curProvider.name + "):" + str(searchStrings))
+        try:
+            searchStrings = list(set(searchStrings))
+        except TypeError:
+            pass
 
-        if isinstance(searchStrings, list):
-            searchStrings = set(searchStrings)
         done_searching = False
         for searchString in searchStrings:
             try:
