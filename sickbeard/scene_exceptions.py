@@ -35,7 +35,6 @@ from sickbeard.exceptions import ex
 excpetionCache = {}
 seasonExcpetionCache = {}
 
-name_set = set()
 exception_tvdb = {}
 
 def get_scene_exceptions(tvdb_id, season=-1):
@@ -95,21 +94,22 @@ def get_scene_exception_by_name(show_name):
     myDB = db.DBConnection("cache.db")
 
     # try the obvious case first
-    exception_result = myDB.select("SELECT tvdb_id FROM scene_exceptions WHERE LOWER(show_name) = ?", [show_name.lower()])
+    exception_result = myDB.select("SELECT tvdb_id, season FROM scene_exceptions WHERE LOWER(show_name) = ?", [show_name.lower()])
     if exception_result:
-        return int(exception_result[0]["tvdb_id"])
+        return (int(exception_result[0]["tvdb_id"]), int(exception_result[0]["season"]))
 
-    all_exception_results = myDB.select("SELECT show_name, tvdb_id FROM scene_exceptions")
+    all_exception_results = myDB.select("SELECT show_name, tvdb_id, season FROM scene_exceptions")
     for cur_exception in all_exception_results:
 
         cur_exception_name = cur_exception["show_name"]
         cur_tvdb_id = int(cur_exception["tvdb_id"])
+        cur_season = int(cur_exception["season"])
 
         if show_name.lower() in (cur_exception_name.lower(), sanitizeSceneName(cur_exception_name).lower().replace('.', ' ')):
             logger.log(u"Scene exception lookup got tvdb id " + str(cur_tvdb_id) + u", using that", logger.DEBUG)
-            return cur_tvdb_id
+            return (cur_tvdb_id, cur_season)
 
-    return None
+    return None, None
 
 def retrieve_exceptions(localOnly=False):
     """
@@ -236,22 +236,17 @@ def getSceneSeasons(tvdb_id):
     seasons = myDB.select("SELECT DISTINCT season FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
     return [cur_exception["season"] for cur_exception in seasons]
 
+
 def buil_name_set():
-    global name_set
-    name_list = []
-    name_list_temp = []
-    
     global exception_tvdb
     exception_tvdb = {}
-    
-    for show in sickbeard.showList:
-        for curSeason in [-1]+sickbeard.scene_exceptions.get_scene_seasons(show.tvdbid):
-            name_list_temp.append(show.name)
-            for name in get_scene_exceptions(show.tvdbid, season=curSeason):
-                name_list_temp.append(name)
-                exception_tvdb[name] = show.tvdbid
 
-    for showName in name_list_temp:
-        name_list += helpers.full_sanitizeSceneName(showName)
-    name_set = set(name_list)
+    for show in sickbeard.showList:
+        for curSeason in [-1] + sickbeard.scene_exceptions.get_scene_seasons(show.tvdbid):
+            exception_tvdb[helpers.full_sanitizeSceneName(show.name)] = show.tvdbid
+            for name in get_scene_exceptions(show.tvdbid, season=curSeason):
+                exception_tvdb[name] = show.tvdbid
+                exception_tvdb[helpers.full_sanitizeSceneName(name)] = show.tvdbid
+
+
 

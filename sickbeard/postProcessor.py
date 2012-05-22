@@ -84,6 +84,7 @@ class PostProcessor(object):
     
         self.in_history = False
         self.release_group = None
+        self.series_name = ""
         self.is_proper = False
     
         self.log = ''
@@ -411,13 +412,14 @@ class PostProcessor(object):
         
         def _finalize(parse_result):
             self.release_group = parse_result.release_group
+            self.series_name = parse_result.series_name
             if parse_result.extra_info:
                 self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
         
         # for each possible interpretation of that scene name
         for cur_name in name_list:
             self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
-            scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
+            scene_id, scene_season = scene_exceptions.get_scene_exception_by_name(cur_name)
             if scene_id:
                 self._log(u"Scene exception lookup got tvdb id "+str(scene_id)+u", using that", logger.DEBUG)
                 if(parse_result.is_anime):
@@ -664,6 +666,8 @@ class PostProcessor(object):
             return (season, episodes)
 
         self._log(u"This looks like a scene release converting scene numbers to tvdb numbers", logger.DEBUG)
+
+        season = self._getSeasonNumberFromeName(tvdb_id, self.series_name, season)
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes, scene=True)
         if ep_obj:
             newEpisodeNumbers = []
@@ -671,6 +675,20 @@ class PostProcessor(object):
                 newEpisodeNumbers.append(curEp.episode)
             return (ep_obj.season, newEpisodeNumbers)
         return (season, episodes)
+
+    def _getSeasonNumberFromeName(self, tvdb_id, name, org_season):
+        scene_tvdb_id, scene_season = scene_exceptions.get_scene_exception_by_name(name)
+        if scene_tvdb_id:
+            if scene_tvdb_id == tvdb_id:
+                self._log(u"Looks like " + name + " is tvdb season " + str(scene_season), logger.DEBUG)
+            else:
+                logger.log("dfuq when i tried to figure out the season from the name i got a different tvdbid then we got before !! stoping right now!", logger.ERROR)
+                raise exceptions.PostProcessingFailed()
+        else:
+            scene_season = org_season
+            self._log(u"Looks like " + name + " is tvdb season " + str(scene_season) + " (NO CHANGE)", logger.DEBUG)
+
+        return scene_season
 
     def _get_ep_obj(self, tvdb_id, season, episodes, scene=False):
         """
