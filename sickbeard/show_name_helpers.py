@@ -300,16 +300,17 @@ def allPossibleShowNames(show, season=-1):
     # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
     # any countries defined in common.countryList
     # (and vice versa)
-    for curName in set(showNames):
-        if not curName:
-            continue
-        for curCountry in country_list:
-            if curName.endswith(' '+curCountry):
-                newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
-            elif curName.endswith(' ('+curCountry+')'):
-                newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+country_list[curCountry]+')'))
-
-    showNames += newShowNames
+    # only for none anime
+    if not show.is_anime:
+        for curName in set(showNames):
+            if not curName:
+                continue
+            for curCountry in country_list:
+                if curName.endswith(' '+curCountry):
+                    newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
+                elif curName.endswith(' ('+curCountry+')'):
+                    newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+country_list[curCountry]+')'))
+        showNames += newShowNames
 
     return showNames
 
