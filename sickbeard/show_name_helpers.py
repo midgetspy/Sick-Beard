@@ -237,7 +237,7 @@ def isGoodResult(name, show, log=True):
         if show.startyear:
             escaped_name += "(?:\W+"+str(show.startyear)+")?"
 
-        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\.','^(.*) >','^\[\d{5,}.*\[ ']
+        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\. "?','^(.*) >','^\[\d{5,}.*\[ ','^\.: ']
         realname = name
         for regex in releasetrim:
             name = re.sub(regex, "", name)

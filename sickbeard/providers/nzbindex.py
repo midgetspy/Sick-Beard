@@ -76,7 +76,7 @@ class NZBIndexProvider(generic.NZBProvider):
 
         searchURL = "http://nzbindex.nl/rss/?" + urllib.urlencode(params)
 
-        logger.log(u"Search string: " + searchURL, logger.DEBUG)
+        logger.log(u"Search string: " + searchURL)
 
         logger.log(u"Sleeping 10 seconds to respect NZBIndex's rules")
         time.sleep(10)
