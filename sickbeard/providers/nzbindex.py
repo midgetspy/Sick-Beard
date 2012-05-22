@@ -47,18 +47,20 @@ class NZBIndexProvider(generic.NZBProvider):
         return sickbeard.NZBINDEX
 
     def _get_season_search_strings(self, show, season):
-        sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, "NZBIndex"))
+        # sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, "NZBIndex"))
 
-        # search for all show names and episode numbers like ("a","b","c") in a single search
-        return [' '.join(sceneSearchStrings)]
+        # # search for all show names and episode numbers like ("a","b","c") in a single search
+        # return [' '.join(sceneSearchStrings)]
+        return [x for x in show_name_helpers.makeSceneSeasonSearchString(show, season)]
 
     def _get_episode_search_strings(self, ep_obj):
-        # tvrname is better for most shows
-        if ep_obj.show.tvrname:
-            searchStr = ep_obj.show.tvrname + " S%02dE%02d"%(ep_obj.season, ep_obj.episode)
-        else:
-            searchStr = ep_obj.show.name + " S%02dE%02d"%(ep_obj.season, ep_obj.episode)
-        return [searchStr]
+        # # tvrname is better for most shows
+        # if ep_obj.show.tvrname:
+        #     searchStr = ep_obj.show.tvrname + " S%02dE%02d"%(ep_obj.season, ep_obj.episode)
+        # else:
+        #     searchStr = ep_obj.show.name + " S%02dE%02d"%(ep_obj.season, ep_obj.episode)
+        # return [searchStr]
+        return [x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
     def _doSearch(self, curString, quotes=False, show=None):
 
