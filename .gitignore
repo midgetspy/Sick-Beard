@@ -14,6 +14,7 @@ server.key
 tests/Logs/*
 tests/sickbeard.*
 tests/cache.db
+*.nzb
 
 #  Compiled source   #
 ######################
