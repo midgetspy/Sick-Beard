@@ -1,4 +1,4 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
+NewHomeAddShows# Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -1809,6 +1809,8 @@ class NewHomeAddShows:
             redirect("/home")
         else:
             helpers.chmodAsParent(show_dir)
+            notifiers.synoindex_notifier.addFolder(show_dir)
+            logger.log("Added " +show_dir+" to the synoindexer", logger.DEBUG)
 
         # prepare the inputs for passing along
         if seasonFolders == "on":
