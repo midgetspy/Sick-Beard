@@ -378,7 +378,7 @@ class PostProcessor(object):
         if not name:
             return to_return
             
-        trimprefix = ['^sof-']
+        trimprefix = ['^sof-','^euhd-']
         for regex in trimprefix:
             name = re.sub(regex, "", name)
     
