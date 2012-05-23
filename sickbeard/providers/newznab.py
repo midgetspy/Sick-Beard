@@ -40,7 +40,7 @@ from sickbeard.exceptions import ex
 
 class NewznabProvider(generic.NZBProvider):
 
-	def __init__(self, name, url, key=''):
+	def __init__(self, name, url, catIDs, key=''):
 
 		generic.NZBProvider.__init__(self, name)
 
@@ -48,17 +48,22 @@ class NewznabProvider(generic.NZBProvider):
 
 		self.url = url
 		self.key = key
+		if not catIDs:
+			self.catIDs = '5000'
+			logger.log(u"Using fallback catID: 5000, please select a cat id to search in for provider [" + name + "]", logger.ERROR)
+		else:		
+			self.catIDs = catIDs
 		
 		# if a provider doesn't need an api key then this can be false
 		self.needs_auth = True
 
-		self.enabled = True
+		self.enabled = False
 		self.supportsBacklog = True
 
 		self.default = False
 
 	def configStr(self):
-		return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
+		return self.name + '|' + self.url + '|' + self.key + '|' + self.catIDs + '|' + str(int(self.enabled))
 
 	def imageName(self):
 		if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID()+'.gif')):
@@ -174,10 +179,11 @@ class NewznabProvider(generic.NZBProvider):
 
 	def _doSearch(self, search_params, show=None):
 
+		# Use category 5020 -> TV/Foreign
 		params = {"t": "tvsearch",
 				  "maxage": sickbeard.USENET_RETENTION,
 				  "limit": 100,
-				  "cat": '2000'}
+				  "cat": self.catIDs}
 
 		# hack this in for now
 		if self.getID() == 'nzbs_org':
@@ -260,9 +266,10 @@ class NewznabCache(tvcache.TVCache):
 
 	def _getRSSData(self):
 
+		# Use category 5020 -> TV/Foreign
 		params = {"t": "tvsearch",
 				  "age": sickbeard.USENET_RETENTION,
-				  "cat": '2000'}
+				  "cat": self.provider.catIDs}
 
 		# hack this in for now
 		if self.provider.getID() == 'nzbs_org':

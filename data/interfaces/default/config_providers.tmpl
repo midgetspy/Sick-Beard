@@ -17,7 +17,7 @@
 
 var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', '$curNewznabProvider.catIDs', $int($curNewznabProvider.default), show_nzb_providers);
 #end for
 });
 //-->
@@ -77,7 +77,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "kerews", "tvtorrents", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -116,6 +116,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <input class="component-desc newznab_key" type="text" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" size="40" />
                             </label>
                         </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">$curNewznabProvider.name Category IDs to search in</span>
+                                <input class="component-desc newznab_catIDs" type="text" id="${curNewznabProvider.getID()}_catIDs" value="$curNewznabProvider.catIDs" size="40" />
+                            </label>
+                        </div>
+                       
 </div>
 #end for
 
@@ -161,6 +168,27 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix">
                                 <span class="component-title">Newzbin Password</span>
                                 <input class="component-desc" type="password" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="40" />
+                            </label>
+                        </div>
+</div>
+
+<div class="providerDiv" id="kerewsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">kere.ws URL</span>
+                                <input class="component-desc" type="text" name="kerews_url" value="$sickbeard.KEREWS_URL" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">kere.ws API key</span>
+                                <input class="component-desc" type="text" name="kerews_apikey" value="$sickbeard.KEREWS_APIKEY" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">kere.ws category IDs to search in</span>
+                                <input class="component-desc" type="text" name="kerews_catIDs" value="$sickbeard.KEREWS_CATIDS" size="40" />
                             </label>
                         </div>
 </div>
@@ -273,6 +301,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-desc">(leave blank if not required)</span>
                             </label>
                         </div>
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Category IDs to search in</span>
+                                <input class="component-desc" type="text" id="newznab_catIDs" size="40" />
+                            </label>
+                        </div>
+                    
             <div id="newznab_add_div">
                 <input type="button" class="newznab_save" id="newznab_add" value="Add" />
             </div>

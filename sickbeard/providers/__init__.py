@@ -25,10 +25,13 @@ __all__ = ['ezrss',
            'newzbin',
            'nzbindex',
            'nzbserien',
+           'kere_ws',
            'btn',
            ]
 
 import sickbeard
+from sickbeard import logger
+
 
 from os import sys
 
@@ -79,6 +82,7 @@ def getNewznabProviderList(data):
             providerDict[curDefault.name].name = curDefault.name
             providerDict[curDefault.name].url = curDefault.url
             providerDict[curDefault.name].needs_auth = curDefault.needs_auth
+            providerDict[curDefault.name].catIDs = curDefault.catIDs
         
     return filter(lambda x: x, providerList)
 
@@ -88,18 +92,26 @@ def makeNewznabProvider(configString):
     if not configString:
         return None
 
-    name, url, key, enabled = configString.split('|')
+    # first try the new format of the newznab providers (catIDs added)
+    try:
+        name, url, key, catIDs, enabled = configString.split('|')
+    except:
+        # that did not work, try the old format without catIDs
+        name, url, key, enabled = configString.split('|')
+        logger.log(u"newznab provider list does not contain catIDs. Using fallback catID: 5000 for provider [" + name + "]", logger.WARNING)
+        catIDs = 5000
 
     newznab = sys.modules['sickbeard.providers.newznab']
 
-    newProvider = newznab.NewznabProvider(name, url)
-    newProvider.key = key
-    newProvider.enabled = enabled == '1'
+    newProvider = newznab.NewznabProvider(name, url, catIDs, key)
+    #newProvider.key = key
+    #newProvider.catIDs = catIDs
+    #newProvider.enabled = enabled == '1'
 
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://momo.sickbeard.com/|0|0!!!NZBs.org|http://beta.nzbs.org/||0'
+    return 'Sick Beard Index|http://momo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/||5000|0'
 
 
 def getProviderModule(name):

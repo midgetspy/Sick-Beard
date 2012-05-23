@@ -1031,13 +1031,13 @@ class ConfigProviders:
 
     @cherrypy.expose
     def canAddNewznabProvider(self, name):
-
+             
         if not name:
             return json.dumps({'error': 'Invalid name specified'})
 
         providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
 
-        tempProvider = newznab.NewznabProvider(name, '')
+        tempProvider = newznab.NewznabProvider(name, '', '')
 
         if tempProvider.getID() in providerDict:
             return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
@@ -1089,11 +1089,12 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
+    def saveProviders(self, nzbs_org_uid=None, nzbs_org_hash=None,
+                      nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
-                      btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
-                      newzbin_username=None, newzbin_password=None,
+ 					  btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
+                      newzbin_username=None, newzbin_password=None, kerews_url=None, kerews_apikey=None, kerews_catIDs=None,
                       provider_order=None):
 
         results = []
@@ -1111,9 +1112,9 @@ class ConfigProviders:
             if not curNewznabProviderStr:
                 continue
 
-            curName, curURL, curKey = curNewznabProviderStr.split('|')
+            curName, curURL, curKey, curCatIDs = curNewznabProviderStr.split('|')
 
-            newProvider = newznab.NewznabProvider(curName, curURL, curKey)
+            newProvider = newznab.NewznabProvider(curName, curURL, curCatIDs, curKey)
 
             curID = newProvider.getID()
 
@@ -1122,6 +1123,7 @@ class ConfigProviders:
                 newznabProviderDict[curID].name = curName
                 newznabProviderDict[curID].url = curURL
                 newznabProviderDict[curID].key = curKey
+                newznabProviderDict[curID].catIDs = curCatIDs
             else:
                 sickbeard.newznabProviderList.append(newProvider)
 
@@ -1151,6 +1153,8 @@ class ConfigProviders:
                 sickbeard.NZBINDEX = curEnabled
             elif curProvider == 'nzbserien':
                 sickbeard.NZBSERIEN = curEnabled
+            elif curProvider == 'kerews':
+                sickbeard.KEREWS = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
@@ -1182,6 +1186,10 @@ class ConfigProviders:
 
         sickbeard.NEWZBIN_USERNAME = newzbin_username
         sickbeard.NEWZBIN_PASSWORD = newzbin_password
+
+        sickbeard.KEREWS_URL = kerews_url
+        sickbeard.KEREWS_APIKEY = kerews_apikey
+        sickbeard.KEREWS_CATIDS = kerews_catIDs
 
         sickbeard.PROVIDER_ORDER = provider_list
 
@@ -1569,7 +1577,7 @@ class NewHomeAddShows:
     def getTVDBLanguages(self):
         result = tvdb_api.Tvdb().config['valid_languages']
 
-        # Make sure list is sorted alphabetically but 'en' is in front
+        # Make sure list is sorted alphabetically but 'de' is in front
         if 'de' in result:
             del result[result.index('de')]
         result.sort()
@@ -1801,9 +1809,6 @@ class NewHomeAddShows:
             redirect("/home")
         else:
             helpers.chmodAsParent(show_dir)
-            #adds show dir to synoindexer...
-            notifiers.synoindex_notifier.addFolder(show_dir)
-            logger.log("Added " +show_dir+" to the synoindexer", logger.DEBUG)
 
         # prepare the inputs for passing along
         if seasonFolders == "on":
@@ -1994,7 +1999,7 @@ class Home:
         if 'callback' in kwargs and '_' in kwargs:
             callback, _ = kwargs['callback'], kwargs['_']
         else:
-            return "Error: Unsupported Request. Send jsonp request with 'callback' variable in the query stiring."
+            return "Error: Unsupported Request. Send jsonp request with 'callback' variable in the query string."
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
         cherrypy.response.headers['Content-Type'] = 'text/javascript'
         cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
