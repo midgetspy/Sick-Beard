@@ -1,4 +1,4 @@
-NewHomeAddShows# Author: Nic Wolfe <nic@wolfeden.ca>
+# Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
