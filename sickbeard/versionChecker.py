@@ -48,10 +48,10 @@ class CheckVersion():
             self.updater = None
 
     def run(self):
-        self.check_for_new_version()
-        
         # refresh scene exceptions too
         scene_exceptions.retrieve_exceptions()
+
+        self.check_for_new_version()
 
     def find_install_type(self):
         """
