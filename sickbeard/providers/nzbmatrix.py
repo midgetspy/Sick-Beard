@@ -45,8 +45,8 @@ class NZBMatrixProvider(generic.NZBProvider):
     def isEnabled(self):
         return sickbeard.NZBMATRIX
 
-    def _get_season_search_strings(self, show, season):
-        sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, "nzbmatrix"))
+    def _get_season_search_strings(self, show, season, scene=False):
+        sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, extraSearchType="nzbmatrix", scene=scene))
 
         # search for all show names and episode numbers like ("a","b","c") in a single search
         return [' '.join(sceneSearchStrings)]

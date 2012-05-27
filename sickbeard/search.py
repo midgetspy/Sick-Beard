@@ -299,11 +299,12 @@ def findEpisode(episode, manualSearch=False):
         # this way we do not break the special abilities of the providers e.g. nzbmatrix
         searchStrings = curProvider.get_episode_search_strings(episode)
         logger.log("All search string permutations (" + curProvider.name + "):" + str(searchStrings))
+        """
         try:
             searchStrings = list(set(searchStrings))
         except TypeError:
             pass
-
+        """
         done_searching = False
         for searchString in searchStrings:
             try:
@@ -358,7 +359,7 @@ def findEpisode(episode, manualSearch=False):
 
     return bestResult
 
-def findSeason(show, season):
+def findSeason(show, season, scene=False):
 
     logger.log(u"Searching for stuff we need from "+show.name+" season "+str(season))
 
@@ -372,7 +373,7 @@ def findSeason(show, season):
             continue
 
         try:
-            curResults = curProvider.findSeasonResults(show, season)
+            curResults = curProvider.findSeasonResults(show, season, scene)
 
             # make a list of all the results for this provider
             for curEp in curResults:

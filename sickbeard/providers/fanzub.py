@@ -54,11 +54,11 @@ class Fanzub(generic.NZBProvider):
     def _checkAuth(self):
         return True
 
-    def _get_season_search_strings(self, show, season):
+    def _get_season_search_strings(self, show, season, scene=False):
         names = []
         if season is -1:
             names = [show.name.encode('utf-8')]
-        names.extend(show_name_helpers.makeSceneSeasonSearchString(show, season))
+        names.extend(show_name_helpers.makeSceneSeasonSearchString(show, season, scene=scene))
         return names
 
     def _get_episode_search_strings(self, ep_obj):

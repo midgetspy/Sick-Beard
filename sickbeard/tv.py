@@ -23,6 +23,7 @@ import datetime
 import threading
 import re
 import glob
+from sickbeard.completparser import CompleteParser
 try:
     import json
 except ImportError:
@@ -47,7 +48,6 @@ from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek
 
-from sickbeard.helpers import parse_result_wrapper
 from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
 
@@ -135,7 +135,8 @@ class TVShow(object):
         if self.anime and absolute_number != None and season == None and episode == None:
             myDB = db.DBConnection()
             sql = "SELECT * FROM tv_episodes WHERE showid = ? and absolute_number = ? and season != 0"
-            sqlResults = myDB.select(sql, [self.tvdbid,absolute_number])
+            sqlResults = myDB.select(sql, [self.tvdbid, absolute_number])
+                
             if len(sqlResults) == 1:
                 episode = int(sqlResults[0]["episode"])
                 season = int(sqlResults[0]["season"])
@@ -466,20 +467,19 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": -------------------------------------------- ", logger.DEBUG)
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
         logger.log(str(self.tvdbid) + ": -------------------------------------------- ", logger.DEBUG)
-        try:
-            parse_result = parse_result_wrapper(self,file)
-        except InvalidNameException:
-            logger.log(u"tv: Unable to parse the filename "+file+" into a valid episode", logger.ERROR)
-            return None
+
+        cp = CompleteParser(show=self)
+        cpr = cp.parse(file)
+        parse_result = cpr.parse_result
 
         if len(parse_result.episode_numbers) == 0 and not parse_result.air_by_date and not parse_result.is_anime:
-            logger.log("parse_result: "+str(parse_result))
+            logger.log("parse_result: " + str(parse_result))
             logger.log(u"No episode number found in "+file+", ignoring it", logger.ERROR)
             return None
 
         # for now lets assume that any episode in the show dir belongs to that show
-        season = parse_result.season_number if parse_result.season_number != None else 1
-        episodes = parse_result.episode_numbers
+        season = cpr.season
+        episodes = cpr.episodes
         rootEp = None
 
         # if we have an air-by-date show then get the real season/episode numbers
@@ -503,26 +503,7 @@ class TVShow(object):
             except tvdb_exceptions.tvdb_error, e:
                 logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
                 return None
-        
-        if self.is_anime and parse_result.is_anime and len(parse_result.ab_episode_numbers) > 0:
-            try:
-                (new_season, new_episodes) = helpers.get_all_episodes_from_absolute_number(self, None, parse_result.ab_episode_numbers)
-                # we found an episode
-                if parse_result.season_number and len(parse_result.episode_numbers) > 0: # lets check if we also parsed SxE
-                    if new_season != parse_result.season_number or  new_episodes != parse_result.episode_numbers: # where the parsed ones equal to the db info ? if not tell him
-                        logger.log(u"parsed: "+str(parse_result.season_number)+"x"+str(parse_result.episode_numbers)+" vs db: "+str(new_season)+"x"+str(new_episodes)+" with regex "+str(parse_result.which_regex), logger.DEBUG)
-                        logger.log(u"The Season and Episode(s) from Episode(s) "+str(parse_result.ab_episode_numbers)+" was parsed from file '"+str(file)+"' and did not match the DB entry. I assume the Absolute Number was correct. DB data is used for "+str(parse_result.ab_episode_numbers)+".", logger.WARNING)
-                # we will use the db info any way
-                season = new_season
-                episodes = new_episodes
-            except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                logger.log(str(self.tvdbid) + ": DB objekt with absolute number " + str(parse_result.ab_episode_numbers) + " was not found.", logger.WARNING)
-                if parse_result.season_number and len(parse_result.episode_numbers) > 0: # wait was this dude crazy and also provided SxE in the filename and did we find it ? if so tell him and use that
-                    logger.log(u"But we also parsed "+str(parse_result.season_number)+"x"+str(parse_result.episode_numbers)+". I will use that", logger.WARNING)
-                    season = parse_result.season_number
-                    episodes = parse_result.episode_numbers
-                else: # we cant figure out what this is
-                    return None
+
             
             
         for curEpNum in episodes:

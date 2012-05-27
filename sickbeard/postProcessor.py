@@ -43,11 +43,10 @@ from sickbeard.exceptions import ex
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
-from sickbeard.helpers import parse_result_wrapper
-
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import lib.adba as adba
+from sickbeard.completparser import CompleteParser
 
 class PostProcessor(object):
     """
@@ -378,126 +377,19 @@ class PostProcessor(object):
         if none were found.
         """
         logger.log(u"Analyzing name "+repr(name))
-    
+
         to_return = (None, None, [])
-    
+
         if not name:
             return to_return
-    
-        # parse the name to break it into show name, season, and episode
-        parse_result = parse_result_wrapper(None,name,tvdbActiveLookUp=True)
-        self._log("Parsed "+name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
 
-        if parse_result.air_by_date:
-            season = -1
-            episodes = [parse_result.air_date]
-        elif parse_result.is_anime:
-            try:
-                season = parse_result.season_number # better then nothing or ?
-                episodes = parse_result.ab_episode_numbers # better then nothing or ?
-            except:
-                season = None
-                episodes = []
-        else:
-            season = parse_result.season_number
-            episodes = parse_result.episode_numbers 
+        cp = CompleteParser(tvdbActiveLookUp=True)
+        cpr = cp.parse(name)
+        self.is_proper = cpr.is_proper
+        self.series_name = cpr.series_name
 
-        to_return = (None, season, episodes)
-    
-        # do a scene reverse-lookup to get a list of all possible names
-        name_list = show_name_helpers.sceneToNormalShowNames(parse_result.series_name)
+        return (cpr.tvdbid, cpr.season, cpr.episodes)
 
-        if not name_list:
-            return (None, season, episodes)
-        
-        def _finalize(parse_result):
-            self.release_group = parse_result.release_group
-            self.series_name = parse_result.series_name
-            if parse_result.extra_info:
-                self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
-        
-        # for each possible interpretation of that scene name
-        for cur_name in name_list:
-            self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
-            scene_id, scene_season = scene_exceptions.get_scene_exception_by_name(cur_name)
-            if scene_id:
-                self._log(u"Scene exception lookup got tvdb id "+str(scene_id)+u", using that", logger.DEBUG)
-                if(parse_result.is_anime):
-                    show = helpers.findCertainShow(sickbeard.showList, scene_id)
-                    try:
-                        (actual_season, actual_episodes) = helpers.get_all_episodes_from_absolute_number(show, None, parse_result.ab_episode_numbers)
-                    except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                        logger.log(str(scene_id) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, cant determin season and episode numbers")
-                    else:
-                        season = actual_season
-                        episodes = actual_episodes
-
-                _finalize(parse_result)
-                return (scene_id, season, episodes)
-
-        # see if we can find the name directly in the DB, if so use it
-        for cur_name in name_list:
-            self._log(u"Looking up "+cur_name+" in the DB", logger.DEBUG)
-            db_result = helpers.searchDBForShow(cur_name)
-            if db_result:
-                tvdb_id = int(db_result[0])
-                self._log(u"Lookup successful(1), using tvdb id "+str(tvdb_id)+" season: "+str(season)+" episode: "+str(episodes), logger.DEBUG)  
-                show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                if show.is_anime and len(parse_result.ab_episode_numbers) > 0:
-                    try:
-                        (actual_season, actual_episodes) = helpers.get_all_episodes_from_absolute_number(show, None, parse_result.ab_episode_numbers)
-                    except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                        logger.log(str(tvdb_id) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, skipping this episode")
-                        continue
-                    
-                    _finalize(parse_result)
-                    return (tvdb_id, actual_season, actual_episodes)
-                else:
-                    _finalize(parse_result)
-                    return (tvdb_id, season, episodes)
-                    
-        # see if we can find the name with a TVDB lookup
-        for cur_name in name_list:
-            try:
-                t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
-                self._log(u"Looking up name "+cur_name+u" on TVDB", logger.DEBUG)
-                showObj = t[cur_name]
-            except (tvdb_exceptions.tvdb_exception):
-                # if none found, search on all languages
-                try:
-                    # There's gotta be a better way of doing this but we don't wanna
-                    # change the language value elsewhere
-                    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-
-                    ltvdb_api_parms['search_all_languages'] = True
-                    t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **ltvdb_api_parms)
-
-                    self._log(u"Looking up name "+cur_name+u" in all languages on TVDB", logger.DEBUG)
-                    showObj = t[cur_name]
-                except (tvdb_exceptions.tvdb_exception, IOError):
-                    pass
-
-                continue
-            except (IOError):
-                continue
-            tvdb_id = int(showObj["id"])
-            self._log(u"Lookup successful(2), using tvdb id "+str(tvdb_id), logger.DEBUG)
-            show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-            if not show:
-                continue
-            if show.is_anime and len(parse_result.ab_episode_numbers) > 0:
-                try:
-                    (season, episodes) = helpers.get_all_episodes_from_absolute_number(show, None, parse_result.ab_episode_numbers)
-                except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                    logger.log(str(tvdb_id) + ": TVDB object absolute number " + str(parse_result.ab_episode_numbers) + " is incomplete, skipping this episode")
-                    continue
-
-            _finalize(parse_result)
-            return (tvdb_id, season, episodes)
-
-        _finalize(parse_result)
-        return to_return
-    
     def _analyze_anidb(self,filePath):
         if not helpers.set_up_anidb_connection():
             return (None, None, None)
@@ -600,7 +492,7 @@ class PostProcessor(object):
             except InvalidNameException, e:
                 logger.log(u"Unable to parse, skipping: "+ex(e), logger.DEBUG)
                 continue
-            
+
             # if we already did a successful history lookup then keep that tvdb_id value
             if cur_tvdb_id and not (self.in_history and tvdb_id):
                 tvdb_id = cur_tvdb_id
@@ -608,87 +500,12 @@ class PostProcessor(object):
                 season = cur_season
             if cur_episodes:
                 episodes = cur_episodes
-            
-            # at this point we should allready have the corret episodes and numbering even for anime
-            # only abd shows dont since it is not saved in the db
-            # for air-by-date shows we need to look up the season/episode from tvdb
-            if season == -1 and tvdb_id and episodes:
-                self._log(u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
-                
-                # try to get language set for this show
-                tvdb_lang = None
-                try:
-                    showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                    if(showObj != None):
-                        tvdb_lang = showObj.lang
-                except exceptions.MultipleShowObjectsException:
-                    raise #TODO: later I'll just log this, for now I want to know about it ASAP
-
-                try:
-                    # There's gotta be a better way of doing this but we don't wanna
-                    # change the language value elsewhere
-                    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-
-                    if tvdb_lang and not tvdb_lang == 'en':
-                        ltvdb_api_parms['language'] = tvdb_lang
-
-                    t = tvdb_api.Tvdb(**ltvdb_api_parms)
-                    epObj = t[tvdb_id].airedOn(episodes[0])[0]
-                    season = int(epObj["seasonnumber"])
-                    episodes = [int(epObj["episodenumber"])]
-                    self._log(u"Got season "+str(season)+" episodes "+str(episodes), logger.DEBUG)
-                except tvdb_exceptions.tvdb_episodenotfound, e:
-                    self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(tvdb_id)+u", skipping", logger.DEBUG)
-
-                    # we don't want to leave dates in the episode list if we couldn't convert them to real episode numbers
-                    episodes = []
-
-                    continue
-              
-            # if there's no season then we can hopefully just use 1 automatically
-            elif season == None and tvdb_id:
-                myDB = db.DBConnection()
-                numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
-                if int(numseasonsSQlResult[0][0]) == 1 and season == None:
-                    self._log(u"Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
-                    season = 1
 
             if tvdb_id and season != None and episodes:
-                season, episodes = self._sceneToTVDBNumbers(tvdb_id, season, episodes)
                 return (tvdb_id, season, episodes)
-
-        season, episodes = self._sceneToTVDBNumbers(tvdb_id, season, episodes)
         return (tvdb_id, season, episodes)
 
-    def _sceneToTVDBNumbers(self, tvdb_id, season, episodes):
-        if not self.release_group:
-            self._log(u"This does NOT look like a scene release. assuming these are tvdb numbers", logger.DEBUG)
-            return (season, episodes)
-
-        self._log(u"This looks like a scene release converting scene numbers to tvdb numbers", logger.DEBUG)
-
-        season = self._getSeasonNumberFromeName(tvdb_id, self.series_name, season)
-        ep_obj = self._get_ep_obj(tvdb_id, season, episodes, scene=True)
-        if ep_obj:
-            newEpisodeNumbers = []
-            for curEp in [ep_obj] + ep_obj.relatedEps:
-                newEpisodeNumbers.append(curEp.episode)
-            return (ep_obj.season, newEpisodeNumbers)
-        return (season, episodes)
-
-    def _getSeasonNumberFromeName(self, tvdb_id, name, org_season):
-        scene_tvdb_id, scene_season = scene_exceptions.get_scene_exception_by_name(name)
-        if scene_tvdb_id:
-            if scene_tvdb_id == tvdb_id:
-                self._log(u"Looks like " + name + " is tvdb season " + str(scene_season), logger.DEBUG)
-            else:
-                logger.log("dfuq when i tried to figure out the season from the name i got a different tvdbid then we got before !! stoping right now!", logger.ERROR)
-                raise exceptions.PostProcessingFailed()
-        else:
-            scene_season = org_season
-            self._log(u"Looks like " + name + " is tvdb season " + str(scene_season) + " (NO CHANGE)", logger.DEBUG)
-
-        return scene_season
+   
 
     def _get_ep_obj(self, tvdb_id, season, episodes, scene=False):
         """

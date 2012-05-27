@@ -31,7 +31,7 @@ from xml.dom.minidom import Node
 import sickbeard
 
 from sickbeard.exceptions import MultipleShowObjectsException, EpisodeNotFoundByAbsoluteNumerException
-from sickbeard import logger, classes
+from sickbeard import logger, classes, exceptions
 from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
@@ -512,50 +512,6 @@ def get_all_episodes_from_absolute_number(show, tvdb_id, absolute_numbers):
         season = ep.season # this will always take the last found seson so eps that cross the season border are not handeled well
     
     return (season, episodes)
-
-def parse_result_wrapper(show, toParse, showList=[], tvdbActiveLookUp=False, returnShow=False, activateAnimeRegEx=True):
-    """Retruns a parse result or a InvalidNameException
-        it will try to take the correct regex for the show if given
-        if not given it will try Anime first then Normal
-        if name is parsed as anime it will lookup the tvdbid and check if we have it as an anime
-        only if both is true we will consider it an anime
-        
-        to get the tvdbid the tvdbapi might be used if tvdbActiveLookUp is True
-    """
-    if len(showList) == 0:
-        showList = sickbeard.showList
-
-    if show and show.is_anime and activateAnimeRegEx:
-        modeList = [NameParser.ANIME_REGEX, NameParser.NORMAL_REGEX]    
-    elif show and not show.is_anime or not activateAnimeRegEx:
-        modeList = [NameParser.NORMAL_REGEX] 
-    else: # just try both ... time consuming
-        modeList = [NameParser.ANIME_REGEX, NameParser.NORMAL_REGEX]    
-        
-    for mode in modeList:
-        try:
-            myParser = NameParser(regexMode=mode)                
-            parse_result = myParser.parse(toParse)
-        except InvalidNameException:
-            pass
-        else:
-            if mode == NameParser.ANIME_REGEX and not (show and show.is_anime):
-                show = get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
-                if not show: # if we didnt get an tvdbid or the show is not an anime (in our db) we will chose the next regex mode
-                    logger.log("no show found", logger.DEBUG)
-                    continue
-                elif not show.is_anime:
-                    logger.log("found a show but the show is not an anime " + str(show.tvdbid), logger.DEBUG)
-                    continue
-                else: # this means it was an anime
-                    break
-            break
-    else:
-        raise InvalidNameException("Unable to parse "+toParse)
-    if not returnShow:
-        return parse_result
-    else:
-        return (parse_result, show)
 
 def _check_against_names(nameInQuestion, show, season=-1):
 

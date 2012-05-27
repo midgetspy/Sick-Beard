@@ -19,11 +19,13 @@
 import sickbeard
 
 from sickbeard.common import countryList
-from sickbeard.helpers import sanitizeSceneName, parse_result_wrapper
+from sickbeard.helpers import sanitizeSceneName
 from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
 from sickbeard import db
 from sickbeard.blackandwhitelist import *
+
+from sickbeard.completparser import CompleteParser
 
 import re
 import datetime
@@ -44,13 +46,17 @@ def filterBadReleases(name):
     
     Returns: True if the release name is OK, False if it's bad.
     """
-
+    """
     try:
         parse_result = parse_result_wrapper(None,name)
     except InvalidNameException:
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
-
+    """
+    cp = CompleteParser()
+    cpr = cp.parse(name)
+    parse_result = cpr.parse_result
+    
     # use the extra info and the scene group to filter against
     check_string = ''
     if parse_result.extra_info:
@@ -114,7 +120,7 @@ def makeSceneShowSearchStrings(show, season=-1):
     return map(sanitizeSceneName, showNames)
 
 
-def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
+def makeSceneSeasonSearchString (show, segment, extraSearchType=None, scene=False):
 
     myDB = db.DBConnection()
 
@@ -126,7 +132,10 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
     elif show.is_anime:
         """this part is from darkcube"""
         numseasons = 0
-        episodeNumbersSQLResult = myDB.select("SELECT absolute_number, status FROM tv_episodes WHERE showid = ? and season = ?", [show.tvdbid, segment])
+        if not scene:
+            episodeNumbersSQLResult = myDB.select("SELECT absolute_number, status FROM tv_episodes WHERE showid = ? and season = ?", [show.tvdbid, segment])
+        else:
+            episodeNumbersSQLResult = myDB.select("SELECT scene_absolute_number, status FROM tv_episodes WHERE showid = ? and scene_season = ?", [show.tvdbid, segment])
         
         # get show qualities
         anyQualities, bestQualities = common.Quality.splitQuality(show.quality)
@@ -146,11 +155,15 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         
             # if we need a better one then add it to the list of episodes to fetch
             if (curStatus in (common.DOWNLOADED, common.SNATCHED) and curQuality < highestBestQuality) or curStatus == common.WANTED:
-                try:
-                    if int(episodeNumberResult["absolute_number"]) > 0:
-                        seasonStrings.append("%d" % int(episodeNumberResult["absolute_number"]))
-                except:
-                    pass
+                if not scene:
+                    if isinstance(episodeNumberResult["absolute_number"], int):
+                        ab_number = int(episodeNumberResult["absolute_number"])
+                else:
+                    if isinstance(episodeNumberResult["scene_absolute_number"], int):
+                        ab_number = int(episodeNumberResult["scene_absolute_number"])
+                if ab_number > 0:
+                    seasonStrings.append("%d" % ab_number)
+
     else:
         numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
         numseasons = int(numseasonsSQlResult[0][0])
@@ -161,7 +174,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
             seasonStrings.append("%ix" % segment)
 
     bwl = BlackAndWhiteList(show.tvdbid)
-    showNames = set(makeSceneShowSearchStrings(show))
+    showNames = set(makeSceneShowSearchStrings(show, segment))
 
     toReturn = []
     term_list = []

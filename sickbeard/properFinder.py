@@ -32,8 +32,7 @@ from sickbeard.common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, Quality
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from name_parser.parser import InvalidNameException
-from sickbeard.helpers import parse_result_wrapper
-
+from sickbeard.completparser import CompleteParser
 
 class ProperFinder():
 
@@ -93,11 +92,9 @@ class ProperFinder():
         for curProper in sortedPropers:
 
             # parse the file name
-            try:
-                parse_result = parse_result_wrapper(None, curProper.name)
-            except InvalidNameException:
-                logger.log(u"Unable to parse the filename "+curProper.name+" into a valid episode", logger.DEBUG)
-                continue
+            cp = CompleteParser()
+            cpr = cp.parse(curProper.name)
+            parse_result = cpr.parse_result
 
             if not parse_result.episode_numbers and not parse_result.is_anime:
                 logger.log(u"Ignoring "+curProper.name+" because it's for a full season rather than specific episode", logger.DEBUG)

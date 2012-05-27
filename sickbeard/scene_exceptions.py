@@ -86,6 +86,9 @@ def get_scene_seasons(tvdb_id):
 
 
 def get_scene_exception_by_name(show_name):
+    return get_scene_exception_by_name_multiple(show_name)[0]
+
+def get_scene_exception_by_name_multiple(show_name):
     """
     Given a show name, return the tvdbid of the exception, None if no exception
     is present.
@@ -94,10 +97,11 @@ def get_scene_exception_by_name(show_name):
     myDB = db.DBConnection("cache.db")
 
     # try the obvious case first
-    exception_result = myDB.select("SELECT tvdb_id, season FROM scene_exceptions WHERE LOWER(show_name) = ?", [show_name.lower()])
+    exception_result = myDB.select("SELECT tvdb_id, season FROM scene_exceptions WHERE LOWER(show_name) = ? ORDER BY season ASC", [show_name.lower()])
     if exception_result:
-        return (int(exception_result[0]["tvdb_id"]), int(exception_result[0]["season"]))
+        return [(int(x["tvdb_id"]), int(x["season"])) for x in exception_result]
 
+    out = []
     all_exception_results = myDB.select("SELECT show_name, tvdb_id, season FROM scene_exceptions")
     for cur_exception in all_exception_results:
 
@@ -107,9 +111,11 @@ def get_scene_exception_by_name(show_name):
 
         if show_name.lower() in (cur_exception_name.lower(), sanitizeSceneName(cur_exception_name).lower().replace('.', ' ')):
             logger.log(u"Scene exception lookup got tvdb id " + str(cur_tvdb_id) + u", using that", logger.DEBUG)
-            return (cur_tvdb_id, cur_season)
-
-    return None, None
+            out.append((cur_tvdb_id, cur_season))
+    if out:
+        return out
+    else:
+        return [(None, None)]
 
 def retrieve_exceptions(localOnly=False):
     """

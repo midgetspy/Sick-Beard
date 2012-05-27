@@ -53,8 +53,8 @@ class NZBsProvider(generic.NZBProvider):
 		if sickbeard.NZBS_UID in (None, "") or sickbeard.NZBS_HASH in (None, ""):
 			raise exceptions.AuthException("NZBs.org authentication details are empty, check your config")
 
-	def _get_season_search_strings(self, show, season):
-		return ['^'+x for x in show_name_helpers.makeSceneSeasonSearchString(show, season)]
+	def _get_season_search_strings(self, show, season, scene=False):
+		return ['^'+x for x in show_name_helpers.makeSceneSeasonSearchString(show, season, scene=scene)]
 
 	def _get_episode_search_strings(self, ep_obj):
 		return ['^'+x for x in show_name_helpers.makeSceneSearchString(ep_obj)]

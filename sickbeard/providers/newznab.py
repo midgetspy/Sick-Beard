@@ -68,7 +68,7 @@ class NewznabProvider(generic.NZBProvider):
 	def isEnabled(self):
 		return self.enabled
 
-	def _get_season_search_strings(self, show, season=None):
+	def _get_season_search_strings(self, show, season=None, scene=False):
 
 		if not show:
 			return [{}]

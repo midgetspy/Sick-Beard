@@ -36,7 +36,7 @@ from sickbeard.exceptions import ex
 from lib.hachoir_parser import createParser
 
 from sickbeard.name_parser.parser import InvalidNameException
-from sickbeard.helpers import parse_result_wrapper
+from sickbeard.completparser import CompleteParser
 
 class GenericProvider:
 
@@ -260,14 +260,12 @@ class GenericProvider:
         for item in itemList:
 
             (title, url) = self._get_title_and_url(item)
-            
-            # parse the file name
-            try:
-                parse_result = parse_result_wrapper(episode.show,title)
-            except InvalidNameException:
-                logger.log(u"generic1: Unable to parse the filename "+title+" into a valid episode", logger.DEBUG)
-                continue
-                    
+
+            cp = CompleteParser(show=episode.show, tvdbActiveLookUp=True)
+            cpr = cp.parse(title)
+
+            parse_result = cpr.parse_result
+
             if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
@@ -280,7 +278,7 @@ class GenericProvider:
                 logger.log("Episode "+title+" isn't "+str(episode.scene_season)+"x"+str(episode.scene_episode)+", skipping it", logger.DEBUG)
                 continue
 
-            quality = self.getQuality(item,anime=episode.show.is_anime)
+            quality = cpr.quality
 
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
@@ -300,12 +298,12 @@ class GenericProvider:
 
 
 
-    def findSeasonResults(self, show, season):
+    def findSeasonResults(self, show, season, scene=False):
 
         itemList = []
         results = {}
 
-        for curString in self._get_season_search_strings(show, season):
+        for curString in self._get_season_search_strings(show, season, scene):
             itemList += self._doSearch(curString, show=show)
 
         for item in itemList:
@@ -316,7 +314,8 @@ class GenericProvider:
 
             # parse the file name
             try:
-                parse_result = parse_result_wrapper(show,title)
+                parse_result = None
+                #parse_result = parse_result_wrapper(show,title)
             except InvalidNameException:
                 logger.log(u"generic2: Unable to parse the filename "+title+" into a valid episode", logger.DEBUG)
                 continue
