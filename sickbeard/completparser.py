@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import traceback
 import threading
 import re
 from types import FunctionType, MethodType
@@ -57,12 +58,21 @@ class CompleteParser(object):
     def parse(self, name_to_parse):
         self.complete_result.lock.acquire()
         self.name_to_parse = name_to_parse
-        self._log("Parser for '" + ek.ek(str, self.name_to_parse) + "' locked. Starting to parse now", logger.DEBUG)
+        try:
+            self._log(u"Parser for '" + ek.ek(str, self.name_to_parse) + "' locked. Starting to parse now", logger.DEBUG)
+        except UnicodeEncodeError, e:
+            self._log("Could not encode name i was going to parse. " + ex(e), logger.ERROR)
+            self._log("Current encoding used is '" + str(sickbeard.SYS_ENCODING) + "'")
+            self._log(traceback.format_exc(), logger.DEBUG)
+            self.complete_result.lock.release()
+            return self.complete_result
+
         # lets parse the name
         try:
             self.raw_parse_result, cur_show = self.parse_wrapper(self.show, self.name_to_parse, self.showList, self.tvdbActiveLookUp)
         except InvalidNameException:
             self._log("Could not parse: " + ek.ek(str, name_to_parse), logger.DEBUG)
+            self.complete_result.lock.release()
             return self.complete_result
 
         self._log("Parsed :" + ek.ek(str, self.name_to_parse) + " into: " + ek.ek(str, self.raw_parse_result), logger.DEBUG)
@@ -78,6 +88,7 @@ class CompleteParser(object):
         # TODO: move this into the parse_wrapper()
         # check if we parsed an air by date show as air by date
         if cur_show and cur_show.air_by_date and not self.raw_parse_result.air_by_date:
+            self.complete_result.lock.release()
             return self.complete_result
 
         # TODO: find a place for "if there's no season then we can hopefully just use 1 automatically"
