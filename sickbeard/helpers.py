@@ -331,16 +331,6 @@ def buildNFOXML(myShow):
 
     return tvNode
 
-
-def searchDBForShow(regShowName):
-    """Return False|(tvdb_id,show_name)
-    Sanitize given show name into multiple versions and see if we have a record of that show name in the DB
-    """    
-    show = get_show_by_name(regShowName, sickbeard.showList)
-    if show:
-        return (show.tvdbid, show.name)
-    return None
-
 def sizeof_fmt(num):
     '''
     >>> sizeof_fmt(2)
@@ -530,48 +520,6 @@ def _check_against_names(nameInQuestion, show, season=-1):
             return True
 
     return False
-
-def get_show_by_name(name, showList, useTvdb=False):
-    logger.log(u"Trying to get the tvdbid for "+name, logger.DEBUG)
-    
-    name = full_sanitizeSceneName(name)
-    
-    cacheResult = sickbeard.name_cache.retrieveNameFromCache(name)
-    if cacheResult:
-        return findCertainShow(sickbeard.showList, cacheResult)
-
-    if name in sickbeard.scene_exceptions.exception_tvdb:
-        logger.log(u"Found " + name + " in the exception_tvdb", logger.DEBUG)
-        return findCertainShow(showList, sickbeard.scene_exceptions.exception_tvdb[name])
-    else:
-        logger.log(u"NOT Found " + name + " in the exception_tvdb", logger.DEBUG)
-        
-    if useTvdb:
-        try:
-            t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
-            showObj = t[name]
-        except (tvdb_exceptions.tvdb_exception):
-            # if none found, search on all languages
-            try:
-                # There's gotta be a better way of doing this but we don't wanna
-                # change the language value elsewhere
-                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-    
-                ltvdb_api_parms['search_all_languages'] = True
-                t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **ltvdb_api_parms)
-                showObj = t[name]
-            except (tvdb_exceptions.tvdb_exception, IOError):
-                pass
-    
-            return None
-        except (IOError):
-            return None
-        else:
-            show = findCertainShow(sickbeard.showList, int(showObj["id"]))
-            if show:
-                return show
-            
-    return None
 
 
 def set_up_anidb_connection():
