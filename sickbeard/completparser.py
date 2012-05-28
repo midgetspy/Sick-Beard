@@ -143,7 +143,7 @@ class CompleteParser(object):
                 return (None, None)
             else:
                 return (season, episodes)
-        else: #TODO: implement a local lookup
+        else:
             myDB = db.DBConnection()
             sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [self.show.tvdbid, adb_part.toordinal()])
             if len(sql_results) != 1:
@@ -211,7 +211,6 @@ class CompleteParser(object):
                 continue
             possible_seasons.append(cur_scene_season)
         #if not possible_seasons: # no special season name was used or we could not find it
-        #    possible_seasons = show.getAllSeasonNumbers() # lets look at every season
         self._log("possible seasons for " + scene_name + "(" + str(show.tvdbid) + ") are " + str(possible_seasons), logger.DEBUG)
 
         # lets just get a db connection we will need it anyway
@@ -232,7 +231,7 @@ class CompleteParser(object):
                         elif len(namesSQlResult) == 0:
                             break # break out of current absolute_numbers -> next season ... this is not a good sign
                         # if we are here we found ONE episode for this season absolute number
-                        self._log("I found matching episode " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
+                        self._log("I found matching episode: " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
                         out_episodes.append(int(namesSQlResult[0]['episode']))
                         out_absolute_numbers.append(int(namesSQlResult[0]['absolute_number']))
                         out_season = int(namesSQlResult[0]['season']) # note this will always use the last season we got ... this will be a problem on double episodes that break the season barrier
@@ -249,7 +248,7 @@ class CompleteParser(object):
                     elif len(namesSQlResult) == 0:
                         continue
                     # if we are here we found ONE episode for this season absolute number
-                    self._log("I found matching episode " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
+                    self._log("I found matching episode: " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
                     out_episodes.append(int(namesSQlResult[0]['episode']))
                     out_absolute_numbers.append(int(namesSQlResult[0]['absolute_number']))
                     out_season = int(namesSQlResult[0]['season']) # note this will always use the last season we got ... this will be a problem on double episodes that break the season barrier
@@ -273,7 +272,7 @@ class CompleteParser(object):
                         elif len(namesSQlResult) == 0:
                             break # break out of current episode -> next season ... this is not a good sign
                         # if we are here we found ONE episode for this season absolute number
-                        self._log("I found matching episode " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
+                        self._log("I found matching episode: " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
                         out_episodes.append(int(namesSQlResult[0]['episode']))
                         out_season = int(namesSQlResult[0]['season']) # note this will always use the last season we got ... this will be a problem on double episodes that break the season barrier
                     if out_season: # if we found a episode in the cur_possible_season we dont need / want to look at the other posibilites
@@ -288,7 +287,7 @@ class CompleteParser(object):
                     elif len(namesSQlResult) == 0:
                         continue
                     # if we are here we found ONE episode for this season absolute number
-                    self._log("I found matching episode " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
+                    self._log("I found matching episode: " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
                     out_episodes.append(int(namesSQlResult[0]['episode']))
                     out_season = int(namesSQlResult[0]['season']) # note this will always use the last season we got ... this will be a problem on double episodes that break the season barrier
                     self.complete_result.scene = True
