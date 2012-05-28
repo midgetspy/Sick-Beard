@@ -61,21 +61,20 @@ class CompleteParser(object):
         try:
             self._log(u"Parser for '" + ek.ek(str, self.name_to_parse) + "' locked. Starting to parse now", logger.DEBUG)
         except UnicodeEncodeError, e:
-            self._log("Could not encode name i was going to parse. " + ex(e), logger.ERROR)
-            self._log("Current encoding used is '" + str(sickbeard.SYS_ENCODING) + "'")
+            self._log("Could not encode name i was going to parse. This might lead to later issues when we need to access the file system. error message: " + ex(e), logger.WARNING)
+            self._log("Current encoding used by sickbeard is '" + str(sickbeard.SYS_ENCODING) + "'", logger.WARNING)
             self._log(traceback.format_exc(), logger.DEBUG)
-            self.complete_result.lock.release()
-            return self.complete_result
+            self._log(u"Parser for '" + self.name_to_parse + "' locked. Starting to parse now", logger.DEBUG)
 
         # lets parse the name
         try:
             self.raw_parse_result, cur_show = self.parse_wrapper(self.show, self.name_to_parse, self.showList, self.tvdbActiveLookUp)
         except InvalidNameException:
-            self._log("Could not parse: " + ek.ek(str, name_to_parse), logger.DEBUG)
+            self._log(u"Could not parse: " + self.name_to_parse, logger.DEBUG)
             self.complete_result.lock.release()
             return self.complete_result
 
-        self._log("Parsed :" + ek.ek(str, self.name_to_parse) + " into: " + ek.ek(str, self.raw_parse_result), logger.DEBUG)
+        self._log(u"Parsed :" + self.name_to_parse + " into: " + str(self.raw_parse_result), logger.DEBUG)
 
         # setup values of the
         self.complete_result.parse_result = self.raw_parse_result
@@ -196,14 +195,14 @@ class CompleteParser(object):
                 myParser = NameParser(regexMode=mode)
                 parse_result = myParser.parse(toParse)
             except InvalidNameException:
-                pass
+                self._log(u"Could not parse '" + toParse + "' in regex mode: " + str(0), logger.DEBUG)
             else:
-                show = helpers.get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
-                if mode == NameParser.ANIME_REGEX or mode == NameParser.NORMAL_REGEX:
-                    if show and show.is_anime:
+                show = self.get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
+                if show and show.is_anime:
+                    if mode == NameParser.ANIME_REGEX or mode == NameParser.NORMAL_REGEX:
                         break
-                elif mode == NameParser.NORMAL_REGEX:
-                    if (show and not show.is_anime) or not show:
+                else:
+                    if mode == NameParser.NORMAL_REGEX:
                         break
         else:
             raise InvalidNameException(u"Unable to parse " + toParse)
@@ -252,7 +251,7 @@ class CompleteParser(object):
                         elif len(namesSQlResult) == 0:
                             break # break out of current absolute_numbers -> next season ... this is not a good sign
                         # if we are here we found ONE episode for this season absolute number
-                        self._log("I found matching episode: " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
+                        self._log(u"I found matching episode: " + namesSQlResult[0]['name'], logger.DEBUG)
                         out_episodes.append(int(namesSQlResult[0]['episode']))
                         out_absolute_numbers.append(int(namesSQlResult[0]['absolute_number']))
                         out_season = int(namesSQlResult[0]['season']) # note this will always use the last season we got ... this will be a problem on double episodes that break the season barrier
@@ -269,7 +268,7 @@ class CompleteParser(object):
                     elif len(namesSQlResult) == 0:
                         continue
                     # if we are here we found ONE episode for this season absolute number
-                    self._log("I found matching episode: " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
+                    self._log(u"I found matching episode: " + namesSQlResult[0]['name'], logger.DEBUG)
                     out_episodes.append(int(namesSQlResult[0]['episode']))
                     out_absolute_numbers.append(int(namesSQlResult[0]['absolute_number']))
                     out_season = int(namesSQlResult[0]['season']) # note this will always use the last season we got ... this will be a problem on double episodes that break the season barrier
@@ -293,7 +292,7 @@ class CompleteParser(object):
                         elif len(namesSQlResult) == 0:
                             break # break out of current episode -> next season ... this is not a good sign
                         # if we are here we found ONE episode for this season absolute number
-                        self._log("I found matching episode: " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
+                        self._log(u"I found matching episode: " + namesSQlResult[0]['name'], logger.DEBUG)
                         out_episodes.append(int(namesSQlResult[0]['episode']))
                         out_season = int(namesSQlResult[0]['season']) # note this will always use the last season we got ... this will be a problem on double episodes that break the season barrier
                     if out_season: # if we found a episode in the cur_possible_season we dont need / want to look at the other posibilites
@@ -308,7 +307,7 @@ class CompleteParser(object):
                     elif len(namesSQlResult) == 0:
                         continue
                     # if we are here we found ONE episode for this season absolute number
-                    self._log("I found matching episode: " + ek.ek(str, namesSQlResult[0]['name']), logger.DEBUG)
+                    self._log(u"I found matching episode: " + namesSQlResult[0]['name'], logger.DEBUG)
                     out_episodes.append(int(namesSQlResult[0]['episode']))
                     out_season = int(namesSQlResult[0]['season']) # note this will always use the last season we got ... this will be a problem on double episodes that break the season barrier
                     self.complete_result.scene = True
@@ -336,7 +335,7 @@ class CompleteParser(object):
             self._log(u"Found " + name + " in the exception list", logger.DEBUG)
             return helpers.findCertainShow(showList, sickbeard.scene_exceptions.exception_tvdb[name])
         else:
-            self._log(u"NOT Found " + name + " in the exception_tvdb", logger.DEBUG)
+            self._log(u"Did NOT find " + name + " in the exception list", logger.DEBUG)
 
         if useTvdb:
             try:
