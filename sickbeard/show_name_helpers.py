@@ -281,7 +281,7 @@ def isGoodResult(name, show, log=True, season=-1):
             return True
 
     if log:
-        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+        logger.log(u"Provider gave result " + name + " but that doesn't seem like a valid result for " + show.name + " " + str(season) + "so I'm ignoring it")
     return False
 
 def allPossibleShowNames(show, season=-1):

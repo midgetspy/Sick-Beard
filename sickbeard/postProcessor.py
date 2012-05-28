@@ -383,7 +383,7 @@ class PostProcessor(object):
         if not name:
             return to_return
 
-        cp = CompleteParser(tvdbActiveLookUp=True)
+        cp = CompleteParser(log=self._log, tvdbActiveLookUp=True)
         cpr = cp.parse(name)
         self.is_proper = cpr.is_proper
         self.series_name = cpr.series_name

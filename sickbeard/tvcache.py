@@ -193,7 +193,7 @@ class TVCache():
 
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
-            cp = CompleteParser(tvdbActiveLookUp=True)
+            cp = CompleteParser()
             cpr = cp.parse(curName)
             if cpr:
                 break

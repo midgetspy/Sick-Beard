@@ -221,7 +221,7 @@ def pickBestResult(results, quality_list=None, show=None):
         if not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN:
             bestResult = cur_result
         elif bestResult.quality == cur_result.quality:
-            if "proper" in cur_result.name.lower() or "repack" in cur_result.name.lower():
+            if bestResult.is_proper:
                 bestResult = cur_result
             elif "internal" in bestResult.name.lower() and "internal" not in cur_result.name.lower():
                 bestResult = cur_result
@@ -379,7 +379,7 @@ def findSeason(show, season, scene=False):
             for curEp in curResults:
 
                 # skip non-tv crap
-                curResults[curEp] = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), curResults[curEp])
+                curResults[curEp] = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show, season=season), curResults[curEp])
 
                 if curEp in foundResults:
                     foundResults[curEp] += curResults[curEp]
@@ -454,7 +454,7 @@ def findSeason(show, season, scene=False):
             # if not, break it apart and add them as the lowest priority results
             individualResults = nzbSplitter.splitResult(bestSeasonNZB)
 
-            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
+            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show, season=season), individualResults)
 
             for curResult in individualResults:
                 if len(curResult.episodes) == 1:
