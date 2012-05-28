@@ -460,22 +460,19 @@ class TVShow(object):
 
     # make a TVEpisode object from a media file
     def makeEpFromFile(self, file):
-        
+
         if not ek.ek(os.path.isfile, file):
             logger.log(str(self.tvdbid) + ": That isn't even a real file dude... " + file)
             return None
-        
+
         logger.log(str(self.tvdbid) + ": -------------------------------------------- ", logger.DEBUG)
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
         logger.log(str(self.tvdbid) + ": -------------------------------------------- ", logger.DEBUG)
 
-        cp = CompleteParser(show=self)
+        cp = CompleteParser(show=self, tvdbActiveLookUp=True)
         cpr = cp.parse(file)
-        parse_result = cpr.parse_result
-
-        if len(parse_result.episode_numbers) == 0 and not parse_result.air_by_date and not parse_result.is_anime:
-            logger.log("parse_result: " + str(parse_result))
-            logger.log(u"No episode number found in "+file+", ignoring it", logger.ERROR)
+        if not cpr:
+            logger.log(u"No episode number found in " + file + ", ignoring it", logger.ERROR)
             return None
 
         # for now lets assume that any episode in the show dir belongs to that show
@@ -483,30 +480,6 @@ class TVShow(object):
         episodes = cpr.episodes
         rootEp = None
 
-        # if we have an air-by-date show then get the real season/episode numbers
-        if parse_result.air_by_date:
-            try:
-                # There's gotta be a better way of doing this but we don't wanna
-                # change the cache value elsewhere
-                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-
-                if self.lang:
-                    ltvdb_api_parms['language'] = self.lang
-
-                t = tvdb_api.Tvdb(**ltvdb_api_parms)
-
-                epObj = t[self.tvdbid].airedOn(parse_result.air_date)[0]
-                season = int(epObj["seasonnumber"])
-                episodes = [int(epObj["episodenumber"])]
-            except tvdb_exceptions.tvdb_episodenotfound:
-                logger.log(u"Unable to find episode with date "+str(episodes[0])+" for show "+self.name+", skipping", logger.WARNING)
-                return None
-            except tvdb_exceptions.tvdb_error, e:
-                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
-                return None
-
-            
-            
         for curEpNum in episodes:
 
             episode = int(curEpNum)
@@ -1524,7 +1497,7 @@ class TVEpisode(object):
 
         logger.log(str(self.show.tvdbid) + ": Saving episode details to database", logger.DEBUG)
 
-        logger.log(u"STATUS IS " + str(self.status), logger.DEBUG)
+        logger.log(u"STATUS IS " + str(statusStrings[self.status]), logger.DEBUG)
 
         myDB = db.DBConnection()
         newValueDict = {"tvdbid": self.tvdbid,

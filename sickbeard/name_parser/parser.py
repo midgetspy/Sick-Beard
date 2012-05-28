@@ -365,5 +365,10 @@ class ParseResult(object):
         return False
     is_anime = property(_is_anime)
 
+    def _sxxexx(self):
+        return bool(self.season_number != None and self.episode_numbers)
+
+    sxxexx = property(_sxxexx)
+
 class InvalidNameException(Exception):
     "The given name is not valid"

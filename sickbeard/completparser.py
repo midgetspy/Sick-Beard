@@ -49,6 +49,7 @@ class CompleteParser(object):
         else:
             self.showList = sickbeard.showList
         self.tvdbActiveLookUp = tvdbActiveLookUp
+        self._parse_mode = None
 
     def _log(self, toLog, logLevel=logger.MESSAGE):
         logger.log(toLog, logLevel)
@@ -95,16 +96,24 @@ class CompleteParser(object):
                 pass
         else:
             self._log("Assuming tvdb numbers", logger.DEBUG)
+            self.complete_result.season = self.raw_parse_result.season_number
+            self.complete_result.episodes = self.raw_parse_result.episode_numbers
 
-        if cur_show and cur_show.is_anime and not self.complete_result.scene: # only need to to do another converion if the scene2tvdb didn work
-            self._log("Getting season and episodes from absolute numbers", logger.DEBUG)
-            try:
-                _actual_season, _actual_episodes = helpers.get_all_episodes_from_absolute_number(cur_show, None, self.raw_parse_result.ab_episode_numbers)
-            except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                self._log(str(cur_show.tvdbid) + ": TVDB object absolute number " + str(self.raw_parse_result.ab_episode_numbers) + " is incomplete, cant determin season and episode numbers")
-            else:
-                self.complete_result.season = _actual_season
-                self.complete_result.episodes = _actual_episodes
+        if cur_show and cur_show.is_anime and not self.complete_result.scene: # only need to to do another conversion if the scene2tvdb didn work
+            if self.raw_parse_result.is_anime:
+                self._log("Getting season and episodes from absolute numbers", logger.DEBUG)
+                try:
+                    _actual_season, _actual_episodes = helpers.get_all_episodes_from_absolute_number(cur_show, None, self.raw_parse_result.ab_episode_numbers)
+                except exceptions.EpisodeNotFoundByAbsoluteNumerException:
+                    self._log(str(cur_show.tvdbid) + ": TVDB object absolute number " + str(self.raw_parse_result.ab_episode_numbers) + " is incomplete, cant determin season and episode numbers")
+                else:
+                    self.complete_result.season = _actual_season
+                    self.complete_result.episodes = _actual_episodes
+            elif self.raw_parse_result.sxxexx:
+                self._log("No absolute number found while parsing an anime but we have season and episode numbers. There will be no scene conversion for this.", logger.DEBUG)
+                # this show is an anime but scene conversion did not work and we dont have any absolute numbers but we do have sxxexx numbers
+                self.complete_result.season = self.raw_parse_result.season_number
+                self.complete_result.episodes = self.raw_parse_result.episode_numbers
 
         if not cur_show:
             self._log("No show couldn't be matched. assuming tvdb numbers", logger.DEBUG)
@@ -179,7 +188,7 @@ class CompleteParser(object):
                 pass
             else:
                 show = helpers.get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
-                if mode == NameParser.ANIME_REGEX:
+                if mode == NameParser.ANIME_REGEX or mode == NameParser.NORMAL_REGEX:
                     if show and show.is_anime:
                         break
                 elif mode == NameParser.NORMAL_REGEX:
@@ -188,6 +197,7 @@ class CompleteParser(object):
         else:
             raise InvalidNameException(u"Unable to parse " + toParse)
 
+        self._parse_mode = mode
         return (parse_result, show)
 
     def scene2tvdb(self, show, scene_name, season, episodes, absolute_numbers):
@@ -211,13 +221,13 @@ class CompleteParser(object):
                 continue
             possible_seasons.append(cur_scene_season)
         #if not possible_seasons: # no special season name was used or we could not find it
-        self._log("possible seasons for " + scene_name + "(" + str(show.tvdbid) + ") are " + str(possible_seasons), logger.DEBUG)
+        self._log("possible seasons for '" + scene_name + "' (" + str(show.tvdbid) + ") are " + str(possible_seasons), logger.DEBUG)
 
         # lets just get a db connection we will need it anyway
         myDB = db.DBConnection()
         # should we use absolute_numbers -> anime or season, episodes -> normal show
         if show.is_anime:
-            self._log(u"" + show.name + " is an anime i will scene convert the absolute numbers " + str(absolute_numbers), logger.DEBUG)
+            self._log(u"'" + show.name + "' is an anime i will scene convert the absolute numbers " + str(absolute_numbers), logger.DEBUG)
             if possible_seasons:
                 #check if we have a scene_absolute_number in the possible seasons
                 for cur_possible_season in possible_seasons:
@@ -258,7 +268,7 @@ class CompleteParser(object):
                 # we still have to convert the absolute number to sxxexx ... but that is done not here
                 self.complete_result.scene = False # should be false
         else:
-            self._log(u"" + show.name + " is a normal show i will scene convert the season and episodes " + str(season) + "x" + str(episodes), logger.DEBUG)
+            self._log(u"'" + show.name + "' is a normal show i will scene convert the season and episodes " + str(season) + "x" + str(episodes), logger.DEBUG)
             out_absolute_numbers = None
             if possible_seasons:
                 #check if we have a scene_absolute_number in the possible seasons
