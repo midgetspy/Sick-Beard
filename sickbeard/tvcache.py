@@ -204,7 +204,7 @@ class TVCache():
         # get the current timestamp
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
         myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality, release_group) VALUES (?,?,?,?,?,?,?,?,?)",
-                    [name, cpr.season, episodeText, 0, cpr.tvdb_id, url, curTimestamp, cpr.quality, cpr.release_group])
+                    [name, cpr.season, episodeText, 0, cpr.tvdbid, url, curTimestamp, cpr.quality, cpr.release_group])
 
 
     def searchCache(self, episode, manualSearch=False):
