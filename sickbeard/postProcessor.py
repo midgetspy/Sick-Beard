@@ -391,6 +391,9 @@ class PostProcessor(object):
         return (cpr.tvdbid, cpr.season, cpr.episodes)
 
     def _analyze_anidb(self,filePath):
+        #TODO: rewrite this
+        return (None, None, None)
+        
         if not helpers.set_up_anidb_connection():
             return (None, None, None)
         
