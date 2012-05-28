@@ -205,9 +205,9 @@ class CompleteParser(object):
             if cur_scene_tvdb_id and cur_scene_tvdb_id != show.tvdbid:
                 self._log("dfuq when i tried to figure out the season from the name i got a different tvdbid then we got before !! stoping right now! before: " + str(show.tvdbid) + " now:" + str(cur_scene_tvdb_id), logger.ERROR)
                 raise MultipleSceneShowResults("different tvdbid then we got before")
-            # don't add season -1 since this is a generic name and not a real season
+            # don't add season -1 since this is a generic name and not a real season... or if we get None
             # if this was the only result possible_seasons will stay empty and the next parts will look in the general matter
-            if cur_scene_season == -1:
+            if cur_scene_season == -1 or cur_scene_season == None:
                 continue
             possible_seasons.append(cur_scene_season)
         #if not possible_seasons: # no special season name was used or we could not find it
@@ -348,14 +348,12 @@ class CompleteParser(object):
 
 class CompleteResult(object):
 
-    def __init__(self, show=None, season=None, episodes=[], absolute_numbers=[], quality=None, raw_parse_result=None, scene=False):
+    def __init__(self, show=None, season=None, episodes=[], absolute_numbers=[], quality=common.Quality.UNKNOWN, raw_parse_result=None, scene=False):
         self.show = show
         self.season = season
         self.episodes = episodes
         self.absolute_numbers = absolute_numbers
         self.quality = quality
-        if self.quality == None:
-            self.quality = common.Quality.UNKNOWN
         self.parse_result = raw_parse_result
         self.scene = scene # was a scene conversion done ?
         self._is_proper = False

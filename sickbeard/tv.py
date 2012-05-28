@@ -24,6 +24,7 @@ import threading
 import re
 import glob
 from sickbeard.completparser import CompleteParser
+from sickbeard.common import statusStrings
 try:
     import json
 except ImportError:
@@ -968,7 +969,7 @@ class TVShow(object):
 
         epStatus = int(sqlResults[0]["status"])
 
-        logger.log(u"current episode status: "+str(epStatus), logger.DEBUG)
+        logger.log(u"current episode status: " + statusStrings[epStatus], logger.DEBUG)
 
         # if we know we don't want it then just say no
         if epStatus in (SKIPPED, IGNORED, ARCHIVED) and not manualSearch:
