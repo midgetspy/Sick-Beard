@@ -725,7 +725,78 @@
                     </fieldset>
                 </div><!-- /nma component-group //-->
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://www.livenotifier.net/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/ln.gif" alt="" title="LiveNotifier" width="16" height="16" /> LiveNotifier </a></h3>
+                        <p>LiveNotifier is a generic notification system for Android designed to work with smart devices such as Sony's SmartWatch.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_ln" id="use_ln" #if $sickbeard.USE_LN then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_ln">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through LiveNotifier?</span>
+                            </label>
+                        </div>
 
+                        <div id="content_use_ln">
+                            <div class="field-pair">
+                                <input type="checkbox" name="ln_notify_onsnatch" id="ln_notify_onsnatch" #if $sickbeard.LN_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="ln_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="ln_notify_ondownload" id="ln_notify_ondownload" #if $sickbeard.LN_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="ln_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                       <span class="component-title">LiveNotifier API key:</span>
+                                    <input type="text" name="ln_api" id="ln_api" value="$sickbeard.LN_API" size="55" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Multiple keys must be seperated by a , (comma).</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Device Selection:</span>
+                                       <select id="ln_device" name="ln_device">
+                                        <option value="smart" #if $sickbeard.LN_DEVICE == "smart" then 'selected="selected"' else ""#>Smart Accessories only</option>
+                                        <option value="phone" #if $sickbeard.LN_DEVICE == "phone" then 'selected="selected"' else ""#>Phone only</option>
+                                        <option value="all" #if $sickbeard.LN_DEVICE == "all" then 'selected="selected"' else ""#>All devices</option>
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Where the notification should be displayed.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                       <span class="component-title">Image URL:</span>
+                                    <input type="text" name="ln_image_url" id="ln_image_url" value="$sickbeard.LN_IMAGE_URL" size="55" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The image URL to send along with the notification, this allows an image to be attached to the notification.</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testLN-result">Click below to test.</div>
+                            <input type="button" value="Test LiveNotifier" id="testLN" />
+                            <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_ln //-->
+
+                    </fieldset>
+                </div><!-- /ln component-group //-->
+                
+                
                 <br />
                 <h1>Online</h1>
                 <br />
