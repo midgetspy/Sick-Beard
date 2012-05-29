@@ -284,6 +284,13 @@ NMA_NOTIFY_ONDOWNLOAD = False
 NMA_API = None
 NMA_PRIORITY = 0
 
+USE_LN = False
+LN_NOTIFY_ONSNATCH = False
+LN_NOTIFY_ONDOWNLOAD = False
+LN_API = None
+LN_DEVICE = "all"
+LN_IMAGE_URL = None
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -400,6 +407,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
+                USE_LN, LN_NOTIFY_ONSNATCH, LN_NOTIFY_ONDOWNLOAD, LN_API, LN_DEVICE, LN_IMAGE_URL, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
@@ -669,6 +677,13 @@ def initialize(consoleLogging=True):
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
         NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
 
+        USE_LN = bool(check_setting_int(CFG, 'LN', 'use_ln', 0))
+        LN_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'LN', 'ln_notify_onsnatch', 0))
+        LN_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'LN', 'ln_notify_ondownload', 0))
+        LN_API = check_setting_str(CFG, 'LN', 'ln_api', '')
+        LN_DEVICE = check_setting_str(CFG, 'LN', 'ln_device', "all")
+        LN_IMAGE_URL = check_setting_str(CFG, 'LN', 'ln_image_url', '')
+            
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
@@ -1215,6 +1230,14 @@ def save_config():
     new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
+    
+    new_config['LN'] = {}
+    new_config['LN']['use_ln'] = int(USE_LN)
+    new_config['LN']['ln_notify_onsnatch'] = int(LN_NOTIFY_ONSNATCH)
+    new_config['LN']['ln_notify_ondownload'] = int(LN_NOTIFY_ONDOWNLOAD)
+    new_config['LN']['ln_api'] = LN_API
+    new_config['LN']['ln_device'] = LN_DEVICE
+    new_config['LN']['ln_image_url'] = LN_IMAGE_URL
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])

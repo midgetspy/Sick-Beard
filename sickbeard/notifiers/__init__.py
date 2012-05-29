@@ -32,6 +32,7 @@ import synoindex
 import trakt
 import pytivo
 import nma
+import ln
 
 from sickbeard.common import *
 
@@ -49,6 +50,7 @@ synoindex_notifier = synoindex.synoIndexNotifier()
 trakt_notifier = trakt.TraktNotifier()
 pytivo_notifier = pytivo.pyTivoNotifier()
 nma_notifier = nma.NMA_Notifier()
+ln_notifier = ln.LN_Notifier()
 
 notifiers = [
     # Libnotify notifier goes first because it doesn't involve blocking on
@@ -66,6 +68,7 @@ notifiers = [
     trakt_notifier,
     pytivo_notifier,
     nma_notifier,
+    ln_notifier
 ]
 
 def notify_download(ep_name):

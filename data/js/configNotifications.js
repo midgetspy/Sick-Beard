@@ -142,4 +142,13 @@ $(document).ready(function(){
         var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
         function (data){ $('#testNMA-result').html(data); });
     });
+    
+    $('#testLN').click(function(){
+        $('#testLN-result').html(loading);
+        var ln_api = $("#ln_api").val();
+        var ln_device = $("#ln_device").val();
+        var ln_image_url = $("#ln_image_url").val();
+        var ln_result = $.get(sbRoot+"/home/testLN", {'ln_api': ln_api, 'ln_device': ln_device, 'ln_image_url': ln_image_url}, 
+        function (data){ $('#testLN-result').html(data); });
+    });
 });

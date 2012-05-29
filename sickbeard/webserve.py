@@ -1217,7 +1217,8 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_ln=None, ln_notify_onsnatch=None, ln_notify_ondownload=None, ln_api=None, ln_device="all", ln_image_url=None):
 
         results = []
 
@@ -1400,6 +1401,22 @@ class ConfigNotifications:
             nma_notify_ondownload = 1
         else:
             nma_notify_ondownload = 0
+        
+        if use_ln == "on":
+            use_ln = 1
+        else:
+            use_ln = 0
+        
+        if ln_notify_onsnatch == "on":
+            ln_notify_onsnatch = 1
+        else:
+            ln_notify_onsnatch = 0
+
+        if ln_notify_ondownload == "on":
+            ln_notify_ondownload = 1
+        else:
+            ln_notify_ondownload = 0
+        
 
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
@@ -1480,6 +1497,13 @@ class ConfigNotifications:
         sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
+        
+        sickbeard.USE_LN = use_ln
+        sickbeard.LN_NOTIFY_ONSNATCH = ln_notify_onsnatch
+        sickbeard.LN_NOTIFY_ONDOWNLOAD = ln_notify_ondownload
+        sickbeard.LN_API = ln_api
+        sickbeard.LN_DEVICE = ln_device
+        sickbeard.LN_IMAGE_URL = ln_image_url
         
         sickbeard.save_config()
 
@@ -2174,6 +2198,16 @@ class Home:
         else:
             return "Test NMA notice failed"
 
+    @cherrypy.expose
+    def testLN(self, ln_api=None, ln_device="all", ln_image_url=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        result = notifiers.ln_notifier.test_notify(ln_api, ln_device, ln_image_url)
+        if result:
+            return "Test LiveNotifier notice sent successfully"
+        else:
+            return "Test LiveNotifier notice failed"
+            
     @cherrypy.expose
     def shutdown(self):
 
