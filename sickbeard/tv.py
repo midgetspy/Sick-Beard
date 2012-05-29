@@ -471,8 +471,8 @@ class TVShow(object):
 
         cp = CompleteParser(show=self, tvdbActiveLookUp=True)
         cpr = cp.parse(file)
-        if not cpr:
-            logger.log(u"No episode number found in " + file + ", ignoring it", logger.ERROR)
+        if not cpr.sxxexx:
+            logger.log(u"No conclusive information found in " + file + ", ignoring it", logger.ERROR)
             return None
 
         # for now lets assume that any episode in the show dir belongs to that show

@@ -74,8 +74,11 @@ class CompleteParser(object):
             self.complete_result.lock.release()
             return self.complete_result
 
-        self._log(u"Parsed :" + self.name_to_parse + " into: " + unicode(self.raw_parse_result), logger.DEBUG)
-
+        try:
+            self._log(u"Parsed :" + self.name_to_parse + " into: " + unicode(self.raw_parse_result), logger.DEBUG)
+        except UnicodeEncodeError, e:
+            self._log("Could not encode parse result. This might lead to later issues. error message: " + ex(e), logger.WARNING)
+            self._log(u"Parsing done for " + self.name_to_parse, logger.DEBUG)
         # setup values of the
         self.complete_result.parse_result = self.raw_parse_result
         if self.show and cur_show:
@@ -392,13 +395,17 @@ class CompleteResult(object):
     def _getSeriesName(self):
         return self.parse_result.series_name
 
+    def _sxxexx(self):
+        return bool(self.season != None and self.episodes)
+
     def __nonzero__(self):
-        return bool(self.show and self.parse_result and self.season != None and self.episodes )
+        return bool(self.show and self.parse_result and self.season != None and self.episodes)
 
     tvdbid = property(_getTVDBID)
     is_proper = property(_isProper)
     release_group = property(_getReleaseGroup)
     series_name = property(_getSeriesName)
+    sxxexx = property(_sxxexx)
 
 
 class MultipleSceneShowResults(Exception):
