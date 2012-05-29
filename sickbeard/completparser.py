@@ -74,13 +74,13 @@ class CompleteParser(object):
             self.complete_result.lock.release()
             return self.complete_result
 
-        self._log(u"Parsed :" + self.name_to_parse + " into: " + str(self.raw_parse_result), logger.DEBUG)
+        self._log(u"Parsed :" + self.name_to_parse + " into: " + unicode(self.raw_parse_result), logger.DEBUG)
 
         # setup values of the
         self.complete_result.parse_result = self.raw_parse_result
         if self.show and cur_show:
             if self.show.tvdbid != cur_show.tvdbid:
-                self._log("I expected an episode of the show " + str(self.show.name) + " but the parser thinks its the show " + str(cur_show) + ". I will continue thinking its " + str(self.show), logger.WARNING)
+                self._log(u"I expected an episode of the show " + self.show.name + " but the parser thinks its the show " + cur_show.name + ". I will continue thinking its " + self.show.name, logger.WARNING)
                 cur_show = self.show
         self.complete_result.show = cur_show
 
