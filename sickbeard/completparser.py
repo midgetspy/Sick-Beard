@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 # Author: Dennis Lutter <lad1337@gmail.com>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -56,11 +57,22 @@ class CompleteParser(object):
         logger.log(toLog, logLevel)
 
     def parse(self, name_to_parse):
+        # a wrapper to definitely unlock the complete_result ... but still re raise any errors
         self.complete_result.lock.acquire()
+        try:
+            result = self._parse(name_to_parse)
+        except Exception, e:
+            self.complete_result.lock.release()
+            raise e
+        else:
+            self.complete_result.lock.release()
+            return result
+
+    def _parse(self, name_to_parse):
         self.name_to_parse = name_to_parse
         try:
             self._log(u"Parser for '" + ek.ek(str, self.name_to_parse) + "' locked. Starting to parse now", logger.DEBUG)
-        except UnicodeEncodeError, e:
+        except (UnicodeEncodeError, UnicodeDecodeError), e:
             self._log("Could not encode name i was going to parse. This might lead to later issues when we need to access the file system. error message: " + ex(e), logger.WARNING)
             self._log("Current encoding used by sickbeard is '" + str(sickbeard.SYS_ENCODING) + "'", logger.WARNING)
             self._log(traceback.format_exc(), logger.DEBUG)
@@ -71,14 +83,14 @@ class CompleteParser(object):
             self.raw_parse_result, cur_show = self.parse_wrapper(self.show, self.name_to_parse, self.showList, self.tvdbActiveLookUp)
         except InvalidNameException:
             self._log(u"Could not parse: " + self.name_to_parse, logger.DEBUG)
-            self.complete_result.lock.release()
             return self.complete_result
 
         try:
             self._log(u"Parsed :" + self.name_to_parse + " into: " + unicode(self.raw_parse_result), logger.DEBUG)
-        except UnicodeEncodeError, e:
+        except (UnicodeEncodeError, UnicodeDecodeError), e:
             self._log("Could not encode parse result. This might lead to later issues. error message: " + ex(e), logger.WARNING)
             self._log(u"Parsing done for " + self.name_to_parse, logger.DEBUG)
+
         # setup values of the
         self.complete_result.parse_result = self.raw_parse_result
         if self.show and cur_show:
@@ -90,7 +102,6 @@ class CompleteParser(object):
         # TODO: move this into the parse_wrapper()
         # check if we parsed an air by date show as air by date
         if cur_show and cur_show.air_by_date and not self.raw_parse_result.air_by_date:
-            self.complete_result.lock.release()
             return self.complete_result
 
         # TODO: find a place for "if there's no season then we can hopefully just use 1 automatically"
@@ -135,14 +146,19 @@ class CompleteParser(object):
             self.complete_result.episodes = self.raw_parse_result.episode_numbers
 
         self.complete_result.quality = common.Quality.nameQuality(self.name_to_parse, bool(cur_show and cur_show.is_anime))
-
-        self.complete_result.lock.release()
         return self.complete_result
 
     def _convertADB(self, adb_part):
         self._log("Getting season and episodes for ADB episode: " + str(adb_part), logger.DEBUG)
         if not self.show:
             return (None, None)
+
+        myDB = db.DBConnection()
+        sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [self.show.tvdbid, adb_part.toordinal()])
+        if len(sql_results) == 1:
+            return (int(sql_results[0]["season"]), [int(sql_results[0]["episode"])])
+
+        self._log(u"Tried to look up the date for the episode " + self.name_to_parse + " but the database didn't give proper results, skipping it", logger.WARNING)
         if self.tvdbActiveLookUp:
             try:
                 # There's gotta be a better way of doing this but we don't wanna
@@ -166,13 +182,7 @@ class CompleteParser(object):
             else:
                 return (season, episodes)
         else:
-            myDB = db.DBConnection()
-            sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [self.show.tvdbid, adb_part.toordinal()])
-            if len(sql_results) != 1:
-                self._log(u"Tried to look up the date for the episode " + self.name_to_parse + " but the database didn't give proper results, skipping it", logger.WARNING)
-                return(None, None)
-
-            return (int(sql_results[0]["season"]), [int(sql_results[0]["episode"])])
+            return(None, None)
 
     def parse_wrapper(self, show=None, toParse='', showList=[], tvdbActiveLookUp=False):
         """Retruns a parse result or a InvalidNameException
