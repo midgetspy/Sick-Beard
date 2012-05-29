@@ -548,7 +548,7 @@ def set_up_anidb_connection():
 
    
 def full_sanitizeSceneName(name):
-    return re.sub('[. -]', ' ', sanitizeSceneName(name)).lower().lstrip()
+    return re.sub('[. -;]', ' ', sanitizeSceneName(name)).lower().lstrip()
 
 
 def sanitizeSceneName (name, ezrss=False):
@@ -561,7 +561,7 @@ def sanitizeSceneName (name, ezrss=False):
     """
 
     if not ezrss:
-        bad_chars = ",:;()!?"
+        bad_chars = ",:()!?"
     # ezrss leaves : and ! in their show names as far as I can tell
     else:
         bad_chars = ",()'?"
