@@ -397,7 +397,7 @@ class CompleteResult(object):
         return 0
 
     def _isProper(self):
-        return re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', self.parse_result.extra_info, re.I) != None
+        return bool(self.parse_result.extra_info and re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', self.parse_result.extra_info, re.I) != None)
 
     def _getReleaseGroup(self):
         return self.parse_result.release_group
