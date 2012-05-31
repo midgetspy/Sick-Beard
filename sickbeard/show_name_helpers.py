@@ -175,7 +175,12 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
             # for providers that don't allow multiple searches in one request we only search for Sxx style stuff
             else:
                 for cur_season in seasonStrings:
-                    toReturn.append(curShow + "." + cur_season)
+                    # Adds the target language to the search string if it is not an 'English' title
+                    if show.lang == "en":
+                        toReturn.append(curShow + "." + cur_season)
+                    else:
+                        toReturn.append(curShow + "." + cur_season + " " + langCodes[show.lang]);
+                    # toReturn.append(curShow + "." + cur_season)
         
         # nzbmatrix is special, we build a search string just for them
         elif extraSearchType == "nzbmatrix":
@@ -211,8 +216,9 @@ def makeSceneSearchString (episode):
                     "%ix%02i" % (int(episode.season), int(episode.episode))]
 
     # for single-season shows just search for the show name
-    if numseasons == 1:
-        epStrings = ['']
+    # deactivated the following lines to always use the Season Number to get a more accurate search result 
+    # if numseasons == 1:
+    #     epStrings = ['']
 
     showNames = set(makeSceneShowSearchStrings(episode.show))
 
@@ -220,8 +226,12 @@ def makeSceneSearchString (episode):
 
     for curShow in showNames:
         for curEpString in epStrings:
-            toReturn.append(curShow + '.' + curEpString)
-
+            #toReturn.append(curShow + '.' + curEpString)
+            # Adds the target language to the search string if it is not an 'English' title                
+            if episode.show.lang == "en":
+                toReturn.append(curShow + "." + curEpString)
+            else:
+                toReturn.append(curShow + "." + curEpString + " " + langCodes[episode.show.lang]);
     return toReturn
 
 def isGoodResult(name, show, log=True):
@@ -237,6 +247,8 @@ def isGoodResult(name, show, log=True):
         if show.startyear:
             escaped_name += "(?:\W+"+str(show.startyear)+")?"
 
+        #releasetrim = '^<?.* \d{9,} ?-? '
+        #use regex and sub to replace common spam
         releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\. "?','^(.*) >','^\[\d{5,}.*\[ ','^\.: ']
         realname = name
         for regex in releasetrim:
