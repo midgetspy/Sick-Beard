@@ -596,7 +596,7 @@ def initialize(consoleLogging=True):
         KEREWS = bool(check_setting_int(CFG, 'KereWS', 'kerews', 0))
         KEREWS_URL = check_setting_str(CFG, 'KereWS', 'kerews_url', 'http://kere.ws/')
         KEREWS_APIKEY = check_setting_str(CFG, 'KereWS', 'kerews_apikey', '')
-        KEREWS_CATIDS = check_setting_str(CFG, 'KereWS', 'kerews_catIDs', '2000')
+        KEREWS_CATIDS = check_setting_str(CFG, 'KereWS', 'kerews_catIDs', '2000,8000')
 
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 0))
 
