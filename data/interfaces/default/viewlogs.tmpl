@@ -2,7 +2,8 @@
 #from sickbeard import classes
 #from sickbeard.common import *
 #from sickbeard.logger import reverseNames
-#set global $title="Log File"
+#set global $header="Log File"
+#set global $title=""
 
 #set global $sbPath = ".."
 
@@ -14,13 +15,17 @@
 <!--
 \$(document).ready(function(){
     \$('#minLevel').change(function(){
-        url = 'viewlog?minLevel='+\$(this).val()
+        url = '$sbRoot/errorlogs/viewlog/?minLevel='+\$(this).val()
         window.location.href = url
     });
 });
 //-->
 </script>
-
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
 <div class="h2footer align-right"><b>Minimum logging level to display:</b> <select name="minLevel" id="minLevel">
 #set $levels = $reverseNames.keys()
 $levels.sort(lambda x,y: cmp($reverseNames[$x], $reverseNames[$y]))

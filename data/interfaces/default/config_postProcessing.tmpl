@@ -5,7 +5,7 @@
 #from sickbeard import metadata
 #from sickbeard.metadata.generic import GenericMetadata
 #set global $title  = "Config - Post Processing"
-#set global $header = "Post Processing Configuration"
+#set global $header = "Post Processing"
 
 #set global $sbPath="../.."
 
@@ -14,14 +14,22 @@
 
 <script type="text/javascript" src="$sbRoot/js/configPostProcessing.js"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js"></script>
-
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
 <div id="config">
 <div id="config-content">
-<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
 
 <form id="configForm" action="savePostProcessing" method="post">
 
             <div id="config-components">
+                <ul>
+                	<li><a href="#core-component-group3">Post-Processing</a></li>
+                	<li><a href="#core-component-group2">Metadata</a></li>
+                	<li><a href="#core-component-group4">Episode Naming</a></li>
+                </ul>
                 
                 <div id="core-component-group3" class="component-group clearfix">
 
@@ -292,12 +300,19 @@
                     </fieldset>
                 </div><!-- /component-group4 //-->
 
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+            <br/>
+            <small class="float-right">All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</small>
+            
+            <input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components -->
 
 </form>
 </div></div>
 <div class="clearfix"></div>
 
-
+<script type="text/javascript" charset="utf-8">
+<!--
+    jQuery('#config-components').tabs();
+//-->
+</script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

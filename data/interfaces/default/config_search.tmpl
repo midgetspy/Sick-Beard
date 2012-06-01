@@ -10,14 +10,23 @@
 
 <script type="text/javascript" src="$sbRoot/js/configSearch.js"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js"></script>
-
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
 <div id="config">
 <div id="config-content">
-<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
 
 <form id="configForm" action="saveSearch" method="post">
 
             <div id="config-components">
+                <ul>
+                	<li><a href="#core-component-group1">Episode Search</a></li>
+                	<li><a href="#core-component-group2">NZB Search</a></li>
+                	<li><a href="#core-component-group3">Torrent Search</a></li>
+                </ul>
+                
                 
                 <div id="core-component-group1" class="component-group clearfix">
 
@@ -214,6 +223,9 @@
                         </div>
                         
                         <div class="clearfix"></div>
+                        
+                        <div class="testNotification" id="testSABnzbd-result">Click below to test.</div>
+                        <input type="button" value="Test SABnzbd" id="testSABnzbd" class="test-button"/>
                         <input type="submit" class="config_submitter" value="Save Changes" /><br/>
                         
                         </div><!-- /content_use_nzbs //-->
@@ -260,20 +272,24 @@
                         
                     </fieldset>
                 </div><!-- /component-group3 //-->
-
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+		<br/>
+            <small class="float-right">All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</small>
+            <input type="submit" class="config_submitter button" value="Save Changes" /><br/>
 
             </div><!-- /config-components //-->
 
 </form>
+
 </div></div>
 <div class="clearfix"></div>
 
 <script type="text/javascript" charset="utf-8">
 <!--
+	jQuery('#config-components').tabs();
     jQuery('#nzb_dir').fileBrowser({ title: 'Select NZB Black Hole/Watch Directory' });
     jQuery('#torrent_dir').fileBrowser({ title: 'Select Torrent Black Hole/Watch Directory' });
     jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
+    
 //-->
 </script>
 

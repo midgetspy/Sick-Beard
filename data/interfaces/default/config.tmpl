@@ -7,7 +7,11 @@
 
 #set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
 <div id="summary" class="align-left">
 <table class="infoTable" cellspacing="1" border="0" cellpadding="0">
     <tr><td class="infoTableHeader">SB Version: </td><td class="infoTableCell">alpha ($sickbeard.version.SICKBEARD_VERSION) <!-- &ndash; build.date //--></td></tr>
@@ -24,10 +28,5 @@
     <tr><td class="infoTableHeader">Internet Relay Chat </td><td class="infoTableCell"><a href="irc://irc.freenode.net/#sickbeard"><i>#sickbeard</i> on <i>irc.freenode.net</i></a></td></tr>
 </table>
 </div>
-
-<table class="infoTable" cellspacing="1" border="0" cellpadding="0"><tr>
-    <td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donateCC_LG.gif" alt="[donate]" /></a></td>
-    <td>Sickbeard is free, but you can contribute by giving a <b><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;">donation</a></b>.</td>
-</tr></table>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

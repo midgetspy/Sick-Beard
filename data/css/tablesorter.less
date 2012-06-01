@@ -1,0 +1,91 @@
+// Config 
+@import "config.less";
+
+/* SB Theme */
+table.tablesorter {
+    width: 100%;
+    margin-left:auto;
+    margin-right:auto;
+    text-align:left;
+    color: #000;
+    background-color: #fff;
+    border-spacing: 0;
+}
+table.tablesorter td {
+    font-size: 12px;
+    padding: 8px 10px;
+}
+/* remove extra border from left edge */
+table.tablesorter th:first-child,
+table.tablesorter td:first-child {
+    border-left: none;
+}
+table.tablesorter th {
+   border-collapse: collapse;
+   .gradient(#555555,#333333);
+   color: #fff;
+}
+table.tablesorter .tablesorter-header {
+/*    background-image: url(../images/tablesorter/bg.gif); */
+    background-repeat: no-repeat;
+    background-position: center right;
+    //padding: 4px 18px 4px 4px;
+    cursor: pointer;
+}
+table.tablesorter .tablesorter-header-inner {
+	//background: url(../images/tablesorter/bg.gif) no-repeat right center; 
+	padding: 0px 18px 0px 4px;
+}
+table.tablesorter th.tablesorter-headerSortUp .tablesorter-header-inner {
+	background: url(../images/tablesorter/asc.gif) no-repeat right center; 
+}
+table.tablesorter th.tablesorter-headerSortDown .tablesorter-header-inner {
+	background: url(../images/tablesorter/desc.gif) no-repeat right center; 
+}
+table.tablesorter th.tablesorter-headerSortUp {
+    .gradient(#777777, #555555);
+        color: #FFFFFF;
+/*    background-image: url(../images/tablesorter/asc.gif); */
+}
+table.tablesorter th.tablesorter-headerSortDown {
+    .gradient(#777777, #555555);
+        color: #FFFFFF;
+/*    background-image: url(../images/tablesorter/desc.gif); */
+}
+
+/* Zebra Widget - row alternating colors */
+table.tablesorter tr.odd td {
+    background-color: #F5F1E4;
+}
+table.tablesorter tr.even td {
+    background-color: #fbf9f3;
+}
+/* filter widget */
+table.tablesorter input.tablesorter-filter {
+    width: 98%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+table.tablesorter tr.tablesorter-filter,
+table.tablesorter tr.tablesorter-filter td {
+    text-align: center;
+    background: #eee;
+}
+/* optional disabled input styling */ 
+table.tablesorter input.tablesorter-filter.disabled {
+    display: none;
+}
+
+
+/* xtra css for sb */
+.tablesorter-header-inner {
+    text-align: left;
+    white-space: nowrap;
+    padding: 0 2px;
+}
+tr.tablesorter-stickyHeader {
+    background-color: #fff;
+    padding: 2px 0;
+}
+

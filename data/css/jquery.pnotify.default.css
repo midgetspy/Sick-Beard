@@ -10,10 +10,9 @@
 /* Notice
 ----------------------------------*/
 .ui-pnotify {
-	top: 10px;
-	right: 15px;
-	position: absolute;
-	height: auto;
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
 	/* Ensure that the notices are on top of everything else. */
 	z-index: 9999;
 }
@@ -21,19 +20,38 @@
 html > body .ui-pnotify {
 	position: fixed;
 }
-.ui-pnotify .ui-pnotify-shadow {
-	margin: 0;
-	position: absolute;
-	top: .1em;
-	left: .1em;
-	bottom: -.2em;
-	right: -.2em;
-	z-index: -1;
+.ui-pnotify .ui-widget {
+	background: none;
 }
 .ui-pnotify-container {
 	background-position: 0 0;
-	padding: .8em;
-	height: 100%;
+	border: 1px solid #cccccc;
+	  background-image: -moz-linear-gradient(#fdf0d5, #fff9ee) !important;
+	  background-image: linear-gradient(#fdf0d5, #fff9ee) !important;
+	  background-image: -webkit-linear-gradient(#fdf0d5, #fff9ee) !important;
+	  background-image: -o-linear-gradient(#fdf0d5, #fff9ee) !important;
+	  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+	  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+	  -moz-border-radius: 7px;
+	  -webkit-border-radius: 7px;
+	  border-radius: 7px;
+	  font-size: 14px;
+	  -moz-box-shadow: 0px 0px 2px #aaaaaa;
+	  -webkit-box-shadow: 0px 0px 2px #aaaaaa;
+	  -o-box-shadow: 0px 0px 2px #aaaaaa;
+	  box-shadow: 0px 0px 2px #aaaaaa;
+	  padding: 7px 10px;
+	  text-align: center;
+	  min-height: 22px;
+	  width: 250px;
+	  z-index: 9999;
+	  font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+	  line-height: normal;
+	  filter: alpha(opacity=85);
+	  -moz-opacity: 0.8 !important;
+	  -khtml-opacity: 0.8 !important;
+	  -o-opacity: 0.8 !important;
+	  opacity: 0.8 !important;
 }
 .ui-pnotify-closer {
 	float: right;
@@ -41,12 +59,17 @@ html > body .ui-pnotify {
 }
 .ui-pnotify-title {
 	display: block;
-	font-size: 1.2em;
+	background: none;
+	font-size: 14px;
 	font-weight: bold;
-	margin-bottom: .4em;
+	font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+	line-height: normal;
 }
 .ui-pnotify-text {
 	display: block;
+	 font-size: 14px;
+	 font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+	 line-height: normal;
 }
 .ui-pnotify-icon, .ui-pnotify-icon span {
 	display: block;
@@ -65,7 +88,7 @@ html > body .ui-pnotify {
 	z-index: 10000;
 }
 .ui-pnotify-history-container .ui-pnotify-history-header {
-	padding: 2px;
+	/*padding: 2px;*/
 }
 .ui-pnotify-history-container button {
 	cursor: pointer;
@@ -75,15 +98,4 @@ html > body .ui-pnotify {
 .ui-pnotify-history-container .ui-pnotify-history-pulldown {
 	display: block;
 	margin: 0 auto;
-}
-.ui-pnotify .picon {
-	background-color: transparent;
-	background-repeat: no-repeat;
-	background-position: center center;
-	width: 17px;
-	height: 17px;
-}
-.ui-pnotify .ui-widget {
-    font-family: verdana, sans-serif;
-    font-size: 95% !important;
 }

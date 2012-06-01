@@ -4,7 +4,9 @@
 #from sickbeard.common import *
     </div>
 </div>
-<div class="footer">
+<div class="footer clearfix">
+
+<div class="meta" style="float:left;">
 #set $myDB = $db.DBConnection()
 #set $today = str($datetime.date.today().toordinal())
 #set $numShows = len($sickbeard.showList)
@@ -12,10 +14,15 @@
 #set $numDLEpisodes = $myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") AND season != 0 and episode != 0 AND airdate <= "+$today+"")[0][0]
 #set $numEpisodes = $myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+"")[0][0]
 <b>$numShows shows</b> ($numGoodShows active) | <b>$numDLEpisodes/$numEpisodes</b> episodes downloaded 
-<br />
 <b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> |
 <!--<b>Update</b>: <a%a=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%> | //-->
-<b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d").decode($sickbeard.SYS_ENCODING) <br />
+<b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d").decode($sickbeard.SYS_ENCODING) 
+</div>
+<ul style="float:right;">
+        <li><a href="$sbRoot/manage/manageSearches/forceVersionCheck"><img src="$sbRoot/images/menu/update16.png" alt="" width="16" height="16" />Force Version Check</a></li>
+        <li><a href="$sbRoot/home/restart/?pid=$sbPID" class="confirm"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
+        <li><a href="$sbRoot/home/shutdown/" class="confirm"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
+</ul>
 </div>
 </body>
 </html>

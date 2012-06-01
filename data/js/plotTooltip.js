@@ -1,19 +1,40 @@
-$(function(){
-        $('body').append('<div id="tooltip" />');
-        $('.plotInfo').tooltip(
-        {
-                position:     'bottom right',
-                offset:       [0, 5],
-                delay:        100,
-                effect:       'fade',
-                tip:          '#tooltip',
-                onBeforeShow: function(e) {
-                        match = this.getTrigger().attr("id").match(/^plot_info_(\d+)_(\d+)_(\d+)$/);
-                        $('#tooltip').html($.ajax({
-                                async:   false,
-                                data:    { show: match[1], episode: match[3], season: match[2] },
-                                url:     $("#sbRoot").val()+'/home/plotDetails'
-                        }).responseText);
+$(function () {
+    $('.plotInfo').each(function () {
+        match = $(this).attr("id").match(/^plot_info_(\d+)_(\d+)_(\d+)$/);
+        $(this).qtip({
+            content: {
+                text: 'Loading...',
+                ajax: {
+                    url: $("#sbRoot").val() + '/home/plotDetails',
+                    type: 'GET',
+                    data: {
+                        show: match[1],
+                        episode: match[3],
+                        season: match[2]
+                    },
+                    success: function (data, status) {
+                        this.set('content.text', data);
+                    }
                 }
-        })
-})
+            },
+            show: {
+                solo: true
+            },
+            position: {
+                viewport: $(window),
+                my: 'left center',
+                adjust: {
+                    y: -6,
+                    x: 3
+                }
+            },
+            style: {
+                tip: {
+                    corner: true,
+                    method: 'polygon'
+                },
+                classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-sb'
+            }
+        });
+    });
+});
