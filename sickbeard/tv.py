@@ -313,7 +313,7 @@ class TVShow(object):
 
     def loadEpisodesFromTVDB(self, cache=True):
         
-        self.clearSeasonNumbersCache()
+        self._clearSeasonNumbersCache()
         
         # There's gotta be a better way of doing this but we don't wanna
         # change the cache value elsewhere
@@ -1002,15 +1002,22 @@ class TVShow(object):
                 return Overview.GOOD
 
     def getAllSeasonNumbers(self):
-        if not self.seasonNumberCache:
+        if not self._seasonNumberCache:
             myDB = db.DBConnection()
             sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0", [self.tvdbid])
-            self.seasonNumberCache = [int(x["season"]) for x in sqlResults]
+            self._seasonNumberCache = [int(x["season"]) for x in sqlResults]
 
-        return self.seasonNumberCache
+        return self._seasonNumberCache
 
-    def clearSeasonNumbersCache(self):
-        self.seasonNumberCache = []
+    def _clearSeasonNumbersCache(self):
+        self._seasonNumberCache = []
+
+    def getPreviuosAiredCount(self, season, episode):
+        myDB = db.DBConnection()
+        epCount = myDB.select("SELECT COUNT(tvdbid) count FROM tv_episodes WHERE showid = ? AND season != 0 AND airdate > 1 AND (( season = ? AND episode < ? ) OR ( season < ? ))", [self.tvdbid, season, episode, season])
+        if len(epCount):
+            return int(epCount[0]['count'])
+        return 0
 
 def dirty_setter(attr_name):
     def wrapper(self, val):
@@ -1333,8 +1340,11 @@ class TVEpisode(object):
             elif self.airdate == datetime.date.fromordinal(1):
                 if self.status == IGNORED:
                     logger.log(u"Episode has no air date, but it's already marked as ignored", logger.DEBUG)
+                elif self.season > 0 and self.show.getPreviuosAiredCount(self.season, self.episode):
+                    logger.log(u"Episode has no air date, it's not a special and we have previously aired episodes, automatically marking it unaired", logger.DEBUG)
+                    self.status = UNAIRED
                 else:
-                    logger.log(u"Episode has no air date, automatically marking it skipped", logger.DEBUG)
+                    logger.log(u"Episode has no air date and it's a special (or we dont have previously aired episodes), automatically marking it skipped", logger.DEBUG)
                     self.status = SKIPPED
             # if we don't have the file and the airdate is in the past
             else:

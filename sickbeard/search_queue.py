@@ -145,7 +145,7 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
         curDate = datetime.date.today().toordinal()
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate < ?", [common.UNAIRED, curDate])
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate < ? AND airdate > 1", [common.UNAIRED, curDate])
 
         for sqlEp in sqlResults:
 
