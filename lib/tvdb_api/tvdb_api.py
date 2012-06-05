@@ -20,6 +20,7 @@ __version__ = "1.5"
 
 import os
 import sys
+import zipfile
 import urllib
 import urllib2
 import StringIO
@@ -312,6 +313,7 @@ class Tvdb:
                 debug = False,
                 cache = True,
                 cache_dir = False,
+                use_zip = True,
                 banners = False,
                 actors = False,
                 custom_ui = None,
@@ -343,6 +345,10 @@ class Tvdb:
 
         cache_dir (str/unicode):
             Location for the cache directory, defaults to systems TEMP_DIR.
+            
+        use_zip (True/ False):
+            Needs cache_dir and cache = True. Retrieves ZIP file and extract to
+            cache_dir. Use unzipped files if available.
 
         banners (True/False):
             Retrieves the banners for a show. These are accessed
@@ -394,9 +400,9 @@ class Tvdb:
         
         global lastTimeout
         
-        # if we're given a lastTimeout that is less than 1 min just give up
+        # if we're given a lastTimeout that is less than 1 min just wait a few seconds
         if not forceConnect and lastTimeout != None and datetime.datetime.now() - lastTimeout < datetime.timedelta(minutes=1):
-            raise tvdb_error("We recently timed out, so giving up early this time")
+            time.sleep(5)
         
         self.shows = ShowContainer() # Holds all Show classes
         self.corrections = {} # Holds show-name to show_id mapping
@@ -427,11 +433,18 @@ class Tvdb:
             self.config['cache_enabled'] = cache
         else:
             self.config['cache_enabled'] = False
-
+        
+        if use_zip:
+            self.config['use_zip'] = True
+        else:
+            self.config['use_zip'] = False
+            
         # Clean cache, this might need to be moved elsewhere
         if self.config['cache_enabled'] and self.config['cache_location']:
             # log().debug("Cleaning cache %s " % self.config['cache_location'])
             clean_cache(self.config['cache_location'])
+        else:
+            self.config['use_zip'] = False
 
         self.config['banners_enabled'] = banners
         self.config['actors_enabled'] = actors
@@ -481,6 +494,7 @@ class Tvdb:
         else:
             self.config['url_getSeries'] = "%(base_url)s/api/GetSeries.php?seriesname=%%s&language=%(language)s" % self.config
 
+        self.config['url_seriesZip'] = "%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.zip" % self.config
         self.config['url_epInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.xml" % self.config
 
         self.config['url_seriesInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/%%s.xml" % self.config
@@ -488,6 +502,17 @@ class Tvdb:
 
         self.config['url_seriesBanner'] = "%(base_url)s/api/%(apikey)s/series/%%s/banners.xml" % self.config
         self.config['url_artworkPrefix'] = "%(base_url)s/banners/%%s" % self.config
+        
+
+        self.config['unzip_base_url'] = os.path.join(self.config['cache_location'],u'unzip')
+        
+        self.config['unzip_url_epInfo'] = "%(unzip_base_url)s-%%s-%%s.xml" % self.config
+
+        self.config['unzip_url_seriesInfo'] = "%(unzip_base_url)s-%%s-%%s.xml" % self.config
+        self.config['unzip_url_actorsInfo'] = "%(unzip_base_url)s-%%s-actors.xml" % self.config
+
+        self.config['unzip_url_seriesBanner'] = "%(unzip_base_url)s-%%s-banners.xml" % self.config
+        
 
     #end __init__
 
@@ -532,10 +557,69 @@ class Tvdb:
         
         return str(resp)
 
-    def _getetsrc(self, url):
+    def _getzipfile(self, url_zip, sid, language, recache=False):
+
+        if self.config['cache_enabled'] and self.config['cache_location']:
+
+            # biggest file and most important to extract
+            language_xml = os.path.join(self.config['cache_location'],u'unzip-'+str(sid)+'-'+language+'.xml')
+            
+            if os.path.isfile(language_xml):
+                if str(self.config['cache_enabled']).lower() == 'recache' or recache:
+                    # When forced recache. Don't download and unzip again if file was extracted < 10 minutes ago
+                    now = time.time()
+                    last_time_unzipped = 600
+                    if now - os.stat(language_xml).st_mtime < last_time_unzipped:
+                        # xml already extracted and recache to soon
+                        log().debug("Extracted < 10 minutes ago, not recaching")
+                        return True
+                    else:
+                        recache = True
+                else:
+                    # xml already extracted
+                    return True
+                
+            # file doesn't exist or recache
+            log().debug("Retrieving URL %s" % url_zip)
+            src_zip = self._loadUrl(url_zip, recache)
+            
+            # extract all files
+            try:
+                zip_file = zipfile.ZipFile(StringIO.StringIO(src_zip))
+                for xml_file in zip_file.namelist():
+                    src = zip_file.read(xml_file)
+                    unzip_name = u'unzip-'+str(sid)+'-'+xml_file
+                    name_in_cache = open(os.path.join(self.config['cache_location'],unzip_name), 'wb')
+                    name_in_cache.write(src)
+                    name_in_cache.close()
+
+                zip_file.close()
+
+            except:
+                # unzip failed
+                log().debug("Unzip failed")
+
+            if os.path.isfile(language_xml):
+                # xml extracted.
+                return True
+        
+        return False
+    
+    def _getetsrc(self, url, unzip_url=None, is_unzipped=False):
         """Loads a URL using caching, returns an ElementTree of the source
         """
-        src = self._loadUrl(url)
+        # Check if there is a (unzip) local version first, otherwise continue with url
+
+        if is_unzipped and unzip_url:
+            try:
+                unzip_file = open(unzip_url, 'rb')
+                src = unzip_file.read()
+                unzip_file.close()
+            except:
+                src = self._loadUrl(url)
+        else:    
+            src = self._loadUrl(url)
+
         try:
             return ElementTree.fromstring(src.rstrip('\r'))
         except SyntaxError:
@@ -637,7 +721,7 @@ class Tvdb:
 
     #end _getSeries
 
-    def _parseBanners(self, sid):
+    def _parseBanners(self, sid, is_unzipped):
         """Parses banners XML, from
         http://www.thetvdb.com/api/[APIKEY]/series/[SERIES ID]/banners.xml
 
@@ -656,7 +740,12 @@ class Tvdb:
         This interface will be improved in future versions.
         """
         log().debug('Getting season banners for %s' % (sid))
-        bannersEt = self._getetsrc( self.config['url_seriesBanner'] % (sid) )
+        
+        if is_unzipped:
+            bannersEt = self._getetsrc( self.config['url_seriesBanner'] % (sid), self.config['unzip_url_seriesBanner'] % (sid), is_unzipped)
+        else:
+            bannersEt = self._getetsrc( self.config['url_seriesBanner'] % (sid), None, is_unzipped)
+                
         banners = {}
         for cur_banner in bannersEt.findall('Banner'):
             bid = cur_banner.find('id').text
@@ -689,7 +778,7 @@ class Tvdb:
 
         self._setShowData(sid, "_banners", banners)
 
-    def _parseActors(self, sid):
+    def _parseActors(self, sid, is_unzipped):
         """Parsers actors XML, from
         http://www.thetvdb.com/api/[APIKEY]/series/[SERIES ID]/actors.xml
 
@@ -714,8 +803,12 @@ class Tvdb:
         data from the XML)
         """
         log().debug("Getting actors for %s" % (sid))
-        actorsEt = self._getetsrc(self.config['url_actorsInfo'] % (sid))
-
+         
+        if is_unzipped:
+            actorsEt = self._getetsrc( self.config['url_actorsInfo'] % (sid), self.config['unzip_url_actorsInfo'] % (sid), is_unzipped)
+        else:
+            actorsEt = self._getetsrc( self.config['url_actorsInfo'] % (sid), None, is_unzipped)
+        
         cur_actors = Actors()
         for curActorItem in actorsEt.findall("Actor"):
             curActor = Actor()
@@ -749,11 +842,22 @@ class Tvdb:
             )
             getShowInLanguage = self.config['language']
 
+
+        # Get series zipfile and unzip to cache
+        if self.config['use_zip']:
+            if self._getzipfile(self.config['url_seriesZip'] % (sid, language), sid, language):
+                is_unzipped = True
+            else:
+                #Unzip failed. Get series zipfile with recache and unzip to cache
+                is_unzipped = self._getzipfile(self.config['url_seriesZip'] % (sid, language), sid, language, recache=True)
+        else:
+            is_unzipped = False
+
         # Parse show information
         log().debug('Getting all series data for %s' % (sid))
-        seriesInfoEt = self._getetsrc(
-            self.config['url_seriesInfo'] % (sid, getShowInLanguage)
-        )
+        
+        seriesInfoEt = self._getetsrc(self.config['url_seriesInfo'] % (sid, getShowInLanguage), self.config['unzip_url_seriesInfo'] % (sid, getShowInLanguage), is_unzipped)
+        
         for curInfo in seriesInfoEt.findall("Series")[0]:
             tag = curInfo.tag.lower()
             value = curInfo.text
@@ -766,18 +870,18 @@ class Tvdb:
 
             self._setShowData(sid, tag, value)
         #end for series
-
+        
         # Parse banners
         if self.config['banners_enabled']:
-            self._parseBanners(sid)
+            self._parseBanners(sid, is_unzipped)
 
         # Parse actors
         if self.config['actors_enabled']:
-            self._parseActors(sid)
+            self._parseActors(sid, is_unzipped)
 
         # Parse episode data
         log().debug('Getting all episodes of %s' % (sid))
-        epsEt = self._getetsrc( self.config['url_epInfo'] % (sid, language) )
+        epsEt = self._getetsrc( self.config['url_epInfo'] % (sid, language), self.config['unzip_url_epInfo'] % (sid, language), is_unzipped)
 
         for cur_ep in epsEt.findall("Episode"):
             seas_no = int(cur_ep.find('SeasonNumber').text)
