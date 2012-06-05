@@ -745,7 +745,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != '' ORDER BY episode ASC", [self.tvdbid])
 
         # build list of locations
         fileLocations = {}
