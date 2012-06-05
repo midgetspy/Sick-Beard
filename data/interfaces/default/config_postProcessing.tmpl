@@ -12,12 +12,12 @@
 #set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/configPostProcessing.js"></script>
-<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+<script type="text/javascript" src="$sbRoot/js/configPostProcessing.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
-<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
+<h5>All non-absolute folder locations are relative to <span class="path">$sickbeard.DATA_DIR</span></h5>
 
 <form id="configForm" action="savePostProcessing" method="post">
 
@@ -34,7 +34,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix" for="tv_download_dir">
                                 <span class="component-title">TV Download Dir</span>
-                                <input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="45" />
+                                <input type="text" name="tv_download_dir" id="tv_download_dir" value="$sickbeard.TV_DOWNLOAD_DIR" size="35" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -92,7 +92,7 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                        <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>
                 </div><!-- /component-group3 //-->
@@ -105,12 +105,12 @@
                     </div>
 
                     <fieldset class="component-group-list">
-                        <div class="field-pair">
+                        <div class="field-pair clearfix">
                             <label class="clearfix">
                                 <span class="component-title jumbo">Metadata Type:</span>
                                 <span class="component-desc">
                                     #set $m_dict = $metadata.get_metadata_generator_dict()
-                                    <select id="metadataType">
+                                    <select id="metadataType" class="input-medium" >
                                     #for ($cur_name, $cur_generator) in $m_dict.items():
                                     <option value="$GenericMetadata.makeID($cur_name)">$cur_name</option>
                                     #end for
@@ -120,37 +120,36 @@
                             <span>Toggle the metadata options that you wish to be created. <b>Multiple targets may be used.</b></span>
                         </div>
 
-                        <div id="metadataLegend">
-                            <div style="width: 190px; float: left;">Create:</div>
-                            <div style="width: 260px; float: left;">Results:</div>
-                        </div>
-                        <div class="clearfix"></div>
-
 #for ($cur_name, $cur_generator) in $m_dict.items(): 
 #set $cur_metadata_inst = $sickbeard.metadata_provider_dict[$cur_generator.name]
 #set $cur_id = $GenericMetadata.makeID($cur_name)
-<div class="metadataDiv" id="$cur_id">
-    <div class="metadata_options">
-        <label for="${cur_id}_show_metadata"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_show_metadata" #if $cur_metadata_inst.show_metadata then "checked=\"checked\"" else ""#/>&nbsp;Show Metadata</label>
-        <label for="${cur_id}_episode_metadata"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_episode_metadata" #if $cur_metadata_inst.episode_metadata then "checked=\"checked\"" else ""#/>&nbsp;Episode Metadata</label>
-        <label for="${cur_id}_fanart"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_fanart" #if $cur_metadata_inst.fanart then "checked=\"checked\"" else ""#/>&nbsp;Show Fanart Image</label>
-        <label for="${cur_id}_poster"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_poster" #if $cur_metadata_inst.poster then "checked=\"checked\"" else ""#/>&nbsp;Show Folder Image</label>
-        <label for="${cur_id}_episode_thumbnails"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_episode_thumbnails" #if $cur_metadata_inst.episode_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Episode Thumbnail</label>
-        <label for="${cur_id}_season_thumbnails"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_season_thumbnails" #if $cur_metadata_inst.season_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Season Thumbnail</label>
+<div class="metadataDiv clearfix" id="$cur_id">
+    <div class="metadata-options-wrapper">
+        <h4>Create:</h4>
+        <div class="metadata-options">
+            <label for="${cur_id}_show_metadata" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_show_metadata" #if $cur_metadata_inst.show_metadata then "checked=\"checked\"" else ""#/>&nbsp;Show Metadata</label>
+            <label for="${cur_id}_episode_metadata" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_episode_metadata" #if $cur_metadata_inst.episode_metadata then "checked=\"checked\"" else ""#/>&nbsp;Episode Metadata</label>
+            <label for="${cur_id}_fanart" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_fanart" #if $cur_metadata_inst.fanart then "checked=\"checked\"" else ""#/>&nbsp;Show Fanart Image</label>
+            <label for="${cur_id}_poster" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_poster" #if $cur_metadata_inst.poster then "checked=\"checked\"" else ""#/>&nbsp;Show Folder Image</label>
+            <label for="${cur_id}_episode_thumbnails" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_episode_thumbnails" #if $cur_metadata_inst.episode_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Episode Thumbnail</label>
+            <label for="${cur_id}_season_thumbnails" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_season_thumbnails" #if $cur_metadata_inst.season_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Season Thumbnail</label>
+        </div>
     </div>
-    <div class="metadata_example">
-        <label for="${cur_id}_show_metadata"><span id="${cur_id}_eg_show_metadata">$cur_metadata_inst.eg_show_metadata</span></label>
-        <label for="${cur_id}_episode_metadata"><span id="${cur_id}_eg_episode_metadata">$cur_metadata_inst.eg_episode_metadata</span></label>
-        <label for="${cur_id}_fanart"><span id="${cur_id}_eg_fanart">$cur_metadata_inst.eg_fanart</span></label>
-        <label for="${cur_id}_poster"><span id="${cur_id}_eg_poster">$cur_metadata_inst.eg_poster</span></label>
-        <label for="${cur_id}_episode_thumbnails"><span id="${cur_id}_eg_episode_thumbnails">$cur_metadata_inst.eg_episode_thumbnails</span></label>
-        <label for="${cur_id}_season_thumbnails"><span id="${cur_id}_eg_season_thumbnails">$cur_metadata_inst.eg_season_thumbnails</span></label>
+    <div class="metadata-example-wrapper">
+        <h4>Results:</h4>
+        <div class="metadata-example">
+            <label for="${cur_id}_show_metadata"><span id="${cur_id}_eg_show_metadata">$cur_metadata_inst.eg_show_metadata</span></label>
+            <label for="${cur_id}_episode_metadata"><span id="${cur_id}_eg_episode_metadata">$cur_metadata_inst.eg_episode_metadata</span></label>
+            <label for="${cur_id}_fanart"><span id="${cur_id}_eg_fanart">$cur_metadata_inst.eg_fanart</span></label>
+            <label for="${cur_id}_poster"><span id="${cur_id}_eg_poster">$cur_metadata_inst.eg_poster</span></label>
+            <label for="${cur_id}_episode_thumbnails"><span id="${cur_id}_eg_episode_thumbnails">$cur_metadata_inst.eg_episode_thumbnails</span></label>
+            <label for="${cur_id}_season_thumbnails"><span id="${cur_id}_eg_season_thumbnails">$cur_metadata_inst.eg_season_thumbnails</span></label>
+        </div>
     </div>
+
     <input type="hidden" name="${cur_id}_data" id="${cur_id}_data" value="$cur_metadata_inst.get_config()" />
 </div>
 #end for
-
-                        <div class="clearfix" style="clear:left;"></div>
 
                         <div class="field-pair clearfix">
                             <input type="checkbox" name="use_banner" id="use_banner" #if $sickbeard.USE_BANNER then "checked=checked" else ""#/>
@@ -160,7 +159,7 @@
                             </label>
                         </div>
 
-                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                        <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>
                 </div><!-- /component-group2 //-->
@@ -224,7 +223,7 @@
                             <label class="nocheck clearfix" for="naming_sep_type">
                                 <span class="component-title">Separator Style</span>
                                 <span class="component-desc">
-                                    <select name="naming_sep_type" id="naming_sep_type">
+                                    <select name="naming_sep_type" id="naming_sep_type" class="input-small" >
                                     #for ($i, $ex) in enumerate($config.naming_sep_type_text):
                                     <option value="$i" #if $i == int($sickbeard.NAMING_SEP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
@@ -237,7 +236,7 @@
                             <label class="nocheck clearfix" for="naming_ep_type">
                                 <span class="component-title">Number Style</span>
                                 <span class="component-desc">
-                                    <select name="naming_ep_type" id="naming_ep_type">
+                                    <select name="naming_ep_type" id="naming_ep_type" class="input-small" >
                                     #for ($i, $ex) in enumerate($config.naming_ep_type_text):
                                     <option value="$i" #if $i == int($sickbeard.NAMING_EP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
@@ -257,7 +256,7 @@
                             <label class="nocheck clearfix" for="naming_multi_ep_type">
                                 <span class="component-title">Multi-episode Style</span>
                                 <span class="component-desc">
-                                    <select name="naming_multi_ep_type" id="naming_multi_ep_type">
+                                    <select name="naming_multi_ep_type" id="naming_multi_ep_type" class="input-small" >
                                     #for ($i, $ex) in enumerate($config.naming_multi_ep_type_text):
                                     <option value="$i" #if $i == int($sickbeard.NAMING_MULTI_EP_TYPE) then "selected=\"selected\"" else ""#>$ex</option>
                                     #end for
@@ -288,16 +287,23 @@
                             </label>
                         </div>
 
-                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group4 //-->
 
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                <div class="component-group-save">
+                    <input type="submit" class="btn config_submitter" value="Save Changes" />
+                </div><br />
+
             </div><!-- /config-components -->
 
 </form>
 </div></div>
-<div class="clearfix"></div>
 
+<script type="text/javascript" charset="utf-8">
+<!--
+    jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
+//-->
+</script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
