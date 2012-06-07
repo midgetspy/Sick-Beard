@@ -36,12 +36,15 @@
     #end if    
 
   #set $epStr = str($cur_ep_obj.season) + "x" + str($cur_ep_obj.episode)
-  #set $epList = [cur_ep_obj.episode] + [x.episode for x in cur_ep_obj.relatedEps]
+  #set $epList = sorted([cur_ep_obj.episode] + [x.episode for x in cur_ep_obj.relatedEps])
+  #if len($epList) > 1:
+    #set $epList = [$min($epList), $max($epList)]
+  #end if
   <tr class="season-$curSeason">
     <td width="1%">
       <input type="checkbox" class="epCheck" id="<%=str(cur_ep_obj.season)+'x'+str(cur_ep_obj.episode)%>" name="<%=str(cur_ep_obj.season) +"x"+str(cur_ep_obj.episode) %>" />
     </td>
-    <td align="center"><%= "-".join(map(str, set((min(epList), max(epList))))) %></td>
+    <td align="center"><%= "-".join(map(str, epList)) %></td>
     <td width="50%">$curLoc</td>
     <td width="50%">$cur_ep_obj.proper_path().$curExt</td>
     </td>
