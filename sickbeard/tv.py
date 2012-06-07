@@ -1353,14 +1353,13 @@ class TVEpisode(object):
         if len(self.relatedEps) == 0:
             goodName = self.name
 
-        elif len(self.relatedEps) > 1:
+        else:
             goodName = ''
 
-        else:
             singleName = True
             curGoodName = None
 
-            for curName in [self.name]+[x.name for x in self.relatedEps]:
+            for curName in [self.name] + [x.name for x in self.relatedEps]:
                 match = re.match(multiNameRegex, curName)
                 if not match:
                     singleName = False
