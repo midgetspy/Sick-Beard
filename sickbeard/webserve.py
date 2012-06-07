@@ -2520,14 +2520,15 @@ class Home:
         myDB = db.DBConnection()
         ep_list = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != '' GROUP BY location ORDER BY season*1000+episode", [show])
 
+        try:
+            show_loc = showObj.location #@UnusedVariable
+        except exceptions.ShowDirNotFoundException:
+            return _genericMessage("Error", "Can't rename episodes when the show dir is missing.")
+
         for cur_ep in ep_list:
 
             # get the episode object
             cur_ep_obj = showObj.makeEpFromFile(cur_ep["location"])
-            
-            # figure out the path vars
-            cur_path = cur_ep_obj.location[len(showObj.location)+1:]
-            cur_ext = cur_path.rsplit('.')[-1]
             
             ep_obj_list.append(cur_ep_obj)
                 
@@ -2550,6 +2551,11 @@ class Home:
         if show_obj == None:
             errMsg = "Error", "Show not in show list"
             return _genericMessage("Error", errMsg)
+
+        try:
+            show_loc = show_obj.location #@UnusedVariable
+        except exceptions.ShowDirNotFoundException:
+            return _genericMessage("Error", "Can't rename episodes when the show dir is missing.")
 
         myDB = db.DBConnection()
 
