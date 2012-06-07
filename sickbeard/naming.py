@@ -28,10 +28,6 @@ from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 from common import Quality, DOWNLOADED
 
-dir_presets = ('Season %0S',
-               '%RN',
-               )
-
 name_presets = ('%SN - %Sx%0E - %EN',
                 '%S.N.S%0SE%0E.%E.N',
                 '%Sx%0E - %EN',

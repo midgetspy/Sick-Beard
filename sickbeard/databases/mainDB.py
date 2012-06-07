@@ -469,6 +469,31 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
                     self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?", [cur_name, ep_results[0]["episode_id"]])
                     break
 
+        # check each snatch to see if we can use it to get a release name from
+        empty_results = self.connection.select("SELECT episode_id, location FROM tv_episodes WHERE release_name = ''")
+        
+        logger.log(u"Adding release name to all episodes with obvious scene filenames")
+        for cur_result in empty_results:
+            
+            ep_file_name = ek.ek(os.path.basename, cur_result["location"])
+            ep_file_name = ek.ek(os.path.splitext, ep_file_name)[0]
+            
+            # I only want to find real scene names here so anything with a space in it is out
+            if ' ' in ep_file_name:
+                continue
+            
+            try:
+                np = NameParser(False)
+                parse_result = np.parse(ep_file_name)
+            except InvalidNameException:
+                continue
+        
+            if not parse_result.release_group:
+                continue
+            
+            logger.log(u"Name "+ep_file_name+" gave release group of "+parse_result.release_group+", seems valid", logger.DEBUG)
+            self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?", [ep_file_name, cur_result["episode_id"]])
+
         self.incDBVersion()
 
 class RenameSeasonFolders(AddSizeAndSceneNameFields):

@@ -1522,14 +1522,14 @@ class TVEpisode(object):
                 continue
             
             # start with the ep string, eg. E03
-            ep_string = self._format_string(ep_format.upper())#replace_map[ep_format.upper()]
+            ep_string = self._format_string(ep_format.upper())
             for other_ep in self.relatedEps:
                 if multi == NAMING_DUPLICATE:
                     # add " - S01"
                     ep_string += sep + season_format
                 # add "E04"
                 ep_string += ep_sep
-                ep_string += other_ep._format_string(ep_format.upper())#._replace_map()[ep_format.upper()]
+                ep_string += other_ep._format_string(ep_format.upper())
 
             if season_ep_match:
                 regex_replacement = r'\g<pre_sep>\g<2>\g<3>' + ep_string + r'\g<post_sep>'
