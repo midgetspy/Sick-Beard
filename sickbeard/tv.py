@@ -1431,23 +1431,13 @@ class TVEpisode(object):
                    '%0D': '%02d' % self.airdate.day,
                    }
 
-    def _format_string(self, pattern=None):
+    def _format_string(self, pattern, replace_map):
         """
         Replaces all template strings with the correct value
         """
 
-        replace_map = self._replace_map()
-
         result_name = pattern
 
-        # if there's no release group then replace it with a reasonable facsimile
-        if not replace_map['%RN']:
-            logger.log(u"Episode has no release name, making up a fake one", logger.DEBUG)
-            result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
-            result_name = result_name.replace('%RG', 'SiCKBEARD')
-            result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
-            result_name = result_name.replace('%rg', 'sickbeard')
-        
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
             result_name = result_name.replace(cur_replacement, helpers.sanitizeFileName(replace_map[cur_replacement]))
@@ -1471,7 +1461,17 @@ class TVEpisode(object):
         # split off ep name part only
         name_groups = re.split(r'[\\/]', pattern)
         
+        replace_map = self._replace_map()
+
         result_name = pattern
+        
+        # if there's no release group then replace it with a reasonable facsimile
+        if not replace_map['%RN']:
+            result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
+            result_name = result_name.replace('%RG', 'SiCKBEARD')
+            result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
+            result_name = result_name.replace('%rg', 'sickbeard')
+            logger.log(u"Episode has no release name, replacing it with a generic one: "+result_name, logger.DEBUG)
         
         # figure out the double-ep numbering style for each group, if applicable
         for cur_name_group in name_groups:
@@ -1524,14 +1524,14 @@ class TVEpisode(object):
                 continue
             
             # start with the ep string, eg. E03
-            ep_string = self._format_string(ep_format.upper())
+            ep_string = self._format_string(ep_format.upper(), replace_map)
             for other_ep in self.relatedEps:
                 if multi == NAMING_DUPLICATE:
                     # add " - S01"
                     ep_string += sep + season_format
                 # add "E04"
                 ep_string += ep_sep
-                ep_string += other_ep._format_string(ep_format.upper())
+                ep_string += other_ep._format_string(ep_format.upper(), other_ep._replace_map())
 
             if season_ep_match:
                 regex_replacement = r'\g<pre_sep>\g<2>\g<3>' + ep_string + r'\g<post_sep>'
@@ -1544,7 +1544,7 @@ class TVEpisode(object):
             logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
 
-        result_name = self._format_string(result_name)
+        result_name = self._format_string(result_name, replace_map)
         
         return result_name
 
