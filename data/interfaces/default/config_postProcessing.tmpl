@@ -232,11 +232,23 @@
                             </label>
                         </div>
                         
-						<div class="field-pair">
+                        <div class="field-pair">
                             <input type="radio" name="naming_anime" id="naming_anime_only" value="2" #if $sickbeard.NAMING_ANIME == 2 then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_anime_only">
                                 <span class="component-title">Only Absolute Number</span>
                                 <span class="component-desc">Replace season/episode format with absolute number</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Only applies to animes.</span>
+                            </label>
+                        </div>
+                                          
+                        <div class="field-pair">
+                            <input type="radio" name="naming_anime" id="naming_anime_none" value="3" #if $sickbeard.NAMING_ANIME == 3 then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="naming_anime_none">
+                                <span class="component-title">No Absolute Number</span>
+                                <span class="component-desc">Dont include the absolute number</span>
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>

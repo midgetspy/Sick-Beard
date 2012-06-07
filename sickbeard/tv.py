@@ -1623,7 +1623,7 @@ class TVEpisode(object):
             goodEpString += config.naming_multi_ep_type[naming_multi_ep_type][naming_ep_type] % {'seasonnumber': relEp.season, 'episodenumber': relEp.episode}
 
         # anime ?
-        if self.show.anime:
+        if self.show.anime and naming_anime != 3:
             #FIXME: this should be set on show creation !!
             if self.absolute_number == 0:
                 curAbsolute_number = self.episode
