@@ -1461,10 +1461,10 @@ class TVEpisode(object):
         logger.log(u"pattern: "+pattern, logger.DEBUG)
         
         if pattern == None:
-            pattern = sickbeard.NAME_FORMATTING
+            pattern = sickbeard.NAMING_PATTERN
         
         if multi == None:
-            multi = sickbeard.MULTI_FORMAT
+            multi = sickbeard.NAMING_MULTI_EP
         
         # split off ep name part only
         name_groups = re.split(r'[\\/]', pattern)
