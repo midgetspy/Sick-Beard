@@ -342,7 +342,7 @@ class CompleteParser(object):
             self._log(u"Not trying to get the tvdbid. No name given", logger.DEBUG)
             return None
 
-        self._log(u"Trying to get the tvdbid for " + str(name), logger.DEBUG)
+        self._log(u"Trying to get the tvdbid for " + name, logger.DEBUG)
 
         name = helpers.full_sanitizeSceneName(name)
 
