@@ -1445,6 +1445,8 @@ class TVEpisode(object):
             logger.log(u"Episode has no release name, making up a fake one", logger.DEBUG)
             result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
             result_name = result_name.replace('%RG', 'SiCKBEARD')
+            result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
+            result_name = result_name.replace('%rg', 'sickbeard')
         
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
