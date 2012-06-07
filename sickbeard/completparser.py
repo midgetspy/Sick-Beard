@@ -338,7 +338,11 @@ class CompleteParser(object):
         return (out_season, out_episodes, out_absolute_numbers)
 
     def get_show_by_name(self, name, showList, useTvdb=False):
-        self._log(u"Trying to get the tvdbid for " + name, logger.DEBUG)
+        if not name:
+            self._log(u"Not trying to get the tvdbid. No name given", logger.DEBUG)
+            return None
+
+        self._log(u"Trying to get the tvdbid for " + str(name), logger.DEBUG)
 
         name = helpers.full_sanitizeSceneName(name)
 
