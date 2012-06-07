@@ -2506,14 +2506,12 @@ class Home:
     def testRename(self, show=None):
 
         if show == None:
-            errMsg = "You must specify a show"
-            return _genericMessage("Error", errMsg)
+            return _genericMessage("Error", "You must specify a show")
 
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
         if showObj == None:
-            errMsg = "Error", "Show not in show list"
-            return _genericMessage("Error", errMsg)
+            return _genericMessage("Error", "Show not in show list")
 
         ep_obj_list = []
 

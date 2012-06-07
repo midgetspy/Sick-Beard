@@ -138,6 +138,7 @@ def _generate_sample_ep(multi=None):
     ep = TVEpisode(2,3,"Ep Name")
     ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
     ep._airdate = datetime.date(2011, 3, 9)
+    ep._release_name = 'Show.Name.S02E03.HDTV.XviD-RLSGROUP'
 
     if multi != None:
         ep._name = "Ep Name (1)"
