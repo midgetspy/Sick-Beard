@@ -1458,9 +1458,6 @@ class TVEpisode(object):
         if multi == None:
             multi = sickbeard.NAMING_MULTI_EP
         
-        # split off ep name part only
-        name_groups = re.split(r'[\\/]', pattern)
-        
         replace_map = self._replace_map()
 
         result_name = pattern
@@ -1472,6 +1469,9 @@ class TVEpisode(object):
             result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
             result_name = result_name.replace('%rg', 'sickbeard')
             logger.log(u"Episode has no release name, replacing it with a generic one: "+result_name, logger.DEBUG)
+        
+        # split off ep name part only
+        name_groups = re.split(r'[\\/]', result_name)
         
         # figure out the double-ep numbering style for each group, if applicable
         for cur_name_group in name_groups:
