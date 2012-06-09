@@ -248,8 +248,8 @@
                                 <span class="component-title">Multi-episode Style</span>
                                 <span class="component-desc">
                                     <select id="naming_multi_ep" name="naming_multi_ep">
-                                    #for $cur_multi_ep in $multiEpStrings:
-                                        <option value="$cur_multi_ep" #if $cur_multi_ep == $sickbeard.NAMING_MULTI_EP then "selected=\"selected\" class=\"selected\"" else ""#>$multiEpStrings[$cur_multi_ep]</option>
+                                    #for $cur_multi_ep in sorted($multiEpStrings.items(), key=lambda x: x[1]):
+                                        <option value="$cur_multi_ep[0]" #if $cur_multi_ep[0] == $sickbeard.NAMING_MULTI_EP then "selected=\"selected\" class=\"selected\"" else ""#>$cur_multi_ep[1]</option>
                                     #end for
                                     </select>
                                 </span>

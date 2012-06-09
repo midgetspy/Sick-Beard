@@ -61,10 +61,10 @@ NAMING_SEPARATED_REPEAT = 16
 
 multiEpStrings = {}
 multiEpStrings[NAMING_REPEAT] = "Repeat"
-multiEpStrings[NAMING_SEPARATED_REPEAT] = "Separated Repeat"
+multiEpStrings[NAMING_SEPARATED_REPEAT] = "Repeat (Separated)"
 multiEpStrings[NAMING_DUPLICATE] = "Duplicate"
 multiEpStrings[NAMING_EXTEND] = "Extend"
-multiEpStrings[NAMING_LIMITED_EXTEND] = "Limited Extend"
+multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
 
 class Quality:
 
