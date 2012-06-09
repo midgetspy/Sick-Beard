@@ -219,11 +219,26 @@ class TVShow(object):
 
             logger.log(str(self.tvdbid) + ": Creating episode from " + mediaFile, logger.DEBUG)
             try:
-                curEpisode = self.makeEpFromFile(os.path.join(self._location, mediaFile))
+                curEpisode = self.makeEpFromFile(ek.ek(os.path.join, self._location, mediaFile))
             except (exceptions.ShowNotFoundException, exceptions.EpisodeNotFoundException), e:
                 logger.log(u"Episode "+mediaFile+" returned an exception: "+ex(e), logger.ERROR)
             except exceptions.EpisodeDeletedException:
                 logger.log(u"The episode deleted itself when I tried making an object for it", logger.DEBUG)
+
+            # see if we should save the release name in the db
+            ep_file_name = ek.ek(os.path.basename, curEpisode.location)
+            ep_file_name = ek.ek(os.path.splitext, ep_file_name)[0]
+            
+            parse_result = None
+            try:
+                np = NameParser(False)
+                parse_result = np.parse(ep_file_name)
+            except InvalidNameException:
+                pass
+        
+            if not ' ' in ep_file_name and parse_result and parse_result.release_group:
+                logger.log(u"Name "+ep_file_name+" gave release group of "+parse_result.release_group+", seems valid", logger.DEBUG)
+                curEpisode.release_name = ep_file_name
 
             # store the reference in the show
             if curEpisode != None:
