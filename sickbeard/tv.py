@@ -1351,6 +1351,7 @@ class TVEpisode(object):
         if self.location == None or self.location == "":
             return None
         else:
+            return ek.ek(os.path.join, self.show.location, self.location)
 
     def prettyName(self):
         """
@@ -1359,7 +1360,6 @@ class TVEpisode(object):
         
         Returns: A string representing the episode's name and season/ep numbers 
         """
-
 
         return self._format_pattern('%SN - %Sx%0E - %EN')
 

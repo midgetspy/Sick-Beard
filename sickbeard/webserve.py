@@ -41,7 +41,7 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
 
-from sickbeard.providers import newznab, getProviderClass
+from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
