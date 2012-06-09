@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import cherrypy
 import os.path
 import datetime
@@ -273,6 +271,8 @@ class ConfigMigrator():
                 migration_name = ': ' + self.migration_names[next_version]
             else:
                 migration_name = ''
+            
+            helpers.backupVersionedFile(sickbeard.CONFIG_FILE, next_version)
             
             # do the migration, expect a method named _migrate_v<num>
             logger.log(u"Migrating config up to version "+str(next_version)+migration_name)

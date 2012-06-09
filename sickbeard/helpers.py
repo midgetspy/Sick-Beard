@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import StringIO, zlib, gzip
 import os
 import stat
@@ -24,6 +23,7 @@ import urllib, urllib2
 import re, socket
 import shutil
 import traceback
+import time, sys
 
 from xml.dom.minidom import Node
 
@@ -633,3 +633,27 @@ def get_xml_text(node):
         if child_node.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
             text += child_node.data
     return text.strip()
+
+def backupVersionedFile(oldFile, version):
+    numTries = 0
+    
+    newFile = oldFile + '.' + 'v'+str(version)
+    
+    while not ek.ek(os.path.isfile, newFile):
+        if not ek.ek(os.path.isfile, oldFile):
+            break
+
+        try:
+            logger.log(u"Attempting to back up "+oldFile+" before migration...")
+            shutil.copy(oldFile, newFile)
+            logger.log(u"Done backup, proceeding with migration.")
+            break
+        except Exception, e:
+            logger.log(u"Error while trying to back up "+oldFile+": "+ex(e))
+            numTries += 1
+            time.sleep(1)
+            logger.log(u"Trying again.")
+
+        if numTries >= 10:
+            logger.log(u"Unable to back up "+oldFile+", please do it manually.")
+            sys.exit(1)

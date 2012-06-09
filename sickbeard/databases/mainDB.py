@@ -17,15 +17,12 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
-import shutil, time, os.path, sys
+import os.path
 
-from sickbeard import db
-from sickbeard import common
-from sickbeard import logger
+from sickbeard import db, common, helpers, logger
 from sickbeard.providers.generic import GenericProvider
 
 from sickbeard import encodingKludge as ek
-from sickbeard.exceptions import ex
 from sickbeard.name_parser.parser import NameParser, InvalidNameException 
 
 class MainSanityCheck(db.DBSanityCheck):
@@ -52,6 +49,9 @@ class MainSanityCheck(db.DBSanityCheck):
         else:
             logger.log(u"No duplicate episode, check passed")
         
+def backupDatabase(version):
+    helpers.backupVersionedFile(db.dbFilename(), version)
+
 # ======================
 # = Main DB Migrations =
 # ======================
@@ -130,25 +130,7 @@ class NewQualitySettings (NumericProviders):
 
     def execute(self):
 
-        numTries = 0
-        while not ek.ek(os.path.isfile, db.dbFilename(suffix='v0')):
-            if not ek.ek(os.path.isfile, db.dbFilename()):
-                break
-
-            try:
-                logger.log(u"Attempting to back up your sickbeard.db file before migration...")
-                shutil.copy(db.dbFilename(), db.dbFilename(suffix='v0'))
-                logger.log(u"Done backup, proceeding with migration.")
-                break
-            except Exception, e:
-                logger.log(u"Error while trying to back up your sickbeard.db: "+ex(e))
-                numTries += 1
-                time.sleep(1)
-                logger.log(u"Trying again.")
-
-            if numTries >= 10:
-                logger.log(u"Unable to back up your sickbeard.db file, please do it manually.")
-                sys.exit(1)
+        backupDatabase(0)
 
         # old stuff that's been removed from common but we need it to upgrade
         HD = 1
@@ -405,6 +387,8 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
         return self.checkDBVersion() >= 10
     
     def execute(self):
+
+        backupDatabase(10)
 
         if not self.hasColumn("tv_episodes", "file_size"):
             self.addColumn("tv_episodes", "file_size")
