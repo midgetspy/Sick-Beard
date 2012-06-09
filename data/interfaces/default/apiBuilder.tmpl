@@ -90,8 +90,8 @@ addList("sb.setdefaults-status", "Archived", "&status=archived", "sb.setdefaults
 addList("sb.setdefaults-status", "Ignored", "&status=ignored", "sb.setdefaults-opt");
 
 addOption("sb.setdefaults-opt", "Optional Param", "", 1);
-addList("sb.setdefaults-opt", "No Season Folder", "&season_folder=0", "quality");
-addList("sb.setdefaults-opt", "Use Season Folder", "&season_folder=1", "quality");
+addList("sb.setdefaults-opt", "Flatten (No Season Folder)", "&flatten_folders=1", "quality");
+addList("sb.setdefaults-opt", "Use Season Folder", "&flatten_folders=0", "quality");
 
 addOption("shows", "Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&paused=1");
@@ -108,8 +108,8 @@ addList("show.addexisting-tvdbid", "101501 (Ancient Aliens)", "&tvdbid=101501", 
 addList("show.addexisting-tvdbid", "80348 (Chuck)", "&tvdbid=80348", "show.addexisting-opt");
 
 addOption("show.addexisting-opt", "Optional Param", "", 1);
-addList("show.addexisting-opt", "No Season Folder", "&season_folder=0", "quality");
-addList("show.addexisting-opt", "Use Season Folder", "&season_folder=1", "quality");
+addList("show.addexisting-opt", "Flatten (No Season Folder)", "&flatten_folders=1", "quality");
+addList("show.addexisting-opt", "Use Season Folder", "&flatten_folders=0", "quality");
 
 addList("show.addnew", "101501 (Ancient Aliens)", "&tvdbid=101501", "show.addnew-loc");
 addList("show.addnew", "80348 (Chuck)", "&tvdbid=80348", "show.addnew-loc");
@@ -127,8 +127,8 @@ addList("show.addnew-status", "Archived", "&status=archived", "show.addnew-opt")
 addList("show.addnew-status", "Ignored", "&status=ignored", "show.addnew-opt");
 
 addOption("show.addnew-opt", "Optional Param", "", 1);
-addList("show.addnew-opt", "No Season Folder", "&season_folder=0", "quality");
-addList("show.addnew-opt", "Use Season Folder", "&season_folder=1", "quality");
+addList("show.addnew-opt", "Flatten (No Season Folder)", "&flatten_folders=1", "quality");
+addList("show.addnew-opt", "Use Season Folder", "&flatten_folders=0", "quality");
 
 addOptGroup("sb.searchtvdb", "Search by Name");
 addList("sb.searchtvdb", "Lost", "&name=Lost", "sb.searchtvdb-lang");
@@ -257,15 +257,25 @@ addList("episode.setstatus", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episod
 #end for
 
 // build out each show's season+episode list for episode.setstatus cmd
+#set $curSeason = -1
 #for $curShow in $episodeSQLResults:
     #for $curShowSeason in $episodeSQLResults[$curShow]:
+        #if $curShowSeason.season != $curSeason and $curShowSeason.season != 0:
+            // insert just the season as the ep number is now optional
+            addList("episode.setstatus-$curShow", "Season $curShowSeason.season", "&season=$curShowSeason.season", "episode-status-$curShow");
+            #set $curSeason = int($curShowSeason.season)
+        #end if
 addList("episode.setstatus-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-status-$curShow");
     #end for
-addOption("episode-status-$curShow", "Wanted", "&status=wanted");
+addList("episode-status-$curShow", "Wanted", "&status=wanted", "force");
 addOption("episode-status-$curShow", "Skipped", "&status=skipped");
 addOption("episode-status-$curShow", "Archived", "&status=archived");
 addOption("episode-status-$curShow", "Ignored", "&status=ignored");
 #end for
+
+addOption("force", "Optional Param", "", 1);
+addOption("force", "Replace Downloaded EP", "&force=1");
+addOption("force", "Skip Downloaded EP", "&force=0");
 
 addOption("future", "Optional Param", "", 1);
 addList("future", "Sort by Date", "&sort=date", "future-type");

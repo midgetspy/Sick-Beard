@@ -67,7 +67,7 @@ result_type_map = {RESULT_SUCCESS: "success",
 
 class Api:
     """ api class that returns json results """
-    version = 0.2
+    version = 0.3
     intent = 4
 
     @cherrypy.expose
@@ -163,7 +163,7 @@ class Api:
         response.headers['Content-Type'] = 'application/json;charset=UTF-8'
         try:
             out = json.dumps(dict, indent=self.intent, sort_keys=True)
-        except Exception, e: # if we fail to generate the output fake a error
+        except Exception, e: # if we fail to generate the output fake an error
             logger.log(u"API :: " + traceback.format_exc(), logger.DEBUG)
             out = '{"result":"' + result_type_map[RESULT_ERROR] + '", "message": "error while composing output: "' + ex(e) + '"}'
         return out
@@ -874,18 +874,21 @@ class CMD_EpisodeSetStatus(ApiCall):
     _help = {"desc": "set status of an episode",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                    "season": {"desc": "the season number"},
-                                   "episode": {"desc": "the episode number"},
                                    "status": {"desc": "the status values: wanted, skipped, archived, ignored"}
-                                  }
+                                  },
+             "optionalParameters": {"episode": {"desc": "the episode number"},
+                                    "force": {"desc": "should we replace existing episodes or not"}
+                                     }
              }
 
     def __init__(self, args, kwargs):
         # required
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         self.s, args = self.check_params(args, kwargs, "season", None, True, "int", [])
-        self.e, args = self.check_params(args, kwargs, "episode", None, True, "int", [])
         self.status, args = self.check_params(args, kwargs, "status", None, True, "string", ["wanted", "skipped", "archived", "ignored"])
         # optional
+        self.e, args = self.check_params(args, kwargs, "episode", None, False, "int", [])
+        self.force, args = self.check_params(args, kwargs, "force", 0, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -904,43 +907,55 @@ class CMD_EpisodeSetStatus(ApiCall):
         if not self.status in statusStrings.statusStrings:
             return _responds(RESULT_FAILURE, msg="Invalid Status")
 
-        epObj = showObj.getEpisode(int(self.s), int(self.e))
-        if epObj == None:
-            return _responds(RESULT_FAILURE, msg="Episode not found")
-
         #only allow the status options we want
         if int(self.status) not in (3, 5, 6, 7):
             return _responds(RESULT_FAILURE, msg="Show not found")
 
-        segment_list = []
-        if int(self.status) == WANTED:
-            # figure out what segment the episode is in and remember it so we can backlog it
-            if epObj.show.air_by_date:
-                ep_segment = str(epObj.airdate)[:7]
-            else:
-                ep_segment = epObj.season
+        # branch logic for when user provides an episode number (old method)
+        if self.e:
+            epObj = showObj.getEpisode(int(self.s), int(self.e))
+            if epObj == None:
+                return _responds(RESULT_FAILURE, msg="Episode not found")
 
-            if ep_segment not in segment_list:
-                segment_list.append(ep_segment)
+            segment_list = []
+            if int(self.status) == WANTED:
+                # figure out what segment the episode is in and remember it so we can backlog it
+                if epObj.show.air_by_date:
+                    ep_segment = str(epObj.airdate)[:7]
+                else:
+                    ep_segment = epObj.season
+    
+                if ep_segment not in segment_list:
+                    segment_list.append(ep_segment)
 
-        with epObj.lock:
-            # don't let them mess up UNAIRED episodes
-            if epObj.status == UNAIRED:
-                return _responds(RESULT_FAILURE, msg="Refusing to change status because it is UNAIRED")
+            with epObj.lock:
+                # don't let them mess up UNAIRED episodes
+                if epObj.status == UNAIRED:
+                    return _responds(RESULT_FAILURE, msg="Refusing to change status because it is UNAIRED")
 
-            if int(self.status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
-                return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
+                if int(self.status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
+                    return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
 
-            epObj.status = int(self.status)
-            epObj.saveToDB()
+                # allow the user to force setting the status to wanted for an already downloaded episode
+                if int(self.status) == WANTED and epObj.status in Quality.DOWNLOADED:
+                    if bool(self.force) == True:
+                        epObj.status = int(self.status)
+                        epObj.saveToDB()
+                    else:
+                        return _responds(RESULT_FAILURE, msg="Refusing to change status to Wanted because it's already marked as SNATCHED/DOWNLOADED")
+                else:
+                    epObj.status = int(self.status)
+                    epObj.saveToDB()
 
-            for cur_segment in segment_list:
-                cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
-                sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
-                logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
-                return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
+                for cur_segment in segment_list:
+                    cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
+                    sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
+                    logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to Wanted")
+                    return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
 
-        return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
+                return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
+
+        return _responds(RESULT_FAILURE, msg='episode.setstatus no ep (setting a season) logic branch not coded')
 
 
 class CMD_Exceptions(ApiCall):
