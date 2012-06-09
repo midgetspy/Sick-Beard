@@ -25,25 +25,18 @@
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
-
 \$.tablesorter.addParser({
     id: 'loadingNames',
     is: function(s) {
         return false;
-    }, 
+    },
     format: function(s) {
         if (s.indexOf('Loading...') == 0)
-            return s.replace('Loading...','!!!');
-        else if (s.indexOf('The ') == 0)
-            return s.replace('The ', '')
-        else if (s.indexOf('A ') == 0)
-            return s.replace('A ', '')
-        else
-            return s;
+            return s.replace('Loading...','000');
+        return (s || '').replace(/^(The|A)\s/i,'');
     },
     type: 'text'
 });
-
 \$.tablesorter.addParser({
     id: 'quality',
     is: function(s) {

@@ -22,7 +22,7 @@
         sortList: [[0,1]],
         textExtraction: {
             4: function(node) { return \$(node).find("span").text().toLowerCase(); }
-        },
+        }
     });
     \$('#limit').change(function(){
         url = '$sbRoot/history/?limit='+\$(this).val()

@@ -125,23 +125,34 @@ font-size: 1em;
 }
 
 .sickbeardTable {
-width:100%;
-margin-left:auto;
-margin-right:auto;
+    width: 100%;
+    margin-left:auto;
+    margin-right:auto;
+    text-align:left;
+    color: #000;
+    background-color: #fff;
+    border-spacing: 0;
+}
+.sickbeardTable th,
+.sickbeardTable td {
+    padding: 4px;
+    border-left: #fff 1px solid;
+    border-top: #fff 1px solid;
+}
+.sickbeardTable th:first-child,
+.sickbeardTable td:first-child {
+    border-left: none;
 }
 .sickbeardTable th{
-padding:3px;
-font-weight:700;
-background-color:#333;
-color:#FFF;
-text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
-}
-.sickbeardTable td{
-padding:4px;
+    border-collapse: collapse;
+    background-color: #333;
+    color: #fff;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-align: center;
 }
 .sickbeardTable tfoot a {
-color:#FFF;
-text-decoration: none;
+    color:#fff;
+    text-decoration: none;
 }
 
 .row {

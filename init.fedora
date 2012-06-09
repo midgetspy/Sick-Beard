@@ -1,3 +1,5 @@
+#!/bin/sh
+#
 ### BEGIN INIT INFO
 # Provides:          sickbeard
 # Required-Start:    $all
@@ -23,7 +25,7 @@ lockfile=/var/lock/subsys/$prog
 ## the defaults
 username=${SB_USER-sickbeard}
 homedir=${SB_HOME-/opt/sickbeard}
-datadir=${SB_DATA-~/.sickbeard}
+datadir=${SB_DATA-/opt/sickbeard}
 pidfile=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
 nice=${SB_NICE-}
 ##
@@ -33,13 +35,13 @@ options=" --daemon --nolaunch --pidfile=${pidfile} --datadir=${datadir}"
 
 # create PID directory if not exist and ensure the SickBeard user can write to it
 if [ ! -d $pidpath ]; then
-	mkdir -p $pidpath
-	chown $username $pidpath
+        mkdir -p $pidpath
+        chown $username $pidpath
 fi
 
 if [ ! -d $datadir ]; then
-	mkdir -p $datadir
-	chown $username $datadir
+        mkdir -p $datadir
+        chown $username $datadir
 fi
 
 start() {
@@ -89,4 +91,3 @@ case "$1" in
         echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
         exit 2
 esac
-

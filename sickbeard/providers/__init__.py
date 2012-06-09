@@ -19,7 +19,7 @@
 __all__ = ['ezrss',
            'tvtorrents',
            'nzbmatrix',
-           'nzbs_org',
+           'nzbs_org_old',
            'nzbsrus',
            'womble',
            'newzbin',
@@ -97,7 +97,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://momo.sickbeard.com/|0|0'
+    return 'Sick Beard Index|http://momo.sickbeard.com/|0|0!!!NZBs.org|http://beta.nzbs.org/||0'
 
 
 def getProviderModule(name):
@@ -106,7 +106,7 @@ def getProviderModule(name):
     if name in __all__ and prefix+name in sys.modules:
         return sys.modules[prefix+name]
     else:
-        return None
+        raise Exception("Can't find "+prefix+name+" in "+repr(sys.modules))
 
 def getProviderClass(id):
 

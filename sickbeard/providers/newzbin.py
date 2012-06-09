@@ -115,10 +115,11 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_SDTV(self, attrs):
 
-        # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
-        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
+        # Video Fmt: (XviD, DivX, H.264/x264), NOT 720p, NOT 1080p, NOT 1080i
+        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
-                            and ('1080p' not in attrs['Video Fmt'])
+                            and ('1080p' not in attrs['Video Fmt']) \
+                            and ('1080i' not in attrs['Video Fmt'])
 
         # Source: TV Cap or HDTV or (None)
         source = 'Source' not in attrs or 'TV Cap' in attrs['Source'] or 'HDTV' in attrs['Source']
@@ -130,11 +131,12 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_SDDVD(self, attrs):
 
-        # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
-        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
+        # Video Fmt: (XviD, DivX, H.264/x264), NOT 720p, NOT 1080p, NOT 1080i
+        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
-                            and ('1080p' not in attrs['Video Fmt'])
-
+                            and ('1080p' not in attrs['Video Fmt']) \
+                            and ('1080i' not in attrs['Video Fmt'])
+    						
         # Source: DVD
         source = 'Source' in attrs and 'DVD' in attrs['Source']
 
@@ -144,8 +146,8 @@ class NewzbinProvider(generic.NZBProvider):
         return video_fmt and source and subs
 
     def _is_HDTV(self, attrs):
-        # Video Fmt: x264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
+        # Video Fmt: H.264/x264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
 
         # Source: TV Cap or HDTV or (None)
@@ -158,19 +160,22 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_WEBDL(self, attrs):
 
-        # Video Fmt: H.264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('H.264' in attrs['Video Fmt']) \
+        # Video Fmt: H.264/x264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
+
+        # Source: WEB-DL
+        source = 'Source' in attrs and 'WEB-DL' in attrs['Source']
 
         # Subtitles: (None)
         subs = 'Subtitles' not in attrs
 
-        return video_fmt and subs
+        return video_fmt and source and subs
 
     def _is_720pBluRay(self, attrs):
 
-        # Video Fmt: x264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
+        # Video Fmt: H.264/x264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
 
         # Source: Blu-ray or HD-DVD
@@ -180,8 +185,8 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_1080pBluRay(self, attrs):
 
-        # Video Fmt: x264, 1080p
-        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
+        # Video Fmt: H.264/x264, 1080p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('1080p' in attrs['Video Fmt'])
 
         # Source: Blu-ray or HD-DVD
