@@ -922,12 +922,12 @@ class ConfigPostProcessing:
         redirect("/config/postProcessing/")
 
     @cherrypy.expose
-    def testNaming(self, pattern=None, multi=None):
+    def testNaming(self, pattern=None, multi=None, abd=False):
 
         if multi != None:
             multi = int(multi)
 
-        result = naming.test_name(pattern, multi)
+        result = naming.test_name(pattern, multi, abd)
 
         result = ek.ek(os.path.join, result['dir'], result['name']) 
 

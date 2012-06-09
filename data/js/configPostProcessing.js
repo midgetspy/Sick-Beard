@@ -57,7 +57,7 @@ $(document).ready(function () {
     function fill_abd_examples() {
         var pattern = $('#naming_abd_pattern').val();
 
-        $.get(sbRoot + '/config/postProcessing/testNaming', {pattern: pattern},
+        $.get(sbRoot + '/config/postProcessing/testNaming', {pattern: pattern, abd: 'True'},
             function (data) {
                 if (data) {
                     $('#naming_abd_example').text(data + '.ext');

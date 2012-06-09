@@ -103,7 +103,7 @@ def check_valid_abd_naming(pattern=None):
 
 
 def validate_name(pattern, multi=None, file_only=False, abd=False):
-    ep = _generate_sample_ep(multi)
+    ep = _generate_sample_ep(multi, abd)
 
     parser = NameParser(True)
 
@@ -133,12 +133,15 @@ def validate_name(pattern, multi=None, file_only=False, abd=False):
 
     return True
 
-def _generate_sample_ep(multi=None):
+def _generate_sample_ep(multi=None, abd=False):
     # make a fake episode object
     ep = TVEpisode(2,3,"Ep Name")
     ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
     ep._airdate = datetime.date(2011, 3, 9)
-    ep._release_name = 'Show.Name.S02E03.HDTV.XviD-RLSGROUP'
+    if abd:
+        ep._release_name = 'Show.Name.2011.03.09.HDTV.XviD-RLSGROUP'
+    else:
+        ep._release_name = 'Show.Name.S02E03.HDTV.XviD-RLSGROUP'
 
     if multi != None:
         ep._name = "Ep Name (1)"
@@ -150,8 +153,8 @@ def _generate_sample_ep(multi=None):
 
     return ep
 
-def test_name(pattern, multi=None):
+def test_name(pattern, multi=None, abd=False):
 
-    ep = _generate_sample_ep(multi)
+    ep = _generate_sample_ep(multi, abd)
 
     return {'name': ep.formatted_filename(pattern, multi), 'dir': ep.formatted_dir(pattern, multi)}
