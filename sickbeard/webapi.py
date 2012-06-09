@@ -1314,7 +1314,7 @@ class CMD_SickBeardGetDefaults(ApiCall):
 
         anyQualities, bestQualities = _mapQuality(sickbeard.QUALITY_DEFAULT)
 
-        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT].lower(), "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities, "future_show_paused": int(sickbeard.COMING_EPS_DISPLAY_PAUSED) }
+        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT].lower(), "flatten_folders": int(sickbeard.FLATTEN_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities, "future_show_paused": int(sickbeard.COMING_EPS_DISPLAY_PAUSED) }
         return _responds(RESULT_SUCCESS, data)
 
 
@@ -1482,7 +1482,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
     _help = {"desc": "set sickbeard user defaults",
              "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
-                                    "season_folder": {"desc": "use season subfolders within the show directory"},
+                                    "flatten_folders": {"desc": "flatten subfolders within the show directory"},
                                     "status": {"desc": "status of missing episodes"}
                                     }
              }
@@ -1493,7 +1493,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.future_show_paused, args = self.check_params(args, kwargs, "future_show_paused", None, False, "bool", [])
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", None, False, "bool", [])
+        self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", None, False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1537,8 +1537,8 @@ class CMD_SickBeardSetDefaults(ApiCall):
                 raise ApiError("Status Prohibited")
             sickbeard.STATUS_DEFAULT = self.status
 
-        if self.season_folder != None:
-            sickbeard.SEASON_FOLDERS_DEFAULT = int(self.season_folder)
+        if self.flatten_folders != None:
+            sickbeard.FLATTEN_FOLDERS_DEFAULT = int(self.flatten_folders)
 
         if self.future_show_paused != None:
             sickbeard.COMING_EPS_DISPLAY_PAUSED = int(self.future_show_paused)
@@ -1605,7 +1605,7 @@ class CMD_Show(ApiCall):
         showDict["show_name"] = showObj.name
         showDict["paused"] = showObj.paused
         showDict["air_by_date"] = showObj.air_by_date
-        showDict["season_folders"] = showObj.seasonfolders
+        showDict["flatten_folders"] = showObj.flatten_folders
         #clean up tvdb horrible airs field
         showDict["airs"] = str(showObj.airs).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
         showDict["tvrage_id"] = showObj.tvrid
@@ -1631,7 +1631,7 @@ class CMD_ShowAddExisting(ApiCall):
                                 },
              "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
-                                    "season_folder": {"desc": "use season subfolders for the show"}
+                                    "flatten_folders": {"desc": "flatten subfolders for the show"}
                                     }
              }
 
@@ -1642,7 +1642,7 @@ class CMD_ShowAddExisting(ApiCall):
         # optional
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", str(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
+        self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1689,7 +1689,7 @@ class CMD_ShowAddExisting(ApiCall):
         if iqualityID or aqualityID:
             newQuality = Quality.combineQualities(iqualityID, aqualityID)
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.season_folder)) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.flatten_folders)) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 
@@ -1700,7 +1700,7 @@ class CMD_ShowAddNew(ApiCall):
              "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "location": {"desc": "base path for where the show folder is to be created"},
                                     "archive": {"desc": "archive quality for the show"},
-                                    "season_folder": {"desc": "use season subfolders for the show"},
+                                    "flatten_folders": {"desc": "flatten subfolders for the show"},
                                     "status": {"desc": "status of missing episodes"},
                                     "lang": {"desc": "the 2 letter lang abbreviation id"}
                                     }
@@ -1719,7 +1719,7 @@ class CMD_ShowAddNew(ApiCall):
         self.location, args = self.check_params(args, kwargs, "location", None, False, "string", [])
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", str(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
+        self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
         # super, missing, help
@@ -1807,7 +1807,7 @@ class CMD_ShowAddNew(ApiCall):
             else:
                 helpers.chmodAsParent(showPath)
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), self.lang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.flatten_folders), self.lang) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 
