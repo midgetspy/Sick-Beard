@@ -116,7 +116,7 @@
                                         #if $cur_preset == $sickbeard.NAMING_PATTERN:
                                             #set is_custom = False
                                         #end if
-                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected=\"selected\"" else ""#>$tmp['name']</option>
+                                        <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected=\"selected\"" else ""#>$os.path.join($tmp['dir'], $tmp['name'])</option>
                                     #end for
                                     <option id="$sickbeard.NAMING_PATTERN" #if $is_custom then "selected=\"selected\"" else ""#>Custom...</option>
                                 </select>
@@ -291,7 +291,7 @@
                                             #if $cur_preset == $sickbeard.NAMING_ABD_PATTERN:
                                                 #set is_abd_custom = False
                                             #end if
-                                            <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_ABD_PATTERN then "selected=\"selected\"" else ""#>$tmp['name']</option>
+                                            <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_ABD_PATTERN then "selected=\"selected\"" else ""#>$os.path.join($tmp['dir'], $tmp['name'])</option>
                                         #end for
                                         <option id="$sickbeard.NAMING_ABD_PATTERN" #if $is_abd_custom then "selected=\"selected\"" else ""#>Custom...</option>
                                     </select>
@@ -414,7 +414,7 @@
                                             </tr>
                                             <tr class="even">
                                               <td class="align-right">&nbsp;</td>
-                                              <td>%M</td>
+                                              <td>%0M</td>
                                               <td>03</td>
                                             </tr>
                                             <tr>
@@ -430,7 +430,7 @@
                                             <tr>
                                               <td class="align-right"><b>Release Name:</b></td>
                                               <td>%RN</td>
-                                              <td>Show.Name.S02E03.HDTV.XviD-RLSGROUP</td>
+                                              <td>Show.Name.2010.03.09.HDTV.XviD-RLSGROUP</td>
                                             </tr>
                                             <tr class="even">
                                               <td class="align-right"><b>Release Group:</b></td>
