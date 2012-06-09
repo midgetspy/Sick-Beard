@@ -1471,9 +1471,14 @@ class TVEpisode(object):
         
         # if there's no release group then replace it with a reasonable facsimile
         if not replace_map['%RN']:
-            result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
+            if self.show.air_by_date:
+                result_name = result_name.replace('%RN', '%S.N.%A.D.%E.N-SiCKBEARD')
+                result_name = result_name.replace('%rn', '%s.n.%A.D.%e.n-sickbeard')
+            else:
+                result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
+                result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
+
             result_name = result_name.replace('%RG', 'SiCKBEARD')
-            result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
             result_name = result_name.replace('%rg', 'sickbeard')
             logger.log(u"Episode has no release name, replacing it with a generic one: "+result_name, logger.DEBUG)
         
