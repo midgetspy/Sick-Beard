@@ -43,7 +43,7 @@ from sickbeard import encodingKludge as ek
 
 from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
-from common import NAMING_DUPLICATE, NAMING_EXTEND
+from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_SEPARATED_REPEAT
 
 class TVShow(object):
 
@@ -1538,7 +1538,7 @@ class TVEpisode(object):
                     sep = ' '
 
                 # force 2-3-4 format if they chose to extend
-                if multi == NAMING_EXTEND:
+                if multi in (NAMING_EXTEND, NAMING_LIMITED_EXTEND):
                     ep_sep = '-'
                 
                 regex_used = season_ep_regex
@@ -1561,9 +1561,18 @@ class TVEpisode(object):
             # start with the ep string, eg. E03
             ep_string = self._format_string(ep_format.upper(), replace_map)
             for other_ep in self.relatedEps:
-                if multi == NAMING_DUPLICATE:
+                
+                # for limited extend we only append the last ep
+                if multi == NAMING_LIMITED_EXTEND and other_ep != self.relatedEps[-1]:
+                    continue
+                
+                elif multi == NAMING_DUPLICATE:
                     # add " - S01"
                     ep_string += sep + season_format
+                
+                elif multi == NAMING_SEPARATED_REPEAT:
+                    ep_string += sep
+
                 # add "E04"
                 ep_string += ep_sep
                 ep_string += other_ep._format_string(ep_format.upper(), other_ep._replace_map())

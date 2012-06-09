@@ -145,11 +145,18 @@ def _generate_sample_ep(multi=None, abd=False):
 
     if multi != None:
         ep._name = "Ep Name (1)"
+        ep._release_name = 'Show.Name.S02E03E04E05.HDTV.XviD-RLSGROUP'
+
         secondEp = TVEpisode(2,4,"Ep Name (2)")
         secondEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
-        ep.relatedEps.append(secondEp)
-        ep._release_name = 'Show.Name.S02E03E04.HDTV.XviD-RLSGROUP'
         secondEp._release_name = ep._release_name
+
+        thirdEp = TVEpisode(2,5,"Ep Name (3)")
+        thirdEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
+        thirdEp._release_name = ep._release_name
+
+        ep.relatedEps.append(secondEp)
+        ep.relatedEps.append(thirdEp)
 
     return ep
 
