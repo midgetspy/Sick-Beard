@@ -587,7 +587,7 @@ class PostProcessor(object):
             if root_ep == None:
                 root_ep = curEp
                 root_ep.relatedEps = []
-            else:
+            elif curEp not in root_ep.relatedEps:
                 root_ep.relatedEps.append(curEp)
         
         return root_ep
