@@ -88,14 +88,14 @@ class ManualSearchQueueItem(generic_queue.QueueItem):
     def execute(self):
         generic_queue.QueueItem.execute(self)
 
-        logger.log("Searching for download for " + self.ep_obj.prettyName(True))
+        logger.log("Searching for download for " + self.ep_obj.prettyName())
 
         foundEpisode = search.findEpisode(self.ep_obj, manualSearch=True)
         result = False
 
         if not foundEpisode:
-            ui.notifications.message('No downloads were found', "Couldn't find a download for <i>%s</i>" % self.ep_obj.prettyName(True))
-            logger.log(u"Unable to find a download for "+self.ep_obj.prettyName(True))
+            ui.notifications.message('No downloads were found', "Couldn't find a download for <i>%s</i>" % self.ep_obj.prettyName())
+            logger.log(u"Unable to find a download for "+self.ep_obj.prettyName())
 
         else:
 

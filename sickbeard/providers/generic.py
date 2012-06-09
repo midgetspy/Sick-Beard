@@ -222,7 +222,7 @@ class GenericProvider:
 
         self._checkAuth()
 
-        logger.log(u"Searching "+self.name+" for " + episode.prettyName(True))
+        logger.log(u"Searching "+self.name+" for " + episode.prettyName())
 
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)

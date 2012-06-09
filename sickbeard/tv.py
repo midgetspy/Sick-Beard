@@ -1021,7 +1021,6 @@ class TVEpisode(object):
         if self.dirty:
             self.saveToDB()
 
-
     def loadFromDB(self, season, episode):
 
         logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
@@ -1062,7 +1061,6 @@ class TVEpisode(object):
 
             self.dirty = False
             return True
-
 
     def loadFromTVDB(self, season=None, episode=None, cache=True, tvapi=None, cachedSeason=None):
 
@@ -1256,7 +1254,6 @@ class TVEpisode(object):
             else:
                 self.hastbn = False
 
-
     def __str__ (self):
 
         toReturn = ""
@@ -1268,7 +1265,6 @@ class TVEpisode(object):
         toReturn += "hastbn: " + str(self.hastbn) + "\n"
         toReturn += "status: " + str(self.status) + "\n"
         return toReturn
-
 
     def createMetaFiles(self, force=False):
 
@@ -1282,7 +1278,6 @@ class TVEpisode(object):
         if self.checkForMetaFiles():
             self.saveToDB()
 
-
     def createNFO(self, force=False):
 
         result = False
@@ -1291,7 +1286,6 @@ class TVEpisode(object):
             result = cur_provider.create_episode_metadata(self) or result
 
         return result
-
 
     def createThumbnail(self, force=False):
 
@@ -1320,6 +1314,13 @@ class TVEpisode(object):
         raise exceptions.EpisodeDeletedException()
 
     def saveToDB(self, forceSave=False):
+        """
+        Saves this episode to the database if any of its data has been changed since the last save.
+        
+        forceSave: If True it will save to the database even if no data has been changed since the
+                    last save (aka if the record is not dirty).
+        """
+        
         if not self.dirty and not forceSave:
             logger.log(str(self.show.tvdbid) + ": Not saving episode to db - record is not dirty", logger.DEBUG)
             return
@@ -1346,18 +1347,19 @@ class TVEpisode(object):
         # use a custom update/insert method to get the data into the DB
         myDB.upsert("tv_episodes", newValueDict, controlValueDict)
 
-
     def fullPath (self):
         if self.location == None or self.location == "":
             return None
         else:
-            return os.path.join(self.show.location, self.location)
 
-    def getOverview(self):
-        return self.show.getOverview(self.status)
+    def prettyName(self):
+        """
+        Returns the name of this episode in a "pretty" human-readable format. Used for logging
+        and notifications and such.
+        
+        Returns: A string representing the episode's name and season/ep numbers 
+        """
 
-    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
-                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None):
 
         return self._format_pattern('%SN - %Sx%0E - %EN')
 
@@ -1403,6 +1405,12 @@ class TVEpisode(object):
         return goodName
 
     def _replace_map(self):
+        """
+        Generates a replacement map for this episode which maps all possible custom naming patterns to the correct
+        value for this episode.
+        
+        Returns: A dict with patterns as the keys and their replacement values as the values.
+        """
         
         ep_name = self._ep_name()
         
@@ -1632,6 +1640,10 @@ class TVEpisode(object):
         return self._format_pattern(name_groups[-1], multi)
 
     def rename(self):
+        """
+        Renames an episode file and all related files to the location and filename as specified
+        in the naming settings.
+        """
         
         proper_path = self.proper_path()
         absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
