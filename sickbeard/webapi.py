@@ -160,9 +160,13 @@ class Api:
     def _out_as_json(self, dict):
         """ set cherrypy response to json """
         response = cherrypy.response
+        request = cherrypy.request
         response.headers['Content-Type'] = 'application/json;charset=UTF-8'
         try:
             out = json.dumps(dict, indent=self.intent, sort_keys=True)
+            callback = request.params.get('callback') or request.params.get('jsonp')
+            if callback != None:
+                out = callback + '(' + out + ');' # wrap with JSONP call if requested
         except Exception, e: # if we fail to generate the output fake a error
             logger.log(u"API :: " + traceback.format_exc(), logger.DEBUG)
             out = '{"result":"' + result_type_map[RESULT_ERROR] + '", "message": "error while composing output: "' + ex(e) + '"}'
