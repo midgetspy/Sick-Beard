@@ -33,8 +33,10 @@ from sickbeard import notifiers
 from sickbeard import nzbSplitter
 from sickbeard import ui
 from sickbeard import encodingKludge as ek
-from sickbeard.exceptions import ex
 from sickbeard import providers
+
+from sickbeard.exceptions import ex
+from sickbeard.providers.generic import GenericProvider
 
 def _downloadResult(result):
     """
@@ -395,8 +397,7 @@ def findSeason(show, season):
 
         else:
             
-            # Check if the provider of this NZB is BTN, if so it's not a NZB but a torrent so all we can do is leach the entire torrent, user will have to select which eps not do download in his torrent client
-            if not 'BTN' in bestSeasonNZB.provider.name:
+            if bestSeasonNZB.provider.providerType == GenericProvider.NZB:
                 logger.log(u"Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
                 
                 # if not, break it apart and add them as the lowest priority results
@@ -414,7 +415,10 @@ def findSeason(show, season):
                         foundResults[epNum].append(curResult)
                     else:
                         foundResults[epNum] = [curResult]
+
+            # If this is a torrent all we can do is leech the entire torrent, user will have to select which eps not do download in his torrent client
             else:
+                
                 # Season result from BTN must be a full-season torrent, creating multi-ep result for it.
                 logger.log(u"Adding multi-ep result for full-season torrent. Set the episodes you don't want to 'don't download' in your torrent client if desired!")
                 epObjs = []
@@ -469,7 +473,7 @@ def findSeason(show, season):
 
             logger.log(u"Multi-ep check result is multiNeededEps: "+str(multiNeededEps)+", multiNotNeededEps: "+str(multiNotNeededEps), logger.DEBUG)
 
-            if not neededEps:
+            if not multiNeededEps:
                 logger.log(u"All of these episodes were covered by another multi-episode nzbs, ignoring this multi-ep result", logger.DEBUG)
                 continue
 

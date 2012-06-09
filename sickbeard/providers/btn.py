@@ -25,7 +25,7 @@ from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard.common import Quality
-from sickbeard.exceptions import ex
+from sickbeard.exceptions import ex, AuthException
 
 from lib import jsonrpclib
 import datetime
@@ -102,7 +102,7 @@ class BTNProvider(generic.TorrentProvider):
             (title, url) = self._get_title_and_url(torrent_info)
 
             if not title or not url:
-                logger.log(u"The BTN provider did not return both a valid title and URL for search parameters: " + str(params) + " but returned " + str(torrentinfo), logger.WARNING)
+                logger.log(u"The BTN provider did not return both a valid title and URL for search parameters: " + str(params) + " but returned " + str(torrent_info), logger.WARNING)
             results.append(torrent_info)
 
 #        Disabled this because it overspammed the debug log a bit too much
@@ -290,7 +290,7 @@ class BTNCache(tvcache.TVCache):
         self._clearCache()
 
         if not self._checkAuth(data):
-            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
+            raise AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
 
         # By now we know we've got data and no auth errors, all we need to do is put it in the database
         for item in data:
