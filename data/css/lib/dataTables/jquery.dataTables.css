@@ -1,5 +1,4 @@
 
-
 /*
  * Table
  */
@@ -10,13 +9,17 @@ table.dataTable {
 }
 
 table.dataTable thead th {
-	padding: 3px 0px 3px 10px;
+	padding: 3px 18px 3px 10px;
+	border-bottom: 1px solid black;
+	font-weight: bold;
 	cursor: pointer;
 	*cursor: hand;
 }
 
 table.dataTable tfoot th {
-	padding: 3px 10px;
+	padding: 3px 18px 3px 10px;
+	border-top: 1px solid black;
+	font-weight: bold;
 }
 
 table.dataTable td {
@@ -28,20 +31,16 @@ table.dataTable td.dataTables_empty {
 	text-align: center;
 }
 
-table.dataTable tr.odd { background-color: #f5f1e4; }
-table.dataTable tr.even { background-color: #dfdacf; }
+table.dataTable tr.odd { background-color: #E2E4FF; }
+table.dataTable tr.even { background-color: white; }
 
-table.dataTable tr.odd td.sorting_1 { background-color: #F5EDD5; }
-table.dataTable tr.odd td.sorting_2 { background-color: #F5EDD5; }
-table.dataTable tr.odd td.sorting_3 { background-color: #F5EDD5; }
-table.dataTable tr.even td.sorting_1 { background-color: #E0D7C1; }
-table.dataTable tr.even td.sorting_2 { background-color: #E0D7C1; }
-table.dataTable tr.even td.sorting_3 { background-color: #E0D7C1; }
+table.dataTable tr.odd td.sorting_1 { background-color: #D3D6FF; }
+table.dataTable tr.odd td.sorting_2 { background-color: #DADCFF; }
+table.dataTable tr.odd td.sorting_3 { background-color: #E0E2FF; }
+table.dataTable tr.even td.sorting_1 { background-color: #EAEBFF; }
+table.dataTable tr.even td.sorting_2 { background-color: #F2F3FF; }
+table.dataTable tr.even td.sorting_3 { background-color: #F9F9FF; }
 
-table.dataTable th.sortedHeader {
-	background: none;
-	background-color: #57442B;
-}
 
 /*
  * Table wrapper
@@ -50,12 +49,6 @@ table.dataTable th.sortedHeader {
 	position: relative;
 	clear: both;
 	*zoom: 1;
-}
-.dataTables_wrapper .ui-widget-header {
-	font-weight: normal;
-}
-.dataTables_wrapper .ui-toolbar {
-	padding: 5px;
 }
 
 
@@ -80,7 +73,6 @@ table.dataTable th.sortedHeader {
  * Table information
  */
 .dataTables_info {
-	padding-top: 3px;
 	clear: both;
 	float: left;
 }
@@ -92,24 +84,6 @@ table.dataTable th.sortedHeader {
 .dataTables_paginate {
 	float: right;
 	text-align: right;
-}
-
-.dataTables_paginate .ui-button {
-	margin-right: -0.1em !important;
-}
-
-.paging_two_button .ui-button {
-	float: left;
-	cursor: pointer;
-	* cursor: hand;
-}
-
-.paging_full_numbers .ui-button {
-	padding: 2px 6px;
-	margin: 0;
-	cursor: pointer;
-	* cursor: hand;
-	color: #333;
 }
 
 /* Two button pagination - previous / next */
@@ -159,6 +133,10 @@ table.dataTable th.sortedHeader {
 .paginate_disabled_next { background: url('../images/forward_disabled.png') no-repeat top right; }
 
 /* Full number pagination */
+.paging_full_numbers {
+	height: 22px;
+	line-height: 22px;
+}
 .paging_full_numbers a:active {
 	outline: none
 }
@@ -216,19 +194,13 @@ table.dataTable th.sortedHeader {
 /*
  * Sorting
  */
-table.dataTable thead th div.DataTables_sort_wrapper {
-	position: relative;
-	padding-right: 20px;
-	padding-right: 20px;
-}
+.sorting { background: url('../../images/sort_both.png') no-repeat center right; }
+.sorting_asc { background: url('../../images/sort_asc.png') no-repeat center right; }
+.sorting_desc { background: url('../../images/sort_desc.png') no-repeat center right; }
 
-table.dataTable thead th div.DataTables_sort_wrapper span {
-	position: absolute;
-	top: 50%;
-	margin-top: -8px;
-	right: 0;
-}
-
+.sorting_asc_disabled { background: url('../../images/sort_asc_disabled.png') no-repeat center right; }
+.sorting_desc_disabled { background: url('../../images/sort_desc_disabled.png') no-repeat center right; }
+ 
 table.dataTable th:active {
 	outline: none;
 }
