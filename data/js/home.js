@@ -113,15 +113,14 @@ $(document).ready(function(){
             	// sort the name column with the active column
             	"aDataSort": [5, 1],
             	"sType": "alt-string",
-            	"bUseRendered": false,
             	
             	// render the Active column as an image
                 "fnRender": function ( oObj, sVal ) {
                 	var img = '<img src="'+sbRoot+'/images/';
                     if (sVal == true) {
-                    	img += 'yes16.png" alt="Y"';
+                    	img += 'yes16.png" alt="Active"';
                     } else {
-                    	img += 'no16.png" alt="N"';
+                    	img += 'no16.png" alt="Not Active"';
 	                }
 	                img += 'width="16" height="16" />';
                     return img;

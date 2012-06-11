@@ -9,7 +9,7 @@ function check_crc() {
     	var cur_crc = data["crc"];
     	if (last_crc != cur_crc) {
 	    	if (last_crc != "")
-	    		homeTable.fnReloadAjax(json_url);
+	    		comingEpsTableObj.fnReloadAjax(json_url);
     		last_crc = cur_crc;
     	}
     });
