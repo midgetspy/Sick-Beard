@@ -54,8 +54,15 @@ $(document).ready(function(){
                     else
                         resultStr += '<a href="http://thetvdb.com/?tab=series&id=' + obj[0] + '" onclick=\"window.open(this.href, \'_blank\'); return false;\" ><b>' + obj[1] + '</b></a>';
 
-                    if (obj[2] != null)
-                        resultStr += ' (started on ' + obj[2] + ')';
+                    if (obj[2] != null) {
+                        var startDate = new Date(obj[2]);
+                        var today = new Date();
+                        if (startDate>today)
+                                resultStr += ' (will debut on ' + obj[2] + ')';
+                        else
+                                resultStr += ' (started on ' + obj[2] + ')';
+                    }
+                    
                     resultStr += '<br />';
                 });
                 resultStr += '</ul>';

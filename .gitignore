@@ -9,6 +9,12 @@ autoProcessTV/autoProcessTV.cfg
 server.crt
 server.key
 
+#  SB Test Related   #
+######################
+tests/Logs/*
+tests/sickbeard.*
+tests/cache.db
+
 #  Compiled source   #
 ######################
 *.py[co]

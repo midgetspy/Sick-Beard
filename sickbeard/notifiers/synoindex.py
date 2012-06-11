@@ -35,9 +35,39 @@ class synoIndexNotifier:
     def notify_download(self, ep_name):
         pass
 
-    def update_library(self, ep_obj):
+    def moveFolder(self, old_path, new_path):
+        self.moveObject(old_path, new_path)
+
+    def moveFile(self, old_file, new_file):
+        self.moveObject(old_file, new_file)
+
+    def moveObject(self, old_path, new_path):
         if sickbeard.USE_SYNOINDEX:
-            synoindex_cmd = ['/usr/syno/bin/synoindex', '-a', ek.ek(os.path.abspath, ep_obj.location)]
+            synoindex_cmd = ['/usr/syno/bin/synoindex', '-N', ek.ek(os.path.abspath, new_path), ek.ek(os.path.abspath, old_path)]
+            logger.log(u"Executing command "+str(synoindex_cmd))
+            logger.log(u"Absolute path to command: "+ek.ek(os.path.abspath, synoindex_cmd[0]), logger.DEBUG)
+            try:
+                p = subprocess.Popen(synoindex_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
+                out, err = p.communicate() #@UnusedVariable
+                logger.log(u"Script result: "+str(out), logger.DEBUG)
+            except OSError, e:
+                logger.log(u"Unable to run synoindex: "+ex(e))
+
+    def deleteFolder(self, cur_path):
+        self.makeObject('-D', cur_path)
+
+    def addFolder(self, cur_path):
+        self.makeObject('-A', cur_path)
+
+    def deleteFile(self, cur_file):
+        self.makeObject('-d', cur_file)
+
+    def addFile(self, cur_file):
+        self.makeObject('-a', cur_file)
+
+    def makeObject(self, cmd_arg, cur_path):
+        if sickbeard.USE_SYNOINDEX:
+            synoindex_cmd = ['/usr/syno/bin/synoindex', cmd_arg, ek.ek(os.path.abspath, cur_path)]
             logger.log(u"Executing command "+str(synoindex_cmd))
             logger.log(u"Absolute path to command: "+ek.ek(os.path.abspath, synoindex_cmd[0]), logger.DEBUG)
             try:
