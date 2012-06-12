@@ -150,5 +150,5 @@ $(document).ready(function(){
 	});
 	
 	// start watching the show list crcs
-    //check_crc();
+    check_crc();
 });
