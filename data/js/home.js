@@ -60,7 +60,7 @@ $(document).ready(function(){
         	{
         		"sClass": "center",
         		"aTargets": [0, 2, 3, 4, 5, 6]
-             },
+            },
 
 			// Date
 			{
@@ -135,7 +135,8 @@ $(document).ready(function(){
             	"aTargets": [6]
 			},
     	],
-        "aoColumns": [
+
+    	"aoColumns": [
             { "mDataProp": "next_airdate" },
             { "mDataProp": "name" },
             { "mDataProp": "network" },
@@ -143,9 +144,11 @@ $(document).ready(function(){
             { "mDataProp": "percent_downloaded" },
             { "mDataProp": "active" },
             { "mDataProp": "status" }
-        ]
-    });
+        ],
+        
+        "aaSorting": [[5, 'asc'], [1, 'asc']]
+	});
 	
 	// start watching the show list crcs
-    check_crc();
+    //check_crc();
 });

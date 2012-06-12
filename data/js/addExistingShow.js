@@ -45,12 +45,42 @@ $(document).ready(function() {
         $('#tableDiv').html('<img id="searchingAnim" src="'+sbRoot+'/images/loading32.gif" height="32" width="32" /> loading folders...');
         $.get(sbRoot+'/home/addShows/massAddTable', url, function(data) {
             $('#tableDiv').html(data);
-            $("#addRootDirTable").tablesorter({
-                //sortList: [[1,0]],
-                widgets: ['zebra'],
-                headers: {
-                    0: { sorter: false }
-                }
+            $("#addRootDirTable").dataTable({
+            	
+        		// disable most stuff for the table
+                "bPaginate": false,
+                "bInfo": false,
+                "bFilter": false,
+                "bAutoWidth": false,
+                "bProcessing": false,
+
+        		// only show the basic DOM elements
+        		"sDom": "lftipr",
+                "bJQueryUI": true,
+                
+                "aoColumnDefs": [
+                	{ "sClass": "center", "aTargets": [0] },
+
+        			// checkbox
+                    {
+        				"bSortable": false,
+        				"bSearchable": false,
+        				"aTargets": [0],
+                    },
+                    
+        			// path
+                    {
+                    	"sType": "titles",
+                    	"aTargets": [ 1 ]
+                    },
+                    
+        			// TVDB link
+                    {
+                    	"sType": "link-text",
+                    	"aTargets": [ 2 ]
+                    },
+                    
+            	],
             });
         });
 

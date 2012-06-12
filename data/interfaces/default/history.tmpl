@@ -16,7 +16,6 @@
 <script type="text/javascript" src="$sbRoot/js/lib/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="$sbRoot/js/jquery.dataTables.reloadAjax.js"></script>
 <script type="text/javascript" src="$sbRoot/js/jquery.dataTables.sorting.js"></script>
-<script type="text/javascript" src="$sbRoot/js/home.js"></script>
 
 <script type="text/javascript">
 <!--
@@ -24,8 +23,12 @@
 { 
     \$("#historyTable").dataTable({
         "bJQueryUI": true,
-        "sPaginationType": "full_numbers",
-        "bStateSave": true,
+        "bStateSave": false,
+        "aaSorting": [[0, 'desc']],
+        "iDisplayLength": 50,
+
+        "sPaginationType": "two_button",
+
         "aoColumnDefs": [
             { "asSorting": [ "desc", "asc" ], "aTargets": [0] },
             

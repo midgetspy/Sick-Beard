@@ -56,10 +56,30 @@ $(document).ready(function(){
 	   var y = b.match(/alt="(.*?)"/)[1].toLowerCase();
 	   return ((x < y) ? -1 : ((x > y) ?  1 : 0));
 	};
-	 
+		 
 	$.fn.dataTableExt.oSort['alt-string-desc'] = function(a,b) {
 	   var x = a.match(/alt="(.*?)"/)[1].toLowerCase();
 	   var y = b.match(/alt="(.*?)"/)[1].toLowerCase();
+	   return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+	};
+
+	$.fn.dataTableExt.oSort['link-text-asc']  = function(a,b) {
+	   var x = a.match(/>\s*(.*?)\s*<\s*\/\s*a\s*>/);
+	   var y = b.match(/>\s*(.*?)\s*<\s*\/\s*a\s*>/);
+
+	   x = x != null ? x[1].toLowerCase() : a.toLowerCase();
+	   y = y != null ? y[1].toLowerCase() : b.toLowerCase();
+	   
+	   return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+	};
+		 
+	$.fn.dataTableExt.oSort['link-text-desc'] = function(a,b) {
+	   var x = a.match(/>\s*(.*?)\s*<\s*\/\s*a\s*>/);
+	   var y = b.match(/>\s*(.*?)\s*<\s*\/\s*a\s*>/);
+
+	   x = x != null ? x[1].toLowerCase() : a.toLowerCase();
+	   y = y != null ? y[1].toLowerCase() : b.toLowerCase();
+	   
 	   return ((x < y) ?  1 : ((x > y) ? -1 : 0));
 	};
 
