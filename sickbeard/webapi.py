@@ -901,61 +901,85 @@ class CMD_EpisodeSetStatus(ApiCall):
         # convert the string status to a int
         for status in statusStrings.statusStrings:
             if str(statusStrings[status]).lower() == str(self.status).lower():
-                self.status = status
+                self.status = status # here self.status becomes an int
                 break
-        # this should be obsolete bcause of the above
-        if not self.status in statusStrings.statusStrings:
-            return _responds(RESULT_FAILURE, msg="Invalid Status")
+        else: # if we dont break out of the for loop we got here.
+            raise ApiError("The status string could not be matched to a status. Report to Devs!") #the allowed values has at least one item that could not be matched against the internal status strings
 
-        #only allow the status options we want
-        if int(self.status) not in (3, 5, 6, 7):
-            return _responds(RESULT_FAILURE, msg="Show not found")
-
+        ep_list = []
         # branch logic for when user provides an episode number (old method)
         if self.e:
-            epObj = showObj.getEpisode(int(self.s), int(self.e))
+            epObj = showObj.getEpisode(self.s, self.e)
             if epObj == None:
                 return _responds(RESULT_FAILURE, msg="Episode not found")
+            ep_list = [epObj]
+        else:
+            # get all episode numbers frome self,season
+            ep_list = showObj.getAllEpisodes(season=self.s)
 
-            segment_list = []
-            if int(self.status) == WANTED:
+        results = []
+        for epObj in ep_list:
+            if self.status == WANTED:
                 # figure out what segment the episode is in and remember it so we can backlog it
-                if epObj.show.air_by_date:
+                if showObj.air_by_date:
                     ep_segment = str(epObj.airdate)[:7]
                 else:
                     ep_segment = epObj.season
-    
-                if ep_segment not in segment_list:
-                    segment_list.append(ep_segment)
 
             with epObj.lock:
                 # don't let them mess up UNAIRED episodes
                 if epObj.status == UNAIRED:
-                    return _responds(RESULT_FAILURE, msg="Refusing to change status because it is UNAIRED")
+                    continue
+                    results.append('unaired')
+                    #return _responds(RESULT_FAILURE, msg="Refusing to change status because it is UNAIRED")
 
-                if int(self.status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
-                    return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
+                if self.status in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
+                    continue
+                    results.append('notSnatchedDownloaded')
+                    #return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
 
                 # allow the user to force setting the status to wanted for an already downloaded episode
-                if int(self.status) == WANTED and epObj.status in Quality.DOWNLOADED:
-                    if bool(self.force) == True:
-                        epObj.status = int(self.status)
+                if self.status == WANTED and epObj.status in Quality.DOWNLOADED:
+                    if self.force == True:
+                        epObj.status = self.status
                         epObj.saveToDB()
                     else:
-                        return _responds(RESULT_FAILURE, msg="Refusing to change status to Wanted because it's already marked as SNATCHED/DOWNLOADED")
+                        results.append('alreadySnatchedDownloaded')
+                        continue
+                        #return _responds(RESULT_FAILURE, msg="Refusing to change status to Wanted because it's already marked as SNATCHED/DOWNLOADED")
                 else:
-                    epObj.status = int(self.status)
+                    epObj.status = self.status
                     epObj.saveToDB()
 
-                for cur_segment in segment_list:
-                    cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
+                if self.status == WANTED:
+                    cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, ep_segment)
                     sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
-                    logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to Wanted")
-                    return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
+                    logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(ep_segment) + " because some eps were set to Wanted")
+                    results.append('successWanted')
+                    continue
+                    #return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
+                results.append('success')
+                #return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
 
-                return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
-
-        return _responds(RESULT_FAILURE, msg='episode.setstatus no ep (setting a season) logic branch not coded')
+        if 'successWanted' in results:
+            # if we have set any episode to wanted we send we send them to wanted.
+            # only other option is that others might gave been skiped because they are already downloaded or snatched
+            return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
+        elif 'alreadySnatchedDownloaded' in results:
+            # if we never had a successWanted but alreadySnatchedDownloaded all episodes where snatched ot dowloaded allready
+            # we do this before the generic succes because the success for a wanted was already checked with successWanted
+            return _responds(RESULT_FAILURE, msg="Refusing to change status to Wanted because it's already marked as SNATCHED/DOWNLOADED")
+        elif 'success' in results:
+            # this covers basically all other statuses besides wanted
+            return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
+        elif 'unaired' in results:
+            # no succes but we have unaired error
+            return _responds(RESULT_FAILURE, msg="Refusing to change status because it is UNAIRED")
+        elif 'notSnatchedDownloaded' in results:
+            return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
+        else:
+            # if everything else fails ... we fail
+            return _responds(RESULT_FAILURE, msg='episode.setstatus no ep (setting a season)')
 
 
 class CMD_Exceptions(ApiCall):
