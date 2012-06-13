@@ -489,6 +489,12 @@ class TVDBShorthandWrapper(ApiCall):
 #     helper functions         #
 ################################
 
+def _sizeof_fmt(num):
+    for x in ['bytes','KB','MB','GB','TB']:
+        if num < 1024.00:
+            return "%3.2f %s" % (num, x)
+        num /= 1024.00
+
 def _is_int(data):
     try:
         int(data)
@@ -795,7 +801,7 @@ class CMD_Episode(ApiCall):
             return _responds(RESULT_FAILURE, msg="Show not found")
 
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select("SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
+        sqlResults = myDB.select("SELECT name, description, airdate, status, location, file_size, release_name FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
         if not len(sqlResults) == 1:
             raise ApiError("Episode not found")
         episode = sqlResults[0]
@@ -810,7 +816,7 @@ class CMD_Episode(ApiCall):
         if bool(self.fullPath) == True and showPath:
             pass
         elif bool(self.fullPath) == False and showPath:
-            #i am using the length because lstrip removes to much
+            # using the length because lstrip removes to much
             showPathLength = len(showPath) + 1 # the / or \ yeah not that nice i know
             episode["location"] = episode["location"][showPathLength:]
         elif not showPath: # show dir is broken ... episode path will be empty
@@ -820,6 +826,7 @@ class CMD_Episode(ApiCall):
         status, quality = Quality.splitCompositeStatus(int(episode["status"]))
         episode["status"] = _get_status_Strings(status)
         episode["quality"] = _get_quality_string(quality)
+        episode["file_size_human"] = _sizeof_fmt(episode["file_size"])
 
         myDB.connection.close()
         return _responds(RESULT_SUCCESS, episode)
