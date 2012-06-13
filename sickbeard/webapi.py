@@ -938,8 +938,8 @@ class CMD_EpisodeSetStatus(ApiCall):
                     results.append('notSnatchedDownloaded')
                     #return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
 
-                # allow the user to force setting the status to wanted for an already downloaded episode
-                if self.status == WANTED and epObj.status in Quality.DOWNLOADED:
+                # allow the user to force setting the status for an already downloaded episode
+                if epObj.status in Quality.DOWNLOADED:
                     if self.force == True:
                         epObj.status = self.status
                         epObj.saveToDB()
@@ -962,24 +962,24 @@ class CMD_EpisodeSetStatus(ApiCall):
                 #return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
 
         if 'successWanted' in results:
-            # if we have set any episode to wanted we send we send them to wanted.
+            # if we have set any episode to wanted we set them to wanted.
             # only other option is that others might gave been skiped because they are already downloaded or snatched
             return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
         elif 'alreadySnatchedDownloaded' in results:
-            # if we never had a successWanted but alreadySnatchedDownloaded all episodes where snatched ot dowloaded allready
+            # if we never had a successWanted but alreadySnatchedDownloaded all episodes where snatched to dowloaded already
             # we do this before the generic succes because the success for a wanted was already checked with successWanted
-            return _responds(RESULT_FAILURE, msg="Refusing to change status to Wanted because it's already marked as SNATCHED/DOWNLOADED")
+            return _responds(RESULT_FAILURE, msg="Refusing to change status because it's already marked as SNATCHED/DOWNLOADED")
         elif 'success' in results:
             # this covers basically all other statuses besides wanted
             return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
         elif 'unaired' in results:
-            # no succes but we have unaired error
+            # no succes because the unaired error
             return _responds(RESULT_FAILURE, msg="Refusing to change status because it is UNAIRED")
         elif 'notSnatchedDownloaded' in results:
             return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
         else:
             # if everything else fails ... we fail
-            return _responds(RESULT_FAILURE, msg='episode.setstatus no ep (setting a season)')
+            return _responds(RESULT_FAILURE, msg='Failed to set status')
 
 
 class CMD_Exceptions(ApiCall):

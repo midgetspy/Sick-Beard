@@ -257,20 +257,20 @@ addList("episode.setstatus", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episod
 #end for
 
 // build out each show's season+episode list for episode.setstatus cmd
-#set $curSeason = -1
 #for $curShow in $episodeSQLResults:
+    #set $curSeason = -1
     #for $curShowSeason in $episodeSQLResults[$curShow]:
         #if $curShowSeason.season != $curSeason and $curShowSeason.season != 0:
             // insert just the season as the ep number is now optional
             addList("episode.setstatus-$curShow", "Season $curShowSeason.season", "&season=$curShowSeason.season", "episode-status-$curShow");
-            #set $curSeason = int($curShowSeason.season)
         #end if
+        #set $curSeason = int($curShowSeason.season)
 addList("episode.setstatus-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-status-$curShow");
     #end for
 addList("episode-status-$curShow", "Wanted", "&status=wanted", "force");
-addOption("episode-status-$curShow", "Skipped", "&status=skipped");
-addOption("episode-status-$curShow", "Archived", "&status=archived");
-addOption("episode-status-$curShow", "Ignored", "&status=ignored");
+addList("episode-status-$curShow", "Skipped", "&status=skipped", "force");
+addList("episode-status-$curShow", "Archived", "&status=archived", "force");
+addList("episode-status-$curShow", "Ignored", "&status=ignored", "force");
 #end for
 
 addOption("force", "Optional Param", "", 1);
