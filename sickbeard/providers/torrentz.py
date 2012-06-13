@@ -110,8 +110,9 @@ class TORRENTZProvider(generic.TorrentProvider):
                     if data and data.startswith("<?xml"):
                         responseSoup = etree.ElementTree(etree.XML(data))
                         newItems = responseSoup.getiterator('item')
+                        oldCount = len(items)
                         items.extend(newItems)
-                        if len(newItems) < 50:
+                        if len(items) - oldCount < 50:
                             break
                 except Exception, e:
                     logger.log((u"Error trying to load " + self.name + " RSS feed for %(show_name)s page %(page)d: " % {'page': index, 'show_name': params['show_name']})+str(e).decode('utf-8'), logger.ERROR)
@@ -158,6 +159,9 @@ class TORRENTZProvider(generic.TorrentProvider):
             data = self.getURL(result.url, [("Referer", result.url)])
             if data == None:
                 return False
+            if data.find('<html') > -1:
+                return False
+
             fileOut = open(torrentFileName, 'wb')
             logger.log(u"Saving to " + torrentFileName, logger.DEBUG)
             fileOut.write(data)

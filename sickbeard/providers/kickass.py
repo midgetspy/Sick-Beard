@@ -124,8 +124,9 @@ class KICKASSProvider(generic.TorrentProvider):
                     if data and data.startswith("<?xml"):
                         responseSoup = etree.ElementTree(etree.XML(data))
                         newItems = responseSoup.getiterator('item')
+                        oldCount = len(items)
                         items.extend(newItems)
-                        if len(newItems) < 25:
+                        if len(items) - oldCount < 25:
                             break
                 except Exception, e:
                     logger.log(u"Error trying to load " + self.name + " RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
@@ -172,6 +173,9 @@ class KICKASSProvider(generic.TorrentProvider):
             data = self.getURL(result.url, [("Referer", result.url)])
             if data == None:
                 return False
+            if data.find('<html') > -1:
+                return False
+
             fileOut = open(torrentFileName, 'wb')
             logger.log(u"Saving to " + torrentFileName, logger.DEBUG)
             fileOut.write(data)
