@@ -108,7 +108,8 @@ class CompleteParser(object):
 
         # TODO: find a place for "if there's no season then we can hopefully just use 1 automatically"
         # fixing scene numbers now !
-        if cur_show and self.raw_parse_result.release_group and not cur_show.air_by_date:
+        # removed "and self.raw_parse_result.release_group" check ... less save but maybe save enough
+        if cur_show and not cur_show.air_by_date:
             # this does also take care of absolute number to sxxexx conversion
             self._log("This looks like a scene release converting numbers", logger.DEBUG)
             self.complete_result.season, self.complete_result.episodes, self.complete_result.ab_episode_numbers = \
