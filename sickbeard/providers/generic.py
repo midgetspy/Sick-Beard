@@ -388,3 +388,29 @@ class TorrentProvider(GenericProvider):
         GenericProvider.__init__(self, name)
 
         self.providerType = GenericProvider.TORRENT
+
+    def downloadFromTorrentCache(self, episodeName, torrentUrl):
+        data = ""
+        try:
+            logger.log(u"Downloading a result for " + self.name + " at " + torrentUrl)
+            
+            torrentFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(episodeName) + '.' + self.providerType)
+            #add self referer to get application/x-bittorrent from torrage.com
+            headers = [("Referer", torrentUrl)]
+
+            data = helpers.getURL(torrentUrl, headers)
+
+            if data == None:
+                raise Exception("Invalid torrent.")
+            if data.find('<html') > -1:
+                raise Exception("Invalid torrent.")
+
+            fileOut = open(torrentFileName, 'wb')
+            logger.log(u"Saving to " + torrentFileName, logger.DEBUG)
+            fileOut.write(data)
+            fileOut.close()
+            helpers.chmodAsParent(torrentFileName)
+            return self._verify_download(torrentFileName)
+        except Exception, e:
+            logger.log("Unable to download or save torrent: "+str(e).decode('utf-8') + str(data).decode('utf-8'), logger.ERROR)
+            raise

@@ -165,26 +165,19 @@ class KICKASSProvider(generic.TorrentProvider):
         return None
     
     def downloadResult(self, result):
+        url = result.url
         try:
-            logger.log(u"Downloading a result from " + self.name + " at " + result.url)
-            
-            torrentFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
-            #add self referer to get application/x-bittorrent from torcache.net
-            data = self.getURL(result.url, [("Referer", result.url)])
-            if data == None:
-                return False
-            if data.find('<html') > -1:
-                return False
-
-            fileOut = open(torrentFileName, 'wb')
-            logger.log(u"Saving to " + torrentFileName, logger.DEBUG)
-            fileOut.write(data)
-            fileOut.close()
-            helpers.chmodAsParent(torrentFileName)
-            return self._verify_download(torrentFileName)
+            return self.downloadFromTorrentCache(result.name, url)
         except Exception, e:
-            logger.log("Unable to save the file: "+str(e).decode('utf-8'), logger.ERROR)
-            return False
+            try:
+                url = "http://torrage.com/" + result.url.replace('http://torcache.net/','')
+                return self.downloadFromTorrentCache(result.name, url)
+            except Exception, e:
+                try:
+                    url = "http://zoink.it/" + result.url.replace('http://torcache.net/','')
+                    return self.downloadFromTorrentCache(result.name, url)
+                except Exception, e:
+                    return False
         
 class KICKASSCache(tvcache.TVCache):
 
