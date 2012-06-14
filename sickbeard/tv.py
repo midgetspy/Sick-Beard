@@ -892,7 +892,7 @@ class TVShow(object):
         curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
         # if we are re-downloading then we only want it if it's in our bestQualities list and better than what we have
-        if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and quality in bestQualities and quality > curQuality:
+        if curStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER and quality in bestQualities and quality > curQuality:
             logger.log(u"We already have this ep but the new one is better quality, saying yes", logger.DEBUG)
             return True
 
