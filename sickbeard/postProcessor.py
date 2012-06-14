@@ -527,13 +527,15 @@ class PostProcessor(object):
                     epObj = t[tvdb_id].airedOn(episodes[0])[0]
                     season = int(epObj["seasonnumber"])
                     episodes = [int(epObj["episodenumber"])]
-                    self._log(u"Got season "+str(season)+" episodes "+str(episodes), logger.DEBUG)
+                    self._log(u"Got season " + str(season) + " episodes " + str(episodes), logger.DEBUG)
                 except tvdb_exceptions.tvdb_episodenotfound, e:
-                    self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(tvdb_id)+u", skipping", logger.DEBUG)
-
+                    self._log(u"Unable to find episode with date " + str(episodes[0]) + u" for show " + str(tvdb_id) + u", skipping", logger.DEBUG)
                     # we don't want to leave dates in the episode list if we couldn't convert them to real episode numbers
                     episodes = []
-
+                    continue
+                except tvdb_exceptions.tvdb_error, e:
+                    logger.log(u"Unable to contact TVDB: " + ex(e), logger.WARNING)
+                    episodes = []
                     continue
 
             # if there's no season then we can hopefully just use 1 automatically
