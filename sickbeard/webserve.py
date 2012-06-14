@@ -1784,7 +1784,7 @@ class NewHomeAddShows:
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
             ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
-            redirect('/home')
+            redirect('/home/addShows/existingShows')
         
         # don't create show dir if config says not to
         if sickbeard.ADD_SHOWS_WO_DIR:
